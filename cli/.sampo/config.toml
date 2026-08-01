@@ -1,0 +1,12 @@
+# Sampo configuration for insights-cli releases.
+version = 1
+
+[git]
+default_branch = "master"
+
+[github]
+repository = "Insights/insights"
+
+[packages]
+ignore_unpublished = false
+ignore = []

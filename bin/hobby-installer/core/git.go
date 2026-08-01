@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const insightsRepoURL = "https://github.com/hanzoai/insights.git"
+const insightsRepoURL = "https://github.com/Insights/insights.git"
 
 // Function variables for testability - tests swap these to mock command execution
 var (
@@ -140,9 +140,9 @@ func GetCurrentCommit() (string, error) {
 	return strings.TrimSpace(out), nil
 }
 
-func CopyComposeFiles(version string) error {
+func CopyComposeFiles() error {
 	logger := GetLogger()
-	logger.Debug("CopyComposeFiles version=%q", version)
+	logger.Debug("CopyComposeFiles")
 
 	_ = os.Remove("docker-compose.yml") // Ignore error if file doesn't exist
 
@@ -151,51 +151,15 @@ func CopyComposeFiles(version string) error {
 		return err
 	}
 
-	return copyFileWithEnvSubst("insights/docker-compose.hobby.yml", "docker-compose.yml", version)
-}
-
-func copyFileWithEnvSubst(src, dst, version string) error {
-	logger := GetLogger()
-	data, err := os.ReadFile(src)
-	if err != nil {
-		logger.Debug("Failed to read %s: %v", src, err)
+	// Copy the shared service-connection env file that docker-compose.base.yml references via env_file.
+	if err := copyFile("insights/.env.services", ".env.services"); err != nil {
+		logger.Debug("Failed to copy .env.services: %v", err)
 		return err
 	}
 
-	content := string(data)
-
-	registryURL := os.Getenv("REGISTRY_URL")
-	if registryURL == "" {
-		registryURL = ReadEnvValue("REGISTRY_URL")
-	}
-	if registryURL == "" {
-		registryURL = "hanzoai/insights"
-	}
-
-	if version == "" {
-		version = "latest"
-	}
-
-	nodeTag := os.Getenv("INSIGHTS_NODE_TAG")
-	if nodeTag == "" {
-		nodeTag = ReadEnvValue("INSIGHTS_NODE_TAG")
-	}
-	if nodeTag == "" {
-		nodeTag = "latest"
-	}
-
-	logger.Debug("copyFileWithEnvSubst: REGISTRY_URL=%q, INSIGHTS_APP_TAG=%q, INSIGHTS_NODE_TAG=%q", registryURL, version, nodeTag)
-
-	content = strings.ReplaceAll(content, "${REGISTRY_URL}", registryURL)
-	content = strings.ReplaceAll(content, "$REGISTRY_URL", registryURL)
-	content = strings.ReplaceAll(content, "${INSIGHTS_APP_TAG}", version)
-	content = strings.ReplaceAll(content, "$INSIGHTS_APP_TAG", version)
-	// Replace INSIGHTS_NODE_TAG, preserving the :-latest default syntax for Docker Compose
-	content = strings.ReplaceAll(content, "${INSIGHTS_NODE_TAG:-latest}", nodeTag)
-	content = strings.ReplaceAll(content, "${INSIGHTS_NODE_TAG}", nodeTag)
-	content = strings.ReplaceAll(content, "$INSIGHTS_NODE_TAG", nodeTag)
-
-	return os.WriteFile(dst, []byte(content), 0644)
+	// Copy as-is — Docker Compose reads REGISTRY_URL, POSTFN_APP_TAG, and
+	// POSTFN_NODE_TAG from .env at runtime, so no substitution needed here.
+	return copyFile("insights/docker-compose.hobby.yml", "docker-compose.yml")
 }
 
 func copyFile(src, dst string) error {

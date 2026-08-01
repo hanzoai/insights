@@ -2,7 +2,7 @@ import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { DateTime, Settings } from 'luxon'
 
-import { defaultConfig } from '~/config/config'
+import { defaultConfig } from '~/common/config/config'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 
 import { createInsightsFunction } from '../_tests/fixtures'
@@ -92,7 +92,7 @@ describe('NativeDestinationExecutorService', () => {
                     "headers": {
                       "Authorization": "Bearer abc",
                       "Content-Type": "application/json",
-                      "User-Agent": "Insights.com/1.0",
+                      "User-Agent": "Hanzo.ai/1.0",
                     },
                     "method": "POST",
                   },
@@ -137,7 +137,7 @@ describe('NativeDestinationExecutorService', () => {
                     "headers": {
                       "Authorization": "Bearer abc",
                       "Content-Type": "application/json",
-                      "User-Agent": "Insights.com/1.0",
+                      "User-Agent": "Hanzo.ai/1.0",
                     },
                     "method": "POST",
                   },
@@ -148,7 +148,7 @@ describe('NativeDestinationExecutorService', () => {
                 functionId: expect.any(String),
                 insightsFunction: expect.any(Object),
                 id: expect.any(String),
-                queue: 'fn',
+                queue: 'script',
                 queueMetadata: {
                     tries: 1,
                 },
@@ -198,7 +198,7 @@ describe('NativeDestinationExecutorService', () => {
                     "headers": {
                       "Authorization": "Bearer abc",
                       "Content-Type": "application/json",
-                      "User-Agent": "Insights.com/1.0",
+                      "User-Agent": "Hanzo.ai/1.0",
                     },
                     "method": "POST",
                   },
@@ -209,7 +209,7 @@ describe('NativeDestinationExecutorService', () => {
                 insightsFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'fn',
+                queue: 'script',
                 queueMetadata: { tries: 1 },
                 queueParameters: undefined,
                 queuePriority: 1,
@@ -236,7 +236,7 @@ describe('NativeDestinationExecutorService', () => {
                 insightsFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'fn',
+                queue: 'script',
                 queueMetadata: {
                     tries: 2,
                 },
@@ -267,7 +267,7 @@ describe('NativeDestinationExecutorService', () => {
                 insightsFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'fn',
+                queue: 'script',
                 queueMetadata: { tries: 3 },
                 queueParameters: undefined,
                 queuePriority: 0,

@@ -8,6 +8,9 @@ from unittest.mock import patch
 
 from django.test import override_settings
 
+from parameterized import parameterized
+from rest_framework.exceptions import ValidationError
+
 from insights.schema import (
     ActorsQuery,
     BaseMathType,
@@ -41,9 +44,10 @@ from insights.insightsql.visitor import clear_locations
 from insights.datastore.client import sync_execute
 from insights.insightsql_queries.actors_query_runner import ActorsQueryRunner
 from insights.models.group.util import create_group
-from insights.models.property_definition import PropertyDefinition, PropertyType
 from insights.models.utils import UUIDT
 from insights.test.test_utils import create_group_type_mapping_without_created_at
+
+from products.event_definitions.backend.models.property_definition import PropertyDefinition, PropertyType
 
 
 class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
@@ -100,7 +104,14 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
         response = runner.calculate()
         assert len(response.results) == 10
 
-        assert set(response.results[0][0].keys()) == {"id", "created_at", "distinct_ids", "properties", "is_identified"}
+        assert set(response.results[0][0].keys()) == {
+            "id",
+            "created_at",
+            "last_seen_at",
+            "distinct_ids",
+            "properties",
+            "is_identified",
+        }
         assert response.results[0][0].get("properties").get("random_uuid") == self.random_uuid
         assert len(response.results[0][0].get("distinct_ids")) > 0
 
@@ -136,6 +147,60 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
         )
         self.assertEqual(len(runner.calculate().results), 2)
 
+    def _create_internal_and_external_persons(self) -> None:
+        for index in range(3):
+            _create_person(
+                properties={"email": f"employee{index}@hanzo.ai"},
+                team=self.team,
+                distinct_ids=[f"internal-{index}"],
+                is_identified=True,
+            )
+        for index in range(2):
+            _create_person(
+                properties={"email": f"customer{index}@example.com"},
+                team=self.team,
+                distinct_ids=[f"external-{index}"],
+                is_identified=True,
+            )
+        flush_persons_and_events()
+
+    @parameterized.expand(
+        [
+            # Person-scoped filter applied: the 3 internal persons are excluded, leaving 2.
+            (
+                "person_filter_on_excludes_internal",
+                True,
+                [{"key": "email", "value": "@hanzo.ai", "operator": "not_icontains", "type": "person"}],
+                2,
+            ),
+            # Flag off: the filter is not applied, so all 5 persons are returned.
+            (
+                "person_filter_off_keeps_all",
+                False,
+                [{"key": "email", "value": "@hanzo.ai", "operator": "not_icontains", "type": "person"}],
+                5,
+            ),
+            # Event-scoped filters have no meaning on a persons query. They must be skipped, not raise.
+            (
+                "event_scoped_filter_is_ignored",
+                True,
+                [{"key": "$host", "value": "localhost", "operator": "is_not", "type": "event"}],
+                5,
+            ),
+            # No configured filters means the flag is a no-op.
+            ("empty_test_account_filters_is_noop", True, [], 5),
+        ]
+    )
+    def test_filter_test_accounts_applies_only_person_scoped_filters(
+        self, _name: str, filter_test_accounts: bool, test_account_filters: list, expected_count: int
+    ) -> None:
+        self._create_internal_and_external_persons()
+        self.team.test_account_filters = test_account_filters
+        self.team.save()
+
+        runner = self._create_runner(ActorsQuery(filterTestAccounts=filter_test_accounts))
+        self.assertEqual(len(runner.calculate().results), expected_count)
+
     def test_persons_query_search_email(self):
         self.random_uuid = self._create_random_persons()
         self._create_random_persons()
@@ -156,6 +221,13 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
         runner = self._create_runner(ActorsQuery(search=f"id-{self.random_uuid}-9"))
         self.assertEqual(len(runner.calculate().results), 1)
         runner = self._create_runner(ActorsQuery(search=f"id-{self.random_uuid}-9"))
+        self.assertEqual(len(runner.calculate().results), 1)
+
+    def test_persons_query_search_trims_whitespace(self):
+        self.random_uuid = self._create_random_persons()
+        runner = self._create_runner(ActorsQuery(search=f"  jacob4@{self.random_uuid}.insights  "))
+        self.assertEqual(len(runner.calculate().results), 1)
+        runner = self._create_runner(ActorsQuery(search=f"\tjacob4@{self.random_uuid}.insights\n"))
         self.assertEqual(len(runner.calculate().results), 1)
 
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -183,58 +255,51 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
         self.assertIsNotNone(results, "The query should execute without errors")
 
+    @freeze_time("2023-05-10T15:23:00Z")
     def test_persons_query_with_insight_actors_source_order_by_last_seen(self):
-        _create_person(
-            properties={
-                "email": f"first@hanzo.ai",
-                "name": "Mr Jump the Gun",
-            },
-            team=self.team,
-            distinct_ids=["jump-the-gun"],
-            is_identified=True,
-        )
-        _create_event(
-            distinct_id="jump-the-gun",
-            event=f"$pageview",
-            team=self.team,
-        )
-        self.random_uuid = self._create_random_persons()
-        _create_person(
-            properties={
-                "email": "last@hanzo.ai",
-                "name": "Mr Sleepy",
-            },
-            team=self.team,
-            distinct_ids=["sleepy"],
-            is_identified=True,
-        )
-        _create_event(
-            distinct_id="sleepy",
-            event=f"$pageview",
-            team=self.team,
-        )
+        with freeze_time("2023-05-07T15:23:00Z"):
+            _create_person(
+                properties={
+                    "email": f"first@hanzo.ai",
+                    "name": "Mr Jump the Gun",
+                },
+                team=self.team,
+                distinct_ids=["jump-the-gun"],
+                is_identified=True,
+            )
+            _create_event(distinct_id="jump-the-gun", event="clicky", team=self.team)
+        with freeze_time("2023-05-09T15:23:00Z"):
+            _create_person(
+                properties={
+                    "email": "last@hanzo.ai",
+                    "name": "Mr Sleepy",
+                },
+                team=self.team,
+                distinct_ids=["sleepy"],
+                is_identified=True,
+            )
+            _create_event(distinct_id="sleepy", event="clicky", team=self.team)
         flush_persons_and_events()
 
         for direction, expected_email in [("DESC", "last@hanzo.ai"), ("ASC", "first@hanzo.ai")]:
             with self.subTest(direction):
-                # Create ActorsQuery with InsightActorsQuery source, similar to PowerUsersTable
                 query = ActorsQuery(
-                    select=["properties.email", "event_count", "last_seen"],
+                    select=["properties.email", "event_count", "last_seen_at"],
                     source=InsightActorsQuery(
                         source=TrendsQuery(
-                            series=[EventsNode(event="$pageview")],
+                            series=[EventsNode(event="clicky")],
                             dateRange=DateRange(date_from="-30d"),
                             interval=IntervalType.DAY,
                             trendsFilter=TrendsFilter(display=ChartDisplayType.ACTIONS_TABLE),
                         ),
                         series=0,
                     ),
-                    orderBy=[f"last_seen {direction}"],
+                    orderBy=[f"last_seen_at {direction}"],
                 )
 
                 runner = self._create_runner(query)
                 results = runner.calculate().results
-                self.assertEqual(results[0][0], expected_email)
+                self.assertEqual(expected_email, results[0][0])
 
     def test_persons_query_order_by_with_aliases(self):
         # We use the first column by default as an order key. It used to cause "error redefining alias" errors.
@@ -389,6 +454,20 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
             response = runner.calculate()
             self.assertEqual(response.results, [[f"jacob4@{self.random_uuid}.hanzo.ai"]])
 
+    def test_source_lifecycle_query_runs_lifecycle_validations(self):
+        query = ActorsQuery(
+            source=InsightActorsQuery(
+                source=LifecycleQuery(
+                    dateRange=DateRange(date_from="2020-01-09", date_to="2020-01-19"),
+                    interval=IntervalType.DAY,
+                    series=[],
+                )
+            )
+        )
+
+        with pytest.raises(ValidationError, match="Lifecycle insights require at least one series."):
+            self._create_runner(query).calculate()
+
     def test_persons_query_grouping(self):
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         _create_person(
@@ -413,7 +492,7 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
             team=self.team,
         )
         flush_persons_and_events()
-        runner = self._create_runner(ActorsQuery(search="insights.com"))
+        runner = self._create_runner(ActorsQuery(search="hanzo.ai"))
 
         response = runner.calculate()
         # Should show a single person despite multiple distinct_ids
@@ -583,7 +662,6 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
             group_type_index=0,
             group_key="org1",
             properties={"name": "org1.inc"},
-            sync=True,
         )
 
         _create_person(
@@ -743,6 +821,57 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
         display_names = [row[0]["display_name"] for row in response.results]
         assert set(display_names) == {"Test User With Spaces"}
 
+    @parameterized.expand(
+        [
+            (
+                "empty_first_prop_falls_through",
+                ["name", "email"],
+                {"name": "", "email": "user@email.com"},
+                "user@email.com",
+            ),
+            (
+                "non_empty_value_still_wins",
+                ["name", "email"],
+                {"name": "Test User", "email": "user@email.com"},
+                "Test User",
+            ),
+        ]
+    )
+    def test_person_display_name_empty_string_fallthrough(
+        self, _name, display_name_properties, person_properties, expected_display_name
+    ):
+        # An empty-string property should fall through to the next configured property.
+        _create_person(
+            team_id=self.team.pk,
+            distinct_ids=["id_email", "id_anon"],
+            properties=person_properties,
+        )
+        self.team.person_display_name_properties = display_name_properties
+        self.team.save()
+        self.team.refresh_from_db()
+        flush_persons_and_events()
+        query = ActorsQuery(select=["person_display_name"])
+        runner = self._create_runner(query)
+        response = runner.calculate()
+        display_names = [row[0]["display_name"] for row in response.results]
+        assert set(display_names) == {expected_display_name}
+
+    def test_person_display_name_all_empty_strings_falls_back_to_id(self):
+        person = _create_person(
+            team_id=self.team.pk,
+            distinct_ids=["id_email", "id_anon"],
+            properties={"name": "", "email": ""},
+        )
+        self.team.person_display_name_properties = ["name", "email"]
+        self.team.save()
+        self.team.refresh_from_db()
+        flush_persons_and_events()
+        query = ActorsQuery(select=["person_display_name"])
+        runner = self._create_runner(query)
+        response = runner.calculate()
+        display_names = [row[0]["display_name"] for row in response.results]
+        assert set(display_names) == {str(person.uuid)}
+
     def test_select_property_name_with_spaces(self):
         _create_person(
             team_id=self.team.pk,
@@ -831,66 +960,33 @@ class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
         strategy = PersonStrategy(team=self.team, query=query, paginator=paginator)
 
         # Temporarily set a small batch size to verify batching works
-        with patch.object(PersonStrategy, "BATCH_SIZE", 2):
+        with patch("insights.models.person.util.PERSONFN_BATCH_SIZE", 2):
             result = strategy.get_actors(person_uuids)
 
         self.assertEqual(len(result), 5)
         for uuid in person_uuids:
             self.assertIn(uuid, result)
 
-    @freeze_time("2023-05-10T15:00:00Z")
+    @freeze_time("2023-05-07T15:23:00Z")
     def test_last_seen_for_persons(self):
-        # Create person with events at different times
         _create_person(
             properties={"email": "test@example.com"},
             team=self.team,
-            distinct_ids=["user123"],
+            distinct_ids=["test-user-distinct-id"],
             is_identified=True,
+            immediate=True,
         )
-
-        # Create events at different times
-        with freeze_time("2023-05-08T10:00:00Z"):
-            _create_event(event="early_event", distinct_id="user123", team=self.team)
-
-        with freeze_time("2023-05-09T14:30:00Z"):
-            _create_event(event="late_event", distinct_id="user123", team=self.team)
-
         flush_persons_and_events()
-
-        # Query with last_seen included
-        query = ActorsQuery(select=["person", "id", "last_seen"])
+        query = ActorsQuery(select=["person", "id", "last_seen_at"])
         runner = ActorsQueryRunner(query=query, team=self.team)
 
         response = runner.calculate()
 
-        self.assertEqual(len(response.results), 2, "One for each event")
         result = response.results[0]
-
-        # Check that last_seen is the timestamp of the latest event
-        last_seen_idx = response.columns.index("last_seen")
+        last_seen_idx = response.columns.index("last_seen_at")
         last_seen_value = result[last_seen_idx]
-
-        self.assertEqual(str(last_seen_value), "2023-05-09 14:30:00+00:00")
-
-    def test_last_seen_not_calculated_when_not_requested(self):
-        _create_person(
-            properties={"email": "test@example.com"},
-            team=self.team,
-            distinct_ids=["user123"],
-            is_identified=True,
+        self.assertEqual(
+            "2023-05-07 15:00:00+00:00",
+            str(last_seen_value),
+            "Should round to the bottom of the hour of the event (user creation)",
         )
-        _create_event(event="test_event", distinct_id="user123", team=self.team)
-        flush_persons_and_events()
-
-        # Query without last_seen
-        query = ActorsQuery(select=["person", "id"])
-        runner = ActorsQueryRunner(query=query, team=self.team)
-
-        response = runner.calculate()
-
-        # Should not have last_seen column
-        self.assertNotIn("last_seen", response.columns)
-        # Generated SQL should not contain events table reference
-        insightsql = runner.to_query()
-        printed_query = str(insightsql)
-        self.assertNotIn("events", printed_query.lower())

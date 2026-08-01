@@ -11,10 +11,11 @@ import { OrganizationMembershipLevel } from 'lib/constants'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
 import { Modal } from 'lib/elements/Modal'
-import { capitalizeFirstLetter, isEmail, pluralize } from 'lib/utils'
 import { organizationMembershipLevelIntegers } from 'lib/utils/permissioning'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
+import { isEmail } from 'lib/utils/url'
 import { organizationLogic } from 'scenes/organizationLogic'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { userLogic } from 'scenes/userLogic'
 
 import { AccessControlLevel, AvailableFeature } from '~/types'
@@ -83,16 +84,8 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
             <div className="flex items-center gap-2">
                 <h4 className="text-sm font-medium mb-0">Project access</h4>
                 <Tooltip
-                    title={
-                        <span>
-                            Give this user access to specific projects. These access controls will be applied when the
-                            user accepts the invite and joins the organization. Learn more about{' '}
-                            <Link to="https://hanzo.ai/docs/settings/access-control" target="_blank">
-                                access controls
-                            </Link>{' '}
-                            in our docs.
-                        </span>
-                    }
+                    docLink="https://hanzo.ai/docs/settings/access-control"
+                    title="Give this user access to specific projects. These access controls will be applied when the user accepts the invite and joins the organization."
                 >
                     <IconInfo className="text-muted-alt" />
                 </Tooltip>
@@ -201,7 +194,7 @@ export function InviteRow({
     const name = PLACEHOLDER_NAMES[index % PLACEHOLDER_NAMES.length]
 
     const { hasAvailableFeature } = useValues(userLogic)
-    const hasAdvancedPermissions = hasAvailableFeature(AvailableFeature.ADVANCED_PERMISSIONS)
+    const hasAccessControl = hasAvailableFeature(AvailableFeature.ACCESS_CONTROL)
 
     const { invitesToSend } = useValues(inviteLogic)
     const { updateInviteAtIndex, inviteTeamMembers, deleteInviteAtIndex } = useActions(inviteLogic)
@@ -298,7 +291,7 @@ export function InviteRow({
                 )}
             </div>
 
-            {hasAdvancedPermissions && !hideProjectAccessSelector && <ProjectAccessSelector inviteIndex={index} />}
+            {hasAccessControl && !hideProjectAccessSelector && <ProjectAccessSelector inviteIndex={index} />}
         </div>
     )
 }
@@ -427,7 +420,14 @@ export function InviteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                         <p>
                             Invite others to your organization to collaborate together in Insights. An invite is specific
                             to an email address and expires after 3 days. Name can be provided for the team member's
-                            convenience.
+                            convenience.{' '}
+                            <Link
+                                to="https://hanzo.ai/docs/settings/organizations#adding-new-members"
+                                target="_blank"
+                                targetBlankIcon
+                            >
+                                Docs
+                            </Link>
                         </p>
                     ) : (
                         <p>

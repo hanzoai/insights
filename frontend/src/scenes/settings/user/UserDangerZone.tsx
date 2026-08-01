@@ -6,7 +6,8 @@ import { IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Input, Modal, Table, Tag, Tooltip } from '@hanzo/elements'
 
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { detailedTime, humanFriendlyDetailedTime, isNotNil } from 'lib/utils'
+import { detailedTime, humanFriendlyDetailedTime } from 'lib/utils/datetime'
+import { isNotNil } from 'lib/utils/guards'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
@@ -28,9 +29,11 @@ export function DeleteUserModal({
     const { push } = useActions(router)
     const { updateCurrentOrganization, deleteUser } = useActions(userLogic)
     const { userLoading } = useValues(userLogic)
-    const { organizationToDelete, isUserDeletionConfirmed } = useValues(userDangerZoneLogic)
+    const { organizationToDelete, isUserDeletionConfirmed, deletedOrganizationIds } = useValues(userDangerZoneLogic)
     const { leaveOrganization, setOrganizationToDelete, setIsUserDeletionConfirmed } = useActions(userDangerZoneLogic)
-    const organizations = (user?.organizations ?? []).filter(isNotNil)
+    const organizations = (user?.organizations ?? [])
+        .filter(isNotNil)
+        .filter((org) => !deletedOrganizationIds.includes(org.id))
     const { keys } = useValues(personalAPIKeysLogic)
     const { loadKeys } = useActions(personalAPIKeysLogic)
 
@@ -223,6 +226,7 @@ export function DeleteUserModal({
                 isOpen={organizationToDelete !== null}
                 setIsOpen={() => setOrganizationToDelete(null)}
                 organization={organizationToDelete}
+                redirectPath={urls.settings('user-danger-zone')}
             />
         </>
     )

@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useState } from 'react'
 
 import { IconChip } from '@hanzo/icons'
 
 import { Popover } from 'lib/elements/Popover'
 import { Tooltip } from 'lib/elements/Tooltip'
-
-import { humanFriendlyMilliseconds, humanizeBytes } from '~/lib/utils'
+import { humanFriendlyMilliseconds } from 'lib/utils/durations'
+import { humanizeBytes } from 'lib/utils/numbers'
 
 import { dataNodeLogic } from './dataNodeLogic'
 

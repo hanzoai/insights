@@ -1,10 +1,10 @@
 import { Histogram } from 'prom-client'
 
-import { parseJSON } from '~/utils/json-parse'
+import { parseJSON } from '~/common/utils/json-parse'
+import { logger } from '~/common/utils/logger'
+import { FetchOptions, FetchResponse } from '~/common/utils/request'
 
-import { logger } from '../../utils/logger'
-import { FetchOptions, FetchResponse } from '../../utils/request'
-import { NATIVE_INSIGHTS_FUNCTIONS_BY_ID } from '../templates'
+import { NATIVE_FN_FUNCTIONS_BY_ID } from '../templates'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, Response } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
 import { CDP_TEST_ID, createAddLogFunction, isNativeInsightsFunction } from '../utils'
@@ -67,7 +67,7 @@ export class NativeDestinationExecutorService {
             : null
 
         try {
-            const nativeDestination = nativeDestinationId ? NATIVE_INSIGHTS_FUNCTIONS_BY_ID[nativeDestinationId] : null
+            const nativeDestination = nativeDestinationId ? NATIVE_FN_FUNCTIONS_BY_ID[nativeDestinationId] : null
 
             if (!nativeDestination) {
                 throw new Error(`Native destination ${nativeDestinationId} not found`)
@@ -93,7 +93,7 @@ export class NativeDestinationExecutorService {
                     }
 
                     const headers: Record<string, any> = {
-                        'User-Agent': 'Insights.com/1.0',
+                        'User-Agent': 'Hanzo.ai/1.0',
                         ...options.headers,
                     }
 
@@ -161,6 +161,8 @@ export class NativeDestinationExecutorService {
                         url,
                         fetchParams: fetchOptions,
                         templateId: invocation.insightsFunction.template_id ?? '',
+                        teamId: invocation.teamId,
+                        insightsFunctionId: invocation.insightsFunction.id,
                     })
 
                     const fetchResponseText = (await fetchResponse?.text()) ?? 'unknown'
@@ -237,7 +239,7 @@ export class NativeDestinationExecutorService {
                 if (retriesPossible) {
                     // We have retries left so we can trigger a retry
                     result.finished = false
-                    result.invocation.queue = 'fn'
+                    result.invocation.queue = 'script'
                     result.invocation.queuePriority = metadata.tries
                     result.invocation.queueScheduledAt = getNextRetryTime(
                         this.serverConfig.CDP_FETCH_BACKOFF_BASE_MS,

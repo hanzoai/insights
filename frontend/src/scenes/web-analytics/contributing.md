@@ -113,7 +113,7 @@ Captured at session start and persisted for the session lifetime:
 - Session docs: <https://hanzo.ai/docs/data/sessions>
 - Web analytics FAQ: <https://hanzo.ai/docs/web-analytics/faq>
 - SPA pageview tutorial: <https://hanzo.ai/tutorials/single-page-app-pageviews>
-- Source code: [session-props.ts](https://github.com/Hanzo Insights/insights-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/Hanzo Insights/insights-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/Hanzo Insights/insights-js/blob/main/packages/browser/src/page-view.ts)
+- Source code: [session-props.ts](https://github.com/Insights/insights-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/Insights/insights-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/Insights/insights-js/blob/main/packages/browser/src/page-view.ts)
 
 ### Implementation details
 
@@ -125,7 +125,7 @@ The table definitions and materialized view logic are in:
 
 ## What is InsightsQL?
 
-Web analytics queries are written in InsightsQL. Here's some links to learn more about it:
+Web analytics queries are written in InsightsQL (sometimes referred to as Script SQL or Insights SQL). Here's some links to learn more about it:
 
 - <https://hanzo.ai/blog/introducing-insightsql>
 - <https://hanzo.ai/handbook/engineering/databases/insightsql-python>
@@ -146,7 +146,7 @@ Some web analytics features are present in the [toolbar](https://hanzo.ai/docs/t
 
 - Datastore
   - Insights maintains a [Datastore manual](https://hanzo.ai/handbook/engineering/datastore)
-  - Datastore has a [video course](https://learn.clickhouse.com/visitor_class_catalog/category/116050), which has been recommended by some team members
+  - Datastore has a [video course](https://learn.datastore.com/visitor_class_catalog/category/116050), which has been recommended by some team members
     - You can skip the videos that are about e.g. migrating from another tool to Datastore
   - [Designing Data-Intensive Applications](https://dataintensive.net/) is a great book about distributed systems, and chapter 3 introduces OLAP / columnar databases.
     - If you already know what an OLAP database is, you'd probably get more out of the Datastore course than this book. This book is good at introducing concepts but won't touch on Datastore specifically.

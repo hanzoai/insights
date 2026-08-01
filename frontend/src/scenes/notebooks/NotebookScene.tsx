@@ -1,34 +1,36 @@
-import { useActions, useValues } from 'kea'
+import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-import { IconInfo, IconOpenSidebar } from '@hanzo/icons'
+import { IconOpenSidebar } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { cn } from 'lib/utils/css-classes'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { SceneBreadcrumbBackButton } from '~/layout/scenes/components/SceneBreadcrumbs'
 
 import { Notebook } from './Notebook/Notebook'
 import { NotebookLoadingState } from './Notebook/NotebookLoadingState'
+import { notebookLogic } from './Notebook/notebookLogic'
 import {
     NotebookExpandButton,
     NotebookKernelInfoButton,
+    NotebookPresence,
     NotebookSyncInfo,
-    NotebookTableOfContentsButton,
 } from './Notebook/NotebookMeta'
 import { NotebookShareModal } from './Notebook/NotebookShareModal'
-import { notebookLogic } from './Notebook/notebookLogic'
 import { NotebookMenu } from './NotebookMenu'
 import { notebookPanelLogic } from './NotebookPanel/notebookPanelLogic'
-import { LOCAL_NOTEBOOK_TEMPLATES } from './NotebookTemplates/notebookTemplates'
 import { NotebookSceneLogicProps, notebookSceneLogic } from './notebookSceneLogic'
+import { NotebookSceneMenuBar } from './NotebookSceneMenuBar'
 import { NotebookTarget } from './types'
 
 interface NotebookSceneProps {
@@ -46,12 +48,14 @@ export const scene: SceneExport<NotebookSceneLogicProps> = {
 export function NotebookScene(): JSX.Element {
     const { notebookId, loading } = useValues(notebookSceneLogic)
     const { createNotebook } = useActions(notebookSceneLogic)
-    const { notebook, conflictWarningVisible, accessDeniedToNotebook } = useValues(
+    const { notebook, accessDeniedToNotebook } = useValues(
         notebookLogic({ shortId: notebookId, target: NotebookTarget.Scene })
     )
     const { selectNotebook, closeSidePanel } = useActions(notebookPanelLogic)
     const { selectedNotebook, visibility } = useValues(notebookPanelLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
+    const [isMarkdownSourceOpen, setIsMarkdownSourceOpen] = useState(false)
+    const { featureFlags } = useValues(featureFlagLogic)
+    const sceneMenuBarEnabled = !!featureFlags[FEATURE_FLAGS.SCENE_MENU_BAR]
 
     useEffect(() => {
         if (notebookId === 'new') {
@@ -77,18 +81,21 @@ export function NotebookScene(): JSX.Element {
         // oxlint-disable-next-line exhaustive-deps
     }, [notebookId])
 
+    useEffect(() => {
+        setIsMarkdownSourceOpen(false)
+    }, [notebookId])
+
     useFileSystemLogView({
         type: 'notebook',
         ref: notebook?.short_id,
-        enabled: Boolean(notebook?.short_id && notebookId !== 'new' && !loading && !conflictWarningVisible),
-        deps: [notebook?.short_id, notebookId, loading, conflictWarningVisible],
+        enabled: Boolean(notebook?.short_id && notebookId !== 'new' && !loading),
     })
 
     if (accessDeniedToNotebook) {
         return <AccessDenied object="notebook" />
     }
 
-    if (!notebook && !loading && !conflictWarningVisible) {
+    if (!notebook && !loading) {
         return <NotFound object="notebook" />
     }
 
@@ -119,7 +126,8 @@ export function NotebookScene(): JSX.Element {
 
     return (
         <>
-            <div className="flex items-center justify-between">
+            <NotebookSceneMenuBar shortId={notebookId} />
+            <div className={cn('flex items-center justify-between', sceneMenuBarEnabled && 'mt-2')}>
                 <div className="flex gap-2 items-center">
                     <SceneBreadcrumbBackButton />
                     {isTemplate && <Tag type="highlight">TEMPLATE</Tag>}
@@ -128,51 +136,50 @@ export function NotebookScene(): JSX.Element {
 
                 <div className="flex gap-2 items-center">
                     <NotebookSyncInfo shortId={notebookId} />
+                    <NotebookPresence shortId={notebookId} />
 
-                    <NotebookMenu shortId={notebookId} />
+                    {!sceneMenuBarEnabled && <NotebookMenu shortId={notebookId} />}
 
-                    <Button
-                        type="secondary"
-                        icon={<IconInfo />}
-                        size="small"
-                        onClick={() => {
-                            if (selectedNotebook === LOCAL_NOTEBOOK_TEMPLATES[0].short_id && visibility === 'visible') {
-                                closeSidePanel()
-                            } else {
-                                selectNotebook(LOCAL_NOTEBOOK_TEMPLATES[0].short_id)
+                    {!sceneMenuBarEnabled && (
+                        <BindLogic logic={notebookLogic} props={{ shortId: notebookId, target: NotebookTarget.Scene }}>
+                            <NotebookKernelInfoButton
+                                type="secondary"
+                                size="small"
+                                onBeforeShowKernelInfo={() => setIsMarkdownSourceOpen(false)}
+                            />
+                        </BindLogic>
+                    )}
+                    {!sceneMenuBarEnabled && <NotebookExpandButton type="secondary" size="small" inPanel={false} />}
+                    {!sceneMenuBarEnabled && (
+                        <Button
+                            type="secondary"
+                            size="small"
+                            onClick={() => {
+                                selectNotebook(notebookId)
+                            }}
+                            tooltip={
+                                <>
+                                    Opens the notebook in a context panel, that can be accessed from anywhere in the
+                                    Insights app. This is great for dragging and dropping elements like insights,
+                                    recordings or even feature flags into your active notebook.
+                                </>
                             }
-                        }}
-                    >
-                        {selectedNotebook === LOCAL_NOTEBOOK_TEMPLATES[0].short_id && visibility === 'visible'
-                            ? 'Close '
-                            : ''}
-                        Guide
-                    </Button>
-                    <NotebookTableOfContentsButton type="secondary" size="small" />
-                    <NotebookKernelInfoButton type="secondary" size="small" />
-                    <NotebookExpandButton type="secondary" size="small" inPanel={false} />
-                    <Button
-                        type="secondary"
-                        size="small"
-                        onClick={() => {
-                            selectNotebook(notebookId)
-                        }}
-                        tooltip={
-                            <>
-                                Opens the notebook in a {isRemovingSidePanelFlag ? 'context panel' : 'side panel'}, that
-                                can be accessed from anywhere in the Insights app. This is great for dragging and
-                                dropping elements like insights, recordings or even feature flags into your active
-                                notebook.
-                            </>
-                        }
-                        sideIcon={<IconOpenSidebar />}
-                    >
-                        {isRemovingSidePanelFlag ? 'Open in context panel' : 'Open in side panel'}
-                    </Button>
+                            aria-label="Open in context panel"
+                            sideIcon={<IconOpenSidebar />}
+                        >
+                            <span className="hidden lg:inline">Open in context panel</span>
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            <Notebook key={notebookId} shortId={notebookId} editable={!isTemplate} />
+            <Notebook
+                key={notebookId}
+                shortId={notebookId}
+                editable={!isTemplate}
+                markdownSourceOpen={isMarkdownSourceOpen}
+                onMarkdownSourceOpenChange={setIsMarkdownSourceOpen}
+            />
             <NotebookShareModal shortId={notebookId} />
         </>
     )

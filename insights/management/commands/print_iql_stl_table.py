@@ -29,5 +29,5 @@ class Command(BaseCommand):
             print(  # noqa: T201
                 fn.ljust(max_length),
                 "InsightsQL" if fn in insightsql_functions else "     ",
-                "Script" if fn in insights_functions else "      ",
+                "Script" if fn in insights_functions else "   ",
             )

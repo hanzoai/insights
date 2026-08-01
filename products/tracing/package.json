@@ -1,0 +1,27 @@
+{
+    "name": "@hanzo/products-tracing",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short"
+    },
+    "dependencies": {
+        "@hanzo/quill-charts": "workspace:*",
+        "kea": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "kea-subscriptions": "catalog:",
+        "insights-js": "catalog:"
+    },
+    "devDependencies": {
+        "kea-test-utils": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/brand": "catalog:",
+        "@hanzo/icons": "catalog:",
+        "@testing-library/react": "*",
+        "@types/react": "*",
+        "clsx": "*",
+        "fast-equals": "catalog:",
+        "react": "*",
+        "react-window": "*"
+    }
+}

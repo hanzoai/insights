@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 
 import { IconDashboard } from '@hanzo/icons'
 
-import { Button } from 'lib/elements/Button'
 import { IconWithCount } from 'lib/elements/icons'
+import { Button } from 'lib/elements/Button'
 
 import { dashboardsModel } from '~/models/dashboardsModel'
 import { QueryBasedInsightModel } from '~/types'

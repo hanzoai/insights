@@ -1,12 +1,9 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 from uuid import UUID
 
 from insights.datastore.materialized_columns import ColumnName
 from insights.constants import PropertyOperatorType
 from insights.models import Filter
-from insights.models.cohort import Cohort
-from insights.models.cohort.sql import GET_COHORTPEOPLE_BY_COHORT_ID, GET_STATIC_COHORTPEOPLE_BY_COHORT_ID
-from insights.models.cohort.util import format_precalculated_cohort_query, format_static_cohort_query
 from insights.models.entity import Entity
 from insights.models.filters.path_filter import PathFilter
 from insights.models.filters.retention_filter import RetentionFilter
@@ -21,6 +18,10 @@ from insights.queries.column_optimizer.column_optimizer import ColumnOptimizer
 from insights.queries.person_distinct_id_query import get_team_distinct_ids_query
 from insights.queries.trends.util import COUNT_PER_ACTOR_MATH_FUNCTIONS
 from insights.queries.util import PersonPropertiesMode
+
+from products.cohorts.backend.models.cohort import Cohort
+from products.cohorts.backend.models.sql import GET_COHORTPEOPLE_BY_COHORT_ID, GET_STATIC_COHORTPEOPLE_BY_COHORT_ID
+from products.cohorts.backend.models.util import format_precalculated_cohort_query, format_static_cohort_query
 
 
 class PersonQuery:
@@ -303,7 +304,7 @@ class PersonQuery:
             # TODO: doesn't support non-caclculated cohorts
             for index, property in enumerate(self._cohort_filters):
                 try:
-                    cohort = Cohort.objects.get(pk=property.value, team_id=self._team_id)
+                    cohort = Cohort.objects.get(pk=cast(str | int, property.value), team_id=self._team_id)
                     if property.type == "static-cohort":
                         subquery, subquery_params = format_static_cohort_query(cohort, index, prepend)
                     else:

@@ -1,14 +1,15 @@
 # XXX: The tables defined in this module are not used and are only retained for migration consistency reasons. See
 # `person_distinct_id_overrides` in `insights.models.person.sql` for its replacement tables, or
-# https://github.com/Hanzo Insights/insights/pull/23616 for additional context.
+# https://github.com/Insights/insights/pull/23616 for additional context.
 
+from insights.datastore.client.connection import DatastoreUser, get_datastore_creds
 from insights.datastore.cluster import ON_CLUSTER_CLAUSE
 from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_PERSON_OVERRIDE
-from insights.settings.data_stores import DATASTORE_DATABASE, KAFKA_HOSTS
+from insights.settings.data_stores import DATASTORE_DATABASE
+from insights.settings.kafka import KAFKA_HOSTS
 
-PERSON_OVERRIDES_CREATE_TABLE_SQL = (
-    lambda on_cluster=True: f"""
+PERSON_OVERRIDES_CREATE_TABLE_SQL = lambda on_cluster=True: f"""
     CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`person_overrides`
     {ON_CLUSTER_CLAUSE(on_cluster)} (
         team_id INT NOT NULL,
@@ -52,7 +53,7 @@ PERSON_OVERRIDES_CREATE_TABLE_SQL = (
     -- associated events are on. To do this we use the ReplicatedReplacingMergeTree
     -- engine specifying a static `zk_path`. This will cause the Engine to
     -- consider all replicas as the same. See
-    -- https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication
+    -- https://datastore.com/docs/en/engines/table-engines/mergetree-family/replication
     -- for details.
     ENGINE = {{engine}}
 
@@ -68,8 +69,7 @@ PERSON_OVERRIDES_CREATE_TABLE_SQL = (
     -- ensure that we are always querying the latest version of the mapping.
     ORDER BY (team_id, old_person_id)
 """.format(
-        engine=ReplacingMergeTree("person_overrides", replication_scheme=ReplicationScheme.REPLICATED, ver="version")
-    )
+    engine=ReplacingMergeTree("person_overrides", replication_scheme=ReplicationScheme.REPLICATED, ver="version")
 )
 
 # An abstraction over Kafka that allows us to consume, via a Datastore
@@ -89,7 +89,7 @@ KAFKA_PERSON_OVERRIDES_TABLE_SQL = f"""
     -- Take the types from the `person_overrides` table, except for the
     -- `created_at`, which we want to use the DEFAULT now() from the
     -- `person_overrides` definition. See
-    -- https://github.com/hanzoai/datastore/pull/38272 for details of `EMPTY
+    -- https://github.com/Datastore/Datastore/pull/38272 for details of `EMPTY
     -- AS SELECT`
     EMPTY AS SELECT
         team_id,
@@ -148,6 +148,9 @@ GROUP BY
 """
 
 # Datastore dictionaries allow us to JOIN events with their new override_person_ids (if any).
+_dict_reader_creds = get_datastore_creds(DatastoreUser.DICT_READER)
+DATASTORE_DICT_READER_USER = _dict_reader_creds.user
+DATASTORE_DICT_READER_PASSWORD = _dict_reader_creds.password
 PERSON_OVERRIDES_CREATE_DICTIONARY_SQL = f"""
     CREATE DICTIONARY IF NOT EXISTS `{DATASTORE_DATABASE}`.`person_overrides_dict`
     {ON_CLUSTER_CLAUSE()} (
@@ -156,7 +159,7 @@ PERSON_OVERRIDES_CREATE_DICTIONARY_SQL = f"""
         override_person_id UUID
     )
     PRIMARY KEY team_id, old_person_id
-    SOURCE(DATASTORE(QUERY '{GET_LATEST_PERSON_OVERRIDE_ID_SQL}'))
+    SOURCE(DATASTORE(QUERY '{GET_LATEST_PERSON_OVERRIDE_ID_SQL}' USER '{DATASTORE_DICT_READER_USER}' PASSWORD '{DATASTORE_DICT_READER_PASSWORD}'))
     LAYOUT(COMPLEX_KEY_HASHED(PREALLOCATE 1))
 
     -- The LIFETIME setting indicates to Datastore to automatically update this dictionary

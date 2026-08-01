@@ -1,14 +1,25 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi import HTTPException
 
 from llm_gateway.products.config import (
     ALLOWED_PRODUCTS,
+    BEDROCK_MODELS,
+    POSTFN_AI_DEV_APP_ID,
+    POSTFN_AI_EU_APP_ID,
+    POSTFN_AI_US_APP_ID,
+    POSTFN_CODE_DEV_APP_ID,
+    POSTFN_CODE_EU_APP_ID,
+    POSTFN_CODE_US_APP_ID,
     PRODUCT_ALIASES,
     PRODUCTS,
     TWIG_EU_APP_ID,
     TWIG_US_APP_ID,
+    UNCONDITIONAL_SERVER_CREDENTIAL_PRODUCTS,
     WIZARD_EU_APP_ID,
     WIZARD_US_APP_ID,
+    check_free_tier_model_access,
     check_product_access,
     get_product_config,
     resolve_product_alias,
@@ -31,28 +42,75 @@ class TestCheckProductAccess:
     @pytest.mark.parametrize(
         "product,auth_method,application_id,model,expected_allowed,expected_error_contains",
         [
-            # llm_gateway allows everything
+            # llm_gateway allows API keys but rejects OAuth (no app IDs configured)
             ("llm_gateway", "personal_api_key", None, "claude-3-opus", True, None),
-            ("llm_gateway", "oauth_access_token", "any-app-id", "gpt-4o", True, None),
+            ("llm_gateway", "oauth_access_token", "any-app-id", "gpt-4o", False, "not authorized"),
             ("llm_gateway", "personal_api_key", None, None, True, None),
-            # twig requires OAuth with valid app ID
-            ("twig", "personal_api_key", None, None, False, "requires OAuth"),
-            ("twig", "oauth_access_token", "invalid-app-id", None, False, "not authorized"),
-            ("twig", "oauth_access_token", TWIG_US_APP_ID, None, True, None),
-            ("twig", "oauth_access_token", TWIG_EU_APP_ID, None, True, None),
+            # ci allows API keys with any model (used by e2e test runs); OAuth rejected (no app IDs)
+            ("ci", "personal_api_key", None, "claude-3-opus", True, None),
+            ("ci", "oauth_access_token", "any-app-id", "gpt-4o", False, "not authorized"),
+            # insights_code requires OAuth with valid app ID
+            ("insights_code", "personal_api_key", None, None, False, "requires OAuth"),
+            ("insights_code", "oauth_access_token", "invalid-app-id", None, False, "not authorized"),
+            ("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, None, True, None),
+            ("insights_code", "oauth_access_token", POSTFN_CODE_EU_APP_ID, None, True, None),
             # wizard allows API keys and OAuth with valid app ID
             ("wizard", "personal_api_key", None, "claude-3-opus", True, None),
             ("wizard", "oauth_access_token", "invalid-app-id", None, False, "not authorized"),
             ("wizard", "oauth_access_token", WIZARD_US_APP_ID, None, True, None),
             ("wizard", "oauth_access_token", WIZARD_EU_APP_ID, None, True, None),
-            # django allows API keys with any model
+            # django allows API keys with any model; OAuth rejected (no app IDs configured)
             ("django", "personal_api_key", None, "gpt-4.1-mini", True, None),
             ("django", "personal_api_key", None, "claude-3-opus", True, None),
-            ("django", "oauth_access_token", "any-app-id", "gpt-4.1-mini", True, None),
-            # llma_translation allows API keys but only gpt-4.1-mini
+            ("django", "oauth_access_token", "any-app-id", "gpt-4.1-mini", False, "not authorized"),
+            # Custom image scans accept only server-minted OAuth credentials.
+            ("custom_image_scans", "personal_api_key", None, "@cf/zai-org/glm-5.2", False, "requires OAuth"),
+            (
+                "custom_image_scans",
+                "oauth_access_token",
+                POSTFN_CODE_US_APP_ID,
+                "@cf/zai-org/glm-5.2",
+                False,
+                "server-minted",
+            ),
+            # llma_translation allows API keys but only gpt-4.1-mini; OAuth rejected (no app IDs configured)
             ("llma_translation", "personal_api_key", None, "gpt-4.1-mini", True, None),
             ("llma_translation", "personal_api_key", None, "claude-3-opus", False, "not allowed"),
-            ("llma_translation", "oauth_access_token", "any-app-id", "gpt-4.1-mini", True, None),
+            ("llma_translation", "oauth_access_token", "any-app-id", "gpt-4.1-mini", False, "not authorized"),
+            # signals allows API keys (shared gateway key) with any model, and OAuth from the
+            # array/twig (insights_code) app for coding-agent tasks
+            ("signals", "personal_api_key", None, "claude-haiku-4-5", True, None),
+            ("signals", "personal_api_key", None, "claude-sonnet-4-5", True, None),
+            ("signals", "personal_api_key", None, "claude-3-opus", True, None),
+            ("signals", "oauth_access_token", "any-app-id", "claude-haiku-4-5", False, "not authorized"),
+            ("signals", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-haiku-4-5", True, None),
+            ("signals", "oauth_access_token", POSTFN_CODE_EU_APP_ID, "claude-sonnet-4-5", True, None),
+            # conversations: utility prompts (API key) and support-reply sandbox (array OAuth app)
+            ("conversations", "personal_api_key", None, "claude-haiku-4-5", True, None),
+            ("conversations", "personal_api_key", None, "claude-sonnet-4-6", True, None),
+            ("conversations", "personal_api_key", None, "claude-sonnet-5", True, None),
+            ("conversations", "personal_api_key", None, "claude-opus-4-8", False, "not allowed"),
+            ("conversations", "oauth_access_token", "any-app-id", "claude-sonnet-5", False, "not authorized"),
+            ("conversations", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", True, None),
+            ("conversations", "oauth_access_token", POSTFN_CODE_EU_APP_ID, "claude-sonnet-4-6", True, None),
+            # insights_ai allows API keys with any model and OAuth from the Insights AI app.
+            ("insights_ai", "personal_api_key", None, "claude-sonnet-4-5", True, None),
+            ("insights_ai", "personal_api_key", None, "gpt-5.3-codex", True, None),
+            ("insights_ai", "oauth_access_token", "any-app-id", "claude-sonnet-4-5", False, "not authorized"),
+            ("insights_ai", "oauth_access_token", POSTFN_AI_US_APP_ID, "claude-sonnet-4-5", True, None),
+            ("insights_ai", "oauth_access_token", POSTFN_AI_EU_APP_ID, "gpt-5.3-codex", True, None),
+            ("insights_ai", "oauth_access_token", POSTFN_AI_DEV_APP_ID, "claude-3-opus", True, None),
+            # changelog_bot: shared-key auth, models pinned to the openai/-prefixed ids the curator
+            # sends verbatim. Exact-match only: bare ids (no prefix) AND variant suffixes must be
+            # rejected, or the cost pin doesn't hold.
+            ("changelog_bot", "personal_api_key", None, "openai/gpt-5.6-terra", True, None),
+            ("changelog_bot", "personal_api_key", None, "openai/gpt-5.6-sol", True, None),
+            ("changelog_bot", "personal_api_key", None, "gpt-5.6-terra", False, "not allowed"),
+            ("changelog_bot", "personal_api_key", None, "openai/gpt-5-mini", False, "not allowed"),
+            # exact_model_match: a pricier "-pro" variant of a pinned id must NOT slip through startswith.
+            ("changelog_bot", "personal_api_key", None, "openai/gpt-5.6-terra-pro", False, "not allowed"),
+            ("changelog_bot", "personal_api_key", None, "openai/gpt-5.6-sol-pro", False, "not allowed"),
+            ("changelog_bot", "oauth_access_token", "any-app-id", "openai/gpt-5.6-terra", False, "not authorized"),
             # unknown product
             ("unknown", "personal_api_key", None, None, False, "Unknown product"),
         ],
@@ -75,17 +133,28 @@ class TestCheckProductAccess:
     @pytest.mark.parametrize(
         "model",
         [
+            "claude-fable-5",
             "claude-opus-4-5",
             "claude-opus-4-6",
+            "claude-opus-4-7",
+            "claude-opus-4-8",
+            "claude-opus-5",
+            "claude-fable-5",
             "claude-sonnet-4-5",
+            "claude-sonnet-4-6",
+            "claude-sonnet-5",
             "claude-haiku-4-5",
+            "gpt-5.6-sol",
+            "gpt-5.6-terra",
+            "gpt-5.6-luna",
+            "gpt-5.5",
             "gpt-5.3-codex",
             "gpt-5.2",
             "gpt-5-mini",
         ],
     )
-    def test_array_allows_restricted_models_with_valid_app_id(self, model: str):
-        allowed, error = check_product_access("array", "oauth_access_token", TWIG_US_APP_ID, model)
+    def test_insights_code_allows_restricted_models_with_valid_app_id(self, model: str):
+        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -99,8 +168,8 @@ class TestCheckProductAccess:
             "o1",
         ],
     )
-    def test_array_rejects_non_allowed_models(self, model: str):
-        allowed, error = check_product_access("array", "oauth_access_token", TWIG_US_APP_ID, model)
+    def test_insights_code_rejects_non_allowed_models(self, model: str):
+        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
         assert allowed is False
         assert error is not None
         assert "not allowed" in error
@@ -108,36 +177,271 @@ class TestCheckProductAccess:
     @pytest.mark.parametrize(
         "model",
         [
+            "claude-fable-5",
             "claude-opus-4-5",
             "claude-opus-4-6",
+            "claude-opus-4-7",
+            "claude-opus-4-8",
+            "claude-opus-5",
+            "claude-fable-5",
             "claude-sonnet-4-5",
+            "claude-sonnet-4-6",
+            "claude-sonnet-5",
             "claude-haiku-4-5",
+            "gpt-5.5",
             "gpt-5.3-codex",
             "gpt-5.2",
             "gpt-5-mini",
+        ],
+    )
+    def test_insights_code_allows_configured_models(self, model: str):
+        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        assert allowed is True
+        assert error is None
+
+    @pytest.mark.parametrize(
+        "model",
+        [
             "claude-opus-4-5-20260101",
+            "claude-sonnet-4-5-20250929",
+            "claude-haiku-4-5-20251001-v2",
+            "gpt-5.2-turbo",
         ],
     )
-    def test_twig_allows_configured_models_with_valid_app_id(self, model: str):
-        allowed, error = check_product_access("twig", "oauth_access_token", TWIG_US_APP_ID, model)
+    def test_insights_code_allows_dated_variants_via_prefix_matching(self, model: str):
+        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
     @pytest.mark.parametrize(
         "model",
         [
-            "gpt-4o",
-            "gpt-4o-mini",
-            "claude-3-5-haiku-20241022",
-            "claude-3-opus",
-            "o1",
+            "Claude-Opus-4-5",
+            "CLAUDE-SONNET-4-5",
+            "GPT-5.2",
+            "Claude-Haiku-4-5",
         ],
     )
-    def test_twig_rejects_unconfigured_models(self, model: str):
-        allowed, error = check_product_access("twig", "oauth_access_token", TWIG_US_APP_ID, model)
+    def test_model_matching_is_case_insensitive(self, model: str):
+        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        assert allowed is True
+        assert error is None
+
+    @pytest.mark.parametrize(
+        "alias",
+        ["twig", "array"],
+    )
+    def test_legacy_aliases_resolve_to_insights_code(self, alias: str):
+        allowed, error = check_product_access(alias, "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-4-5")
+        assert allowed is True
+        assert error is None
+
+    @pytest.mark.parametrize(
+        "alias",
+        ["twig", "array"],
+    )
+    def test_legacy_aliases_reject_non_allowed_models(self, alias: str):
+        allowed, error = check_product_access(alias, "oauth_access_token", POSTFN_CODE_US_APP_ID, "gpt-4o")
         assert allowed is False
         assert error is not None
         assert "not allowed" in error
+
+    @pytest.mark.parametrize("model", sorted(BEDROCK_MODELS))
+    def test_insights_code_allows_bedrock_models(self, model: str):
+        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        assert allowed is True
+        assert error is None
+
+    @patch(
+        "llm_gateway.products.config.get_settings",
+        return_value=MagicMock(debug=False, bedrock_region_name="us-east-1", insights_code_model_gate_enabled=False),
+    )
+    def test_insights_code_rejects_unallowed_model_via_bedrock_provider(self, mock_get_settings: MagicMock):
+        # A model outside the allowlist with no Bedrock mapping must stay rejected on the bedrock
+        # provider path — the BEDROCK_MODELS entries in the allowlist union must not resurrect it.
+        allowed, error = check_product_access(
+            "insights_code",
+            "oauth_access_token",
+            POSTFN_CODE_US_APP_ID,
+            "claude-3-opus",
+            provider="bedrock",
+        )
+        assert allowed is False
+        assert error is not None
+        assert "not allowed" in error
+
+    @pytest.mark.parametrize(
+        "model",
+        [
+            "claude-opus-4-5",
+            "claude-opus-4-6",
+            "claude-opus-4-7",
+            "claude-opus-4-8",
+            "claude-opus-5",
+            "claude-fable-5",
+            "claude-sonnet-4-5",
+            "claude-sonnet-5",
+            "claude-haiku-4-5",
+            "gpt-5.3-codex",
+            "gpt-5.2",
+            "gpt-5-mini",
+        ],
+    )
+    def test_background_agents_allows_configured_models(self, model: str):
+        allowed, error = check_product_access("background_agents", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        assert allowed is True
+        assert error is None
+
+    def test_background_agents_rejects_api_keys(self):
+        allowed, error = check_product_access("background_agents", "personal_api_key", None, None)
+        assert allowed is False
+        assert error is not None
+        assert "requires OAuth" in error
+
+    def test_background_agents_does_not_allow_claude_sonnet_4_6(self):
+        allowed, error = check_product_access(
+            "background_agents", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-4-6"
+        )
+        assert allowed is False
+        assert error is not None
+        assert "not allowed" in error
+
+    @patch(
+        "llm_gateway.products.config.get_settings",
+        return_value=MagicMock(debug=False, bedrock_region_name="us-east-1", insights_code_model_gate_enabled=False),
+    )
+    def test_background_agents_allows_claude_sonnet_4_6_via_bedrock_provider(self, mock_get_settings: MagicMock):
+        allowed, error = check_product_access(
+            "background_agents",
+            "oauth_access_token",
+            POSTFN_CODE_US_APP_ID,
+            "claude-sonnet-4-6",
+            provider="bedrock",
+        )
+        assert allowed is True
+        assert error is None
+
+    @pytest.mark.parametrize("model", sorted(BEDROCK_MODELS))
+    def test_background_agents_allows_bedrock_models(self, model: str):
+        allowed, error = check_product_access("background_agents", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        assert allowed is True
+        assert error is None
+
+    def test_slack_twig_allows_claude_haiku(self):
+        allowed, error = check_product_access("slack-twig", "personal_api_key", None, "claude-haiku-4-5")
+        assert allowed is True
+        assert error is None
+
+    def test_slack_twig_rejects_non_haiku_models(self):
+        allowed, error = check_product_access("slack-twig", "personal_api_key", None, "claude-sonnet-4-5")
+        assert allowed is False
+        assert error is not None
+        assert "not allowed" in error
+
+    def test_slack_app_routing_allows_claude_haiku_via_api_key(self):
+        allowed, error = check_product_access("slack_app_routing", "personal_api_key", None, "claude-haiku-4-5")
+        assert allowed is True
+        assert error is None
+
+    def test_slack_app_routing_rejects_non_haiku_models(self):
+        allowed, error = check_product_access("slack_app_routing", "personal_api_key", None, "claude-sonnet-4-5")
+        assert allowed is False
+        assert error is not None
+        assert "not allowed" in error
+
+    def test_slack_insights_code_alias_still_resolves(self):
+        # Legacy alias kept for backward compat (old URL paths, Django integration kind).
+        allowed, error = check_product_access("slack-insights-code", "personal_api_key", None, "claude-haiku-4-5")
+        assert allowed is True
+        assert error is None
+
+    @pytest.mark.parametrize(
+        "model",
+        [
+            "claude-opus-4-7",
+            "claude-opus-4-8",
+            "claude-opus-5",
+            "claude-sonnet-4-6",
+            "claude-sonnet-5",
+            "claude-haiku-4-5",
+            "gpt-5.3-codex",
+        ],
+    )
+    def test_slack_app_allows_agent_models(self, model: str):
+        allowed, error = check_product_access("slack_app", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        assert allowed is True
+        assert error is None
+
+    def test_slack_app_rejects_api_keys(self):
+        allowed, error = check_product_access("slack_app", "personal_api_key", None, "claude-sonnet-4-6")
+        assert allowed is False
+        assert error is not None
+        assert "requires OAuth" in error
+
+    def test_slack_app_rejects_unauthorized_oauth_app(self):
+        allowed, error = check_product_access(
+            "slack_app", "oauth_access_token", "00000000-0000-0000-0000-000000000000", "claude-sonnet-4-6"
+        )
+        assert allowed is False
+        assert error is not None
+        assert "not authorized" in error
+
+    @pytest.mark.parametrize(
+        "application_id",
+        [
+            POSTFN_AI_US_APP_ID,
+            POSTFN_AI_EU_APP_ID,
+            POSTFN_AI_DEV_APP_ID,
+        ],
+    )
+    def test_insights_ai_allows_oauth_apps(self, application_id: str):
+        allowed, error = check_product_access("insights_ai", "oauth_access_token", application_id, "claude-sonnet-4-5")
+        assert allowed is True
+        assert error is None
+
+    def test_insights_ai_rejects_insights_code_oauth_app(self):
+        allowed, error = check_product_access(
+            "insights_ai", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-4-5"
+        )
+        assert allowed is False
+        assert error is not None
+        assert "not authorized" in error
+
+
+class TestBackwardsCompatibility:
+    def test_twig_app_id_constants_are_aliases(self):
+        assert TWIG_US_APP_ID == POSTFN_CODE_US_APP_ID
+        assert TWIG_EU_APP_ID == POSTFN_CODE_EU_APP_ID
+
+    @pytest.mark.parametrize(
+        "alias,target",
+        [
+            ("twig", "insights_code"),
+            ("array", "insights_code"),
+            ("slack-twig", "slack_app_routing"),
+            ("slack-insights-code", "slack_app_routing"),
+        ],
+    )
+    def test_aliases_resolve_to_canonical_product(self, alias: str, target: str):
+        assert resolve_product_alias(alias) == target
+
+    def test_twig_alias_returns_same_config_as_insights_code(self):
+        assert get_product_config("twig") is get_product_config("insights_code")
+
+    def test_array_alias_returns_same_config_as_insights_code(self):
+        assert get_product_config("array") is get_product_config("insights_code")
+
+    def test_twig_alias_validates_to_insights_code(self):
+        assert validate_product("twig") == "insights_code"
+
+    def test_array_alias_validates_to_insights_code(self):
+        assert validate_product("array") == "insights_code"
+
+    def test_slack_aliases_resolve_to_slack_app_routing(self):
+        assert get_product_config("slack-twig") is get_product_config("slack_app_routing")
+        assert get_product_config("slack-insights-code") is get_product_config("slack_app_routing")
+        assert validate_product("slack-twig") == "slack_app_routing"
+        assert validate_product("slack-insights-code") == "slack_app_routing"
 
 
 class TestValidateProduct:
@@ -159,7 +463,226 @@ class TestValidateProduct:
         assert validate_product(alias) == target
 
     def test_resolve_product_alias_returns_alias_target(self):
-        assert resolve_product_alias("array") == "twig"
+        assert resolve_product_alias("array") == "insights_code"
+        assert resolve_product_alias("twig") == "insights_code"
+        assert resolve_product_alias("slack-twig") == "slack_app_routing"
+        assert resolve_product_alias("slack-insights-code") == "slack_app_routing"
 
     def test_resolve_product_alias_returns_input_if_not_aliased(self):
         assert resolve_product_alias("wizard") == "wizard"
+
+
+class TestCheckFreeTierModelAccess:
+    @pytest.fixture(autouse=True)
+    def gate_enabled(self, monkeypatch: pytest.MonkeyPatch):
+        from llm_gateway.config import get_settings
+
+        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        get_settings.cache_clear()
+        yield
+        get_settings.cache_clear()
+
+    def test_gate_disabled_by_default_allows_premium_models(self, monkeypatch: pytest.MonkeyPatch):
+        # the PR deploys inert: behavior changes only when the env flag flips
+        from llm_gateway.config import get_settings
+
+        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        get_settings.cache_clear()
+        allowed, error = check_free_tier_model_access(
+            product="insights_code",
+            model="claude-fable-5",
+            provider=None,
+            code_usage_billed=False,
+            usage_unlimited=False,
+        )
+        assert allowed is True
+        assert error is None
+
+    @pytest.mark.parametrize(
+        "product,model,code_usage_billed,usage_unlimited,expected_allowed",
+        [
+            # Unbilled org on the Code surface: premium blocked, open model allowed
+            ("insights_code", "claude-fable-5", False, False, False),
+            ("insights_code", "@cf/zai-org/glm-5.2", False, False, True),
+            # The alias routes are the same surface - a URL spelling must not bypass
+            ("array", "claude-fable-5", False, False, False),
+            ("twig", "gpt-5.5", False, False, False),
+            # Org pays for Desktop usage: everything stays open
+            ("insights_code", "claude-fable-5", True, False, True),
+            # Staff bypass mirrors the cost-throttle exemption
+            ("insights_code", "claude-fable-5", False, True, True),
+            # Other products keep their own allowlists; the gate is Code-only
+            ("llm_gateway", "claude-fable-5", False, False, True),
+            # No model in the body: nothing to gate (product allowlist still applies)
+            ("insights_code", None, False, False, True),
+        ],
+    )
+    def test_gate_matrix(
+        self,
+        product: str,
+        model: str | None,
+        code_usage_billed: bool,
+        usage_unlimited: bool,
+        expected_allowed: bool,
+    ):
+        allowed, error = check_free_tier_model_access(
+            product=product,
+            model=model,
+            provider=None,
+            code_usage_billed=code_usage_billed,
+            usage_unlimited=usage_unlimited,
+        )
+        assert allowed is expected_allowed
+        if expected_allowed:
+            assert error is None
+        else:
+            assert model is not None and error is not None
+            assert model in error
+            assert "@cf/zai-org/glm-5.2" in error
+
+    def test_denied_model_alias_variant_is_also_denied(self):
+        # The old gate's hole: an exact-match list let date-suffixed aliases
+        # through. Prefix matching must not - but a free-listed model's own
+        # variants stay allowed.
+        allowed, _ = check_free_tier_model_access(
+            product="insights_code",
+            model="claude-fable-5-20260301",
+            provider=None,
+            code_usage_billed=False,
+            usage_unlimited=False,
+        )
+        assert allowed is False
+        allowed, _ = check_free_tier_model_access(
+            product="insights_code",
+            model="@cf/zai-org/glm-5.2-fp8",
+            provider=None,
+            code_usage_billed=False,
+            usage_unlimited=False,
+        )
+        assert allowed is True
+
+
+class TestServerCredentialRequirement:
+    """The internal products that share the Insights Desktop OAuth app (background_agents, signals,
+    slack_app, conversations, onboarding) must accept only server-minted tokens — those carrying the
+    internal `internal_run:read` marker. Otherwise a user's own Desktop OAuth token could route around
+    the insights_code free-tier gate through these products to premium models."""
+
+    _MARKER_SCOPES = ["llm_gateway:read", "task:write", "internal_run:read"]
+
+    @pytest.fixture(autouse=True)
+    def gate_enabled(self, monkeypatch: pytest.MonkeyPatch):
+        from llm_gateway.config import get_settings
+
+        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        get_settings.cache_clear()
+        yield
+        get_settings.cache_clear()
+
+    @pytest.mark.parametrize("product", ["background_agents", "signals", "slack_app", "conversations", "onboarding"])
+    def test_oauth_without_marker_is_rejected(self, product: str):
+        # a desktop Code token (wildcard scope, no internal marker); claude-sonnet-5 is in every
+        # sibling's model list, so the rejection is unambiguously the missing server credential
+        allowed, error = check_product_access(
+            product, "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
+        )
+        assert allowed is False
+        assert error is not None and "server-minted" in error
+
+    @pytest.mark.parametrize("product", ["background_agents", "signals", "slack_app", "conversations", "onboarding"])
+    def test_oauth_with_marker_is_allowed(self, product: str):
+        allowed, error = check_product_access(
+            product, "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=self._MARKER_SCOPES
+        )
+        assert allowed is True
+        assert error is None
+
+    def test_insights_code_does_not_require_the_marker(self):
+        # desktop users reach insights_code with a marker-less token — must keep working
+        allowed, error = check_product_access(
+            "insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
+        )
+        assert allowed is True
+        assert error is None
+
+    def test_personal_api_key_is_not_subject_to_the_marker(self):
+        # the shared server-side gateway key reaches signals as a PAK; the check is OAuth-only
+        allowed, error = check_product_access(
+            "signals", "personal_api_key", None, "claude-sonnet-5", scopes=["llm_gateway:read"]
+        )
+        assert allowed is True
+        assert error is None
+
+    def test_gate_disabled_leaves_sibling_access_unchanged(self, monkeypatch: pytest.MonkeyPatch):
+        # deploys inert: with the flag off, a marker-less token still reaches the siblings
+        from llm_gateway.config import get_settings
+
+        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        get_settings.cache_clear()
+        allowed, error = check_product_access(
+            "signals", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
+        )
+        assert allowed is True
+        assert error is None
+
+    # The rest of this class runs with the gate forced on, which is the state in which the
+    # requirement was already known to hold. These cover the default state, where the products that
+    # never shipped without the check have to enforce it anyway. Spelled out rather than derived
+    # from UNCONDITIONAL_SERVER_CREDENTIAL_PRODUCTS: parameterizing over the set under test would
+    # make dropping a product from it delete its own coverage instead of failing.
+    @pytest.mark.parametrize("product", ["custom_image_scans", "onboarding"])
+    def test_gate_disabled_still_refuses_unconditional_products(self, product: str, monkeypatch: pytest.MonkeyPatch):
+        from llm_gateway.config import get_settings
+
+        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        get_settings.cache_clear()
+        allowed, error = check_product_access(product, "oauth_access_token", POSTFN_CODE_US_APP_ID, None, scopes=["*"])
+        assert allowed is False
+        assert error is not None and "server-minted" in error
+
+    @pytest.mark.parametrize("product", ["custom_image_scans", "onboarding"])
+    def test_gate_disabled_still_admits_server_minted_tokens(self, product: str, monkeypatch: pytest.MonkeyPatch):
+        from llm_gateway.config import get_settings
+
+        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        get_settings.cache_clear()
+        allowed, error = check_product_access(
+            product, "oauth_access_token", POSTFN_CODE_US_APP_ID, None, scopes=self._MARKER_SCOPES
+        )
+        assert allowed is True
+        assert error is None
+
+
+_CODE_APP_IDS = frozenset({POSTFN_CODE_DEV_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_US_APP_ID})
+_CODE_APP_PRODUCTS = [
+    name
+    for name, config in PRODUCTS.items()
+    if config.allowed_application_ids and config.allowed_application_ids & _CODE_APP_IDS
+]
+
+
+class TestServerCredentialConfigInvariant:
+    # Derived from PRODUCTS rather than hand-enumerated: requires_server_credential
+    # defaults to False, so a future product added to the Code OAuth app without it
+    # would silently reopen the premium-model escape the marker closes. It must fail
+    # here instead.
+    @pytest.mark.parametrize("product", [p for p in _CODE_APP_PRODUCTS if p != "insights_code"])
+    def test_internal_code_app_products_require_a_server_credential(self, product: str):
+        assert PRODUCTS[product].requires_server_credential, (
+            f"'{product}' accepts the Insights Desktop OAuth app but doesn't require a server-minted "
+            "credential, so a user's own Desktop OAuth token could reach it and route around the "
+            "insights_code free-tier model gate"
+        )
+
+    def test_unconditional_products_are_the_ones_enforcing_without_the_flag(self):
+        # Pairs with the two flag-off tests above, which name their products literally. If a
+        # product is added here without flag-off coverage, or removed from here while still
+        # expected to enforce, exactly one of the two sides fails.
+        assert UNCONDITIONAL_SERVER_CREDENTIAL_PRODUCTS == frozenset({"custom_image_scans", "onboarding"})
+
+    def test_insights_code_is_the_only_code_app_product_open_to_user_tokens(self):
+        # desktop users hold marker-less Code tokens; requiring the marker on the
+        # user-facing product would lock them all out. Membership is asserted so a
+        # broken _CODE_APP_PRODUCTS derivation can't quietly hollow out this class.
+        assert "insights_code" in _CODE_APP_PRODUCTS
+        assert PRODUCTS["insights_code"].requires_server_credential is False

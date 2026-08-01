@@ -36,7 +36,7 @@ impl Manager {
         params: &'args Params,
     ) -> Query<'args, Postgres, PgArguments> {
         /* The original Django query formulation we're duplicating
-                 * https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L279-L289
+                 * https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L279-L289
 
         SELECT count(*) as full_count
         FROM {self.table}
@@ -54,7 +54,7 @@ impl Manager {
 
                 * Also, the conditionally-applied join on event properties table applied above as
                 * self._join_on_event_property()
-                * https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L293-L305
+                * https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L293-L305
                 */
 
         // build & render the query
@@ -66,6 +66,7 @@ impl Manager {
             project_id,
             params.parent_type,
             &params.event_names,
+            &params.is_feature_flag,
         );
 
         // begin the WHERE clause
@@ -108,7 +109,7 @@ impl Manager {
         params: &'args Params,
     ) -> Query<'args, Postgres, PgArguments> {
         /* The original Django query we're duplicating
-                 * https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L262-L275
+                 * https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L262-L275
 
         SELECT {self.property_definition_fields}, {self.event_property_field} AS is_seen_on_filtered_events
         FROM {self.table}
@@ -131,17 +132,18 @@ impl Manager {
 
                 * Also, the conditionally-applied join on event properties table applied above as
                 * self._join_on_event_property()
-                * https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L293-L305
+                * https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L293-L305
                 */
 
         self.gen_prop_defs_select_clause(qb, params.use_enterprise_taxonomy);
 
         // append event_property_field clause to SELECT clause
-        let is_seen_resolved = if self.is_parent_type_event(params.parent_type) {
-            format!("{EVENT_PROPERTY_TABLE_ALIAS}.\"property\"")
-        } else {
-            "NULL".to_string()
-        };
+        let is_seen_resolved =
+            if self.should_join_event_property(params.parent_type, &params.is_feature_flag) {
+                format!("{EVENT_PROPERTY_TABLE_ALIAS}.\"property\"")
+            } else {
+                "NULL".to_string()
+            };
         qb.push(format!(
             ", {is_seen_resolved} IS NOT NULL AS is_seen_on_filtered_events "
         ));
@@ -152,6 +154,7 @@ impl Manager {
             project_id,
             params.parent_type,
             &params.event_names,
+            &params.is_feature_flag,
         );
 
         // begin the WHERE clause
@@ -224,7 +227,7 @@ impl Manager {
 
     fn gen_from_clause(&self, qb: &mut QueryBuilder<Postgres>, use_enterprise_taxonomy: bool) {
         // conditionally apply JOIN on enterprise prop defs if request param flag is set
-        // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L505-L506
+        // https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L505-L506
         let from_clause = if use_enterprise_taxonomy {
             format!(
                 " FROM {PROPERTY_DEFS_TABLE} FULL OUTER JOIN {ENTERPRISE_PROP_DEFS_TABLE} ON {PROPERTY_DEFS_TABLE}.\"id\"={ENTERPRISE_PROP_DEFS_TABLE}.\"propertydefinition_ptr_id\" "
@@ -243,33 +246,34 @@ impl Manager {
         project_id: i32,
         parent_type: PropertyParentType,
         event_names: &'args [String],
+        is_feature_flag: &Option<bool>,
     ) {
-        // conditionally join on event properties table
-        // this join is only applied if the query is scoped to type "event"
-        if self.is_parent_type_event(parent_type) {
-            let filter_by_event_names = !event_names.is_empty();
-
-            // if a list of event_names was supplied, we want this join to narrow
-            // to only those events. otherwise it's a LEFT JOIN for enrichment only
-            qb.push(self.event_property_join_type(filter_by_event_names));
-            qb.push(format!(
-                " (SELECT DISTINCT property FROM {EVENT_PROPERTY_TABLE} WHERE COALESCE(project_id, team_id) = "
-            ));
-            qb.push_bind(project_id);
-            qb.push(" ");
-
-            // conditionally apply filter if event_names list was supplied
-            if filter_by_event_names {
-                qb.push(" AND event = ANY(");
-                qb.push_bind(event_names);
-                qb.push(") ");
-            }
-
-            // close the JOIN clause and add the JOIN condition
-            qb.push(format!(
-                ") AS {EVENT_PROPERTY_TABLE_ALIAS} ON {EVENT_PROPERTY_TABLE_ALIAS}.\"property\" = {PROPERTY_DEFS_TABLE}.\"name\" "
-            ));
+        if !self.should_join_event_property(parent_type, is_feature_flag) {
+            return;
         }
+
+        let filter_by_event_names = !event_names.is_empty();
+
+        // if a list of event_names was supplied, we want this join to narrow
+        // to only those events. otherwise it's a LEFT JOIN for enrichment only
+        qb.push(self.event_property_join_type(filter_by_event_names));
+        qb.push(format!(
+            " (SELECT DISTINCT property FROM {EVENT_PROPERTY_TABLE} WHERE COALESCE(project_id, team_id) = "
+        ));
+        qb.push_bind(project_id);
+        qb.push(" ");
+
+        // conditionally apply filter if event_names list was supplied
+        if filter_by_event_names {
+            qb.push(" AND event = ANY(");
+            qb.push_bind(event_names);
+            qb.push(") ");
+        }
+
+        // close the JOIN clause and add the JOIN condition
+        qb.push(format!(
+            ") AS {EVENT_PROPERTY_TABLE_ALIAS} ON {EVENT_PROPERTY_TABLE_ALIAS}.\"property\" = {PROPERTY_DEFS_TABLE}.\"name\" "
+        ));
     }
 
     fn init_where_clause(&self, qb: &mut QueryBuilder<Postgres>, project_id: i32) {
@@ -299,7 +303,7 @@ impl Manager {
         // conditionally filter on excluded_properties
         // NOTE: excluded_properties is also passed to the Django API as JSON,
         // but may not matter when passed to this service. TBD. See below:
-        // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L241
+        // https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L241
         if self.is_parent_type_event(parent_type) {
             qb.push(format!(" AND NOT {PROPERTY_DEFS_TABLE}.\"name\" = ANY("));
 
@@ -336,8 +340,8 @@ impl Manager {
         is_numerical: bool,
     ) {
         // conditionally filter for numerical-valued properties:
-        // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L493-L499
-        // https://github.com/hanzoai/insights/blob/main/insights/filters.py#L61-L84
+        // https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L493-L499
+        // https://github.com/Insights/insights/blob/master/insights/filters.py#L61-L84
         if is_numerical {
             qb.push(format!(
                 " AND {PROPERTY_DEFS_TABLE}.\"is_numerical\" = true AND NOT {PROPERTY_DEFS_TABLE}.\"name\" = ANY(ARRAY['distinct_id', 'timestamp']) ",
@@ -353,10 +357,10 @@ impl Manager {
         filter_initial_props: bool,
     ) {
         // conditionally apply search term matching; skip this if possible, it's not cheap!
-        // logic: https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L493-L499
+        // logic: https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L493-L499
         if !search_terms.is_empty() {
             // step 1: identify property def "aliases" to enrich our fuzzy matching; see also:
-            // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L309-L324
+            // https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L309-L324
 
             // attempt to enrich basic search terms using a heuristic:
             // if the description associated with any std Insights event properties
@@ -390,7 +394,7 @@ impl Manager {
             };
 
             // step 2: filter "initial" prop defs if the user wants "latest"
-            // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L326-L339
+            // https://github.com/Insights/insights/blob/master/insights/taxonomy/property_definition_api.py#L326-L339
             let screening_clause = if filter_initial_props {
                 format!(" OR NOT name ILIKE '%{SEARCH_SCREEN_WORD}%' ")
             } else {
@@ -402,7 +406,7 @@ impl Manager {
 
             // step 3: generate the search fuzzy-matching SQL clause
             // Original Django monolith query construction step is here:
-            // https://github.com/hanzoai/insights/blob/main/insights/filters.py#L61-L84
+            // https://github.com/Insights/insights/blob/master/insights/filters.py#L61-L84
             if !search_fields.is_empty() && !search_terms.is_empty() {
                 // outer loop: one AND clause for every search term supplied by caller.
                 // each of these clauses may be enriched with "search_extras" suffix
@@ -469,6 +473,16 @@ impl Manager {
         } else {
             " LEFT JOIN "
         }
+    }
+
+    // Should the query JOIN on insights_eventproperty? False for non-event types
+    // and for feature flag queries (flags are global, not per-event).
+    fn should_join_event_property(
+        &self,
+        parent_type: PropertyParentType,
+        is_feature_flag: &Option<bool>,
+    ) -> bool {
+        self.is_parent_type_event(parent_type) && !matches!(is_feature_flag, Some(true))
     }
 
     // is the "parent type" of this request (and prop defs query) the default "event" type?

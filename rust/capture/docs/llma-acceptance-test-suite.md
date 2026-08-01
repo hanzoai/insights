@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the Python acceptance test suite for the LLM Analytics pipeline. These tests validate **end-to-end functionality** that requires real Insights infrastructure: database, S3 storage, Kafka, authentication services, and the full ingestion pipeline.
+This document describes the Python acceptance test suite for the AI observability pipeline. These tests validate **end-to-end functionality** that requires real Insights infrastructure: database, S3 storage, Kafka, authentication services, and the full ingestion pipeline.
 
 **Implementation Requirement**: Each phase in the implementation plan must pass its corresponding acceptance tests before proceeding to the next phase. This ensures incremental validation and prevents regression as new features are added.
 
@@ -154,10 +154,10 @@ The acceptance test suite is implemented in Python using pytest to test against 
 
 ```bash
 # Insights Instance (defaults to http://localhost:8010 if not set)
-export INSIGHTS_TEST_BASE_URL="http://localhost:8010"
+export POSTFN_TEST_BASE_URL="http://localhost:8010"
 
 # Personal API Key (required - no default)
-export INSIGHTS_PERSONAL_API_KEY="your_personal_api_key_here"
+export POSTFN_PERSONAL_API_KEY="your_personal_api_key_here"
 ```
 
 **Creating a Personal API Key:**
@@ -168,7 +168,7 @@ export INSIGHTS_PERSONAL_API_KEY="your_personal_api_key_here"
 4. Configure the key:
    - **Organization & project access**: Set to **All** (to avoid permission issues)
    - **Scopes**: Set to **All access** (required for creating/deleting test organizations and projects)
-5. Copy the generated key and set it as `INSIGHTS_PERSONAL_API_KEY`
+5. Copy the generated key and set it as `POSTFN_PERSONAL_API_KEY`
 
 **Note**: The test suite automatically creates temporary organizations and projects for each test class and cleans them up after tests complete. S3 configuration is handled by the Insights instance itself.
 
@@ -182,10 +182,10 @@ cd common/ingestion/acceptance_tests
 python run_tests.py
 
 # Or run pytest directly for specific tests
-pytest test_llm_analytics.py::TestLLMAnalytics::test_basic_ai_generation_event -v
+pytest test_llm_analytics.py::TestAIObservability::test_basic_ai_generation_event -v
 
 # Run specific test class
-pytest test_llm_analytics.py::TestLLMAnalytics -v
+pytest test_llm_analytics.py::TestAIObservability -v
 ```
 
 The `run_tests.py` script automatically:

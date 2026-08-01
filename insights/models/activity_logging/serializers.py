@@ -1,4 +1,4 @@
-from drf_spectacular.utils import extend_schema_serializer
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 
 from insights.models import User
@@ -44,16 +44,26 @@ class DetailSerializer(serializers.Serializer):
 
 @extend_schema_serializer(component_name="ActivityLogEntry")
 class ActivityLogSerializer(serializers.Serializer):
-    class Meta:
-        exclude = ["team_id, organization_id"]
-
+    id = serializers.UUIDField(read_only=True)
     user = serializers.SerializerMethodField()
     activity = serializers.CharField(read_only=True)
     scope = serializers.CharField(read_only=True)
     item_id = serializers.CharField(read_only=True)
     detail = DetailSerializer(required=False)
     created_at = serializers.DateTimeField(read_only=True)
+    is_system = serializers.BooleanField(
+        read_only=True, help_text="Whether the activity was performed by the system rather than a user."
+    )
+    was_impersonated = serializers.BooleanField(
+        read_only=True, help_text="Whether the acting user was being impersonated by Insights staff."
+    )
+    client = serializers.CharField(
+        read_only=True,
+        allow_null=True,
+        help_text="API client that triggered the activity, from the x-insights-client request header (e.g. 'mcp'). Null for requests that did not send the header.",
+    )
 
+    @extend_schema_field({"type": "object", "nullable": True})
     def get_user(self, activity_log: ActivityLog):
         if activity_log.is_system:
             return {"first_name": "System", "email": None, "is_system": True}

@@ -4,19 +4,21 @@ import { useMemo, useState } from 'react'
 import { IconCheck, IconPencil, IconPlusSmall, IconTrash, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
 
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Table } from 'lib/elements/Table'
-import { uuid } from 'lib/utils'
+import { uuid } from 'lib/utils/dom'
 import { QUERY_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { ConversionGoalFilter, NodeKind } from '~/queries/schema/schema-general'
 
 import { marketingAnalyticsSettingsLogic } from '../../logic/marketingAnalyticsSettingsLogic'
+import { ConversionGoalDropdown } from '../common/ConversionGoalDropdown'
 import {
     MarketingAnalyticsValidationWarningBanner,
     validateConversionGoals,
 } from '../MarketingAnalyticsValidationWarningBanner'
-import { ConversionGoalDropdown } from '../common/ConversionGoalDropdown'
 import {
     conversionGoalDescription,
     conversionGoalNamePlaceholder,
@@ -46,6 +48,10 @@ export function ConversionGoalsConfiguration({
     const [formState, setFormState] = useState<ConversionGoalFormState>(createEmptyFormState)
     const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
     const [editingGoal, setEditingGoal] = useState<ConversionGoalFilter | null>(null)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     const validationWarnings = useMemo(() => validateConversionGoals(conversion_goals), [conversion_goals])
 
@@ -107,6 +113,7 @@ export function ConversionGoalsConfiguration({
                             value={formState.name}
                             onChange={(value) => setFormState((prev) => ({ ...prev, name: value }))}
                             placeholder={conversionGoalNamePlaceholder}
+                            disabledReason={restrictedReason}
                         />
                     </div>
 
@@ -123,6 +130,7 @@ export function ConversionGoalsConfiguration({
                                     },
                                 }))
                             }
+                            disabledReason={restrictedReason}
                         />
                     </div>
 
@@ -133,11 +141,17 @@ export function ConversionGoalsConfiguration({
                             disabled={!isFormValid}
                             size="small"
                             icon={<IconPlusSmall />}
+                            disabledReason={restrictedReason}
                         >
                             Add conversion goal
                         </Button>
 
-                        <Button onClick={() => setFormState(createEmptyFormState())}>Clear</Button>
+                        <Button
+                            onClick={() => setFormState(createEmptyFormState())}
+                            disabledReason={restrictedReason}
+                        >
+                            Clear
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -171,6 +185,7 @@ export function ConversionGoalsConfiguration({
                                                 )
                                             }
                                             size="small"
+                                            disabledReason={restrictedReason}
                                         />
                                     )
                                 }
@@ -238,12 +253,14 @@ export function ConversionGoalsConfiguration({
                                                 type="primary"
                                                 onClick={handleSaveEdit}
                                                 tooltip="Save changes"
+                                                disabledReason={restrictedReason}
                                             />
                                             <Button
                                                 icon={<IconX />}
                                                 size="small"
                                                 onClick={handleCancelEdit}
                                                 tooltip="Cancel"
+                                                disabledReason={restrictedReason}
                                             />
                                         </div>
                                     )
@@ -256,6 +273,7 @@ export function ConversionGoalsConfiguration({
                                             size="small"
                                             onClick={() => handleStartEdit(goal)}
                                             tooltip="Edit conversion goal"
+                                            disabledReason={restrictedReason}
                                         />
                                         <Button
                                             icon={<IconTrash />}
@@ -263,6 +281,7 @@ export function ConversionGoalsConfiguration({
                                             status="danger"
                                             onClick={() => handleRemoveGoal(goal.conversion_goal_id)}
                                             tooltip="Remove conversion goal"
+                                            disabledReason={restrictedReason}
                                         />
                                     </div>
                                 )

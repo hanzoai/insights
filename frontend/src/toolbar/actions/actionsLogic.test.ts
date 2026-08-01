@@ -33,19 +33,25 @@ const unsortedActions: ActionType[] = [
 ]
 const apiJson = { results: unsortedActions }
 
-global.fetch = jest.fn(() =>
-    Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(apiJson),
-    } as any as Response)
-)
+// The toolbar calls `global.fetch` directly (not the app api client / MSW). Reassign the mock per
+// test in beforeEach — the MSW jest harness installs its own `global.fetch` in a global beforeAll,
+// which runs after this module loads and would otherwise clobber a top-level assignment.
+const installFetchMock = (): void => {
+    global.fetch = jest.fn(() =>
+        Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(apiJson),
+        } as any as Response)
+    )
+}
 
 describe('toolbar actionsLogic', () => {
     let logic: ReturnType<typeof actionsLogic.build>
 
     beforeEach(() => {
+        installFetchMock()
         initKeaTests()
-        toolbarConfigLogic.build({ apiURL: 'http://localhost' }).mount()
+        toolbarConfigLogic.build({ apiURL: 'http://localhost', accessToken: 'test-token' }).mount()
         logic = actionsLogic()
         logic.mount()
     })

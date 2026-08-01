@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getAngularSteps as getAngularStepsPA } from '../product-analytics/angular'
 import { StepDefinition } from '../steps'
@@ -28,7 +28,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             code: dedent`
                               import { ErrorHandler, Injectable, Provider } from '@angular/core';
                               import { HttpErrorResponse } from '@angular/common/http';
-                              import insights from '@hanzo/insights';
+                              import insights from 'insights-js';
                               
                               @Injectable({ providedIn: 'root' })
                               class InsightsErrorHandler implements ErrorHandler {
@@ -165,18 +165,13 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        exceptionAutocaptureStep,
-        manualCaptureStep,
-        verifyStep,
-    ]
+    return [...installSteps, exceptionAutocaptureStep, manualCaptureStep, verifyStep]
 }
 
 export const AngularInstallation = createInstallation(getAngularSteps)

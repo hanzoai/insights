@@ -1,6 +1,7 @@
 import { useMountedLogic, useValues } from 'kea'
 
-import { Select } from 'lib/elements/Select'
+import { Select, SelectOptions } from 'lib/elements/Select'
+import { isKeyOf } from 'lib/utils/guards'
 import { cleanedInsightActorsQueryOptions } from 'scenes/trends/persons-modal/persons-modal-utils'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
@@ -28,14 +29,14 @@ export function InsightActorsQueryOptions({ setQuery, query }: InsightActorsQuer
                         fullWidth
                         className="min-w-32"
                         placeholder={key}
-                        value={query?.[key] ?? null}
+                        value={isKeyOf(key, query) && !Array.isArray(query[key]) ? query[key] : null}
                         onChange={(v) =>
                             setQuery?.({
                                 ...query,
                                 [key]: v,
                             })
                         }
-                        options={options}
+                        options={options as SelectOptions<any>}
                     />
                 </div>
             ))}

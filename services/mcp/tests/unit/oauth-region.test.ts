@@ -1,8 +1,70 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
-import { getAuthorizationServerUrl, getBaseUrlForRegion, toCloudRegion } from '@/lib/constants'
+import {
+    getAuthorizationServerUrl,
+    getBaseUrlForRegion,
+    getPublicBaseUrl,
+    isCloudApi,
+    isLocalApi,
+    toCloudRegion,
+} from '@/lib/constants'
 
 describe('OAuth Region Routing', () => {
+    const originalEnv = { ...process.env }
+
+    afterEach(() => {
+        process.env = { ...originalEnv }
+    })
+
+    describe('isLocalApi', () => {
+        it('returns true when POSTFN_API_BASE_URL is localhost', () => {
+            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
+            expect(isLocalApi()).toBe(true)
+        })
+
+        it('returns false when POSTFN_API_BASE_URL is a cloud URL', () => {
+            process.env.POSTFN_API_BASE_URL = 'https://us.hanzo.ai'
+            expect(isLocalApi()).toBe(false)
+        })
+
+        it('returns false when POSTFN_API_BASE_URL is not set', () => {
+            delete process.env.POSTFN_API_BASE_URL
+            expect(isLocalApi()).toBe(false)
+        })
+    })
+
+    describe('isCloudApi', () => {
+        it('returns true when POSTFN_API_BASE_URL is not set', () => {
+            delete process.env.POSTFN_API_BASE_URL
+            expect(isCloudApi()).toBe(true)
+        })
+
+        it('returns true for us.hanzo.ai', () => {
+            process.env.POSTFN_API_BASE_URL = 'https://us.hanzo.ai'
+            expect(isCloudApi()).toBe(true)
+        })
+
+        it('returns true for eu.hanzo.ai', () => {
+            process.env.POSTFN_API_BASE_URL = 'https://eu.hanzo.ai'
+            expect(isCloudApi()).toBe(true)
+        })
+
+        it('returns true for internal cluster URL', () => {
+            process.env.POSTFN_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
+            expect(isCloudApi()).toBe(true)
+        })
+
+        it('returns false for self-hosted domain', () => {
+            process.env.POSTFN_API_BASE_URL = 'https://insights.example.com'
+            expect(isCloudApi()).toBe(false)
+        })
+
+        it('returns false for localhost', () => {
+            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
+            expect(isCloudApi()).toBe(false)
+        })
+    })
+
     describe('toCloudRegion', () => {
         it.each([
             { input: 'eu', expected: 'eu' },
@@ -21,73 +83,58 @@ describe('OAuth Region Routing', () => {
 
     describe('getBaseUrlForRegion', () => {
         it('returns EU URL for eu region', () => {
-            expect(getBaseUrlForRegion('eu')).toBe('https://insights.hanzo.ai')
+            expect(getBaseUrlForRegion('eu')).toBe('https://eu.hanzo.ai')
         })
 
         it('returns US URL for us region', () => {
-            expect(getBaseUrlForRegion('us')).toBe('https://insights.hanzo.ai')
+            expect(getBaseUrlForRegion('us')).toBe('https://us.hanzo.ai')
+        })
+    })
+
+    describe('getPublicBaseUrl', () => {
+        it('returns POSTFN_PUBLIC_URL when set', () => {
+            process.env.POSTFN_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
+            process.env.POSTFN_PUBLIC_URL = 'https://us.hanzo.ai'
+            expect(getPublicBaseUrl()).toBe('https://us.hanzo.ai')
+        })
+
+        it('falls back to POSTFN_API_BASE_URL when POSTFN_PUBLIC_URL is not set', () => {
+            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
+            delete process.env.POSTFN_PUBLIC_URL
+            expect(getPublicBaseUrl()).toBe('http://localhost:8010')
+        })
+
+        it('returns undefined when neither is set', () => {
+            delete process.env.POSTFN_API_BASE_URL
+            delete process.env.POSTFN_PUBLIC_URL
+            expect(getPublicBaseUrl()).toBeUndefined()
         })
     })
 
     describe('getAuthorizationServerUrl', () => {
-        it('returns EU URL when region is eu', () => {
-            expect(getAuthorizationServerUrl('eu')).toBe('https://insights.hanzo.ai')
+        it('returns localhost when POSTFN_API_BASE_URL is localhost', () => {
+            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
+            expect(getAuthorizationServerUrl()).toBe('http://localhost:8010')
         })
 
-        it('returns EU URL when region is EU (case insensitive)', () => {
-            expect(getAuthorizationServerUrl('EU')).toBe('https://insights.hanzo.ai')
+        it('returns oauth proxy URL when POSTFN_API_BASE_URL is a cloud URL', () => {
+            process.env.POSTFN_API_BASE_URL = 'https://us.hanzo.ai'
+            expect(getAuthorizationServerUrl()).toBe('https://oauth.hanzo.ai')
         })
 
-        it('returns US URL when region is us', () => {
-            expect(getAuthorizationServerUrl('us')).toBe('https://insights.hanzo.ai')
+        it('returns oauth proxy URL when POSTFN_API_BASE_URL is an internal cluster URL', () => {
+            process.env.POSTFN_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
+            expect(getAuthorizationServerUrl()).toBe('https://oauth.hanzo.ai')
         })
 
-        it('returns US URL when region is null', () => {
-            expect(getAuthorizationServerUrl(null)).toBe('https://insights.hanzo.ai')
+        it('returns self-hosted URL when POSTFN_API_BASE_URL is a custom domain', () => {
+            process.env.POSTFN_API_BASE_URL = 'https://insights.example.com'
+            expect(getAuthorizationServerUrl()).toBe('https://insights.example.com')
         })
 
-        it('returns US URL for unknown region', () => {
-            expect(getAuthorizationServerUrl('unknown')).toBe('https://insights.hanzo.ai')
-        })
-    })
-
-    describe('Protected Resource Metadata', () => {
-        const testCases = [
-            {
-                name: 'defaults to US when no region param',
-                params: '',
-                expectedServer: 'https://insights.hanzo.ai',
-            },
-            {
-                name: 'returns EU server when region=eu',
-                params: '?region=eu',
-                expectedServer: 'https://insights.hanzo.ai',
-            },
-            {
-                name: 'returns EU server when region=EU (case insensitive)',
-                params: '?region=EU',
-                expectedServer: 'https://insights.hanzo.ai',
-            },
-            {
-                name: 'returns US server when region=us',
-                params: '?region=us',
-                expectedServer: 'https://insights.hanzo.ai',
-            },
-            {
-                name: 'defaults to US for unknown region',
-                params: '?region=unknown',
-                expectedServer: 'https://insights.hanzo.ai',
-            },
-        ]
-
-        it.each(testCases)('$name', ({ params, expectedServer }) => {
-            const url = new URL(`https://mcp.hanzo.ai/.well-known/oauth-protected-resource${params}`)
-            const regionParam = url.searchParams.get('region')
-
-            // Uses actual helpers from constants.ts
-            const authorizationServer = getBaseUrlForRegion(toCloudRegion(regionParam))
-
-            expect(authorizationServer).toBe(expectedServer)
+        it('returns oauth proxy URL when not set', () => {
+            delete process.env.POSTFN_API_BASE_URL
+            expect(getAuthorizationServerUrl()).toBe('https://oauth.hanzo.ai')
         })
     })
 
@@ -96,6 +143,8 @@ describe('OAuth Region Routing', () => {
         // between the host and the resource path:
         // - Resource /mcp → metadata at /.well-known/oauth-protected-resource/mcp
         // - Resource /sse → metadata at /.well-known/oauth-protected-resource/sse
+        //   (the /sse endpoint itself is deprecated and redirects to /mcp, but the
+        //   metadata generator stays generic so cached metadata for /sse remains valid)
         const testCases = [
             {
                 name: 'includes region param and resource path /mcp in metadata URL',
@@ -108,7 +157,7 @@ describe('OAuth Region Routing', () => {
                 expectedMetadataUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/mcp',
             },
             {
-                name: 'includes resource path /sse for SSE endpoint',
+                name: 'includes resource path /sse for legacy SSE endpoint',
                 requestUrl: 'https://mcp.hanzo.ai/sse',
                 expectedMetadataUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/sse',
             },

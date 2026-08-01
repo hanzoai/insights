@@ -4,7 +4,8 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from insights.models import User
-from insights.models.insights_flow import InsightsFlow
+
+from products.workflows.backend.models.hog_flow import InsightsFlow
 
 
 class BackfillInsightsFlowBillableActionTypesTest(TestCase):
@@ -58,7 +59,7 @@ class BackfillInsightsFlowBillableActionTypesTest(TestCase):
 
         # Run the command
         out = StringIO()
-        call_command("backfill_customflow_billable_action_types", stdout=out)
+        call_command("backfill_hogflow_billable_action_types", stdout=out)
 
         # Refresh from database
         flow1.refresh_from_db()
@@ -89,7 +90,7 @@ class BackfillInsightsFlowBillableActionTypesTest(TestCase):
         )
 
         out = StringIO()
-        call_command("backfill_customflow_billable_action_types", "--dry-run", stdout=out)
+        call_command("backfill_hogflow_billable_action_types", "--dry-run", stdout=out)
 
         flow.refresh_from_db()
         self.assertIsNone(flow.billable_action_types)
@@ -110,7 +111,7 @@ class BackfillInsightsFlowBillableActionTypesTest(TestCase):
         )
 
         # Run the command - should fix the wrong value
-        call_command("backfill_customflow_billable_action_types")
+        call_command("backfill_hogflow_billable_action_types")
         flow.refresh_from_db()
         self.assertEqual(sorted(flow.billable_action_types or []), ["function"])  # Only function is billable
 
@@ -129,7 +130,7 @@ class BackfillInsightsFlowBillableActionTypesTest(TestCase):
             trigger={"type": "event"},
         )
 
-        call_command("backfill_customflow_billable_action_types")
+        call_command("backfill_hogflow_billable_action_types")
         flow.refresh_from_db()
 
         # Should have unique types only (and only billable ones)
@@ -155,7 +156,7 @@ class BackfillInsightsFlowBillableActionTypesTest(TestCase):
 
         # Run with small page size
         out = StringIO()
-        call_command("backfill_customflow_billable_action_types", "--page-size", "10", stdout=out)
+        call_command("backfill_hogflow_billable_action_types", "--page-size", "10", stdout=out)
 
         output = out.getvalue()
 

@@ -38,7 +38,7 @@ def get_org_owner_or_first_user(organization_id: str) -> Optional[User]:
 
 def capture_event(
     *,
-    hia_client: Client,
+    pha_client: Client,
     name: str,
     organization_id: Optional[str] = None,
     team_id: Optional[int] = None,
@@ -75,7 +75,7 @@ def capture_event(
             organization_id=organization_id,
         )
 
-        hia_client.capture(
+        pha_client.capture(
             distinct_id=distinct_id,
             event=name,
             properties={**properties, "scope": "user"},
@@ -83,7 +83,7 @@ def capture_event(
             timestamp=timestamp,
         )
     else:
-        hia_client.capture(
+        pha_client.capture(
             distinct_id=get_machine_id(),
             event=name,
             properties={**properties, "scope": "machine"},

@@ -81,6 +81,7 @@ const MOCK_ACTION: ActionType = {
     last_calculated_at: '2024-05-21T12:57:50.894221Z',
     pinned_at: null,
     user_access_level: AccessControlLevel.Editor,
+    reference_count: 3,
 }
 
 const MOCK_SCREEN_ACTION: ActionType = {
@@ -135,6 +136,7 @@ const MOCK_SCREEN_ACTION: ActionType = {
     last_calculated_at: '2024-05-21T12:57:50.894221Z',
     pinned_at: null,
     user_access_level: AccessControlLevel.Editor,
+    reference_count: 0,
 }
 
 const meta: Meta = {
@@ -145,6 +147,7 @@ const meta: Meta = {
         viewMode: 'story',
         mockDate: '2023-02-15', // To stabilize relative dates
         pageUrl: urls.actions(),
+        testOptions: { viewport: { width: 1300, height: 2000 } },
     },
     decorators: [
         mswDecorator({
@@ -158,7 +161,7 @@ const meta: Meta = {
 }
 export default meta
 
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<{}>
 export const ActionsList: Story = {}
 
 export const Action: Story = {

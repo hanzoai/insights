@@ -14,6 +14,10 @@ from insights.schema import HumanMessage, MaxBillingContext
 from insights.models import Team, User
 from insights.temporal.ai.base import AgentBaseWorkflow
 
+from products.insights_ai.backend.models.assistant import Conversation
+
+from ee.hogai.research_agent.runner import ResearchAgentRunner
+from ee.hogai.stream.redis_stream import ConversationRedisStream
 
 logger = structlog.get_logger(__name__)
 

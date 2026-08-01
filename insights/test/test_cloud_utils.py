@@ -5,6 +5,7 @@ from insights.test.base import BaseTest
 
 from insights.cloud_utils import TEST_clear_instance_license_cache, get_cached_instance_license
 
+from ee.models.license import License
 
 
 class TestCloudUtils(BaseTest):

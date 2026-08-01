@@ -1,0 +1,12 @@
+[package]
+name = "personinsights-stateright"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+clap = { workspace = true }
+stateright = "0.31"
+
+[dependencies.personinsights-coordination]
+path = "../personinsights-coordination"

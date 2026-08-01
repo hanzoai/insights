@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlowAction } from '../../../../schema/insightsflow'
+import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+
 import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult } from '../../../types'
-import { ScriptExecutorExecuteAsyncOptions } from '../../script-executor.service'
+import { HogExecutorExecuteAsyncOptions } from '../../script-executor.service'
 
 export interface ActionHandlerResult {
     nextAction?: InsightsFlowAction
@@ -16,7 +17,7 @@ export interface ActionHandlerOptions<T extends InsightsFlowAction> {
     invocation: CyclotronJobInvocationInsightsFlow
     action: T
     result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>
-    scriptExecutorOptions?: ScriptExecutorExecuteAsyncOptions
+    hogExecutorOptions?: HogExecutorExecuteAsyncOptions
 }
 
 export interface ActionHandler {

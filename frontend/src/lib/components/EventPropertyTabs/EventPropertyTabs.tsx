@@ -7,11 +7,12 @@ import { eventPropertyFilteringLogic } from 'lib/components/EventPropertyTabs/ev
 import { HTMLElementsDisplay } from 'lib/components/HTMLElementsDisplay/HTMLElementsDisplay'
 import { dayjs } from 'lib/dayjs'
 import { Tab, Tabs, TabsProps } from 'lib/elements/Tabs'
-import { AutocaptureImageTab, autocaptureToImage } from 'lib/utils/autocapture-previews'
+import { isKeyOf } from 'lib/utils/guards'
 
-import { CORE_FILTER_DEFINITIONS_BY_GROUP, INSIGHTS_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
-import { EventType, RecordingEventType } from '~/types'
+import { CORE_FILTER_DEFINITIONS_BY_GROUP, POSTFN_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
+import { EventType, RecordingEventType, SurveyEventProperties } from '~/types'
 
+import { AutocaptureImageTab, hasAutocaptureImage } from '../AutocapturePreviewImage/AutocapturePreviewImage'
 import { ErrorEventType } from '../Errors/types'
 
 export type ErrorPropertyTabEvent = EventType | RecordingEventType | ErrorEventType
@@ -33,16 +34,18 @@ type EventPropertyTabKey =
     | 'raw'
     | 'conversation'
     | 'evaluation'
+    | 'tag'
     | 'exception_properties'
     | 'error_display'
     | 'debug_properties'
     | 'metadata'
     | 'survey_response'
+    | 'mcp'
 
 export const EventPropertyTabs = ({
     event,
     tabContentComponentFn,
-    ...tabsProps
+    ...lemonTabsProps
 }: {
     event: ErrorPropertyTabEvent
     tabContentComponentFn: (props: TabContentComponentFnProps) => JSX.Element
@@ -53,9 +56,13 @@ export const EventPropertyTabs = ({
     const isAIGenerationEvent = event.event === '$ai_generation'
     const isAIConversationEvent = isAIGenerationEvent || event.event === '$ai_span' || event.event === '$ai_trace'
     const isAIEvaluationEvent = event.event === '$ai_evaluation'
+    const isAITagEvent = event.event === '$ai_tag'
 
     const isErrorEvent = event.event === '$exception'
-    const isSurveyResponseEvent = event.event === 'survey sent'
+    const isSurveyResponseEvent = event.event === 'survey sent' && !!event.properties?.[SurveyEventProperties.SURVEY_ID]
+    const isMcpEvent =
+        typeof event.event === 'string' &&
+        (event.event.startsWith('mcp_') || event.event.startsWith('$mcp_') || event.event.startsWith('mcp '))
 
     const { filterProperties } = useValues(eventPropertyFilteringLogic)
 
@@ -64,21 +71,27 @@ export const EventPropertyTabs = ({
             ? 'conversation'
             : isAIEvaluationEvent
               ? 'evaluation'
-              : isErrorEvent
-                ? 'error_display'
-                : isSurveyResponseEvent
-                  ? 'survey_response'
-                  : 'properties'
+              : isAITagEvent
+                ? 'tag'
+                : isErrorEvent
+                  ? 'error_display'
+                  : isSurveyResponseEvent
+                    ? 'survey_response'
+                    : isMcpEvent
+                      ? 'mcp'
+                      : 'properties'
     )
 
-    const promotedKeys = INSIGHTS_EVENT_PROMOTED_PROPERTIES[event.event]
+    const promotedKeys = isKeyOf(event.event, POSTFN_EVENT_PROMOTED_PROPERTIES)
+        ? POSTFN_EVENT_PROMOTED_PROPERTIES[event.event]
+        : []
 
-    let properties = {}
-    const featureFlagProperties = {}
-    const errorProperties = {}
-    const debugProperties = {}
-    let setProperties = {}
-    let setOnceProperties = {}
+    let properties: Record<string, any> = {}
+    const featureFlagProperties: Record<string, any> = {}
+    const errorProperties: Record<string, any> = {}
+    const debugProperties: Record<string, any> = {}
+    let setProperties: Record<string, any> = {}
+    let setOnceProperties: Record<string, any> = {}
 
     for (const key of Object.keys(event.properties)) {
         if (!CORE_FILTER_DEFINITIONS_BY_GROUP.events[key] || !CORE_FILTER_DEFINITIONS_BY_GROUP.events[key].system) {
@@ -113,18 +126,30 @@ export const EventPropertyTabs = ({
             label: 'Survey response',
             content: tabContentComponentFn({ event, properties: event.properties, tabKey: 'survey_response' }),
         },
+        isMcpEvent && {
+            key: 'mcp',
+            label: 'MCP analytics',
+            content: tabContentComponentFn({ event, properties: event.properties, tabKey: 'mcp' }),
+        },
         isAIConversationEvent
             ? {
                   key: 'conversation',
                   label: 'Conversation',
-                  content: tabContentComponentFn({ event, properties, tabKey: 'conversation' }),
+                  content: tabContentComponentFn({ event, properties: event.properties, tabKey: 'conversation' }),
               }
             : null,
         isAIEvaluationEvent
             ? {
                   key: 'evaluation',
                   label: 'Evaluation',
-                  content: tabContentComponentFn({ event, properties, tabKey: 'evaluation' }),
+                  content: tabContentComponentFn({ event, properties: event.properties, tabKey: 'evaluation' }),
+              }
+            : null,
+        isAITagEvent
+            ? {
+                  key: 'tag',
+                  label: 'Tag',
+                  content: tabContentComponentFn({ event, properties: event.properties, tabKey: 'tag' }),
               }
             : null,
         {
@@ -164,7 +189,7 @@ export const EventPropertyTabs = ({
                   ),
               }
             : null,
-        event.elements && autocaptureToImage(event.elements)
+        event.elements && hasAutocaptureImage(event.elements)
             ? {
                   key: 'image',
                   label: 'Image',
@@ -174,7 +199,7 @@ export const EventPropertyTabs = ({
         Object.keys(setProperties).length > 0
             ? {
                   key: '$set_properties',
-                  label: 'User properties',
+                  label: 'Person properties',
                   content: tabContentComponentFn({
                       properties: setProperties,
                       event,
@@ -186,7 +211,7 @@ export const EventPropertyTabs = ({
         Object.keys(setOnceProperties).length > 0
             ? {
                   key: '$set_once_properties',
-                  label: 'Set once user properties',
+                  label: 'Set once person properties',
                   content: tabContentComponentFn({
                       properties: setOnceProperties,
                       event,
@@ -227,7 +252,7 @@ export const EventPropertyTabs = ({
     ]
     return (
         <Tabs
-            {...tabsProps}
+            {...lemonTabsProps}
             activeKey={activeTab}
             onChange={(newKey: EventPropertyTabKey) => setActiveTab(newKey)}
             tabs={tabs}

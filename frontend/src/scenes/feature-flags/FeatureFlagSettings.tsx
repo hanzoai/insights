@@ -2,17 +2,27 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconRefresh, IconTrash } from '@hanzo/icons'
-import { Button, Dialog, Switch, TextArea } from '@hanzo/elements'
+import { Button, Dialog, Switch, Tag, TextArea } from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { FEATURE_FLAGS, TeamMembershipLevel } from 'lib/constants'
+import { Banner } from 'lib/elements/Banner'
 import { Field } from 'lib/elements/Field'
+import { Link } from 'lib/elements/Link'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { teamLogic } from 'scenes/teamLogic'
+import { urls } from 'scenes/urls'
 
 import { featureFlagConfirmationSettingsLogic } from './featureFlagConfirmationSettingsLogic'
 
 export function FlagPersistenceSettings(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
     const { currentTeam } = useValues(teamLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     return (
         <Switch
@@ -25,6 +35,7 @@ export function FlagPersistenceSettings(): JSX.Element {
             label="Enable flag persistence by default"
             bordered
             checked={!!currentTeam?.flags_persistence_default}
+            disabledReason={restrictedReason}
         />
     )
 }
@@ -33,6 +44,10 @@ export function FlagChangeConfirmationSettings(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
     const { currentTeam } = useValues(teamLogic)
     const { confirmationMessageLoading } = useValues(featureFlagConfirmationSettingsLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     return (
         <div className="space-y-2">
@@ -46,6 +61,7 @@ export function FlagChangeConfirmationSettings(): JSX.Element {
                 label="Require confirmation for feature flag changes"
                 bordered
                 checked={!!currentTeam?.feature_flag_confirmation_enabled}
+                disabledReason={restrictedReason}
             />
 
             {currentTeam?.feature_flag_confirmation_enabled && (
@@ -61,12 +77,13 @@ export function FlagChangeConfirmationSettings(): JSX.Element {
                                 placeholder="Optional custom message. Default: '⚠️ These changes will immediately affect users matching the release conditions. Please ensure you understand the consequences before proceeding.'"
                                 maxLength={500}
                                 maxRows={3}
+                                disabled={!!restrictedReason}
                             />
                         </Field>
                         <Button
                             type="primary"
                             htmlType="submit"
-                            disabledReason={!currentTeam ? 'Loading team...' : undefined}
+                            disabledReason={!currentTeam ? 'Loading team...' : restrictedReason}
                             loading={confirmationMessageLoading}
                         >
                             Save message
@@ -80,7 +97,11 @@ export function FlagChangeConfirmationSettings(): JSX.Element {
 
 export function FlagsSecureApiKeys(): JSX.Element {
     const { currentTeam, isTeamTokenResetAvailable } = useValues(teamLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
     const { deleteSecretTokenBackup, rotateSecretToken } = useActions(teamLogic)
+
+    const projectSecretApiKeysEnabled = !!featureFlags[FEATURE_FLAGS.PROJECT_SECRET_API_KEYS]
+    const hasLegacyKey = !!(currentTeam?.secret_api_token || currentTeam?.secret_api_token_backup)
 
     const openResetDialog = (): void => {
         const verb = currentTeam?.secret_api_token ? 'Rotate' : 'Generate'
@@ -122,10 +143,40 @@ export function FlagsSecureApiKeys(): JSX.Element {
         })
     }
 
+    // Teams without a legacy key shouldn't be offered to create a deprecated credential
+    if (projectSecretApiKeysEnabled && !hasLegacyKey) {
+        return (
+            <Banner type="warning">
+                <p className="mb-1">
+                    The feature flags secure API key is deprecated. Create a <strong>project secret API key</strong>{' '}
+                    with the <strong>feature_flag:read</strong> scope (the "Local feature flag evaluation" preset)
+                    instead. It's hashed at rest, scoped, and rotatable.
+                </p>
+                <Link to={urls.settings('environment-secret-api-keys')}>Create a project secret API key</Link>
+            </Banner>
+        )
+    }
+
     return (
         <div className="space-y-2">
-            <h3 className="mt-0 mb-1 text-sm font-semibold text-muted">
-                Primary Key <span className="text-green-700 text-xs ml-2">(Active)</span>
+            {projectSecretApiKeysEnabled && (
+                <Banner type="warning">
+                    <p className="mb-1">
+                        This feature flags secure API key is deprecated. Create a{' '}
+                        <strong>project secret API key</strong> with the <strong>feature_flag:read</strong> scope (the
+                        "Local feature flag evaluation" preset) instead. It's hashed at rest, scoped, and rotatable
+                        without affecting your primary key.
+                    </p>
+                    <Link to={urls.settings('environment-secret-api-keys')}>Create a project secret API key</Link>
+                </Banner>
+            )}
+            <h3
+                className={`${
+                    projectSecretApiKeysEnabled ? 'mt-4' : 'mt-0'
+                } mb-1 text-sm font-semibold text-muted flex items-center gap-2`}
+            >
+                Primary Key <span className="text-green-700 text-xs">(Active)</span>
+                {projectSecretApiKeysEnabled && <Tag type="warning">Deprecated</Tag>}
             </h3>
             <CodeSnippet
                 actions={
@@ -170,7 +221,7 @@ export function FlagsSecureApiKeys(): JSX.Element {
                     </p>
                 </>
             ) : (
-                <p className="text-xs text-muted mt-2">
+                <p className="text-xs text-muted mt-2 mb-0">
                     Rotating the key will move this primary key to backup so you can migrate safely.
                 </p>
             )}

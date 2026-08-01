@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { Label, Modal, Select } from '@hanzo/elements'
+import { Label, Modal, Select, Tag } from '@hanzo/elements'
 import { Button, ColorPicker, Table, TableColumns } from '@hanzo/elements'
 
-import { DataColorToken } from 'lib/colors'
+import { DashboardEventSource } from 'lib/utils/eventUsageLogic'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { formatBreakdownLabel } from 'scenes/insights/utils'
 import { dataColorThemesLogic } from 'scenes/settings/environment/dataColorThemesLogic'
@@ -13,14 +13,9 @@ import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { BreakdownFilter } from '~/queries/schema/schema-general'
 import { DashboardMode } from '~/types'
 
+import { BreakdownColorConfig, denormalizeBreakdownValue, findBreakdownColorConfig } from './dashboardBreakdownColors'
 import { dashboardInsightColorsModalLogic } from './dashboardInsightColorsModalLogic'
 import { dashboardLogic } from './dashboardLogic'
-
-export type BreakdownColorConfig = {
-    colorToken: DataColorToken | null
-    breakdownValue: string
-    breakdownType: BreakdownFilter['breakdown_type']
-}
 
 export function DashboardInsightColorsModal(): JSX.Element {
     const { isOpen, insightTilesLoading, breakdownValues } = useValues(dashboardInsightColorsModalLogic)
@@ -28,17 +23,19 @@ export function DashboardInsightColorsModal(): JSX.Element {
 
     const { themes: _themes, themesLoading } = useValues(dataColorThemesLogic)
 
-    const {
-        temporaryBreakdownColors: dashboardBreakdownColors,
-        dataColorThemeId,
-        dashboardMode,
-    } = useValues(dashboardLogic)
+    const { effectiveBreakdownColors, dataColorThemeId, dashboardMode } = useValues(dashboardLogic)
     const { setBreakdownColorConfig, setDataColorThemeId, setDashboardMode } = useActions(dashboardLogic)
 
     const { formatPropertyValueForDisplay } = useValues(propertyDefinitionsModel)
     const { allCohorts } = useValues(cohortsModel)
 
     const themes = _themes || []
+
+    const ensureEditMode = (): void => {
+        if (dashboardMode !== DashboardMode.Edit) {
+            setDashboardMode(DashboardMode.Edit, DashboardEventSource.DashboardInsightColorsModal)
+        }
+    }
 
     const columns: TableColumns<BreakdownColorConfig> = [
         {
@@ -47,7 +44,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
             render: (_, { breakdownValue, ...config }) => {
                 const breakdownFilter: BreakdownFilter = { breakdown_type: config.breakdownType }
                 const breakdownLabel = formatBreakdownLabel(
-                    breakdownValue,
+                    denormalizeBreakdownValue(breakdownValue),
                     breakdownFilter,
                     allCohorts?.results,
                     formatPropertyValueForDisplay
@@ -61,32 +58,53 @@ export function DashboardInsightColorsModal(): JSX.Element {
             title: 'Color',
             key: 'color',
             width: 400,
-            render: (_, { colorToken, ...config }) => {
+            render: (_, { colorToken, source, ...config }) => {
                 return (
-                    <ColorPicker
-                        selectedColorToken={colorToken}
-                        onSelectColorToken={(colorToken) => {
-                            if (dashboardMode !== DashboardMode.Edit) {
-                                setDashboardMode(DashboardMode.Edit, null)
+                    <div className="flex items-center gap-2">
+                        <ColorPicker
+                            selectedColorToken={colorToken}
+                            onSelectColorToken={(colorToken) => {
+                                ensureEditMode()
+                                setBreakdownColorConfig({
+                                    ...config,
+                                    colorToken,
+                                    source: 'manual',
+                                })
+                            }}
+                            customButton={
+                                colorToken === null ? (
+                                    <Button type="tertiary">Customize color</Button>
+                                ) : undefined
                             }
-
-                            setBreakdownColorConfig({
-                                ...config,
-                                colorToken,
-                            })
-                        }}
-                        customButton={
-                            colorToken === null ? <Button type="tertiary">Customize color</Button> : undefined
-                        }
-                        themeId={dataColorThemeId}
-                    />
+                            themeId={dataColorThemeId}
+                        />
+                        {source === 'auto' ? (
+                            <Tag type="muted">Auto</Tag>
+                        ) : colorToken !== null ? (
+                            <Button
+                                size="small"
+                                type="tertiary"
+                                tooltip="Reset to automatic color"
+                                onClick={() => {
+                                    ensureEditMode()
+                                    setBreakdownColorConfig({
+                                        ...config,
+                                        colorToken: null,
+                                        source: 'manual',
+                                    })
+                                }}
+                            >
+                                Reset
+                            </Button>
+                        ) : null}
+                    </div>
                 )
             },
         },
     ]
 
     return (
-        <Modal title="Customize Breakdown Colors" isOpen={isOpen} onClose={hideInsightColorsModal}>
+        <Modal title="Customize breakdown colors" isOpen={isOpen} onClose={hideInsightColorsModal}>
             <Label info="Select a color theme for all insights on this dashboard. If a theme is selected, it will be applied to all series and breakdowns.">
                 Color theme
             </Label>
@@ -95,10 +113,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
                 value={dataColorThemeId || null}
                 placeholder="Defined by insight"
                 onChange={(id) => {
-                    if (dashboardMode !== DashboardMode.Edit) {
-                        setDashboardMode(DashboardMode.Edit, null)
-                    }
-
+                    ensureEditMode()
                     setDataColorThemeId(id)
                 }}
                 loading={themesLoading}
@@ -107,30 +122,28 @@ export function DashboardInsightColorsModal(): JSX.Element {
 
             <Label className="mt-4">Breakdown colors</Label>
             <p className="text-muted-alt mb-4">
-                Assign custom colors to breakdown values that will be used consistently across all insights on this
-                dashboard. <i>Note: This feature currently only works for trend and step-based funnel insights.</i>
+                Breakdown values get a consistent color across all insights on this dashboard. Pick a color to pin a
+                value to it. <i>Note: This works for trend, funnel, and retention insights.</i>
             </p>
+            <Table
+                columns={columns}
+                dataSource={breakdownValues.map((breakdownValue) => {
+                    const config = findBreakdownColorConfig(
+                        effectiveBreakdownColors,
+                        breakdownValue.breakdownValue,
+                        breakdownValue.breakdownType
+                    )
+                    return {
+                        ...breakdownValue,
+                        colorToken: config?.colorToken || null,
+                        source: config?.source,
+                    }
+                })}
+                loading={insightTilesLoading || undefined}
+            />
             {insightTilesLoading ? (
-                <div className="flex flex-col items-center">
-                    <p className="text-primary">Waiting for dashboard tiles to load and refresh…</p>
-                </div>
-            ) : (
-                <>
-                    <Table
-                        columns={columns}
-                        dataSource={breakdownValues.map((breakdownValue) => ({
-                            ...breakdownValue,
-                            colorToken:
-                                dashboardBreakdownColors.find(
-                                    (c) =>
-                                        c.breakdownValue === breakdownValue.breakdownValue &&
-                                        c.breakdownType === breakdownValue.breakdownType
-                                )?.colorToken || null,
-                        }))}
-                        loading={insightTilesLoading || undefined}
-                    />
-                </>
-            )}
+                <p className="text-muted-alt mt-2">Tiles are still loading. More breakdown values may appear.</p>
+            ) : null}
         </Modal>
     )
 }

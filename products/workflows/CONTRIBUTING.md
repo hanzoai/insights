@@ -5,15 +5,15 @@ This product is designed so other teams can add their own workflow trigger types
 At a high level:
 
 - **Frontend (workflows editor)** uses registries to discover which trigger types and action nodes to show.
-- **Backend (CDP templates)** defines what a "function node" actually does via an insights function template (`template_id`).
-- **Backend (async functions)** provides any custom runtime functionality used by script code (e.g. HTTP requests, enriched lookups, etc.).
+- **Backend (CDP Script templates)** defines what a “function node” actually does via a Script function template (`template_id`).
+- **Backend (async functions)** provides any custom runtime functionality used by Script code (e.g. HTTP requests, enriched lookups, etc.).
 
 ## How the pieces connect
 
-When you add a new "insights function" action node, the wiring is:
+When you add a new “script function” action node, the wiring is:
 
 1. Frontend action node sets `config.template_id`.
-2. Backend template with the same `id` contains the script code run for that node.
+2. Backend template with the same `id` contains the Script code run for that node.
 3. Script code may call async functions (e.g. `insightsGetTicket(...)`).
 4. Async function implementation is registered in the Node service and executed at runtime.
 
@@ -73,7 +73,7 @@ registerTriggerType({
 })
 ```
 
-### 2) Ensure it's imported (registered)
+### 2) Ensure it’s imported (registered)
 
 Registration is done via module side effects. Your trigger file must be imported by the workflows frontend bundle.
 
@@ -85,7 +85,7 @@ Add an import for your file there (pattern shown by `conversations`).
 
 ### 3) (Optional) Add a configuration UI
 
-If your trigger needs extra UI beyond the standard "Event" filters, provide a `ConfigComponent`.
+If your trigger needs extra UI beyond the standard “Event” filters, provide a `ConfigComponent`.
 
 Reference:
 
@@ -98,12 +98,12 @@ Notes:
 
 ## Frontend: adding an action node
 
-Action nodes shown in the "Build" toolbar come from:
+Action nodes shown in the “Build” toolbar come from:
 
 - Built-ins in products/workflows/frontend/Workflows/insightsflows/panel/InsightsFlowEditorPanelBuild.tsx
 - Registered categories from products/workflows/frontend/Workflows/insightsflows/registry/actions/actionNodeRegistry.ts
 
-Each category contains one or more `CreateActionType` nodes (see type in products/workflows/frontend/Workflows/insightsflows/insightsFlowEditorLogic.tsx).
+Each category contains one or more `CreateActionType` nodes (see type in products/workflows/frontend/Workflows/insightsflows/hogFlowEditorLogic.tsx).
 
 ### 1) Add an action node category
 
@@ -139,7 +139,7 @@ registerActionNodeCategory({
 })
 ```
 
-### 2) Ensure it's imported (registered)
+### 2) Ensure it’s imported (registered)
 
 As with triggers, registration is done via side-effect imports.
 
@@ -151,9 +151,9 @@ The editor imports the registry entrypoint here:
 
 - products/workflows/frontend/Workflows/insightsflows/panel/InsightsFlowEditorPanelBuild.tsx
 
-## Backend: adding an insights function template (`template_id`)
+## Backend: adding a Script function template (`template_id`)
 
-Workflow "function" nodes run script code via insights function templates. For a new action node, you typically add a new destination template and reference it by `template_id`.
+Workflow “function” nodes run Script code via Script function templates. For a new action node, you typically add a new destination template and reference it by `template_id`.
 
 ### 1) Create the template file
 
@@ -177,23 +177,23 @@ Examples:
 Guidelines:
 
 - Choose a stable, unique `id` (this is what the frontend uses as `template_id`).
-- For workflow-only templates, prefer `status: 'hidden'` so they don't show up in generic template pickers.
+- For workflow-only templates, prefer `status: 'hidden'` so they don’t show up in generic template pickers.
 - Keep `inputs_schema` accurate: it drives UI and validation.
 
 ### 2) Register it in the templates index
 
-Templates are exported from a central list. Add an import and include it in `IQL_FUNCTION_TEMPLATES_DESTINATIONS`:
+Templates are exported from a central list. Add an import and include it in `FN_FUNCTION_TEMPLATES_DESTINATIONS`:
 
 - nodejs/src/cdp/templates/index.ts
 
 Reference for how existing workflows templates are added:
 
-- Imports: `insightsGetTicketTemplate`, `insightsUpdateTicketTemplate`, `insightsSetInsightsflowVariableTemplate`
-- List: `IQL_FUNCTION_TEMPLATES_DESTINATIONS`
+- Imports: `insightsGetTicketTemplate`, `insightsUpdateTicketTemplate`, `insightsSetHogflowVariableTemplate`
+- List: `FN_FUNCTION_TEMPLATES_DESTINATIONS`
 
 ## Backend: adding an async function
 
-Async functions are Node-side functions callable from script code.
+Async functions are Node-side functions callable from Script code.
 
 Example of a simple pattern and required `mock` implementation:
 
@@ -221,7 +221,7 @@ registerAsyncFunction('myAsyncFn', {
     // Write to result.invocation / result.logs / result.error
   },
   mock: (args, logs) => {
-    // Used in the workflows "Test" tooling when real requests are disabled
+    // Used in the workflows “Test” tooling when real requests are disabled
     return { status: 200, body: {} }
   },
 })
@@ -240,11 +240,70 @@ Async functions are registered via side-effect imports. Add your file to:
 
 - nodejs/src/cdp/async-functions/index.ts
 
-If you skip this step, your async function will never be available to script code.
+If you skip this step, your async function will never be available to Script code.
+
+## Frontend: adding a custom input type
+
+The input configuration UI (`CyclotronJobInputs`) supports product-specific input types via a lazy renderer registry.
+Built-in types (`string`, `number`, `boolean`, etc.) are handled directly in the switch statement.
+Custom types are looked up in `CUSTOM_INPUT_RENDERERS` and lazy-loaded when rendered.
+
+### 1) Create the renderer component
+
+Create a React component in your product that default-exports a function accepting `CustomInputRendererProps`:
+
+```tsx
+import type { CustomInputRendererProps } from 'lib/components/CyclotronJob/customInputRenderers'
+
+export default function MyCustomInput({ value, onChange }: CustomInputRendererProps): JSX.Element {
+  return <input value={value} onChange={(e) => onChange(e.target.value)} />
+}
+```
+
+### 2) Register it in the mapping
+
+Add an entry to `CUSTOM_INPUT_RENDERERS` in:
+
+- frontend/src/lib/components/CyclotronJob/customInputRenderers.ts
+
+```ts
+export const CUSTOM_INPUT_RENDERERS = {
+  my_custom_type: lazy(() => import('products/my_product/frontend/components/MyCustomInput')),
+}
+```
+
+The component is lazy-loaded via `React.lazy`, so no product code is bundled until the input type is actually rendered.
+
+### 3) Add the type to the schema unions
+
+Add your type string to `CyclotronJobInputSchemaType.type` in:
+
+- frontend/src/types.ts
+- nodejs/src/cdp/types.ts
+- nodejs/src/schema/cyclotron.ts
+- products/workflows/frontend/Workflows/insightsflows/steps/types.ts
+
+### 4) Use it in a template
+
+Reference the type in your template's `inputs_schema`:
+
+```ts
+{
+    key: 'my_field',
+    type: 'my_custom_type',
+    label: 'My field',
+    required: false,
+}
+```
+
+Existing example:
+
+- `insights_assignee` type defined in nodejs/src/cdp/templates/\_destinations/insights_conversations/insights-update-ticket.template.ts
+- Renderer in products/conversations/frontend/components/Assignee/CyclotronJobInputAssignee.tsx
 
 ## Common pitfalls
 
 - **Forgot the side-effect import**: triggers/actions must be imported by their `index.ts`, and async functions must be imported by nodejs/src/cdp/async-functions/index.ts.
 - **Template id mismatch**: `config.template_id` in the frontend must exactly match `template.id` in the backend.
-- **Mocks don't match real behavior**: workflows test tooling relies on `mock` returning realistic structures.
-- **Feature flag gating**: if you add `featureFlag` to triggers or categories, make sure you're using an existing flag from `lib/constants`.
+- **Mocks don’t match real behavior**: workflows test tooling relies on `mock` returning realistic structures.
+- **Feature flag gating**: if you add `featureFlag` to triggers or categories, make sure you’re using an existing flag from `lib/constants`.

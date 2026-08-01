@@ -1,21 +1,33 @@
 import { useActions, useValues } from 'kea'
+import insights from 'insights-js'
 
 import { IconGear } from '@hanzo/icons'
-import { Banner, Button } from '@hanzo/elements'
+import { Banner, Button, Tabs } from '@hanzo/elements'
 
-import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { IconFeedback } from 'lib/elements/icons'
+import { cn } from 'lib/utils/css-classes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { Settings } from 'scenes/settings/Settings'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { ProductKey } from '~/queries/schema/schema-general'
 
+import { LogsAlertingSection } from 'products/logs/frontend/components/LogsAlerting/LogsAlertingSection'
+import { LogsServices } from 'products/logs/frontend/components/LogsServices/LogsServices'
+import { LogsSqlEditor } from 'products/logs/frontend/components/LogsSqlEditor/LogsSqlEditor'
+import { LogsTransformations } from 'products/logs/frontend/components/LogsTransformations/LogsTransformations'
 import { LogsViewer } from 'products/logs/frontend/components/LogsViewer'
-import { LogsSetupPrompt } from 'products/logs/frontend/components/SetupPrompt/SetupPrompt'
+import { LogsViewerModal } from 'products/logs/frontend/components/LogsViewer/LogsViewerModal'
 import { logsIngestionLogic } from 'products/logs/frontend/components/SetupPrompt/logsIngestionLogic'
+import { LogsSetupPrompt } from 'products/logs/frontend/components/SetupPrompt/SetupPrompt'
 
 import { useOpenLogsSettingsPanel } from './hooks/useOpenLogsSettingsPanel'
-import { logsSceneLogic } from './logsSceneLogic'
+import { LOGS_SCENE_VIEWER_ID, LogsSceneActiveTab, logsSceneLogic } from './logsSceneLogic'
+
+export const LOGS_LOGIC_KEY = 'logs'
 
 export const scene: SceneExport = {
     component: LogsScene,
@@ -24,17 +36,17 @@ export const scene: SceneExport = {
 }
 
 export function LogsScene(): JSX.Element {
+    const useTabbedView = useFeatureFlag('LOGS_TABBED_VIEW')
+
     return (
-        <SceneContent>
-            <LogsSceneContent />
+        <SceneContent className="h-[calc(var(--scene-layout-rect-height,_100vh)_-_1rem)]">
+            {useTabbedView ? <LogsSceneTabbedContent /> : <LogsSceneContent />}
         </SceneContent>
     )
 }
 
 const LogsSceneContent = (): JSX.Element => {
-    const { tabId } = useValues(logsSceneLogic)
     const { hasLogs, teamHasLogsCheckFailed } = useValues(logsIngestionLogic)
-    const { loadTeamHasLogs } = useActions(logsIngestionLogic)
     const openLogsSettings = useOpenLogsSettingsPanel()
 
     return (
@@ -47,41 +59,121 @@ const LogsSceneContent = (): JSX.Element => {
                 }}
                 actions={
                     <>
-                        {hasLogs && (
-                            <Button size="small" type="secondary" id="logs-feedback-button">
-                                Send feedback
-                            </Button>
-                        )}
+                        {hasLogs && <LogsSceneFeedbackButton />}
                         <Button size="small" type="secondary" icon={<IconGear />} onClick={openLogsSettings}>
                             Settings
                         </Button>
                     </>
                 }
             />
-            {/*
-             * A failed check is a server fault, not a verdict about the user's setup, so it must not
-             * be dressed up as onboarding advice. The "you may not have configured logging" reading
-             * belongs exclusively to the case where the check SUCCEEDS and reports no logs — which
-             * LogsSetupPrompt already renders. Error and unconfigured are different facts.
-             * Not dismissible: a dismissed error banner would hide a live outage forever.
-             */}
             {teamHasLogsCheckFailed && (
                 <Banner
-                    type="error"
+                    type="info"
+                    dismissKey="logs-setup-hint-banner"
                     action={{
-                        children: 'Retry',
-                        onClick: () => loadTeamHasLogs(),
+                        to: 'https://hanzo.ai/docs/logs/',
+                        targetBlank: true,
+                        children: 'Setup guide',
                     }}
                 >
-                    Couldn't load logs — the logs query failed on the server. This says nothing about whether logging is
-                    configured for this project; we couldn't reach the logs backend to find out.
+                    Unable to verify logs setup. If you haven't configured logging yet, check out our setup guide.
                 </Banner>
             )}
             <LogsSetupPrompt>
-                <div className="flex flex-col gap-2 py-2 h-[calc(100vh_-_var(--breadcrumbs-height-compact,_0px)_-_var(--scene-title-section-height,_0px)_-_5px_+_10rem)]">
-                    <LogsViewer id={tabId} />
+                <div className="flex flex-col gap-2 py-2 flex-1 min-h-0">
+                    <LogsViewer id={LOGS_SCENE_VIEWER_ID} showSavedViewsButton />
                 </div>
             </LogsSetupPrompt>
         </>
+    )
+}
+
+const LogsSceneTabbedContent = (): JSX.Element => {
+    const { activeTab } = useValues(logsSceneLogic)
+    const { setActiveTab } = useActions(logsSceneLogic)
+    const { hasLogs, teamHasLogsCheckFailed } = useValues(logsIngestionLogic)
+    const showServicesView = useFeatureFlag('LOGS_SERVICES_VIEW')
+    const showAlerting = useFeatureFlag('LOGS_ALERTING')
+    const showSqlView = useFeatureFlag('LOGS_SQL_VIEW')
+    const showTransformations = useFeatureFlag('LOGS_TRANSFORMATIONS')
+
+    const tabs: { key: LogsSceneActiveTab; label: string }[] = [
+        { key: 'viewer', label: 'Viewer' },
+        ...(showServicesView ? [{ key: 'services' as const, label: 'Services' }] : []),
+        ...(showAlerting ? [{ key: 'alerts' as const, label: 'Alerts' }] : []),
+        ...(showSqlView ? [{ key: 'sql' as const, label: 'SQL' }] : []),
+        ...(showTransformations ? [{ key: 'transformations' as const, label: 'Transformations' }] : []),
+        { key: 'configuration', label: 'Configuration' },
+    ]
+
+    return (
+        <>
+            <SceneTitleSection
+                name={sceneConfigurations[Scene.Logs].name}
+                resourceType={{
+                    type: sceneConfigurations[Scene.Logs].iconType || 'default_icon_type',
+                }}
+                actions={<>{hasLogs && <LogsSceneFeedbackButton />}</>}
+            />
+            {teamHasLogsCheckFailed && (
+                <Banner
+                    type="info"
+                    dismissKey="logs-setup-hint-banner"
+                    action={{
+                        to: 'https://hanzo.ai/docs/logs/',
+                        targetBlank: true,
+                        children: 'Setup guide',
+                    }}
+                >
+                    Unable to verify logs setup. If you haven't configured logging yet, check out our setup guide.
+                </Banner>
+            )}
+            <Tabs<LogsSceneActiveTab>
+                activeKey={activeTab}
+                onChange={(key) => {
+                    if (key === 'sql' && activeTab !== 'sql') {
+                        insights.capture('logs sql tab opened')
+                    }
+                    setActiveTab(key)
+                }}
+                tabs={tabs}
+                sceneInset
+            />
+            {/* Keep the viewer mounted across tab switches (just hidden when inactive) so its loaded
+                logs, scroll position, and virtualized-list state survive — switching away and back
+                should not replay the initial loading animation. */}
+            <div className={cn('flex flex-col flex-1 min-h-0', activeTab !== 'viewer' && 'hidden')}>
+                <LogsSetupPrompt>
+                    <div className="flex flex-col gap-2 py-2 flex-1 min-h-0">
+                        <LogsViewer id={LOGS_SCENE_VIEWER_ID} showSavedViewsButton />
+                    </div>
+                </LogsSetupPrompt>
+            </div>
+            {activeTab === 'services' && showServicesView && (
+                <>
+                    <LogsServices />
+                    <LogsViewerModal />
+                </>
+            )}
+            {activeTab === 'alerts' && showAlerting && <LogsAlertingSection />}
+            {activeTab === 'sql' && showSqlView && <LogsSqlEditor id={LOGS_SCENE_VIEWER_ID} />}
+            {activeTab === 'transformations' && showTransformations && <LogsTransformations />}
+            {activeTab === 'configuration' && (
+                <Settings logicKey={LOGS_LOGIC_KEY} sectionId="environment-logs" settingId="logs" handleLocally />
+            )}
+        </>
+    )
+}
+
+const LogsSceneFeedbackButton = (): JSX.Element => {
+    return (
+        <Button
+            size="small"
+            type="secondary"
+            icon={<IconFeedback />}
+            onClick={() => insights.displaySurvey('019a7d95-3810-0000-34dc-404a58075f17')}
+        >
+            Feedback
+        </Button>
     )
 }

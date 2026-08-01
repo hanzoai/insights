@@ -8,9 +8,16 @@ export interface InlineInsightsQLEditorProps {
     onChange: (value: TaxonomicFilterValue, item?: any) => void
     metadataSource?: AnyDataNode
     globals?: Record<string, any>
+    showBreakdownLabelHint?: boolean
 }
 
-export function InlineInsightsQLEditor({ value, onChange, metadataSource, globals }: InlineInsightsQLEditorProps): JSX.Element {
+export function InlineInsightsQLEditor({
+    value,
+    onChange,
+    metadataSource,
+    globals,
+    showBreakdownLabelHint,
+}: InlineInsightsQLEditorProps): JSX.Element {
     return (
         <>
             <div className="taxonomic-group-title">SQL expression</div>
@@ -21,6 +28,7 @@ export function InlineInsightsQLEditor({ value, onChange, metadataSource, global
                     metadataSource={metadataSource}
                     globals={globals}
                     submitText={value ? 'Update SQL expression' : 'Add SQL expression'}
+                    showBreakdownLabelHint={showBreakdownLabelHint}
                     disableAutoFocus // :TRICKY: No autofocus here. It's controlled in the TaxonomicFilter.
                 />
             </div>

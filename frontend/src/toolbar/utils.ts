@@ -1,21 +1,125 @@
-import { finder } from '@medv/finder'
 import { querySelectorAllDeep } from 'query-selector-shadow-dom'
 import { CSSProperties } from 'react'
 
-import { CLICK_TARGETS, CLICK_TARGET_SELECTOR, TAGS_TO_IGNORE, escapeRegex } from 'lib/actionUtils'
-import { cssEscape } from 'lib/utils/cssEscape'
+import { CLICK_TARGETS, CLICK_TARGET_SELECTOR, TAGS_TO_IGNORE, escapeRegex } from 'lib/utils/actions'
 
 import { patch } from '~/toolbar/patch'
+import { toolbarLogger } from '~/toolbar/toolbarLogger'
+import { captureToolbarException } from '~/toolbar/toolbarInsightsJS'
 import { ActionStepForm, ElementRect } from '~/toolbar/types'
-import { ActionStepType } from '~/types'
+import { finder } from '~/toolbar/vendor/finder'
+import { Experiment, ActionStepType, ExperimentStatus } from '~/types'
 
 import { ActionStepPropertyKey } from './actions/ActionStep'
 
-export const TOOLBAR_ID = '__INSIGHTS_TOOLBAR__'
+export const TOOLBAR_ID = '__POSTFN_TOOLBAR__'
+
+// Props arrive via the `__insights=<base64>` URL fragment, so the static type is not
+// load-bearing at runtime — verify before storing strings that flow into auth headers.
+export const asNonEmptyString = (v: unknown): string | null => (typeof v === 'string' && v.length > 0 ? v : null)
+
+// `fetch` that always resolves to something safe to read `.status`/`.ok`/`.json()` off. A
+// site-level `window.fetch` wrapper on the customer page can resolve to `undefined`/`null` (or
+// another non-object), which makes every downstream `.status` access throw a TypeError. Normalize
+// any non-object value into a synthetic failed response so the toolbar's OAuth chain and its
+// callers can treat it as an ordinary request failure rather than crashing.
+export async function safeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    // nosemgrep: toolbar-no-raw-fetch - this IS the wrapper the rule points everyone to
+    const response = await fetch(input, init)
+    if (response && typeof response === 'object') {
+        return response
+    }
+    return new Response(JSON.stringify({ results: [], detail: 'invalid_fetch_response' }), { status: 502 })
+}
 
 const elementToQueryCache = new WeakMap<HTMLElement, string | undefined>()
 export const TOOLBAR_CONTAINER_CLASS = 'toolbar-global-fade-container'
 export const LOCALSTORAGE_KEY = '_insightsToolbarParams'
+export const OAUTH_LOCALSTORAGE_KEY = '_insightsToolbarOAuth'
+export const PKCE_STORAGE_KEY = '_insightsToolbarPKCE'
+
+export interface ToolbarAuthParams {
+    code: string
+    clientId: string
+}
+
+/**
+ * Read `__insights_toolbar=code:…,client_id:…` from the URL hash without modifying the URL.
+ * Returns the matched params if found, or null.
+ */
+export function readToolbarAuthHash(): ToolbarAuthParams | null {
+    let hash: string
+    try {
+        hash = decodeURIComponent(window.location.hash)
+    } catch {
+        hash = window.location.hash
+    }
+    const codeMatch = hash.match(/__insights_toolbar=code:([^,]+),client_id:([^,&]+)/)
+    if (!codeMatch) {
+        return null
+    }
+    return {
+        code: codeMatch[1],
+        clientId: codeMatch[2],
+    }
+}
+
+/**
+ * Remove `__insights_toolbar=code:…,client_id:…` from the URL hash.
+ *
+ * Separated from reading so that the URL modification (history.replaceState)
+ * can be deferred — some SPAs watch for URL changes and re-render the page,
+ * which can destroy the toolbar mid-initialization if the hash is cleaned
+ * synchronously during mount.
+ */
+export function cleanToolbarAuthHash(): void {
+    let hash: string
+    try {
+        hash = decodeURIComponent(window.location.hash)
+    } catch {
+        hash = window.location.hash
+    }
+    if (!hash.includes('__insights_toolbar=')) {
+        return
+    }
+
+    // When the toolbar param was the first hash-query on a SPA route
+    // (e.g. `#/login?__insights_toolbar=X&foo=bar`), removing it leaves
+    // `#/login&foo=bar` where the `&` should be `?`. Detect that case so we
+    // can restore the `?` after stripping. Only fires when the original hash
+    // contained `?__insights_toolbar=` literally — fragments that join the
+    // toolbar param with `&` (e.g. `#/dashboard&tab=1&__insights_toolbar=X`)
+    // are left untouched because that `&` was the customer's separator.
+    const toolbarWasFirstHashQuery = hash.includes('?__insights_toolbar=')
+
+    let cleanHash = hash
+        .replace(/[?&]?__insights_toolbar=[^&]*/g, '')
+        .replace(/&&+/g, '&')
+        .replace(/[?&]$/, '')
+        .replace(/^#&/, '#')
+        .replace(/^#$/, '')
+
+    if (toolbarWasFirstHashQuery) {
+        cleanHash = cleanHash.replace(/(^#\/[^?]*)&/, '$1?')
+    }
+
+    history.replaceState(null, '', location.pathname + location.search + (cleanHash || ''))
+}
+
+export async function generatePKCE(): Promise<{ verifier: string; challenge: string }> {
+    const bytes = new Uint8Array(48)
+    crypto.getRandomValues(bytes)
+    const verifier = btoa(String.fromCharCode(...bytes))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '')
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))
+    const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '')
+    return { verifier, challenge }
+}
 
 export function getSafeText(el: HTMLElement): string {
     if (!el.childNodes || !el.childNodes.length) {
@@ -55,7 +159,7 @@ function computeElementQuery(element: HTMLElement, dataAttributes: string[]): st
             continue
         }
 
-        const escapedSelector = `[${cssEscape(name)}="${cssEscape(value)}"]`
+        const escapedSelector = `[${CSS.escape(name)}="${CSS.escape(value)}"]`
         const unescapedSelector = `[${name}="${value}"]`
 
         if (querySelectorAllDeep(escapedSelector).length == 1) {
@@ -71,15 +175,24 @@ function computeElementQuery(element: HTMLElement, dataAttributes: string[]): st
             tagName: (name) => !TAGS_TO_IGNORE.includes(name),
             // include several selectors e.g. prefer .project-homepage > .project-header > .project-title over .project-title
             seedMinLength: 5,
-            attr: (name) => {
+            attr: (name, value) => {
                 // preference to data attributes if they exist
                 // that aren't in the Insights preferred list - they were returned early above
-                return name.startsWith('data-')
+                return name.startsWith('data-') && value.length < 100 && !containsUnstableGeneratedId(value)
             },
+            // the combination guard tripped and cut the candidate search short -
+            // the selector may degrade to a brittle positional path - record host
+            // and depth so we can see how often and where pathological DOMs hit this
+            onCombinationsCapped: ({ levels }) =>
+                toolbarLogger.warn('element_selector', 'finder hit maxCombinations cap, candidate search truncated', {
+                    host: window.location.host,
+                    levels,
+                }),
         })
-        return slashDotDataAttrUnescape(foundSelector)
+        return unescapeCssSelector(foundSelector)
     } catch (error) {
-        console.warn('Error while trying to find a selector for element', element, error)
+        toolbarLogger.warn('element_selector', 'Error while trying to find a selector for element')
+        captureToolbarException(error, 'element_selector_computation')
         return undefined
     }
 }
@@ -117,8 +230,12 @@ export function getParent(element: HTMLElement): HTMLElement | null {
     return null
 }
 
-export function trimElement(element: HTMLElement, selector?: string): HTMLElement | null {
-    const target_selector = selector || CLICK_TARGET_SELECTOR
+export function trimElement(
+    element: HTMLElement,
+    options?: { selector?: string; cursorPointerCache?: WeakMap<HTMLElement, boolean> }
+): HTMLElement | null {
+    const target_selector = options?.selector || CLICK_TARGET_SELECTOR
+    const cursorPointerCache = options?.cursorPointerCache
     if (!element) {
         return null
     }
@@ -129,8 +246,6 @@ export function trimElement(element: HTMLElement, selector?: string): HTMLElemen
 
     let loopElement = element
 
-    // if it's an element with only one child, go down to the lowest node as far as we can
-    // we'll come back up later
     while (true) {
         if (loopElement.children.length === 1) {
             loopElement = loopElement.children[0] as HTMLElement
@@ -139,23 +254,31 @@ export function trimElement(element: HTMLElement, selector?: string): HTMLElemen
         }
     }
 
+    const hasCachedPointer = (el: HTMLElement): boolean => {
+        if (!cursorPointerCache) {
+            return window.getComputedStyle(el).getPropertyValue('cursor') === 'pointer'
+        }
+        const cached = cursorPointerCache.get(el)
+        if (cached !== undefined) {
+            return cached
+        }
+        const result = window.getComputedStyle(el).getPropertyValue('cursor') === 'pointer'
+        cursorPointerCache.set(el, result)
+        return result
+    }
+
     while (loopElement) {
         const parent = getParent(loopElement)
         if (!parent) {
             return null
         }
 
-        // return when we find a click target
         if (loopElement.matches?.(target_selector)) {
             return loopElement
         }
 
-        const compStyles = window.getComputedStyle(loopElement)
-        if (compStyles.getPropertyValue('cursor') === 'pointer') {
-            const parentStyles = parent ? window.getComputedStyle(parent) : null
-            if (!parentStyles || parentStyles.getPropertyValue('cursor') !== 'pointer') {
-                return loopElement
-            }
+        if (hasCachedPointer(loopElement) && !hasCachedPointer(parent)) {
+            return loopElement
         }
 
         loopElement = parent
@@ -257,7 +380,7 @@ export function getAllClickTargets(
             return a
         }, [] as HTMLElement[])
     const selectedElements = [...elements, ...pointerElements, ...shadowElements]
-        .map((e) => trimElement(e, targetSelector))
+        .map((e) => trimElement(e, { selector: targetSelector }))
         .filter((e) => e)
     const uniqueElements = Array.from(new Set(selectedElements)) as HTMLElement[]
 
@@ -305,7 +428,7 @@ export function getElementForStep(step: ActionStepForm, allElements?: HTMLElemen
     }
 
     if (step.href && (step.href_selected || typeof step.href_selected === 'undefined')) {
-        selector += `[href="${cssEscape(step.href)}"]`
+        selector += `[href="${CSS.escape(step.href)}"]`
     }
 
     const hasText = step.text && step.text.trim() && (step.text_selected || typeof step.text_selected === 'undefined')
@@ -318,7 +441,8 @@ export function getElementForStep(step: ActionStepForm, allElements?: HTMLElemen
     try {
         elements = [...(querySelectorAllDeep(selector || '*', document, allElements) as unknown as HTMLElement[])]
     } catch (e) {
-        console.error('Cannot use selector:', selector, '. with exception: ', e)
+        toolbarLogger.error('element_step_selector', 'Cannot use selector', { selector })
+        captureToolbarException(e, 'element_step_selector', { selector })
         return null
     }
 
@@ -423,6 +547,18 @@ export function stepToDatabaseFormat(step: ActionStepForm): ActionStepType {
     }
 }
 
+export function rectEqual(a?: ElementRect, b?: ElementRect): boolean {
+    if (a === b) {
+        return true
+    }
+    if (!a || !b) {
+        return false
+    }
+    return a.top === b.top && a.left === b.left && a.right === b.right && a.bottom === b.bottom
+}
+
+export const EMPTY_STYLE: Record<string, any> = {}
+
 export function getRectForElement(element: HTMLElement): ElementRect {
     const elements = [elementToAreaRect(element)]
 
@@ -445,20 +581,43 @@ export function getRectForElement(element: HTMLElement): ElementRect {
     return maxRect
 }
 
+let zoomCache = new WeakMap<HTMLElement, number[]>()
+let pageUsesZoom: boolean | undefined
+
+export function invalidateZoomCache(): void {
+    pageUsesZoom = undefined
+    zoomCache = new WeakMap()
+}
+
 export const getZoomLevel = (el: HTMLElement): number[] => {
+    if (pageUsesZoom === false) {
+        return []
+    }
+
+    const cached = zoomCache.get(el)
+    if (cached !== undefined) {
+        return cached
+    }
+
     const zooms: number[] = []
-    const getZoom = (el: HTMLElement): void => {
-        const zoom = window.getComputedStyle(el).getPropertyValue('zoom')
+    const getZoom = (current: HTMLElement): void => {
+        const zoom = window.getComputedStyle(current).getPropertyValue('zoom')
         const rzoom = zoom ? parseFloat(zoom) : 1
         if (rzoom !== 1) {
             zooms.push(rzoom)
         }
-        if (el.parentElement?.parentElement) {
-            getZoom(el.parentElement)
+        if (current.parentElement?.parentElement) {
+            getZoom(current.parentElement)
         }
     }
     getZoom(el)
     zooms.reverse()
+
+    if (zooms.length > 0) {
+        pageUsesZoom = true
+    }
+
+    zoomCache.set(el, zooms)
     return zooms
 }
 export const getRect = (el: HTMLElement): ElementRect => {
@@ -497,14 +656,34 @@ export function getHeatMapHue(count: number, maxCount: number): number {
 }
 
 /*
- * KLUDGE: e.g. [data-attr="session\.recording\.preview"] is valid CSS
- * but our action matching doesn't support it
- * in order to avoid trying to write a general purpose CSS unescaper
- * we just remove the backslash in this specific pattern
- * if it matches data-attr="bla\.blah\.blah"
+ * KLUDGE: finder() builds selectors with CSS.escape, e.g. [data-attr="session\.recording\.preview"]
+ * or [data-id="base-ui-\:rg\:-viewport"]. That's valid CSS, but our action/element matching compares
+ * raw attribute values, so the escapes must be removed. This handles single-character escapes
+ * (\. -> ., \: -> :) and hex code-point escapes (\31 -> 1) without being a fully general CSS unescaper.
+ *
+ * Safety: this only works correctly because finder's wordLike gate rejects id/class tokens that
+ * contain ':', so unescaping outside quoted attribute values never produces pseudo-class collisions.
+ * If that gate is ever relaxed, this function will need to become attribute-value-aware.
  */
-export function slashDotDataAttrUnescape(foundSelector: string): string | undefined {
-    return foundSelector.replace(/\\./g, '.')
+export function unescapeCssSelector(foundSelector: string): string {
+    return foundSelector.replace(/\\([0-9a-fA-F]{1,6} ?|.)/g, (_, escaped: string) => {
+        if (/^[0-9a-fA-F]/.test(escaped)) {
+            // hex code-point escape: \31 23-foo → "123-foo", \: would not reach here
+            const codePoint = parseInt(escaped, 16)
+            // guard invalid code points (> U+10FFFF or 0) per CSS spec — fall back to U+FFFD
+            return codePoint === 0 || codePoint > 0x10ffff ? '�' : String.fromCodePoint(codePoint)
+        }
+        return escaped
+    })
+}
+
+// React's useId() emits per-render identifiers like ":r5:" (React <= 18) or "«r5»" (React 19),
+// which component libraries embed in DOM attributes (e.g. data-id="base-ui-:rg:-viewport").
+// They change between renders and deploys, so a selector built on one never matches recorded events.
+const UNSTABLE_GENERATED_ID_REGEX = /:r[0-9a-z]*:|«r[0-9a-z]*»/i
+
+export function containsUnstableGeneratedId(value: string): boolean {
+    return UNSTABLE_GENERATED_ID_REGEX.test(value)
 }
 
 export function makeNavigateWrapper(onNavigate: () => void, patchKey: string): () => () => void {
@@ -554,6 +733,47 @@ export function makeNavigateWrapper(onNavigate: () => void, patchKey: string): (
             unwrapReplaceState?.()
         }
     }
+}
+
+// Toolbar-owned copy of the app's experiment variant-split helper. Duplicated rather than
+// imported from scenes/experiments/utils, which drags 37KB and app-only modules into the
+// customer-facing bundle for this one pure function.
+export function percentageDistribution(variantCount: number): number[] {
+    const basePercentage = Math.floor(100 / variantCount)
+    const percentages = new Array(variantCount).fill(basePercentage)
+
+    // try to equally distribute `remaining` across variants
+    let remaining = 100 - basePercentage * variantCount
+    for (let i = 0; remaining > 0; i++, remaining--) {
+        percentages[i] += 1
+    }
+
+    return percentages
+}
+
+// Toolbar-owned copy of the app's experiment status helpers. Duplicated rather than imported
+// from scenes/experiments/experimentStatus so the toolbar bundle doesn't reach into the app
+// scene zone for these two pure functions.
+type ExperimentStatusInput = Pick<Experiment, 'status' | 'start_date' | 'end_date'> | null | undefined
+
+function getExperimentStatus(experiment: ExperimentStatusInput): ExperimentStatus {
+    if (!experiment) {
+        return ExperimentStatus.Draft
+    }
+    if (experiment.status) {
+        return experiment.status
+    }
+    if (experiment.end_date) {
+        return ExperimentStatus.Stopped
+    }
+    if (experiment.start_date) {
+        return ExperimentStatus.Running
+    }
+    return ExperimentStatus.Draft
+}
+
+export function isLaunched(experiment: ExperimentStatusInput): boolean {
+    return getExperimentStatus(experiment) !== ExperimentStatus.Draft
 }
 
 export function joinWithUiHost(uiHost: string, path: string): string {

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useEffect, useState } from 'react'
 
 import { IconMessage } from '@hanzo/icons'
@@ -8,13 +8,13 @@ import { Button, Tooltip } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { formatPercentage } from 'lib/utils'
+import { formatPercentage } from 'lib/utils/numbers'
 import { addProductIntent, addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { useMaxTool } from 'scenes/max/useMaxTool'
 import { urls } from 'scenes/urls'
 
 import { DataNodeLogicProps, dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
-import { insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
+import { insightVizDataNodeKey } from '~/queries/nodes/InsightViz/insightVizKeys'
 import {
     FunnelsQuery,
     FunnelsQueryResponse,
@@ -25,9 +25,11 @@ import {
 } from '~/queries/schema/schema-general'
 import { InsightLogicProps } from '~/types'
 
-import { QuickSurveyModal } from '../QuickSurveyModal'
+import { useAttachedContext } from 'products/insights_ai/frontend/api/logics'
+
 import { SURVEY_CREATED_SOURCE } from '../constants'
 import { QuickSurveyType } from '../quick-create/types'
+import { QuickSurveyModal } from '../QuickSurveyModal'
 import { captureMaxAISurveyCreationException } from '../utils'
 import { SurveyableFunnelInsight, extractFunnelContext } from '../utils/opportunityDetection'
 
@@ -81,7 +83,7 @@ export function SurveyOpportunityButton({
             insight_id: insight.id,
             ...funnelContext,
         },
-        callback: (toolOutput: { survey_id?: string; survey_name?: string; error?: string }) => {
+        callback: (toolOutput: { survey_id?: string; survey_name?: string; survey_type?: string; error?: string }) => {
             addProductIntent({
                 product_type: ProductKey.SURVEYS,
                 intent_context: ProductIntentContext.SURVEY_CREATED,
@@ -96,9 +98,29 @@ export function SurveyOpportunityButton({
                 return captureMaxAISurveyCreationException(toolOutput.error, source)
             }
 
-            router.actions.push(urls.survey(toolOutput.survey_id))
+            if (toolOutput.survey_type === 'popover') {
+                router.actions.push(urls.surveyWizard(toolOutput.survey_id))
+            } else {
+                router.actions.push(urls.survey(toolOutput.survey_id) + '?edit=true')
+            }
         },
     })
+
+    useAttachedContext(
+        funnelContext
+            ? [
+                  { type: 'insight', key: insight.id, label: funnelContext.insightName },
+                  {
+                      type: 'survey_opportunity_funnel_context',
+                      value: JSON.stringify({
+                          conversionRate: funnelContext.conversionRate,
+                          steps: funnelContext.steps,
+                      }),
+                      label: 'Funnel conversion context',
+                  },
+              ]
+            : null
+    )
 
     const handleClick = (): void => {
         insights.capture('survey opportunity clicked', {

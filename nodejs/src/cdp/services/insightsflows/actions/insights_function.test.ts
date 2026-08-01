@@ -2,31 +2,40 @@ import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { DateTime } from 'luxon'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
 import { insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
+import { InsightsFlowAction } from '~/cdp/schema/hogflow'
 import { createInvocationResult } from '~/cdp/utils/invocation-utils'
+import { closeHub, createHub } from '~/common/utils/db/hub'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
-import { closeHub, createHub } from '~/utils/db/hub'
 
-import { InsightsFlowAction } from '../../../../schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow, DBInsightsFunctionTemplate } from '../../../types'
-import { ScriptExecutorService } from '../../script-executor.service'
-import { InsightsFunctionTemplateManagerService } from '../../managers/insights-function-template-manager.service'
+import { HogExecutorService } from '../../script-executor.service'
+import { HogInputsService } from '../../script-inputs.service'
+import { InsightsFunctionTemplateManagerService } from '../../managers/script-function-template-manager.service'
+import { RecipientsManagerService } from '../../managers/recipients-manager.service'
+import { TeamWorkflowsConfigService } from '../../managers/team-workflows-config.service'
+import { EmailSuppressionService, emailSuppressionConfigFromEnv } from '../../messaging/email-suppression.service'
+import { EmailValidationService } from '../../messaging/email-validation.service'
+import { EmailService } from '../../messaging/email.service'
+import { EmailTrackingCodeSigner } from '../../messaging/helpers/tracking-code'
 import { RecipientPreferencesService } from '../../messaging/recipient-preferences.service'
-import { InsightsFlowFunctionsService } from '../insightsflow-functions.service'
-import { findActionByType } from '../insightsflow-utils'
+import { RecipientTokensService } from '../../messaging/recipient-tokens.service'
+import { InsightsFlowFunctionsService } from '../hogflow-functions.service'
+import { findActionByType } from '../hogflow-utils'
 import { InsightsFunctionHandler } from './insights_function'
 
 describe('InsightsFunctionHandler', () => {
     let hub: Hub
     let team: Team
     let insightsFunctionHandler: InsightsFunctionHandler
-    let mockInsightsFunctionExecutor: ScriptExecutorService
+    let mockInsightsFunctionExecutor: HogExecutorService
     let mockInsightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
     let mockInsightsFlowFunctionsService: InsightsFlowFunctionsService
     let mockRecipientPreferencesService: RecipientPreferencesService
+    let mockEmailValidationService: EmailValidationService
 
     let invocation: CyclotronJobInvocationInsightsFlow
     let action: Extract<InsightsFlowAction, { type: 'function' }>
@@ -35,9 +44,46 @@ describe('InsightsFunctionHandler', () => {
     beforeEach(async () => {
         await resetTestDatabase()
         hub = await createHub()
-        team = await getFirstTeam(hub)
+        team = await getFirstTeam(hub.postgres)
 
-        mockInsightsFunctionExecutor = new ScriptExecutorService(hub)
+        const recipientTokensService = new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL)
+        const hogInputsService = new HogInputsService(
+            hub.integrationManager,
+            recipientTokensService,
+            hub.encryptedFields
+        )
+        const emailService = new EmailService(
+            {
+                sesAccessKeyId: hub.SES_ACCESS_KEY_ID,
+                sesSecretAccessKey: hub.SES_SECRET_ACCESS_KEY,
+                sesRegion: hub.SES_REGION,
+                sesEndpoint: hub.SES_ENDPOINT,
+                sesTrackedConfigurationSet: hub.SES_TRACKED_CONFIGURATION_SET,
+                sesUntrackedConfigurationSet: hub.SES_UNTRACKED_CONFIGURATION_SET,
+                sesTenantAttributionEnabled: false,
+            },
+            hub.integrationManager,
+            new TeamWorkflowsConfigService(hub.postgres),
+            hub.ENCRYPTION_SALT_KEYS,
+            hub.SITE_URL,
+            new EmailTrackingCodeSigner(hub.ENCRYPTION_SALT_KEYS, hub.CDP_EMAIL_TRACKING_URL),
+            new EmailSuppressionService(hub.postgres, emailSuppressionConfigFromEnv()),
+            new RecipientsManagerService(hub.postgres)
+        )
+        mockInsightsFunctionExecutor = new HogExecutorService(
+            {
+                hogCostTimingUpperMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
+                googleAdwordsDeveloperToken: hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
+                fetchRetries: hub.CDP_FETCH_RETRIES,
+                fetchBackoffBaseMs: hub.CDP_FETCH_BACKOFF_BASE_MS,
+                fetchBackoffMaxMs: hub.CDP_FETCH_BACKOFF_MAX_MS,
+            },
+            { teamManager: hub.teamManager, siteUrl: hub.SITE_URL },
+            hogInputsService,
+            emailService,
+            recipientTokensService,
+            undefined as any
+        )
         mockInsightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(hub.postgres)
         mockInsightsFlowFunctionsService = new InsightsFlowFunctionsService(
             hub.SITE_URL,
@@ -45,18 +91,22 @@ describe('InsightsFunctionHandler', () => {
             mockInsightsFunctionExecutor
         )
         mockRecipientPreferencesService = {
-            shouldSkipAction: jest.fn().mockResolvedValue(false),
+            shouldSkipAction: jest.fn().mockResolvedValue(null),
+        } as any
+        mockEmailValidationService = {
+            getSkipReason: jest.fn().mockResolvedValue(null),
         } as any
         insightsFunctionHandler = new InsightsFunctionHandler(
             mockInsightsFlowFunctionsService,
             mockRecipientPreferencesService,
+            mockEmailValidationService,
             'fetch'
         )
 
-        // Simple custom function that prints the inputs
+        // Simple script function that prints the inputs
 
         template = await insertInsightsFunctionTemplate(hub.postgres, {
-            id: 'template-test-customflow-executor',
+            id: 'template-test-hogflow-executor',
             name: 'Test Template',
             code: `fetch('http://localhost/test', { 'method': 'POST', 'body': inputs })`,
             inputs_schema: [
@@ -83,7 +133,7 @@ describe('InsightsFunctionHandler', () => {
             },
         })
 
-        const insightsFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureInsightsFlowBuilder()
             .withTeamId(team.id)
             .withWorkflow({
                 actions: {
@@ -121,8 +171,8 @@ describe('InsightsFunctionHandler', () => {
             })
             .build()
 
-        action = findActionByType(insightsFlow, 'function')!
-        invocation = createExampleInsightsFlowInvocation(insightsFlow)
+        action = findActionByType(hogFlow, 'function')!
+        invocation = createExampleInsightsFlowInvocation(hogFlow)
 
         invocation.state.currentAction = {
             id: action.id,
@@ -134,9 +184,9 @@ describe('InsightsFunctionHandler', () => {
         await closeHub(hub)
     })
 
-    it('should execute a custom function with integration inputs and continue', async () => {
+    it('should execute a script function with integration inputs and continue', async () => {
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
@@ -147,7 +197,7 @@ describe('InsightsFunctionHandler', () => {
               [
                 "http://localhost/test",
                 {
-                  "body": "{"name":"John Doe","oauth":{"team":"foobar","access_token":"token","not_encrypted":"not-encrypted","access_token_raw":"token"}}",
+                  "body": "{"name":"John Doe","oauth":{"$integration_id":1,"team":"foobar","access_token":"token","not_encrypted":"not-encrypted","access_token_raw":"token"}}",
                   "headers": {
                     "Content-Type": "application/json",
                   },
@@ -162,12 +212,115 @@ describe('InsightsFunctionHandler', () => {
         expect(invocationResult.logs[0].message).toContain('[Action:function] Function completed')
     })
 
+    describe('with groups', () => {
+        beforeEach(() => {
+            invocation.groups = {
+                organization: {
+                    id: 'org_key',
+                    type: 'organization',
+                    index: 0,
+                    url: '',
+                    properties: { owner_name: 'Chris McNeill' },
+                },
+            }
+        })
+
+        it('should forward groups to the script function invocation globals', async () => {
+            const buildInsightsFunctionInvocationSpy = jest.spyOn(mockInsightsFlowFunctionsService, 'buildInsightsFunctionInvocation')
+
+            const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
+                queue: 'script',
+                queuePriority: 0,
+            })
+
+            await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
+
+            const passedGlobals = buildInsightsFunctionInvocationSpy.mock.calls[0][2]
+            expect(passedGlobals.groups).toEqual(invocation.groups)
+        })
+
+        it('should render a group property referenced in a function input template', async () => {
+            // {groups.organization.properties.owner_name} compiled to script bytecode
+            action.config.inputs.name = {
+                value: '{groups.organization.properties.owner_name}',
+                templating: 'script',
+                bytecode: ['_H', 1, 32, 'owner_name', 32, 'properties', 32, 'organization', 32, 'groups', 1, 4],
+            }
+
+            const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
+                queue: 'script',
+                queuePriority: 0,
+            })
+
+            const handlerResult = await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
+
+            expect(handlerResult.error).toBeUndefined()
+            expect(mockFetch.mock.calls[0][1].body).toContain('"name":"Chris McNeill"')
+        })
+    })
+
+    describe('missing variable references', () => {
+        beforeEach(() => {
+            // {variables.coupon} compiled to script bytecode; the run has no `coupon` variable
+            action.config.inputs.name = {
+                value: '{variables.coupon}',
+                templating: 'script',
+                bytecode: ['_H', 1, 32, 'coupon', 32, 'variables', 1, 2],
+            }
+            invocation.state.variables = {}
+        })
+
+        it('warns in the run log when an input references a variable the run does not have', async () => {
+            const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
+                queue: 'script',
+                queuePriority: 0,
+            })
+
+            const handlerResult = await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
+
+            const warnings = invocationResult.logs.filter(
+                (l) => l.level === 'warn' && l.message.includes('not set for this run')
+            )
+            expect(warnings).toHaveLength(1)
+            expect(warnings[0].message).toContain('coupon')
+            // Rendering is unchanged: the step still executes, with the reference rendered empty
+            expect(handlerResult.error).toBeUndefined()
+            expect(mockFetch).toHaveBeenCalled()
+        })
+
+        it('does not warn again on a continuation that reuses already-rendered state', async () => {
+            const firstResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
+                queue: 'script',
+                queuePriority: 0,
+            })
+            await insightsFunctionHandler.execute({ invocation, action, result: firstResult })
+
+            // Simulate a continuation: the rendered function state is carried on the action,
+            // exactly as the handler persists it for a paused function
+            invocation.state.currentAction!.insightsFunctionState = {
+                globals: { ...createExampleInsightsFlowInvocation(invocation.hogFlow).state.event, inputs: {} } as any,
+                timings: [],
+                attempts: 0,
+            } as any
+
+            const continuationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
+                queue: 'script',
+                queuePriority: 0,
+            })
+            await insightsFunctionHandler.execute({ invocation, action, result: continuationResult })
+
+            expect(
+                continuationResult.logs.filter((l) => l.level === 'warn' && l.message.includes('not set for this run'))
+            ).toHaveLength(0)
+        })
+    })
+
     it('should throw an error if template is not found', async () => {
-        const action = findActionByType(invocation.insightsFlow, 'function')!
+        const action = findActionByType(invocation.hogFlow, 'function')!
         action.config.template_id = 'template_123'
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
@@ -178,7 +331,7 @@ describe('InsightsFunctionHandler', () => {
 
     it('should check recipient preferences before execution', async () => {
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
@@ -193,7 +346,7 @@ describe('InsightsFunctionHandler', () => {
         const buildInsightsFunctionInvocationSpy = jest.spyOn(mockInsightsFlowFunctionsService, 'buildInsightsFunctionInvocation')
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
@@ -224,11 +377,11 @@ describe('InsightsFunctionHandler', () => {
         expect(calledConfig.mappings).toEqual([{ name: 'input mapping field' }])
     })
 
-    it('should skip execution if recipient preferences service returns true', async () => {
-        ;(mockRecipientPreferencesService.shouldSkipAction as jest.Mock).mockResolvedValueOnce(true)
+    it('should skip execution and log an opt-out message when recipient preferences returns opted_out', async () => {
+        ;(mockRecipientPreferencesService.shouldSkipAction as jest.Mock).mockResolvedValueOnce('opted_out')
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
@@ -242,62 +395,106 @@ describe('InsightsFunctionHandler', () => {
         expect(invocationResult.logs[0].message).toContain(
             `[Action:function] Recipient has opted out, skipping message delivery.`
         )
+        // Opt-out skips do not emit an app metric — no billable_invocation, no email_suppressed.
+        expect(invocationResult.metrics).toEqual([])
         expect(mockFetch).not.toHaveBeenCalled()
     })
 
-    it('should emit a single billable_invocation metric upon function completion', async () => {
+    // Guards the fix that split suppression from opt-out: previously both branches collapsed to a
+    // single "opted out" log with no metric, so a customer couldn't tell why a workflow send was
+    // skipped or measure suppression volume from the app-metrics view.
+    it('should skip execution, log a suppression message, and emit email_suppressed when recipient preferences returns suppressed', async () => {
+        ;(mockRecipientPreferencesService.shouldSkipAction as jest.Mock).mockResolvedValueOnce('suppressed')
+
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
-        await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
+        const handlerResult = await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
 
-        const billableMetrics = invocationResult.metrics.filter(
-            (metric) => metric.metric_name === 'billable_invocation' && metric.metric_kind === 'fetch'
+        expect(handlerResult.nextAction?.id).toBe('exit')
+        expect(invocationResult.logs).toHaveLength(1)
+        expect(invocationResult.logs[0].message).toContain(
+            `[Action:function] Skipping send: recipient is on the suppression list.`
         )
-
-        expect(billableMetrics).toHaveLength(1)
-
-        expect(billableMetrics[0]).toMatchObject({
-            team_id: team.id,
-            app_source_id: invocation.functionId,
-            instance_id: invocation.id,
-            metric_kind: 'fetch',
-            metric_name: 'billable_invocation',
-            count: 1,
-        })
+        expect(invocationResult.metrics).toEqual([
+            {
+                team_id: team.id,
+                app_source_id: invocation.functionId,
+                instance_id: action.id,
+                metric_kind: 'email',
+                metric_name: 'email_suppressed',
+                count: 1,
+            },
+        ])
+        expect(mockFetch).not.toHaveBeenCalled()
     })
 
-    it('should emit a billable_invocation metric with email kind when billingMetricType is email', async () => {
-        insightsFunctionHandler = new InsightsFunctionHandler(
-            mockInsightsFlowFunctionsService,
-            mockRecipientPreferencesService,
-            'email'
+    it('should skip the send and emit email_bounce_prevented when validation predicts a hard bounce', async () => {
+        ;(mockEmailValidationService.getSkipReason as jest.Mock).mockResolvedValueOnce(
+            'Skipping send: the domain "dead.invalid" has no reachable mail servers, so this message would hard bounce.'
         )
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
-        await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
+        const handlerResult = await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
 
-        const billableMetrics = invocationResult.metrics.filter(
-            (metric) => metric.metric_name === 'billable_invocation' && metric.metric_kind === 'email'
-        )
-
-        expect(billableMetrics).toHaveLength(1)
-
-        expect(billableMetrics[0]).toMatchObject({
-            team_id: team.id,
-            app_source_id: invocation.functionId,
-            instance_id: invocation.id,
-            metric_kind: 'email',
-            metric_name: 'billable_invocation',
-            count: 1,
-        })
+        // Flow continues to the next action (a skip, not a failure branch), and nothing was sent.
+        expect(handlerResult.nextAction?.id).toBe('exit')
+        expect(mockFetch).not.toHaveBeenCalled()
+        expect(invocationResult.logs[0].message).toContain('no reachable mail servers')
+        expect(invocationResult.metrics).toEqual([
+            {
+                team_id: team.id,
+                app_source_id: invocation.functionId,
+                instance_id: action.id,
+                metric_kind: 'email',
+                metric_name: 'email_bounce_prevented',
+                count: 1,
+            },
+        ])
     })
+
+    // The billing kind is the whole point of the per-channel handlers: push bills at its own rate
+    // (roughly half of email), so a completed invocation must emit exactly one billable_invocation
+    // carrying the handler's billing type — never fall back to another channel's kind.
+    it.each(['fetch', 'email', 'push'] as const)(
+        'emits a single billable_invocation with %s kind matching the handler billing type',
+        async (billingType) => {
+            const handler = new InsightsFunctionHandler(
+                mockInsightsFlowFunctionsService,
+                mockRecipientPreferencesService,
+                mockEmailValidationService,
+                billingType
+            )
+
+            const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
+                queue: 'script',
+                queuePriority: 0,
+            })
+
+            await handler.execute({ invocation, action, result: invocationResult })
+
+            const billableMetrics = invocationResult.metrics.filter(
+                (metric) => metric.metric_name === 'billable_invocation'
+            )
+
+            expect(billableMetrics).toHaveLength(1)
+
+            expect(billableMetrics[0]).toMatchObject({
+                team_id: team.id,
+                app_source_id: invocation.functionId,
+                instance_id: action.id,
+                metric_kind: billingType,
+                metric_name: 'billable_invocation',
+                count: 1,
+            })
+        }
+    )
 
     it('should not emit a billable_invocation metric if function is not finished', async () => {
         // Mock the executeWithAsyncFunctions to return a non-finished result
@@ -307,10 +504,12 @@ describe('InsightsFunctionHandler', () => {
             logs: [],
             metrics: [],
             capturedInsightsEvents: [],
+            warehouseWebhookPayloads: [],
+            emailAssets: [],
         })
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
@@ -324,10 +523,10 @@ describe('InsightsFunctionHandler', () => {
     })
 
     it('should not emit a billable_invocation metric when recipient opts out', async () => {
-        ;(mockRecipientPreferencesService.shouldSkipAction as jest.Mock).mockResolvedValueOnce(true)
+        ;(mockRecipientPreferencesService.shouldSkipAction as jest.Mock).mockResolvedValueOnce('opted_out')
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
         })
 
@@ -343,5 +542,62 @@ describe('InsightsFunctionHandler', () => {
         // Verify the function was still marked as finished with the right log
         expect(invocationResult.logs).toHaveLength(1)
         expect(invocationResult.logs[0].message).toContain('Recipient has opted out')
+    })
+
+    describe('non_failure_status_codes propagation', () => {
+        it('propagates non_failure_status_codes from action.config.inputs into the synthetic script function', async () => {
+            const templateWithNonFailure = await insertInsightsFunctionTemplate(hub.postgres, {
+                id: 'template-test-hogflow-non-failure-status',
+                name: 'Test Template With Non-Failure Codes',
+                code: `fetch('http://localhost/test', { 'method': 'POST', 'body': {} })`,
+                inputs_schema: [
+                    {
+                        key: 'non_failure_status_codes',
+                        type: 'non_failure_status_codes',
+                        required: false,
+                    },
+                ],
+            })
+
+            const hogFlow = new FixtureInsightsFlowBuilder()
+                .withTeamId(team.id)
+                .withWorkflow({
+                    actions: {
+                        function: {
+                            type: 'function',
+                            config: {
+                                template_id: templateWithNonFailure.template_id,
+                                inputs: {
+                                    non_failure_status_codes: {
+                                        value: ['4xx', 500],
+                                    },
+                                },
+                            },
+                        },
+                        exit: {
+                            type: 'exit',
+                            config: {},
+                        },
+                    },
+                    edges: [{ from: 'function', to: 'exit', type: 'continue' }],
+                })
+                .build()
+
+            const flowAction = findActionByType(hogFlow, 'function')!
+
+            const builtInsightsFunction = await mockInsightsFlowFunctionsService.buildInsightsFunction(hogFlow, flowAction.config)
+
+            expect(builtInsightsFunction.inputs_schema).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        key: 'non_failure_status_codes',
+                        type: 'non_failure_status_codes',
+                    }),
+                ])
+            )
+            expect(builtInsightsFunction.inputs?.non_failure_status_codes).toEqual({
+                value: ['4xx', 500],
+            })
+        })
     })
 })

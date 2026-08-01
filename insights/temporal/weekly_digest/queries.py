@@ -4,18 +4,19 @@ from django.db.models import Count, Q, QuerySet
 
 from insights.helpers.session_recording_playlist_templates import DEFAULT_PLAYLIST_NAMES
 from insights.models import Organization
-from insights.models.dashboard import Dashboard
-from insights.models.event_definition import EventDefinition
-from insights.models.experiment import Experiment
-from insights.models.feature_flag import FeatureFlag
 from insights.models.file_system.user_product_list import UserProductList
 from insights.models.organization import OrganizationMembership
-from insights.models.surveys.survey import Survey
 from insights.models.team import Team
 from insights.session_recordings.models.session_recording_playlist import SessionRecordingPlaylist
 from insights.sync import database_sync_to_async
 
-from products.data_warehouse.backend.models.external_data_source import ExternalDataSource
+from products.dashboards.backend.models.dashboard import Dashboard
+from products.error_tracking.backend.facade.api import query_new_error_issues as query_new_error_issues
+from products.event_definitions.backend.models.event_definition import EventDefinition
+from products.experiments.backend.models.experiment import Experiment
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
+from products.surveys.backend.models import Survey
+from products.warehouse_sources.backend.facade.models import ExternalDataSource
 
 
 def query_teams_for_digest() -> QuerySet:
@@ -101,7 +102,6 @@ def query_new_feature_flags(period_start: datetime, period_end: datetime) -> Que
         FeatureFlag.objects.filter(
             created_at__gt=period_start,
             created_at__lte=period_end,
-            deleted=False,
         )
         .exclude(name__contains="Feature Flag for Experiment")
         .exclude(name__contains="Targeting flag for survey")

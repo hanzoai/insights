@@ -1,5 +1,4 @@
-import { getMeta, resetMeta } from '@hanzo/plugin-scaffold/test/utils'
-
+import { getMeta, resetMeta } from '../../test-utils'
 import { EngagePluginEvent, onEvent } from './index'
 
 describe('sendgrid', () => {

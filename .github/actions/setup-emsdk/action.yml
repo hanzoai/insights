@@ -43,7 +43,7 @@ runs:
               echo "Downloaded $(du -h "$RUNNER_TEMP/emsdk-pinned.tar.gz" | cut -f1) tarball"
 
         - name: Save emsdk tarball to cache
-          if: steps.cache-emsdk.outputs.cache-hit != 'true' && github.ref == 'refs/heads/main'
+          if: steps.cache-emsdk.outputs.cache-hit != 'true' && github.ref == 'refs/heads/master'
           uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
           with:
               path: ${{ runner.temp }}/emsdk-pinned.tar.gz

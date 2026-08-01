@@ -1,4 +1,4 @@
-from datastore_orm import migrations
+from infi.datastore_orm import migrations
 
 from insights.datastore.client import sync_execute
 from insights.datastore.materialized_columns import get_materialized_column_for_property
@@ -41,6 +41,11 @@ def ensure_only_new_column_exists(database, table_name, old_column_name, new_col
 
 
 def materialize_session_and_window_id(database):
+    try:
+        from ee.datastore.materialized_columns.columns import materialize
+    except ImportError:
+        return
+
     properties = ["$session_id", "$window_id"]
     for property_name in properties:
         current_materialized_column = get_materialized_column_for_property("events", "properties", property_name)

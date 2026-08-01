@@ -1,4 +1,4 @@
-from insights.schema import PropertyOperator
+from insights.schema_enums import PropertyOperator
 
 
 def clean_global_properties(properties: dict | list[dict] | None):

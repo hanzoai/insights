@@ -5,9 +5,10 @@ import { Banner } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { Link } from 'lib/elements/Link'
 import { IconGroupedEvents, IconHeatmap } from 'lib/elements/icons'
+import { Link } from 'lib/elements/Link'
+import { userHasAccess } from 'lib/utils/accessControlUtils'
+import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -15,6 +16,7 @@ import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { ProductKey } from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 export const scene: SceneExport = {
     component: ToolbarLaunch,
@@ -22,7 +24,13 @@ export const scene: SceneExport = {
 }
 
 export function ToolbarLaunch(): JSX.Element {
-    const isExperimentsEnabled = useFeatureFlag('WEB_EXPERIMENTS')
+    // Authorized URLs are a single shared team field; the backend gates edits on web analytics
+    // editor access, so only offer the add/edit/delete controls to users who can actually save.
+    // In Storybook there's no app context, so allow editing there.
+    const canEdit =
+        inStorybook() || inStorybookTestRunner()
+            ? true
+            : userHasAccess(AccessControlResourceType.WebAnalytics, AccessControlLevel.Editor)
 
     const features: FeatureHighlightProps[] = [
         {
@@ -50,29 +58,31 @@ export function ToolbarLaunch(): JSX.Element {
             caption: "Measure your website's performance.",
             icon: <IconPieChart />,
         },
-        ...(isExperimentsEnabled
-            ? [
-                  {
-                      title: 'Experiments',
-                      caption: 'Run experiments and A/B test your website.',
-                      icon: <IconFlask />,
-                  },
-              ]
-            : []),
+        {
+            title: 'Experiments',
+            caption: 'Run experiments and A/B test your website.',
+            icon: <IconFlask />,
+        },
     ]
 
     return (
         <SceneContent>
             <SceneTitleSection
-                name="Site Inspector"
-                description="Site Inspector launches Insights right in your app or website."
+                name="Toolbar"
+                description="Insights toolbar launches Insights right in your app or website."
                 resourceType={{
                     type: 'toolbar',
                 }}
             />
 
-            <SceneSection title="Authorized URLs for Site Inspector" description="Click on the URL to launch the Site Inspector.">
-                <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} addText="Add authorized URL" />
+            <SceneSection title="Authorized URLs for Toolbar" description="Click on the URL to launch the toolbar.">
+                <AuthorizedUrlList
+                    type={AuthorizedUrlListType.TOOLBAR_URLS}
+                    addText="Add authorized URL"
+                    allowAdd={canEdit}
+                    allowDelete={canEdit}
+                    displaySuggestions={canEdit}
+                />
                 <Banner type="info">
                     Make sure you're using the <Link to={`${urls.settings('project')}#snippet`}>HTML snippet</Link> or
                     the latest <code>insights-js</code> version.

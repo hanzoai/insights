@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getNuxtSteps as getNuxtStepsPA } from '../product-analytics/nuxt'
 import { StepDefinition } from '../steps'
@@ -107,18 +107,13 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        manualCaptureStep,
-        exceptionAutocaptureStep,
-        verifyStep,
-    ]
+    return [...installSteps, manualCaptureStep, exceptionAutocaptureStep, verifyStep]
 }
 
 export const Nuxt36Installation = createInstallation(getNuxt36Steps)

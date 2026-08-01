@@ -22,7 +22,9 @@ from insights.schema import (
     EventsNode,
     FilterLogicalOperator,
     InsightsQLQueryModifiers,
+    InCohortVia,
     InsightActorsQuery,
+    PersonsArgMaxVersion,
     PersonsOnEventsMode,
     TrendsQuery,
 )
@@ -33,15 +35,20 @@ from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.actors_query_runner import ActorsQueryRunner
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
 from insights.models.person.util import create_person
+from insights.uuidt import UUIDT
+
+from products.cohorts.backend.models.cohort import Cohort
+from products.cohorts.backend.models.util import recalculate_cohortpeople
 
 
 @patch("hanzo_insights.feature_enabled", new=Mock(return_value=True))  # for persons-inner-where-optimization
 class TestPersonOptimization(DatastoreTestMixin, APIBaseTest):
     """
-    Mostly tests for the optimization of pre-filtering before aggregating. See https://github.com/Hanzo Insights/insights/pull/25604
+    Mostly tests for the optimization of pre-filtering before aggregating. See https://github.com/Insights/insights/pull/25604
     """
 
     def setUp(self):
@@ -155,6 +162,87 @@ class TestPersonOptimization(DatastoreTestMixin, APIBaseTest):
         assert response.datastore
         self.assertIn("where_optimization", response.datastore)
         self.assertNotIn("in(tuple(person.id, person.version)", response.datastore)
+
+
+class TestPersonsV2LimitPushDown(DatastoreTestMixin, APIBaseTest):
+    """Tests for the V2 argmax ORDER BY / LIMIT push-down into the inner subquery.
+
+    The optimization pushes ORDER BY + LIMIT into the inner deduplication
+    subquery so Datastore doesn't have to deduplicate every person.
+    It is only safe when there's no outer WHERE that would filter rows
+    after the inner query -- otherwise the LIMIT excludes valid rows
+    before the filter runs.
+    """
+
+    def _v2_modifiers(self) -> InsightsQLQueryModifiers:
+        modifiers = create_default_modifiers_for_team(self.team)
+        modifiers.personsArgMaxVersion = PersonsArgMaxVersion.V2
+        modifiers.personsOnEventsMode = PersonsOnEventsMode.DISABLED
+        return modifiers
+
+    @snapshot_datastore_queries
+    def test_v2_order_by_and_limit_pushed_down(self):
+        """ORDER BY + LIMIT are pushed into the inner subquery when there's no WHERE."""
+        _create_person(team_id=self.team.pk, distinct_ids=["p1"], properties={"$some_prop": "a"})
+        _create_person(team_id=self.team.pk, distinct_ids=["p2"], properties={"$some_prop": "b"})
+        flush_persons_and_events()
+
+        response = execute_insightsql_query(
+            parse_select("SELECT id, properties.$some_prop FROM persons ORDER BY created_at DESC LIMIT 2"),
+            self.team,
+            modifiers=self._v2_modifiers(),
+        )
+        assert response.datastore is not None
+        assert "in(tuple(person.id, person.version)" in response.datastore
+        # LIMIT is pushed into the inner subquery
+        assert "LIMIT 3" in response.datastore
+        assert len(response.results) == 2
+
+    @snapshot_datastore_queries
+    def test_v2_cohort_where_does_not_push_limit_down(self):
+        """When there's an outer WHERE (e.g. a cohort filter), ORDER BY and LIMIT
+        must not be pushed into the inner subquery. Otherwise the inner LIMIT
+        restricts the person set before the cohort filter runs, and valid
+        cohort members get excluded."""
+        random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
+        cohort_prop_value = f"cohort_match_{random_uuid}"
+        _create_person(
+            properties={"email": "cohort_member@example.com", "cohort_marker": cohort_prop_value},
+            team=self.team,
+            distinct_ids=[f"cohort_member_{random_uuid}"],
+            is_identified=True,
+        )
+        for i in range(10):
+            _create_person(
+                properties={"email": f"user{i}@example.com", "cohort_marker": "no_match"},
+                team=self.team,
+                distinct_ids=[f"non_cohort_{i}_{random_uuid}"],
+                is_identified=True,
+            )
+        sync_execute("OPTIMIZE TABLE person FINAL")
+        cohort = Cohort.objects.create(
+            team=self.team,
+            groups=[{"properties": [{"key": "cohort_marker", "value": cohort_prop_value, "type": "person"}]}],
+        )
+        recalculate_cohortpeople(cohort, pending_version=0, initiating_user_id=None)
+
+        modifiers = self._v2_modifiers()
+        modifiers.inCohortVia = InCohortVia.LEFTJOIN_CONJOINED
+
+        response = execute_insightsql_query(
+            f"SELECT id, properties.email FROM persons WHERE id IN COHORT {cohort.pk} ORDER BY created_at DESC LIMIT 3",
+            self.team,
+            modifiers=modifiers,
+            pretty=False,
+        )
+        assert response.datastore is not None
+        # V2 path is used but LIMIT is NOT pushed into the inner subquery
+        assert "in(tuple(person.id, person.version)" in response.datastore
+        # The inner GROUP BY subquery should have no LIMIT
+        assert "LIMIT 4" not in response.datastore
+        # The cohort member is correctly returned
+        assert len(response.results) == 1
+        assert response.results[0][1] == "cohort_member@example.com"
 
 
 class TestPersons(DatastoreTestMixin, APIBaseTest):
@@ -400,3 +488,99 @@ class TestVirtualFieldDetection(APIBaseTest):
 
         result = _is_virtual_field_requiring_join(mock_node)  # type: ignore
         self.assertFalse(result, "Malformed AST should return False without exception")
+
+
+class TestArgMaxNonNullableSimplification(DatastoreTestMixin, APIBaseTest):
+    """`tupleElement(argMax(tuple(X), version), 1)` is simplified to `argMax(X, version)` only when X
+    is non-nullable.
+
+    The tuple() wrap is load-bearing for nullable columns: Datastore `argMax(x, v)` returns the
+    closest *non-null* x, so over a nullable column it would return a stale earlier value instead of
+    the latest one when that latest value is NULL. Every correctness test below creates a person whose
+    LATEST version unsets a property and asserts the latest (NULL) value wins — which is exactly what
+    breaks if the wrap is wrongly dropped (the query would return the stale earlier value instead).
+    """
+
+    def _modifiers(self) -> InsightsQLQueryModifiers:
+        modifiers = create_default_modifiers_for_team(self.team)
+        modifiers.personsOnEventsMode = PersonsOnEventsMode.DISABLED
+        return modifiers
+
+    def _person_unsetting_prop_in_latest_version(self, distinct_id: str, prop: str):
+        person = _create_person(
+            team_id=self.team.pk,
+            distinct_ids=[distinct_id],
+            properties={prop: "stale_old_value", "untouched": "keep"},
+            version=1,
+            created_at=datetime(2024, 1, 1, 12),
+        )
+        # Latest version no longer carries `prop`, so its value is NULL.
+        create_person(
+            team_id=self.team.pk,
+            uuid=str(person.uuid),
+            properties={"untouched": "keep"},
+            version=2,
+            created_at=datetime(2024, 1, 1, 12),
+        )
+        flush_persons_and_events()
+        return person
+
+    @parameterized.expand(
+        [
+            # (label, property, materialize_first, expected source-read marker in the SQL)
+            ("json", "jsonprop", False, "JSONExtractRaw(person.properties"),
+            ("materialized", "matprop", True, "pmat_matprop"),
+        ]
+    )
+    @snapshot_datastore_queries
+    def test_nullable_property_keeps_wrap_and_latest_null_wins(self, label, prop, materialize_first, read_marker):
+        if materialize_first:
+            from ee.datastore.materialized_columns.analyze import materialize  # noqa: PLC0415
+
+            materialize("person", prop, is_nullable=True)
+        person = self._person_unsetting_prop_in_latest_version(f"null-{label}", prop)
+        response = execute_insightsql_query(
+            parse_select(f"SELECT properties.{prop}, properties.untouched FROM persons WHERE id = {{pid}}"),
+            self.team,
+            placeholders={"pid": ast.Constant(value=person.uuid)},
+            modifiers=self._modifiers(),
+        )
+        # The latest version unset the property, so NULL must win; a dropped wrap would make argMax skip the NULL and return the stale earlier value.
+        assert response.results[0][0] is None
+        assert response.results[0][1] == "keep"
+        # The nullable read (JSON extract or materialized column) stays wrapped.
+        assert response.datastore is not None
+        assert read_marker in response.datastore
+        assert "tupleElement(argMax(tuple(" in response.datastore
+
+    @snapshot_datastore_queries
+    def test_non_nullable_columns_are_simplified(self):
+        person = self._person_unsetting_prop_in_latest_version("nonnull-cols", "jsonprop")
+        response = execute_insightsql_query(
+            parse_select("SELECT id, created_at FROM persons WHERE id = {pid}"),
+            self.team,
+            placeholders={"pid": ast.Constant(value=person.uuid)},
+            modifiers=self._modifiers(),
+        )
+        assert response.datastore is not None
+        # is_deleted and created_at are non-nullable -> plain argMax, no tuple()/tupleElement() wrap.
+        assert "argMax(person.is_deleted, person.version)" in response.datastore
+        assert "tupleElement(argMax(tuple(person.is_deleted" not in response.datastore
+        assert "tupleElement(argMax(tuple(toTimeZone(person.created_at" not in response.datastore
+        assert str(person.uuid) == str(response.results[0][0])
+
+    @snapshot_datastore_queries
+    def test_event_person_override_person_id_is_simplified(self):
+        _create_event(event="$pageview", distinct_id="ovr", team=self.team)
+        flush_persons_and_events()
+        response = execute_insightsql_query(
+            parse_select("SELECT person_id FROM events WHERE event = '$pageview'"),
+            self.team,
+        )
+        assert response.datastore is not None
+        # The person-overrides subquery argMaxes a non-nullable person_id -> simplified.
+        assert (
+            "argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version)"
+            in response.datastore
+        )
+        assert "tupleElement(argMax(tuple(person_distinct_id_overrides.person_id" not in response.datastore

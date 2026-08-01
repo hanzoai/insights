@@ -1,5 +1,6 @@
 import { createParser } from 'eventsource-parser'
 import {
+    MakeLogicType,
     BuiltLogic,
     actions,
     afterMount,
@@ -16,7 +17,7 @@ import {
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import api, { ApiError } from 'lib/api'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
@@ -24,7 +25,7 @@ import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { uuid } from 'lib/utils'
+import { uuid } from 'lib/utils/dom'
 import { maxContextLogic } from 'scenes/max/maxContextLogic'
 import { notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 import { NotebookTarget } from 'scenes/notebooks/types'
@@ -39,7 +40,6 @@ import {
     AgentMode,
     ApprovalDecisionStatus,
     AssistantEventType,
-    AssistantForm,
     AssistantGenerationStatusEvent,
     AssistantGenerationStatusType,
     AssistantMessage,
@@ -55,7 +55,6 @@ import {
     SubagentUpdateEvent,
     TaskExecutionStatus,
 } from '~/queries/schema/schema-assistant-messages'
-import { SidePanelTab } from '~/types'
 import {
     Conversation,
     ConversationDetail,
@@ -63,17 +62,41 @@ import {
     ConversationStatus,
     ConversationType,
     PendingApproval,
+    SidePanelTab,
 } from '~/types'
 
-import { EnhancedToolCall, getToolCallDescriptionAndWidget } from './Thread'
-import { ToolRegistration } from './max-constants'
-import { MaxBillingContext, MaxBillingContextSubscriptionLevel, maxBillingContextLogic } from './maxBillingContextLogic'
-import { maxGlobalLogic } from './maxGlobalLogic'
-import { maxLogic } from './maxLogic'
-import type { maxThreadLogicType } from './maxThreadLogicType'
-import { MaxUIContext } from './maxTypes'
-import { MAX_SLASH_COMMANDS, SlashCommand } from './slash-commands'
 import {
+    attachedContextLogic,
+    getRandomThinkingMessage,
+    isTerminalRunStatus,
+    INITIAL_PERMISSION_MODE,
+    runStreamLogic,
+} from 'products/insights_ai/frontend/api/logics'
+import { LogEntry, parseLogEvent } from 'products/insights_ai/frontend/lib/parse-logs'
+import { isPiTaskRuntime } from 'products/insights_ai/frontend/types/taskTypes'
+
+import type { PermissionRequestRecord } from '../../../../products/insights_ai/frontend/types/streamTypes'
+import type { FeatureFlagsSet } from '../../lib/logic/featureFlagLogic'
+import { handsFreeLogic } from './handsFreeLogic'
+import { summariseAssistantThread } from './handsFreeUtils'
+import {
+    EnhancedToolCall,
+    MODE_DEFINITIONS,
+    TOOL_DEFINITIONS,
+    ToolRegistration,
+    getModeDisplayName,
+} from './max-constants'
+import { PENDING_AI_PROMPT_KEY } from './max-storage-keys'
+import { MaxBillingContext, maxBillingContextLogic } from './maxBillingContextLogic'
+import { maxGlobalLogic } from './maxGlobalLogic'
+import { SCENE_PANEL_ID, SIDE_PANEL_PANEL_ID, maxLogic } from './maxLogic'
+import { AttachedContext, MaxUIContext } from './maxTypes'
+import { insightsAiContextLogic } from './insightsAiContextLogic'
+import { MAX_SLASH_COMMANDS, SlashCommand } from './slash-commands'
+import { getToolCallDescriptionAndWidgetDef } from './toolCallDisplay'
+import {
+    activeSceneLogicHasMaxContext,
+    findPendingClientToolCall,
     getAgentModeForScene,
     isAssistantMessage,
     isAssistantToolCallMessage,
@@ -81,10 +104,12 @@ import {
     isSubagentUpdateEvent,
     threadEndsWithMultiQuestionForm,
 } from './utils'
-import { getRandomThinkingMessage } from './utils/thinkingMessages'
 
-/** Key for persisting pending AI prompts across page reloads (e.g., OAuth redirects) */
-export const PENDING_AI_PROMPT_KEY = 'insights_ai_pending_prompt'
+// On a dashboard, the first message can fire before the dashboard has loaded, when
+// dashboardLogic.maxContext still returns []. askMax waits (bounded) for the load so the
+// dashboard context is included. Bounded so a stuck/failed load never blocks sending.
+export const MAX_DASHBOARD_CONTEXT_WAIT_MS = 8000
+const DASHBOARD_CONTEXT_POLL_INTERVAL_MS = 100
 
 export type MessageStatus = 'loading' | 'completed' | 'error'
 
@@ -99,31 +124,596 @@ const FAILURE_MESSAGE: FailureMessage & ThreadMessage = {
 }
 
 export interface MaxThreadLogicProps {
-    tabId: string // used to refer back to MaxLogic
+    panelId?: string // identifies the MaxLogic instance backing this panel (scene tab id or side panel)
     conversationId: string
     conversation?: ConversationDetail | null
+    skipInitialLoad?: boolean
 }
 
-export const maxThreadLogic = kea<maxThreadLogicType>([
-    key((props) => {
-        if (!props.tabId) {
-            throw new Error('AI thread logic must have a tabId prop')
+async function shouldBlockPendingPiTask(pendingBindTaskId: string): Promise<boolean> {
+    try {
+        const pendingTask = await api.tasks.get(pendingBindTaskId)
+        if (!isPiTaskRuntime(pendingTask.runtime)) {
+            return false
         }
-        return `${props.conversationId}-${props.tabId}`
-    }),
+
+        toast.error("Pi tasks aren't available in Insights AI yet.")
+        return true
+    } catch {
+        toast.error("Couldn't load this task. Please try again.")
+        return true
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface maxThreadLogicValues {
+    featureFlags: FeatureFlagsSet // featureFlagLogic
+    billingContext: MaxBillingContext | null // maxBillingContextLogic
+    compiledContext: MaxUIContext | null // maxContextLogic
+    availableStaticTools: ToolRegistration[] // maxGlobalLogic
+    dataProcessingAccepted: boolean // maxGlobalLogic
+    toolMap: {
+        [x: string]: ToolRegistration
+    } // maxGlobalLogic
+    tools: ToolRegistration[] // maxGlobalLogic
+    activeStreamingThreads: number // maxLogic
+    activeThreadKey: string // maxLogic
+    autoRun: boolean // maxLogic
+    parentConversationId: string | null // maxLogic
+    pendingBindTaskId: string | null // maxLogic
+    question: string // maxLogic
+    sandboxAttachments: AttachedContext[] // insightsAiContextLogic
+    pendingSandboxPermissionRequest: PermissionRequestRecord | null // runStreamLogic
+    sandboxCurrentMode: string | null // runStreamLogic
+    sceneId: string | null // sceneLogic
+    activeDangerousOperationApproval: {
+        payload: Record<string, any>
+        preview: string
+        proposalId: string
+        status: 'pending_approval'
+        toolName: string
+    } | null
+    activeMultiQuestionForm: MultiQuestionForm | null
+    agentMode: AgentMode | null
+    agentModeLockedByUser: boolean
+    cancelCount: number
+    cancelLoading: boolean
+    contextDisabledReason: string | undefined
+    conversation: Conversation | null
+    conversationId: string
+    conversationLoading: boolean
+    currentThinkingMessage: string | null
+    effectiveApprovalStatuses: Record<
+        string,
+        {
+            feedback?: string
+            status: ApprovalDecisionStatus
+        }
+    >
+    filteredCommands: SlashCommand[]
+    formPending: boolean
+    inputDisabled: boolean
+    isAnotherAgenticIterationScheduled: boolean
+    isConvertedConversation: boolean
+    isImpersonatingExistingConversation: boolean
+    isSandboxMode: boolean
+    isSharedThread: boolean
+    multiQuestionFormPending: boolean
+    pendingApprovalProposalId: string | null
+    pendingApprovalsData: Record<string, PendingApproval>
+    pendingPrompt: string | null
+    queueData: {
+        limit: number
+        messages: ConversationQueueMessage[]
+    }
+    queueDataLoading: boolean
+    queueDisabledReason: string | undefined
+    queueIsFull: boolean
+    queueLimit: number
+    queueSubmitting: boolean
+    queuedMessages: ConversationQueueMessage[]
+    queueingEnabled: boolean
+    resolvedApprovalStatuses: Record<
+        string,
+        {
+            feedback?: string
+            status: 'approved' | 'auto_rejected' | 'rejected'
+        }
+    >
+    retryCount: number
+    sandboxConversationKey: string
+    sandboxEntries: LogEntry[]
+    showContextUI: boolean
+    showDeepResearchModeToggle: boolean
+    streamingActive: boolean
+    submissionDisabledReason: string | undefined
+    supportOverrideEnabled: boolean
+    threadGrouped: ThreadMessage[]
+    threadLoading: boolean
+    threadMessageCount: number
+    threadRaw: ThreadMessage[]
+    toolCallUpdateMap: Map<string, string[]>
+    traceId: string | null
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface maxThreadLogicActions {
+    loadConversation: (conversationId: string) => string // maxGlobalLogic
+    askMax: (
+        prompt: string | null,
+        addToThread?: boolean | undefined,
+        uiContext?: Partial<MaxUIContext> | undefined
+    ) => {
+        addToThread: boolean
+        prompt: string | null
+        uiContext: Partial<MaxUIContext> | undefined
+    } // maxLogic
+    decrActiveStreamingThreads: () => {
+        value: true
+    } // maxLogic
+    incrActiveStreamingThreads: () => {
+        value: true
+    } // maxLogic
+    loadConversationHistory: (
+        _?:
+            | {
+                  doNotUpdateCurrentThread?: boolean
+              }
+            | undefined
+    ) => {
+        doNotUpdateCurrentThread?: boolean
+    } // maxLogic
+    loadConversationHistorySuccess: (
+        conversationHistory: ConversationDetail[],
+        payload?:
+            | {
+                  doNotUpdateCurrentThread?: boolean
+              }
+            | undefined
+    ) => {
+        conversationHistory: ConversationDetail[]
+        payload?: {
+            doNotUpdateCurrentThread?: boolean
+        }
+    } // maxLogic
+    setAutoRun: (autoRun: boolean) => {
+        autoRun: boolean
+    } // maxLogic
+    setConversationId: (conversationId: string) => {
+        conversationId: string
+    } // maxLogic
+    setPendingBindTaskId: (taskId: string | null) => {
+        taskId: string | null
+    } // maxLogic
+    setQuestion: (question: string) => {
+        question: string
+    } // maxLogic
+    updateGlobalConversationCache: (conversation: Conversation | ConversationDetail) => {
+        conversation: Conversation | ConversationDetail
+    } // maxLogic
+    clearSandboxAttachments: () => {
+        value: true
+    } // insightsAiContextLogic
+    bootstrapSandboxRun: (payload: { justCreatedRun?: boolean; runId: string; taskId: string; traceId?: string }) => {
+        justCreatedRun?: boolean | undefined
+        runId: string
+        taskId: string
+        traceId?: string | undefined
+    } // runStreamLogic
+    cancelSandboxRun: (
+        run?:
+            | {
+                  runId: string
+                  taskId: string
+              }
+            | undefined
+    ) => {
+        run:
+            | {
+                  runId: string
+                  taskId: string
+              }
+            | undefined
+    } // runStreamLogic
+    openSandboxSse: (payload: { runId: string; startLatest?: boolean; taskId: string; traceId?: string }) => {
+        runId: string
+        startLatest?: boolean | undefined
+        taskId: string
+        traceId?: string | undefined
+    } // runStreamLogic
+    pushSandboxError: (
+        errorMessage: string,
+        variant?: 'crash' | 'error' | undefined
+    ) => {
+        errorMessage: string
+        variant: 'crash' | 'error'
+    } // runStreamLogic
+    pushSandboxHumanMessage: (content: string) => {
+        content: string
+    } // runStreamLogic
+    resetSandboxStream: () => {
+        value: true
+    } // runStreamLogic
+    setSandboxRunOpening: (opening: boolean) => {
+        opening: boolean
+    } // runStreamLogic
+    activateCommand: (command: SlashCommand) => {
+        command: SlashCommand
+    }
+    addMessage: (message: ThreadMessage) => {
+        message: ThreadMessage
+    }
+    addPendingApprovalData: (approval: PendingApproval) => {
+        approval: PendingApproval
+    }
+    appendMessageToConversation: (message: string) => {
+        message: string
+    }
+    appendSandboxEntry: (entry: LogEntry) => {
+        entry: LogEntry
+    }
+    clearPendingApproval: () => {
+        value: true
+    }
+    clearQueuedMessages: () => {
+        value: true
+    }
+    completeThreadGeneration: () => {
+        value: true
+    }
+    consumeQueuedMessage: (message: ConversationQueueMessage) => {
+        message: ConversationQueueMessage
+    }
+    continueAfterApproval: (proposalId: string) => {
+        proposalId: string
+    }
+    continueAfterForm: (formAnswers: MultiQuestionFormAnswers) => {
+        formAnswers: MultiQuestionFormAnswers
+    }
+    continueAfterFormDismissal: () => {
+        value: true
+    }
+    continueAfterRejection: (
+        proposalId: string,
+        feedback?: string
+    ) => {
+        feedback: string | undefined
+        proposalId: string
+    }
+    continueWithClientToolResult: (
+        result: Record<string, unknown>,
+        toolCallId: string
+    ) => {
+        result: Record<string, unknown>
+        toolCallId: string
+    }
+    deleteQueuedMessage: (queueId: string) => {
+        queueId: string
+    }
+    endStreaming: () => {
+        value: true
+    }
+    enqueueQueuedMessage: (payload: {
+        agentMode?: AgentMode | null
+        billingContext?: MaxBillingContext | null
+        content: string
+        contextualTools?: Record<string, any>
+        uiContext?: MaxUIContext
+    }) => {
+        agentMode?: AgentMode | null | undefined
+        billingContext?: MaxBillingContext | null | undefined
+        content: string
+        contextualTools?: Record<string, any> | undefined
+        uiContext?: MaxUIContext | undefined
+    }
+    executePendingClientToolCall: () => {
+        value: true
+    }
+    finalizeStreamingMessages: () => {
+        value: true
+    }
+    loadPendingApprovalsData: (approvals: PendingApproval[]) => {
+        approvals: PendingApproval[]
+    }
+    loadQueueData: () => any
+    loadQueueDataFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadQueueDataSuccess: (
+        queueData: {
+            limit: number
+            messages: ConversationQueueMessage[]
+        },
+        payload?: any
+    ) => {
+        queueData: {
+            limit: number
+            messages: ConversationQueueMessage[]
+        }
+        payload?: any
+    }
+    prewarmSandbox: () => {
+        value: true
+    }
+    processNotebookUpdate: (
+        notebookId: string,
+        notebookContent: JSONContent
+    ) => {
+        notebookContent: JSONContent
+        notebookId: string
+    }
+    reconnectToStream: () => {
+        value: true
+    }
+    refreshSandboxEntries: () => {
+        value: true
+    }
+    releaseSandboxPrewarm: () => {
+        value: true
+    }
+    replaceMessage: (
+        index: number,
+        message: ThreadMessage
+    ) => {
+        index: number
+        message: ThreadMessage
+    }
+    resetCancelCount: () => {
+        value: true
+    }
+    resetRetryCount: () => {
+        value: true
+    }
+    resetSandboxEntries: () => {
+        value: true
+    }
+    resetThread: () => {
+        value: true
+    }
+    retryLastMessage: () => {
+        value: true
+    }
+    selectCommand: (command: SlashCommand) => {
+        command: SlashCommand
+    }
+    setAgentMode: (agentMode: AgentMode | null) => {
+        agentMode: AgentMode | null
+    }
+    setCancelLoading: (cancelLoading: boolean) => {
+        cancelLoading: boolean
+    }
+    setConversation: (conversation: Conversation) => {
+        conversation: Conversation
+    }
+    setForAnotherAgenticIteration: (value: boolean) => {
+        value: boolean
+    }
+    setIsSandboxMode: (isSandboxMode: boolean) => {
+        isSandboxMode: boolean
+    }
+    setMessageStatus: (
+        index: number,
+        status: MessageStatus
+    ) => {
+        index: number
+        status: MessageStatus
+    }
+    setPendingApproval: (proposalId: string) => {
+        proposalId: string
+    }
+    setQueueLimit: (limit: number) => {
+        limit: number
+    }
+    setQueuedMessages: (messages: ConversationQueueMessage[]) => {
+        messages: ConversationQueueMessage[]
+    }
+    setResolvedApprovalStatus: (
+        proposalId: string,
+        status: 'approved' | 'auto_rejected' | 'rejected',
+        feedback?: string
+    ) => {
+        feedback: string | undefined
+        proposalId: string
+        status: 'approved' | 'auto_rejected' | 'rejected'
+    }
+    setSupportOverrideEnabled: (enabled: boolean) => {
+        enabled: boolean
+    }
+    setThread: (thread: ThreadMessage[]) => {
+        thread: ThreadMessage[]
+    }
+    setToolCallUpdate: (
+        update: AssistantUpdateEvent | SubagentUpdateEvent,
+        toolMap: Record<string, ToolRegistration>
+    ) => {
+        toolMap: Record<string, ToolRegistration>
+        update: AssistantUpdateEvent | SubagentUpdateEvent
+    }
+    setTraceId: (traceId: string) => {
+        traceId: string
+    }
+    stopGeneration: () => {
+        value: true
+    }
+    streamConversation: (
+        streamData: {
+            agent_mode: AgentMode | null
+            content: string | null
+            contextual_tools?: Record<string, any>
+            conversation?: string
+            is_sandbox?: boolean
+            resume_payload?: ResumePayload | null
+            ui_context?: any
+        },
+        generationAttempt: number,
+        addToThread?: boolean
+    ) => {
+        addToThread: boolean
+        generationAttempt: number
+        streamData: {
+            agent_mode: AgentMode | null
+            content: string | null
+            contextual_tools?: Record<string, any> | undefined
+            conversation?: string | undefined
+            is_sandbox?: boolean | undefined
+            resume_payload?: ResumePayload | null | undefined
+            ui_context?: any
+        }
+    }
+    syncAgentModeFromConversation: (agentMode: AgentMode | null) => {
+        agentMode: AgentMode | null
+    }
+    updateQueuedMessage: (
+        queueId: string,
+        content: string
+    ) => {
+        content: string
+        queueId: string
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface maxThreadLogicMeta {
+    key: string
+    __keaTypeGenInternalSelectorTypes: {
+        conversationId: (conversation: Conversation | null, conversationId: string) => string
+        sandboxConversationKey: (conversationId: string) => string
+        isConvertedConversation: (conversation: Conversation | null, threadRaw: ThreadMessage[]) => boolean
+        effectiveApprovalStatuses: (
+            resolvedApprovalStatuses: Record<
+                string,
+                {
+                    feedback?: string
+                    status: 'approved' | 'auto_rejected' | 'rejected'
+                }
+            >,
+            pendingApprovalsData: Record<string, PendingApproval>
+        ) => Record<
+            string,
+            {
+                feedback?: string
+                status: ApprovalDecisionStatus
+            }
+        >
+        isSharedThread: (conversation: Conversation | null, user: null | import('~/types').UserType) => boolean
+        isImpersonatingExistingConversation: (
+            conversation: Conversation | null,
+            supportOverrideEnabled: boolean,
+            user: null | import('~/types').UserType
+        ) => boolean
+        threadLoading: (conversationLoading: boolean, streamingActive: boolean) => boolean
+        queueingEnabled: (featureFlags: FeatureFlagsSet, isSandboxMode: boolean) => boolean
+        queueIsFull: (queuedMessages: ConversationQueueMessage[], queueLimit: number) => boolean
+        queueDisabledReason: (
+            queueingEnabled: boolean,
+            threadLoading: boolean,
+            queueIsFull: boolean
+        ) => string | undefined
+        threadGrouped: (
+            threadRaw: ThreadMessage[],
+            threadLoading: boolean,
+            toolCallUpdateMap: Map<string, string[]>,
+            pendingApprovalsData: Record<string, PendingApproval>,
+            resolvedApprovalStatuses: Record<
+                string,
+                {
+                    feedback?: string
+                    status: 'approved' | 'auto_rejected' | 'rejected'
+                }
+            >,
+            currentThinkingMessage: string | null
+        ) => ThreadMessage[]
+        threadMessageCount: (threadRaw: ThreadMessage[]) => number
+        formPending: (threadRaw: ThreadMessage[]) => boolean
+        multiQuestionFormPending: (threadRaw: ThreadMessage[]) => boolean
+        activeMultiQuestionForm: (threadRaw: ThreadMessage[]) => MultiQuestionForm | null
+        activeDangerousOperationApproval: (
+            pendingApprovalProposalId: string | null,
+            pendingApprovalsData: Record<string, PendingApproval>,
+            resolvedApprovalStatuses: Record<
+                string,
+                {
+                    feedback?: string
+                    status: 'approved' | 'auto_rejected' | 'rejected'
+                }
+            >
+        ) => {
+            payload: Record<string, any>
+            preview: string
+            proposalId: string
+            status: 'pending_approval'
+            toolName: string
+        } | null
+        inputDisabled: (
+            formPending: boolean,
+            multiQuestionFormPending: boolean,
+            threadLoading: boolean,
+            dataProcessingAccepted: boolean,
+            isSharedThread: boolean,
+            isImpersonatingExistingConversation: boolean,
+            pendingApprovalProposalId: string | null,
+            resolvedApprovalStatuses: Record<
+                string,
+                {
+                    feedback?: string
+                    status: 'approved' | 'auto_rejected' | 'rejected'
+                }
+            >
+        ) => boolean
+        contextDisabledReason: (
+            formPending: boolean,
+            multiQuestionFormPending: boolean,
+            threadLoading: boolean,
+            activeStreamingThreads: number,
+            isImpersonatingExistingConversation: boolean
+        ) => string | undefined
+        submissionDisabledReason: (
+            contextDisabledReason: string | undefined,
+            question: string,
+            queueDisabledReason: string | undefined
+        ) => string | undefined
+        filteredCommands: (
+            question: string,
+            featureFlags: FeatureFlagsSet,
+            threadLoading: boolean,
+            conversation: Conversation | null
+        ) => SlashCommand[]
+        showDeepResearchModeToggle: (conversation: Conversation | null, featureFlags: FeatureFlagsSet) => boolean
+        showContextUI: (conversation: Conversation | null, featureFlags: FeatureFlagsSet) => boolean
+    }
+}
+
+export type maxThreadLogicType = MakeLogicType<
+    maxThreadLogicValues,
+    maxThreadLogicActions,
+    MaxThreadLogicProps,
+    maxThreadLogicMeta
+>
+
+export const maxThreadLogic = kea<maxThreadLogicType>([
+    // Mirror maxLogic's key fallback: the bare /ai scene has no panelId, and both logics must
+    // resolve to the same `scene` instance (maxThreadLogic connects to maxLogic({ panelId })).
+    key((props) => `${props.conversationId}-${props.panelId || SCENE_PANEL_ID}`),
 
     path((key) => ['scenes', 'max', 'maxThreadLogic', key]),
 
     props({} as MaxThreadLogicProps),
 
     propsChanged(({ actions, values, props }) => {
-        // Streaming is active, do not update the thread
         if (!props.conversation) {
             return
         }
 
-        // New messages have been added since we last updated the thread
-        if (!values.streamingActive && props.conversation.messages.length > values.threadMessageCount) {
+        // Handle new messages post-mount; initial load in afterMount.
+        if (
+            !values.streamingActive &&
+            props.conversation.messages &&
+            props.conversation.messages.length > values.threadMessageCount
+        ) {
             actions.setThread(updateMessagesWithCompletedStatus(props.conversation.messages))
         }
 
@@ -134,12 +724,19 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         }
     }),
 
-    connect(({ tabId }: MaxThreadLogicProps) => ({
+    connect(({ panelId, conversationId }: MaxThreadLogicProps) => ({
         values: [
             maxGlobalLogic,
             ['dataProcessingAccepted', 'toolMap', 'tools', 'availableStaticTools'],
-            maxLogic({ tabId }),
-            ['question', 'autoRun', 'threadLogicKey as activeThreadKey', 'activeStreamingThreads'],
+            maxLogic({ panelId }),
+            [
+                'question',
+                'autoRun',
+                'threadLogicKey as activeThreadKey',
+                'activeStreamingThreads',
+                'conversationId as parentConversationId',
+                'pendingBindTaskId',
+            ],
             maxContextLogic,
             ['compiledContext'],
             maxBillingContextLogic,
@@ -148,9 +745,19 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             ['featureFlags'],
             sceneLogic,
             ['sceneId'],
+            // Mounts this conversation's sandbox attachment store so its `attachments` are readable
+            // at send time even when no context-chip UI is rendered (a fresh conversation never
+            // mounts it itself).
+            insightsAiContextLogic({ conversationId }),
+            ['attachments as sandboxAttachments'],
+            // Surfaces the sandbox stream's input-area state to components outside ThreadView's
+            // BindLogic subtree (the input area renders for LangGraph conversations too, so they
+            // can't bind the keyed stream logic themselves).
+            runStreamLogic({ streamKey: conversationId, conversationId }),
+            ['pendingPermissionRequest as pendingSandboxPermissionRequest', 'currentMode as sandboxCurrentMode'],
         ],
         actions: [
-            maxLogic({ tabId }),
+            maxLogic({ panelId }),
             [
                 'askMax',
                 'setQuestion',
@@ -161,9 +768,26 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 'setConversationId',
                 'setAutoRun',
                 'loadConversationHistorySuccess',
+                'setPendingBindTaskId',
             ],
             maxGlobalLogic,
             ['loadConversation'],
+            // Pulling the action in (rather than calling the instance's actions directly) mounts this
+            // conversation's stream logic as a dependency, so its listeners actually run. ThreadView
+            // only mounts it while a sandbox conversation is rendered — too late for the first message
+            // of a new one.
+            runStreamLogic({ streamKey: conversationId, conversationId }),
+            [
+                'openSseForRun as openSandboxSse',
+                'pushHumanMessage as pushSandboxHumanMessage',
+                'pushErrorItem as pushSandboxError',
+                'setRunOpening as setSandboxRunOpening',
+                'bootstrapRun as bootstrapSandboxRun',
+                'reset as resetSandboxStream',
+                'cancelRun as cancelSandboxRun',
+            ],
+            insightsAiContextLogic({ conversationId }),
+            ['clearAttachments as clearSandboxAttachments'],
         ],
     })),
 
@@ -173,6 +797,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         streamConversation: (
             streamData: {
                 agent_mode: AgentMode | null
+                is_sandbox?: boolean
                 content: string | null
                 conversation?: string
                 contextual_tools?: Record<string, any>
@@ -184,10 +809,20 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         ) => ({ streamData, generationAttempt, addToThread }),
         stopGeneration: true,
         completeThreadGeneration: true,
+        // Narrow teardown: flips only streamingActive -> false. Used by the sandbox error/terminal
+        // listeners where completeThreadGeneration's queue-drain (auto-starting the next message)
+        // would be wrong after a failure.
+        endStreaming: true,
         addMessage: (message: ThreadMessage) => ({ message }),
-        replaceMessage: (index: number, message: ThreadMessage) => ({ index, message }),
+        replaceMessage: (index: number, message: ThreadMessage) => ({
+            index,
+            message,
+        }),
         setThread: (thread: ThreadMessage[]) => ({ thread }),
-        setMessageStatus: (index: number, status: MessageStatus) => ({ index, status }),
+        setMessageStatus: (index: number, status: MessageStatus) => ({
+            index,
+            status,
+        }),
         retryLastMessage: true,
         resetRetryCount: true,
         resetCancelCount: true,
@@ -198,7 +833,10 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         selectCommand: (command: SlashCommand) => ({ command }),
         activateCommand: (command: SlashCommand) => ({ command }),
         setAgentMode: (agentMode: AgentMode | null) => ({ agentMode }),
-        syncAgentModeFromConversation: (agentMode: AgentMode | null) => ({ agentMode }),
+        setIsSandboxMode: (isSandboxMode: boolean) => ({ isSandboxMode }),
+        syncAgentModeFromConversation: (agentMode: AgentMode | null) => ({
+            agentMode,
+        }),
         setSupportOverrideEnabled: (enabled: boolean) => ({ enabled }),
         processNotebookUpdate: (notebookId: string, notebookContent: JSONContent) => ({ notebookId, notebookContent }),
         appendMessageToConversation: (message: string) => ({ message }),
@@ -209,7 +847,10 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             billingContext?: MaxBillingContext | null
             agentMode?: AgentMode | null
         }) => payload,
-        updateQueuedMessage: (queueId: string, content: string) => ({ queueId, content }),
+        updateQueuedMessage: (queueId: string, content: string) => ({
+            queueId,
+            content,
+        }),
         deleteQueuedMessage: (queueId: string) => ({ queueId }),
         consumeQueuedMessage: (message: ConversationQueueMessage) => ({ message }),
         setQueuedMessages: (messages: ConversationQueueMessage[]) => ({ messages }),
@@ -226,9 +867,22 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         setCancelLoading: (cancelLoading: boolean) => ({ cancelLoading }),
         setPendingApproval: (proposalId: string) => ({ proposalId }),
         clearPendingApproval: true,
-        continueAfterForm: (formAnswers: MultiQuestionFormAnswers) => ({ formAnswers }),
+        appendSandboxEntry: (entry: LogEntry) => ({ entry }),
+        prewarmSandbox: true,
+        releaseSandboxPrewarm: true,
+        refreshSandboxEntries: true,
+        resetSandboxEntries: true,
+        continueAfterForm: (formAnswers: MultiQuestionFormAnswers) => ({
+            formAnswers,
+        }),
+        continueAfterFormDismissal: true,
+        continueWithClientToolResult: (result: Record<string, unknown>, toolCallId: string) => ({ result, toolCallId }),
+        executePendingClientToolCall: true,
         continueAfterApproval: (proposalId: string) => ({ proposalId }),
-        continueAfterRejection: (proposalId: string, feedback?: string) => ({ proposalId, feedback }),
+        continueAfterRejection: (proposalId: string, feedback?: string) => ({
+            proposalId,
+            feedback,
+        }),
         setResolvedApprovalStatus: (
             proposalId: string,
             status: 'approved' | 'rejected' | 'auto_rejected',
@@ -270,6 +924,8 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 setThread: (_, { thread }) => thread,
                 // Remove streaming messages on failure so server state becomes source of truth
                 finalizeStreamingMessages: (state) => state.filter((msg) => msg.status !== 'loading'),
+                completeThreadGeneration: (state) =>
+                    state.map((msg) => (msg.status === 'loading' ? { ...msg, status: 'completed' as const } : msg)),
             },
         ],
 
@@ -288,6 +944,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 reconnectToStream: () => true,
                 streamConversation: () => true,
                 completeThreadGeneration: () => false,
+                endStreaming: () => false,
             },
         ],
 
@@ -308,6 +965,13 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             {
                 setAgentMode: () => true,
                 askMax: () => false,
+            },
+        ],
+
+        isSandboxMode: [
+            false,
+            {
+                setIsSandboxMode: (_, { isSandboxMode }) => isSandboxMode,
             },
         ],
 
@@ -339,6 +1003,14 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             },
         ],
 
+        queueSubmitting: [
+            false,
+            {
+                enqueueQueuedMessage: () => true,
+                setQueuedMessages: () => false,
+            },
+        ],
+
         // Whether generation should be immediately continued due to tool execution
         isAnotherAgenticIterationScheduled: [
             false,
@@ -357,13 +1029,16 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     {
                         update,
                         toolMap,
-                    }: { update: AssistantUpdateEvent | SubagentUpdateEvent; toolMap: Record<string, ToolRegistration> }
+                    }: {
+                        update: AssistantUpdateEvent | SubagentUpdateEvent
+                        toolMap: Record<string, ToolRegistration>
+                    }
                 ) => {
                     const currentValue = value.get(update.tool_call_id) || []
                     const newMap = new Map(value)
                     let newValue: string
                     if (isSubagentUpdateEvent(update)) {
-                        const [description, _] = getToolCallDescriptionAndWidget(
+                        const [description, _] = getToolCallDescriptionAndWidgetDef(
                             update.content as unknown as EnhancedToolCall,
                             toolMap
                         )
@@ -505,6 +1180,17 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 setConversation: () => false,
             },
         ],
+
+        sandboxEntries: [
+            [] as LogEntry[],
+            {
+                appendSandboxEntry: (state, { entry }) => [...state, entry],
+                refreshSandboxEntries: (state) => [...state],
+                resetSandboxEntries: () => [],
+                setConversation: () => [],
+                resetThread: () => [],
+            },
+        ],
     })),
 
     loaders(({ values }) => ({
@@ -517,8 +1203,12 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     }
                     try {
                         const queue = await api.conversations.queue.list(values.conversation.id)
-                        return { messages: queue.messages, limit: queue.max_queue_messages }
+                        return {
+                            messages: queue.messages,
+                            limit: queue.max_queue_messages,
+                        }
                     } catch (error: any) {
+                        insights.captureException(error)
                         if (error instanceof ApiError && error.status === 404) {
                             return { messages: [], limit: 0 }
                         }
@@ -532,10 +1222,19 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
     listeners((logic) => ({
         streamConversation: async (
-            { streamData: { agent_mode: agentMode, ...streamData }, generationAttempt, addToThread = true },
+            {
+                streamData: { agent_mode: agentMode, is_sandbox: isSandbox, ...streamData },
+                generationAttempt,
+                addToThread = true,
+            },
             breakpoint
         ) => {
             const { actions, values, cache, mount, props } = logic as BuiltLogic<maxThreadLogicType>
+
+            if (isPiTaskRuntime(values.conversation?.task?.runtime)) {
+                return
+            }
+
             // Set active streaming threads, so we know streaming is active
             const releaseStreamingLock = mount() // lock the logic - don't unmount before we're done streaming
             actions.incrActiveStreamingThreads()
@@ -544,7 +1243,24 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             const traceId = uuid()
             actions.setTraceId(traceId)
 
-            if (generationAttempt === 0 && streamData.content && addToThread) {
+            // Sandbox runtime: route the message to a non-streaming products/tasks Run, then hand the
+            // SSE connection off to runStreamLogic. The LangGraph EventSource loop below is never
+            // entered for sandbox conversations.
+            //
+            // An *existing* sandbox conversation (`agent_runtime === 'sandbox'`) uses the dedicated
+            // `/sandbox/` routing endpoint. A *brand-new* conversation has no row yet — it's created
+            // lazily on the first message — so `agent_runtime` isn't known here; we detect the
+            // `is_sandbox` flag and let the conversation-create endpoint create it + return the run
+            // IDs as JSON (both endpoints return the identical { task_id, run_id, just_created_run }).
+            const isExistingSandboxConversation = values.conversation?.agent_runtime === 'sandbox'
+            const isSandboxConversation = isExistingSandboxConversation || !!isSandbox
+
+            // Echo the human message into whichever thread the renderer actually shows. A sandbox
+            // conversation renders runStreamLogic's threadItems (not this logic's thread) and
+            // echoes via pushSandboxHumanMessage below; adding it to the legacy thread too would
+            // briefly show a duplicate (until the runtime resolves to the ThreadView) that vanishes
+            // on reload, since sandbox turns live in the run log, not the legacy conversation messages.
+            if (generationAttempt === 0 && streamData.content && addToThread && !isSandboxConversation) {
                 const message: ThreadMessage = {
                     type: AssistantMessageType.Human,
                     content: streamData.content,
@@ -554,8 +1270,133 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.addMessage(message)
             }
 
+            if (isSandboxConversation) {
+                // ThreadView renders runStreamLogic's threadItems, not this logic's thread,
+                // so the human message must be echoed there to show up in the UI.
+                if (generationAttempt === 0 && streamData.content && addToThread) {
+                    actions.pushSandboxHumanMessage(streamData.content)
+                    // Pull the current scene's `maxContext` into the sandbox attachments at send
+                    // (consumption) time so on-scene entities flow into `sandboxAttachments` below.
+                    // Nothing else dispatches this, so without it scene context never auto-attaches.
+                    insightsAiContextLogic({ conversationId: props.conversationId }).actions.syncSceneAttachments()
+                }
+                try {
+                    const conversationId = values.conversation?.id || values.conversationId
+                    if (conversationId && streamData.content) {
+                        // The sandbox runtime has no agent modes — they're a legacy LangGraph concept. If the
+                        // user still picked one, carry it through as a context note so the agent can acknowledge it.
+                        const attachedContext: AttachedContext[] = [...values.sandboxAttachments]
+                        // Merge context from the new `attachedContextLogic` store (e.g. a future @-mention
+                        // picker, or trace refs only the new store knows) into the legacy send. Known entity
+                        // types map to `{ type, id, name }`; anything else degrades to a text item (the
+                        // backend validates against its fixed type set). Server-side `prune_repeated_entity_refs`
+                        // collapses any overlap with `sandboxAttachments`.
+                        const allowedEntityTypes = new Set<AttachedContext['type']>([
+                            'dashboard',
+                            'insight',
+                            'event',
+                            'action',
+                            'error_tracking_issue',
+                            'evaluation',
+                            'notebook',
+                        ])
+                        // `findMounted` — the store is only mounted while something provides context (the
+                        // scene bridge or a `useAttachedContext` consumer); a bare legacy chat must not
+                        // fail the send over an unmounted logic.
+                        for (const item of attachedContextLogic.findMounted()?.values.contextItems ?? []) {
+                            if (
+                                item.type !== 'text' &&
+                                allowedEntityTypes.has(item.type as AttachedContext['type']) &&
+                                item.key != null &&
+                                item.key !== ''
+                            ) {
+                                attachedContext.push({
+                                    type: item.type as AttachedContext['type'],
+                                    id: item.key,
+                                    name: item.label,
+                                })
+                            } else {
+                                // Keyed items outside the allowlist (e.g. a trace ref) carry no `value`,
+                                // so render their key/label the way insightsContextBlock's formatItem does.
+                                const keyedFallback =
+                                    item.key != null && item.key !== ''
+                                        ? `${item.type} ${item.key}${item.label ? ` ("${item.label}")` : ''}`
+                                        : ''
+                                const fallback = item.value || keyedFallback
+                                if (fallback.trim()) {
+                                    attachedContext.push({ type: 'text', value: fallback })
+                                }
+                            }
+                        }
+                        if (values.agentMode) {
+                            attachedContext.push({
+                                type: 'text',
+                                value: `The user selected a mode: "${getModeDisplayName(values.agentMode)}". It was in the legacy implementation. Acknowledge the mode if the user refers to it.`,
+                            })
+                        }
+                        // Optimistic boot indicator: light the "spinning up sandbox" provisioning state
+                        // for the duration of the open POST, before any SSE state exists. `openSandboxSse`
+                        // (success) clears it via the reducer; the failure/no-handle paths clear it below.
+                        actions.setSandboxRunOpening(true)
+                        // Single create-or-resume opener: it creates the conversation row on first use,
+                        // starts/continues the Run, and returns the (task, run) handle. A message always
+                        // provisions a run (a null handle only happens on a warm with a full pool).
+                        const handle = await api.conversations.open(conversationId, {
+                            content: streamData.content,
+                            trace_id: traceId,
+                            attached_context: attachedContext,
+                            initial_permission_mode: INITIAL_PERMISSION_MODE,
+                            // Bind a brand-new conversation to an existing Task (inbox "Open task") so the
+                            // backend resumes that Task's run. Only the first message carries it.
+                            ...(values.pendingBindTaskId ? { task_id: values.pendingBindTaskId } : {}),
+                        })
+                        if (handle) {
+                            // The sent message consumes any in-flight warm — it's now the active run, so
+                            // drop the release handle to avoid cancelling the run out from under it.
+                            cache.warmRun = null
+                            // The bind is one-shot: the conversation now exists bound to the Task, so
+                            // follow-ups target it directly — don't re-send task_id.
+                            if (values.pendingBindTaskId) {
+                                actions.setPendingBindTaskId(null)
+                            }
+                            actions.openSandboxSse({
+                                taskId: handle.task_id,
+                                runId: handle.run_id,
+                                // Fresh runs need everything from the top; follow-ups resume from latest.
+                                startLatest: !handle.just_created_run,
+                                // Correlate SSE-side telemetry with the trace this run was sent under.
+                                traceId,
+                            })
+                            // The streaming lock must span the whole SSE stream so the input stays
+                            // guarded until `_insights/turn_complete` or a terminal/error event —
+                            // mirrors the LangGraph path holding the lock for its entire stream.
+                            // Released exactly once by the runStreamLogic listeners below; the
+                            // closure nulls itself so a second terminal event is a no-op.
+                            cache.sandboxStreamRelease = (): void => {
+                                cache.sandboxStreamRelease = null
+                                actions.decrActiveStreamingThreads()
+                                releaseStreamingLock()
+                            }
+                            return
+                        }
+                    }
+                } catch (e) {
+                    insights.captureException(e)
+                    actions.pushSandboxError('Failed to send your message. Please try again.')
+                }
+                // The POST failed or no run was started — nothing will stream. Drop the optimistic boot
+                // indicator and release the lock now.
+                actions.setSandboxRunOpening(false)
+                actions.decrActiveStreamingThreads()
+                releaseStreamingLock()
+                return
+            }
+
+            let caughtException = false
+
             try {
                 cache.generationController = new AbortController()
+                actions.resetSandboxEntries()
 
                 // Ensure we have valid data for the API call
                 const apiData: any = { ...streamData }
@@ -583,7 +1424,13 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 const parser = createParser({
                     onEvent: async ({ data, event }) => {
                         pendingEventHandlers.push(
-                            onEventImplementation(event as string, data, { actions, values, props, agentMode })
+                            onEventImplementation(event as string, data, {
+                                actions,
+                                values,
+                                props,
+                                agentMode,
+                                cache,
+                            })
                         )
                     },
                 })
@@ -597,6 +1444,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     }
                 }
             } catch (e) {
+                caughtException = true
                 // Cancel any next iteration
                 actions.setForAnotherAgenticIteration(false)
 
@@ -617,16 +1465,36 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     )
                 }
 
+                if (e instanceof DOMException && e.name === 'AbortError') {
+                    insights.capture('max conversation turn completed', {
+                        status: 'cancelled',
+                        conversation_id: values.conversation?.id,
+                        trace_id: traceId,
+                        agent_mode: agentMode,
+                        generation_attempt: generationAttempt,
+                    })
+                }
+
                 if (!(e instanceof DOMException) || e.name !== 'AbortError') {
                     let releaseException = true
+                    // Some statuses are expected business conditions the UI already handles
+                    // gracefully (out of AI credits, rate limited). Don't report those to error
+                    // tracking as exceptions; only genuine failures should be captured.
+                    let reportException = true
                     // Generic message by default
                     const relevantErrorMessage = { ...FAILURE_MESSAGE, id: uuid() }
                     const offlineMessage = 'You appear to be offline. Please check your internet connection.'
 
-                    // Network exception errors might be overwritten by the API wrapper, so we check for the generic Error type.
-                    if (e instanceof Error && e.message.toLowerCase().includes('failed to fetch')) {
-                        // Failed to fetch -> request failed to connect.
-                        // If the conversation is in progress, we retry up to 15 times.
+                    // Network errors surface differently across browsers and may be wrapped by handleFetch:
+                    //   Chrome/Edge: "Failed to fetch"
+                    //   Firefox:     "NetworkError when attempting to fetch resource."
+                    //   Safari:      "Load failed"
+                    //   handleFetch: ApiError with status === undefined (fetch itself threw)
+                    const isNetworkError =
+                        (e instanceof Error && /failed to fetch|network\s*error|load failed/i.test(e.message)) ||
+                        (e instanceof ApiError && !e.status)
+
+                    if (isNetworkError) {
                         if (values.conversation?.status === ConversationStatus.InProgress) {
                             if (generationAttempt > 15) {
                                 relevantErrorMessage.content = offlineMessage
@@ -635,16 +1503,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                                 return
                             }
                         } else {
-                            // No started conversation, show the offline message.
                             relevantErrorMessage.content = offlineMessage
-                        }
-                    } else if (e instanceof Error && e.message.toLowerCase() === 'network error') {
-                        // Network error -> request failed in progress.
-                        if (generationAttempt > 15) {
-                            relevantErrorMessage.content = offlineMessage
-                        } else {
-                            await retry()
-                            return
                         }
                     } else if (e instanceof ApiError) {
                         if (e.status === 400) {
@@ -657,12 +1516,31 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                             if (e.data?.attr === 'content') {
                                 relevantErrorMessage.content =
                                     'Oops! Your message is too long. Ensure it has no more than 40000 characters.'
+                            } else if (e.detail) {
+                                relevantErrorMessage.content = e.detail
                             }
                         }
 
-                        // Prevents parallel generation attempts. Total wait time is: 21 seconds.
+                        // 409 means the conversation is already in progress.
+                        // Reconnect to the existing stream instead of resending the message.
                         if (e.status === 409 && generationAttempt <= 5) {
-                            await retry()
+                            // Mark that the next stream replay should clear the thread on the
+                            // first real event. We defer the clear (rather than doing it now)
+                            // so the user keeps seeing the existing thread + loading indicator
+                            // while we reconnect. The stream replays all events from the
+                            // beginning so we must rebuild from scratch to avoid duplicates.
+                            cache.clearThreadOnReplay = true
+                            await breakpoint(1000 * (generationAttempt + 1))
+                            actions.decrActiveStreamingThreads()
+                            actions.streamConversation(
+                                {
+                                    content: null,
+                                    conversation: streamData.conversation,
+                                    agent_mode: agentMode,
+                                    is_sandbox: isSandbox || undefined,
+                                },
+                                generationAttempt + 1
+                            )
                             return
                         }
 
@@ -671,11 +1549,13 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                             relevantErrorMessage.content =
                                 e.detail ||
                                 `You've reached Insights AI's usage limit for the moment. Please try again ${e.formattedRetryAfter}.`
+                            reportException = false
                         }
 
                         if (e.status === 402) {
                             relevantErrorMessage.content =
                                 'Your organization reached its AI credit usage limit. Increase the limits in [Billing](/organization/billing), or ask an org admin to do so.'
+                            reportException = false
                         }
 
                         if (e.status && e.status >= 500) {
@@ -683,11 +1563,27 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                                 'Something is wrong with our servers. Please try again later.'
                         }
                     } else {
-                        insights.captureException(e)
                         console.error(e)
                     }
 
+                    if (reportException) {
+                        insights.captureException(e)
+                    }
+
                     if (releaseException) {
+                        insights.capture('max conversation turn completed', {
+                            status: 'failure',
+                            conversation_id: values.conversation?.id,
+                            trace_id: traceId,
+                            agent_mode: agentMode,
+                            generation_attempt: generationAttempt,
+                            error_status_code: e instanceof ApiError ? e.status : undefined,
+                            error_type: isNetworkError
+                                ? 'network_error'
+                                : e instanceof ApiError
+                                  ? 'api_error'
+                                  : 'unknown_error',
+                        })
                         // Remove streaming messages and reload from server (source of truth)
                         actions.finalizeStreamingMessages()
                         actions.addMessage(relevantErrorMessage)
@@ -703,13 +1599,60 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.askMax(null)
             } else {
                 // Otherwise wrap things up
+                if (!caughtException) {
+                    const hasGenerationError = values.threadRaw.some((msg) => msg.status === 'error')
+                    insights.capture('max conversation turn completed', {
+                        status: hasGenerationError ? 'generation_error' : 'success',
+                        conversation_id: values.conversation?.id,
+                        trace_id: traceId,
+                        agent_mode: agentMode,
+                        generation_attempt: generationAttempt,
+                    })
+                }
                 actions.completeThreadGeneration()
             }
             cache.generationController = undefined
             releaseStreamingLock() // release the lock
         },
     })),
-    listeners(({ actions, values, cache }) => ({
+    // Sandbox runs stream through this conversation's runStreamLogic instance, so the streaming
+    // lock taken in streamConversation can only be released when that instance signals the turn
+    // ended — on turn completion, a terminal run status, or a stream error. Its action types are
+    // per-instance (the key is in the path), so they're resolved from props at build time.
+    listeners(({ props, cache, actions, values }) => {
+        const sandboxStreamActionTypes = runStreamLogic({ streamKey: props.conversationId }).actionTypes
+        // Normal turn completion: full turn-end, including the sandbox queue-drain that starts the
+        // next queued message (completeThreadGeneration's intended next-turn behavior).
+        const completeSandboxTurn = (): void => {
+            cache.sandboxStreamRelease?.()
+            if (values.streamingActive) {
+                actions.completeThreadGeneration()
+            }
+        }
+        // Error / terminal status: just stop streaming. Must NOT run completeThreadGeneration's
+        // queue-drain — auto-starting the next queued message after a failure is wrong. The
+        // streamingActive guard also keeps history-replay terminal events (replayedFromHistory,
+        // dispatched during bootstrapRun with no live turn) from firing teardown.
+        const endSandboxStream = (): void => {
+            cache.sandboxStreamRelease?.()
+            if (values.streamingActive) {
+                actions.endStreaming()
+            }
+        }
+        return {
+            [sandboxStreamActionTypes.markTurnComplete]: completeSandboxTurn,
+            // handleTerminalStatus fires for every task_run_state frame, including the initial
+            // non-terminal queued/in_progress ones — only tear down on an actually terminal
+            // status, mirroring runStreamLogic's own guard.
+            [sandboxStreamActionTypes.handleTerminalStatus]: ({ status }: { status: string }) => {
+                if (isTerminalRunStatus(status)) {
+                    endSandboxStream()
+                }
+            },
+            [sandboxStreamActionTypes.handleStreamError]: endSandboxStream,
+        }
+    }),
+    listeners(({ actions, values, cache, props }) => ({
         setConversation: ({ conversation }) => {
             const nextConversationId = conversation?.id ?? null
             if (cache.lastConversationId !== nextConversationId) {
@@ -724,6 +1667,9 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             if (!values.agentModeLockedByUser && conversation?.agent_mode) {
                 actions.syncAgentModeFromConversation(conversation.agent_mode as AgentMode)
             }
+            if (conversation?.is_sandbox) {
+                actions.setIsSandboxMode(true)
+            }
             if (
                 values.queueingEnabled &&
                 conversation?.pending_approvals?.some((approval) => approval.decision_status === 'pending')
@@ -731,6 +1677,96 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.clearQueuedMessages()
             }
             // Note: pending approvals loading is handled in the reducer (pendingApprovalsData.setConversation)
+        },
+        setQuestion: ({ question }) => {
+            // Sandbox pre-warming. Debounce on the first non-whitespace keystroke so the sandbox
+            // boots while the user is still typing; release if the input empties.
+            // LangGraph conversations are unaffected.
+            if (values.conversation?.agent_runtime !== 'sandbox') {
+                return
+            }
+            // Don't warm if a run is already active — the live Run is the desired state.
+            if (values.threadLoading) {
+                return
+            }
+            if (question.trim() === '') {
+                // Input emptied — cancel a pending warm trigger and schedule release after 5s.
+                cache.disposables.dispose('prewarm-debounce')
+                if (cache.prewarmed) {
+                    cache.disposables.add(() => {
+                        const timer = setTimeout(() => actions.releaseSandboxPrewarm(), 5000)
+                        return () => clearTimeout(timer)
+                    }, 'prewarm-release')
+                }
+                return
+            }
+            // Non-empty input: cancel any pending release, then debounce the warm.
+            cache.disposables.dispose('prewarm-release')
+            if (cache.prewarmed) {
+                return
+            }
+            cache.disposables.add(() => {
+                const timer = setTimeout(() => actions.prewarmSandbox(), 250)
+                return () => clearTimeout(timer)
+            }, 'prewarm-debounce')
+        },
+        prewarmSandbox: async () => {
+            cache.disposables.dispose('prewarm-debounce')
+            if (values.conversation?.agent_runtime !== 'sandbox' || !values.conversationId) {
+                return
+            }
+            // Guard against duplicate warms and warming over an active run.
+            if (cache.prewarmed || cache.prewarming || values.threadLoading) {
+                return
+            }
+            cache.prewarming = true
+            cache.pendingRelease = false
+            try {
+                // Warm = open with no message: boots a Run that idles awaiting the first message. The
+                // returned handle lets a later release cancel exactly that Run via the relay (a full
+                // pool returns null — nothing to release).
+                const warm = await api.conversations.open(values.conversationId, {
+                    content: null,
+                    initial_permission_mode: INITIAL_PERMISSION_MODE,
+                })
+                cache.warmRun = warm ? { taskId: warm.task_id, runId: warm.run_id } : null
+                cache.prewarmed = true
+                // If the user abandoned the input while this POST was in flight, the blur/empty
+                // release hit the early-exit (nothing was warm yet). Honor it now so the freshly
+                // warmed sandbox isn't leaked until the agent-server's idle self-cancel.
+                if (cache.pendingRelease) {
+                    cache.pendingRelease = false
+                    actions.releaseSandboxPrewarm()
+                }
+            } catch (e) {
+                // Pre-warming is best-effort latency optimization; a failure just means the first
+                // message takes the cold path. Don't surface it to the user.
+                insights.captureException(e)
+            } finally {
+                cache.prewarming = false
+            }
+        },
+        releaseSandboxPrewarm: async () => {
+            cache.disposables.dispose('prewarm-debounce')
+            cache.disposables.dispose('prewarm-release')
+            if (!cache.prewarmed || !values.conversationId) {
+                // A warm POST may still be in flight — record the intent so its success handler
+                // releases the sandbox instead of dropping the request on the floor.
+                if (cache.prewarming) {
+                    cache.pendingRelease = true
+                }
+                cache.prewarmed = false
+                return
+            }
+            // A warm consumed by a sent message must not be released — only release on abandon.
+            cache.prewarmed = false
+            const warmRun = cache.warmRun as { taskId: string; runId: string } | undefined
+            cache.warmRun = null
+            if (warmRun) {
+                // Release = cancel the warm Run through the generic relay (owned by the renderer logic);
+                // it transitions to terminal and drops out of the warm-pool count.
+                actions.cancelSandboxRun(warmRun)
+            }
         },
         enqueueQueuedMessage: async ({ content, contextualTools, uiContext, billingContext, agentMode }) => {
             if (!values.queueingEnabled || !values.conversation?.id) {
@@ -766,6 +1802,8 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueuedMessages(queue.messages)
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
+                insights.captureException(error)
+                actions.setQueuedMessages(values.queuedMessages)
                 if (error instanceof ApiError && error.status === 409) {
                     toast.error('You can only queue two messages at a time.')
                     return
@@ -784,6 +1822,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueuedMessages(queue.messages)
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
+                insights.captureException(error)
                 toast.error(error?.data?.detail || 'Failed to update the queued message.')
             }
         },
@@ -803,6 +1842,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueuedMessages(queue.messages)
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
+                insights.captureException(error)
                 if (error instanceof ApiError && error.status === 404) {
                     return
                 }
@@ -826,6 +1866,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueuedMessages(queue.messages)
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
+                insights.captureException(error)
                 if (error instanceof ApiError && error.status === 404) {
                     return
                 }
@@ -843,6 +1884,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueuedMessages(queue.messages)
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
+                insights.captureException(error)
                 toast.error(error?.data?.detail || 'Failed to clear queued messages.')
             }
         },
@@ -851,15 +1893,88 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.clearQueuedMessages()
             }
         },
-        askMax: async ({ prompt, addToThread = true, uiContext }) => {
+        askMax: async ({ prompt, addToThread = true, uiContext }, breakpoint) => {
             // Only process if this thread is the currently active one
             if (values.conversationId !== values.activeThreadKey) {
                 return
             }
+            if (isPiTaskRuntime(values.conversation?.task?.runtime)) {
+                return
+            }
+            if (
+                !values.conversation?.task &&
+                values.pendingBindTaskId &&
+                (await shouldBlockPendingPiTask(values.pendingBindTaskId))
+            ) {
+                return
+            }
+
+            // A sent message consumes any sandbox pre-warm: the warm Run is the in-progress run the
+            // sandbox routing follows up on, so cancel pending timers and clear the flag WITHOUT
+            // issuing a release/DELETE.
+            cache.disposables.dispose('prewarm-debounce')
+            cache.disposables.dispose('prewarm-release')
+            cache.prewarmed = false
+            cache.warmRun = null
+            // A sent message consumes the warm — drop any in-flight release intent so the
+            // run the message follows up on isn't cancelled out from under it.
+            cache.pendingRelease = false
+            // Wait for the open dashboard to finish loading before collecting context (see the
+            // constants above for why). The scene is re-read every tick, so the gate releases the
+            // moment the dashboard's metadata lands — and immediately if the user navigates away
+            // mid-wait (no longer on a dashboard, or onto a different one that's already loaded).
+            const isDashboardSceneLoading = (): boolean => {
+                if (sceneLogic.values.activeSceneId !== Scene.Dashboard) {
+                    return false
+                }
+                const activeSceneLogic = sceneLogic.values.activeSceneLogic
+                if (!activeSceneLogic) {
+                    // No dashboard scene logic to wait on — its key hasn't resolved or it can't be
+                    // built. Nothing will land, so don't block: send now rather than stalling for the
+                    // full cap and shipping without context anyway.
+                    return false
+                }
+                if (!activeSceneLogicHasMaxContext(activeSceneLogic)) {
+                    // The logic exists but isn't mounted yet — building, or briefly unmounted mid
+                    // dashboard→dashboard navigation. Keep waiting (bounded by the cap) so context
+                    // collection picks up the dashboard once it mounts.
+                    return true
+                }
+                return !(activeSceneLogic.values as { dashboard?: unknown }).dashboard
+            }
+            // Measure real elapsed time, not tick count: breakpoint() only guarantees a *minimum*
+            // delay, so a busy event loop would make a tick counter under-report the wait — letting
+            // it run past the cap and skewing the telemetry below. performance.now() is monotonic.
+            const dashboardWaitStart = performance.now()
+            while (
+                isDashboardSceneLoading() &&
+                performance.now() - dashboardWaitStart < MAX_DASHBOARD_CONTEXT_WAIT_MS
+            ) {
+                await breakpoint(DASHBOARD_CONTEXT_POLL_INTERVAL_MS)
+            }
+            if (isDashboardSceneLoading()) {
+                // We hit the wait cap while the dashboard was still loading, so the message ships
+                // without dashboard context (the original "Max can't see this dashboard" symptom).
+                // Capture it so we can tell whether the cap is ever the binding constraint in prod.
+                const activeLoadedScene = sceneLogic.values.activeLoadedScene
+                const sceneProps = activeLoadedScene?.paramsToProps?.(activeLoadedScene?.sceneParams) || {}
+                insights.capture('max dashboard context wait timed out', {
+                    waited_ms: Math.round(performance.now() - dashboardWaitStart),
+                    dashboard_id: (sceneProps as { id?: number | string }).id,
+                    conversation_id: values.conversation?.id || values.conversationId,
+                })
+            }
             const contextualTools = Object.fromEntries(values.tools.map((tool) => [tool.identifier, tool.context]))
-            const mergedUiContext = uiContext
-                ? { ...values.compiledContext, ...uiContext }
-                : values.compiledContext || undefined
+            // Always send voice_mode as an explicit boolean when handsFreeLogic is mounted,
+            // not just when active. Otherwise a typed turn following a spoken one inherits
+            // the earlier <voice_mode> system instruction from conversation history and
+            // keeps formatting for speech (no markdown, spelled-out numbers).
+            const handsFree = handsFreeLogic.findMounted({ panelId: props.panelId })
+            const voiceMode = handsFree ? { voice_mode: handsFree.values.isActive } : undefined
+            const mergedUiContext =
+                uiContext || voiceMode
+                    ? { ...values.compiledContext, ...uiContext, ...voiceMode }
+                    : values.compiledContext || undefined
             const billingContext =
                 values.billingContext && values.featureFlags[FEATURE_FLAGS.MAX_BILLING_CONTEXT]
                     ? values.billingContext
@@ -884,6 +1999,9 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     agentMode: values.agentMode,
                 })
                 actions.setQuestion('')
+                if (props.panelId === SIDE_PANEL_PANEL_ID && sidePanelStateLogic.isMounted()) {
+                    sidePanelStateLogic.actions.setSidePanelOptions(null)
+                }
                 return
             }
             if (!values.dataProcessingAccepted) {
@@ -927,10 +2045,21 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.clearPendingApproval()
                 actions.setResolvedApprovalStatus(pendingProposalId, 'auto_rejected')
             }
+            // A pending task-bind (inbox "Open task") makes this first message a sandbox task-resume:
+            // the conversation is created bound to the Task and its run is resumed. Force sandbox mode
+            // so the message routes through the sandbox `open` endpoint (which carries the task_id).
+            // Reducers apply synchronously, so the `is_sandbox` derivation below sees the new value.
+            if (values.pendingBindTaskId && !values.isSandboxMode) {
+                actions.setIsSandboxMode(true)
+            }
             const agentMode = values.agentMode
 
             // Clear the question
             actions.setQuestion('')
+            // Drop #panel=max:… options so reload doesn't re-run auto-send from the hash
+            if (props.panelId === SIDE_PANEL_PANEL_ID && sidePanelStateLogic.isMounted()) {
+                sidePanelStateLogic.actions.setSidePanelOptions(null)
+            }
             // For a new conversations, set the frontend conversation ID
             if (!values.conversation) {
                 actions.setConversationId(values.conversationId)
@@ -949,7 +2078,8 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
             actions.streamConversation(
                 {
-                    agent_mode: agentMode,
+                    agent_mode: values.isSandboxMode ? null : agentMode,
+                    is_sandbox: values.isSandboxMode || undefined,
                     content: prompt,
                     contextual_tools: contextualTools,
                     ui_context: mergedUiContext,
@@ -968,17 +2098,30 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             }
 
             try {
-                await api.conversations.cancel(values.conversation.id)
+                if (values.conversation.agent_runtime === 'sandbox') {
+                    // Sandbox runs cancel through the generic tasks relay (the renderer owns the run id).
+                    actions.cancelSandboxRun()
+                } else {
+                    await api.conversations.cancel(values.conversation.id)
+                }
                 cache.generationController?.abort()
+                actions.clearQueuedMessages()
                 actions.resetThread()
+                // Optimistically clear the loading flags so the composer button returns to "send"
+                // immediately, instead of racing the fire-and-forget loadConversation refetch below
+                // (whose success handler is gated on streamingActive). The refetch still reconciles
+                // the true server status moments later.
+                if (values.conversation) {
+                    const canceledConversation = { ...values.conversation, status: ConversationStatus.Idle }
+                    actions.setConversation(canceledConversation)
+                    actions.updateGlobalConversationCache(canceledConversation)
+                }
             } catch (e: any) {
+                insights.captureException(e)
                 toast.error(e?.data?.detail || 'Failed to cancel the generation.')
             }
 
-            try {
-                await actions.loadConversation(values.conversation.id)
-            } catch {}
-
+            actions.loadConversation(values.conversation.id)
             actions.setCancelLoading(false)
         },
 
@@ -995,7 +2138,15 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             if (values.multiQuestionFormPending) {
                 return
             }
-            actions.streamConversation({ conversation: id, content: null, agent_mode: values.agentMode }, 0)
+            actions.streamConversation(
+                {
+                    conversation: id,
+                    content: null,
+                    agent_mode: values.isSandboxMode ? null : values.agentMode,
+                    is_sandbox: values.isSandboxMode || undefined,
+                },
+                0
+            )
         },
 
         retryLastMessage: () => {
@@ -1006,6 +2157,13 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         },
 
         completeThreadGeneration: () => {
+            actions.executePendingClientToolCall()
+
+            const handsFree = handsFreeLogic.findMounted({ panelId: props.panelId })
+            if (handsFree?.values.isActive) {
+                handsFree.actions.speakAssistantResponse(summariseAssistantThread(values.threadRaw))
+            }
+
             // Update the conversation history to include the new conversation
             actions.loadConversationHistory({ doNotUpdateCurrentThread: true })
 
@@ -1025,8 +2183,22 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             // (those which aren't included in the streaming response)
             actions.loadConversation(values.conversation.id)
 
-            if (values.queueingEnabled && values.conversation?.id) {
+            const shouldConsumeSandboxQueue = values.isSandboxMode && values.queuedMessages.length > 0
+
+            if (values.queueingEnabled && values.conversation?.id && !shouldConsumeSandboxQueue) {
                 actions.loadQueueData()
+            }
+
+            // Process queued messages for sandbox conversations.
+            // Regular conversations handle queue consumption on the backend
+            // (process_chat_agent_activity pops and starts new workflows).
+            // Sandbox mode doesn't have this, so the frontend drives it: combine every queued
+            // follow-up into one send. `addToThread: false` skips the optimistic echo so the message
+            // renders only when the live stream echoes it back (stream-confirmed), not at drain time.
+            if (shouldConsumeSandboxQueue) {
+                const combined = values.queuedMessages.map((message) => message.content).join('\n\n')
+                actions.clearQueuedMessages()
+                actions.askMax(combined, false)
             }
 
             // Must go last. Otherwise, the logic will be unmounted before the lifecycle finishes.
@@ -1039,7 +2211,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             // payload is an object with doNotUpdateCurrentThread for loadConversationHistory,
             // but it's a string (conversationId) for loadConversation
             const doNotUpdate = typeof payload === 'object' && payload?.doNotUpdateCurrentThread
-            if (doNotUpdate || values.autoRun || values.streamingActive) {
+            if (props.skipInitialLoad || doNotUpdate || values.autoRun || values.streamingActive) {
                 return
             }
             // Don't auto-reconnect if there's a pending form
@@ -1051,13 +2223,10 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 return
             }
 
-            // Sync conversation data
+            // Keep conversation and thread in sync to avoid empty thread after history updates.
             actions.setConversation(conversation)
-
-            if (conversation.status === ConversationStatus.InProgress) {
-                setTimeout(() => {
-                    actions.reconnectToStream()
-                }, 0)
+            if (conversation.messages?.length && !values.threadRaw.length) {
+                actions.setThread(updateMessagesWithCompletedStatus(conversation.messages))
             }
         },
         selectCommand: ({ command }) => {
@@ -1083,15 +2252,16 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     // We're already on the notebook page, refresh it
                     let logic = notebookLogic.findMounted({ shortId: notebookId })
                     if (logic) {
-                        logic.actions.setLocalContent(notebookContent, true, true)
+                        logic.actions.setLocalContent(notebookContent, true)
                     }
                 } else {
                     // Navigate to the notebook
-                    await openNotebook(notebookId, NotebookTarget.Scene, undefined, (logic) => {
-                        logic.actions.setLocalContent(notebookContent, true, true)
+                    await openNotebook(notebookId, NotebookTarget.Scene, (logic) => {
+                        logic.actions.setLocalContent(notebookContent, true)
                     })
                 }
             } catch (error) {
+                insights.captureException(error)
                 console.error('Failed to navigate to notebook:', error)
             }
         },
@@ -1113,10 +2283,91 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         continueAfterForm: ({ formAnswers }) => {
             actions.streamConversation(
                 {
-                    agent_mode: values.agentMode,
+                    agent_mode: values.isSandboxMode ? null : values.agentMode,
+                    is_sandbox: values.isSandboxMode || undefined,
                     content: null,
                     conversation: values.conversationId,
                     resume_payload: { action: 'form', form_answers: formAnswers },
+                },
+                0,
+                false // Don't add to thread - no human message to show
+            )
+        },
+        continueAfterFormDismissal: () => {
+            actions.streamConversation(
+                {
+                    agent_mode: values.isSandboxMode ? null : values.agentMode,
+                    is_sandbox: values.isSandboxMode || undefined,
+                    content: null,
+                    conversation: values.conversationId,
+                    resume_payload: { action: 'dismiss_form' },
+                },
+                0,
+                false // Don't add to thread - no human message to show
+            )
+        },
+        executePendingClientToolCall: async () => {
+            // Guard on streamingActive, not threadLoading: conversationLoading is still true here
+            // because completeThreadGeneration resets the status after dispatching this action
+            if (values.conversationId !== values.activeThreadKey || values.streamingActive) {
+                return
+            }
+            // Include statically-marked tools so a deregistered handler refuses instead of stranding the call
+            const clientToolNames = new Set([
+                ...Object.values(values.toolMap)
+                    .filter((tool) => tool.clientExecution)
+                    .map((tool) => tool.identifier as string),
+                ...Object.entries(TOOL_DEFINITIONS)
+                    .filter(([, definition]) => definition.clientExecuted)
+                    .map(([name]) => name),
+            ])
+            const pending = findPendingClientToolCall(values.threadRaw, clientToolNames)
+            if (!pending) {
+                return
+            }
+            // One attempt per call: a failing resume turn re-fires completeThreadGeneration with
+            // the same dangling call, which would re-run the handler's side effects unboundedly
+            cache.resumedClientToolCallIds ??= new Set<string>()
+            if (cache.resumedClientToolCallIds.has(pending.toolCallId)) {
+                return
+            }
+            cache.resumedClientToolCallIds.add(pending.toolCallId)
+            const handler = values.toolMap[pending.toolName]?.clientExecution
+            let result: Record<string, unknown>
+            if (!handler) {
+                result = {
+                    client_execution_error:
+                        'The Insights view that executes this tool client-side is no longer open, so the call could not be completed.',
+                }
+            } else {
+                try {
+                    result = (await handler(pending.args)) ?? {}
+                } catch (error) {
+                    result = { client_execution_error: String(error) }
+                }
+            }
+            // A user message during the handler abandons the interrupt server-side — drop the
+            // resume unless the same call is still dangling
+            const stillPending = findPendingClientToolCall(values.threadRaw, clientToolNames)
+            if (
+                values.conversationId !== values.activeThreadKey ||
+                values.streamingActive ||
+                stillPending?.toolCallId !== pending.toolCallId
+            ) {
+                return
+            }
+            actions.continueWithClientToolResult(result, pending.toolCallId)
+        },
+        continueWithClientToolResult: ({ result, toolCallId }) => {
+            actions.streamConversation(
+                {
+                    agent_mode: values.isSandboxMode ? null : values.agentMode,
+                    is_sandbox: values.isSandboxMode || undefined,
+                    content: null,
+                    conversation: values.conversationId,
+                    // Refresh tool context so the resumed generation sees state the handler just changed
+                    contextual_tools: Object.fromEntries(values.tools.map((tool) => [tool.identifier, tool.context])),
+                    resume_payload: { action: 'client_tool_result', tool_call_id: toolCallId, result },
                 },
                 0,
                 false // Don't add to thread - no human message to show
@@ -1132,7 +2383,8 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             // Resume the conversation with the approval payload
             actions.streamConversation(
                 {
-                    agent_mode: values.agentMode,
+                    agent_mode: values.isSandboxMode ? null : values.agentMode,
+                    is_sandbox: values.isSandboxMode || undefined,
                     content: null,
                     conversation: values.conversationId,
                     contextual_tools: Object.fromEntries(values.tools.map((tool) => [tool.identifier, tool.context])),
@@ -1152,11 +2404,16 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             // Resume the conversation with the rejection payload
             actions.streamConversation(
                 {
-                    agent_mode: values.agentMode,
+                    agent_mode: values.isSandboxMode ? null : values.agentMode,
+                    is_sandbox: values.isSandboxMode || undefined,
                     content: null,
                     conversation: values.conversationId,
                     contextual_tools: Object.fromEntries(values.tools.map((tool) => [tool.identifier, tool.context])),
-                    resume_payload: { action: 'reject', proposal_id: proposalId, feedback },
+                    resume_payload: {
+                        action: 'reject',
+                        proposal_id: proposalId,
+                        feedback,
+                    },
                 },
                 0,
                 false // Don't add to thread - no human message to show
@@ -1167,12 +2424,36 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
     selectors({
         conversationId: [
             (s, p) => [s.conversation, p.conversationId],
-            (conversation, propsConversationId) => (conversation?.id ? conversation.id : propsConversationId),
+            (conversation: Conversation | null, propsConversationId: string) =>
+                conversation?.id ? conversation.id : propsConversationId,
+        ],
+
+        // The exact id this instance was keyed with. React must bind the per-conversation sandbox
+        // logics with the same id connect() used above, or the two would resolve different instances.
+        sandboxConversationKey: [(_, p) => [p.conversationId], (conversationId: string): string => conversationId],
+
+        // A converted conversation: now on the sandbox runtime but still carrying its legacy
+        // LangGraph history. Drives the dual render (full legacy thread → "history was converted"
+        // divider → live sandbox thread). Reads `threadRaw`, not `threadGrouped`, so the streaming
+        // thinking-loader injected into `threadGrouped` can't be mistaken for legacy content.
+        isConvertedConversation: [
+            (s) => [s.conversation, s.threadRaw],
+            (conversation: Conversation | null, threadRaw: ThreadMessage[]): boolean =>
+                conversation?.agent_runtime === 'sandbox' && threadRaw.length > 0,
         ],
 
         effectiveApprovalStatuses: [
             (s) => [s.resolvedApprovalStatuses, s.pendingApprovalsData],
-            (resolved, pendingApprovalsData): Record<string, { status: ApprovalDecisionStatus; feedback?: string }> => {
+            (
+                resolved: Record<
+                    string,
+                    {
+                        feedback?: string
+                        status: 'approved' | 'auto_rejected' | 'rejected'
+                    }
+                >,
+                pendingApprovalsData: Record<string, PendingApproval>
+            ): Record<string, { status: ApprovalDecisionStatus; feedback?: string }> => {
                 // Get statuses from pending approvals data
                 const baseStatuses: Record<string, { status: ApprovalDecisionStatus; feedback?: string }> = {}
                 for (const [proposalId, approval] of Object.entries(pendingApprovalsData)) {
@@ -1189,13 +2470,18 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
         isSharedThread: [
             (s) => [s.conversation, userLogic.selectors.user],
-            (conversation, user): boolean => !!conversation?.user && !!user && conversation.user.uuid !== user.uuid,
+            (conversation: Conversation | null, user: null | import('~/types').UserType): boolean =>
+                !!conversation?.user && !!user && conversation.user.uuid !== user.uuid,
         ],
 
         // Whether the current user is impersonating and viewing an existing conversation
         isImpersonatingExistingConversation: [
             (s) => [s.conversation, s.supportOverrideEnabled, userLogic.selectors.user],
-            (conversation, supportOverrideEnabled, user): boolean => {
+            (
+                conversation: Conversation | null,
+                supportOverrideEnabled: boolean,
+                user: null | import('~/types').UserType
+            ): boolean => {
                 // Only when user is impersonating
                 if (!user?.is_impersonated) {
                     return false
@@ -1218,23 +2504,27 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
         threadLoading: [
             (s) => [s.conversationLoading, s.streamingActive],
-            (conversationLoading, streamingActive) => conversationLoading || streamingActive,
+            (conversationLoading: boolean, streamingActive: boolean) => conversationLoading || streamingActive,
         ],
 
         queueingEnabled: [
-            (s) => [s.featureFlags],
-            (featureFlags): boolean => !!featureFlags[FEATURE_FLAGS.INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM],
+            // Sandbox conversations always queue follow-ups sent mid-turn (the backend queue endpoints
+            // aren't flag-gated, and the sandbox runtime drives the drain itself); LangGraph stays
+            // behind the rollout flag.
+            (s) => [s.featureFlags, s.isSandboxMode],
+            (featureFlags: import('lib/logic/featureFlagLogic').FeatureFlagsSet, isSandboxMode: boolean): boolean =>
+                !!featureFlags[FEATURE_FLAGS.POSTFN_AI_QUEUE_MESSAGES_SYSTEM] || isSandboxMode,
         ],
 
         queueIsFull: [
             (s) => [s.queuedMessages, s.queueLimit],
-            (queuedMessages, queueLimit): boolean =>
+            (queuedMessages: ConversationQueueMessage[], queueLimit: number): boolean =>
                 queueLimit !== null && queueLimit > 0 ? queuedMessages.length >= queueLimit : false,
         ],
 
         queueDisabledReason: [
             (s) => [s.queueingEnabled, s.threadLoading, s.queueIsFull],
-            (queueingEnabled, threadLoading, queueIsFull): string | undefined =>
+            (queueingEnabled: boolean, threadLoading: boolean, queueIsFull: boolean): string | undefined =>
                 queueingEnabled && threadLoading && queueIsFull ? 'Queue is full' : undefined,
         ],
 
@@ -1248,12 +2538,18 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 s.currentThinkingMessage,
             ],
             (
-                thread,
-                threadLoading,
-                toolCallUpdateMap,
-                pendingApprovalsData,
-                resolvedApprovalStatuses,
-                currentThinkingMessage
+                thread: ThreadMessage[],
+                threadLoading: boolean,
+                toolCallUpdateMap: Map<string, string[]>,
+                pendingApprovalsData: Record<string, PendingApproval>,
+                resolvedApprovalStatuses: Record<
+                    string,
+                    {
+                        feedback?: string
+                        status: 'approved' | 'auto_rejected' | 'rejected'
+                    }
+                >,
+                currentThinkingMessage: string | null
             ): ThreadMessage[] => {
                 // Filter out messages that shouldn't be displayed
                 let processedThread: ThreadMessage[] = []
@@ -1336,11 +2632,11 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             },
         ],
 
-        threadMessageCount: [(s) => [s.threadRaw], (threadRaw) => threadRaw.length],
+        threadMessageCount: [(s) => [s.threadRaw], (threadRaw: ThreadMessage[]) => threadRaw.length],
 
         formPending: [
             (s) => [s.threadRaw],
-            (threadRaw) => {
+            (threadRaw: ThreadMessage[]) => {
                 const lastMessage = threadRaw[threadRaw.length - 1]
                 if (lastMessage && isAssistantMessage(lastMessage)) {
                     return !!lastMessage.meta?.form
@@ -1351,7 +2647,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
         multiQuestionFormPending: [
             (s) => [s.threadRaw],
-            (threadRaw) => {
+            (threadRaw: ThreadMessage[]) => {
                 return threadEndsWithMultiQuestionForm(threadRaw)
             },
         ],
@@ -1359,7 +2655,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         // Returns the multi-question form data if one is pending
         activeMultiQuestionForm: [
             (s) => [s.threadRaw],
-            (threadRaw): MultiQuestionForm | null => {
+            (threadRaw: ThreadMessage[]): MultiQuestionForm | null => {
                 if (!threadEndsWithMultiQuestionForm(threadRaw)) {
                     return null
                 }
@@ -1378,7 +2674,17 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         // Returns the pending dangerous operation approval data if one is pending
         activeDangerousOperationApproval: [
             (s) => [s.pendingApprovalProposalId, s.pendingApprovalsData, s.resolvedApprovalStatuses],
-            (pendingApprovalProposalId, pendingApprovalsData, resolvedApprovalStatuses) => {
+            (
+                pendingApprovalProposalId: string | null,
+                pendingApprovalsData: Record<string, PendingApproval>,
+                resolvedApprovalStatuses: Record<
+                    string,
+                    {
+                        feedback?: string
+                        status: 'approved' | 'auto_rejected' | 'rejected'
+                    }
+                >
+            ) => {
                 if (!pendingApprovalProposalId || resolvedApprovalStatuses[pendingApprovalProposalId]?.status) {
                     return null
                 }
@@ -1408,25 +2714,25 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 s.resolvedApprovalStatuses,
             ],
             (
-                formPending,
-                multiQuestionFormPending,
-                threadLoading,
-                dataProcessingAccepted,
-                isSharedThread,
-                isImpersonatingExistingConversation,
-                pendingApprovalProposalId,
-                resolvedApprovalStatuses
+                formPending: boolean,
+                multiQuestionFormPending: boolean,
+                threadLoading: boolean,
+                dataProcessingAccepted: boolean,
+                isSharedThread: boolean,
+                isImpersonatingExistingConversation: boolean,
+                pendingApprovalProposalId: string | null,
+                resolvedApprovalStatuses: Record<
+                    string,
+                    {
+                        feedback?: string
+                        status: 'approved' | 'auto_rejected' | 'rejected'
+                    }
+                >
             ) => {
                 // Check if there's an unresolved pending approval
                 const hasPendingApproval =
                     pendingApprovalProposalId !== null && !resolvedApprovalStatuses[pendingApprovalProposalId]?.status
 
-                // Input unavailable when:
-                // - Answer must be provided using a form returned by the AI only
-                // - Answer must be provided using a multi-question form
-                // - We are awaiting user to approve or reject external AI processing data
-                // - Support agent is viewing an existing conversation without override
-                // - There's a pending approval waiting for user decision
                 return (
                     isSharedThread ||
                     formPending ||
@@ -1447,11 +2753,11 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 s.isImpersonatingExistingConversation,
             ],
             (
-                formPending,
-                multiQuestionFormPending,
-                threadLoading,
-                activeStreamingThreads,
-                isImpersonatingExistingConversation
+                formPending: boolean,
+                multiQuestionFormPending: boolean,
+                threadLoading: boolean,
+                activeStreamingThreads: number,
+                isImpersonatingExistingConversation: boolean
             ): string | undefined => {
                 // Allow users to cancel the generation
                 if (threadLoading) {
@@ -1468,7 +2774,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 }
 
                 if (multiQuestionFormPending) {
-                    return 'Please answer the questions above'
+                    return 'Please answer, skip, or dismiss the form above'
                 }
 
                 // Prevent submission if too many active streaming threads (limit: 10)
@@ -1482,7 +2788,11 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
         submissionDisabledReason: [
             (s) => [s.contextDisabledReason, s.question, s.queueDisabledReason],
-            (contextDisabledReason, question, queueDisabledReason): string | undefined => {
+            (
+                contextDisabledReason: string | undefined,
+                question: string,
+                queueDisabledReason: string | undefined
+            ): string | undefined => {
                 // Context-related reasons take precedence (form pending, streaming, etc.)
                 if (contextDisabledReason) {
                     return contextDisabledReason
@@ -1501,32 +2811,29 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         ],
 
         filteredCommands: [
-            (s) => [s.question, s.featureFlags, s.threadLoading, s.billingContext],
+            (s) => [s.question, s.featureFlags, s.threadLoading, s.conversation],
             (
                 question: string,
                 featureFlags: Record<string, boolean | string>,
                 threadLoading: boolean,
-                billingContext: MaxBillingContext | null
+                conversation: Conversation | null
             ): SlashCommand[] => {
-                const hasPaidPlan =
-                    billingContext?.subscription_level === MaxBillingContextSubscriptionLevel.PAID ||
-                    billingContext?.subscription_level === MaxBillingContextSubscriptionLevel.CUSTOM ||
-                    billingContext?.trial?.is_active ||
-                    process.env.NODE_ENV === 'development'
+                // Sandbox runtime drops core-memory commands; LangGraph keeps the full set.
+                const isSandboxRuntime = conversation?.agent_runtime === 'sandbox'
 
                 return MAX_SLASH_COMMANDS.filter(
                     (command) =>
                         command.name.toLowerCase().startsWith(question.toLowerCase()) &&
                         (!command.flag || featureFlags[command.flag]) &&
                         (!command.requiresIdle || !threadLoading) &&
-                        (!command.requiresPaidPlan || hasPaidPlan)
+                        (!command.hiddenInSandbox || !isSandboxRuntime)
                 )
             },
         ],
 
         showDeepResearchModeToggle: [
             (s) => [s.conversation, s.featureFlags],
-            (conversation, featureFlags) =>
+            (conversation: Conversation | null, featureFlags: import('lib/logic/featureFlagLogic').FeatureFlagsSet) =>
                 // if a conversation is already marked as research, or has already started (has title/is in progress), don't show the toggle
                 !!featureFlags[FEATURE_FLAGS.MAX_DEEP_RESEARCH] &&
                 conversation?.type !== ConversationType.DeepResearch &&
@@ -1536,19 +2843,19 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
         showContextUI: [
             (s) => [s.conversation, s.featureFlags],
-            (conversation, featureFlags) =>
+            (conversation: Conversation | null, featureFlags: import('lib/logic/featureFlagLogic').FeatureFlagsSet) =>
                 featureFlags[FEATURE_FLAGS.MAX_DEEP_RESEARCH]
                     ? conversation?.type !== ConversationType.DeepResearch
                     : true,
         ],
     }),
 
-    afterMount((logic) => {
+    afterMount(async (logic) => {
         const { actions, values, props, cache } = logic
         cache.lastConversationId = props.conversationId
         for (const l of maxThreadLogic.findAllMounted()) {
             if (l !== logic && l.props.conversationId === props.conversationId) {
-                // We found a logic with the same conversationId, but a different tabId
+                // We found a logic with the same conversationId, but a different panelId
                 if (l.values.conversation) {
                     actions.setConversation(l.values.conversation)
                 }
@@ -1568,7 +2875,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         // Check for URL-based mode from side panel options (e.g., #panel=max:mode=research:question)
         // This must be done in maxThreadLogic's afterMount to ensure the correct instance sets the mode
         if (
-            props.tabId === 'sidepanel' &&
+            props.panelId === SIDE_PANEL_PANEL_ID &&
             !values.agentMode &&
             sidePanelStateLogic.isMounted() &&
             sidePanelStateLogic.values.selectedTab === SidePanelTab.Max &&
@@ -1586,8 +2893,18 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     parsedMode = values.featureFlags[FEATURE_FLAGS.MAX_DEEP_RESEARCH] ? AgentMode.Research : null
                 } else if (modeValue === 'plan') {
                     parsedMode = values.featureFlags[FEATURE_FLAGS.PHAI_PLAN_MODE] ? AgentMode.Plan : null
+                } else if (modeValue === 'sandbox') {
+                    if (values.featureFlags[FEATURE_FLAGS.PHAI_SANDBOX_MODE]) {
+                        actions.setIsSandboxMode(true)
+                    }
+                    parsedMode = null
                 } else if ((Object.values(AgentMode) as string[]).includes(modeValue)) {
-                    parsedMode = modeValue as AgentMode
+                    const modeDef = MODE_DEFINITIONS[modeValue as keyof typeof MODE_DEFINITIONS]
+                    if (modeDef?.flag && !values.featureFlags[FEATURE_FLAGS[modeDef.flag]]) {
+                        parsedMode = null
+                    } else {
+                        parsedMode = modeValue as AgentMode
+                    }
                 }
                 if (parsedMode !== undefined) {
                     actions.setAgentMode(parsedMode)
@@ -1602,20 +2919,73 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
         if (values.autoRun && values.question) {
             actions.askMax(values.question)
             actions.setAutoRun(false)
-        } else if (
-            props.conversation?.status === ConversationStatus.InProgress &&
-            !values.streamingActive &&
-            !cache.generationController
-        ) {
-            // Don't auto-reconnect if there's a pending form - the user needs to fill it out first
-            // The form submission will properly resume the conversation with the answers
-            if (values.multiQuestionFormPending) {
+            return
+        }
+
+        if (props.skipInitialLoad) {
+            return
+        }
+
+        // Skip for new chats; only proceed for real backend conversations.
+        const parentConversationId = values.parentConversationId
+        if (!parentConversationId) {
+            return
+        }
+
+        // Fetch message history if threadRaw is empty (may already be populated by cross-tab sync)
+        if (values.threadRaw.length === 0) {
+            await maxGlobalLogic.asyncActions.loadConversation(parentConversationId)
+        }
+
+        // The await yields to the microtask queue — bail if the user navigated away.
+        if (!(logic as BuiltLogic<maxThreadLogicType>).isMounted()) {
+            return
+        }
+
+        // Grab freshly loaded conversation from cache; if missing, the load failed, so skip reconnect
+        const conversation = maxGlobalLogic.values.conversationHistory.find((c) => c.id === parentConversationId)
+        if (!conversation || conversation.messages === undefined) {
+            return
+        }
+
+        // Sandbox history-load branch. Sandbox conversations don't persist messages Django-side —
+        // history lives in S3 ACP logs, read via the products/tasks logs/ endpoint. Hand off to
+        // runStreamLogic, which replays logs/ then opens SSE if non-terminal. The LangGraph
+        // reconnect path below is never entered for sandbox runtimes (coexistence).
+        if (conversation.agent_runtime === 'sandbox') {
+            if (isPiTaskRuntime(conversation.task?.runtime)) {
                 return
             }
-            // If the conversation is in progress and we don't have an active stream, reconnect
-            setTimeout(() => {
-                actions.reconnectToStream()
-            }, 0)
+
+            // runStreamLogic and insightsAiContextLogic are connected (so already mounted) for this
+            // conversation. Reset their per-conversation state before replaying this run's history.
+            actions.resetSandboxStream()
+            actions.clearSandboxAttachments()
+            if (conversation.task) {
+                const runId = conversation.task.latest_run
+                if (runId) {
+                    actions.bootstrapSandboxRun({
+                        taskId: conversation.task.id,
+                        runId,
+                    })
+                }
+            }
+            return
+        }
+
+        // Ensure threadRaw is hydrated before streaming, so setThread doesn't overwrite stream tokens.
+        if (values.threadRaw.length === 0 && conversation.messages.length > 0) {
+            actions.setThread(updateMessagesWithCompletedStatus(conversation.messages))
+        }
+
+        // 4. Reconnect to in-progress stream if needed; setThread here is a no-op due to message count guard.
+        if (
+            conversation.status === ConversationStatus.InProgress &&
+            !values.streamingActive &&
+            !cache.generationController &&
+            !values.multiQuestionFormPending
+        ) {
+            actions.reconnectToStream()
         }
     }),
 
@@ -1629,7 +2999,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 try {
                     // Only auto-set mode when no conversation is active and user hasn't manually set mode (e.g., via URL params)
                     if (!values.conversation && !values.agentModeLockedByUser) {
-                        const suggestedMode = getAgentModeForScene(sceneId)
+                        const suggestedMode = getAgentModeForScene(sceneId, values.featureFlags)
                         if (suggestedMode !== values.agentMode) {
                             // Use sync action to not lock - allows conversation to still update mode if agent changes it
                             actions.syncAgentModeFromConversation(suggestedMode)
@@ -1702,7 +3072,6 @@ function enhanceThreadToolCalls(
     let lastPlanningMessageId: string | undefined
     for (let i = group.length - 1; i >= 0; i--) {
         const message = group[i]
-        const previousMessage = i > 0 ? group[i - 1] : null
         if (lastHumanMessageIndex === -1 && isHumanMessage(message)) {
             lastHumanMessageIndex = i
         }
@@ -1715,26 +3084,16 @@ function enhanceThreadToolCalls(
             lastPlanningMessageId = message.id
             break
         }
-        if (previousMessage && isAssistantMessage(message) && isAssistantMessage(previousMessage)) {
-            const formCarriedOverFromPreviousMessage = getFormToCarryOverFromPreviousMessage(previousMessage)
-            if (formCarriedOverFromPreviousMessage) {
-                // This is safe to do in place, as we're iterating backwards, so we always know previousMessage is untouched
-                message.meta = {
-                    ...message.meta,
-                    form: formCarriedOverFromPreviousMessage,
-                }
-            }
-        }
     }
 
     // Enhance assistant messages with tool call status
     return group.map((message, messageIndex) => {
-        message = { ...message }
         // A message is in the final group if it comes after or is the last human message
         const isFinalGroup = messageIndex >= lastHumanMessageIndex
         if (isAssistantMessage(message) && message.tool_calls && message.tool_calls.length > 0) {
             const isLastPlanningMessage = message.id === lastPlanningMessageId
-            message.tool_calls = message.tool_calls.map<EnhancedToolCall>((toolCall) => {
+            const enhancedMessage = { ...message }
+            enhancedMessage.tool_calls = message.tool_calls.map<EnhancedToolCall>((toolCall) => {
                 const resultMessage = toolCallCompletions.get(toolCall.id)
                 const isCompleted = !!resultMessage
                 // create_form is an interactive tool - it's "completed" once rendered (waiting for user input)
@@ -1758,7 +3117,10 @@ function enhanceThreadToolCalls(
                     result: isAssistantToolCallMessage(resultMessage) ? resultMessage : undefined,
                 }
             })
+            return enhancedMessage
         }
+        // Messages we don't enhance are returned by reference so their identity stays stable
+        // across recomputes — this is what lets React.memo(Message) skip them on each token.
         return message
     })
 }
@@ -1772,10 +3134,19 @@ export async function onEventImplementation(
         values,
         props,
         agentMode,
-    }: Pick<BuiltLogic<maxThreadLogicType>, 'actions' | 'values' | 'props'> & {
+        cache,
+    }: Pick<BuiltLogic<maxThreadLogicType>, 'actions' | 'values' | 'props' | 'cache'> & {
         agentMode: AgentMode | null
     }
 ): Promise<void> {
+    // On 409 reconnect, the stream replays all events from the beginning.
+    // Clear the thread on the first real event so the replay rebuilds it
+    // from scratch — this avoids duplicates and ordering conflicts.
+    if (cache.clearThreadOnReplay) {
+        cache.clearThreadOnReplay = false
+        actions.setThread([])
+    }
+
     // A Conversation object is only received when the conversation is new
     if (event === AssistantEventType.Conversation) {
         const parsedResponse = parseResponse<Conversation>(data)
@@ -1810,13 +3181,20 @@ export async function onEventImplementation(
                 .find(([m]) => isHumanMessage(m))?.[1]
 
             const lastHumanMessage = lastHumanIndex != null ? values.threadRaw[lastHumanIndex] : null
+            // Match the streamed human echo to the provisional bubble by trace_id when the server
+            // provides one, otherwise fall back to content so an echo without a trace_id replaces
+            // the provisional message instead of appending a duplicate.
             const shouldReplace =
                 isHumanMessage(lastHumanMessage) &&
-                parsedResponse.trace_id &&
-                lastHumanMessage.trace_id === parsedResponse.trace_id
+                (parsedResponse.trace_id
+                    ? lastHumanMessage.trace_id === parsedResponse.trace_id
+                    : lastHumanMessage.content === parsedResponse.content)
 
             if (lastHumanIndex != null && shouldReplace) {
-                actions.replaceMessage(lastHumanIndex, { ...parsedResponse, status: 'completed' })
+                actions.replaceMessage(lastHumanIndex, {
+                    ...parsedResponse,
+                    status: 'completed',
+                })
             } else {
                 // Fallback – if we somehow don't have a provisional Human message, just add it
                 actions.addMessage({ ...parsedResponse, status: 'completed' })
@@ -1899,6 +3277,51 @@ export async function onEventImplementation(
         actions.addPendingApprovalData(parsedResponse)
         // Track pending approval for auto-rejection
         actions.setPendingApproval(parsedResponse.proposal_id)
+    } else if (event === AssistantEventType.Sandbox) {
+        const parsedResponse = parseResponse<Record<string, unknown>>(data)
+        if (!parsedResponse) {
+            return
+        }
+
+        if (!cache.sandboxToolMap) {
+            cache.sandboxToolMap = new Map<string, LogEntry>()
+            cache.sandboxEventIndex = 0
+        }
+
+        const entry = parseLogEvent(
+            parsedResponse,
+            `sandbox-${cache.sandboxEventIndex++}`,
+            cache.sandboxToolMap as Map<string, LogEntry>
+        )
+        if (!entry) {
+            // Null return from an ACP tool_call/tool_call_update means the tool map
+            // entry was mutated in-place. Refresh to trigger re-render.
+            actions.refreshSandboxEntries()
+            return
+        }
+
+        // For agent text messages, render as normal assistant messages in the thread
+        if (entry.type === 'agent') {
+            const lastMsg = values.threadRaw[values.threadRaw.length - 1]
+            if (isAssistantMessage(lastMsg) && lastMsg.id?.startsWith('sandbox-')) {
+                // Append to existing streaming message
+                actions.replaceMessage(values.threadRaw.length - 1, {
+                    ...lastMsg,
+                    content: (lastMsg.content || '') + (entry.message || ''),
+                    status: 'loading',
+                })
+            } else {
+                actions.addMessage({
+                    type: AssistantMessageType.Assistant,
+                    id: `sandbox-${entry.id}`,
+                    content: entry.message || '',
+                    status: 'loading',
+                })
+            }
+        }
+
+        // Accumulate all sandbox entries (tool calls, console output, etc.) for rendering
+        actions.appendSandboxEntry(entry)
     }
 }
 
@@ -1927,22 +3350,4 @@ function updateMessagesWithCompletedStatus(thread: RootAssistantMessage[]): Thre
         ...message,
         status: 'completed',
     }))
-}
-
-/**
- * Check if a message has a session summary form (with "Open report" button).
- * Used to show the button on the message following a session summarization result.
- * This way, the "Open report" shows up both with the actual tool result AND below the message summarizing the report
- * (which can be quite long).
- */
-function getFormToCarryOverFromPreviousMessage(message: ThreadMessage): AssistantForm | null {
-    if (!isAssistantMessage(message) || !message.meta?.form?.options) {
-        return null
-    }
-
-    // Check if any option has an href to session-summaries
-    const hasSessionSummaryLink = message.meta.form.options.some((option) =>
-        option.href?.startsWith('/session-summaries/')
-    )
-    return hasSessionSummaryLink ? message.meta.form : null
 }

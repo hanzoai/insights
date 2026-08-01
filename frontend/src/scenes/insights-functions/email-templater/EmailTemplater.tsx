@@ -1,12 +1,19 @@
-import 'products/workflows/frontend/TemplateLibrary/MessageTemplatesGrid.scss'
-
 import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { ChildFunctionProps, Form } from 'kea-forms'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import EmailEditor, { EditorRef } from 'react-email-editor'
 
-import { IconChevronDown, IconChevronLeft, IconChevronRight, IconExternal } from '@hanzo/icons'
+import {
+    IconChevronDown,
+    IconChevronLeft,
+    IconChevronRight,
+    IconCollapse,
+    IconExpand,
+    IconExternal,
+    IconPlus,
+    IconX,
+} from '@hanzo/icons'
 import { Button, Label, Modal, Select, Tabs } from '@hanzo/elements'
 
 import { CyclotronJobTemplateSuggestionsButton } from 'lib/components/CyclotronJob/CyclotronJobTemplateSuggestions'
@@ -18,56 +25,79 @@ import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { urls } from 'scenes/urls'
 
+import 'products/workflows/frontend/TemplateLibrary/MessageTemplatesGrid.scss'
 import { MessageTemplateCard } from 'products/workflows/frontend/TemplateLibrary/MessageTemplateCard'
 
 import { unsubscribeLinkToolCustomJs } from './custom-tools/unsubscribeLinkTool'
-import { EmailTemplaterLogicProps, emailTemplaterLogic } from './emailTemplaterLogic'
+import { EMAIL_TYPE_SUPPORTED_FIELDS, EmailTemplaterLogicProps, emailTemplaterLogic } from './emailTemplaterLogic'
 
 export type EmailEditorMode = 'full' | 'preview'
 
-/**
- * email: basic email editor with free-text fields, used for configuring email platform realtime destinations
- * native_email: advanced editor with email integration dropdown, and additional email metafields
- * native_email-template: editor for creating reusable templates, with only subject and preheader, and email content fields
- */
-export type EmailTemplaterType = 'email' | 'native_email' | 'native_email_template'
-type EmailMetaFieldKey = 'from' | 'to' | 'replyTo' | 'subject' | 'preheader'
-type EmailMetaField = {
-    key: EmailMetaFieldKey
-    label: string
-    optional: boolean
-    helpText?: string
-    isAdvancedField?: boolean
+function EmailPreviewIframe({ html, title }: { html: string; title: string }): JSX.Element {
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+    const observerRef = useRef<ResizeObserver | null>(null)
+    const [height, setHeight] = useState<number | null>(null)
+
+    const measure = useCallback(() => {
+        const doc = iframeRef.current?.contentDocument
+        if (doc?.documentElement) {
+            setHeight(doc.documentElement.scrollHeight)
+        }
+    }, [])
+
+    // Size the iframe to its document so the preview shows the whole email. The
+    // ResizeObserver re-measures as images load; re-attached on every load since
+    // srcDoc replaces the document.
+    const onLoad = useCallback(() => {
+        measure()
+        const body = iframeRef.current?.contentDocument?.body
+        if (body) {
+            observerRef.current?.disconnect()
+            observerRef.current = new ResizeObserver(measure)
+            observerRef.current.observe(body)
+        }
+    }, [measure])
+
+    useEffect(() => () => observerRef.current?.disconnect(), [])
+
+    return (
+        <iframe
+            ref={iframeRef}
+            srcDoc={html}
+            // allow-same-origin without allow-scripts keeps the content inert (no JS runs)
+            // while letting the parent read the document height
+            sandbox="allow-same-origin"
+            title={title}
+            className="w-full"
+            style={{ height: height ?? 150 }}
+            onLoad={onLoad}
+        />
+    )
 }
 
-const EMAIL_META_FIELDS = {
-    FROM: { key: 'from', label: 'From', optional: false },
-    TO: { key: 'to', label: 'To', optional: false },
-    REPLY_TO: {
-        key: 'replyTo',
-        label: 'Reply-To',
-        optional: true,
-        helpText: 'Optional reply-to email address. You can comma separate multiple reply-to addresses.',
-    },
-    PREHEADER: {
-        key: 'preheader',
-        label: 'Preheader',
-        optional: true,
-        helpText: 'This is the preview text that appears below the subject line in an inbox.',
-    },
-    SUBJECT: { key: 'subject', label: 'Subject', optional: false },
-} as const
+function AddAdvancedFieldButtons(): JSX.Element | null {
+    const { hiddenAdvancedFields } = useValues(emailTemplaterLogic)
+    const { revealAdvancedField } = useActions(emailTemplaterLogic)
 
-const EMAIL_TYPE_SUPPORTED_FIELDS: Record<EmailTemplaterType, EmailMetaField[]> = {
-    email: [EMAIL_META_FIELDS.FROM, EMAIL_META_FIELDS.TO, EMAIL_META_FIELDS.SUBJECT],
-    native_email: [
-        EMAIL_META_FIELDS.FROM,
-        EMAIL_META_FIELDS.TO,
-        EMAIL_META_FIELDS.REPLY_TO,
-        EMAIL_META_FIELDS.SUBJECT,
-        EMAIL_META_FIELDS.PREHEADER,
-    ],
-    native_email_template: [EMAIL_META_FIELDS.SUBJECT, EMAIL_META_FIELDS.PREHEADER],
+    if (hiddenAdvancedFields.length === 0) {
+        return null
+    }
+
+    return (
+        <div className="flex gap-1 px-2 py-1 border-b shrink-0">
+            {hiddenAdvancedFields.map((field) => (
+                <Button
+                    key={field.key}
+                    size="xsmall"
+                    type="secondary"
+                    icon={<IconPlus />}
+                    onClick={() => revealAdvancedField(field.key)}
+                >
+                    {field.label}
+                </Button>
+            ))}
+        </div>
+    )
 }
 
 function PlainTextEditor(): JSX.Element {
@@ -90,7 +120,7 @@ function PlainTextEditor(): JSX.Element {
                     </span>
                     <CodeEditorResizeable
                         className="flex-1"
-                        language={templatingEngine === 'fn' ? 'scriptTemplate' : 'liquid'}
+                        language={templatingEngine === 'script' ? 'hogTemplate' : 'liquid'}
                         value={value}
                         onChange={onChange}
                         globals={logicProps.variables}
@@ -109,7 +139,13 @@ function PlainTextEditor(): JSX.Element {
     )
 }
 
-function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX.Element {
+function DestinationEmailTemplaterForm({
+    mode,
+    fieldsHidden,
+}: {
+    mode: EmailEditorMode
+    fieldsHidden?: boolean
+}): JSX.Element {
     const { logicProps, mergeTags, activeContentTab } = useValues(emailTemplaterLogic)
     const { setEmailEditorRef, onEmailEditorReady, setIsModalOpen, setActiveContentTab } =
         useActions(emailTemplaterLogic)
@@ -122,34 +158,36 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                 props={logicProps}
                 formKey="emailTemplate"
             >
-                {EMAIL_TYPE_SUPPORTED_FIELDS[logicProps.type].map((field) => (
-                    <Field
-                        key={field.key}
-                        name={field.key}
-                        className="gap-1 pl-2 border-b shrink-0"
-                        // We will handle the error display ourselves
-                        renderError={() => null}
-                    >
-                        {({ value, onChange, error }: ChildFunctionProps) => (
-                            <div className="flex gap-2 items-center">
-                                <Label
-                                    className={error ? 'text-danger' : ''}
-                                    info={field.helpText}
-                                    showOptional={field.optional}
-                                >
-                                    {field.label}
-                                </Label>
-                                <CodeEditorInline
-                                    embedded
-                                    className="flex-1"
-                                    globals={logicProps.variables}
-                                    value={value}
-                                    onChange={onChange}
-                                />
-                            </div>
-                        )}
-                    </Field>
-                ))}
+                <div className={fieldsHidden ? 'h-0 overflow-hidden' : ''}>
+                    {EMAIL_TYPE_SUPPORTED_FIELDS[logicProps.type].map((field) => (
+                        <Field
+                            key={field.key}
+                            name={field.key}
+                            className="gap-1 pl-2 border-b shrink-0"
+                            // We will handle the error display ourselves
+                            renderError={() => null}
+                        >
+                            {({ value, onChange, error }: ChildFunctionProps) => (
+                                <div className="flex gap-2 items-center">
+                                    <Label
+                                        className={error ? 'text-danger' : ''}
+                                        info={field.helpText}
+                                        showOptional={field.optional}
+                                    >
+                                        {field.label}
+                                    </Label>
+                                    <CodeEditorInline
+                                        embedded
+                                        className="flex-1"
+                                        globals={logicProps.variables}
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                </div>
+                            )}
+                        </Field>
+                    ))}
+                </div>
 
                 {mode === 'full' ? (
                     <>
@@ -167,7 +205,9 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                                 className={clsx(
                                     activeContentTab === 'visual'
                                         ? 'flex flex-col flex-1'
-                                        : 'absolute inset-0 -z-10 opacity-0 pointer-events-none'
+                                        : // invisible releases the hidden editor's raster backing while
+                                          // visibility (unlike display:none) preserves its layout state
+                                          'absolute inset-0 -z-10 opacity-0 pointer-events-none invisible'
                                 )}
                             >
                                 <EmailEditor
@@ -177,6 +217,17 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                                     options={{
                                         mergeTags,
                                         displayMode: 'email',
+                                        appearance: {
+                                            actionBar: {
+                                                placement: 'bottom',
+                                            },
+                                            panels: {
+                                                tools: {
+                                                    dock: 'right',
+                                                    collapsible: true,
+                                                },
+                                            },
+                                        },
                                         features: {
                                             preview: true,
                                             imageEditor: true,
@@ -199,7 +250,7 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                                     </Button>
                                 </div>
 
-                                <iframe srcDoc={value} sandbox="" title="Email template preview" className="flex-1" />
+                                <EmailPreviewIframe html={value} title="Email template preview" />
                             </>
                         )}
                     </Field>
@@ -225,12 +276,7 @@ function NativeEmailIntegrationChoice({
             window.open(urls.workflows('channels'), '_blank')
             return
         }
-        const integration = integrationsOfKind?.find((x) => x.id === integrationId)
-        onChange({
-            integrationId,
-            email: integration?.config?.email_address ?? 'default@example.com', // TODO: Remove this default later
-            // name: integration?.config?.name, // TODO: Add support for the name?
-        })
+        onChange({ integrationId })
     }
 
     if (!integrationsLoading && integrationsOfKind?.length === 0) {
@@ -297,7 +343,7 @@ function LiquidSupportedText({
     const { templatingEngine } = useValues(emailTemplaterLogic)
     const { setTemplatingEngine } = useActions(emailTemplaterLogic)
 
-    const templating = templatingEngine ?? 'fn'
+    const templating = templatingEngine ?? 'script'
 
     return (
         <span className="flex grow group relative justify-between">
@@ -316,7 +362,7 @@ function LiquidSupportedText({
                 className="flex-1"
                 globals={globals}
                 value={value}
-                language={templating === 'fn' ? 'scriptTemplate' : 'liquid'}
+                language={templating === 'script' ? 'hogTemplate' : 'liquid'}
                 onChange={onChange}
             />
         </span>
@@ -422,15 +468,23 @@ function TemplateSlider({
 
 function NativeEmailTemplaterForm({
     mode,
+    fieldsHidden,
     onSaveAsTemplate,
 }: {
     mode: EmailEditorMode
+    fieldsHidden?: boolean
     onSaveAsTemplate?: () => void
 }): JSX.Element {
-    const { unlayerEditorProjectId, logicProps, templates, mergeTags, activeContentTab } =
+    const { unlayerEditorProjectId, logicProps, templates, mergeTags, activeContentTab, visibleFields } =
         useValues(emailTemplaterLogic)
-    const { setEmailEditorRef, onEmailEditorReady, setIsModalOpen, applyTemplate, setActiveContentTab } =
-        useActions(emailTemplaterLogic)
+    const {
+        setEmailEditorRef,
+        onEmailEditorReady,
+        setIsModalOpen,
+        applyTemplate,
+        setActiveContentTab,
+        hideAdvancedField,
+    } = useActions(emailTemplaterLogic)
 
     const [previewTemplate, setPreviewTemplate] = useState<(typeof templates)[0] | null>(null)
 
@@ -442,57 +496,75 @@ function NativeEmailTemplaterForm({
                 props={logicProps}
                 formKey="emailTemplate"
             >
-                {EMAIL_TYPE_SUPPORTED_FIELDS[logicProps.type].map((field) => (
-                    <Field
-                        key={field.key}
-                        name={field.key}
-                        className="gap-1 pl-2 border-b shrink-0"
-                        // We will handle the error display ourselves
-                        renderError={() => null}
-                        showOptional={field.optional}
-                    >
-                        {({ value, onChange, error }: ChildFunctionProps) => (
-                            <div className="flex gap-2 items-center">
-                                <Label
-                                    className={error ? 'text-danger' : ''}
-                                    info={field.helpText}
-                                    showOptional={field.optional}
-                                >
-                                    {field.label}
-                                </Label>
-                                {field.key === 'from' ? (
-                                    <NativeEmailIntegrationChoice value={value} onChange={onChange} />
-                                ) : field.key === 'to' ? (
-                                    /**
-                                     * In email inputs, "to" maps to { email: string; name: string; },
-                                     * whereas other fields map directly to their string value
-                                     */
-                                    <LiquidSupportedText
-                                        value={value?.email}
-                                        onChange={(email) => onChange({ ...value, email })}
-                                        globals={logicProps.variables}
-                                    />
-                                ) : (
-                                    <LiquidSupportedText
-                                        value={value}
-                                        onChange={onChange}
-                                        globals={logicProps.variables}
-                                    />
-                                )}
-                            </div>
-                        )}
-                    </Field>
-                ))}
+                <div className={fieldsHidden ? 'h-0 overflow-hidden' : ''}>
+                    {visibleFields.map((field) => (
+                        <Field
+                            key={field.key}
+                            name={field.key}
+                            className="gap-1 pl-2 border-b shrink-0"
+                            // We will handle the error display ourselves
+                            renderError={() => null}
+                            showOptional={field.optional}
+                        >
+                            {({ value, onChange, error }: ChildFunctionProps) => (
+                                <div className="flex gap-2 items-center">
+                                    <Label
+                                        className={error ? 'text-danger' : ''}
+                                        info={field.helpText}
+                                        showOptional={field.optional}
+                                    >
+                                        {field.label}
+                                    </Label>
+                                    {field.key === 'from' ? (
+                                        <NativeEmailIntegrationChoice value={value} onChange={onChange} />
+                                    ) : field.key === 'to' ? (
+                                        /**
+                                         * In email inputs, "to" maps to { email: string; name: string; },
+                                         * whereas other fields map directly to their string value
+                                         */
+                                        <LiquidSupportedText
+                                            value={value?.email}
+                                            onChange={(email) => onChange({ ...value, email })}
+                                            globals={logicProps.variables}
+                                        />
+                                    ) : (
+                                        <LiquidSupportedText
+                                            value={value}
+                                            onChange={onChange}
+                                            globals={logicProps.variables}
+                                        />
+                                    )}
+                                    {field.isAdvancedField && (
+                                        <Button
+                                            size="xsmall"
+                                            type="tertiary"
+                                            icon={<IconX />}
+                                            className="mr-2"
+                                            onClick={() => {
+                                                onChange('')
+                                                hideAdvancedField(field.key)
+                                            }}
+                                            tooltip="Remove field"
+                                        />
+                                    )}
+                                </div>
+                            )}
+                        </Field>
+                    ))}
+
+                    <AddAdvancedFieldButtons />
+
+                    {mode === 'full' && templates.length > 0 && (
+                        <TemplateSlider
+                            templates={templates}
+                            onSelect={applyTemplate}
+                            onSaveAsTemplate={onSaveAsTemplate}
+                        />
+                    )}
+                </div>
 
                 {mode === 'full' ? (
                     <>
-                        {templates.length > 0 && (
-                            <TemplateSlider
-                                templates={templates}
-                                onSelect={applyTemplate}
-                                onSaveAsTemplate={onSaveAsTemplate}
-                            />
-                        )}
                         <Tabs
                             activeKey={activeContentTab}
                             onChange={(key) => setActiveContentTab(key as 'visual' | 'plaintext')}
@@ -507,7 +579,9 @@ function NativeEmailTemplaterForm({
                                 className={clsx(
                                     activeContentTab === 'visual'
                                         ? 'flex flex-col flex-1'
-                                        : 'absolute inset-0 -z-10 opacity-0 pointer-events-none'
+                                        : // invisible releases the hidden editor's raster backing while
+                                          // visibility (unlike display:none) preserves its layout state
+                                          'absolute inset-0 -z-10 opacity-0 pointer-events-none invisible'
                                 )}
                             >
                                 <EmailEditor
@@ -517,6 +591,17 @@ function NativeEmailTemplaterForm({
                                     options={{
                                         mergeTags,
                                         displayMode: 'email',
+                                        appearance: {
+                                            actionBar: {
+                                                placement: 'bottom',
+                                            },
+                                            panels: {
+                                                tools: {
+                                                    dock: 'right',
+                                                    collapsible: true,
+                                                },
+                                            },
+                                        },
                                         features: {
                                             preview: true,
                                             imageEditor: true,
@@ -530,8 +615,8 @@ function NativeEmailTemplaterForm({
                                                   customFonts: [
                                                       {
                                                           label: 'Ubuntu',
-                                                          value: "'Ubuntu',sans-serif",
-                                                          url: 'https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap',
+                                                          value: "'Ubuntu',Tahoma,Verdana,Segoe,sans-serif",
+                                                          url: 'https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700',
                                                           weights: [
                                                               { label: 'Light', value: 300 },
                                                               { label: 'Regular', value: 400 },
@@ -579,7 +664,7 @@ function NativeEmailTemplaterForm({
                                     </Button>
                                 </div>
 
-                                <iframe srcDoc={value} sandbox="" title="Email template preview" className="flex-1" />
+                                <EmailPreviewIframe html={value} title="Email template preview" />
                             </>
                         )}
                     </Field>
@@ -591,19 +676,23 @@ function NativeEmailTemplaterForm({
 
 function EmailTemplaterForm({
     mode,
+    fieldsHidden,
     onSaveAsTemplate,
 }: {
     mode: EmailEditorMode
+    fieldsHidden?: boolean
     onSaveAsTemplate?: () => void
 }): JSX.Element {
     const { logicProps } = useValues(emailTemplaterLogic)
 
     switch (logicProps.type) {
         case 'email':
-            return <DestinationEmailTemplaterForm mode={mode} />
+            return <DestinationEmailTemplaterForm mode={mode} fieldsHidden={fieldsHidden} />
         case 'native_email_template':
         case 'native_email':
-            return <NativeEmailTemplaterForm mode={mode} onSaveAsTemplate={onSaveAsTemplate} />
+            return (
+                <NativeEmailTemplaterForm mode={mode} fieldsHidden={fieldsHidden} onSaveAsTemplate={onSaveAsTemplate} />
+            )
     }
 }
 
@@ -679,6 +768,13 @@ function EmailTemplaterModal(): JSX.Element {
         useValues(emailTemplaterLogic)
     const { closeWithConfirmation, submitEmailTemplate, saveAsTemplate, setIsSaveTemplateModalOpen } =
         useActions(emailTemplaterLogic)
+    const [fieldsHidden, setFieldsHidden] = useState(false)
+
+    useEffect(() => {
+        if (!isModalOpen) {
+            setFieldsHidden(false)
+        }
+    }, [isModalOpen])
 
     return (
         <>
@@ -688,12 +784,25 @@ function EmailTemplaterModal(): JSX.Element {
                 onClose={() => closeWithConfirmation()}
                 hasUnsavedInput={emailTemplateChanged}
             >
-                <div className="h-[80vh] flex">
+                <div className="h-[85vh] flex relative">
+                    <Button
+                        type="tertiary"
+                        size="small"
+                        icon={fieldsHidden ? <IconExpand /> : <IconCollapse />}
+                        onClick={() => setFieldsHidden(!fieldsHidden)}
+                        className="absolute -top-1 right-10 z-10"
+                    >
+                        {fieldsHidden ? 'Show fields' : 'Hide fields'}
+                    </Button>
                     <div className="flex flex-col flex-1">
                         <div className="shrink-0">
                             <h2>Editing email template</h2>
                         </div>
-                        <EmailTemplaterForm mode="full" onSaveAsTemplate={() => setIsSaveTemplateModalOpen(true)} />
+                        <EmailTemplaterForm
+                            mode="full"
+                            fieldsHidden={fieldsHidden}
+                            onSaveAsTemplate={() => setIsSaveTemplateModalOpen(true)}
+                        />
                         <div className="flex gap-2 items-center mt-2">
                             <div className="flex-1" />
                             <Button onClick={() => closeWithConfirmation()}>Discard changes</Button>

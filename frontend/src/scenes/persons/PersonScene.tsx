@@ -1,6 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
+import { memo } from 'react'
 
-import { IconChevronDown, IconCopy, IconInfo, IconTrash } from '@hanzo/icons'
+import { IconChevronDown, IconCopy, IconInfo, IconRefresh, IconTrash } from '@hanzo/icons'
 import { Button, ButtonProps, Divider, Menu, Select, Tag, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
@@ -10,23 +11,27 @@ import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { TZLabel } from 'lib/components/TZLabel'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Tabs } from 'lib/elements/Tabs'
 import { toast } from 'lib/elements/Toast/Toast'
 import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconOpenInApp } from 'lib/elements/icons'
-import { isMobile, pluralize } from 'lib/utils'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
-import { openInAdminPanel } from 'lib/utils/person-actions'
+import { isMobile } from 'lib/utils/dom'
+import { pluralize } from 'lib/utils/strings'
+import { tryDecodeURIComponent } from 'lib/utils/url'
 import { RelatedGroups } from 'scenes/groups/RelatedGroups'
 import { NotebookSelectButton } from 'scenes/notebooks/NotebookSelectButton/NotebookSelectButton'
 import { NotebookNodeType } from 'scenes/notebooks/types'
 import { PersonDeleteModal } from 'scenes/persons/PersonDeleteModal'
 import { personDeleteModalLogic } from 'scenes/persons/personDeleteModalLogic'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { SessionRecordingsPlaylist } from 'scenes/session-recordings/playlist/SessionRecordingsPlaylist'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -37,48 +42,68 @@ import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { Query } from '~/queries/Query/Query'
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
-import { ActivityScope, PersonType, PersonsTabType, PropertyDefinitionType } from '~/types'
+import {
+    AccessControlLevel,
+    AccessControlResourceType,
+    ActivityScope,
+    PersonType,
+    PersonsTabType,
+    PropertyDefinitionType,
+} from '~/types'
+
+import { ComposeTicketButton } from 'products/conversations/frontend/components/ComposeTicket'
+import { FeedbackButton } from 'products/customer_analytics/frontend/components/FeedbackButton'
 
 import { MergeSplitPerson } from './MergeSplitPerson'
+import { asDisplay, pickBestPersonDistinctId } from './person-utils'
 import { PersonCohorts } from './PersonCohorts'
+import { PersonEmailsTab } from './PersonEmailsTab'
+import { PersonLogsTab } from './PersonLogsTab'
 import PersonProfileCanvas from './PersonProfileCanvas'
+import { PersonPushNotificationsTab } from './PersonPushNotificationsTab'
+import { PERSON_EVENTS_CONTEXT_KEY, PersonsLogicProps, personsLogic } from './personsLogic'
 import { RelatedFeatureFlags } from './RelatedFeatureFlags'
-import { asDisplay } from './person-utils'
-import { PersonsLogicProps, personsLogic } from './personsLogic'
 
 export const scene: SceneExport<PersonsLogicProps> = {
     component: PersonScene,
     logic: personsLogic,
     paramsToProps: ({ params: { _: rawUrlId } }) => ({
         syncWithUrl: true,
-        urlId: decodeURIComponent(rawUrlId),
+        // A distinct ID with a stray `%` (e.g. `50%off`) makes decodeURIComponent throw
+        // `URIError: URI malformed`. Fall back to the raw id so the scene still renders.
+        urlId: tryDecodeURIComponent(rawUrlId),
     }),
 }
 
 function PersonCaption({ person }: { person: PersonType }): JSX.Element {
+    // Show the most human-readable distinct ID first; the rest fall into the "+N" menu.
+    const primaryDistinctId = pickBestPersonDistinctId(person.distinct_ids) ?? person.distinct_ids[0]
+    const otherDistinctIds = person.distinct_ids.filter((distinct_id) => distinct_id !== primaryDistinctId)
     return (
         <div className="flex flex-wrap items-center gap-2">
             <div className="flex deprecated-space-x-1">
                 <div>
                     <span className="text-secondary">IDs:</span>{' '}
-                    <CopyToClipboardInline
-                        tooltipMessage={null}
-                        description="person distinct ID"
-                        style={{ justifyContent: 'flex-end' }}
-                    >
-                        {person.distinct_ids[0]}
-                    </CopyToClipboardInline>
+                    <span data-attr="person-distinct-id">
+                        <CopyToClipboardInline
+                            tooltipMessage={null}
+                            description="person distinct ID"
+                            style={{ justifyContent: 'flex-end' }}
+                        >
+                            {primaryDistinctId}
+                        </CopyToClipboardInline>
+                    </span>
                 </div>
-                {person.distinct_ids.length > 1 && (
+                {otherDistinctIds.length > 0 && (
                     <Menu
-                        items={person.distinct_ids.slice(1).map((distinct_id: string) => ({
+                        items={otherDistinctIds.map((distinct_id: string) => ({
                             label: distinct_id,
                             sideIcon: <IconCopy className="text-primary-3000" />,
                             onClick: () => copyToClipboard(distinct_id, 'distinct id'),
                         }))}
                     >
                         <Tag type="primary" className="inline-flex">
-                            <span>+{person.distinct_ids.length - 1}</span>
+                            <span>+{otherDistinctIds.length}</span>
                             <IconChevronDown className="w-4 h-4" />
                         </Tag>
                     </Menu>
@@ -96,7 +121,10 @@ function PersonCaption({ person }: { person: PersonType }): JSX.Element {
             </div>
             <div className="flex items-center gap-1">
                 <span className="text-secondary">Merge restrictions:</span> {person.is_identified ? 'applied' : 'none'}
-                <Link to="https://hanzo.ai/docs/data/identify#alias-assigning-multiple-distinct-ids-to-the-same-user">
+                <Link
+                    to="https://hanzo.ai/docs/data/identify#alias-assigning-multiple-distinct-ids-to-the-same-user"
+                    target="_blank"
+                >
                     <Tooltip
                         title={
                             <>
@@ -119,6 +147,11 @@ interface LaunchToolbarButtonProps {
 
 function LaunchToolbarButton({ distinctId }: LaunchToolbarButtonProps): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
+
+    const toolbarAccessDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.Toolbar,
+        AccessControlLevel.Viewer
+    )
 
     const handleLaunchToolbar = async (targetUrl: string): Promise<void> => {
         if (!currentTeam?.app_urls?.length) {
@@ -156,6 +189,7 @@ function LaunchToolbarButton({ distinctId }: LaunchToolbarButtonProps): JSX.Elem
             }))}
             placeholder="Launch toolbar with this user's feature flags"
             onChange={(value) => value && handleLaunchToolbar(value)}
+            disabledReason={toolbarAccessDisabledReason}
         />
     )
 }
@@ -173,23 +207,51 @@ export function PersonScene(): JSX.Element | null {
         distinctId,
         primaryDistinctId,
         eventsQuery,
+        eventsQueryIsDirty,
         exceptionsQuery,
         surveyResponsesQuery,
     } = useValues(mountedPersonsLogic)
-    const { loadPersons, editProperty, deleteProperty, navigateToTab, setSplitMergeModalShown, setDistinctId } =
-        useActions(mountedPersonsLogic)
+    const {
+        loadPersons,
+        editProperty,
+        deleteProperty,
+        navigateToTab,
+        setSplitMergeModalShown,
+        setDistinctId,
+        setEventsQuery,
+        resetEventsQuery,
+        setExceptionsQuery,
+        setSurveyResponsesQuery,
+    } = useActions(mountedPersonsLogic)
     const { showPersonDeleteModal } = useActions(personDeleteModalLogic)
     const { deletedPersonLoading } = useValues(personDeleteModalLogic)
     const { groupsEnabled } = useValues(groupsAccessLogic)
     const { currentTeam } = useValues(teamLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
     const { addProductIntentForCrossSell } = useActions(teamLogic)
     const { user } = useValues(userLogic)
+    const eventsQueryLogicKey = `${PERSON_EVENTS_CONTEXT_KEY}-${mountedPersonsLogic.key}`
 
     if (personError) {
-        throw new Error(personError)
+        return (
+            <div className="flex flex-col items-center justify-center w-full p-8">
+                <Banner
+                    type="error"
+                    className="max-w-200 w-full"
+                    action={{
+                        children: 'Reload',
+                        onClick: () => window.location.reload(),
+                        'data-attr': 'person-load-error-reload',
+                    }}
+                >
+                    <p>We couldn't load this person.</p>
+                    <p className="text-muted mb-0">{personError}</p>
+                </Banner>
+            </div>
+        )
     }
     if (!person) {
-        return personLoading ? <SpinnerOverlay sceneLevel /> : <NotFound object="user" meta={{ urlId }} />
+        return personLoading ? <SpinnerOverlay sceneLevel /> : <NotFound object="person" meta={{ urlId }} />
     }
 
     return (
@@ -206,6 +268,13 @@ export function PersonScene(): JSX.Element | null {
                 }}
                 actions={
                     <>
+                        <FeedbackButton id="customer-analytics-person-profile-feedback-button" />
+                        <ComposeTicketButton
+                            size="small"
+                            type="secondary"
+                            distinctId={primaryDistinctId ?? person.distinct_ids[0]}
+                            email={typeof person.properties?.email === 'string' ? person.properties.email : undefined}
+                        />
                         {user?.is_staff && <OpenInAdminPanelButton />}
                         <NotebookSelectButton
                             resource={{
@@ -225,7 +294,7 @@ export function PersonScene(): JSX.Element | null {
                             size="small"
                             icon={isMobile() ? <IconTrash /> : null}
                         >
-                            {isMobile() ? null : 'Delete user'}
+                            {isMobile() ? null : 'Delete person'}
                         </Button>
 
                         {person.distinct_ids.length > 1 && (
@@ -273,13 +342,40 @@ export function PersonScene(): JSX.Element | null {
                                 embedded={false}
                                 onDelete={(key) => deleteProperty(key)}
                                 filterable
+                                collapsible
                             />
                         ),
                     },
                     {
                         key: PersonsTabType.EVENTS,
                         label: <span data-attr="persons-events-tab">Events</span>,
-                        content: <Query uniqueKey="person-profile-events" query={eventsQuery} />,
+                        content: (
+                            <Query
+                                uniqueKey="person-profile-events"
+                                attachTo={mountedPersonsLogic}
+                                query={eventsQuery}
+                                setQuery={(q) => setEventsQuery(q)}
+                                context={{
+                                    insightProps: {
+                                        dashboardItemId: `new-${PERSON_EVENTS_CONTEXT_KEY}`,
+                                        dataNodeCollectionId: eventsQueryLogicKey,
+                                    },
+                                    customActions: (
+                                        <Button
+                                            key="reset-events-filters"
+                                            type="secondary"
+                                            size="small"
+                                            icon={<IconRefresh />}
+                                            onClick={() => resetEventsQuery()}
+                                            disabledReason={eventsQueryIsDirty ? undefined : 'No active filters'}
+                                            data-attr="person-events-reset-filters"
+                                        >
+                                            Reset all filters
+                                        </Button>
+                                    ),
+                                }}
+                            />
+                        ),
                     },
                     {
                         key: PersonsTabType.SESSION_RECORDINGS,
@@ -319,14 +415,52 @@ export function PersonScene(): JSX.Element | null {
                         ),
                     },
                     {
+                        key: PersonsTabType.LOGS,
+                        label: <span data-attr="persons-logs-tab">Logs</span>,
+                        content: <PersonLogsTab person={person} />,
+                    },
+                    person.uuid
+                        ? {
+                              key: PersonsTabType.EMAILS,
+                              label: <span data-attr="persons-emails-tab">Emails</span>,
+                              content: <PersonEmailsTab teamId={currentTeam?.id ?? 0} personId={String(person.uuid)} />,
+                          }
+                        : false,
+                    person.uuid && featureFlags[FEATURE_FLAGS.WORKFLOWS_PUSH_NOTIFICATIONS]
+                        ? {
+                              key: PersonsTabType.PUSH_NOTIFICATIONS,
+                              label: <span data-attr="persons-push-notifications-tab">Push notifications</span>,
+                              content: (
+                                  <PersonPushNotificationsTab
+                                      teamId={currentTeam?.id ?? 0}
+                                      personId={String(person.uuid)}
+                                  />
+                              ),
+                          }
+                        : false,
+                    {
                         key: PersonsTabType.EXCEPTIONS,
                         label: <span data-attr="persons-exceptions-tab">Exceptions</span>,
-                        content: <Query query={exceptionsQuery} />,
+                        content: (
+                            <Query
+                                uniqueKey="person-profile-exceptions"
+                                attachTo={mountedPersonsLogic}
+                                query={exceptionsQuery}
+                                setQuery={(q) => setExceptionsQuery(q)}
+                            />
+                        ),
                     },
                     {
                         key: PersonsTabType.SURVEY_RESPONSES,
                         label: <span data-attr="persons-survey-responses-tab">Surveys</span>,
-                        content: <Query query={surveyResponsesQuery} />,
+                        content: (
+                            <Query
+                                uniqueKey="person-profile-surveys"
+                                attachTo={mountedPersonsLogic}
+                                query={surveyResponsesQuery}
+                                setQuery={(q) => setSurveyResponsesQuery(q)}
+                            />
+                        ),
                     },
                     {
                         key: PersonsTabType.COHORTS,
@@ -339,7 +473,7 @@ export function PersonScene(): JSX.Element | null {
                               label: (
                                   <span className="flex items-center" data-attr="persons-related-tab">
                                       Related groups
-                                      <Tooltip title="Users and groups that have shared events with this user in the last 90 days.">
+                                      <Tooltip title="People and groups that have shared events with this person in the last 90 days.">
                                           <IconInfo className="ml-1 text-base shrink-0" />
                                       </Tooltip>
                                   </span>
@@ -350,58 +484,16 @@ export function PersonScene(): JSX.Element | null {
                     person.uuid
                         ? {
                               key: PersonsTabType.FEATURE_FLAGS,
-                              tooltip: `Only shows feature flags with targeting conditions based on user properties.`,
+                              tooltip: `Only shows feature flags with targeting conditions based on person properties.`,
                               label: <span data-attr="persons-related-flags-tab">Feature flags</span>,
-                              content: (() => {
-                                  const selectedDistinctId = distinctId || primaryDistinctId
-                                  return (
-                                      <>
-                                          <div className="flex deprecated-space-x-2 items-center mb-2">
-                                              <div className="flex items-center">
-                                                  Choose ID:
-                                                  <Tooltip
-                                                      title={
-                                                          <div className="deprecated-space-y-2">
-                                                              <div>
-                                                                  Feature flags values can depend on a user's distinct
-                                                                  ID.
-                                                              </div>
-                                                              <div>
-                                                                  If you want your flag values to stay consistent for
-                                                                  each user, you can enable flag persistence in the
-                                                                  feature flag settings.
-                                                              </div>
-                                                              <div>
-                                                                  This option may depend on your specific setup and
-                                                                  isn't always suitable. Read more in the{' '}
-                                                                  <Link to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps">
-                                                                      documentation.
-                                                                  </Link>
-                                                              </div>
-                                                          </div>
-                                                      }
-                                                  >
-                                                      <IconInfo className="ml-1 text-base" />
-                                                  </Tooltip>
-                                              </div>
-                                              <Select
-                                                  value={selectedDistinctId}
-                                                  onChange={(value) => value && setDistinctId(value)}
-                                                  options={person.distinct_ids.map((distinct_id) => ({
-                                                      label: distinct_id,
-                                                      value: distinct_id,
-                                                  }))}
-                                                  data-attr="person-feature-flags-select"
-                                              />
-                                              {selectedDistinctId && (
-                                                  <LaunchToolbarButton distinctId={selectedDistinctId} />
-                                              )}
-                                          </div>
-                                          <Divider className="mb-4" />
-                                          <RelatedFeatureFlags distinctId={selectedDistinctId} />
-                                      </>
-                                  )
-                              })(),
+                              content: (
+                                  <PersonFeatureFlagsTab
+                                      person={person}
+                                      distinctId={distinctId}
+                                      primaryDistinctId={primaryDistinctId}
+                                      setDistinctId={setDistinctId}
+                                  />
+                              ),
                           }
                         : false,
                     {
@@ -428,9 +520,76 @@ export function PersonScene(): JSX.Element | null {
     )
 }
 
+// memoized with stable props so edits elsewhere in the scene don't re-render the mounted tab
+const PersonFeatureFlagsTab = memo(function PersonFeatureFlagsTab({
+    person,
+    distinctId,
+    primaryDistinctId,
+    setDistinctId,
+}: {
+    person: PersonType
+    distinctId: string | null
+    primaryDistinctId: string | null
+    setDistinctId: (distinctId: string) => void
+}): JSX.Element {
+    const selectedDistinctId = distinctId || primaryDistinctId
+    return (
+        <>
+            <div className="flex deprecated-space-x-2 items-center mb-2">
+                <div className="flex items-center">
+                    Choose ID:
+                    <Tooltip
+                        docLink="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
+                        title={
+                            <div className="deprecated-space-y-2">
+                                <div>Feature flags values can depend on a person's distinct ID.</div>
+                                <div>
+                                    If you want your flag values to stay consistent for each user, you can enable flag
+                                    persistence in the feature flag settings.
+                                </div>
+                                <div>This option may depend on your specific setup and isn't always suitable.</div>
+                            </div>
+                        }
+                    >
+                        <IconInfo className="ml-1 text-base" />
+                    </Tooltip>
+                </div>
+                <Select
+                    value={selectedDistinctId}
+                    onChange={(value) => value && setDistinctId(value)}
+                    options={person.distinct_ids.map((distinct_id) => ({
+                        label: distinct_id,
+                        value: distinct_id,
+                    }))}
+                    data-attr="person-feature-flags-select"
+                />
+                {selectedDistinctId && <LaunchToolbarButton distinctId={selectedDistinctId} />}
+            </div>
+            <Divider className="mb-4" />
+            <RelatedFeatureFlags distinctId={selectedDistinctId} />
+        </>
+    )
+})
+
 function OpenInAdminPanelButton({ size = 'small' }: { size?: ButtonProps['size'] }): JSX.Element {
     const { person } = useValues(personsLogic)
-    const disabledReason = !person?.properties.email ? 'User has no email' : undefined
+    const disabledReason = !person?.properties.email ? 'Person has no email' : undefined
+
+    const openInAdminPanel = async (email: string): Promise<void> => {
+        try {
+            const response = await api.users.list(email)
+
+            if (!response.results || response.results.length === 0) {
+                throw new Error('User not found')
+            }
+
+            const userId = response.results[0].id
+            window.open(`/admin/insights/user/${userId}/change/`, '_blank')
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            toast.error(`Failed to open admin panel: ${message}`)
+        }
+    }
 
     return (
         <Button

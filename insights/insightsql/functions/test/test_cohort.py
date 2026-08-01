@@ -1,9 +1,17 @@
+import datetime
+from typing import Any
+
 import pytest
-from insights.test.base import BaseTest, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import BaseTest, QueryMatchingTest, _create_event, _create_person
+from unittest.mock import patch
 
+from django.conf import settings
 from django.test import override_settings
+from django.utils import timezone
 
-from insights.schema import InsightsQLQueryModifiers
+from parameterized import parameterized
+
+from insights.schema import InsightsQLQueryModifiers, InCohortVia, InlineCohortCalculation, PersonsArgMaxVersion
 
 from insights.insightsql import ast
 from insights.insightsql.errors import QueryError
@@ -11,17 +19,29 @@ from insights.insightsql.parser import parse_expr
 from insights.insightsql.query import execute_insightsql_query
 from insights.insightsql.test.utils import pretty_print_response_in_tests
 
-from insights.models import Cohort
-from insights.models.cohort.util import recalculate_cohortpeople
+from insights.datastore.client.execute import sync_execute
 from insights.models.team.team import Team
-from insights.models.utils import UUIDT
+from insights.uuidt import UUIDT
+
+from products.cohorts.backend.models.calculation_history import CohortCalculationHistory
+from products.cohorts.backend.models.cohort import Cohort
+from products.cohorts.backend.models.util import recalculate_cohortpeople
 
 elements_chain_match = lambda x: parse_expr("match(elements_chain, {regex})", {"regex": ast.Constant(value=str(x))})
 not_call = lambda x: ast.Call(name="not", args=[x])
 
 
-class TestCohort(BaseTest):
+class TestCohort(BaseTest, QueryMatchingTest):
+    snapshot: Any
+    allow_dual_schema_snapshots = True
     maxDiff = None
+
+    def assertResponseMatchesSnapshot(self, response) -> None:
+        formatted_response = pretty_print_response_in_tests(response, self.team.pk)
+        use_new_events_schema_snapshot = (
+            settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA and "events_json" in formatted_response.lower()
+        )
+        assert formatted_response == self._schema_snapshot(use_new_events_schema_snapshot)
 
     def _create_random_events(self) -> str:
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
@@ -32,7 +52,6 @@ class TestCohort(BaseTest):
             is_identified=True,
         )
         _create_event(distinct_id="bla", event=random_uuid, team=self.team)
-        flush_persons_and_events()
         return random_uuid
 
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -50,7 +69,7 @@ class TestCohort(BaseTest):
             modifiers=InsightsQLQueryModifiers(inCohortVia="subquery"),
             pretty=False,
         )
-        assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot  # type: ignore
+        self.assertResponseMatchesSnapshot(response)
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0][0], random_uuid)
 
@@ -70,7 +89,7 @@ class TestCohort(BaseTest):
             modifiers=InsightsQLQueryModifiers(inCohortVia="subquery"),
             pretty=False,
         )
-        assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot  # type: ignore
+        self.assertResponseMatchesSnapshot(response)
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0][0], random_uuid)
 
@@ -87,7 +106,7 @@ class TestCohort(BaseTest):
             modifiers=InsightsQLQueryModifiers(inCohortVia="subquery"),
             pretty=False,
         )
-        assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot  # type: ignore
+        self.assertResponseMatchesSnapshot(response)
 
     @pytest.mark.usefixtures("unittest_snapshot")
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
@@ -103,7 +122,7 @@ class TestCohort(BaseTest):
             modifiers=InsightsQLQueryModifiers(inCohortVia="subquery"),
             pretty=False,
         )
-        assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot  # type: ignore
+        self.assertResponseMatchesSnapshot(response)
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=True)
     def test_in_cohort_error(self):
@@ -117,3 +136,201 @@ class TestCohort(BaseTest):
                 self.team,
             )
         self.assertEqual(str(e.exception), "Could not find a cohort with the name 'blabla'")
+
+
+class TestInlineCohortSubquery(BaseTest):
+    """Tests for inlineCohortCalculation modifier via the subquery (cohort()) path."""
+
+    def _setup_cohort_with_new_person_after_calculation(self):
+        """Create a cohort, calculate it, then add a new person who matches but isn't in cohortpeople."""
+        random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
+        distinct_id1 = f"p1_{random_uuid}"
+        distinct_id2 = f"p2_{random_uuid}"
+        _create_person(
+            properties={"test_prop": random_uuid},
+            team=self.team,
+            distinct_ids=[distinct_id1],
+            is_identified=True,
+        )
+        _create_event(distinct_id=distinct_id1, event=random_uuid, team=self.team)
+
+        cohort = Cohort.objects.create(
+            team=self.team,
+            groups=[{"properties": [{"key": "test_prop", "value": random_uuid, "type": "person"}]}],
+        )
+        recalculate_cohortpeople(cohort, pending_version=0, initiating_user_id=None)
+
+        _create_person(
+            properties={"test_prop": random_uuid},
+            team=self.team,
+            distinct_ids=[distinct_id2],
+            is_identified=True,
+        )
+        _create_event(distinct_id=distinct_id2, event=random_uuid, team=self.team)
+        sync_execute("OPTIMIZE TABLE person FINAL")
+
+        return cohort, random_uuid
+
+    @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
+    def test_inline_cohort_subquery_off_vs_always(self):
+        cohort, random_uuid = self._setup_cohort_with_new_person_after_calculation()
+        query = f"SELECT event FROM events WHERE person_id IN COHORT {cohort.pk} AND event = '{random_uuid}'"
+
+        off_response = execute_insightsql_query(
+            query,
+            self.team,
+            modifiers=InsightsQLQueryModifiers(inCohortVia="subquery", inlineCohortCalculation=InlineCohortCalculation.OFF),
+            pretty=False,
+        )
+        self.assertEqual(len(off_response.results), 1)
+
+        always_response = execute_insightsql_query(
+            query,
+            self.team,
+            modifiers=InsightsQLQueryModifiers(
+                inCohortVia="subquery", inlineCohortCalculation=InlineCohortCalculation.ALWAYS
+            ),
+            pretty=False,
+        )
+        self.assertEqual(len(always_response.results), 2)
+
+    @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
+    def test_inline_cohort_static_always_uses_cohortpeople(self):
+        random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
+        _create_person(
+            properties={"$os": "Chrome"},
+            team=self.team,
+            distinct_ids=["person1"],
+            is_identified=True,
+        )
+        _create_event(distinct_id="person1", event=random_uuid, team=self.team)
+
+        cohort = Cohort.objects.create(team=self.team, is_static=True)
+        cohort.insert_users_by_list(["person1"])
+        response = execute_insightsql_query(
+            f"SELECT event FROM events WHERE person_id IN COHORT {cohort.pk} AND event = '{random_uuid}'",
+            self.team,
+            modifiers=InsightsQLQueryModifiers(
+                inCohortVia="subquery", inlineCohortCalculation=InlineCohortCalculation.ALWAYS
+            ),
+            pretty=False,
+        )
+        self.assertEqual(len(response.results), 1)
+
+    @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
+    def test_inline_cohort_auto_mode_with_fast_history(self):
+        cohort, random_uuid = self._setup_cohort_with_new_person_after_calculation()
+        now = timezone.now()
+        CohortCalculationHistory.objects.create(
+            team=self.team,
+            cohort=cohort,
+            filters={},
+            started_at=now,
+            finished_at=now,
+        )
+        with patch("hanzo_insights.feature_enabled", return_value=True):
+            response = execute_insightsql_query(
+                f"SELECT event FROM events WHERE person_id IN COHORT {cohort.pk} AND event = '{random_uuid}'",
+                self.team,
+                modifiers=InsightsQLQueryModifiers(
+                    inCohortVia="subquery", inlineCohortCalculation=InlineCohortCalculation.AUTO
+                ),
+                pretty=False,
+            )
+        self.assertEqual(len(response.results), 2)
+
+    @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
+    def test_inline_cohort_auto_mode_newest_calc_failed(self):
+        cohort, random_uuid = self._setup_cohort_with_new_person_after_calculation()
+        now = timezone.now()
+        CohortCalculationHistory.objects.create(
+            team=self.team,
+            cohort=cohort,
+            filters={},
+            started_at=now - datetime.timedelta(hours=2),
+            finished_at=now - datetime.timedelta(hours=2),
+        )
+        CohortCalculationHistory.objects.create(
+            team=self.team,
+            cohort=cohort,
+            filters={},
+            started_at=now,
+            finished_at=now,
+            error="timeout",
+        )
+        with patch("hanzo_insights.feature_enabled", return_value=True):
+            response = execute_insightsql_query(
+                f"SELECT event FROM events WHERE person_id IN COHORT {cohort.pk} AND event = '{random_uuid}'",
+                self.team,
+                modifiers=InsightsQLQueryModifiers(
+                    inCohortVia="subquery", inlineCohortCalculation=InlineCohortCalculation.AUTO
+                ),
+                pretty=False,
+            )
+        self.assertEqual(len(response.results), 1)
+
+    @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
+    def test_inline_cohort_auto_mode_flag_disabled(self):
+        cohort, random_uuid = self._setup_cohort_with_new_person_after_calculation()
+        with patch("hanzo_insights.feature_enabled", return_value=False):
+            response = execute_insightsql_query(
+                f"SELECT event FROM events WHERE person_id IN COHORT {cohort.pk} AND event = '{random_uuid}'",
+                self.team,
+                modifiers=InsightsQLQueryModifiers(
+                    inCohortVia="subquery", inlineCohortCalculation=InlineCohortCalculation.AUTO
+                ),
+                pretty=False,
+            )
+        self.assertEqual(len(response.results), 1)
+
+    @parameterized.expand(
+        [
+            ("subquery_off", InCohortVia.SUBQUERY, InlineCohortCalculation.OFF),
+            ("subquery_always", InCohortVia.SUBQUERY, InlineCohortCalculation.ALWAYS),
+            ("leftjoin_off", InCohortVia.LEFTJOIN, InlineCohortCalculation.OFF),
+            ("leftjoin_always", InCohortVia.LEFTJOIN, InlineCohortCalculation.ALWAYS),
+            ("conjoined_off", InCohortVia.LEFTJOIN_CONJOINED, InlineCohortCalculation.OFF),
+            ("conjoined_always", InCohortVia.LEFTJOIN_CONJOINED, InlineCohortCalculation.ALWAYS),
+        ]
+    )
+    @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
+    def test_inline_cohort_limit_not_pushed_to_inner_query(self, _name, cohort_via, inline_mode):
+        random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
+        cohort_prop_value = f"cohort_match_{random_uuid}"
+        # Create the cohort member FIRST (oldest created_at)
+        cohort_distinct_id = f"cohort_member_{random_uuid}"
+        _create_person(
+            properties={"email": "cohort_member@example.com", "cohort_marker": cohort_prop_value},
+            team=self.team,
+            distinct_ids=[cohort_distinct_id],
+            is_identified=True,
+        )
+        # Create many non-matching persons AFTER (newer created_at).
+        for i in range(10):
+            distinct_id = f"non_cohort_{i}_{random_uuid}"
+            _create_person(
+                properties={"email": f"user{i}@example.com", "cohort_marker": "no_match"},
+                team=self.team,
+                distinct_ids=[distinct_id],
+                is_identified=True,
+            )
+        sync_execute("OPTIMIZE TABLE person FINAL")
+        cohort = Cohort.objects.create(
+            team=self.team,
+            groups=[{"properties": [{"key": "cohort_marker", "value": cohort_prop_value, "type": "person"}]}],
+        )
+        recalculate_cohortpeople(cohort, pending_version=0, initiating_user_id=None)
+        response = execute_insightsql_query(
+            f"SELECT id, properties.email FROM persons WHERE id IN COHORT {cohort.pk} ORDER BY created_at DESC LIMIT 3",
+            self.team,
+            modifiers=InsightsQLQueryModifiers(
+                inCohortVia=cohort_via,
+                inlineCohortCalculation=inline_mode,
+                personsArgMaxVersion=PersonsArgMaxVersion.V2,
+            ),
+            pretty=False,
+        )
+        assert len(response.results or []) == 1, (
+            f"Expected 1 cohort member but got {len(response.results or [])}. "
+            f"The inner LIMIT is likely filtering out the cohort member before the cohort filter runs."
+        )

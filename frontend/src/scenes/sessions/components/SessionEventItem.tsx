@@ -17,8 +17,8 @@ import { Button, Tooltip } from '@hanzo/elements'
 
 import { getExceptionAttributes } from 'lib/components/Errors/utils'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
-import { TZLabel } from 'lib/components/TZLabel'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
+import { TZLabel } from 'lib/components/TZLabel'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
 import { RecordingEventType } from '~/types'

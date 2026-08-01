@@ -4,9 +4,11 @@ procs:
         shell: 'pnpm --filter=@hanzo/frontend build:products && pnpm --filter=@hanzo/playwright exec playwright test --ui'
         env:
             BASE_URL: 'http://localhost:8010'
+            EMAIL_HOST: 'email.test.insights.net'
 
     backend:
         shell: 'uv sync --active && bin/wait-for-docker && ./bin/start-backend'
+        ready_pattern: 'Listening at'
         env:
             DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights_e2e_test'
             DATASTORE_DATABASE: 'insights_test'
@@ -16,9 +18,12 @@ procs:
             SKIP_SERVICE_VERSION_REQUIREMENTS: '1'
             DEBUG: '1'
             E2E_TESTING: '1'
+            PERSON_ON_EVENTS_OVERRIDE: '1'
+            PERSONFN_ADDR: 'localhost:50052'
 
     celery-worker:
         shell: 'uv sync --active && bin/wait-for-docker && ./bin/start-celery worker'
+        ready_pattern: 'celery@'
         env:
             DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights_e2e_test'
             DATASTORE_DATABASE: 'insights_test'
@@ -28,14 +33,17 @@ procs:
             SKIP_SERVICE_VERSION_REQUIREMENTS: '1'
             DEBUG: '1'
             E2E_TESTING: '1'
+            PERSONFN_ADDR: 'localhost:50052'
 
     frontend:
         shell: './bin/start-frontend'
+        ready_pattern: 'VITE.*ready in'
         env:
             E2E_TESTING: '1'
 
     docker-compose:
-        shell: 'docker compose -f docker-compose.dev.yml -f docker-compose.profiles.yml up --pull always -d && docker compose -f docker-compose.dev.yml -f docker-compose.profiles.yml logs --tail=0 -f'
+        shell: 'docker compose -p insights -f docker-compose.dev.yml -f docker-compose.profiles.yml up --pull always -d && docker compose -p insights -f docker-compose.dev.yml -f docker-compose.profiles.yml --profile ingestion up -d personinsights-replica personinsights-router && echo "docker-compose ready" && docker compose -p insights -f docker-compose.dev.yml -f docker-compose.profiles.yml logs --tail=100 -f'
+        ready_pattern: 'docker-compose ready'
 
     reset-db:
         shell: |-
@@ -46,6 +54,11 @@ procs:
             createdb insights_e2e_test && \
             echo "DROP DATABASE IF EXISTS insights_test SYNC" | curl 'http://localhost:8123/' --data-binary @- && \
             echo "CREATE DATABASE insights_test" | curl 'http://localhost:8123/' --data-binary @- && \
+            echo "=== Detaching conflicting Kafka-engine tables from insights DB (shared consumer group 'group1') ===" && \
+            for tbl in $(echo "SELECT name FROM system.tables WHERE database='insights' AND engine='Kafka' FORMAT TabSeparated" | curl -s 'http://localhost:8123/' --data-binary @-); do \
+                echo "  detaching insights.$tbl"; \
+                echo "DETACH TABLE IF EXISTS insights.\`$tbl\` PERMANENTLY" | curl -s 'http://localhost:8123/' --data-binary @- || true; \
+            done && \
             echo "=== Running migrations ===" && \
             bin/wait-for-docker && \
             python manage.py migrate && \
@@ -54,6 +67,7 @@ procs:
             python manage.py setup_dev && \
             echo "=== Done ==="
         autostart: false
+        ready_pattern: '=== Done ==='
         env:
             PGHOST: 'localhost'
             PGPORT: '5432'
@@ -65,6 +79,7 @@ procs:
             SECRET_KEY: 'e2e_test'
             DEBUG: '1'
             E2E_TESTING: '1'
+            PERSONFN_ADDR: 'localhost:50052'
 
 mouse_scroll_speed: 1
 scrollback: 10000

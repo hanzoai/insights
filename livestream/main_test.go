@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	"github.com/hanzoai/insights/livestream/events"
-	"github.com/hanzoai/insights/livestream/handlers"
+	"github.com/insights/insights/livestream/events"
+	"github.com/insights/insights/livestream/handlers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +20,7 @@ func TestIndex(t *testing.T) {
 
 	if assert.NoError(t, handlers.Index(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "RealTime Insights 3000", rec.Body.String())
+		assert.Equal(t, "RealTime Script 3000", rec.Body.String())
 	}
 }
 

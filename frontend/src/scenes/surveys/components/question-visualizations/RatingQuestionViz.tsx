@@ -1,4 +1,5 @@
-import { BindLogic, useActions, useValues } from 'kea'
+import { useActions, useValues } from 'kea'
+import { useMemo } from 'react'
 
 import { IconInfo, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 import { Button, Collapse, Skeleton, Tooltip } from '@hanzo/elements'
@@ -8,10 +9,10 @@ import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { IntervalFilterStandalone } from 'lib/components/IntervalFilter'
 import { dayjs } from 'lib/dayjs'
 import { IconOpenInNew } from 'lib/elements/icons'
-import { insightLogic } from 'scenes/insights/insightLogic'
-import { LineGraph } from 'scenes/insights/views/LineGraph/LineGraph'
-import { StackedBar, StackedBarSegment, StackedBarSkeleton } from 'scenes/surveys/components/StackedBar'
+import { computeBarColors } from 'scenes/surveys/components/question-visualizations/questionVizTransforms'
+import { RatingBarChart } from 'scenes/surveys/components/question-visualizations/RatingBarChart'
 import { CHART_INSIGHTS_COLORS } from 'scenes/surveys/components/question-visualizations/util'
+import { StackedBar, StackedBarSegment, StackedBarSkeleton } from 'scenes/surveys/components/StackedBar'
 import {
     NPS_DETRACTOR_LABEL,
     NPS_DETRACTOR_VALUES,
@@ -21,16 +22,21 @@ import {
     NPS_PROMOTER_VALUES,
 } from 'scenes/surveys/constants'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
-import { NPSBreakdown, calculateNpsBreakdownFromProcessedData, isThumbQuestion } from 'scenes/surveys/utils'
+import {
+    NPSBreakdown,
+    calculateNpsBreakdownFromProcessedData,
+    getSurveyIdBasedResponseKey,
+    isThumbQuestion,
+} from 'scenes/surveys/utils'
 import { urls } from 'scenes/urls'
 
+import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { Query } from '~/queries/Query/Query'
 import { InsightVizNode, NodeKind, TrendsQuery } from '~/queries/schema/schema-general'
 import {
     ChartDisplayType,
     ChoiceQuestionProcessedResponses,
-    GraphType,
-    InsightLogicProps,
+    EventPropertyFilter,
     PropertyFilterType,
     PropertyOperator,
     RatingSurveyQuestion,
@@ -38,10 +44,6 @@ import {
     SurveyEventName,
     SurveyEventProperties,
 } from '~/types'
-
-const insightProps: InsightLogicProps = {
-    dashboardItemId: `new-survey`,
-}
 
 function createNPSTrendSeries(
     values: string[],
@@ -105,14 +107,48 @@ const CHART_LABELS: Record<number, string[]> = {
     3: ['1', '2', '3'],
 }
 
+type NPSBucket = 'promoter' | 'passive' | 'detractor'
+
+const NPS_BUCKET_COLORS: Record<NPSBucket, string> = {
+    promoter: CHART_INSIGHTS_COLORS[5],
+    passive: CHART_INSIGHTS_COLORS[6],
+    detractor: CHART_INSIGHTS_COLORS[4],
+}
+
+const NPS_BUCKET_TEXT_CLASS: Record<NPSBucket, string> = {
+    promoter: 'text-success',
+    passive: 'text-warning',
+    detractor: 'text-danger',
+}
+
+function getNpsBucketByRatingLabel(ratingLabel: string): { bucket: NPSBucket; label: string } {
+    if (NPS_PROMOTER_VALUES.includes(ratingLabel)) {
+        return { bucket: 'promoter', label: NPS_PROMOTER_LABEL }
+    }
+
+    if (NPS_PASSIVE_VALUES.includes(ratingLabel)) {
+        return { bucket: 'passive', label: NPS_PASSIVE_LABEL }
+    }
+
+    return { bucket: 'detractor', label: NPS_DETRACTOR_LABEL }
+}
+
 function NPSStackedBar({ npsBreakdown }: { npsBreakdown: NPSBreakdown }): JSX.Element {
+    const formatNpsBarValue = (count: number, total: number): string => {
+        const percentage = (count / total) * 100
+        if (percentage < 3) {
+            return ''
+        }
+        return `${count} (${percentage.toFixed(1)}%)`
+    }
+
     const segments: StackedBarSegment[] = [
-        { count: npsBreakdown.promoters, label: NPS_PROMOTER_LABEL, colorClass: 'bg-success' },
-        { count: npsBreakdown.passives, label: NPS_PASSIVE_LABEL, colorClass: 'bg-warning' },
         { count: npsBreakdown.detractors, label: NPS_DETRACTOR_LABEL, colorClass: 'bg-danger' },
+        { count: npsBreakdown.passives, label: NPS_PASSIVE_LABEL, colorClass: 'bg-warning' },
+        { count: npsBreakdown.promoters, label: NPS_PROMOTER_LABEL, colorClass: 'bg-success' },
     ]
 
-    return <StackedBar segments={segments} />
+    return <StackedBar segments={segments} showTooltips={false} barValueFormatter={formatNpsBarValue} />
 }
 
 export function NPSBreakdownSkeleton(): JSX.Element {
@@ -134,17 +170,14 @@ export function NPSBreakdownSkeleton(): JSX.Element {
 }
 
 function NPSBreakdownViz({ npsBreakdown }: { npsBreakdown: NPSBreakdown }): JSX.Element {
+    const score = Number(npsBreakdown.score)
+    const formattedScore = Number.isInteger(score) ? String(score) : score.toFixed(1)
+
     return (
         <div className="flex flex-col gap-2">
             <div className="font-semibold text-secondary">
-                <div className="text-4xl font-bold text-primary">{npsBreakdown.score}</div>
-                <Tooltip
-                    placement="bottom"
-                    title="NPS Score is calculated by subtracting the percentage of detractors (0-6) from the percentage of promoters (9-10). Passives (7-8) are not included in the calculation. It can go from -100 to 100."
-                >
-                    <IconInfo className="text-muted mr-1" />
-                    Latest NPS Score
-                </Tooltip>
+                <div className="text-4xl font-bold text-primary">{formattedScore}</div>
+                <div className="text-sm text-muted mt-1">Latest NPS score (% promoters - % detractors)</div>
             </div>
             {npsBreakdown && <NPSStackedBar npsBreakdown={npsBreakdown} />}
         </div>
@@ -467,9 +500,120 @@ interface Props {
 export function RatingQuestionViz({ question, questionIndex, processedData }: Props): JSX.Element | null {
     const barColor = CHART_INSIGHTS_COLORS[0]
 
+    const { answerFilters } = useValues(surveyLogic)
+    const { setAnswerFilters } = useActions(surveyLogic)
+    const { isDarkModeOn } = useValues(themeLogic)
     const { data } = processedData
     const npsBreakdown = calculateNpsBreakdownFromProcessedData(processedData)
     const thumbsBreakdown = isThumbQuestion(question) ? calculateThumbsBreakdown(processedData) : null
+    const chartLabels = CHART_LABELS?.[question.scale] || ['1', '2', '3']
+    const isNpsRatingQuestion = question.scale === 10 && question.isNpsQuestion !== false
+    const emptyRatingLabels = chartLabels.filter((_label, index) => (data[index]?.value ?? 0) === 0)
+    const totalResponses = data.reduce((sum, entry) => sum + entry.value, 0)
+
+    const tooltipContextByIndex = useMemo(
+        () =>
+            data.map((entry) => ({
+                respondentPercentage: totalResponses > 0 ? ((entry.value / totalResponses) * 100).toFixed(1) : '0.0',
+            })),
+        [data, totalResponses]
+    )
+
+    const responseFilterKey = question.id ? getSurveyIdBasedResponseKey(question.id) : null
+
+    const currentQuestionFilter = useMemo(
+        () =>
+            responseFilterKey
+                ? (answerFilters.find(
+                      (filter) => filter.key === responseFilterKey && filter.type === PropertyFilterType.Event
+                  ) as EventPropertyFilter | undefined)
+                : undefined,
+        [answerFilters, responseFilterKey]
+    )
+
+    const activeRatingLabel = useMemo((): string | null => {
+        if (!currentQuestionFilter || currentQuestionFilter.operator !== PropertyOperator.Exact) {
+            return null
+        }
+
+        if (Array.isArray(currentQuestionFilter.value)) {
+            return currentQuestionFilter.value.length === 1 ? String(currentQuestionFilter.value[0]) : null
+        }
+
+        return typeof currentQuestionFilter.value === 'string' && currentQuestionFilter.value
+            ? currentQuestionFilter.value
+            : null
+    }, [currentQuestionFilter])
+
+    const highlightedRatingLabel = activeRatingLabel
+
+    const ratingBarColors = useMemo((): string[] => {
+        const baseColors = chartLabels.map((label) =>
+            isNpsRatingQuestion ? NPS_BUCKET_COLORS[getNpsBucketByRatingLabel(label).bucket] : barColor
+        )
+        return computeBarColors(baseColors, chartLabels, highlightedRatingLabel, !!activeRatingLabel, isDarkModeOn)
+    }, [activeRatingLabel, barColor, chartLabels, highlightedRatingLabel, isNpsRatingQuestion, isDarkModeOn])
+
+    const npsBucketByIndex = useMemo(
+        () =>
+            chartLabels.map((label) => {
+                if (!isNpsRatingQuestion) {
+                    return null
+                }
+                const { bucket, label: bucketLabel } = getNpsBucketByRatingLabel(label)
+                return { label: bucketLabel, textClass: NPS_BUCKET_TEXT_CLASS[bucket] }
+            }),
+        [chartLabels, isNpsRatingQuestion]
+    )
+
+    const upsertRatingAnswerFilter = (ratingLabel: string | null): void => {
+        if (!responseFilterKey) {
+            return
+        }
+
+        const updatedFilters = [...answerFilters]
+        const existingIndex = updatedFilters.findIndex((f) => f.key === responseFilterKey)
+
+        if (existingIndex >= 0) {
+            if (ratingLabel) {
+                updatedFilters[existingIndex] = {
+                    ...updatedFilters[existingIndex],
+                    key: responseFilterKey,
+                    type: PropertyFilterType.Event,
+                    operator: PropertyOperator.Exact,
+                    value: [ratingLabel],
+                }
+            } else {
+                updatedFilters.splice(existingIndex, 1)
+            }
+        } else if (ratingLabel) {
+            updatedFilters.push({
+                key: responseFilterKey,
+                type: PropertyFilterType.Event,
+                operator: PropertyOperator.Exact,
+                value: [ratingLabel],
+            })
+        }
+
+        setAnswerFilters(updatedFilters)
+    }
+
+    const applyRatingClick = (index: number): void => {
+        if (!responseFilterKey) {
+            return
+        }
+
+        const clickedRatingLabel = chartLabels[index]
+        if (!clickedRatingLabel) {
+            return
+        }
+
+        if (activeRatingLabel === clickedRatingLabel) {
+            upsertRatingAnswerFilter(null)
+        } else {
+            upsertRatingAnswerFilter(clickedRatingLabel)
+        }
+    }
 
     if (isThumbQuestion(question)) {
         return thumbsBreakdown ? <ThumbsBreakdownViz thumbsBreakdown={thumbsBreakdown} /> : null
@@ -479,42 +623,44 @@ export function RatingQuestionViz({ question, questionIndex, processedData }: Pr
         <>
             <div className="flex flex-col gap-1">
                 <div className="h-50 border rounded pt-8">
-                    <div className="relative h-full w-full">
-                        <BindLogic logic={insightLogic} props={insightProps}>
-                            <LineGraph
-                                inSurveyView={true}
-                                hideYAxis={true}
-                                showValuesOnSeries={true}
-                                labelGroupType={1}
-                                data-attr="survey-rating"
-                                type={GraphType.Bar}
-                                hideAnnotations={true}
-                                formula="-"
-                                tooltip={{
-                                    showHeader: false,
-                                    hideColorCol: true,
-                                }}
-                                datasets={[
-                                    {
-                                        id: 1,
-                                        label: 'Number of responses',
-                                        barPercentage: 0.8,
-                                        minBarLength: 2,
-                                        data: data.map((d) => d.value),
-                                        backgroundColor: barColor,
-                                        borderColor: barColor,
-                                        hoverBackgroundColor: barColor,
-                                    },
-                                ]}
-                                labels={CHART_LABELS?.[question.scale] || ['1', '2', '3']}
-                            />
-                        </BindLogic>
-                    </div>
+                    <RatingBarChart
+                        data={data}
+                        chartLabels={chartLabels}
+                        totalResponses={totalResponses}
+                        barColors={ratingBarColors}
+                        activeRatingLabel={activeRatingLabel}
+                        tooltipContextByIndex={tooltipContextByIndex}
+                        npsBucketByIndex={npsBucketByIndex}
+                        onBarClick={applyRatingClick}
+                    />
                 </div>
                 <div className="flex flex-row justify-between">
                     <div className="text-secondary pl-10">{question.lowerBoundLabel}</div>
                     <div className="text-secondary pr-10">{question.upperBoundLabel}</div>
                 </div>
+                {responseFilterKey && (
+                    <div className="text-xs text-muted text-center">
+                        {activeRatingLabel ? (
+                            <>
+                                Showing only rating {activeRatingLabel} responses.{' '}
+                                <button
+                                    className="text-link font-medium hover:underline cursor-pointer"
+                                    onClick={() => upsertRatingAnswerFilter(null)}
+                                >
+                                    Clear filter
+                                </button>{' '}
+                                or click another bar to switch.
+                            </>
+                        ) : (
+                            'Click a rating to filter by that score.'
+                        )}
+                    </div>
+                )}
+                {isNpsRatingQuestion && !activeRatingLabel && emptyRatingLabels.length > 0 && (
+                    <div className="text-xs text-muted text-center">
+                        No responses at ratings: {emptyRatingLabels.join(', ')}
+                    </div>
+                )}
             </div>
             {question.isNpsQuestion !== false && (
                 <>

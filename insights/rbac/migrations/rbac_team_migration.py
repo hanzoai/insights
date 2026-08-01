@@ -4,8 +4,9 @@ import structlog
 
 from insights.exceptions_capture import capture_exception
 from insights.models.organization import Organization, OrganizationMembership
-from insights.models.ee_models import AccessControl
 
+from ee.models.explicit_team_membership import ExplicitTeamMembership
+from ee.models.rbac.access_control import AccessControl
 
 logger = structlog.get_logger(__name__)
 

@@ -1,8 +1,8 @@
-// @ts-nocheck
 import { DateTime, DurationLike } from 'luxon'
 
-import { InsightsFlowAction } from '../../../../schema/insightsflow'
-import { findContinueAction } from '../insightsflow-utils'
+import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+
+import { findContinueAction } from '../hogflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 export class DelayHandler implements ActionHandler {
@@ -15,10 +15,16 @@ export class DelayHandler implements ActionHandler {
             invocation.state.currentAction?.startedAtTimestamp
         )
 
-        return {
-            nextAction: findContinueAction(invocation),
-            scheduledAt: nextScheduledAt ?? undefined,
+        // While the delay is still pending, park WITHOUT advancing currentAction. Advancing eagerly
+        // (returning nextAction alongside scheduledAt) made the job look like it was already at the
+        // next step for the whole delay, so the subscription matcher could wake it — e.g. when the
+        // next step is a wait_until_condition whose event fires — and collapse the delay. Advance only
+        // once the delay has elapsed (calculatedScheduledAt returns null).
+        if (nextScheduledAt) {
+            return { scheduledAt: nextScheduledAt }
         }
+
+        return { nextAction: findContinueAction(invocation) }
     }
 }
 
@@ -34,7 +40,7 @@ const MAX_VALUE_FOR_DURATION_UNIT: Record<string, number> = {
 }
 
 /**
- * Helper for the common case of delaying a custom flow action.
+ * Helper for the common case of delaying a script flow action.
  * We calculate the delay value and return the scheduleAt based on the time the action started.
  * If an optional value is given of the max delay duration, we will use that instead of the default.
  */

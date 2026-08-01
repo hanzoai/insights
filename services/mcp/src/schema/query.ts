@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Common enums and types
-const NodeKind = z.enum(['TrendsQuery', 'FunnelsQuery', 'InsightsQLQuery', 'EventsNode'])
+const NodeKind = z.enum(['TrendsQuery', 'FunnelsQuery', 'PathsQuery', 'InsightsQLQuery', 'EventsNode'])
 
 const IntervalType = z.enum(['hour', 'day', 'week', 'month'])
 
@@ -10,9 +10,12 @@ const ChartDisplayType = z.enum([
     'ActionsTable',
     'ActionsPie',
     'ActionsBar',
+    'ActionsStackedBar',
+    'ActionsAreaGraph',
     'ActionsBarValue',
     'WorldMap',
     'BoldNumber',
+    'TwoDimensionalHeatmap',
 ])
 
 // NOTE: Breakdowns are restricted to either person or event for simplicity
@@ -68,6 +71,54 @@ const InsightsQLFilters = z.object({
     filterTestAccounts: z.boolean().optional(),
 })
 
+const ChartAxis = z.object({
+    column: z.string().describe('Name of a column returned by the SQL query.'),
+    settings: z
+        .object({
+            formatting: z
+                .object({
+                    style: z.enum(['none', 'number', 'short', 'percent']).optional(),
+                    decimalPlaces: z.number().optional(),
+                    prefix: z.string().optional(),
+                    suffix: z.string().optional(),
+                })
+                .optional()
+                .describe('Display formatting for this axis, such as percent, decimals, prefix, or suffix.'),
+            display: z
+                .object({
+                    label: z.string().optional(),
+                    displayType: z.enum(['auto', 'line', 'bar', 'area']).optional(),
+                    yAxisPosition: z.enum(['left', 'right']).optional(),
+                })
+                .optional(),
+        })
+        .optional(),
+})
+
+const ChartSettings = z.object({
+    xAxis: ChartAxis.optional().describe('Column used as the X axis, usually a time bucket or category.'),
+    yAxis: z
+        .array(ChartAxis)
+        .optional()
+        .describe(
+            'Numeric columns plotted as Y series. Include only final metrics the user cares about, not helper columns such as numerators or denominators.'
+        ),
+    seriesBreakdownColumn: z
+        .string()
+        .nullable()
+        .optional()
+        .describe('Column that splits a single Y metric into multiple colored series.'),
+    showLegend: z.boolean().optional(),
+    showNullsAsZero: z.boolean().optional(),
+    stackBars100: z.boolean().optional(),
+})
+
+const TableSettings = z.object({
+    columns: z.array(ChartAxis).optional().describe('Columns to display and their order.'),
+    pinnedColumns: z.array(z.string()).optional(),
+    transpose: z.boolean().optional(),
+})
+
 // Math types that don't require a property
 const BaseMathType = z.enum([
     'total',
@@ -116,7 +167,9 @@ const AnyEntityNode = EventsNode
 // Base query interface
 const InsightsQueryBase = z.object({
     dateRange: DateRange.optional(),
-    filterTestAccounts: z.boolean().optional().default(false),
+    // No hard default: omission lets the project's "Filter out internal and test
+    // users" default setting apply, matching UI behavior for new insights.
+    filterTestAccounts: z.boolean().optional(),
     properties: z
         .union([z.array(AnyPropertyFilter), PropertyGroupFilter])
         .optional()
@@ -161,6 +214,12 @@ const InsightsQLQuerySchema = z.object({
     kind: z.literal('InsightsQLQuery'),
     query: z.string(),
     filters: InsightsQLFilters.optional(),
+    connectionId: z
+        .string()
+        .optional()
+        .describe(
+            'Optional id of an external data source (e.g. a Postgres or DuckDB direct-query connection). When set, the query runs against that source instead of Datastore. Use external-data-sources-connections-list to discover available connection ids.'
+        ),
 })
 
 // Funnels filter
@@ -186,15 +245,55 @@ const FunnelsQuerySchema = InsightsQueryBase.extend({
     breakdownFilter: BreakdownFilter.optional(),
 })
 
+// Paths types
+const PathType = z.enum(['$pageview', '$screen', 'custom_event', 'insightsql'])
+
+const PathCleaningFilter = z.object({
+    alias: z.string().optional(),
+    regex: z.string().optional(),
+})
+
+// Paths filter
+const PathsFilter = z.object({
+    includeEventTypes: z.array(PathType).optional(),
+    pathsInsightsQLExpression: z
+        .string()
+        .optional()
+        .describe('A InsightsQL expression to use as the path step name. Requires includeEventTypes to contain "insightsql".'),
+    startPoint: z.string().optional().describe('Only show paths starting at this step'),
+    endPoint: z.string().optional().describe('Only show paths ending at this step'),
+    stepLimit: z.number().optional().default(5).describe('Maximum number of path steps (default 5)'),
+    edgeLimit: z.number().optional().default(50).describe('Maximum number of edges to return (default 50)'),
+    excludeEvents: z.array(z.string()).optional().describe('Events to exclude from the path'),
+    pathGroupings: z.array(z.string()).optional().describe('Wildcard groups to merge similar path steps'),
+    localPathCleaningFilters: z
+        .array(PathCleaningFilter)
+        .optional()
+        .describe('Regex rules to clean/simplify path step names'),
+    minEdgeWeight: z.number().optional(),
+    maxEdgeWeight: z.number().optional(),
+})
+
+// Paths query
+const PathsQuerySchema = InsightsQueryBase.extend({
+    kind: z.literal('PathsQuery'),
+    pathsFilter: PathsFilter.default({ stepLimit: 5, edgeLimit: 50 }),
+})
+
 // Insight Schema
 const InsightVizNodeSchema = z.object({
     kind: z.literal('InsightVizNode'),
-    source: z.discriminatedUnion('kind', [TrendsQuerySchema, FunnelsQuerySchema]),
+    source: z.discriminatedUnion('kind', [TrendsQuerySchema, FunnelsQuerySchema, PathsQuerySchema]),
 })
 
 const DataVisualizationNodeSchema = z.object({
     kind: z.literal('DataVisualizationNode'),
     source: InsightsQLQuerySchema,
+    display: ChartDisplayType.optional().describe(
+        'Visualization type. Time series should usually use ActionsLineGraph or ActionsAreaGraph; use ActionsTable only when table rows are the intended output.'
+    ),
+    chartSettings: ChartSettings.optional(),
+    tableSettings: TableSettings.optional(),
 })
 
 // Any insight query
@@ -222,6 +321,9 @@ export {
     PropertyFilter,
     PropertyGroupFilter,
     AnyPropertyFilter,
+    ChartAxis,
+    ChartSettings,
+    TableSettings,
     // Entity nodes
     EventsNode,
     AnyEntityNode,
@@ -230,12 +332,14 @@ export {
     CompareFilter,
     TrendsFilter,
     FunnelsFilter,
+    PathsFilter,
     // InsightsQL types
     InsightsQLVariable,
     InsightsQLFilters,
     // Queries
     TrendsQuerySchema,
     FunnelsQuerySchema,
+    PathsQuerySchema,
     InsightsQLQuerySchema,
     InsightVizNodeSchema,
     DataVisualizationNodeSchema,
@@ -244,5 +348,6 @@ export {
 
 export type TrendsQuery = z.infer<typeof TrendsQuerySchema>
 export type FunnelsQuery = z.infer<typeof FunnelsQuerySchema>
+export type PathsQuery = z.infer<typeof PathsQuerySchema>
 export type InsightsQLQuery = z.infer<typeof InsightsQLQuerySchema>
 export type InsightQuery = z.infer<typeof InsightQuerySchema>

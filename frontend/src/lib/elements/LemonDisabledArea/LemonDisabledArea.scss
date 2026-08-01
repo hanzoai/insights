@@ -1,0 +1,10 @@
+.DisabledArea {
+    &.DisabledArea--disabled {
+        cursor: not-allowed;
+        opacity: var(--opacity-disabled);
+    }
+
+    &.DisabledArea--disabled > * {
+        pointer-events: none;
+    }
+}

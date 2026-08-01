@@ -1,6 +1,6 @@
 import { MOCK_DEFAULT_ORGANIZATION } from 'lib/api.mock'
 
-import { Meta } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
 import { Button } from '@hanzo/elements'
@@ -8,9 +8,9 @@ import { Button } from '@hanzo/elements'
 import { mswDecorator } from '~/mocks/browser'
 import { ProductKey } from '~/queries/schema/schema-general'
 
-import { ProductSetupPopover } from './ProductSetupPopover'
+import { ProductSetupPopover, ProductSetupPopoverProps } from './ProductSetupPopover'
 
-const meta: Meta<typeof ProductSetupPopover> = {
+const meta: Meta<ProductSetupPopoverProps> = {
     title: 'Components/ProductSetup/ProductSetupPopover',
     component: ProductSetupPopover,
     parameters: {
@@ -33,22 +33,26 @@ const meta: Meta<typeof ProductSetupPopover> = {
 }
 export default meta
 
-export const Default = (): JSX.Element => {
-    const [visible, setVisible] = useState(true)
-    const [product, setProduct] = useState(ProductKey.PRODUCT_ANALYTICS)
+type Story = StoryObj<ProductSetupPopoverProps>
 
-    return (
-        <div className="p-4 w-200 h-200 bg-white flex items-start justify-end">
-            <ProductSetupPopover
-                visible={visible}
-                onClickOutside={() => setVisible(false)}
-                selectedProduct={product}
-                onSelectProduct={setProduct}
-            >
-                <Button type="primary" onClick={() => setVisible(!visible)}>
-                    Quick start
-                </Button>
-            </ProductSetupPopover>
-        </div>
-    )
+export const Default: Story = {
+    render: () => {
+        const [visible, setVisible] = useState(true)
+        const [product, setProduct] = useState(ProductKey.PRODUCT_ANALYTICS)
+
+        return (
+            <div className="p-4 w-200 h-200 bg-white flex items-start justify-end">
+                <ProductSetupPopover
+                    visible={visible}
+                    onClickOutside={() => setVisible(false)}
+                    selectedProduct={product}
+                    onSelectProduct={setProduct}
+                >
+                    <Button type="primary" onClick={() => setVisible(!visible)}>
+                        Quick start
+                    </Button>
+                </ProductSetupPopover>
+            </div>
+        )
+    },
 }

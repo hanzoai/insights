@@ -1,5 +1,5 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { IconLock } from '@hanzo/icons'
 import { Button, ButtonProps } from '@hanzo/elements'
@@ -9,7 +9,7 @@ import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
 import { BillingProductV2Type } from '~/types'
 
 import { PayGateMiniLogicProps, payGateMiniLogic } from './payGateMiniLogic'
-import { payGateMiniLogicType } from './payGateMiniLogicType'
+import type { payGateMiniLogicType } from './payGateMiniLogic'
 
 type UsePayGateButtonReturn = Pick<
     payGateMiniLogicType['values'],

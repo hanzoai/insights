@@ -3,14 +3,15 @@ import { useActions, useValues } from 'kea'
 import { IconEllipsis, IconTrash } from '@hanzo/icons'
 import { Button, Input, Tag } from '@hanzo/elements'
 
+import { AllowTrainingCallout } from 'lib/components/AllowTrainingCallout/AllowTrainingCallout'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Menu } from 'lib/elements/Menu'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { atColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import { Link } from 'lib/elements/Link'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -106,6 +107,7 @@ export function SessionGroupSummariesTable(): JSX.Element {
                 }}
                 actions={<Tag type="warning">BETA</Tag>}
             />
+            <AllowTrainingCallout featureName="Session summaries" />
             <div className="deprecated-space-y-4">
                 <div className="flex justify-between gap-2 flex-wrap">
                     <Input

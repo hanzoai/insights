@@ -9,7 +9,8 @@ from rest_framework.test import APIClient
 from insights.models.comment import Comment
 
 from products.conversations.backend.models import Ticket
-from products.conversations.backend.models.constants import Status
+from products.conversations.backend.models.constants import ChannelDetail, Status
+from products.conversations.backend.services.identity import compute_identity_hash
 
 
 class TestWidgetAPI(BaseTest):
@@ -36,7 +37,7 @@ class TestWidgetAPI(BaseTest):
         response = self.client.post(
             "/api/conversations/v1/widget/message",
             {"message": "Hello"},
-            HTTP_X_CONVERSATIONS_TOKEN="invalid_token",
+            headers={"x-conversations-token": "invalid_token"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -70,6 +71,30 @@ class TestWidgetAPI(BaseTest):
         self.assertEqual(ticket.status, "new")
         self.assertEqual(ticket.unread_team_count, 1)
 
+    def test_create_ticket_channel_detail_widget_enabled(self):
+        self.team.conversations_settings = {**self.team.conversations_settings, "widget_enabled": True}
+        self.team.save()
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {"message": "Hi", "widget_session_id": self.widget_session_id, "distinct_id": self.distinct_id},
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ticket = Ticket.objects.get(id=response.json()["ticket_id"])
+        self.assertEqual(ticket.channel_detail, ChannelDetail.WIDGET_EMBEDDED)
+
+    def test_create_ticket_channel_detail_widget_disabled(self):
+        self.team.conversations_settings = {**self.team.conversations_settings, "widget_enabled": False}
+        self.team.save()
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {"message": "Hi", "widget_session_id": str(uuid.uuid4()), "distinct_id": "user-456"},
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ticket = Ticket.objects.get(id=response.json()["ticket_id"])
+        self.assertEqual(ticket.channel_detail, ChannelDetail.WIDGET_API)
+
     def test_create_message_to_existing_ticket(self):
         ticket = Ticket.objects.create_with_number(
             team=self.team,
@@ -90,6 +115,32 @@ class TestWidgetAPI(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["ticket_id"], str(ticket.id))
 
+    def test_unverified_request_cannot_repoint_ticket_distinct_id(self):
+        # An anonymous (widget_session_id-only) request must not be able to overwrite an
+        # existing ticket's distinct_id with another identity. Otherwise an attacker who
+        # owns a ticket could re-point it at a victim's distinct_id and have it surface in
+        # the victim's verified history / be linked to the victim's profile for staff.
+        ticket = Ticket.objects.create_with_number(
+            team=self.team,
+            widget_session_id=self.widget_session_id,
+            distinct_id=self.distinct_id,
+            channel_source="widget",
+        )
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {
+                "message": "Trying to hijack identity",
+                "widget_session_id": self.widget_session_id,
+                "distinct_id": "victim@example.com",
+                "ticket_id": str(ticket.id),
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        ticket.refresh_from_db()
+        self.assertEqual(ticket.distinct_id, self.distinct_id)
+
     def test_create_message_updates_session_data_on_existing_ticket(self):
         ticket = Ticket.objects.create_with_number(
             team=self.team,
@@ -97,7 +148,7 @@ class TestWidgetAPI(BaseTest):
             distinct_id=self.distinct_id,
             channel_source="widget",
             session_id="old-session-id",
-            session_context={"current_url": "/some-page", "replay_url": "https://insights.hanzo.ai/replay/old"},
+            session_context={"current_url": "/some-page", "replay_url": "https://app.hanzo.ai/replay/old"},
         )
         response = self.client.post(
             "/api/conversations/v1/widget/message",
@@ -107,7 +158,7 @@ class TestWidgetAPI(BaseTest):
                 "distinct_id": self.distinct_id,
                 "ticket_id": str(ticket.id),
                 "session_id": "new-session-id",
-                "session_context": {"replay_url": "https://insights.hanzo.ai/replay/new"},
+                "session_context": {"replay_url": "https://app.hanzo.ai/replay/new"},
             },
             **self._get_headers(),
         )
@@ -117,7 +168,7 @@ class TestWidgetAPI(BaseTest):
         self.assertEqual(ticket.session_id, "new-session-id")
         # session_context should merge, not replace - preserves current_url while updating replay_url
         self.assertEqual(ticket.session_context["current_url"], "/some-page")
-        self.assertEqual(ticket.session_context["replay_url"], "https://insights.hanzo.ai/replay/new")
+        self.assertEqual(ticket.session_context["replay_url"], "https://app.hanzo.ai/replay/new")
 
     def test_create_message_wrong_widget_session_forbidden(self):
         ticket = Ticket.objects.create_with_number(
@@ -345,6 +396,76 @@ class TestWidgetAPI(BaseTest):
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["status"], Status.NEW)
 
+    def test_list_tickets_limit_respected_after_default_page_cached(self):
+        # Regression: the offset==0 cache key ignores limit, so a default-page
+        # poll (limit=100) must not leak its full cached page to a ?limit=2 request.
+        for _ in range(3):
+            Ticket.objects.create_with_number(
+                team=self.team,
+                widget_session_id=self.widget_session_id,
+                distinct_id=self.distinct_id,
+                channel_source="widget",
+                status=Status.NEW,
+            )
+
+        # Prime the cache with the default page size.
+        default_page = self.client.get(
+            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}",
+            **self._get_headers(),
+        )
+        self.assertEqual(default_page.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(default_page.json()["results"]), 3)
+
+        limited = self.client.get(
+            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&limit=2",
+            **self._get_headers(),
+        )
+        self.assertEqual(limited.status_code, status.HTTP_200_OK)
+        self.assertEqual(limited.json()["count"], 3)
+        self.assertEqual(len(limited.json()["results"]), 2)
+
+    def test_list_tickets_default_page_still_served_from_cache(self):
+        # The widget polling path (offset=0, default limit) must still hit the
+        # cache — the fix must not disable caching for the hot path.
+        Ticket.objects.create_with_number(
+            team=self.team,
+            widget_session_id=self.widget_session_id,
+            distinct_id=self.distinct_id,
+            channel_source="widget",
+            status=Status.NEW,
+        )
+
+        url = f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}"
+
+        # First poll populates the cache, second poll is served from it.
+        first = self.client.get(url, **self._get_headers())
+        self.assertEqual(first.status_code, status.HTTP_200_OK)
+
+        with patch("products.conversations.backend.api.widget.get_cached_tickets") as mock_get:
+            mock_get.return_value = {"count": 99, "results": []}
+            second = self.client.get(url, **self._get_headers())
+            mock_get.assert_called_once()
+            # Response comes straight from the cache, not the DB.
+            self.assertEqual(second.json()["count"], 99)
+
+    def test_list_tickets_custom_limit_never_reads_cache(self):
+        # A custom limit must bypass the cache entirely (both read and write).
+        Ticket.objects.create_with_number(
+            team=self.team,
+            widget_session_id=self.widget_session_id,
+            distinct_id=self.distinct_id,
+            channel_source="widget",
+            status=Status.NEW,
+        )
+
+        with patch("products.conversations.backend.api.widget.get_cached_tickets") as mock_get:
+            response = self.client.get(
+                f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&limit=2",
+                **self._get_headers(),
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_get.assert_not_called()
+
     def test_mark_read(self):
         ticket = Ticket.objects.create_with_number(
             team=self.team,
@@ -413,7 +534,7 @@ class TestWidgetAPI(BaseTest):
         response = self.client.post(
             "/api/conversations/v1/widget/message",
             {
-                "message": "x" * 6000,
+                "message": "x" * 10001,
                 "widget_session_id": self.widget_session_id,
                 "distinct_id": self.distinct_id,
             },
@@ -475,3 +596,321 @@ class TestWidgetCacheInvalidation(BaseTest):
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             mock_invalidate.assert_called_once_with(self.team.id)
+
+
+class TestWidgetIdentityVerification(BaseTest):
+    def setUp(self):
+        super().setUp()
+        self.widget_token = "test_widget_token_iv"
+        self.secret = "test_secret_key_for_hmac"
+        self.team.conversations_enabled = True
+        self.team.conversations_settings = {
+            "widget_public_token": self.widget_token,
+        }
+        self.team.secret_api_token = self.secret
+        self.team.save()
+
+        self.distinct_id = "user_123"
+        self.identity_hash = compute_identity_hash(self.distinct_id, self.secret)
+        self.widget_session_id = str(uuid.uuid4())
+
+        self.client = APIClient()
+
+    def _get_headers(self):
+        return {"HTTP_X_CONVERSATIONS_TOKEN": self.widget_token}
+
+    def _create_ticket(self, distinct_id=None, widget_session_id=None):
+        return Ticket.objects.create_with_number(
+            team=self.team,
+            widget_session_id=widget_session_id or self.widget_session_id,
+            distinct_id=distinct_id or self.distinct_id,
+            channel_source="widget",
+        )
+
+    # --- List tickets ---
+
+    def test_list_tickets_with_valid_identity(self):
+        self._create_ticket()
+        response = self.client.get(
+            "/api/conversations/v1/widget/tickets",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["count"], 1)
+
+    def test_list_tickets_invalid_hash_returns_forbidden(self):
+        self._create_ticket()
+        response = self.client.get(
+            "/api/conversations/v1/widget/tickets",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": "0" * 64,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_list_tickets_without_secret_api_token_is_indistinguishable_from_bad_hash(self):
+        # The widget API is AllowAny, so the "no key configured" response must not reveal
+        # config state to anonymous callers — it stays identical to a signature mismatch.
+        self.team.secret_api_token = None
+        self.team.save()
+
+        response = self.client.get(
+            "/api/conversations/v1/widget/tickets",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json()["error"], "Forbidden")
+
+    def test_list_tickets_with_rotated_backup_token(self):
+        # A hash signed with the old secret keeps verifying after rotation moves it to backup.
+        old_secret = self.secret
+        old_hash = compute_identity_hash(self.distinct_id, old_secret)
+        self.team.secret_api_token = "rotated_new_secret"
+        self.team.secret_api_token_backup = old_secret
+        self.team.save()
+        self._create_ticket()
+
+        response = self.client.get(
+            "/api/conversations/v1/widget/tickets",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": old_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["count"], 1)
+
+    def test_list_tickets_missing_identity_fields_uses_session(self):
+        self._create_ticket()
+        response = self.client.get(
+            "/api/conversations/v1/widget/tickets",
+            {"widget_session_id": self.widget_session_id},
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["count"], 1)
+
+    def test_cross_browser_same_tickets(self):
+        other_session = str(uuid.uuid4())
+        self._create_ticket(widget_session_id=other_session)
+
+        response = self.client.get(
+            "/api/conversations/v1/widget/tickets",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["count"], 1)
+
+    # --- Send message ---
+
+    def test_send_message_creates_ticket_with_identity(self):
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+                "message": "Hello from identity mode",
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ticket = Ticket.objects.get(id=response.json()["ticket_id"])
+        self.assertEqual(ticket.distinct_id, self.distinct_id)
+        self.assertTrue(ticket.identity_verified)
+
+    def test_anonymous_message_creates_unverified_ticket(self):
+        # A widget_session_id-only (no HMAC) request is not server-attested.
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {
+                "widget_session_id": self.widget_session_id,
+                "distinct_id": self.distinct_id,
+                "message": "Anonymous hello",
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ticket = Ticket.objects.get(id=response.json()["ticket_id"])
+        self.assertFalse(ticket.identity_verified)
+
+    def test_verified_message_promotes_anonymous_ticket(self):
+        # An existing anonymous ticket becomes verified once an HMAC-verified
+        # message with the matching distinct_id lands on it.
+        ticket = self._create_ticket()
+        self.assertFalse(ticket.identity_verified)
+
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+                "message": "Now verified",
+                "ticket_id": str(ticket.id),
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ticket.refresh_from_db()
+        self.assertTrue(ticket.identity_verified)
+
+    def test_send_message_existing_ticket_ownership_by_distinct_id(self):
+        ticket = self._create_ticket()
+        Comment.objects.create(
+            team=self.team,
+            scope="conversations_ticket",
+            item_id=str(ticket.id),
+            content="First message",
+            item_context={"author_type": "customer"},
+        )
+
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+                "message": "Follow-up via identity",
+                "ticket_id": str(ticket.id),
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_send_message_invalid_hash_no_session_returns_forbidden(self):
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": "0" * 64,
+                "message": "Should be rejected",
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_send_message_wrong_distinct_id_returns_forbidden(self):
+        ticket = self._create_ticket(distinct_id="user_123")
+        other_id = "user_456"
+        other_hash = compute_identity_hash(other_id, self.secret)
+
+        response = self.client.post(
+            "/api/conversations/v1/widget/message",
+            {
+                "identity_distinct_id": other_id,
+                "identity_hash": other_hash,
+                "message": "Trying to access another user's ticket",
+                "ticket_id": str(ticket.id),
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # --- Get messages ---
+
+    def test_get_messages_with_identity(self):
+        ticket = self._create_ticket()
+        Comment.objects.create(
+            team=self.team,
+            scope="conversations_ticket",
+            item_id=str(ticket.id),
+            content="Test message",
+            item_context={"author_type": "customer"},
+        )
+
+        response = self.client.get(
+            f"/api/conversations/v1/widget/messages/{ticket.id}",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()["messages"]), 1)
+
+    def test_get_messages_invalid_hash_no_session_returns_forbidden(self):
+        ticket = self._create_ticket()
+        response = self.client.get(
+            f"/api/conversations/v1/widget/messages/{ticket.id}",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": "0" * 64,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_messages_wrong_distinct_id_returns_forbidden(self):
+        ticket = self._create_ticket(distinct_id="user_123")
+        other_id = "user_456"
+        other_hash = compute_identity_hash(other_id, self.secret)
+
+        response = self.client.get(
+            f"/api/conversations/v1/widget/messages/{ticket.id}",
+            {
+                "identity_distinct_id": other_id,
+                "identity_hash": other_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # --- Mark read ---
+
+    def test_mark_read_with_identity(self):
+        ticket = self._create_ticket()
+        ticket.unread_customer_count = 3
+        ticket.save()
+
+        response = self.client.post(
+            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": self.identity_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ticket.refresh_from_db()
+        self.assertEqual(ticket.unread_customer_count, 0)
+
+    def test_mark_read_invalid_hash_no_session_returns_forbidden(self):
+        ticket = self._create_ticket()
+        response = self.client.post(
+            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            {
+                "identity_distinct_id": self.distinct_id,
+                "identity_hash": "0" * 64,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_mark_read_wrong_distinct_id_returns_forbidden(self):
+        ticket = self._create_ticket(distinct_id="user_123")
+        other_id = "user_456"
+        other_hash = compute_identity_hash(other_id, self.secret)
+
+        response = self.client.post(
+            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            {
+                "identity_distinct_id": other_id,
+                "identity_hash": other_hash,
+            },
+            **self._get_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

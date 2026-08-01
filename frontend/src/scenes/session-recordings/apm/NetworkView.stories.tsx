@@ -6,7 +6,7 @@ import { useCallback, useRef, useState } from 'react'
 import { Table } from '@hanzo/elements'
 
 import { Tooltip } from 'lib/elements/Tooltip'
-import { humanFriendlyMilliseconds } from 'lib/utils'
+import { humanFriendlyMilliseconds } from 'lib/utils/durations'
 import { initiatorTypeToColor } from 'scenes/session-recordings/apm/performance-event-utils'
 import { MethodTag, StatusTag } from 'scenes/session-recordings/apm/playerInspector/ItemPerformanceEvent'
 
@@ -31,7 +31,7 @@ const MOCK_NETWORK_DATA: PerformanceEvent[] = [
         current_url: '',
         entry_type: 'navigation',
         initiator_type: 'navigation',
-        name: 'https://insights.hanzo.ai/project/1/dashboard',
+        name: 'https://app.hanzo.ai/project/1/dashboard',
         start_time: 0,
         response_end: 1200,
         load_event_end: 2500,
@@ -53,7 +53,7 @@ const MOCK_NETWORK_DATA: PerformanceEvent[] = [
         current_url: '',
         entry_type: 'resource',
         initiator_type: 'script',
-        name: 'https://insights.hanzo.ai/static/js/main.a1b2c3d4.chunk.js',
+        name: 'https://app.hanzo.ai/static/js/main.a1b2c3d4.chunk.js',
         start_time: 150,
         response_end: 800,
         response_status: 200,
@@ -68,7 +68,7 @@ const MOCK_NETWORK_DATA: PerformanceEvent[] = [
         current_url: '',
         entry_type: 'resource',
         initiator_type: 'css',
-        name: 'https://insights.hanzo.ai/static/css/styles.e5f6g7h8.css',
+        name: 'https://app.hanzo.ai/static/css/styles.e5f6g7h8.css',
         start_time: 160,
         response_end: 450,
         response_status: 200,
@@ -132,7 +132,7 @@ const MOCK_NETWORK_DATA: PerformanceEvent[] = [
         current_url: '',
         entry_type: 'resource',
         initiator_type: 'img',
-        name: 'https://insights.hanzo.ai/static/media/logo.svg',
+        name: 'https://app.hanzo.ai/static/media/logo.svg',
         start_time: 500,
         response_end: 620,
         response_status: 200,
@@ -162,7 +162,7 @@ const MOCK_NETWORK_DATA: PerformanceEvent[] = [
         current_url: '',
         entry_type: 'resource',
         initiator_type: 'script',
-        name: 'https://insights.hanzo.ai/static/js/vendor.m3n4o5p6.chunk.js',
+        name: 'https://app.hanzo.ai/static/js/vendor.m3n4o5p6.chunk.js',
         start_time: 170,
         response_end: 950,
         response_status: 200,

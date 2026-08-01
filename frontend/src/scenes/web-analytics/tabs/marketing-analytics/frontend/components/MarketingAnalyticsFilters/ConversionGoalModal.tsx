@@ -5,7 +5,7 @@ import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Button, Input, Modal } from '@hanzo/elements'
 
 import { Link } from 'lib/elements/Link'
-import { objectsEqual } from 'lib/utils'
+import { objectsEqual } from 'lib/utils/objects'
 import { urls } from 'scenes/urls'
 
 import { ConversionGoalFilter } from '~/queries/schema/schema-general'

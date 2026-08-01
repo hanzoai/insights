@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send user, company, and event data to Userlist",
     icon_url="/static/services/userlist.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 let base_uri := 'https://incoming.userlist.com/insights'
 

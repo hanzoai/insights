@@ -2,15 +2,13 @@ import re
 from collections.abc import Iterable
 from datetime import date, datetime
 from difflib import get_close_matches
-from typing import Any, Literal, Optional, Union, cast
+from typing import Any, ClassVar, Optional, cast, get_args
 from uuid import UUID
 
 from django.conf import settings as django_settings
 
-from insights.schema import MaterializationMode, PersonsOnEventsMode, PropertyGroupsMode
-
 from insights.insightsql import ast
-from insights.insightsql.ast import Constant, StringType
+from insights.insightsql.ast import StringType
 from insights.insightsql.base import AST
 from insights.insightsql.constants import (
     InsightsQLDialect,
@@ -20,41 +18,25 @@ from insights.insightsql.constants import (
     get_max_limit_for_context,
 )
 from insights.insightsql.context import InsightsQLContext
-from insights.insightsql.database.models import FunctionCallTable, Table
+from insights.insightsql.database.models import DatabaseField, FunctionCallTable, Table
 from insights.insightsql.errors import ImpossibleASTError, QueryError, ResolutionError
 from insights.insightsql.escape_sql import escape_insightsql_identifier, escape_insightsql_string
-from insights.insightsql.functions import (
-    ADD_OR_NULL_DATETIME_FUNCTIONS,
-    FIRST_ARG_DATETIME_FUNCTIONS,
-    find_insightsql_aggregation,
-    find_insightsql_function,
-    find_insightsql_postinsights_function,
-)
+from insights.insightsql.functions import find_insightsql_aggregation, find_insightsql_function, find_insightsql_postinsights_function
 from insights.insightsql.functions.core import validate_function_args
-from insights.insightsql.functions.embed_text import resolve_embed_text
 from insights.insightsql.functions.mapping import (
     ALL_EXPOSED_FUNCTION_NAMES,
     INSIGHTSQL_COMPARISON_MAPPING,
     is_allowed_parametric_function,
 )
-from insights.insightsql.printer.types import (
-    JoinExprResponse,
-    PrintableMaterializedColumn,
-    PrintableMaterializedPropertyGroupItem,
-)
+from insights.insightsql.printer.types import JoinExprResponse
+from insights.insightsql.resolver import resolve_types
 from insights.insightsql.resolver_utils import lookup_field_by_name
 from insights.insightsql.visitor import Visitor, clone_expr
 
-from insights.datastore.materialized_columns import (
-    MaterializedColumn,
-    TablesWithMaterializedColumns,
-    get_materialized_column_for_property,
-)
-from insights.datastore.property_groups import property_groups
-from insights.models.exchange_rate.sql import EXCHANGE_RATE_DICTIONARY_NAME
-from insights.models.property import PropertyName, TableColumn
-from insights.models.team.team import WeekStartDay
-from insights.models.utils import UUIDT
+from insights.datastore.kafka_engine import json_extract_trim_quotes
+from insights.schema_enums import PersonsOnEventsMode
+from insights.uuidt import UUIDT
+from insights.week_start_day import WeekStartDay
 
 MAX_PLACEHOLDER_MACRO_EXPANSION_DEPTH = 8
 
@@ -72,19 +54,27 @@ def resolve_field_type(expr: ast.Expr) -> ast.Type | None:
     return expr_type
 
 
-class InsightsQLPrinter(Visitor[str]):
-    # NOTE: Call "print_ast()", not this class directly.
+class BasePrinter(Visitor[str]):
+    # NOTE: Call "prepare_and_print_ast()", not this class directly.
+    # Shared AST walker for all dialect printers (InsightsQL, Datastore, Postgres).
+    # Each subclass sets ``DIALECT_NAME`` to identify itself for error messages and
+    # resolver wiring; dialect-specific rendering lives in subclass-overridden hooks.
+
+    DIALECT_NAME: ClassVar[InsightsQLDialect]
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if not hasattr(cls, "DIALECT_NAME"):
+            raise TypeError(f"{cls.__name__} must define DIALECT_NAME")
 
     def __init__(
         self,
         context: InsightsQLContext,
-        dialect: InsightsQLDialect,
         stack: list[AST] | None = None,
         settings: InsightsQLGlobalSettings | None = None,
         pretty: bool = False,
     ):
         self.context = context
-        self.dialect = dialect
         self.stack: list[AST] = stack or []  # Keep track of all traversed nodes.
         self.settings = settings
         self.pretty = pretty
@@ -95,6 +85,150 @@ class InsightsQLPrinter(Visitor[str]):
 
     def indent(self, extra: int = 0):
         return " " * self.tab_size * (self._indent + extra)
+
+    def _min_function_name(self) -> str:
+        """Name of the 2-argument min function for the auto-applied top-level LIMIT cap.
+
+        Defaults to the Datastore spelling; dialects with a different name override this.
+        """
+        return "min2"
+
+    def _expands_placeholder_macros(self) -> bool:
+        """Whether placeholder-argument macros should be expanded into their SQL rendering.
+
+        SQL dialects expand (default); InsightsQL leaves them in their original form for round-trip printing.
+        """
+        return True
+
+    def _assert_set_operator_supported(self, set_operator: str) -> None:
+        """Raise if this dialect does not support the given set operator. Postgres overrides to permit all."""
+        # Allowlist gate against `setattr`-bypass — the printer interpolates `set_operator` verbatim into emitted SQL.
+        if set_operator not in get_args(ast.SetOperator):
+            raise QueryError(f"Invalid set operator: {set_operator!r}")
+        if set_operator in ("INTERSECT ALL", "EXCEPT ALL"):
+            raise ImpossibleASTError(f"{set_operator} is not supported in the '{self.DIALECT_NAME}' dialect")
+        if set_operator.endswith(" BY NAME"):
+            # The resolver lowers BY NAME for Datastore; reaching the printer means this dialect has
+            # neither native support nor a lowering, so refuse rather than emit SQL the engine rejects.
+            raise QueryError(f"{set_operator} is not supported in the '{self.DIALECT_NAME}' dialect")
+
+    def _assert_recursive_cte_supported(self) -> None:
+        """Raise if this dialect does not support recursive CTEs. Postgres overrides to permit."""
+        raise ImpossibleASTError("Recursive CTEs are only supported in PostgreSQL dialect")
+
+    def _assert_qualify_supported(self) -> None:
+        """Raise if this dialect does not support the QUALIFY clause. Postgres overrides to permit."""
+        raise QueryError("QUALIFY is not supported in the '{}' dialect".format(self.DIALECT_NAME))
+
+    def _assert_with_ties_supported(self) -> None:
+        """Raise if this dialect does not support WITH TIES. Postgres overrides to reject."""
+        return
+
+    def _render_column_aliases_inline_suffix(self, column_aliases: list[str]) -> str:
+        """Suffix appended to ``AS alias`` when ``column_aliases`` are present. Postgres emits ``(col_a, col_b)``."""
+        return ""
+
+    def _render_column_aliases_appended(self, column_aliases: list[str]) -> str | None:
+        """String appended to the join-expression list when column aliases apply outside a SELECT alias.
+
+        Default returns ``None`` (not emitted); Postgres returns ``(col_a, col_b)``.
+        """
+        return None
+
+    def _dict_tuple_function_name(self) -> str:
+        """Name of the tuple-constructor function used when lowering a InsightsQL dict literal. Postgres uses ``ROW``."""
+        return "tuple"
+
+    def _render_column_aliased_field_name(self, type: "ast.FieldType", resolved_field) -> str:
+        """Column name to emit when the enclosing table type is ``ColumnAliasedTableType``.
+
+        Default uses the resolved database column name. Postgres overrides to use the alias declared on
+        the table type (Postgres renames the projection via the ``(a, b, c)`` syntax).
+        """
+        return self._print_identifier(resolved_field.name)
+
+    def _apply_window_function_rewrites(
+        self, identifier: str, exprs: list[str], cloned_node: "ast.WindowFunction"
+    ) -> str:
+        """Rewrite ``lag``/``lead`` into the Datastore ``lagInFrame``/``leadInFrame`` form.
+
+        The rewrite renames the function, wraps the value argument in ``toNullable``, and injects a default
+        window frame when none is present. Postgres overrides to return the identifier unchanged because its
+        native ``lag``/``lead`` already provides the desired semantics.
+        """
+        if identifier not in ("lag", "lead"):
+            return identifier
+        identifier = f"{identifier}InFrame"
+        # Wrap the first expression (value) and third expression (default) in toNullable()
+        # The second expression (offset) must remain a non-nullable integer
+        if len(exprs) > 0:
+            exprs[0] = f"toNullable({exprs[0]})"  # value
+        # If there's no window frame specified, add the default one
+        if not cloned_node.over_expr and not cloned_node.over_identifier:
+            cloned_node.over_expr = self._create_default_window_frame(cloned_node)
+        # If there's an over_identifier, we need to extract the new window expr just for this function
+        elif cloned_node.over_identifier:
+            # Find the last select query to look up the window definition
+            last_select = self._last_select()
+            if last_select and last_select.window_exprs and cloned_node.over_identifier in last_select.window_exprs:
+                base_window = last_select.window_exprs[cloned_node.over_identifier]
+                # Create a new window expr based on the referenced one
+                cloned_node.over_expr = ast.WindowExpr(
+                    partition_by=base_window.partition_by,
+                    order_by=base_window.order_by,
+                    frame_method="ROWS" if not base_window.frame_method else base_window.frame_method,
+                    frame_start=base_window.frame_start
+                    or ast.WindowFrameExpr(frame_type="PRECEDING", frame_value=None),
+                    frame_end=base_window.frame_end or ast.WindowFrameExpr(frame_type="FOLLOWING", frame_value=None),
+                )
+                cloned_node.over_identifier = None
+        # If there's an ORDER BY but no frame, add the default frame
+        elif cloned_node.over_expr and cloned_node.over_expr.order_by and not cloned_node.over_expr.frame_method:
+            cloned_node.over_expr = self._create_default_window_frame(cloned_node)
+        return identifier
+
+    def _render_set_query_limit_percent(self, limit: ast.Expr, limit_str: str) -> str:
+        """Render the LIMIT value for a set-operation query when `LIMIT … PERCENT` was used.
+
+        `limit_str` is the already-visited limit expression. The default raises because
+        most dialects don't support LIMIT percent; CH and PG override.
+        """
+        raise QueryError(f"LIMIT percent is not allowed in {self.DIALECT_NAME} dialect")
+
+    def _render_select_query_limit_clause(self, limit: ast.Expr, is_percent: bool) -> str:
+        """Render the full LIMIT clause (including the keyword) for a single SELECT.
+
+        Default handles the non-percent case and raises for percent; CH and PG override.
+        """
+        if is_percent:
+            raise QueryError(f"LIMIT percent is not allowed in {self.DIALECT_NAME} dialect")
+        return f"LIMIT {self.visit(limit)}"
+
+    def _validate_within_group_for_aggregation(self, node: "ast.Call", func_meta) -> None:
+        """Validate that this dialect accepts the WITHIN GROUP clause for `node`.
+
+        Default: permitted. Datastore overrides to reject.
+        """
+        return
+
+    def _render_aggregation_name(self, node: "ast.Call", func_meta) -> str:
+        """Render the function name portion of an aggregation call.
+
+        Default: use the Datastore name from the function registry. InsightsQL overrides
+        to preserve `node.name` (PR 3).
+        """
+        return func_meta.datastore_name
+
+    def _get_connection_supported_functions(self) -> set[str]:
+        metadata = self.context.direct_postgres_connection_metadata
+        if not isinstance(metadata, dict):
+            return set()
+
+        available_functions = metadata.get("available_functions")
+        if not isinstance(available_functions, list):
+            return set()
+
+        return {function_name.lower() for function_name in available_functions if isinstance(function_name, str)}
 
     def visit(self, node: AST | None):
         if node is None:
@@ -108,30 +242,71 @@ class InsightsQLPrinter(Visitor[str]):
         return response
 
     def visit_cte(self, node: ast.CTE):
-        if node.cte_type == "subquery":
-            return f"{node.name} AS {self.visit(node.expr)}"
+        if node.materialized is not None:
+            raise ImpossibleASTError(
+                f"CTE materialization hints are not supported in the '{self.DIALECT_NAME}' dialect"
+            )
+        if node.using_key is not None:
+            raise ImpossibleASTError(f"CTE USING KEY is not supported in the '{self.DIALECT_NAME}' dialect")
 
-        return f"{self.visit(node.expr)} AS {node.name}"
+        if node.cte_type == "subquery":
+            if node.columns is not None:
+                raise NotImplementedError("CTE column name lists are not supported in this dialect")
+            return f"{self._print_identifier(node.name)} AS {self.visit(node.expr)}"
+        return f"{self.visit(node.expr)} AS {self._print_identifier(node.name)}"
+
+    def visit_grouping_set(self, node: ast.GroupingSet):
+        inner = ", ".join(self.visit(e) for e in node.exprs)
+        return f"({inner})"
+
+    def _visit_set_operand(self, node: ast.SelectQuery | ast.SelectSetQuery) -> str:
+        """Render one operand of a set query (UNION/INTERSECT/EXCEPT). Dialects whose grammar
+        needs each operand parenthesized (e.g. to carry a per-branch LIMIT) override this."""
+        query = self.visit(node)
+        if self.pretty:
+            query = query.strip()
+        return query
 
     def visit_select_set_query(self, node: ast.SelectSetQuery):
         self._indent -= 1
-        ret = self.visit(node.initial_select_query)
-        if self.pretty:
-            ret = ret.strip()
+        ret = self._visit_set_operand(node.initial_select_query)
         for expr in node.subsequent_select_queries:
-            query = self.visit(expr.select_query)
-            if self.pretty:
-                query = query.strip()
+            query = self._visit_set_operand(expr.select_query)
             if expr.set_operator is not None:
+                self._assert_set_operator_supported(expr.set_operator)
                 if self.pretty:
                     ret += f"\n{self.indent(1)}{expr.set_operator}\n{self.indent(1)}"
                 else:
                     ret += f" {expr.set_operator} "
             ret += query
         self._indent += 1
+        if node.limit is not None:
+            limit_str = self.visit(node.limit)
+            if node.limit_percent:
+                limit_str = self._render_set_query_limit_percent(node.limit, limit_str)
+
+            if node.limit_with_ties:
+                limit_str += " WITH TIES"
+            if self.pretty:
+                ret = ret.rstrip() + f"\n{self.indent(1)}LIMIT {limit_str}"
+            else:
+                ret += f" LIMIT {limit_str}"
+        if node.offset is not None:
+            offset_str = self.visit(node.offset)
+            if self.pretty:
+                ret = ret.rstrip() + f"\n{self.indent(1)}OFFSET {offset_str}"
+            else:
+                ret += f" OFFSET {offset_str}"
         if len(self.stack) > 1:
             return f"({ret.strip()})"
         return ret
+
+    def visit_values_query(self, node: ast.ValuesQuery):
+        rows = []
+        for row in node.rows:
+            values = ", ".join(self.visit(expr) for expr in row)
+            rows.append(f"({values})")
+        return f"(VALUES {', '.join(rows)})"
 
     def _print_select_columns(self, columns: Iterable[ast.Expr]) -> list[str]:
         return [self.visit(column) for column in columns]
@@ -182,8 +357,8 @@ class InsightsQLPrinter(Visitor[str]):
         ctes = [self.visit(cte) for cte in node.ctes.values()] if node.ctes else None
         has_recursive_cte = any(cte.recursive for cte in node.ctes.values()) if node.ctes else False
 
-        if has_recursive_cte and self.dialect != "postgres":
-            raise ImpossibleASTError("Recursive CTEs are only supported in PostgreSQL dialect")
+        if has_recursive_cte:
+            self._assert_recursive_cte_supported()
 
         window = (
             ", ".join(
@@ -194,8 +369,16 @@ class InsightsQLPrinter(Visitor[str]):
         )
         prewhere = self.visit(node.prewhere) if node.prewhere else None
         where = self.visit(where) if where else None
-        group_by = [self.visit(column) for column in node.group_by] if node.group_by else None
+        group_by: list[str] | None = None
+        if node.group_by:
+            if node.group_by_mode == "grouping_sets":
+                group_by = [self.visit(gs) for gs in node.group_by]
+            else:
+                group_by = [self.visit(column) for column in node.group_by]
         having = self.visit(node.having) if node.having else None
+        if node.qualify is not None:
+            self._assert_qualify_supported()
+        qualify = self.visit(node.qualify) if node.qualify else None
         order_by = [self.visit(column) for column in node.order_by] if node.order_by else None
 
         array_join = ""
@@ -221,22 +404,42 @@ class InsightsQLPrinter(Visitor[str]):
             array_join if array_join else None,
             f"PREWHERE{space}" + prewhere if prewhere else None,
             f"WHERE{space}" + where if where else None,
-            f"GROUP BY{space}{comma.join(group_by)}" if group_by and len(group_by) > 0 else None,
+            (
+                f"GROUP BY ALL"
+                if node.group_by_mode == "all"
+                else f"GROUP BY{space}GROUPING SETS ({comma.join(group_by or [])})"
+                if node.group_by_mode == "grouping_sets"
+                else f"GROUP BY{space}CUBE({comma.join(group_by or [])})"
+                if node.group_by_mode == "cube"
+                else f"GROUP BY{space}ROLLUP({comma.join(group_by or [])})"
+                if node.group_by_mode == "rollup"
+                else f"GROUP BY{space}{comma.join(group_by or [])}"
+            )
+            if node.group_by_mode == "all" or (group_by and len(group_by) > 0)
+            else None,
             f"HAVING{space}" + having if having else None,
+            f"QUALIFY{space}" + qualify if qualify else None,
             f"WINDOW{space}" + window if window else None,
             f"ORDER BY{space}{comma.join(order_by)}" if order_by and len(order_by) > 0 else None,
+            (
+                f"INTERPOLATE ({comma.join(self.visit(expr) for expr in node.interpolate)})"
+                if node.interpolate
+                else ("INTERPOLATE" if node.interpolate is not None else None)
+            ),
         ]
 
         limit = node.limit
-        if self.context.limit_top_select and is_top_level_query:
+        # TODO: We skip the 50k limit guard when LIMIT % is present. Revisit if we can cap percent limits safely.
+        if self.context.limit_top_select and is_top_level_query and not node.limit_percent:
             max_limit = get_max_limit_for_context(self.context.limit_context or LimitContext.QUERY)
+            min_function = self._min_function_name()
 
             if limit is not None:
                 if isinstance(limit, ast.Constant) and isinstance(limit.value, int):
                     limit.value = min(limit.value, max_limit)
                 else:
                     limit = ast.Call(
-                        name="min2",
+                        name=min_function,
                         args=[ast.Constant(value=max_limit), limit],
                     )
             else:
@@ -248,7 +451,10 @@ class InsightsQLPrinter(Visitor[str]):
             )
 
         if limit is not None:
-            clauses.append(f"LIMIT {self.visit(limit)}")
+            if node.limit_with_ties:
+                self._assert_with_ties_supported()
+            limit_str = self._render_select_query_limit_clause(limit, bool(node.limit_percent))
+            clauses.append(limit_str)
             if node.limit_with_ties:
                 clauses.append("WITH TIES")
 
@@ -290,43 +496,128 @@ class InsightsQLPrinter(Visitor[str]):
         table_type: ast.TableType | ast.LazyTableType,
         node_type: ast.TableOrSelectType,
     ):
-        if self.dialect != "insightsql":
-            raise NotImplementedError("InsightsQLPrinter._ensure_team_id_where_clause not overridden")
+        """Inject a ``team_id`` guard into the WHERE clause for SQL-lowering dialects.
+
+        Fail-fast by default: every SQL dialect must override this to enforce team isolation.
+        ``InsightsQLPrinter`` overrides to a no-op because it never produces a real query; CH and PG
+        enforce the guard.
+        """
+        raise NotImplementedError("BasePrinter._ensure_team_id_where_clause not overridden")
+
+    def _get_table_predicates(
+        self,
+        table_type: ast.TableType | ast.LazyTableType,
+        node_type: ast.TableOrSelectType | None,
+    ) -> list[ast.Expr]:
+        """Return predicate expressions from the table definition, resolved against the table's type."""
+        predicates = table_type.table.get_predicates()
+        if not predicates or node_type is None:
+            return []
+
+        scope = ast.SelectQueryType(tables={"t": node_type})
+        return [resolve_types(clone_expr(pred), self.context, self.DIALECT_NAME, [scope]) for pred in predicates]
+
+    def _ensure_access_control_where_clause(
+        self,
+        table_type: ast.TableType | ast.LazyTableType,
+        node_type: ast.TableOrSelectType | None,
+    ) -> ast.Expr | None:
+        """Object-level access-control guard for this table, or None.
+        Override it per dialect: Datastore enforces, Postgres/DuckDB/InsightsQL no-op.
+        """
+        raise NotImplementedError("BasePrinter._ensure_access_control_where_clause not overridden")
+
+    def _events_retention_floor(
+        self,
+        table_type: ast.TableType | ast.LazyTableType,
+        node_type: ast.TableOrSelectType | None,
+    ) -> ast.Expr | None:
+        """Floor events-table scans to the team's retention window. Overridden by the Datastore dialect;
+        default no-op — the InsightsQL and warehouse dialects don't enforce events retention."""
+        return None
 
     def _print_table_ref(self, table_type: ast.TableType | ast.LazyTableType, node: ast.JoinExpr) -> str:
-        if self.dialect == "insightsql":
-            return table_type.table.to_printed_insightsql()
-        raise ImpossibleASTError(f"Unsupported dialect {self.dialect}")
+        """Print a table reference. Fail-fast by default: each dialect must override.
+
+        ``InsightsQLPrinter`` returns the InsightsQL identifier; SQL dialects resolve to real table names.
+        """
+        raise ImpossibleASTError(f"Unsupported dialect {type(self).__name__}")
+
+    def _render_lazy_table_join_expr(self, node: ast.JoinExpr) -> str:
+        """Render a ``LazyTableType`` join target. SQL dialects resolve these before printing."""
+        table_type = cast(ast.LazyTableType, node.type)
+        raise ImpossibleASTError(f"Unexpected LazyTableType for: {table_type.table.to_printed_insightsql()}")
+
+    def _render_untyped_join_expr(self, node: ast.JoinExpr) -> list[str]:
+        """Render a join target that isn't a known resolved type. SQL dialects reject; InsightsQL renders the raw node."""
+        raise QueryError(
+            f"Only selecting from a table or a subquery is supported. Unexpected type: {node.type.__class__.__name__}"
+        )
 
     def visit_join_expr(self, node: ast.JoinExpr) -> JoinExprResponse:
         # Constraints to add to the SELECT's WHERE clause (for most join types)
         extra_where: ast.Expr | None = None
-        # For LEFT JOINs, team_id goes in ON instead of WHERE to preserve NULL rows
-        team_id_for_on_clause: ast.Expr | None = None
+        # For LEFT JOINs, guards (team_id + access control) go in ON instead of WHERE to preserve NULL rows
+        on_clause_guard: ast.Expr | None = None
 
         join_strings = []
-
         if node.join_type is not None:
-            join_strings.append(node.join_type)
+            # Allowlist gate against `setattr`-bypass — the printer interpolates `join_type` verbatim into emitted SQL.
+            jt = node.join_type
+            if not (
+                jt in ast.VALID_JOIN_TYPES
+                or (jt.startswith("GLOBAL ") and jt.removeprefix("GLOBAL ") in ast.VALID_JOIN_TYPES)
+            ):
+                raise QueryError(f"Invalid join type: {jt!r}")
+            join_strings.append(jt)
 
-        if isinstance(node.type, ast.TableAliasType) or isinstance(node.type, ast.TableType):
-            table_type: ast.TableType | ast.LazyTableType | ast.TableAliasType = node.type
-            while isinstance(table_type, ast.TableAliasType):
-                table_type = cast(ast.TableType | ast.LazyTableType | ast.TableAliasType, table_type.table_type)
+        if isinstance(node.type, (ast.TableAliasType, ast.ColumnAliasedTableType, ast.TableType)):
+            table_type: ast.TableType | ast.LazyTableType | ast.TableAliasType | ast.ColumnAliasedTableType = node.type
+            while isinstance(table_type, (ast.TableAliasType, ast.ColumnAliasedTableType)):
+                table_type = cast(
+                    ast.TableType | ast.LazyTableType | ast.TableAliasType | ast.ColumnAliasedTableType,
+                    table_type.table_type,
+                )
 
             if not isinstance(table_type, ast.TableType) and not isinstance(table_type, ast.LazyTableType):
                 raise ImpossibleASTError(f"Invalid table type {type(table_type).__name__} in join_expr")
 
             self._collect_table_top_level_settings(table_type.table)
 
-            # :IMPORTANT: Ensures team_id filtering on every table. For LEFT JOINs, we add it to the
-            # ON clause (not WHERE) to preserve LEFT JOIN semantics - otherwise NULL rows get filtered out.
+            # :IMPORTANT: Ensures team_id and resource_id filtering on every table.
+            # For LEFT JOINs, we add guards to ON (not WHERE) to preserve NULL rows.
             team_id_expr = self._ensure_team_id_where_clause(table_type, node.type)
-            is_left_join = node.join_type is not None and "LEFT" in node.join_type
-            if is_left_join and team_id_expr is not None and node.constraint is not None:
-                team_id_for_on_clause = team_id_expr
+            access_control_expr = self._ensure_access_control_where_clause(table_type, node.type)
+
+            combined_guard: ast.Expr | None = None
+            if team_id_expr and access_control_expr:
+                combined_guard = ast.And(exprs=[team_id_expr, access_control_expr], type=ast.BooleanType())
             else:
-                extra_where = team_id_expr
+                combined_guard = team_id_expr or access_control_expr
+
+            is_left_join = node.join_type is not None and "LEFT" in node.join_type
+            if is_left_join and combined_guard is not None and node.constraint is not None:
+                on_clause_guard = combined_guard
+            else:
+                extra_where = combined_guard
+
+            # Apply table-level predicates (e.g., date filters on PostgresTable), plus the cohort-gated
+            # events-retention floor (timestamp > now() - retention) injected at the lowest level on the events table.
+            predicate_exprs = self._get_table_predicates(table_type, node.type)
+            retention_floor = self._events_retention_floor(table_type, node.type)
+            if retention_floor is not None:
+                predicate_exprs = [*predicate_exprs, retention_floor]
+            for pred in predicate_exprs:
+                if is_left_join and node.constraint is not None:
+                    if on_clause_guard is None:
+                        on_clause_guard = pred
+                    else:
+                        on_clause_guard = ast.And(exprs=[on_clause_guard, pred])
+                else:
+                    if extra_where is None:
+                        extra_where = pred
+                    else:
+                        extra_where = ast.And(exprs=[extra_where, pred])
 
             sql = self._print_table_ref(table_type, node)
 
@@ -353,7 +644,11 @@ class InsightsQLPrinter(Visitor[str]):
 
             join_strings.append(sql)
 
-            if isinstance(node.type, ast.TableAliasType) and node.alias is not None and node.alias != sql:
+            if (
+                isinstance(node.type, (ast.TableAliasType, ast.ColumnAliasedTableType))
+                and node.alias is not None
+                and node.alias != sql
+            ):
                 join_strings.append(f"AS {self._print_identifier(node.alias)}")
 
         elif isinstance(node.type, ast.SelectQueryType):
@@ -375,22 +670,21 @@ class InsightsQLPrinter(Visitor[str]):
 
         elif isinstance(node.type, ast.SelectQueryAliasType) and node.alias is not None:
             join_strings.append(self.visit(node.table))
-            join_strings.append(f"AS {self._print_identifier(node.alias)}")
+            alias_str = f"AS {self._print_identifier(node.alias)}"
+            if node.column_aliases:
+                alias_str += self._render_column_aliases_inline_suffix(node.column_aliases)
+            join_strings.append(alias_str)
 
         elif isinstance(node.type, ast.LazyTableType):
-            if self.dialect == "insightsql":
-                join_strings.append(self._print_identifier(node.type.table.to_printed_insightsql()))
-            else:
-                raise ImpossibleASTError(f"Unexpected LazyTableType for: {node.type.table.to_printed_insightsql()}")
+            join_strings.append(self._render_lazy_table_join_expr(node))
 
-        elif self.dialect == "insightsql":
-            join_strings.append(self.visit(node.table))
-            if node.alias is not None:
-                join_strings.append(f"AS {self._print_identifier(node.alias)}")
         else:
-            raise QueryError(
-                f"Only selecting from a table or a subquery is supported. Unexpected type: {node.type.__class__.__name__}"
-            )
+            join_strings.extend(self._render_untyped_join_expr(node))
+
+        if node.column_aliases and not isinstance(node.type, ast.SelectQueryAliasType):
+            appended = self._render_column_aliases_appended(node.column_aliases)
+            if appended is not None:
+                join_strings.append(appended)
 
         if node.table_final:
             raise QueryError("The FINAL keyword is not supported in InsightsQL as it causes slow queries")
@@ -401,8 +695,11 @@ class InsightsQLPrinter(Visitor[str]):
                 join_strings.append(sample_clause)
 
         if node.constraint is not None:
-            if team_id_for_on_clause is not None:
-                combined_constraint = ast.And(exprs=[team_id_for_on_clause, node.constraint.expr])
+            # Allowlist gate against `setattr`-bypass — the printer interpolates `constraint_type` verbatim.
+            if node.constraint.constraint_type not in ast.VALID_JOIN_CONSTRAINT_TYPES:
+                raise QueryError(f"Invalid join constraint type: {node.constraint.constraint_type!r}")
+            if on_clause_guard is not None:
+                combined_constraint = ast.And(exprs=[on_clause_guard, node.constraint.expr])
                 join_strings.append(f"{node.constraint.constraint_type} {self.visit(combined_constraint)}")
             else:
                 join_strings.append(f"{node.constraint.constraint_type} {self.visit(node.constraint)}")
@@ -441,10 +738,61 @@ class InsightsQLPrinter(Visitor[str]):
     def visit_not(self, node: ast.Not):
         return f"not({self.visit(node.expr)})"
 
+    def visit_named_argument(self, node: ast.NamedArgument):
+        return f"{self._print_identifier(node.name)} := {self.visit(node.value)}"
+
+    def visit_positional_ref(self, node: ast.PositionalRef):
+        if not isinstance(node.index, int) or node.index < 1:
+            raise QueryError(f"Positional reference must be a positive integer, got {node.index}")
+        return f"#{node.index}"
+
+    def _print_join_expr_chain(self, node: ast.JoinExpr) -> str:
+        parts: list[str] = []
+        next_join: ast.JoinExpr | None = node
+        while isinstance(next_join, ast.JoinExpr):
+            visited = self.visit_join_expr(next_join)
+            if visited.where is not None:
+                raise QueryError("JOIN PIVOT/UNPIVOT cannot apply extra WHERE constraints")
+            parts.append(visited.printed_sql)
+            next_join = next_join.next_join
+        return " ".join(parts)
+
+    def visit_unpivot_expr(self, node: ast.UnpivotExpr):
+        if isinstance(node.table, ast.JoinExpr):
+            table = self._print_join_expr_chain(node.table)
+        else:
+            table_expr = self.visit(node.table)
+            table = table_expr.printed_sql if isinstance(table_expr, JoinExprResponse) else table_expr
+        columns = " ".join(self.visit(col) for col in node.columns)
+        include_nulls = "INCLUDE NULLS " if node.include_nulls else ""
+        return f"{table} UNPIVOT {include_nulls}({columns})"
+
+    def visit_unpivot_column(self, node: ast.UnpivotColumn):
+        value_cols = self.visit(node.value_columns)
+        name_cols = self.visit(node.name_columns)
+        values = ", ".join(self.visit(val) for val in node.unpivot_values)
+        return f"{value_cols} FOR {name_cols} IN ({values})"
+
+    def visit_pivot_expr(self, node: ast.PivotExpr):
+        if isinstance(node.table, ast.JoinExpr):
+            table = self._print_join_expr_chain(node.table)
+        else:
+            table_expr = self.visit(node.table)
+            table = table_expr.printed_sql if isinstance(table_expr, JoinExprResponse) else table_expr
+        aggregates = ", ".join(self.visit(agg) for agg in node.aggregates)
+        columns = " ".join(self.visit(col) for col in node.columns)
+        group_by = f" GROUP BY {', '.join(self.visit(g) for g in node.group_by)}" if node.group_by else ""
+        return f"{table} PIVOT ({aggregates} FOR {columns}{group_by})"
+
+    def visit_pivot_column(self, node: ast.PivotColumn):
+        column = self.visit(node.column)
+        values = ", ".join(self.visit(val) for val in node.values)
+        return f"{column} IN ({values})"
+
     def visit_tuple_access(self, node: ast.TupleAccess):
         visited_tuple = self.visit(node.tuple)
         visited_index = int(str(node.index))
-        symbol = "?." if self.dialect == "insightsql" and node.nullish else "."
+        symbol = self._tuple_access_separator(bool(node.nullish))
         if isinstance(node.tuple, ast.Field) or isinstance(node.tuple, ast.Tuple) or isinstance(node.tuple, ast.Call):
             return f"{visited_tuple}{symbol}{visited_index}"
         return f"({visited_tuple}){symbol}{visited_index}"
@@ -453,29 +801,73 @@ class InsightsQLPrinter(Visitor[str]):
         return f"tuple({', '.join([self.visit(expr) for expr in node.exprs])})"
 
     def visit_array_access(self, node: ast.ArrayAccess):
-        symbol = "?." if self.dialect == "insightsql" and node.nullish else ""
-        return f"{self.visit(node.array)}{symbol}[{self.visit(node.property)}]"
+        symbol = self._array_access_prefix(bool(node.nullish))
+        array = self.visit(node.array)
+        # `[...]` binds tighter than any infix-printed form, so a loose operand
+        # must be parenthesized or the printed text re-parses with the access on
+        # the operand's last token (`(1 AS x)[1]` would print as `1 AS x[1]`,
+        # which doesn't parse back).
+        if isinstance(node.array, ast.BetweenExpr | ast.IsDistinctFrom) or (
+            isinstance(node.array, ast.Alias) and not node.array.hidden
+        ):
+            array = f"({array})"
+        return f"{array}{symbol}[{self.visit(node.property)}]"
+
+    def _tuple_access_separator(self, nullish: bool) -> str:
+        """Separator for tuple-access expressions. InsightsQL overrides to emit nullish ``?.`` when requested."""
+        return "."
+
+    def _array_access_prefix(self, nullish: bool) -> str:
+        """Prefix applied before ``[...]`` in array-access expressions. InsightsQL overrides for nullish ``?.``."""
+        return ""
+
+    def visit_array_slice(self, node: ast.ArraySlice):
+        raise QueryError(f"Array slices are not allowed in {self.DIALECT_NAME} dialect")
 
     def visit_array(self, node: ast.Array):
         return f"[{', '.join([self.visit(expr) for expr in node.exprs])}]"
 
     def visit_dict(self, node: ast.Dict):
-        tuple_function = "ROW" if self.dialect == "postgres" else "tuple"
+        tuple_function = self._dict_tuple_function_name()
         str = f"{tuple_function}('__hx_tag', '__hx_obj'"
         for key, value in node.items:
             str += f", {self.visit(key)}, {self.visit(value)}"
         return str + ")"
 
+    def visit_try_cast(self, node: ast.TryCast):
+        raise QueryError(f"TRY_CAST is not allowed in {self.DIALECT_NAME} dialect")
+
     def visit_lambda(self, node: ast.Lambda):
         identifiers = [self._print_identifier(arg) for arg in node.args]
         if len(identifiers) == 0:
             raise ValueError("Lambdas require at least one argument")
-        elif len(identifiers) == 1:
+        if len(identifiers) == 1:
             return f"{identifiers[0]} -> {self.visit(node.expr)}"
         return f"({', '.join(identifiers)}) -> {self.visit(node.expr)}"
 
     def visit_order_expr(self, node: ast.OrderExpr):
-        return f"{self.visit(node.expr)} {node.order}"
+        # Allowlist gate against `setattr`-bypass — the printer interpolates `order` verbatim.
+        if node.order not in ast.VALID_ORDER_DIRECTIONS:
+            raise QueryError(f"Invalid order direction: {node.order!r}")
+        result = f"{self.visit(node.expr)} {node.order}"
+        if node.with_fill is not None:
+            result += f" {self.visit(node.with_fill)}"
+        return result
+
+    def visit_with_fill_expr(self, node: ast.WithFillExpr):
+        parts = ["WITH FILL"]
+        if node.from_value is not None:
+            parts.append(f"FROM {self.visit(node.from_value)}")
+        if node.to_value is not None:
+            parts.append(f"TO {self.visit(node.to_value)}")
+        if node.step_value is not None:
+            parts.append(f"STEP {self.visit(node.step_value)}")
+        return " ".join(parts)
+
+    def visit_interpolate_expr(self, node: ast.InterpolateExpr):
+        if node.value is not None:
+            return f"{self.visit(node.expr)} AS {self.visit(node.value)}"
+        return self.visit(node.expr)
 
     def _get_compare_op(self, op: ast.CompareOperationOp, left: str, right: str) -> str:
         if op == ast.CompareOperationOp.Eq:
@@ -514,14 +906,14 @@ class InsightsQLPrinter(Visitor[str]):
             return f"less({left}, {right})"
         elif op == ast.CompareOperationOp.LtEq:
             return f"lessOrEquals({left}, {right})"
-        # only used for insightsql direct printing (no prepare called)
-        elif op == ast.CompareOperationOp.InCohort and self.dialect == "insightsql":
-            return f"{left} IN COHORT {right}"
-        # only used for insightsql direct printing (no prepare called)
-        elif op == ast.CompareOperationOp.NotInCohort and self.dialect == "insightsql":
-            return f"{left} NOT IN COHORT {right}"
-        else:
-            raise ImpossibleASTError(f"Unknown CompareOperationOp: {op.name}")
+        cohort = self._render_cohort_compare_op(op, left, right)
+        if cohort is not None:
+            return cohort
+        raise ImpossibleASTError(f"Unknown CompareOperationOp: {op.name}")
+
+    def _render_cohort_compare_op(self, op: ast.CompareOperationOp, left: str, right: str) -> str | None:
+        """Render ``InCohort`` / ``NotInCohort`` comparisons. Only InsightsQL supports these; others return None."""
+        return None
 
     def visit_compare_operation(self, node: ast.CompareOperation):
         left = self.visit(node.left)
@@ -529,23 +921,52 @@ class InsightsQLPrinter(Visitor[str]):
         return self._get_compare_op(node.op, left, right)
 
     def visit_between_expr(self, node: ast.BetweenExpr):
-        expr = self.visit(node.expr)
-        low = self.visit(node.low)
-        high = self.visit(node.high)
+        expr = self._visit_infix_operand(node.expr)
+        low = self._visit_infix_operand(node.low)
+        high = self._visit_infix_operand(node.high)
         not_kw = " NOT" if node.negated else ""
         op = f"{expr}{not_kw} BETWEEN {low} AND {high}"
 
         return op
 
+    def visit_is_distinct_from(self, node: ast.IsDistinctFrom):
+        left = self._visit_infix_operand(node.left)
+        right = self._visit_infix_operand(node.right)
+        not_kw = " NOT" if node.negated else ""
+        return f"{left} IS{not_kw} DISTINCT FROM {right}"
+
+    def _visit_infix_operand(self, node: ast.Expr) -> str:
+        """Visit an operand of an infix keyword operator, parenthesizing Alias
+        nodes since AS binds more loosely than BETWEEN / IS DISTINCT FROM."""
+        result = self.visit(node)
+        if isinstance(node, ast.Alias) and not node.hidden:
+            result = f"({result})"
+        return result
+
     def visit_constant(self, node: ast.Constant):
         # Inline everything in InsightsQL
         return self._print_escaped_string(node.value)
+
+    def visit_keyword(self, node: ast.Keyword):
+        # Allowlist gate against `setattr`-bypass — the printer returns `name` verbatim.
+        if node.name not in ast.VALID_KEYWORD_NAMES:
+            raise QueryError(f"Invalid keyword name: {node.name}")
+        return node.name
 
     def visit_field(self, node: ast.Field):
         if node.chain == ["*"]:
             return "*"
         # When printing InsightsQL, we print the properties out as a chain as they are.
         return ".".join([self._print_insightsql_identifier_or_index(identifier) for identifier in node.chain])
+
+    def visit_columns_expr(self, node: ast.ColumnsExpr):
+        raise ImpossibleASTError("Unexpected ast.ColumnsExpr. This should have been expanded by the resolver.")
+
+    def visit_spread_expr(self, node: ast.SpreadExpr):
+        raise ImpossibleASTError(
+            "*COLUMNS(...) can only be used to unpack columns inside function call arguments. "
+            "Use COLUMNS(...) for top-level column selection."
+        )
 
     def visit_call(self, node: ast.Call):
         func_meta = (
@@ -576,8 +997,14 @@ class InsightsQLPrinter(Visitor[str]):
                     )
 
             # Handle format strings in function names before checking function type
-            # For InsightsQL, don't expand the macro, just display it in its original shape.
-            if func_meta.using_placeholder_arguments and self.dialect != "insightsql":
+            # InsightsQL preserves the macro in its original shape; SQL dialects expand it.
+            if func_meta.using_placeholder_arguments and self._expands_placeholder_macros():
+                # The single-arg form of these is degenerate (equivalent to toFloatOrZero/toIntOrZero).
+                # For toFloatOrDefault this is pre-#58714 behavior kept so old saved queries still print;
+                # toIntOrDefault is new but made degenerate the same way for parity.
+                if len(node.args) == 1 and node.name in ("toFloatOrDefault", "toIntOrDefault"):
+                    zero_fn = "toFloatOrZero" if node.name == "toFloatOrDefault" else "toIntOrZero"
+                    return self.visit(ast.Call(name=zero_fn, args=node.args))
                 return self._render_placeholder_macro(
                     node=node,
                     datastore_name=func_meta.datastore_name,
@@ -597,6 +1024,10 @@ class InsightsQLPrinter(Visitor[str]):
                 )
             )
         elif func_meta := find_insightsql_aggregation(node.name):
+            if func_meta.requires_within_group and node.within_group is None:
+                raise QueryError(f"Aggregation '{node.name}' requires WITHIN GROUP")
+            self._validate_within_group_for_aggregation(node, func_meta)
+
             validate_function_args(
                 node.args,
                 func_meta.min_args,
@@ -627,11 +1058,28 @@ class InsightsQLPrinter(Visitor[str]):
 
             arg_strings = [self.visit(arg) for arg in node.args]
             params = [self.visit(param) for param in node.params] if node.params is not None else None
+            within_group = (
+                f" WITHIN GROUP (ORDER BY {', '.join(self.visit(expr) for expr in node.within_group)})"
+                if node.within_group
+                else ""
+            )
 
             params_part = f"({', '.join(params)})" if params is not None else ""
-            args_part = f"({'DISTINCT ' if node.distinct else ''}{', '.join(arg_strings)})"
+            order_by_part = f" ORDER BY {', '.join(self.visit(o) for o in node.order_by)}" if node.order_by else ""
+            args_body = f"{'DISTINCT ' if node.distinct else ''}{', '.join(arg_strings)}{order_by_part}"
+            args_part = (
+                ""
+                if node.within_group is not None and len(arg_strings) == 0 and not node.distinct and not node.order_by
+                else f"({args_body})"
+            )
 
-            return f"{node.name if self.dialect == 'insightsql' else func_meta.datastore_name}{params_part}{args_part}"
+            if node.within_group is not None and not func_meta.requires_within_group:
+                raise QueryError(f"Aggregation '{node.name}' does not support WITHIN GROUP")
+
+            filter_part = f" FILTER (WHERE {self.visit(node.filter_expr)})" if node.filter_expr else ""
+            return (
+                f"{self._render_aggregation_name(node, func_meta)}{params_part}{args_part}{within_group}{filter_part}"
+            )
 
         elif func_meta := find_insightsql_function(node.name):
             validate_function_args(
@@ -652,140 +1100,7 @@ class InsightsQLPrinter(Visitor[str]):
                     argument_term="parameter",
                 )
 
-            if self.dialect == "datastore":
-                args_count = len(node.args) - func_meta.passthrough_suffix_args_count
-                node_args, passthrough_suffix_args = node.args[:args_count], node.args[args_count:]
-
-                if node.name in FIRST_ARG_DATETIME_FUNCTIONS:
-                    args: list[str] = []
-                    for idx, arg in enumerate(node_args):
-                        if idx == 0:
-                            if isinstance(arg, ast.Call) and arg.name in ADD_OR_NULL_DATETIME_FUNCTIONS:
-                                args.append(f"assumeNotNull(toDateTime({self.visit(arg)}))")
-                            else:
-                                args.append(f"toDateTime({self.visit(arg)}, 'UTC')")
-                        else:
-                            args.append(self.visit(arg))
-                elif node.name == "concat":
-                    args = []
-                    for arg in node_args:
-                        if isinstance(arg, ast.Constant):
-                            if arg.value is None:
-                                args.append("''")
-                            elif isinstance(arg.value, str):
-                                args.append(self.visit(arg))
-                            else:
-                                args.append(f"toString({self.visit(arg)})")
-                        elif isinstance(arg, ast.Call) and arg.name == "toString":
-                            if len(arg.args) == 1 and isinstance(arg.args[0], ast.Constant):
-                                if arg.args[0].value is None:
-                                    args.append("''")
-                                else:
-                                    args.append(self.visit(arg))
-                            else:
-                                args.append(f"ifNull({self.visit(arg)}, '')")
-                        else:
-                            args.append(f"ifNull(toString({self.visit(arg)}), '')")
-                else:
-                    args = [self.visit(arg) for arg in node_args]
-
-                # Some of these `isinstance` checks are here just to make our type system happy
-                # We have some guarantees in place to ensure that the arguments are string/constants anyway
-                # Here's to hoping Python's type system gets as smart as TS's one day
-                if func_meta.suffix_args:
-                    for suffix_arg in func_meta.suffix_args:
-                        if len(passthrough_suffix_args) > 0:
-                            if not all(isinstance(arg, ast.Constant) for arg in passthrough_suffix_args):
-                                raise QueryError(
-                                    f"Suffix argument '{suffix_arg.value}' expects ast.Constant arguments, but got {', '.join([type(arg).__name__ for arg in passthrough_suffix_args])}"
-                                )
-
-                            suffix_arg_args_values = [
-                                arg.value for arg in passthrough_suffix_args if isinstance(arg, ast.Constant)
-                            ]
-
-                            if isinstance(suffix_arg.value, str):
-                                suffix_arg.value = suffix_arg.value.format(*suffix_arg_args_values)
-                            else:
-                                raise QueryError(
-                                    f"Suffix argument '{suffix_arg.value}' expects a string, but got {type(suffix_arg.value).__name__}"
-                                )
-                        args.append(self.visit(suffix_arg))
-
-                relevant_datastore_name = func_meta.datastore_name
-                if func_meta.overloads:
-                    first_arg_constant_type = (
-                        node.args[0].type.resolve_constant_type(self.context)
-                        if len(node.args) > 0 and node.args[0].type is not None
-                        else None
-                    )
-
-                    if first_arg_constant_type is not None:
-                        for (
-                            overload_types,
-                            overload_datastore_name,
-                        ) in func_meta.overloads:
-                            if isinstance(first_arg_constant_type, overload_types):
-                                relevant_datastore_name = overload_datastore_name
-                                break  # Found an overload matching the first function org
-
-                if func_meta.tz_aware:
-                    has_tz_override = len(node.args) == func_meta.max_args
-
-                    if not has_tz_override:
-                        args.append(self.visit(ast.Constant(value=self._get_timezone())))
-
-                    # If the datetime is in correct format, use optimal toDateTime, it's stricter but faster
-                    # and it allows CH to use index efficiently.
-                    if (
-                        relevant_datastore_name == "parseDateTime64BestEffortOrNull"
-                        and len(node.args) == 1
-                        and isinstance(node.args[0], Constant)
-                        and isinstance(node.args[0].type, StringType)
-                    ):
-                        relevant_datastore_name = "parseDateTime64BestEffort"
-                        pattern_with_microseconds_str = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,6}$"
-                        pattern_mysql_str = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"
-                        if re.match(pattern_with_microseconds_str, node.args[0].value):
-                            relevant_datastore_name = "toDateTime64"
-                        elif re.match(pattern_mysql_str, node.args[0].value) or re.match(
-                            r"^\d{4}-\d{2}-\d{2}$", node.args[0].value
-                        ):
-                            relevant_datastore_name = "toDateTime"
-                    if (
-                        relevant_datastore_name == "now64"
-                        and (len(node.args) == 0 or (has_tz_override and len(node.args) == 1))
-                    ) or (
-                        relevant_datastore_name
-                        in (
-                            "parseDateTime64BestEffortOrNull",
-                            "parseDateTime64BestEffortUSOrNull",
-                            "parseDateTime64BestEffort",
-                            "toDateTime64",
-                        )
-                        and (len(node.args) == 1 or (has_tz_override and len(node.args) == 2))
-                    ):
-                        # These two CH functions require a precision argument before timezone
-                        args = [*args[:-1], "6", *args[-1:]]
-
-                if node.name == "toStartOfWeek" and len(node.args) == 1:
-                    # If week mode hasn't been specified, use the project's default.
-                    # For Monday-based weeks mode 3 is used (which is ISO 8601), for Sunday-based mode 0 (CH default)
-                    args.insert(1, WeekStartDay(self._get_week_start_day()).datastore_mode)
-
-                if node.name == "trimLeft" and len(args) == 2:
-                    return f"trim(LEADING {args[1]} FROM {args[0]})"
-                elif node.name == "trimRight" and len(args) == 2:
-                    return f"trim(TRAILING {args[1]} FROM {args[0]})"
-                elif node.name == "trim" and len(args) == 2:
-                    return f"trim(BOTH {args[1]} FROM {args[0]})"
-
-                params = [self.visit(param) for param in node.params] if node.params is not None else None
-                params_part = f"({', '.join(params)})" if params is not None else ""
-                args_part = f"({', '.join(args)})"
-                return f"{relevant_datastore_name}{params_part}{args_part}"
-            else:
-                return f"{node.name}({', '.join([self.visit(arg) for arg in node.args])})"
+            return self._render_function_call(node, func_meta)
         elif func_meta := find_insightsql_postinsights_function(node.name):
             validate_function_args(
                 node.args,
@@ -794,59 +1109,48 @@ class InsightsQLPrinter(Visitor[str]):
                 node.name,
             )
 
-            args = [self.visit(arg) for arg in node.args]
-
-            if self.dialect == "datastore":
-                if node.name == "embedText":
-                    return self.visit_constant(resolve_embed_text(self.context.team, node))
-                elif node.name == "lookupDomainType":
-                    channel_dict = get_channel_definition_dict()
-                    return f"coalesce(dictGetOrNull('{channel_dict}', 'domain_type', (coalesce({args[0]}, ''), 'source')), dictGetOrNull('{channel_dict}', 'domain_type', (cutToFirstSignificantSubdomain(coalesce({args[0]}, '')), 'source')))"
-                elif node.name == "lookupPaidSourceType":
-                    channel_dict = get_channel_definition_dict()
-                    return f"coalesce(dictGetOrNull('{channel_dict}', 'type_if_paid', (coalesce({args[0]}, ''), 'source')) , dictGetOrNull('{channel_dict}', 'type_if_paid', (cutToFirstSignificantSubdomain(coalesce({args[0]}, '')), 'source')))"
-                elif node.name == "lookupPaidMediumType":
-                    channel_dict = get_channel_definition_dict()
-                    return f"dictGetOrNull('{channel_dict}', 'type_if_paid', (coalesce({args[0]}, ''), 'medium'))"
-                elif node.name == "lookupOrganicSourceType":
-                    channel_dict = get_channel_definition_dict()
-                    return f"coalesce(dictGetOrNull('{channel_dict}', 'type_if_organic', (coalesce({args[0]}, ''), 'source')), dictGetOrNull('{channel_dict}', 'type_if_organic', (cutToFirstSignificantSubdomain(coalesce({args[0]}, '')), 'source')))"
-                elif node.name == "lookupOrganicMediumType":
-                    channel_dict = get_channel_definition_dict()
-                    return f"dictGetOrNull('{channel_dict}', 'type_if_organic', (coalesce({args[0]}, ''), 'medium'))"
-                elif node.name == "convertCurrency":
-                    # convertCurrency(from_currency, to_currency, amount, timestamp?)
-                    from_currency, to_currency, amount, *_rest = args
-                    date = args[3] if len(args) > 3 and args[3] else "today()"
-                    db = django_settings.DATASTORE_DATABASE
-                    # Build rate lookup expressions
-                    from_rate = f"dictGetOrDefault(`{db}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', {from_currency}, {date}, toDecimal64(0, 10))"
-                    to_rate = f"dictGetOrDefault(`{db}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', {to_currency}, {date}, toDecimal64(0, 10))"
-                    # Use if() around divisor to avoid division by zero with enable_analyzer=0
-                    # (old analyzer evaluates all branches regardless of condition)
-                    safe_from_rate = f"if({from_rate} = 0, toDecimal64(1, 10), {from_rate})"
-                    return f"if(equals({from_currency}, {to_currency}), toDecimal64({amount}, 10), if({from_rate} = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64({amount}, 10), {safe_from_rate}), {to_rate})))"
-
-                relevant_datastore_name = func_meta.datastore_name
-                if "{}" in relevant_datastore_name:
-                    if len(args) != 1:
-                        raise QueryError(f"Function '{node.name}' requires exactly one argument")
-                    return relevant_datastore_name.format(args[0])
-
-                params = [self.visit(param) for param in node.params] if node.params is not None else None
-                params_part = f"({', '.join(params)})" if params is not None else ""
-                args_part = f"({', '.join(args)})"
-                return f"{relevant_datastore_name}{params_part}{args_part}"
-
-            # If insightsql dialect, just keep it as is
-            return f"{node.name}({', '.join(args)})"
+            return self._render_postinsights_function_call(node, func_meta)
         else:
+            passthrough = self._render_connection_supported_function(node)
+            if passthrough is not None:
+                return passthrough
+
+            # SQL/Python-style cast names (int, float, string, uuid, …) map to InsightsQL's
+            # to<Type> functions. Prefer that hint over the lexically-nearest name — for a
+            # short input like "int" the closest match is the operator "in", which sends
+            # users down the wrong path instead of toward "toInt". Match case-insensitively
+            # so casts with internal capitals (toUUID, toDateTime) are found and the
+            # canonically-cased name is suggested.
+            cast_suggestion = {name.lower(): name for name in ALL_EXPOSED_FUNCTION_NAMES}.get(f"to{node.name}".lower())
+            if cast_suggestion is not None:
+                raise QueryError(
+                    f"Unsupported function call '{node.name}(...)'. Perhaps you meant '{cast_suggestion}(...)'?"
+                )
+
             close_matches = get_close_matches(node.name, ALL_EXPOSED_FUNCTION_NAMES, 1)
             if len(close_matches) > 0:
                 raise QueryError(
                     f"Unsupported function call '{node.name}(...)'. Perhaps you meant '{close_matches[0]}(...)'?"
                 )
             raise QueryError(f"Unsupported function call '{node.name}(...)'")
+
+    def _render_connection_supported_function(self, node: "ast.Call") -> str | None:
+        """Pass a function call through unchanged if the underlying connection supports it.
+
+        Only InsightsQL (used against a direct-Postgres connection) opts in; other dialects return None.
+        """
+        return None
+
+    def _render_function_call(self, node: "ast.Call", func_meta) -> str:
+        """Render a standard InsightsQL function call. Default is the InsightsQL/pass-through shape; CH overrides."""
+        order_by_part = f" ORDER BY {', '.join(self.visit(o) for o in node.order_by)}" if node.order_by else ""
+        filter_part = f" FILTER (WHERE {self.visit(node.filter_expr)})" if node.filter_expr else ""
+        return f"{node.name}({', '.join([self.visit(arg) for arg in node.args])}{order_by_part}){filter_part}"
+
+    def _render_postinsights_function_call(self, node: "ast.Call", func_meta) -> str:
+        """Render a Insights-extension function call. Default is InsightsQL pass-through; CH overrides."""
+        args = [self.visit(arg) for arg in node.args]
+        return f"{node.name}({', '.join(args)})"
 
     def visit_placeholder(self, node: ast.Placeholder):
         if node.field is None:
@@ -898,10 +1202,14 @@ class InsightsQLPrinter(Visitor[str]):
     def visit_table_alias_type(self, type: ast.TableAliasType):
         return self._print_identifier(type.alias)
 
+    def visit_column_aliased_table_type(self, type: ast.ColumnAliasedTableType):
+        return self._print_identifier(type.alias)
+
     def visit_lambda_argument_type(self, type: ast.LambdaArgumentType):
         return self._print_identifier(type.name)
 
     def visit_field_type(self, type: ast.FieldType):
+        name_resolution_ambiguous = False
         try:
             last_select = self._last_select()
             type_with_name_in_scope = (
@@ -910,11 +1218,14 @@ class InsightsQLPrinter(Visitor[str]):
                 else None
             )
         except ResolutionError:
+            # The name resolves to more than one source: it genuinely needs a table prefix to disambiguate.
             type_with_name_in_scope = None
+            name_resolution_ambiguous = True
 
         if (
             isinstance(type.table_type, ast.TableType)
             or isinstance(type.table_type, ast.TableAliasType)
+            or isinstance(type.table_type, ast.ColumnAliasedTableType)
             or isinstance(type.table_type, ast.VirtualTableType)
         ):
             resolved_field = type.resolve_database_field(self.context)
@@ -946,10 +1257,26 @@ class InsightsQLPrinter(Visitor[str]):
                 else:
                     field_sql = "person_props"
             else:
-                # this errors because resolved_field is of type ast.Alias and not a field - what's the best way to solve?
-                field_sql = self._print_identifier(resolved_field.name)
-                if self.context.within_non_insightsql_query and type_with_name_in_scope == type:
-                    # Do not prepend table name in non-insightsql context. We don't know what it actually is.
+                # For column-aliased tables in postgres, use the aliased name
+                # (the DB handles renaming via the (a,b,c) syntax). For other
+                # dialects, use the real DB column name.
+                if isinstance(type.table_type, ast.ColumnAliasedTableType):
+                    field_sql = self._render_column_aliased_field_name(type, resolved_field)
+                else:
+                    # resolved_field may be an ast.Alias; in both cases .name is the physical column name to emit
+                    if not isinstance(resolved_field, DatabaseField):
+                        raise QueryError(f"Can't resolve field {type.name}")
+                    field_sql = self._print_identifier(resolved_field.name)
+                if (
+                    self.context.within_non_insightsql_query
+                    and not name_resolution_ambiguous
+                    and (type_with_name_in_scope is None or type_with_name_in_scope == type)
+                ):
+                    # Print the column bare. A non-InsightsQL fragment (lightweight-DELETE predicate, legacy insight) splices
+                    # into a single-base-table context whose mutation analyzer rejects table-qualified names. We can drop
+                    # the prefix whenever the bare name is unambiguous: it resolves to *this* field, or to nothing at all
+                    # (e.g. a materialized column the physical pass synthesized, which isn't in the InsightsQL scope). We keep
+                    # the prefix only when the name resolves to a *different* field (shadowing) or is ambiguous.
                     return field_sql
                 field_sql = f"{self.visit(type.table_type)}.{field_sql}"
 
@@ -985,133 +1312,25 @@ class InsightsQLPrinter(Visitor[str]):
 
         return field_sql
 
-    def _get_materialized_property_source_for_property_type(
-        self, type: ast.PropertyType
-    ) -> PrintableMaterializedColumn | PrintableMaterializedPropertyGroupItem | None:
-        """
-        Find the most efficient materialized property source for the provided property type.
-        """
-        for source in self._get_all_materialized_property_sources(type.field_type, str(type.chain[0])):
-            return source
-        return None
-
-    def _get_table_name(self, table: ast.TableType) -> str:
-        return table.table.to_printed_insightsql()
-
-    def _get_all_materialized_property_sources(
-        self, field_type: ast.FieldType, property_name: str
-    ) -> Iterable[PrintableMaterializedColumn | PrintableMaterializedPropertyGroupItem]:
-        """
-        Find all materialized property sources for the provided field type and property name, ordered from what is
-        likely to be the most efficient access path to the least efficient.
-        """
-        # TODO: It likely makes sense to make this independent of whether or not property groups are used.
-        if self.context.modifiers.materializationMode == "disabled":
-            return
-
-        field = field_type.resolve_database_field(self.context)
-
-        # check for a materialised column
-        table = field_type.table_type
-        while isinstance(table, ast.TableAliasType) or isinstance(table, ast.VirtualTableType):
-            table = table.table_type
-
-        if isinstance(table, ast.TableType):
-            table_name = self._get_table_name(table)
-
-            if field is None:
-                raise QueryError(f"Can't resolve field {field_type.name} on table {table_name}")
-            field_name = cast(Union[Literal["properties"], Literal["person_properties"]], field.name)
-
-            materialized_column = self._get_materialized_column(table_name, property_name, field_name)
-            if materialized_column is not None:
-                yield PrintableMaterializedColumn(
-                    self.visit(field_type.table_type),
-                    self._print_identifier(materialized_column.name),
-                    is_nullable=materialized_column.is_nullable,
-                    has_minmax_index=materialized_column.has_minmax_index,
-                    has_ngram_lower_index=materialized_column.has_ngram_lower_index,
-                    has_bloom_filter_index=materialized_column.has_bloom_filter_index,
-                )
-
-            # Check for dmat (dynamic materialized) columns
-            if dmat_column := self._get_dmat_column(table_name, field_name, property_name):
-                yield PrintableMaterializedColumn(
-                    self.visit(field_type.table_type),
-                    self._print_identifier(dmat_column),
-                    is_nullable=True,
-                    has_minmax_index=False,
-                    has_ngram_lower_index=False,
-                    has_bloom_filter_index=False,
-                )
-
-            if self.dialect == "datastore" and self.context.modifiers.propertyGroupsMode in (
-                PropertyGroupsMode.ENABLED,
-                PropertyGroupsMode.OPTIMIZED,
-            ):
-                # For now, we're assuming that properties are in either no groups or one group, so just using the
-                # first group returned is fine. If we start putting properties in multiple groups, this should be
-                # revisited to find the optimal set (i.e. smallest set) of groups to read from.
-                for property_group_column in property_groups.get_property_group_columns(
-                    table_name, field_name, property_name
-                ):
-                    yield PrintableMaterializedPropertyGroupItem(
-                        self.visit(field_type.table_type),
-                        self._print_identifier(property_group_column),
-                        self.context.add_value(property_name),
-                    )
-        elif self.context.within_non_insightsql_query and (
-            isinstance(table, ast.SelectQueryAliasType) and table.alias == "events__pdi__person"
-        ):
-            # :KLUDGE: Legacy person properties handling. Only used within non-InsightsQL queries, such as insights.
-            if self.context.modifiers.personsOnEventsMode != PersonsOnEventsMode.DISABLED:
-                materialized_column = self._get_materialized_column("events", property_name, "person_properties")
-            else:
-                materialized_column = self._get_materialized_column("person", property_name, "properties")
-            if materialized_column is not None:
-                yield PrintableMaterializedColumn(
-                    None,
-                    self._print_identifier(materialized_column.name),
-                    is_nullable=materialized_column.is_nullable,
-                    has_minmax_index=materialized_column.has_minmax_index,
-                    has_ngram_lower_index=materialized_column.has_ngram_lower_index,
-                    has_bloom_filter_index=materialized_column.has_bloom_filter_index,
-                )
-
     def visit_property_type(self, type: ast.PropertyType):
+        # After lowering, a blob property read is a `PropertyAccess`. A `PropertyType` still reaching the printer is the
+        # leftover OUTER reference to a person/group property that `resolve_lazy_tables` pulled into a join subquery: the
+        # JSON extract now lives inside that subquery (and was lowered there), so this outer node is just an
+        # `alias.column` read of the subquery's result — nothing to lower. (Plus, in the Datastore override, a
+        # data-warehouse struct column.) The printer makes no physical-column decision — that moved to
+        # `logical_property_lowering` + the Datastore physical passes.
         if type.joined_subquery is not None and type.joined_subquery_field_name is not None:
             return f"{self._print_identifier(type.joined_subquery.alias)}.{self._print_identifier(type.joined_subquery_field_name)}"
 
-        materialized_property_source = self._get_materialized_property_source_for_property_type(type)
-        if materialized_property_source is not None:
-            # Special handling for $ai_trace_id, $ai_session_id, and $ai_is_error to avoid nullIf wrapping for index optimization
-            if (
-                len(type.chain) == 1
-                and type.chain[0] in ("$ai_trace_id", "$ai_session_id", "$ai_is_error")
-                and isinstance(materialized_property_source, PrintableMaterializedColumn)
-            ):
-                materialized_property_sql = str(materialized_property_source)
-            elif (
-                isinstance(materialized_property_source, PrintableMaterializedColumn)
-                and not materialized_property_source.is_nullable
-            ):
-                # TODO: rematerialize all columns to properly support empty strings and "null" string values.
-                if self.context.modifiers.materializationMode == MaterializationMode.LEGACY_NULL_AS_STRING:
-                    materialized_property_sql = f"nullIf({materialized_property_source}, '')"
-                else:  # MaterializationMode AUTO or LEGACY_NULL_AS_NULL
-                    materialized_property_sql = f"nullIf(nullIf({materialized_property_source}, ''), 'null')"
-            else:
-                materialized_property_sql = str(materialized_property_source)
-
-            if len(type.chain) == 1:
-                return materialized_property_sql
-            else:
-                return self._unsafe_json_extract_trim_quotes(
-                    materialized_property_sql,
-                    self._json_property_args(type.chain[1:]),
-                )
-
         return self._unsafe_json_extract_trim_quotes(self.visit(type.field_type), self._json_property_args(type.chain))
+
+    def visit_property_access(self, node: ast.PropertyAccess) -> str:
+        # Renders a lowered property read: extract the key path from the JSON source in this dialect's syntax (Datastore
+        # JSONExtractRaw + null/quote scrub via the base helper; Postgres/DuckDB override
+        # `_unsafe_json_extract_trim_quotes`/`_json_property_args` for `->`/`->>`). It calls the same JSON-extract helper
+        # `visit_property_type` uses for its blob fallback just above, so the output is the plain JSON-extract form. No
+        # physical-column decision happens here.
+        return self._unsafe_json_extract_trim_quotes(self.visit(node.expr), self._json_property_args(node.keys))
 
     def visit_sample_expr(self, node: ast.SampleExpr) -> Optional[str]:
         # SAMPLE 1 means no sampling, skip it entirely
@@ -1143,6 +1362,9 @@ class InsightsQLPrinter(Visitor[str]):
 
     def visit_field_alias_type(self, type: ast.FieldAliasType):
         return self._print_identifier(type.alias)
+
+    def visit_expression_field_type(self, type: ast.ExpressionFieldType):
+        return self.visit(type.expr)
 
     def visit_virtual_table_type(self, type: ast.VirtualTableType):
         return self.visit(type.table_type)
@@ -1208,36 +1430,7 @@ class InsightsQLPrinter(Visitor[str]):
         exprs = [self.visit(expr) for expr in node.exprs or []]
         cloned_node = cast(ast.WindowFunction, clone_expr(node))
 
-        # For compatibility with Datastore syntax, convert lag/lead to lagInFrame/leadInFrame and add default window frame if needed
-        if identifier in ("lag", "lead") and self.dialect != "postgres":
-            identifier = f"{identifier}InFrame"
-            # Wrap the first expression (value) and third expression (default) in toNullable()
-            # The second expression (offset) must remain a non-nullable integer
-            if len(exprs) > 0:
-                exprs[0] = f"toNullable({exprs[0]})"  # value
-            # If there's no window frame specified, add the default one
-            if not cloned_node.over_expr and not cloned_node.over_identifier:
-                cloned_node.over_expr = self._create_default_window_frame(cloned_node)
-            # If there's an over_identifier, we need to extract the new window expr just for this function
-            elif cloned_node.over_identifier:
-                # Find the last select query to look up the window definition
-                last_select = self._last_select()
-                if last_select and last_select.window_exprs and cloned_node.over_identifier in last_select.window_exprs:
-                    base_window = last_select.window_exprs[cloned_node.over_identifier]
-                    # Create a new window expr based on the referenced one
-                    cloned_node.over_expr = ast.WindowExpr(
-                        partition_by=base_window.partition_by,
-                        order_by=base_window.order_by,
-                        frame_method="ROWS" if not base_window.frame_method else base_window.frame_method,
-                        frame_start=base_window.frame_start
-                        or ast.WindowFrameExpr(frame_type="PRECEDING", frame_value=None),
-                        frame_end=base_window.frame_end
-                        or ast.WindowFrameExpr(frame_type="FOLLOWING", frame_value=None),
-                    )
-                    cloned_node.over_identifier = None
-            # If there's an ORDER BY but no frame, add the default frame
-            elif cloned_node.over_expr and cloned_node.over_expr.order_by and not cloned_node.over_expr.frame_method:
-                cloned_node.over_expr = self._create_default_window_frame(cloned_node)
+        identifier = self._apply_window_function_rewrites(identifier, exprs, cloned_node)
 
         # Handle any additional function arguments
         args = f"({', '.join(self.visit(arg) for arg in cloned_node.args)})" if cloned_node.args else ""
@@ -1256,10 +1449,14 @@ class InsightsQLPrinter(Visitor[str]):
             return f"{identifier}({', '.join(exprs)}) OVER {over}"
 
     def visit_window_frame_expr(self, node: ast.WindowFrameExpr):
-        if node.frame_type == "PRECEDING":
-            return f"{int(str(node.frame_value)) if node.frame_value is not None else 'UNBOUNDED'} PRECEDING"
-        elif node.frame_type == "FOLLOWING":
-            return f"{int(str(node.frame_value)) if node.frame_value is not None else 'UNBOUNDED'} FOLLOWING"
+        if node.frame_type in ("PRECEDING", "FOLLOWING"):
+            if node.frame_value is None:
+                value_str = "UNBOUNDED"
+            elif isinstance(node.frame_value, int):
+                value_str = str(node.frame_value)
+            else:
+                value_str = self.visit(node.frame_value)
+            return f"{value_str} {node.frame_type}"
         elif node.frame_type == "CURRENT ROW":
             return "CURRENT ROW"
         else:
@@ -1316,41 +1513,16 @@ class InsightsQLPrinter(Visitor[str]):
             return str(name)
         return escape_insightsql_identifier(name)
 
-    def _print_escaped_string(self, name: float | int | str | list | tuple | datetime | date | UUID | UUIDT) -> str:
+    def _print_escaped_string(
+        self, name: bool | float | int | str | list | tuple | datetime | date | UUID | UUIDT | None
+    ) -> str:
         return escape_insightsql_string(name, timezone=self._get_timezone())
 
     def _unsafe_json_extract_trim_quotes(self, unsafe_field: str, unsafe_args: list[str]) -> str:
-        return f"replaceRegexpAll(nullIf(nullIf(JSONExtractRaw({', '.join([unsafe_field, *unsafe_args])}), ''), 'null'), '^\"|\"$', '')"
+        return json_extract_trim_quotes(unsafe_field, *unsafe_args)
 
     def _json_property_args(self, chain: Iterable[Any]) -> list[str]:
         return [self.context.add_value(name) for name in chain]
-
-    def _get_materialized_column(
-        self, table_name: str, property_name: PropertyName, field_name: TableColumn
-    ) -> MaterializedColumn | None:
-        return get_materialized_column_for_property(
-            cast(TablesWithMaterializedColumns, table_name), field_name, property_name
-        )
-
-    def _get_dmat_column(self, table_name: str, field_name: str, property_name: str) -> str | None:
-        """
-        Get the dmat column name for a property if available.
-
-        Returns the column name (e.g., 'dmat_numeric_3') if a materialized slot exists,
-        otherwise None.
-        """
-        if self.context.property_swapper is None:
-            return None
-
-        # Only event properties have dmat columns
-        if table_name != "events" or field_name != "properties":
-            return None
-
-        prop_info = self.context.property_swapper.event_properties.get(property_name)
-        if prop_info:
-            return prop_info.get("dmat")
-
-        return None
 
     def _get_timezone(self) -> str:
         if self.context.modifiers.convertToProjectTimezone is False:
@@ -1368,6 +1540,15 @@ class InsightsQLPrinter(Visitor[str]):
         elif isinstance(node_type, ast.CallType):
             return node_type.return_type.nullable
         elif isinstance(node_type, ast.FieldType):
+            # A field reading from a subquery (alias) has no database field, so `is_nullable` defaults to True and
+            # over-wraps the column in `ifNull(...)`. Its real nullability is the projected column's constant type —
+            # use that, so a non-nullable value selected from a subquery isn't needlessly null-wrapped (which, for a
+            # join key, Datastore can't use). Real-table fields keep `is_nullable` (identical result, no risk).
+            if not isinstance(node_type.table_type, ast.BaseTableType):
+                try:
+                    return node_type.resolve_constant_type(self.context).nullable
+                except Exception:
+                    return True
             return node_type.is_nullable(self.context)
         return None
 
@@ -1468,10 +1649,12 @@ class InsightsQLPrinter(Visitor[str]):
             case "text" | "varchar" | "char" | "string":
                 return f"toString({self.visit(node.expr)})"
             case "boolean" | "bool":
-                return f"toBoolean({self.visit(node.expr)})"
+                return f"accurateCastOrNull({self.visit(node.expr)}, 'Bool')"
             case "date":
                 return f"toDate({self.visit(node.expr)})"
-            case "datetime" | "timestamp" | "timestamptz":
+            case (
+                "datetime" | "timestamp" | "timestamptz" | "timestamp with time zone" | "timestamp with local time zone"
+            ):
                 return f"toDateTime({self.visit(node.expr)}, '{self._get_timezone()}')"
             case _:
                 raise QueryError(f"Unsupported type cast to '{node.type_name}'")

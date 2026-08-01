@@ -1,20 +1,23 @@
+import { createMockJobQueue } from '~/tests/helpers/mocks/job-queue.mock'
 import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { DateTime } from 'luxon'
 
+import { closeHub, createHub } from '~/common/utils/db/hub'
+import { configureEventLoopYield, getEventLoopYieldThresholdMs } from '~/common/utils/event-loop-yield'
+import { UUIDT } from '~/common/utils/utils'
+import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
-import { UUIDT } from '~/utils/utils'
 
 import { Hub, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     createExampleInvocation,
-    createScriptExecutionGlobals,
+    createHogExecutionGlobals,
     createInsightsFunction,
     insertInsightsFunction,
 } from '../_tests/fixtures'
-import { compileFn } from '../templates/compiler'
+import { compileHog } from '../templates/compiler'
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
 import { CdpCyclotronWorker } from './cdp-cyclotron-worker.consumer'
@@ -35,8 +38,8 @@ describe('CdpCyclotronWorker', () => {
     beforeEach(async () => {
         await resetTestDatabase()
         hub = await createHub()
-        team = await getFirstTeam(hub)
-        processor = new CdpCyclotronWorker(hub)
+        team = await getFirstTeam(hub.postgres)
+        processor = new CdpCyclotronWorker(hub, createCdpConsumerDeps(hub), createMockJobQueue())
 
         fn = await insertInsightsFunction(
             hub.postgres,
@@ -50,7 +53,7 @@ describe('CdpCyclotronWorker', () => {
         )
 
         globals = {
-            ...createScriptExecutionGlobals({}),
+            ...createHogExecutionGlobals({}),
             inputs: {
                 url: 'https://hanzo.ai',
             },
@@ -99,7 +102,7 @@ describe('CdpCyclotronWorker', () => {
             ])
         })
 
-        it('should route custom functions to correct executor services based on template_id', async () => {
+        it('should route script functions to correct executor services based on template_id', async () => {
             const segmentFn = await insertInsightsFunction(
                 hub.postgres,
                 team.id,
@@ -136,7 +139,7 @@ describe('CdpCyclotronWorker', () => {
             const nativeExecutorSpy = jest.spyOn(processor['nativeDestinationExecutorService'], 'execute')
             const pluginExecutorSpy = jest.spyOn(processor['pluginDestinationExecutorService'], 'execute')
             const segmentExecutorSpy = jest.spyOn(processor['segmentDestinationExecutorService'], 'execute')
-            const scriptExecutorSpy = jest.spyOn(processor['scriptExecutor'], 'executeWithAsyncFunctions')
+            const hogExecutorSpy = jest.spyOn(processor['hogExecutor'], 'executeWithAsyncFunctions')
 
             const invocations = [
                 createExampleInvocation(nativeFn, globals),
@@ -168,8 +171,8 @@ describe('CdpCyclotronWorker', () => {
                 })
             )
 
-            expect(scriptExecutorSpy).toHaveBeenCalledTimes(1)
-            expect(scriptExecutorSpy).toHaveBeenCalledWith(
+            expect(hogExecutorSpy).toHaveBeenCalledTimes(1)
+            expect(hogExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
                     insightsFunction: expect.objectContaining({ template_id: 'template-webhook' }),
                 })
@@ -186,6 +189,8 @@ describe('CdpCyclotronWorker', () => {
             } as any)
 
             const invocationId = invocation.id
+            // Capture reference time BEFORE execution to avoid timing race in lower-bound assertion
+            const beforeExecution = DateTime.now()
             const results = await processor.processInvocations([invocation])
             const result = results[0]
 
@@ -193,10 +198,10 @@ describe('CdpCyclotronWorker', () => {
             expect(result.error).toBe(undefined)
             expect(result.metrics).toEqual([])
             expect(result.invocation.id).toEqual(invocationId)
-            expect(result.invocation.queue).toEqual('fn')
+            expect(result.invocation.queue).toEqual('script')
             // NOTE: Check the queue scheduled at is within the bounds of the backoff
-            expect(result.invocation.queueScheduledAt?.toMillis()).toBeGreaterThan(
-                DateTime.now().plus({ milliseconds: hub.CDP_FETCH_BACKOFF_BASE_MS }).toMillis()
+            expect(result.invocation.queueScheduledAt?.toMillis()).toBeGreaterThanOrEqual(
+                beforeExecution.plus({ milliseconds: hub.CDP_FETCH_BACKOFF_BASE_MS }).toMillis()
             )
             expect(result.invocation.queueScheduledAt?.toMillis()).toBeLessThan(
                 DateTime.now().plus({ milliseconds: hub.CDP_FETCH_BACKOFF_MAX_MS }).toMillis()
@@ -242,7 +247,7 @@ describe('CdpCyclotronWorker', () => {
             ])
         })
 
-        it('should dequeue an invocation if the custom function cannot be found', async () => {
+        it('should dequeue an invocation if the script function cannot be found', async () => {
             const dequeueInvocationsSpy = jest
                 .spyOn(processor['cyclotronJobQueue'], 'dequeueInvocations')
                 .mockResolvedValue(undefined)
@@ -252,6 +257,23 @@ describe('CdpCyclotronWorker', () => {
             expect(results).toEqual([])
             expect(dequeueInvocationsSpy).toHaveBeenCalledWith([invocation])
         })
+
+        it.each([['project'], ['event']] as const)(
+            'should DLQ a malformed invocation whose globals is missing %s instead of crashing',
+            async (field) => {
+                const dequeueInvocationsSpy = jest
+                    .spyOn(processor['cyclotronJobQueue'], 'dequeueInvocations')
+                    .mockResolvedValue(undefined)
+
+                const malformed = createExampleInvocation(fn, globals)
+                delete (malformed.state.globals as any)[field]
+
+                const results = await processor['loadInsightsFunctions']([malformed])
+
+                expect(results).toEqual([])
+                expect(dequeueInvocationsSpy).toHaveBeenCalledWith([malformed])
+            }
+        )
 
         it('should skip a loaded function if it is disabled', async () => {
             const fn2 = await insertInsightsFunction(
@@ -378,7 +400,7 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const scriptFn = await insertInsightsFunction(
+                const hogFn = await insertInsightsFunction(
                     hub.postgres,
                     team.id,
                     createInsightsFunction({
@@ -388,7 +410,7 @@ describe('CdpCyclotronWorker', () => {
                     })
                 )
 
-                const scriptInvocation = createExampleInvocation(scriptFn, {
+                const hogInvocation = createExampleInvocation(hogFn, {
                     ...globals,
                     event: {
                         ...globals.event,
@@ -396,7 +418,7 @@ describe('CdpCyclotronWorker', () => {
                     },
                 })
 
-                await processor.processInvocations([scriptInvocation])
+                await processor.processInvocations([hogInvocation])
 
                 expect(observeSpy).toHaveBeenCalledTimes(1)
                 expect(observeSpy).toHaveBeenCalledWith(1000)
@@ -406,17 +428,22 @@ describe('CdpCyclotronWorker', () => {
         describe('thread relief', () => {
             jest.setTimeout(10000)
             let interval: NodeJS.Timeout
+            const blockTime = 200
+            let originalThresholdMs: number
+
             beforeEach(() => {
                 jest.spyOn(Date, 'now').mockRestore()
                 jest.useRealTimers()
+                originalThresholdMs = getEventLoopYieldThresholdMs()
+                configureEventLoopYield(blockTime)
             })
 
             afterEach(() => {
                 clearInterval(interval)
+                configureEventLoopYield(originalThresholdMs)
             })
 
             it('should process batches in a way that does not block the main thread', async () => {
-                const blockTime = 200
                 let lastCheck = Date.now()
                 let longestDelay = 0
 
@@ -443,12 +470,11 @@ describe('CdpCyclotronWorker', () => {
                     createInsightsFunction({
                         ...FN_FILTERS_EXAMPLES.no_filters,
                         script: evilFunctionCode,
-                        bytecode: await compileFn(evilFunctionCode),
+                        bytecode: await compileHog(evilFunctionCode),
                     })
                 )
 
-                hub.CDP_WATCHER_HOG_COST_TIMING_UPPER_MS = blockTime
-                hub.CDP_WATCHER_HOG_COST_TIMING_LOWER_MS = 0
+                processor.hogExecutor['config'].hogCostTimingUpperMs = blockTime
 
                 const numberToTest = 5
                 const invocations = Array.from({ length: numberToTest }, () =>

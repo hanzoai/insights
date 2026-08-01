@@ -4,8 +4,8 @@ import { Input } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { INSIGHTS_PER_PAGE, eventInsightsLogic } from 'scenes/data-management/events/eventInsightsLogic'
 import { useSummarizeInsight } from 'scenes/insights/summarizeInsight'
 import { InsightIcon } from 'scenes/saved-insights/SavedInsights'
@@ -50,6 +50,7 @@ export function EventDefinitionInsights({ definition }: { definition: EventDefin
         {
             title: 'Last modified',
             sorter: true,
+            defaultSortOrder: -1,
             dataIndex: 'last_modified_at',
             render: function renderLastModified(last_modified_at: string) {
                 return (

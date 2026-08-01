@@ -1,28 +1,60 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 
 import { IconBell, IconCheck } from '@hanzo/icons'
-import { Banner, Button, Switch, TextArea, Link } from '@hanzo/elements'
+import { Banner, Button, Input, Switch, TextArea, Link } from '@hanzo/elements'
 
 import { BasicCard } from 'lib/components/Cards/BasicCard'
-import { SpinnerOverlay } from 'lib/elements/Spinner'
+import { FEATURE_FLAGS } from 'lib/constants'
+import { useAnchor } from 'lib/hooks/useAnchor'
 import { IconLink } from 'lib/elements/icons'
+import { SpinnerOverlay } from 'lib/elements/Spinner'
 import { Label } from 'lib/ui/Label/Label'
+import { userLogic } from 'scenes/userLogic'
+
+import { AvailableFeature } from '~/types'
 
 import { EnrichedEarlyAccessFeature, featurePreviewsLogic } from './featurePreviewsLogic'
 
-const hasInsightsJsFailedToLoadFeaturePreviews = (): boolean => !!window.INSIGHTS_GLOBAL_ERRORS?.onFeatureFlagsLoadError
+type AvailableFeatureChecker = (feature: AvailableFeature) => boolean
+
+interface FeaturePreviewWarning {
+    /** Returns the warning to display for a feature, or null if none should show. */
+    resolve: (hasAvailableFeature: AvailableFeatureChecker) => React.ReactNode | null
+}
+
+/**
+ * Per-flag warnings shown on the early-access card. Add an entry here to surface a warning
+ * for a specific preview without touching the FeaturePreview component itself.
+ */
+const FEATURE_PREVIEW_WARNINGS: Record<string, FeaturePreviewWarning> = {
+    [FEATURE_FLAGS.FEATURE_FLAG_NOTIFICATIONS]: {
+        resolve: (hasAvailableFeature) =>
+            hasAvailableFeature(AvailableFeature.AUDIT_LOGS)
+                ? null
+                : 'This feature requires the Enterprise plan or the Scale add-on. Enabling the preview will not unlock it on your current plan.',
+    },
+}
+
+const hasInsightsJsFailedToLoadFeaturePreviews = (): boolean => !!window.POSTFN_GLOBAL_ERRORS?.onFeatureFlagsLoadError
 
 // Feature previews can be linked to by using hash in the url
-// example external link: https://insights.hanzo.ai/settings/user-feature-previews#llm-analytics
+// example external link: https://app.hanzo.ai/settings/user-feature-previews#llm-analytics
 export function FeaturePreviews(): JSX.Element {
-    const { earlyAccessFeatures, rawEarlyAccessFeaturesLoading } = useValues(featurePreviewsLogic)
-    const { loadEarlyAccessFeatures } = useActions(featurePreviewsLogic)
+    const { filteredEarlyAccessFeatures, rawEarlyAccessFeaturesLoading, searchTerm } = useValues(featurePreviewsLogic)
+    const { hasAvailableFeature } = useValues(userLogic)
+    const { loadEarlyAccessFeatures, setSearchTerm } = useActions(featurePreviewsLogic)
 
     useLayoutEffect(() => loadEarlyAccessFeatures(), [loadEarlyAccessFeatures])
 
-    const betaFeatures = earlyAccessFeatures.filter((f) => f.stage === 'beta')
-    const failedToLoadFeaturePreviews = earlyAccessFeatures.length === 0 && hasInsightsJsFailedToLoadFeaturePreviews()
+    // Cards render only after the async feature fetch, so the scene-level anchor handling
+    // fires too early — defer the scroll + highlight until the cards exist.
+    useAnchor(rawEarlyAccessFeaturesLoading ? '' : window.location.hash)
+
+    const betaFeatures = filteredEarlyAccessFeatures.filter((f) => f.stage === 'beta')
+    const shouldShowEmptyState =
+        filteredEarlyAccessFeatures.length === 0 && !rawEarlyAccessFeaturesLoading && !searchTerm
+    const failedToLoadFeaturePreviews = shouldShowEmptyState && hasInsightsJsFailedToLoadFeaturePreviews()
 
     return (
         <div className="flex flex-col gap-2">
@@ -47,23 +79,45 @@ export function FeaturePreviews(): JSX.Element {
             {rawEarlyAccessFeaturesLoading ? (
                 <SpinnerOverlay />
             ) : (
-                betaFeatures.map((feature) => (
-                    <div key={feature.flagKey}>
-                        <FeaturePreview feature={feature} />
-                    </div>
-                ))
+                <>
+                    {!shouldShowEmptyState && (
+                        <Input
+                            type="search"
+                            placeholder="Search feature previews..."
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            allowClear
+                        />
+                    )}
+                    {betaFeatures.length === 0 && searchTerm.trim() ? (
+                        <p className="text-secondary text-center mt-4">No matching feature previews</p>
+                    ) : (
+                        betaFeatures.map((feature) => (
+                            <div key={feature.flagKey}>
+                                <FeaturePreview
+                                    feature={feature}
+                                    warning={FEATURE_PREVIEW_WARNINGS[feature.flagKey]?.resolve(hasAvailableFeature)}
+                                />
+                            </div>
+                        ))
+                    )}
+                </>
             )}
         </div>
     )
 }
 
 export function FeaturePreviewsComingSoon(): JSX.Element {
-    const { earlyAccessFeatures, rawEarlyAccessFeaturesLoading } = useValues(featurePreviewsLogic)
+    const { filteredEarlyAccessFeatures, rawEarlyAccessFeaturesLoading } = useValues(featurePreviewsLogic)
     const { loadEarlyAccessFeatures } = useActions(featurePreviewsLogic)
 
     useLayoutEffect(() => loadEarlyAccessFeatures(), [loadEarlyAccessFeatures])
 
-    const conceptFeatures = earlyAccessFeatures.filter((f) => f.stage === 'concept')
+    // Cards render only after the async feature fetch, so the scene-level anchor handling
+    // fires too early — defer the scroll + highlight until the cards exist.
+    useAnchor(rawEarlyAccessFeaturesLoading ? '' : window.location.hash)
+
+    const conceptFeatures = filteredEarlyAccessFeatures.filter((f) => f.stage === 'concept')
 
     return (
         <div className="flex flex-col gap-2">
@@ -108,9 +162,74 @@ function PreviewCard({ feature, title, description, actions, children }: Preview
 }
 
 function ConceptPreview({ feature }: { feature: EnrichedEarlyAccessFeature }): JSX.Element {
-    const { updateEarlyAccessFeatureEnrollment, copyExternalFeaturePreviewLink } = useActions(featurePreviewsLogic)
+    const { updateEarlyAccessFeatureEnrollment, copyExternalFeaturePreviewLink, submitConceptSurvey } =
+        useActions(featurePreviewsLogic)
+    const { waitlistSurveysEnabled, conceptSurveySubmissions } = useValues(featurePreviewsLogic)
 
     const { flagKey, enabled, name, description } = feature
+    const [email, setEmail] = useState('')
+
+    // When the gate is on and the feature has a linked waitlist survey, collect an email
+    // (recorded as a survey response) instead of the one-click, login-tied enrollment.
+    const surveyId = feature.payload?.survey_id
+    const hasWaitlistSurvey = waitlistSurveysEnabled && !!surveyId
+    // `enabled` covers users who registered interest before the survey era — the
+    // migration command moves them into the survey, so don't ask them again.
+    const surveySubmitted = !!conceptSurveySubmissions[flagKey] || enabled
+
+    let actions: JSX.Element
+    if (hasWaitlistSurvey) {
+        actions = surveySubmitted ? (
+            // role="status" makes the confirmation a live region: the form (and its focused
+            // button) unmounts on submit, so without it screen readers announce nothing.
+            <span role="status" className="flex items-center gap-1 text-success font-medium">
+                <IconCheck /> Thanks — we'll email you when it's ready.
+            </span>
+        ) : (
+            <form
+                className="flex items-center gap-2"
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    if (email) {
+                        submitConceptSurvey(flagKey, email)
+                    }
+                }}
+            >
+                <Input
+                    type="email"
+                    value={email}
+                    onChange={setEmail}
+                    placeholder="email@yourcompany.com"
+                    aria-label="Email address"
+                    autoComplete="email"
+                    size="small"
+                />
+                <Button
+                    type="primary"
+                    size="small"
+                    htmlType="submit"
+                    disabledReason={!email ? 'Enter your email' : undefined}
+                >
+                    Get notified
+                </Button>
+            </form>
+        )
+    } else {
+        actions = (
+            <Button
+                type="primary"
+                disabledReason={
+                    enabled && "You have already expressed your interest. We'll contact you when it's ready"
+                }
+                onClick={() => updateEarlyAccessFeatureEnrollment(flagKey, true, feature.stage)}
+                size="small"
+                sideIcon={enabled ? <IconCheck /> : <IconBell />}
+                className="w-fit"
+            >
+                {enabled ? 'Registered' : 'Get notified'}
+            </Button>
+        )
+    }
 
     return (
         <PreviewCard
@@ -130,27 +249,18 @@ function ConceptPreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                     {description || <span className="text-tertiary">No description</span>}
                 </p>
             }
-            actions={
-                <div className="flex flex-col gap-2">
-                    <Button
-                        type="primary"
-                        disabledReason={
-                            enabled && "You have already expressed your interest. We'll contact you when it's ready"
-                        }
-                        onClick={() => updateEarlyAccessFeatureEnrollment(flagKey, true, feature.stage)}
-                        size="small"
-                        sideIcon={enabled ? <IconCheck /> : <IconBell />}
-                        className="w-fit"
-                    >
-                        {enabled ? 'Registered' : 'Get notified'}
-                    </Button>
-                </div>
-            }
+            actions={actions}
         />
     )
 }
 
-function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): JSX.Element {
+interface FeaturePreviewProps {
+    feature: EnrichedEarlyAccessFeature
+    /** Optional warning rendered under the description (e.g. plan/add-on requirements). */
+    warning?: React.ReactNode
+}
+
+function FeaturePreview({ feature, warning }: FeaturePreviewProps): JSX.Element {
     const { activeFeedbackFlagKey, activeFeedbackFlagKeyLoading } = useValues(featurePreviewsLogic)
     const {
         beginEarlyAccessFeatureFeedback,
@@ -164,6 +274,15 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
     const isFeedbackActive = activeFeedbackFlagKey === flagKey
 
     const [feedback, setFeedback] = useState('')
+
+    // Clear the draft when this card's feedback panel closes (success or cancel). A failed submit
+    // leaves the panel open (activeFeedbackFlagKey is unchanged on failure), so the text is kept
+    // for a retry rather than lost.
+    useEffect(() => {
+        if (!isFeedbackActive) {
+            setFeedback('')
+        }
+    }, [isFeedbackActive])
 
     return (
         <PreviewCard
@@ -188,9 +307,10 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                 </div>
             }
             description={
-                <p className="m-0 max-w-prose">
-                    {description || <span className="text-tertiary">No description</span>}
-                </p>
+                <div className="flex flex-col gap-2 max-w-prose">
+                    <p className="m-0">{description || <span className="text-tertiary">No description</span>}</p>
+                    {warning && <Banner type="warning">{warning}</Banner>}
+                </div>
             }
             actions={
                 <div className="flex flex-col gap-2">
@@ -218,9 +338,9 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                         onChange={(value) => setFeedback(value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && e.metaKey) {
-                                void submitEarlyAccessFeatureFeedback(feedback).then(() => {
-                                    setFeedback('')
-                                })
+                                // Clearing on success is handled when the panel closes; a failed
+                                // submit keeps the panel open so the text survives for a retry
+                                void submitEarlyAccessFeatureFeedback(feedback)
                             } else if (e.key === 'Escape') {
                                 cancelEarlyAccessFeatureFeedback()
                                 setFeedback('')
@@ -241,9 +361,9 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                         <Button
                             type="primary"
                             onClick={() => {
-                                void submitEarlyAccessFeatureFeedback(feedback).then(() => {
-                                    setFeedback('')
-                                })
+                                // Clearing on success is handled when the panel closes; a failed
+                                // submit keeps the panel open so the text survives for a retry
+                                void submitEarlyAccessFeatureFeedback(feedback)
                             }}
                             loading={activeFeedbackFlagKeyLoading}
                             className="flex-1"

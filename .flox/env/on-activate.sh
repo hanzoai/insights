@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# Hanzo Insights flox on-activate hook
+# Insights flox on-activate hook
 # Sourced (not executed) from manifest.toml — env vars persist into profile scripts.
+#
+# IMPORTANT: This script must NEVER use sudo. It runs automatically on every
+# shell activation, so requiring elevated privileges would condition developers
+# to blindly grant root access to code that changes without notice.
 
 set -euo pipefail
 
@@ -22,6 +26,33 @@ _cleanup_tmpfiles() {
   done
 }
 trap _cleanup_tmpfiles EXIT
+
+_strip_ansi() {
+  sed $'s/\x1b\\[[0-9;]*[a-zA-Z]//g' | tr -d '\r'
+}
+
+_save_failure_log() {
+  local label="$1"
+  local tmpfile="$2"
+  local logdir="$FLOX_ENV_CACHE/activation-error-logs"
+  local slug="${label// /-}"
+  local logfile="$logdir/${slug}-$(date +%Y%m%d-%H%M%S).log"
+
+  local log_saved=0
+  # Best-effort: failures here must not abort the script under `set -euo pipefail`.
+  if mkdir -p "$logdir" 2>/dev/null; then
+    {
+      echo "── ${label} (failed) ──"
+      _strip_ansi < "$tmpfile"
+      echo ""
+    } 2>/dev/null > "$logfile" && log_saved=1 || true
+  fi
+
+  printf '    %b%s%b\n' "${C_DIM}" "$(tail -n 15 "$tmpfile" 2>/dev/null | _strip_ansi || true)" "${C_RESET}"
+  if [[ "$log_saved" -eq 1 ]]; then
+    printf '    %bFull log: %s%b\n' "${C_DIM}" "$logfile" "${C_RESET}"
+  fi
+}
 
 # ── Step runner ─────────────────────────────────────────────────────
 # Runs a command with a spinner and live output preview.
@@ -48,6 +79,7 @@ run_step() {
       echo -e "\r  ${C_GREEN}✓${C_RESET} ${label}"
     else
       echo -e "\r  ${C_RED}✗${C_RESET} ${label}  (failed)"
+      _save_failure_log "$label" "$tmpfile"
       return 1
     fi
     return 0
@@ -106,8 +138,56 @@ run_step() {
     if [[ "$had_output" == true ]]; then printf "\033[2K"; fi
   else
     printf "\r\033[2K  ${C_RED}✗${C_RESET} %-42s %3ds\n" "$label" "$elapsed"
-    # Show last few lines of output on failure
-    echo -e "    ${C_DIM}$(tail -n 3 "$tmpfile" 2>/dev/null)${C_RESET}"
+    # Save failure log and show last few lines of output on failure
+    _save_failure_log "$label" "$tmpfile"
+    return $exit_code
+  fi
+}
+
+# Compute sha256 of a file. Portable across Linux (sha256sum) and macOS
+# (shasum). Returns empty string when the file is missing or no hasher
+# is available; safe to call inside `[[ ... ]]` under set -euo pipefail.
+_sha256_file() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  local result=""
+  if command -v sha256sum >/dev/null 2>&1; then
+    result=$(sha256sum "$file" 2>/dev/null | awk '{print $1}' || true)
+  elif command -v shasum >/dev/null 2>&1; then
+    result=$(shasum -a 256 "$file" 2>/dev/null | awk '{print $1}' || true)
+  fi
+  printf '%s' "$result"
+}
+
+# Read an AMI-bake stamp file, stripping whitespace. Returns empty
+# string when the stamp is missing -- which is the expected case on
+# laptops and on workspaces booted from a non-baked image. Callers
+# treat empty as "no match" and fall back to running the full step.
+_read_ami_stamp() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  tr -d '[:space:]' < "$file" 2>/dev/null || true
+}
+
+# Waits for a step that was started earlier as a background subshell and
+# reports its outcome. Mirrors run_step's final status line without a
+# spinner -- the work has usually completed by the time wait is called.
+# Usage: wait_bg_step "Label" <pid> <start_epoch> <logfile>
+wait_bg_step() {
+  local label="$1"
+  local pid="$2"
+  local start_time="$3"
+  local tmpfile="$4"
+
+  local exit_code=0
+  wait "$pid" 2>/dev/null || exit_code=$?
+  local elapsed=$(( $(date +%s) - start_time ))
+
+  if [[ $exit_code -eq 0 ]]; then
+    printf "  ${C_GREEN}✓${C_RESET} %-42s %3ds\n" "$label" "$elapsed"
+  else
+    printf "  ${C_RED}✗${C_RESET} %-42s %3ds\n" "$label" "$elapsed"
+    _save_failure_log "$label" "$tmpfile"
     return $exit_code
   fi
 }
@@ -123,8 +203,29 @@ warn_step() {
   printf "  ${C_YELLOW}⚠${C_RESET} %s\n" "$label"
 }
 
+# ── Interactive mode detection ────────────────────────────────────
+# Skip all interactive prompts in non-interactive terminals or when running under Insights Desktop (automated agent).
+_interactive=false
+if [[ -t 0 ]] && [[ -z "${POSTFN_CODE:-}" ]]; then
+  _interactive=true
+fi
+
+# ── Go toolchain isolation ─────────────────────────────────────────
+# User shells often export GOROOT/GOCACHE for Homebrew, asdf, or other local Go
+# installs. Keep flox builds on the pinned Go toolchain and cache compiled
+# packages inside the flox environment so host Go upgrades cannot poison builds.
+unset GOROOT
+export GOTOOLCHAIN=local
+export GOPATH="$FLOX_ENV_CACHE/go"
+export GOCACHE="$FLOX_ENV_CACHE/go-build"
+export GOMODCACHE="$GOPATH/pkg/mod"
+
+# uv-managed venv location (mirrors the [profile] scripts; not in [vars], which
+# can't expand $FLOX_ENV_CACHE). Used below for uv sync + the insightscli symlink.
+export UV_PROJECT_ENVIRONMENT="$FLOX_ENV_CACHE/venv"
+
 # ── Direnv first-time setup (interactive only) ─────────────────────
-if [[ -t 0 ]] && ! command -v direnv >/dev/null 2>&1 && [[ ! -f "$FLOX_ENV_CACHE/.hush-direnv" ]]; then
+if [[ "$_interactive" == true ]] && ! command -v direnv >/dev/null 2>&1 && [[ ! -f "$FLOX_ENV_CACHE/.hush-direnv" ]]; then
   read -p "$(echo -e "${C_BOLD}direnv${C_RESET} recommended for auto-activation. Set up now? (Y/n) ")" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
@@ -136,14 +237,119 @@ if [[ -t 0 ]] && ! command -v direnv >/dev/null 2>&1 && [[ ! -f "$FLOX_ENV_CACHE
   echo
 fi
 
+# ── Xcode license check (macOS only) ─────────────────────────────────
+# Only check when full Xcode.app is installed (not just Command Line Tools),
+# since xcodebuild -license check returns non-zero for CLT-only setups too.
+if [[ "$(uname -s)" == "Darwin" ]] && command -v xcodebuild >/dev/null 2>&1 \
+   && [[ "$(xcode-select -p 2>/dev/null)" == /Applications/Xcode*.app/* ]]; then
+  if ! xcodebuild -license check >/dev/null 2>&1; then
+    if [[ "$_interactive" == true ]] && [[ ! -f "$FLOX_ENV_CACHE/.hush-xcode-license" ]]; then
+      warn_step "Xcode license not accepted. Native builds may fail."
+      read -p "$(echo -e "   Accept Xcode license now? (Y/n) ")" -n 1 -r
+      echo
+      if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
+        echo -e "   ${C_DIM}Running: sudo xcodebuild -license accept${C_RESET}"
+        if sudo xcodebuild -license accept; then
+          done_step "Xcode license accepted"
+        else
+          echo -e "   ${C_RED}✗${C_RESET} Failed to accept Xcode license"
+          echo -e "   ${C_DIM}Run 'sudo xcodebuild -license' manually to resolve.${C_RESET}"
+        fi
+      else
+        touch "$FLOX_ENV_CACHE/.hush-xcode-license"
+        echo -e "   ${C_DIM}Skipped. Run 'sudo xcodebuild -license' if builds fail.${C_RESET}"
+      fi
+      echo
+    elif [[ ! -t 0 ]]; then
+      echo -e "  ${C_YELLOW}⚠${C_RESET} Xcode license not accepted  ${C_DIM}(run 'sudo xcodebuild -license')${C_RESET}"
+    fi
+  fi
+fi
+
 # ── Header ──────────────────────────────────────────────────────────
 _branch=$(git -C "$FLOX_ENV_PROJECT" branch --show-current 2>/dev/null || echo "???")
-echo -e "\n${C_CYAN}Hanzo Insights dev${C_RESET} ${C_DIM}── ${_branch}${C_RESET}\n"
+echo -e "\n${C_CYAN}Insights dev${C_RESET} ${C_DIM}── ${_branch}${C_RESET}\n"
 
 _activation_start=$(date +%s)
 
+# ── Steps 1, 1b, 2 (kicked off in parallel, with AMI cache-skip) ───
+# uv sync, pnpm install, and `make phrocs build` are independent -- none
+# of them reads or writes the other's outputs. Kick the two non-spinner
+# ones off in the background BEFORE foregrounding uv sync, so the wall
+# clock is bounded by the slowest single step instead of the sum. uv sync
+# stays foregrounded because the completion + man-page steps that follow
+# depend on the venv it populates, and because its run_step spinner remains
+# the user-visible progress indicator for activate.
+#
+# Each step also checks an AMI-bake stamp file (sha256 of the source-of-
+# truth input recorded at bake time): when the on-disk hash matches the
+# baked hash, the workspace is in the same state as the bake and the
+# subprocess would be a no-op, so we skip it entirely. On laptops or
+# pre-stamp workspaces the stamps are missing and the checks fall back
+# to running normally -- no regression.
+_PNPM_LOCK="$FLOX_ENV_PROJECT/pnpm-lock.yaml"
+_UV_LOCK="$FLOX_ENV_PROJECT/uv.lock"
+_PHROCS_BIN="$FLOX_ENV_PROJECT/tools/phrocs/dist/phrocs"
+
+_PNPM_BAKED=$(_read_ami_stamp /etc/insights-coder-ami-pnpm-stamp)
+_UV_BAKED=$(_read_ami_stamp /etc/insights-coder-ami-uv-stamp)
+_PHROCS_BAKED=$(_read_ami_stamp /etc/insights-coder-ami-phrocs-stamp)
+
+_PNPM_CURRENT=$(_sha256_file "$_PNPM_LOCK")
+_UV_CURRENT=$(_sha256_file "$_UV_LOCK")
+_PHROCS_CURRENT=$(_sha256_file "$_PHROCS_BIN")
+
+_PNPM_SKIP=0
+[[ -n "$_PNPM_BAKED" && -n "$_PNPM_CURRENT" && "$_PNPM_BAKED" == "$_PNPM_CURRENT" ]] && _PNPM_SKIP=1
+_UV_SKIP=0
+[[ -n "$_UV_BAKED" && -n "$_UV_CURRENT" && "$_UV_BAKED" == "$_UV_CURRENT" ]] && _UV_SKIP=1
+_PHROCS_SKIP=0
+[[ -n "$_PHROCS_BAKED" && -n "$_PHROCS_CURRENT" && "$_PHROCS_BAKED" == "$_PHROCS_CURRENT" ]] && _PHROCS_SKIP=1
+
+# Sandbox the automatic installs below by default on macOS (opt out with
+# POSTFN_DEV_SANDBOX=0). .env.local isn't loaded at flox-activate time, so check
+# it directly — but only when the live env is unset, so shell env keeps precedence.
+# The build scripts that run during install (uv sdist hooks, allowlisted pnpm
+# builds, cargo build.rs) then execute inside the sandbox, like the runtime path.
+# See bin/dev-sandbox.
+_DEV_SANDBOX_INSTALLS=0
+if [[ "$(uname -s)" == "Darwin" && -x "$FLOX_ENV_PROJECT/bin/dev-sandbox" ]]; then
+  _DEV_SANDBOX_INSTALLS=1
+  if [[ "${POSTFN_DEV_SANDBOX:-}" == "0" ]]; then
+    _DEV_SANDBOX_INSTALLS=0
+  elif [[ -z "${POSTFN_DEV_SANDBOX:-}" ]] && grep -qE "^[[:space:]]*POSTFN_DEV_SANDBOX=0[[:space:]]*$" "$FLOX_ENV_PROJECT/.env.local" 2>/dev/null; then
+    _DEV_SANDBOX_INSTALLS=0
+  fi
+fi
+
+if [[ "$_PNPM_SKIP" -eq 0 ]]; then
+  _BG_PNPM_LOG=$(mktemp)
+  _ACTIVATION_TMPFILES+=("$_BG_PNPM_LOG")
+  if [[ "$_DEV_SANDBOX_INSTALLS" -eq 1 ]]; then
+    ( "$FLOX_ENV_PROJECT/bin/dev-sandbox" "pnpm install" ) >"$_BG_PNPM_LOG" 2>&1 &
+  else
+    ( pnpm install ) >"$_BG_PNPM_LOG" 2>&1 &
+  fi
+  _BG_PNPM_PID=$!
+  _BG_PNPM_START=$(date +%s)
+fi
+
+if [[ "$_PHROCS_SKIP" -eq 0 ]]; then
+  _BG_PHROCS_LOG=$(mktemp)
+  _ACTIVATION_TMPFILES+=("$_BG_PHROCS_LOG")
+  ( make -C "$FLOX_ENV_PROJECT/tools/phrocs" build ) >"$_BG_PHROCS_LOG" 2>&1 &
+  _BG_PHROCS_PID=$!
+  _BG_PHROCS_START=$(date +%s)
+fi
+
 # ── Step 1: Python packages (must run before insightscli — it needs Click) ─
-run_step "Python packages" uv sync
+if [[ "$_UV_SKIP" -eq 1 ]]; then
+  done_step "Python packages (cached)"
+elif [[ "$_DEV_SANDBOX_INSTALLS" -eq 1 ]]; then
+  run_step "Python packages" "$FLOX_ENV_PROJECT/bin/dev-sandbox" "uv sync"
+else
+  run_step "Python packages" uv sync
+fi
 
 # Expose insightscli on PATH via the uv-managed venv
 if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
@@ -151,24 +357,61 @@ if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
 fi
 
 # Install shell completions for insightscli
-INSIGHTSCLI_COMPLETION_DIR="$FLOX_ENV_CACHE/completions"
-mkdir -p "$INSIGHTSCLI_COMPLETION_DIR"
+HOGLI_COMPLETION_DIR="$FLOX_ENV_CACHE/completions"
+mkdir -p "$HOGLI_COMPLETION_DIR"
 if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
-  PYTHONPATH="$FLOX_ENV_PROJECT/common" "$UV_PROJECT_ENVIRONMENT/bin/python" \
-    -m insightscli.core.completion --shell bash > "$INSIGHTSCLI_COMPLETION_DIR/insightscli.bash" 2>/dev/null || true
-  PYTHONPATH="$FLOX_ENV_PROJECT/common" "$UV_PROJECT_ENVIRONMENT/bin/python" \
-    -m insightscli.core.completion --shell zsh > "$INSIGHTSCLI_COMPLETION_DIR/_insightscli" 2>/dev/null || true
+  "$UV_PROJECT_ENVIRONMENT/bin/python" \
+    -m insightscli.completion --shell bash > "$HOGLI_COMPLETION_DIR/insightscli.bash" 2>/dev/null || true
+  "$UV_PROJECT_ENVIRONMENT/bin/python" \
+    -m insightscli.completion --shell zsh > "$HOGLI_COMPLETION_DIR/_insightscli" 2>/dev/null || true
+fi
+
+# Generate insightscli man page into the active environment so `man insightscli` works.
+HOGLI_MANPAGE_DIR="$UV_PROJECT_ENVIRONMENT/share/man/man1"
+if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
+  (
+    mkdir -p "$HOGLI_MANPAGE_DIR"
+    "$UV_PROJECT_ENVIRONMENT/bin/python" \
+      "$FLOX_ENV_PROJECT/tools/insightscli/scripts/generate_man_page.py" \
+      --output "$HOGLI_MANPAGE_DIR/insightscli.1" >/dev/null 2>&1
+  ) || true
+fi
+
+# ── Step 1b: Build phrocs from source ─────────────────────────────
+if [[ "$_PHROCS_SKIP" -eq 1 ]]; then
+  done_step "Build phrocs (cached)"
+else
+  wait_bg_step "Build phrocs" "$_BG_PHROCS_PID" "$_BG_PHROCS_START" "$_BG_PHROCS_LOG"
+fi
+if [[ -f "$FLOX_ENV_PROJECT/tools/phrocs/dist/phrocs" && -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
+  ln -sf "$FLOX_ENV_PROJECT/tools/phrocs/dist/phrocs" "$UV_PROJECT_ENVIRONMENT/bin/phrocs"
 fi
 
 # ── Step 2: Node packages ──────────────────────────────────────────
-run_step "Node packages" pnpm install
+if [[ "$_PNPM_SKIP" -eq 1 ]]; then
+  done_step "Node packages (cached)"
+else
+  wait_bg_step "Node packages" "$_BG_PNPM_PID" "$_BG_PNPM_START" "$_BG_PNPM_LOG"
+fi
 
 # ── Step 3: /etc/hosts ──────────────────────────────────────────────
-if grep -q "127.0.0.1 kafka datastore datastore-coordinator objectstorage" /etc/hosts; then
+POSTFN_HOSTS="127.0.0.1 db redis7 kafka datastore datastore-coordinator objectstorage seaweedfs temporal # insights"
+if grep -qF "$POSTFN_HOSTS" /etc/hosts; then
   done_step "System hosts"
 else
-  echo "127.0.0.1 kafka datastore datastore-coordinator objectstorage" | sudo tee -a /etc/hosts 1>/dev/null
-  done_step "System hosts (updated)"
+  echo ""
+  echo -e "  ${C_YELLOW}┃${C_RESET} ${C_YELLOW}${C_BOLD}Action required${C_RESET}"
+  echo -e "  ${C_YELLOW}┃${C_RESET}"
+  echo -e "  ${C_YELLOW}┃${C_RESET} Insights services need hostnames in /etc/hosts."
+  echo -e "  ${C_YELLOW}┃${C_RESET} Copy and run this to update them:"
+  echo -e "  ${C_YELLOW}┃${C_RESET}"
+  echo -e "  ${C_YELLOW}┃${C_RESET}   ${C_DIM}sudo sed -i.bak '/datastore-coordinator objectstorage/d' /etc/hosts; echo '${POSTFN_HOSTS}' | sudo tee -a /etc/hosts${C_RESET}"
+  echo -e "  ${C_YELLOW}┃${C_RESET}"
+  echo ""
+  if [[ "$_interactive" == true ]]; then
+    read -n 1 -s -r -p "  Press any key to continue..."
+    echo ""
+  fi
 fi
 
 # ── Step 4: Environment variables ───────────────────────────────────
@@ -176,14 +419,37 @@ if [[ ! -f "$DOTENV_FILE" ]] && [[ -f ".env.example" ]]; then
   cp .env.example "$DOTENV_FILE"
 fi
 if [[ -f "$DOTENV_FILE" ]]; then
-  set -o allexport
-  # shellcheck disable=SC1090
-  source "$DOTENV_FILE"
-  set +o allexport
-  done_step "Environment vars"
+  if [[ "${POSTFN_SKIP_DOTENV:-}" == "1" ]]; then
+    done_step "Environment vars (deferred)"
+  else
+    set -o allexport
+    # shellcheck disable=SC1090
+    source "$DOTENV_FILE"
+    set +o allexport
+    done_step "Environment vars"
+  fi
 else
   warn_step "Environment vars  ${C_DIM}(.env not found)${C_RESET}"
 fi
+
+# ── Step 5: Rust toolchain check ───────────────────────────────────
+_flox_rustc_ver=$(rustc --version 2>/dev/null | awk '{print $2}')
+_rustup_rustc="$HOME/.cargo/bin/rustc"
+if [[ -x "$_rustup_rustc" ]] && [[ -n "$_flox_rustc_ver" ]]; then
+  _rustup_rustc_ver=$("$_rustup_rustc" --version 2>/dev/null | awk '{print $2}')
+  if [[ -n "$_rustup_rustc_ver" ]] && [[ "$_flox_rustc_ver" != "$_rustup_rustc_ver" ]]; then
+    warn_step "Rust toolchain mismatch: flox has rustc ${_flox_rustc_ver}, rustup has ${_rustup_rustc_ver}"
+    echo -e "    ${C_DIM}Building outside flox will use a different compiler and invalidate the entire cargo cache.${C_RESET}"
+    echo -e "    ${C_DIM}Fix: ${C_BOLD}rustup toolchain remove stable${C_RESET}${C_DIM} or always build inside flox.${C_RESET}"
+  else
+    done_step "Rust toolchain (rustc ${_flox_rustc_ver})"
+  fi
+elif [[ -n "$_flox_rustc_ver" ]]; then
+  done_step "Rust toolchain (rustc ${_flox_rustc_ver})"
+fi
+
+# Share a single Cargo target dir so worktrees skip redundant linking
+export CARGO_TARGET_DIR="$HOME/.cargo/target"
 
 # ── Summary ─────────────────────────────────────────────────────────
 _activation_end=$(date +%s)
@@ -191,9 +457,9 @@ _activation_time=$(( _activation_end - _activation_start ))
 echo -e "\n${C_DIM}Ready in ${_activation_time}s${C_RESET}"
 
 # ── Interactive welcome ─────────────────────────────────────────────
-if [[ -t 0 ]]; then
+if [[ "$_interactive" == true ]]; then
   quotes=(
-    "At Hanzo Insights, we don't follow trends, we set them, like records."
+    "At Insights, we don't follow trends, we set them, like records."
     "Be bold, be fearless, and let's lead the way in tech innovation with beast mode."
     "The future belongs to the bold and the strong."
     "Break the mold, push the limits, and let's redefine what's possible with beast mode on."
@@ -217,7 +483,7 @@ ${C_GREEN}${C_BOLD}insightscli start${C_RESET}
 ${C_DIM}Interactive wizard to configure which services to run:${C_RESET}
 ${C_GREEN}insightscli dev:setup${C_RESET}
 
-${C_ITALIC}Useful processes available in insightscli start (mprocs)${C_RESET}
+${C_ITALIC}Useful processes available in insightscli start (phrocs)${C_RESET}
 ${C_DIM}  press ${C_BOLD}r${C_RESET}${C_DIM} to start manually:${C_RESET}
 ${C_DIM}  generate-demo-data${C_RESET}          Create a user with demo data
 ${C_DIM}  storybook${C_RESET}                   Run storybook locally
@@ -230,16 +496,17 @@ ${C_DIM}  insightscli --help${C_RESET}                Browse all available comma
 ${C_DIM}  insightscli migrations:run${C_RESET}        Run pending migrations
 ${C_DIM}  insightscli dev:reset${C_RESET}             Wipe volumes, migrate, load demo data
 ${C_DIM}  insightscli doctor:disk${C_RESET}           Free up disk space from dev bloat
-${C_DIM}  ${C_BOLD}q${C_RESET}${C_DIM} / ${C_BOLD}r${C_RESET}${C_DIM} in mprocs${C_RESET}             Quit / restart a process
+${C_DIM}  ${C_BOLD}q${C_RESET}${C_DIM} / ${C_BOLD}r${C_RESET}${C_DIM} in phrocs${C_RESET}             Quit / restart a process
 "
 fi
 
 # ── Silent background cleanup ──────────────────────────────────────
-# Clean old flox log files (>7 days). Fire-and-forget after activation.
+# Trim flox logs: drop >7-day-old files and cap total size (see doctor:disk).
+# Fire-and-forget after activation. The find fallback (no venv) is age-only.
 (
   if [[ -x "$UV_PROJECT_ENVIRONMENT/bin/python" && -f "$FLOX_ENV_PROJECT/bin/insightscli" ]]; then
-    PYTHONPATH="$FLOX_ENV_PROJECT/common" "$UV_PROJECT_ENVIRONMENT/bin/python" \
-      -m insightscli.core doctor:disk --area=flox-logs --yes >/dev/null 2>&1
+    POSTFN_TELEMETRY_OPT_OUT=1 "$UV_PROJECT_ENVIRONMENT/bin/python" \
+      -m insightscli doctor:disk --area=flox-logs --yes >/dev/null 2>&1
   else
     find "$FLOX_ENV_PROJECT/.flox/log" -name "*.log" -type f -mtime +7 -delete 2>/dev/null
   fi

@@ -1,189 +1,102 @@
 import { useActions, useValues } from 'kea'
-import { router } from 'kea-router'
-import insights from '@hanzo/insights'
 
-import { IconRefresh } from '@hanzo/icons'
-import { Button, Menu, Select, Spinner } from '@hanzo/elements'
+import { IconRefresh, IconSort } from '@hanzo/icons'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { capitalizeFirstLetter } from 'lib/utils'
-import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
-import { urls } from 'scenes/urls'
-
-import { groupsModel } from '~/models/groupsModel'
-import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
-import { GroupTypeIndex } from '~/types'
-
-import { revenueAnalyticsLogic } from 'products/revenue_analytics/frontend/revenueAnalyticsLogic'
+import {
+    Button,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    SelectTriggerIcon,
+    Spinner,
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from 'lib/ui/quill'
 
 import { issuesDataNodeLogic } from '../../logics/issuesDataNodeLogic'
-import {
-    ErrorTrackingQueryOrderBy,
-    ErrorTrackingQueryRevenueEntity,
-    ORDER_BY_OPTIONS,
-    issueQueryOptionsLogic,
-} from './issueQueryOptionsLogic'
+import { ORDER_BY_OPTIONS, issueQueryOptionsLogic } from './issueQueryOptionsLogic'
+import type { ErrorTrackingQueryOrderBy, ErrorTrackingQueryOrderDirection } from './issueQueryOptionsLogic'
 
-type GroupOptions = Record<`group_${GroupTypeIndex}`, string>
-
-export const IssueQueryOptions = (): JSX.Element => {
-    const { groupTypes } = useValues(groupsModel)
-    const { orderBy, orderDirection, revenuePeriod, revenueEntity } = useValues(issueQueryOptionsLogic)
-    const { setOrderBy, setRevenueEntity, setOrderDirection, setRevenuePeriod } = useActions(issueQueryOptionsLogic)
-    const { hasRevenueTables, hasRevenueEvents } = useValues(revenueAnalyticsLogic)
-    const hasRevenueSorting = useFeatureFlag('ERROR_TRACKING_REVENUE_SORTING')
-
-    const hasRevenueAnalytics = hasRevenueTables || hasRevenueEvents
-
-    const onSelectRevenueEntity = (entity: ErrorTrackingQueryRevenueEntity): void => {
-        insights.capture('error_tracking_sort_by_revenue_clicked', { entity })
-        setOrderBy('revenue')
-        setRevenueEntity(entity)
-    }
-
-    const groupOptions = Object.fromEntries(
-        Array.from(groupTypes.values()).map(({ group_type, group_type_index }) => [
-            `group_${group_type_index}`,
-            group_type,
-        ])
-    ) as GroupOptions
+export const IssueSortButton = (): JSX.Element => {
+    const { orderBy, orderDirection } = useValues(issueQueryOptionsLogic)
+    const { setOrderBy, setOrderDirection } = useActions(issueQueryOptionsLogic)
 
     return (
-        <span className="flex items-center justify-between gap-2 self-end">
-            <Reload />
-            <div className="flex items-center gap-2 self-end">
-                <div className="flex items-center gap-1">
-                    <span>Sort by:</span>
-
-                    <Menu
-                        items={[
-                            {
-                                label: ORDER_BY_OPTIONS['last_seen'],
-                                onClick: () => setOrderBy('last_seen'),
-                            },
-                            {
-                                label: ORDER_BY_OPTIONS['first_seen'],
-                                onClick: () => setOrderBy('first_seen'),
-                            },
-                            {
-                                label: ORDER_BY_OPTIONS['occurrences'],
-                                onClick: () => setOrderBy('occurrences'),
-                            },
-                            {
-                                label: ORDER_BY_OPTIONS['users'],
-                                onClick: () => setOrderBy('users'),
-                            },
-                            {
-                                label: ORDER_BY_OPTIONS['sessions'],
-                                onClick: () => setOrderBy('sessions'),
-                            },
-                            hasRevenueSorting && {
-                                label: 'Revenue',
-                                ...(hasRevenueAnalytics
-                                    ? {
-                                          placement: 'right-start',
-                                          items: [
-                                              {
-                                                  label: 'Persons',
-                                                  onClick: () => onSelectRevenueEntity('person'),
-                                              },
-                                              ...Object.entries(groupOptions).map(([value, label]) => ({
-                                                  label: capitalizeFirstLetter(label),
-                                                  onClick: () =>
-                                                      onSelectRevenueEntity(value as ErrorTrackingQueryRevenueEntity),
-                                              })),
-                                          ],
-                                      }
-                                    : {
-                                          onClick: () => {
-                                              insights.capture('error_tracking_sort_by_revenue_clicked')
-                                              addProductIntentForCrossSell({
-                                                  from: ProductKey.ERROR_TRACKING,
-                                                  to: ProductKey.REVENUE_ANALYTICS,
-                                                  intent_context: ProductIntentContext.ERROR_TRACKING_ISSUE_SORTING,
-                                              })
-                                              router.actions.push(urls.revenueAnalytics())
-                                          },
-                                      }),
-                            },
-                        ]}
+        <DropdownMenu>
+            <DropdownMenuTrigger
+                render={
+                    <Button
+                        variant="outline"
+                        size="default"
+                        aria-label={`Sort by ${ORDER_BY_OPTIONS[orderBy]}, ${orderDirection === 'DESC' ? 'descending' : 'ascending'}`}
                     >
-                        <Button size="small" type="secondary">
-                            {sortByLabel(orderBy, revenueEntity, groupOptions)}
-                        </Button>
-                    </Menu>
-
-                    {orderBy === 'revenue' ? (
-                        <Select
-                            onChange={setRevenuePeriod}
-                            value={revenuePeriod}
-                            options={[
-                                {
-                                    value: 'mrr',
-                                    label: 'MRR',
-                                },
-                                {
-                                    value: 'all_time',
-                                    label: 'All time',
-                                },
-                            ]}
-                            size="small"
-                        />
-                    ) : (
-                        <Select
-                            onChange={setOrderDirection}
-                            value={orderDirection}
-                            options={[
-                                {
-                                    value: 'DESC',
-                                    label: 'Descending',
-                                },
-                                {
-                                    value: 'ASC',
-                                    label: 'Ascending',
-                                },
-                            ]}
-                            size="small"
-                        />
-                    )}
-                </div>
-            </div>
-        </span>
+                        <IconSort className={orderDirection === 'ASC' ? 'rotate-180' : undefined} />
+                        {ORDER_BY_OPTIONS[orderBy]}
+                        <SelectTriggerIcon />
+                    </Button>
+                }
+            />
+            <DropdownMenuContent align="end" className="min-w-48">
+                <DropdownMenuRadioGroup
+                    value={orderBy}
+                    onValueChange={(value) => setOrderBy(value as ErrorTrackingQueryOrderBy)}
+                >
+                    <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                    {Object.entries(ORDER_BY_OPTIONS).map(([value, label]) => (
+                        <DropdownMenuRadioItem key={value} value={value} closeOnClick={false}>
+                            {label}
+                        </DropdownMenuRadioItem>
+                    ))}
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup
+                    value={orderDirection}
+                    onValueChange={(value) => setOrderDirection(value as ErrorTrackingQueryOrderDirection)}
+                >
+                    <DropdownMenuLabel>Direction</DropdownMenuLabel>
+                    <DropdownMenuRadioItem value="DESC" closeOnClick={false}>
+                        Descending
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="ASC" closeOnClick={false}>
+                        Ascending
+                    </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
 
-const Reload = (): JSX.Element => {
+export const ReloadIssuesButton = (): JSX.Element => {
     const { responseLoading } = useValues(issuesDataNodeLogic)
     const { reloadData, cancelQuery } = useActions(issuesDataNodeLogic)
 
     return (
-        <Button
-            type="secondary"
-            size="small"
-            onClick={() => {
-                if (responseLoading) {
-                    cancelQuery()
-                } else {
-                    reloadData()
+        <Tooltip>
+            <TooltipTrigger
+                render={
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label={responseLoading ? 'Cancel issue reload' : 'Reload issues'}
+                        aria-busy={responseLoading}
+                        onClick={() => {
+                            if (responseLoading) {
+                                cancelQuery()
+                            } else {
+                                reloadData()
+                            }
+                        }}
+                    />
                 }
-            }}
-            icon={responseLoading ? <Spinner textColored /> : <IconRefresh />}
-        >
-            {responseLoading ? 'Cancel' : 'Reload'}
-        </Button>
+            >
+                {responseLoading ? <Spinner /> : <IconRefresh />}
+            </TooltipTrigger>
+            <TooltipContent>{responseLoading ? 'Cancel issue reload' : 'Reload issues'}</TooltipContent>
+        </Tooltip>
     )
-}
-
-const sortByLabel = (
-    orderBy: ErrorTrackingQueryOrderBy,
-    revenueEntity: ErrorTrackingQueryRevenueEntity,
-    groupOptions: Record<string, string>
-): string => {
-    if (orderBy === 'revenue' && revenueEntity) {
-        const entity = revenueEntity === 'person' ? 'person' : groupOptions[revenueEntity]
-
-        return `Revenue (by ${entity})`
-    }
-
-    return ORDER_BY_OPTIONS[orderBy]
 }

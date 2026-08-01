@@ -13,7 +13,7 @@ const path = require('path')
 const DOCS_ROOT = path.resolve(__dirname, '../../docs')
 const PUBLISHED_ROOT = path.join(DOCS_ROOT, 'published')
 const LINK_RE = /\[.*?\]\(([^)]+)\)/g
-const INSIGHTS_URL_RE = /https:\/\/insights\.com\/[^\s)"]+/g
+const POSTFN_URL_RE = /https:\/\/insights\.com\/[^\s)"]+/g
 const MAX_CONCURRENT = 10
 const RETRIES = 3
 const TIMEOUT_MS = 10_000
@@ -43,8 +43,8 @@ function extractLinks(content) {
 
 function resolveRelativeLink(fromFile, link) {
     const target = link.split('#')[0]
-    if (!target) return null
-    if (/^https?:\/\/|^mailto:|^\//.test(target)) return null
+    if (!target) {return null}
+    if (/^https?:\/\/|^mailto:|^\//.test(target)) {return null}
 
     const dir = path.dirname(fromFile)
     const resolved = path.resolve(dir, target)
@@ -70,7 +70,7 @@ function resolveRelativeLink(fromFile, link) {
     ]
 
     for (const candidate of candidates) {
-        if (fs.existsSync(candidate)) return null // found, no error
+        if (fs.existsSync(candidate)) {return null} // found, no error
     }
 
     return { file: path.relative(DOCS_ROOT, fromFile), link, resolved: path.relative(DOCS_ROOT, resolved) }
@@ -80,7 +80,7 @@ function resolveRelativeLink(fromFile, link) {
 // e.g. "handbook/engineering/project-structure" if published/handbook/engineering/project-structure.md exists
 function buildPublishedUrlIndex() {
     const index = new Set()
-    if (!fs.existsSync(PUBLISHED_ROOT)) return index
+    if (!fs.existsSync(PUBLISHED_ROOT)) {return index}
 
     for (const file of findMarkdownFiles(PUBLISHED_ROOT)) {
         let rel = path.relative(PUBLISHED_ROOT, file)
@@ -98,7 +98,7 @@ function findAbsoluteLinksToLocalDocs(files, publishedIndex) {
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf8')
         let match
-        const re = new RegExp(INSIGHTS_URL_RE.source, 'g')
+        const re = new RegExp(POSTFN_URL_RE.source, 'g')
         while ((match = re.exec(content)) !== null) {
             const url = match[0].replace(/[,.)]+$/, '')
             const urlPath = url.replace('https://hanzo.ai/', '').split('#')[0].replace(/\/$/, '')
@@ -115,7 +115,7 @@ function collectInsightsUrls(files) {
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf8')
         let match
-        while ((match = INSIGHTS_URL_RE.exec(content)) !== null) {
+        while ((match = POSTFN_URL_RE.exec(content)) !== null) {
             // Strip trailing punctuation that regex might capture
             let url = match[0].replace(/[,.)]+$/, '')
             urls.add(url)
@@ -164,7 +164,7 @@ async function checkInsightsUrls(urls) {
         const batch = urls.slice(i, i + MAX_CONCURRENT)
         const results = await Promise.all(batch.map(fetchWithRetry))
         for (const r of results) {
-            if (!r.ok) failures.push(r)
+            if (!r.ok) {failures.push(r)}
         }
     }
     return failures
@@ -172,72 +172,72 @@ async function checkInsightsUrls(urls) {
 
 async function main() {
     if (!fs.existsSync(DOCS_ROOT)) {
-        console.log('No docs/ directory found, skipping.')
+        console.info('No docs/ directory found, skipping.')
         process.exit(0)
     }
 
     const files = findMarkdownFiles(DOCS_ROOT)
-    console.log(`Found ${files.length} markdown files in docs/\n`)
+    console.info(`Found ${files.length} markdown files in docs/\n`)
 
     let exitCode = 0
 
     // 1. Check relative links
-    console.log('--- Checking relative links ---')
+    console.info('--- Checking relative links ---')
     const brokenRelative = []
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf8')
         const links = extractLinks(content)
         for (const link of links) {
             const err = resolveRelativeLink(file, link)
-            if (err) brokenRelative.push(err)
+            if (err) {brokenRelative.push(err)}
         }
     }
 
     if (brokenRelative.length > 0) {
         for (const { file, link, resolved, reason } of brokenRelative) {
             const detail = reason || `resolved to ${resolved}`
-            console.log(`  ❌ ${file}: ${link} (${detail})`)
+            console.info(`  ❌ ${file}: ${link} (${detail})`)
         }
-        console.log(`\n${brokenRelative.length} broken relative link(s) found.\n`)
+        console.info(`\n${brokenRelative.length} broken relative link(s) found.\n`)
         exitCode = 1
     } else {
-        console.log(`  ✅ All relative links resolve to existing files\n`)
+        console.info(`  ✅ All relative links resolve to existing files\n`)
     }
 
     // 2. Check for absolute links to local docs (should be relative)
-    console.log('--- Checking for absolute links to local docs ---')
+    console.info('--- Checking for absolute links to local docs ---')
     const publishedIndex = buildPublishedUrlIndex()
     const shouldBeRelative = findAbsoluteLinksToLocalDocs(files, publishedIndex)
 
     if (shouldBeRelative.length > 0) {
         for (const { file, url } of shouldBeRelative) {
-            console.log(`  ❌ ${file}: ${url} (exists locally, use a relative link instead)`)
+            console.info(`  ❌ ${file}: ${url} (exists locally, use a relative link instead)`)
         }
-        console.log(`\n${shouldBeRelative.length} link(s) should be relative.\n`)
+        console.info(`\n${shouldBeRelative.length} link(s) should be relative.\n`)
         exitCode = 1
     } else {
-        console.log(`  ✅ No absolute links to local docs found\n`)
+        console.info(`  ✅ No absolute links to local docs found\n`)
     }
 
     // 3. Check hanzo.ai links
-    console.log('--- Checking hanzo.ai links ---')
+    console.info('--- Checking hanzo.ai links ---')
     const urls = collectInsightsUrls(files)
 
     if (urls.length === 0) {
-        console.log('  No hanzo.ai links found, skipping.\n')
+        console.info('  No hanzo.ai links found, skipping.\n')
     } else {
-        console.log(`  Found ${urls.length} unique hanzo.ai URLs to check`)
+        console.info(`  Found ${urls.length} unique hanzo.ai URLs to check`)
         const brokenUrls = await checkInsightsUrls(urls)
 
         if (brokenUrls.length > 0) {
             for (const { url, status } of brokenUrls) {
-                console.log(`  ❌ ${url} (${status})`)
+                console.info(`  ❌ ${url} (${status})`)
             }
-            console.log(`\n${brokenUrls.length} broken hanzo.ai link(s) found.`)
-            console.log('These may be stale references to moved or deleted pages.\n')
+            console.info(`\n${brokenUrls.length} broken hanzo.ai link(s) found.`)
+            console.info('These may be stale references to moved or deleted pages.\n')
             exitCode = 1
         } else {
-            console.log(`  ✅ All ${urls.length} hanzo.ai links are reachable\n`)
+            console.info(`  ✅ All ${urls.length} hanzo.ai links are reachable\n`)
         }
     }
 

@@ -1,12 +1,14 @@
 import { useActions, useValues } from 'kea'
+import insights from 'insights-js'
 
-import { AlertDeletionWarning } from 'lib/components/Alerts/AlertDeletionWarning'
 import { Tabs } from 'lib/elements/Tabs'
 import { Link } from 'lib/elements/Link'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { insightNavLogic } from 'scenes/insights/InsightNav/insightNavLogic'
 import { INSIGHT_TYPE_URLS } from 'scenes/insights/utils'
 import { INSIGHT_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
+
+import { AlertDeletionWarning } from 'products/alerts/frontend/components/AlertDeletionWarning'
 
 import { insightLogic } from '../insightLogic'
 
@@ -20,7 +22,10 @@ export function InsightsNav(): JSX.Element {
             {insight.short_id && <AlertDeletionWarning />}
             <Tabs
                 activeKey={activeView}
-                onChange={(newKey) => setActiveView(newKey)}
+                onChange={(newKey) => {
+                    insights.capture('insight type tab clicked', { insight_type: newKey, previous_type: activeView })
+                    setActiveView(newKey)
+                }}
                 tabs={tabs.map(({ label, type, dataAttr }) => ({
                     key: type,
                     label: (

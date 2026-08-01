@@ -60,10 +60,10 @@ def main():
 
     logger.info("Environment:")
     logger.info(
-        "  INSIGHTS_TEST_BASE_URL: %s", os.environ.get("INSIGHTS_TEST_BASE_URL", "http://localhost:8010 (default)")
+        "  POSTFN_TEST_BASE_URL: %s", os.environ.get("POSTFN_TEST_BASE_URL", "http://localhost:8010 (default)")
     )
     # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-    logger.info("  INSIGHTS_PERSONAL_API_KEY: %s", "SET" if os.environ.get("INSIGHTS_PERSONAL_API_KEY") else "NOT SET")
+    logger.info("  POSTFN_PERSONAL_API_KEY: %s", "SET" if os.environ.get("POSTFN_PERSONAL_API_KEY") else "NOT SET")
 
     exit_code = 1
 

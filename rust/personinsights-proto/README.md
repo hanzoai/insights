@@ -1,6 +1,6 @@
 # personinsights-proto
 
-Rust bindings for the PersonInsights gRPC services.
+Rust bindings for the PersonHog gRPC services.
 
 Proto definitions live in the top-level [`/proto/personinsights`](/proto/personinsights) directory (language-agnostic location for multi-language code generation).
 
@@ -27,8 +27,8 @@ cargo build -p personinsights-proto
 ```rust
 use personinsights_proto::personinsights::{
     types::v1::{Person, GetPersonRequest},
-    service::v1::person_insights_service_server::PersonInsightsService,
-    replica::v1::person_insights_replica_client::PersonInsightsReplicaClient,
+    service::v1::person_hog_service_server::PersonHogService,
+    replica::v1::person_hog_replica_client::PersonHogReplicaClient,
 };
 ```
 

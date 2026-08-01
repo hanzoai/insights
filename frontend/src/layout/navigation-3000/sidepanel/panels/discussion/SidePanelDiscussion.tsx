@@ -4,16 +4,14 @@ import { useEffect } from 'react'
 import { IconChat } from '@hanzo/icons'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
-import { WarningMascot } from 'lib/components/mascots'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { WarningHog } from 'lib/components/mascots'
 import { IconWithCount } from 'lib/elements/icons'
-import { cn } from 'lib/utils/css-classes'
 import { CommentComposer } from 'scenes/comments/CommentComposer'
 import { CommentsList } from 'scenes/comments/CommentsList'
 import { CommentsLogicProps, commentsLogic } from 'scenes/comments/commentsLogic'
 
-import { SidePanelContentContainer } from '../../SidePanelContentContainer'
 import { SidePanelPaneHeader } from '../../components/SidePanelPaneHeader'
+import { SidePanelContentContainer } from '../../SidePanelContentContainer'
 import { sidePanelStateLogic } from '../../sidePanelStateLogic'
 import { sidePanelDiscussionLogic } from './sidePanelDiscussionLogic'
 
@@ -29,68 +27,35 @@ export const SidePanelDiscussionIcon = (props: { className?: string }): JSX.Elem
 
 export const SidePanelDiscussion = (): JSX.Element => {
     const { commentsLogicProps } = useValues(sidePanelDiscussionLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
     const { scope, item_id } = commentsLogicProps ?? {}
+
+    const discussionTitle = (
+        <div className="flex deprecated-space-x-2">
+            <span>
+                Discussion{' '}
+                {scope ? (
+                    <span className="font-normal text-secondary">
+                        about {item_id ? 'this' : ''} {humanizeScope(scope, !!item_id)}
+                    </span>
+                ) : null}
+            </span>
+        </div>
+    )
 
     return (
         <div className="flex flex-col overflow-hidden flex-1">
-            {!isRemovingSidePanelFlag ? (
-                <SidePanelPaneHeader
-                    title={
-                        <div className="flex deprecated-space-x-2">
-                            <span>
-                                Discussion{' '}
-                                {scope ? (
-                                    <span className="font-normal text-secondary">
-                                        about {item_id ? 'this' : ''} {humanizeScope(scope, !!item_id)}
-                                    </span>
-                                ) : null}
-                            </span>
-                        </div>
-                    }
-                />
-            ) : null}
-
-            <SidePanelContentContainer flagOffClassName="contents">
-                {commentsLogicProps && commentsLogicProps.disabled && isRemovingSidePanelFlag ? (
-                    <SidePanelPaneHeader
-                        title={
-                            <div className="flex deprecated-space-x-2">
-                                <span>
-                                    Discussion{' '}
-                                    {scope ? (
-                                        <span className="font-normal text-secondary">
-                                            about {item_id ? 'this' : ''} {humanizeScope(scope, !!item_id)}
-                                        </span>
-                                    ) : null}
-                                </span>
-                            </div>
-                        }
-                    />
+            <SidePanelContentContainer>
+                {commentsLogicProps && commentsLogicProps.disabled ? (
+                    <SidePanelPaneHeader title={discussionTitle} />
                 ) : null}
                 {commentsLogicProps && !commentsLogicProps.disabled ? (
                     <DiscussionContent logicProps={commentsLogicProps}>
-                        {isRemovingSidePanelFlag ? (
-                            <SidePanelPaneHeader
-                                title={
-                                    <div className="flex deprecated-space-x-2">
-                                        <span>
-                                            Discussion{' '}
-                                            {scope ? (
-                                                <span className="font-normal text-secondary">
-                                                    about {item_id ? 'this' : ''} {humanizeScope(scope, !!item_id)}
-                                                </span>
-                                            ) : null}
-                                        </span>
-                                    </div>
-                                }
-                            />
-                        ) : null}
+                        <SidePanelPaneHeader title={discussionTitle} />
                     </DiscussionContent>
                 ) : (
                     <div className="mx-auto p-8 max-w-160 mt-8 ">
-                        <div className={cn('max-w-80 mx-auto', isRemovingSidePanelFlag && 'max-w-24')}>
-                            <WarningMascot className="w-full h-full" />
+                        <div className="max-w-24 mx-auto">
+                            <WarningHog className="w-full h-full" />
                         </div>
                         <h2>Discussions aren't supported here yet...</h2>
                         <p>
@@ -112,22 +77,17 @@ const DiscussionContent = ({
     children?: React.ReactNode
 }): JSX.Element => {
     const { selectedTabOptions } = useValues(sidePanelStateLogic)
-    const { setReplyingComment } = useActions(commentsLogic(logicProps))
+    const { setSelectedComment } = useActions(commentsLogic(logicProps))
     const { setCommentsListRef } = useActions(sidePanelDiscussionLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
 
     useEffect(() => {
-        if (selectedTabOptions) {
-            setReplyingComment(selectedTabOptions)
-        }
+        // Select without auto-focusing the composer; reveal expands the thread the deep link targets
+        setSelectedComment(selectedTabOptions ?? null, true)
     }, [selectedTabOptions]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>
-            <div
-                className={cn('flex-1 overflow-y-auto p-2', isRemovingSidePanelFlag && 'contents')}
-                ref={setCommentsListRef}
-            >
+            <div className="flex-1 overflow-y-auto p-2 contents" ref={setCommentsListRef}>
                 {children}
                 <CommentsList {...logicProps} />
             </div>

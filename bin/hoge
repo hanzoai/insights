@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+if [[ "$@" == *".script"* ]]; then
+  exec python3 -m insights.insightsql.cli --compile "$@"
+elif [[ "$@" == *".js"* ]]; then
+  exec python3 -m insights.insightsql.cli --compile "$@"
+else
+  echo "$0 - the Script compilër! 🦔+🕶️= Hoge"
+  echo ""
+  echo "Usage:     bin/hoge <file.script> [output.hoge]  compile .script into .hoge"
+  echo "           bin/hoge <file.script> <output.js>    compile .script into .js"
+  echo "           bin/script <file.script>                 run .script source code"
+  echo "           bin/script <file.hoge>                run compiled .hoge bytecode"
+  exit 1
+fi

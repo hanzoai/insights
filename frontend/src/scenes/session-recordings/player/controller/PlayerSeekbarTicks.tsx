@@ -1,6 +1,8 @@
 import clsx from 'clsx'
-import insights from '@hanzo/insights'
-import React, { MutableRefObject, memo } from 'react'
+import { useActions, useValues } from 'kea'
+import insights from 'insights-js'
+import React, { MutableRefObject, memo, useEffect, useMemo } from 'react'
+import useResizeObserver from 'use-resize-observer'
 
 import { IconComment } from '@hanzo/icons'
 
@@ -10,19 +12,37 @@ import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { RichContentPreview } from 'lib/elements/RichContent/RichContentEditor'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { autoCaptureEventToDescription } from 'lib/utils'
+import { autoCaptureEventToDescription } from 'lib/utils/events'
+import { getPrimaryPropertyForEvent } from 'lib/utils/events'
 import {
     InspectorListItem,
     InspectorListItemComment,
     InspectorListItemEvent,
+    InspectorListItemExperimentVariant,
+    InspectorListItemMetricEvent,
     InspectorListItemNotebookComment,
 } from 'scenes/session-recordings/player/inspector/playerInspectorLogic'
 import { isSingleEmoji } from 'scenes/session-recordings/utils'
 
+import { primaryEventPropertiesModel } from '~/models/primaryEventPropertiesModel'
+
+import { SeekbarGlyph, resolveOverlappingGlyphs } from './seekbarTickOffsets'
 import { UserActivity } from './UserActivity'
+
+// keep in sync with --emoji-width / --comment-width in Seekbar.scss
+const EMOJI_TICK_WIDTH_PX = 16
+const COMMENT_TICK_WIDTH_PX = 12
 
 function isEventItem(x: InspectorListItem): x is InspectorListItemEvent {
     return 'data' in x && !!x.data && 'event' in x.data
+}
+
+function isExperimentVariantItem(x: InspectorListItem): x is InspectorListItemExperimentVariant {
+    return x.type === 'experiment-variant'
+}
+
+function isMetricEventItem(x: InspectorListItem): x is InspectorListItemMetricEvent {
+    return x.type === 'metric-event'
 }
 
 function isNotebookComment(x: InspectorListItem): x is InspectorListItemNotebookComment {
@@ -52,11 +72,20 @@ function PlayerSeekbarTick({
     endTimeMs,
     zIndex,
     onClick,
+    primaryProperties,
+    offsetPx = 0,
 }: {
-    item: InspectorListItemComment | InspectorListItemNotebookComment | InspectorListItemEvent
+    item:
+        | InspectorListItemComment
+        | InspectorListItemNotebookComment
+        | InspectorListItemEvent
+        | InspectorListItemExperimentVariant
+        | InspectorListItemMetricEvent
     endTimeMs: number
     zIndex: number
     onClick: (e: React.MouseEvent) => void
+    primaryProperties: Record<string, string>
+    offsetPx?: number
 }): JSX.Element | null {
     const position = (item.timeInRecording / endTimeMs) * 100
 
@@ -64,12 +93,15 @@ function PlayerSeekbarTick({
         return null
     }
 
+    const primaryPropertyKey = isEventItem(item) ? getPrimaryPropertyForEvent(item.data.event, primaryProperties) : null
+    const primaryValue = primaryPropertyKey && isEventItem(item) ? item.data.properties?.[primaryPropertyKey] : null
+
     return (
         <div
             className={clsx('PlayerSeekbarTick', item.highlightColor && `PlayerSeekbarTick--${item.highlightColor}`)}
             // eslint-disable-next-line react/forbid-dom-props
             style={{
-                left: `${position}%`,
+                left: offsetPx ? `calc(${position}% + ${offsetPx}px)` : `${position}%`,
                 zIndex: zIndex,
             }}
             onClick={onClick}
@@ -84,7 +116,15 @@ function PlayerSeekbarTick({
                     })
                 }}
                 title={
-                    isEventItem(item) ? (
+                    isExperimentVariantItem(item) ? (
+                        <>
+                            Saw variant "{item.data.variant}" of {item.data.experimentName}
+                        </>
+                    ) : isMetricEventItem(item) ? (
+                        <>
+                            Fired a {item.data.metricName} event ({item.data.experimentName})
+                        </>
+                    ) : isEventItem(item) ? (
                         <>
                             {item.data.event === '$autocapture' ? (
                                 <>{autoCaptureEventToDescription(item.data)}</>
@@ -98,11 +138,8 @@ function PlayerSeekbarTick({
                                     value={item.data.event}
                                 />
                             )}
-                            {item.data.event === '$pageview' &&
-                            (item.data.properties.$pathname || item.data.properties.$current_url) ? (
-                                <span className="ml-2 opacity-75">
-                                    {item.data.properties.$pathname || item.data.properties.$current_url}
-                                </span>
+                            {primaryValue != null && primaryValue !== '' ? (
+                                <span className="ml-2 opacity-75">{String(primaryValue)}</span>
                             ) : null}
                         </>
                     ) : isNotebookComment(item) ? (
@@ -136,20 +173,51 @@ function PlayerSeekbarTick({
     )
 }
 
-export const PlayerSeekbarTicks = memo(
-    function PlayerSeekbarTicks({
+const MemoisedPlayerSeekbarTicks = memo(
+    function PlayerSeekbarTicksInner({
         seekbarItems,
         endTimeMs,
         seekToTime,
         hoverRef,
+        primaryProperties,
+        ticksRef,
+        containerWidth,
     }: {
-        seekbarItems: (InspectorListItemEvent | InspectorListItemComment | InspectorListItemNotebookComment)[]
+        seekbarItems: (
+            | InspectorListItemEvent
+            | InspectorListItemComment
+            | InspectorListItemNotebookComment
+            | InspectorListItemExperimentVariant
+            | InspectorListItemMetricEvent
+        )[]
         endTimeMs: number
         seekToTime: (timeInMilliseconds: number) => void
         hoverRef: MutableRefObject<HTMLDivElement | null>
+        primaryProperties: Record<string, string>
+        ticksRef: (node: HTMLDivElement | null) => void
+        containerWidth: number
     }): JSX.Element {
+        const glyphOffsets = useMemo(() => {
+            const glyphs: SeekbarGlyph[] = []
+            seekbarItems.forEach((item, index) => {
+                if (!isAnyComment(item)) {
+                    return
+                }
+                const position = (item.timeInRecording / endTimeMs) * 100
+                if (position < 0 || position > 100) {
+                    return
+                }
+                glyphs.push({
+                    index,
+                    position,
+                    widthPx: isEmojiComment(item) ? EMOJI_TICK_WIDTH_PX : COMMENT_TICK_WIDTH_PX,
+                })
+            })
+            return resolveOverlappingGlyphs(glyphs, containerWidth)
+        }, [seekbarItems, endTimeMs, containerWidth])
+
         return (
-            <div className="PlayerSeekbarTicks">
+            <div className="PlayerSeekbarTicks" ref={ticksRef}>
                 <UserActivity hoverRef={hoverRef} />
                 {seekbarItems.map((item, i) => {
                     return (
@@ -162,6 +230,8 @@ export const PlayerSeekbarTicks = memo(
                                 e.stopPropagation()
                                 seekToTime(item.timeInRecording)
                             }}
+                            primaryProperties={primaryProperties}
+                            offsetPx={glyphOffsets.get(i)}
                         />
                     )
                 })}
@@ -173,6 +243,53 @@ export const PlayerSeekbarTicks = memo(
             prev.seekbarItems.length === next.seekbarItems.length &&
             prev.seekbarItems.every((item, i) => item.data.id === next.seekbarItems[i].data.id)
 
-        return seekbarItemsAreEqual && prev.endTimeMs === next.endTimeMs && prev.seekToTime === next.seekToTime
+        return (
+            seekbarItemsAreEqual &&
+            prev.endTimeMs === next.endTimeMs &&
+            prev.seekToTime === next.seekToTime &&
+            prev.primaryProperties === next.primaryProperties &&
+            prev.containerWidth === next.containerWidth
+        )
     }
 )
+
+export function PlayerSeekbarTicks({
+    seekbarItems,
+    endTimeMs,
+    seekToTime,
+    hoverRef,
+}: {
+    seekbarItems: (
+        | InspectorListItemEvent
+        | InspectorListItemComment
+        | InspectorListItemNotebookComment
+        | InspectorListItemExperimentVariant
+        | InspectorListItemMetricEvent
+    )[]
+    endTimeMs: number
+    seekToTime: (timeInMilliseconds: number) => void
+    hoverRef: MutableRefObject<HTMLDivElement | null>
+}): JSX.Element {
+    const { primaryProperties } = useValues(primaryEventPropertiesModel)
+    const { ensureLoadedForEvents } = useActions(primaryEventPropertiesModel)
+    const { ref: ticksRef, width: containerWidth } = useResizeObserver<HTMLDivElement>({})
+    const distinctEventNames = useMemo(
+        () => Array.from(new Set(seekbarItems.filter(isEventItem).map((i) => i.data.event))),
+        [seekbarItems]
+    )
+    useEffect(() => {
+        ensureLoadedForEvents(distinctEventNames)
+    }, [distinctEventNames, ensureLoadedForEvents])
+
+    return (
+        <MemoisedPlayerSeekbarTicks
+            seekbarItems={seekbarItems}
+            endTimeMs={endTimeMs}
+            seekToTime={seekToTime}
+            hoverRef={hoverRef}
+            primaryProperties={primaryProperties}
+            ticksRef={ticksRef}
+            containerWidth={containerWidth ?? 0}
+        />
+    )
+}

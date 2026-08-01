@@ -1,35 +1,26 @@
-// @ts-nocheck
 import { instrumented } from '~/common/tracing/tracing-utils'
+import { logger } from '~/common/utils/logger'
+import { PluginsServerConfig } from '~/types'
 
-import { Hub } from '../../types'
-import { logger } from '../../utils/logger'
-import {
-    CyclotronJobInvocation,
-    CyclotronJobInvocationInsightsFlow,
-    CyclotronJobInvocationResult,
-    CyclotronPerson,
-} from '../types'
-import { getPersonDisplayName } from '../utils'
-import { convertToInsightsFunctionFilterGlobal } from '../utils/insights-function-filtering'
-import { CdpCyclotronWorker, CdpCyclotronWorkerHub } from './cdp-cyclotron-worker.consumer'
+import { JobQueue } from '../services/job-queue/job-queue.interface'
+import { CyclotronJobInvocation, CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult } from '../types'
+import { convertToInsightsFunctionFilterGlobal } from '../utils/script-function-filtering'
+import { CdpConsumerBaseDeps } from './cdp-base.consumer'
+import { CdpCyclotronWorker } from './cdp-cyclotron-worker.consumer'
 
-/**
- * Hub type for CdpCyclotronWorkerInsightsFlow.
- * Extends CdpCyclotronWorkerHub with customflow-specific fields.
- */
-export type CdpCyclotronWorkerInsightsFlowHub = CdpCyclotronWorkerHub & Pick<Hub, 'teamManager'>
+export class CdpCyclotronWorkerInsightsFlow extends CdpCyclotronWorker {
+    protected override name = 'CdpCyclotronWorkerInsightsFlow'
 
-export class CdpCyclotronWorkerInsightsFlow extends CdpCyclotronWorker<CdpCyclotronWorkerInsightsFlowHub> {
-    protected name = 'CdpCyclotronWorkerInsightsFlow'
-
-    constructor(hub: CdpCyclotronWorkerInsightsFlowHub) {
-        super(hub, 'customflow')
+    constructor(config: PluginsServerConfig, deps: CdpConsumerBaseDeps, jobQueue: JobQueue) {
+        super(config, deps, jobQueue, 'hogflow')
     }
 
     @instrumented('cdpConsumer.handleEachBatch.executeInvocations')
-    public async processInvocations(invocations: CyclotronJobInvocation[]): Promise<CyclotronJobInvocationResult[]> {
+    public override async processInvocations(
+        invocations: CyclotronJobInvocation[]
+    ): Promise<CyclotronJobInvocationResult[]> {
         const loadedInvocations = await this.loadInsightsFlows(invocations)
-        return await Promise.all(loadedInvocations.map((item) => this.insightsFlowExecutor.execute(item)))
+        return await Promise.all(loadedInvocations.map((item) => this.hogFlowExecutor.execute(item)))
     }
 
     @instrumented('cdpConsumer.handleEachBatch.loadInsightsFlows')
@@ -40,75 +31,104 @@ export class CdpCyclotronWorkerInsightsFlow extends CdpCyclotronWorker<CdpCyclot
 
         await Promise.all(
             invocations.map(async (item) => {
-                const team = await this.hub.teamManager.getTeam(item.teamId)
-                const insightsFlow = await this.insightsFlowManager.getInsightsFlow(item.functionId)
-                if (!insightsFlow || !team) {
-                    logger.error('⚠️', 'Error finding custom flow', {
+                const team = await this.deps.teamManager.getTeam(item.teamId)
+                const hogFlow = await this.hogFlowManager.getInsightsFlow(item.functionId)
+                if (!hogFlow || !team) {
+                    logger.error('⚠️', 'Error finding script flow', {
                         id: item.functionId,
                     })
 
                     failedInvocations.push(item)
 
-                    return null
+                    return
                 }
 
                 // Skip execution if the workflow is no longer active (e.g., disabled/archived)
-                if (insightsFlow.status !== 'active') {
-                    logger.info('⏭️', 'Skipping custom flow invocation - workflow is no longer active', {
+                if (hogFlow.status !== 'active') {
+                    logger.info('⏭️', 'Skipping script flow invocation - workflow is no longer active', {
                         id: item.functionId,
-                        status: insightsFlow.status,
+                        status: hogFlow.status,
                     })
 
                     skippedInvocations.push(item)
 
-                    return null
+                    return
                 }
 
-                const insightsFlowInvocationState = item.state as CyclotronJobInvocationInsightsFlow['state']
+                const hogFlowInvocationState = item.state as CyclotronJobInvocationInsightsFlow['state']
 
-                const dbPerson = await this.personsManager.get({
-                    teamId: insightsFlow.team_id,
-                    distinctId: insightsFlowInvocationState.event.distinct_id,
-                })
+                // Warehouse-row invocations don't have a real person — the row is the unit of work
+                // and person-dependent steps no-op for these flows. Explicitly skip the person lookup
+                // rather than relying on event.distinct_id being empty so future changes to the
+                // synthetic event shape don't accidentally re-enable the lookup.
+                const isWarehouseRow = hogFlow.trigger?.type === 'data-warehouse-table'
+                // A person merge repointed this job's distinct_id and re-keyed personId onto the survivor.
+                // Resolve by that personId so the step reads the merged person — resolving by the repointed
+                // distinct_id would hit its stale ~1min cache entry (the pre-merge person) and e.g. drop an email.
+                const resolveByRepointedPerson =
+                    hogFlowInvocationState.personIdRepointed === true && !!hogFlowInvocationState.personId
+                // One-shot: consume the flag on this wake-resolution only. Later steps fall back to normal
+                // distinct_id-first resolution, which self-heals to the latest survivor if the distinct_id is
+                // repointed again (a second merge onto a non-wait step is out of processMoveBatch's scope).
+                if (resolveByRepointedPerson) {
+                    delete hogFlowInvocationState.personIdRepointed
+                }
+                const personIdOrDistinctId = isWarehouseRow
+                    ? undefined
+                    : resolveByRepointedPerson
+                      ? hogFlowInvocationState.personId
+                      : hogFlowInvocationState.event.distinct_id || hogFlowInvocationState.personId
+                const kind =
+                    resolveByRepointedPerson || !hogFlowInvocationState.event.distinct_id ? 'person_id' : 'distinct_id'
 
-                const personDisplayName = getPersonDisplayName(
-                    team,
-                    insightsFlowInvocationState.event.distinct_id,
-                    dbPerson?.properties ?? {}
-                )
+                const [person, groups] = await Promise.all([
+                    personIdOrDistinctId
+                        ? this.personsManager.getCyclotronPerson(hogFlow.team_id, personIdOrDistinctId, kind)
+                        : undefined,
+                    this.groupsManager.getGroupsForEvent(
+                        hogFlow.team_id,
+                        hogFlowInvocationState.event.properties,
+                        `${this.config.SITE_URL}/project/${hogFlow.team_id}`
+                    ),
+                ])
 
-                if (!dbPerson && insightsFlow.trigger?.type === 'event') {
-                    logger.warn('⚠️', 'Person not found for custom flow invocation', {
-                        insightsFlowId: insightsFlow.id,
-                        distinctId: insightsFlowInvocationState.event.distinct_id,
+                if (!person && hogFlow.trigger?.type === 'event') {
+                    logger.warn('⚠️', 'Person not found for script flow invocation', {
+                        hogFlowId: hogFlow.id,
+                        distinctId: hogFlowInvocationState.event?.distinct_id || hogFlowInvocationState.personId,
                         invocationId: item.id,
                     })
                 }
 
-                const person: CyclotronPerson | undefined = dbPerson
-                    ? {
-                          id: dbPerson.id,
-                          properties: dbPerson.properties,
-                          name: personDisplayName,
-                          url: `${this.hub.SITE_URL}/project/${insightsFlow.team_id}/person/${encodeURIComponent(
-                              insightsFlowInvocationState.event.distinct_id
-                          )}`,
-                      }
-                    : undefined
+                // Batch-triggered invocations arrive with an empty event.distinct_id because the
+                // blast-radius query returns UUIDs only. The person lookup above resolves one
+                // distinct_id for us (when the person has any), so backfill it here so templates
+                // defaulting to `{event.distinct_id}` resolve at script runtime.
+                if (!hogFlowInvocationState.event.distinct_id && person?.distinct_id) {
+                    hogFlowInvocationState.event.distinct_id = person.distinct_id
+                }
+
+                // Persist the resolved person UUID into state so a re-parked wait keeps its person_id
+                // even when a later re-resolution transiently misses. datastore_person wakes match on
+                // person_id only, so a wait parked with person_id = null could never be woken by a
+                // person-property change — it would depend entirely on the polling backstop.
+                if (person?.id && !hogFlowInvocationState.personId) {
+                    hogFlowInvocationState.personId = person.id
+                }
 
                 const filterGlobals = convertToInsightsFunctionFilterGlobal({
-                    event: insightsFlowInvocationState.event,
-                    person,
-                    // TODO: Load groups as well
-                    groups: {},
-                    variables: insightsFlowInvocationState.variables || {},
+                    event: hogFlowInvocationState.event,
+                    person: person ?? undefined,
+                    groups,
+                    variables: hogFlowInvocationState.variables || {},
                 })
 
                 loadedInvocations.push({
                     ...item,
-                    state: insightsFlowInvocationState,
-                    insightsFlow,
-                    person,
+                    state: hogFlowInvocationState,
+                    hogFlow,
+                    person: person ?? undefined,
+                    groups,
                     filterGlobals,
                 })
             })

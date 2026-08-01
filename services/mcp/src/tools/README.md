@@ -103,7 +103,7 @@ Add a clear, actionable description for your tool, assign it to a feature, speci
     "category": "Feature flags", // This will be displayed in the docs, but not readable by the MCP client
     "feature": "flags",
     "summary": "Creates a new feature flag in the project.", // This will be displayed in the docs, but not readable by the MCP client.
-    "required_scopes": ["feature_flag:write"], // You can find a list of available scopes here: https://github.com/Hanzo Insights/insights/blob/31082f4bcc4c45a0ac830777b8a3048e7752a1bc/frontend/src/lib/scopes.tsx
+    "required_scopes": ["feature_flag:write"], // You can find a list of available scopes here: https://github.com/Insights/insights/blob/31082f4bcc4c45a0ac830777b8a3048e7752a1bc/frontend/src/lib/scopes.tsx
     "annotations": {
       "destructiveHint": false, // Does the tool delete or destructively modify data?
       "idempotentHint": false, // Can the tool be safely called multiple times with same result?
@@ -122,7 +122,7 @@ Add a clear, actionable description for your tool, assign it to a feature, speci
 - `dashboards` - [Dashboard creation and management](https://hanzo.ai/docs/product-analytics/dashboards)
 - `insights` - [Analytics insights and SQL queries](https://hanzo.ai/docs/product-analytics/insights)
 - `experiments` - [A/B testing experiments](https://hanzo.ai/docs/experiments)
-- `llm-analytics` - [LLM usage and cost tracking](https://hanzo.ai/docs/llm-analytics)
+- `llm-analytics` - [LLM usage and cost tracking](https://hanzo.ai/docs/ai-observability)
 - `docs` - Insights documentation search
 
 If your tool doesn't fit any of these features, you can create a new feature category yourself.

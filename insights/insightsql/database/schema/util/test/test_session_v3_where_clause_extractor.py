@@ -1,7 +1,10 @@
+from datetime import UTC, datetime
 from typing import Any, Optional, Union
 
 import pytest
 from insights.test.base import APIBaseTest, DatastoreTestMixin
+
+from django.conf import settings
 
 from insights.schema import SessionTableVersion
 
@@ -15,6 +18,8 @@ from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
 from insights.insightsql.visitor import clone_expr
+
+from insights.models import EventDefinition
 
 
 def f(s: Union[str, ast.Expr, None], placeholders: Optional[dict[str, ast.Expr]] = None) -> Union[ast.Expr, None]:
@@ -85,6 +90,59 @@ class TestSessionWhereClauseExtractorV3(DatastoreTestMixin, APIBaseTest):
     def test_handles_select_with_no_where_claus(self):
         inner_where = self.inliner.get_inner_where(parse("SELECT * FROM sessions"))
         assert inner_where is None
+
+    def test_default_bound_with_limit(self):
+        EventDefinition.objects.create(
+            team=self.team,
+            name="$pageview",
+            last_seen_at=datetime(2099, 1, 15, tzinfo=UTC),
+        )
+        actual = f(self.inliner.get_inner_where(parse("SELECT * FROM sessions LIMIT 10")))
+        expected = f("raw_sessions_v3.session_timestamp >= (toDateTime('2099-01-15 00:00:00') - toIntervalDay(30))")
+        assert expected == actual
+
+    def test_no_default_bound_with_limit_and_order_by(self):
+        actual = self.inliner.get_inner_where(parse("SELECT * FROM sessions ORDER BY $start_timestamp LIMIT 10"))
+        assert actual is None
+
+    def test_no_default_bound_with_limit_and_order_by_non_timestamp(self):
+        actual = self.inliner.get_inner_where(parse("SELECT * FROM sessions ORDER BY $channel_type LIMIT 10"))
+        assert actual is None
+
+    def test_no_default_bound_with_limit_and_non_timestamp_where(self):
+        actual = self.inliner.get_inner_where(
+            parse("SELECT * FROM sessions WHERE $initial_utm_campaign = $initial_utm_source LIMIT 10")
+        )
+        assert actual is None
+
+    def test_no_default_bound_with_limit_when_not_select_star(self):
+        actual = self.inliner.get_inner_where(parse("SELECT event FROM sessions LIMIT 10"))
+        assert actual is None
+
+    def assert_limit_bound_edge_case(self, query: str, expected: str):
+        EventDefinition.objects.create(
+            team=self.team,
+            name="$pageview",
+            last_seen_at=datetime(2099, 1, 15, tzinfo=UTC),
+        )
+        actual = f(self.inliner.get_inner_where(parse(query)))
+        assert actual == f(expected)
+
+    def test_limit_bound_where_wins(self):
+        self.assert_limit_bound_edge_case(
+            "SELECT * FROM sessions WHERE $start_timestamp > '2021-01-01' LIMIT 10",
+            "raw_sessions_v3.session_timestamp >= ('2021-01-01' - toIntervalDay(3))",
+        )
+
+    def test_limit_bound_with_offset(self):
+        self.assert_limit_bound_edge_case(
+            "SELECT * FROM sessions LIMIT 10 OFFSET 5",
+            "raw_sessions_v3.session_timestamp >= (toDateTime('2099-01-15 00:00:00') - toIntervalDay(30))",
+        )
+
+    def test_no_limit_bound_with_group_by(self):
+        actual = self.inliner.get_inner_where(parse("SELECT event, count() FROM sessions GROUP BY event LIMIT 10"))
+        assert actual is None
 
     def test_handles_select_with_eq(self):
         actual = f(self.inliner.get_inner_where(parse("SELECT * FROM sessions WHERE $start_timestamp = '2021-01-01'")))
@@ -385,8 +443,30 @@ SELECT
         )
         assert expected == actual
 
+    def test_handles_select_set_query_in_comparison(self):
+        select_set_query = ast.SelectSetQuery(
+            initial_select_query=ast.SelectQuery(select=[ast.Constant(value="2021-01-01")]),
+            subsequent_select_queries=[
+                ast.SelectSetNode(
+                    select_query=ast.SelectQuery(select=[ast.Constant(value="2021-06-01")]),
+                    set_operator="UNION ALL",
+                )
+            ],
+        )
+        where = ast.CompareOperation(
+            left=ast.Field(chain=["$start_timestamp"]),
+            op=ast.CompareOperationOp.Gt,
+            right=select_set_query,
+        )
+        select = ast.SelectQuery(select=[], where=where)
+        # Should not raise NotImplementedError (regression test for #49867)
+        inner_where = self.inliner.get_inner_where(select)
+        assert inner_where is None
+
 
 class TestSessionsV3QueriesInsightsQLToDatastore(DatastoreTestMixin, APIBaseTest):
+    allow_dual_schema_snapshots = True
+
     def print_query(self, query: str) -> str:
         team = self.team
         modifiers = create_default_modifiers_for_team(team)
@@ -403,9 +483,17 @@ class TestSessionsV3QueriesInsightsQLToDatastore(DatastoreTestMixin, APIBaseTest
         pretty = print_prepared_ast(prepared_ast, context=context, dialect="datastore", pretty=True)
         return pretty
 
+    def assert_printed_matches_snapshot(self, actual: str) -> None:
+        generalized_sql = self.generalize_sql(actual)
+        self.snapshot.session.pytest_session.config.option.warn_unused_snapshots = True
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA and "events_json" in generalized_sql:
+            assert generalized_sql == self.snapshot(name="new_events_schema")
+            return
+        assert generalized_sql == self.snapshot
+
     def test_select_with_timestamp(self):
         actual = self.print_query("SELECT session_id FROM sessions WHERE $start_timestamp > '2021-01-01'")
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_join_with_events(self):
         actual = self.print_query(
@@ -420,7 +508,7 @@ WHERE events.timestamp > '2021-01-01'
 GROUP BY sessions.session_id
 """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_union(self):
         actual = self.print_query(
@@ -432,7 +520,7 @@ FROM events
 WHERE events.timestamp < today()
             """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_session_breakdown(self):
         actual = self.print_query(
@@ -476,7 +564,7 @@ WHERE and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024
 GROUP BY day_start,
          breakdown_value"""
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_session_replay_query(self):
         actual = self.print_query(
@@ -489,7 +577,7 @@ WHERE s.session.$entry_pathname = '/home' AND min_first_timestamp >= '2021-01-01
 GROUP BY session_id
         """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_urls_in_sessions_in_timestamp_query(self):
         actual = self.print_query(
@@ -502,7 +590,7 @@ from sessions
 where `$start_timestamp` >= now() - toIntervalDay(7)
 """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_point_query(self):
         actual = self.print_query(
@@ -513,7 +601,7 @@ where `$start_timestamp` >= now() - toIntervalDay(7)
     where session_id == '01995624-6a63-7cc4-800c-f5a45d99fa9b'
     """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_select_query_alias_type_does_not_crash(self):
         # Regression test: queries with aliased subqueries should not crash when
@@ -533,7 +621,7 @@ FROM (
 WHERE subquery.session_id = '0199a58b-fdf2-785c-b6e3-6ba32b2380cf'
 """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_single_session_lookup_with_uuidv7_timestamp(self):
         actual = self.print_query(
@@ -549,7 +637,7 @@ WHERE $start_timestamp >= UUIDv7ToDateTime(toUUID('0199a58b-fdf2-785c-b6e3-6ba32
 LIMIT 1
 """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)
 
     def test_single_session_lookup_with_uuidv7_timestamp_simple(self):
         actual = self.print_query(
@@ -561,4 +649,4 @@ WHERE $start_timestamp >= UUIDv7ToDateTime(toUUID('0199a58b-fdf2-785c-b6e3-6ba32
     AND session_id = '0199a58b-fdf2-785c-b6e3-6ba32b2380cf'
 """
         )
-        assert self.generalize_sql(actual) == self.snapshot
+        self.assert_printed_matches_snapshot(actual)

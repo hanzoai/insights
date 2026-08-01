@@ -1,20 +1,34 @@
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any, NamedTuple, Optional
+from uuid import UUID
 
 from django.conf import settings
 from django.core.exceptions import EmptyResultSet
-from django.db import connections, models, router, transaction
+from django.db import connections, models
 from django.db.models import F, Q
 
+import structlog
+
 from insights.models.utils import UUIDT
-from insights.person_db_router import PERSONS_DB_FOR_READ
 
 from ..team import Team
-from .missing_person import uuidFromDistinctId
+
+logger = structlog.get_logger(__name__)
 
 MAX_LIMIT_DISTINCT_IDS = 2500
 
-# Use centralized database routing constant
-READ_DB_FOR_PERSONS = PERSONS_DB_FOR_READ
+# Mirrors MAX_SPLIT_BATCH_SIZE enforced by the personinsights SplitPerson RPC.
+PERSONFN_SPLIT_BATCH_SIZE = 250
+
+
+class SplitOutcome(NamedTuple):
+    """One distinct_id split onto a new person — the data needed to publish to Kafka."""
+
+    distinct_id: str
+    new_person_uuid: UUID
+    new_person_version: int
+    pdi_version: int
+    new_person_created_at: datetime
 
 
 class PersonQuerySet(models.QuerySet):
@@ -114,15 +128,6 @@ class PersonManager(models.Manager):
     #     """Return PersonQuerySet with team_id enforcement."""
     #     return PersonQuerySet(self.model, using=self._db)
 
-    def create(self, *args: Any, **kwargs: Any):
-        with transaction.atomic(using=self.db):
-            if not kwargs.get("distinct_ids"):
-                return super().create(*args, **kwargs)
-            distinct_ids = kwargs.pop("distinct_ids")
-            person = super().create(*args, **kwargs)
-            person._add_distinct_ids(distinct_ids)
-            return person
-
     def bulk_create(
         self,
         objs,
@@ -206,113 +211,215 @@ class Person(models.Model):
     def distinct_ids(self) -> list[str]:
         if hasattr(self, "distinct_ids_cache"):
             return [id.distinct_id for id in self.distinct_ids_cache]
-        if hasattr(self, "_distinct_ids") and self._distinct_ids:
+        if hasattr(self, "_distinct_ids") and self._distinct_ids is not None:
             return self._distinct_ids
-        return [
-            id[0]
-            for id in PersonDistinctId.objects.db_manager(READ_DB_FOR_PERSONS)
-            .filter(person=self, team_id=self.team_id)
-            .order_by("id")
-            .values_list("distinct_id")
-        ]
+        raise ValueError("Person.distinct_ids requires _distinct_ids to be populated via personinsights")
 
     @property
     def email(self) -> Optional[str]:
         return self.properties.get("email")
 
-    def delete(self, using=None, keep_parents=False):
-        """
-        Override delete to ensure team_id is in WHERE clause for partitioned tables.
+    def split_person(
+        self,
+        main_distinct_id: Optional[str],
+        max_splits: Optional[int] = None,
+        distinct_ids_to_split: Optional[list[str]] = None,
+    ):
+        """Split distinct_ids off of this person onto new persons.
 
-        For partitioned tables (insights_person_new), the default delete generates:
-        DELETE FROM insights_person WHERE id = X, which scans all 64 partitions.
+        When ``distinct_ids_to_split`` is provided, only those specific distinct_ids are
+        moved to new persons; the original person keeps all other distinct_ids and its
+        properties intact. In that mode, ``main_distinct_id`` and ``max_splits`` are
+        ignored. This is the "partial split" path — useful to surgically extract IDs
+        that were over-merged into a mega-person.
 
-        This implementation ensures single-partition access:
-        DELETE FROM insights_person WHERE team_id = Y AND id = X
+        When ``distinct_ids_to_split`` is None, every distinct_id except
+        ``main_distinct_id`` is split off (or only the first ``max_splits`` of them).
+        If ``main_distinct_id`` is also None, the first distinct_id is kept. The
+        original person always retains its properties.
         """
-        if self.pk is None:
-            raise ValueError(
-                f"{self._meta.object_name} object can't be deleted because its {self._meta.pk.attname} attribute is set "
-                "to None."
+        from insights.personinsights_client.caller_tag import personinsights_caller_tag
+        from insights.personinsights_client.client import get_personinsights_client
+        from insights.personinsights_client.proto import GetPersonRequest
+
+        client = get_personinsights_client()
+        if client is None:
+            raise RuntimeError(
+                "split_person requires personinsights, but the client is not configured (PERSONFN_ADDR is unset)"
             )
 
-        # Save pk and team_id before they get cleared by collector
-        person_pk = self.pk
-        person_team_id = self.team_id
+        # Tag every personinsights call made during the split (get_person, the paged
+        # get_distinct_ids_for_person, and the split_person RPCs) so the traffic is attributable.
+        with personinsights_caller_tag("persons/split"):
+            person_resp = client.get_person(GetPersonRequest(team_id=self.team_id, person_id=self.pk))
+            if not person_resp.person or not person_resp.person.id:
+                raise ValueError(f"Person not found: person_id={self.pk}, team_id={self.team_id}")
 
-        using = using or router.db_for_write(self.__class__, instance=self)
+            logger.info(
+                "split_person queried person",
+                person_id=self.pk,
+                person_uuid=person_resp.person.uuid,
+                team_id=self.team_id,
+                version=person_resp.person.version,
+                main_distinct_id=main_distinct_id,
+                max_splits=max_splits,
+                explicit_distinct_ids_count=len(distinct_ids_to_split) if distinct_ids_to_split is not None else None,
+            )
 
-        with transaction.atomic(using=using):
-            # Delete PersonDistinctId records with explicit team_id for partition pruning.
-            # Django's Collector.delete() generates: DELETE FROM insights_persondistinctid WHERE person_id IN (...)
-            # which misses team_id and would scan all partitions on a partitioned table.
-            PersonDistinctId.objects.filter(team_id=person_team_id, person_id=person_pk).delete()
+            if distinct_ids_to_split is not None:
+                self._split_explicit_ids(distinct_ids_to_split)
+            else:
+                self._split_all_ids(client, main_distinct_id, max_splits)
 
-            # Now delete the Person itself with explicit team_id for partition pruning
-            db_connection = connections[using]
-            with db_connection.cursor() as cursor:
-                cursor.execute(
-                    f"DELETE FROM {self._meta.db_table} WHERE team_id = %s AND id = %s", [person_team_id, person_pk]
-                )
+    def _split_explicit_ids(self, distinct_ids_to_split: list[str]) -> None:
+        """Partial split: caller specifies exactly which IDs to move.
 
-        # Return the same format as Django's delete: (num_deleted, {model: count})
-        return (1, {self._meta.label: 1})
+        The RPC validates that every ID belongs to this person — no need to
+        fetch all distinct IDs upfront.
+        """
+        seen: set[str] = set()
+        distinct_ids_to_process: list[str] = []
+        for did in distinct_ids_to_split:
+            if did not in seen:
+                seen.add(did)
+                distinct_ids_to_process.append(did)
 
-    # :DEPRECATED: This should happen through the plugin server
-    def add_distinct_id(self, distinct_id: str) -> None:
-        PersonDistinctId.objects.create(person=self, distinct_id=distinct_id, team_id=self.team_id)
+        if not distinct_ids_to_process:
+            return
 
-    # :DEPRECATED: This should happen through the plugin server
-    def _add_distinct_ids(self, distinct_ids: list[str]) -> None:
-        for distinct_id in distinct_ids:
-            self.add_distinct_id(distinct_id)
+        logger.info(
+            "split_person will split explicit distinct_ids",
+            person_id=self.pk,
+            team_id=self.team_id,
+            distinct_ids_to_split_count=len(distinct_ids_to_process),
+        )
 
-    def split_person(self, main_distinct_id: Optional[str], max_splits: Optional[int] = None):
-        original_person = Person.objects.get(team_id=self.team_id, pk=self.pk)
-        distinct_ids = original_person.distinct_ids
-        original_person_version = original_person.version or 0
-        if not main_distinct_id:
-            self.properties = {}
-            self.save()
-            main_distinct_id = distinct_ids[0]
+        for start in range(0, len(distinct_ids_to_process), PERSONFN_SPLIT_BATCH_SIZE):
+            batch = distinct_ids_to_process[start : start + PERSONFN_SPLIT_BATCH_SIZE]
+            outcomes = self._split_distinct_ids_batch(batch)
+            self._publish_split_to_kafka(outcomes)
 
-        if max_splits is not None and len(distinct_ids) > max_splits:
-            # Split the last N distinct_ids of the list
-            distinct_ids = distinct_ids[-1 * max_splits :]
+    def _split_all_ids(self, client: Any, main_distinct_id: Optional[str], max_splits: Optional[int]) -> None:
+        """Full split: fetch pages of distinct IDs and split each page.
 
-        for distinct_id in distinct_ids:
-            if not distinct_id == main_distinct_id:
-                db_alias = router.db_for_write(PersonDistinctId) or "default"
-                with transaction.atomic(using=db_alias):
-                    pdi = PersonDistinctId.objects.select_for_update().get(person=self, distinct_id=distinct_id)
-                    person, _ = Person.objects.get_or_create(
-                        uuid=uuidFromDistinctId(self.team_id, distinct_id),
-                        team_id=self.team_id,
-                        defaults={
-                            # Set version higher than delete events (which use version + 100).
-                            # Keep in sync with: insights/models/person/util.py:222 (_delete_person)
-                            # and plugin-server/src/utils/db/utils.ts:152 (generateKafkaPersonUpdateMessage)
-                            "version": original_person_version + 101,
-                        },
-                    )
-                    pdi.person_id = str(person.id)
-                    # Set distinct_id version higher than delete events (which use pdi.version + 100).
-                    # This ensures the split distinct_id overrides any deleted distinct_id.
-                    pdi.version = (pdi.version or 0) + 101
-                    pdi.save(update_fields=["version", "person_id"])
+        Each split removes the IDs from this person, so the next fetch returns
+        a shrinking set. No ordering is needed — the loop terminates when only
+        the main distinct_id remains (or max_splits is reached).
+        """
+        from insights.personinsights_client.proto import GetDistinctIdsForPersonRequest
 
-                from insights.models.person.util import create_person, create_person_distinct_id
+        splits_done = 0
+        # +1 so the main_distinct_id can appear in the page without eating a split slot
+        fetch_limit = PERSONFN_SPLIT_BATCH_SIZE + 1
 
-                create_person_distinct_id(
+        while True:
+            did_resp = client.get_distinct_ids_for_person(
+                GetDistinctIdsForPersonRequest(
                     team_id=self.team_id,
-                    distinct_id=distinct_id,
-                    person_id=str(person.uuid),
-                    is_deleted=False,
-                    version=pdi.version,
+                    person_id=self.pk,
+                    limit=fetch_limit,
                 )
-                create_person(
-                    team_id=self.team_id, uuid=str(person.uuid), version=person.version, created_at=person.created_at
-                )
+            )
+            page = [d.distinct_id for d in did_resp.distinct_ids]
+
+            if not page:
+                break
+
+            if not main_distinct_id:
+                main_distinct_id = page[0]
+
+            to_split = [did for did in page if did != main_distinct_id]
+
+            if not to_split:
+                break
+
+            if max_splits is not None:
+                remaining = max_splits - splits_done
+                if remaining <= 0:
+                    break
+                to_split = to_split[:remaining]
+
+            logger.info(
+                "split_person splitting page",
+                person_id=self.pk,
+                team_id=self.team_id,
+                main_distinct_id=main_distinct_id,
+                page_size=len(page),
+                splitting_count=len(to_split),
+                splits_done=splits_done,
+            )
+
+            outcomes = self._split_distinct_ids_batch(to_split)
+            self._publish_split_to_kafka(outcomes)
+            splits_done += len(outcomes)
+
+            if len(page) < fetch_limit:
+                break
+
+    def _split_distinct_ids_batch(self, distinct_ids: list[str]) -> list[SplitOutcome]:
+        """Split one batch of distinct_ids onto new persons via the personinsights
+        SplitPerson RPC. Personhog owns this write — there is no ORM path.
+
+        The server creates each new person with a deterministic UUIDv5
+        (matching ``uuidFromDistinctId``) and bumps versions by 101, higher
+        than delete events (which use version + 100) so the split overrides
+        any deleted rows. Keep in sync with:
+        insights/models/person/util.py (_delete_person) and
+        rust/personinsights-replica/src/storage/postgres/person.rs (SPLIT_VERSION_OFFSET).
+        """
+        from insights.personinsights_client.client import get_personinsights_client
+        from insights.personinsights_client.proto import SplitPersonRequest
+
+        client = get_personinsights_client()
+        if client is None:
+            raise RuntimeError(
+                "split_person requires personinsights, but the client is not configured (PERSONFN_ADDR is unset)"
+            )
+
+        response = client.split_person(
+            SplitPersonRequest(
+                team_id=self.team_id,
+                person_id=self.pk,
+                distinct_ids_to_split=distinct_ids,
+            )
+        )
+        if len(response.splits) != len(distinct_ids):
+            logger.error(
+                "split_person RPC returned unexpected number of splits",
+                expected=len(distinct_ids),
+                actual=len(response.splits),
+                team_id=self.team_id,
+                person_id=self.pk,
+            )
+        return [
+            SplitOutcome(
+                distinct_id=split.distinct_id,
+                new_person_uuid=UUID(split.new_person_uuid),
+                new_person_version=split.new_person_version,
+                pdi_version=split.pdi_version,
+                new_person_created_at=datetime.fromtimestamp(split.new_person_created_at_ms / 1000, tz=UTC),
+            )
+            for split in response.splits
+        ]
+
+    def _publish_split_to_kafka(self, outcomes: list[SplitOutcome]) -> None:
+        """Publish Kafka messages for each split person and PDI reassignment."""
+        from insights.models.person.util import create_person, create_person_distinct_id
+
+        for outcome in outcomes:
+            create_person_distinct_id(
+                team_id=self.team_id,
+                distinct_id=outcome.distinct_id,
+                person_id=str(outcome.new_person_uuid),
+                is_deleted=False,
+                version=outcome.pdi_version,
+            )
+            create_person(
+                team_id=self.team_id,
+                uuid=str(outcome.new_person_uuid),
+                version=outcome.new_person_version,
+                created_at=outcome.new_person_created_at,
+            )
 
 
 class PersonDistinctId(models.Model):
@@ -351,7 +458,7 @@ class PersonlessDistinctId(models.Model):
 
 
 class PersonOverrideMapping(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/Insights/insights/pull/23616
 
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()
@@ -366,7 +473,7 @@ class PersonOverrideMapping(models.Model):
 
 
 class PersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/Insights/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     # DO_NOTHING + db_constraint=False: Team deletion handled manually, may be cross-database
@@ -397,14 +504,14 @@ class PersonOverride(models.Model):
                 name="unique override per old_person_id",
             ),
             models.CheckConstraint(
-                check=~Q(old_person_id__exact=F("override_person_id")),
+                condition=~Q(old_person_id__exact=F("override_person_id")),
                 name="old_person_id_different_from_override_person_id",
             ),
         ]
 
 
 class PendingPersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/Insights/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()
@@ -418,7 +525,7 @@ class PendingPersonOverride(models.Model):
 
 
 class FlatPersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/Insights/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()
@@ -439,7 +546,7 @@ class FlatPersonOverride(models.Model):
                 name="flatpersonoverride_unique_old_person_by_team",
             ),
             models.CheckConstraint(
-                check=~Q(old_person_id__exact=F("override_person_id")),
+                condition=~Q(old_person_id__exact=F("override_person_id")),
                 name="flatpersonoverride_check_circular_reference",
             ),
         ]
@@ -466,19 +573,15 @@ def get_distinct_ids_for_subquery(person: Person | None, team: Team) -> list[str
     last_ids_limit = MAX_LIMIT_DISTINCT_IDS - first_ids_limit
 
     if person is not None:
-        first_ids = (
-            PersonDistinctId.objects.db_manager(READ_DB_FOR_PERSONS)
-            .filter(person=person, team=team)
-            .order_by("id")
-            .values_list("distinct_id", flat=True)[:first_ids_limit]
-        )
-        last_ids = (
-            PersonDistinctId.objects.db_manager(READ_DB_FOR_PERSONS)
-            .filter(person=person, team=team)
-            .order_by("-id")
-            .values_list("distinct_id", flat=True)[:last_ids_limit]
-        )
-        distinct_ids = first_ids.union(last_ids)
-    else:
-        distinct_ids = []
-    return list(map(str, distinct_ids))
+        # When a Person comes from personinsights (via proto_person_to_model), distinct IDs
+        # are already populated on _distinct_ids — use them directly to avoid hitting
+        # the Django ORM below, which would defeat the purpose of the personinsights path.
+        if hasattr(person, "_distinct_ids") and person._distinct_ids is not None:
+            ids = person._distinct_ids
+            if len(ids) <= MAX_LIMIT_DISTINCT_IDS:
+                return ids
+            return list(set(ids[:first_ids_limit] + ids[-last_ids_limit:]))
+
+        raise ValueError("get_distinct_ids_for_subquery requires _distinct_ids to be populated via personinsights")
+
+    return []

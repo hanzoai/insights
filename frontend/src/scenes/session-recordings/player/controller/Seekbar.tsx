@@ -4,19 +4,22 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 import React from 'react'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { cn } from 'lib/utils/css-classes'
+import { SourceLoadingState } from '@hanzo/replay-shared'
 
-import { RecordingSegment } from '~/types'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { cn } from 'lib/utils/css-classes'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 
 import { playerInspectorLogic } from '../inspector/playerInspectorLogic'
+import { playerMetaLogic } from '../player-meta/playerMetaLogic'
 import { playerSettingsLogic } from '../playerSettingsLogic'
 import { sessionRecordingDataCoordinatorLogic } from '../sessionRecordingDataCoordinatorLogic'
 import { sessionRecordingPlayerLogic } from '../sessionRecordingPlayerLogic'
-import { SourceLoadingState } from '../snapshot-store/types'
 import { PlayerSeekbarPreview } from './PlayerSeekbarPreview'
 import { PlayerSeekbarTicks } from './PlayerSeekbarTicks'
 import { seekbarLogic } from './seekbarLogic'
+import { SeekbarSegments } from './SeekbarSegments'
 
 const SeekbarSources = React.memo(function SeekbarSourcesRaw({
     sourceLoadingStates,
@@ -73,56 +76,17 @@ const SeekbarSources = React.memo(function SeekbarSourcesRaw({
     return <div className="PlayerSeekbar__sources">{items}</div>
 })
 
-// the seekbar and its children can be accidentally re-rendered as the player ticks
-const SeekbarSegment = React.memo(function SeekbarSegmentRaw({
-    segment,
-    durationMs,
-}: {
-    segment: RecordingSegment
-    durationMs: number
-}): JSX.Element {
-    return (
-        <div
-            className={cn(
-                'PlayerSeekbar__segments__item',
-                segment.isActive && 'PlayerSeekbar__segments__item--active',
-                segment.kind === 'buffer' && 'PlayerSeekbar__segments__item--buffer',
-                segment.isLoading && 'PlayerSeekbar__segments__item--buffer-loading'
-            )}
-            title={segment.kind === 'buffer' ? undefined : segment.isActive ? 'Active period' : 'Inactive period'}
-            // eslint-disable-next-line react/forbid-dom-props
-            style={{
-                width: `${(100 * segment.durationMs) / durationMs}%`,
-            }}
-        />
-    )
-})
-
-function SeekbarSegments(): JSX.Element {
-    const { logicProps } = useValues(sessionRecordingPlayerLogic)
-    const { segments, durationMs } = useValues(sessionRecordingDataCoordinatorLogic(logicProps))
-    return (
-        <div className="PlayerSeekbar__segments">
-            {segments?.map((segment: RecordingSegment) => (
-                <SeekbarSegment
-                    segment={segment}
-                    durationMs={durationMs}
-                    key={`${segment.startTimestamp}-${segment.endTimestamp}-${segment.windowId}-${segment.kind}`}
-                />
-            ))}
-        </div>
-    )
-}
-
 export function Seekbar(): JSX.Element {
-    const { sessionRecordingId, logicProps, hasSnapshots } = useValues(sessionRecordingPlayerLogic)
+    const { sessionRecordingId, logicProps, hasSnapshots, hasLateFullSnapshot, leadingUnplayableMs } =
+        useValues(sessionRecordingPlayerLogic)
     const { seekToTime } = useActions(sessionRecordingPlayerLogic)
     const { seekbarItems } = useValues(playerInspectorLogic(logicProps))
-    const { endTimeMs, thumbLeftPos, bufferPercent, isScrubbing } = useValues(seekbarLogic(logicProps))
+    const { endTimeMs, thumbLeftPos, isScrubbing } = useValues(seekbarLogic(logicProps))
     const { timestampFormat } = useValues(playerSettingsLogic)
+    const { sessionSummarySegmentRanges } = useValues(playerMetaLogic(logicProps))
 
     const { handleDown, setSlider, setThumb } = useActions(seekbarLogic(logicProps))
-    const { sessionPlayerData, sessionPlayerMetaData, sourceLoadingStates, snapshotStore } = useValues(
+    const { sessionPlayerData, sessionPlayerMetaData, effectiveSourceLoadingStates } = useValues(
         sessionRecordingDataCoordinatorLogic(logicProps)
     )
 
@@ -141,8 +105,6 @@ export function Seekbar(): JSX.Element {
 
     const allowPreviewScrubbing = useFeatureFlag('SEEKBAR_PREVIEW_SCRUBBING')
 
-    const useSnapshotStore = !!snapshotStore
-
     return (
         <div className="flex flex-col items-end mx-4 mt-2 h-8" data-attr="rrweb-controller">
             <PlayerSeekbarTicks
@@ -155,7 +117,6 @@ export function Seekbar(): JSX.Element {
             <div
                 className={cn('PlayerSeekbar', {
                     'PlayerSeekbar--scrubbing': isScrubbing,
-                    'PlayerSeekbar--sources': useSnapshotStore,
                 })}
                 ref={seekBarRef}
             >
@@ -165,31 +126,35 @@ export function Seekbar(): JSX.Element {
                     onMouseDown={handleDown}
                     onTouchStart={handleDown}
                 >
-                    {useSnapshotStore ? (
-                        <>
-                            <SeekbarSources
-                                sourceLoadingStates={sourceLoadingStates}
-                                recordingStartMs={sessionPlayerData.start?.valueOf() ?? 0}
-                                recordingEndMs={sessionPlayerData.end?.valueOf() ?? 0}
-                            />
+                    <SeekbarSources
+                        sourceLoadingStates={effectiveSourceLoadingStates}
+                        recordingStartMs={sessionPlayerData.start?.valueOf() ?? 0}
+                        recordingEndMs={sessionPlayerData.end?.valueOf() ?? 0}
+                    />
+                    <SeekbarSegments
+                        segments={sessionSummarySegmentRanges}
+                        endTimeMs={endTimeMs}
+                        onSeekToSegment={seekToTime}
+                    />
+                    {hasLateFullSnapshot && endTimeMs > 0 ? (
+                        <Tooltip
+                            title={`The first ${humanFriendlyDuration(leadingUnplayableMs / 1000, {
+                                maxUnits: 2,
+                            })} can't be played — the initial screen snapshot arrived late`}
+                            placement="top"
+                        >
                             <div
-                                className="PlayerSeekbar__played"
+                                className="PlayerSeekbar__unplayable"
                                 // eslint-disable-next-line react/forbid-dom-props
-                                style={{ width: `${Math.max(thumbLeftPos, 0)}px` }}
+                                style={{ width: `${Math.min(100, (leadingUnplayableMs / endTimeMs) * 100)}%` }}
                             />
-                        </>
-                    ) : (
-                        <>
-                            <SeekbarSegments />
-                            <div
-                                className="PlayerSeekbar__currentbar"
-                                // eslint-disable-next-line react/forbid-dom-props
-                                style={{ width: `${Math.max(thumbLeftPos, 0)}px` }}
-                            />
-                            {/* eslint-disable-next-line react/forbid-dom-props */}
-                            <div className="PlayerSeekbar__bufferbar" style={{ width: `${bufferPercent}%` }} />
-                        </>
-                    )}
+                        </Tooltip>
+                    ) : null}
+                    <div
+                        className="PlayerSeekbar__played"
+                        // eslint-disable-next-line react/forbid-dom-props
+                        style={{ width: `${Math.max(thumbLeftPos, 0)}px` }}
+                    />
 
                     <div
                         className="PlayerSeekbar__thumb"
@@ -198,7 +163,7 @@ export function Seekbar(): JSX.Element {
                         style={{ transform: `translateX(${thumbLeftPos}px)` }}
                     />
 
-                    {hasSnapshots && allowPreviewScrubbing ? (
+                    {hasSnapshots ? (
                         <PlayerSeekbarPreview
                             minMs={0}
                             maxMs={sessionPlayerData.durationMs}
@@ -210,6 +175,7 @@ export function Seekbar(): JSX.Element {
                             }
                             timestampFormat={timestampFormat}
                             startTime={sessionPlayerData.start}
+                            showPreviewFrame={!!allowPreviewScrubbing}
                         />
                     ) : null}
                 </div>

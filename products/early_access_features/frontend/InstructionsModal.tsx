@@ -8,6 +8,8 @@ import { urls } from 'scenes/urls'
 
 import { FeatureFlagType } from '~/types'
 
+import EarlyAccessFeatureImage from 'public/early-access-feature-demo.png'
+
 interface InstructionsModalProps {
     flag: FeatureFlagType['key']
     visible: boolean
@@ -30,6 +32,7 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
                             Give your users a{' '}
                             <Link to={urls.insightsFunctionNew('template-early-access-features')}>prebuilt widget</Link> to
                             opt-in to features
+                            <img className="max-h-full max-w-full mt-2.5" src={EarlyAccessFeatureImage} />
                         </div>
                     ),
                 },
@@ -85,7 +88,10 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
             <div>
                 <div className="mb-2">
                     Implement manual release condition toggles to give your users the ability choose which features they
-                    want to try
+                    want to try.{' '}
+                    <Link to="https://hanzo.ai/docs/feature-flags/early-access-feature-management" target="_blank">
+                        Read the full documentation
+                    </Link>
                 </div>
                 {panels}
             </div>

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import abc
 import time
 import logging
@@ -9,22 +10,76 @@ from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from concurrent.futures import ALL_COMPLETED, FIRST_EXCEPTION, Future, ThreadPoolExecutor, as_completed
 from copy import copy
 from dataclasses import dataclass, field
-from typing import Any, Generic, Literal, NamedTuple, Optional, TypeVar
+from typing import Any, ClassVar, Generic, Literal, NamedTuple, Optional, TypeVar
 
-import dagster
 from datastore_driver import Client
+from datastore_driver.errors import ServerException
 from datastore_pool import ChPool
 
 from insights import settings
 from insights.datastore.client.connection import NodeRole, Workload, _make_ch_pool, default_client
 from insights.settings import DATASTORE_PER_TEAM_SETTINGS
-from insights.settings.data_stores import DATASTORE_CLUSTER
+from insights.settings.data_stores import DATASTORE_CLUSTER, TEST
 
-logger = dagster.get_dagster_logger("datastore")
+
+class _LazyDagsterLogger:
+    """Defer `import dagster` (~320ms) off this module's import. cluster.py loads very early at
+    django.setup() (via insights.errors -> the datastore client), but the dagster logger is only
+    needed when a log call actually fires. get_dagster_logger() resolves the dagster run context at
+    emit time, so caching one instance here matches the previous module-level behavior — no change to
+    log routing inside dagster ops, just no dagster import for the web/migrate/shell/celery processes
+    that never log from here.
+    """
+
+    _logger: ClassVar[logging.Logger | None] = None
+
+    def __getattr__(self, name: str) -> Any:
+        if _LazyDagsterLogger._logger is None:
+            import dagster  # noqa: PLC0415
+
+            _LazyDagsterLogger._logger = dagster.get_dagster_logger("datastore")
+        return getattr(_LazyDagsterLogger._logger, name)
+
+
+logger = _LazyDagsterLogger()
 
 
 def ON_CLUSTER_CLAUSE(on_cluster=True):
-    return f"ON CLUSTER '{DATASTORE_CLUSTER}'" if on_cluster else ""
+    # The test Datastore is a single node: ON CLUSTER only adds distributed-DDL keeper
+    # round-trips (tens of ms per statement) without changing the outcome, and tests issue
+    # DDL in bulk (session-start CREATEs, per-test TRUNCATEs), so render no clause there.
+    # If a call site ever needs to exercise real ON CLUSTER SQL under TEST, thread an
+    # allow-in-test flag through here.
+    if on_cluster and not TEST:
+        return f"ON CLUSTER '{DATASTORE_CLUSTER}'"
+    return ""
+
+
+# Smoke-test only: when migrating against the multinode docker-compose stack
+# from the host, every docker hostname (`datastore-aux`, …) is mapped to
+# 127.0.0.1 via /etc/hosts, but only one container can publish on port 9000 —
+# so without a per-host port override, every role-routed connection lands on
+# whichever container holds 127.0.0.1:9000 (the data node). The compose file
+# publishes each satellite on a distinct host port; this map mirrors that.
+#
+# Canonical source: `docker-compose.multinode-datastore.yml` (per-service
+# `ports:` blocks). Keep this map in sync when adding or renumbering nodes.
+_MULTINODE_HOST_PORT_OVERRIDES: dict[str, tuple[str, int]] = {
+    "datastore-data": ("localhost", 9000),
+    "datastore-ai-events": ("localhost", 9100),
+    "datastore-aux": ("localhost", 9200),
+    "datastore-ops": ("localhost", 9300),
+    "datastore-sessions": ("localhost", 9400),
+    "datastore-logs": ("localhost", 9500),
+}
+
+
+def _resolve_connection_target(host_name: str, port: int | None) -> tuple[str, int | None]:
+    if settings.MULTINODE_DATASTORE:
+        override = _MULTINODE_HOST_PORT_OVERRIDES.get(host_name)
+        if override:
+            return override
+    return (host_name, port)
 
 
 K = TypeVar("K")
@@ -79,8 +134,8 @@ class ConnectionInfo(NamedTuple):
     host: str
     port: int | None
 
-    def make_pool(self, client_settings: Mapping[str, str] | None = None) -> ChPool:
-        return _make_ch_pool(host=self.host, port=self.port, client_settings=client_settings)
+    def make_pool(self, client_settings: Mapping[str, str] | None = None, **connection_overrides: Any) -> ChPool:
+        return _make_ch_pool(host=self.host, port=self.port, client_settings=client_settings, **connection_overrides)
 
 
 class HostInfo(NamedTuple):
@@ -102,7 +157,10 @@ class DatastoreCluster:
         logger: logging.Logger | None = None,
         client_settings: Mapping[str, str] | None = None,
         cluster: str | None = None,
+        data_cluster: str | None = None,
+        satellite_clusters: Sequence[str] | None = None,
         retry_policy: RetryPolicy | None = None,
+        connection_overrides: Mapping[str, Any] | None = None,
     ) -> None:
         if logger is None:
             logger = logging.getLogger(__name__)
@@ -110,31 +168,66 @@ class DatastoreCluster:
         self.__shards: dict[int, set[HostInfo]] = defaultdict(set)
         self.__extra_hosts: set[HostInfo] = set()
 
-        cluster_hosts = self.__get_cluster_hosts(bootstrap_client, cluster or settings.DATASTORE_CLUSTER, retry_policy)
+        migrations_cluster = cluster or settings.DATASTORE_CLUSTER
+        cluster_hosts = self.__get_cluster_hosts(bootstrap_client, migrations_cluster, retry_policy)
 
         for row in cluster_hosts:
             (host_name, port, shard_num, replica_num, host_cluster_type, host_cluster_role) = row
-
-            # For self-hosted single-node deployments, cluster config uses localhost
-            # for DDL coordination, but the web/worker pod must connect via the
-            # service DNS name (DATASTORE_HOST).  Override the host from
-            # system.clusters so connections go to the right place.
-            if not settings.CLOUD_DEPLOYMENT and host_name in ("localhost", "127.0.0.1"):
-                host_name = settings.DATASTORE_HOST
-
+            # We only use the port from system.clusters if we're running in E2E tests or debug mode,
+            # otherwise, we will use the default port.
+            effective_port = port if (settings.E2E_TESTING or settings.DEBUG) else None
+            resolved_host, resolved_port = _resolve_connection_target(host_name, effective_port)
             host_info = HostInfo(
-                ConnectionInfo(
-                    host_name,
-                    # We only use the port from system.clusters if we're running in E2E tests or debug mode,
-                    # otherwise, we will use the default port.
-                    port=port if (settings.E2E_TESTING or settings.DEBUG) else None,
-                ),
+                ConnectionInfo(resolved_host, resolved_port),
                 shard_num if host_cluster_role == NodeRole.DATA else None,
                 replica_num if host_cluster_role == NodeRole.DATA else None,
                 host_cluster_type,
                 host_cluster_role,
             )
             (self.__shards[shard_num] if host_info.shard_num is not None else self.__extra_hosts).add(host_info)
+
+        # insights_migrations may not include all DATA nodes — discover them from
+        # the main insights cluster which has the complete shard topology
+        if data_cluster and data_cluster != migrations_cluster:
+            self.__shards.clear()
+            data_hosts = self.__get_cluster_hosts(bootstrap_client, data_cluster, retry_policy)
+            for row in data_hosts:
+                (host_name, port, shard_num, replica_num, host_cluster_type, host_cluster_role) = row
+                if host_cluster_role == NodeRole.DATA:
+                    effective_port = port if (settings.E2E_TESTING or settings.DEBUG) else None
+                    resolved_host, resolved_port = _resolve_connection_target(host_name, effective_port)
+                    host_info = HostInfo(
+                        ConnectionInfo(resolved_host, resolved_port),
+                        shard_num,
+                        replica_num,
+                        host_cluster_type,
+                        host_cluster_role,
+                    )
+                    self.__shards[shard_num].add(host_info)
+            logger.info(
+                "Discovered %d DATA nodes across %d shards from cluster %r",
+                sum(len(s) for s in self.__shards.values()),
+                len(self.__shards),
+                data_cluster,
+            )
+
+        for satellite_name in satellite_clusters or []:
+            satellite_hosts = self.__get_satellite_cluster_hosts(
+                bootstrap_client, satellite_name, migrations_cluster, retry_policy
+            )
+            logger.info("Discovered %d hosts from satellite cluster %r", len(satellite_hosts), satellite_name)
+            for row in satellite_hosts:
+                (host_name, port, _shard_num, _replica_num, host_cluster_type, host_cluster_role) = row
+                effective_port = port if (settings.E2E_TESTING or settings.DEBUG) else None
+                resolved_host, resolved_port = _resolve_connection_target(host_name, effective_port)
+                host_info = HostInfo(
+                    ConnectionInfo(resolved_host, resolved_port),
+                    shard_num=None,
+                    replica_num=None,
+                    host_cluster_type=host_cluster_type,
+                    host_cluster_role=host_cluster_role,
+                )
+                self.__extra_hosts.add(host_info)
 
         if extra_hosts is not None and len(extra_hosts) > 0:
             self.__extra_hosts.update(
@@ -154,16 +247,14 @@ class DatastoreCluster:
         self.__logger = logger
         self.__client_settings = client_settings
         self.__retry_policy = retry_policy
+        self.__connection_overrides = dict(connection_overrides) if connection_overrides else {}
 
     def __get_cluster_hosts(self, client: Client, cluster: str, retry_policy: RetryPolicy | None = None):
-        # For self-hosted (non-cloud) single-node deployments, skip is_local filter
-        # because the service DNS name may not resolve as local on the Datastore node.
-        is_local_filter = "and is_local" if settings.CLOUD_DEPLOYMENT else ""
         get_cluster_hosts_fn = lambda client: client.execute(
             f"""
             SELECT host_name, port, shard_num, replica_num, getMacro('hostClusterType') as host_cluster_type, getMacro('hostClusterRole') as host_cluster_role
             FROM clusterAllReplicas(%(name)s, system.clusters)
-            WHERE name = %(name)s {is_local_filter}
+            WHERE name = %(name)s and is_local
             ORDER BY shard_num, replica_num
             """,
             {"name": cluster},
@@ -174,10 +265,34 @@ class DatastoreCluster:
 
         return get_cluster_hosts_fn(client)
 
+    def __get_satellite_cluster_hosts(
+        self,
+        client: Client,
+        satellite_cluster: str,
+        migrations_cluster: str,
+        retry_policy: RetryPolicy | None = None,
+    ):
+        get_hosts_fn = lambda client: client.execute(
+            """
+            SELECT host_name, port, shard_num, replica_num, getMacro('hostClusterType') as host_cluster_type, getMacro('hostClusterRole') as host_cluster_role
+            FROM clusterAllReplicas(%(satellite_name)s, system.clusters)
+            WHERE is_local AND cluster = %(migrations_cluster)s
+            ORDER BY shard_num, replica_num
+            """,
+            {"satellite_name": satellite_cluster, "migrations_cluster": migrations_cluster},
+        )
+
+        if retry_policy is not None:
+            get_hosts_fn = retry_policy(get_hosts_fn)
+
+        return get_hosts_fn(client)
+
     def __get_task_function(self, host: HostInfo, fn: Callable[[Client], T]) -> Callable[[], T]:
         pool = self.__pools.get(host)
         if pool is None:
-            pool = self.__pools[host] = host.connection_info.make_pool(self.__client_settings)
+            pool = self.__pools[host] = host.connection_info.make_pool(
+                self.__client_settings, **self.__connection_overrides
+            )
 
         if self.__retry_policy is not None:
             fn = self.__retry_policy(fn)
@@ -199,12 +314,23 @@ class DatastoreCluster:
     def __hosts_by_roles(
         self, hosts: set[HostInfo], node_roles: list[NodeRole], workload: Workload = Workload.DEFAULT
     ) -> set[HostInfo]:
-        return {
-            host
-            for host in hosts
-            if (host.host_cluster_role in node_roles or NodeRole.ALL in node_roles)
-            and (host.host_cluster_type == workload.value.lower() or workload == Workload.DEFAULT)
-        }
+        # Deduplicate by connection_info to avoid executing on the same physical node twice
+        # (e.g. in local dev where satellite clusters point to the same Datastore instance)
+        seen: dict[ConnectionInfo, HostInfo] = {}
+        for host in hosts:
+            if (host.host_cluster_role in node_roles or NodeRole.ALL in node_roles) and (
+                host.host_cluster_type == workload.value.lower() or workload == Workload.DEFAULT
+            ):
+                if host.connection_info not in seen:
+                    seen[host.connection_info] = host
+        logger.info(
+            "Matched %d hosts for roles %s (from %d candidates): %s",
+            len(seen),
+            node_roles,
+            len(hosts),
+            [f"{h.connection_info.host}({h.host_cluster_role})" for h in seen.values()],
+        )
+        return set(seen.values())
 
     @property
     def __hosts(self) -> set[HostInfo]:
@@ -426,8 +552,11 @@ def get_cluster(
     logger: logging.Logger | None = None,
     client_settings: Mapping[str, str] | None = None,
     cluster: str | None = None,
+    data_cluster: str | None = None,
+    satellite_clusters: Sequence[str] | None = None,
     retry_policy: RetryPolicy | None = None,
     host: str = settings.DATASTORE_HOST,
+    connection_overrides: Mapping[str, Any] | None = None,
 ) -> DatastoreCluster:
     extra_hosts = []
     for host_config in map(copy, DATASTORE_PER_TEAM_SETTINGS.values()):
@@ -439,8 +568,42 @@ def get_cluster(
         logger=logger,
         client_settings=client_settings,
         cluster=cluster,
+        data_cluster=data_cluster,
+        satellite_clusters=satellite_clusters,
         retry_policy=retry_policy,
+        connection_overrides=connection_overrides,
     )
+
+
+# Masks inline credentials (e.g. dictionary `SOURCE(DATASTORE(... PASSWORD '…'))` or
+# `CREATE USER … IDENTIFIED BY '…'`) so they never reach logs. Datastore needs the password in
+# the source SQL for dictionary reloads to authenticate, so we redact at the logging boundary
+# rather than dropping it from the query.
+_SQL_SECRET_RE = re.compile(r"(?i)\b(PASSWORD|IDENTIFIED\s+WITH\s+\S+\s+BY|IDENTIFIED\s+BY)\s+'(?:[^']|'')*'")
+
+
+def redact_sql_secrets(sql: str) -> str:
+    return _SQL_SECRET_RE.sub(r"\1 '[REDACTED]'", sql)
+
+
+# Cap how much SQL we embed in a Query repr. Reprs land in logs (every statement the migration
+# runner executes) and traces, so a multi-megabyte statement — e.g. a large seed INSERT with all
+# its VALUES inline — floods them. The head is enough to identify the statement.
+_MAX_QUERY_REPR_LEN = 1500
+
+
+def _truncate_query(query: str) -> str:
+    if len(query) <= _MAX_QUERY_REPR_LEN:
+        return query
+    return f"{query[:_MAX_QUERY_REPR_LEN]}… ({len(query) - _MAX_QUERY_REPR_LEN} more chars truncated)"
+
+
+def _redact_parameters(parameters: Any) -> Any:
+    if isinstance(parameters, Mapping):
+        return {k: ("[REDACTED]" if "password" in str(k).lower() else v) for k, v in parameters.items()}
+    if isinstance(parameters, list):
+        return [_redact_parameters(p) for p in parameters]
+    return parameters
 
 
 @dataclass
@@ -453,11 +616,13 @@ class Query:
         return client.execute(self.query, self.parameters, settings=self.settings)
 
     def __repr__(self) -> str:
+        query = _truncate_query(redact_sql_secrets(self.query))
         if self.parameters and isinstance(self.parameters, list):
-            params_repr = f"{self.parameters[:50]!r} (showing first 50 out of {len(self.parameters)} parameters)"
+            shown = _redact_parameters(self.parameters[:50])
+            params_repr = f"{shown!r} (showing first 50 out of {len(self.parameters)} parameters)"
         else:
-            params_repr = f"{self.parameters!r}"
-        return f"Query(query={self.query!r}, parameters={params_repr}, settings={self.settings!r})"
+            params_repr = f"{_redact_parameters(self.parameters)!r}"
+        return f"Query(query={query!r}, parameters={params_repr}, settings={self.settings!r})"
 
 
 @dataclass
@@ -520,6 +685,10 @@ class MutationNotFound(Exception):
     pass
 
 
+# not present in datastore_driver.errors.ErrorCodes; see Datastore src/Common/ErrorCodes.cpp
+TOO_MANY_MUTATIONS = 692
+
+
 @dataclass
 class MutationWaiter:
     table: str
@@ -555,6 +724,24 @@ class MutationWaiter:
     def wait(self, client: Client) -> None:
         while not self.is_done(client):
             time.sleep(15.0)
+
+
+@dataclass
+class MutationWaiters:
+    """Waits on several mutations as one unit — e.g. the same delete applied to the legacy and
+    native-JSON events tables."""
+
+    waiters: Sequence[MutationWaiter]
+
+    def __call__(self, client: Client) -> None:
+        return self.wait(client)
+
+    def is_done(self, client: Client) -> bool:
+        return all(waiter.is_done(client) for waiter in self.waiters)
+
+    def wait(self, client: Client) -> None:
+        for waiter in self.waiters:
+            waiter.wait(client)
 
 
 @dataclass
@@ -599,7 +786,17 @@ class MutationRunner(abc.ABC):
         if not commands_to_enqueue:
             return MutationWaiter(self.table, set(mutations_running.values()))
 
-        client.execute(self.get_statement(commands_to_enqueue), self.parameters, settings=self.settings)
+        while True:
+            self.wait_for_mutation_capacity(client)
+            try:
+                client.execute(self.get_statement(commands_to_enqueue), self.parameters, settings=self.settings)
+                break
+            except ServerException as e:
+                # another mutation can land in the gap between the capacity check and our ALTER, so
+                # go back to waiting instead of failing
+                if e.code != TOO_MANY_MUTATIONS:
+                    raise
+                logger.info("Mutation rejected by %s due to unfinished mutations, waiting for capacity...", self.table)
 
         # mutations are not always immediately visible, so give anything new a bit of time to show up
         start = time.time()
@@ -612,6 +809,31 @@ class MutationRunner(abc.ABC):
         raise Exception(
             f"unable to find mutation for {expected_commands - mutations_running.keys()!r} after {time.time() - start:0.2f}s!"
         )
+
+    def wait_for_mutation_capacity(self, client: Client, poll_interval: float = 60.0) -> None:
+        """
+        Block until the target table has no unfinished mutations before enqueueing a new one, since tables can be
+        configured with ``number_of_mutations_to_throw`` to reject new mutations while others (e.g. a long-running
+        backfill) are still in flight.
+        """
+        while True:
+            [[count]] = client.execute(
+                """
+                SELECT count()
+                FROM system.mutations
+                WHERE database = %(database)s AND table = %(table)s AND NOT is_done AND NOT is_killed
+                """,
+                {"database": settings.DATASTORE_DATABASE, "table": self.table},
+            )
+            if count == 0:
+                return
+            logger.info(
+                "Waiting for %s unfinished mutation(s) on %s before enqueueing new mutation (checking again in %ss)...",
+                count,
+                self.table,
+                poll_interval,
+            )
+            time.sleep(poll_interval)
 
     def find_existing_mutations(self, client: Client, commands: Set[str] | None = None) -> Mapping[str, str]:
         """
@@ -627,6 +849,14 @@ class MutationRunner(abc.ABC):
         # we match commands by position, so require a stable ordering - this is because this class is provided the
         # command template without parameter values, while the record in the mutation log will have the values inlined
         command_list = [*commands]
+        # `formatQuerySingleLine` + collapse-whitespace + trim on both sides of the join so
+        # cosmetic spacing differences between our formatting and what
+        # `system.mutations.command` stored don't break the byte-equality match.
+        # Callers must pass fully-qualified identifiers (`db.table` / `db.dictionary`) —
+        # Datastore normalizes bare references against the connection database when
+        # storing the mutation, and a bare-vs-qualified mismatch defeats the join.
+        alter_prefix = f"ALTER TABLE {settings.DATASTORE_DATABASE}.{self.table} "
+        per_command_alters = ", ".join(f"$__sql${alter_prefix}{cmd}$__sql$" for cmd in command_list)
         mutations = client.execute(
             f"""
             SELECT mutation_id
@@ -635,11 +865,13 @@ class MutationRunner(abc.ABC):
                     (arrayJoin(
                         arrayZip(
                             arrayMap(
-                                command -> extract(command, '^\\s*(.*?)(?:,)?\\s*$'),  -- strip leading/trailing whitespace and optional trailing comma
-                                arraySlice(  -- drop "ALTER TABLE" preamble line
-                                    splitByChar('\n', formatQuery($__sql$ALTER TABLE {settings.DATASTORE_DATABASE}.{self.table} {", ".join(command_list)}$__sql$)),
-                                    2
-                                )
+                                alter -> trim(BOTH ' ' FROM
+                                    replaceRegexpAll(
+                                        replaceOne(formatQuerySingleLine(alter), %(__alter_prefix)s, ''),
+                                        '[ \\t\\n]+', ' '
+                                    )
+                                ),
+                                [{per_command_alters}]
                             ) as commands,
                             arrayEnumerate(commands)
                         )
@@ -648,7 +880,7 @@ class MutationRunner(abc.ABC):
             ) commands
             LEFT OUTER JOIN (
                 SELECT
-                    command,
+                    trim(BOTH ' ' FROM replaceRegexpAll(command, '[ \\t\\n]+', ' ')) as command,
                     argMax(mutation_id, create_time) as mutation_id  -- Get the most recent mutation for each command
                 FROM system.mutations
                 WHERE
@@ -663,6 +895,7 @@ class MutationRunner(abc.ABC):
             {
                 f"__database": settings.DATASTORE_DATABASE,
                 f"__table": self.table,
+                f"__alter_prefix": alter_prefix,
                 **self.parameters,
             },
         )

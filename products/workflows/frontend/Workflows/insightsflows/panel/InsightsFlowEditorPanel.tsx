@@ -5,10 +5,10 @@ import { useActions, useValues } from 'kea'
 import { IconArrowLeft, IconTrash } from '@hanzo/icons'
 import { Badge, Button, Tab, Tabs, Tooltip } from '@hanzo/elements'
 
-import { capitalizeFirstLetter } from 'lib/utils'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
 
 import { workflowLogic } from '../../workflowLogic'
-import { INSIGHTS_FLOW_EDITOR_MODES, InsightsFlowEditorMode, insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { FN_FLOW_EDITOR_MODES, InsightsFlowEditorMode, hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { useInsightsFlowStep } from '../steps/InsightsFlowSteps'
 import { InsightsFlowEditorPanelBuild } from './InsightsFlowEditorPanelBuild'
 import { InsightsFlowEditorPanelBuildDetail } from './InsightsFlowEditorPanelBuildDetail'
@@ -19,13 +19,13 @@ import { EmailActionTestContent } from './testing/InsightsFlowEditorNotification
 import { InsightsFlowEditorPanelTest } from './testing/InsightsFlowEditorPanelTest'
 
 export function InsightsFlowEditorPanel(): JSX.Element | null {
-    const { selectedNode, mode, selectedNodeCanBeDeleted, workflow } = useValues(insightsFlowEditorLogic)
-    const { setMode, setSelectedNodeId } = useActions(insightsFlowEditorLogic)
+    const { selectedNode, mode, selectedNodeCanBeDeleted, workflow } = useValues(hogFlowEditorLogic)
+    const { setMode, setSelectedNodeId } = useActions(hogFlowEditorLogic)
     const { deleteElements } = useReactFlow()
 
     const variablesCount = workflow?.variables?.length || 0
 
-    const tabs: Tab<InsightsFlowEditorMode>[] = INSIGHTS_FLOW_EDITOR_MODES.map((mode) => ({
+    const tabs: Tab<InsightsFlowEditorMode>[] = FN_FLOW_EDITOR_MODES.map((mode) => ({
         label: (
             <>
                 {capitalizeFirstLetter(mode)}

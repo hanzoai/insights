@@ -23,6 +23,7 @@ export const OBJECTS = {
         'IconPresent',
         'IconMagicWand',
         'IconAI',
+        'IconAIGateway',
         'IconMagic',
         'IconHelmet',
         'IconSpotlight',
@@ -83,7 +84,7 @@ export const OBJECTS = {
         'IconNewspaper',
         'IconAIText',
     ],
-}
+} as const
 
 export const TECHNOLOGY = {
     Workflows: [
@@ -189,7 +190,7 @@ export const TECHNOLOGY = {
         'IconSwift',
         'IconElixir',
     ],
-}
+} as const
 
 export const ELEMENTS = {
     Actions: [
@@ -221,6 +222,8 @@ export const ELEMENTS = {
         'IconUnlock',
         'IconPrivacy',
         'IconShield',
+        'IconShieldEmpty',
+        'IconShieldExclamation',
         'IconShieldLock',
         'IconWarning',
         'IconQuestion',
@@ -230,6 +233,7 @@ export const ELEMENTS = {
         'IconAsterisk',
         'IconCircleDashed',
         'IconX',
+        'IconXCircle',
         'IconAtSign',
         'IconEllipsis',
         'IconHide',
@@ -284,7 +288,7 @@ export const ELEMENTS = {
         'IconPercentage',
         'IconSquareRoot',
     ],
-}
+} as const
 
 export const TEAMS_AND_COMPANIES = {
     Analytics: [
@@ -321,12 +325,18 @@ export const TEAMS_AND_COMPANIES = {
         'IconRewindPlay',
         'IconVideoCamera',
     ],
-    'Feature Success': ['IconFlask', 'IconTestTube', 'IconMultivariateTesting', 'IconSplitTesting', 'IconBalance'],
+    'Feature Success': ['IconFlask', 'IconTestTube', 'IconSplitTesting', 'IconBalance'],
     Modeling: ['IconDirectedGraph'],
     Pipeline: ['IconWebhooks', 'IconDecisionTree', 'IconEndpoints'],
     'Product OS': ['IconNotebook', 'IconInsightsQL', 'IconDashboard', 'IconSupport'],
     Logos: ['IconLogomark', 'IconGithub', 'IconGitLab', 'IconLinear', 'IconRedux'],
     ErrorTracking: ['IconIssue'],
-    LLMAnalytics: ['IconLlmAnalytics', 'IconLlmPromptEvaluation', 'IconLlmPromptManagement', 'IconScatter'],
+    AIObservability: [
+        'IconLlmAnalytics',
+        'IconLlmPromptEvaluation',
+        'IconLlmPromptManagement',
+        'IconMCP',
+        'IconScatter',
+    ],
     InsightsAI: ['IconBrain'],
-}
+} as const

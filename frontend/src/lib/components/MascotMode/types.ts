@@ -1,26 +1,12 @@
-// Mascot mode removed — stub kept for import compatibility
+import type {
+    MascotActor as _MascotActor,
+    MascotActorOptions as _MascotActorOptions,
+    MascotModeConfig as _MascotModeConfig,
+    MascotModeInterface as _MascotModeInterface,
+} from '@hanzo/mascot-mode'
 
-export interface MascotModeInterface {
-    stateManager?: any
-    gameUI?: any
-    getAllMascots?: () => any[]
-}
-export interface MascotActor {
-    setOnFire?: (v: number) => void
-    updateSprite?: (name: string, options?: any) => void
-}
-export interface MascotModeConfig {
-    assetsUrl?: string
-    platforms?: any
-    onQuit?: (game: any) => void
-}
-export interface MascotActorOptions {
-    id?: string
-    player?: boolean
-    color?: string | null
-    skin?: string | null
-    accessories?: string[]
-    ai_enabled?: boolean
-    interactions_enabled?: boolean
-    controls_enabled?: boolean
-}
+// NOTE: For whatever reason, kea-typegen can't navigate the exported class, so we need to do this
+export interface MascotModeInterface extends _MascotModeInterface {}
+export interface MascotActor extends _MascotActor {}
+export interface MascotModeConfig extends _MascotModeConfig {}
+export interface MascotActorOptions extends _MascotActorOptions {}

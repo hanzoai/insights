@@ -9,7 +9,7 @@
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "*",
+        "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

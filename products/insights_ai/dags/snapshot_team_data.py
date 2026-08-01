@@ -26,9 +26,9 @@ from insights.insightsql_queries.ai.actors_property_taxonomy_query_runner import
 from insights.insightsql_queries.ai.event_taxonomy_query_runner import EventTaxonomyQueryRunner
 from insights.insightsql_queries.ai.team_taxonomy_query_runner import TeamTaxonomyQueryRunner
 from insights.insightsql_queries.query_runner import ExecutionMode
-from insights.models import GroupTypeMapping, Team
-from insights.models.property_definition import PropertyDefinition
+from insights.models import Team
 
+from products.event_definitions.backend.models.property_definition import PropertyDefinition
 from products.insights_ai.dags.utils import (
     check_dump_exists,
     compose_datastore_dump_path,
@@ -36,6 +36,18 @@ from products.insights_ai.dags.utils import (
     dump_model,
 )
 
+from ee.hogai.eval.schema import (
+    ActorsPropertyTaxonomySnapshot,
+    BaseSnapshot,
+    DatastoreTeamDataSnapshot,
+    DataWarehouseTableSnapshot,
+    GroupTypeMappingSnapshot,
+    PostgresTeamDataSnapshot,
+    PropertyDefinitionSnapshot,
+    PropertyTaxonomySnapshot,
+    TeamSnapshot,
+    TeamTaxonomyItemSnapshot,
+)
 
 DEFAULT_RETRY_POLICY = dagster.RetryPolicy(
     max_retries=4,
@@ -80,7 +92,7 @@ def snapshot_postgres_model(
     retry_policy=DEFAULT_RETRY_POLICY,
     code_version="v1",
     tags={
-        "owner": JobOwners.TEAM_INSIGHTS_AI.value,
+        "owner": JobOwners.TEAM_POSTFN_AI.value,
         "dagster/max_runtime": 60 * 15,  # 15 minutes
     },
 )
@@ -105,7 +117,7 @@ def snapshot_postgres_team_data(
                 asset_key="team_postgres_snapshot",
                 description="Avro snapshots of team Postgres data",
                 metadata={"team_id": team_id, **deps},
-                tags={"owner": JobOwners.TEAM_INSIGHTS_AI.value},
+                tags={"owner": JobOwners.TEAM_POSTFN_AI.value},
             )
         )
     except Team.DoesNotExist as e:
@@ -233,9 +245,11 @@ def snapshot_actors_property_taxonomy(
 
     # Snapshot all group type mappings and person
     results: list[ActorsPropertyTaxonomySnapshot] = []
+    from insights.models.group_type_mapping import get_group_types_for_team
+
     group_type_mappings: list[int | None] = [
         None,
-        *(g.group_type_index for g in GroupTypeMapping.objects.filter(team=team)),
+        *(m["group_type_index"] for m in get_group_types_for_team(team.id)),
     ]
 
     for index in group_type_mappings:
@@ -298,7 +312,7 @@ def snapshot_actors_property_taxonomy(
     description="Snapshots Datastore team data",
     retry_policy=DEFAULT_RETRY_POLICY,
     tags={
-        "owner": JobOwners.TEAM_INSIGHTS_AI.value,
+        "owner": JobOwners.TEAM_POSTFN_AI.value,
         "dagster/max_runtime": 60 * 15,  # 15 minutes
     },
     code_version="v1",
@@ -343,7 +357,7 @@ def snapshot_datastore_team_data(
                 "team_id": team_id,
                 **materialized_result.model_dump(),
             },
-            tags={"owner": JobOwners.TEAM_INSIGHTS_AI.value},
+            tags={"owner": JobOwners.TEAM_POSTFN_AI.value},
         )
     )
 

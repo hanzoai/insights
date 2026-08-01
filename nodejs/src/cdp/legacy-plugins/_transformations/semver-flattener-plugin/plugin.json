@@ -1,6 +1,6 @@
 {
     "name": "insights-semver-flattener",
-    "url": "https://github.com/hanzoai/semver-flattener-plugin",
+    "url": "https://github.com/Insights/semver-flattener-plugin",
     "main": "index.ts",
     "config": [
         {

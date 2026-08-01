@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hanzoai/insights/livestream/geo"
-	"github.com/hanzoai/insights/livestream/mocks"
+	"github.com/insights/insights/livestream/geo"
+	"github.com/insights/insights/livestream/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

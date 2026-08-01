@@ -571,7 +571,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
     parser.add_argument(
         "--gateway-url",
-        default=os.environ.get("GATEWAY_URL", "https://gateway.insights.hanzo.ai"),
+        default=os.environ.get("GATEWAY_URL", "https://gateway.us.hanzo.ai"),
     )
     return parser.parse_args()
 

@@ -373,7 +373,7 @@ class MyWorfklow:
 
 When developing a workflow or activity, you will most likely want **all** your logs to have Temporal context variables (like `activity_type`, `attempt`, or `workflow_id`). Thus, the logging pipeline is configured to **automatically** populate the context with the activity's or workflow's information. All the logs from the previous example would have these variables set in the context.
 
-This logging pipeline also works locally, both when running a worker locally either with `mprocs` or manually running `start_temporal_worker.py`, and if you run your unit tests with:
+This logging pipeline also works locally, both when running a worker locally either with `phrocs` or manually running `start_temporal_worker.py`, and if you run your unit tests with:
 
 ```sh
 DEBUG=1 pytest path/to/your/tests.py -s
@@ -400,7 +400,7 @@ Once workflows and activities are finished, there are a few more steps required 
 
 Once your workflow and activities have been written, it's time to decide which workers will run them. At Insights, we have multiple sets of Temporal workers running. Each set of workers listens to a particular task queue, which is how we coordinate which workflows and activities will each worker run: By executing your workflows and activities in a certain task queue, only workers from the set of workers configured to poll that task queue will pick up the work.
 
-Since each product has its own requirements when it comes to worker resources and behavior, each product has its own set of workers, and the product team manages the deployment of said workers. For in-development workflows and activities, there exists a set of workers listening on a shared task queue (called `general-purpose-task-queue`). Anybody may use this general task queue, so you can assign your workflows to it while they are still in development. Once your workflows have moved past the prototyping stage, I recommend looking in the [charts](https://github.com/Hanzo Insights/charts) repository for the `temporal-worker` package you can use to create your own deployment. With your own set of workers, you can define resource limits of your own, and avoid conflicts with other workflows running in the shared task queue.
+Since each product has its own requirements when it comes to worker resources and behavior, each product has its own set of workers, and the product team manages the deployment of said workers. For in-development workflows and activities, there exists a set of workers listening on a shared task queue (called `general-purpose-task-queue`). Anybody may use this general task queue, so you can assign your workflows to it while they are still in development. Once your workflows have moved past the prototyping stage, I recommend looking in the [charts](https://github.com/Insights/charts) repository for the `temporal-worker` package you can use to create your own deployment. With your own set of workers, you can define resource limits of your own, and avoid conflicts with other workflows running in the shared task queue.
 
 Regardless of which task queue and workers are chosen to run your workflows, all workers are configured right here in the code. So, you need to get your workflow classes and your activity functions in the worker configuration based on the task queue you have chosen. This is done by adding your workflows and activities to mappings in the `insights/management/command/start_temporal_worker.py` script. I recommend that you group all your workflows and activities in a single collection at the top level `__init__.py` of your product package, so that then they can be imported in `start_temporal_worker.py` and added to the mappings.
 
@@ -440,9 +440,13 @@ Once the workers are deployed, they will be able to run your workflows and activ
 
 ### Trigger deployments for workers
 
-Some changes in our CI/CD pipeline will be required to ensure your changes are triggering deployments to your Temporal workers. First, when a new deployment of Temporal workers is created, you may want to trigger the deployment on merges to this repository's `main` branch. For that, edit the `container-images-cd.yaml` GitHub workflow and add a new trigger step.
+This step is not optional, and it is not a follow-up: the charts deployment's image pointer (`state/<worker>.yaml` in the charts repo) is hand-seeded when the fleet is created and is only ever updated by the trigger step in this repository's `container-images-cd.yml` workflow. Without a trigger step your fleet stays pinned at its seed digest forever — and if the seed was taken before your feature merged, you ship a fleet running an image that does not contain your code. A worker started with a task queue that has no registered workflows in its image crash-loops on `ValueError: At least one activity, Nexus service, or workflow must be specified`. Land the trigger step before (or with) the charts fleet PR, and make sure the seed digest postdates your feature's merge commit.
 
-Moreover, notice that in the workflow every trigger step comes after a check step. This step ensures that only certain module changes trigger a worker re-deployment, and not every single change. This is done because restarting workers can be disruptive to workflows running in it, so as a general rule try to minimize the changes that will trigger a re-deployment of workers. You will probably only need the common temporal modules + your product specific modules in the check.
+To add one, edit the `container-images-cd.yml` GitHub workflow and copy an existing narrow worker's check + trigger step pair (the `release` name must match the charts state-file key).
+
+Notice that every trigger step comes after a check step. This step ensures that only certain module changes trigger a worker re-deployment, and not every single change. This is done because restarting workers can be disruptive to workflows running in it, so as a general rule try to minimize the changes that will trigger a re-deployment of workers. You will probably only need the common temporal modules + your product specific modules in the check — including modules your code imports from elsewhere in the repo (grep your entrypoint's imports).
+
+After the first deployment, verify by execution, not by dashboard health: temporal worker deployments disable liveness/readiness probes, so a crash-looping fleet still shows Healthy in ArgoCD, and Python startup tracebacks reach the logs pipeline at info severity (no error-level signal). Check the fleet's logs (`service.name = <worker>`) for the startup banner repeating every few minutes, and confirm one real workflow completed end to end.
 
 > [!NOTE]
 > Temporal workers stop polling for new tasks when a shutdown is initiated, and the deployments can configure a timeout for the shutdown, which can give time for all workflows currently running to finish. Configuring this correctly can minimize the disruption caused by triggering new deployments, but it can be hard to find the right timeout that ensures everything has time to finish without waiting forever.
@@ -473,7 +477,7 @@ There are examples on how to achieve this throughout the codebase: Batch exports
 
 ## Develop locally with Temporal
 
-The development stack includes: A Temporal service to act as a local orchestrator, a Temporal UI, and, if you are using `mprocs`, multiple Temporal workers that are started automatically, one per task queue. These workers includes a worker listening on the shared `general-purpose-task-queue`, which can be used for development. If you have deployed a new set of workers, add it to `bin/mprocs.yaml` so that a worker can start automatically for folks doing local development.
+The development stack includes: A Temporal service to act as a local orchestrator, a Temporal UI, and, if you are using `phrocs`, multiple Temporal workers that are started automatically, one per task queue. These workers includes a worker listening on the shared `general-purpose-task-queue`, which can be used for development. If you have deployed a new set of workers, add it to `bin/mprocs.yaml` so that a worker can start automatically for folks doing local development.
 
 By default, Temporal workers automatically hot reload when Python files change (similar to backend and celery workers). If you need to disable hot reloading, set `TEMPORAL_DISABLE_HOT_RELOAD=1`.
 
@@ -481,16 +485,102 @@ Some products or features may require additional configuration, for example: Dat
 
 As you run workflows, you will be able to see the logs in the worker's logs, and you can go to the Temporal UI at http://localhost:8081 to check on the workflow status.
 
+## Testing patterns
+
+Temporal tests are expensive — they boot Temporal test servers, register activities, and frequently force the slow `TransactionTestCase` isolation mode. The cost is real (per-test TRUNCATE across multiple databases), so write them deliberately.
+
+### Pick the lightest harness that proves what you need
+
+| Harness                                                   | When to use                                                                  | Cost                       |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------- |
+| Pure pytest (no Worker, no `ActivityEnvironment`)         | Unit-testing pure functions — prompt builders, parsers, decision trees       | ~ms/test                   |
+| `ActivityEnvironment`                                     | Testing a single activity's body in isolation; no workflow orchestration     | ~tens of ms/test           |
+| Real Worker + `WorkflowEnvironment.start_time_skipping()` | Integration tests that exercise workflow ↔ activity orchestration end-to-end | seconds/test + Worker boot |
+
+Per Temporal's own guidance: write the **majority** of tests as the cheapest harness that still proves the contract you care about. Spinning up a Worker is a deliberate choice for integration tests, not the default.
+
+### The `django_db(transaction=True)` rule
+
+Async tests that touch the Django ORM via `sync_to_async` / `database_sync_to_async` will fail without `@pytest.mark.django_db(transaction=True)`. asgiref dispatches the wrapped sync function to a separate thread, which gets its own DB connection, which can't see the test's wrapping atomic transaction. The test will create a row, the activity will fail to find it.
+
+`transaction=True` swaps fast transaction-rollback for slow TRUNCATE-everything between tests. This is the correct workaround — there's no clean way to share a Django connection across threads — but it's expensive, so **only use it when needed**:
+
+```python
+# Async test + Django ORM = needs transaction=True
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.asyncio
+async def test_my_activity(team):
+    source = await sync_to_async(ExternalDataSource.objects.create)(team=team, ...)
+    result = await my_activity(SomeInputs(source_id=source.pk))
+    assert result.ok
+
+# Sync test or no ORM = does NOT need transaction=True
+@pytest.mark.django_db  # transaction rollback — much faster
+def test_my_pure_function(team):
+    source = ExternalDataSource.objects.create(team=team, ...)
+    assert build_query(source) == "..."
+```
+
+### Sharing `WorkflowEnvironment` + `Worker` across tests is tempting but brittle
+
+`WorkflowEnvironment.start_time_skipping()` spawns a real `temporal-test-server` process; `Worker(...)` registers every workflow + activity. Booting them per-test is expensive and the obvious optimization is a module-scoped autouse fixture that boots once and yields a shared client.
+
+**We tried this on `test_end_to_end.py` and reverted it (PR #59405).** The savings were real on most tests (~8s per invocation) but specific tests interact with process-wide state — mocking `ShutdownMonitor.raise_if_is_worker_shutdown`, patching `ee.api.billing.requests.get` and `insights.cloud_utils.is_instance_licensed_cached` — in ways that, once applied to the shared Worker's activity-executor threads, take minutes to recover from after the test's mock context exits. The worker-shutdown tests were the obvious case; the billing-limits tests surfaced next; the pattern was likely not exhaustive. The CI cost regression outweighed the saving.
+
+If you want to try sharing again, the safe pre-condition is: **no test in the file mocks or patches a target the shared Worker's threads can reach during workflow execution.** That's hard to verify by inspection, so escape hatches end up necessary. The pattern works fine in principle but needs per-file judgement, not a blanket optimization.
+
+### Watch for production code that calls `connection.connect()`
+
+Some activities call `django.db.connection.connect()` explicitly to recover from stale worker connections in production. Under test that drops the test's wrapping atomic — the next ORM read on the (new) connection sees no data, and teardown fails with `TransactionManagementError: The rollback flag doesn't work outside of an 'atomic' block`.
+
+Targeted fix in the test file (or a `conftest.py` for the whole package): no-op the reconnect during tests.
+
+```python
+@pytest.fixture(autouse=True)
+def _no_worker_reconnect(monkeypatch):
+    from django.db import connection
+    monkeypatch.setattr(connection, "connect", lambda: None)
+```
+
+With this fixture the test can stay on fast `@pytest.mark.django_db` (no `transaction=True`). See `insights/temporal/proxy_service/test/test_send_proxy_email.py` for a real example.
+
+### Don't copy-paste; parametrize
+
+It's tempting to write "one test per endpoint" when adding source variants. The temptation produces files like the historical state of `test_end_to_end.py`: 83 mechanically identical 10-line tests differing only in fixture name. Each one paid the full per-test cost.
+
+Prefer `@pytest.mark.parametrize`:
+
+```python
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "schema_name,table_name,fixture_name",
+    [
+        ("charge", "stripe_charge", "stripe_charge"),
+        ("customer", "stripe_customer", "stripe_customer"),
+        # ... etc — adding a new endpoint is now appending a tuple
+    ],
+)
+async def test_stripe_source(team, mock_stripe_client, request, schema_name, table_name, fixture_name):
+    fixture_data = request.getfixturevalue(fixture_name)
+    await _run(team=team, schema_name=schema_name, table_name=table_name,
+               source_type="Stripe", job_inputs=_STRIPE_JOB_INPUTS,
+               mock_data_response=fixture_data["data"])
+```
+
+The per-test cost is the same as N separate functions, but the file shrinks and adding endpoints stops feeling like a refactor.
+
 ## Relevant documentation
 
 - [Documentation for the Temporal Python SDK](https://docs.temporal.io/develop/python).
 - [Documentation on Temporal schedules](https://docs.temporal.io/evaluate/development-production-features/schedules).
 - [Documentation on different types of activities](https://docs.temporal.io/develop/python/python-sdk-sync-vs-async).
+- [Documentation on testing Temporal applications](https://docs.temporal.io/develop/python/best-practices/testing-suite).
 - [Temporal Python SDK repository](https://github.com/temporalio/sdk-python).
 - [Temporal Python SDK code samples](https://github.com/temporalio/samples-python).
 
 ## Examples in Insights
 
-- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/Hanzo Insights/insights/tree/main/products/batch_exports/backend/temporal/destinations).
-- [Examples on unit testing Temporal workflows](https://github.com/Hanzo Insights/insights/tree/main/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
+- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/Insights/insights/tree/master/products/batch_exports/backend/temporal/destinations).
+- [Examples on unit testing Temporal workflows](https://github.com/Insights/insights/tree/master/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
 - DuckLake data modeling writes leverage Temporal too; follow the [DuckLake copy workflow configuration guide](../ducklake/README.md) to see how we configure environment variables, bucket layouts, and IAM perms for the copy workflow.

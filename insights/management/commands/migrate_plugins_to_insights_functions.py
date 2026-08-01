@@ -32,7 +32,7 @@ class Command(BaseCommand):
         kind = options["kind"]
         batch_size = options["batch_size"]
         limit = options["limit"]
-        print("Migrating plugins to custom functions", options)  # noqa: T201
+        print("Migrating plugins to script functions", options)  # noqa: T201
 
         migrate_legacy_plugins(
             dry_run=dry_run, team_ids=team_ids, test_mode=test_mode, kind=kind, batch_size=batch_size, limit=limit

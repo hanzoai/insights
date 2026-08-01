@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::storage::error::StorageResult;
 use crate::storage::postgres::ConsistencyLevel;
-use crate::storage::types::{HashKeyOverrideContext, HashKeyOverrideInput};
+use crate::storage::types::HashKeyOverrideContext;
 
 /// Feature flag hash key override operations
 #[async_trait]
@@ -36,18 +36,25 @@ pub trait FeatureFlagStorage: Send + Sync {
         consistency: ConsistencyLevel,
     ) -> StorageResult<Vec<HashKeyOverrideContext>>;
 
-    /// Batch upsert hash key overrides. Returns the number of inserted records.
+    /// Upsert hash key overrides by resolving distinct_ids to person_ids server-side.
     ///
-    /// All overrides in a batch share the same `hash_key`, which is used for
-    /// experience continuity - ensuring consistent flag values when a user
-    /// logs in with a new distinct_id.
+    /// Resolves all `distinct_ids` to person_ids via `insights_persondistinctid`,
+    /// cross-joins with `feature_flag_keys`, and inserts overrides with the given
+    /// `hash_key`. Returns the number of inserted records.
     async fn upsert_hash_key_overrides(
         &self,
         team_id: i64,
-        overrides: &[HashKeyOverrideInput],
+        distinct_ids: &[String],
+        feature_flag_keys: &[String],
         hash_key: &str,
     ) -> StorageResult<i64>;
 
-    /// Delete all hash key overrides for the specified teams. Returns the number of deleted records.
-    async fn delete_hash_key_overrides_by_teams(&self, team_ids: &[i64]) -> StorageResult<i64>;
+    /// Delete up to `batch_size` hash key overrides across the specified teams.
+    /// Selects rows with FOR UPDATE SKIP LOCKED so concurrent batches don't contend.
+    /// Returns the number of deleted rows; 0 means no more rows to delete.
+    async fn delete_hash_key_overrides_by_teams(
+        &self,
+        team_ids: &[i64],
+        batch_size: i64,
+    ) -> StorageResult<i64>;
 }

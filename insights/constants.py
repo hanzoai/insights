@@ -3,7 +3,7 @@ from typing import Literal
 
 from semantic_version import Version
 
-FROZEN_INSIGHTS_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
+FROZEN_POSTFN_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
 INTERNAL_BOT_EMAIL_SUFFIX = "@insightsbot.user"
 
 
@@ -12,13 +12,13 @@ INTERNAL_BOT_EMAIL_SUFFIX = "@insightsbot.user"
 class AvailableFeature(StrEnum):
     ZAPIER = "zapier"
     ORGANIZATIONS_PROJECTS = "organizations_projects"
-    ENVIRONMENTS = "environments"
     SOCIAL_SSO = "social_sso"
     SAML = "saml"
     SCIM = "scim"
     SSO_ENFORCEMENT = "sso_enforcement"
     ADVANCED_PERMISSIONS = "advanced_permissions"  # TODO: Remove this once access_control is propagated
     ACCESS_CONTROL = "access_control"
+    PROPERTY_ACCESS_CONTROL = "property_access_control"
     INGESTION_TAXONOMY = "ingestion_taxonomy"
     PATHS_ADVANCED = "paths_advanced"
     CORRELATION_ANALYSIS = "correlation_analysis"
@@ -39,6 +39,8 @@ class AvailableFeature(StrEnum):
     MANAGED_REVERSE_PROXY = "managed_reverse_proxy"
     DATA_PIPELINES = "data_pipelines"
     ALERTS = "alerts"
+    HIGH_FREQUENCY_ALERTS = "high_frequency_alerts"
+    REAL_TIME_ALERTS = "real_time_alerts"
     DATA_COLOR_THEMES = "data_color_themes"
     API_QUERIES_CONCURRENCY = "api_queries_concurrency"
     ORGANIZATION_INVITE_SETTINGS = "organization_invite_settings"
@@ -46,8 +48,17 @@ class AvailableFeature(StrEnum):
     ORGANIZATION_SECURITY_SETTINGS = "organization_security_settings"
     ORGANIZATION_APP_QUERY_CONCURRENCY_LIMIT = "organization_app_query_concurrency_limit"
     SESSION_REPLAY_DATA_RETENTION = "session_replay_data_retention"
+    PRODUCT_ANALYTICS_DATA_RETENTION = "product_analytics_data_retention"
+    LOGS_RETENTION_30D = "logs_retention_30d"
     AUDIT_LOGS = "audit_logs"
     APPROVALS = "approvals"
+    XAA_AUTHENTICATION = "xaa_authentication"
+    POSTFN_CODE_USAGE = "insights_code_usage"
+
+
+LOGS_RETENTION_FEATURES_BY_DAYS: dict[int, AvailableFeature] = {
+    30: AvailableFeature.LOGS_RETENTION_30D,
+}
 
 
 TREND_FILTER_TYPE_ACTIONS = "actions"
@@ -64,7 +75,9 @@ TRENDS_BAR = "ActionsBar"
 TRENDS_BAR_VALUE = "ActionsBarValue"
 TRENDS_WORLD_MAP = "WorldMap"
 TRENDS_BOLD_NUMBER = "BoldNumber"
+TRENDS_METRIC = "Metric"
 TRENDS_CALENDAR_HEATMAP = "CalendarHeatmap"
+TRENDS_BOX_PLOT = "BoxPlot"
 
 # Sync with frontend NON_TIME_SERIES_DISPLAY_TYPES
 NON_TIME_SERIES_DISPLAY_TYPES = [
@@ -76,7 +89,7 @@ NON_TIME_SERIES_DISPLAY_TYPES = [
     TRENDS_CALENDAR_HEATMAP,
 ]
 # Sync with frontend NON_BREAKDOWN_DISPLAY_TYPES
-NON_BREAKDOWN_DISPLAY_TYPES = [TRENDS_BOLD_NUMBER, TRENDS_CALENDAR_HEATMAP]
+NON_BREAKDOWN_DISPLAY_TYPES = [TRENDS_BOLD_NUMBER, TRENDS_METRIC, TRENDS_CALENDAR_HEATMAP, TRENDS_BOX_PLOT]
 
 # CONSTANTS
 INSIGHT_TRENDS = "TRENDS"
@@ -106,6 +119,7 @@ DISPLAY_TYPES = Literal[
     "ActionsBarValue",
     "WorldMap",
     "BoldNumber",
+    "Metric",
     "CalendarHeatmap",
 ]
 
@@ -311,21 +325,16 @@ class FlagRequestType(StrEnum):
 
 SURVEY_TARGETING_FLAG_PREFIX = "survey-targeting-"
 PRODUCT_TOUR_TARGETING_FLAG_PREFIX = "product-tour-targeting-"
+
+# Server-side evaluation via hanzo_insights; keep in sync with frontend FEATURE_FLAGS.
+SUBSCRIPTION_AI_SUMMARY_PROMPT_GUIDE_FEATURE_FLAG_KEY = "subscription-ai-summary-prompt-guide"
+SUBSCRIPTION_AI_PROMPT_FEATURE_FLAG_KEY = "ai-subscriptions"
+EXPERIMENTS_SYNC_QUERIES_FEATURE_FLAG_KEY = "experiments-sync-queries"
 GENERATED_DASHBOARD_PREFIX = "Generated Dashboard"
 
 ENRICHED_DASHBOARD_INSIGHT_IDENTIFIER = "Feature Viewed"
 
-# Hosts a signed-in user may be handed to on ?forum_login=true.
-#
-# This allowlisted insights.com — a live third party at 51.152.91.38 that Hanzo
-# does not own — because a debrand rewrote the upstream project's own forum
-# domain into our vocabulary without asking whether we run a forum. We do not.
-# An allowlist naming somebody else's host is the opposite of an allowlist.
-#
-# Empty, so the ?forum_login=true branch admits nothing. localhost went too: it
-# is only reachable from a developer's own machine, and keeping a lone dev entry
-# invites the next reader to add a "real" one beside it.
-PERMITTED_FORUM_DOMAINS: list[str] = []
+PERMITTED_FORUM_DOMAINS = ["localhost", "hanzo.ai"]
 
 INVITE_DAYS_VALIDITY = 3  # number of days for which team invites are valid
 
@@ -368,7 +377,7 @@ LOGIN_METHODS = [
     {
         "key": "google-oauth2",
         "display": "Google OAuth",
-        "backends": ["google-oauth2"],
+        "backends": ["google-oauth2", "ee.api.authentication.CustomGoogleOAuth2"],
     },
     {
         "key": "github",
@@ -383,7 +392,7 @@ LOGIN_METHODS = [
     {
         "key": "saml",
         "display": "SAML",
-        "backends": ["saml"],
+        "backends": ["saml", "ee.api.authentication.MultitenantSAMLAuth"],
     },
     {
         "key": "passkey",

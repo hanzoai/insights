@@ -1,6 +1,5 @@
 import './BillingLineGraph.scss'
 
-import 'chartjs-adapter-dayjs-3'
 import annotationPlugin from 'chartjs-plugin-annotation'
 import { useValues } from 'kea'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -18,6 +17,7 @@ import { Tooltip } from 'lib/elements/Tooltip'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 
+// eslint-disable-next-line import/no-cycle
 import { BillingLineGraphTooltip } from './BillingLineGraphTooltip'
 import { useBillingMarkersPositioning } from './useBillingMarkersPositioning'
 

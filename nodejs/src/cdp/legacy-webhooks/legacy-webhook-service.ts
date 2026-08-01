@@ -1,39 +1,29 @@
 import { Message } from 'node-rdkafka'
 
-import { mutatePostIngestionEventWithElementsList } from '~/utils/event'
-import { datastoreTimestampSecondPrecisionToISO, datastoreTimestampToISO } from '~/utils/utils'
+import { PostgresRouter, PostgresUse } from '~/common/utils/db/postgres'
+import { mutatePostIngestionEventWithElementsList } from '~/common/utils/event'
+import { parseJSON } from '~/common/utils/json-parse'
+import { logger } from '~/common/utils/logger'
+import { PubSub } from '~/common/utils/pubsub'
+import { TeamManager } from '~/common/utils/team-manager'
+import { clickHouseTimestampSecondPrecisionToISO, clickHouseTimestampToISO } from '~/common/utils/utils'
 
-import {
-    Action,
-    Hook,
-    HookPayload,
-    Hub,
-    PostIngestionEvent,
-    RawDatastoreEvent,
-    RawStreamEvent,
-    Team,
-} from '../../types'
-import { PostgresUse } from '../../utils/db/postgres'
-import { parseJSON } from '../../utils/json-parse'
-import { logger } from '../../utils/logger'
+import { Action, Hook, HookPayload, PostIngestionEvent, RawDatastoreEvent, RawKafkaEvent, Team } from '../../types'
 import { counterParseError } from '../consumers/metrics'
 import { ActionManager } from '../legacy-webhooks/action-manager'
 import { ActionMatcher } from '../legacy-webhooks/action-matcher'
-import { addGroupPropertiesToPostIngestionEvent } from '../legacy-webhooks/utils'
 import { cdpTrackedFetch } from '../services/script-executor.service'
-
-/** Narrowed Hub type for LegacyWebhookService */
-export type LegacyWebhookServiceHub = Pick<
-    Hub,
-    'postgres' | 'pubSub' | 'teamManager' | 'groupTypeManager' | 'groupRepository'
->
 
 export class LegacyWebhookService {
     protected actionManager: ActionManager
     protected actionMatcher: ActionMatcher
 
-    constructor(private hub: LegacyWebhookServiceHub) {
-        this.actionManager = new ActionManager(hub.postgres, hub.pubSub)
+    constructor(
+        private postgres: PostgresRouter,
+        private teamManager: TeamManager,
+        pubSub: PubSub
+    ) {
+        this.actionManager = new ActionManager(postgres, pubSub)
         this.actionMatcher = new ActionMatcher(this.actionManager)
     }
 
@@ -47,13 +37,13 @@ export class LegacyWebhookService {
     }
 
     private async fireWebhooks(event: PostIngestionEvent, actionMatches: Action[]): Promise<void> {
-        const team = await this.hub.teamManager.getTeam(event.teamId)
+        const team = await this.teamManager.getTeam(event.teamId)
 
         if (!team) {
             return
         }
 
-        if (await this.hub.teamManager.hasAvailableFeature(team.id, 'zapier')) {
+        if (await this.teamManager.hasAvailableFeature(team.id, 'zapier')) {
             const restHooks = actionMatches.flatMap((action) => action.hooks.map((hook) => ({ hook, action })))
 
             if (restHooks.length > 0) {
@@ -95,7 +85,7 @@ export class LegacyWebhookService {
     }
 
     private async deleteRestHook(hookId: Hook['id']): Promise<void> {
-        await this.hub.postgres.query(
+        await this.postgres.query(
             PostgresUse.COMMON_WRITE,
             `DELETE FROM ee_hook WHERE id = $1`,
             [hookId],
@@ -109,29 +99,16 @@ export class LegacyWebhookService {
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
                     if (
-                        !this.actionMatcher.hasWebhooks(datastoreEvent.team_id) ||
-                        !(await this.hub.teamManager.hasAvailableFeature(datastoreEvent.team_id, 'zapier'))
+                        !this.actionMatcher.hasWebhooks(clickHouseEvent.team_id) ||
+                        !(await this.teamManager.hasAvailableFeature(clickHouseEvent.team_id, 'zapier'))
                     ) {
-                        // exit early if no webhooks nor resthooks
                         return
                     }
 
-                    const eventWithoutGroups = convertToPostIngestionEvent(datastoreEvent)
-                    // This is very inefficient, we always pull group properties for all groups (up to 5) for this event
-                    // from PG if a webhook is defined for this team.
-                    // Instead we should be lazily loading group properties only when needed, but this is the fastest way to fix this consumer
-                    // that will be deprecated in the near future by CDP/Script
-                    const event = await addGroupPropertiesToPostIngestionEvent(
-                        eventWithoutGroups,
-                        this.hub.groupTypeManager,
-                        this.hub.teamManager,
-                        this.hub.groupRepository
-                    )
-
-                    events.push(event)
+                    events.push(convertToPostIngestionEvent(clickHouseEvent))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
@@ -152,7 +129,7 @@ export class LegacyWebhookService {
     }
 }
 
-function convertToPostIngestionEvent(event: RawStreamEvent): PostIngestionEvent {
+function convertToPostIngestionEvent(event: RawKafkaEvent): PostIngestionEvent {
     const properties = event.properties ? parseJSON(event.properties) : {}
     if (event.elements_chain) {
         properties['$elements_chain'] = event.elements_chain
@@ -165,11 +142,11 @@ function convertToPostIngestionEvent(event: RawStreamEvent): PostIngestionEvent 
         projectId: event.project_id,
         distinctId: event.distinct_id,
         properties,
-        timestamp: datastoreTimestampToISO(event.timestamp),
+        timestamp: clickHouseTimestampToISO(event.timestamp),
         elementsList: undefined,
         person_id: event.person_id,
         person_created_at: event.person_created_at
-            ? datastoreTimestampSecondPrecisionToISO(event.person_created_at)
+            ? clickHouseTimestampSecondPrecisionToISO(event.person_created_at)
             : null,
         person_properties: event.person_properties ? parseJSON(event.person_properties) : {},
     }

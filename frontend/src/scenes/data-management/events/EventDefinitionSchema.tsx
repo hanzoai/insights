@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import { IconInfo, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Tag, Link, Tooltip } from '@hanzo/elements'
 
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { Query } from '~/queries/Query/Query'
 import { urls } from '~/scenes/urls'
@@ -11,8 +13,8 @@ import { EventDefinition, SchemaEnforcementMode } from '~/types'
 
 import { PropertyGroupModal } from '../schema/PropertyGroupModal'
 import { PropertyTypeTag } from '../schema/PropertyTypeTag'
-import { SelectPropertyGroupModal } from '../schema/SelectPropertyGroupModal'
 import { SchemaPropertyGroupProperty, schemaManagementLogic } from '../schema/schemaManagementLogic'
+import { SelectPropertyGroupModal } from '../schema/SelectPropertyGroupModal'
 import { EventSchema, eventDefinitionSchemaLogic } from './eventDefinitionSchemaLogic'
 import { buildPropertyGroupTrendsQuery } from './propertyGroupTrendsQuery'
 
@@ -40,17 +42,19 @@ function PropertyRow({ property }: { property: SchemaPropertyGroupProperty }): J
 function PropertyGroupCard({
     schema,
     eventName,
+    eventFirstSeen,
     onEdit,
     onRemove,
 }: {
     schema: EventSchema
     eventName: string
+    eventFirstSeen?: string | null
     onEdit: () => void
     onRemove: () => void
 }): JSX.Element {
     const queryResult = useMemo(
-        () => buildPropertyGroupTrendsQuery(eventName, schema.property_group.properties),
-        [eventName, schema.property_group.properties]
+        () => buildPropertyGroupTrendsQuery(eventName, schema.property_group.properties, eventFirstSeen),
+        [eventName, eventFirstSeen, schema.property_group.properties]
     )
 
     const linkQuery = useMemo(
@@ -106,7 +110,7 @@ function PropertyGroupCard({
                     <div className="p-4 bg-bg-light">
                         <h4 className="font-semibold mb-2 text-sm flex items-center gap-1">
                             <Link to={insightUrl} className="text-default hover:text-link">
-                                Property Coverage Trends (90 days)
+                                Property Coverage Trends ({queryResult.dateRangeLabel})
                             </Link>
                             <Tooltip title="% of events containing this property">
                                 <IconInfo className="text-xl text-secondary shrink-0" />
@@ -118,7 +122,7 @@ function PropertyGroupCard({
                                 properties. Chart is limited to 25 properties.
                             </div>
                         )}
-                        <div>
+                        <div className="flex flex-col h-48">
                             <Query query={queryResult.query} readOnly embedded />
                         </div>
                     </div>
@@ -145,6 +149,7 @@ export function EventDefinitionSchema({ definition }: { definition: EventDefinit
         [eventSchemas]
     )
 
+    const hasSchemaEnforcementReject = useFeatureFlag('SCHEMA_ENFORCEMENT_REJECT')
     const isEnforcementEnabled = schemaEnforcementMode === SchemaEnforcementMode.Reject
 
     const hasPropertyGroups = eventSchemas.length > 0
@@ -155,28 +160,30 @@ export function EventDefinitionSchema({ definition }: { definition: EventDefinit
             description="Define which property groups this event should have. Property groups establish a schema that helps document expected properties."
             actions={
                 <>
-                    <Checkbox
-                        label={
-                            <span className="flex items-center gap-1">
-                                Reject invalid events
-                                <Tooltip title="When enabled, events missing required properties or with wrong types will be rejected at ingestion time">
-                                    <IconInfo className="text-lg text-secondary" />
-                                </Tooltip>
-                            </span>
-                        }
-                        bordered
-                        size="small"
-                        checked={isEnforcementEnabled}
-                        onChange={(checked) =>
-                            updateSchemaEnforcementMode(
-                                checked ? SchemaEnforcementMode.Reject : SchemaEnforcementMode.Allow
-                            )
-                        }
-                        disabled={!hasPropertyGroups || schemaEnforcementModeUpdating}
-                        disabledReason={
-                            !hasPropertyGroups ? 'Define a schema before enabling schema enforcement' : undefined
-                        }
-                    />
+                    {(hasSchemaEnforcementReject || isEnforcementEnabled) && (
+                        <Checkbox
+                            label={
+                                <span className="flex items-center gap-1">
+                                    Reject invalid events
+                                    <Tooltip title="When enabled, events missing required properties or with wrong types will be rejected at ingestion time">
+                                        <IconInfo className="text-lg text-secondary" />
+                                    </Tooltip>
+                                </span>
+                            }
+                            bordered
+                            size="small"
+                            checked={isEnforcementEnabled}
+                            onChange={(checked) =>
+                                updateSchemaEnforcementMode(
+                                    checked ? SchemaEnforcementMode.Reject : SchemaEnforcementMode.Allow
+                                )
+                            }
+                            disabled={!hasPropertyGroups || schemaEnforcementModeUpdating}
+                            disabledReason={
+                                !hasPropertyGroups ? 'Define a schema before enabling schema enforcement' : undefined
+                            }
+                        />
+                    )}
                     <Button
                         type="primary"
                         icon={<IconPlus />}
@@ -206,6 +213,7 @@ export function EventDefinitionSchema({ definition }: { definition: EventDefinit
                                 key={schema.id}
                                 schema={schema}
                                 eventName={definition.name}
+                                eventFirstSeen={definition.created_at}
                                 onEdit={() => {
                                     setEditingPropertyGroup(schema.property_group)
                                     setPropertyGroupModalOpen(true)

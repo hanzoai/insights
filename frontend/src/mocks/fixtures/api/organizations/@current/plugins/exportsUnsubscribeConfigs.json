@@ -5,7 +5,7 @@
         "enabled": true,
         "order": 2,
         "config": {
-            "host": "insights.hanzo.ai",
+            "host": "eu.hanzo.ai",
             "replication": "1",
             "disable_geoip": "No",
             "project_api_key": "sdsdd",
@@ -18,7 +18,7 @@
             "plugin_type": "custom",
             "name": "Replicator",
             "description": "Replicator description",
-            "url": "https://github.com/hanzoai/insights-plugin-replicator",
+            "url": "https://github.com/Insights/insights-plugin-replicator",
             "icon": null,
             "config_schema": [],
             "tag": "2dd67e1dec9c8b5febd7a6d9235c51072950cd37",

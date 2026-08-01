@@ -2,7 +2,10 @@ from typing import cast
 
 from insights.test.base import BaseTest
 
+from parameterized import parameterized
+
 from insights.insightsql import ast
+from insights.insightsql.errors import QueryError
 from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.placeholders import find_placeholders, replace_placeholders
 from insights.insightsql.printer import to_printed_insightsql
@@ -202,3 +205,21 @@ class TestBytecodePlaceholders(BaseTest):
         finder = find_placeholders(expr)
         self.assertTrue(len(finder.placeholder_expressions) > 0)
         self.assertEqual(finder.placeholder_fields, [])
+
+    @parameterized.expand(
+        [
+            ("sleep_direct", "{sleep(600)}", "sleep"),
+            ("run_direct", "{run('SELECT 1')}", "run"),
+            ("nested_in_another_call", "{concat(sleep(600))}", "sleep"),
+            # Indirect invocations bypass the static name check but must still be rejected at VM
+            # dispatch, otherwise the blocking function runs on the request thread.
+            ("sleep_expression_call", "{(sleep)(600)}", "sleep"),
+            ("run_expression_call", "{(run)('SELECT 1')}", "run"),
+            ("sleep_bound_to_local", "{(() -> {let f := sleep; return f(600)})()}", "sleep"),
+        ]
+    )
+    def test_replace_placeholders_rejects_blocking_functions(self, _name, query, fn_name):
+        expr = parse_expr(query)
+        with self.assertRaises((QueryError, ScriptVMException)) as context:
+            replace_placeholders(expr, {})
+        self.assertIn(fn_name, str(context.exception))

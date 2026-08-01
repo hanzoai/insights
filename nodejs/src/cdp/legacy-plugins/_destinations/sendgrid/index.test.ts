@@ -1,6 +1,5 @@
+import { getMeta, resetMeta } from '../../test-utils'
 import { onEvent, setupPlugin } from './index'
-
-const { getMeta, resetMeta } = require('@hanzo/plugin-scaffold/test/utils.js')
 
 describe('sendgrid', () => {
     const mockFetch = jest.fn()

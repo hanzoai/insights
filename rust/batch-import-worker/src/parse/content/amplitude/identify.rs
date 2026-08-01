@@ -4,7 +4,7 @@ use common_types::{CapturedEvent, InternallyCapturedEvent, RawEvent};
 use serde_json::Value;
 use uuid::Uuid;
 
-/// Creates an Insights $identify event that links a user_id to a device_id
+/// Creates a Insights $identify event that links a user_id to a device_id
 /// This is used when we first encounter a user_id + device_id combination from Amplitude
 pub fn create_identify_event(
     team_id: i32,

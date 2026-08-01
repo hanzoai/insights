@@ -1,18 +1,15 @@
-import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
-import { IconFlag, IconStar } from '@hanzo/icons'
-import { Dropdown, ProfilePicture } from '@hanzo/elements'
+import { IconFlag, IconHeart, IconHeartFilled } from '@hanzo/icons'
 
+import { MemberSelectMultiplePopover } from 'lib/components/MemberSelectMultiplePopover'
 import { TagSelect } from 'lib/components/TagSelect'
 import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input/Input'
 import { Select } from 'lib/elements/Select'
 import { Switch } from 'lib/elements/Switch'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { fullName } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
-import { membersLogic } from 'scenes/organization/membersLogic'
 import { INSIGHT_TYPE_OPTIONS } from 'scenes/saved-insights/SavedInsights'
 import { SavedInsightFilters } from 'scenes/saved-insights/savedInsightsLogic'
 
@@ -32,28 +29,8 @@ export function SavedInsightsFilters({
     borderless?: boolean
 }): JSX.Element {
     const { search, hideFeatureFlagInsights, favorited, tags, insightType, createdBy } = filters
-    const { meFirstMembers, filteredMembers, membersLoading, search: memberSearch } = useValues(membersLogic)
-    const { setSearch: setMemberSearch, ensureAllMembersLoaded } = useActions(membersLogic)
     const quickFilterSet = new Set(quickFilters)
     const hasInsightTypeSelection = !!insightType && insightType !== 'All types'
-    const hasCreatedBySelection = createdBy !== 'All users' && (createdBy as number[]).length > 0
-    const currentUserId = meFirstMembers[0]?.user.id
-    const isFilteredToCurrentUser =
-        hasCreatedBySelection && (createdBy as number[]).length === 1 && (createdBy as number[])[0] === currentUserId
-
-    const handleMemberToggle = (userId: number): void => {
-        const currentUsers = createdBy !== 'All users' ? (createdBy as number[]) : []
-        const selected = new Set(currentUsers)
-        if (selected.has(userId)) {
-            selected.delete(userId)
-        } else {
-            selected.add(userId)
-        }
-        const newValue = Array.from(selected)
-        const createdByValue = newValue.length > 0 ? newValue : 'All users'
-        setFilters({ createdBy: createdByValue })
-        insights.capture('saved insights filtered', { filter_type: 'created_by', value: createdByValue })
-    }
 
     return (
         <div className={cn('flex justify-between gap-2 items-center flex-wrap')}>
@@ -102,99 +79,18 @@ export function SavedInsightsFilters({
                         </TagSelect>
                     )}
                     {quickFilterSet.has('createdBy') && (
-                        <Dropdown
-                            closeOnClickInside={false}
-                            matchWidth={false}
-                            placement="bottom-end"
-                            actionable
-                            onVisibilityChange={(visible) => {
-                                if (visible) {
-                                    ensureAllMembersLoaded()
-                                    setMemberSearch('')
-                                }
+                        <MemberSelectMultiplePopover
+                            value={createdBy !== 'All users' ? (createdBy as number[]) : []}
+                            onChange={(ids) => {
+                                const createdByValue = ids.length > 0 ? ids : 'All users'
+                                setFilters({ createdBy: createdByValue })
+                                insights.capture('saved insights filtered', {
+                                    filter_type: 'created_by',
+                                    value: createdByValue,
+                                })
                             }}
-                            overlay={
-                                <div className="max-w-100 deprecated-space-y-2">
-                                    <Input
-                                        type="search"
-                                        placeholder="Search"
-                                        autoFocus
-                                        value={memberSearch}
-                                        onChange={setMemberSearch}
-                                        fullWidth
-                                    />
-                                    <ul className="deprecated-space-y-px">
-                                        {filteredMembers.map((member) => (
-                                            <li key={member.user.uuid}>
-                                                <Button
-                                                    fullWidth
-                                                    role="menuitem"
-                                                    size="small"
-                                                    icon={<ProfilePicture size="md" user={member.user} />}
-                                                    onClick={() => handleMemberToggle(member.user.id)}
-                                                >
-                                                    <span className="flex items-center justify-between gap-2 flex-1">
-                                                        <span className="flex items-center gap-2 max-w-full">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="cursor-pointer"
-                                                                checked={
-                                                                    createdBy !== 'All users' &&
-                                                                    (createdBy as number[]).includes(member.user.id)
-                                                                }
-                                                                readOnly
-                                                            />
-                                                            <span>{fullName(member.user)}</span>
-                                                        </span>
-                                                        <span className="text-secondary">
-                                                            {meFirstMembers[0] === member && `(you)`}
-                                                        </span>
-                                                    </span>
-                                                </Button>
-                                            </li>
-                                        ))}
-                                        {membersLoading ? (
-                                            <div className="p-2 text-secondary italic truncate border-t">
-                                                Loading...
-                                            </div>
-                                        ) : filteredMembers.length === 0 ? (
-                                            <div className="p-2 text-secondary italic truncate border-t">
-                                                {memberSearch ? <span>No matches</span> : <span>No users</span>}
-                                            </div>
-                                        ) : null}
-                                        {hasCreatedBySelection && (
-                                            <>
-                                                <div className="my-1 border-t" />
-                                                <li>
-                                                    <Button
-                                                        fullWidth
-                                                        role="menuitem"
-                                                        size="small"
-                                                        onClick={() => setFilters({ createdBy: 'All users' })}
-                                                        type="tertiary"
-                                                    >
-                                                        Clear selection
-                                                    </Button>
-                                                </li>
-                                            </>
-                                        )}
-                                    </ul>
-                                </div>
-                            }
-                        >
-                            <Button
-                                size="small"
-                                type="secondary"
-                                status={borderless && !hasCreatedBySelection ? 'alt' : 'default'}
-                                active={hasCreatedBySelection}
-                            >
-                                {isFilteredToCurrentUser
-                                    ? 'Created by you'
-                                    : hasCreatedBySelection
-                                      ? `Created by (${(createdBy as number[]).length})`
-                                      : 'Created by'}
-                            </Button>
-                        </Dropdown>
+                            borderless={borderless}
+                        />
                     )}
                     {quickFilterSet.has('favorites') && (
                         <Button
@@ -203,7 +99,13 @@ export function SavedInsightsFilters({
                             active={favorited || false}
                             onClick={() => setFilters({ favorited: !favorited })}
                             size="small"
-                            icon={<IconStar />}
+                            icon={
+                                favorited ? (
+                                    <IconHeartFilled className="text-danger" />
+                                ) : (
+                                    <IconHeart className="text-secondary" />
+                                )
+                            }
                         >
                             Favorites
                         </Button>

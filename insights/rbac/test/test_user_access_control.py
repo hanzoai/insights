@@ -1,10 +1,11 @@
 import pytest
 from insights.test.base import BaseTest
+from unittest.mock import patch
 
+from parameterized import parameterized
 from rest_framework import serializers
 
 from insights.constants import AvailableFeature
-from insights.models.dashboard import Dashboard
 from insights.models.file_system.file_system import FileSystem
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.team.team import Team
@@ -14,8 +15,22 @@ from insights.rbac.user_access_control import (
     AccessSource,
     UserAccessControl,
     UserAccessControlSerializerMixin,
+    get_effective_access_level_for_member,
+    get_effective_access_level_for_role,
     get_field_access_control_map,
+    model_to_resource,
 )
+
+from products.dashboards.backend.models.dashboard import Dashboard
+from products.replay_vision.backend.models.vision_action import VisionAction, VisionActionRun
+from products.warehouse_sources.backend.facade.models import DataWarehouseTable, ExternalDataSource
+
+try:
+    from ee.models.rbac.access_control import AccessControl
+    from ee.models.rbac.role import Role, RoleMembership
+except ImportError:
+    pass
+
 
 class BaseUserAccessControlTest(BaseTest):
     user_access_control: UserAccessControl
@@ -40,8 +55,8 @@ class BaseUserAccessControlTest(BaseTest):
         super().setUp()
         self.organization.available_product_features = [
             {
-                "key": AvailableFeature.ADVANCED_PERMISSIONS,
-                "name": AvailableFeature.ADVANCED_PERMISSIONS,
+                "key": AvailableFeature.ACCESS_CONTROL,
+                "name": AvailableFeature.ACCESS_CONTROL,
             },
             {
                 "key": AvailableFeature.ROLE_BASED_ACCESS,
@@ -71,6 +86,13 @@ class BaseUserAccessControlTest(BaseTest):
 
 @pytest.mark.ee
 class TestUserAccessControl(BaseUserAccessControlTest):
+    def test_vision_action_models_map_to_vision_action_resource(self):
+        # VisionAction/VisionActionRun's _meta.model_name (visionaction/visionactionrun) differs from the
+        # vision_action scope object, so without the explicit mapping they silently drop out of
+        # object-level access control and a per-action grant wouldn't be enforced.
+        assert model_to_resource(VisionAction()) == "vision_action"
+        assert model_to_resource(VisionActionRun()) == "vision_action"
+
     def test_no_organization_id_passed(self):
         # Create a user without an organization
         user_without_org = User.objects.create(email="no-org@hanzo.ai", password="testtest")
@@ -357,9 +379,9 @@ class TestUserAccessControlFileSystem(BaseUserAccessControlTest):
     def setUp(self):
         super().setUp()
 
-        # Enable advanced permissions & role-based access for tests
+        # Enable access control & role-based access for tests
         self.organization.available_product_features = [
-            {"key": "advanced_permissions", "name": "advanced_permissions"},
+            {"key": "access_control", "name": "access_control"},
             {"key": "role_based_access", "name": "sso_enforcement"},
         ]
         self.organization.save()
@@ -515,13 +537,38 @@ class TestUserAccessControlFileSystem(BaseUserAccessControlTest):
         # Now user is no longer project admin, so file_b is excluded again (they're not the creator).
         self.assertCountEqual([self.file_a], filtered_for_user_after_removal)
 
+    def test_filtering_ignores_rules_without_entitlement(self):
+        # Global "none" rule on file_b (user is not its creator)
+        AccessControl.objects.create(
+            team=self.team,
+            resource="my_resource",
+            resource_id="def",
+            access_level="none",
+        )
+
+        # Sanity: with the entitlement the rule is enforced (file_b hidden)
+        self.assertCountEqual(
+            [self.file_a],
+            self.user_access_control.filter_and_annotate_file_system_queryset(FileSystem.objects.all()),
+        )
+
+        # Downgrade: drop the access_control entitlement -> stale rule must be ignored
+        self.organization.available_product_features = []
+        self.organization.save()
+
+        fresh_uac = UserAccessControl(self.user, self.team)
+        self.assertCountEqual(
+            [self.file_a, self.file_b],
+            fresh_uac.filter_and_annotate_file_system_queryset(FileSystem.objects.all()),
+        )
+
 
 @pytest.mark.ee
 class TestUserAccessControlSerializer(BaseUserAccessControlTest):
     def setUp(self):
         super().setUp()
         # We'll use Dashboard as a sample resource object
-        from insights.models.dashboard import Dashboard
+        from products.dashboards.backend.models.dashboard import Dashboard
 
         self.dashboard = Dashboard.objects.create(team=self.team)
 
@@ -1008,7 +1055,7 @@ class TestUserAccessControlSpecificAccessLevelForObject(BaseUserAccessControlTes
 
     def test_feature_flag_specific_access_control(self):
         """Test feature flag-specific access controls"""
-        from insights.models.feature_flag import FeatureFlag
+        from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
         feature_flag = FeatureFlag.objects.create(team=self.team, created_by=self.other_user)
 
@@ -1040,7 +1087,7 @@ class TestUserAccessControlSpecificAccessLevelForObject(BaseUserAccessControlTes
 
     def test_insight_specific_access_control(self):
         """Test insight-specific access controls"""
-        from insights.models.insight import Insight
+        from products.product_analytics.backend.models.insight import Insight
 
         insight = Insight.objects.create(team=self.team, created_by=self.other_user)
 
@@ -1193,6 +1240,97 @@ class TestSpecificObjectAccessControl(BaseUserAccessControlTest):
         assert self.notebook_1.id in notebook_ids
         assert self.notebook_3.id in notebook_ids
         assert self.notebook_2.id not in notebook_ids  # Explicitly blocked
+
+    def test_filter_queryset_ignores_rules_without_entitlement(self):
+        from products.notebooks.backend.models import Notebook
+
+        # Member-level "none" rule blocking notebook_2 for the user
+        self._create_access_control(
+            resource="notebook",
+            resource_id=str(self.notebook_2.id),
+            access_level="none",
+            organization_member=self.organization_membership,
+        )
+
+        # Sanity: with the entitlement the rule is enforced
+        self._clear_uac_caches()
+        enforced_ids = list(
+            self.user_access_control.filter_queryset_by_access_level(Notebook.objects.all()).values_list(
+                "id", flat=True
+            )
+        )
+        assert self.notebook_2.id not in enforced_ids
+
+        # Downgrade: drop the access_control entitlement -> stale rule must be ignored
+        self.organization.available_product_features = []
+        self.organization.save()
+
+        fresh_uac = UserAccessControl(self.user, self.team)
+        filtered_ids = list(
+            fresh_uac.filter_queryset_by_access_level(Notebook.objects.all()).values_list("id", flat=True)
+        )
+        assert self.notebook_1.id in filtered_ids
+        assert self.notebook_2.id in filtered_ids
+        assert self.notebook_3.id in filtered_ids
+
+    def test_blocked_resource_ids_by_scope_ignores_rules_without_entitlement(self):
+        # Member-level "none" rule blocking notebook_2 for the user
+        self._create_access_control(
+            resource="notebook",
+            resource_id=str(self.notebook_2.id),
+            access_level="none",
+            organization_member=self.organization_membership,
+        )
+
+        # Sanity: with the entitlement the object is reported as blocked
+        self._clear_uac_caches()
+        assert str(self.notebook_2.id) in self.user_access_control.blocked_resource_ids_by_scope.get("notebook", set())
+
+        # Downgrade: drop the access_control entitlement -> stale rule must be ignored
+        self.organization.available_product_features = []
+        self.organization.save()
+
+        fresh_uac = UserAccessControl(self.user, self.team)
+        assert fresh_uac.blocked_resource_ids_by_scope == {}
+
+    @parameterized.expand(
+        [
+            (
+                "include_all_if_admin lists default-none dashboard for org admin (issue #44364)",
+                True,
+                True,
+            ),
+            (
+                "include_all_if_admin false keeps blocked default-none dashboards out of list for org admin",
+                False,
+                False,
+            ),
+        ]
+    )
+    def test_organization_admin_dashboard_list_respects_include_all_if_admin_flag(
+        self, _name: str, include_all_if_admin: bool, expect_dashboard_in_results: bool
+    ) -> None:
+        self.organization_membership.level = OrganizationMembership.Level.ADMIN
+        self.organization_membership.save()
+
+        dashboard = Dashboard.objects.create(team=self.team, created_by=self.other_user)
+        self._create_access_control(
+            resource="dashboard",
+            resource_id=str(dashboard.id),
+            access_level="none",
+        )
+
+        self._clear_uac_caches()
+        uac = UserAccessControl(self.user, self.team)
+        filtered = uac.filter_queryset_by_access_level(
+            Dashboard.objects.filter(team=self.team),
+            include_all_if_admin=include_all_if_admin,
+        )
+        ids = list(filtered.values_list("id", flat=True))
+        if expect_dashboard_in_results:
+            assert dashboard.id in ids
+        else:
+            assert dashboard.id not in ids
 
     def test_get_user_access_level_with_specific_access_priority(self):
         """Test that get_user_access_level prioritizes specific access over resource access"""
@@ -1467,21 +1605,16 @@ class TestFieldLevelAccessControl(BaseUserAccessControlTest):
 
         # Verify session recording fields are mapped
         assert "session_recording_opt_in" in team_mappings
-        assert team_mappings["session_recording_opt_in"] == ("session_recording", "editor")
+        assert team_mappings["session_recording_opt_in"] == ("project", "admin")
         assert "session_recording_sample_rate" in team_mappings
-        assert team_mappings["session_recording_sample_rate"] == ("session_recording", "editor")
+        assert team_mappings["session_recording_sample_rate"] == ("project", "admin")
 
     def test_field_validation_blocks_without_access(self):
         """Test that field validation blocks updates without proper access"""
         from rest_framework.exceptions import ValidationError
 
-        # Give user only viewer access to session recordings
-        self._create_access_control(
-            resource="session_recording",
-            resource_id=None,
-            access_level="viewer",
-            organization_member=self.organization_membership,
-        )
+        # Set project access to "member" (default for all project members)
+        self._create_access_control(resource="project", resource_id=str(self.team.id), access_level="member")
         self._clear_uac_caches()
 
         # Create a mock serializer with access control mixin
@@ -1493,6 +1626,7 @@ class TestFieldLevelAccessControl(BaseUserAccessControlTest):
         serializer = TeamSerializer(instance=self.team, context={"view": view_mock})
 
         # Try to modify a protected field - should raise validation error
+        # session_recording_opt_in requires "admin" access to project, but user only has "member"
         attrs = {"session_recording_opt_in": True}
         with pytest.raises(ValidationError) as exc_info:
             serializer.validate(attrs)
@@ -1503,7 +1637,7 @@ class TestFieldLevelAccessControl(BaseUserAccessControlTest):
         # The error is a list, get the actual message
         error_detail = detail["session_recording_opt_in"]
         error_msg = str(error_detail[0]) if isinstance(error_detail, list) else str(error_detail)
-        assert "editor access to session recordings" in error_msg, f"Got error message: {error_msg!r}"
+        assert "admin access to projects" in error_msg, f"Got error message: {error_msg!r}"
 
     def test_field_validation_allows_with_proper_access(self):
         """Test that field validation allows updates with proper access"""
@@ -1584,3 +1718,428 @@ class TestFieldLevelAccessControl(BaseUserAccessControlTest):
         attrs = {"session_recording_opt_in": True, "session_recording_sample_rate": 0.5}
         result = serializer.validate(attrs)
         assert result == attrs
+
+
+class TestGetEffectiveAccessLevelForRole:
+    @parameterized.expand(
+        [
+            # (test_name, resource, default_level, role_level, effective_access_level, inherited_access_level, inherited_access_level_reason)
+            # Project defaults apply if no role overrides
+            ("project_default_none_no_override", "project", "none", None, "none", "none", "project_default"),
+            ("project_default_member_no_override", "project", "member", None, "member", "member", "project_default"),
+            ("resource_default_none_no_override", "feature_flag", "none", None, "none", "none", "project_default"),
+            # Role overrides higher than project defaults
+            ("project_role_override_higher", "project", "member", "admin", "admin", "member", "project_default"),
+            (
+                "resource_role_override_higher",
+                "feature_flag",
+                "viewer",
+                "manager",
+                "manager",
+                "viewer",
+                "project_default",
+            ),
+            # Role overrides same as project defaults
+            ("project_role_override_same", "project", "member", "member", "member", "member", "project_default"),
+            ("resource_role_override_same", "feature_flag", "viewer", "viewer", "viewer", "viewer", "project_default"),
+            # Role overrides lower than project defaults - effective stays at default
+            ("project_role_override_lower", "project", "admin", "member", "admin", "admin", "project_default"),
+            ("resource_role_override_lower", "feature_flag", "editor", "viewer", "editor", "editor", "project_default"),
+            # No overrides at all - everything is None
+            ("no_default_no_override", "project", None, None, None, None, None),
+            ("resource_no_default_no_override", "feature_flag", None, None, None, None, None),
+            # No default but role exists - effective is role, inherited is None
+            ("no_default_role_exists", "project", None, "admin", "admin", None, None),
+            ("resource_no_default_role_exists", "feature_flag", None, "editor", "editor", None, None),
+        ]
+    )
+    def test_effective_access_for_role(
+        self,
+        _name,
+        resource,
+        default_level,
+        role_level,
+        expected_effective,
+        expected_inherited,
+        expected_inherited_reason,
+    ):
+        result = get_effective_access_level_for_role(
+            resource=resource,
+            default_level=default_level,
+            role_level=role_level,
+        )
+        assert result.effective_access_level == expected_effective
+        assert result.inherited_access_level == expected_inherited
+        assert result.inherited_access_level_reason == expected_inherited_reason
+
+
+class TestGetEffectiveAccessLevelForMember:
+    @parameterized.expand(
+        [
+            # (test_name, resource, default_level, role_levels, member_level, is_admin, effective_access_level, inherited_access_level, inherited_access_level_reason)
+            # Org admin always gets highest
+            ("org_admin_no_overrides", "project", "none", [], None, True, "admin", "admin", "organization_admin"),
+            (
+                "org_admin_ignores_all",
+                "project",
+                "none",
+                ["member"],
+                "member",
+                True,
+                "admin",
+                "admin",
+                "organization_admin",
+            ),
+            (
+                "org_admin_resource",
+                "feature_flag",
+                "none",
+                ["viewer"],
+                "editor",
+                True,
+                "manager",
+                "manager",
+                "organization_admin",
+            ),
+            # Project defaults apply if no overrides
+            ("default_none_no_overrides", "project", "none", [], None, False, "none", "none", "project_default"),
+            (
+                "default_member_no_overrides",
+                "project",
+                "member",
+                [],
+                None,
+                False,
+                "member",
+                "member",
+                "project_default",
+            ),
+            # Member override higher than default - inherited stays at default
+            (
+                "member_higher_than_default",
+                "project",
+                "member",
+                [],
+                "admin",
+                False,
+                "admin",
+                "member",
+                "project_default",
+            ),
+            # Member override lower than default - effective stays at default
+            ("member_lower_than_default", "project", "admin", [], "member", False, "admin", "admin", "project_default"),
+            # Role higher than default - inherited reflects role
+            (
+                "role_higher_than_default",
+                "project",
+                "member",
+                ["admin"],
+                None,
+                False,
+                "admin",
+                "admin",
+                "role_override",
+            ),
+            (
+                "resource_role_higher",
+                "feature_flag",
+                "viewer",
+                ["editor"],
+                None,
+                False,
+                "editor",
+                "editor",
+                "role_override",
+            ),
+            # Role higher than member - inherited reflects role, effective from role
+            (
+                "role_higher_than_member",
+                "project",
+                "none",
+                ["admin"],
+                "member",
+                False,
+                "admin",
+                "admin",
+                "role_override",
+            ),
+            # Multiple roles - highest role wins as inherited
+            (
+                "multiple_roles_highest",
+                "project",
+                "none",
+                ["member", "admin", "none"],
+                None,
+                False,
+                "admin",
+                "admin",
+                "role_override",
+            ),
+            # Member override same as inherited from default
+            ("member_same_as_default", "project", "member", [], "member", False, "member", "member", "project_default"),
+            # Member override highest of all - inherited from role, effective from member
+            (
+                "member_highest_of_all",
+                "project",
+                "member",
+                ["member"],
+                "admin",
+                False,
+                "admin",
+                "member",
+                "project_default",
+            ),
+            # No overrides at all - everything is None
+            ("no_default_no_overrides", "project", None, [], None, False, None, None, None),
+            ("resource_no_default_no_overrides", "feature_flag", None, [], None, False, None, None, None),
+            # Only member level exists - effective is member, inherited is None
+            ("only_member_level", "project", None, [], "admin", False, "admin", None, None),
+            ("resource_only_member_level", "feature_flag", None, [], "editor", False, "editor", None, None),
+        ]
+    )
+    def test_effective_access_for_member(
+        self,
+        _name,
+        resource,
+        default_level,
+        role_levels,
+        member_level,
+        is_org_admin,
+        expected_effective,
+        expected_inherited,
+        expected_inherited_reason,
+    ):
+        result = get_effective_access_level_for_member(
+            resource=resource,
+            default_level=default_level,
+            role_levels=role_levels,
+            member_level=member_level,
+            is_org_admin=is_org_admin,
+        )
+        assert result.effective_access_level == expected_effective
+        assert result.inherited_access_level == expected_inherited
+        assert result.inherited_access_level_reason == expected_inherited_reason
+
+
+class TestAccessControlMissingEE(BaseTest):
+    """Verify that UserAccessControl methods don't crash when the ee module is not installed."""
+
+    def setUp(self):
+        super().setUp()
+        self.uac = UserAccessControl(self.user, self.team, self.organization.id)
+
+    @patch("insights.rbac.user_access_control.EE_AVAILABLE", False)
+    def test_get_access_controls_returns_empty(self):
+        filters = {"team_id": self.team.id, "resource": "dashboard", "resource_id": None}
+        assert self.uac._get_access_controls(filters) == []
+
+    @patch("insights.rbac.user_access_control.EE_AVAILABLE", False)
+    def test_preload_access_levels_does_not_crash(self):
+        self.uac.preload_access_levels(team=self.team, resource="dashboard")
+
+    @patch("insights.rbac.user_access_control.EE_AVAILABLE", False)
+    def test_preload_object_access_controls_does_not_crash(self):
+        dashboard = Dashboard.objects.create(team=self.team, name="test")
+        self.uac.preload_object_access_controls([dashboard])
+
+    @patch("insights.rbac.user_access_control.EE_AVAILABLE", False)
+    def test_filter_and_annotate_file_system_queryset_returns_unfiltered(self):
+        qs = FileSystem.objects.filter(team=self.team)
+        result = self.uac.filter_and_annotate_file_system_queryset(qs)
+        assert list(result) == list(qs)
+
+
+class TestBlockedResourceIdsByScope(BaseTest):
+    """
+    Tests the deny-set precedence used by InsightsQL system tables.
+
+    These exercise UserAccessControl.blocked_resource_ids_by_scope directly,
+    which is also the single source of truth for the InsightsQL printer guard and
+    the cache-key fingerprint in query_runner.py.
+    """
+
+    def setUp(self):
+        super().setUp()
+        from insights.constants import AvailableFeature
+
+        self.organization.available_product_features = [
+            {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
+        ]
+        self.organization.save()
+
+        self.membership = OrganizationMembership.objects.get(user=self.user, organization=self.organization)
+        self.membership.level = OrganizationMembership.Level.MEMBER
+        self.membership.save()
+
+        self.uac = UserAccessControl(self.user, self.team)
+
+    def _blocked(self, resource="dashboard") -> set[str]:
+        return self.uac.blocked_resource_ids_by_scope.get(resource, set())
+
+    def test_empty_for_org_admin(self):
+        self.membership.level = OrganizationMembership.Level.ADMIN
+        self.membership.save()
+        self.uac = UserAccessControl(self.user, self.team)
+        assert self._blocked() == set()
+
+    def test_no_object_overrides_means_no_blocked_ids(self):
+        assert self._blocked() == set()
+
+    def test_object_default_none_blocks_object(self):
+        AccessControl.objects.create(
+            team=self.team,
+            resource="dashboard",
+            resource_id="42",
+            access_level="none",
+        )
+        assert "42" in self._blocked()
+
+    def test_object_default_editor_allows_object(self):
+        AccessControl.objects.create(
+            team=self.team,
+            resource="dashboard",
+            resource_id="42",
+            access_level="editor",
+        )
+        assert "42" not in self._blocked()
+
+    def test_object_default_none_with_member_editor_override_allows(self):
+        AccessControl.objects.create(
+            team=self.team,
+            resource="dashboard",
+            resource_id="42",
+            access_level="none",
+        )
+        AccessControl.objects.create(
+            team=self.team,
+            resource="dashboard",
+            resource_id="42",
+            access_level="editor",
+            organization_member=self.membership,
+        )
+        assert "42" not in self._blocked()
+
+    def test_object_default_editor_with_member_none_blocks(self):
+        AccessControl.objects.create(
+            team=self.team,
+            resource="dashboard",
+            resource_id="42",
+            access_level="editor",
+        )
+        AccessControl.objects.create(
+            team=self.team,
+            resource="dashboard",
+            resource_id="42",
+            access_level="none",
+            organization_member=self.membership,
+        )
+        assert "42" in self._blocked()
+
+    def test_multiple_objects_mixed_access(self):
+        AccessControl.objects.create(team=self.team, resource="dashboard", resource_id="10", access_level="none")
+        AccessControl.objects.create(team=self.team, resource="dashboard", resource_id="20", access_level="editor")
+        AccessControl.objects.create(team=self.team, resource="dashboard", resource_id="30", access_level="none")
+        AccessControl.objects.create(
+            team=self.team,
+            resource="dashboard",
+            resource_id="30",
+            access_level="editor",
+            organization_member=self.membership,
+        )
+        assert self._blocked() == {"10"}
+
+
+@pytest.mark.ee
+class TestUserAccessControlFallbackParent(BaseUserAccessControlTest):
+    """Resolution through RESOURCE_FALLBACK_MAP: a synced table falls back to the source that syncs it."""
+
+    def setUp(self):
+        super().setUp()
+        self.membership = OrganizationMembership.objects.get(user=self.user, organization=self.organization)
+        self.source = ExternalDataSource.objects.create(
+            team_id=self.team.pk,
+            source_id="src",
+            connection_id="conn",
+            destination_id="dest",
+            source_type="Stripe",
+            prefix="test",
+        )
+        self.sourced_table = DataWarehouseTable.objects.create(
+            name="customers", format="Parquet", team=self.team, external_data_source=self.source, columns={}
+        )
+        self.self_managed_table = DataWarehouseTable.objects.create(
+            name="uploads", format="Parquet", team=self.team, columns={}
+        )
+
+    def _apply(self, rules, table):
+        # The four places a rule can be written about this table. The ladder exists because these are
+        # different statements: "this source" is not "all sources", and neither is "all tables".
+        targets = {
+            "this_table": ("warehouse_table", str(table.id)),
+            "this_source": ("external_data_source", str(self.source.id)),
+            "all_tables": ("warehouse_objects", None),
+            "all_sources": ("external_data_source", None),
+        }
+        for target, level in rules.items():
+            resource, resource_id = targets[target]
+            self._create_access_control(
+                resource=resource, resource_id=resource_id, access_level=level, organization_member=self.membership
+            )
+        self._clear_uac_caches()
+
+    def _level(self, table):
+        return self.user_access_control.get_user_access_level(table)
+
+    @parameterized.expand(
+        [
+            # A rule about a source reaches the tables it syncs, written either way round.
+            ("source_reaches_its_tables", {"this_source": "none"}, "none"),
+            ("all_sources_reaches_sourced_tables", {"all_sources": "none"}, "none"),
+            # The table's own rule is more specific than its source's, in both directions.
+            ("table_grant_beats_source_deny", {"this_source": "none", "this_table": "editor"}, "editor"),
+            ("table_deny_beats_source_grant", {"this_source": "editor", "this_table": "none"}, "none"),
+            # "All tables" is more specific than "all sources", so a broad table grant isn't capped
+            # by a source denial - which lets an editor on tables sync a schema they only view.
+            ("all_tables_beats_all_sources", {"all_sources": "none", "all_tables": "viewer"}, "viewer"),
+            # ...and one named source is more specific than "all tables".
+            ("one_source_beats_all_tables", {"this_source": "none", "all_tables": "editor"}, "none"),
+        ]
+    )
+    def test_sourced_table_resolution(self, _name, rules, expected):
+        self._apply(rules, self.sourced_table)
+
+        assert self._level(self.sourced_table) == expected
+
+    @parameterized.expand(
+        [
+            # A self-managed table has no source, so no rule about sources may reach it. Without this
+            # skip, restricting sources would silently lock every S3 table and direct connection that
+            # no source has ever touched.
+            ("all_sources_cannot_reach_it", {"all_sources": "none"}, "editor"),
+            ("one_source_cannot_reach_it", {"this_source": "none"}, "editor"),
+            # The rules that do apply to it still govern it - the skip isn't switching access off.
+            ("all_tables_still_governs_it", {"all_tables": "none"}, "none"),
+            ("its_own_rule_still_governs_it", {"this_table": "viewer"}, "viewer"),
+        ]
+    )
+    def test_self_managed_table_skips_the_source(self, _name, rules, expected):
+        self._apply(rules, self.self_managed_table)
+
+        assert self._level(self.self_managed_table) == expected
+
+    def test_source_denial_does_not_leak_across_sources(self):
+        other_source = ExternalDataSource.objects.create(
+            team_id=self.team.pk,
+            source_id="src2",
+            connection_id="conn2",
+            destination_id="dest2",
+            source_type="Stripe",
+            prefix="other",
+        )
+        other_table = DataWarehouseTable.objects.create(
+            name="invoices", format="Parquet", team=self.team, external_data_source=other_source, columns={}
+        )
+        self._apply({"this_source": "none"}, self.sourced_table)
+
+        assert self._level(self.sourced_table) == "none"
+        assert self._level(other_table) == "editor"

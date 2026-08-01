@@ -116,7 +116,7 @@ class JavaScriptCompiler(Visitor):
         self.args = args or []
         self.indent_level = 0
         self.stl_functions: set[str] = set()
-        self.mode: str = "iql"
+        self.mode: str = "script"
 
         # Initialize locals with function arguments
         for arg in self.args:
@@ -143,14 +143,14 @@ class JavaScriptCompiler(Visitor):
         return "\n".join(indentation + line if line else "" for line in code.split("\n"))
 
     def visit(self, node: ast.AST | None):
-        # In "iql" mode we compile AST nodes to bytecode.
+        # In "script" mode we compile AST nodes to bytecode.
         # In "ast" mode we pass through as they are.
         # You may enter "ast" mode with `sql()` or `(select ...)`
-        if self.mode == "iql" or isinstance(node, ast.Placeholder):
+        if self.mode == "script" or isinstance(node, ast.Placeholder):
             return super().visit(node)
-        return self._visit_iql_ast(node)
+        return self._visit_hog_ast(node)
 
-    def _visit_iql_ast(self, node: AST | None) -> str:
+    def _visit_hog_ast(self, node: AST | None) -> str:
         if node is None:
             return "null"
         if isinstance(node, ast.InsightsQLXTag):
@@ -354,7 +354,7 @@ class JavaScriptCompiler(Visitor):
         if node.name == "sql" and len(node.args) == 1:
             self.mode = "ast"
             response = self.visit(node.args[0])
-            self.mode = "iql"
+            self.mode = "script"
             return response
 
         if node.name in STL_FUNCTIONS:
@@ -550,8 +550,8 @@ class JavaScriptCompiler(Visitor):
         self._start_scope()
         for arg in node.params:
             self._declare_local(arg)
-        if isinstance(node.body, ast.Placeholder):
-            body_code = ast.Block(declarations=[ast.ExprStatement(expr=node.body.expr), ast.ReturnStatement(expr=None)])
+        if isinstance(node.body, ast.Placeholder):  # type: ignore[unreachable]
+            body_code = ast.Block(declarations=[ast.ExprStatement(expr=node.body.expr), ast.ReturnStatement(expr=None)])  # type: ignore[unreachable]
         else:
             body_code = self.visit(_as_block(node.body))
         self._end_scope()
@@ -632,7 +632,7 @@ class JavaScriptCompiler(Visitor):
 
     def visit_placeholder(self, node: ast.Placeholder):
         if self.mode == "ast":
-            self.mode = "iql"
+            self.mode = "script"
             result = self.visit(node.expr)
             self.mode = "ast"
             return result
@@ -643,7 +643,7 @@ class JavaScriptCompiler(Visitor):
         last_mode = self.mode
         self.mode = "ast"
         try:
-            return self._visit_iql_ast(node)
+            return self._visit_hog_ast(node)
         finally:
             self.mode = last_mode
 

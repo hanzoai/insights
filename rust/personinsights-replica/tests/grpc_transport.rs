@@ -6,12 +6,12 @@
 mod common;
 
 use common::{TestContext, TestPerson};
-use personinsights_proto::personinsights::replica::v1::person_insights_replica_client::PersonInsightsReplicaClient;
-use personinsights_proto::personinsights::replica::v1::person_insights_replica_server::PersonInsightsReplicaServer;
+use personinsights_proto::personinsights::replica::v1::person_hog_replica_client::PersonHogReplicaClient;
+use personinsights_proto::personinsights::replica::v1::person_hog_replica_server::PersonHogReplicaServer;
 use personinsights_proto::personinsights::types::v1::{
     GetPersonByUuidRequest, GetPersonRequest, GetPersonsByDistinctIdsInTeamRequest,
 };
-use personinsights_replica::service::PersonInsightsReplicaService;
+use personinsights_replica::service::PersonHogReplicaService;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tonic::transport::{Channel, Server};
@@ -19,7 +19,7 @@ use tonic::transport::{Channel, Server};
 /// Test context that spins up a real gRPC server and provides a client.
 pub struct GrpcTestContext {
     ctx: TestContext,
-    pub client: PersonInsightsReplicaClient<Channel>,
+    pub client: PersonHogReplicaClient<Channel>,
 }
 
 impl std::ops::Deref for GrpcTestContext {
@@ -32,7 +32,7 @@ impl std::ops::Deref for GrpcTestContext {
 impl GrpcTestContext {
     pub async fn new() -> Self {
         let ctx = TestContext::new().await;
-        let service = PersonInsightsReplicaService::new(ctx.storage.clone());
+        let service = PersonHogReplicaService::new(ctx.storage.clone());
 
         // Bind to a random available port
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -41,7 +41,7 @@ impl GrpcTestContext {
         // Spawn the server
         tokio::spawn(async move {
             Server::builder()
-                .add_service(PersonInsightsReplicaServer::new(service))
+                .add_service(PersonHogReplicaServer::new(service))
                 .serve_with_incoming(tokio_stream::wrappers::TcpListenerStream::new(listener))
                 .await
                 .unwrap();
@@ -51,7 +51,7 @@ impl GrpcTestContext {
         tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
 
         // Create client
-        let client = PersonInsightsReplicaClient::connect(format!("http://{addr}"))
+        let client = PersonHogReplicaClient::connect(format!("http://{addr}"))
             .await
             .expect("Failed to connect to test server");
 

@@ -1,25 +1,26 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import React from 'react'
 
-import { IconMagicWand } from '@hanzo/icons'
-import { Button, Switch, Link } from '@hanzo/elements'
+import { IconMagicWand, IconTarget } from '@hanzo/icons'
+import { Button, Snack, Switch, Link } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { heatmapDateOptions } from 'lib/components/IframedToolbarBrowser/utils'
 import { HeatmapsSettings } from 'lib/components/heatmaps/HeatMapsSettings'
+import { heatmapDateOptions } from 'lib/components/IframedToolbarBrowser/utils'
+import { IconSync } from 'lib/elements/icons'
 import { Input } from 'lib/elements/Input'
 import { Label } from 'lib/elements/Label'
 import { SegmentedButton } from 'lib/elements/SegmentedButton'
 import { Spinner } from 'lib/elements/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconSync } from 'lib/elements/icons'
-import { urls } from 'scenes/urls'
 
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
 import { elementsLogic } from '~/toolbar/elements/elementsLogic'
 import { heatmapToolbarMenuLogic } from '~/toolbar/elements/heatmapToolbarMenuLogic'
 import { currentPageLogic } from '~/toolbar/stats/currentPageLogic'
+import { useToolbarFeatureFlag } from '~/toolbar/toolbarInsightsJS'
+import { urls } from '~/toolbar/urls'
 import { joinWithUiHost } from '~/toolbar/utils'
 
 import { toolbarConfigLogic } from '../toolbarConfigLogic'
@@ -83,6 +84,7 @@ const SectionButton = ({
 export const HeatmapToolbarMenu = (): JSX.Element => {
     const { wildcardHref, autoWildcardEnabled } = useValues(currentPageLogic)
     const { setWildcardHref, autoWildcardHref, setAutoWildcardEnabled } = useActions(currentPageLogic)
+    const areaFilterFlagEnabled = useToolbarFeatureFlag('toolbar-heatmap-area-filter')
 
     const {
         matchLinksByHref,
@@ -91,6 +93,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
         commonFilters,
         heatmapFilters,
         canLoadMoreElementStats,
+        loadedElementStatsCount,
         viewportRange,
         rawHeatmapLoading,
         elementStatsLoading,
@@ -100,6 +103,8 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
         samplingFactor,
         elementsLoading,
         processingProgress,
+        areaSelectionActive,
+        heatmapAreaFilter,
     } = useValues(heatmapToolbarMenuLogic)
     const {
         setCommonFilters,
@@ -110,6 +115,9 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
         setHeatmapFixedPositionMode,
         setHeatmapColorPalette,
         setSamplingFactor,
+        startAreaSelection,
+        cancelAreaSelection,
+        selectHeatmapAreaFilter,
     } = useActions(heatmapToolbarMenuLogic)
     const { setHighlightElement, setSelectedElement } = useActions(elementsLogic)
 
@@ -166,7 +174,43 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                         }}
                         dateOptions={heatmapDateOptions}
                     />
+                    {areaFilterFlagEnabled ? (
+                        <Button
+                            size="small"
+                            type="secondary"
+                            icon={<IconTarget />}
+                            active={areaSelectionActive}
+                            data-attr="heatmap-area-filter-toggle"
+                            onClick={() => (areaSelectionActive ? cancelAreaSelection() : startAreaSelection())}
+                            tooltip={
+                                <>
+                                    Filter the heatmap and clickmap to one part of the page, e.g. the nav or the main
+                                    content. Click this, then hover the page and click an area. Press <kbd>↑</kbd> to
+                                    grow the selection to a bigger container, <kbd>↓</kbd> to shrink it, and{' '}
+                                    <kbd>Esc</kbd> to cancel. Heatmap points on fixed or sticky elements are only
+                                    included when the chosen area is itself fixed or sticky.
+                                </>
+                            }
+                        >
+                            {areaSelectionActive ? 'Click an area of the page…' : 'Filter to area'}
+                        </Button>
+                    ) : null}
                 </div>
+                {heatmapAreaFilter && !areaSelectionActive ? (
+                    <div className="flex flex-row items-center gap-2 py-2 border-b">
+                        <span className="text-muted text-xs">Filtered to</span>
+                        <Snack
+                            className="font-mono text-xs shrink min-w-0 truncate"
+                            title={
+                                heatmapAreaFilter.selector ??
+                                'No unique selector could be derived for this element, so the clickmap is filtered client-side only and may be limited to the loaded data.'
+                            }
+                            onClose={() => selectHeatmapAreaFilter(null)}
+                        >
+                            {heatmapAreaFilter.selector ?? `<${heatmapAreaFilter.element.tagName.toLowerCase()}>`}
+                        </Snack>
+                    </div>
+                ) : null}
             </ToolbarMenu.Header>
             <ToolbarMenu.Body>
                 <div className="border-b p-2">
@@ -228,7 +272,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                 <div className="flex items-center gap-1">
                                     <Label
                                         info="Sampling computes the result on a proportion of data of the users in the dataset, making click maps load significantly faster."
-                                        infoLink="https://hanzo.ai/docs/product-analytics/sampling"
+                                        infoLink="https://hanzo.ai/docs/toolbar/heatmaps"
                                     >
                                         Sampling
                                     </Label>
@@ -270,6 +314,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                     type="secondary"
                                     size="small"
                                     onClick={loadMoreElementStats}
+                                    loading={elementStatsLoading}
                                     disabledReason={
                                         canLoadMoreElementStats ? undefined : 'Loaded all elements in this data range.'
                                     }
@@ -309,6 +354,13 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                     '!'
                                 )}
                             </div>
+                            {canLoadMoreElementStats && loadedElementStatsCount > 0 && (
+                                <div className="mb-2 text-muted text-xs">
+                                    {elementStatsLoading
+                                        ? `Showing the top ${loadedElementStatsCount.toLocaleString()} element groups by click count — loading the rest automatically…`
+                                        : `Showing the top ${loadedElementStatsCount.toLocaleString()} element groups by click count — load more for the full data range.`}
+                                </div>
+                            )}
                             <div className="flex flex-col w-full h-full">
                                 {countedElements.length ? (
                                     countedElements.map(({ element, count }, index) => {

@@ -4,7 +4,7 @@ import { IconCheckCircle, IconChip, IconClock, IconLaptop, IconLock, IconPencil,
 import { Button, Table, Spinner } from '@hanzo/elements'
 
 import { IconLink, IconSync } from 'lib/elements/icons'
-import { humanFriendlyDetailedTime } from 'lib/utils'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { PasskeyCredential, passkeySettingsLogic } from './passkeySettingsLogic'
 

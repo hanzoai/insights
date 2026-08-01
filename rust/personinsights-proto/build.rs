@@ -13,6 +13,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 format!("{proto_root}/personinsights/types/v1/cohort.proto"),
                 format!("{proto_root}/personinsights/types/v1/feature_flag.proto"),
                 // Services
+                format!("{proto_root}/personinsights/identity/v1/identity.proto"),
+                format!("{proto_root}/personinsights/leader/v1/leader.proto"),
                 format!("{proto_root}/personinsights/replica/v1/replica.proto"),
                 format!("{proto_root}/personinsights/service/v1/service.proto"),
             ],

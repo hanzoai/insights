@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Updates properties of a Insights group (requires Group Analytics addon)',
     icon_url: '/static/insights-icon.svg',
     category: ['Custom', 'Analytics'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if (empty(inputs.group_key)) {
   throw Error('Group key is required')

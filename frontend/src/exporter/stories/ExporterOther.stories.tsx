@@ -1,12 +1,20 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Decorator, Meta, StoryObj } from '@storybook/react'
 import { useEffect } from 'react'
 
-import { ExportType } from '~/exporter/types'
+import { ExportType, ExportedData } from '~/exporter/types'
 
+import __dataTableEvents from '../../mocks/fixtures/api/projects/team_id/insights/dataTableEvents.json'
+import __dataTableInsightsQL from '../../mocks/fixtures/api/projects/team_id/insights/dataTableInsightsQL.json'
+import __lifecycle from '../../mocks/fixtures/api/projects/team_id/insights/lifecycle.json'
+import __retention from '../../mocks/fixtures/api/projects/team_id/insights/retention.json'
+import __stickiness from '../../mocks/fixtures/api/projects/team_id/insights/stickiness.json'
+import __trendsBarBreakdown from '../../mocks/fixtures/api/projects/team_id/insights/trendsBarBreakdown.json'
+import __trendsLine from '../../mocks/fixtures/api/projects/team_id/insights/trendsLine.json'
+import __userPaths from '../../mocks/fixtures/api/projects/team_id/insights/userPaths.json'
 import { Exporter } from '../Exporter'
 
-type Story = StoryObj<typeof Exporter>
-const meta: Meta<typeof Exporter> = {
+type Story = StoryObj<ExportedData>
+const meta: Meta<ExportedData> = {
     title: 'Exporter/Other',
     component: Exporter,
     args: {
@@ -24,49 +32,96 @@ const meta: Meta<typeof Exporter> = {
         viewMode: 'story',
     },
     tags: [], // Omit 'autodocs', as it's broken with Exporter
+    render: (props) => {
+        useEffect(() => {
+            document.body.className = ''
+            document.documentElement.className = `export-type-${props.type}`
+        }, [props.type])
+        return (
+            <div className={`storybook-export-type-${props.type} p-4`}>
+                <Exporter {...props} />
+            </div>
+        )
+    },
 }
 
 export default meta
 
-const Template: StoryFn<typeof Exporter> = (props) => {
-    useEffect(() => {
-        document.body.className = ''
-        document.documentElement.className = `export-type-${props.type}`
-    }, [props.type])
-    return (
-        <div className={`storybook-export-type-${props.type} p-4`}>
-            <Exporter {...props} />
-        </div>
-    )
+export const RetentionInsight: Story = {
+    args: { insight: __retention as any },
 }
 
-export const RetentionInsight: Story = Template.bind({})
-RetentionInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/retention.json') }
+export const LifecycleInsight: Story = {
+    args: { insight: __lifecycle as any },
+    tags: ['test-skip'], // doesn't produce a helpful reference image, as canvas can't be captured
+}
 
-export const LifecycleInsight: Story = Template.bind({})
-LifecycleInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/lifecycle.json') }
-LifecycleInsight.tags = ['test-skip'] // doesn't produce a helpful reference image, as canvas can't be captured
+export const StickinessInsight: Story = {
+    args: { insight: __stickiness as any },
+    tags: ['test-skip'], // doesn't produce a helpful reference image, as canvas can't be captured
+}
 
-export const StickinessInsight: Story = Template.bind({})
-StickinessInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/stickiness.json') }
-StickinessInsight.tags = ['test-skip'] // doesn't produce a helpful reference image, as canvas can't be captured
+export const UserPathsInsight: Story = {
+    args: { insight: __userPaths as any },
+    tags: ['test-skip'], // FIXME: flaky tests, most likely due to resize observer changes
+}
 
-export const UserPathsInsight: Story = Template.bind({})
-UserPathsInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/userPaths.json') }
-UserPathsInsight.tags = ['test-skip'] // FIXME: flaky tests, most likely due to resize observer changes
-
-export const EventTableInsight: Story = Template.bind({})
-EventTableInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/dataTableEvents.json') }
-
-/** This should not happen in the exporter, but if it does, it shouldn't error out - we want a clear message. */
-export const EventTableInsightNoResults: Story = Template.bind({})
-// @ts-expect-error
-EventTableInsightNoResults.args = { insight: { ...EventTableInsight.args.insight, result: null } }
-
-export const SQLInsight: Story = Template.bind({})
-SQLInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/dataTableInsightsQL.json') }
+export const EventTableInsight: Story = {
+    args: { insight: __dataTableEvents as any },
+}
 
 /** This should not happen in the exporter, but if it does, it shouldn't error out - we want a clear message. */
-export const SQLInsightNoResults: Story = Template.bind({})
-// @ts-expect-error
-SQLInsightNoResults.args = { insight: { ...SQLInsight.args.insight, result: null } }
+export const EventTableInsightNoResults: Story = {
+    args: {
+        insight: {
+            ...(__dataTableEvents as any),
+            result: null,
+        },
+    },
+}
+
+export const SQLInsight: Story = {
+    args: { insight: __dataTableInsightsQL as any },
+}
+
+/** This should not happen in the exporter, but if it does, it shouldn't error out - we want a clear message. */
+export const SQLInsightNoResults: Story = {
+    args: {
+        insight: {
+            ...(__dataTableInsightsQL as any),
+            result: null,
+        },
+    },
+}
+
+/** Mirrors the 800px viewport the image exporter renders ad-hoc query exports in (see
+ * `_insight_query_screenshot_width`). Without it the test runner's shrink-to-fit root leaves the
+ * responsive chart canvas nothing to fill, collapsing the chart to the width of its axis labels. */
+const adhocExportViewport: Decorator = (StoryFn): JSX.Element => <div className="w-[800px]">{StoryFn()}</div>
+
+const adhocExportParameters = {
+    testOptions: { waitForSelector: '.ExportedInsight canvas' },
+}
+
+/** Ad-hoc query image export (`export_context.source`) — a query rendered from inlined results, with no saved insight. */
+export const AdhocQueryExport: Story = {
+    args: {
+        type: ExportType.Image,
+        query: (__trendsLine as any).query,
+        query_results: { results: (__trendsLine as any).result },
+    },
+    decorators: [adhocExportViewport],
+    parameters: adhocExportParameters,
+}
+
+/** Multi-series ad-hoc export with `?legend=true` — the horizontal exporter legend below the chart, never the in-chart side legend. */
+export const AdhocQueryExportWithLegend: Story = {
+    args: {
+        type: ExportType.Image,
+        query: (__trendsBarBreakdown as any).query,
+        query_results: { results: (__trendsBarBreakdown as any).result },
+        legend: true,
+    },
+    decorators: [adhocExportViewport],
+    parameters: adhocExportParameters,
+}

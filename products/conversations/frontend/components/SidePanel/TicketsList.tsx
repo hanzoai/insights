@@ -1,24 +1,31 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { IconChevronRight } from '@hanzo/icons'
 import { Badge, Button, Tag, Spinner } from '@hanzo/elements'
 import { Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { stripMarkdown } from 'lib/utils/stripMarkdown'
+import { stripMarkdown } from 'lib/utils/markdown'
 
 import type { ConversationTicket } from '../../types'
 import { sidepanelTicketsLogic } from './sidepanelTicketsLogic'
 
-export function TicketsList(): JSX.Element {
-    const { tickets, ticketsLoading } = useValues(sidepanelTicketsLogic)
+interface TicketsListProps {
+    /** Highlights the matching row in master-detail layouts where the list stays visible */
+    selectedTicketId?: string | null
+}
+
+export function TicketsList({ selectedTicketId = null }: TicketsListProps): JSX.Element {
+    const { tickets, ticketsLoading, canCreateTicket } = useValues(sidepanelTicketsLogic)
     const { setCurrentTicket, setView } = useActions(sidepanelTicketsLogic)
 
-    if (!insights.conversations || !insights.conversations.isAvailable()) {
+    const hasIdentityMode = !!window.JS_POSTFN_IDENTITY_DISTINCT_ID
+
+    if (!hasIdentityMode && (!insights.conversations || !insights.conversations.isAvailable())) {
         return (
             <div className="text-center text-muted-alt py-8">
-                <p>Conversations are not available for this team.</p>
+                <p>Support is not available for this team.</p>
             </div>
         )
     }
@@ -33,25 +40,35 @@ export function TicketsList(): JSX.Element {
 
     return (
         <div className="flex flex-col gap-2">
-            <Button
-                type="primary"
-                fullWidth
-                center
-                onClick={() => setView('new')}
-                data-attr="sidebar-create-new-ticket"
-            >
-                Create new ticket
-            </Button>
-            <p className="text-center text-xs text-muted-alt m-0">
-                Switched browsers?{' '}
-                <Link className="cursor-pointer" onClick={() => setView('restore')} data-attr="sidebar-recover-tickets">
-                    Recover your tickets
-                </Link>
-            </p>
+            {canCreateTicket && (
+                <Button
+                    type="primary"
+                    fullWidth
+                    center
+                    onClick={() => setView('new')}
+                    data-attr="sidebar-create-new-ticket"
+                >
+                    Create new ticket
+                </Button>
+            )}
+            {!hasIdentityMode && (
+                <p className="text-center text-xs text-muted-alt m-0">
+                    Switched browsers?{' '}
+                    <Link
+                        className="cursor-pointer"
+                        onClick={() => setView('restore')}
+                        data-attr="sidebar-recover-tickets"
+                    >
+                        Recover your tickets
+                    </Link>
+                </p>
+            )}
             {tickets.length === 0 ? (
                 <div className="text-center text-muted-alt py-8">
                     <p>No tickets yet.</p>
-                    <p className="text-sm">Create a new ticket to get help from our team.</p>
+                    {canCreateTicket && (
+                        <p className="text-sm">Create a new ticket to get help from our support engineers.</p>
+                    )}
                 </div>
             ) : (
                 <div className="flex flex-col gap-1 mt-2">
@@ -59,8 +76,8 @@ export function TicketsList(): JSX.Element {
                         <div
                             key={ticket.id}
                             className={`flex items-center justify-between p-3 rounded border cursor-pointer hover:bg-surface-light transition-colors ${
-                                (ticket.unread_count ?? 0) > 0 ? 'bg-primary-alt-highlight' : 'bg-white'
-                            }`}
+                                (ticket.unread_count ?? 0) > 0 ? 'bg-primary-alt-highlight' : 'bg-surface-primary'
+                            } ${ticket.id === selectedTicketId ? 'border-accent' : ''}`}
                             onClick={() => {
                                 setCurrentTicket(ticket)
                             }}

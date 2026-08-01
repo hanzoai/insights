@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'kea'
@@ -6,6 +7,7 @@ import { Provider } from 'kea'
 import { useMocks } from '~/mocks/jest'
 import { actionsModel } from '~/models/actionsModel'
 import { groupsModel } from '~/models/groupsModel'
+import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { initKeaTests } from '~/test/init'
 import { mockActionDefinition, mockGetEventDefinitions, mockGetPropertyDefinitions } from '~/test/mocks'
 import { PropertyFilterType, PropertyOperator } from '~/types'
@@ -29,7 +31,10 @@ describe('PropertyFilters', () => {
                     { id: 1, name: 'location', count: 1 },
                     { id: 2, name: 'role', count: 2 },
                 ],
-                '/api/environments/:team/events/values': [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
+                '/api/environments/:team/events/values': {
+                    results: [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
+                    refreshing: false,
+                },
             },
             post: {
                 '/api/environments/:team/query': { results: [] },
@@ -38,6 +43,7 @@ describe('PropertyFilters', () => {
         initKeaTests()
         actionsModel.mount()
         groupsModel.mount()
+        propertyDefinitionsModel.mount()
     })
 
     afterEach(() => {
@@ -81,19 +87,23 @@ describe('PropertyFilters', () => {
     it('add filter: click add, search, select property, verify onChange shape', async () => {
         const { onChange } = renderPropertyFilters({ sendAllKeyUpdates: true })
 
-        userEvent.click(screen.getByTestId('new-prop-filter-test-page'))
+        await userEvent.click(screen.getByTestId('new-prop-filter-test-page'))
 
         await waitFor(() => {
             expect(screen.getByTestId('taxonomic-filter-searchfield')).toBeInTheDocument()
         })
 
-        userEvent.type(screen.getByTestId('taxonomic-filter-searchfield'), '$browser')
+        await userEvent.type(screen.getByTestId('taxonomic-filter-searchfield'), '$browser')
 
         await waitFor(() => {
             expect(screen.getAllByText('$browser').length).toBeGreaterThanOrEqual(1)
         })
 
-        userEvent.click(screen.getByTestId('prop-filter-event_properties-0'))
+        await waitFor(() => {
+            expect(screen.getByTestId('prop-filter-event_properties-0').textContent).toMatch(/Browser/)
+        })
+
+        await userEvent.click(screen.getByTestId('prop-filter-event_properties-0'))
 
         await waitFor(() => {
             expect(onChange).toHaveBeenCalled()
@@ -113,7 +123,7 @@ describe('PropertyFilters', () => {
 
         const firstRow = screen.getByTestId('property-filter-0')
         const closeButton = firstRow.querySelector('.PropertyFilterButton--closeable .Button')
-        userEvent.click(closeButton!)
+        await userEvent.click(closeButton!)
 
         await waitFor(() => {
             expect(onChange).toHaveBeenCalled()
@@ -139,17 +149,17 @@ describe('PropertyFilters', () => {
             </Provider>
         )
 
-        userEvent.click(screen.getByTestId('new-prop-filter-round-trip'))
+        await userEvent.click(screen.getByTestId('new-prop-filter-round-trip'))
         await waitFor(() => {
             expect(screen.getByTestId('taxonomic-filter-searchfield')).toBeInTheDocument()
         })
 
-        userEvent.type(screen.getByTestId('taxonomic-filter-searchfield'), '$browser')
+        await userEvent.type(screen.getByTestId('taxonomic-filter-searchfield'), '$browser')
         await waitFor(() => {
-            expect(screen.getAllByText('$browser').length).toBeGreaterThanOrEqual(1)
+            expect(screen.getByTestId('prop-filter-event_properties-0').textContent).toMatch(/Browser/)
         })
 
-        userEvent.click(screen.getByTestId('prop-filter-event_properties-0'))
+        await userEvent.click(screen.getByTestId('prop-filter-event_properties-0'))
         await waitFor(() => {
             expect(onChange).toHaveBeenCalled()
         })
@@ -170,6 +180,25 @@ describe('PropertyFilters', () => {
 
         const pill = screen.getByTestId('property-filter-0').querySelector('.PropertyFilterButton-content')
         expect(pill?.textContent).toMatch(/Browser/)
+    })
+
+    it('does not crash when propertyFilters is a non-array (legacy / corrupted shape)', () => {
+        // Regression test for "n.map is not a function" crash. The reducer's initial-state path
+        // runs parseProperties, but the prop-change useEffect previously called setFilters directly
+        // — so any consumer (e.g. a InsightsFlow with an event-shaped object stored in conversion.filters)
+        // crashed the moment the picker re-rendered. PropertyFilters must tolerate the same input
+        // shapes parseProperties does: arrays, PropertyGroup objects, and dict-style objects.
+        const eventShapedObject = {
+            events: [{ id: 'user_signed_up', name: 'user_signed_up', type: 'events', order: 0 }],
+            source: 'events',
+            actions: [],
+        } as any
+
+        expect(() =>
+            renderPropertyFilters({
+                propertyFilters: eventShapedObject,
+            })
+        ).not.toThrow()
     })
 
     it('does not change reducer state when re-rendered with same filter values', () => {
@@ -206,5 +235,52 @@ describe('PropertyFilters', () => {
 
         expect(logic.values._filtersState).toBe(stateBefore)
         expect(screen.getByTestId('property-filter-0')).toBeInTheDocument()
+    })
+
+    it('keeps an in-progress filter when re-rendered with a new same-content array', async () => {
+        // Regression: a parent that re-renders frequently (e.g. a live-streaming
+        // dashboard) passes a freshly `.filter()`-ed array each render. A property
+        // picked but not yet given a value is never committed via onChange, so it is
+        // absent from that array — it must not be wiped when the array reference churns.
+        const onChange = jest.fn()
+        const { rerender } = render(
+            <Provider>
+                <PropertyFilters
+                    pageKey="in-progress"
+                    onChange={onChange}
+                    propertyFilters={[]}
+                    taxonomicGroupTypes={[TaxonomicFilterGroupType.EventProperties]}
+                />
+            </Provider>
+        )
+
+        await userEvent.click(screen.getByTestId('new-prop-filter-in-progress'))
+        await waitFor(() => {
+            expect(screen.getByTestId('taxonomic-filter-searchfield')).toBeInTheDocument()
+        })
+        await userEvent.type(screen.getByTestId('taxonomic-filter-searchfield'), '$browser')
+        await waitFor(() => {
+            expect(screen.getByTestId('prop-filter-event_properties-0').textContent).toMatch(/Browser/)
+        })
+        await userEvent.click(screen.getByTestId('prop-filter-event_properties-0'))
+
+        // Property chosen, value not set yet → uncommitted, so the parent isn't notified.
+        expect(onChange).not.toHaveBeenCalled()
+        expect(screen.getByTestId('taxonomic-value-select')).toBeInTheDocument()
+
+        // Parent re-renders with a new array reference holding the same (empty) content.
+        rerender(
+            <Provider>
+                <PropertyFilters
+                    pageKey="in-progress"
+                    onChange={onChange}
+                    propertyFilters={[]}
+                    taxonomicGroupTypes={[TaxonomicFilterGroupType.EventProperties]}
+                />
+            </Provider>
+        )
+
+        // The in-progress filter (and its value selector) survive.
+        expect(screen.getByTestId('taxonomic-value-select')).toBeInTheDocument()
     })
 })

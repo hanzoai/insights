@@ -43,7 +43,7 @@ the Postgres and Datastore containers did NOT have persistent named volumes by d
 
 If you choose to upgrade, you will likely lose data contained in these anonymous volumes.
 
-See: https://github.com/hanzoai/insights/pull/11256
+See: https://github.com/Insights/insights/pull/11256
 
 WE STRONGLY RECOMMEND YOU:
 • Stop and back up your entire environment

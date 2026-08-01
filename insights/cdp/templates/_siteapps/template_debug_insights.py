@@ -7,14 +7,15 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     id="template-debug-insights-js",
     name="Insights JS debugger",
     description="Enable extra debugging tools on your insights-js",
-    icon_url="",
+    icon_url="https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png",
     category=["Custom"],
     code_language="javascript",
     code="""
 export function onLoad({ inputs, insights }) {
     if (inputs.enable_debugging) {
         console.log("[Insights JS debugger site app] Enabling Insights.js debugging", insights)
-        insights.debug(true)
+        globalThis.POSTFN_DEBUG = true
+        globalThis.__POSTFN_JS_DEBUGGER_ENABLED = true
     }
 
     if (inputs.capture_config) {

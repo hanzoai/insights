@@ -6,15 +6,26 @@ noindex: true
 
 This guide explains how to create isolated Insights development environments using Flox and Git worktrees for seamless branch switching.
 
+> This guide builds on the [developing locally](./developing-locally) setup.
+> You should have Flox installed and be able to run `insightscli start`
+> (Insights's developer CLI, available inside the Flox environment) before proceeding.
+
 **Key Benefits:**
 
 - Work on multiple branches simultaneously with isolated environments
 - Each worktree has its own Flox environment and Python dependencies
 - Quick switching between features, bug fixes, and PR reviews
-- Standard `bin/start` command works in each worktree
+- Standard `insightscli start` command works in each worktree
 
-> [!IMPORTANT]
-> **Important:** Only one Insights instance (`bin/start`) can run at a time since they all use the same ports. The workflow focuses on quickly stopping one instance and starting another.
+> **Important:** Only one Insights instance (`insightscli start`) can run at a time since they all use the same ports. The workflow focuses on quickly stopping one instance and starting another.
+
+## Light worktrees
+
+You only need the full setup below when you want to run the app in a worktree. For edit and commit workflows, a plain `git worktree add <path> <branch>` is enough:
+
+- Pre-commit hooks (lint-staged, insightscli, ruff, ty) work out of the box: they borrow the main clone's `node_modules` and Python venv automatically, as long as the worktree's `pnpm-lock.yaml` and `uv.lock` match the main clone's.
+- If a lockfile differs, the hooks tell you what to install locally instead.
+- Use `phw` (below) only when you need to run the app in that worktree.
 
 ## Prerequisites
 
@@ -28,47 +39,19 @@ This guide explains how to create isolated Insights development environments usi
 
 ### Worktree Location
 
-By default, worktrees are created in `~/.worktrees/insights/`. You can customize this location by setting the `INSIGHTS_WORKTREE_BASE` environment variable:
+By default, worktrees are created in `~/.worktrees/insights/`. You can customize this location by setting the `POSTFN_WORKTREE_BASE` environment variable:
 
 ```bash
 # In your shell profile (~/.zshrc or ~/.bashrc)
-export INSIGHTS_WORKTREE_BASE="/path/to/your/preferred/location"
+export POSTFN_WORKTREE_BASE="/path/to/your/preferred/location"
 ```
 
 For example:
 
 ```bash
-export INSIGHTS_WORKTREE_BASE="$HOME/code/worktrees"
+export POSTFN_WORKTREE_BASE="$HOME/code/worktrees"
 # Worktrees will be created in ~/code/worktrees/<branch-name>
 ```
-
-### Worktree Location Management
-
-The `phw list` and `phw remove` commands work with **all** your Insights worktrees, regardless of where they were created. This is helpful if you:
-
-- Changed your `INSIGHTS_WORKTREE_BASE` setting after creating some worktrees
-- Have worktrees in multiple locations
-- Want to clean up old worktrees from previous setups
-
-**Example scenario:**
-
-```bash
-# You had worktrees in the old location
-ls ~/.worktrees/insights/
-# old-feature/  pr-1234-teammate/
-
-# You changed your worktree base
-export INSIGHTS_WORKTREE_BASE="$HOME/dev/worktrees"
-
-# phw list still shows ALL worktrees
-phw list
-# Shows both old location worktrees AND new location worktrees
-
-# phw remove works with any worktree location
-phw remove pr-1234-teammate  # Works even though it's in old location!
-```
-
-This uses Git's native worktree tracking (`git worktree list`) rather than trying to guess paths.
 
 ## Quick Start
 
@@ -82,9 +65,6 @@ brew install direnv gh jq
 
 # Add direnv hook to your shell (~/.zshrc or ~/.bashrc)
 eval "$(direnv hook zsh)"  # or bash
-
-# Add the phw function for auto-cd functionality
-echo 'source ~/dev/insights/insights/bin/phw' >> ~/.zshrc  # or ~/.bashrc
 
 # Reload your shell
 source ~/.zshrc  # or ~/.bashrc
@@ -102,14 +82,14 @@ After setup, use the `phw` command for everything:
 #### Create a NEW branch
 
 ```bash
-# creates branch haacked/new-feature and worktree haacked/new-feature off of main
+# creates branch haacked/new-feature and worktree haacked/new-feature off of master
 phw create haacked/new-feature
 # You're now IN the worktree with Flox activated!
-bin/start
-# Access at http://localhost:8000
+insightscli start
+# Access at http://localhost:8010
 
 # Or specify a different base branch
-phw create haacked/new-feature main
+phw create haacked/new-feature master
 ```
 
 #### Work on EXISTING branch
@@ -117,8 +97,8 @@ phw create haacked/new-feature main
 ```bash
 phw checkout haacked/new-feature
 # Creates worktree for existing branch, Flox activated!
-bin/start
-# Access at http://localhost:8000
+insightscli start
+# Access at http://localhost:8010
 ```
 
 #### Switch to EXISTING worktree
@@ -126,8 +106,8 @@ bin/start
 ```bash
 phw switch haacked/new-feature
 # Switches to already created worktree, Flox activated!
-bin/start
-# Access at http://localhost:8000
+insightscli start
+# Access at http://localhost:8010
 ```
 
 #### Review a Pull Request
@@ -135,8 +115,8 @@ bin/start
 ```bash
 phw pr 12345
 # Fetched PR, switched to worktree, ready to test!
-bin/start
-# Access at http://localhost:8000
+insightscli start
+# Access at http://localhost:8010
 ```
 
 ## Real-World Example
@@ -144,31 +124,31 @@ bin/start
 ```bash
 # 9:00 AM - Start working on new dashboard
 phw create haacked/analytics-dashboard
-bin/migrate  # Run migrations
-bin/start    # Start development
-# Work on feature at http://localhost:8000
+insightscli migrations:run  # Run migrations
+insightscli start           # Start development
+# Work on feature at http://localhost:8010
 
 # 10:30 AM - Urgent production bug!
 # Stop current Insights instance first
-# Ctrl+C to stop bin/start
-phw checkout main
+# Ctrl+C to stop insightscli start
+phw checkout master
 # Already in main worktree with Flox activated
-git pull origin main
-bin/start    # Start development
-# Fix bug, test at http://localhost:8000
+git pull origin master
+insightscli start  # Start development
+# Fix bug, test at http://localhost:8010
 
 # 11:00 AM - Review teammate's PR
 # Stop current instance first
 phw pr 5678
 # Automatically fetches PR and switches to it
-bin/start
-# Review at http://localhost:8000
+insightscli start
+# Review at http://localhost:8010
 
 # 2:00 PM - Back to feature work
 # Stop current instance and switch back
 phw switch haacked/analytics-dashboard
 # You may see interactive prompt - press Enter to skip nesting, or run 'exit' first
-bin/start    # Continue where you left off
+insightscli start  # Continue where you left off
 
 # 5:00 PM - Cleanup
 phw list                                # See all worktrees
@@ -189,17 +169,17 @@ phw pr 1234
 
 # Work on feature
 phw switch haacked/feature-analytics
-bin/start  # Work on feature
+insightscli start  # Work on feature
 
 # Stop and switch to bug fix
 # Ctrl+C to stop
 phw switch bugfix/login-issue
-bin/start  # Switch to bug fix work
+insightscli start  # Switch to bug fix work
 
 # Stop and switch to PR review
 # Ctrl+C to stop
 phw switch pr-1234-teammate
-bin/start  # Review PR
+insightscli start  # Review PR
 ```
 
 ### Managing Your Worktrees
@@ -226,12 +206,40 @@ phw list
 phw remove pr-5678-teammate
 ```
 
+### Worktree Location Management
+
+The `phw list` and `phw remove` commands work with **all** your Insights worktrees, regardless of where they were created. This is helpful if you:
+
+- Changed your `POSTFN_WORKTREE_BASE` setting after creating some worktrees
+- Have worktrees in multiple locations
+- Want to clean up old worktrees from previous setups
+
+**Example scenario:**
+
+```bash
+# You had worktrees in the old location
+ls ~/.worktrees/insights/
+# old-feature/  pr-1234-teammate/
+
+# You changed your worktree base
+export POSTFN_WORKTREE_BASE="$HOME/dev/worktrees"
+
+# phw list still shows ALL worktrees
+phw list
+# Shows both old location worktrees AND new location worktrees
+
+# phw remove works with any worktree location
+phw remove pr-1234-teammate  # Works even though it's in old location!
+```
+
+This uses Git's native worktree tracking (`git worktree list`) rather than trying to guess paths.
+
 ## Quick Reference
 
 ### Commands
 
 ```bash
-phw create <branch> [base-branch]   # Create new branch & worktree (defaults to main)
+phw create <branch> [base-branch]   # Create new branch & worktree (defaults to master)
 phw checkout <branch>               # Create worktree for existing branch
 phw switch <branch>                 # Switch to existing worktree
 phw pr <number>                     # Checkout PR in worktree
@@ -244,7 +252,7 @@ phw list                            # List all worktrees
 - **Isolated environments**: Each worktree has its own Flox environment and Python dependencies
 - **Quick switching**: Move between branches without losing work or rebuilding dependencies
 - **Clean separation**: Different features, bug fixes, and PR reviews stay completely separate
-- **Standard tools**: Uses familiar `bin/start` command in each worktree
+- **Standard tools**: Uses familiar `insightscli start` command in each worktree
 
 ## How It Works
 
@@ -349,12 +357,11 @@ flox activate
 
 ### phw command not found
 
-```bash
-# Make sure you've sourced the phw script
-source ~/dev/insights/insights/bin/phw
+Make sure the Flox environment is activated:
 
-# Add it permanently to your shell profile
-echo 'source ~/dev/insights/insights/bin/phw' >> ~/.zshrc
+```bash
+cd ~/dev/insights/insights
+flox activate
 ```
 
 ### Dependencies out of sync
@@ -398,24 +405,26 @@ git worktree prune
 For a complete one-time setup, run:
 
 ```bash
-# For zsh users
+# For zsh users (replace ~/dev/insights/insights with your repo path)
 brew install direnv gh jq && \
 echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc && \
-echo 'source ~/dev/insights/insights/bin/phw' >> ~/.zshrc && \
 source ~/.zshrc && \
+cd ~/dev/insights/insights && \
+flox activate -- true && \
 echo "✅ Setup complete! You can now use 'phw' commands."
 
-# For bash users
+# For bash users (replace ~/dev/insights/insights with your repo path)
 brew install direnv gh jq && \
 echo 'eval "$(direnv hook bash)"' >> ~/.bashrc && \
-echo 'source ~/dev/insights/insights/bin/phw' >> ~/.bashrc && \
 source ~/.bashrc && \
+cd ~/dev/insights/insights && \
+flox activate -- true && \
 echo "✅ Setup complete! You can now use 'phw' commands."
 ```
 
 After setup, you're ready to use commands like:
 
-- `phw create haacked/feature` (create from main)
+- `phw create haacked/feature` (create from master)
 - `phw create haacked/feature my-branch` (create from my-branch)
 - `phw checkout my-branch`
 - `phw pr 12345`

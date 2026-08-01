@@ -1,6 +1,6 @@
 # Monorepo Layout
 
-High-level structure of the Insights monorepo. Some directories are aspirational (e.g., `platform/` doesn't exist yet - shared code currently lives in `common/`).
+High-level structure of the Insights monorepo.
 
 ## Directory structure
 
@@ -13,31 +13,31 @@ insights/               # Legacy monolith code
 
 ee/                    # Enterprise features (being migrated to products/ and insights/)
 
-products/              # Product-specific apps
+products/              # Product-specific apps (see products/README.md for layout)
   <product>/
-    backend/           # Django app (models, logic, api/, presentation/)
+    backend/           # Django app (models, logic, api/, presentation/, tasks/, tests/)
     frontend/          # React (scenes, components, logics)
     manifest.tsx       # Routes, scenes, URLs
     package.json
+    services/          # Optional: services this product deploys (see "What a product can own")
+    packages/          # Optional: libraries/CLIs this product owns
 
-services/              # Independent backend services
+services/              # Independent services NOT owned by any one product
   llm-gateway/         # LLM proxy service
   mcp/                 # Model Context Protocol service
+  oauth-proxy/         # OAuth proxy (Cloudflare Worker)
+  stripe-app/          # Stripe integration app
 
-common/                # Shared code (exists today)
-  insightscli/               # Developer CLI tooling
-  insightsql_parser/   # InsightsQL parser
+packages/              # Libraries shared across more than one product/service (e.g. quill)
 
-platform/              # Shared platform code (aspirational - not yet created)
-  integrations/        # External adapters
-    vercel/
-  schemas/             # Shared Pydantic schemas
-  auth/                # Token utils
-  http/                # Shared HTTP clients
-  storage/             # S3/GCS clients
-  queue/               # Message queue helpers
-  db/                  # Shared DB utilities
-  observability/       # Logging, tracing, metrics
+common/                # Shared code — holding pen, NOT a destination (goal: shrink it)
+  insightsql_parser/        # InsightsQL parser
+
+tools/                 # Developer/CI tooling, not imported by runtime code
+  insightscli/               # Developer CLI framework (PyPI-publishable; uv workspace member)
+  insightscli-commands/      # Insights-specific insightscli commands (consumed via insightscli.yaml)
+
+devenv/                # Developer environment config (intent map, process model)
 ```
 
 ### Products
@@ -50,6 +50,32 @@ User-facing features with their own backend (Django app) and frontend (React). E
 
 See [products/README.md](/products/README.md) for how to create products. For new isolated products, see [products/architecture.md](/products/architecture.md) for design principles (DTOs, facades, isolation rules).
 
+#### What a product can own
+
+Most products are a Django app plus React scenes — and most already carry more: an `mcp/` directory of MCP tool definitions, often a `skills/` directory of agent skills. A product can own anything attributable to it, runtime and tooling alike. Nest it under the product instead of scattering it across top-level dirs:
+
+- `products/<product>/mcp/` — MCP tool definitions (`tools.yaml`) and UI apps (most products)
+- `products/<product>/skills/` — agent skills for the product (many products)
+- `products/<product>/services/<svc>/` — a service or worker the product deploys
+- `products/<product>/packages/<lib>/` — a library or CLI the product owns
+- dev/CI/backfill scripts, benchmarks, audits, fixtures and dummy-data generators, a standalone console — same idea
+
+Top-level `services/`, `packages/`, `tools/`, and `cli/` are for things no single product owns. Keep package names (`@hanzo/<name>`) independent of location — pnpm resolves by name, so relocating later is a path move with no import churn.
+
+Nest because tooling boundaries become path-scoped (`products/<product>/**` for CODEOWNERS, CI filters, lint) instead of hand-synced `<product>-*` prefixes. A prefix doing a folder's job is the signal to nest.
+
+### Packages
+
+This covers **pnpm workspace packages** (JS/TS). Python and Rust differ — there, location and import name matter directly (a top-level Python package can even shadow a stdlib module, which is why there's no top-level `platform/`), so these rules don't apply.
+
+For pnpm packages, location doesn't gate who can import them (pnpm resolves by name), so location is an ownership signal, not access control. Place by current ownership:
+
+- Owned by one product → `products/<product>/packages/<name>/` (the default — keeps the product self-contained).
+- Genuinely shared across more than one product/service → top-level `packages/<name>/` (e.g. `packages/quill/`).
+- Promote nested → root only when a second consumer actually depends on it — on real usage, not intent. It's a path rename with a stable package name (no import churn), so don't pay the "shared" cost before it's true.
+
+`pnpm-workspace.yaml` globs are explicit (`products/*`, `packages/quill`, …) and don't yet match nested `products/<product>/packages/*` or a new top-level `packages/<name>/` — so register the package's path there when you add it, or `workspace:*` deps, filters, and scripts won't resolve.
+
 ### Services
 
 - are their own deployment
@@ -59,29 +85,21 @@ See [products/README.md](/products/README.md) for how to create products. For ne
 - aren’t cross-cutting glue
 - aren’t frontend-facing “products”
 
-These are not glue, because glue adapts other systems.  
-They are not products, because no one interacts with them as a user-facing feature.  
-They are not platform, because they own domain logic, not shared tooling.
-
-### Platform
-
-Cross-cutting glue and infrastructure: external adapters (Vercel), clients, shared libs. Must not import products/services.
-
-Why platform must not call product code:
-
-- If platform imports and calls product code, platform becomes a hidden orchestrator
-- it must know which products exist
-- it must route events to product logic
-- it accumulates product-specific conditionals
-- dependency direction flips (platform → products)
-- cycles become likely over time
-
-That destroys the "platform is foundational" property and makes boundaries brittle.
+These are not glue, because glue adapts other systems.
+They are not products, because no one interacts with them as a user-facing feature.
 
 ### Common
 
-Shared code that exists today: `insightscli` (developer CLI), `insightsql_parser`, and other cross-cutting utilities. Some of this may eventually move to `platform/` or `tools/` as the structure matures.
+A holding pen for shared code that predates a better home (`insightsql_parser` and other cross-cutting utilities) — **not** a destination, and the goal is to shrink it, not grow it.
 
-### Tools (aspirational)
+A catch-all "common" reliably rots into a junk drawer: unscoped, unenforced, imported by everything — a second monolith with worse boundaries than the first. The name itself is the smell; context-named homes are the cure. Unlike `products/*` (tach + turbo), nothing mechanically guards what lands here — only the convention, and conventions erode unless they're made hard to violate.
 
-Developer tooling: CLIs, linters, formatters, code generators, scaffolding scripts. Not imported by runtime code. Can be standalone packages or internal utilities. Currently `common/insightscli/` serves this purpose.
+So new code should go somewhere with a real boundary first: `products/<name>/`, `tools/`, `services/`, or `packages/` (a clean, published-style leaf — `packages/quill` is the model). Land code in `common/` only when none of those fit _and_ it can't yet be a clean leaf because it still imports app modules (`lib/*`, `scenes/*`); when that's the case, treat it as tracked debt and name the graduation target. Once something here becomes a clean leaf, promote it out to `packages/` or the owning product and delete it from `common/`. See `common/AGENTS.md` for the agent-facing rules.
+
+### Tools
+
+Developer tooling: CLIs (notably `insightscli/` framework + `insightscli-commands/`), linters, formatters, code generators, scaffolding scripts, CI automation. Not imported by runtime code — build-time, CI, or developer-workflow artifacts only.
+
+### Dev environment
+
+Configuration for the local developer environment. The `devenv/` directory holds the intent/capability model that drives `insightscli dev:setup` — mapping developer intents (e.g., "I'm working on error tracking") to capabilities (event_ingestion, replay_storage, etc.) and the processes that provide them. Process definitions live in `bin/mprocs.yaml`.

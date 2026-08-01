@@ -1,31 +1,29 @@
 import './Navigation.scss'
 
 import { useActions, useMountedLogic, useValues } from 'kea'
-import { ReactNode, useEffect, useRef } from 'react'
+import { ReactNode, useCallback, useEffect, useRef } from 'react'
 
-import { BillingAlertsV2 } from 'lib/components/BillingAlertsV2'
+import { mcpHintLogic } from 'lib/components/MCPHint/mcpHintLogic'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { cn } from 'lib/utils/css-classes'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
+import { useMaxTool } from 'scenes/max/useMaxTool'
 import { sceneLogic } from 'scenes/sceneLogic'
-import { SceneConfig } from 'scenes/sceneTypes'
+import { Scene, SceneConfig } from 'scenes/sceneTypes'
 
 import { PanelLayout } from '~/layout/panel-layout/PanelLayout'
-import { ProjectDragAndDropProvider } from '~/layout/panel-layout/ProjectTree/ProjectDragAndDropContext'
 import { panelLayoutLogic } from '~/layout/panel-layout/panelLayoutLogic'
+import { ProjectDragAndDropProvider } from '~/layout/panel-layout/ProjectTree/ProjectDragAndDropContext'
 
-import { ProjectNotice } from '../navigation/ProjectNotice'
 import { navigationLogic } from '../navigation/navigationLogic'
-import { SceneLayout } from '../scenes/SceneLayout'
-import { SceneTabs } from '../scenes/SceneTabs'
+import { ProjectNotice } from '../navigation/ProjectNotice'
 import { SceneTitlePanelButton } from '../scenes/components/SceneTitleSection'
+import { SceneLayout } from '../scenes/SceneLayout'
 import { sceneLayoutLogic } from '../scenes/sceneLayoutLogic'
 import { MinimalNavigation } from './components/MinimalNavigation'
 import { navigation3000Logic } from './navigationLogic'
 import { SidePanel } from './sidepanel/SidePanel'
-import { SidePanelOfframpModal } from './sidepanel/SidePanelOfframpModal'
 import { sidePanelStateLogic } from './sidepanel/sidePanelStateLogic'
 import { themeLogic } from './themeLogic'
 
@@ -37,21 +35,50 @@ export function Navigation({
     sceneConfig: SceneConfig | null
 }): JSX.Element {
     useMountedLogic(maxGlobalLogic)
-    const { isDev } = useValues(preflightLogic)
+    useMountedLogic(mcpHintLogic)
+
     const { theme } = useValues(themeLogic)
     const { mobileLayout } = useValues(navigationLogic)
     const { mode } = useValues(navigation3000Logic)
     const mainRef = useRef<HTMLElement>(null)
-    const { mainContentRect, isLayoutNavCollapsed, isLayoutPanelVisible } = useValues(panelLayoutLogic)
+    const { mainContentRect, isLayoutNavCollapsed, isLayoutPanelVisible, navbarWidth } = useValues(panelLayoutLogic)
     const { setMainContentRef, setMainContentRect } = useActions(panelLayoutLogic)
-    const { setTabScrollDepth } = useActions(sceneLogic)
-    const { activeTabId } = useValues(sceneLogic)
+    const { activeSceneId } = useValues(sceneLogic)
     const { registerScenePanelElement } = useActions(sceneLayoutLogic)
     const { scenePanelIsPresent, scenePanelOpenManual } = useValues(sceneLayoutLogic)
     const { sidePanelOpen } = useValues(sidePanelStateLogic)
     const { sidePanelWidth } = useValues(panelLayoutLogic)
-    const { firstTabIsActive } = useValues(sceneLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
+
+    // SceneMenuBar (when enabled) replaces ProjectNotice's role of conveying project-level
+    // context above scene content, so we hide the notice for users on the new menu bar.
+    const sceneMenuBarEnabled = useFeatureFlag('SCENE_MENU_BAR')
+    const inlinePanelRef = useRef<HTMLDivElement | null>(null)
+    const inlinePanelCallbackRef = useCallback(
+        (node: HTMLDivElement | null) => {
+            inlinePanelRef.current = node
+            registerScenePanelElement(node)
+        },
+        [registerScenePanelElement]
+    )
+
+    // SidePanelInfo overrides scenePanelElement while the Info tab is open and
+    // clears it on unmount, leaving it null even though Navigation's inline
+    // panel div is still in the DOM. Re-register it when the side panel closes.
+    useEffect(() => {
+        if (!sidePanelOpen && inlinePanelRef.current) {
+            registerScenePanelElement(inlinePanelRef.current)
+        }
+    }, [sidePanelOpen, registerScenePanelElement])
+
+    // Null the registration on Navigation unmount so the detached inline
+    // panel div is not pinned by sceneLayoutLogic's reducer. Kept in its own
+    // empty-deps effect so it fires only on final unmount, not on every
+    // sidePanelOpen toggle (which would briefly blank SceneLayout's portal).
+    useEffect(() => {
+        return () => {
+            registerScenePanelElement(null)
+        }
+    }, [registerScenePanelElement])
 
     // Set container ref so we can measure the width of the scene layout in logic
     useEffect(() => {
@@ -62,11 +89,36 @@ export function Navigation({
         }
     }, [mainRef, setMainContentRef, setMainContentRect])
 
+    // Register `create_user_interview_topic` globally so Max can create user interview
+    // topics from any page (including the homepage), not only from the user-interviews
+    // scene. The scene wires its own richer `useMaxTool` for the "New topic" button.
+    const userInterviewsEnabled = useFeatureFlag('USER_INTERVIEWS')
+    useMaxTool({
+        identifier: 'create_user_interview_topic',
+        active: userInterviewsEnabled,
+        context: {},
+    })
+
+    const noPaddingScene = sceneConfig?.layout === 'app-raw-no-header' || sceneConfig?.layout === 'app-raw'
+
     if (mode !== 'full') {
+        const showMinimalNavigation = mode === 'minimal' || mode === 'zen'
         return (
             // eslint-disable-next-line react/forbid-dom-props
-            <div className="Navigation3000 flex-col" style={theme?.mainStyle}>
-                {(mode === 'minimal' || mode === 'zen') && <MinimalNavigation />}
+            <div
+                className="Navigation3000 flex-col"
+                style={
+                    {
+                        ...theme?.mainStyle,
+                        // The MinimalNavigation bar sits above the scene, so push the
+                        // settings scene's viewport-fixed nav down to clear it.
+                        ...(showMinimalNavigation && {
+                            '--settings-nav-top': 'calc(var(--minimal-navigation-height) + var(--scene-padding))',
+                        }),
+                    } as React.CSSProperties
+                }
+            >
+                {showMinimalNavigation && <MinimalNavigation />}
                 <main className={mode === 'zen' ? 'p-4' : undefined}>{children}</main>
             </div>
         )
@@ -85,7 +137,6 @@ export function Navigation({
             <div
                 className={cn('app-layout bg-surface-tertiary', {
                     'app-layout--mobile': mobileLayout,
-                    'app-layout--scene-side-panel reduce-visual-noise': isRemovingSidePanelFlag,
                 })}
                 style={
                     {
@@ -96,16 +147,15 @@ export function Navigation({
                         '--scene-layout-scrollbar-width': mainRef?.current?.clientWidth
                             ? mainRef.current.clientWidth - (mainContentRect?.width ?? 0) + 'px'
                             : '0px',
-                        // The scene canvas is a RAISED surface by default. It used to
-                        // default to the ground (#000) and only lift for the single scene
-                        // that sets canvasBackground, so every other page rendered content
-                        // on the same black as the chrome around it -- no elevation, the
-                        // panel read as a hole rather than a surface. The flag now opts a
-                        // scene DOWN to the ground for the edge-to-edge case.
                         '--scene-layout-background': sceneConfig?.canvasBackground
-                            ? 'var(--color-bg-primary)'
-                            : 'var(--color-bg-surface-primary)',
+                            ? 'var(--color-bg-surface-primary)'
+                            : 'var(--color-bg-primary)',
                         '--side-panel-width': sidePanelWidth + 'px',
+                        // Live navbar width from the resizer drives both the grid's left column
+                        // (via --left-nav-width below) and the nav element itself, which reads
+                        // --project-navbar-width. Collapsed/mobile fall back to the base default.
+                        '--project-navbar-width':
+                            !mobileLayout && !isLayoutNavCollapsed ? `${navbarWidth}px` : undefined,
                         '--left-nav-width': isLayoutNavCollapsed
                             ? 'var(--project-navbar-width-collapsed)'
                             : 'var(--project-navbar-width)',
@@ -115,17 +165,11 @@ export function Navigation({
                 <ProjectDragAndDropProvider>
                     <PanelLayout className="left-nav" />
 
-                    <div className="top-nav h-[var(--scene-layout-header-height)] sticky top-0 z-[var(--z-main-nav)] flex justify-center items-start mt-px">
-                        <SceneTabs />
-                    </div>
-
                     <div
                         className={cn(
-                            '@container/main-content-container main-content-container flex overflow-hidden lg:rounded border-t lg:border border-primary lg:mb-2 relative',
+                            '@container/main-content-container main-content-container flex overflow-hidden lg:rounded border-t lg:border border-primary relative lg:mr-1 lg:mb-1 lg:mt-1',
                             {
-                                'lg:rounded-tl-none': firstTabIsActive,
-                                'lg:mr-1 lg:mb-1': isRemovingSidePanelFlag,
-                                'rounded-r-none': isRemovingSidePanelFlag && sidePanelOpen,
+                                'rounded-r-none': sidePanelOpen,
                             }
                         )}
                     >
@@ -135,38 +179,34 @@ export function Navigation({
                             tabIndex={0}
                             id="main-content"
                             className={cn(
-                                '@container/main-content bg-[var(--scene-layout-background)] overflow-y-auto overflow-x-hidden show-scrollbar-on-hover p-4 pb-0 h-full flex-1 rounded-t',
+                                '@container/main-content bg-[var(--scene-layout-background)] overflow-y-auto overflow-x-hidden show-scrollbar-on-hover p-4 pb-0 h-full flex-1 rounded-t focus-visible:outline-none flex flex-col',
                                 {
-                                    'p-0':
-                                        sceneConfig?.layout === 'app-raw-no-header' ||
-                                        sceneConfig?.layout === 'app-raw',
-                                    'rounded-tl-none': firstTabIsActive,
-                                    'focus-visible:outline-none': isRemovingSidePanelFlag,
-                                    'lg:max-w-[calc(100%-var(--side-panel-width))] rounded-r-none':
-                                        isRemovingSidePanelFlag && sidePanelOpen,
+                                    'p-0': noPaddingScene,
+                                    'lg:max-w-[calc(100%-var(--side-panel-width))] rounded-r-none': sidePanelOpen,
                                 }
                             )}
-                            onScroll={(e) => {
-                                if (activeTabId) {
-                                    setTabScrollDepth(activeTabId, e.currentTarget.scrollTop)
-                                }
-                            }}
                         >
                             <SceneLayout sceneConfig={sceneConfig}>
-                                {(!sceneConfig?.hideBillingNotice || !sceneConfig?.hideProjectNotice) && (
+                                {!sceneMenuBarEnabled && !sceneConfig?.hideProjectNotice && (
                                     <div
                                         className={cn({
                                             'px-4 empty:hidden': sceneConfig?.layout === 'app-raw-no-header',
+                                            // Settings scene's nav is viewport-fixed on desktop, so the
+                                            // banner needs to clear it (nav width + column gap) to align
+                                            // with the settings content column.
+                                            'md:ml-[calc(var(--settings-nav-width)+2rem)]':
+                                                activeSceneId === Scene.Settings,
                                         })}
                                     >
-                                        {!sceneConfig?.hideBillingNotice && <BillingAlertsV2 className="my-0 mb-4" />}
-                                        {!sceneConfig?.hideProjectNotice && !isDev && (
-                                            <ProjectNotice className="my-0 mb-4" />
-                                        )}
+                                        <ProjectNotice
+                                            className={cn('my-0 mb-4', {
+                                                'mt-4': noPaddingScene,
+                                            })}
+                                        />
                                     </div>
                                 )}
                                 {children}
-                                {isRemovingSidePanelFlag && <SidePanel />}
+                                <SidePanel />
                             </SceneLayout>
                         </main>
 
@@ -183,7 +223,7 @@ export function Navigation({
                                     )}
                                 >
                                     <div className="h-[50px] flex items-center justify-end gap-2 -mx-2 px-4 py-2 border-b border-primary shrink-0">
-                                        <SceneTitlePanelButton inPanel />
+                                        <SceneTitlePanelButton />
                                     </div>
                                     <ScrollableShadows
                                         direction="vertical"
@@ -191,16 +231,14 @@ export function Navigation({
                                         innerClassName="px-2 py-2 bg-primary"
                                         styledScrollbars
                                     >
-                                        <div ref={registerScenePanelElement} />
+                                        <div ref={inlinePanelCallbackRef} />
                                     </ScrollableShadows>
                                 </div>
                             </>
                         )}
                     </div>
-                    {!isRemovingSidePanelFlag && <SidePanel className="right-nav" />}
                 </ProjectDragAndDropProvider>
             </div>
-            {isRemovingSidePanelFlag && <SidePanelOfframpModal />}
         </>
     )
 }

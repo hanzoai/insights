@@ -3,22 +3,82 @@ package events
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"slices"
+	"strconv"
+	"strings"
 	"sync/atomic"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/hanzoai/insights/livestream/metrics"
-	metric "github.com/luxfi/metric"
+	"github.com/insights/insights/livestream/metrics"
+	"github.com/prometheus/client_golang/prometheus"
 )
+
+const (
+	OpExact        = "exact"
+	OpIsNot        = "is_not"
+	OpIContains    = "icontains"
+	OpNotIContains = "not_icontains"
+	OpRegex        = "regex"
+	OpNotRegex     = "not_regex"
+	OpGreaterThan  = "gt"
+	OpGreaterEqual = "gte"
+	OpLessThan     = "lt"
+	OpLessEqual    = "lte"
+	OpIsSet        = "is_set"
+	OpIsNotSet     = "is_not_set"
+)
+
+type CompiledPropertyFilter struct {
+	Key      string
+	Operator string
+	Values   []string
+
+	lowerValues []string
+	regexes     []*regexp.Regexp
+	numbers     []float64
+	numericOK   []bool
+}
+
+func NewCompiledPropertyFilter(key, operator string, values []string) CompiledPropertyFilter {
+	f := CompiledPropertyFilter{Key: key, Operator: operator, Values: values}
+	switch operator {
+	case OpIContains, OpNotIContains:
+		f.lowerValues = make([]string, len(values))
+		for i, v := range values {
+			f.lowerValues[i] = strings.ToLower(v)
+		}
+	case OpRegex, OpNotRegex:
+		f.regexes = make([]*regexp.Regexp, len(values))
+		for i, v := range values {
+			if re, err := regexp.Compile(v); err == nil {
+				f.regexes[i] = re
+			} else {
+				log.Printf("WARNING: ignoring invalid regex in %s filter for key=%s value=%q: %v", operator, key, v, err)
+			}
+		}
+	case OpGreaterThan, OpGreaterEqual, OpLessThan, OpLessEqual:
+		f.numbers = make([]float64, len(values))
+		f.numericOK = make([]bool, len(values))
+		for i, v := range values {
+			if n, err := strconv.ParseFloat(strings.TrimSpace(v), 64); err == nil {
+				f.numbers[i] = n
+				f.numericOK[i] = true
+			}
+		}
+	}
+	return f
+}
 
 type Subscription struct {
 	SubID uint64
 
 	// Filters
-	TeamId     int
-	Token      string
-	DistinctId string
-	EventTypes []string
+	TeamId          int
+	Token           string
+	DistinctId      string
+	EventTypes      []string
+	PropertyFilters []CompiledPropertyFilter
 
 	Geo     bool
 	Columns []string
@@ -84,6 +144,14 @@ func convertToResponseInsightsEvent(event InsightsEvent, teamId int, columns []s
 		}
 	}
 
+	// Always pass through $virt_* bot classification properties
+	// regardless of requested columns
+	for _, key := range []string{"$virt_is_bot", "$virt_traffic_type", "$virt_traffic_category", "$virt_bot_name"} {
+		if val, ok := event.Properties[key]; ok {
+			properties[key] = val
+		}
+	}
+
 	return &ResponseInsightsEvent{
 		Uuid:       event.Uuid,
 		Timestamp:  event.Timestamp,
@@ -105,13 +173,17 @@ func uuidFromDistinctId(teamId int, distinctId string) string {
 	return uuid.NewV5(personUUIDV5Namespace, input).String()
 }
 
+func logUnsubscribe(sub Subscription) {
+	if dropped := sub.DroppedEvents.Load(); dropped > 0 {
+		log.Printf("Team %d dropped %d events", sub.TeamId, dropped)
+	}
+	metrics.SubTotal.Dec()
+}
+
 func removeSubscription(subID uint64, subs []Subscription) []Subscription {
 	for i, sub := range subs {
 		if subID == sub.SubID {
-			if dropped := sub.DroppedEvents.Load(); dropped > 0 {
-				log.Printf("Team %d dropped %d events", sub.TeamId, dropped)
-			}
-			metrics.SubTotal.Dec()
+			logUnsubscribe(sub)
 			return slices.Delete(subs, i, i+1)
 		}
 	}
@@ -127,50 +199,171 @@ func (c *Filter) Run() {
 		case unSub := <-c.UnSubChan:
 			c.subs = removeSubscription(unSub.SubID, c.subs)
 		case event := <-c.inboundChan:
-			var responseGeoEvent *ResponseGeoEvent
-
+			matching := make([]Subscription, 0, len(c.subs))
 			for _, sub := range c.subs {
-				if sub.ShouldClose.Load() {
-					continue
-				}
-
 				if sub.Token != "" && event.Token != sub.Token {
 					continue
 				}
+				matching = append(matching, sub)
+			}
+			deliverEvent(event, matching)
+		}
+	}
+}
 
-				if sub.DistinctId != "" && event.DistinctId != sub.DistinctId {
-					continue
+func matchesPropertyFilters(props map[string]interface{}, filters []CompiledPropertyFilter) bool {
+	for i := range filters {
+		if !filters[i].matches(props) {
+			return false
+		}
+	}
+	return true
+}
+
+func (f *CompiledPropertyFilter) hasValidRegex() bool {
+	for _, re := range f.regexes {
+		if re != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (f *CompiledPropertyFilter) matches(props map[string]interface{}) bool {
+	raw, present := props[f.Key]
+
+	switch f.Operator {
+	case OpIsSet:
+		return present
+	case OpIsNotSet:
+		return !present
+	}
+
+	if (f.Operator == OpRegex || f.Operator == OpNotRegex) && !f.hasValidRegex() {
+		return false
+	}
+
+	if !present {
+		switch f.Operator {
+		case OpIsNot, OpNotIContains, OpNotRegex:
+			return true
+		default:
+			return false
+		}
+	}
+
+	actual := fmt.Sprint(raw)
+
+	switch f.Operator {
+	case OpExact:
+		return slices.Contains(f.Values, actual)
+	case OpIsNot:
+		return !slices.Contains(f.Values, actual)
+	case OpIContains:
+		lower := strings.ToLower(actual)
+		for _, v := range f.lowerValues {
+			if strings.Contains(lower, v) {
+				return true
+			}
+		}
+		return false
+	case OpNotIContains:
+		lower := strings.ToLower(actual)
+		for _, v := range f.lowerValues {
+			if strings.Contains(lower, v) {
+				return false
+			}
+		}
+		return true
+	case OpRegex:
+		for _, re := range f.regexes {
+			if re != nil && re.MatchString(actual) {
+				return true
+			}
+		}
+		return false
+	case OpNotRegex:
+		for _, re := range f.regexes {
+			if re != nil && re.MatchString(actual) {
+				return false
+			}
+		}
+		return true
+	case OpGreaterThan, OpGreaterEqual, OpLessThan, OpLessEqual:
+		actualNum, err := strconv.ParseFloat(strings.TrimSpace(actual), 64)
+		if err != nil {
+			return false
+		}
+		for i, ok := range f.numericOK {
+			if ok && compareNumeric(f.Operator, actualNum, f.numbers[i]) {
+				return true
+			}
+		}
+		return false
+	default:
+		return false
+	}
+}
+
+func compareNumeric(operator string, actual, want float64) bool {
+	switch operator {
+	case OpGreaterThan:
+		return actual > want
+	case OpGreaterEqual:
+		return actual >= want
+	case OpLessThan:
+		return actual < want
+	case OpLessEqual:
+		return actual <= want
+	default:
+		return false
+	}
+}
+
+// Routes a single event to all matching subscriptions.
+// Used by both Filter (in-memory path) and TokenRouter (Redis pub/sub path).
+func deliverEvent(event InsightsEvent, subs []Subscription) {
+	var responseGeoEvent *ResponseGeoEvent
+
+	for _, sub := range subs {
+		if sub.ShouldClose.Load() {
+			continue
+		}
+
+		if sub.DistinctId != "" && event.DistinctId != sub.DistinctId {
+			continue
+		}
+
+		if len(sub.EventTypes) > 0 && !slices.Contains(sub.EventTypes, event.Event) {
+			continue
+		}
+
+		if len(sub.PropertyFilters) > 0 && !matchesPropertyFilters(event.Properties, sub.PropertyFilters) {
+			continue
+		}
+
+		if sub.Geo {
+			if event.Lat != 0.0 {
+				if responseGeoEvent == nil {
+					responseGeoEvent = convertToResponseGeoEvent(event)
 				}
 
-				if len(sub.EventTypes) > 0 && !slices.Contains(sub.EventTypes, event.Event) {
-					continue
-				}
-
-				if sub.Geo {
-					if event.Lat != 0.0 {
-						if responseGeoEvent == nil {
-							responseGeoEvent = convertToResponseGeoEvent(event)
-						}
-
-						select {
-						case sub.EventChan <- *responseGeoEvent:
-						default:
-							sub.DroppedEvents.Add(1)
-							metrics.DroppedEvents.With(metric.Labels{"channel": "geo"}).Inc()
-						}
-					}
-				} else {
-					responseEvent := convertToResponseInsightsEvent(event, sub.TeamId, sub.Columns)
-
-					select {
-					case sub.EventChan <- *responseEvent:
-					default:
-						sub.DroppedEvents.Add(1)
-						metrics.DroppedEvents.With(metric.Labels{"channel": "events"}).Inc()
-					}
+				select {
+				case sub.EventChan <- *responseGeoEvent:
+				default:
+					sub.DroppedEvents.Add(1)
+					metrics.DroppedEvents.With(prometheus.Labels{"channel": "geo"}).Inc()
 				}
 			}
+		} else {
+			responseEvent := convertToResponseInsightsEvent(event, sub.TeamId, sub.Columns)
 
+			select {
+			case sub.EventChan <- *responseEvent:
+			default:
+				sub.DroppedEvents.Add(1)
+				metrics.DroppedEvents.With(prometheus.Labels{"channel": "events"}).Inc()
+			}
 		}
 	}
 }

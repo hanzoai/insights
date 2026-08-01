@@ -1,7 +1,4 @@
 from collections import defaultdict
-from typing import Any, cast
-
-from insights.schema import DatabaseSchemaManagedViewTableKind
 
 from insights.insightsql import ast
 from insights.insightsql.context import InsightsQLContext
@@ -12,14 +9,13 @@ from insights.insightsql.database.models import (
     LazyJoinToAdd,
     LazyTable,
     LazyTableToAdd,
-    SavedQuery,
     StringDatabaseField,
 )
+from insights.insightsql.database.schema.util.revenue_analytics import get_table_kind, is_event_view
 from insights.insightsql.errors import ResolutionError
 
-from insights.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
-
-from products.revenue_analytics.backend.views.schemas import SCHEMAS as VIEW_SCHEMAS
+from insights.exchange_rate_constants import EXCHANGE_RATE_DECIMAL_PRECISION
+from insights.schema_enums import DatabaseSchemaManagedViewTableKind
 
 ZERO_DECIMAL = ast.Call(
     name="toDecimal", args=[ast.Constant(value=0), ast.Constant(value=EXCHANGE_RATE_DECIMAL_PRECISION)]
@@ -27,9 +23,20 @@ ZERO_DECIMAL = ast.Call(
 
 FIELDS: dict[str, FieldOrTable] = {
     "team_id": IntegerDatabaseField(name="team_id"),
-    "group_key": StringDatabaseField(name="group_key"),
-    "revenue": DecimalDatabaseField(name="revenue", nullable=False),
-    "mrr": DecimalDatabaseField(name="mrr", nullable=False),
+    "group_key": StringDatabaseField(
+        name="group_key",
+        description="Group key these revenue figures are aggregated for; join target for `groups.key`.",
+    ),
+    "revenue": DecimalDatabaseField(
+        name="revenue",
+        nullable=False,
+        description="Total revenue attributed to the group, summed across all its customers, in the project's base currency.",
+    ),
+    "mrr": DecimalDatabaseField(
+        name="mrr",
+        nullable=False,
+        description="Monthly recurring revenue attributed to the group, summed across all its customers, in the project's base currency.",
+    ),
 }
 
 
@@ -56,59 +63,19 @@ def join_with_groups_revenue_analytics_table(
     )
 
 
-def _base_view_args_from_saved_query(saved_query: SavedQuery) -> dict[str, Any]:
-    return {
-        "id": saved_query.id,
-        "query": saved_query.query,
-        "name": saved_query.name,
-        "fields": saved_query.fields,
-        "metadata": saved_query.metadata,
-        # :KLUDGE: None of these properties below are great but it's all we can do to figure this one out for now
-        # We'll be able to come up with a better solution we don't need to support the old managed views anymore
-        "prefix": ".".join(saved_query.name.split(".")[:-1]),
-        "source_id": None,  # Not used so just ignore it
-        "event_name": saved_query.name.split(".")[2] if "revenue_analytics.events" in saved_query.name else None,
-    }
-
-
 def select_from_groups_revenue_analytics_table(context: InsightsQLContext) -> ast.SelectQuery | ast.SelectSetQuery:
-    from products.revenue_analytics.backend.views import (
-        RevenueAnalyticsBaseView,
-        RevenueAnalyticsCustomerView,
-        RevenueAnalyticsMRRView,
-        RevenueAnalyticsRevenueItemView,
-    )
-
     if not context.database:
         return ast.SelectQuery.empty(columns=FIELDS)
 
-    customer_schema = VIEW_SCHEMAS[DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_CUSTOMER]
-    mrr_schema = VIEW_SCHEMAS[DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_MRR]
-    revenue_item_schema = VIEW_SCHEMAS[DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_REVENUE_ITEM]
-
     # Get all customer/mrr/revenue item tuples from the existing views making sure we ignore `all`
     # since the `group` join is in the child view
-    all_views = defaultdict[str, dict[DatabaseSchemaManagedViewTableKind, RevenueAnalyticsBaseView]](defaultdict)
+    all_views = defaultdict[str, dict](defaultdict)
     for view_name in context.database.get_view_names():
-        view = cast(SavedQuery | RevenueAnalyticsBaseView, context.database.get_table(view_name))
-        prefix = ".".join(view_name.split(".")[:-1])
-
-        # Might need to convert to RevenueAnalyticsBaseView from a SavedQuery if the FF is enabled
-        # Soon we'll be able to remove all of this and handle them all using the `SavedQuery` logic directly
-        if view_name.endswith(customer_schema.source_suffix) or view_name.endswith(customer_schema.events_suffix):
-            if not isinstance(view, RevenueAnalyticsBaseView):
-                view = RevenueAnalyticsCustomerView(**_base_view_args_from_saved_query(view))
-            all_views[prefix][DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_CUSTOMER] = view
-        elif view_name.endswith(revenue_item_schema.source_suffix) or view_name.endswith(
-            revenue_item_schema.events_suffix
-        ):
-            if not isinstance(view, RevenueAnalyticsBaseView):
-                view = RevenueAnalyticsRevenueItemView(**_base_view_args_from_saved_query(view))
-            all_views[prefix][DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_REVENUE_ITEM] = view
-        elif view_name.endswith(mrr_schema.source_suffix) or view_name.endswith(mrr_schema.events_suffix):
-            if not isinstance(view, RevenueAnalyticsBaseView):
-                view = RevenueAnalyticsMRRView(**_base_view_args_from_saved_query(view))
-            all_views[prefix][DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_MRR] = view
+        table_kind = get_table_kind(view_name)
+        if table_kind is not None:
+            view = context.database.get_table(view_name)
+            prefix = ".".join(view_name.split(".")[:-1])
+            all_views[prefix][table_kind] = view
 
     # Iterate over all possible view tuples and figure out which queries we can add to the set
     queries = []
@@ -121,7 +88,7 @@ def select_from_groups_revenue_analytics_table(context: InsightsQLContext) -> as
         if customer_view is None or revenue_item_view is None or mrr_view is None:
             continue
 
-        if customer_view.is_event_view():
+        if is_event_view(customer_view.name):
             # For events, group_keys are on each event (group_0_key through group_4_key)
             # We aggregate by group_key directly from each source, then FULL OUTER JOIN
             # since there's no base entity table to start from
@@ -406,6 +373,10 @@ def _build_dw_query(
 
 
 class GroupsRevenueAnalyticsTable(LazyTable):
+    description: str = (
+        "Revenue and MRR aggregated per group from the revenue analytics views. "
+        "One row per group key; reachable from groups via the `revenue_analytics` join."
+    )
     fields: dict[str, FieldOrTable] = FIELDS
 
     def lazy_select(

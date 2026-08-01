@@ -2,18 +2,18 @@ import os
 import logging
 from collections.abc import Mapping
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cache
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 
-from datastore_connect import get_client
-from datastore_connect.driver import (
-    Client as HttpClient,
-    httputil,
-)
 from datastore_driver import Client as SyncClient
 from datastore_pool import ChPool
+
+if TYPE_CHECKING:
+    from datastore_connect.driver import Client as HttpClient
 
 from insights.datastore.workload import Workload
 from insights.settings import data_stores
@@ -24,14 +24,30 @@ class NodeRole(StrEnum):
     # Roles of nodes for a particular NodeType. These are meant to
     # match the CH macro hostClusterRole
     ALL = "all"
-    COORDINATOR = "coordinator"
     DATA = "data"
     INGESTION_EVENTS = "events"
     INGESTION_SMALL = "small"
     INGESTION_MEDIUM = "medium"
-    SHUFFLEHOG = "shuffleinsights"
     ENDPOINTS = "endpoints"
     LOGS = "logs"
+
+    # Below nodes are part of separate clusters.
+    AI_EVENTS = "ai_events"
+    AUX = "aux"
+    OPS = "ops"
+    SESSIONS = "sessions"
+
+
+# Roles that host replicated MergeTree data; valid ALTER TABLE targets.
+# LOGS hosts replicated tables too (metric_series1/metric_samples1 via migration
+# 0283); non-sharded ALTERs on it run via any_host_by_roles like the satellites.
+DATA_NODE_ROLES: frozenset[NodeRole] = frozenset(
+    {NodeRole.DATA, NodeRole.AI_EVENTS, NodeRole.AUX, NodeRole.LOGS, NodeRole.OPS, NodeRole.SESSIONS}
+)
+# Single-shard data clusters: ALTER runs on one host, replication propagates.
+SINGLE_SHARD_DATA_NODE_ROLES: frozenset[NodeRole] = frozenset(
+    {NodeRole.AI_EVENTS, NodeRole.AUX, NodeRole.OPS, NodeRole.SESSIONS}
+)
 
 
 _default_workload = Workload.ONLINE
@@ -55,26 +71,44 @@ class DatastoreUser(StrEnum):
     META = "meta"
     MESSAGING = "messaging"  # a.k.a. behavioral cohorts
     MAX_AI = "max_ai"  # llm/a
+    LLM_ANALYTICS = "llm_analytics"  # background AI observability workflows; interactive requests use APP
+    ERROR_TRACKING = "error_tracking"
     ENDPOINTS = "endpoints"
+    BILLING = "billing"
 
+    # Backups - used by Dagster backup jobs
+    BACKUPS = "backups"
+    # Part breaker - used by Dagster part breaking jobs
+    PART_BREAKER = "part_breaker"
     # Dev Operations - do not normally use
     OPS = "ops"
     # Only for migrations - do not normally use
     MIGRATIONS = "migrations"
+    # Low-privilege reader baked into dictionary SOURCE blocks, decoupling
+    # dictionary credentials from the default user.
+    DICT_READER = "dict_reader"
 
 
-__user_dict: Mapping[DatastoreUser, tuple[str, str]] | None = None
+@dataclass(frozen=True)
+class DatastoreCredentials:
+    user: str
+    password: str = field(repr=False)
 
 
-def init_datastore_users() -> Mapping[DatastoreUser, tuple[str, str]]:
+__user_dict: Mapping[DatastoreUser, DatastoreCredentials] | None = None
+
+
+def init_datastore_users() -> Mapping[DatastoreUser, DatastoreCredentials]:
     user_dict = {
-        DatastoreUser.DEFAULT: (data_stores.DATASTORE_USER, data_stores.DATASTORE_PASSWORD),
+        DatastoreUser.DEFAULT: DatastoreCredentials(
+            user=data_stores.DATASTORE_USER, password=data_stores.DATASTORE_PASSWORD
+        ),
     }
     for u in DatastoreUser:
         user = os.getenv(f"DATASTORE_{u.name.upper()}_USER")
         password = os.getenv(f"DATASTORE_{u.name.upper()}_PASSWORD")
         if user and password:
-            user_dict[u] = (user, password)
+            user_dict[u] = DatastoreCredentials(user=user, password=password)
         elif bool(user) != bool(password):
             logging.warning(f"only one of datastore user/password provided, check your config")
     user_names = ",".join([x.name for x in user_dict.keys()])
@@ -82,7 +116,7 @@ def init_datastore_users() -> Mapping[DatastoreUser, tuple[str, str]]:
     return user_dict
 
 
-def get_datastore_creds(user: DatastoreUser) -> tuple[str, str]:
+def get_datastore_creds(user: DatastoreUser) -> DatastoreCredentials:
     """
     Retrieve Datastore credentials for the specified user.
 
@@ -97,19 +131,15 @@ def get_datastore_creds(user: DatastoreUser) -> tuple[str, str]:
     Args:
         user (DatastoreUser): The user whose Datastore credentials need
                                to be retrieved.
-
-    Returns:
-        tuple[str, str]: A tuple containing the username and password associated
-                         with the specified user.
     """
     global __user_dict
     if not __user_dict:
         __user_dict = init_datastore_users()
-    return __user_dict[user] if user in __user_dict else __user_dict[DatastoreUser.DEFAULT]
+    return __user_dict.get(user, __user_dict[DatastoreUser.DEFAULT])
 
 
 class ProxyClient:
-    def __init__(self, client: HttpClient):
+    def __init__(self, client: "HttpClient"):
         self._client = client
 
     def execute(
@@ -124,6 +154,8 @@ class ProxyClient:
         columnar=False,
     ):
         if query_id:
+            if settings is None:
+                settings = {}
             settings["query_id"] = query_id
         result = self._client.query(query=query, parameters=params, settings=settings, column_oriented=columnar)
 
@@ -144,17 +176,26 @@ class ProxyClient:
         pass
 
 
-_datastore_http_pool_mgr = httputil.get_pool_manager(
-    maxsize=settings.DATASTORE_CONN_POOL_MAX,  # max number of open connection per pool
-    block=True,  # makes the maxsize limit per pool, keeps connections
-    num_pools=12,  # number of pools
-    ca_cert=settings.DATASTORE_CA,
-    verify=settings.QUERYSERVICE_VERIFY,
-)
+@cache
+def _datastore_http_pool_mgr():
+    # datastore_connect probes pandas/numpy availability when imported, dragging pandas and
+    # pyarrow (~400ms) onto the path of whoever imports it — and this module loads at
+    # django.setup(). Only the HTTP client paths need it, so build the pool manager on demand.
+    from datastore_connect.driver import httputil  # noqa: PLC0415
+
+    return httputil.get_pool_manager(
+        maxsize=settings.DATASTORE_CONN_POOL_MAX,  # max number of open connection per pool
+        block=True,  # makes the maxsize limit per pool, keeps connections
+        num_pools=12,  # number of pools
+        ca_cert=settings.DATASTORE_CA,
+        verify=settings.QUERYSERVICE_VERIFY,
+    )
 
 
 @contextmanager
 def get_http_client(**overrides):
+    from datastore_connect import get_client  # noqa: PLC0415
+
     kwargs = {
         "host": settings.DATASTORE_HOST,
         "database": settings.DATASTORE_DATABASE,
@@ -166,7 +207,7 @@ def get_http_client(**overrides):
         "send_receive_timeout": 30 if settings.TEST else 999_999_999,
         "autogenerate_session_id": True,
         # beware, this makes each query to run in a separate session - no temporary tables will work
-        "pool_mgr": _datastore_http_pool_mgr,
+        "pool_mgr": _datastore_http_pool_mgr(),
         **overrides,
     }
     yield ProxyClient(get_client(**kwargs))
@@ -178,12 +219,18 @@ def get_kwargs_for_client(
     readonly=False,
     ch_user: DatastoreUser = DatastoreUser.DEFAULT,
 ):
-    # Workload.LOGS deliberately has no branch here: it resolves like every other
-    # workload, so it inherits the one configured datastore connection from
-    # _make_ch_pool. It used to return a whole replacement dict built from a
-    # parallel setting family nothing set, which pinned Logs to localhost:9000.
-    (user, password) = get_datastore_creds(ch_user)
-    base_kwargs = {"user": user, "password": password}
+    if workload == Workload.LOGS:
+        return {
+            "host": settings.DATASTORE_LOGS_CLUSTER_HOST,
+            "port": settings.DATASTORE_LOGS_CLUSTER_PORT,
+            "database": settings.DATASTORE_LOGS_CLUSTER_DATABASE,
+            "user": settings.DATASTORE_LOGS_CLUSTER_USER,
+            "password": settings.DATASTORE_LOGS_CLUSTER_PASSWORD,
+            "secure": settings.DATASTORE_LOGS_CLUSTER_SECURE,
+        }
+
+    creds = get_datastore_creds(ch_user)
+    base_kwargs = {"user": creds.user, "password": creds.password}
 
     if team_id is not None and str(team_id) in settings.DATASTORE_PER_TEAM_SETTINGS:
         user_settings = settings.DATASTORE_PER_TEAM_SETTINGS[str(team_id)]

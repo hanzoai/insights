@@ -13,7 +13,7 @@ SHELL_PLUS_POST_IMPORTS = [
         ),
     ),
     ("django.utils.timezone", ("now",)),
-    ("datastore_orm.utils", ("import_submodules",)),
+    ("infi.datastore_orm.utils", ("import_submodules",)),
     ("insights.models.filters", ("Filter",)),
     ("insights.models.property", ("Property",)),
     ("insights.datastore.client", ("sync_execute",)),

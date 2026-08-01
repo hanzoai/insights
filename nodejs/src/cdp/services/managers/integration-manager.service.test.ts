@@ -1,8 +1,8 @@
 import { IntegrationType } from '~/cdp/types'
+import { closeHub, createHub } from '~/common/utils/db/hub'
+import { PostgresUse } from '~/common/utils/db/postgres'
 import { createTeam, getTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub } from '~/types'
-import { closeHub, createHub } from '~/utils/db/hub'
-import { PostgresUse } from '~/utils/db/postgres'
 
 import { insertIntegration } from '../../_tests/fixtures'
 import { IntegrationManagerService } from './integration-manager.service'
@@ -19,7 +19,7 @@ describe('IntegrationManager', () => {
         await resetTestDatabase()
         manager = new IntegrationManagerService(hub.pubSub, hub.postgres, hub.encryptedFields)
 
-        const team = await getTeam(hub, 2)
+        const team = await getTeam(hub.postgres, 2)
 
         teamId1 = await createTeam(hub.postgres, team!.organization_id)
 

@@ -3,7 +3,9 @@ from insights.test.base import BaseTest
 
 from django import db
 
-from insights.models import Dashboard, User, UserScenePersonalisation
+from insights.models import User, UserScenePersonalisation
+
+from products.dashboards.backend.models.dashboard import Dashboard
 
 
 class TestUserScenePersonalisation(BaseTest):

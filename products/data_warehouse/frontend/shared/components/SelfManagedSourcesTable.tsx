@@ -1,0 +1,79 @@
+import { useActions, useValues } from 'kea'
+
+import { Button, Dialog, Input, Table } from '@hanzo/elements'
+
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { urls } from 'scenes/urls'
+
+import { sourceManagementLogic } from '../logics/sourceManagementLogic'
+import { SourceIcon, mapUrlToProvider } from './SourceIcon'
+
+export function SelfManagedSourcesTable(): JSX.Element {
+    const { filteredSelfManagedTables, searchTerm, databaseLoading } = useValues(sourceManagementLogic)
+    const { deleteSelfManagedTable, refreshSelfManagedTableSchema, setSearchTerm } = useActions(sourceManagementLogic)
+
+    return (
+        <div>
+            <div className="flex gap-2 justify-between items-center mb-4">
+                <Input type="search" placeholder="Search..." onChange={setSearchTerm} value={searchTerm} />
+            </div>
+            <Table
+                id="self-managed-sources"
+                dataSource={filteredSelfManagedTables}
+                loading={databaseLoading}
+                pagination={{ pageSize: 10 }}
+                scrollToTopOnPageChange={false}
+                columns={[
+                    {
+                        width: 0,
+                        render: (_, table) => <SourceIcon type={mapUrlToProvider(table.url_pattern)} />,
+                    },
+                    {
+                        title: 'Source',
+                        key: 'name',
+                        render: (_, table) => (
+                            <TableLink
+                                to={urls.dataWarehouseSource(`self-managed-${table.id}`)}
+                                title={table.name}
+                            />
+                        ),
+                    },
+                    {
+                        key: 'actions',
+                        render: (_, table) => (
+                            <div className="flex flex-row justify-end">
+                                <Button
+                                    data-attr={`refresh-data-warehouse-${table.name}`}
+                                    onClick={() => refreshSelfManagedTableSchema(table.id)}
+                                >
+                                    Update schema from source
+                                </Button>
+                                <Button
+                                    status="danger"
+                                    data-attr={`delete-data-warehouse-${table.name}`}
+                                    onClick={() => {
+                                        Dialog.open({
+                                            title: 'Delete table?',
+                                            description:
+                                                'Table deletion cannot be undone. All views and joins related to this table will be deleted.',
+                                            primaryButton: {
+                                                children: 'Delete',
+                                                status: 'danger',
+                                                onClick: () => deleteSelfManagedTable(table.id),
+                                            },
+                                            secondaryButton: {
+                                                children: 'Cancel',
+                                            },
+                                        })
+                                    }}
+                                >
+                                    Delete
+                                </Button>
+                            </div>
+                        ),
+                    },
+                ]}
+            />
+        </div>
+    )
+}

@@ -1,6 +1,6 @@
 {
     "name": "Hubspot",
-    "url": "https://github.com/hanzoai/hubspot-plugin",
+    "url": "https://github.com/Insights/hubspot-plugin",
     "description": "Send contact data to Hubspot on Insights identify events.",
     "main": "index.ts",
     "config": [
@@ -42,7 +42,7 @@
             "hint": "Deprecated",
             "name": "Insights Instance",
             "type": "string",
-            "default": "https://insights.hanzo.ai",
+            "default": "https://app.hanzo.ai",
             "required": false
         },
         {
@@ -57,7 +57,7 @@
         {
             "key": "insightsProjectKey",
             "hint": "Deprecated",
-            "name": "Project API Key",
+            "name": "Project token",
             "type": "string",
             "default": "",
             "secret": false,
