@@ -367,3 +367,58 @@ so `containerStatuses[0]` is not necessarily the app.
 Registry tag lists are paginated: `/tags/list?n=10000` can return nothing at all.
 To ask whether a specific version exists, probe its manifest — 200 or 404 — which
 is also the only way to catch a phantom tag (listed, but with no image behind it).
+
+## The upstream logo: five surfaces fixed here, one bigger one is NOT
+
+The hedgehog and its wordmark were still drawn under our product's name. Five
+surfaces are fixed in this repo — the product-tour footer preview, both toolbar
+authorize screens, the survey error page, and the MCP link mark — all now the
+HANZO wordmark in `currentColor`.
+
+**Search by path data, not by colour.** Two of those five drew the mark with
+`var(--ph-brand-*)` rather than a literal `#1D4AFF`, so a hex grep finds the
+templates and misses the survey page. The path strings are the reliable tell:
+`M55.383 75.225` and `5.77226 8.02931` (hedgehog), `M303.32 114.86` and
+`M29.375 11.6667` (wordmark).
+
+**The wordmark asset was itself wrong.** `frontend/public/hanzo-logo.svg` had
+five glyphs reading H, N, A, N, S — a duplicated N, no Z, no O. It rendered
+HNANS on the login page. `insights-logo-cloud.svg` and `insights-logo-demo.svg`
+were byte-identical copies with no referrer and are deleted. Render an SVG
+before believing it; nothing in CI reads letterforms.
+
+**What is NOT fixed, and it is the widest surface of the lot.** The browser SDK
+still ships the upstream mark, and we serve it:
+
+    https://insights.hanzo.ai/static/array.full.js   200, contains the hedgehog
+
+It comes from `@hanzo/insights` (1.358.1), copied into `frontend/dist` by
+`frontend/bin/copy-insights-js`, and it renders `Tour by <mark>` and
+`Survey by <mark>` — 20 dist files carry it. That is the widget on our
+CUSTOMERS' websites, seen by their end users, so it is a wider audience than
+every surface fixed here combined. Fixing it means fixing the `@hanzo/insights`
+fork and publishing; it cannot be done from this repo.
+
+Note the distinction that makes this easy to get wrong: the file fixed here,
+`scenes/product-tours/editor/FooterPreview.tsx`, is the EDITOR'S PREVIEW of the
+widget. The widget itself is the SDK. Fixing the preview alone changes what the
+tour author sees and nothing about what their users see.
+
+## One icon set, two package names
+
+`@hanzo/icons` resolves through a `pnpm.overrides` alias in the root
+`package.json` to `@hanzo/insights-icons`. The shadowed name is real and
+published: `@hanzo/icons@0.36.6` is a 301-byte stub whose only content is a
+dependency on the upstream `@posthog/icons`. Drop the alias and the upstream
+package returns silently, with no install error.
+
+1,073 files import `@hanzo/icons`, so the fix is at the package, not the
+imports: publish the fork's content as `@hanzo/icons` and delete the alias.
+Note before doing it that `insights-hosts` aliases the SAME name to
+`@hanzo/insights-icons@0.36.6` and is pre-rename (its SCSS has no `.Icon`
+rules), so it must keep its own pin.
+
+Until then the guard is `frontend/src/lib/elements/icons/icons.test.ts`, which
+renders every icon and asserts `class="Icon"`. Verified both ways: 318/318 pass
+on 0.36.7, and 318/318 fail on 0.36.6 — so it catches the drift rather than
+merely documenting it.
