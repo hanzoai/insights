@@ -2,12 +2,16 @@ import './Modal.scss'
 
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
-import Modal from 'react-modal'
+// react-modal's default export is aliased because this file exports its own
+// Modal: the debrand renamed LemonModal onto that name, so the unaliased import
+// collided with it and `<Modal>` below resolved to this file's own component --
+// a component rendering itself.
+import ReactModal from 'react-modal'
 
 import { IconX } from '@hanzo/icons'
 
-import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { Button } from 'lib/elements/Button'
+import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 
 import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 
@@ -109,10 +113,7 @@ export function Modal({
                 // providing immediate visual feedback on click
                 <div
                     key={ignoredOverlayClickCount}
-                    className={clsx(
-                        'Modal__close',
-                        ignoredOverlayClickCount > 0 && 'Modal__close--highlighted'
-                    )}
+                    className={clsx('Modal__close', ignoredOverlayClickCount > 0 && 'Modal__close--highlighted')}
                 >
                     <Tooltip
                         visible={!!ignoredOverlayClickCount || undefined}
@@ -178,7 +179,7 @@ export function Modal({
         </div>
     ) : (
         // eslint-disable-next-line react/forbid-elements
-        <Modal
+        <ReactModal
             isOpen={isOpen}
             onRequestClose={(e) => {
                 if (hasUnsavedInput && e.type === 'click') {
@@ -211,7 +212,7 @@ export function Modal({
             parentSelector={floatingContainer ? () => floatingContainer : undefined}
         >
             {modalContent}
-        </Modal>
+        </ReactModal>
     )
 }
 

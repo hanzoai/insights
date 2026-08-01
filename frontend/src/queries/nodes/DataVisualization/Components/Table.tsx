@@ -3,9 +3,12 @@ import '../../DataTable/DataTable.scss'
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
+// Aliased because this module exports its own Table (imported by name in three
+// places): the debrand renamed LemonTable onto that name, so the unaliased
+// import collided with it and the export below rendered itself.
+import { Table as ElementsTable, TableColumn, Tooltip } from '@hanzo/elements'
 import { IconPin, IconPinFilled } from '@hanzo/icons'
 import insights from '@hanzo/insights'
-import { Table, TableColumn, Tooltip } from '@hanzo/elements'
 
 import { execScript } from 'lib/iql'
 import { lightenDarkenColor } from 'lib/utils'
@@ -65,112 +68,110 @@ export const Table = (props: TableProps): JSX.Element => {
     } = useValues(dataVisualizationLogic)
     const { toggleColumnPin } = useActions(dataVisualizationLogic)
 
-    const tableColumns: TableColumn<TableDataCell<any>[], any>[] = tabularColumns.map(
-        ({ column, settings }, index) => {
-            const { title, ...columnMeta } = renderColumnMeta(column.name, props.query, props.context)
+    const tableColumns: TableColumn<TableDataCell<any>[], any>[] = tabularColumns.map(({ column, settings }, index) => {
+        const { title, ...columnMeta } = renderColumnMeta(column.name, props.query, props.context)
 
-            const columnTitle = settings?.display?.label || title || column.name
+        const columnTitle = settings?.display?.label || title || column.name
 
-            const formattedTitle = typeof columnTitle === 'string' ? formatColumnTitle(columnTitle) : columnTitle
+        const formattedTitle = typeof columnTitle === 'string' ? formatColumnTitle(columnTitle) : columnTitle
 
-            return {
-                ...columnMeta,
-                key: column.name,
-                title: (
-                    <div className="flex items-center gap-1">
-                        <span>{formattedTitle}</span>
-                        {isPinningEnabled && (
-                            <Tooltip title={isColumnPinned(column.name) ? 'Unpin column' : 'Pin column'}>
-                                <span
-                                    className="inline-flex items-center justify-center cursor-pointer p-1 -m-1"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        toggleColumnPin(column.name)
-                                    }}
-                                >
-                                    {isColumnPinned(column.name) ? (
-                                        <IconPinFilled className="text-sm" />
-                                    ) : (
-                                        <IconPin className="text-sm" />
-                                    )}
-                                </span>
-                            </Tooltip>
-                        )}
+        return {
+            ...columnMeta,
+            key: column.name,
+            title: (
+                <div className="flex items-center gap-1">
+                    <span>{formattedTitle}</span>
+                    {isPinningEnabled && (
+                        <Tooltip title={isColumnPinned(column.name) ? 'Unpin column' : 'Pin column'}>
+                            <span
+                                className="inline-flex items-center justify-center cursor-pointer p-1 -m-1"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    toggleColumnPin(column.name)
+                                }}
+                            >
+                                {isColumnPinned(column.name) ? (
+                                    <IconPinFilled className="text-sm" />
+                                ) : (
+                                    <IconPin className="text-sm" />
+                                )}
+                            </span>
+                        </Tooltip>
+                    )}
+                </div>
+            ),
+            render: (_, data, recordIndex: number, rowCount: number) => {
+                return (
+                    <div className="truncate">
+                        {renderColumn(column.name, data[index].formattedValue, data, recordIndex, rowCount, {
+                            kind: NodeKind.DataTableNode,
+                            source: props.query.source,
+                        })}
                     </div>
-                ),
-                render: (_, data, recordIndex: number, rowCount: number) => {
-                    return (
-                        <div className="truncate">
-                            {renderColumn(column.name, data[index].formattedValue, data, recordIndex, rowCount, {
-                                kind: NodeKind.DataTableNode,
-                                source: props.query.source,
-                            })}
-                        </div>
-                    )
-                },
-                style: (_, data) => {
-                    const cf = conditionalFormattingRules
-                        .filter((n) => n.columnName === column.name)
-                        .filter((n) => {
-                            const isValidBytecode = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
-                            if (!isValidBytecode) {
-                                insights.captureException(new Error('Invalid bytecode for conditional formatting'), {
-                                    formatRule: n,
-                                })
-                            }
-
-                            return isValidBytecode
-                        })
-                        .map((n) => {
-                            const res = execScript(n.bytecode, {
-                                globals: {
-                                    value: data[index].value,
-                                    input: convertTableValue(n.input, column.type.name),
-                                },
-                                functions: {},
-                                maxAsyncSteps: 0,
+                )
+            },
+            style: (_, data) => {
+                const cf = conditionalFormattingRules
+                    .filter((n) => n.columnName === column.name)
+                    .filter((n) => {
+                        const isValidBytecode = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
+                        if (!isValidBytecode) {
+                            insights.captureException(new Error('Invalid bytecode for conditional formatting'), {
+                                formatRule: n,
                             })
+                        }
 
-                            return {
-                                rule: n,
-                                result: res.result,
-                            }
+                        return isValidBytecode
+                    })
+                    .map((n) => {
+                        const res = execScript(n.bytecode, {
+                            globals: {
+                                value: data[index].value,
+                                input: convertTableValue(n.input, column.type.name),
+                            },
+                            functions: {},
+                            maxAsyncSteps: 0,
                         })
 
-                    const conditionalFormattingMatches = cf.find((n) => Boolean(n.result))
-
-                    if (conditionalFormattingMatches) {
-                        const ruleColor = conditionalFormattingMatches.rule.color
-                        const colorMode = conditionalFormattingMatches.rule.colorMode ?? 'light'
-
-                        // If the color mode matches the current theme, return as it was saved
-                        if ((colorMode === 'dark' && isDarkModeOn) || (colorMode === 'light' && !isDarkModeOn)) {
-                            return {
-                                backgroundColor: ruleColor,
-                            }
-                        }
-
-                        // If the color mode is dark, but we're in light mode - then lighten the color
-                        if (colorMode === 'dark' && !isDarkModeOn) {
-                            return {
-                                backgroundColor: lightenDarkenColor(ruleColor, 30),
-                            }
-                        }
-
-                        // If the color mode is light, but we're in dark mode - then darken the color
                         return {
-                            backgroundColor: lightenDarkenColor(ruleColor, -30),
+                            rule: n,
+                            result: res.result,
+                        }
+                    })
+
+                const conditionalFormattingMatches = cf.find((n) => Boolean(n.result))
+
+                if (conditionalFormattingMatches) {
+                    const ruleColor = conditionalFormattingMatches.rule.color
+                    const colorMode = conditionalFormattingMatches.rule.colorMode ?? 'light'
+
+                    // If the color mode matches the current theme, return as it was saved
+                    if ((colorMode === 'dark' && isDarkModeOn) || (colorMode === 'light' && !isDarkModeOn)) {
+                        return {
+                            backgroundColor: ruleColor,
                         }
                     }
 
-                    return undefined
-                },
-            }
+                    // If the color mode is dark, but we're in light mode - then lighten the color
+                    if (colorMode === 'dark' && !isDarkModeOn) {
+                        return {
+                            backgroundColor: lightenDarkenColor(ruleColor, 30),
+                        }
+                    }
+
+                    // If the color mode is light, but we're in dark mode - then darken the color
+                    return {
+                        backgroundColor: lightenDarkenColor(ruleColor, -30),
+                    }
+                }
+
+                return undefined
+            },
         }
-    )
+    })
 
     return (
-        <Table
+        <ElementsTable
             className="DataVisualizationTable"
             dataSource={tabularData}
             columns={tableColumns}
