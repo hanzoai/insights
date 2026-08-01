@@ -43,7 +43,8 @@ restored so CI builds the monolith `Dockerfile` and pushes to
 | Product / web / revenue / marketing / customer analytics, insights, dashboards, funnels, retention, trends | `/v1/analytics/{overview,timeseries,realtime,top/*}` | **GAP** — backend not shipped (below) |
 | Org / user / project / `personal_api_keys` / `login` | **Hanzo IAM** (`hanzo.id`, OIDC `owner`) + `/v1/projects` | covered by IAM (auth/tenancy, not observability) |
 | Data warehouse / data_modeling / batch_exports | Datastore warehouse (`hanzoai/datastore`) direct | substrate retained |
-| Feature flags, early access, surveys, experiments, product tours, session replay, error tracking, CDP, notebooks, groups, user interviews | — | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
+| Feature flags, early access, surveys, experiments, product tours, error tracking, CDP, notebooks, groups, user interviews | — | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
+| Session replay | — | **NOT sunset.** The ingest→S3→warehouse→playback pipeline is live and proven; only the write and read doors are unwired. See the replay section below before touching it. |
 
 ### Honest GAPs (must port before claiming full parity)
 1. **`cloud/clients/analytics` is NOT shipped.** `console2` allow-lists and calls
@@ -52,16 +53,15 @@ restored so CI builds the monolith `Dockerfile` and pushes to
    read path is therefore not yet live. This is a **pre-existing** gap (Django
    product-analytics was already `502`), owned by the cloud lane — not created by
    this retirement. Until it lands, only `/v1/evals/*` serves observability reads.
-2. **Legacy product-analytics / flags / replay / surveys / experiments** are
-   formally **sunset**, not migrated. If any is still required, it must be
-   re-platformed deliberately.
+2. **Legacy product-analytics / flags / surveys / experiments** are formally
+   **sunset**, not migrated. If any is still required, it must be re-platformed
+   deliberately. Session replay is NOT in this list — see below.
 
-## Ingest is NATIVE — the capture/kafka tier is GONE (verified 2026-07-26)
+## Ingest is NATIVE for analytics — the replay tier is alive, not gone
 
-Do not go looking for `insights-capture`, `insights-plugin`, `insights-kafka` or
-`insights-kv`. **Those CRs and pods no longer exist.** The only insights
-workloads in ns `hanzo` are `insights-web`, `insights-worker`, `insights-sql`.
-Events are ingested by the **cloud Go binary**, not by the Rust capture service:
+`insights-capture`, `insights-kafka` and `insights-kv` are gone. **`insights-plugin`
+is NOT** — it is running, and it is the session-replay blob ingester. Analytics
+events are ingested by the **cloud Go binary**, not by the Rust capture service:
 
 ```
 insights.hanzo.ai/{e,/e/,v1/e,/v1/e/,batch,capture}   (ingress prio 150)
@@ -85,20 +85,53 @@ Django answers HTML, cloud answers
 
 `POST /v1/ai` is likewise unrouted and falls through to Django.
 
-**`POST /v1/s` (session recordings) is BROKEN and losing data.** It still points
-at `insights-hanzo-ai-capture` → `insights-capture.hanzo.svc`, which has no
-pods, so it 502s — ~16 real posts per 3h are being dropped.
-`insights.session_replay_events` has **0 rows**; replay has never worked in this
-deploy. Reviving it is a project, not a config fix: that Distributed table is
-fed by `kafka_session_replay_events` + `session_replay_events_mv`, and with the
-Kafka tier deleted **nothing can write the index** even if snapshot blobs landed
-in S3. It needs a new writer path in cloud, or the Kafka tier back. Do not "fix"
-the route alone — pointing it somewhere that returns 200 would only lose the
-data more quietly.
+### Session replay: the pipeline is LIVE. Only the two doors are missing.
 
-Relatedly, `insights` still carries **23 Kafka-engine tables** pointing at
-`kafka:9092`, which does not resolve. They error in the background forever and
-are why `preflight.kafka` is `false`.
+Earlier revisions of this file said replay "has never worked", that
+`session_replay_events` has 0 rows, that `kafka:9092` does not resolve and that
+`POST /v1/s` 502s off a dead capture service. **All four are false**, and
+believing them costs hours. Re-probed and reproduced twice, independently:
+
+- `kafka:9092` resolves. `Service kafka/hanzo` selects
+  `app.kubernetes.io/name=cloud`; the endpoint is the cloud pod, which mounts
+  `hanzoai/kafka` `protocol.Broker` over embedded JetStream. `preflight.kafka` is
+  **true**, and so are datastore/db/object_storage.
+- The chain runs end to end: produce to `session_recording_snapshot_item_events`
+  → `blob_ingester_consumer_v2` in **insights-plugin** → snappy block in S3 →
+  `datastore_session_replay_events` → `kafka_session_replay_events` →
+  `session_replay_events_mv` → sharded → Distributed → list and playback. Proven
+  by producing a message and reading its rrweb back out of the block.
+- `/v1/s` does not 502. There is **no `/v1/s` router**, no `insights-capture`
+  Service, Deployment or App CR. `/s`, `/s/`, `/v1/s` and `/v1/s/` all answer
+  **403 from the Django catch-all** — same data loss, different mechanism.
+- 24 Kafka-engine tables, not 23. The "Temporarily pause scheduling" lines are
+  idle-topic backoff, not failure.
+
+Two doors are missing, and neither is a bug in the pipeline:
+
+**Write door (a product decision).** Nothing accepts the browser's POST. The
+canonical producer is `rust/capture` in `CaptureMode::Recordings` —
+`rust/capture/src/router.rs` serves `/v1/s` and `events/recordings.rs` emits
+exactly the format the ingester consumes. It is not built (no job in
+`.hanzo/workflows/`) and has no image, workload or route. Reviving it is the
+cheap option; folding replay into cloud is ~715 LoC of `$snapshot` →
+`$snapshot_items` transform that `apps/analytics` does not have; writing to the
+ingestion topic from Django is cheap now and wrong forever — `api/capture.py`
+says so itself.
+
+**Read door (config).** `RECORDING_API_URL` is empty on insights-web, so
+`insights/storage/recordings/block_storage.py:317` raises `RuntimeError` and
+playback fails even though the data exists. insights-plugin also has no Service.
+Both are universe changes.
+
+**Before giving insights-plugin a Service, know what it exposes.** It serves the
+recording API: block reads, `DELETE .../recordings/:session_id` and
+`POST .../recordings/bulk_delete`, with `team_id` read straight from the path and
+never verified. Those routes now refuse a caller that does not present
+`INTERNAL_API_SECRET` (an empty secret denies), so a Service must ship **with the
+secret provisioned from KMS on both insights-plugin and insights-web**, or
+playback 401s. Keep it ClusterIP; that is not a boundary against other pods, but
+it should not be an Ingress either.
 
 The `ingress-routes` CM hot-reloads via file-provider fsnotify — NEVER
 `rollout restart deploy/ingress` (ACME/TLS outage). Routes live in
@@ -155,10 +188,12 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
   `hanzoai/stream` shim, Datastore (`DATASTORE_DATABASE=insights`). Probes are
   `tcpSocket:8000` (Django rejects kubelet `httpGet` Host under restricted
   `ALLOWED_HOSTS`; the CRD probe schema has no `httpHeaders`).
-- **Only three insights workloads exist**: `insights-web`, `insights-worker`,
-  `insights-sql`. The `insights-capture` / `-kafka` / `-kv` / `-plugin` CRs were
-  deleted — earlier revisions of this file listed them as retained, which is no
-  longer true. See the ingest section above.
+- The insights workloads are `insights-web`, `insights-worker`, `insights-sql`,
+  **`insights-plugin`** and `insights-livestream`. The `insights-capture` /
+  `-kafka` / `-kv` CRs were deleted; `-plugin` was not. Earlier revisions of this
+  file claimed only three exist and told you not to go looking for the plugin —
+  that is wrong, and it is the ingester replay depends on. Enumerate the
+  namespace rather than trusting this list.
 - Rollout is verified BY IMAGE, never by `readyReplicas` alone: gate on
   `updatedReplicas == replicas` with the old ReplicaSet at zero, and exec a pod
   selected by its image. Reading a pod mid-rollout returns the OLD build and
