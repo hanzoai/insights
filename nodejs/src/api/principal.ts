@@ -57,11 +57,22 @@ export interface IamOptions {
 const AUTH_SCHEME = 'bearer '
 
 /**
- * Kubelet probes and prometheus scrapes arrive without credentials, and the
- * webhook surface under /public/ is public by contract. Everything else needs a
- * principal.
+ * What serves without a principal, split by the shape each one actually is.
+ *
+ * Kubelet probes and prometheus scrapes arrive without credentials, and they are
+ * exactly four PATHS — so they are matched exactly. Prefix-matching them (which
+ * is what this did, inherited from the middleware it replaces) quietly makes
+ * every future path that merely STARTS with one of them public: `/metrics` would
+ * exempt `/metricsExport`, and nothing about adding that route would say so. No
+ * such route exists today, so this closes a trap rather than a hole — but a trap
+ * in the one file that decides who gets in is worth closing while it is still
+ * only a trap.
+ *
+ * /public/ is genuinely a SUBTREE — the webhook surface, public by contract, with
+ * `:webhook_id` under it — so it stays a prefix.
  */
-const PUBLIC_PATH_PREFIXES = ['/public/', '/healthz', '/_ready', '/_metrics', '/metrics']
+const PUBLIC_PATHS = ['/healthz', '/_ready', '/_metrics', '/metrics']
+const PUBLIC_PATH_PREFIXES = ['/public/']
 
 /**
  * The org is an IAM owner claim — a short label. Anything longer is malformed or
@@ -271,7 +282,9 @@ export interface PrincipalMiddlewareOptions {
  * the path, the body or a header.
  */
 export function createPrincipalMiddleware(iam: Iam | null, options: PrincipalMiddlewareOptions = {}) {
-    const excluded = [...PUBLIC_PATH_PREFIXES, ...(options.excludedPathPrefixes ?? [])]
+    const excludedPrefixes = [...PUBLIC_PATH_PREFIXES, ...(options.excludedPathPrefixes ?? [])]
+    const isPublic = (path: string): boolean =>
+        PUBLIC_PATHS.includes(path) || excludedPrefixes.some((prefix) => path.startsWith(prefix))
 
     if (!iam) {
         // Said once at wiring time, not per request: without this the refusals
@@ -280,7 +293,7 @@ export function createPrincipalMiddleware(iam: Iam | null, options: PrincipalMid
     }
 
     return (req: Request, res: Response, next: NextFunction): void => {
-        if (excluded.some((prefix) => req.path.startsWith(prefix))) {
+        if (isPublic(req.path)) {
             next()
             return
         }

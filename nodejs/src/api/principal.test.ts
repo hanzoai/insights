@@ -133,4 +133,20 @@ describe('principal gate', () => {
         await supertest(gated).get('/healthz').expect(200)
         await supertest(gated).get('/public/webhooks/x').expect(200)
     })
+
+    it('does not extend a probe exemption to paths that merely start with one', async () => {
+        // The probe paths are matched exactly. Prefix-matching them would make a
+        // future /metricsExport public without anything saying so.
+        const app = express()
+        app.use(createPrincipalMiddleware(iam.iam))
+        for (const path of ['/metricsExport', '/healthz-internal', '/_readyz', '/publicity']) {
+            app.get(path, (_req, res) => {
+                res.status(200).json({ leaked: path })
+            })
+        }
+        listening.push(app.listen(0, () => {}))
+        for (const path of ['/metricsExport', '/healthz-internal', '/_readyz', '/publicity']) {
+            await supertest(app).get(path).expect(401)
+        }
+    })
 })
