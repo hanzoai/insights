@@ -23,12 +23,22 @@ import { insightsFilterOutPlugin } from './legacy-plugins/_transformations/insig
 import { BASE_KV_KEY, ScriptWatcherState } from './services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from './types'
 
+// The internal HTTP surface refuses uncredentialed callers, so these tests present
+// the credential and exercise the router. The gate itself is tested in
+// api/middleware/internal-api-auth.test.ts.
+const INTERNAL_API_SECRET = 'test-internal-api-secret'
+
 describe('CDP API', () => {
     let hub: Hub
     let team: Team
     let app: express.Application
     let server: Server
     let api: CdpApi
+
+    const internal = () => ({
+        get: (url: string) => supertest(app).get(url).set('x-internal-api-secret', INTERNAL_API_SECRET),
+        post: (url: string) => supertest(app).post(url).set('x-internal-api-secret', INTERNAL_API_SECRET),
+    })
     let insightsFunction: InsightsFunctionType
     let insightsFunctionMultiFetch: InsightsFunctionType
 
@@ -77,7 +87,7 @@ describe('CDP API', () => {
         team = await getFirstTeam(hub)
 
         api = new CdpApi(hub)
-        app = setupExpressApp()
+        app = setupExpressApp({ internalApiSecret: INTERNAL_API_SECRET })
         app.use('/', api.router())
         server = app.listen(0, () => {})
     })
@@ -108,7 +118,7 @@ describe('CDP API', () => {
     })
 
     it('errors if missing custom function', async () => {
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${new UUIDT().toString()}/invocations`)
             .send({ globals })
 
@@ -116,7 +126,7 @@ describe('CDP API', () => {
     })
 
     it('errors if missing team', async () => {
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${new UUIDT().toString()}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals })
 
@@ -124,7 +134,7 @@ describe('CDP API', () => {
     })
 
     it('errors if missing values', async () => {
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({})
 
@@ -135,7 +145,7 @@ describe('CDP API', () => {
     })
 
     it("does not error if custom function is 'new'", async () => {
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
             .send({ globals })
 
@@ -143,7 +153,7 @@ describe('CDP API', () => {
     })
 
     it('can invoke a function via the API with mocks', async () => {
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
@@ -200,7 +210,7 @@ describe('CDP API', () => {
             })
         )
 
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
@@ -238,7 +248,7 @@ describe('CDP API', () => {
             ...FN_FILTERS_EXAMPLES.elements_text_filter,
         })
 
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
@@ -267,7 +277,7 @@ describe('CDP API', () => {
                 dump: () => Promise.resolve(),
             })
         )
-        const res = await supertest(app)
+        const res = await internal()
             .post(
                 `/api/projects/${insightsFunctionMultiFetch.team_id}/insights_functions/${insightsFunctionMultiFetch.id}/invocations`
             )
@@ -307,7 +317,7 @@ describe('CDP API', () => {
             ...FN_FILTERS_EXAMPLES.no_filters,
         })
 
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
@@ -342,7 +352,7 @@ describe('CDP API', () => {
             ...FN_FILTERS_EXAMPLES.no_filters,
         })
 
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
@@ -390,7 +400,7 @@ describe('CDP API', () => {
             ],
         })
 
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
@@ -436,7 +446,7 @@ describe('CDP API', () => {
             ...FN_FILTERS_EXAMPLES.no_filters,
         })
 
-        const res = await supertest(app)
+        const res = await internal()
             .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
@@ -505,7 +515,7 @@ describe('CDP API', () => {
         })
 
         it('processes transformations and returns the result if not null', async () => {
-            const res = await supertest(app)
+            const res = await internal()
                 .post(`/api/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration })
 
@@ -538,7 +548,7 @@ describe('CDP API', () => {
         it('processes transformations and returns the result if null', async () => {
             globals.event!.event = 'drop me'
 
-            const res = await supertest(app)
+            const res = await internal()
                 .post(`/api/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration })
 
@@ -572,7 +582,7 @@ describe('CDP API', () => {
             await api['scriptWatcher'].forceStateChange(insightsFunction, ScriptWatcherState.degraded)
             await api['scriptWatcher'].forceStateChange(insightsFunctionMultiFetch, ScriptWatcherState.disabled)
 
-            const res = await supertest(app).get('/api/insights_functions/states')
+            const res = await internal().get('/api/insights_functions/states')
             expect(res.status).toEqual(200)
             expect(res.body).toEqual({
                 results: [
@@ -606,7 +616,7 @@ describe('CDP API', () => {
         const largePayload = 'x'.repeat(600 * 1024)
 
         it('accepts large payloads on custom function invocations endpoint', async () => {
-            const res = await supertest(app)
+            const res = await internal()
                 .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
                 .send({ globals, mock_async_functions: true, configuration: { large_field: largePayload } })
 
@@ -614,7 +624,7 @@ describe('CDP API', () => {
         })
 
         it('accepts large payloads on custom flow invocations endpoint', async () => {
-            const res = await supertest(app)
+            const res = await internal()
                 .post(`/api/projects/${insightsFunction.team_id}/insights_flows/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration: { large_field: largePayload } })
 
@@ -624,7 +634,7 @@ describe('CDP API', () => {
         })
 
         it('rejects large payloads on public webhooks endpoint', async () => {
-            const res = await supertest(app).post('/public/webhooks/test-webhook').send({ large_field: largePayload })
+            const res = await internal().post('/public/webhooks/test-webhook').send({ large_field: largePayload })
 
             expect(res.status).toEqual(413)
             expect(res.body).toEqual({ error: 'Request entity too large' })
@@ -667,8 +677,10 @@ describe('CDP API', () => {
 
         it('errors if missing team', async () => {
             const nonExistentTeamId = new UUIDT().toString()
-            const res = await supertest(app)
-                .post(`/api/projects/${nonExistentTeamId}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-123`)
+            const res = await internal()
+                .post(
+                    `/api/projects/${nonExistentTeamId}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-123`
+                )
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -677,8 +689,10 @@ describe('CDP API', () => {
 
         it('errors if missing custom flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
-            const res = await supertest(app)
-                .post(`/api/projects/${batchInsightsFlow.team_id}/insights_flows/${nonExistentUuid}/batch_invocations/job-123`)
+            const res = await internal()
+                .post(
+                    `/api/projects/${batchInsightsFlow.team_id}/insights_flows/${nonExistentUuid}/batch_invocations/job-123`
+                )
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -700,7 +714,7 @@ describe('CDP API', () => {
                 },
             })
 
-            const res = await supertest(app)
+            const res = await internal()
                 .post(
                     `/api/projects/${nonBatchInsightsFlow.team_id}/insights_flows/${nonBatchInsightsFlow.id}/batch_invocations/job-123`
                 )
@@ -714,8 +728,10 @@ describe('CDP API', () => {
             const mockProduce = jest.fn().mockResolvedValue(undefined)
             hub.kafkaProducer = { produce: mockProduce } as any
 
-            const res = await supertest(app)
-                .post(`/api/projects/${batchInsightsFlow.team_id}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-123`)
+            const res = await internal()
+                .post(
+                    `/api/projects/${batchInsightsFlow.team_id}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-123`
+                )
                 .send({
                     filters: {
                         filter_test_accounts: true,
@@ -745,8 +761,10 @@ describe('CDP API', () => {
             const mockProduce = jest.fn().mockResolvedValue(undefined)
             hub.kafkaProducer = { produce: mockProduce } as any
 
-            const res = await supertest(app)
-                .post(`/api/projects/${batchInsightsFlow.team_id}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-456`)
+            const res = await internal()
+                .post(
+                    `/api/projects/${batchInsightsFlow.team_id}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-456`
+                )
                 .send({})
 
             expect(res.status).toEqual(200)
@@ -771,8 +789,10 @@ describe('CDP API', () => {
         it('errors if kafka producer not available', async () => {
             hub.kafkaProducer = undefined as any
 
-            const res = await supertest(app)
-                .post(`/api/projects/${batchInsightsFlow.team_id}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-123`)
+            const res = await internal()
+                .post(
+                    `/api/projects/${batchInsightsFlow.team_id}/insights_flows/${batchInsightsFlow.id}/batch_invocations/job-123`
+                )
                 .send({})
 
             expect(res.status).toEqual(500)
