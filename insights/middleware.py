@@ -758,7 +758,13 @@ class CSPMiddleware:
             csp_parts = [
                 "default-src 'self'",
                 f"style-src 'self' 'unsafe-inline' {resource_url} https://fonts.googleapis.com",
-                f"script-src 'self' 'nonce-{nonce}' {resource_url} https://*.i.hanzo.ai",
+                # wasm-unsafe-eval, not unsafe-eval: the app ships and instantiates
+                # real WebAssembly (snappy_bg.wasm, used by the replay decompression
+                # worker and the exporter). Nothing in the app bundle needs plain
+                # eval -- `new Function` appears only in the toolbar, which runs on
+                # customer sites under their CSP, not ours -- so the narrower token
+                # is the whole legitimate need.
+                f"script-src 'self' 'nonce-{nonce}' 'wasm-unsafe-eval' {resource_url} https://*.i.hanzo.ai",
                 f"font-src 'self' {resource_url} https://app-static.insights.hanzo.ai https://app-static-prod.hanzo.ai https://fonts.gstatic.com https://cdn.jsdelivr.net https://assets.faircado.com https://use.typekit.net",
                 "worker-src 'self'",
                 "child-src 'none'",
