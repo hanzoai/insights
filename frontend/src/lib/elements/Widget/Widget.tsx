@@ -16,7 +16,7 @@ export interface WidgetProps {
 
 export function Widget({ title, onClose, actions, children, className }: WidgetProps): JSX.Element {
     return (
-        <Widget className={className}>
+        <Root className={className}>
             <Header>
                 <span className="flex-1 text-primary-alt px-2 truncate">{title}</span>
                 {actions}
@@ -24,11 +24,14 @@ export function Widget({ title, onClose, actions, children, className }: WidgetP
                 {onClose && <Button status="danger" onClick={onClose} size="small" icon={<IconX />} />}
             </Header>
             <Content>{children}</Content>
-        </Widget>
+        </Root>
     )
 }
 
-const Widget = ({ children, className }: { children: React.ReactNode; className?: string }): JSX.Element => {
+// The exported Widget above is the wrapper; this is the private root element it
+// renders into, named alongside its Header/Content siblings. Both were called
+// Widget until the debrand renamed the exported LemonWidget onto this one.
+const Root = ({ children, className }: { children: React.ReactNode; className?: string }): JSX.Element => {
     return <div className={clsx('Widget', className)}>{children}</div>
 }
 
