@@ -1,7 +1,10 @@
-import insights from '@hanzo/insights'
-import { ToastOptions, ToastContentProps as ToastifyRenderProps, toast } from 'react-toastify'
+// react-toastify's `toast` is aliased because this file exports its own: the
+// debrand renamed lemonToast onto that name, so every unaliased call below bound
+// to the object being defined and called itself.
+import { ToastOptions, ToastContentProps as ToastifyRenderProps, toast as toastify } from 'react-toastify'
 
 import { IconCheckCircle, IconInfo, IconWarning, IconX } from '@hanzo/icons'
+import insights from '@hanzo/insights'
 
 import { isChristmas } from 'lib/holidays'
 import { hashCodeForString } from 'lib/utils'
@@ -11,15 +14,7 @@ import { Spinner } from '../Spinner'
 import { IconErrorOutline, IconGift } from '../icons'
 
 export function ToastCloseButton({ closeToast }: { closeToast?: () => void }): JSX.Element {
-    return (
-        <Button
-            type="tertiary"
-            size="small"
-            icon={<IconX />}
-            onClick={closeToast}
-            data-attr="toast-close-button"
-        />
-    )
+    return <Button type="tertiary" size="small" icon={<IconX />} onClick={closeToast} data-attr="toast-close-button" />
 }
 
 interface ToastButton {
@@ -56,7 +51,7 @@ export function ToastContent({ type, message, button, id }: ToastContentProps): 
                 <Button
                     onClick={() => {
                         void button.action()
-                        toast.dismiss(id)
+                        toastify.dismiss(id)
                     }}
                     type="secondary"
                     size="small"
@@ -86,14 +81,14 @@ function ensureToastId(toastOptions: ToastOptions, type: string, message?: strin
 export const toast = {
     info(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}): void {
         toastOptions = ensureToastId(toastOptions, 'info', message)
-        toast.info(<ToastContent type="info" message={message} button={button} id={toastOptions.toastId} />, {
+        toastify.info(<ToastContent type="info" message={message} button={button} id={toastOptions.toastId} />, {
             icon: <IconInfo />,
             ...toastOptions,
         })
     },
     success(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}): void {
         toastOptions = ensureToastId(toastOptions, 'success', message)
-        toast.success(<ToastContent type="success" message={message} button={button} id={toastOptions.toastId} />, {
+        toastify.success(<ToastContent type="success" message={message} button={button} id={toastOptions.toastId} />, {
             icon: isChristmas() ? <IconGift className="text-green-600" /> : <IconCheckCircle />,
             ...toastOptions,
         })
@@ -105,7 +100,7 @@ export const toast = {
             toastId: toastOptions.toastId,
         })
         toastOptions = ensureToastId(toastOptions, 'warning', message)
-        toast.warning(<ToastContent type="warning" message={message} button={button} id={toastOptions.toastId} />, {
+        toastify.warning(<ToastContent type="warning" message={message} button={button} id={toastOptions.toastId} />, {
             icon: <IconWarning />,
             ...toastOptions,
         })
@@ -122,7 +117,7 @@ export const toast = {
         }
 
         toastOptions = ensureToastId(toastOptions, 'error', message)
-        toast.error(
+        toastify.error(
             <ToastContent
                 type="error"
                 message={message}
@@ -145,7 +140,7 @@ export const toast = {
         // different operations often share identical pending text like "Saving..."
         toastOptions = ensureToastId(toastOptions, 'promise')
         // see https://fkhadra.github.io/react-toastify/promise
-        return toast.promise(
+        return toastify.promise(
             promise,
             {
                 pending: {
@@ -169,6 +164,6 @@ export const toast = {
         )
     },
     dismiss(id?: number | string): void {
-        toast.dismiss(id)
+        toastify.dismiss(id)
     },
 }
