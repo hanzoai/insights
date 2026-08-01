@@ -36,13 +36,13 @@ interface TextAreaPropsBase
     rightFooter?: ReactElement
 }
 
-interface TextAreaWithCmdEnterProps extends TextAreaPropsBase {
+export interface TextAreaWithCmdEnterProps extends TextAreaPropsBase {
     /** Callback for when Cmd/Ctrl + Enter is pressed. In this case, the user adds new lines with Enter like always. */
     onPressCmdEnter?: (currentValue: string) => void
     onPressEnter?: never
 }
 
-interface TextAreaWithEnterProps extends TextAreaPropsBase {
+export interface TextAreaWithEnterProps extends TextAreaPropsBase {
     /** Callback for when Enter is pressed. In this case, to add a new line the user must press Cmd + Enter. */
     onPressEnter: (currentValue: string) => void
     onPressCmdEnter?: never
