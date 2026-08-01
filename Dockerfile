@@ -295,7 +295,9 @@ USER insights
 
 # Add the commit hash
 ARG COMMIT_HASH
-RUN echo $COMMIT_HASH > /code/commit.txt
+# Quoted with a default so an unpassed build-arg writes "unknown" rather than an
+# empty file -- the footer then says so instead of rendering a blank commit.
+RUN echo "${COMMIT_HASH:-unknown}" > /code/commit.txt
 
 # Copy the Python dependencies and Django staticfiles from the insights-build stage.
 COPY --from=insights-build --chown=insights:insights /code/staticfiles /code/staticfiles
