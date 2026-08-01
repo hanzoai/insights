@@ -110,6 +110,7 @@ jobs:
           # The commit rides the image, so dropping it from the tag loses nothing:
           # `docker inspect` still answers which source built this.
           docker build -f Dockerfile \
+            --build-arg COMMIT_HASH="${GITHUB_SHA}" \
             --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
             --label "org.opencontainers.image.version=${VERSION}" \
             --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
