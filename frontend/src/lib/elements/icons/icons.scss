@@ -1,14 +1,11 @@
-// The one rule that gives an icon a size. Without it an SVG has no intrinsic
-// width and renders at its viewBox scaled to the container — which is why every
-// icon on the site came up enormous after the design system was renamed.
+// The one rule that gives an icon a size. The package renders its SVGs with
+// width="100%" and no height, so without this they paint at their container's
+// width — 300px in a column, 214px in an input.
 //
-// Two selectors because two producers emit icons and only one of them moved:
-// icons.tsx in this repo emits `Icon`, while the icon PACKAGE
-// (@hanzo/insights-icons) still emits the pre-rename name. That package is our
-// own fork, so the real fix is republishing it emitting `Icon` and deleting the
-// second selector here — not carrying both forever.
-.Icon,
-.LemonIcon {
+// Both producers emit `Icon`: icons.tsx here, and @hanzo/icons via the patch in
+// patches/, which is what lets the sixteen contextual `.Icon` selectors across
+// the design system keep reaching package icons at all.
+.Icon {
     display: inline-block;
     width: 1em;
     vertical-align: -0.15em; // -0.15em ensures vertical centering in inline contexts
