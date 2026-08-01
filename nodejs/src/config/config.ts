@@ -88,8 +88,7 @@ export function getDefaultConfig(): PluginsServerConfig {
         DATASTORE_HOST: process.env.DATASTORE_HOST || 'localhost',
         DATASTORE_PORT: Number(process.env.DATASTORE_PORT) || 8123,
         DATASTORE_DATABASE:
-            process.env.DATASTORE_DATABASE ||
-            (isTestEnv() ? 'insights_test' : isDevEnv() ? 'default' : ''),
+            process.env.DATASTORE_DATABASE || (isTestEnv() ? 'insights_test' : isDevEnv() ? 'default' : ''),
         DATASTORE_USER: process.env.DATASTORE_USER || 'default',
         DATASTORE_PASSWORD: process.env.DATASTORE_PASSWORD || '',
         EVENT_OVERFLOW_BUCKET_CAPACITY: 1000,
@@ -185,8 +184,10 @@ export function getDefaultConfig(): PluginsServerConfig {
         // Super properties for internal analytics (matching Python insightsanalytics.super_properties)
         OTEL_SERVICE_NAME: null,
         OTEL_SERVICE_ENVIRONMENT: null,
-        // Internal API authentication
-        INTERNAL_API_SECRET: '',
+        // Hanzo IAM — the identity every non-public HTTP route is gated on.
+        // Empty issuer means "not configured", which REFUSES rather than serves.
+        IAM_ISSUER: 'https://hanzo.id',
+        IAM_JWKS_URL: 'https://hanzo.id/v1/iam/.well-known/jwks',
 
         SESSION_RECORDING_LOCAL_DIRECTORY: '.tmp/sessions',
         // NOTE: 10 minutes
