@@ -41,7 +41,12 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
                 <div className="flex gap-4">
                     <div className="flex-1">
                         <Field name="name" label="Filter name">
-                            <Input placeholder="e.g. Environment" disabled={quickFiltersLoading} autoFocus />
+                            <Input
+                                placeholder="e.g. Environment"
+                                disabledReason={quickFiltersLoading ? 'Quick filters are still loading' : undefined}
+                                autoFocus
+                                data-attr="quick-filter-name"
+                            />
                         </Field>
                     </div>
                     <div className="flex-1">
@@ -56,6 +61,7 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
                                     disabled={quickFiltersLoading}
                                     type="secondary"
                                     fullWidth
+                                    selectingKeyOnly
                                 />
                             )}
                         </Field>
@@ -176,6 +182,9 @@ function FilterOptionRow({
                     />
                 </div>
                 {rowErrors?.value && <Field.Error error={rowErrors.value} />}
+                {option.operator === PropertyOperator.Exact &&
+                    Array.isArray(option.value) &&
+                    option.value.length > 1 && <span className="text-xs text-muted">Matches any of these values</span>}
             </div>
             <div className="flex flex-col w-[30%] gap-2">
                 <Input
@@ -183,6 +192,7 @@ function FilterOptionRow({
                     onChange={(value) => updateOption(index, { label: value })}
                     placeholder="Display name (e.g., Production)"
                     disabledReason={!propertyName ? 'Select an event property first' : undefined}
+                    data-attr={`quick-filter-option-label-${index}`}
                 />
                 {rowErrors?.label && <Field.Error error={rowErrors.label} />}
             </div>

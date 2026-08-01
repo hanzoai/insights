@@ -26,12 +26,14 @@ We also have a growing collection of Rust services that handle performance-criti
 - property-defs-rs – extracts and infers property definitions from events
 - hook services – manages webhooks with high performance
 - scriptvm – evaluates InsightsQL bytecode via a stack machine implementation
+- personinsights-replica – serves person data over gRPC, backed by PostgreSQL
+- personinsights-router – routes person data requests to replica instances via gRPC
 
 These components rely on a few external services:
 
 - Datastore – for storing big data (events, persons – analytics queries)
 - Kafka – for queuing events for ingestion
-- MinIO – for storing files (session recordings, file exports)
+- SeaweedFS – S3-compatible object storage for files (session recordings, file exports)
 - PostgreSQL – for storing ordinary data (users, projects, saved insights)
 - Redis – for caching and inter-service communication
 - Zookeeper – for coordinating Kafka and Datastore clusters
@@ -39,7 +41,7 @@ These components rely on a few external services:
 When spinning up an instance of Insights for development, we recommend the following hybrid configuration:
 
 - External services (Datastore, Kafka, PostgreSQL, Redis, etc.) run in Docker via `docker compose`
-- Insights apps (Django, frontend, plugin-server, Celery) run on the host using `insightscli start` (which uses mprocs, a terminal UI, to manage and display logs from all processes simultaneously)
+- Insights apps (Django, frontend, plugin-server, Celery) run on the host using `insightscli start` (which uses phrocs, a terminal UI, to manage and display logs from all processes simultaneously)
 
 This approach gives you fast iteration on the code you're developing while keeping infrastructure isolated.
 
@@ -52,7 +54,7 @@ For other Linux distros, adjust the steps as needed (e.g. use `dnf` or `pacman` 
 
 Windows isn't supported natively. But, Windows users can run a Linux virtual machine. The latest Ubuntu LTS Desktop is recommended. (Ubuntu Server is not recommended as debugging the frontend will require a browser that can access localhost.)
 
-In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/Hanzo Insights/hanzo.ai/blob/main/contents/handbook/engineering/developing-locally.md)!
+In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/Insights/insights/blob/master/docs/published/handbook/engineering/developing-locally.md)!
 
 ## Option 1: Developing locally
 
@@ -96,7 +98,7 @@ This is the recommended option for most developers.
 Clone the [Insights repo](https://github.com/insights/insights). All future commands assume you're inside the `insights/` folder.
 
 ```bash
-git clone --filter=blob:none https://github.com/Hanzo Insights/insights && cd insights/
+git clone --filter=blob:none https://github.com/Insights/insights && cd insights/
 ```
 
 **Performance tip:** The `--filter=blob:none` flag downloads all commit history and tree structure, but defers file contents (blobs) until needed. This reduces the clone from ~3 GB to a few hundred MB and makes the initial clone **15-17x faster**. You still get full git history for commands like `git log` and `git diff` – blobs are fetched on demand as you use them.
@@ -132,15 +134,64 @@ To get Insights running in a dev environment:
 
    > Note on app dependencies: Python requirements get updated every time the environment is activated (`uv sync` is lightning fast). JS dependencies only get installed if `node_modules/` is not present (`pnpm install` still takes a couple lengthy seconds). Dependencies for other languages currently don't get auto-installed.
 
-3. After successful environment activation, run `insightscli start`. This launches the Docker infrastructure and all Insights processes together via mprocs — a terminal UI that shows logs from every service side by side.
+3. After successful environment activation, run `insightscli start`. This automatically cleans up any orphaned dev processes from a previous unclean shutdown, then launches the Docker infrastructure and all Insights processes together via phrocs, a terminal UI that aggregates logs from all processes in one place.
+
+   > Note on connection errors: If you see connection errors on `insightscli start`, ensure the following entry exists in `/etc/hosts`:
+   >
+   > ```text
+   > 127.0.0.1 db redis7 kafka datastore datastore-coordinator objectstorage seaweedfs temporal
+   > ```
 
 This is it – you should be seeing the Insights app at <a href="http://localhost:8010" target="_blank">http://localhost:8010</a>.
 
-You can now change Insights in any way you want. See [Project structure](./project-structure) for an intro to the repository's contents. To commit changes, create a new branch based on `main` for your intended change, and develop away.
+You can now change Insights in any way you want. See [Project structure](./project-structure) for an intro to the repository's contents. To commit changes, create a new branch based on `master` for your intended change, and develop away.
 
 ### Customizing which services run
 
 By default, `insightscli start` runs a minimal set of services (enough for product analytics). To customize which services start, run `insightscli dev:setup` which lets you select intents based on the products you're working on. Your choices are saved and used automatically by `insightscli start`.
+
+### Setting environment variables
+
+Three env files come into play when `insightscli start` runs:
+
+- `.env.services` (committed) — how to reach local services like Postgres, Redis, Kafka, Datastore. Shared with hobby deployments and Docker containers.
+- `.env.development` (committed) — dev-mode runtime knobs: `DEBUG`, OpenTelemetry, DuckLake, ports, etc.
+- `.env.local` (gitignored) — your overrides and secrets. Copy `.env.local.example` to get started.
+
+Precedence (highest wins): `shell env > .env.local > .env.development > .env.services`.
+
+To run AI features locally, you'll need API keys for OpenAI, Anthropic, and others. Insights employees can pull them from 1Password without ever pasting raw values:
+
+```bash
+cp .env.local.example .env.local           # uncomment the op:// lines you need
+brew install 1password-cli                 # one-time
+insightscli start                                 # auto-resolves op:// via `op run`
+```
+
+If `bin/start` sees any `op://` reference in `.env.local`, it re-execs itself under `op run --env-file=.env.local`. No need to remember the wrapper command.
+
+If the `op` CLI isn't installed, `op://` lines are skipped (rather than sourced as literal `op://...` strings that break downstream services with cryptic errors). Services that need those secrets will fail with their own "missing key" errors — install `1password-cli` or replace the refs with literal values.
+
+### Running in detached mode
+
+By default, `insightscli start` runs interactively with a terminal UI (phrocs) that displays logs from all processes. If you prefer to run the dev stack in the background without an attached terminal, use detached mode:
+
+```bash
+insightscli up -d
+```
+
+This starts all services in the background and returns once the IPC socket is bound. `insightscli start -d` is also available as an equivalent. Detached mode is useful for:
+
+- Coder workspaces and remote development environments
+- CI pipelines and automated testing
+- Agent sessions and headless development
+
+**Companion commands:**
+
+- `insightscli wait` – blocks until all services are ready (useful in scripts)
+- `insightscli down` – gracefully stops the detached stack (`insightscli stop` is also available as an equivalent)
+- `insightscli docker:services:down` – stops the docker compose containers, which keep running after `insightscli down` or quitting phrocs (the compose stack is shared across worktrees)
+- `insightscli docker:services:remove` – like `docker:services:down`, but also wipes all docker volumes (postgres, datastore, and the rest of the stack's data)
 
 ### Manual setup
 
@@ -157,10 +208,37 @@ If you see "Exit Code 137" or out-of-memory errors, your Docker container doesn'
 If you see `Error while fetching server API version: 500 Server Error for http+docker://localhost/version`, make sure Docker (or OrbStack) is actually running.
 
 **Port conflicts**
-If you see a port binding error for 5432, you have Postgres running locally. Use `lsof -i :5432` to find the process, then `sudo service postgresql stop` to stop it. You may also see errors like `role "insights" does not exist`, which could indicate that a local PostgreSQL instance is being used instead of the expected containerized one.
+`insightscli start` automatically cleans up orphaned Insights processes before launching, which resolves most port conflicts. To skip this, set `HOGLI_SKIP_ZOMBIE_CHECK=1`. If you still see a port binding error for 5432, you likely have Postgres running locally. Use `lsof -i :5432` to find the process, then `sudo service postgresql stop` to stop it. You may also see errors like `role "insights" does not exist`, which could indicate that a local PostgreSQL instance is being used instead of the expected containerized one.
 
 **GeoLite database missing**
 The feature-flags container needs the GeoLite database in `/share`. If it's missing, run `./bin/download-mmdb` and then `chmod 0755 ./share/GeoLite2-City.mmdb`.
+
+**Local Datastore suddenly empty (July 2026 named-volume switch)**
+Datastore and ZooKeeper store their data in named docker volumes (`datastore-data`, `zookeeper-data`), so their state survives container recreation.
+The first `insightscli start` after updating past the July 2026 switch to named volumes would otherwise recreate both containers with fresh volumes (the data previously lived in anonymous volumes that container recreation discards).
+`insightscli start` runs `insightscli doctor:migrate-volumes` before bringing the stack up, which salvages the old anonymous volumes into the new named ones automatically whenever it can prove the mapping is unambiguous — no action needed, and it's a no-op on every subsequent start once migrated.
+
+If it prints a warning instead of migrating (an ambiguous or missing old container — for example two datastore containers left over under this same compose project, or the old container already removed by a prior cleanup), it deliberately didn't guess, and local Datastore data resets once instead.
+Run `insightscli migrations:run` to recreate the Datastore schema, or `insightscli dev:reset` for a full wipe plus demo data.
+The old anonymous volumes are left dangling in that case; reclaim the disk space with `docker volume prune` (check first with `docker volume ls -f dangling=true`) once you're done, or salvage them manually if you still need that data:
+
+Stop the stack (`insightscli docker:services:down`), then identify the old volumes by peeking inside each dangling candidate:
+
+```bash
+docker volume ls -qf dangling=true
+docker run --rm -v <volume>:/v alpine ls /v
+```
+
+The Datastore volume contains `store` and `metadata`; the ZooKeeper snapshot volume has `version-2/snapshot.*`; the ZooKeeper transaction-log volume has `version-2/log.*`.
+Copy each old volume into its named replacement. The `insights_` prefix below is the compose project name (`$COMPOSE_PROJECT_NAME`, `insights` by default); substitute yours if you've overridden it:
+
+```bash
+docker run --rm -v <old-datastore-volume>:/from:ro -v insights_datastore-data:/to alpine sh -c 'rm -rf /to/* && cp -a /from/. /to/'
+```
+
+Repeat for `insights_zookeeper-data` (snapshots) and `insights_zookeeper-datalog` (transaction logs).
+Datastore and ZooKeeper state must move together — restoring only one side breaks every replicated table with "replica already exists" errors.
+Then start the stack again with `insightscli up`.
 
 **Datastore "get_mempolicy" warning**
 You might see `get_mempolicy: Operation not permitted` in the Datastore logs. This is harmless and can be ignored. To verify Datastore started properly, run `docker exec -it insights-datastore-1 bash` then `datastore-client --query "SELECT 1"`.
@@ -201,25 +279,11 @@ If you get `Configuration property "enable.ssl.certificate.verification" not sup
 **pyproject.toml parse warnings**
 When running `uv sync`, you may see a `Failed to parse` warning related to `pyproject.toml`. This is usually harmless – if you see the `Activate with:` line at the end, your environment was created successfully.
 
-## Option 2: Developing with Codespaces
+## Option 2: Developing with Coder workspaces (Insights employees only)
 
-This is a faster option to get up and running if you can't or don't want to set up locally.
+If you work at Insights and want a remote workspace instead of running the stack on your laptop, see the [internal Coder workspaces guide](https://github.com/Insights/insights/blob/master/docs/internal/coder-workspaces.md).
 
-1. Create your codespace.
-   ![](https://user-images.githubusercontent.com/890921/231489405-cb2010b4-d9e3-4837-bfdf-b2d4ef5c5d0b.png)
-2. Update it to 8-core machine type (the smallest is probably too small to get Insights running properly).
-   ![](https://user-images.githubusercontent.com/890921/231490278-140f814e-e77b-46d5-9a4f-31c1b1d6956a.png)
-3. Open the codespace, using one of the "Open in" options from the list.
-4. In the codespace, open a terminal window and run `docker compose -f docker-compose.dev.yml up`.
-5. Ensure that you are using the right Node version (`nvm install 22 && nvm use 22`) then, in another terminal, run `pnpm i` (and use the same terminal for the following commands).
-6. Then run `uv sync`
-   - If this doesn't activate your python virtual environment, run `uv venv` (install `uv` following the [uv standalone installer guide](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer) if needed)
-7. Install `sqlx-cli` with `cargo install sqlx-cli` (install Cargo following the [Cargo getting started guide](https://doc.rust-lang.org/cargo/getting-started/installation.html) if needed)
-8. Now run `DEBUG=1 ./bin/migrate`
-9. Install [mprocs](https://github.com/pvolok/mprocs#installation) (`cargo install mprocs`)
-10. Run `bin/insightscli start` (or just `insightscli start` if using Flox).
-11. Open browser to <http://localhost:8010/>.
-12. To get some practical test data into your brand-new instance of Insights, run `DEBUG=1 ./manage.py generate_demo_data`.
+If you drive your workflow with a coding agent (Claude Code, Cursor, etc.), the `setting-up-devbox` skill walks the agent through the whole flow — the tailnet prerequisite, `insightscli devbox:setup`, starting a box, storing auth as Coder user secrets, and running commands on the box with `insightscli devbox:exec`. Just ask it to set up your devbox.
 
 ## Testing
 
@@ -230,25 +294,19 @@ For a Insights PR to be merged, all tests must be green, and ideally you should 
 For frontend unit tests, run:
 
 ```bash
-pnpm --filter=@hanzo/frontend test
+insightscli test frontend/src/
 ```
 
 You can narrow the run down to only files under matching paths:
 
 ```bash
-pnpm jest --testPathPattern=frontend/src/lib/components/DateFilter/DateFilter.test.tsx
+insightscli test frontend/src/lib/components/DateFilter/DateFilter.test.tsx
 ```
 
-To update all visual regression test snapshots, make sure Storybook is running on your machine (you can start it with `pnpm storybook` in a separate Terminal tab). You may also need to install Playwright with `pnpm exec playwright install`. And then run:
+To update all visual regression test snapshots, make sure Storybook is running on your machine (you can start it with `insightscli storybook` in a separate Terminal tab). You may also need to install Playwright with `pnpm exec playwright install`. And then run:
 
 ```bash
-pnpm test:visual
-```
-
-To only update snapshots for stories under a specific path, run:
-
-```bash
-pnpm test:visual:update frontend/src/lib/Example.stories.tsx
+insightscli storybook:test
 ```
 
 ### Backend
@@ -256,26 +314,32 @@ pnpm test:visual:update frontend/src/lib/Example.stories.tsx
 For backend tests, run:
 
 ```bash
-pytest
+insightscli test insights/test/
 ```
 
 You can narrow the run down to only files under matching paths:
 
 ```bash
-pytest insights/test/test_example.py
+insightscli test insights/test/test_example.py
 ```
 
 Or to only test cases with matching function names:
 
 ```bash
-pytest insights/test/test_example.py -k test_something
+insightscli test insights/test/test_example.py -k test_something
 ```
 
 To see debug logs (such as Datastore queries), add argument `--log-cli-level=DEBUG`.
 
+You can also run tests for all files changed on the current branch:
+
+```bash
+insightscli test --changed
+```
+
 ### End-to-end
 
-For Playwright end-to-end tests, run `bin/e2e-test-runner`. This will spin up a test instance of Insights and show you the Playwright interface, from which you'll manually choose tests to run. You'll need `uv` installed (the Python package manager), which you can do so with `brew install uv`. Once you're done, terminate the command with Cmd + C.
+For Playwright end-to-end tests, run `insightscli test:e2e` (which wraps `bin/e2e-test-runner`). This will spin up a test instance of Insights and show you the Playwright interface, from which you'll manually choose tests to run. You'll need `uv` installed (the Python package manager), which you can do so with `brew install uv`. Once you're done, terminate the command with Cmd + C.
 
 ## Django migrations
 
@@ -306,11 +370,13 @@ If you'd like to have ALL feature flags that exist in Insights at your disposal 
 
 This command automatically turns any feature flag ending in `_EXPERIMENT` as a multivariate flag with `control` and `test` variants.
 
-Backend side flags are only evaluated locally, which requires the `INSIGHTS_PERSONAL_API_KEY` env var to be set. Generate the key in [your user settings](http://localhost:8010/settings/user#personal-api-keys).
+Backend side flags are automatically configured in DEBUG mode using the
+dev API key created by `manage.py setup_local_api_key`.
+If you need to override the key, set the `POSTFN_PERSONAL_API_KEY` env var.
 
 ## Extra: Debugging with VS Code
 
-The Insights repository includes [VS Code launch options for debugging](https://github.com/Hanzo Insights/insights/blob/main/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
+The Insights repository includes [VS Code launch options for debugging](https://github.com/Insights/insights/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
 
 > **Note:** You can debug all services using the main "Insights" launch option. If you are running most services with `insightscli start` and only want to debug one (e.g. the backend), use `insightscli dev:setup` to exclude that service so it doesn't conflict with the VS Code debugger.
 
@@ -326,7 +392,7 @@ With PyCharm's built in support for Django, it's fairly easy to setup debugging 
    - If using Flox: `path_to_repo/insights/.flox/cache/venv/bin/python`.
 3. Setup Django support (Settings… > Languages & Frameworks > Django):
    - Django project root: `path_to_repo`
-   - Settings: `insights/settings/__init__py`
+   - Settings: `insights/settings/__init__.py`
 4. To run tests correctly in PyCharm, disable the Django test runner:
    - Go to Settings… > Languages & Frameworks > Django
    - Check "Do not use Django test runner"
@@ -439,9 +505,39 @@ When creating a new email, there are a few steps to take. It's important to add 
    message.send()
    ```
 
+## Extra: Using AI assistants with your local dev environment
+
+Phrocs (the process manager) includes an MCP (Model Context Protocol) server that lets AI coding assistants query your local dev environment. This is useful for debugging issues with AI tools like Claude Desktop, Cursor, Windsurf, or other MCP-compatible assistants.
+
+### Setup
+
+The repository includes a `.mcp.json` configuration file in the repo root that registers the phrocs MCP server. To use it:
+
+1. Ensure your AI tool supports MCP and can read `.mcp.json` configuration files
+2. Open the Insights repository in your AI tool
+3. The phrocs MCP server is available automatically when `insightscli start` is running
+
+### Available tools
+
+The MCP server provides two tools:
+
+- **get_process_status** – Returns process status including PID, running state, readiness, and real-time metrics (CPU, memory, threads)
+- **get_process_logs** – Retrieves recent log lines from a process's in-memory buffer, with optional grep filtering
+
+### Example usage
+
+Ask your AI assistant questions like:
+
+- "What processes are currently running?"
+- "Show me the recent logs from the backend process"
+- "Is the frontend process ready?"
+- "Search the worker logs for error messages"
+
+The AI assistant uses the MCP tools to query phrocs directly and provide you with the relevant information.
+
 ## Extra: Developing paid features (Insights employees only)
 
-If you're a Insights employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/Hanzo Insights/billing?tab=readme-ov-file#licensing-your-local-instance).
+If you're a Insights employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/Insights/billing?tab=readme-ov-file#licensing-your-local-instance).
 
 ## Extra: Resetting your local database
 
@@ -463,7 +559,7 @@ If you need to start fresh with a clean database (for example, if your local dat
 
 3. Wait for all migrations to complete. You can monitor the logs to ensure migrations have finished running.
 
-4. Once Insights is running, click the **generate-demo-data** service in the mprocs terminal UI (you may have to scroll), then type `r` to start the service and generate test data.
+4. Once Insights is running, click the **generate-demo-data** service in the phrocs terminal UI (you may have to scroll), then type `r` to start the service and generate test data.
 
 > **Note:** This process will completely wipe your local database. Make sure you don't have any important local data before proceeding.
 
@@ -476,6 +572,13 @@ insightscli build:openapi
 ```
 
 See the [Type system guide](type-system) for details on how type generation works and best practices for documenting your API.
+
+## Extra: Working on multiple branches simultaneously
+
+If you frequently switch between features, bug fixes, and PR reviews, the
+[isolated development with Flox](./flox-multi-instance-workflow) guide shows
+how to use Git worktrees with per-worktree Flox environments for fast context
+switching.
 
 ## Extra: Working with the data warehouse
 

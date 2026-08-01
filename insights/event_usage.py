@@ -2,14 +2,27 @@
 Module to centralize event reporting on the server-side.
 """
 
-from typing import Optional
+import re
+from enum import StrEnum
+from typing import TYPE_CHECKING, NotRequired, Optional, Required, TypedDict
+from urllib.parse import urlparse
+
+from django.contrib.auth.models import AnonymousUser
 
 import hanzo_insights
+from opentelemetry import trace
+from rest_framework.authentication import SessionAuthentication
 
+from insights.datastore.query_tagging import get_query_tag_value
 from insights.models import Organization, User
+from insights.models.activity_logging.model_activity import is_impersonated_session
 from insights.models.team import Team
 from insights.settings import SITE_URL
+from insights.synthetic_user import SyntheticUser
 from insights.utils import get_instance_realm
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
 
 
 def report_user_signed_up(
@@ -256,16 +269,235 @@ def report_user_organization_membership_level_changed(
     )
 
 
-def report_user_action(user: User, event: str, properties: Optional[dict] = None, team: Optional[Team] = None):
-    if not user.distinct_id:
-        return
+class EventSource(StrEnum):
+    WEB = "web"
+    API = "api"
+    CLI = "cli"
+    POSTFN_AI = "insights_ai"
+    POSTFN_CODE = "insights_code"
+    TERRAFORM = "terraform"
+    MCP = "mcp"
+    WIZARD = "wizard"
+    CACHE_WARMING = "cache_warming"
+    ALERT = "alert"
+    EXPORT = "export"
+    SUBSCRIPTION = "subscription"
+
+
+class McpProps(TypedDict):
+    mcp_user_agent: str | None
+    mcp_client_name: str | None
+    mcp_client_version: str | None
+    mcp_protocol_version: str | None
+    mcp_oauth_client_name: str | None
+
+
+AnalyticsProps = TypedDict(
+    "AnalyticsProps",
+    {
+        "source": Required[EventSource],
+        "$current_url": NotRequired[str | None],
+        "$host": NotRequired[str | None],
+        "$pathname": NotRequired[str | None],
+        "$session_id": NotRequired[str | None],
+        "was_impersonated": NotRequired[bool],
+        "access_method": NotRequired[str | None],
+        "user_agent": NotRequired[str | None],
+        "mcp_user_agent": NotRequired[str | None],
+        "mcp_client_name": NotRequired[str | None],
+        "mcp_client_version": NotRequired[str | None],
+        "mcp_protocol_version": NotRequired[str | None],
+        "mcp_oauth_client_name": NotRequired[str | None],
+    },
+    total=False,
+)
+
+_POSTFN_CODE_UA_RE = re.compile(r"insights/(code|[\w.-]+\.script\.dev)")
+
+# The wizard appends `program: <id>` to its user-agent so the backend can tell the
+# self-driving onboarding program apart from other wizard programs (they all share the
+# `insights/wizard` UA). Used to attribute self-driving-created sources distinctly.
+_WIZARD_SELF_DRIVING_PROGRAM_RE = re.compile(r"program:\s*self-driving")
+
+
+def get_event_source(request) -> EventSource:
+    """Determine the source of an API request for analytics."""
+    user_agent = request.headers.get("user-agent", "") or ""
+    if not isinstance(user_agent, str):
+        user_agent = ""
+    # Wizard, insights-code, insights-cli etc. all wrap MCP — their UA tokens
+    # must win over the X-Insights-Client header so the source reflects the
+    # outer caller.
+    if "insights/terraform-provider" in user_agent:
+        return EventSource.TERRAFORM
+    if "insights/wizard" in user_agent:
+        return EventSource.WIZARD
+    if _POSTFN_CODE_UA_RE.search(user_agent):
+        return EventSource.POSTFN_CODE
+    if user_agent == "insights-cli" or request.headers.get("X-Insights-Mcp-Consumer") == "insights-cli":
+        return EventSource.CLI
+    if "insights/mcp-server" in user_agent or request.headers.get("X-Insights-Client") == "mcp":
+        return EventSource.MCP
+    # DRF sets successful_authenticator during view dispatch; before that
+    # (e.g. in middleware), fall back to checking the Django session cookie
+    # which is available after Django's AuthenticationMiddleware runs.
+    if isinstance(getattr(request, "successful_authenticator", None), SessionAuthentication):
+        return EventSource.WEB
+    if getattr(getattr(request, "session", None), "session_key", None) is not None:
+        return EventSource.WEB
+    return EventSource.API
+
+
+def is_wizard_self_driving_program(request) -> bool:
+    """Whether the request comes from the wizard's `self-driving` onboarding program.
+
+    All wizard programs share the `insights/wizard` user-agent, so `get_event_source`
+    can only tell they're "the wizard". The self-driving program additionally tags its
+    UA with a `program: self-driving` marker, letting callers attribute its work apart
+    from other wizard runs.
+
+    When the request is proxied through the Insights MCP server, that server overwrites
+    `User-Agent` with its own token and forwards the wizard's original UA — marker
+    included — in `X-Insights-Mcp-User-Agent`. Inspect both so the marker is found whether
+    the wizard called us directly or via the MCP server.
+    """
+    user_agent = request.headers.get("user-agent", "") or ""
+    mcp_user_agent = request.headers.get("X-Insights-Mcp-User-Agent", "") or ""
+    combined = "\n".join(part for part in (user_agent, mcp_user_agent) if isinstance(part, str))
+    return "insights/wizard" in combined and bool(_WIZARD_SELF_DRIVING_PROGRAM_RE.search(combined))
+
+
+MAX_HEADER_VALUE_LENGTH = 1000
+
+
+def sanitize_header_value(value: str | None) -> str | None:
+    if not isinstance(value, str) or not value:
+        return None
+    return re.sub(r"[\x00-\x1f\x7f]", "", value).strip()[:MAX_HEADER_VALUE_LENGTH] or None
+
+
+def get_mcp_properties(request) -> McpProps:
+    """Extract MCP client metadata from request headers."""
+    return {
+        "mcp_user_agent": sanitize_header_value(request.headers.get("X-Insights-Mcp-User-Agent")),
+        "mcp_client_name": sanitize_header_value(request.headers.get("X-Insights-Mcp-Client-Name")),
+        "mcp_client_version": sanitize_header_value(request.headers.get("X-Insights-Mcp-Client-Version")),
+        "mcp_protocol_version": sanitize_header_value(request.headers.get("X-Insights-Mcp-Protocol-Version")),
+        "mcp_oauth_client_name": sanitize_header_value(request.headers.get("X-Insights-Mcp-Oauth-Client-Name")),
+    }
+
+
+def get_request_analytics_properties(request) -> AnalyticsProps:
+    """Extract standard analytics properties from a request."""
+    current_url = request.headers.get("Referer")
+    host: str | None = None
+    pathname: str | None = None
+    if isinstance(current_url, str) and current_url:
+        parsed = urlparse(current_url)
+        host = parsed.netloc or None
+        pathname = parsed.path or None
+    else:
+        current_url = None
+    # Auth classes tag the query context with access_method during DRF dispatch
+    # (personal_api_key, oauth, id_jag, ...); session auth leaves it unset.
+    access_method = get_query_tag_value("access_method")
+    return {
+        "source": get_event_source(request),
+        "$current_url": current_url,
+        "$host": host,
+        "$pathname": pathname,
+        "$session_id": sanitize_header_value(request.headers.get("X-Insights-Session-Id")),
+        "was_impersonated": is_impersonated_session(request),
+        "access_method": access_method,
+        "user_agent": sanitize_header_value(request.headers.get("User-Agent")),
+        **get_mcp_properties(request),
+    }
+
+
+_tracer = trace.get_tracer(__name__)
+
+
+def report_user_action(
+    user: User | AnonymousUser | SyntheticUser,
+    event: str,
+    properties: Optional[dict] = None,
+    *,
+    team: Optional[Team] = None,
+    organization: Optional[Organization] = None,
+    request: Optional["Request"] = None,
+    analytics_props: Optional[AnalyticsProps] = None,
+    send_feature_flags: bool = False,
+):
+    if request is not None and analytics_props is not None:
+        raise ValueError("Pass either request or analytics_props, not both")
     if properties is None:
         properties = {}
+    if request is not None:
+        properties = {**get_request_analytics_properties(request), **properties}
+    if analytics_props is not None:
+        properties = {**analytics_props, **properties}
+
+    # Synthetic principals (e.g. project secret API keys) have no User row but still carry a
+    # distinct_id, so service-authenticated actions are captured instead of silently dropped.
+    if isinstance(user, SyntheticUser):
+        synthetic_team = team or user.team
+        hanzo_insights.capture(
+            distinct_id=user.distinct_id,
+            event=event,
+            properties=properties,
+            groups=groups(organization or synthetic_team.organization, synthetic_team),
+        )
+        return
+
+    # isinstance works through Django's SimpleLazyObject because it proxies __class__
+    if not isinstance(user, User) or not user.distinct_id:
+        return
+    if user.email:
+        properties["$set_once"] = {"email": user.email}
+    with _tracer.start_as_current_span("report_user_action"):
+        hanzo_insights.capture(
+            distinct_id=user.distinct_id,
+            event=event,
+            properties=properties,
+            groups=groups(organization or user.current_organization, team or user.current_team),
+            send_feature_flags=send_feature_flags,
+        )
+
+
+def report_user_or_team_action(
+    event: str,
+    properties: Optional[dict] = None,
+    *,
+    user: Optional[User | AnonymousUser] = None,
+    team: Optional[Team] = None,
+    organization: Optional[Organization] = None,
+    analytics_props: Optional[AnalyticsProps] = None,
+):
+    if properties is None:
+        properties = {}
+    if analytics_props is not None:
+        properties = {**analytics_props, **properties}
+
+    # isinstance works through Django's SimpleLazyObject because it proxies __class__
+    real_user = user if isinstance(user, User) else None
+
+    distinct_id = None
+    if real_user and real_user.distinct_id:
+        distinct_id = real_user.distinct_id
+    elif team:
+        distinct_id = str(team.uuid)
+
+    if not distinct_id:
+        return
+
+    org = organization or (real_user.current_organization if real_user else None)
+    tm = team or (real_user.current_team if real_user else None)
+
     hanzo_insights.capture(
-        distinct_id=user.distinct_id,
+        distinct_id=distinct_id,
         event=event,
         properties=properties,
-        groups=groups(user.current_organization, team or user.current_team),
+        groups=groups(org, tm),
     )
 
 
@@ -278,6 +510,33 @@ def report_organization_deleted(user: User, organization: Organization):
         properties=organization.get_analytics_metadata(),
         groups=groups(organization),
     )
+
+
+def report_organization_deletion_initiated(user: User, organization: Organization):
+    if not user.distinct_id:
+        return
+    hanzo_insights.capture(
+        distinct_id=user.distinct_id,
+        event="organization deletion initiated",
+        properties=organization.get_analytics_metadata(),
+        groups=groups(organization),
+    )
+
+
+def report_organization_deletion_completed(user_id: int, organization_id: str) -> None:
+    from insights.models import User as UserModel
+    from insights.ph_client import ph_scoped_capture
+
+    user = UserModel.objects.filter(id=user_id).first()
+    if not user or not user.distinct_id:
+        return
+    with ph_scoped_capture() as capture_ph_event:
+        capture_ph_event(
+            distinct_id=user.distinct_id,
+            event="organization deletion completed",
+            properties={"organization_id": organization_id},
+            groups={"instance": SITE_URL, "organization": organization_id},
+        )
 
 
 def report_user_deleted_account(user: User):

@@ -63,7 +63,7 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
 
                     {!expanded ? (
                         <Button
-                            data-attr="expand-fn-testing"
+                            data-attr="expand-script-testing"
                             type="secondary"
                             disabledReason={
                                 unsaved ? 'Testing tools are only available after creating the webhook' : undefined
@@ -85,7 +85,7 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                     <Switch
                                         onChange={(v) => onChange(!v)}
                                         checked={!value}
-                                        data-attr="toggle-fn-test-mocking"
+                                        data-attr="toggle-script-test-mocking"
                                         className="px-2 py-1"
                                         label={
                                             <Tooltip
@@ -108,7 +108,7 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
 
                             {expanded && (
                                 <Button
-                                    data-attr="hide-fn-testing"
+                                    data-attr="hide-script-testing"
                                     icon={<IconX />}
                                     onClick={() => toggleExpanded()}
                                     tooltip="Hide testing"
@@ -188,7 +188,7 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                     ) : null}
                                     <Button
                                         type="primary"
-                                        data-attr="test-fn-webhook"
+                                        data-attr="test-script-webhook"
                                         onClick={submitTestInvocation}
                                         loading={isTestInvocationSubmitting}
                                         size="small"

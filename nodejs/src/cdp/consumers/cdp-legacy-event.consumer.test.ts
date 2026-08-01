@@ -2,13 +2,14 @@ import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { DateTime } from 'luxon'
 
+import { closeHub, createHub } from '~/common/utils/db/hub'
+import { PostgresUse } from '~/common/utils/db/postgres'
+import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
-import { PostgresUse } from '../../utils/db/postgres'
-import { createScriptExecutionGlobals } from '../_tests/fixtures'
+import { createHogExecutionGlobals } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
 import { InsightsFunctionInvocationGlobals } from '../types'
@@ -30,9 +31,9 @@ describe('CdpLegacyEventsConsumer', () => {
     beforeEach(async () => {
         hub = await createHub()
         await resetTestDatabase()
-        consumer = new CdpLegacyEventsConsumer(hub)
+        consumer = new CdpLegacyEventsConsumer(hub, createCdpConsumerDeps(hub))
         legacyPluginExecutor = new LegacyPluginExecutorService(hub.postgres, hub.geoipService)
-        team = await getFirstTeam(hub)
+        team = await getFirstTeam(hub.postgres)
 
         const fixedTime = DateTime.fromObject({ year: 2025, month: 1, day: 1 }, { zone: 'UTC' })
         jest.spyOn(Date, 'now').mockReturnValue(fixedTime.toMillis())
@@ -52,7 +53,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 'Customer.io',
                 'custom',
                 false,
-                'https://github.com/hanzoai/customerio-plugin',
+                'https://github.com/Insights/customerio-plugin',
                 JSON.stringify({}),
                 false,
                 false,
@@ -136,7 +137,7 @@ describe('CdpLegacyEventsConsumer', () => {
             })
         )
 
-        invocation = createScriptExecutionGlobals({
+        invocation = createHogExecutionGlobals({
             project: {
                 id: team.id,
                 name: team.name,
@@ -165,7 +166,7 @@ describe('CdpLegacyEventsConsumer', () => {
     })
 
     describe('convertPluginConfigToInsightsFunction', () => {
-        it('should convert a lightweight plugin config to a custom function', () => {
+        it('should convert a lightweight plugin config to a script function', () => {
             const lightweightConfig = {
                 id: pluginConfig.id,
                 team_id: team.id,
@@ -180,7 +181,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/hanzoai/customerio-plugin',
+                    url: 'https://github.com/Insights/customerio-plugin',
                 },
             }
 
@@ -212,7 +213,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/hanzoai/customerio-plugin',
+                    url: 'https://github.com/Insights/customerio-plugin',
                 },
             }
 
@@ -252,7 +253,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/hanzoai/customerio-plugin',
+                    url: 'https://github.com/Insights/customerio-plugin',
                 },
             }
 
@@ -309,7 +310,7 @@ describe('CdpLegacyEventsConsumer', () => {
     })
 
     describe('getLegacyPluginInsightsFunctionInvocations', () => {
-        it('should load custom functions and create invocations', async () => {
+        it('should load script functions and create invocations', async () => {
             // This test validates the full flow
             const invocations = await consumer['getLegacyPluginInsightsFunctionInvocations'](invocation)
 
@@ -337,7 +338,7 @@ describe('CdpLegacyEventsConsumer', () => {
             expect(invocations).toEqual([])
         })
 
-        it('should load attachments and include them in custom function inputs', async () => {
+        it('should load attachments and include them in script function inputs', async () => {
             // Insert an attachment for the plugin config
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
@@ -492,7 +493,7 @@ describe('CdpLegacyEventsConsumer', () => {
     })
 
     describe('LazyLoader caching', () => {
-        it('should cache custom functions and batch requests', async () => {
+        it('should cache script functions and batch requests', async () => {
             // Clear any existing cache
             consumer['pluginConfigsLoader'].clear()
 
@@ -522,12 +523,12 @@ describe('CdpLegacyEventsConsumer', () => {
     })
 
     describe('shutdown behavior', () => {
-        it('should flush app metrics when stopping', async () => {
-            const flushSpy = jest.spyOn(consumer['appMetrics'], 'flush')
+        it('should flush invocation results when stopping', async () => {
+            const flushSpy = jest.spyOn(consumer['invocationResultsService'], 'flush')
 
             await consumer.stop()
 
-            expect(flushSpy).toHaveBeenCalledTimes(1)
+            expect(flushSpy).toHaveBeenCalled()
         })
     })
 })

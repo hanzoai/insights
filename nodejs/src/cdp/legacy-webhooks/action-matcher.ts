@@ -1,8 +1,13 @@
 import escapeStringRegexp from 'escape-string-regexp'
-import equal from 'fast-deep-equal'
+import { deepEqual as equal } from 'fast-equals'
 import { Summary } from 'prom-client'
 
-import { Properties } from '@hanzo/plugin-scaffold'
+import { stringToBoolean } from '~/common/utils/env-utils'
+import { mutatePostIngestionEventWithElementsList } from '~/common/utils/event'
+import { captureException } from '~/common/utils/insights'
+import { createTrackedRE2 } from '~/common/utils/tracked-re2'
+import { stringify } from '~/common/utils/utils'
+import { Properties } from '~/plugin-scaffold'
 
 import {
     Action,
@@ -18,11 +23,6 @@ import {
     PropertyOperator,
     StringMatching,
 } from '../../types'
-import { stringToBoolean } from '../../utils/env-utils'
-import { mutatePostIngestionEventWithElementsList } from '../../utils/event'
-import { captureException } from '../../utils/insights'
-import { createTrackedRE2 } from '../../utils/tracked-re2'
-import { stringify } from '../../utils/utils'
 import { ActionManager } from './action-manager'
 
 /** These operators can only be matched if the provided filter's value has the right type. */
@@ -50,7 +50,7 @@ const actionMatchMsSummary = new Summary({
 })
 
 /** Return whether two values compare to each other according to the specified operator.
- * This simulates the behavior of datastore (or other DBMSs) which like to cast values in SELECTs to the column's type.
+ * This simulates the behavior of Datastore (or other DBMSs) which like to cast values in SELECTs to the column's type.
  */
 export function castingCompare(
     a: any,
@@ -60,7 +60,7 @@ export function castingCompare(
     // Do null transformation first
     // Datastore treats the string "null" as null, while here we treat them as different values
     // Thus, this check special cases the string "null" to be equal to the null value
-    // See more: https://github.com/hanzoai/insights/issues/12893
+    // See more: https://github.com/Insights/insights/issues/12893
     if (a === null) {
         a = 'null'
     }
@@ -115,7 +115,7 @@ export function castingCompare(
 export function matchString(actual: string, expected: string, matching: StringMatching): boolean {
     switch (matching) {
         case StringMatching.Regex:
-            // Using RE2 here because that's what datastore uses for regex matching anyway
+            // Using RE2 here because that's what Datastore uses for regex matching anyway
             // It's also safer for user-provided patterns because of a few explicit limitations
             try {
                 return createTrackedRE2(expected, undefined, 'action-matcher:matchString').test(actual)

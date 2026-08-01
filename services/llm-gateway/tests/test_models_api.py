@@ -8,81 +8,93 @@ from llm_gateway.services.model_registry import ModelRegistryService
 
 MOCK_COST_DATA: dict[str, ModelCost] = {
     "gpt-4o": {
-        "llm_provider": "openai",
+        "litellm_provider": "openai",
         "max_input_tokens": 128000,
         "supports_vision": True,
         "mode": "chat",
     },
     "gpt-4o-mini": {
-        "llm_provider": "openai",
+        "litellm_provider": "openai",
         "max_input_tokens": 128000,
         "supports_vision": True,
         "mode": "chat",
     },
     "gpt-5.2": {
-        "llm_provider": "openai",
+        "litellm_provider": "openai",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
     },
     "gpt-5-mini": {
-        "llm_provider": "openai",
+        "litellm_provider": "openai",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
     },
     "gpt-5.3-codex": {
-        "llm_provider": "openai",
+        "litellm_provider": "openai",
         "max_input_tokens": 200000,
         "supports_vision": False,
         "mode": "chat",
     },
     "o1": {
-        "llm_provider": "openai",
+        "litellm_provider": "openai",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
     },
     "claude-3-5-sonnet-20241022": {
-        "llm_provider": "anthropic",
+        "litellm_provider": "anthropic",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
     },
     "claude-opus-4-5": {
-        "llm_provider": "anthropic",
+        "litellm_provider": "anthropic",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
     },
     "claude-opus-4-6": {
-        "llm_provider": "anthropic",
+        "litellm_provider": "anthropic",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
     },
     "claude-sonnet-4-5": {
-        "llm_provider": "anthropic",
+        "litellm_provider": "anthropic",
+        "max_input_tokens": 200000,
+        "supports_vision": True,
+        "mode": "chat",
+    },
+    "claude-sonnet-4-6": {
+        "litellm_provider": "anthropic",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
     },
     "claude-haiku-4-5": {
-        "llm_provider": "anthropic",
+        "litellm_provider": "anthropic",
         "max_input_tokens": 200000,
-        "supports_vision": True,
-        "mode": "chat",
-    },
-    "gemini-2.0-flash": {
-        "llm_provider": "vertex_ai",
-        "max_input_tokens": 1048576,
         "supports_vision": True,
         "mode": "chat",
     },
     "claude-sonnet-4-5-20260101": {
-        "llm_provider": "anthropic",
+        "litellm_provider": "anthropic",
         "max_input_tokens": 200000,
         "supports_vision": True,
+        "mode": "chat",
+    },
+    "openrouter/anthropic/claude-3.5-sonnet": {
+        "litellm_provider": "openrouter",
+        "max_input_tokens": 200000,
+        "supports_vision": True,
+        "mode": "chat",
+    },
+    "fireworks_ai/accounts/fireworks/models/llama-v3p1-70b-instruct": {
+        "litellm_provider": "fireworks_ai",
+        "max_input_tokens": 131072,
+        "supports_vision": False,
         "mode": "chat",
     },
 }
@@ -100,7 +112,8 @@ def create_mock_settings() -> MagicMock:
     settings = MagicMock()
     settings.openai_api_key = "sk-test"
     settings.anthropic_api_key = "sk-ant-test"
-    settings.gemini_api_key = "gemini-test"
+    settings.openrouter_api_key = "or-test"
+    settings.fireworks_api_key = "fw-test"
     return settings
 
 
@@ -139,6 +152,8 @@ class TestListModelsEndpoint:
         assert data["object"] == "list"
         assert isinstance(data["data"], list)
         assert len(data["data"]) > 0
+        # codex-acp compatibility: `models` mirrors `data`
+        assert data["models"] == data["data"]
 
     def test_model_object_has_required_fields(self, client: TestClient):
         response = client.get("/v1/models")
@@ -153,6 +168,14 @@ class TestListModelsEndpoint:
         assert "supports_streaming" in model
         assert "supports_vision" in model
 
+    def test_truncation_policy_limit_is_non_zero(self, client: TestClient):
+        # Ensure truncation_policy.limit is always > 0 (prevents tool output breakage).
+        response = client.get("/v1/models")
+        for model in response.json()["data"]:
+            policy = model["truncation_policy"]
+            assert policy["mode"] in {"bytes", "tokens"}
+            assert policy["limit"] > 0, f"{model['id']} would truncate tool output to zero"
+
 
 class TestListModelsForProductEndpoint:
     def test_returns_models_for_llm_gateway(self, client: TestClient):
@@ -162,9 +185,11 @@ class TestListModelsForProductEndpoint:
         model_ids = {m["id"] for m in data["data"]}
         assert "gpt-4o" in model_ids
         assert "o1" in model_ids
+        assert "claude-sonnet-4-5" in model_ids
+        assert "claude-3-5-sonnet-20241022" in model_ids
 
-    def test_twig_filters_models_by_allowed_list(self, client: TestClient):
-        response = client.get("/twig/v1/models")
+    def test_insights_code_filters_models_by_allowed_list(self, client: TestClient):
+        response = client.get("/insights_code/v1/models")
         assert response.status_code == 200
         data = response.json()
         model_ids = {m["id"] for m in data["data"]}
@@ -172,17 +197,141 @@ class TestListModelsForProductEndpoint:
         assert "claude-sonnet-4-5-20260101" not in model_ids
         assert "gpt-4o" not in model_ids
         assert "o1" not in model_ids
-        assert "claude-3-5-sonnet-20241022" not in model_ids
 
-    def test_array_alias_routes_to_twig(self, client: TestClient):
-        response = client.get("/array/v1/models")
+    @pytest.mark.parametrize("alias", ["twig", "array"])
+    def test_legacy_alias_routes_to_insights_code(self, client: TestClient, alias: str):
+        response = client.get(f"/{alias}/v1/models")
         assert response.status_code == 200
         data = response.json()
         model_ids = {m["id"] for m in data["data"]}
-        assert "claude-sonnet-4-5" in model_ids
-        assert "gpt-4o" not in model_ids
+        insights_code_response = client.get("/insights_code/v1/models")
+        insights_code_model_ids = {m["id"] for m in insights_code_response.json()["data"]}
+        assert model_ids == insights_code_model_ids
 
     def test_returns_error_for_invalid_product(self, client: TestClient):
         response = client.get("/invalid_product/v1/models")
         assert response.status_code == 400
         assert "Invalid product" in response.json()["detail"]
+
+
+class TestResponsesModeModels:
+    @pytest.mark.parametrize(
+        "endpoint", ["/v1/models", "/insights_code/v1/models", "/array/v1/models", "/twig/v1/models"]
+    )
+    def test_models_endpoint_includes_responses_mode_models(self, client: TestClient, endpoint: str):
+        cost_data_with_responses = dict(MOCK_COST_DATA)
+        cost_data_with_responses["gpt-5.3-codex"] = {
+            **cost_data_with_responses["gpt-5.3-codex"],
+            "mode": "responses",
+        }
+
+        def get_costs_with_responses(self: ModelCostService, model: str) -> ModelCost | None:
+            return cost_data_with_responses.get(model)
+
+        def get_all_models_with_responses(self: ModelCostService) -> dict[str, ModelCost]:
+            return cost_data_with_responses
+
+        ModelRegistryService.reset_instance()
+        ModelCostService.reset_instance()
+        with (
+            patch.object(ModelCostService, "get_costs", get_costs_with_responses),
+            patch.object(ModelCostService, "get_all_models", get_all_models_with_responses),
+        ):
+            response = client.get(endpoint)
+            assert response.status_code == 200
+            model_ids = {m["id"] for m in response.json()["data"]}
+            assert "gpt-5.3-codex" in model_ids
+
+
+def _wire_authenticated_user(mock_db_pool, distinct_id: str):
+    from unittest.mock import AsyncMock
+
+    conn = AsyncMock()
+    conn.fetchrow = AsyncMock(
+        return_value={
+            "id": "key_id",
+            "user_id": 1,
+            "scopes": ["llm_gateway:read"],
+            "current_team_id": 1,
+            "distinct_id": distinct_id,
+            "is_staff": False,
+        }
+    )
+    mock_db_pool.acquire = AsyncMock(return_value=conn)
+    mock_db_pool.release = AsyncMock()
+
+
+class TestFreeTierModelListing:
+    @pytest.fixture(autouse=True)
+    def gate_enabled(self, monkeypatch: pytest.MonkeyPatch):
+        from llm_gateway.config import get_settings
+
+        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        get_settings.cache_clear()
+        yield
+        get_settings.cache_clear()
+
+    def test_anonymous_caller_gets_full_unrestricted_list(self, client: TestClient):
+        # an unidentifiable caller may be a billed org; never mark for those
+        response = client.get("/insights_code/v1/models")
+        assert response.status_code == 200
+        models = response.json()["data"]
+        assert "claude-opus-4-5" in {m["id"] for m in models}
+        assert all(m["allowed"] for m in models)
+
+    def test_unbilled_org_gets_full_list_with_premium_models_marked(self, app, mock_db_pool):
+        from unittest.mock import AsyncMock
+
+        from llm_gateway.services.quota_resolver import QuotaResourceStatus
+
+        _wire_authenticated_user(mock_db_pool, "unbilled-user")
+
+        with TestClient(app) as c:
+            c.app.state.quota_resolver.get_resource_status = AsyncMock(
+                return_value=QuotaResourceStatus(limited=False, code_usage_billing_active=False)
+            )
+            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer phx_unbilled_org_models"})
+
+        assert response.status_code == 200
+        body = response.json()
+        by_id = {m["id"]: m for m in body["data"]}
+        premium = by_id["claude-opus-4-5"]
+        assert premium["allowed"] is False
+        assert premium["restriction_reason"] == "paid_plan_required"
+        # exact, not subset: the default free model must survive the allowlist
+        # and the annotation, or free-tier callers have no usable model
+        assert {m["id"] for m in body["data"] if m["allowed"]} == {"@cf/zai-org/glm-5.2"}
+        # codex reads the `models` mirror; the marks must be there too
+        assert body["models"] == body["data"]
+
+    def test_billed_org_sees_full_list(self, app, mock_db_pool):
+        from unittest.mock import AsyncMock
+
+        from llm_gateway.services.quota_resolver import QuotaResourceStatus
+
+        _wire_authenticated_user(mock_db_pool, "billed-user")
+
+        with TestClient(app) as c:
+            c.app.state.quota_resolver.get_resource_status = AsyncMock(
+                return_value=QuotaResourceStatus(limited=False, code_usage_billing_active=True)
+            )
+            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer phx_billed_org_models"})
+
+        assert response.status_code == 200
+        models = response.json()["data"]
+        assert "claude-opus-4-5" in {m["id"] for m in models}
+        assert all(m["allowed"] for m in models)
+
+    def test_auth_resolution_failure_serves_full_unrestricted_list(self, app, mock_db_pool):
+        from unittest.mock import AsyncMock
+
+        # an auth outage must not mark a possibly-billed caller's models
+        mock_db_pool.acquire = AsyncMock(side_effect=RuntimeError("db down"))
+
+        with TestClient(app) as c:
+            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer phx_auth_outage_models"})
+
+        assert response.status_code == 200
+        models = response.json()["data"]
+        assert "claude-opus-4-5" in {m["id"] for m in models}
+        assert all(m["allowed"] for m in models)

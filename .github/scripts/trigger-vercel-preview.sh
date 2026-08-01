@@ -11,7 +11,7 @@ fi
 
 PR_BRANCH="$1"
 
-echo "📢 Triggering Vercel deployment for insights.com@main (gatsby-source-git)"
+echo "📢 Triggering Vercel deployment for hanzo.ai@master (gatsby-source-git)"
 echo "   Monorepo branch: $PR_BRANCH (per-deployment env)"
 
 PAYLOAD='{
@@ -20,11 +20,11 @@ PAYLOAD='{
   "gitSource": {
     "type": "github",
     "repoId": "260550412",
-    "ref": "main"
+    "ref": "master"
   },
   "build": {
     "env": {
-      "GATSBY_INSIGHTS_BRANCH": "'"$PR_BRANCH"'"
+      "GATSBY_POSTFN_BRANCH": "'"$PR_BRANCH"'"
     }
   }
 }'

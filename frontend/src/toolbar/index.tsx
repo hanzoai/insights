@@ -1,5 +1,4 @@
 import '~/styles'
-
 import './styles.scss'
 
 import { KeaPlugin, resetContext } from 'kea'
@@ -10,11 +9,17 @@ import { routerPlugin } from 'kea-router'
 import { subscriptionsPlugin } from 'kea-subscriptions'
 import { waitForPlugin } from 'kea-waitfor'
 import { windowValuesPlugin } from 'kea-window-values'
-import type { Insights } from '~/lib/insights-browser'
+import type { Insights } from 'insights-js'
 import { createRoot } from 'react-dom/client'
 
 import { disposablesPlugin } from '~/kea-disposables'
 import { ToolbarApp } from '~/toolbar/ToolbarApp'
+import { canonicalizeApiHost } from '~/toolbar/toolbarConfigLogic'
+import { insightsToolbarController, setToolbarRefs } from '~/toolbar/toolbarController'
+import { toolbarLogger } from '~/toolbar/toolbarLogger'
+import { captureToolbarException } from '~/toolbar/toolbarInsightsJS'
+import { isToolbarRequestError } from '~/toolbar/toolbarRequestError'
+import { safeFetch } from '~/toolbar/utils'
 import { ToolbarParams } from '~/types'
 
 interface InitKeaProps {
@@ -42,7 +47,19 @@ const initKeaInToolbar = ({ routerHistory, routerLocation, beforePlugins }: Init
         formsPlugin,
         loadersPlugin({
             onFailure({ error, reducerKey, actionKey }: { error: any; reducerKey: string; actionKey: string }) {
-                console.error('toolbar fetch failed', error, reducerKey, actionKey)
+                toolbarLogger.error('kea_loader', 'Toolbar fetch failed', {
+                    reducer_key: reducerKey,
+                    action_key: actionKey,
+                })
+                // Loaders throw ToolbarRequestError to drive their *Failure actions on
+                // expected request failures (4xx/5xx/network) - those are logged above but
+                // must not pollute error tracking. Anything else is a genuine toolbar bug.
+                if (!isToolbarRequestError(error)) {
+                    captureToolbarException(error, 'kea_loader', {
+                        reducer_key: reducerKey,
+                        action_key: actionKey,
+                    })
+                }
             },
         }),
         subscriptionsPlugin,
@@ -70,26 +87,56 @@ const initKeaInToolbar = ({ routerHistory, routerLocation, beforePlugins }: Init
 }
 
 const win = window as any
+win['insightsToolbarController'] = insightsToolbarController
 
-win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, insights?: Insights) {
+// Re-exported for the loader script (loader.ts), which forwards its controller stub here.
+export { insightsToolbarController }
+
+export async function loadToolbar(toolbarParams: ToolbarParams, insights?: Insights): Promise<void> {
+    // Store the start time so we can measure total load duration in initInstrumentation.
+    // The loader script already stamps this before fetching the app module, so the measured
+    // duration includes the chunk fetch — keep the earliest timestamp.
+    ;(window as any).__insights_toolbar_load_start ??= performance.now()
+
     // If insights and toolbarFlagsKey is present, fetch the feature flags from the backend
     if (insights && toolbarParams.toolbarFlagsKey) {
-        const apiHost = insights.config?.api_host || toolbarParams.apiURL || window.location.origin
-        const trimmedHost = apiHost.replace(/\/+$/, '')
-        await fetch(`${trimmedHost}/api/user/get_toolbar_preloaded_flags?key=${toolbarParams.toolbarFlagsKey}`, {
-            credentials: 'include',
-        })
-            .then((response) => response.json())
-            .then((data) => {
+        // Validate with canonicalizeApiHost so an attacker-controlled apiURL in
+        // the hash can't receive the credentialed request (the flags key is
+        // low-impact on its own, but `credentials: 'include'` would send any
+        // cookies for the attacker's origin alongside it).
+        const trimmedHost =
+            canonicalizeApiHost(insights.config?.api_host) ||
+            canonicalizeApiHost(toolbarParams.apiURL) ||
+            window.location.origin
+        const flagsUrl = `${trimmedHost}/api/user/get_toolbar_preloaded_flags?key=${toolbarParams.toolbarFlagsKey}`
+
+        // The flags preload is best-effort and the toolbar degrades cleanly without it.
+        // Every failure mode here is request-shaped (transient network failure, ad blocker,
+        // CORS, a proxy returning a non-JSON error page, an invalid/stale flags key), so
+        // nothing in this block is reported to error tracking - only logged.
+        let response: Response | undefined
+        try {
+            response = await safeFetch(flagsUrl, { credentials: 'include' })
+        } catch (error) {
+            toolbarLogger.warn('flags', 'Error fetching toolbar feature flags', {
+                error: error instanceof Error ? error.message : String(error),
+            })
+        }
+
+        if (response) {
+            try {
+                const data = await response.json()
                 if (data.featureFlags) {
                     insights.featureFlags.overrideFeatureFlags({ flags: data.featureFlags })
                 } else {
-                    console.error('[Toolbar Flags] Feature flags not found:', JSON.stringify(data))
+                    toolbarLogger.error('flags', 'Feature flags not found', { response: data })
                 }
-            })
-            .catch((error) => {
-                console.error('[Toolbar Flags] Error fetching toolbar feature flags:', error)
-            })
+            } catch (error) {
+                toolbarLogger.error('flags', 'Error processing toolbar feature flags', {
+                    error: error instanceof Error ? error.message : String(error),
+                })
+            }
+        }
     }
 
     initKeaInToolbar()
@@ -99,9 +146,7 @@ win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, insights?
     document.body.appendChild(container)
 
     if (!insights) {
-        console.warn(
-            '⚠️⚠️⚠️ Loaded toolbar via old version of insights-js that does not support feature flags. Please upgrade! ⚠️⚠️⚠️'
-        )
+        toolbarLogger.warn('init', 'Loaded toolbar via old version of insights-js that does not support feature flags')
     }
 
     root.render(
@@ -112,7 +157,12 @@ win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, insights?
             insights={insights}
         />
     )
+
+    setToolbarRefs(root, container)
 }
 
+// Kept for direct consumers and back-compat: once this module evaluates, calls skip the loader.
+win['ph_load_toolbar'] = loadToolbar
+
 /** @deprecated, use "ph_load_toolbar" instead */
-win['ph_load_editor'] = win['ph_load_toolbar']
+win['ph_load_editor'] = loadToolbar

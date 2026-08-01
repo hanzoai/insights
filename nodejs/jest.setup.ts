@@ -1,11 +1,15 @@
 // eslint-disable-next-line no-restricted-imports
 import fetch from 'node-fetch'
 
-import { logger, shutdownLogger } from './src/utils/logger'
+import { installPostgresTypeParsers } from './src/common/utils/db/postgres'
+import { logger, shutdownLogger } from './src/common/utils/logger'
 
 const { readFileSync } = require('fs')
 const { DateTime } = require('luxon')
 const { join } = require('path')
+
+// Sets up the same type parsers as used everywhere else in the codebase
+installPostgresTypeParsers()
 
 // Mock @pyroscope/nodejs to avoid ESM compatibility issues with p-limit
 jest.mock('@pyroscope/nodejs', () => ({
@@ -42,7 +46,7 @@ beforeEach(() => {
     const responsesToUrls: Record<string, any> = {
         'https://google.com/results.json?query=fetched': { count: 2, query: 'bla', results: [true, true] },
         'https://mmdbcdn.insights.net/': readFileSync(join(__dirname, 'tests', 'assets', 'GeoLite2-City-Test.mmdb.br')),
-        'https://insights.hanzo.ai/api/event?token=THIS+IS+NOT+A+TOKEN+FOR+TEAM+2': { hello: 'world' },
+        'https://app.hanzo.ai/api/event?token=THIS+IS+NOT+A+TOKEN+FOR+TEAM+2': { hello: 'world' },
         'https://onevent.com/': { success: true },
         'https://www.example.com': { example: 'data' },
     }

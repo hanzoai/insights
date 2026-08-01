@@ -18,6 +18,7 @@ const meta: Meta = {
         viewMode: 'story',
         mockDate: '2025-01-27',
         pageUrl: urls.experiments(),
+        testOptions: { viewport: { width: 1300, height: 2000 } },
     },
     decorators: [
         mswDecorator({
@@ -35,6 +36,6 @@ const meta: Meta = {
     ],
 }
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<{}>
 
 export const Experiments: Story = {}

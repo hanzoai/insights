@@ -4,9 +4,9 @@ import { IconSparkles } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
 
 import { Progress } from 'lib/elements/Progress'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
+import { SessionSummaryComponent } from 'scenes/session-recordings/player/PlayerSummaryViews'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
-import { SessionSummaryComponent } from 'scenes/session-recordings/player/sidebar/PlayerSidebarSessionSummary'
 
 import { notebookNodePersonFeedLogic } from '../notebookNodePersonFeedLogic'
 

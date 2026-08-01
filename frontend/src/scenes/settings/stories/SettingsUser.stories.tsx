@@ -1,8 +1,9 @@
 import { MOCK_DEFAULT_TEAM } from 'lib/api.mock'
 
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { within } from '@testing-library/dom'
+import userEvent from '@testing-library/user-event'
 import { router } from 'kea-router'
-import { useEffect } from 'react'
 
 import { STORYBOOK_FEATURE_FLAGS } from 'lib/constants'
 import { App } from 'scenes/App'
@@ -17,8 +18,8 @@ interface StoryProps {
     sectionId: SettingSectionId
 }
 
-type Story = StoryObj<(props: StoryProps) => JSX.Element>
-const meta: Meta<(props: StoryProps) => JSX.Element> = {
+type Story = StoryObj<StoryProps>
+const meta: Meta<StoryProps> = {
     title: 'Scenes-App/Settings/User',
     parameters: {
         layout: 'fullscreen',
@@ -37,38 +38,55 @@ const meta: Meta<(props: StoryProps) => JSX.Element> = {
                 '/api/projects/:id/integrations': { results: [] },
             },
             patch: {
-                '/api/projects/:id': async (req, res, ctx) => {
+                '/api/projects/:id': async ({ request }) => {
                     // bounce the setting back as is
-                    const newTeamSettings = { ...MOCK_DEFAULT_TEAM, ...(await req.json()) }
-                    return res(ctx.json(newTeamSettings))
+                    const newTeamSettings = { ...MOCK_DEFAULT_TEAM, ...((await request.json()) as object) }
+                    return [200, newTeamSettings]
                 },
             },
         }),
     ],
+    render: ({ sectionId }) => {
+        // Navigate synchronously before <App /> mounts so it renders the settings scene directly,
+        // never the project homepage. A useEffect push fires after the first paint, so the snapshot
+        // can race and capture the homepage frame instead.
+        router.actions.push(urls.settings(sectionId))
+
+        return <App />
+    },
 }
 export default meta
 
-const Template: StoryFn<StoryProps> = ({ sectionId }) => {
-    useEffect(() => {
-        router.actions.push(urls.settings(sectionId))
-    }, [sectionId])
-
-    return <App />
-}
-
 // -- User --
 
-export const SettingsUserProfile: Story = Template.bind({})
-SettingsUserProfile.args = { sectionId: 'user-profile' }
+export const SettingsUserProfile: Story = {
+    args: { sectionId: 'user-profile' },
+}
 
-export const SettingsUserApiKeys: Story = Template.bind({})
-SettingsUserApiKeys.args = { sectionId: 'user-api-keys' }
+export const SettingsUserApiKeys: Story = {
+    args: { sectionId: 'user-api-keys' },
+}
 
-export const SettingsUserNotifications: Story = Template.bind({})
-SettingsUserNotifications.args = { sectionId: 'user-notifications' }
+export const SettingsUserNotifications: Story = {
+    args: { sectionId: 'user-notifications' },
+}
 
-export const SettingsUserCustomization: Story = Template.bind({})
-SettingsUserCustomization.args = { sectionId: 'user-customization' }
+export const SettingsUserCustomization: Story = {
+    args: { sectionId: 'user-customization' },
+}
 
-export const SettingsUserDangerZone: Story = Template.bind({})
-SettingsUserDangerZone.args = { sectionId: 'user-danger-zone' }
+export const SettingsUserNavigation: Story = {
+    args: { sectionId: 'user-navigation' },
+}
+
+export const SettingsUserDangerZone: Story = {
+    args: { sectionId: 'user-danger-zone' },
+}
+
+export const SettingsUserRemindersModal: Story = {
+    args: { sectionId: 'user-reminders' },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+        await userEvent.click(await canvas.findByText('New reminder'))
+    },
+}

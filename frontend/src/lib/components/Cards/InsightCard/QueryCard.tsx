@@ -4,10 +4,10 @@ import React, { useState } from 'react'
 
 import { CardMeta } from 'lib/components/Cards/CardMeta'
 import { MenuItemList } from 'lib/elements/Menu/Menu'
+import { themeLogic } from 'lib/logic/themeLogic'
 import { urls } from 'scenes/urls'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
-import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { Query } from '~/queries/Query/Query'
 import { Node } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'

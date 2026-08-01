@@ -4,14 +4,15 @@ sidebar: Docs
 showTitle: true
 ---
 
-> **Note:** This page refers to our [main product repository](https://github.com/Hanzo Insights/insights), not our website.
+> **Note:** This page refers to our [main product repository](https://github.com/Insights/insights), not our website.
 
 ## Directory tree
 
 ```text
 .
 ├── bin              # Shell scripts wrapped by insightscli, the unified developer CLI
-├── common           # Shared code: insightscli CLI, Insights SQL parser, ScriptVM, shared UI packages
+├── common           # Shared code: Insights SQL parser, ScriptVM, shared UI packages
+├── tools            # Developer/CI tooling (insightscli framework, insightscli-commands, openapi-codegen, ...)
 ├── ee               # Enterprise platform package features (separate license)
 ├── frontend         # React/TypeScript frontend application
 │   └── src
@@ -60,7 +61,7 @@ The Django backend application. Key subdirectories:
 
 Product-specific code organized as **vertical slices**. Each product folder contains its own backend (Django app), frontend (React), and optionally shared code. This structure allows features to evolve independently.
 
-See the [products README](https://github.com/Hanzo Insights/insights/blob/main/products/README.md) for detailed conventions.
+See the [products README](https://github.com/Insights/insights/blob/master/products/README.md) for detailed conventions.
 
 ### `nodejs`
 
@@ -83,14 +84,22 @@ High-performance Rust services including:
 
 Shared code used across the codebase:
 
-- `insightscli` – Unified developer CLI for building, testing, and running Insights
-- `insightsql_parser` – InsightsQL parser (C++)
-- `scriptvm` – Hog virtual machine
+- `insightsql_parser` – Insights SQL parser (C++)
+- `scriptvm` – Script virtual machine
 - `tailwind` – Shared Tailwind configuration
+
+### `tools`
+
+Developer and CI tooling, not imported by runtime code:
+
+- `insightscli` – Developer CLI framework (PyPI-publishable)
+- `insightscli-commands` – Insights-specific insightscli commands
+- `openapi-codegen` – OpenAPI client/spec generation
+- (and others — see `tools/`)
 
 ### `ee`
 
-Enterprise edition licensed features. This directory has a [separate license](https://github.com/Hanzo Insights/insights/blob/main/ee/LICENSE) - not MIT. For 100% FOSS code, see [Insights/insights-foss](https://github.com/Hanzo Insights/insights-foss).
+Enterprise edition licensed features. This directory has a [separate license](https://github.com/Insights/insights/blob/master/ee/LICENSE) - not MIT. For 100% FOSS code, see [Insights/insights-foss](https://github.com/Insights/insights-foss).
 
 ### `playwright`
 

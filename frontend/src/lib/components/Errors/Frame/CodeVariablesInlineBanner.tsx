@@ -4,7 +4,7 @@ import { IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
 import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
-import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
+import { lemonBannerLogic } from 'lib/elements/Banner/lemonBannerLogic'
 import { Link } from 'lib/elements/Link'
 
 const SUPPORTED_RUNTIMES = ['python']
@@ -12,7 +12,7 @@ const SUPPORTED_RUNTIMES = ['python']
 export function CodeVariablesInlineBanner(): JSX.Element | null {
     const { exceptionAttributes } = useValues(errorPropertiesLogic)
 
-    const dismissLogic = bannerLogic({
+    const dismissLogic = lemonBannerLogic({
         dismissKey: `code-variables-inline-banner-${exceptionAttributes?.runtime}`,
     })
     const { isDismissed } = useValues(dismissLogic)

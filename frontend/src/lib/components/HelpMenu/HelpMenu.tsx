@@ -1,64 +1,45 @@
 import { Menu } from '@base-ui/react/menu'
 import { useActions, useValues } from 'kea'
 
-import {
-    IconBook,
-    IconCopy,
-    IconDatabase,
-    IconEllipsis,
-    IconExpand45,
-    IconGear,
-    IconLive,
-    IconOpenSidebar,
-    IconQuestion,
-    IconServer,
-    IconShieldLock,
-    IconSparkles,
-    IconSupport,
-} from '@hanzo/icons'
+import { IconCopy, IconDatabase, IconOpenSidebar, IconServer, IconShieldLock, IconSparkles } from '@hanzo/icons'
 import { ProfilePicture } from '@hanzo/elements'
 
-import { AI_AVAILABLE } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
+import { IconMenu, IconWithBadge } from 'lib/elements/icons'
+import { Badge } from 'lib/elements/Badge/Badge'
 import { Link } from 'lib/elements/Link/Link'
-import { IconBlank } from 'lib/elements/icons'
+import { preflightLogic } from 'lib/logic/preflightLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
-import { DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'
 import { Label } from 'lib/ui/Label/Label'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
-import { navigation3000Logic } from '~/layout/navigation-3000/navigationLogic'
-import { sidePanelOfframpLogic } from '~/layout/navigation-3000/sidepanel/sidePanelOfframpLogic'
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { SidePanelTab } from '~/types'
 
-import { RenderKeybind } from '../AppShortcuts/AppShortcutMenu'
-import { appShortcutLogic } from '../AppShortcuts/appShortcutLogic'
-import { keyBinds } from '../AppShortcuts/shortcuts'
-import { openCHQueriesDebugModal } from '../AppShortcuts/utils/DebugCHQueries'
-import { ThemeMenu } from '../Menus/ThemeMenu'
 import { ScrollableShadows } from '../ScrollableShadows/ScrollableShadows'
+import { RenderKeybind } from '../Shortcuts/ShortcutMenu'
+import { keyBinds } from '../Shortcuts/shortcuts'
+import { openCHQueriesDebugModal } from '../Shortcuts/utils/DebugCHQueries'
+import { healthSummaryLogic } from './healthSummaryLogic'
 import { helpMenuLogic } from './helpMenuLogic'
+import { insightsStatusLogic } from './insightsStatusLogic'
 
 export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Element {
     const { openSidePanel } = useActions(sidePanelStateLogic)
-    const { isHelpMenuOpen } = useValues(helpMenuLogic)
+    const { isHelpMenuOpen, triggerBadgeContent, triggerBadgeStatus } = useValues(helpMenuLogic)
     const { setHelpMenuOpen } = useActions(helpMenuLogic)
-    const { toggleZenMode } = useActions(navigation3000Logic)
-    const { setAppShortcutMenuOpen } = useActions(appShortcutLogic)
     const { user } = useValues(userLogic)
-    const { isCloud, preflight } = useValues(preflightLogic)
-    const { showOfframpModal } = useActions(sidePanelOfframpLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
+    const { isCloudOrDev, preflight } = useValues(preflightLogic)
     const { reportAccountOwnerClicked } = useActions(eventUsageLogic)
     const { billing } = useValues(billingLogic)
+    const { insightsStatusTooltip, insightsStatusBadgeStatus, insightsStatusBadgeContent, statusPageUrl } =
+        useValues(insightsStatusLogic)
+    const { totalIssues } = useValues(healthSummaryLogic)
 
     return (
         <Menu.Root open={isHelpMenuOpen} onOpenChange={setHelpMenuOpen}>
@@ -68,7 +49,7 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                         tooltip={
                             iconOnly ? (
                                 <>
-                                    Help menu
+                                    More
                                     <RenderKeybind keybind={[keyBinds.helpMenu]} className="ml-1" />
                                 </>
                             ) : undefined
@@ -82,11 +63,18 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                         data-attr="help-menu-button"
                     >
                         <span className="flex text-secondary group-hover:text-primary">
-                            <IconQuestion className="size-[17px]" />
+                            <IconWithBadge
+                                content={triggerBadgeContent}
+                                size="xsmall"
+                                status={triggerBadgeStatus}
+                                className="flex"
+                            >
+                                <IconMenu className="size-[17px]" />
+                            </IconWithBadge>
                         </span>
                         {!iconOnly && (
                             <>
-                                <span className="-ml-[1px]">Help</span>
+                                <span className="-ml-px">More</span>
                                 <MenuOpenIndicator direction="up" />
                             </>
                         )}
@@ -109,39 +97,27 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                             className="flex flex-col gap-px overflow-x-hidden"
                             innerClassName="primitive-menu-content-inner p-1 "
                         >
-                            {AI_AVAILABLE && (
-                                <div className="flex flex-col gap-px">
-                                    <Menu.Item
-                                        render={(props) => (
-                                            <Link
-                                                {...props}
-                                                to={urls.ai()}
-                                                buttonProps={{
-                                                    menuItem: true,
-                                                    size: 'fit',
-                                                    className:
-                                                        'flex flex-col gap-1 p-2 border border-primary rounded h-32 items-center justify-center shadow hover:border-accent transition-colors',
-                                                }}
-                                                data-attr="help-menu-ask-insights-ai-button"
-                                            >
-                                                <span className="size-3 [&>svg]:size-4 mb-3">
-                                                    <IconSparkles className="text-ai" />
-                                                </span>
-                                                <span className="text-sm font-medium">Ask Insights AI</span>
-                                                <span className="text-xs text-tertiary text-center text-pretty">
-                                                    Insights AI answers 80%+ of support questions we receive!
-                                                </span>
-                                            </Link>
-                                        )}
-                                    />
-                                </div>
-                            )}
-                            <div className="flex flex-col gap-px pt-1">
+                            <div className="flex flex-col gap-px">
+                                <Label intent="menu" className="px-2">
+                                    Help
+                                </Label>
+                                <Menu.Item
+                                    render={(props) => (
+                                        <Link
+                                            {...props}
+                                            to={urls.ai()}
+                                            buttonProps={{ menuItem: true }}
+                                            data-attr="more-menu-ask-ai-button"
+                                        >
+                                            Ask Insights AI
+                                            <IconSparkles className="text-ai" />
+                                        </Link>
+                                    )}
+                                />
                                 <Menu.Item
                                     onClick={() => openSidePanel(SidePanelTab.Support)}
                                     render={
-                                        <ButtonPrimitive menuItem data-attr="help-menu-support-button">
-                                            <IconSupport />
+                                        <ButtonPrimitive menuItem data-attr="more-menu-support-button">
                                             Support
                                             <IconOpenSidebar className="size-3" />
                                         </ButtonPrimitive>
@@ -158,10 +134,37 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                             disableDocsPanel
                                             tooltip="Open docs in new browser tab"
                                             tooltipPlacement="right"
-                                            data-attr="help-menu-docs-button"
+                                            data-attr="more-menu-docs-button"
                                         >
-                                            <IconBook />
                                             Docs
+                                        </Link>
+                                    )}
+                                />
+
+                                <Label intent="menu" className="px-2 mt-3">
+                                    System
+                                </Label>
+                                <Menu.Item
+                                    render={(props) => (
+                                        <Link
+                                            {...props}
+                                            targetBlankIcon
+                                            target="_blank"
+                                            buttonProps={{ menuItem: true }}
+                                            to={statusPageUrl}
+                                            tooltip={insightsStatusTooltip}
+                                            tooltipPlacement="right"
+                                            tooltipCloseDelayMs={0}
+                                            data-attr="more-menu-status-button"
+                                        >
+                                            Status Page
+                                            {insightsStatusBadgeStatus !== 'success' && (
+                                                <Badge
+                                                    content={insightsStatusBadgeContent}
+                                                    size="xsmall"
+                                                    status={insightsStatusBadgeStatus}
+                                                />
+                                            )}
                                         </Link>
                                     )}
                                 />
@@ -169,12 +172,23 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                     render={(props) => (
                                         <Link
                                             {...props}
-                                            to={urls.settings()}
+                                            to={urls.health()}
                                             buttonProps={{ menuItem: true }}
-                                            data-attr="help-menu-settings-button"
+                                            tooltip={
+                                                totalIssues > 0
+                                                    ? `${totalIssues} health issue${totalIssues === 1 ? '' : 's'}`
+                                                    : 'All systems healthy'
+                                            }
+                                            tooltipPlacement="right"
+                                            tooltipCloseDelayMs={0}
+                                            data-attr="more-menu-health-button"
                                         >
-                                            <IconGear />
-                                            Settings
+                                            Health
+                                            <Badge
+                                                size="small"
+                                                content={triggerBadgeContent}
+                                                status={triggerBadgeStatus}
+                                            />
                                         </Link>
                                     )}
                                 />
@@ -189,22 +203,46 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                             target="_blank"
                                             buttonProps={{ menuItem: true }}
                                             to="https://hanzo.ai/changelog"
-                                            data-attr="help-menu-changelog-button"
+                                            data-attr="more-menu-changelog-button"
                                         >
-                                            <IconLive />
                                             Changelog
                                         </Link>
                                     )}
                                 />
 
-                                {user?.is_staff && <></>}
+                                <Menu.Item
+                                    render={(props) => (
+                                        <Link
+                                            {...props}
+                                            to={urls.exports()}
+                                            buttonProps={{ menuItem: true }}
+                                            data-attr="more-menu-exports-button"
+                                        >
+                                            Exports
+                                        </Link>
+                                    )}
+                                />
+
+                                {!isCloudOrDev && (
+                                    <Menu.Item
+                                        render={(props) => (
+                                            <Link
+                                                {...props}
+                                                to={urls.moveToInsightsCloud()}
+                                                buttonProps={{ menuItem: true }}
+                                                data-attr="help-menu-upgrade-to-cloud-button"
+                                            >
+                                                Try Insights Cloud
+                                            </Link>
+                                        )}
+                                    />
+                                )}
 
                                 {user?.is_staff && (
                                     <Menu.SubmenuRoot>
                                         <Menu.SubmenuTrigger
                                             render={
                                                 <ButtonPrimitive menuItem data-attr="help-menu-admin-button">
-                                                    <IconBlank />
                                                     Admin (Lucky you!)
                                                     <MenuOpenIndicator intent="sub" />
                                                 </ButtonPrimitive>
@@ -283,92 +321,22 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                     </Menu.SubmenuRoot>
                                 )}
 
-                                {isRemovingSidePanelFlag && (
-                                    <Menu.Item
-                                        onClick={() => {
-                                            showOfframpModal()
-                                            setHelpMenuOpen(false)
-                                        }}
-                                        render={
-                                            <ButtonPrimitive menuItem>
-                                                <IconBlank />
-                                                Where's the panel? 🤔
-                                            </ButtonPrimitive>
-                                        }
-                                    />
-                                )}
-
-                                <Menu.SubmenuRoot>
-                                    <Menu.SubmenuTrigger
-                                        render={
-                                            <ButtonPrimitive menuItem data-attr="help-menu-display-options-button">
-                                                <IconEllipsis />
-                                                Display options
-                                                <MenuOpenIndicator intent="sub" />
-                                            </ButtonPrimitive>
-                                        }
-                                    />
-                                    <Menu.Portal>
-                                        <Menu.Positioner className="z-[var(--z-popover)]">
-                                            <Menu.Popup className="primitive-menu-content max-h-[calc(var(--available-height)-4px)] min-w-[250px]">
-                                                <ScrollableShadows
-                                                    direction="vertical"
-                                                    styledScrollbars
-                                                    className="flex flex-col gap-px overflow-x-hidden"
-                                                    innerClassName="primitive-menu-content-inner p-1 "
-                                                >
-                                                    <Menu.Item
-                                                        onClick={() => setAppShortcutMenuOpen(true)}
-                                                        render={
-                                                            <ButtonPrimitive
-                                                                tooltip="Open shortcut menu"
-                                                                tooltipPlacement="right"
-                                                                menuItem
-                                                                data-attr="help-menu-shortcuts-button"
-                                                            >
-                                                                <span className="size-4 flex items-center justify-center">
-                                                                    ⌘
-                                                                </span>
-                                                                Shortcuts
-                                                                <div className="flex gap-1 ml-auto items-center">
-                                                                    <KeyboardShortcut command option k />
-                                                                    <span className="text-xs opacity-75">or</span>
-                                                                    <KeyboardShortcut command shift k />
-                                                                </div>
-                                                            </ButtonPrimitive>
-                                                        }
-                                                    />
-                                                    <Menu.Item
-                                                        onClick={toggleZenMode}
-                                                        render={
-                                                            <ButtonPrimitive
-                                                                menuItem
-                                                                data-attr="help-menu-zen-mode-button"
-                                                            >
-                                                                <IconExpand45 />
-                                                                Zen mode
-                                                            </ButtonPrimitive>
-                                                        }
-                                                    />
-                                                    <ThemeMenu />
-                                                </ScrollableShadows>
-                                            </Menu.Popup>
-                                        </Menu.Positioner>
-                                    </Menu.Portal>
-                                </Menu.SubmenuRoot>
-
                                 {billing?.account_owner?.email && billing?.account_owner?.name && (
                                     <>
-                                        <Label intent="menu" className="px-2 mt-2">
+                                        <Label intent="menu" className="px-2 mt-4">
                                             YOUR INSIGHTS HUMAN
                                         </Label>
-                                        <DropdownMenuSeparator />
                                         <Menu.Item
                                             onClick={() => {
-                                                void copyToClipboard(billing?.account_owner?.email || '', 'email')
+                                                // It's dumb rechecking this, but TS needs it because of closures
+                                                if (!billing?.account_owner?.email || !billing?.account_owner?.name) {
+                                                    return
+                                                }
+
+                                                void copyToClipboard(billing.account_owner.email, 'email')
                                                 reportAccountOwnerClicked({
-                                                    name: billing?.account_owner?.name || '',
-                                                    email: billing?.account_owner?.email || '',
+                                                    name: billing.account_owner.name,
+                                                    email: billing.account_owner.email,
                                                 })
                                             }}
                                             render={
@@ -380,13 +348,13 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                                 >
                                                     <ProfilePicture
                                                         user={{
-                                                            first_name: billing?.account_owner?.name || '',
-                                                            email: billing?.account_owner?.email || '',
+                                                            first_name: billing.account_owner.name,
+                                                            email: billing.account_owner.email,
                                                         }}
                                                         size="xs"
                                                     />
                                                     <span className="truncate font-semibold">
-                                                        {billing?.account_owner?.name || ''}
+                                                        {billing.account_owner.name}
                                                     </span>
                                                     <div className="ml-auto">
                                                         <IconCopy />

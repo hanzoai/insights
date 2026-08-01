@@ -2,29 +2,33 @@ import './SessionRecordingPlayer.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { useEffect, useMemo, useRef } from 'react'
+import insights from 'insights-js'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import insights from '@hanzo/insights'
-import { Button } from '@hanzo/elements'
+import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
+import { Banner, Button } from '@hanzo/elements'
 
-import { BuilderMascot2 } from 'lib/components/mascots'
+import { pngHoggie } from 'lib/brand/hoggies'
+import { WarningHog } from 'lib/components/mascots'
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
 import useIsHovering from 'lib/hooks/useIsHovering'
 import { HotkeysInterface, useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { usePageVisibilityCb } from 'lib/hooks/usePageVisibility'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
+import { Link } from 'lib/elements/Link'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 import { useNotebookDrag } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'
+import { PlayerFrameCommentOverlay } from 'scenes/session-recordings/player/commenting/PlayerFrameCommentOverlay'
 import { RecordingDeleted } from 'scenes/session-recordings/player/RecordingDeleted'
 import { RecordingNotFound } from 'scenes/session-recordings/player/RecordingNotFound'
-import { PlayerFrameCommentOverlay } from 'scenes/session-recordings/player/commenting/PlayerFrameCommentOverlay'
 import { urls } from 'scenes/urls'
 
-import { PlayerFrame } from './PlayerFrame'
-import { PlayerFrameMetaOverlay } from './PlayerFrameMetaOverlay'
-import { PlayerFrameOverlay } from './PlayerFrameOverlay'
 import { ClipOverlay } from './controller/ClipRecording'
 import { PlayerController } from './controller/PlayerController'
 import { PlayerMetaBar } from './player-meta/PlayerMetaBar'
+import { PlayerFrame } from './PlayerFrame'
+import { PlayerFrameMetaOverlay } from './PlayerFrameMetaOverlay'
+import { PlayerFrameOverlay } from './PlayerFrameOverlay'
 import { playerSettingsLogic } from './playerSettingsLogic'
 import { sessionRecordingDataCoordinatorLogic } from './sessionRecordingDataCoordinatorLogic'
 import {
@@ -34,6 +38,8 @@ import {
     sessionRecordingPlayerLogic,
 } from './sessionRecordingPlayerLogic'
 import { SessionRecordingPlayerExplorer } from './view-explorer/SessionRecordingPlayerExplorer'
+
+const MascotConstruction2 = pngHoggie(construction2Png)
 
 export interface PurePlayerProps {
     noMeta?: boolean
@@ -48,7 +54,12 @@ export const createPlaybackSpeedKey = (action: (val: number) => void): HotkeysIn
 }
 
 export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps): JSX.Element {
-    const playerRef = useRef<HTMLDivElement>(null)
+    const playerRef = useRef<HTMLDivElement | null>(null)
+    const [playerContainer, setPlayerContainer] = useState<HTMLDivElement | null>(null)
+    const playerCallbackRef = useCallback((el: HTMLDivElement | null) => {
+        playerRef.current = el
+        setPlayerContainer(el)
+    }, [])
     const {
         incrementClickCount,
         setIsFullScreen,
@@ -82,11 +93,19 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
         showingClipParams,
         isMuted,
         endReached,
+        hasLateFullSnapshot,
+        leadingUnplayableMs,
     } = useValues(sessionRecordingPlayerLogic)
 
-    const { isNotFound, isRecentAndInvalid, isRecordingDeleted, recordingDeletedAt } = useValues(
-        sessionRecordingDataCoordinatorLogic(logicProps)
-    )
+    const {
+        isNotFound,
+        loadMetaError,
+        isRecentAndInvalid,
+        isOldAndInvalid,
+        isRecordingDeleted,
+        recordingDeletedAt,
+        recordingDeletedBy,
+    } = useValues(sessionRecordingDataCoordinatorLogic(logicProps))
     const { loadSnapshots } = useActions(sessionRecordingDataCoordinatorLogic(logicProps))
 
     const { isPlaylistCollapsed, showMetadataFooter } = useValues(playerSettingsLogic)
@@ -123,10 +142,37 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
         [isRecentAndInvalid]
     )
 
+    useEffect(
+        () => {
+            if (isOldAndInvalid) {
+                insights.capture('session loaded old and invalid', {
+                    viewedSessionRecording: sessionRecordingId,
+                    recordingStartTime: sessionPlayerData?.start,
+                })
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [isOldAndInvalid]
+    )
+
+    useEffect(
+        () => {
+            if (hasLateFullSnapshot) {
+                insights.capture('session loaded with late full snapshot', {
+                    viewedSessionRecording: sessionRecordingId,
+                    recordingStartTime: sessionPlayerData?.start,
+                    leadingUnplayableMs,
+                })
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [hasLateFullSnapshot]
+    )
+
     // Track if the recording has ended to be able to reliably get it from the BE and stop the recording
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            ;(window as any).__INSIGHTS_RECORDING_ENDED__ = endReached
+            ;(window as any).__POSTFN_RECORDING_ENDED__ = endReached
         }
     }, [endReached])
 
@@ -224,7 +270,17 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
     if (isNotFound) {
         return (
             <div className="flex-1 w-full flex justify-center">
-                <RecordingNotFound />
+                <RecordingNotFound sessionRecordingId={sessionRecordingId} />
+            </div>
+        )
+    }
+
+    if (loadMetaError) {
+        return (
+            <div className="flex-1 w-full flex justify-center items-center p-4">
+                <Banner type="error" className="max-w-xl">
+                    There was an error loading this recording. Please try again later.
+                </Banner>
             </div>
         )
     }
@@ -232,14 +288,14 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
     if (isRecordingDeleted) {
         return (
             <div className="flex-1 w-full flex justify-center items-center">
-                <RecordingDeleted deletedAt={recordingDeletedAt} />
+                <RecordingDeleted deletedAt={recordingDeletedAt} deletedBy={recordingDeletedBy} />
             </div>
         )
     }
 
     return (
         <div
-            ref={playerRef}
+            ref={playerCallbackRef}
             className={clsx(
                 'SessionRecordingPlayer',
                 {
@@ -253,26 +309,65 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
             onMouseMove={() => setPlayNextAnimationInterrupted(true)}
             onMouseOut={() => setPlayNextAnimationInterrupted(false)}
         >
-            <FloatingContainerContext.Provider value={playerRef}>
+            <FloatingContainerContext.Provider value={playerContainer}>
                 {explorerMode ? (
                     <SessionRecordingPlayerExplorer {...explorerMode} onClose={() => closeExplorer()} />
                 ) : (
                     <div className="SessionRecordingPlayer__main flex flex-col h-full w-full">
-                        {isRecentAndInvalid ? (
-                            <div className="flex flex-1 flex-col items-center justify-center">
-                                <BuilderMascot2 height={200} />
-                                <h1>We're still working on it</h1>
-                                <p>
-                                    This recording hasn't been fully ingested yet. It should be ready to watch in a few
-                                    minutes.
-                                </p>
-                                <Button type="secondary" onClick={loadSnapshots}>
-                                    Reload
-                                </Button>
+                        {isRecentAndInvalid || isOldAndInvalid ? (
+                            <div className="flex flex-col flex-1 w-full relative">
+                                {/* Keep the meta bar so the activity/inspector panel stays reachable */}
+                                <div className="relative">{showMeta ? <PlayerMetaBar /> : null}</div>
+                                <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
+                                    {isOldAndInvalid && !isRecentAndInvalid ? (
+                                        <>
+                                            <WarningHog height={200} width={200} />
+                                            <h1>This recording can't be played</h1>
+                                            <p className="max-w-120">
+                                                The snapshot of the screen taken when this recording started never
+                                                reached Insights, so there is nothing to play back. This usually happens
+                                                when the browser is closed or goes offline before the recording finishes
+                                                uploading.{' '}
+                                                <Link to="https://hanzo.ai/docs/session-replay/troubleshooting">
+                                                    Learn more
+                                                </Link>
+                                            </p>
+                                            <Button type="secondary" onClick={loadSnapshots}>
+                                                Reload
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <MascotConstruction2 className="h-50" />
+                                            <h1>We're still working on it</h1>
+                                            <p className="max-w-120">
+                                                This recording hasn't been fully ingested yet. It should be ready to
+                                                watch in a few minutes.
+                                            </p>
+                                            <Button type="secondary" onClick={loadSnapshots}>
+                                                Reload
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             <div className="flex w-full h-full">
                                 <div className="flex flex-col flex-1 w-full relative">
+                                    {hasLateFullSnapshot && !hidePlayerElements ? (
+                                        <Banner
+                                            type="warning"
+                                            dismissKey={`late-full-snapshot-${sessionRecordingId}`}
+                                        >
+                                            The first{' '}
+                                            {humanFriendlyDuration(leadingUnplayableMs / 1000, { maxUnits: 2 })} of this
+                                            recording can't be shown — the initial snapshot of the screen arrived late,
+                                            so playback starts from the first frame we can render.{' '}
+                                            <Link to="https://hanzo.ai/docs/session-replay/troubleshooting">
+                                                Learn more
+                                            </Link>
+                                        </Banner>
+                                    ) : null}
                                     <div className="relative">{showMeta ? <PlayerMetaBar /> : null}</div>
                                     <div
                                         className="SessionRecordingPlayer__body"

@@ -1,5 +1,12 @@
 import { useValues } from 'kea'
 
+import { FEATURE_FLAGS } from 'lib/constants'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import {
+    daysOfWeekLabel,
+    getExcludedDaysOfWeek,
+    querySupportsDaysOfWeek,
+} from 'scenes/insights/filters/InsightDateFilter/daysOfWeekFilterUtils'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
@@ -15,7 +22,16 @@ export const InsightResultMetadata = ({
     disableLastComputationRefresh,
 }: InsightResultMetadataProps): JSX.Element => {
     const { insightProps } = useValues(insightLogic)
-    const { samplingFactor } = useValues(insightVizDataLogic(insightProps))
+    const { samplingFactor, trendsFilter, dateRange, querySource } = useValues(insightVizDataLogic(insightProps))
+    const { featureFlags } = useValues(featureFlagLogic)
+
+    const quillDateFilterEnabled = featureFlags[FEATURE_FLAGS.PRODUCT_ANALYTICS_QUILL_DATE_FILTER] === 'test'
+    // Only insights that apply daysOfWeek server-side get the note
+    const excludedDays =
+        quillDateFilterEnabled && querySupportsDaysOfWeek(querySource) ? getExcludedDaysOfWeek(dateRange) : []
+    const excludedLabel = daysOfWeekLabel(excludedDays)
+    const excludedText = ['Weekends', 'Weekdays'].includes(excludedLabel) ? excludedLabel.toLowerCase() : excludedLabel
+
     return (
         <>
             {!disableLastComputation && <ComputationTimeWithRefresh disableRefresh={disableLastComputationRefresh} />}
@@ -23,6 +39,24 @@ export const InsightResultMetadata = ({
                 <span className="text-secondary">
                     {!disableLastComputation && <span className="mx-1">•</span>}
                     Results calculated from {samplingFactor * 100}% of users
+                </span>
+            ) : null}
+            {excludedDays.length > 0 ? (
+                <span className="text-secondary">
+                    <span className="mx-1">•</span>
+                    Excluding {excludedText}
+                </span>
+            ) : null}
+            {trendsFilter?.hideWeekends && featureFlags[FEATURE_FLAGS.PRODUCT_ANALYTICS_HIDE_WEEKENDS] ? (
+                <span className="text-secondary">
+                    <span className="mx-1">•</span>
+                    Weekends hidden
+                </span>
+            ) : null}
+            {quillDateFilterEnabled && dateRange?.excludeIncompletePeriods ? (
+                <span className="text-secondary">
+                    <span className="mx-1">•</span>
+                    Incomplete period excluded
                 </span>
             ) : null}
         </>

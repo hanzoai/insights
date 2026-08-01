@@ -1,9 +1,7 @@
 from unittest.mock import Mock
 
 from insights.management.commands.backfill_precalculated_person_properties import extract_person_property_filters
-from insights.temporal.messaging.backfill_precalculated_person_properties_coordinator_workflow import (
-    PersonPropertyFilter,
-)
+from insights.temporal.messaging.backfill_precalculated_person_properties_workflow import PersonPropertyFilter
 
 
 class TestExtractPersonPropertyFilters:

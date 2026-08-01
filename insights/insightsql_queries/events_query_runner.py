@@ -1,9 +1,8 @@
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import cached_property
 from typing import cast
 
-from django.db.models import Prefetch
 from django.utils.timezone import now
 
 import orjson
@@ -14,20 +13,30 @@ from insights.schema import CachedEventsQueryResponse, DashboardFilter, EventsQu
 from insights.insightsql import ast
 from insights.insightsql.ast import Alias
 from insights.insightsql.parser import parse_expr, parse_order_expr, parse_select
-from insights.insightsql.property import action_to_expr, has_aggregation, map_virtual_properties, property_to_expr
+from insights.insightsql.property import (
+    action_to_expr,
+    has_aggregation,
+    map_virtual_properties,
+    property_to_expr,
+    steps_to_expr,
+)
 from insights.insightsql.query import execute_insightsql_query
 
 from insights.api.element import ElementSerializer
 from insights.api.person import PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES
-from insights.api.utils import get_pk_or_uuid
+from insights.datastore.query_tagging import tag_contains_user_insightsql
 from insights.insightsql_queries.insights.insight_actors_query_runner import InsightActorsQueryRunner
 from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner, get_query_runner
-from insights.models import Action, Person
+from insights.insightsql_queries.utils.person_display_name import person_display_name_property_exprs
+from insights.models import Person, PropertyDefinition
 from insights.models.element import chain_to_elements
-from insights.models.person.person import READ_DB_FOR_PERSONS, PersonDistinctId, get_distinct_ids_for_subquery
-from insights.models.person.util import get_persons_by_distinct_ids
+from insights.models.person.person import MAX_LIMIT_DISTINCT_IDS, get_distinct_ids_for_subquery
+from insights.models.person.util import get_person_by_pk_or_uuid, get_persons_mapped_by_distinct_id
+from insights.personinsights_client.caller_tag import personinsights_caller_tag
 from insights.utils import relative_date_parse
+
+from products.actions.backend.models.action import Action, ActionStepJSON
 
 logger = structlog.get_logger(__name__)
 
@@ -47,6 +56,19 @@ SELECT_STAR_FROM_EVENTS_FIELDS = [
 # Wide columns that defeat presorted optimization
 WIDE_COLUMNS = {"elements_chain", "properties"}
 
+# Pagination cursors are encoded as ``<timestamp>|<uuid>`` so a stable uuid tiebreaker can advance
+# past events that share the boundary timestamp instead of dropping every tied row beyond the page
+# limit (which happens with a plain exclusive ``timestamp <`` filter). Coarse-precision sources such
+# as bulk imports routinely land hundreds of events on the same second, so ties are not rare there.
+CURSOR_DELIMITER = "|"
+
+
+def split_pagination_cursor(value: str) -> tuple[str, str | None]:
+    """Split a ``<timestamp>|<uuid>`` cursor. Plain user-supplied date filters have no delimiter and
+    pass through unchanged with a ``None`` tiebreaker."""
+    timestamp, delimiter, uuid = value.partition(CURSOR_DELIMITER)
+    return timestamp, (uuid if delimiter else None)
+
 
 class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
     query: EventsQuery
@@ -57,6 +79,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
         self.paginator = InsightsQLHasMorePaginator.from_limit_context(
             limit_context=self.limit_context, limit=self.query.limit, offset=self.query.offset
         )
+        self._cursor_eligible = False
 
     @cached_property
     def source_runner(self) -> InsightActorsQueryRunner:
@@ -65,8 +88,15 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
 
         return cast(
             InsightActorsQueryRunner,
-            get_query_runner(self.query.source, self.team, self.timings, self.limit_context, self.modifiers),
+            get_query_runner(
+                self.query.source, self.team, self.timings, self.limit_context, self.modifiers, user=self.user
+            ),
         )
+
+    def validate(self) -> None:
+        super().validate()
+        if self.query.source is not None:
+            self.source_runner.validate()
 
     def select_cols(self) -> tuple[list[str], list[ast.Expr]]:
         select_input: list[str] = []
@@ -82,13 +112,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                 person_indices.append(index)
             elif col.split("--")[0].strip() == "person_display_name":
                 property_keys = self.team.person_display_name_properties or PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES
-                # Only use backticks for property names with spaces or special chars
-                props = []
-                for key in property_keys:
-                    if re.match(r"^[A-Za-z_$][A-Za-z0-9_$]*$", key):
-                        props.append(f"toString(person.properties.{key})")
-                    else:
-                        props.append(f"toString(person.properties.`{key}`)")
+                props = person_display_name_property_exprs(property_keys, "person.properties")
                 expr = f"(coalesce({', '.join([*props, 'distinct_id'])}), toString(person.id), distinct_id)"
                 select_input.append(expr)
             else:
@@ -119,12 +143,95 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
 
         return True
 
+    def apply_pagination_cursor(self, cursor: str) -> None:
+        # The cursor is a ``<timestamp>|<uuid>`` pair (see ``split_pagination_cursor``); ``to_query``
+        # turns it into a timestamp filter with a uuid tiebreaker so events sharing the boundary
+        # timestamp are not skipped. Bare-timestamp cursors from older clients still work.
+        order: str = "DESC"
+        if self.query.orderBy:
+            order = parse_order_expr(self.query.orderBy[0]).order
+        if order == "ASC":
+            self.query.after = cursor
+        else:
+            self.query.before = cursor
+
+    def _extract_last_timestamp(self, row: list) -> str | None:
+        select_input = self.select_input_raw()
+        val = None
+        if "*" in select_input:
+            star_idx = select_input.index("*")
+            if isinstance(row[star_idx], dict):
+                val = row[star_idx].get("timestamp")
+        if val is None:
+            for i, col in enumerate(select_input):
+                if col.split("--")[0].strip() == "timestamp":
+                    val = row[i]
+                    break
+        if val is None:
+            return None
+        if isinstance(val, datetime):
+            return val.isoformat()
+        return str(val)
+
+    def _extract_last_uuid(self, row: list) -> str | None:
+        select_input = self.select_input_raw()
+        if "*" in select_input:
+            star_idx = select_input.index("*")
+            if isinstance(row[star_idx], dict) and row[star_idx].get("uuid") is not None:
+                return str(row[star_idx]["uuid"])
+        for i, col in enumerate(select_input):
+            if col.split("--")[0].strip() == "uuid" and row[i] is not None:
+                return str(row[i])
+        return None
+
+    def _raise_on_restricted_property_select(self, select: list[ast.Expr]) -> None:
+        # User-authored ``select`` entries that explicitly reference a restricted event or person
+        # property must fail loudly — the printer's silent JSONDropKeys strip would otherwise turn
+        # the request into an empty string, which is surprising when the field name was typed by hand.
+        from insights.insightsql.errors import ResolutionError
+        from insights.insightsql.visitor import TraversingVisitor
+
+        from products.access_control.backend.property_access_control import get_restricted_property_names
+
+        restricted_event_props = get_restricted_property_names(
+            team_id=self.team.pk,
+            user=self.user,
+            property_type=PropertyDefinition.Type.EVENT,
+        )
+        restricted_person_props = get_restricted_property_names(
+            team_id=self.team.pk,
+            user=self.user,
+            property_type=PropertyDefinition.Type.PERSON,
+        )
+        if not restricted_event_props and not restricted_person_props:
+            return
+
+        class _Checker(TraversingVisitor):
+            def visit_field(self, node: ast.Field) -> None:
+                chain = [str(c) for c in node.chain]
+                # ``properties.<name>`` on the events table.
+                if len(chain) >= 2 and chain[0] == "properties" and chain[1] in restricted_event_props:
+                    raise ResolutionError(f"Access to property '{chain[1]}' is restricted")
+                # ``person.properties.<name>`` (or ``poe.properties.<name>``) on the joined person.
+                if (
+                    len(chain) >= 3
+                    and chain[0] in ("person", "poe")
+                    and chain[1] == "properties"
+                    and chain[2] in restricted_person_props
+                ):
+                    raise ResolutionError(f"Access to property '{chain[2]}' is restricted")
+
+        checker = _Checker()
+        for expr in select:
+            checker.visit(expr)
+
     def to_query(self) -> ast.SelectQuery:
-        # Note: This code is inefficient and problematic, see https://github.com/Hanzo Insights/insights/issues/13485 for details.
+        # Note: This code is inefficient and problematic, see https://github.com/Insights/insights/issues/13485 for details.
         with self.timings.measure("build_ast"):
             # columns & group_by
             with self.timings.measure("columns"):
                 select_input, select = self.select_cols()
+                self._raise_on_restricted_property_select(select)
 
             with self.timings.measure("aggregations"):
                 group_by: list[ast.Expr] = [column for column in select if not has_aggregation(column)]
@@ -172,11 +279,29 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                         if not action.steps:
                             raise Exception("Action does not have any match groups")
                         where_exprs.append(action_to_expr(action))
+                elif self.query.actionSteps:
+                    with self.timings.measure("action_steps"):
+                        steps = [
+                            ActionStepJSON(
+                                event=s.event,
+                                tag_name=s.tag_name,
+                                text=s.text,
+                                text_matching=s.text_matching.value if s.text_matching else None,
+                                href=s.href,
+                                href_matching=s.href_matching.value if s.href_matching else None,
+                                selector=s.selector,
+                                url=s.url,
+                                url_matching=s.url_matching.value if s.url_matching else None,
+                                properties=[p.model_dump() for p in s.properties] if s.properties else None,
+                            )
+                            for s in self.query.actionSteps
+                        ]
+                        where_exprs.append(steps_to_expr(steps, self.team))
                 if self.query.personId:
-                    with self.timings.measure("person_id"):
-                        person: Person | None = get_pk_or_uuid(
-                            Person.objects.db_manager(READ_DB_FOR_PERSONS).filter(team=self.team), self.query.personId
-                        ).first()
+                    with self.timings.measure("person_id"), personinsights_caller_tag("persons/events-query"):
+                        person: Person | None = get_person_by_pk_or_uuid(
+                            self.team.pk, self.query.personId, distinct_id_limit=MAX_LIMIT_DISTINCT_IDS
+                        )
                         where_exprs.append(
                             ast.CompareOperation(
                                 left=ast.Call(name="cityHash64", args=[ast.Field(chain=["distinct_id"])]),
@@ -197,26 +322,56 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
             with self.timings.measure("timestamps"):
                 # prevent accidentally future events from being visible by default
                 before = self.query.before or (now() + timedelta(seconds=5)).isoformat()
-                parsed_date = relative_date_parse(before, self.team.timezone_info)
-                where_exprs.append(
-                    parse_expr(
-                        "timestamp < {timestamp}",
-                        {"timestamp": ast.Constant(value=parsed_date)},
-                        timings=self.timings,
-                    )
-                )
-
-                # limit to the last 24h by default
-                after = self.query.after or "-24h"
-                if after != "all":
-                    parsed_date = relative_date_parse(after, self.team.timezone_info)
+                before_timestamp, before_uuid = split_pagination_cursor(before)
+                parsed_date = relative_date_parse(before_timestamp, self.team.timezone_info)
+                if before_uuid:
+                    # Advance past events sharing the boundary timestamp using uuid as a tiebreaker,
+                    # matching the ``timestamp DESC, uuid DESC`` ordering applied below.
                     where_exprs.append(
                         parse_expr(
-                            "timestamp > {timestamp}",
+                            "timestamp < {before} OR (timestamp = {before_eq} AND uuid < {before_uuid})",
+                            {
+                                "before": ast.Constant(value=parsed_date),
+                                "before_eq": ast.Constant(value=parsed_date),
+                                "before_uuid": ast.Call(name="toUUID", args=[ast.Constant(value=before_uuid)]),
+                            },
+                            timings=self.timings,
+                        )
+                    )
+                else:
+                    where_exprs.append(
+                        parse_expr(
+                            "timestamp < {timestamp}",
                             {"timestamp": ast.Constant(value=parsed_date)},
                             timings=self.timings,
                         )
                     )
+
+                # limit to the last 24h by default
+                after = self.query.after or "-24h"
+                if after != "all":
+                    after_timestamp, after_uuid = split_pagination_cursor(after)
+                    parsed_date = relative_date_parse(after_timestamp, self.team.timezone_info)
+                    if after_uuid:
+                        where_exprs.append(
+                            parse_expr(
+                                "timestamp > {after} OR (timestamp = {after_eq} AND uuid > {after_uuid})",
+                                {
+                                    "after": ast.Constant(value=parsed_date),
+                                    "after_eq": ast.Constant(value=parsed_date),
+                                    "after_uuid": ast.Call(name="toUUID", args=[ast.Constant(value=after_uuid)]),
+                                },
+                                timings=self.timings,
+                            )
+                        )
+                    else:
+                        where_exprs.append(
+                            parse_expr(
+                                "timestamp > {timestamp}",
+                                {"timestamp": ast.Constant(value=parsed_date)},
+                                timings=self.timings,
+                            )
+                        )
 
             # where & having
             with self.timings.measure("where"):
@@ -234,12 +389,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                             property_keys = (
                                 self.team.person_display_name_properties or PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES
                             )
-                            props = []
-                            for key in property_keys:
-                                if re.match(r"^[A-Za-z_$][A-Za-z0-9_$]*$", key):
-                                    props.append(f"toString(person.properties.{key})")
-                                else:
-                                    props.append(f"toString(person.properties.`{key}`)")
+                            props = person_display_name_property_exprs(property_keys, "person.properties")
                             expr = f"(coalesce({', '.join([*props, 'distinct_id'])}), toString(person.id))"
                             newCol = re.sub(r"person_display_name -- Person ", expr, col)
                             columns.append(newCol)
@@ -256,6 +406,22 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                     order_by = [ast.OrderExpr(expr=select[0], order="ASC")]
                 else:
                     order_by = []
+
+                first_order = order_by[0].expr if order_by else None
+                self._cursor_eligible = (
+                    self.query.source is None
+                    and not has_any_aggregation
+                    and isinstance(first_order, ast.Field)
+                    and first_order.chain == ["timestamp"]
+                )
+
+                # When ordering by timestamp, append uuid as a stable secondary sort so the ordering
+                # is total. Ties on timestamp would otherwise be arbitrary and shift between pages,
+                # which is what lets cursor pagination silently skip events sharing a timestamp.
+                if self._cursor_eligible and not any(
+                    isinstance(o.expr, ast.Field) and o.expr.chain == ["uuid"] for o in order_by
+                ):
+                    order_by.append(ast.OrderExpr(expr=ast.Field(chain=["uuid"]), order=order_by[0].order))
 
             with self.timings.measure("select"):
                 if self.query.source is not None:
@@ -309,6 +475,11 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                 return stmt
 
     def _calculate(self) -> EventsQueryResponse:
+        # Tag here (not in `to_query()`) so platform code that calls `to_query()` as a
+        # sub-query helper — e.g. `insightsql_cohort_query.py` — doesn't false-positive when
+        # the `select` / `where` strings it builds are platform constants. User-facing
+        # `EventsQuery` execution always lands in `_calculate()` via the runner.
+        tag_contains_user_insightsql()
         query_result = self.paginator.execute_insightsql_query(
             query=self.to_query(),
             team=self.team,
@@ -316,6 +487,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
             timings=self.timings,
             modifiers=self.modifiers,
             limit_context=self.limit_context,
+            user=self.user,
         )
 
         # Convert star field from tuple to dict in each result
@@ -343,7 +515,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                         properties = result[star_idx].get("properties", {})
                         if isinstance(properties, dict):
                             session_id = properties.get("$session_id")
-                            if session_id:
+                            if isinstance(session_id, str) and session_id:
                                 properties["$has_recording"] = session_id in session_recordings_map
 
         person_indices: list[int] = []
@@ -369,22 +541,23 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                 distinct_ids = list({event[person_idx] for event in self.paginator.results})
 
                 distinct_to_person: dict[str, Person] = {}
-                # Process distinct_ids in batches to avoid overwhelming PostgreSQL
                 batch_size = 1000
-                for i in range(0, len(distinct_ids), batch_size):
-                    batch_distinct_ids = distinct_ids[i : i + batch_size]
-                    persons = get_persons_by_distinct_ids(self.team.pk, batch_distinct_ids)
-                    persons = persons.prefetch_related(
-                        Prefetch(
-                            "persondistinctid_set",
-                            queryset=PersonDistinctId.objects.filter(team_id=self.team.pk).order_by("id"),
-                            to_attr="distinct_ids_cache",
-                        )
-                    )
-                    for person in persons.iterator(chunk_size=1000):
-                        if person:
-                            for person_distinct_id in person.distinct_ids:
-                                distinct_to_person[person_distinct_id] = person
+                with personinsights_caller_tag("persons/events-person-column"):
+                    for i in range(0, len(distinct_ids), batch_size):
+                        batch_distinct_ids = distinct_ids[i : i + batch_size]
+                        distinct_to_person.update(get_persons_mapped_by_distinct_id(self.team.pk, batch_distinct_ids))
+
+                # Load restricted person properties to strip from the side-channel result
+                from products.access_control.backend.property_access_control import (
+                    get_restricted_property_names,
+                    strip_restricted_properties,
+                )
+
+                restricted_person_props = get_restricted_property_names(
+                    team_id=self.team.pk,
+                    user=self.user,
+                    property_type=PropertyDefinition.Type.PERSON,
+                )
 
                 # Loop over all columns in case there is more than one "person" column
                 for column_index in person_indices:
@@ -393,16 +566,25 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                         self.paginator.results[index] = list(result)
                         if distinct_to_person.get(distinct_id):
                             person = distinct_to_person[distinct_id]
+                            properties = strip_restricted_properties(person.properties or {}, restricted_person_props)
                             self.paginator.results[index][column_index] = {
                                 "uuid": person.uuid,
                                 "created_at": person.created_at,
-                                "properties": person.properties or {},
+                                "properties": properties,
                                 "distinct_id": distinct_id,
                             }
                         else:
                             self.paginator.results[index][column_index] = {
                                 "distinct_id": distinct_id,
                             }
+
+        next_cursor = None
+        if self._cursor_eligible and self.paginator.has_more() and self.paginator.results:
+            last_row = self.paginator.results[-1]
+            last_timestamp = self._extract_last_timestamp(last_row)
+            if last_timestamp is not None:
+                last_uuid = self._extract_last_uuid(last_row)
+                next_cursor = f"{last_timestamp}{CURSOR_DELIMITER}{last_uuid}" if last_uuid else last_timestamp
 
         return EventsQueryResponse(
             results=self.paginator.results,
@@ -411,6 +593,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
             timings=self.timings.to_list(),
             insightsql=query_result.insightsql,
             modifiers=self.modifiers,
+            nextCursor=next_cursor,
             **self.paginator.response_params(),
         )
 
@@ -447,7 +630,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
                 properties = result[star_idx].get("properties", {})
                 if isinstance(properties, dict):
                     session_id = properties.get("$session_id")
-                    if session_id and session_id != "":
+                    if isinstance(session_id, str) and session_id:
                         session_ids.add(session_id)
 
         # If no session IDs, return empty set
@@ -458,8 +641,11 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
         # Use the date range from the query to optimize the search
         after = self.query.after or "-24h"
         before = self.query.before or (now() + timedelta(seconds=5)).isoformat()
-        date_from = relative_date_parse(after, self.team.timezone_info) if after != "all" else None
-        date_to = relative_date_parse(before, self.team.timezone_info)
+        # before/after may carry a `<timestamp>|<uuid>` pagination cursor — only the timestamp matters here.
+        after_timestamp = split_pagination_cursor(after)[0]
+        before_timestamp = split_pagination_cursor(before)[0]
+        date_from = relative_date_parse(after_timestamp, self.team.timezone_info) if after != "all" else None
+        date_to = relative_date_parse(before_timestamp, self.team.timezone_info)
 
         where_conditions: list[ast.Expr] = [
             ast.CompareOperation(
@@ -506,6 +692,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
         response = execute_insightsql_query(
             query=session_check_query,
             team=self.team,
+            user=self.user,
             query_type="EventsQuerySessionRecordingsCheck",
             timings=self.timings,
             modifiers=self.modifiers,

@@ -16,8 +16,8 @@ import {
     IconRuby,
     IconRust,
     IconSwift,
+    type IconProps,
 } from '@hanzo/icons'
-import { IconProps } from '@hanzo/icons/dist/src/types/icon-types'
 
 import { ErrorTrackingRuntime } from 'lib/components/Errors/types'
 

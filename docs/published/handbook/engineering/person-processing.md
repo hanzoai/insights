@@ -359,7 +359,7 @@ After person processing, updates are produced to Kafka:
 - `distinct_id`: The distinct_id that was sent with the event (not changed by squashing)
 - Other event data
 
-**`person`**: [ReplacingMergeTree](https://clickhouse.com/docs/engines/table-engines/mergetree-family/replacingmergetree) of person data
+**`person`**: [ReplacingMergeTree](https://datastore.com/docs/engines/table-engines/mergetree-family/replacingmergetree) of person data
 
 - Keeps latest version per person UUID
 

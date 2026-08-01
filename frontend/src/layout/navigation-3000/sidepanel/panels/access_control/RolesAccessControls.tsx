@@ -20,11 +20,11 @@ import {
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { usersSelectOptions } from 'lib/components/UserSelectItem'
+import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { Field } from 'lib/elements/Field'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { fullName } from 'lib/utils'
+import { fullName } from 'lib/utils/strings'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
@@ -34,7 +34,7 @@ import { AvailableFeature, RoleType } from '~/types'
 import { roleAccessControlLogic } from './roleAccessControlLogic'
 
 export function RolesAccessControls(): JSX.Element {
-    const { sortedRoles, rolesLoading, selectedRoleId } = useValues(roleAccessControlLogic)
+    const { sortedRoles, rolesLoading, selectedRoleId, canEditRoles } = useValues(roleAccessControlLogic)
     const { currentOrganization } = useValues(organizationLogic)
     const { guardAvailableFeature } = useValues(upgradeModalLogic)
 
@@ -95,28 +95,20 @@ export function RolesAccessControls(): JSX.Element {
             },
         },
         {
-            key: 'manage_access',
+            key: 'edit',
             width: 0,
             render: (_, role) => {
                 if (!role) {
                     return null
                 }
-                const manageAccessUrl = combineUrl(urls.settings('environment-access-control'), {
-                    access_tab: 'roles',
-                    access_role_id: role.id,
-                }).url
                 return (
                     <Button
                         type="tertiary"
                         size="small"
-                        className="whitespace-nowrap"
-                        onClick={() =>
-                            guardAvailableFeature(AvailableFeature.ROLE_BASED_ACCESS, () => {
-                                router.actions.push(manageAccessUrl)
-                            })
-                        }
+                        onClick={() => setEditingRoleId(role.id)}
+                        disabledReason={!canEditRoles ? 'You cannot edit this' : undefined}
                     >
-                        Manage access
+                        Edit
                     </Button>
                 )
             },
@@ -141,7 +133,7 @@ export function RolesAccessControls(): JSX.Element {
             <Button
                 className="mt-2"
                 type="primary"
-                onClick={() => setEditingRoleId('new')}
+                onClick={() => guardAvailableFeature(AvailableFeature.ROLE_BASED_ACCESS, () => setEditingRoleId('new'))}
                 icon={<IconPlus />}
                 disabledReason={defaultRoleRestrictionReason}
             >
@@ -156,7 +148,8 @@ export function RolesAccessControls(): JSX.Element {
 function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
     const { user } = useValues(userLogic)
     const { sortedMembers, roles, canEditRoles } = useValues(roleAccessControlLogic)
-    const { addMembersToRole, removeMemberFromRole, setEditingRoleId } = useActions(roleAccessControlLogic)
+    const { addMembersToRole, removeMemberFromRole } = useActions(roleAccessControlLogic)
+    const { guardAvailableFeature } = useValues(upgradeModalLogic)
     const [membersToAdd, setMembersToAdd] = useState<string[]>([])
 
     const role = roles?.find((role) => role.id === roleId)
@@ -189,7 +182,7 @@ function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
                             onChange={(newValues: string[]) => setMembersToAdd(newValues)}
                             mode="multiple"
                             disabled={!canEditRoles}
-                            options={usersSelectOptions(
+                            options={usersLemonSelectOptions(
                                 membersNotInRole.map((member) => member.user),
                                 'uuid'
                             )}
@@ -210,15 +203,23 @@ function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
                         Add members
                     </Button>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        type="secondary"
-                        onClick={() => setEditingRoleId(role.id)}
-                        disabledReason={!canEditRoles ? 'You cannot edit this' : undefined}
-                    >
-                        Edit
-                    </Button>
-                </div>
+                <Button
+                    type="secondary"
+                    size="small"
+                    className="whitespace-nowrap"
+                    onClick={() =>
+                        guardAvailableFeature(AvailableFeature.ROLE_BASED_ACCESS, () => {
+                            router.actions.push(
+                                combineUrl(urls.settings('environment-access-control'), {
+                                    access_tab: 'roles',
+                                    access_role_id: role.id,
+                                }).url
+                            )
+                        })
+                    }
+                >
+                    Manage access
+                </Button>
             </div>
 
             <Table
@@ -358,7 +359,7 @@ export function DefaultRoleSelector(): JSX.Element {
                 value={currentOrganization?.default_role_id || null}
                 onChange={(value) => {
                     guardAvailableFeature(
-                        AvailableFeature.ADVANCED_PERMISSIONS,
+                        AvailableFeature.ROLE_BASED_ACCESS,
                         updateOrganization.bind(null, { default_role_id: value })
                     )
                 }}

@@ -95,7 +95,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Send conversion events to Snapchat Ads',
     icon_url: '/static/services/snapchat.png',
     category: ['Advertisement'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if (empty(inputs.pixelId) or empty(inputs.oauth.access_token)) {
     throw Error('Pixel ID and access token are required')

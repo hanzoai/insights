@@ -6,9 +6,9 @@ import { Banner, Button, Table } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
-import { SurveyStatsSummaryWithData } from 'scenes/surveys/SurveyStatsSummary'
 import { SurveyQuestionVisualization } from 'scenes/surveys/components/question-visualizations/SurveyQuestionVisualization'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
+import { SurveyStatsSummaryWithData } from 'scenes/surveys/SurveyStatsSummary'
 
 import { SurveyQuestionType } from '~/types'
 

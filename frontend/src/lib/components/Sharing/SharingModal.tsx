@@ -1,35 +1,43 @@
-import './SharingModal.scss'
-
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { ReactNode, useEffect, useState } from 'react'
 
 import { IconCollapse, IconExpand, IconInfo, IconLock } from '@hanzo/icons'
-import { Banner, Button, Divider, Modal, Skeleton, Switch } from '@hanzo/elements'
+import {
+    Banner,
+    Button,
+    Divider,
+    Modal,
+    Select,
+    Skeleton,
+    Switch,
+} from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { TemplateLinkSection } from 'lib/components/Sharing/TemplateLinkSection'
 import { TEMPLATE_LINK_HEADING, TEMPLATE_LINK_PII_WARNING } from 'lib/components/Sharing/templateLinkMessages'
+import { TemplateLinkSection } from 'lib/components/Sharing/TemplateLinkSection'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
 import { FEATURE_FLAGS } from 'lib/constants'
+import { IconLink } from 'lib/elements/icons'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
+import { Label } from 'lib/elements/Label/Label'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconLink } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
+import { preflightLogic } from 'lib/logic/preflightLogic'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
-import { getInsightDefinitionUrl } from 'lib/utils/insightLinks'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 import { projectLogic } from 'scenes/projectLogic'
 import { urls } from 'scenes/urls'
 
 import { AccessControlPopoutCTA } from '~/layout/navigation-3000/sidepanel/panels/access_control/AccessControlPopoutCTA'
+import { nodeKindToInsightType } from '~/queries/nodes/InsightQuery/utils/queryNodeToFilter'
 import { AnyResponseType, Node } from '~/queries/schema/schema-general'
+import { NodeKind } from '~/queries/schema/schema-general'
 import { isDataTableNode, isDataVisualizationNode, isInsightVizNode } from '~/queries/utils'
 import {
     AccessControlLevel,
@@ -38,8 +46,8 @@ import {
     InsightShortId,
     QueryBasedInsightModel,
 } from '~/types'
+import { InsightType } from '~/types'
 
-import { AccessControlAction } from '../AccessControlAction'
 import { upgradeModalLogic } from '../UpgradeModal/upgradeModalLogic'
 import { SharePasswordsTable } from './SharePasswordsTable'
 import { sharingLogic } from './sharingLogic'
@@ -47,7 +55,8 @@ import { sharingLogic } from './sharingLogic'
 function getResourceType(
     dashboardId?: number,
     insightShortId?: InsightShortId,
-    recordingId?: string
+    recordingId?: string,
+    notebookShortId?: string
 ): AccessControlResourceType {
     if (dashboardId) {
         return AccessControlResourceType.Dashboard
@@ -57,6 +66,9 @@ function getResourceType(
     }
     if (recordingId) {
         return AccessControlResourceType.SessionRecording
+    }
+    if (notebookShortId) {
+        return AccessControlResourceType.Notebook
     }
     return AccessControlResourceType.Project
 }
@@ -69,6 +81,7 @@ export interface SharingModalBaseProps {
     insight?: Partial<QueryBasedInsightModel>
     cachedResults?: AnyResponseType
     recordingId?: string
+    notebookShortId?: string
 
     title?: string
     previewIframe?: boolean
@@ -78,12 +91,14 @@ export interface SharingModalBaseProps {
      */
     recordingLinkTimeForm?: ReactNode
     userAccessLevel?: AccessControlLevel
+    onSharingEnabledChange?: (enabled: boolean) => void
 }
 
 export interface SharingModalProps extends SharingModalBaseProps {
     isOpen: boolean
     closeModal: () => void
     inline?: boolean
+    'data-attr'?: string
 }
 
 export function SharingModalContent({
@@ -92,20 +107,24 @@ export function SharingModalContent({
     insight,
     cachedResults,
     recordingId,
+    notebookShortId,
     additionalParams,
     previewIframe = false,
     recordingLinkTimeForm = undefined,
     userAccessLevel,
+    onSharingEnabledChange,
 }: SharingModalBaseProps): JSX.Element {
     const logicProps = {
         dashboardId,
         insightShortId,
         recordingId,
+        notebookShortId,
         additionalParams,
+        onSharingEnabledChange,
     }
     const {
         whitelabelAvailable,
-        advancedPermissionsAvailable,
+        accessControlAvailable,
         sharingConfiguration,
         sharingConfigurationLoading,
         showPreview,
@@ -155,10 +174,35 @@ export function SharingModalContent({
           })
         : null
 
-    const resource = dashboardId ? 'dashboard' : insightShortId ? 'insight' : recordingId ? 'recording' : 'this'
-    const hasEditAccess = userAccessLevel
-        ? accessLevelSatisfied(resource as AccessControlResourceType, userAccessLevel, AccessControlLevel.Editor)
-        : true
+    const resource = dashboardId
+        ? 'dashboard'
+        : insightShortId
+          ? 'insight'
+          : recordingId
+            ? 'recording'
+            : notebookShortId
+              ? 'notebook'
+              : 'this'
+    // Sharing requires editor access to the underlying resource being shared (enforced via
+    // `userAccessLevel`, the object's own access level) AND editor access to the independent
+    // `sharing_configuration` resource, which lets an org restrict who may manage public sharing
+    // at all, regardless of how much access they have to the resource itself.
+    const underlyingResourceDisabledReason = userAccessLevel
+        ? getAccessControlDisabledReason(
+              getResourceType(dashboardId, insightShortId, recordingId, notebookShortId),
+              AccessControlLevel.Editor,
+              userAccessLevel
+          )
+        : null
+    const sharingConfigDisabledReason = sharingConfiguration?.user_access_level
+        ? getAccessControlDisabledReason(
+              AccessControlResourceType.SharingConfiguration,
+              AccessControlLevel.Editor,
+              sharingConfiguration.user_access_level
+          )
+        : null
+    const sharingManageDisabledReason = underlyingResourceDisabledReason ?? sharingConfigDisabledReason
+    const hasEditAccess = !sharingManageDisabledReason
 
     useEffect(() => {
         setIframeLoaded(false)
@@ -201,22 +245,17 @@ export function SharingModalContent({
                         {!sharingAllowed ? (
                             <Banner type="warning">Public sharing is disabled for this organization.</Banner>
                         ) : (
-                            <AccessControlAction
-                                resourceType={getResourceType(dashboardId, insightShortId, recordingId)}
-                                minAccessLevel={AccessControlLevel.Editor}
-                                userAccessLevel={userAccessLevel}
-                            >
-                                <Switch
-                                    id="sharing-switch"
-                                    label={`Share ${resource} publicly`}
-                                    checked={sharingConfiguration.enabled}
-                                    data-attr="sharing-switch"
-                                    onChange={(active) => setIsEnabled(active)}
-                                    bordered
-                                    fullWidth
-                                    loading={sharingConfigurationLoading}
-                                />
-                            </AccessControlAction>
+                            <Switch
+                                id="sharing-switch"
+                                label={`Share ${resource} publicly`}
+                                checked={sharingConfiguration.enabled}
+                                data-attr="sharing-switch"
+                                onChange={(active) => setIsEnabled(active)}
+                                bordered
+                                fullWidth
+                                loading={sharingConfigurationLoading}
+                                disabledReason={sharingManageDisabledReason}
+                            />
                         )}
 
                         {sharingAllowed && sharingConfiguration.enabled && sharingConfiguration.access_token ? (
@@ -230,7 +269,7 @@ export function SharingModalContent({
                                                 label={
                                                     <div className="flex items-center">
                                                         Password protect
-                                                        {!advancedPermissionsAvailable && (
+                                                        {!accessControlAvailable && (
                                                             <Tooltip title="This is a premium feature, click to learn more.">
                                                                 <IconLock className="ml-1.5 text-muted text-lg" />
                                                             </Tooltip>
@@ -239,15 +278,15 @@ export function SharingModalContent({
                                                 }
                                                 onChange={(passwordRequired: boolean) => {
                                                     if (passwordRequired) {
-                                                        guardAvailableFeature(
-                                                            AvailableFeature.ADVANCED_PERMISSIONS,
-                                                            () => setPasswordRequired(passwordRequired)
+                                                        guardAvailableFeature(AvailableFeature.ACCESS_CONTROL, () =>
+                                                            setPasswordRequired(passwordRequired)
                                                         )
                                                     } else {
                                                         setPasswordRequired(passwordRequired)
                                                     }
                                                 }}
                                                 checked={sharingConfiguration.password_required}
+                                                disabledReason={sharingManageDisabledReason}
                                             />
                                             {sharingConfiguration.password_required && (
                                                 <div className="mt-1 w-full">
@@ -255,6 +294,8 @@ export function SharingModalContent({
                                                         dashboardId={dashboardId}
                                                         insightId={insight?.id}
                                                         recordingId={recordingId}
+                                                        notebookShortId={notebookShortId}
+                                                        disabledReason={sharingManageDisabledReason}
                                                     />
                                                 </div>
                                             )}
@@ -262,7 +303,7 @@ export function SharingModalContent({
                                     )}
                                     <Button
                                         data-attr="sharing-link-button"
-                                        type="secondary"
+                                        type="primary"
                                         onClick={() => {
                                             // TRICKY: there's a chance this was sending useless errors to error tracking
                                             // even when it succeeded, so we're explicitly ignoring the promise success
@@ -274,158 +315,189 @@ export function SharingModalContent({
                                             )
                                         }}
                                         icon={<IconLink />}
-                                        fullWidth
-                                        className="mb-4"
+                                        className="ml-auto mb-4"
                                     >
                                         Copy public link
                                     </Button>
-                                    {recordingLinkTimeForm}
-                                    <TitleWithIcon
-                                        icon={
-                                            <Tooltip
-                                                title={`Use the HTML snippet below to embed the ${resource} on your website`}
-                                            >
-                                                <IconInfo />
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <b>Embed {resource}</b>
-                                    </TitleWithIcon>
-                                    <CodeSnippet language={Language.HTML}>{embedCode}</CodeSnippet>
-                                </div>
-                                {hasEditAccess && (
-                                    <Form
-                                        logic={sharingLogic}
-                                        props={logicProps}
-                                        formKey="sharingSettings"
-                                        className="deprecated-space-y-2"
-                                    >
-                                        <div className="grid grid-cols-2 gap-2 grid-flow *:odd:last:col-span-2">
-                                            {insight && (
-                                                <Field name="noHeader">
-                                                    {({ value, onChange }) => (
-                                                        <Switch
-                                                            fullWidth
-                                                            bordered
-                                                            label={<div>Show title and description</div>}
-                                                            onChange={() => onChange(!value)}
-                                                            checked={!value}
-                                                        />
-                                                    )}
-                                                </Field>
-                                            )}
-                                            <Field name="whitelabel">
-                                                {({ value }) => (
-                                                    <Switch
-                                                        fullWidth
-                                                        bordered
-                                                        label={
-                                                            <div className="flex items-center">
-                                                                <span>Show Insights branding</span>
-                                                                {!whitelabelAvailable && (
-                                                                    <Tooltip title="This is a premium feature, click to learn more.">
-                                                                        <IconLock className="ml-1.5 text-secondary text-lg" />
-                                                                    </Tooltip>
-                                                                )}
-                                                            </div>
-                                                        }
-                                                        onChange={(showBranding: boolean) => {
-                                                            const newWhitelabelValue = !showBranding
-                                                            if (newWhitelabelValue) {
-                                                                guardAvailableFeature(
-                                                                    AvailableFeature.WHITE_LABELLING,
-                                                                    () =>
-                                                                        setSharingSettingsValue(
-                                                                            'whitelabel',
-                                                                            newWhitelabelValue
-                                                                        )
-                                                                )
-                                                            } else {
-                                                                setSharingSettingsValue(
-                                                                    'whitelabel',
-                                                                    newWhitelabelValue
-                                                                )
-                                                            }
-                                                        }}
-                                                        checked={!value}
-                                                    />
+                                    {hasEditAccess && (
+                                        <Form
+                                            logic={sharingLogic}
+                                            props={logicProps}
+                                            formKey="sharingSettings"
+                                            className="deprecated-space-y-2"
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                {insight && (
+                                                    <Field name="noHeader">
+                                                        {({ value, onChange }) => (
+                                                            <Switch
+                                                                fullWidth
+                                                                bordered
+                                                                label={<div>Show title and description</div>}
+                                                                onChange={() => onChange(!value)}
+                                                                checked={!value}
+                                                            />
+                                                        )}
+                                                    </Field>
                                                 )}
-                                            </Field>
-
-                                            {isInsightVizNode(insight?.query) && insightShortId && (
-                                                // These options are only valid for `InsightVizNode`s, and they rely on `insightVizDataLogic`
-                                                <>
-                                                    <LegendCheckbox insightShortId={insightShortId} />
-                                                    <DetailedResultsCheckbox insightShortId={insightShortId} />
-                                                </>
-                                            )}
-
-                                            {recordingId && (
-                                                <Field name="showInspector">
-                                                    {({ value, onChange }) => (
-                                                        <Switch
-                                                            fullWidth
-                                                            bordered
-                                                            label={<div>Show inspector panel</div>}
-                                                            onChange={onChange}
-                                                            checked={value}
-                                                        />
-                                                    )}
-                                                </Field>
-                                            )}
-
-                                            {dashboardId && (
-                                                <Field name="hideExtraDetails">
-                                                    {({ value, onChange }) => (
+                                                <Field name="whitelabel">
+                                                    {({ value }) => (
                                                         <Switch
                                                             fullWidth
                                                             bordered
                                                             label={
                                                                 <div className="flex items-center">
-                                                                    <span>Show insight details</span>
-                                                                    <Tooltip title="When disabled, viewers won't see the extra insights details like the who created the insight and the applied filters.">
-                                                                        <IconInfo className="ml-1.5 text-secondary text-lg" />
-                                                                    </Tooltip>
+                                                                    <span>Show Insights branding</span>
+                                                                    {!whitelabelAvailable && (
+                                                                        <Tooltip title="This is a premium feature, click to learn more.">
+                                                                            <IconLock className="ml-1.5 text-secondary text-lg" />
+                                                                        </Tooltip>
+                                                                    )}
                                                                 </div>
                                                             }
-                                                            onChange={() => onChange(!value)}
+                                                            onChange={(showBranding: boolean) => {
+                                                                const newWhitelabelValue = !showBranding
+                                                                if (newWhitelabelValue) {
+                                                                    guardAvailableFeature(
+                                                                        AvailableFeature.WHITE_LABELLING,
+                                                                        () =>
+                                                                            setSharingSettingsValue(
+                                                                                'whitelabel',
+                                                                                newWhitelabelValue
+                                                                            )
+                                                                    )
+                                                                } else {
+                                                                    setSharingSettingsValue(
+                                                                        'whitelabel',
+                                                                        newWhitelabelValue
+                                                                    )
+                                                                }
+                                                            }}
                                                             checked={!value}
                                                         />
                                                     )}
                                                 </Field>
-                                            )}
-                                        </div>
 
-                                        {previewIframe && (
-                                            <div className="rounded border">
-                                                <Button
-                                                    fullWidth
-                                                    sideIcon={showPreview ? <IconCollapse /> : <IconExpand />}
-                                                    onClick={togglePreview}
-                                                >
-                                                    Preview
-                                                    {showPreview && !iframeLoaded ? <Spinner className="ml-2" /> : null}
-                                                </Button>
-                                                {showPreview && (
-                                                    <div className="SharingPreview border-t">
-                                                        <iframe
-                                                            className="block"
-                                                            {...iframeProperties}
-                                                            title="Shared insight preview"
-                                                            onLoad={() => setIframeLoaded(true)}
-                                                            sandbox="allow-scripts allow-same-origin allow-popups"
-                                                        />
-                                                    </div>
+                                                {isInsightVizNode(insight?.query) &&
+                                                    insightShortId && (
+                                                        // These options are only valid for `InsightVizNode`s, and they rely on `insightVizDataLogic`
+                                                        <>
+                                                            <LegendCheckbox insightShortId={insightShortId} />
+                                                            <DetailedResultsCheckbox insightShortId={insightShortId} />
+                                                        </>
+                                                    )}
+
+                                                {recordingId && (
+                                                    <Field name="showInspector">
+                                                        {({ value, onChange }) => (
+                                                            <Switch
+                                                                fullWidth
+                                                                bordered
+                                                                label={<div>Show inspector panel</div>}
+                                                                onChange={onChange}
+                                                                checked={value}
+                                                            />
+                                                        )}
+                                                    </Field>
+                                                )}
+
+                                                {dashboardId && (
+                                                    <>
+                                                        <Field name="hideExtraDetails">
+                                                            {({ value, onChange }) => (
+                                                                <Switch
+                                                                    fullWidth
+                                                                    bordered
+                                                                    label={
+                                                                        <div className="flex items-center">
+                                                                            <span>Show insight details</span>
+                                                                            <Tooltip title="When disabled, viewers won't see the extra insights details like the who created the insight and the applied filters.">
+                                                                                <IconInfo className="ml-1.5 text-secondary text-lg" />
+                                                                            </Tooltip>
+                                                                        </div>
+                                                                    }
+                                                                    onChange={() => onChange(!value)}
+                                                                    checked={!value}
+                                                                />
+                                                            )}
+                                                        </Field>
+
+                                                        <Field
+                                                            name="theme"
+                                                            inline
+                                                            className="items-center justify-between col-span-2"
+                                                        >
+                                                            {({ value, onChange }) => (
+                                                                <>
+                                                                    <Label htmlFor="sharing-theme-select">
+                                                                        Theme
+                                                                    </Label>
+                                                                    <Select
+                                                                        id="sharing-theme-select"
+                                                                        value={value ?? 'system'}
+                                                                        onSelect={(theme) => onChange(theme)}
+                                                                        options={[
+                                                                            { value: 'system', label: 'System' },
+                                                                            { value: 'light', label: 'Light' },
+                                                                            { value: 'dark', label: 'Dark' },
+                                                                        ]}
+                                                                    />
+                                                                </>
+                                                            )}
+                                                        </Field>
+                                                    </>
                                                 )}
                                             </div>
-                                        )}
-                                    </Form>
-                                )}
+
+                                            {previewIframe && (
+                                                <div className="rounded border">
+                                                    <Button
+                                                        fullWidth
+                                                        sideIcon={showPreview ? <IconCollapse /> : <IconExpand />}
+                                                        onClick={togglePreview}
+                                                    >
+                                                        Preview
+                                                        {showPreview && !iframeLoaded ? (
+                                                            <Spinner className="ml-2" />
+                                                        ) : null}
+                                                    </Button>
+                                                    {showPreview && (
+                                                        <div className="SharingPreview border-t">
+                                                            <iframe
+                                                                className="block"
+                                                                {...iframeProperties}
+                                                                title="Shared insight preview"
+                                                                onLoad={() => setIframeLoaded(true)}
+                                                                sandbox="allow-scripts allow-same-origin allow-popups"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </Form>
+                                    )}
+                                    {recordingLinkTimeForm}
+                                </div>
                             </>
                         ) : null}
                     </>
                 )}
             </div>
+            {sharingConfiguration?.enabled && embedCode && (
+                <>
+                    <Divider />
+                    <TitleWithIcon
+                        icon={
+                            <Tooltip title={`Use the HTML snippet below to embed the ${resource} on your website`}>
+                                <IconInfo />
+                            </Tooltip>
+                        }
+                    >
+                        <b>Embed {resource}</b>
+                    </TitleWithIcon>
+                    <CodeSnippet language={Language.HTML}>{embedCode}</CodeSnippet>
+                </>
+            )}
             {insight?.query && (
                 <>
                     <Divider />
@@ -631,13 +703,21 @@ function LegendCheckbox({ insightShortId }: { insightShortId: InsightShortId }):
     )
 }
 
-export function SharingModal({ closeModal, isOpen, inline, title, ...props }: SharingModalProps): JSX.Element {
+export function SharingModal({
+    closeModal,
+    isOpen,
+    inline,
+    title,
+    'data-attr': dataAttr,
+    ...props
+}: SharingModalProps): JSX.Element {
     return (
         <Modal
             onClose={closeModal}
             isOpen={isOpen}
             width={SHARING_MODAL_WIDTH}
             title={title ?? 'Sharing'}
+            data-attr={dataAttr}
             footer={
                 <Button type="secondary" onClick={closeModal}>
                     Done
@@ -664,4 +744,41 @@ SharingModal.open = (props: SharingModalBaseProps) => {
             type: 'secondary',
         },
     })
+}
+
+/**
+ * Build a canonical definition-based insight link ("template link").
+ * The link always points to `/insights/new` on the provided baseUrl and includes:
+ *   #insight=<InsightType>&q=<URL-encoded JSON definition>
+ *
+ * It works for both saved insights (where `query` is persisted on the model)
+ * and unsaved/draft insights (pass the raw query object).
+ */
+export function getInsightDefinitionUrl(
+    insight: Pick<QueryBasedInsightModel, 'query'> | { query: Node<Record<string, any>> },
+    baseUrl: string
+): string {
+    if (!insight?.query) {
+        throw new Error('getInsightDefinitionUrl: insight.query is required')
+    }
+
+    // Derive InsightType from the query where possible so the #insight=<TYPE> hash param is present
+    let insightType: InsightType | undefined
+    type InsightVizNode = { kind: NodeKind.InsightVizNode; source?: { kind?: string } }
+    const kind = (
+        insight.query.kind === NodeKind.InsightVizNode
+            ? (insight.query as InsightVizNode).source?.kind
+            : insight.query.kind
+    ) as keyof typeof nodeKindToInsightType | undefined
+
+    if (kind && kind in nodeKindToInsightType) {
+        insightType = nodeKindToInsightType[kind as keyof typeof nodeKindToInsightType]
+    }
+
+    const relativeUrl = urls.insightNew({ query: insight.query, type: insightType })
+
+    // Ensure the link is project-agnostic (`/project/<id>` may get injected elsewhere)
+    const cleanedPath = relativeUrl.replace(/^\/project\/[^/]+/, '')
+
+    return `${baseUrl}${cleanedPath}`
 }

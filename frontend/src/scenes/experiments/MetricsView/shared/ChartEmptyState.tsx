@@ -3,7 +3,8 @@ import { Tag } from '@hanzo/elements'
 
 import { isLegacyExperimentQuery } from 'scenes/experiments/utils'
 
-import { LegacyErrorChecklist } from '../legacy/LegacyErrorChecklist'
+import { LegacyErrorChecklist } from '~/scenes/experiments/legacy'
+
 import { MetricErrorState } from '../new/MetricErrorState'
 import { ErrorChecklist } from './ErrorChecklist'
 
@@ -14,6 +15,8 @@ interface ChartEmptyStateProps {
     error?: any
     query?: Record<string, any>
     onRetry?: () => void
+    /** Disables the "Try again" button (with a tooltip) while a recalculation is already in flight. */
+    retryDisabledReason?: string
 }
 
 export function ChartEmptyState({
@@ -23,6 +26,7 @@ export function ChartEmptyState({
     metric,
     query,
     onRetry,
+    retryDisabledReason,
 }: ChartEmptyStateProps): JSX.Element | null {
     /**
      * early return if experiment has not started
@@ -68,7 +72,14 @@ export function ChartEmptyState({
                 <ErrorChecklist error={error} metric={metric} />
             ) : (
                 // Use rich error state for all other errors
-                <MetricErrorState error={error} metric={metric} query={query} onRetry={onRetry} height={height} />
+                <MetricErrorState
+                    error={error}
+                    metric={metric}
+                    query={query}
+                    onRetry={onRetry}
+                    retryDisabledReason={retryDisabledReason}
+                    height={height}
+                />
             )}
         </div>
     )

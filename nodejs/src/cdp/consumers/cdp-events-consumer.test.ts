@@ -1,46 +1,48 @@
+import { createMockJobQueue } from '../../../tests/helpers/mocks/job-queue.mock'
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
-import { InsightsFlow } from '~/schema/insightsflow'
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { GroupReadRepository } from '~/common/groups/repositories/group-repository.interface'
+import { closeHub, createHub } from '~/common/utils/db/hub'
 
-import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
+import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
+import {
+    createOrganization,
+    createTeam,
+    getFirstTeam,
+    getTeam,
+    resetTestDatabase,
+    updateOrganizationAvailableFeatures,
+} from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
-    createScriptExecutionGlobals,
+    createHogExecutionGlobals,
     createIncomingEvent,
-    createInternalEvent,
     createKafkaMessage,
 } from '../_tests/fixtures'
 import { insertInsightsFlow as _insertInsightsFlow } from '../_tests/fixtures-insightsflows'
-import { CyclotronJobQueue } from '../services/job-queue/job-queue'
-import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
+import { GroupsManagerService } from '../services/managers/groups-manager.service'
+import { HogWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { CdpEventsConsumer } from './cdp-events.consumer'
-import { CdpInternalEventsConsumer } from './cdp-internal-event.consumer'
 
 jest.setTimeout(1000)
 
-/**
- * NOTE: The internal and normal events consumers are very similar so we can test them together
- */
-describe.each([
-    [CdpEventsConsumer.name, CdpEventsConsumer, 'destination' as const],
-    [CdpInternalEventsConsumer.name, CdpInternalEventsConsumer, 'internal_destination' as const],
-])('%s', (_name, Consumer, scriptType) => {
-    let processor: CdpEventsConsumer | CdpInternalEventsConsumer
+describe('CdpEventsConsumer', () => {
+    let processor: CdpEventsConsumer
     let hub: Hub
     let team: Team
     let team2: Team
-    let mockQueueInvocations: jest.Mock
+    let mockQueueInvocations: jest.MockedFunction<any>
 
     const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>) => {
         const teamId = insightsFunction.team_id ?? team.id
         const item = await _insertInsightsFunction(hub.postgres, teamId, {
             ...insightsFunction,
-            type: scriptType,
+            type: 'destination',
         })
         // Trigger the reload that django would do
         processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [item.id])
@@ -50,17 +52,22 @@ describe.each([
     beforeEach(async () => {
         await resetTestDatabase()
         hub = await createHub()
-        team = await getFirstTeam(hub) // This team has data_pipelines feature by default (legacy addon)
+        team = await getFirstTeam(hub.postgres) // This team has data_pipelines feature by default (legacy addon)
 
         // Create second organization without data_pipelines for testing quota limiting
         const otherOrganizationId = await createOrganization(hub.postgres)
         const team2Id = await createTeam(hub.postgres, otherOrganizationId)
-        team2 = (await getTeam(hub, team2Id))! // This team does NOT have data_pipelines
+        team2 = (await getTeam(hub.postgres, team2Id))! // This team does NOT have data_pipelines
 
         // Set up default quota limiting mock - not limited by default
         jest.spyOn(hub.quotaLimiting, 'isTeamQuotaLimited').mockResolvedValue(false)
 
-        processor = new Consumer(hub)
+        const mockJobQueue = createMockJobQueue()
+
+        processor = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub), {
+            hogQueue: mockJobQueue,
+            hogflowQueue: mockJobQueue,
+        })
 
         // NOTE: We don't want to actually connect to Kafka for these tests as it is slow and we are testing the core logic only
         processor['kafkaConsumer'] = {
@@ -69,13 +76,7 @@ describe.each([
             isHealthy: jest.fn(),
         } as any
 
-        processor['cyclotronJobQueue'] = {
-            queueInvocations: jest.fn(),
-            startAsProducer: jest.fn(() => Promise.resolve()),
-            stop: jest.fn(),
-        } as unknown as jest.Mocked<CyclotronJobQueue>
-
-        mockQueueInvocations = jest.mocked(processor['cyclotronJobQueue']['queueInvocations'])
+        mockQueueInvocations = mockJobQueue.queueInvocations
 
         await processor.start()
     })
@@ -91,7 +92,7 @@ describe.each([
     })
 
     describe('team filtering', () => {
-        it('should not parse events for teams without custom functions', async () => {
+        it('should not parse events for teams without script functions', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
                 ...FN_EXAMPLES.simple_fetch,
@@ -99,16 +100,10 @@ describe.each([
                 ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
-            const events =
-                processor instanceof CdpInternalEventsConsumer
-                    ? [
-                          createKafkaMessage(createInternalEvent(team.id, {})),
-                          createKafkaMessage(createInternalEvent(team2.id, {})),
-                      ]
-                    : [
-                          createKafkaMessage(createIncomingEvent(team.id, {})),
-                          createKafkaMessage(createIncomingEvent(team2.id, {})),
-                      ]
+            const events = [
+                createKafkaMessage(createIncomingEvent(team.id, {})),
+                createKafkaMessage(createIncomingEvent(team2.id, {})),
+            ]
             const invocations = await processor._parseKafkaBatch(events)
             expect(invocations).toHaveLength(1)
             expect(invocations[0].project.id).toBe(team.id)
@@ -144,7 +139,7 @@ describe.each([
                     ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
-                globals = createScriptExecutionGlobals({
+                globals = createHogExecutionGlobals({
                     project: {
                         id: team.id,
                     } as any,
@@ -221,7 +216,7 @@ describe.each([
                 )
 
                 // Billing is per-event, not per-destination: 1 event → 2 destinations = 1 billable_invocation
-                if (scriptType === 'destination') {
+                {
                     const billingMetrics = metrics.filter((m: any) => m.value.metric_name === 'billable_invocation')
                     expect(billingMetrics).toHaveLength(1)
                     expect(billingMetrics[0].value).toMatchObject({
@@ -251,7 +246,7 @@ describe.each([
                     mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                 ).toMatchObject([
                     {
-                        key: expect.any(String),
+                        key: null,
                         topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'insights_function',
@@ -264,7 +259,7 @@ describe.each([
                         },
                     },
                     {
-                        key: expect.any(String),
+                        key: null,
                         topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'insights_function',
@@ -277,30 +272,26 @@ describe.each([
                         },
                     },
                     // Billing is per-event: 1 event → 1 destination = 1 billable_invocation
-                    ...(scriptType !== 'destination'
-                        ? []
-                        : [
-                              {
-                                  key: expect.any(String),
-                                  topic: 'datastore_app_metrics2_test',
-                                  value: {
-                                      app_source: 'insights_function',
-                                      app_source_id: '_event_trigger',
-                                      instance_id: globals.event.uuid,
-                                      count: 1,
-                                      metric_kind: 'billing',
-                                      metric_name: 'billable_invocation',
-                                      team_id: 2,
-                                      timestamp: expect.any(String),
-                                  },
-                              },
-                          ]),
+                    {
+                        key: null,
+                        topic: 'datastore_app_metrics2_test',
+                        value: {
+                            app_source: 'insights_function',
+                            app_source_id: '_event_trigger',
+                            instance_id: globals.event.uuid,
+                            count: 1,
+                            metric_kind: 'billing',
+                            metric_name: 'billable_invocation',
+                            team_id: 2,
+                            timestamp: expect.any(String),
+                        },
+                    },
                 ])
             })
 
             it('should filter out functions that are disabled', async () => {
-                await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.disabled)
-                await processor.scriptWatcher.forceStateChange(fnPrinterPageviewFilters, ScriptWatcherState.disabled)
+                await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.disabled)
+                await processor.hogWatcher.forceStateChange(fnPrinterPageviewFilters, HogWatcherState.disabled)
 
                 const { invocations } = await processor.processBatch([globals])
 
@@ -333,10 +324,10 @@ describe.each([
                 ])
             })
 
-            if (scriptType === 'destination') {
+            {
                 it('should bill once per event, not per destination (multiple events)', async () => {
                     // Create a second event with different UUID
-                    const globals2 = createScriptExecutionGlobals({
+                    const globals2 = createHogExecutionGlobals({
                         project: {
                             id: team.id,
                         } as any,
@@ -408,7 +399,7 @@ describe.each([
                 })
 
                 // Globals for team2 (without data_pipelines)
-                globals = createScriptExecutionGlobals({
+                globals = createHogExecutionGlobals({
                     project: {
                         id: team2.id,
                     } as any,
@@ -510,7 +501,7 @@ describe.each([
             let globals: InsightsFunctionInvocationGlobals
 
             beforeEach(() => {
-                globals = createScriptExecutionGlobals({
+                globals = createHogExecutionGlobals({
                     project: {
                         id: team.id,
                     } as any,
@@ -534,7 +525,7 @@ describe.each([
                 await processor.processBatch([globals])
                 expect(mockProducerObserver.getProducedKafkaMessages()).toMatchObject([
                     {
-                        key: expect.any(String),
+                        key: null,
                         topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'insights_function',
@@ -559,15 +550,15 @@ describe.each([
     })
 })
 
-describe('custom flow processing', () => {
-    let processor: CdpEventsConsumer | CdpInternalEventsConsumer
+describe('script flow processing', () => {
+    let processor: CdpEventsConsumer
     let hub: Hub
     let team: Team
 
-    const insertInsightsFlow = async (insightsFlow: InsightsFlow) => {
-        const teamId = insightsFlow.team_id ?? team.id
+    const insertInsightsFlow = async (hogFlow: InsightsFlow) => {
+        const teamId = hogFlow.team_id ?? team.id
 
-        const item = await _insertInsightsFlow(hub.postgres, insightsFlow)
+        const item = await _insertInsightsFlow(hub.postgres, hogFlow)
         // Trigger the reload that django would do
         processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [item.id])
         return item
@@ -576,8 +567,13 @@ describe('custom flow processing', () => {
     beforeEach(async () => {
         await resetTestDatabase()
         hub = await createHub()
-        team = await getFirstTeam(hub)
-        processor = new CdpEventsConsumer(hub)
+        team = await getFirstTeam(hub.postgres)
+        const mockQueue = createMockJobQueue()
+
+        processor = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub), {
+            hogQueue: mockQueue,
+            hogflowQueue: mockQueue,
+        })
 
         // NOTE: We don't want to actually connect to Kafka for these tests as it is slow and we are testing the core logic only
         processor['kafkaConsumer'] = {
@@ -585,12 +581,6 @@ describe('custom flow processing', () => {
             disconnect: jest.fn(),
             isHealthy: jest.fn(),
         } as any
-
-        processor['cyclotronJobQueue'] = {
-            queueInvocations: jest.fn(),
-            startAsProducer: jest.fn(() => Promise.resolve()),
-            stop: jest.fn(),
-        } as unknown as jest.Mocked<CyclotronJobQueue>
 
         await processor.start()
     })
@@ -609,7 +599,7 @@ describe('custom flow processing', () => {
         let globals: InsightsFunctionInvocationGlobals
 
         beforeEach(() => {
-            globals = createScriptExecutionGlobals({
+            globals = createHogExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -624,17 +614,17 @@ describe('custom flow processing', () => {
             })
         })
 
-        it('should not create custom flow invocations with no filters', async () => {
-            const insightsFlow = new FixtureInsightsFlowBuilder().withTeamId(team.id).build()
-            insightsFlow.trigger = {} as any
-            await insertInsightsFlow(insightsFlow)
+        it('should not create script flow invocations with no filters', async () => {
+            const hogFlow = new FixtureInsightsFlowBuilder().withTeamId(team.id).build()
+            hogFlow.trigger = {} as any
+            await insertInsightsFlow(hogFlow)
 
-            const invocations = await processor['createInsightsFlowInvocations']([globals])
+            const invocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
             expect(invocations).toHaveLength(0)
         })
 
-        it('should not create custom flow invocations with webhook triggers', async () => {
-            const insightsFlow = new FixtureInsightsFlowBuilder()
+        it('should not create script flow invocations with webhook triggers', async () => {
+            const hogFlow = new FixtureInsightsFlowBuilder()
                 .withTeamId(team.id)
                 .withSimpleWorkflow({
                     trigger: {
@@ -644,14 +634,14 @@ describe('custom flow processing', () => {
                     },
                 })
                 .build()
-            await insertInsightsFlow(insightsFlow)
+            await insertInsightsFlow(hogFlow)
 
-            const invocations = await processor['createInsightsFlowInvocations']([globals])
+            const invocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
             expect(invocations).toHaveLength(0)
         })
 
-        it('should create custom flow invocations with matching filters', async () => {
-            const insightsFlow = await insertInsightsFlow(
+        it('should create script flow invocations with matching filters', async () => {
+            const hogFlow = await insertInsightsFlow(
                 new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
@@ -663,7 +653,7 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const noInvocations = await processor['createInsightsFlowInvocations']([
+            const noInvocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([
                 {
                     ...globals,
                     event: {
@@ -675,15 +665,15 @@ describe('custom flow processing', () => {
 
             expect(noInvocations).toHaveLength(0)
 
-            const invocations = await processor['createInsightsFlowInvocations']([globals])
+            const invocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: insightsFlow.id,
-                insightsFlow: {
-                    id: insightsFlow.id,
+                functionId: hogFlow.id,
+                hogFlow: {
+                    id: hogFlow.id,
                 },
                 id: expect.any(String),
-                queue: 'customflow',
+                queue: 'hogflow',
                 queuePriority: 1,
                 state: {
                     event: globals.event,
@@ -693,7 +683,7 @@ describe('custom flow processing', () => {
             })
         })
 
-        it('should not produce billable_invocation metrics for custom flow invocations', async () => {
+        it('should not produce billable_invocation metrics for script flow invocations', async () => {
             await insertInsightsFlow(
                 new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
@@ -706,7 +696,7 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            await processor['createInsightsFlowInvocations']([globals])
+            await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
 
             const producedMetrics =
                 mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
@@ -722,11 +712,11 @@ describe('custom flow processing', () => {
         })
     })
 
-    describe('quota limiting for custom flows', () => {
+    describe('quota limiting for script flows', () => {
         let globals: InsightsFunctionInvocationGlobals
 
         beforeEach(() => {
-            globals = createScriptExecutionGlobals({
+            globals = createHogExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -743,13 +733,13 @@ describe('custom flow processing', () => {
 
         it('should not process workflows with email actions when team has email quota limit', async () => {
             // Mock quota limiting for email
-            ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest
+            ;(processor as any)['deps'].quotaLimiting.isTeamQuotaLimited = jest
                 .fn()
                 .mockImplementation((_teamId, resource) => {
                     return resource === 'workflow_emails'
                 })
 
-            const insightsFlow = await insertInsightsFlow(
+            const hogFlow = await insertInsightsFlow(
                 new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
@@ -783,17 +773,17 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createInsightsFlowInvocations']([globals])
+            const invocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
 
             // Should have no invocations returned due to quota limiting
             expect(invocations).toHaveLength(0)
 
             // Should have checked quota limits
-            expect((processor as any).hub.quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
+            expect((processor as any)['deps'].quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
                 team.id,
                 'workflow_emails'
             )
-            expect((processor as any).hub.quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
+            expect((processor as any)['deps'].quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
                 team.id,
                 'workflow_destinations_dispatched'
             )
@@ -808,8 +798,8 @@ describe('custom flow processing', () => {
                 expect.arrayContaining([
                     expect.objectContaining({
                         value: expect.objectContaining({
-                            app_source: 'insights_flow',
-                            app_source_id: insightsFlow.id,
+                            app_source: 'hog_flow',
+                            app_source_id: hogFlow.id,
                             metric_kind: 'failure',
                             metric_name: 'quota_limited',
                         }),
@@ -820,7 +810,7 @@ describe('custom flow processing', () => {
 
         it('should not process workflows with destination actions when team has destination quota limit', async () => {
             // Mock quota limiting for destinations
-            ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest
+            ;(processor as any)['deps'].quotaLimiting.isTeamQuotaLimited = jest
                 .fn()
                 .mockImplementation((_teamId, resource) => {
                     return resource === 'workflow_destinations_dispatched'
@@ -860,10 +850,10 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createInsightsFlowInvocations']([globals])
+            const invocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
 
             expect(invocations).toHaveLength(0)
-            expect((processor as any).hub.quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
+            expect((processor as any)['deps'].quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
                 team.id,
                 'workflow_destinations_dispatched'
             )
@@ -871,9 +861,9 @@ describe('custom flow processing', () => {
 
         it('should process workflows without limited action types even when quotas exist', async () => {
             // Mock quota limiting for both
-            ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(true)
+            ;(processor as any)['deps'].quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(true)
 
-            const insightsFlow = await insertInsightsFlow(
+            const hogFlow = await insertInsightsFlow(
                 new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
@@ -907,23 +897,23 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createInsightsFlowInvocations']([globals])
+            const invocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
 
             // Should process the workflow since it doesn't have email or destination actions
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: insightsFlow.id,
-                insightsFlow: {
-                    id: insightsFlow.id,
+                functionId: hogFlow.id,
+                hogFlow: {
+                    id: hogFlow.id,
                 },
             })
         })
 
         it('should process workflows when team has no quota limits', async () => {
             // No quota limits
-            ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(false)
+            ;(processor as any)['deps'].quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(false)
 
-            const insightsFlow = await insertInsightsFlow(
+            const hogFlow = await insertInsightsFlow(
                 new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
@@ -957,15 +947,216 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createInsightsFlowInvocations']([globals])
+            const invocations = await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
 
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: insightsFlow.id,
-                insightsFlow: {
-                    id: insightsFlow.id,
+                functionId: hogFlow.id,
+                hogFlow: {
+                    id: hogFlow.id,
                 },
             })
+        })
+
+        it('should load group properties before building invocations', async () => {
+            await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
+                    .withTeamId(team.id)
+                    .withSimpleWorkflow({
+                        trigger: {
+                            type: 'event',
+                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                        },
+                    })
+                    .build()
+            )
+
+            const spy = jest.spyOn(processor['groupsManager'], 'addGroupsToGlobalsList')
+
+            await processor.processBatch([globals])
+
+            expect(spy).toHaveBeenCalledTimes(1)
+            expect(spy).toHaveBeenCalledWith([globals])
+        })
+    })
+
+    describe('group properties enrichment', () => {
+        let globals: InsightsFunctionInvocationGlobals
+
+        const setupGroups = async () => {
+            await updateOrganizationAvailableFeatures(hub.postgres, team.organization_id, [
+                { key: 'data_pipelines', name: 'Data Pipelines' },
+                { key: 'group_analytics', name: 'Group Analytics' },
+            ])
+            hub.teamManager['lazyLoader'].clear()
+
+            const mockGroupRepo: GroupReadRepository = {
+                fetchGroupsByKeys: jest.fn().mockResolvedValue([
+                    {
+                        team_id: team.id,
+                        group_type_index: 0,
+                        group_key: 'acme-inc',
+                        group_properties: { name: 'Acme Inc', industry: 'Tech' },
+                    },
+                    {
+                        team_id: team.id,
+                        group_type_index: 1,
+                        group_key: 'project-alpha',
+                        group_properties: { name: 'Project Alpha', status: 'active' },
+                    },
+                ]),
+                fetchGroupTypesByTeamIds: jest.fn().mockImplementation((teamIds: number[]) => {
+                    const result: Record<string, { group_type: string; group_type_index: number }[]> = {}
+                    for (const id of teamIds) {
+                        result[id.toString()] = [
+                            { group_type: 'company', group_type_index: 0 },
+                            { group_type: 'project', group_type_index: 1 },
+                        ]
+                    }
+                    return Promise.resolve(result)
+                }),
+                fetchGroupTypesByProjectIds: jest.fn().mockResolvedValue({}),
+            }
+
+            processor['groupsManager'] = new GroupsManagerService(hub.teamManager, mockGroupRepo)
+        }
+
+        beforeEach(() => {
+            globals = createHogExecutionGlobals({
+                groups: undefined, // Must be undefined so addGroupsToGlobals actually enriches
+                project: {
+                    id: team.id,
+                } as any,
+                event: {
+                    uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
+                    event: '$pageview',
+                    properties: {
+                        $current_url: 'https://hanzo.ai',
+                        $lib_version: '1.0.0',
+                        $groups: { company: 'acme-inc', project: 'project-alpha' },
+                    },
+                } as any,
+            })
+        })
+
+        it('should enrich globals with group properties for hogflow invocations', async () => {
+            await setupGroups()
+
+            const hogFlow = await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
+                    .withTeamId(team.id)
+                    .withSimpleWorkflow({
+                        trigger: {
+                            type: 'event',
+                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                        },
+                    })
+                    .build()
+            )
+
+            const { invocations } = await processor.processBatch([globals])
+
+            expect(invocations).toHaveLength(1)
+            expect(invocations[0].functionId).toBe(hogFlow.id)
+
+            // Verify the globals were enriched with group properties
+            expect(globals.groups).toEqual({
+                company: expect.objectContaining({
+                    id: 'acme-inc',
+                    type: 'company',
+                    index: 0,
+                    properties: { name: 'Acme Inc', industry: 'Tech' },
+                }),
+                project: expect.objectContaining({
+                    id: 'project-alpha',
+                    type: 'project',
+                    index: 1,
+                    properties: { name: 'Project Alpha', status: 'active' },
+                }),
+            })
+        })
+
+        it('should include group properties in hogflow filterGlobals', async () => {
+            await setupGroups()
+
+            await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
+                    .withTeamId(team.id)
+                    .withSimpleWorkflow({
+                        trigger: {
+                            type: 'event',
+                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                        },
+                    })
+                    .build()
+            )
+
+            const { invocations } = await processor.processBatch([globals])
+
+            expect(invocations).toHaveLength(1)
+
+            // filterGlobals should have group keys and properties populated
+            const filterGlobals = (invocations[0] as any).filterGlobals
+            expect(filterGlobals.$group_0).toBe('acme-inc')
+            expect(filterGlobals.$group_1).toBe('project-alpha')
+            expect(filterGlobals.group_0).toEqual({
+                properties: { name: 'Acme Inc', industry: 'Tech' },
+            })
+            expect(filterGlobals.group_1).toEqual({
+                properties: { name: 'Project Alpha', status: 'active' },
+            })
+        })
+
+        it('should have empty groups when event has no $groups property', async () => {
+            await setupGroups()
+
+            globals.event.properties = {
+                $current_url: 'https://hanzo.ai',
+                $lib_version: '1.0.0',
+            }
+
+            await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
+                    .withTeamId(team.id)
+                    .withSimpleWorkflow({
+                        trigger: {
+                            type: 'event',
+                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                        },
+                    })
+                    .build()
+            )
+
+            const { invocations } = await processor.processBatch([globals])
+
+            expect(invocations).toHaveLength(1)
+            expect(globals.groups).toEqual({})
+
+            // filterGlobals should have null group keys and empty properties
+            const filterGlobals = (invocations[0] as any).filterGlobals
+            expect(filterGlobals.$group_0).toBeNull()
+            expect(filterGlobals.group_0).toEqual({ properties: {} })
+        })
+
+        it('should have empty groups when team lacks group_analytics feature', async () => {
+            // Don't call setupGroups - team only has data_pipelines by default
+
+            await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
+                    .withTeamId(team.id)
+                    .withSimpleWorkflow({
+                        trigger: {
+                            type: 'event',
+                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                        },
+                    })
+                    .build()
+            )
+
+            const { invocations } = await processor.processBatch([globals])
+
+            expect(invocations).toHaveLength(1)
+            expect(globals.groups).toEqual({})
         })
     })
 })

@@ -25,6 +25,8 @@ from insights.settings.activity_log import *
 from insights.settings.async_migrations import *
 from insights.settings.batch_exports import *
 from insights.settings.celery import *
+from insights.settings.cohorts import *
+from insights.settings.kafka import *
 from insights.settings.data_stores import *
 from insights.settings.dagster import *
 from insights.settings.demo import *
@@ -42,11 +44,15 @@ from insights.settings.object_storage import *
 from insights.settings.temporal import *
 from insights.settings.web import *
 from insights.settings.data_warehouse import *
+from insights.settings.managed_migrations import *
 from insights.settings.session_replay import *
 from insights.settings.session_replay_v2 import *
 from insights.settings.integrations import *
 from insights.settings.payments import *
+from insights.settings.personinsights import *
 from insights.settings.ses import *
+from insights.settings.email import *
+from insights.settings.exports import *
 
 from insights.settings.utils import get_from_env, str_to_bool
 
@@ -65,7 +71,18 @@ INSTANCE_PREFERENCES = {
 }
 
 SITE_URL: str = os.getenv("SITE_URL", "http://localhost:8010").rstrip("/")
+NGROK_URL: str | None = os.getenv("NGROK_URL", None)
 INSTANCE_TAG: str = os.getenv("INSTANCE_TAG", "none")
+
+# Local dev only (DEBUG): force this email when resolving Slack users instead of
+# hitting Slack's users.info API, so it matches the seeded fixture user. Set it
+# empty to use the real Slack email while keeping DEBUG on. Ignored outside DEBUG.
+SLACK_APP_LOCAL_DEV_EMAIL: str = os.getenv("SLACK_APP_LOCAL_DEV_EMAIL", "test@hanzo.ai")
+
+# Vapi voice-AI integration (used by user_interviews to host public interview pages).
+VAPI_PUBLIC_KEY: str = os.getenv("VAPI_PUBLIC_KEY", "")
+VAPI_ASSISTANT_ID: str = os.getenv("VAPI_ASSISTANT_ID", "")
+VAPI_WEBHOOK_SECRET: str = os.getenv("VAPI_WEBHOOK_SECRET", "")
 
 if DEBUG:
     JS_URL: str = os.getenv("JS_URL", "http://localhost:8234").rstrip("/")
@@ -78,7 +95,7 @@ DISABLE_MMDB: bool = get_from_env(
 PLUGINS_PREINSTALLED_URLS: list[str] = (
     os.getenv(
         "PLUGINS_PREINSTALLED_URLS",
-        "https://www.npmjs.com/package/@insights/geoip-plugin",
+        "https://www.npmjs.com/package/@hanzo/geoip-plugin",
     ).split(",")
     if not DISABLE_MMDB
     else []
@@ -100,6 +117,12 @@ PERSON_ON_EVENTS_OVERRIDE: bool = get_from_env("PERSON_ON_EVENTS_OVERRIDE", opti
 # Only written in specific scripts - do not use outside of them.
 PERSON_ON_EVENTS_V2_OVERRIDE: bool = get_from_env("PERSON_ON_EVENTS_V2_OVERRIDE", optional=True, type_cast=str_to_bool)
 
+# Events data retention enforcement override (ops kill switch / local + test toggle). When unset (None),
+# enforcement falls back to the per-project `events-data-retention` cohort flag. When set, forces it on/off everywhere.
+EVENTS_DATA_RETENTION_ENFORCED: bool | None = get_from_env(
+    "EVENTS_DATA_RETENTION_ENFORCED", optional=True, type_cast=str_to_bool
+)
+
 # Support creating multiple organizations in a single instance. Requires a premium license.
 MULTI_ORG_ENABLED: bool = get_from_env("MULTI_ORG_ENABLED", False, type_cast=str_to_bool)
 
@@ -113,7 +136,8 @@ PROM_PUSHGATEWAY_ADDRESS: str | None = os.getenv("PROM_PUSHGATEWAY_ADDRESS", Non
 
 INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME: int = get_from_env("INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME", 600, type_cast=int)
 
-# Customer.io email service (optional, only for transactional emails)
-CUSTOMER_IO_API_KEY: str = os.getenv("CUSTOMER_IO_API_KEY", "")
-CUSTOMER_IO_API_URL: str = os.getenv("CUSTOMER_IO_API_URL", "https://api.customer.io")
+QUERY_COALESCING_MAX_WAIT_SECONDS: int = get_from_env("QUERY_COALESCING_MAX_WAIT_SECONDS", 300, type_cast=int)
 
+# Extend and override these settings with EE's ones
+if "ee.apps.EnterpriseConfig" in INSTALLED_APPS:
+    from ee.settings import *  # noqa: F401, F403

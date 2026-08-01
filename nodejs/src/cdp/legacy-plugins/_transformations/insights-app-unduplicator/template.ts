@@ -12,7 +12,7 @@ export const insightsAppUnduplicator: LegacyTransformationPlugin = {
         id: 'plugin-insights-app-unduplicator',
         name: 'Insights App Unduplicator',
         description: 'Prevent duplicates in your data when ingesting.',
-        icon_url: '',
+        icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

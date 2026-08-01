@@ -62,7 +62,7 @@ impl Language {
             Language::Golang => format!(
                 r#"
 1. Install the Insights Go SDK if you haven't already:
-   go get github.com/hanzoai/insights-go
+   go get github.com/insights/insights-go
 2. Store the generated Go code in a folder named `typed` (e.g. `/src/lib/typed`):
    mkdir -p <your-directory>/src/lib/typed
    mv {output_path} <your-directory>/src/lib/typed
@@ -85,7 +85,7 @@ You can add optional properties through the option functions:
 2. Import and use the typed Insights client:
    from insights_typed import InsightsTyped
 
-   client = InsightsTyped("<ph_project_api_key>", host="<ph_client_api_host>")
+   client = InsightsTyped("<ph_project_token>", host="<ph_client_api_host>")
 
    # Use typed capture methods with full IDE autocomplete:
    client.capture_event_name(

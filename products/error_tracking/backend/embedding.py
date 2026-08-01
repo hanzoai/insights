@@ -1,8 +1,10 @@
 from django.conf import settings
 
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
 from insights.datastore.indexes import index_by_kafka_timestamp
 from insights.datastore.kafka_engine import (
     CONSUMER_GROUP_DOCUMENT_EMBEDDINGS,
+    CONSUMER_GROUP_DOCUMENT_EMBEDDINGS_WS,
     KAFKA_COLUMNS_WITH_PARTITION,
     kafka_engine,
 )
@@ -16,6 +18,8 @@ DISTRIBUTED_DOCUMENT_EMBEDDINGS = f"distributed_{DOCUMENT_EMBEDDINGS}"
 DOCUMENT_EMBEDDING_WRITABLE = f"writable_{DOCUMENT_EMBEDDINGS}"
 KAFKA_DOCUMENT_EMBEDDINGS = f"kafka_{DOCUMENT_EMBEDDINGS}"
 DOCUMENT_EMBEDDINGS_MV = f"{DOCUMENT_EMBEDDINGS}_mv"
+KAFKA_DOCUMENT_EMBEDDINGS_WS = f"kafka_{DOCUMENT_EMBEDDINGS}_ws"
+DOCUMENT_EMBEDDINGS_WS_MV = f"{DOCUMENT_EMBEDDINGS}_ws_mv"
 
 DOCUMENT_EMBEDDINGS_TABLE_BASE_SQL = """
 CREATE TABLE IF NOT EXISTS {table_name}
@@ -53,7 +57,7 @@ def DOCUMENT_EMBEDDINGS_TABLE_SQL():
     --  - Documents with the same ID whose timestamp is in the same day are the same document, and the later inserted one should be retained
     PARTITION BY toMonday(timestamp)
     ORDER BY (team_id, toDate(timestamp), product, document_type, model_name, rendering, cityHash64(document_id))
-    TTL toDateTime(timestamp) + INTERVAL 3 MONTH
+    TTL timestamp + INTERVAL 3 MONTH
     SETTINGS index_granularity = 512, ttl_only_drop_parts = 1
     """
     ).format(
@@ -139,9 +143,7 @@ FROM {database}.{kafka_table}
 
 
 def TRUNCATE_DOCUMENT_EMBEDDINGS_TABLE_SQL():
-    return (
-        f"TRUNCATE TABLE IF EXISTS {PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
-    )
+    return f"TRUNCATE TABLE IF EXISTS {PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS} {ON_CLUSTER_CLAUSE()}"
 
 
 # Migration helpers for transitioning to partitioned tables
@@ -155,3 +157,53 @@ def DROP_DISTRIBUTED_DOCUMENT_EMBEDDINGS_SQL():
 
 def DROP_DOCUMENT_EMBEDDINGS_WRITABLE_SQL():
     return f"DROP TABLE IF EXISTS {DOCUMENT_EMBEDDING_WRITABLE}"
+
+
+# WarpStream-shared Kafka engine table + MV (coexist alongside MSK tables, same target writable
+# table). The MSK side stays in place during the cut-over and gets dropped in a follow-up
+# migration once produce traffic has shifted to the shared cluster.
+
+DROP_KAFKA_DOCUMENT_EMBEDDINGS_WS_TABLE_SQL = f"DROP TABLE IF EXISTS {KAFKA_DOCUMENT_EMBEDDINGS_WS}"
+DROP_DOCUMENT_EMBEDDINGS_WS_MV_SQL = f"DROP TABLE IF EXISTS {DOCUMENT_EMBEDDINGS_WS_MV}"
+
+
+def KAFKA_DOCUMENT_EMBEDDINGS_WS_TABLE_SQL():
+    return DOCUMENT_EMBEDDINGS_TABLE_BASE_SQL.format(
+        table_name=KAFKA_DOCUMENT_EMBEDDINGS_WS,
+        engine=kafka_engine(
+            KAFKA_DOCUMENT_EMBEDDINGS_TOPIC,
+            group=CONSUMER_GROUP_DOCUMENT_EMBEDDINGS_WS,
+            named_collection=settings.DATASTORE_KAFKA_WARPSTREAM_SHARED_NAMED_COLLECTION,
+        ),
+        content_default="",
+        metadata_default="",
+        extra_fields="",
+    )
+
+
+def DOCUMENT_EMBEDDINGS_WS_MV_SQL(target_table=DOCUMENT_EMBEDDING_WRITABLE):
+    return """
+CREATE MATERIALIZED VIEW IF NOT EXISTS {mv_name}
+TO {target_table}
+AS SELECT
+team_id,
+product,
+document_type,
+model_name,
+rendering,
+document_id,
+timestamp,
+_timestamp as inserted_at,
+coalesce(content, '') as content,
+coalesce(metadata, '{{}}') as metadata,
+embedding,
+_timestamp,
+_offset,
+_partition
+FROM {database}.{kafka_table}
+""".format(
+        mv_name=DOCUMENT_EMBEDDINGS_WS_MV,
+        target_table=target_table,
+        kafka_table=KAFKA_DOCUMENT_EMBEDDINGS_WS,
+        database=settings.DATASTORE_DATABASE,
+    )

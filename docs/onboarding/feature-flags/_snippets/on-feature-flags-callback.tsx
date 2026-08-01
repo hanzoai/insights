@@ -1,4 +1,4 @@
-import { useMDXComponents } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { useMDXComponents } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 export const OnFeatureFlagsCallbackSnippet = (): JSX.Element => {
     const { CodeBlock, dedent, Markdown } = useMDXComponents()
@@ -28,5 +28,3 @@ export const OnFeatureFlagsCallbackSnippet = (): JSX.Element => {
         </>
     )
 }
-
-

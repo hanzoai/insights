@@ -33,7 +33,7 @@ describe('wizardLogic', () => {
 
     describe('if more than one project is available', () => {
         beforeEach(() => {
-            window.INSIGHTS_APP_CONTEXT = {
+            window.POSTFN_APP_CONTEXT = {
                 current_user: {
                     organization: {
                         teams: [MOCK_DEFAULT_TEAM, { ...MOCK_DEFAULT_TEAM, id: MOCK_DEFAULT_TEAM.id + 1 }],
@@ -55,7 +55,7 @@ describe('wizardLogic', () => {
 
     describe('if only one project is available', () => {
         beforeEach(() => {
-            window.INSIGHTS_APP_CONTEXT = {
+            window.POSTFN_APP_CONTEXT = {
                 current_user: {
                     organization: {
                         ...MOCK_DEFAULT_ORGANIZATION,
@@ -74,6 +74,9 @@ describe('wizardLogic', () => {
                 view: 'pending',
                 wizardHash: MOCK_HASH,
             })
+            // Drain the auto-triggered authenticate request: its trailing setView would
+            // otherwise dispatch into the next test's store and flip its view.
+            await expectLogic(logic).toFinishAllListeners()
         })
     })
 

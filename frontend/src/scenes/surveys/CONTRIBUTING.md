@@ -10,6 +10,7 @@
    - `--responses` - Number of responses per survey (default: 50)
    - `--team-id` - Team ID to create surveys for (default: first team)
    - `--days-back` - Spread responses over the last N days (default: 30)
+   - `--question-types` - Generate only specific question types (for example, `--question-types nps` to guarantee an NPS question)
 
 ## How to test changes
 
@@ -20,7 +21,7 @@
 
 ### JS SDK Changes
 
-Most survey logic lives in the [Insights JS SDK](https://github.com/Hanzo Insights/insights-js/). To test changes:
+Most survey logic lives in the [Insights JS SDK](https://github.com/Insights/insights-js/). To test changes:
 
 First, build the package with hot-reload:
 
@@ -100,10 +101,10 @@ Changes are picked up automatically via `package:watch`.
 
 ```bash
 # Adjust these paths to match your setup
-INSIGHTS_JS_DIR=~/src/insights-js
+POSTFN_JS_DIR=~/src/insights-js
 DOTCOM_DIR=~/src/dotcom
 
-TGZ_PATH="$INSIGHTS_JS_DIR/target/insights-js.tgz"
+TGZ_PATH="$POSTFN_JS_DIR/target/insights-js.tgz"
 sed -i '' "s|\"insights-js\": \".*\"|\"insights-js\": \"file:$TGZ_PATH\"|" "$DOTCOM_DIR/frontend/package.json"
 cd "$DOTCOM_DIR" && pnpm install
 # restart the frontend
@@ -213,7 +214,7 @@ One caveat: **reserved ngrok domains are only available for paid ngrok users.**
 
 ### Testing survey usage_report
 
-The function [get_teams_with_survey_responses_count_in_period](https://github.com/Hanzo Insights/insights/blob/main/insights/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
+The function [get_teams_with_survey_responses_count_in_period](https://github.com/Insights/insights/blob/master/insights/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
 
 Here's how to run it in the Django shell:
 
@@ -235,7 +236,7 @@ print(results)
 
 ### insights-js logs
 
-We [added some logging on the JS SDK](https://github.com/Hanzo Insights/insights-js/pull/1663) to help debug issues with surveys.
+We [added some logging on the JS SDK](https://github.com/Insights/insights-js/pull/1663) to help debug issues with surveys.
 
 However, those logs are only enabled when insights-js (v1.117.0 and higher) is set with debug=true.
 

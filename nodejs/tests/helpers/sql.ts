@@ -1,18 +1,11 @@
 import { DateTime } from 'luxon'
 
-import { defaultConfig } from '../../src/config/config'
-import {
-    CookielessServerHashMode,
-    Hub,
-    InternalPerson,
-    PluginsServerConfig,
-    ProjectId,
-    RawOrganization,
-    RawPerson,
-    Team,
-} from '../../src/types'
-import { PostgresRouter, PostgresUse } from '../../src/utils/db/postgres'
-import { UUIDT } from '../../src/utils/utils'
+import { defaultConfig } from '~/common/config/config'
+import { PostgresRouter, PostgresUse } from '~/common/utils/db/postgres'
+import { UUIDT } from '~/common/utils/utils'
+
+import { CookielessServerHashMode, InternalPerson, ProjectId, RawOrganization, RawPerson, Team } from '../../src/types'
+import { assertRouterTargetsTestDatabase } from './database-guard'
 
 export const commonUserId = 1001
 export const commonOrganizationMembershipId = '0177364a-fc7b-0000-511c-137090b9e4e1'
@@ -110,6 +103,11 @@ END $$;
 `
 
 export async function clearDatabase(db: PostgresRouter) {
+    await Promise.all([
+        assertRouterTargetsTestDatabase(db, PostgresUse.COMMON_WRITE),
+        assertRouterTargetsTestDatabase(db, PostgresUse.PERSONS_WRITE),
+    ])
+
     await db
         .query(PostgresUse.COMMON_WRITE, POSTGRES_DELETE_COMMON_TABLES_QUERY, undefined, 'delete-common-tables')
         .catch((e) => {
@@ -127,25 +125,11 @@ export async function clearDatabase(db: PostgresRouter) {
 
 // TODO: This shouldn't be called resetTestDatabase, as it actually adds data to the database
 // which can be misleading for people running tests
-export async function resetTestDatabase(extraServerConfig: Partial<PluginsServerConfig> = {}): Promise<void> {
-    const config = { ...defaultConfig, ...extraServerConfig, POSTGRES_CONNECTION_POOL_SIZE: 1 }
+export async function resetTestDatabase(): Promise<void> {
+    const config = { ...defaultConfig, POSTGRES_CONNECTION_POOL_SIZE: 1 }
     const pg = new PostgresRouter(config)
 
-    // Delete common tables using COMMON_WRITE
-    await pg
-        .query(PostgresUse.COMMON_WRITE, POSTGRES_DELETE_COMMON_TABLES_QUERY, undefined, 'delete-common-tables')
-        .catch((e) => {
-            console.error('Error deleting common tables', e)
-            throw e
-        })
-
-    // Delete persons tables using PERSONS_WRITE
-    await pg
-        .query(PostgresUse.PERSONS_WRITE, POSTGRES_DELETE_PERSONS_TABLES_QUERY, undefined, 'delete-persons-tables')
-        .catch((e) => {
-            console.error('Error deleting persons tables', e)
-            throw e
-        })
+    await clearDatabase(pg)
 
     const teamIdToCreate = 2 // TODO: This might be wrong
     await createUserTeamAndOrganization(pg, teamIdToCreate)
@@ -308,8 +292,8 @@ export async function createUserTeamAndOrganization(
     await insertRow(db, 'insights_team', teamData)
 }
 
-export async function getTeams(hub: Hub): Promise<Team[]> {
-    const selectResult = await hub.postgres.query<Team>(
+export async function getTeams(postgres: PostgresRouter): Promise<Team[]> {
+    const selectResult = await postgres.query<Team>(
         PostgresUse.COMMON_READ,
         'SELECT * FROM insights_team ORDER BY id',
         undefined,
@@ -321,13 +305,13 @@ export async function getTeams(hub: Hub): Promise<Team[]> {
     return selectResult.rows
 }
 
-export async function getTeam(hub: Hub, teamId: Team['id']): Promise<Team | null> {
-    const teams = await getTeams(hub)
+export async function getTeam(postgres: PostgresRouter, teamId: Team['id']): Promise<Team | null> {
+    const teams = await getTeams(postgres)
     return teams.find((team) => team.id === teamId) ?? null
 }
 
-export async function getFirstTeam(hub: Hub): Promise<Team> {
-    return (await getTeams(hub))[0]
+export async function getFirstTeam(postgres: PostgresRouter): Promise<Team> {
+    return (await getTeams(postgres))[0]
 }
 
 export const createOrganization = async (pg: PostgresRouter) => {
@@ -514,6 +498,7 @@ export async function fetchPostgresDistinctIdsForPerson(postgres: PostgresRouter
 }
 
 export async function resetBehavioralCohortsDatabase(postgres: PostgresRouter): Promise<void> {
+    await assertRouterTargetsTestDatabase(postgres, PostgresUse.BEHAVIORAL_COHORTS_RW)
     await postgres.query(
         PostgresUse.BEHAVIORAL_COHORTS_RW,
         'TRUNCATE TABLE cohort_membership',

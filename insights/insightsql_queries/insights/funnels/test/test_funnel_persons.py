@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Optional, cast
+from typing import Optional
 from uuid import UUID
 
 from freezegun import freeze_time
@@ -9,55 +9,39 @@ from insights.test.base import (
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
+    flush_persons_and_events,
     snapshot_datastore_queries,
 )
 
+from django.test import override_settings
 from django.utils import timezone
+
+from parameterized import parameterized
 
 from insights.schema import (
     ActorsQuery,
     BaseMathType,
+    BreakdownFilter,
+    Compare,
+    CompareFilter,
     DateRange,
     EventsNode,
     FunnelsActorsQuery,
     FunnelsFilter,
     FunnelsQuery,
+    FunnelVizType,
 )
 
-from insights.constants import INSIGHT_FUNNELS
 from insights.insightsql_queries.actors_query_runner import ActorsQueryRunner
-from insights.insightsql_queries.legacy_compatibility.filter_to_query import filter_to_query
-from insights.models import Cohort
+from insights.insightsql_queries.insights.funnels.funnels_query_runner import FunnelsQueryRunner
 from insights.models.event.util import bulk_create_events
-from insights.models.person.util import bulk_create_persons
 from insights.models.team.team import Team
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 from insights.test.test_journeys import journeys_for
 
+from products.cohorts.backend.models.cohort import Cohort
+
 FORMAT_TIME = "%Y-%m-%d 00:00:00"
-
-
-def get_actors_legacy_filters(
-    filters: dict[str, Any],
-    team: Team,
-    funnel_step: Optional[int] = None,
-    funnel_step_breakdown: Optional[str | float | list[str | float]] = None,
-    funnel_trends_drop_off: Optional[bool] = None,
-    funnel_trends_entrance_period_start: Optional[str] = None,
-    offset: Optional[int] = None,
-    include_recordings: bool = False,
-) -> list[list]:
-    funnels_query = cast(FunnelsQuery, filter_to_query(filters))
-    return get_actors(
-        funnels_query,
-        team,
-        funnel_step,
-        funnel_step_breakdown,
-        funnel_trends_drop_off,
-        funnel_trends_entrance_period_start,
-        offset,
-        include_recordings,
-    )
 
 
 def get_actors(
@@ -69,6 +53,7 @@ def get_actors(
     funnel_trends_entrance_period_start: Optional[str] = None,
     offset: Optional[int] = None,
     include_recordings: bool = False,
+    compare: Optional[Compare] = None,
 ) -> list[list]:
     funnel_actors_query = FunnelsActorsQuery(
         source=funnels_query,
@@ -77,6 +62,7 @@ def get_actors(
         funnelTrendsDropOff=funnel_trends_drop_off,
         funnelTrendsEntrancePeriodStart=funnel_trends_entrance_period_start,
         includeRecordings=include_recordings,
+        compare=compare,
     )
     actors_query = ActorsQuery(
         source=funnel_actors_query,
@@ -90,7 +76,8 @@ def get_actors(
 class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
     def _create_sample_data_multiple_dropoffs(self):
         for i in range(35):
-            bulk_create_persons([{"distinct_ids": [f"user_{i}"], "team_id": self.team.pk}])
+            _create_person(distinct_ids=[f"user_{i}"], team=self.team)
+        flush_persons_and_events()
         events = []
         for i in range(5):
             events.append(
@@ -196,81 +183,26 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
 
         return person1, person2
 
-    def test_first_step(self):
+    @parameterized.expand(
+        [
+            ("first_step", 1, 35),
+            ("last_step", 3, 5),
+            ("second_step_dropoff", -2, 20),
+            ("last_step_dropoff", -3, 10),
+        ]
+    )
+    def test_step_actors(self, _name: str, funnel_step: int, expected_count: int) -> None:
         self._create_sample_data_multiple_dropoffs()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "interval": "day",
-            "date_from": "2021-05-01 00:00:00",
-            "date_to": "2021-05-07 00:00:00",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="step one"), EventsNode(event="step two"), EventsNode(event="step three")],
+            interval="day",
+            dateRange=DateRange(date_from="2021-05-01 00:00:00", date_to="2021-05-07 00:00:00"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=funnel_step)
 
-        self.assertEqual(35, len(results))
-
-    def test_last_step(self):
-        self._create_sample_data_multiple_dropoffs()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "interval": "day",
-            "date_from": "2021-05-01 00:00:00",
-            "date_to": "2021-05-07 00:00:00",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
-
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=3)
-
-        self.assertEqual(5, len(results))
-
-    def test_second_step_dropoff(self):
-        self._create_sample_data_multiple_dropoffs()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "interval": "day",
-            "date_from": "2021-05-01 00:00:00",
-            "date_to": "2021-05-07 00:00:00",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
-
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=-2)
-
-        self.assertEqual(20, len(results))
-
-    def test_last_step_dropoff(self):
-        self._create_sample_data_multiple_dropoffs()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "interval": "day",
-            "date_from": "2021-05-01 00:00:00",
-            "date_to": "2021-05-07 00:00:00",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
-
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=-3)
-
-        self.assertEqual(10, len(results))
+        self.assertEqual(expected_count, len(results))
 
     def _create_sample_data(self):
         for i in range(110):
@@ -296,113 +228,86 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
 
     def test_basic_offset(self):
         self._create_sample_data()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "interval": "day",
-            "date_from": "2021-05-01 00:00:00",
-            "date_to": "2021-05-07 00:00:00",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="step one"), EventsNode(event="step two"), EventsNode(event="step three")],
+            interval="day",
+            dateRange=DateRange(date_from="2021-05-01 00:00:00", date_to="2021-05-07 00:00:00"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+        )
 
         # fetch first 100 people
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         self.assertEqual(100, len(results))
 
         # fetch next 100 people (just 10 remaining)
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, offset=100)
+        results = get_actors(query, self.team, funnel_step=1, offset=100)
         self.assertEqual(10, len(results))
 
     @also_test_with_materialized_columns(["$browser"])
     def test_first_step_breakdowns(self):
         person1, person2 = self._create_browser_breakdown_events()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-01",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0},
-                {"id": "play movie", "order": 1},
-                {"id": "buy", "order": 2},
-            ],
-            "breakdown_type": "event",
-            "breakdown": "$browser",
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="sign up"), EventsNode(event="play movie"), EventsNode(event="buy")],
+            interval="day",
+            dateRange=DateRange(date_from="2020-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+            breakdownFilter=BreakdownFilter(breakdown_type="event", breakdown="$browser"),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         # self.assertCountEqual([val[0]["id"] for val in results], [person1.uuid, person2.uuid])
         self.assertCountEqual([results[0][0], results[1][0]], [person1.uuid, person2.uuid])
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, funnel_step_breakdown=["Chrome"])
+        results = get_actors(query, self.team, funnel_step=1, funnel_step_breakdown=["Chrome"])
         # self.assertCountEqual([val[0]["id"] for val in results], [person1.uuid])
         self.assertCountEqual([results[0][0]], [person1.uuid])
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, funnel_step_breakdown=["Safari"])
+        results = get_actors(query, self.team, funnel_step=1, funnel_step_breakdown=["Safari"])
         # self.assertCountEqual([val[0]["id"] for val in results], [person2.uuid])
         self.assertCountEqual([results[0][0]], [person2.uuid])
 
     def test_first_step_breakdowns_with_multi_property_breakdown(self):
         person1, person2 = self._create_browser_breakdown_events()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-01",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0},
-                {"id": "play movie", "order": 1},
-                {"id": "buy", "order": 2},
-            ],
-            "breakdown_type": "event",
-            "breakdown": ["$browser", "$browser_version"],
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="sign up"), EventsNode(event="play movie"), EventsNode(event="buy")],
+            interval="day",
+            dateRange=DateRange(date_from="2020-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+            breakdownFilter=BreakdownFilter(breakdown_type="event", breakdown=["$browser", "$browser_version"]),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         # self.assertCountEqual([val[0]["id"] for val in results], [person1.uuid, person2.uuid])
         self.assertCountEqual([results[0][0], results[1][0]], [person1.uuid, person2.uuid])
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, funnel_step_breakdown=["Chrome", "95"])
+        results = get_actors(query, self.team, funnel_step=1, funnel_step_breakdown=["Chrome", "95"])
         # self.assertCountEqual([val[0]["id"] for val in results], [person1.uuid])
         self.assertCountEqual([results[0][0]], [person1.uuid])
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, funnel_step_breakdown=["Safari", "14"])
+        results = get_actors(query, self.team, funnel_step=1, funnel_step_breakdown=["Safari", "14"])
         # self.assertCountEqual([val[0]["id"] for val in results], [person2.uuid])
         self.assertCountEqual([results[0][0]], [person2.uuid])
 
     @also_test_with_materialized_columns(person_properties=["$country"])
     def test_first_step_breakdown_person(self):
         person1, person2 = self._create_browser_breakdown_events()
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-01",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0},
-                {"id": "play movie", "order": 1},
-                {"id": "buy", "order": 2},
-            ],
-            "breakdown_type": "person",
-            "breakdown": "$country",
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="sign up"), EventsNode(event="play movie"), EventsNode(event="buy")],
+            interval="day",
+            dateRange=DateRange(date_from="2020-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+            breakdownFilter=BreakdownFilter(breakdown_type="person", breakdown="$country"),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         # self.assertCountEqual([val[0]["id"] for val in results], [person1.uuid, person2.uuid])
         self.assertCountEqual([results[0][0], results[1][0]], [person1.uuid, person2.uuid])
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, funnel_step_breakdown=["EE"])
+        results = get_actors(query, self.team, funnel_step=1, funnel_step_breakdown=["EE"])
         # self.assertCountEqual([val[0]["id"] for val in results], [person2.uuid])
         self.assertCountEqual([results[0][0]], [person2.uuid])
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, funnel_step_breakdown=["PL"])
+        results = get_actors(query, self.team, funnel_step=1, funnel_step_breakdown=["PL"])
         # self.assertCountEqual([val[0]["id"] for val in results], [person1.uuid])
         self.assertCountEqual([results[0][0]], [person1.uuid])
 
@@ -423,21 +328,14 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
         )
         cohort.calculate_people_ch(pending_version=0)
 
-        filters = {
-            "events": [
-                {"id": "sign up", "order": 0},
-                {"id": "play movie", "order": 1},
-                {"id": "buy", "order": 2},
-            ],
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-01",
-            "date_to": "2020-01-08",
-            "funnel_window_days": 7,
-            "breakdown_type": "cohort",
-            "breakdown": [cohort.pk],
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="sign up"), EventsNode(event="play movie"), EventsNode(event="buy")],
+            dateRange=DateRange(date_from="2020-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+            breakdownFilter=BreakdownFilter(breakdown_type="cohort", breakdown=[cohort.pk]),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         self.assertEqual(results[0][0], person.uuid)
 
     @snapshot_datastore_queries
@@ -469,20 +367,14 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
         )
 
         # First event, but no recording
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2021-01-01",
-            "date_to": "2021-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="step one"), EventsNode(event="step two"), EventsNode(event="step three")],
+            interval="day",
+            dateRange=DateRange(date_from="2021-01-01", date_to="2021-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, include_recordings=True)
+        results = get_actors(query, self.team, funnel_step=1, include_recordings=True)
         # self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(results[0][0], p1.uuid)
         self.assertEqual(
@@ -492,20 +384,7 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
         )
 
         # Second event, with recording
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2021-01-01",
-            "date_to": "2021-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
-
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=2, include_recordings=True)
+        results = get_actors(query, self.team, funnel_step=2, include_recordings=True)
         # self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(results[0][0], p1.uuid)
         self.assertEqual(
@@ -526,20 +405,7 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
         )
 
         # Third event dropoff, with recording
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2021-01-01",
-            "date_to": "2021-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "step one", "order": 0},
-                {"id": "step two", "order": 1},
-                {"id": "step three", "order": 2},
-            ],
-        }
-
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=-3, include_recordings=True)
+        results = get_actors(query, self.team, funnel_step=-3, include_recordings=True)
         # self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(results[0][0], p1.uuid)
         self.assertEqual(
@@ -584,21 +450,15 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
             create_people=False,
         )
 
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-01",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0},
-                {"id": "play movie", "order": 1},
-            ],
-            "breakdown_type": "event",
-            "breakdown": "$browser",
-        }
+        query = FunnelsQuery(
+            series=[EventsNode(event="sign up"), EventsNode(event="play movie")],
+            interval="day",
+            dateRange=DateRange(date_from="2020-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+            breakdownFilter=BreakdownFilter(breakdown_type="event", breakdown="$browser"),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1, funnel_step_breakdown=["test'123"])
+        results = get_actors(query, self.team, funnel_step=1, funnel_step_breakdown=["test'123"])
         self.assertCountEqual([results[0][0]], [person1.uuid])
 
     def test_first_time_math_basic(self):
@@ -631,36 +491,31 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
             create_people=False,
         )
 
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-01",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0, "math": BaseMathType.FIRST_TIME_FOR_USER},
-                {"id": "play movie", "order": 1},
+        query = FunnelsQuery(
+            series=[
+                EventsNode(event="sign up", math=BaseMathType.FIRST_TIME_FOR_USER),
+                EventsNode(event="play movie"),
             ],
-            "breakdown_type": "event",
-            "breakdown": "$browser",
-        }
+            interval="day",
+            dateRange=DateRange(date_from="2020-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+            breakdownFilter=BreakdownFilter(breakdown_type="event", breakdown="$browser"),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         self.assertCountEqual([results[0][0]], [person1.uuid])
 
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-02",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0, "math": BaseMathType.FIRST_TIME_FOR_USER},
-                {"id": "play movie", "order": 1},
+        query = FunnelsQuery(
+            series=[
+                EventsNode(event="sign up", math=BaseMathType.FIRST_TIME_FOR_USER),
+                EventsNode(event="play movie"),
             ],
-        }
+            interval="day",
+            dateRange=DateRange(date_from="2020-01-02", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         self.assertEqual(len(results), 0)
 
     def test_first_time_math_multiple_ids(self):
@@ -707,37 +562,32 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
             create_people=False,
         )
 
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2020-01-01",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0, "math": BaseMathType.FIRST_TIME_FOR_USER},
-                {"id": "play movie", "order": 1},
+        query = FunnelsQuery(
+            series=[
+                EventsNode(event="sign up", math=BaseMathType.FIRST_TIME_FOR_USER),
+                EventsNode(event="play movie"),
             ],
-        }
+            interval="day",
+            dateRange=DateRange(date_from="2020-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         self.assertEqual(len(results), 1)
         self.assertCountEqual(set(results[0][1]["distinct_ids"]), {"person1", "anon1"})
 
-        filters = {
-            "insight": INSIGHT_FUNNELS,
-            "date_from": "2019-01-01",
-            "date_to": "2020-01-08",
-            "interval": "day",
-            "funnel_window_days": 7,
-            "events": [
-                {"id": "sign up", "order": 0, "math": BaseMathType.FIRST_TIME_FOR_USER},
-                {"id": "play movie", "order": 1},
+        query = FunnelsQuery(
+            series=[
+                EventsNode(event="sign up", math=BaseMathType.FIRST_TIME_FOR_USER),
+                EventsNode(event="play movie"),
             ],
-            "breakdown_type": "event",
-            "breakdown": "$browser",
-        }
+            interval="day",
+            dateRange=DateRange(date_from="2019-01-01", date_to="2020-01-08"),
+            funnelsFilter=FunnelsFilter(funnelWindowIntervalUnit="day", funnelWindowInterval=7),
+            breakdownFilter=BreakdownFilter(breakdown_type="event", breakdown="$browser"),
+        )
 
-        results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
+        results = get_actors(query, self.team, funnel_step=1)
         self.assertEqual(len(results), 2)
         self.assertCountEqual(set(results[0][1]["distinct_ids"]), {"person1", "anon1"})
         self.assertCountEqual(set(results[1][1]["distinct_ids"]), {"person2", "anon2"})
@@ -830,3 +680,350 @@ class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
 
         # Should return 2 users: user_does_step1_only and user_does_step1_and_2_only
         self.assertEqual(len(results), 2)
+
+
+class TestFunnelSessionActors(DatastoreTestMixin, APIBaseTest):
+    """Tests for funnel actors when aggregating by session_id."""
+
+    def _create_session_funnel_data(self):
+        from insights.models.utils import uuid7
+
+        self.session_id_1 = str(uuid7("2021-01-02 00:00:00"))
+        self.session_id_2 = str(uuid7("2021-01-03 00:00:00"))
+
+        self.person = _create_person(
+            distinct_ids=["user_1"],
+            team_id=self.team.pk,
+            properties={"email": "test@example.com", "name": "Test User", "$browser": "Chrome"},
+        )
+        _create_event(
+            event="step one",
+            distinct_id="user_1",
+            team=self.team,
+            timestamp="2021-01-02 00:00:00",
+            properties={"$session_id": self.session_id_1},
+        )
+        _create_event(
+            event="step two",
+            distinct_id="user_1",
+            team=self.team,
+            timestamp="2021-01-02 01:00:00",
+            properties={"$session_id": self.session_id_1},
+        )
+        _create_event(
+            event="step one",
+            distinct_id="user_1",
+            team=self.team,
+            timestamp="2021-01-03 00:00:00",
+            properties={"$session_id": self.session_id_2},
+        )
+
+    def _base_funnels_query(self, viz_type=FunnelVizType.STEPS) -> FunnelsQuery:
+        return FunnelsQuery(
+            series=[
+                EventsNode(event="step one"),
+                EventsNode(event="step two"),
+            ],
+            dateRange=DateRange(date_from="2021-01-01", date_to="2021-01-08"),
+            funnelsFilter=FunnelsFilter(
+                funnelAggregateByInsightsQL="properties.$session_id",
+                funnelWindowInterval=7,
+                funnelWindowIntervalUnit="day",
+                funnelVizType=viz_type,
+            ),
+        )
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_session_actors_returns_sessions_with_person(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query()
+        funnel_actors_query = FunnelsActorsQuery(source=funnels_query, funnelStep=1)
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert "person" in response.columns
+        assert len(response.results) == 2
+
+        session_ids = {str(row[0]["session_id"]) for row in response.results}
+        assert session_ids == {self.session_id_1, self.session_id_2}
+
+        person_col_index = response.columns.index("person")
+        for row in response.results:
+            person_data = row[person_col_index]
+            assert person_data is not None
+            assert "properties" in person_data
+            assert person_data["properties"]["email"] == "test@example.com"
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_session_actors_step_completed(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query()
+        funnel_actors_query = FunnelsActorsQuery(source=funnels_query, funnelStep=2)
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert len(response.results) == 1
+        assert str(response.results[0][0]["session_id"]) == self.session_id_1
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_session_actors_dropoff(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query()
+        funnel_actors_query = FunnelsActorsQuery(source=funnels_query, funnelStep=-2)
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert len(response.results) == 1
+        assert str(response.results[0][0]["session_id"]) == self.session_id_2
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_trends_session_actors(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query(viz_type=FunnelVizType.TRENDS)
+        funnel_actors_query = FunnelsActorsQuery(
+            source=funnels_query,
+            funnelTrendsDropOff=False,
+            funnelTrendsEntrancePeriodStart="2021-01-02T00:00:00+00:00",
+        )
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert "person" in response.columns
+        assert len(response.results) == 1
+        assert str(response.results[0][0]["session_id"]) == self.session_id_1
+
+        person_col_index = response.columns.index("person")
+        person_data = response.results[0][person_col_index]
+        assert person_data is not None
+        assert person_data["properties"]["email"] == "test@example.com"
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_trends_session_actors_dropoff(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query(viz_type=FunnelVizType.TRENDS)
+        funnel_actors_query = FunnelsActorsQuery(
+            source=funnels_query,
+            funnelTrendsDropOff=True,
+            funnelTrendsEntrancePeriodStart="2021-01-03T00:00:00+00:00",
+        )
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert "person" in response.columns
+        assert len(response.results) == 1
+        assert str(response.results[0][0]["session_id"]) == self.session_id_2
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_session_actors_search_by_email(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query()
+        funnel_actors_query = FunnelsActorsQuery(source=funnels_query, funnelStep=1)
+
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+            search="test@example.com",
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert len(response.results) == 2
+        session_ids = {str(row[0]["session_id"]) for row in response.results}
+        assert session_ids == {self.session_id_1, self.session_id_2}
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_session_actors_search_by_name(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query()
+        funnel_actors_query = FunnelsActorsQuery(source=funnels_query, funnelStep=1)
+
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+            search="Test User",
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert len(response.results) == 2
+        session_ids = {str(row[0]["session_id"]) for row in response.results}
+        assert session_ids == {self.session_id_1, self.session_id_2}
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_session_actors_search_email_no_match(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query()
+        funnel_actors_query = FunnelsActorsQuery(source=funnels_query, funnelStep=1)
+
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+            search="non-existing@example.com",
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert len(response.results) == 0
+
+    @freeze_time("2021-01-08 00:00:00.000Z")
+    def test_funnel_session_actors_search_name_no_match(self):
+        self._create_session_funnel_data()
+
+        funnels_query = self._base_funnels_query()
+        funnel_actors_query = FunnelsActorsQuery(source=funnels_query, funnelStep=1)
+
+        actors_query = ActorsQuery(
+            source=funnel_actors_query,
+            select=["actor"],
+            search="non existing",
+        )
+        response = ActorsQueryRunner(query=actors_query, team=self.team).calculate()
+
+        assert len(response.results) == 0
+
+
+@override_settings(IN_UNIT_TESTING=True)
+class TestFunnelComparePersons(DatastoreTestMixin, APIBaseTest):
+    def _compare_query(self, compare_to: Optional[str] = None) -> FunnelsQuery:
+        return FunnelsQuery(
+            dateRange=DateRange(date_from="2021-06-07 00:00:00", date_to="2021-06-13 23:59:59"),
+            interval="day",
+            series=[EventsNode(event="step one"), EventsNode(event="step two")],
+            funnelsFilter=FunnelsFilter(
+                funnelVizType=FunnelVizType.STEPS,
+                funnelWindowInterval=7,
+                funnelWindowIntervalUnit="day",
+            ),
+            compareFilter=CompareFilter(compare=True, compare_to=compare_to),
+        )
+
+    def _seed_two_periods(self) -> None:
+        # Current window 2021-06-07..06-13 holds one converter; the default previous window
+        # (prior 7 days, 2021-05-31..06-06) holds two. Distinct counts make the period the
+        # actors query scoped to unambiguous: 1=current, 2=previous, 3=combined (a bug).
+        journeys_for(
+            {
+                "current_user": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 8, 10)},
+                    {"event": "step two", "timestamp": datetime(2021, 6, 8, 11)},
+                ],
+                "previous_user_a": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 1, 10)},
+                    {"event": "step two", "timestamp": datetime(2021, 6, 1, 11)},
+                ],
+                "previous_user_b": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 2, 10)},
+                    {"event": "step two", "timestamp": datetime(2021, 6, 2, 11)},
+                ],
+            },
+            self.team,
+        )
+
+    def test_previous_period_bar_returns_previous_period_actors(self):
+        self._seed_two_periods()
+
+        results = get_actors(self._compare_query(), self.team, funnel_step=1, compare=Compare.PREVIOUS)
+
+        self.assertEqual(len(results), 2)
+
+    def _seed_converters_and_dropoffs(self) -> None:
+        # Current window 2021-06-07..06-13: 1 full conversion + 1 drop-off after step one.
+        # Previous window 2021-05-31..06-06: 2 full conversions + 1 drop-off after step one.
+        # Period-distinct totals at every step pin which window the actors query scoped to.
+        journeys_for(
+            {
+                "current_converter": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 8, 10)},
+                    {"event": "step two", "timestamp": datetime(2021, 6, 8, 11)},
+                ],
+                "current_dropoff": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 9, 10)},
+                ],
+                "previous_converter_a": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 1, 10)},
+                    {"event": "step two", "timestamp": datetime(2021, 6, 1, 11)},
+                ],
+                "previous_converter_b": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 2, 10)},
+                    {"event": "step two", "timestamp": datetime(2021, 6, 2, 11)},
+                ],
+                "previous_dropoff": [
+                    {"event": "step one", "timestamp": datetime(2021, 6, 3, 10)},
+                ],
+            },
+            self.team,
+        )
+
+    @parameterized.expand(
+        [
+            ("current_entrants", Compare.CURRENT, 1, 2),
+            ("current_converted", Compare.CURRENT, 2, 1),
+            ("current_dropoff", Compare.CURRENT, -2, 1),
+            ("previous_entrants", Compare.PREVIOUS, 1, 3),
+            ("previous_converted", Compare.PREVIOUS, 2, 2),
+            ("previous_dropoff", Compare.PREVIOUS, -2, 1),
+        ]
+    )
+    def test_period_scoping_across_step_types(
+        self, _name: str, compare: Compare, funnel_step: int, expected_count: int
+    ) -> None:
+        self._seed_converters_and_dropoffs()
+
+        results = get_actors(self._compare_query(), self.team, funnel_step=funnel_step, compare=compare)
+
+        self.assertEqual(expected_count, len(results))
+
+    def test_actor_count_matches_bar_count(self) -> None:
+        self._seed_converters_and_dropoffs()
+        query = self._compare_query()
+
+        rows = FunnelsQueryRunner(query=query, team=self.team).calculate().results
+        bar_count = {(row["compare_label"], row["order"]): row["count"] for row in rows}
+
+        # The number of actors behind each bar must equal the count rendered on that bar.
+        for compare in (Compare.CURRENT, Compare.PREVIOUS):
+            label = compare.value
+            for order, funnel_step in ((0, 1), (1, 2)):
+                actors = get_actors(query, self.team, funnel_step=funnel_step, compare=compare)
+                self.assertEqual(
+                    bar_count[(label, order)],
+                    len(actors),
+                    f"{label} step {funnel_step} actor count must match the bar count",
+                )
+
+    def test_non_compare_actors_unchanged(self) -> None:
+        # A funnel without compare must ignore the period field and return its single-range actors.
+        self._seed_converters_and_dropoffs()
+        query = FunnelsQuery(
+            dateRange=DateRange(date_from="2021-06-07 00:00:00", date_to="2021-06-13 23:59:59"),
+            interval="day",
+            series=[EventsNode(event="step one"), EventsNode(event="step two")],
+            funnelsFilter=FunnelsFilter(
+                funnelVizType=FunnelVizType.STEPS,
+                funnelWindowInterval=7,
+                funnelWindowIntervalUnit="day",
+            ),
+        )
+
+        self.assertEqual(len(get_actors(query, self.team, funnel_step=1)), 2)
+        self.assertEqual(len(get_actors(query, self.team, funnel_step=2)), 1)

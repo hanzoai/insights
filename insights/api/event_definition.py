@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import uuid
 from collections import defaultdict
 from typing import Any, Literal, Optional, cast
 
 from django.core.cache import cache
-from django.db.models import Manager
+from django.db.models import Manager, Prefetch
+from django.http import Http404
 
 import orjson
+import hanzo_insights
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
-from loginas.utils import is_impersonated_session
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_serializer
 from rest_framework import mixins, request, response, serializers, status, viewsets
 
 from insights.api.event_definition_generators.base import EventDefinitionGenerator
@@ -18,17 +20,26 @@ from insights.api.event_definition_generators.python import PythonGenerator
 from insights.api.event_definition_generators.typescript import TypeScriptGenerator
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
-from insights.api.tagged_item import TaggedItemSerializerMixin, TaggedItemViewSetMixin
+from insights.api.tagged_item import (
+    BulkTagActivityContext,
+    BulkUpdateTagsUUIDRequestSerializer,
+    BulkUpdateTagsUUIDResponseSerializer,
+    TaggedItemSerializerMixin,
+    TaggedItemViewSetMixin,
+    apply_bulk_tag_changes,
+)
 from insights.api.utils import action
 from insights.datastore.client import sync_execute
 from insights.constants import EventDefinitionType
 from insights.event_usage import report_user_action
 from insights.filters import TermSearchFilterBackend, term_search_filter_sql
-from insights.models import EventDefinition, ObjectMediaPreview, Team
+from insights.helpers.impersonation import is_impersonated
+from insights.models import EventDefinition, ObjectMediaPreview, TaggedItem, Team
 from insights.models.activity_logging.activity_log import Detail, log_activity
 from insights.models.user import User
 from insights.models.utils import UUIDT
 from insights.settings import EE_AVAILABLE
+from insights.taxonomy.taxonomy import CORE_EVENTS, STALE_EVENT_DAYS
 from insights.utils import get_safe_cache, relative_date_parse
 
 # If EE is enabled, we use ee.api.ee_event_definition.EnterpriseEventDefinitionSerializer
@@ -43,6 +54,7 @@ def create_event_definitions_sql(
     if order_expressions is None:
         order_expressions = []
     if is_enterprise:
+        from ee.models import EnterpriseEventDefinition
 
         ee_model = EnterpriseEventDefinition
     else:
@@ -55,6 +67,8 @@ def create_event_definitions_sql(
         for f in ee_model._meta.get_fields()
         if hasattr(f, "column") and f.column not in ["deprecated_tags", "tags"]
     }
+    # Django relies on PK being present in the result set to tell if it's a saved instance
+    event_definition_fields.add("id as pk")
 
     enterprise_join = (
         "FULL OUTER JOIN ee_enterpriseeventdefinition ON insights_eventdefinition.id=ee_enterpriseeventdefinition.eventdefinition_ptr_id"
@@ -84,6 +98,18 @@ def create_event_definitions_sql(
         """
 
 
+class PrimaryPropertiesResponseSerializer(serializers.Serializer):
+    primary_properties = serializers.DictField(
+        child=serializers.CharField(),
+        help_text=(
+            "Mapping from event name to the team-configured primary property for that event. "
+            "Names without a configured primary property are omitted; callers should fall back "
+            "to the core taxonomy defaults for those."
+        ),
+    )
+
+
+@extend_schema_serializer(component_name="EventDefinitionRecord")
 class EventDefinitionSerializer(TaggedItemSerializerMixin, serializers.ModelSerializer):
     is_action = serializers.SerializerMethodField(read_only=True)
     action_id = serializers.IntegerField(read_only=True)
@@ -92,6 +118,17 @@ class EventDefinitionSerializer(TaggedItemSerializerMixin, serializers.ModelSeri
     last_calculated_at = serializers.DateTimeField(read_only=True)
     last_updated_at = serializers.DateTimeField(read_only=True)
     post_to_slack = serializers.BooleanField(default=False)
+    primary_property = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=False,
+        max_length=400,
+        help_text=(
+            "Name of a single property on this event that Insights UIs should display alongside the event "
+            "(for example `$pathname` on `$pageview`). When set, surfaces like the session replay inspector "
+            "show the property's value next to the event name without the user having to open the event."
+        ),
+    )
 
     class Meta:
         model = EventDefinition
@@ -103,6 +140,7 @@ class EventDefinitionSerializer(TaggedItemSerializerMixin, serializers.ModelSeri
             "last_updated_at",
             "tags",
             "enforcement_mode",
+            "primary_property",
             # Action fields
             "is_action",
             "action_id",
@@ -128,6 +166,27 @@ class EventDefinitionSerializer(TaggedItemSerializerMixin, serializers.ModelSeri
         if "hidden" in validated_data and "verified" in validated_data:
             if validated_data["hidden"] and validated_data["verified"]:
                 raise serializers.ValidationError("An event cannot be both hidden and verified")
+
+        if validated_data.get("enforcement_mode") == "reject":
+            request = self.context.get("request")
+            if not request or not request.user:
+                raise serializers.ValidationError(
+                    'Setting schema enforcement mode to "reject" requires an authenticated request'
+                )
+            user = request.user
+            org = self.context["get_organization"]()
+            org_id = str(org.id) if org else ""
+            flag_enabled = hanzo_insights.feature_enabled(
+                "schema-enforcement-reject",
+                str(user.distinct_id),
+                groups={"organization": org_id},
+                group_properties={"organization": {"id": org_id}},
+                only_evaluate_locally=False,
+            )
+            if not flag_enabled:
+                raise serializers.ValidationError(
+                    'Setting schema enforcement mode to "reject" requires the schema-enforcement-reject feature flag'
+                )
 
         return validated_data
 
@@ -155,18 +214,19 @@ class EventDefinitionSerializer(TaggedItemSerializerMixin, serializers.ModelSeri
         # Report user action for analytics
         if request and request.user:
             report_user_action(
-                cast(User, request.user),
+                request.user,
                 "event definition created",
                 {"name": event_definition.name},
+                team=view.team,
+                request=request,
             )
 
         return event_definition
 
-    def get_is_action(self, obj):
+    def get_is_action(self, obj) -> bool:
         return hasattr(obj, "action_id") and obj.action_id is not None
 
 
-@extend_schema(tags=["core"])
 class EventDefinitionViewSet(
     TeamAndOrgViewSetMixin,
     TaggedItemViewSetMixin,
@@ -178,13 +238,15 @@ class EventDefinitionViewSet(
     viewsets.GenericViewSet,
 ):
     scope_object = "event_definition"
+    # "bulk_update_tags" must be opted in here so personal API keys with event_definition:write can use it.
+    scope_object_write_actions = ["create", "update", "partial_update", "patch", "destroy", "bulk_update_tags"]
     serializer_class = EventDefinitionSerializer
     lookup_field = "id"
     filter_backends = [TermSearchFilterBackend]
     queryset = EventDefinition.objects.all()
 
     search_fields = ["name"]
-    ordering_fields = ["name", "last_seen_at"]
+    ordering_fields = ["name", "last_seen_at", "created_at"]
 
     def dangerously_get_queryset(self):
         # `type` = 'all' | 'event' | 'action_event'
@@ -196,9 +258,15 @@ class EventDefinitionViewSet(
 
         params = {"project_id": self.project_id, "is_insights_event": "$%", **search_kwargs}
         order_expressions = self._ordering_params_from_request()
+        has_explicit_ordering = "ordering" in self.request.GET
+        has_search_terms = bool(search and search.strip())
+
+        if has_search_terms and not has_explicit_ordering:
+            order_expressions = [("length(name)", "ASC"), *order_expressions]
 
         event_definition_object_manager: Manager
         if EE_AVAILABLE:
+            from ee.models.event_definition import EnterpriseEventDefinition
 
             event_definition_object_manager = EnterpriseEventDefinition.objects
         else:
@@ -208,12 +276,44 @@ class EventDefinitionViewSet(
         if exclude_hidden and EE_AVAILABLE:
             search_query = search_query + " AND (hidden IS NULL OR hidden = false)"
 
+        exclude_stale = self.request.GET.get("exclude_stale", "false").lower() == "true"
+        if exclude_stale:
+            # `last_seen_at` is not indexed: the predicate runs after the project-scoped
+            # pre-filter in `create_event_definitions_sql` has already narrowed the row
+            # set per tenant, and the response is paginated. Worth re-checking with
+            # EXPLAIN if the largest tenants start showing this in slow-query logs.
+            search_query = (
+                search_query
+                + " AND (insights_eventdefinition.last_seen_at IS NULL"
+                + " OR insights_eventdefinition.last_seen_at > NOW() - %(stale_interval)s::interval)"
+            )
+            params["stale_interval"] = f"{STALE_EVENT_DAYS} days"
+
+        verified_param = self.request.GET.get("verified")
+        if verified_param is not None and EE_AVAILABLE:
+            if verified_param.lower() == "true":
+                search_query = (
+                    search_query + " AND (verified = true OR insights_eventdefinition.name = ANY(%(core_events)s))"
+                )
+                params["core_events"] = CORE_EVENTS
+            else:
+                search_query = (
+                    search_query
+                    + " AND (verified IS NULL OR verified = false) AND NOT insights_eventdefinition.name = ANY(%(core_events)s)"
+                )
+                params["core_events"] = CORE_EVENTS
+
         excluded_properties = self.request.GET.get("excluded_properties")
 
         if excluded_properties:
             excluded_list = list(set(orjson.loads(excluded_properties)))
             search_query = search_query + " AND NOT name = ANY(%(excluded_list)s)"
             params["excluded_list"] = excluded_list
+
+        names = [name for value in self.request.query_params.getlist("names") for name in value.split(",") if name]
+        if names:
+            search_query = search_query + " AND insights_eventdefinition.name = ANY(%(names)s)"
+            params["names"] = list(set(names))
 
         sql = create_event_definitions_sql(
             event_type,
@@ -251,7 +351,13 @@ class EventDefinitionViewSet(
         orderings = self.request.GET.getlist("ordering")
 
         for ordering in orderings:
-            if ordering and ordering.replace("-", "") in ["name", "last_seen_at", "last_seen_at::date"]:
+            if ordering and ordering.replace("-", "") in [
+                "name",
+                "last_seen_at",
+                "last_seen_at::date",
+                "created_at",
+                "created_at::date",
+            ]:
                 order = ordering.replace("-", "")
                 if "-" in ordering:
                     order_direction = "DESC"
@@ -265,6 +371,38 @@ class EventDefinitionViewSet(
 
         return results
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "exclude_stale",
+                OpenApiTypes.BOOL,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description=(
+                    f"When true, omit events whose last ingested occurrence is older than {STALE_EVENT_DAYS} days. "
+                    "Events that have never been seen (`last_seen_at` is null) are kept so newly-defined events "
+                    "remain discoverable. Default false. If a search returns zero results with this filter on, "
+                    "retry with `exclude_stale=false` and tell the user the matches are stale."
+                ),
+            ),
+            OpenApiParameter(
+                "exclude_hidden",
+                OpenApiTypes.BOOL,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="When true, omit events that have been explicitly hidden by a team admin (Enterprise only).",
+            ),
+            OpenApiParameter(
+                "names",
+                OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                many=True,
+                description="Return exact matches for these event names. Pass names as repeated or comma-separated values.",
+            ),
+        ],
+        extensions={"x-product": "event_definitions"},
+    )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -291,10 +429,18 @@ class EventDefinitionViewSet(
         return response.Response(serializer.data)
 
     def dangerously_get_object(self):
+        # A non-UUID lookup (e.g. the literal "undefined" from a link built without a saved
+        # definition id) would raise a ValueError deep in the ORM and surface as a 500. Return a
+        # clean 404 instead.
+        try:
+            uuid.UUID(str(self.kwargs["id"]))
+        except ValueError:
+            raise Http404("Event definition not found.")
         return self._get_event_definition(id=self.kwargs["id"], team__project_id=self.project_id)
 
     def _get_event_definition(self, **filters) -> EventDefinition:
         if EE_AVAILABLE:
+            from ee.models.event_definition import EnterpriseEventDefinition
 
             enterprise_event = EnterpriseEventDefinition.objects.filter(**filters).first()
             if enterprise_event:
@@ -313,9 +459,51 @@ class EventDefinitionViewSet(
     def get_serializer_class(self) -> type[serializers.ModelSerializer]:
         serializer_class = self.serializer_class
         if EE_AVAILABLE:
+            from ee.api.ee_event_definition import EnterpriseEventDefinitionSerializer
 
             serializer_class = EnterpriseEventDefinitionSerializer  # type: ignore
         return serializer_class
+
+    @extend_schema(
+        request=BulkUpdateTagsUUIDRequestSerializer,
+        responses={200: BulkUpdateTagsUUIDResponseSerializer},
+    )
+    @action(methods=["POST"], detail=False)
+    def bulk_update_tags(self, request, *args, **kwargs) -> response.Response:
+        """Add, remove, or replace tags across multiple event definitions in one request.
+
+        Overrides ``TaggedItemViewSetMixin.bulk_update_tags``, which assumes integer PKs and runs
+        object-level access-control filtering. Event definitions use UUID PKs and are not an
+        object-level access-controlled resource — project membership (enforced by the viewset) is
+        the only boundary, matching the single-object update path — so this scopes by project and
+        skips the per-object editor check. Tags live on the base ``EventDefinition`` row, so it
+        operates there regardless of the enterprise extension.
+        """
+        serializer = BulkUpdateTagsUUIDRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated = serializer.validated_data
+        validated_ids = validated["ids"]
+
+        objects = list(
+            EventDefinition.objects.filter(id__in=validated_ids, team__project_id=self.project_id).prefetch_related(
+                Prefetch("tagged_items", queryset=TaggedItem.objects.select_related("tag"), to_attr="prefetched_tags")
+            )
+        )
+
+        found_ids = {obj.id for obj in objects}
+        skipped = [{"id": obj_id, "reason": "Not found"} for obj_id in validated_ids if obj_id not in found_ids]
+
+        activity_context = BulkTagActivityContext(
+            scope="EventDefinition",
+            user=cast(User, request.user),
+            was_impersonated=is_impersonated(request),
+            # The single-object event-definition update path logs under the "changed" verb.
+            activity="changed",
+        )
+        updated = apply_bulk_tag_changes(
+            objects, validated["action"], validated["tags"], activity_context=activity_context
+        )
+        return response.Response({"updated": updated, "skipped": skipped})
 
     def perform_create(self, serializer):
         """Handle context and side effects for event definition creation."""
@@ -340,7 +528,7 @@ class EventDefinitionViewSet(
             organization_id=cast(UUIDT, self.organization_id),
             team_id=self.team_id,
             user=user,
-            was_impersonated=is_impersonated_session(self.request),
+            was_impersonated=is_impersonated(self.request),
             item_id=str(event_definition.id),
             scope="EventDefinition",
             activity="created",
@@ -377,7 +565,7 @@ class EventDefinitionViewSet(
             item_id=str(event_definition.id),
             scope="EventDefinition",
             activity="changed",
-            was_impersonated=is_impersonated_session(self.request),
+            was_impersonated=is_impersonated(self.request),
             detail=Detail(name=str(event_definition.name), changes=changes),
         )
 
@@ -385,18 +573,19 @@ class EventDefinitionViewSet(
         instance: EventDefinition = self.get_object()
         instance_id: str = str(instance.id)
         self.perform_destroy(instance)
-        # Casting, since an anonymous use CANNOT access this endpoint
         report_user_action(
-            cast(User, request.user),
+            request.user,
             "event definition deleted",
             {"name": instance.name},
+            team=self.team,
+            request=request,
         )
         user = cast(User, request.user)
         log_activity(
             organization_id=cast(UUIDT, self.organization_id),
             team_id=self.team_id,
             user=user,
-            was_impersonated=is_impersonated_session(request),
+            was_impersonated=is_impersonated(request),
             item_id=instance_id,
             scope="EventDefinition",
             activity="deleted",
@@ -426,6 +615,7 @@ class EventDefinitionViewSet(
             self.request.user,
             self.team_id,
             self.project_id,
+            request=self.request,
         )
 
         return response.Response(
@@ -488,6 +678,43 @@ class EventDefinitionViewSet(
 
         serializer = self.get_serializer(event_def)
         return response.Response(serializer.data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "names",
+                OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                many=True,
+                description=(
+                    "Optional: restrict the response to these event names. "
+                    "Repeat the parameter for multiple names (e.g. `?names=a&names=b`). "
+                    "When omitted, returns every team-configured primary property."
+                ),
+            ),
+        ],
+        responses={200: PrimaryPropertiesResponseSerializer},
+    )
+    @action(detail=False, methods=["GET"], url_path="primary_properties", required_scopes=["event_definition:read"])
+    def primary_properties(self, request, *args, **kwargs):
+        """Resolve team-configured primary properties for event definitions.
+
+        The response only contains entries where a non-null primary_property is set on the
+        EventDefinition. Callers should fall back to the core taxonomy defaults client-side
+        for names not present in the response.
+        """
+        queryset = EventDefinition.objects.filter(
+            team__project_id=self.project_id,
+            primary_property__isnull=False,
+        ).exclude(primary_property="")
+
+        names = [name for name in request.query_params.getlist("names") if name]
+        if names:
+            queryset = queryset.filter(name__in=list(set(names)))
+
+        rows = queryset.values_list("name", "primary_property")
+        return response.Response({"primary_properties": dict(rows)})
 
 
 def fetch_30day_event_queries(

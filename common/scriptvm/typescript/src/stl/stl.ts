@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
-import { isIQLAST, isIQLCallable, isIQLClosure, isIQLDate, isIQLDateTime, isIQLError, newIQLError } from '../objects'
-import { AsyncSTLFunction, IQLDate, IQLDateTime, IQLInterval, STLFunction } from '../types'
+import { isHogAST, isHogCallable, isHogClosure, isHogDate, isHogDateTime, isHogError, newHogError } from '../objects'
+import { AsyncSTLFunction, HogDate, HogDateTime, HogInterval, STLFunction } from '../types'
 import { getNestedValue, like } from '../utils'
 import { md5, sha256, sha256HmacChain } from './crypto'
 import {
@@ -11,46 +11,46 @@ import {
     now,
     toDate,
     toDateTime,
-    toIQLDate,
-    toIQLDateTime,
+    toHogDate,
+    toHogDateTime,
     toTimeZone,
     toUnixTimestamp,
     toUnixTimestampMilli,
 } from './date'
-import { printIQLStringOutput } from './print'
 import { isIPAddressInRange } from './ip'
+import { printHogStringOutput } from './print'
 
 // TODO: this file should be generated from or mergred with insights/insightsql/compiler/javascript_stl.py
 
 function STLToString(args: any[]): string {
-    if (isIQLDate(args[0])) {
+    if (isHogDate(args[0])) {
         const month = args[0].month
         const day = args[0].day
         return `${args[0].year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`
     }
-    if (isIQLDateTime(args[0])) {
+    if (isHogDateTime(args[0])) {
         return DateTime.fromSeconds(args[0].dt, { zone: args[0].zone }).toISO()
     }
-    return printIQLStringOutput(args[0])
+    return printHogStringOutput(args[0])
 }
 
-// Helper: IQLInterval
-// function isIQLInterval(obj: any): obj is IQLInterval {
-//     return obj && obj.__iqlInterval__ === true
+// Helper: HogInterval
+// function isHogInterval(obj: any): obj is HogInterval {
+//     return obj && obj.__hogInterval__ === true
 // }
 
-function toIQLInterval(value: number, unit: string): IQLInterval {
+function toHogInterval(value: number, unit: string): HogInterval {
     return {
-        __iqlInterval__: true,
+        __hogInterval__: true,
         value: value,
         unit: unit,
     }
 }
 
-function applyIntervalToDateTime(base: IQLDate | IQLDateTime, interval: IQLInterval): IQLDate | IQLDateTime {
+function applyIntervalToDateTime(base: HogDate | HogDateTime, interval: HogInterval): HogDate | HogDateTime {
     let dt: DateTime
     let zone = 'UTC'
-    if (isIQLDateTime(base)) {
+    if (isHogDateTime(base)) {
         zone = base.zone
         dt = DateTime.fromSeconds(base.dt, { zone })
     } else {
@@ -92,15 +92,15 @@ function applyIntervalToDateTime(base: IQLDate | IQLDateTime, interval: IQLInter
             throw new Error(`Unsupported interval unit: ${unit}`)
     }
 
-    if (isIQLDateTime(base)) {
+    if (isHogDateTime(base)) {
         return {
-            __iqlDateTime__: true,
+            __hogDateTime__: true,
             dt: newDt.toSeconds(),
             zone: newDt.zoneName || 'UTC',
         }
     }
     return {
-        __iqlDate__: true,
+        __hogDate__: true,
         year: newDt.year,
         month: newDt.month,
         day: newDt.day,
@@ -108,16 +108,16 @@ function applyIntervalToDateTime(base: IQLDate | IQLDateTime, interval: IQLInter
 }
 
 // dateAdd(unit, amount, datetime)
-function dateAddFn([unit, amount, datetime]: any[]): IQLDate | IQLDateTime {
-    return applyIntervalToDateTime(datetime, toIQLInterval(amount, unit))
+function dateAddFn([unit, amount, datetime]: any[]): HogDate | HogDateTime {
+    return applyIntervalToDateTime(datetime, toHogInterval(amount, unit))
 }
 
 // dateDiff(unit, start, end)
 function dateDiffFn([unit, startVal, endVal]: any[]): number {
     function toDT(obj: any): DateTime {
-        if (isIQLDateTime(obj)) {
+        if (isHogDateTime(obj)) {
             return DateTime.fromSeconds(obj.dt, { zone: obj.zone })
-        } else if (isIQLDate(obj)) {
+        } else if (isHogDate(obj)) {
             return DateTime.fromObject({ year: obj.year, month: obj.month, day: obj.day }, { zone: 'UTC' })
         }
         // try parse ISO string
@@ -150,8 +150,8 @@ function dateDiffFn([unit, startVal, endVal]: any[]): number {
 }
 
 // dateTrunc(unit, datetime)
-function dateTruncFn([unit, val]: any[]): IQLDateTime {
-    if (!isIQLDateTime(val)) {
+function dateTruncFn([unit, val]: any[]): HogDateTime {
+    if (!isHogDateTime(val)) {
         throw new Error('Expected a DateTime for dateTrunc')
     }
     const dt = DateTime.fromSeconds(val.dt, { zone: val.zone })
@@ -182,7 +182,7 @@ function dateTruncFn([unit, val]: any[]): IQLDateTime {
             throw new Error(`Unsupported unit for dateTrunc: ${unit}`)
     }
     return {
-        __iqlDateTime__: true,
+        __hogDateTime__: true,
         dt: truncated.toSeconds(),
         zone: truncated.zoneName || 'UTC',
     }
@@ -245,7 +245,7 @@ function ifFn([cond, thenVal, elseVal]: any[]): any {
 }
 
 function inFn([val, arr]: any[]): boolean {
-    return Array.isArray(arr) || (arr && arr.__isIQLTuple) ? arr.includes(val) : false
+    return Array.isArray(arr) || (arr && arr.__isHogTuple) ? arr.includes(val) : false
 }
 
 function min2Fn([a, b]: any[]): any {
@@ -281,9 +281,9 @@ function floorFn([a]: any[]): any {
 // extract(part, datetime)
 function extractFn([part, val]: any[]): number {
     function toDT(obj: any): DateTime {
-        if (isIQLDateTime(obj)) {
+        if (isHogDateTime(obj)) {
             return DateTime.fromSeconds(obj.dt, { zone: obj.zone })
-        } else if (isIQLDate(obj)) {
+        } else if (isHogDate(obj)) {
             return DateTime.fromObject({ year: obj.year, month: obj.month, day: obj.day }, { zone: 'UTC' })
         }
         return DateTime.fromISO(obj, { zone: 'UTC' })
@@ -329,24 +329,24 @@ function substringFn([s, start, optionalLength]: any[]): string {
     return startIdx < s.length ? s.slice(startIdx, endIdx) : ''
 }
 
-function addDaysFn([dateOrDt, days]: any[]): IQLDate | IQLDateTime {
-    return applyIntervalToDateTime(dateOrDt, toIQLInterval(days, 'day'))
+function addDaysFn([dateOrDt, days]: any[]): HogDate | HogDateTime {
+    return applyIntervalToDateTime(dateOrDt, toHogInterval(days, 'day'))
 }
 
-function toIntervalDayFn([val]: any[]): IQLInterval {
-    return toIQLInterval(val, 'day')
+function toIntervalDayFn([val]: any[]): HogInterval {
+    return toHogInterval(val, 'day')
 }
 
-function toIntervalHourFn([val]: any[]): IQLInterval {
-    return toIQLInterval(val, 'hour')
+function toIntervalHourFn([val]: any[]): HogInterval {
+    return toHogInterval(val, 'hour')
 }
 
-function toIntervalMinuteFn([val]: any[]): IQLInterval {
-    return toIQLInterval(val, 'minute')
+function toIntervalMinuteFn([val]: any[]): HogInterval {
+    return toHogInterval(val, 'minute')
 }
 
-function toIntervalMonthFn([val]: any[]): IQLInterval {
-    return toIQLInterval(val, 'month')
+function toIntervalMonthFn([val]: any[]): HogInterval {
+    return toHogInterval(val, 'month')
 }
 
 function toYearFn([val]: any[]): number {
@@ -357,26 +357,26 @@ function toMonthFn([val]: any[]): number {
     return extractFn(['month', val])
 }
 
-function toStartOfDayFn([val]: any[]): IQLDateTime {
-    return dateTruncFn(['day', isIQLDateTime(val) ? val : toDateTimeFromDate(val)])
+function toStartOfDayFn([val]: any[]): HogDateTime {
+    return dateTruncFn(['day', isHogDateTime(val) ? val : toDateTimeFromDate(val)])
 }
 
-function toStartOfHourFn([val]: any[]): IQLDateTime {
-    return dateTruncFn(['hour', isIQLDateTime(val) ? val : toDateTimeFromDate(val)])
+function toStartOfHourFn([val]: any[]): HogDateTime {
+    return dateTruncFn(['hour', isHogDateTime(val) ? val : toDateTimeFromDate(val)])
 }
 
-function toStartOfMonthFn([val]: any[]): IQLDateTime {
-    return dateTruncFn(['month', isIQLDateTime(val) ? val : toDateTimeFromDate(val)])
+function toStartOfMonthFn([val]: any[]): HogDateTime {
+    return dateTruncFn(['month', isHogDateTime(val) ? val : toDateTimeFromDate(val)])
 }
 
-function toStartOfWeekFn([val]: any[]): IQLDateTime {
-    const dt = isIQLDateTime(val)
+function toStartOfWeekFn([val]: any[]): HogDateTime {
+    const dt = isHogDateTime(val)
         ? DateTime.fromSeconds(val.dt, { zone: val.zone })
         : DateTime.fromObject({ year: val.year, month: val.month, day: val.day }, { zone: 'UTC' })
     const weekday = dt.weekday // Monday=1, Sunday=7
     const startOfWeek = dt.minus({ days: weekday - 1 }).startOf('day')
     return {
-        __iqlDateTime__: true,
+        __hogDateTime__: true,
         dt: startOfWeek.toSeconds(),
         zone: startOfWeek.zoneName || 'UTC',
     }
@@ -388,20 +388,20 @@ function toYYYYMMFn([val]: any[]): number {
     return y * 100 + m
 }
 
-function todayFn(): IQLDate {
+function todayFn(): HogDate {
     const now = DateTime.now().setZone('UTC')
     return {
-        __iqlDate__: true,
+        __hogDate__: true,
         year: now.year,
         month: now.month,
         day: now.day,
     }
 }
 
-function toDateTimeFromDate(date: IQLDate): IQLDateTime {
+function toDateTimeFromDate(date: HogDate): HogDateTime {
     const dt = DateTime.fromObject({ year: date.year, month: date.month, day: date.day }, { zone: 'UTC' })
     return {
-        __iqlDateTime__: true,
+        __hogDateTime__: true,
         dt: dt.toSeconds(),
         zone: 'UTC',
     }
@@ -469,6 +469,24 @@ function JSONExtractStringFn(args: any[]): string | null {
     return val != null ? String(val) : null
 }
 
+function JSONExtractFn(args: any[]): any {
+    if (args.length < 2) {
+        return null
+    }
+    let obj = args[0]
+    try {
+        if (typeof obj === 'string') {
+            obj = JSON.parse(obj)
+        }
+    } catch {
+        return null
+    }
+    // Last argument is the return type (Datastore convention), which we ignore.
+    // Arguments between first and last are path components.
+    const path = args.length > 2 ? args.slice(1, -1) : []
+    return getNestedValue(obj, path, true) ?? null
+}
+
 export const STL: Record<string, STLFunction> = {
     concat: {
         fn: (args) => {
@@ -488,6 +506,22 @@ export const STL: Record<string, STLFunction> = {
         },
         description: 'Checks if a string matches a regex pattern',
         example: 'match($1, $2)',
+        minArgs: 2,
+        maxArgs: 2,
+    },
+    extractRegex: {
+        fn: (args, _name, options) => {
+            if (!options?.external?.regex?.extract) {
+                throw new Error('Set options.external.regex.extract for RegEx extract support')
+            }
+            if (args[0] == null || args[1] == null) {
+                return ''
+            }
+            // Script: extractRegex(haystack, pattern) → External: extract(regex, value)
+            return options.external.regex.extract(String(args[1]), String(args[0]))
+        },
+        description: 'Extracts substring matching regex pattern (first capture group or whole match)',
+        example: 'extractRegex($1, $2)',
         minArgs: 2,
         maxArgs: 2,
     },
@@ -535,9 +569,9 @@ export const STL: Record<string, STLFunction> = {
     },
     toInt: {
         fn: (args) => {
-            if (isIQLDateTime(args[0])) {
+            if (isHogDateTime(args[0])) {
                 return Math.floor(args[0].dt)
-            } else if (isIQLDate(args[0])) {
+            } else if (isHogDate(args[0])) {
                 const day = DateTime.fromObject({ year: args[0].year, month: args[0].month, day: args[0].day })
                 const epoch = DateTime.fromObject({ year: 1970, month: 1, day: 1 })
                 return Math.floor(day.diff(epoch, 'days').days)
@@ -551,9 +585,9 @@ export const STL: Record<string, STLFunction> = {
     },
     toFloat: {
         fn: (args) => {
-            if (isIQLDateTime(args[0])) {
+            if (isHogDateTime(args[0])) {
                 return args[0].dt
-            } else if (isIQLDate(args[0])) {
+            } else if (isHogDate(args[0])) {
                 const day = DateTime.fromObject({ year: args[0].year, month: args[0].month, day: args[0].day })
                 const epoch = DateTime.fromObject({ year: 1970, month: 1, day: 1 })
                 return Math.floor(day.diff(epoch, 'days').days)
@@ -635,7 +669,7 @@ export const STL: Record<string, STLFunction> = {
     tuple: {
         fn: (args) => {
             const tuple = args.slice()
-            ;(tuple as any).__isIQLTuple = true
+            ;(tuple as any).__isHogTuple = true
             return tuple
         },
         description: 'Creates a tuple from multiple values',
@@ -676,7 +710,7 @@ export const STL: Record<string, STLFunction> = {
     print: {
         fn: (args) => {
             // eslint-disable-next-line no-console
-            console.log(...args.map(printIQLStringOutput))
+            console.log(...args.map(printHogStringOutput))
         },
         description: 'Prints values to console',
         example: 'print($1, $2)',
@@ -691,12 +725,12 @@ export const STL: Record<string, STLFunction> = {
                     return x.map(convert)
                 } else if (typeof x === 'object' && x !== null) {
                     // DateTime and other objects will be sanitized and not converted to a map
-                    if (x.__iqlDateTime__) {
-                        return toIQLDateTime(x.dt, x.zone)
-                    } else if (x.__iqlDate__) {
-                        return toIQLDate(x.year, x.month, x.day)
-                    } else if (x.__iqlError__) {
-                        return newIQLError(x.type, x.message, x.payload)
+                    if (x.__hogDateTime__) {
+                        return toHogDateTime(x.dt, x.zone)
+                    } else if (x.__hogDate__) {
+                        return toHogDate(x.year, x.month, x.day)
+                    } else if (x.__hogError__) {
+                        return newHogError(x.type, x.message, x.payload)
                     }
                     // All other objects will
                     const map = new Map()
@@ -737,12 +771,12 @@ export const STL: Record<string, STLFunction> = {
                         if (Array.isArray(x)) {
                             return x.map((v) => convert(v, marked))
                         }
-                        if (isIQLDateTime(x) || isIQLDate(x) || isIQLError(x) || isIQLAST(x)) {
+                        if (isHogDateTime(x) || isHogDate(x) || isHogError(x) || isHogAST(x)) {
                             return x
                         }
-                        if (isIQLCallable(x) || isIQLClosure(x)) {
+                        if (isHogCallable(x) || isHogClosure(x)) {
                             // we don't support serializing callables
-                            const callable = isIQLCallable(x) ? x : x.callable
+                            const callable = isHogCallable(x) ? x : x.callable
                             return `fn<${callable.name || 'lambda'}(${callable.argCount})>`
                         }
                         const obj: Record<string, any> = {}
@@ -921,6 +955,19 @@ export const STL: Record<string, STLFunction> = {
         minArgs: 1,
         maxArgs: 1,
     },
+    tryDecodeURLComponent: {
+        fn: (args) => {
+            try {
+                return decodeURIComponent(args[0])
+            } catch {
+                return null
+            }
+        },
+        description: 'Safely URL-decodes a string, returns null on error',
+        example: 'tryDecodeURLComponent($1)',
+        minArgs: 1,
+        maxArgs: 1,
+    },
     replaceOne: {
         fn: (args) => {
             return args[0].replace(args[1], args[2])
@@ -1049,6 +1096,13 @@ export const STL: Record<string, STLFunction> = {
         },
         description: 'Generates a random UUID v4',
         example: 'generateUUIDv4()',
+        minArgs: 0,
+        maxArgs: 0,
+    },
+    randomFloat: {
+        fn: () => Math.random(),
+        description: 'Returns a uniformly random float in [0, 1). Not cryptographically secure.',
+        example: 'randomFloat()',
         minArgs: 0,
         maxArgs: 0,
     },
@@ -1336,29 +1390,29 @@ export const STL: Record<string, STLFunction> = {
         minArgs: 2,
         maxArgs: 3,
     },
-    IQLError: {
-        fn: (args) => newIQLError(args[0], args[1], args[2]),
+    HogError: {
+        fn: (args) => newHogError(args[0], args[1], args[2]),
         description: 'Creates a Script error',
-        example: 'IQLError($1, $2, $3)',
+        example: 'HogError($1, $2, $3)',
         minArgs: 1,
         maxArgs: 3,
     },
     Error: {
-        fn: (args, name) => newIQLError(name, args[0], args[1]),
+        fn: (args, name) => newHogError(name, args[0], args[1]),
         description: 'Creates a generic error',
         example: 'Error($1, $2)',
         minArgs: 0,
         maxArgs: 2,
     },
     RetryError: {
-        fn: (args, name) => newIQLError(name, args[0], args[1]),
+        fn: (args, name) => newHogError(name, args[0], args[1]),
         description: 'Creates a retry error',
         example: 'RetryError($1, $2)',
         minArgs: 0,
         maxArgs: 2,
     },
     NotImplementedError: {
-        fn: (args, name) => newIQLError(name, args[0], args[1]),
+        fn: (args, name) => newHogError(name, args[0], args[1]),
         description: 'Creates a not implemented error',
         example: 'NotImplementedError($1, $2)',
         minArgs: 0,
@@ -1368,18 +1422,18 @@ export const STL: Record<string, STLFunction> = {
         fn: (args) => {
             if (args[0] === null || args[0] === undefined) {
                 return 'null'
-            } else if (isIQLDateTime(args[0])) {
+            } else if (isHogDateTime(args[0])) {
                 return 'datetime'
-            } else if (isIQLDate(args[0])) {
+            } else if (isHogDate(args[0])) {
                 return 'date'
-            } else if (isIQLError(args[0])) {
+            } else if (isHogError(args[0])) {
                 return 'error'
-            } else if (isIQLCallable(args[0]) || isIQLClosure(args[0])) {
+            } else if (isHogCallable(args[0]) || isHogClosure(args[0])) {
                 return 'function'
-            } else if (isIQLAST(args[0])) {
+            } else if (isHogAST(args[0])) {
                 return 'sql'
             } else if (Array.isArray(args[0])) {
-                if ((args[0] as any).__isIQLTuple) {
+                if ((args[0] as any).__isHogTuple) {
                     return 'tuple'
                 }
                 return 'array'
@@ -1398,6 +1452,12 @@ export const STL: Record<string, STLFunction> = {
         example: 'typeof($1)',
         minArgs: 1,
         maxArgs: 1,
+    },
+    JSONExtract: {
+        fn: JSONExtractFn,
+        description: 'Extracts a value from JSON by path with a return type hint',
+        example: 'JSONExtract($1, $2, $3)',
+        minArgs: 2,
     },
     JSONExtractArrayRaw: {
         fn: JSONExtractArrayRawFn,

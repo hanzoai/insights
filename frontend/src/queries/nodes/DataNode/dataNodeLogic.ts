@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import {
+    MakeLogicType,
     actions,
     afterMount,
     beforeUnmount,
@@ -15,12 +16,13 @@ import {
 } from 'kea'
 import { lazyLoaders, loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import api, { ApiMethodOptions } from 'lib/api'
 import { dayjs } from 'lib/dayjs'
-import { shouldCancelQuery, uuid } from 'lib/utils'
 import { ConcurrencyController } from 'lib/utils/concurrencyController'
+import { uuid } from 'lib/utils/dom'
+import { shouldCancelQuery } from 'lib/utils/requests'
 import { UNSAVED_INSIGHT_MIN_REFRESH_INTERVAL_MINUTES } from 'scenes/insights/insightLogic'
 import { compareDataNodeQuery, haveVariablesOrFiltersChanged, validateQuery } from 'scenes/insights/utils/queryUtils'
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -36,7 +38,10 @@ import {
     ActorsQueryResponse,
     AnyResponseType,
     DashboardFilter,
+    AccountsQuery,
+    AccountsQueryResponse,
     DataNode,
+    DataVisualizationNode,
     ErrorTrackingQuery,
     ErrorTrackingQueryResponse,
     EventsQuery,
@@ -55,27 +60,49 @@ import {
     QueryStatus,
     QueryTiming,
     RefreshType,
+    SessionQuery,
+    SessionQueryResponse,
     SessionsQuery,
     SessionsQueryResponse,
     TracesQuery,
     TracesQueryResponse,
+    WebStatsTableQuery,
+    WebStatsTableQueryResponse,
 } from '~/queries/schema/schema-general'
 import {
+    isAccountsQuery,
     isActorsQuery,
     isErrorTrackingQuery,
     isEventsQuery,
     isGroupsQuery,
+    isDataVisualizationNode,
     isInsightsQLQuery,
     isInsightActorsQuery,
     isInsightQueryNode,
     isMarketingAnalyticsTableQuery,
     isPersonsNode,
+    isSessionQuery,
     isSessionsQuery,
     isTracesQuery,
+    isWebStatsTableQuery,
 } from '~/queries/utils'
 import { TeamType } from '~/types'
 
-import type { dataNodeLogicType } from './dataNodeLogicType'
+import type { TeamPublicType, UserType } from '../../../types'
+import type {
+    InsightsQLAutocompleteResponse,
+    InsightsQLMetadataResponse,
+    HogQueryResponse,
+    LogAttributesQueryResponse,
+    LogValuesQueryResponse,
+    LogsQueryResponse,
+    MetricsQueryResponse,
+    TraceSpansAggregationQueryResponse,
+    TraceSpansAttributeBreakdownQueryResponse,
+    TraceSpansQueryResponse,
+    TraceSpansTreeQueryResponse,
+} from '../../schema/schema-general'
+import type { DataNodeRegisteredProps } from './dataNodeCollectionLogic'
 
 export interface DataNodeLogicProps {
     key: string
@@ -114,18 +141,23 @@ export const AUTOLOAD_INTERVAL = 30000
 const LOAD_MORE_ROWS_LIMIT = 10000
 
 const concurrencyController = new ConcurrencyController(1)
-const webAnalyticsConcurrencyController = new ConcurrencyController(3)
-const webAnalyticsPreAggConcurrencyController = new ConcurrencyController(5)
+const webAnalyticsConcurrencyController = new ConcurrencyController(6)
+const webAnalyticsPreAggConcurrencyController = new ConcurrencyController(6)
+const marketingAnalyticsConcurrencyController = new ConcurrencyController(6)
 
 function getConcurrencyController(query: DataNode, currentTeam: TeamType): ConcurrencyController {
     const mountedSceneLogic = sceneLogic.findMounted()
     const activeScene = mountedSceneLogic?.values.activeSceneId
+
+    if (activeScene === Scene.MarketingAnalytics) {
+        return marketingAnalyticsConcurrencyController
+    }
+
     if (
         [
             Scene.WebAnalytics,
             Scene.WebAnalyticsWebVitals,
             Scene.WebAnalyticsPageReports,
-            Scene.WebAnalyticsMarketing,
             Scene.WebAnalyticsHealth,
             Scene.WebAnalyticsLive,
         ].includes(activeScene as Scene) &&
@@ -149,17 +181,35 @@ function getConcurrencyController(query: DataNode, currentTeam: TeamType): Concu
     return concurrencyController
 }
 
-function addModifiers(query: DataNode, modifiers?: InsightsQLQueryModifiers): DataNode {
+function addModifiers<T extends Record<string, any>, N extends DataNode<T> | DataVisualizationNode>(
+    query: N,
+    modifiers?: InsightsQLQueryModifiers
+): N {
     if (!modifiers) {
         return query
     }
+    if (isDataVisualizationNode(query)) {
+        // for DataVisualizationNodes, add the modifier to the source query instead
+        return {
+            ...query,
+            source: addModifiers(query.source, modifiers),
+        }
+    }
     return {
         ...query,
-        modifiers: { ...query.modifiers, ...modifiers },
+        modifiers: { ...('modifiers' in query ? query.modifiers : {}), ...modifiers },
     }
 }
 
-function addTags<T extends Record<string, any>>(query: DataNode<T>): DataNode<T> {
+function addTags<T extends Record<string, any>, N extends DataNode<T> | DataVisualizationNode>(query: N): N {
+    if (isDataVisualizationNode(query)) {
+        // for DataVisualizationNodes, add the tags to the source query instead
+        return {
+            ...query,
+            source: addTags(query.source),
+        }
+    }
+
     // find the currently mounted scene logic to get the active scene, but don't use the kea connect()
     // method to do this as we don't want to mount the sceneLogic if it isn't already mounted
     const mountedSceneLogic = sceneLogic.findMounted()
@@ -176,8 +226,622 @@ function addTags<T extends Record<string, any>>(query: DataNode<T>): DataNode<T>
     if (result.tags && Object.keys(result.tags).length === 0) {
         delete result.tags // Remove empty tags object
     }
-    return result
+    return result as N
 }
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface dataNodeLogicValues {
+    currentTeam: TeamPublicType | TeamType | null // teamLogic
+    currentTeamId: number | null // teamLogic
+    user: UserType | null // userLogic
+    autoLoadRunning: boolean
+    autoLoadStarted: boolean
+    autoLoadToggled: boolean
+    backToSourceQuery: InsightVizNode | null
+    canLoadNewData: boolean
+    canLoadNextData: boolean
+    dataLimit: number | null
+    dataLoading: boolean
+    elapsedTime: number | null
+    filteredCount: number | null
+    filteredCountLoading: boolean
+    filteredCountQuery: DataNode | null
+    getInsightRefreshButtonDisabledReason: () => string
+    hasActiveFilters: boolean
+    hasMoreData: boolean
+    highlightedRows: Set<any>
+    isRefresh: boolean
+    isShowingCachedResults: boolean
+    lastRefresh: string | null
+    loadingStart: number | null
+    loadingTimeSeconds: number
+    newDataLoading: boolean
+    newQuery: DataNode | null
+    nextAllowedRefresh: string | null
+    nextDataLoading: boolean
+    nextQuery: DataNode | null
+    numberOfRows: number | null
+    pollResponse: Record<string, QueryStatus | null> | null
+    query: DataNode<Record<string, any>>
+    queryCancelled: boolean
+    queryId: string | null
+    queryLog: InsightsQLQueryResponse | null
+    queryLogLoading: boolean
+    queryLogQueryId: string | null
+    response:
+        | ErrorTrackingQueryResponse
+        | InsightsQLAutocompleteResponse
+        | InsightsQLMetadataResponse
+        | InsightsQLQueryResponse<any[]>
+        | HogQueryResponse
+        | LogAttributesQueryResponse
+        | LogValuesQueryResponse
+        | MetricsQueryResponse
+        | Record<string, any>
+        | SessionsQueryResponse
+        | TraceSpansAggregationQueryResponse
+        | TraceSpansAttributeBreakdownQueryResponse
+        | TraceSpansQueryResponse
+        | null
+    responseError: string | null
+    responseErrorObject: Record<string, any> | null
+    responseLoading: boolean
+    shouldCalculateCount: boolean
+    timings: QueryTiming[] | null
+    totalCount: number | null
+    totalCountLoading: boolean
+    totalCountQuery: DataNode | null
+    variableOverridesAreSet: boolean
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface dataNodeLogicActions {
+    collectionNodeLoadData: (id: string) => {
+        id: string
+    } // dataNodeCollectionLogic
+    collectionNodeLoadDataFailure: (id: string) => {
+        id: string
+    } // dataNodeCollectionLogic
+    collectionNodeLoadDataSuccess: (id: string) => {
+        id: string
+    } // dataNodeCollectionLogic
+    mountDataNode: (
+        id: string,
+        props: DataNodeRegisteredProps
+    ) => {
+        id: string
+        props: DataNodeRegisteredProps
+    } // dataNodeCollectionLogic
+    unmountDataNode: (id: string) => {
+        id: string
+    } // dataNodeCollectionLogic
+    abortAnyRunningQuery: () => {
+        value: true
+    }
+    abortQuery: (payload: { queryId: string }) => {
+        queryId: string
+    }
+    cancelQuery: () => {
+        value: true
+    }
+    clearResponse: () => {
+        value: true
+    }
+    clearResponseFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    clearResponseSuccess: (
+        response: null,
+        payload?: {
+            value: true
+        }
+    ) => {
+        response: null
+        payload?: {
+            value: true
+        }
+    }
+    highlightRows: (rows: any[]) => {
+        rows: any[]
+    }
+    loadData: (
+        refresh?: RefreshType,
+        alreadyRunningQueryId?: string,
+        overrideQuery?: DataNode<Record<string, any>>
+    ) => {
+        overrideQuery: DataNode<Record<string, any>> | undefined
+        pollOnly: boolean
+        queryId: string
+        refresh: RefreshType | undefined
+    }
+    loadDataFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadDataSuccess: (
+        response:
+            | ErrorTrackingQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | null
+            | undefined,
+        payload?: {
+            overrideQuery: DataNode<Record<string, any>> | undefined
+            pollOnly: boolean
+            queryId: string
+            refresh: RefreshType | undefined
+        }
+    ) => {
+        response:
+            | ErrorTrackingQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | null
+            | undefined
+        payload?: {
+            overrideQuery: DataNode<Record<string, any>> | undefined
+            pollOnly: boolean
+            queryId: string
+            refresh: RefreshType | undefined
+        }
+    }
+    loadFilteredCount: () => {
+        value: true
+    }
+    loadFilteredCountFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadFilteredCountSuccess: (
+        filteredCount: number | null,
+        payload?: {
+            value: true
+        }
+    ) => {
+        filteredCount: number | null
+        payload?: {
+            value: true
+        }
+    }
+    loadNewData: () => any
+    loadNewDataFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadNewDataSuccess: (
+        response:
+            | ErrorTrackingQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | null,
+        payload?: any
+    ) => {
+        response:
+            | ErrorTrackingQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | null
+        payload?: any
+    }
+    loadNextData: () => any
+    loadNextDataFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadNextDataSuccess: (
+        response:
+            | ErrorTrackingQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | null,
+        payload?: any
+    ) => {
+        response:
+            | ErrorTrackingQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | null
+        payload?: any
+    }
+    loadQueryLog: (queryId: any) => any
+    loadQueryLogFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadQueryLogSuccess: (
+        queryLog: InsightsQLQueryResponse<any[]>,
+        payload?: any
+    ) => {
+        queryLog: InsightsQLQueryResponse<any[]>
+        payload?: any
+    }
+    loadTotalCount: () => any
+    loadTotalCountFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadTotalCountSuccess: (
+        totalCount: number | null,
+        payload?: any
+    ) => {
+        totalCount: number | null
+        payload?: any
+    }
+    resetLoadingTimer: () => {
+        value: true
+    }
+    setElapsedTime: (elapsedTime: number) => {
+        elapsedTime: number
+    }
+    setLoadingTime: (seconds: number) => {
+        seconds: number
+    }
+    setPollResponse: (status: QueryStatus | null) => {
+        status: QueryStatus | null
+    }
+    setQueryLogQueryId: (queryId: string) => {
+        queryId: string
+    }
+    setResponse: (
+        response: Exclude<AnyResponseType, undefined>
+    ) =>
+        | ErrorTrackingQueryResponse
+        | EventsQueryResponse
+        | InsightsQLAutocompleteResponse
+        | InsightsQLMetadataResponse
+        | InsightsQLQueryResponse<any[]>
+        | HogQueryResponse
+        | LogAttributesQueryResponse
+        | LogsQueryResponse
+        | LogValuesQueryResponse
+        | MetricsQueryResponse
+        | Record<string, any>
+        | SessionsQueryResponse
+        | TraceSpansAggregationQueryResponse
+        | TraceSpansAttributeBreakdownQueryResponse
+        | TraceSpansQueryResponse
+        | TraceSpansTreeQueryResponse
+    setResponseFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    setResponseSuccess: (
+        response:
+            | ErrorTrackingQueryResponse
+            | EventsQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogsQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | TraceSpansTreeQueryResponse,
+        payload?:
+            | ErrorTrackingQueryResponse
+            | EventsQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogsQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | TraceSpansTreeQueryResponse
+    ) => {
+        response:
+            | ErrorTrackingQueryResponse
+            | EventsQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogsQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | TraceSpansTreeQueryResponse
+        payload?:
+            | ErrorTrackingQueryResponse
+            | EventsQueryResponse
+            | InsightsQLAutocompleteResponse
+            | InsightsQLMetadataResponse
+            | InsightsQLQueryResponse<any[]>
+            | HogQueryResponse
+            | LogAttributesQueryResponse
+            | LogsQueryResponse
+            | LogValuesQueryResponse
+            | MetricsQueryResponse
+            | Record<string, any>
+            | SessionsQueryResponse
+            | TraceSpansAggregationQueryResponse
+            | TraceSpansAttributeBreakdownQueryResponse
+            | TraceSpansQueryResponse
+            | TraceSpansTreeQueryResponse
+    }
+    startAutoLoad: () => {
+        value: true
+    }
+    stopAutoLoad: () => {
+        value: true
+    }
+    toggleAutoLoad: () => {
+        value: true
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface dataNodeLogicMeta {
+    key: string
+    __keaTypeGenInternalSelectorTypes: {
+        variableOverridesAreSet: (arg: any) => boolean
+        isShowingCachedResults: (arg: any, arg2: any, isRefresh: boolean) => boolean
+        query: (query: DataNode<Record<string, any>>) => DataNode<Record<string, any>>
+        newQuery: (
+            query: DataNode<Record<string, any>>,
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null
+        ) => DataNode | null
+        canLoadNewData: (newQuery: DataNode<Record<string, any>> | null, isShowingCachedResults: boolean) => boolean
+        nextQuery: (
+            query: DataNode<Record<string, any>>,
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null,
+            responseError: string | null,
+            dataLoading: boolean,
+            isShowingCachedResults: boolean,
+            arg: any
+        ) => DataNode | null
+        canLoadNextData: (nextQuery: DataNode<Record<string, any>> | null, isShowingCachedResults: boolean) => boolean
+        hasMoreData: (
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null
+        ) => boolean
+        dataLimit: (
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null
+        ) => number | null
+        backToSourceQuery: (query: DataNode<Record<string, any>>) => InsightVizNode | null
+        autoLoadRunning: (autoLoadToggled: boolean, autoLoadStarted: boolean, dataLoading: boolean) => boolean
+        lastRefresh: (
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null
+        ) => string | null
+        nextAllowedRefresh: (
+            query: DataNode<Record<string, any>>,
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null
+        ) => string | null
+        getInsightRefreshButtonDisabledReason: (
+            nextAllowedRefresh: string | null,
+            lastRefresh: string | null
+        ) => () => string
+        timings: (
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null
+        ) => QueryTiming[] | null
+        numberOfRows: (
+            response:
+                | ErrorTrackingQueryResponse
+                | InsightsQLAutocompleteResponse
+                | InsightsQLMetadataResponse
+                | InsightsQLQueryResponse<any[]>
+                | HogQueryResponse
+                | LogAttributesQueryResponse
+                | LogValuesQueryResponse
+                | MetricsQueryResponse
+                | Record<string, any>
+                | SessionsQueryResponse
+                | TraceSpansAggregationQueryResponse
+                | TraceSpansAttributeBreakdownQueryResponse
+                | TraceSpansQueryResponse
+                | null
+        ) => number | null
+        hasActiveFilters: (query: DataNode<Record<string, any>>) => boolean
+        totalCountQuery: (query: DataNode<Record<string, any>>) => DataNode | null
+        filteredCountQuery: (query: DataNode<Record<string, any>>, hasActiveFilters: boolean) => DataNode | null
+    }
+}
+
+export type dataNodeLogicType = MakeLogicType<
+    dataNodeLogicValues,
+    dataNodeLogicActions,
+    DataNodeLogicProps,
+    dataNodeLogicMeta
+>
 
 export const dataNodeLogic = kea<dataNodeLogicType>([
     path(['queries', 'nodes', 'dataNodeLogic']),
@@ -274,7 +938,11 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                 setResponse: (response) => response,
                 clearResponse: () => null,
                 loadData: async ({ refresh: refreshArg, queryId, pollOnly, overrideQuery }, breakpoint) => {
-                    const query = addTags(overrideQuery ?? props.query)
+                    const rawQuery = overrideQuery ?? props.query
+                    if (!rawQuery || typeof rawQuery !== 'object' || !('kind' in rawQuery)) {
+                        return null
+                    }
+                    const query = addTags(rawQuery)
 
                     // Use the explicit refresh type passed, or determine it based on query type
                     // Default to non-force variants
@@ -312,11 +980,6 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
 
                     if (!values.currentTeamId) {
                         // if shared/exported, the team is not loaded
-                        return null
-                    }
-
-                    if (query === undefined || Object.keys(query).length === 0) {
-                        // no need to try and load a query before properly initialized
                         return null
                     }
 
@@ -429,9 +1092,12 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                         isActorsQuery(props.query) ||
                         isGroupsQuery(props.query) ||
                         isTracesQuery(props.query) ||
+                        isSessionQuery(props.query) ||
                         isErrorTrackingQuery(props.query) ||
                         isSessionsQuery(props.query) ||
-                        isMarketingAnalyticsTableQuery(props.query)
+                        isMarketingAnalyticsTableQuery(props.query) ||
+                        isAccountsQuery(props.query) ||
+                        isWebStatsTableQuery(props.query)
                     ) {
                         const newResponse =
                             (await performQuery(
@@ -452,8 +1118,11 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                             | GroupsQueryResponse
                             | ErrorTrackingQueryResponse
                             | TracesQueryResponse
+                            | SessionQueryResponse
                             | SessionsQueryResponse
                             | MarketingAnalyticsTableQueryResponse
+                            | AccountsQueryResponse
+                            | WebStatsTableQueryResponse
 
                         let results = [...(queryResponse?.results ?? []), ...(newResponse?.results ?? [])]
 
@@ -729,7 +1398,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         ],
         isShowingCachedResults: [
             (s) => [(_, props) => props.cachedResults ?? null, (_, props) => props.query, s.isRefresh],
-            (cachedResults: AnyResponseType | null, query: DataNode, isRefresh): boolean => {
+            (cachedResults: AnyResponseType | null, query: DataNode, isRefresh: boolean): boolean => {
                 if (isRefresh) {
                     return false
                 }
@@ -740,10 +1409,27 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                 )
             },
         ],
-        query: [(_, p) => [p.query], (query) => query],
+        query: [(_, p) => [p.query], (query: DataNode<Record<string, any>>) => query],
         newQuery: [
             (s, p) => [p.query, s.response],
-            (query, response): DataNode | null => {
+            (
+                query: DataNode<Record<string, any>>,
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse
+            ): DataNode | null => {
                 if (!isEventsQuery(query)) {
                     return null
                 }
@@ -769,7 +1455,8 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         ],
         canLoadNewData: [
             (s) => [s.newQuery, s.isShowingCachedResults],
-            (newQuery, isShowingCachedResults) => (isShowingCachedResults ? false : !!newQuery),
+            (newQuery: DataNode | null, isShowingCachedResults: boolean) =>
+                isShowingCachedResults ? false : !!newQuery,
         ],
         nextQuery: [
             (s, p) => [
@@ -781,11 +1468,25 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                 (_, props) => props.maxPaginationLimit,
             ],
             (
-                query,
-                response,
-                responseError,
-                dataLoading,
-                isShowingCachedResults,
+                query: DataNode<Record<string, any>>,
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse,
+                responseError: string | null,
+                dataLoading: boolean,
+                isShowingCachedResults: boolean,
                 maxPaginationLimit
             ): DataNode | null => {
                 if (isShowingCachedResults) {
@@ -799,8 +1500,11 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                         isGroupsQuery(query) ||
                         isErrorTrackingQuery(query) ||
                         isTracesQuery(query) ||
+                        isSessionQuery(query) ||
                         isSessionsQuery(query) ||
-                        isMarketingAnalyticsTableQuery(query)) &&
+                        isMarketingAnalyticsTableQuery(query) ||
+                        isAccountsQuery(query) ||
+                        isWebStatsTableQuery(query)) &&
                     !responseError &&
                     !dataLoading
                 ) {
@@ -812,22 +1516,32 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                                 | GroupsQueryResponse
                                 | ErrorTrackingQueryResponse
                                 | TracesQueryResponse
+                                | SessionQueryResponse
                                 | SessionsQueryResponse
                                 | MarketingAnalyticsTableQueryResponse
+                                | AccountsQueryResponse
+                                | WebStatsTableQueryResponse
                         )?.hasMore
                     ) {
-                        const sortKey = isTracesQuery(query) ? null : (query.orderBy?.[0] ?? 'timestamp DESC')
+                        const sortKey =
+                            isTracesQuery(query) || isSessionQuery(query)
+                                ? null
+                                : (query.orderBy?.[0] ?? 'timestamp DESC')
                         if (isEventsQuery(query) && sortKey === 'timestamp DESC') {
                             const typedResults = (response as EventsQueryResponse)?.results
-                            const sortColumnIndex = query.select
-                                .map((hql) => removeExpressionComment(hql))
-                                .indexOf('timestamp')
+                            const cleanedColumns = query.select.map((hql) => removeExpressionComment(hql))
+                            const sortColumnIndex = cleanedColumns.indexOf('timestamp')
                             if (sortColumnIndex !== -1) {
-                                const lastTimestamp = typedResults?.[typedResults.length - 1]?.[sortColumnIndex]
+                                const lastRow = typedResults?.[typedResults.length - 1]
+                                const lastTimestamp = lastRow?.[sortColumnIndex]
                                 if (lastTimestamp) {
+                                    // Encode the last row's uuid into the cursor so pagination advances
+                                    // through events sharing a timestamp instead of dropping the ties past
+                                    // the page boundary. The backend splits `<timestamp>|<uuid>` back apart.
+                                    const lastUuid = extractCursorUuid(lastRow, cleanedColumns)
                                     const newQuery: EventsQuery = {
                                         ...query,
-                                        before: lastTimestamp,
+                                        before: lastUuid ? `${lastTimestamp}|${lastUuid}` : lastTimestamp,
                                         limit: Math.max(
                                             100,
                                             Math.min(2 * (typedResults?.length || 100), effectivePaginationLimit)
@@ -844,15 +1558,18 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                                     | GroupsQueryResponse
                                     | ErrorTrackingQueryResponse
                                     | TracesQueryResponse
+                                    | SessionQueryResponse
                                     | SessionsQueryResponse
                                     | MarketingAnalyticsTableQueryResponse
+                                    | AccountsQueryResponse
+                                    | WebStatsTableQueryResponse
                             )?.results
                             return {
                                 ...query,
                                 offset: typedResults?.length || 0,
-                                limit: Math.max(
-                                    100,
-                                    Math.min(2 * (typedResults?.length || 100), effectivePaginationLimit)
+                                limit: Math.min(
+                                    effectivePaginationLimit,
+                                    Math.max(100, 2 * (typedResults?.length || 100))
                                 ),
                             } as
                                 | EventsQuery
@@ -860,8 +1577,11 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                                 | GroupsQuery
                                 | ErrorTrackingQuery
                                 | TracesQuery
+                                | SessionQuery
                                 | SessionsQuery
                                 | MarketingAnalyticsTableQuery
+                                | AccountsQuery
+                                | WebStatsTableQuery
                         }
                     }
                 }
@@ -879,24 +1599,57 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         ],
         canLoadNextData: [
             (s) => [s.nextQuery, s.isShowingCachedResults],
-            (nextQuery, isShowingCachedResults) => (isShowingCachedResults ? false : !!nextQuery),
+            (nextQuery: DataNode | null, isShowingCachedResults: boolean) =>
+                isShowingCachedResults ? false : !!nextQuery,
         ],
         hasMoreData: [
             (s) => [s.response],
-            (response): boolean => {
+            (
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse
+            ): boolean => {
                 return response && 'hasMore' in response && response.hasMore
             },
         ],
         dataLimit: [
             // get limit from response
             (s) => [s.response],
-            (response): number | null => {
+            (
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse
+            ): number | null => {
                 return response && 'limit' in response ? (response.limit ?? null) : null
             },
         ],
         backToSourceQuery: [
             (s) => [s.query],
-            (query): InsightVizNode | null => {
+            (query: DataNode<Record<string, any>>): InsightVizNode | null => {
                 const insightSource =
                     (isActorsQuery(query) && isInsightActorsQuery(query.source) ? query.source.source : null) ??
                     (isEventsQuery(query) && isInsightActorsQuery(query.source) ? query.source.source : null)
@@ -913,17 +1666,51 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         ],
         autoLoadRunning: [
             (s) => [s.autoLoadToggled, s.autoLoadStarted, s.dataLoading],
-            (autoLoadToggled, autoLoadStarted, dataLoading) => autoLoadToggled && autoLoadStarted && !dataLoading,
+            (autoLoadToggled: boolean, autoLoadStarted: boolean, dataLoading: boolean) =>
+                autoLoadToggled && autoLoadStarted && !dataLoading,
         ],
         lastRefresh: [
             (s) => [s.response],
-            (response): string | null => {
+            (
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse
+            ): string | null => {
                 return response && 'last_refresh' in response ? response.last_refresh : null
             },
         ],
         nextAllowedRefresh: [
             (s, p) => [p.query, s.response],
-            (query, response): string | null => {
+            (
+                query: DataNode<Record<string, any>>,
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse
+            ): string | null => {
                 return isInsightQueryNode(query) && response && 'next_allowed_client_refresh' in response
                     ? response.next_allowed_client_refresh
                     : null
@@ -957,21 +1744,53 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         ],
         timings: [
             (s) => [s.response],
-            (response): QueryTiming[] | null => {
+            (
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse
+            ): QueryTiming[] | null => {
                 return response && 'timings' in response ? response.timings : null
             },
         ],
         numberOfRows: [
             (s) => [s.response],
-            (response): number | null => {
+            (
+                response:
+                    | ErrorTrackingQueryResponse
+                    | InsightsQLQueryResponse<any[]>
+                    | Record<string, any>
+                    | SessionsQueryResponse
+                    | null
+                    | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
+                    | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
+                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').LogAttributesQueryResponse
+                    | import('~/queries/schema/schema-general').LogValuesQueryResponse
+                    | import('~/queries/schema/schema-general').MetricsQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAggregationQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansAttributeBreakdownQueryResponse
+                    | import('~/queries/schema/schema-general').TraceSpansQueryResponse
+            ): number | null => {
                 if (!response) {
                     return null
                 }
-                const fields = ['result', 'results']
-                for (const field of fields) {
-                    if (field in response && Array.isArray(response[field])) {
-                        return response[field].length
-                    }
+                if ('result' in response && Array.isArray(response['result'])) {
+                    return response['result'].length
+                }
+                if ('results' in response && Array.isArray(response['results'])) {
+                    return response['results'].length
                 }
                 return null
             },
@@ -1240,4 +2059,24 @@ const dedupeResults = (arr: any[], key: string): any[] => {
             return acc
         }, {})
     )
+}
+
+// Pull the event uuid out of a result row to use as a stable pagination tiebreaker. It lives either
+// in the expanded `*` column (an object) or in an explicit `uuid` column.
+function extractCursorUuid(row: any[] | undefined, columns: string[]): string | undefined {
+    if (!row) {
+        return undefined
+    }
+    const starIndex = columns.indexOf('*')
+    if (starIndex !== -1) {
+        const starValue = row[starIndex]
+        if (starValue && typeof starValue === 'object' && typeof starValue.uuid === 'string') {
+            return starValue.uuid
+        }
+    }
+    const uuidIndex = columns.indexOf('uuid')
+    if (uuidIndex !== -1 && typeof row[uuidIndex] === 'string') {
+        return row[uuidIndex]
+    }
+    return undefined
 }

@@ -7,8 +7,9 @@ from insights.insightsql import ast
 from insights.insightsql.errors import QueryError
 from insights.insightsql.visitor import CloningVisitor
 
-from insights.models.insight_variable import InsightVariable
 from insights.models.team.team import Team
+
+from products.product_analytics.backend.models.insight_variable import InsightVariable
 
 T = TypeVar("T", bound=ast.Expr)
 

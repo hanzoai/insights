@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
-import { createScriptExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
+import { createHogExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { cloneInvocation, createInvocation } from './invocation-utils'
 
 describe('Invocation utils', () => {
@@ -17,7 +17,7 @@ describe('Invocation utils', () => {
 
         const invocation = createInvocation(
             {
-                ...createScriptExecutionGlobals(),
+                ...createHogExecutionGlobals(),
                 inputs: { foo: 'bar' },
             },
             createInsightsFunction({
@@ -39,7 +39,7 @@ describe('Invocation utils', () => {
 
             expect(rest).toMatchInlineSnapshot(`
                 {
-                  "queue": "fn",
+                  "queue": "script",
                   "queueMetadata": undefined,
                   "queueParameters": undefined,
                   "queuePriority": 0,
@@ -70,7 +70,7 @@ describe('Invocation utils', () => {
 
             expect(rest).toMatchInlineSnapshot(`
                 {
-                  "queue": "fn",
+                  "queue": "script",
                   "queueMetadata": {
                     "foo": "bar",
                   },

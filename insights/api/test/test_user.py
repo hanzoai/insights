@@ -4,31 +4,48 @@ from datetime import timedelta
 from typing import cast
 from urllib.parse import quote, unquote
 
+import pytest
 from freezegun.api import freeze_time
-from insights.test.base import APIBaseTest
+from insights.test.base import APIBaseTest, NonAtomicBaseTest
 from unittest import mock
 from unittest.mock import ANY, patch
 
-from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core import mail
 from django.core.cache import cache
-from django.test import override_settings
+from django.db import connection
+from django.test import SimpleTestCase
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from django.utils.text import slugify
 
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_totp.models import TOTPDevice
+from parameterized import parameterized
 from rest_framework import status
+from social_django.models import UserSocialAuth
 
 from insights.api.email_verification import email_verification_token_generator
-from insights.api.oauth.test_dcr import generate_rsa_key
-from insights.models import Dashboard, Team, User
+from insights.api.oauth.toolbar_service import ToolbarOAuthState, build_toolbar_oauth_state, new_state_nonce
+from insights.api.user import UserSerializer
+from insights.constants import AvailableFeature
+from insights.models import Team, User
 from insights.models.instance_setting import set_instance_setting
-from insights.models.oauth import OAuthAccessToken, OAuthApplication
+from insights.models.oauth import OAuthAccessToken, OAuthApplication, OAuthGrant, OAuthRefreshToken
 from insights.models.organization import Organization, OrganizationMembership
-from insights.models.personal_api_key import PersonalAPIKey, hash_key_value
-from insights.models.utils import generate_random_token_personal
+from insights.models.organization_domain import OrganizationDomain
+from insights.models.personal_api_key import PersonalAPIKey
+from insights.models.user import default_ui_configuration_for_new_users
+from insights.models.utils import generate_random_token_personal, hash_key_value
+from insights.models.webauthn_credential import WebauthnCredential
+from insights.temporal.tests.delete_teams.inline import execute_deletion_workflows_inline
+
+from products.dashboards.backend.models.dashboard import Dashboard
+
+try:
+    from ee.models.rbac.access_control import AccessControl
+except ImportError:
+    pass
 
 
 def create_user(email: str, password: str, organization: Organization):
@@ -112,6 +129,7 @@ class TestUserAPI(APIBaseTest):
                     "members_can_use_personal_api_keys": True,
                     "is_active": True,
                     "is_not_active_reason": None,
+                    "is_pending_deletion": False,
                 },
                 {
                     "id": str(self.new_org.id),
@@ -122,9 +140,278 @@ class TestUserAPI(APIBaseTest):
                     "members_can_use_personal_api_keys": True,
                     "is_active": True,
                     "is_not_active_reason": None,
+                    "is_pending_deletion": False,
                 },
             ],
         )
+
+    def test_me_membership_queries_do_not_scale_with_org_count(self):
+        def me_membership_queries(user: User) -> tuple[int, dict]:
+            self.client.force_login(user)
+            with CaptureQueriesContext(connection) as ctx:
+                response = self.client.get("/api/users/@me/")
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            count = sum(
+                1
+                for q in ctx.captured_queries
+                if "insights_organizationmembership" in q["sql"] and q["sql"].lstrip()[:6].upper() == "SELECT"
+            )
+            return count, response.json()
+
+        user_in_one_org = create_user(
+            "one-org@example.com", self.CONFIG_PASSWORD, Organization.objects.create(name="Solo Org")
+        )
+
+        owner_org = Organization.objects.create(name="Owner Org")
+        user_in_many_orgs = create_user("many-orgs@example.com", self.CONFIG_PASSWORD, owner_org)
+        OrganizationMembership.objects.filter(organization=owner_org, user=user_in_many_orgs).update(
+            level=OrganizationMembership.Level.OWNER
+        )
+        member_orgs = [Organization.objects.create(name=f"Member Org {i}") for i in range(5)]
+        for org in member_orgs:
+            OrganizationMembership.objects.create(
+                organization=org, user=user_in_many_orgs, level=OrganizationMembership.Level.MEMBER
+            )
+
+        few, _ = me_membership_queries(user_in_one_org)
+        many, many_body = me_membership_queries(user_in_many_orgs)
+
+        assert few > 0, "membership query predicate matched nothing; the table/SELECT filter is wrong"
+        assert many == few, f"membership_level is N+1: {many} membership queries for 6 orgs vs {few} for 1 org"
+
+        levels_by_org = {org["id"]: org["membership_level"] for org in many_body["organizations"]}
+        assert levels_by_org[str(owner_org.id)] == OrganizationMembership.Level.OWNER
+        assert levels_by_org[str(member_orgs[0].id)] == OrganizationMembership.Level.MEMBER
+
+    def test_current_user_includes_pending_invites(self):
+        from insights.models import OrganizationInvite
+
+        other_org = Organization.objects.create(name="Other Org For Pending Invites Test")
+        matching_invite = OrganizationInvite.objects.create(
+            organization=other_org,
+            target_email=self.user.email,
+            created_by=self.user,
+        )
+
+        # Invite for a different email — should be ignored.
+        OrganizationInvite.objects.create(
+            organization=self.organization,
+            target_email="someone-else@example.com",
+            created_by=self.user,
+        )
+
+        # Invite to an org the user already belongs to — should be ignored.
+        OrganizationInvite.objects.create(
+            organization=self.organization,
+            target_email=self.user.email,
+            created_by=self.user,
+        )
+
+        response = self.client.get("/api/users/@me/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        pending_invites = response.json()["pending_invites"]
+        self.assertEqual(len(pending_invites), 1)
+        self.assertEqual(pending_invites[0]["id"], str(matching_invite.id))
+        self.assertEqual(pending_invites[0]["organization_id"], str(other_org.id))
+        self.assertEqual(pending_invites[0]["organization_name"], "Other Org For Pending Invites Test")
+        self.assertEqual(pending_invites[0]["target_email"], self.user.email)
+
+    def test_current_user_pending_invites_matches_email_case_insensitively(self):
+        from insights.models import OrganizationInvite
+
+        other_org = Organization.objects.create(name="Other Org For Pending Invites Test")
+        OrganizationInvite.objects.create(
+            organization=other_org,
+            target_email=self.user.email.upper(),
+            created_by=self.user,
+        )
+
+        response = self.client.get("/api/users/@me/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()["pending_invites"]), 1)
+
+    def test_current_user_pending_invites_excludes_expired(self):
+        from insights.constants import INVITE_DAYS_VALIDITY
+        from insights.models import OrganizationInvite
+
+        other_org = Organization.objects.create(name="Other Org For Pending Invites Test")
+        with freeze_time(timezone.now() - timedelta(days=INVITE_DAYS_VALIDITY + 1)):
+            OrganizationInvite.objects.create(
+                organization=other_org,
+                target_email=self.user.email,
+                created_by=self.user,
+            )
+
+        response = self.client.get("/api/users/@me/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()["pending_invites"]), 0)
+
+    def test_mascot_config_is_unset(self):
+        self.user.mascot_config = None
+        self.user.save()
+
+        response = self.client.get(f"/api/users/@me/mascot_config/")
+        assert response.status_code == status.HTTP_200_OK
+        # the front end assumes it will _always_ get JSON
+        assert response.json() == {}
+
+    def test_mascot_config_is_set(self):
+        self.user.mascot_config = {"a bag": "of data"}
+        self.user.save()
+
+        response = self.client.get(f"/api/users/@me/mascot_config/")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {"a bag": "of data"}
+
+    def test_can_update_ui_configuration(self):
+        configuration = {
+            "version": 1,
+            "sidebar": {
+                "sections": {"recents": {"visible": False}},
+                "items": {"data": {"visible": False}},
+            },
+        }
+
+        response = self.client.patch("/api/users/@me/", {"ui_configuration": configuration})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["ui_configuration"], configuration)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.ui_configuration, configuration)
+
+    def test_cannot_update_ui_configuration_not_matching_schema(self):
+        configuration_before = self.user.ui_configuration
+
+        response = self.client.patch(
+            "/api/users/@me/",
+            {"ui_configuration": {"version": 1, "sidebar": {"items": {"bogus": {"visible": False}}}}},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()["attr"], "ui_configuration")
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.ui_configuration, configuration_before)
+
+    def test_users_me_includes_active_realtime_notification_types(self):
+        self.client.force_login(self.user)
+        response = self.client.get("/api/users/@me/")
+        assert response.status_code == 200
+        body = response.json()
+        assert "active_realtime_notification_types" in body
+        assert "comment_mention" in body["active_realtime_notification_types"]
+
+    @parameterized.expand(
+        [
+            ("unreviewed_nothing", False, False, False, False),
+            ("unreviewed_pat_only", False, True, False, True),
+            ("unreviewed_passkey_only", False, False, True, True),
+            ("unreviewed_pat_and_passkey", False, True, True, True),
+            ("reviewed_pat_only", True, True, False, False),
+            ("reviewed_passkey_only", True, False, True, False),
+            ("reviewed_pat_and_passkey", True, True, True, False),
+            ("reviewed_nothing", True, False, False, False),
+        ]
+    )
+    def test_requires_credential_review(
+        self,
+        _name: str,
+        reviewed: bool,
+        with_key: bool,
+        with_passkey: bool,
+        expected: bool,
+    ):
+        self.user.credentials_reviewed_at = timezone.now() if reviewed else None
+        self.user.save(update_fields=["credentials_reviewed_at"])
+        if with_key:
+            PersonalAPIKey.objects.create(
+                user=self.user,
+                label="Test key",
+                secure_value=hash_key_value("phx_test_value_1234567890"),
+                scopes=["*"],
+            )
+        if with_passkey:
+            WebauthnCredential.objects.create(
+                user=self.user,
+                label="Test passkey",
+                credential_id=b"test-credential-id",
+                public_key=b"test-public-key",
+                algorithm=-7,
+                transports=["internal"],
+                verified=True,
+            )
+        response = self.client.get("/api/users/@me/")
+        assert response.status_code == 200
+        assert response.json()["requires_credential_review"] is expected
+
+    def test_requires_credential_review_unverified_passkey(self):
+        # Unverified passkeys are the realistic pre-claim attack artifact - a partner
+        # session can register a credential without ever completing verification.
+        self.user.credentials_reviewed_at = None
+        self.user.save(update_fields=["credentials_reviewed_at"])
+        WebauthnCredential.objects.create(
+            user=self.user,
+            label="Unverified passkey",
+            credential_id=b"unverified-credential-id",
+            public_key=b"test-public-key",
+            algorithm=-7,
+            transports=["internal"],
+            verified=False,
+        )
+        response = self.client.get("/api/users/@me/")
+        assert response.status_code == 200
+        assert response.json()["requires_credential_review"] is True
+
+    def test_credentials_review_complete_endpoint(self):
+        User.objects.filter(pk=self.user.pk).update(credentials_reviewed_at=None)
+        PersonalAPIKey.objects.create(
+            user=self.user,
+            label="Test key",
+            secure_value=hash_key_value("phx_test_value_1234567890"),
+            scopes=["*"],
+        )
+
+        response = self.client.get("/api/users/@me/")
+        assert response.json()["requires_credential_review"] is True
+
+        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        assert response.status_code == 204
+
+        refreshed = User.objects.get(pk=self.user.pk)
+        assert refreshed.credentials_reviewed_at is not None
+
+        response = self.client.get("/api/users/@me/")
+        assert response.json()["requires_credential_review"] is False
+
+        first_ts = refreshed.credentials_reviewed_at
+        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        assert response.status_code == 204
+        assert User.objects.get(pk=self.user.pk).credentials_reviewed_at == first_ts
+
+    def test_credentials_review_complete_requires_auth(self):
+        self.client.logout()
+        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_credentials_review_complete_rejects_personal_api_key_auth(self):
+        # The partner-issued wildcard PAK is the thing this feature surfaces;
+        # accepting it as auth here would let the attacker silently dismiss
+        # their own review before the legit owner ever logs in.
+        api_key_value = generate_random_token_personal()
+        PersonalAPIKey.objects.create(
+            user=self.user,
+            label="Partner-minted key",
+            secure_value=hash_key_value(api_key_value),
+            scopes=["*"],
+        )
+        User.objects.filter(pk=self.user.pk).update(credentials_reviewed_at=None)
+
+        self.client.logout()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key_value}")
+        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+        assert User.objects.get(pk=self.user.pk).credentials_reviewed_at is None
 
     def test_can_only_list_yourself(self):
         """
@@ -156,12 +443,12 @@ class TestUserAPI(APIBaseTest):
 
     def test_non_admin_filter_users_by_email(self):
         org = Organization.objects.create()
-        user = User.objects.create(
-            email="foo@bar.com",
-            password="<PASSWORD>",
-            organization=org,
-            current_team=Team.objects.create(organization=org, name="Another team"),
+        team = Team.objects.create(organization=org, name="Another team")
+        user = User.objects.create_and_join(
+            org, "foo@bar.com", "<PASSWORD>", first_name="", level=OrganizationMembership.Level.MEMBER
         )
+        user.current_team = team
+        user.save(update_fields=["current_team"])
 
         response = self.client.get(f"/api/users/?email={user.email}")
 
@@ -169,21 +456,20 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(response.json()["count"], 0, "Should not return users from another orgs")
 
     def test_admin_filter_users_by_email(self):
-        admin = User.objects.create(
-            email="admin@admin.com",
-            password="pw",
-            organization=self.organization,
-            current_team=self.team,
-            is_staff=True,
+        admin = User.objects.create_and_join(
+            self.organization, "admin@admin.com", "pw", first_name="", level=OrganizationMembership.Level.MEMBER
         )
+        admin.current_team = self.team
+        admin.is_staff = True
+        admin.save(update_fields=["current_team", "is_staff"])
         self.client.force_authenticate(admin)
         org = Organization.objects.create()
-        user = User.objects.create(
-            email="foo@bar.com",
-            password="<PASSWORD>",
-            organization=org,
-            current_team=Team.objects.create(organization=org, name="Another team"),
+        team = Team.objects.create(organization=org, name="Another team")
+        user = User.objects.create_and_join(
+            org, "foo@bar.com", "<PASSWORD>", first_name="", level=OrganizationMembership.Level.MEMBER
         )
+        user.current_team = team
+        user.save(update_fields=["current_team"])
 
         response = self.client.get(f"/api/users/?email={user.email}")
 
@@ -210,9 +496,8 @@ class TestUserAPI(APIBaseTest):
 
     # UPDATING USER
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_update_current_user(self, mock_capture, mock_identify_task):
+    def test_update_current_user(self, mock_capture):
         another_org = Organization.objects.create(name="Another Org")
         another_team = Team.objects.create(name="Another Team", organization=another_org)
         user = self._create_user("old@hanzo.ai", password="12345678")
@@ -254,7 +539,10 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(user.has_seen_product_intro_for, {"feature_flags": True})
         self.assertEqual(user.role_at_organization, "engineering")
 
-        mock_capture.assert_called_once_with(
+        # UserSerializer.to_representation also fires hanzo_insights.capture
+        # for the "update user properties" identify, so use assert_any_call to
+        # find the "user updated" event we actually care about here.
+        mock_capture.assert_any_call(
             event="user updated",
             distinct_id=user.distinct_id,
             properties={
@@ -275,9 +563,8 @@ class TestUserAPI(APIBaseTest):
             },
         )
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_user_can_cancel_own_email_change_request(self, _mock_capture, _mock_identify_task):
+    def test_user_can_cancel_own_email_change_request(self, _mock_capture):
         self.user.pending_email = "another@email.com"
         self.user.save()
 
@@ -287,20 +574,16 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_200_OK
         assert response_data["pending_email"] is None
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_user_cannot_cancel_email_change_request_if_it_doesnt_exist(self, _mock_capture, _mock_identify_task):
+    def test_user_cannot_cancel_email_change_request_if_it_doesnt_exist(self, _mock_capture):
         # Fire a call to the endpoint without priming the User with a pending_email field
 
         response = self.client.patch("/api/users/cancel_email_change_request")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_set_scene_personalisation_for_user_dashboard_must_be_in_current_team(
-        self, _mock_capture, _mock_identify_task
-    ):
+    def test_set_scene_personalisation_for_user_dashboard_must_be_in_current_team(self, _mock_capture):
         a_third_team = Team.objects.create(name="A Third Team", organization=self.organization)
 
         dashboard_one = Dashboard.objects.create(team=a_third_team, name="Dashboard 1")
@@ -317,9 +600,8 @@ class TestUserAPI(APIBaseTest):
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_set_scene_personalisation_for_user_dashboard_must_exist(self, _mock_capture, _mock_identify_task):
+    def test_set_scene_personalisation_for_user_dashboard_must_exist(self, _mock_capture):
         response = self.client.post(
             "/api/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
@@ -327,9 +609,8 @@ class TestUserAPI(APIBaseTest):
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_set_scene_personalisation_for_user_must_send_dashboard(self, _mock_capture, _mock_identify_task):
+    def test_set_scene_personalisation_for_user_must_send_dashboard(self, _mock_capture):
         response = self.client.post(
             "/api/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
@@ -337,9 +618,8 @@ class TestUserAPI(APIBaseTest):
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_set_scene_personalisation_for_user_must_send_scene(self, _mock_capture, _mock_identify_task):
+    def test_set_scene_personalisation_for_user_must_send_scene(self, _mock_capture):
         dashboard_one = Dashboard.objects.create(team=self.team, name="Dashboard 1")
 
         response = self.client.post(
@@ -353,9 +633,8 @@ class TestUserAPI(APIBaseTest):
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_set_scene_personalisation_for_user(self, _mock_capture, _mock_identify_task):
+    def test_set_scene_personalisation_for_user(self, _mock_capture):
         another_org = Organization.objects.create(name="Another Org")
         another_team = Team.objects.create(name="Another Team", organization=another_org)
         user = self._create_user("the-user@hanzo.ai", password="12345678")
@@ -498,6 +777,229 @@ class TestUserAPI(APIBaseTest):
                 "beta@example.com",
             )
 
+    @parameterized.expand(
+        [
+            ("single_google", [("google-oauth2", "google-sub-1")]),
+            (
+                "multiple_providers",
+                [
+                    ("google-oauth2", "google-sub-1"),
+                    ("google-oauth2", "google-sub-2"),
+                    ("github", "octocat"),
+                    ("gitlab", "12345"),
+                ],
+            ),
+        ]
+    )
+    def test_verified_email_change_removes_social_auth_connections(self, _, social_auths: list[tuple[str, str]]):
+        self.user.email = "alpha@example.com"
+        self.user.save()
+
+        social_auth_ids = [
+            UserSocialAuth.objects.create(user=self.user, provider=provider, uid=uid).id
+            for provider, uid in social_auths
+        ]
+        other_user = User.objects.create_user("other@example.com", "pwd1234*", "Other")
+        other_user_social_auth_id = UserSocialAuth.objects.create(
+            user=other_user, provider="google-oauth2", uid="other-google-sub"
+        ).id
+
+        with (
+            patch("insights.api.user.is_email_available", return_value=True) as mock_is_email_available,
+            patch("insights.tasks.email.send_email_change_emails.delay") as mock_send_email_change_emails,
+            patch("insights.api.email_verification.send_email_verification") as mock_send_email_verification,
+        ):
+            with self.is_cloud(True):
+                response = self.client.patch(
+                    "/api/users/@me/",
+                    {
+                        "email": "beta@example.com",
+                    },
+                )
+
+            assert response.status_code == status.HTTP_200_OK
+            mock_is_email_available.assert_called_once()
+            mock_send_email_verification.assert_called_once()
+
+            token = email_verification_token_generator.make_token(self.user)
+            response = self.client.post(
+                "/api/users/verify_email/",
+                {"uuid": self.user.uuid, "token": token},
+            )
+            assert response.status_code == status.HTTP_200_OK
+
+            self.user.refresh_from_db()
+            assert self.user.email == "beta@example.com"
+            assert self.user.pending_email is None
+            for social_auth_id in social_auth_ids:
+                assert not UserSocialAuth.objects.filter(id=social_auth_id).exists()
+            assert UserSocialAuth.objects.filter(id=other_user_social_auth_id).exists()
+            mock_send_email_change_emails.assert_called_once_with(
+                ANY,
+                self.user.first_name,
+                "alpha@example.com",
+                "beta@example.com",
+            )
+
+    @parameterized.expand(
+        [
+            ("current_email_enforced", "alpha@example.com", "sso_enforced_current_email"),
+            ("new_email_enforced", "beta@example.com", "sso_enforced_new_email"),
+        ]
+    )
+    @patch("insights.api.user.is_email_available", return_value=True)
+    @patch("insights.tasks.email.send_email_change_emails.delay")
+    def test_email_change_blocked_when_sso_is_enforced(
+        self,
+        _,
+        enforced_email: str,
+        expected_code: str,
+        mock_send_email_change_emails,
+        mock_is_email_available,
+    ):
+        self.user.email = "alpha@example.com"
+        self.user.save()
+
+        with patch(
+            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
+            side_effect=lambda email, organization=None: "google-oauth2" if email == enforced_email else None,
+        ):
+            with self.is_cloud(True):
+                response = self.client.patch("/api/users/@me/", {"email": "beta@example.com"})
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["code"] == expected_code
+        self.user.refresh_from_db()
+        assert self.user.email == "alpha@example.com"
+        assert self.user.pending_email is None
+        mock_send_email_change_emails.assert_not_called()
+
+    @patch("insights.api.user.is_email_available", return_value=True)
+    @patch("insights.api.user.EmailVerifier.send_verification_email")
+    def test_email_change_allowed_between_two_sso_enforced_domains_of_same_org(
+        self,
+        mock_send_email_verification,
+        mock_is_email_available,
+    ):
+        self.user.email = "alice@example.com"
+        self.user.save()
+        for domain in ("example.com", "example.org"):
+            OrganizationDomain.objects.create(
+                organization=self.organization,
+                domain=domain,
+                verified_at=timezone.now(),
+                sso_enforcement="google-oauth2",
+            )
+
+        with patch(
+            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
+            side_effect=lambda email, organization=None: (
+                "google-oauth2" if email.split("@")[-1] in ("example.com", "example.org") else None
+            ),
+        ):
+            with self.is_cloud(True):
+                response = self.client.patch("/api/users/@me/", {"email": "alice@example.org"})
+
+        assert response.status_code == status.HTTP_200_OK
+        self.user.refresh_from_db()
+        assert self.user.pending_email == "alice@example.org"
+        mock_send_email_verification.assert_called_once()
+
+    @patch("insights.api.user.is_email_available", return_value=True)
+    @patch("insights.tasks.email.send_email_change_emails.delay")
+    def test_email_change_blocked_to_sso_enforced_domain_of_another_org(
+        self,
+        mock_send_email_change_emails,
+        mock_is_email_available,
+    ):
+        self.user.email = "alice@example.com"
+        self.user.save()
+        OrganizationDomain.objects.create(
+            organization=self.organization,
+            domain="example.com",
+            verified_at=timezone.now(),
+            sso_enforcement="google-oauth2",
+        )
+        other_org = Organization.objects.create(name="Attacker Org")
+        OrganizationDomain.objects.create(
+            organization=other_org,
+            domain="example.net",
+            verified_at=timezone.now(),
+            sso_enforcement="google-oauth2",
+        )
+
+        with patch(
+            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
+            side_effect=lambda email, organization=None: (
+                "google-oauth2" if email.split("@")[-1] in ("example.com", "example.net") else None
+            ),
+        ):
+            with self.is_cloud(True):
+                response = self.client.patch("/api/users/@me/", {"email": "alice@example.net"})
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["code"] == "sso_enforced_current_email"
+        self.user.refresh_from_db()
+        assert self.user.email == "alice@example.com"
+        assert self.user.pending_email is None
+
+    @patch("insights.tasks.email.send_email_change_emails.delay")
+    def test_verify_email_without_pending_email_keeps_social_auth_connections(self, mock_send_email_change_emails):
+        social_auth = UserSocialAuth.objects.create(
+            user=self.user,
+            provider="google-oauth2",
+            uid="google-sub-1",
+        )
+
+        token = email_verification_token_generator.make_token(self.user)
+        response = self.client.post(
+            "/api/users/verify_email/",
+            {"uuid": self.user.uuid, "token": token},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        self.user.refresh_from_db()
+        assert UserSocialAuth.objects.filter(id=social_auth.id).exists()
+        mock_send_email_change_emails.assert_not_called()
+
+    @patch("insights.api.user.login")
+    @patch("insights.tasks.email.send_email_change_emails.delay")
+    def test_email_change_verification_skips_auto_login_for_sso_enforced_domain(self, _, mock_login):
+        self.user.pending_email = "alice@example.com"
+        self.user.save()
+
+        with patch(
+            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
+            side_effect=lambda email, organization=None: "google-oauth2" if email == "alice@example.com" else None,
+        ):
+            token = email_verification_token_generator.make_token(self.user)
+            response = self.client.post("/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["requires_sso"] is True
+        self.user.refresh_from_db()
+        assert self.user.email == "alice@example.com"
+        # No password-backend session is handed out for an SSO-enforced account; they must log in via SSO.
+        mock_login.assert_not_called()
+
+    @patch("insights.api.user.login")
+    @patch("insights.tasks.email.send_email_change_emails.delay")
+    def test_initial_email_verification_skips_auto_login_for_sso_enforced_domain(self, _, mock_login):
+        self.user.email = "alice@example.com"
+        self.user.pending_email = None
+        self.user.save()
+
+        with patch(
+            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
+            side_effect=lambda email, organization=None: "google-oauth2" if email == "alice@example.com" else None,
+        ):
+            token = email_verification_token_generator.make_token(self.user)
+            response = self.client.post("/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["requires_sso"] is True
+        mock_login.assert_not_called()
+
     @patch("insights.api.user.is_email_available", return_value=True)
     @patch("insights.tasks.email.send_email_change_emails.delay")
     def test_no_notifications_when_user_email_is_changed_and_only_case_differs(
@@ -533,9 +1035,8 @@ class TestUserAPI(APIBaseTest):
         self.user.refresh_from_db()
         self.assertEqual(self.user.is_staff, False)
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_can_update_current_organization(self, mock_capture, mock_identify):
+    def test_can_update_current_organization(self, mock_capture):
         response = self.client.patch("/api/users/@me/", {"set_current_organization": str(self.new_org.id)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -550,7 +1051,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(self.user.current_organization, self.new_org)
         self.assertEqual(self.user.current_team, self.new_project)
 
-        mock_capture.assert_called_once_with(
+        mock_capture.assert_any_call(
             event="user updated",
             distinct_id=self.user.distinct_id,
             properties={"updated_attrs": ["current_organization", "current_team"], "$set": mock.ANY},
@@ -561,9 +1062,8 @@ class TestUserAPI(APIBaseTest):
             },
         )
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_can_update_current_project(self, mock_capture, mock_identify):
+    def test_can_update_current_project(self, mock_capture):
         team = Team.objects.create(name="Local Team", organization=self.new_org)
         response = self.client.patch("/api/users/@me/", {"set_current_team": team.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -578,7 +1078,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(self.user.current_organization, self.new_org)
         self.assertEqual(self.user.current_team, team)
 
-        mock_capture.assert_called_once_with(
+        mock_capture.assert_any_call(
             event="user updated",
             distinct_id=self.user.distinct_id,
             properties={"updated_attrs": ["current_organization", "current_team"], "$set": mock.ANY},
@@ -795,10 +1295,9 @@ class TestUserAPI(APIBaseTest):
             self.assertIn(result_organization, [self.organization, new_org])
             self.assertEqual(self.user.current_organization, result_organization)
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
     @patch("insights.tasks.email.send_password_changed_email.delay")
-    def test_user_can_update_password(self, mock_send_password_changed_email, mock_capture, mock_identify):
+    def test_user_can_update_password(self, mock_send_password_changed_email, mock_capture):
         user = self._create_user("bob@hanzo.ai", password="A12345678")
         self.client.force_login(user)
 
@@ -820,7 +1319,7 @@ class TestUserAPI(APIBaseTest):
         user.refresh_from_db()
         self.assertTrue(user.check_password("a_new_password"))
 
-        mock_capture.assert_called_once_with(
+        mock_capture.assert_any_call(
             event="user updated",
             distinct_id=user.distinct_id,
             properties={"updated_attrs": ["password"], "$set": mock.ANY},
@@ -838,12 +1337,9 @@ class TestUserAPI(APIBaseTest):
         # Assert password changed email was sent
         mock_send_password_changed_email.assert_called_once_with(user.id)
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
     @patch("insights.tasks.email.send_password_changed_email.delay")
-    def test_user_with_no_password_set_can_set_password(
-        self, mock_send_password_changed_email, mock_capture, mock_identify
-    ):
+    def test_user_with_no_password_set_can_set_password(self, mock_send_password_changed_email, mock_capture):
         user = self._create_user("no_password@hanzo.ai", password=None)
         self.client.force_login(user)
 
@@ -865,7 +1361,7 @@ class TestUserAPI(APIBaseTest):
         user.refresh_from_db()
         self.assertTrue(user.check_password("a_new_password"))
 
-        mock_capture.assert_called_once_with(
+        mock_capture.assert_any_call(
             event="user updated",
             distinct_id=user.distinct_id,
             properties={"updated_attrs": ["password"], "$set": mock.ANY},
@@ -904,9 +1400,8 @@ class TestUserAPI(APIBaseTest):
         user.refresh_from_db()
         self.assertTrue(user.check_password("a_new_password"))
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_cannot_update_to_insecure_password(self, mock_capture, mock_identify):
+    def test_cannot_update_to_insecure_password(self, mock_capture):
         response = self.client.patch(
             "/api/users/@me/",
             {"current_password": self.CONFIG_PASSWORD, "password": "123"},
@@ -929,7 +1424,11 @@ class TestUserAPI(APIBaseTest):
         # Password was not changed
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password(self.CONFIG_PASSWORD))
-        mock_capture.assert_not_called()
+        # The GET on /api/users/@me/ fires the inline identify ("update user properties")
+        # via UserSerializer.to_representation. The 4xx PATCH must NOT fire "user updated"
+        # because the update was rejected.
+        update_calls = [c for c in mock_capture.call_args_list if c.kwargs.get("event") == "user updated"]
+        assert update_calls == []
 
     def test_user_cannot_update_password_without_current_password(self):
         response = self.client.patch("/api/users/@me/", {"password": "12345678"})
@@ -1123,10 +1622,7 @@ class TestUserAPI(APIBaseTest):
         response = self.client.delete(f"/api/users/@me/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    @patch("insights.api.user.secrets.token_urlsafe")
-    def test_redirect_user_to_site_with_toolbar(self, patched_token):
-        patched_token.return_value = "tokenvalue"
-
+    def test_redirect_user_to_site_with_toolbar(self):
         self.team.app_urls = ["http://127.0.0.1:8010"]
         self.team.save()
 
@@ -1139,13 +1635,10 @@ class TestUserAPI(APIBaseTest):
         self.maxDiff = None
         assert (
             unquote(locationHeader)
-            == 'http://127.0.0.1:8010#__insights={"action": "ph_authorize", "token": "token123", "temporaryToken": "tokenvalue", "actionId": null, "experimentId": null, "productTourId": null, "userIntent": "add-action", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}'
+            == 'http://127.0.0.1:8010#__insights={"action": "ph_authorize", "token": "token123", "actionId": null, "experimentId": null, "productTourId": null, "userIntent": "add-action", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}'
         )
 
-    @patch("insights.api.user.secrets.token_urlsafe")
-    def test_generate_params_for_user_to_load_toolbar(self, patched_token):
-        patched_token.return_value = "tokenvalue"
-
+    def test_generate_params_for_user_to_load_toolbar(self):
         self.team.app_urls = ["http://127.0.0.1:8010"]
         self.team.save()
 
@@ -1155,13 +1648,10 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_200_OK
         assert (
             unquote(response.json()["toolbarParams"])
-            == '{"action": "ph_authorize", "token": "token123", "temporaryToken": "tokenvalue", "actionId": null, "experimentId": null, "productTourId": null, "userIntent": "add-action", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}'
+            == '{"action": "ph_authorize", "token": "token123", "actionId": null, "experimentId": null, "productTourId": null, "userIntent": "add-action", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}'
         )
 
-    @patch("insights.api.user.secrets.token_urlsafe")
-    def test_generate_only_param_can_be_falsy(self, patched_token):
-        patched_token.return_value = "tokenvalue"
-
+    def test_generate_only_param_can_be_falsy(self):
         self.team.app_urls = ["http://127.0.0.1:8010"]
         self.team.save()
 
@@ -1170,10 +1660,7 @@ class TestUserAPI(APIBaseTest):
         )
         assert response.status_code == status.HTTP_302_FOUND
 
-    @patch("insights.api.user.secrets.token_urlsafe")
-    def test_redirect_user_to_site_with_experiments_toolbar(self, patched_token):
-        patched_token.return_value = "tokenvalue"
-
+    def test_redirect_user_to_site_with_experiments_toolbar(self):
         self.team.app_urls = ["http://127.0.0.1:8010"]
         self.team.save()
 
@@ -1186,13 +1673,10 @@ class TestUserAPI(APIBaseTest):
         self.maxDiff = None
         self.assertEqual(
             unquote(locationHeader),
-            'http://127.0.0.1:8010#__insights={"action": "ph_authorize", "token": "token123", "temporaryToken": "tokenvalue", "actionId": null, "experimentId": "12", "productTourId": null, "userIntent": "edit-experiment", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}',
+            'http://127.0.0.1:8010#__insights={"action": "ph_authorize", "token": "token123", "actionId": null, "experimentId": "12", "productTourId": null, "userIntent": "edit-experiment", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}',
         )
 
-    @patch("insights.api.user.secrets.token_urlsafe")
-    def test_redirect_only_to_allowed_urls(self, patched_token):
-        patched_token.return_value = "tokenvalue"
-
+    def test_redirect_only_to_allowed_urls(self):
         self.team.app_urls = [
             "https://www.example.com",
             "https://*.otherexample.com",
@@ -1214,7 +1698,11 @@ class TestUserAPI(APIBaseTest):
         # hostnames
         assert_allowed_url("https://www.example.com")
         assert_forbidden_url("https://www.notexample.com")
-        assert_forbidden_url("https://www.anotherexample.com")
+        # www.anotherexample.com is equivalent to anotherexample.com
+        assert_allowed_url("https://www.anotherexample.com")
+
+        # bare domain matches www entry
+        assert_allowed_url("https://example.com")
 
         # wildcard domains and folders
         assert_forbidden_url("https://subdomain.example.com")
@@ -1227,7 +1715,7 @@ class TestUserAPI(APIBaseTest):
         """Test that prepare_toolbar_preloaded_flags creates a cache entry with feature flags"""
         from django.core.cache import cache
 
-        from insights.models import FeatureFlag
+        from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
         patched_token.return_value = "test-cache-key-123"
 
@@ -1240,7 +1728,7 @@ class TestUserAPI(APIBaseTest):
         }
 
         # Create some feature flags
-        FeatureFlag.objects.create(team=self.team, key="test-flag-1", created_by=self.user, rollout_percentage=100)
+        FeatureFlag.objects.create(team=self.team, key="test-flag-1", created_by=self.user)
         FeatureFlag.objects.create(
             team=self.team,
             key="test-flag-2",
@@ -1269,6 +1757,23 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(cached_data["team_id"], self.team.id)
         self.assertIn("test-flag-1", cached_data["feature_flags"])
         self.assertIn("test-flag-2", cached_data["feature_flags"])
+
+    @patch("insights.api.user.get_flags_from_service")
+    def test_prepare_toolbar_preloaded_flags_passes_internal_request_token(self, mock_get_flags):
+        """The toolbar prep handler is internal Insights traffic, not customer SDK
+        traffic — it must forward INTERNAL_REQUEST_TOKEN so the Rust service skips
+        the per-team billing limiter."""
+        mock_get_flags.return_value = {"flags": {}}
+
+        with self.settings(INTERNAL_REQUEST_TOKEN="test-internal-token"):
+            response = self.client.post(
+                "/api/user/prepare_toolbar_preloaded_flags/",
+                {"distinct_id": "user123"},
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(mock_get_flags.call_args.kwargs["internal_request_token"], "test-internal-token")
 
     def test_get_toolbar_preloaded_flags_retrieves_from_cache(self):
         """Test that get_toolbar_preloaded_flags retrieves flags from cache"""
@@ -1311,11 +1816,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn("error", response.json())
 
-    @patch("insights.api.user.secrets.token_urlsafe")
-    def test_redirect_to_site_with_toolbar_flags_key(self, patched_token):
-        """Test that redirect_to_site passes toolbarFlagsKey through to params"""
-        patched_token.return_value = "tokenvalue"
-
+    def test_redirect_to_site_with_toolbar_flags_key(self):
         self.team.app_urls = ["http://127.0.0.1:8010"]
         self.team.save()
 
@@ -1383,6 +1884,10 @@ class TestUserAPI(APIBaseTest):
                 "data_pipeline_error_threshold": 0.1,
                 "project_api_key_exposed": True,
                 "materialized_view_sync_failed": True,
+                "web_analytics_weekly_digest": True,
+                "organization_member_join_email_disabled": {},
+                "realtime_notifications_disabled": {},
+                "pipeline_notifications_disabled": {},
             },
         )
 
@@ -1399,6 +1904,10 @@ class TestUserAPI(APIBaseTest):
                 "data_pipeline_error_threshold": 0.1,
                 "project_api_key_exposed": True,
                 "materialized_view_sync_failed": True,
+                "web_analytics_weekly_digest": True,
+                "organization_member_join_email_disabled": {},
+                "realtime_notifications_disabled": {},
+                "pipeline_notifications_disabled": {},
             },
         )
 
@@ -1419,6 +1928,200 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(
             response_data["notification_settings"]["project_weekly_digest_disabled"], {"123": True, "456": True}
         )
+
+    def test_notification_settings_organization_member_join_settings_are_merged_not_replaced(self):
+        # First update
+        response = self.client.patch(
+            "/api/users/@me/",
+            {
+                "notification_settings": {
+                    "organization_member_join_email_disabled": {"00000000-0000-0000-0000-000000000001": True}
+                }
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Second update with different organization
+        response = self.client.patch(
+            "/api/users/@me/",
+            {
+                "notification_settings": {
+                    "organization_member_join_email_disabled": {"00000000-0000-0000-0000-000000000002": True}
+                }
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+        self.assertEqual(
+            response_data["notification_settings"]["organization_member_join_email_disabled"],
+            {
+                "00000000-0000-0000-0000-000000000001": True,
+                "00000000-0000-0000-0000-000000000002": True,
+            },
+        )
+
+    def test_notification_settings_default_includes_realtime_disabled_empty_dict(self):
+        user = self._create_user("rt-defaults@test.com")
+        assert user.notification_settings["realtime_notifications_disabled"] == {}
+
+    def test_realtime_notifications_disabled_accepts_valid_payload(self):
+        self.client.force_login(self.user)
+        response = self.client.patch(
+            "/api/users/@me/",
+            {
+                "notification_settings": {
+                    "realtime_notifications_disabled": {"comment_mention": {str(self.team.id): True}}
+                }
+            },
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+        self.user.refresh_from_db()
+        assert self.user.partial_notification_settings is not None
+        assert self.user.partial_notification_settings["realtime_notifications_disabled"] == {
+            "comment_mention": {str(self.team.id): True}
+        }
+
+    @parameterized.expand(
+        [
+            ("unknown_type", {"made_up_type": {"1": True}}, "Unknown notification type"),
+            ("non_bool_value", {"comment_mention": {"1": "yes"}}, "must be boolean"),
+            ("non_dict_top_level", "not_a_dict", "must be a dict"),
+            ("non_dict_inner", {"comment_mention": "not_a_dict"}, "must be a dict of team_id"),
+        ]
+    )
+    def test_realtime_notifications_disabled_rejects_invalid_payload(self, _name, payload, expected_message_substr):
+        self.client.force_login(self.user)
+        response = self.client.patch(
+            "/api/users/@me/",
+            {"notification_settings": {"realtime_notifications_disabled": payload}},
+            format="json",
+        )
+        assert response.status_code == 400, response.json()
+        assert expected_message_substr in response.json()["detail"], response.json()
+
+    def test_realtime_notifications_disabled_false_overwrites_true_for_same_pair(self):
+        self.user.partial_notification_settings = {"realtime_notifications_disabled": {"comment_mention": {"1": True}}}
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.patch(
+            "/api/users/@me/",
+            {"notification_settings": {"realtime_notifications_disabled": {"comment_mention": {"1": False}}}},
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+        self.user.refresh_from_db()
+        assert self.user.partial_notification_settings is not None
+        assert self.user.partial_notification_settings["realtime_notifications_disabled"] == {
+            "comment_mention": {"1": False}
+        }
+
+    def test_realtime_notifications_disabled_two_level_merge_preserves_other_pairs(self):
+        self.user.partial_notification_settings = {
+            "realtime_notifications_disabled": {
+                "comment_mention": {"7": True, "8": True},
+                "alert_firing": {"7": True},
+            }
+        }
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.patch(
+            "/api/users/@me/",
+            {"notification_settings": {"realtime_notifications_disabled": {"comment_mention": {"9": True}}}},
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+        self.user.refresh_from_db()
+        assert self.user.partial_notification_settings is not None
+        assert self.user.partial_notification_settings["realtime_notifications_disabled"] == {
+            "comment_mention": {"7": True, "8": True, "9": True},
+            "alert_firing": {"7": True},
+        }
+
+    @parameterized.expand(
+        [
+            ("bool_scalar", "all_weekly_digest_disabled", False),
+            ("plugin_disabled_bool", "plugin_disabled", True),
+            ("project_dict", "project_weekly_digest_disabled", {"99": True}),
+            ("org_dict", "organization_member_join_email_disabled", {"00000000-0000-0000-0000-000000000099": True}),
+            ("realtime_two_level_dict", "realtime_notifications_disabled", {"comment_mention": {"99": True}}),
+            ("float_threshold", "data_pipeline_error_threshold", 0.99),
+        ]
+    )
+    def test_partial_notification_settings_patch_preserves_unrelated_keys(self, _name, patched_key, patched_value):
+        # Pre-seed every key with a non-default value so any clobber is visible.
+        pre_seeded = {
+            "plugin_disabled": False,
+            "error_tracking_issue_assigned": False,
+            "discussions_mentioned": False,
+            "project_weekly_digest_disabled": {"1": True, "2": True},
+            "all_weekly_digest_disabled": True,
+            "data_pipeline_error_threshold": 0.42,
+            "project_api_key_exposed": False,
+            "materialized_view_sync_failed": True,
+            "web_analytics_weekly_digest": False,
+            "organization_member_join_email_disabled": {"00000000-0000-0000-0000-000000000001": True},
+            "realtime_notifications_disabled": {"comment_mention": {"1": True}},
+        }
+        self.user.partial_notification_settings = pre_seeded
+        self.user.save()
+        self.client.force_login(self.user)
+
+        response = self.client.patch(
+            "/api/users/@me/",
+            {"notification_settings": {patched_key: patched_value}},
+            format="json",
+        )
+
+        assert response.status_code == 200, response.json()
+        self.user.refresh_from_db()
+        assert self.user.partial_notification_settings is not None
+        for unrelated_key, original_value in pre_seeded.items():
+            if unrelated_key == patched_key:
+                continue
+            assert self.user.partial_notification_settings[unrelated_key] == original_value, (
+                f"Patching {patched_key!r} clobbered {unrelated_key!r}"
+            )
+
+    def test_pipeline_notifications_rejects_malformed_pipeline_ids(self):
+        for bad_key in [
+            "<script>alert(1)</script>",
+            "random_garbage_key",
+            "insights_function:",
+            "insights_function:not a uuid",
+            "unknown_type:abc",
+            "",
+        ]:
+            response = self.client.patch(
+                "/api/users/@me/",
+                {"notification_settings": {"pipeline_notifications_disabled": {bad_key: True}}},
+            )
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, f"key {bad_key!r} was accepted")
+            self.assertEqual(response.json()["code"], "invalid_input")
+
+    def test_pipeline_notifications_accepts_valid_pipeline_ids(self):
+        for good_key in [
+            "insights_function:019dcf05-db1d-0000-682a-935c8e1ad2c9",
+            "batch_export:019dcf05-dac4-0000-07d4-cf53026deba6",
+            "plugin_config:42",
+        ]:
+            response = self.client.patch(
+                "/api/users/@me/",
+                {"notification_settings": {"pipeline_notifications_disabled": {good_key: True}}},
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK, f"key {good_key!r} was rejected")
+
+    def test_pipeline_notifications_caps_total_entries(self):
+        from insights.api.user import MAX_PIPELINE_NOTIFICATIONS
+
+        too_many = {f"insights_function:fake-{i}": True for i in range(MAX_PIPELINE_NOTIFICATIONS + 1)}
+        response = self.client.patch(
+            "/api/users/@me/",
+            {"notification_settings": {"pipeline_notifications_disabled": too_many}},
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("more than", response.json()["detail"])
 
     def test_invalid_notification_settings_returns_error(self):
         response = self.client.patch("/api/users/@me/", {"notification_settings": {"invalid_key": True}})
@@ -1448,7 +2151,7 @@ class TestUserAPI(APIBaseTest):
             {
                 "type": "validation_error",
                 "code": "invalid_input",
-                "detail": "Project notification setting values must be boolean, got <class 'str'> instead",
+                "detail": "Notification setting values must be boolean, got <class 'str'> instead",
                 "attr": "notification_settings",
             },
         )
@@ -1469,37 +2172,295 @@ class TestUserAPI(APIBaseTest):
                 "data_pipeline_error_threshold": 0.01,  # Default value
                 "project_api_key_exposed": True,  # Default value
                 "materialized_view_sync_failed": False,  # Default value
+                "web_analytics_weekly_digest": True,  # Default value
+                "organization_member_join_email_disabled": {},  # Default value
+                "realtime_notifications_disabled": {},  # Default value
+                "pipeline_notifications_disabled": {},  # Default value
             },
         )
 
 
-class TestUserSlackWebhook(APIBaseTest):
-    ENDPOINT: str = "/api/user/test_slack_webhook/"
+class TestUserUIConfigurationValidation(SimpleTestCase):
+    @parameterized.expand(
+        [
+            ("not_an_object", ["version"]),
+            ("missing_version", {"sidebar": {}}),
+            ("unknown_top_level_key", {"version": 1, "surprise": True}),
+            ("unknown_section", {"version": 1, "sidebar": {"sections": {"bogus": {"visible": False}}}}),
+            ("unknown_item", {"version": 1, "sidebar": {"items": {"bogus": {"visible": False}}}}),
+            ("activity_not_customizable", {"version": 1, "sidebar": {"items": {"activity": {"visible": False}}}}),
+            ("non_boolean_visible", {"version": 1, "sidebar": {"items": {"home": {"visible": "nope"}}}}),
+            ("unknown_node_key", {"version": 1, "sidebar": {"items": {"home": {"visible": False, "size": 1}}}}),
+        ]
+    )
+    def test_invalid_ui_configuration_is_rejected(self, _name, value):
+        serializer = UserSerializer(data={"ui_configuration": value}, partial=True)
 
-    def send_request(self, payload):
-        return self.client.post(self.ENDPOINT, payload)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("ui_configuration", serializer.errors)
 
-    def test_slack_webhook_no_webhook(self):
-        response = self.send_request({})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["error"], "no webhook URL")
+    @parameterized.expand(
+        [
+            ("null", None),
+            ("minimal", {"version": 1}),
+            (
+                "full",
+                {
+                    "version": 1,
+                    "sidebar": {
+                        "sections": {"project": {"visible": True}, "recents": {}, "my_tools": {"visible": False}},
+                        "items": {
+                            "home": {"visible": False},
+                            "inbox": {"visible": False},
+                            "data": {"visible": False},
+                            "files": {"visible": False},
+                            "tools": {"visible": False},
+                            "starred": {"visible": False},
+                            "notifications": {"visible": False},
+                            "help": {"visible": False},
+                        },
+                    },
+                },
+            ),
+            ("new_user_default", default_ui_configuration_for_new_users()),
+        ]
+    )
+    def test_valid_ui_configuration_is_accepted(self, _name, value):
+        serializer = UserSerializer(data={"ui_configuration": value}, partial=True)
 
-    def test_slack_webhook_bad_url(self):
-        response = self.send_request({"webhook": "blabla"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["error"], "invalid webhook URL")
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertEqual(serializer.validated_data["ui_configuration"], value)
 
-    def test_slack_webhook_bad_url_full(self):
-        response = self.send_request({"webhook": "http://localhost/bla"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["error"], "invalid webhook URL")
+
+@pytest.mark.ee
+class TestToolbarAccessControl(APIBaseTest):
+    """The toolbar launch endpoints must respect the `toolbar` resource's access control."""
+
+    def setUp(self):
+        super().setUp()
+        self.organization.available_product_features = [
+            {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
+        ]
+        self.organization.save()
+        self.team.app_urls = ["http://127.0.0.1:8010"]
+        self.team.save()
+
+    def _deny_toolbar_access(self):
+        membership = OrganizationMembership.objects.get(user=self.user, organization=self.organization)
+        AccessControl.objects.create(
+            team=self.team,
+            resource="toolbar",
+            resource_id=None,
+            access_level="none",
+            organization_member=membership,
+        )
+
+    def test_redirect_to_site_denied_without_toolbar_access(self):
+        self._deny_toolbar_access()
+
+        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_redirect_to_site_allowed_with_default_access(self):
+        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_redirect_to_site_returns_404_without_crashing_when_user_has_no_team(self):
+        """`team.app_urls` must not be dereferenced before the `team is None` guard, or a
+        session-authed user with no current project crashes with an AttributeError instead of
+        getting the expected 404."""
+        new_user = User.objects.create_user(email="no-team@hanzo.ai", password="testpass123", first_name="")
+        self.client.force_login(new_user)
+
+        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @patch("insights.api.user.get_or_create_toolbar_oauth_application")
+    def test_toolbar_oauth_authorize_denied_without_toolbar_access(self, mock_get_or_create_app):
+        self._deny_toolbar_access()
+
+        response = self.client.get(
+            "/toolbar_oauth/authorize/?redirect=http%3A%2F%2F127.0.0.1%3A8010&code_challenge=abc"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_get_or_create_app.assert_not_called()
+
+    def test_get_toolbar_preloaded_flags_denied_without_toolbar_access(self):
+        cache.set("toolbar_flags_test-key", {"feature_flags": {"a-flag": True}, "team_id": self.team.id}, timeout=300)
+        self._deny_toolbar_access()
+
+        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @patch("insights.api.user.get_flags_from_service")
+    def test_prepare_toolbar_preloaded_flags_denied_without_toolbar_access(self, mock_get_flags):
+        mock_get_flags.return_value = {"flags": {}}
+        self._deny_toolbar_access()
+
+        response = self.client.post(
+            "/api/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_get_flags.assert_not_called()
+
+    def test_toolbar_oauth_callback_denied_without_toolbar_access(self):
+        self._deny_toolbar_access()
+
+        response = self.client.get("/toolbar_oauth/callback?code=abc123&state=fake-state")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_toolbar_oauth_callback_narrows_grant_to_verified_team(self):
+        """The generic first-party OAuth auto-approval issues the grant with scoped_teams=[]
+        (unrestricted across every team in the org) since it has no notion of which team a toolbar
+        launch was verified for. The callback must narrow it to that team, or the resulting tokens
+        could be replayed against a different team in the same org where toolbar access is denied."""
+        oauth_app = OAuthApplication.objects.create(
+            name="Test Toolbar OAuth App",
+            client_id="test_toolbar_client_id_scoping",
+            client_type=OAuthApplication.CLIENT_PUBLIC,
+            authorization_grant_type=OAuthApplication.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="https://example.com/callback",
+            algorithm="RS256",
+            user=self.user,
+        )
+        grant = OAuthGrant.objects.create(
+            application=oauth_app,
+            user=self.user,
+            code="test-grant-code",
+            expires=timezone.now() + timedelta(minutes=10),
+            redirect_uri="https://example.com/callback",
+            scope="openid",
+            code_challenge="abc",
+            code_challenge_method="S256",
+            scoped_teams=[],
+            scoped_organizations=[str(self.organization.id)],
+        )
+        signed_state, _ = build_toolbar_oauth_state(
+            ToolbarOAuthState(
+                nonce=new_state_nonce(),
+                user_id=self.user.id,
+                team_id=self.team.id,
+                app_url="http://127.0.0.1:8010",
+            )
+        )
+
+        with patch("insights.api.user.get_or_create_toolbar_oauth_application", return_value=oauth_app):
+            response = self.client.get(f"/toolbar_oauth/callback?code={grant.code}&state={signed_state}")
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        grant.refresh_from_db()
+        self.assertEqual(grant.scoped_teams, [self.team.id])
+
+    def test_toolbar_oauth_refresh_denied_after_access_revoked(self):
+        """A refresh token minted before access was revoked must not be usable to mint new
+        tokens afterwards - the refresh endpoint has no session auth, so it must re-check
+        the token owner's current toolbar access itself."""
+        oauth_app = OAuthApplication.objects.create(
+            name="Test Toolbar OAuth App",
+            client_id="test_toolbar_client_id",
+            client_type=OAuthApplication.CLIENT_PUBLIC,
+            authorization_grant_type=OAuthApplication.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="https://example.com/callback",
+            algorithm="RS256",
+            user=self.user,
+        )
+        refresh_token = OAuthRefreshToken.objects.create(
+            user=self.user,
+            application=oauth_app,
+            token="test_toolbar_refresh_token",
+            scoped_teams=[self.team.id],
+        )
+        self._deny_toolbar_access()
+
+        with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
+            response = self.client.post(
+                "/api/user/toolbar_oauth_refresh/",
+                {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_refresh_tokens.assert_not_called()
+
+    def test_toolbar_oauth_refresh_denied_when_access_revoked_in_scoped_team_despite_switching_active_team(self):
+        """The refresh check must gate on the token's scoped team, not the user's mutable current
+        team - otherwise a user whose access was revoked in the project the token is scoped to
+        could keep refreshing it by switching their active team to one where access remains."""
+        other_team = Team.objects.create(organization=self.organization, name="Other team")
+        oauth_app = OAuthApplication.objects.create(
+            name="Test Toolbar OAuth App",
+            client_id="test_toolbar_client_id_team_switch",
+            client_type=OAuthApplication.CLIENT_PUBLIC,
+            authorization_grant_type=OAuthApplication.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="https://example.com/callback",
+            algorithm="RS256",
+            user=self.user,
+        )
+        refresh_token = OAuthRefreshToken.objects.create(
+            user=self.user,
+            application=oauth_app,
+            token="test_toolbar_refresh_token_team_switch",
+            scoped_teams=[self.team.id],
+        )
+        self._deny_toolbar_access()
+        self.user.current_team = other_team
+        self.user.save()
+
+        with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
+            response = self.client.post(
+                "/api/user/toolbar_oauth_refresh/",
+                {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_refresh_tokens.assert_not_called()
+
+    def test_toolbar_oauth_refresh_denied_when_token_owner_has_no_team(self):
+        """A refresh token with no scoped team (e.g. one minted before grants were narrowed to a
+        single verified team) must be denied rather than allowed through - the check fails closed
+        when it can't resolve exactly one scoped team to verify access against."""
+        no_team_user = User.objects.create_user(
+            email="no-team-refresh@hanzo.ai", password="testpass123", first_name=""
+        )
+        oauth_app = OAuthApplication.objects.create(
+            name="Test Toolbar OAuth App",
+            client_id="test_toolbar_client_id_no_team",
+            client_type=OAuthApplication.CLIENT_PUBLIC,
+            authorization_grant_type=OAuthApplication.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="https://example.com/callback",
+            algorithm="RS256",
+            user=no_team_user,
+        )
+        refresh_token = OAuthRefreshToken.objects.create(
+            user=no_team_user,
+            application=oauth_app,
+            token="test_toolbar_refresh_token_no_team",
+        )
+
+        with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
+            response = self.client.post(
+                "/api/user/toolbar_oauth_refresh/",
+                {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_refresh_tokens.assert_not_called()
 
 
 class TestSessionAuthEndpoints(APIBaseTest):
     """
     Tests that certain endpoints require session authentication and reject Personal API Keys.
 
-    These endpoints (redirect_to_site, test_slack_webhook, etc.) are browser-interactive
+    These endpoints (redirect_to_site, etc.) are browser-interactive
     features that should not be accessible via API keys.
     """
 
@@ -1516,7 +2477,7 @@ class TestSessionAuthEndpoints(APIBaseTest):
         self.team.save()
 
     def test_redirect_to_site_rejects_personal_api_key(self):
-        """Personal API Keys should not be able to call redirect_to_site to mint temporary tokens."""
+        """Personal API Keys should not be able to call redirect_to_site."""
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
 
@@ -1530,23 +2491,6 @@ class TestSessionAuthEndpoints(APIBaseTest):
         response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-
-    def test_test_slack_webhook_rejects_personal_api_key(self):
-        """Personal API Keys should not be able to call test_slack_webhook."""
-        self.client.logout()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
-
-        response = self.client.post("/api/user/test_slack_webhook/", {"webhook": "https://hooks.slack.com/test"})
-
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
-
-    def test_test_slack_webhook_works_with_session_auth(self):
-        """Session authentication should still work for test_slack_webhook."""
-        response = self.client.post("/api/user/test_slack_webhook/", {"webhook": "invalid"})
-
-        # Returns 200 with error message (not 401) - endpoint is accessible
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_prepare_toolbar_preloaded_flags_rejects_personal_api_key(self):
         """Personal API Keys should not be able to call prepare_toolbar_preloaded_flags."""
@@ -1889,6 +2833,57 @@ class TestEmailVerificationAPI(APIBaseTest):
         assert self.user.email == "new@hanzo.ai"
         assert self.user.pending_email is None
 
+    def test_email_verification_does_not_log_in_user_with_2fa_totp(self):
+        # If the user has a TOTP device configured, verifying their email must
+        # NOT silently establish an authenticated session — otherwise an
+        # attacker with access to the email inbox could bypass 2FA entirely.
+        TOTPDevice.objects.create(user=self.user, name="default", confirmed=True)
+
+        token = email_verification_token_generator.make_token(self.user)
+        self.client.logout()
+        assert self.client.session.get("_auth_user_id") is None
+
+        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {"success": True, "token": token, "requires_2fa": True}
+
+        # Email should still be marked verified, but the session must remain unauthenticated.
+        self.user.refresh_from_db()
+        assert self.user.is_email_verified
+        assert self.client.session.get("_auth_user_id") is None
+
+    def test_cant_request_verification_for_already_verified_email(self):
+        self.user.is_email_verified = True
+        self.user.save()
+
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            response = self.client.post(f"/api/users/request_email_verification/", {"uuid": self.user.uuid})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {
+                "type": "validation_error",
+                "code": "already_verified",
+                "detail": "Email is already verified.",
+                "attr": None,
+            },
+        )
+        # No email should have been sent for an already-verified address.
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_can_request_verification_for_pending_email_change(self):
+        # An already-verified user who initiated an email change still needs to
+        # verify the new address — re-requesting the verification link must work.
+        self.user.is_email_verified = True
+        self.user.pending_email = "new-address@hanzo.ai"
+        self.user.save()
+
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
+            response = self.client.post(f"/api/users/request_email_verification/", {"uuid": self.user.uuid})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["new-address@hanzo.ai"])
+
 
 class TestUserTwoFactor(APIBaseTest):
     def setUp(self):
@@ -2128,6 +3123,51 @@ class TestUserTwoFactor(APIBaseTest):
             },
         )
 
+    @parameterized.expand(
+        [
+            # name, has_totp, passkey_state, passkeys_enabled_for_2fa, expected_is_2fa_enabled
+            ("no_factor", False, None, False, False),
+            ("totp_only", True, None, False, True),
+            ("passkey_enabled_for_2fa", False, "verified", True, True),
+            ("passkey_present_but_disabled_for_2fa", False, "verified", False, False),
+            ("unverified_passkey_enabled_for_2fa", False, "unverified", True, False),
+        ]
+    )
+    def test_user_me_is_2fa_enabled(
+        self,
+        _name: str,
+        has_totp: bool,
+        passkey_state: str | None,
+        passkeys_enabled_for_2fa: bool,
+        expected_is_2fa_enabled: bool,
+    ):
+        """
+        /api/users/@me/.is_2fa_enabled must reflect passkey-2FA, not only TOTP — otherwise the
+        frontend keeps reopening the enforce-2FA setup modal even after the user has a passkey
+        configured as their second factor.
+        """
+        from insights.models.webauthn_credential import WebauthnCredential
+
+        if has_totp:
+            TOTPDevice.objects.create(user=self.user, name="default", confirmed=True)
+        if passkey_state is not None:
+            WebauthnCredential.objects.create(
+                user=self.user,
+                credential_id=b"cred",
+                label="Test Passkey",
+                public_key=b"pk",
+                algorithm=-7,
+                counter=0,
+                transports=["internal"],
+                verified=(passkey_state == "verified"),
+            )
+        self.user.passkeys_enabled_for_2fa = passkeys_enabled_for_2fa
+        self.user.save(update_fields=["passkeys_enabled_for_2fa"])
+
+        response = self.client.get("/api/users/@me/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["is_2fa_enabled"], expected_is_2fa_enabled)
+
     @patch("insights.api.user.default_device")
     def test_two_factor_backup_codes_generation(self, mock_default_device):
         # Mock TOTP device to simulate 2FA being enabled
@@ -2176,12 +3216,6 @@ class TestUserTwoFactor(APIBaseTest):
         # Verify email was triggered
         mock_send_email.delay.assert_called_once_with(self.user.id)
 
-    @override_settings(
-        OAUTH2_PROVIDER={
-            **settings.OAUTH2_PROVIDER,
-            "OIDC_RSA_PRIVATE_KEY": generate_rsa_key(),
-        }
-    )
     def test_team_scoped_oauth_token_with_user_read_can_access_me_endpoint(self):
         oauth_app = OAuthApplication.objects.create(
             name="Test OAuth App",
@@ -2207,3 +3241,49 @@ class TestUserTwoFactor(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["uuid"], str(self.user.uuid))
+
+
+class TestUserDeletionAfterOrgDeletion(NonAtomicBaseTest):
+    """Deleting a user's only organization (which runs on Temporal) must let them delete their account.
+
+    The org-deletion workflow runs inline so the membership cascade actually completes; that requires a
+    non-atomic test case, since the workflow's activities run on their own database connections.
+    """
+
+    CLASS_DATA_LEVEL_SETUP = False
+
+    @patch("hanzo_insights.capture")
+    def test_can_delete_account_after_deleting_only_organization(self, mock_capture):
+        org = Organization.objects.create(name="Solo Org")
+        user = User.objects.create(email="solo@hanzo.ai", password="testpassword")
+        OrganizationMembership.objects.create(
+            user=user,
+            organization=org,
+            level=OrganizationMembership.Level.OWNER,
+        )
+        self.client.force_login(user)
+
+        # User belongs to exactly one organization
+        response = self.client.get("/api/users/@me/")
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["organizations"]) == 1
+
+        # Cannot delete account while still a member of an organization
+        response = self.client.delete("/api/users/@me/")
+        assert response.status_code == status.HTTP_409_CONFLICT
+
+        # Delete the organization (runs the deletion workflow to completion)
+        with execute_deletion_workflows_inline():
+            response = self.client.delete(f"/api/organizations/{org.id}")
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+        # The membership cascade removed the user's memberships, so they now see zero organizations
+        assert not OrganizationMembership.objects.filter(user=user).exists()
+        response = self.client.get("/api/users/@me/")
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["organizations"]) == 0
+
+        # Now the user can delete their account
+        response = self.client.delete("/api/users/@me/")
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not User.objects.filter(pk=user.pk).exists()

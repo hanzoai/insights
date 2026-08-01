@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { IconX } from '@hanzo/icons'
 import { Button, Divider, Skeleton } from '@hanzo/elements'
 
-import { BurningMoneyMascot } from 'lib/components/mascots'
+import { BurningMoneyHog } from 'lib/components/mascots'
 
-import { PurchaseCreditsModal } from './PurchaseCreditsModal'
 import { billingLogic } from './billingLogic'
+import { PurchaseCreditsModal } from './PurchaseCreditsModal'
 
 export const DEFAULT_ESTIMATED_MONTHLY_CREDIT_AMOUNT_USD = 500
 
@@ -33,7 +33,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                     onClick={() => toggleCreditCTAHeroDismissed(false)}
                 >
                     <span className="flex items-center gap-1.5">
-                        <BurningMoneyMascot
+                        <BurningMoneyHog
                             className="w-8 h-8 group-hover:animate-bounce"
                             style={{ animationDuration: '0.75s' }}
                         />
@@ -68,10 +68,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                                             pay that as soon as possible so we can apply the credits to your account.
                                         </>
                                     ) : (
-                                        <>
-                                            We'll will charge your card on file and we'll email you if there are any
-                                            issues!"
-                                        </>
+                                        <>We'll charge your card on file and we'll email you if there are any issues!</>
                                     )}
                                 </p>
                             </>
@@ -96,7 +93,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                                     {estimatedMonthlyCreditAmountUsd === null ? (
                                         <Skeleton className="inline-block h-4 w-18 rounded align-text-bottom" />
                                     ) : (
-                                        <strong>{estimatedMonthlyCreditAmountUsd.toFixed(0)}/month</strong>
+                                        <strong>${estimatedMonthlyCreditAmountUsd.toFixed(0)}/month</strong>
                                     )}{' '}
                                     over the next year.
                                 </p>
@@ -128,7 +125,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                         )}
                     </div>
                     <div className="flex flex-col justify-center items-end w-30">
-                        <BurningMoneyMascot className="w-full h-auto" />
+                        <BurningMoneyHog className="w-full h-auto" />
                         {creditOverview.status === 'pending' && creditOverview.invoice_url && (
                             <Button
                                 type="primary"

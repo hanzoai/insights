@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
 
-from insights.models import InsightsFunction
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 
 class Command(BaseCommand):
@@ -14,7 +14,7 @@ class Command(BaseCommand):
         silent = options.get("silent", False)
         query = """
         SELECT DISTINCT hf.id
-        FROM insights_insightsfunction hf
+        FROM insights_hogfunction hf
         CROSS JOIN LATERAL jsonb_array_elements(hf.inputs_schema) AS schema
         JOIN insights_integration i
         ON i.id = CAST((hf.inputs -> (schema->>'key')) ->> 'value' AS INTEGER)

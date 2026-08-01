@@ -10,8 +10,8 @@ import {
 } from './cyclotronJobTemplateSuggestionsLogic'
 
 export type CyclotronJobTemplateSuggestionsProps = {
-    templating: 'fn' | 'liquid'
-    setTemplatingEngine?: (templating: 'fn' | 'liquid') => void
+    templating: 'script' | 'liquid'
+    setTemplatingEngine?: (templating: 'script' | 'liquid') => void
     value: string
     onOptionSelect: (option: CyclotronJobTemplateOption) => void
 }
@@ -65,7 +65,7 @@ export function CyclotronJobTemplateSuggestions({
                             value={templating}
                             onChange={setTemplatingEngine}
                             options={[
-                                { label: 'Script', value: 'fn' },
+                                { label: 'Script', value: 'script' },
                                 { label: 'Liquid', value: 'liquid' },
                             ]}
                             tooltip="Change the templating language"

@@ -12,7 +12,7 @@ from llm_gateway.auth.service import AuthService
 
 
 @pytest.fixture(autouse=True)
-def reset_cache() -> Generator[None, None, None]:
+def reset_cache() -> Generator[None]:
     reset_auth_cache()
     yield
     reset_auth_cache()
@@ -163,6 +163,57 @@ class TestAuthCache:
         assert hit is True
         assert cached_user == user
 
+    def test_per_entry_ttl_overrides_default(self) -> None:
+        cache = AuthCache(max_size=100, ttl=900)
+        user = AuthenticatedUser(
+            user_id=1, team_id=2, auth_method="test", distinct_id="test-distinct-id", scopes=["read"]
+        )
+
+        cache.set("key1", user, ttl=1)
+        hit, _ = cache.get("key1")
+        assert hit is True
+
+        time.sleep(1.1)
+
+        hit, cached_user = cache.get("key1")
+        assert hit is False
+        assert cached_user is None
+
+    def test_ttl_clamped_to_token_remaining_lifetime(self) -> None:
+        cache = AuthCache(max_size=100, ttl=900)
+        user = AuthenticatedUser(
+            user_id=1,
+            team_id=2,
+            auth_method="oauth_access_token",
+            distinct_id="test-distinct-id",
+            scopes=["llm_gateway:read"],
+            token_expires_at=datetime.now(UTC) + timedelta(seconds=1),
+        )
+
+        cache.set("short_lived", user, ttl=900)
+        hit, _ = cache.get("short_lived")
+        assert hit is True
+
+        time.sleep(1.1)
+
+        hit, cached_user = cache.get("short_lived")
+        assert hit is False
+        assert cached_user is None
+
+    def test_already_expired_token_not_cached(self) -> None:
+        cache = AuthCache(max_size=100, ttl=60)
+        user = AuthenticatedUser(
+            user_id=1,
+            team_id=2,
+            auth_method="oauth_access_token",
+            distinct_id="test-distinct-id",
+            scopes=["llm_gateway:read"],
+            token_expires_at=datetime.now(UTC) - timedelta(seconds=1),
+        )
+
+        cache.set("already_expired", user, ttl=60)
+        assert cache.size == 0
+
 
 class TestAuthServiceCaching:
     @pytest.fixture
@@ -187,14 +238,15 @@ class TestAuthServiceCaching:
                 "scopes": ["llm_gateway:read"],
                 "current_team_id": 456,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
-        result1 = await auth_service.authenticate("hix_test_key", mock_pool)
+        result1 = await auth_service.authenticate("phx_test_key", mock_pool)
         assert result1 is not None
         assert conn.fetchrow.call_count == 1
 
-        result2 = await auth_service.authenticate("hix_test_key", mock_pool)
+        result2 = await auth_service.authenticate("phx_test_key", mock_pool)
         assert result2 is not None
         assert result2.user_id == 123
         assert conn.fetchrow.call_count == 1
@@ -206,11 +258,11 @@ class TestAuthServiceCaching:
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=None)
 
-        result1 = await auth_service.authenticate("hix_invalid_key", mock_pool)
+        result1 = await auth_service.authenticate("phx_invalid_key", mock_pool)
         assert result1 is None
         assert conn.fetchrow.call_count == 1
 
-        result2 = await auth_service.authenticate("hix_invalid_key", mock_pool)
+        result2 = await auth_service.authenticate("phx_invalid_key", mock_pool)
         assert result2 is None
         assert conn.fetchrow.call_count == 1
 
@@ -226,14 +278,15 @@ class TestAuthServiceCaching:
                 "current_team_id": 456,
                 "application_id": 789,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
-        result1 = await auth_service.authenticate("hia_test_token", mock_pool)
+        result1 = await auth_service.authenticate("pha_test_token", mock_pool)
         assert result1 is not None
         assert conn.fetchrow.call_count == 1
 
-        result2 = await auth_service.authenticate("hia_test_token", mock_pool)
+        result2 = await auth_service.authenticate("pha_test_token", mock_pool)
         assert result2 is not None
         assert result2.user_id == 123
         assert conn.fetchrow.call_count == 1
@@ -245,11 +298,11 @@ class TestAuthServiceCaching:
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=None)
 
-        result1 = await auth_service.authenticate("hia_invalid_token", mock_pool)
+        result1 = await auth_service.authenticate("pha_invalid_token", mock_pool)
         assert result1 is None
         assert conn.fetchrow.call_count == 1
 
-        result2 = await auth_service.authenticate("hia_invalid_token", mock_pool)
+        result2 = await auth_service.authenticate("pha_invalid_token", mock_pool)
         assert result2 is None
         assert conn.fetchrow.call_count == 1
 
@@ -265,14 +318,15 @@ class TestAuthServiceCaching:
                 "current_team_id": 456,
                 "application_id": 789,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
-        result1 = await auth_service.authenticate("hia_no_expiry", mock_pool)
+        result1 = await auth_service.authenticate("pha_no_expiry", mock_pool)
         assert result1 is not None
         assert conn.fetchrow.call_count == 1
 
-        result2 = await auth_service.authenticate("hia_no_expiry", mock_pool)
+        result2 = await auth_service.authenticate("pha_no_expiry", mock_pool)
         assert result2 is not None
         assert conn.fetchrow.call_count == 1
 
@@ -304,8 +358,8 @@ class TestAuthServiceMetrics:
     @pytest.mark.parametrize(
         "token,auth_type",
         [
-            pytest.param("hix_test_key", "personal_api_key", id="personal_api_key"),
-            pytest.param("hia_test_token", "oauth_access_token", id="oauth_access_token"),
+            pytest.param("phx_test_key", "personal_api_key", id="personal_api_key"),
+            pytest.param("pha_test_token", "oauth_access_token", id="oauth_access_token"),
         ],
     )
     async def test_cache_miss_increments_metric(
@@ -322,6 +376,7 @@ class TestAuthServiceMetrics:
                 "application_id": 789,
                 "expires": datetime.now(UTC) + timedelta(hours=1),
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
@@ -334,8 +389,8 @@ class TestAuthServiceMetrics:
     @pytest.mark.parametrize(
         "token,auth_type",
         [
-            pytest.param("hix_test_key", "personal_api_key", id="personal_api_key"),
-            pytest.param("hia_test_token", "oauth_access_token", id="oauth_access_token"),
+            pytest.param("phx_test_key", "personal_api_key", id="personal_api_key"),
+            pytest.param("pha_test_token", "oauth_access_token", id="oauth_access_token"),
         ],
     )
     async def test_cache_hit_increments_metric(
@@ -352,6 +407,7 @@ class TestAuthServiceMetrics:
                 "application_id": 789,
                 "expires": datetime.now(UTC) + timedelta(hours=1),
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
@@ -366,8 +422,8 @@ class TestAuthServiceMetrics:
     @pytest.mark.parametrize(
         "token,auth_type",
         [
-            pytest.param("hix_invalid", "personal_api_key", id="personal_api_key"),
-            pytest.param("hia_invalid", "oauth_access_token", id="oauth_access_token"),
+            pytest.param("phx_invalid", "personal_api_key", id="personal_api_key"),
+            pytest.param("pha_invalid", "oauth_access_token", id="oauth_access_token"),
         ],
     )
     async def test_invalid_auth_increments_metric_on_cache_miss(
@@ -385,8 +441,8 @@ class TestAuthServiceMetrics:
     @pytest.mark.parametrize(
         "token,auth_type",
         [
-            pytest.param("hix_invalid", "personal_api_key", id="personal_api_key"),
-            pytest.param("hia_invalid", "oauth_access_token", id="oauth_access_token"),
+            pytest.param("phx_invalid", "personal_api_key", id="personal_api_key"),
+            pytest.param("pha_invalid", "oauth_access_token", id="oauth_access_token"),
         ],
     )
     async def test_invalid_auth_increments_metric_on_negative_cache_hit(

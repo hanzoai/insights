@@ -12,9 +12,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'cohort'
          AND NOT ("insights_filesystem"."shortcut"
@@ -37,9 +40,14 @@
          "insights_cohort"."created_at",
          "insights_cohort"."is_calculating",
          "insights_cohort"."last_calculation",
+         "insights_cohort"."last_calculation_duration_ms",
          "insights_cohort"."errors_calculating",
          "insights_cohort"."last_error_at",
+         "insights_cohort"."last_backfill_person_properties_at",
+         "insights_cohort"."last_backfill_events_at",
+         "insights_cohort"."last_realtime_cohort_calculation_at",
          "insights_cohort"."is_static",
+         "insights_cohort"."kind",
          "insights_cohort"."cohort_type",
          "insights_cohort"."groups"
   FROM "insights_cohort"
@@ -64,9 +72,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'cohort'
          AND NOT ("insights_filesystem"."shortcut"
@@ -89,9 +100,14 @@
          "insights_cohort"."created_at",
          "insights_cohort"."is_calculating",
          "insights_cohort"."last_calculation",
+         "insights_cohort"."last_calculation_duration_ms",
          "insights_cohort"."errors_calculating",
          "insights_cohort"."last_error_at",
+         "insights_cohort"."last_backfill_person_properties_at",
+         "insights_cohort"."last_backfill_events_at",
+         "insights_cohort"."last_realtime_cohort_calculation_at",
          "insights_cohort"."is_static",
+         "insights_cohort"."kind",
          "insights_cohort"."cohort_type",
          "insights_cohort"."groups"
   FROM "insights_cohort"
@@ -116,9 +132,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'cohort'
          AND NOT ("insights_filesystem"."shortcut"
@@ -138,9 +157,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'cohort'
          AND NOT ("insights_filesystem"."shortcut"
@@ -160,9 +182,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'cohort'
          AND NOT ("insights_filesystem"."shortcut"
@@ -182,9 +207,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'cohort'
          AND NOT ("insights_filesystem"."shortcut"
@@ -207,9 +235,14 @@
          "insights_cohort"."created_at",
          "insights_cohort"."is_calculating",
          "insights_cohort"."last_calculation",
+         "insights_cohort"."last_calculation_duration_ms",
          "insights_cohort"."errors_calculating",
          "insights_cohort"."last_error_at",
+         "insights_cohort"."last_backfill_person_properties_at",
+         "insights_cohort"."last_backfill_events_at",
+         "insights_cohort"."last_realtime_cohort_calculation_at",
          "insights_cohort"."is_static",
+         "insights_cohort"."kind",
          "insights_cohort"."cohort_type",
          "insights_cohort"."groups"
   FROM "insights_cohort"
@@ -237,9 +270,14 @@
          "insights_cohort"."created_at",
          "insights_cohort"."is_calculating",
          "insights_cohort"."last_calculation",
+         "insights_cohort"."last_calculation_duration_ms",
          "insights_cohort"."errors_calculating",
          "insights_cohort"."last_error_at",
+         "insights_cohort"."last_backfill_person_properties_at",
+         "insights_cohort"."last_backfill_events_at",
+         "insights_cohort"."last_realtime_cohort_calculation_at",
          "insights_cohort"."is_static",
+         "insights_cohort"."kind",
          "insights_cohort"."cohort_type",
          "insights_cohort"."groups"
   FROM "insights_cohort"
@@ -267,9 +305,14 @@
          "insights_cohort"."created_at",
          "insights_cohort"."is_calculating",
          "insights_cohort"."last_calculation",
+         "insights_cohort"."last_calculation_duration_ms",
          "insights_cohort"."errors_calculating",
          "insights_cohort"."last_error_at",
+         "insights_cohort"."last_backfill_person_properties_at",
+         "insights_cohort"."last_backfill_events_at",
+         "insights_cohort"."last_realtime_cohort_calculation_at",
          "insights_cohort"."is_static",
+         "insights_cohort"."kind",
          "insights_cohort"."cohort_type",
          "insights_cohort"."groups"
   FROM "insights_cohort"
@@ -297,9 +340,14 @@
          "insights_cohort"."created_at",
          "insights_cohort"."is_calculating",
          "insights_cohort"."last_calculation",
+         "insights_cohort"."last_calculation_duration_ms",
          "insights_cohort"."errors_calculating",
          "insights_cohort"."last_error_at",
+         "insights_cohort"."last_backfill_person_properties_at",
+         "insights_cohort"."last_backfill_events_at",
+         "insights_cohort"."last_realtime_cohort_calculation_at",
          "insights_cohort"."is_static",
+         "insights_cohort"."kind",
          "insights_cohort"."cohort_type",
          "insights_cohort"."groups"
   FROM "insights_cohort"

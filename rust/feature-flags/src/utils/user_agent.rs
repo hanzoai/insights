@@ -70,6 +70,15 @@ impl UserAgentInfo {
 
     /// Parse a Insights SDK User-Agent (after stripping "insights-" prefix).
     fn parse_insights_sdk(rest: &str) -> Self {
+        if let Some(legacy_ruby_version) = Self::legacy_ruby_version(rest) {
+            return Self {
+                sdk_name: Some("insights-ruby"),
+                sdk_version: Some(legacy_ruby_version.to_string()),
+                is_browser: false,
+                runtime: RuntimeType::Server,
+            };
+        }
+
         // Pattern: <sdk-name>/<version> [optional extra info]
         let Some(slash_idx) = rest.find('/') else {
             return Self::unknown();
@@ -98,6 +107,7 @@ impl UserAgentInfo {
             "node" => ("insights-node", RuntimeType::Server),
             "dotnet" => ("insights-dotnet", RuntimeType::Server),
             "elixir" => ("insights-elixir", RuntimeType::Server),
+            "rs" => ("insights-rs", RuntimeType::Server),
             // Deprecated: insights-server users are migrating to insights-java
             "server" => ("insights-server", RuntimeType::Server),
             // Client-side SDKs (mobile and browser)
@@ -115,6 +125,17 @@ impl UserAgentInfo {
             sdk_version: Some(version.to_string()),
             is_browser: false,
             runtime,
+        }
+    }
+
+    fn legacy_ruby_version(rest: &str) -> Option<&str> {
+        let version = rest.strip_prefix("ruby")?;
+        let first = version.chars().next()?;
+
+        if first.is_ascii_digit() {
+            Some(version.split_whitespace().next().unwrap_or(version))
+        } else {
+            None
         }
     }
 
@@ -204,6 +225,18 @@ mod tests {
         RuntimeType::Server
     )]
     #[case(
+        "insights-ruby2.0.0",
+        Some("insights-ruby"),
+        Some("2.0.0"),
+        RuntimeType::Server
+    )]
+    #[case(
+        "insights-ruby2.0.0 (Linux)",
+        Some("insights-ruby"),
+        Some("2.0.0"),
+        RuntimeType::Server
+    )]
+    #[case(
         "insights-go/1.0.0",
         Some("insights-go"),
         Some("1.0.0"),
@@ -231,6 +264,12 @@ mod tests {
         "insights-elixir/0.2.0",
         Some("insights-elixir"),
         Some("0.2.0"),
+        RuntimeType::Server
+    )]
+    #[case(
+        "insights-rs/0.10.0",
+        Some("insights-rs"),
+        Some("0.10.0"),
         RuntimeType::Server
     )]
     #[case(
@@ -319,6 +358,8 @@ mod tests {
 
     #[rstest]
     #[case("insights-python", None, None)] // No slash
+    #[case("insights-ruby", None, None)] // Legacy Ruby format still needs a version
+    #[case("insights-rubybeta", None, None)] // Legacy Ruby version must start with a digit
     #[case("insights-python/", None, None)] // Empty version
     #[case("insights-/1.0.0", None, None)] // Empty SDK name
     #[case("", None, None)] // Empty string
@@ -349,12 +390,14 @@ mod tests {
     #[case(Some("insights-flutter/4.0.0"), "insights-flutter")]
     #[case(Some("insights-python/1.4.0"), "insights-python")]
     #[case(Some("insights-ruby/2.0.0"), "insights-ruby")]
+    #[case(Some("insights-ruby2.0.0"), "insights-ruby")]
     #[case(Some("insights-php/3.0.0"), "insights-php")]
     #[case(Some("insights-java/1.0.0"), "insights-java")]
     #[case(Some("insights-go/0.1.0"), "insights-go")]
     #[case(Some("insights-node/2.2.0"), "insights-node")]
     #[case(Some("insights-dotnet/1.0.0"), "insights-dotnet")]
     #[case(Some("insights-elixir/0.2.0"), "insights-elixir")]
+    #[case(Some("insights-rs/0.10.0"), "insights-rs")]
     #[case(Some("insights-server/1.0.0"), "insights-server")]
     #[case(
         Some("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"),
@@ -380,6 +423,8 @@ mod tests {
     #[rstest]
     #[case("insights-python/3.0.0", Some("insights-python"))]
     #[case("insights-node/1.2.3", Some("insights-node"))]
+    #[case("insights-ruby2.0.0", Some("insights-ruby"))]
+    #[case("insights-rs/0.10.0", Some("insights-rs"))]
     #[case("insights-android/3.0.0", Some("insights-android"))]
     #[case("insights-server/1.0.0", Some("insights-server"))]
     #[case("Mozilla/5.0 (Windows NT 10.0; Win64; x64)", Some("web"))]

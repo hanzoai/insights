@@ -7,10 +7,10 @@ import { Tag } from 'lib/elements/Tag'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
-import { Query } from '~/queries/Query/Query'
 import { Timings } from '~/queries/nodes/DataNode/ElapsedTime'
+import { Query } from '~/queries/Query/Query'
 import { InsightsQLMetadataResponse, InsightVizNode, Node, NodeKind, QueryTiming } from '~/queries/schema/schema-general'
-import { isDataTableNode, isInsightQueryNode, isInsightVizNode } from '~/queries/utils'
+import { isDataTableNode, isInsightsQLQuery, isInsightQueryNode, isInsightVizNode } from '~/queries/utils'
 
 import { QueryLogTable } from './QueryLogTable'
 
@@ -36,6 +36,17 @@ function toLine(insightsql: string, position: number): number {
 function toColumn(insightsql: string, position: number): number {
     return toLineColumn(insightsql, position).column
 }
+
+export function getExecutedQueryTabLabel(query: Node): string {
+    const hogQLQuery = isInsightsQLQuery(query)
+        ? query
+        : (isDataTableNode(query) || isInsightVizNode(query)) && isInsightsQLQuery(query.source)
+          ? query.source
+          : null
+
+    return hogQLQuery?.connectionId ? 'Raw SQL' : 'Datastore'
+}
+
 interface QueryTabsProps<Q extends Node> {
     query: Q
     queryKey: `new-${string}`
@@ -54,7 +65,7 @@ export function QueryTabs<Q extends Node>({
     const clickHouseTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './datastore_execute')?.t ?? 0
     const explainTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './explain')?.t ?? 0
     const totalTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === '.')?.t ?? 0
-    const insightsQLTime = totalTime - explainTime - clickHouseTime
+    const hogQLTime = totalTime - explainTime - clickHouseTime
     const tabs: TabsProps<string>['tabs'] = query
         ? [
               response?.error && {
@@ -124,7 +135,7 @@ export function QueryTabs<Q extends Node>({
                   label: (
                       <>
                           SQL
-                          {insightsQLTime && <Tag className="ml-2">{Math.floor(insightsQLTime * 10) / 10}s</Tag>}
+                          {hogQLTime && <Tag className="ml-2">{Math.floor(hogQLTime * 10) / 10}s</Tag>}
                       </>
                   ),
                   content: (
@@ -141,10 +152,10 @@ export function QueryTabs<Q extends Node>({
                   key: 'datastore',
                   label: (
                       <>
-                          Datastore
-                          {clickHouseTime && (
+                          {getExecutedQueryTabLabel(query)}
+                          {clickHouseTime ? (
                               <Tag className="ml-2">{Math.floor(clickHouseTime * 10) / 10}s</Tag>
-                          )}
+                          ) : null}
                       </>
                   ),
                   content: (

@@ -12,7 +12,7 @@ export const replicatorPlugin: LegacyDestinationPlugin = {
         id: 'plugin-insights-plugin-replicator',
         name: 'Replicator',
         description: 'Replicate Insights event stream in another Insights instance',
-        icon_url: 'https://raw.githubusercontent.com/hanzoai/insights-plugin-replicator/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/Insights/insights-plugin-replicator/master/logo.png',
         category: [],
         code_language: 'javascript',
         code: 'return event',
@@ -29,7 +29,7 @@ export const replicatorPlugin: LegacyDestinationPlugin = {
             {
                 templating: false,
                 key: 'project_api_key',
-                label: 'Project API Key',
+                label: 'Project token',
                 type: 'string',
                 description: 'Grab it from e.g. https://insights.yourcompany.com/project/settings',
                 required: true,

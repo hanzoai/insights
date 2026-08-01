@@ -1,7 +1,9 @@
-import insights from '@hanzo/insights'
+import type { BuiltLogic } from 'kea'
+import insights from 'insights-js'
 
+import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { humanFriendlyDuration } from 'lib/utils'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 
 import { VisualizationBlock } from '~/queries/schema/schema-assistant-artifacts'
 import {
@@ -36,16 +38,20 @@ import { isInsightsQLQuery, isInsightQueryNode } from '~/queries/utils'
 import { ActionType, DashboardType, EventDefinition, QueryBasedInsightModel } from '~/types'
 
 import { Scene } from '../sceneTypes'
-import { EnhancedToolCall } from './Thread'
 import { MODE_DEFINITIONS } from './max-constants'
+import { EnhancedToolCall } from './max-constants'
 import { SuggestionGroup } from './maxLogic'
 import {
+    EvaluationRuntime,
+    InsightWithQuery,
     MaxActionContext,
     MaxContextType,
     MaxDashboardContext,
     MaxErrorTrackingIssueContext,
+    MaxEvaluationContext,
     MaxEventContext,
     MaxInsightContext,
+    MaxNotebookContext,
     MaxUIContext,
 } from './maxTypes'
 
@@ -117,6 +123,41 @@ export function threadEndsWithMultiQuestionForm(messages: RootAssistantMessage[]
     return false
 }
 
+export interface PendingClientToolCall {
+    toolName: string
+    toolCallId: string
+    args: Record<string, any>
+}
+
+// A client tool call is pending when the current turn contains it with no result message.
+// The whole turn is scanned, not just the last message: a sibling server-side tool's result
+// may land after the assistant message carrying the client call.
+export function findPendingClientToolCall(
+    messages: RootAssistantMessage[],
+    clientToolNames: Set<string>
+): PendingClientToolCall | null {
+    const lastHumanIndex = messages.findLastIndex(isHumanMessage)
+    const currentTurn = messages.slice(lastHumanIndex + 1)
+
+    const completedToolCallIds = new Set<string>()
+    for (const message of messages) {
+        if (message.type === AssistantMessageType.ToolCall && 'tool_call_id' in message) {
+            completedToolCallIds.add((message as { tool_call_id: string }).tool_call_id)
+        }
+    }
+    for (const message of currentTurn) {
+        if (!isAssistantMessage(message) || !message.tool_calls?.length) {
+            continue
+        }
+        for (const toolCall of message.tool_calls) {
+            if (clientToolNames.has(toolCall.name) && !completedToolCallIds.has(toolCall.id)) {
+                return { toolName: toolCall.name, toolCallId: toolCall.id, args: toolCall.args ?? {} }
+            }
+        }
+    }
+    return null
+}
+
 export function castAssistantQuery(query: AnyAssistantGeneratedQuery | QuerySchemaRoot | null): QuerySchemaRoot | null {
     if (query) {
         return query as QuerySchemaRoot
@@ -144,37 +185,6 @@ export function getSlackThreadUrl(slackThreadKey: string, slackWorkspaceDomain?:
     return `https://${domain}.slack.com/archives/${channel}/${urlTs}`
 }
 
-/**
- * Checks if a suggestion requires user input.
- * @param suggestion - The suggestion to check.
- * @returns True if the suggestion requires input, false otherwise.
- */
-export function checkSuggestionRequiresUserInput(suggestion: string): boolean {
-    const matches = suggestion.match(/<|>|…/g)
-    return !!matches && matches.length > 0
-}
-
-/**
- * Strips the user input placeholder (`<`, `>`, `…`) from a suggestion.
- * @param suggestion - The suggestion to strip.
- * @returns The stripped suggestion.
- */
-export function stripSuggestionPlaceholders(suggestion: string): string {
-    return `${suggestion
-        .replace(/<[^>]*>/g, '')
-        .replace(/…$/, '')
-        .trim()} `
-}
-
-/**
- * Formats a suggestion by stripping the placeholder characters (`<`, `>`) from a suggestion.
- * @param suggestion - The suggestion to format.
- * @returns The formatted suggestion.
- */
-export function formatSuggestion(suggestion: string): string {
-    return `${suggestion.replace(/[<>]/g, '').replace(/…$/, '').trim()}${suggestion.endsWith('…') ? '…' : ''}`
-}
-
 // Utility functions for transforming data to max context
 export const insightToMaxContext = (
     insight: Partial<QueryBasedInsightModel>,
@@ -195,13 +205,15 @@ export const insightToMaxContext = (
     }
 }
 
-export const dashboardToMaxContext = (dashboard: DashboardType<QueryBasedInsightModel>): MaxDashboardContext => {
+export const dashboardToMaxContext = (dashboard: DashboardType<InsightWithQuery>): MaxDashboardContext => {
     return {
         type: MaxContextType.DASHBOARD,
         id: dashboard.id,
         name: dashboard.name,
         description: dashboard.description,
-        insights: dashboard.tiles.filter((tile) => tile.insight).map((tile) => insightToMaxContext(tile.insight!)),
+        insights: (dashboard.tiles ?? [])
+            .filter((tile) => tile.insight)
+            .map((tile) => insightToMaxContext(tile.insight!)),
         filters: dashboard.filters,
     }
 }
@@ -235,6 +247,30 @@ export const errorTrackingIssueToMaxContextPayload = (issue: {
     }
 }
 
+export const notebookToMaxContextPayload = (notebook: {
+    short_id: string
+    title?: string | null
+}): MaxNotebookContext => ({
+    type: MaxContextType.NOTEBOOK,
+    id: notebook.short_id,
+    name: notebook.title,
+})
+
+export const evaluationToMaxContextPayload = (evaluation: {
+    id: string
+    name?: string | null
+    description?: string | null
+    evaluation_type: EvaluationRuntime
+    hog_source?: string | null
+}): MaxEvaluationContext => ({
+    type: MaxContextType.EVALUATION,
+    id: evaluation.id,
+    name: evaluation.name,
+    description: evaluation.description,
+    evaluation_type: evaluation.evaluation_type,
+    hog_source: evaluation.hog_source,
+})
+
 /**
  * Generic context that can be passed when opening Insights AI.
  */
@@ -243,6 +279,14 @@ export interface MaxOpenContext {
     errorTrackingIssue?: {
         id: string
         name?: string | null
+    }
+    /** Evaluation context */
+    evaluation?: {
+        id: string
+        name?: string | null
+        description?: string | null
+        evaluation_type: EvaluationRuntime
+        hog_source?: string | null
     }
 }
 
@@ -254,6 +298,10 @@ export function convertToMaxUIContext(openContext: MaxOpenContext): Partial<MaxU
 
     if (openContext.errorTrackingIssue) {
         uiContext.error_tracking_issues = [errorTrackingIssueToMaxContextPayload(openContext.errorTrackingIssue)]
+    }
+
+    if (openContext.evaluation) {
+        uiContext.evaluations = [evaluationToMaxContextPayload(openContext.evaluation)]
     }
 
     return uiContext
@@ -290,17 +338,24 @@ export function captureFeedback(
             $ai_feedback_text: feedbackText,
             $ai_session_id: conversationId,
             $ai_trace_id: traceId,
+            ai_product: 'insights_ai',
         })
     }
 }
 
 /** Maps a scene ID to the agent mode that should be activated for that scene */
-export function getAgentModeForScene(sceneId: Scene | null): AgentMode | null {
+export function getAgentModeForScene(
+    sceneId: Scene | null,
+    featureFlags: Record<string, boolean | string>
+): AgentMode | null {
     if (!sceneId) {
         return null
     }
     for (const [mode, def] of Object.entries(MODE_DEFINITIONS)) {
         if (def.scenes?.has(sceneId)) {
+            if (def.flag && !featureFlags[FEATURE_FLAGS[def.flag]]) {
+                return null
+            }
             return mode as AgentMode
         }
     }
@@ -310,6 +365,9 @@ export function getAgentModeForScene(sceneId: Scene | null): AgentMode | null {
 export const visualizationTypeToQuery = (
     visualization: VisualizationItem | VisualizationArtifactContent | VisualizationBlock
 ): QuerySchema | null => {
+    if (!visualization) {
+        return null
+    }
     const source = castAssistantQuery('answer' in visualization ? visualization.answer : visualization.query)
     if (isInsightsQLQuery(source)) {
         return { kind: NodeKind.DataVisualizationNode, source: source } satisfies DataVisualizationNode
@@ -318,4 +376,17 @@ export const visualizationTypeToQuery = (
         return { kind: NodeKind.InsightVizNode, source, showHeader: true } satisfies InsightVizNode
     }
     return source
+}
+
+/**
+ * Whether it's safe to read auto-context from the active scene logic. `sceneLogic`'s
+ * `activeSceneLogic` is built but may already be unmounted mid scene-transition (e.g. navigating
+ * away from a dashboard); reading its selectors/values then throws `[KEA] Can not find path`
+ * because the reducer path is gone from the store. Check this at read time — mounted state changes
+ * without a selector-input change, so it can't be memoized upstream.
+ */
+export function activeSceneLogicHasMaxContext(
+    activeSceneLogic: BuiltLogic | null | undefined
+): activeSceneLogic is BuiltLogic {
+    return !!activeSceneLogic?.isMounted() && 'maxContext' in activeSceneLogic.selectors
 }

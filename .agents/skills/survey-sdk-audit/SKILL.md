@@ -13,10 +13,10 @@ Use this skill when auditing survey feature support across Insights SDKs for `su
 
 Before starting, verify the SDK paths are accessible. Run `ls` on each path:
 
-- `$INSIGHTS_JS_PATH`
-- `$INSIGHTS_IOS_PATH`
-- `$INSIGHTS_ANDROID_PATH`
-- `$INSIGHTS_FLUTTER_PATH`
+- `$POSTFN_JS_PATH`
+- `$POSTFN_IOS_PATH`
+- `$POSTFN_ANDROID_PATH`
+- `$POSTFN_FLUTTER_PATH`
 
 If any path is empty or doesn't exist, ask the user: "I need the path to [SDK repo] on your machine. Where is it located?"
 
@@ -25,10 +25,10 @@ Once you have all paths, ask the user if they'd like to save them for future ses
 ```json
 {
   "env": {
-    "INSIGHTS_JS_PATH": "/path/to/insights-js",
-    "INSIGHTS_IOS_PATH": "/path/to/insights-ios",
-    "INSIGHTS_ANDROID_PATH": "/path/to/insights-android",
-    "INSIGHTS_FLUTTER_PATH": "/path/to/insights-flutter"
+    "POSTFN_JS_PATH": "/path/to/insights-js",
+    "POSTFN_IOS_PATH": "/path/to/insights-ios",
+    "POSTFN_ANDROID_PATH": "/path/to/insights-android",
+    "POSTFN_FLUTTER_PATH": "/path/to/insights-flutter"
   },
   "permissions": {
     "allow": [
@@ -49,7 +49,7 @@ Once you have all paths, ask the user if they'd like to save them for future ses
 
 ## Using SDK Paths in Commands
 
-**IMPORTANT**: Environment variables like `$INSIGHTS_JS_PATH` do NOT expand reliably in Bash tool commands.
+**IMPORTANT**: Environment variables like `$POSTFN_JS_PATH` do NOT expand reliably in Bash tool commands.
 
 Instead of bash commands, prefer:
 
@@ -59,63 +59,31 @@ Instead of bash commands, prefer:
 If you must use bash, first expand the variable:
 
 ```bash
-echo $INSIGHTS_JS_PATH
+echo $POSTFN_JS_PATH
 ```
 
 Then use the echoed path directly in subsequent commands.
 
-## Tracking Issue
+## Issue Visibility
 
-All survey SDK feature parity work is tracked in:
-**https://github.com/Hanzo Insights/insights/issues/45658**
-
-When creating new issues for missing features:
-
-1. Create the issue in the appropriate SDK repo (see labels below)
-2. Add the issue to the tracking issue's "Tracked Issues" section as a task list item:
-
-   ```markdown
-   - [ ] https://github.com/Hanzo Insights/repo/issues/123
-   ```
-
-   Note: GitHub automatically expands issue links to show titles, so no description is needed.
-
-3. Update the relevant feature table in the tracking issue if needed
-
-To update the tracking issue body:
-
-**Step 1**: Fetch the current body to a temp file:
-
-```bash
-gh api repos/Insights/insights/issues/45658 --jq '.body' > /tmp/tracking_issue_body.md
-```
-
-**Step 2**: Use the Edit tool to modify `/tmp/tracking_issue_body.md`. This ensures the user can review the diff of your changes before proceeding.
-
-**Step 3**: After the user has approved the edits, push the update:
-
-```bash
-gh api repos/Insights/insights/issues/45658 -X PATCH -f body="$(cat /tmp/tracking_issue_body.md)"
-```
-
-**Important**: Always use the Edit tool on the temp file rather than writing directly. This gives the user visibility into exactly what changes are being made to the tracking issue.
+Survey SDK feature parity has no central tracking issue. Visibility lives at repo level: `surveyVersionRequirements.ts` links unsupported SDKs to their issues, and each new issue cross-links its siblings via a `## Related` section (see the issue template below).
 
 ## SDK Paths and Changelogs
 
 | SDK                  | Code Path                                | Changelog                                             |
 | -------------------- | ---------------------------------------- | ----------------------------------------------------- |
-| insights-js (browser) | `$INSIGHTS_JS_PATH/packages/browser`      | `$INSIGHTS_JS_PATH/packages/browser/CHANGELOG.md`      |
-| insights-react-native | `$INSIGHTS_JS_PATH/packages/react-native` | `$INSIGHTS_JS_PATH/packages/react-native/CHANGELOG.md` |
-| insights-ios          | `$INSIGHTS_IOS_PATH`                      | `$INSIGHTS_IOS_PATH/CHANGELOG.md`                      |
-| insights-android      | `$INSIGHTS_ANDROID_PATH`                  | `$INSIGHTS_ANDROID_PATH/CHANGELOG.md`                  |
-| insights-flutter      | `$INSIGHTS_FLUTTER_PATH`                  | `$INSIGHTS_FLUTTER_PATH/CHANGELOG.md`                  |
+| insights-js (browser) | `$POSTFN_JS_PATH/packages/browser`      | `$POSTFN_JS_PATH/packages/browser/CHANGELOG.md`      |
+| insights-react-native | `$POSTFN_JS_PATH/packages/react-native` | `$POSTFN_JS_PATH/packages/react-native/CHANGELOG.md` |
+| insights-ios          | `$POSTFN_IOS_PATH`                      | `$POSTFN_IOS_PATH/CHANGELOG.md`                      |
+| insights-android      | `$POSTFN_ANDROID_PATH`                  | `$POSTFN_ANDROID_PATH/CHANGELOG.md`                  |
+| insights-flutter      | `$POSTFN_FLUTTER_PATH`                  | `$POSTFN_FLUTTER_PATH/CHANGELOG.md`                  |
 
 ## Flutter Native Dependencies
 
 Flutter wraps native SDKs. Check dependency versions in:
 
-- iOS: `$INSIGHTS_FLUTTER_PATH/ios/insights_flutter.podspec` (look for `s.dependency 'Insights'`)
-- Android: `$INSIGHTS_FLUTTER_PATH/android/build.gradle` (look for `insights-android` dependency)
+- iOS: `$POSTFN_FLUTTER_PATH/ios/insights_flutter.podspec` (look for `s.dependency 'Insights'`)
+- Android: `$POSTFN_FLUTTER_PATH/android/build.gradle` (look for `insights-android` dependency)
 
 ## Audit Process
 
@@ -150,7 +118,7 @@ git tag --contains COMMIT_HASH | sort -V | head -3
 
 ```bash
 # Find when Flutter started requiring iOS version X.Y.Z
-cd $INSIGHTS_FLUTTER_PATH && git log --oneline -p -- "ios/insights_flutter.podspec" | grep -B10 "X.Y.Z"
+cd $POSTFN_FLUTTER_PATH && git log --oneline -p -- "ios/insights_flutter.podspec" | grep -B10 "X.Y.Z"
 
 # Get the Flutter version for that commit
 git tag --contains COMMIT_HASH | sort -V | head -1
@@ -160,14 +128,24 @@ git tag --contains COMMIT_HASH | sort -V | head -1
 
 **CRITICAL**: Having a field in a data model does NOT mean the feature is implemented. You must check the actual filtering/matching logic.
 
+**SDK rendering capabilities:**
+
+- **insights-js (browser)**: Built-in survey rendering (HTML/CSS popup)
+- **insights-react-native**: Built-in survey rendering (React Native components in `packages/react-native/src/surveys/`)
+- **insights-ios**: Built-in survey rendering (SwiftUI views in `Insights/Surveys/` — `SurveySheet.swift`, `QuestionTypes.swift`, `MultipleChoiceOptions.swift`)
+- **insights-android**: **No built-in UI** — pure delegate pattern. Exposes display models (`InsightsDisplaySurvey`, `InsightsDisplayChoiceQuestion`, etc.) for developers to render themselves. Use `issue: false` for rendering-only features.
+- **insights-flutter**: Built-in survey rendering (Flutter widgets in `lib/src/surveys/widgets/` — `survey_bottom_sheet.dart`, `choice_question.dart`)
+
+For SDKs with built-in rendering, a feature must be **actually implemented in the rendering code**, not just present as a field on the data model. For Android (delegate-only), exposing the field on the display model is sufficient — mark as `issue: false` with a comment.
+
 Key files to check for survey filtering logic:
 
-- **insights-js (browser)**: `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - utility functions like `canActivateRepeatedly`, `getSurveySeen`, `hasEvents`
-- **insights-js (browser)**: `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys.tsx` - main survey logic
-- **insights-react-native**: `$INSIGHTS_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts` - main filtering logic
-- **insights-react-native**: `$INSIGHTS_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - utility functions like `canActivateRepeatedly`, `hasEvents`
-- **insights-ios**: `$INSIGHTS_IOS_PATH/Insights/Surveys/InsightsSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
-- **insights-android**: `$INSIGHTS_ANDROID_PATH/insights-android/src/main/java/com/insights/android/surveys/InsightsSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
+- **insights-js (browser)**: `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - utility functions like `canActivateRepeatedly`, `getSurveySeen`, `hasEvents`
+- **insights-js (browser)**: `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys.tsx` - main survey logic
+- **insights-react-native**: `$POSTFN_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts` - main filtering logic
+- **insights-react-native**: `$POSTFN_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - utility functions like `canActivateRepeatedly`, `hasEvents`
+- **insights-ios**: `$POSTFN_IOS_PATH/Insights/Surveys/InsightsSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
+- **insights-android**: `$POSTFN_ANDROID_PATH/insights-android/src/main/java/com/insights/android/surveys/InsightsSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
 
 **Key utility functions to compare across SDKs:**
 
@@ -179,10 +157,19 @@ Key files to check for survey filtering logic:
 
 **Example pitfall 2**: The browser `canActivateRepeatedly` checks THREE conditions: (1) event repeatedActivation, (2) `schedule === 'always'`, (3) survey in progress. Mobile SDKs may only check condition (1), missing the `schedule` check entirely.
 
+**Key files to check for survey rendering logic:**
+
+- **insights-js (browser)**: `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - `getDisplayOrderQuestions()`, `getDisplayOrderChoices()`
+- **insights-react-native**: `$POSTFN_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - `getDisplayOrderQuestions()`, `getDisplayOrderChoices()`
+- **insights-ios**: `$POSTFN_IOS_PATH/Insights/Surveys/QuestionTypes.swift` - `SingleChoiceQuestionView`, `MultipleChoiceQuestionView`; `$POSTFN_IOS_PATH/Insights/Surveys/SurveySheet.swift` - question ordering
+- **insights-android**: No built-in UI — only check display model exposure in `$POSTFN_ANDROID_PATH/insights/src/main/java/com/insights/surveys/InsightsDisplaySurveyQuestion.kt` and `InsightsDisplaySurveyAppearance.kt`
+- **insights-flutter**: `$POSTFN_FLUTTER_PATH/lib/src/surveys/widgets/survey_bottom_sheet.dart` - question ordering; `$POSTFN_FLUTTER_PATH/lib/src/surveys/widgets/choice_question.dart` - choice rendering
+
 What to look for:
 
 - Is the field parsed from JSON into the model? (necessary but not sufficient)
 - Is the field used in filtering logic like `getActiveMatchingSurveys()`?
+- **For rendering features**: Is the field actually used by the built-in UI? (check rendering code, not just data models)
 - Does the logic match the reference implementation behavior?
 - Test files don't count as implementation
 
@@ -192,8 +179,8 @@ What to look for:
 
 When auditing a feature:
 
-1. First check `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys.ts` to understand the complete, correct behavior
-2. Then compare mobile SDKs against insights-react-native (`$INSIGHTS_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts`) which is the reference for mobile-specific implementations
+1. First check `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys.ts` to understand the complete, correct behavior
+2. Then compare mobile SDKs against insights-react-native (`$POSTFN_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts`) which is the reference for mobile-specific implementations
 
 ## Web-Only vs Cross-Platform Features
 
@@ -218,7 +205,7 @@ For each feature, produce:
         'insights_flutter': 'X.Y.Z',  // add comment: first version to require native SDK >= X.Y
     },
     unsupportedSdks: [
-        { sdk: 'sdk-name', issue: 'https://github.com/Hanzo Insights/repo/issues/123' },  // needs implementation
+        { sdk: 'sdk-name', issue: 'https://github.com/Insights/repo/issues/123' },  // needs implementation
         { sdk: 'sdk-name', issue: false },  // not applicable (e.g., web-only feature)
     ],
     check: (s) => ...,
@@ -271,7 +258,7 @@ gh issue create --repo Insights/insights-flutter --label "Survey" --label "enhan
 ```markdown
 ## 🚨 IMPORTANT
 
-This issue is likely user-facing in the main Insights app, see [`surveyVersionRequirements.ts`](https://github.com/Hanzo Insights/insights/blob/main/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
+This issue is likely user-facing in the main Insights app, see [`surveyVersionRequirements.ts`](https://github.com/Insights/insights/blob/master/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
 
 ## Summary
 
@@ -290,11 +277,29 @@ The [SDK] SDK does not support [feature] for surveys.
 See insights-js browser: `packages/browser/src/extensions/surveys.ts`
 For mobile-specific patterns, see insights-react-native: `packages/react-native/src/surveys/getActiveMatchingSurveys.ts`
 
-## Tracking
+## Related
 
-This is tracked in the survey SDK feature parity issue: https://github.com/Hanzo Insights/insights/issues/45658
+- [links to the sibling SDK issues created for the same feature — list the ones that exist at creation time; the rest are backfilled below]
 
 _This issue was generated by Claude using the `/survey-sdk-audit` skill._
+```
+
+### Backfill Sibling Links
+
+Issues are created one at a time, so earlier issues cannot link siblings that do not exist yet. After creating all issues for the feature, backfill each issue's `## Related` section so every issue links every sibling:
+
+**Step 1**: Fetch the current body to a temp file:
+
+```bash
+gh issue view 123 --repo Insights/insights-ios --json body --jq '.body' > /tmp/issue_body.md
+```
+
+**Step 2**: Use the Edit tool on the temp file to fill in the sibling links (and remove the placeholder). This lets the user review the diff before anything is pushed.
+
+**Step 3**: Push the update:
+
+```bash
+gh issue edit 123 --repo Insights/insights-ios --body-file /tmp/issue_body.md
 ```
 
 ## Completion Checklist
@@ -310,7 +315,8 @@ Before finishing the audit, verify all steps are complete:
 - [ ] **Search for existing issues** - Before creating new ones
 - [ ] **Create GitHub issues** - For any unsupported SDKs (with proper labels)
 - [ ] **Update surveyVersionRequirements.ts** - Fix versions and add issue links to unsupportedSdks
-- [ ] **Update tracking issue** - Add new issues to https://github.com/Hanzo Insights/insights/issues/45658
+- [ ] **Regenerate SDK parity docs** - Run `pnpm --filter=@hanzo/frontend build:survey-sdk-docs` to update `docs/published/docs/surveys/sdk-feature-support.mdx`
+- [ ] **Backfill sibling links** - After all issues are created, update each issue's Related section so every issue links every sibling (see Backfill Sibling Links)
 
 ## Common Pitfalls
 
@@ -321,6 +327,8 @@ Before finishing the audit, verify all steps are complete:
 5. **Flutter inherits from native** - its "support" depends on iOS/Android SDK versions it requires
 6. **Always search for existing issues first** - before creating new GitHub issues
 7. **Compare utility function implementations** - functions like `canActivateRepeatedly` may have different logic across SDKs; browser is the source of truth
+8. **Built-in UI ≠ delegate** - iOS, React Native, and Flutter have built-in survey rendering; Android is delegate-only (no built-in UI). A field on the display model is sufficient for Android (`issue: false`) but for SDKs with built-in rendering, the rendering code must actually use the field
+9. **Check rendering code, not just models** - e.g., iOS exposes `shuffleOptions` on `InsightsDisplayChoiceQuestion` but the SwiftUI `QuestionTypes.swift` completely ignores it when rendering choices
 
 ## Post-Audit: Skill Improvement
 

@@ -13,7 +13,15 @@ import { iconForType } from './defaultTree'
 import { FolderState } from './types'
 
 // Hardcoded category order - categories not in this list will be sorted alphabetically after these
-export const CATEGORY_ORDER = ['Analytics', 'AI Analytics', 'Behavior', 'Features', 'Tools', 'Unreleased']
+export const CATEGORY_ORDER = [
+    'Analytics',
+    'AI engineering',
+    'Behavior',
+    'App monitoring',
+    'Features',
+    'Tools',
+    'Unreleased',
+]
 
 export function getCategoryOrder(category: string | undefined): number {
     if (!category) {
@@ -25,7 +33,7 @@ export function getCategoryOrder(category: string | undefined): number {
 
 // Define the order of categories in the data management panel
 const DATA_MANAGEMENT_PANEL_ORDER: Record<string, number> = {
-    'Data Pipeline': 1,
+    Pipeline: 1,
     Schema: 2,
     Tools: 3,
     Metadata: 4,
@@ -44,6 +52,8 @@ export interface ConvertProps {
     users?: Record<string, UserBasicType>
     foldersFirst?: boolean
     allShortcuts?: boolean
+    /** Skip injecting category header rows, listing all items in sequence instead. */
+    disableCategories?: boolean
 }
 
 export function getItemId(item: FileSystemImport | FileSystemEntry, protocol = 'project://'): string {
@@ -114,13 +124,17 @@ export function convertFileSystemEntryToTreeDataItem({
     users,
     foldersFirst = true,
     allShortcuts = false,
+    disableCategories = false,
 }: ConvertProps): TreeDataItem[] {
     function itemToTreeDataItem(item: FileSystemImport | FileSystemEntry): TreeDataItem {
         const pathSplit = splitPath(item.path)
         const lastPart = pathSplit.pop()
-        const itemName = unescapePath(
-            lastPart ? (item.href?.includes('new') ? `New ${lastPart.toLowerCase()}` : lastPart) : 'Unnamed'
-        )
+        const itemName =
+            'displayLabel' in item && item.displayLabel
+                ? item.displayLabel
+                : unescapePath(
+                      lastPart ? (item.href?.includes('new') ? `New ${lastPart.toLowerCase()}` : lastPart) : 'Unnamed'
+                  )
         const nodeId = getItemId(item, root)
         const displayName = <SearchHighlightMultiple string={itemName} substring={searchTerm ?? ''} />
         const user: UserBasicType | undefined = item.meta?.created_by ? users?.[item.meta.created_by] : undefined
@@ -361,7 +375,7 @@ export function convertFileSystemEntryToTreeDataItem({
         }
     }
 
-    if (rootNodes.find((node) => node.record?.category)) {
+    if (!disableCategories && rootNodes.find((node) => node.record?.category)) {
         const newRootNodes: TreeDataItem[] = []
         let lastCategory: string | null = null
         for (const node of rootNodes) {

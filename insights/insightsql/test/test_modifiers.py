@@ -3,6 +3,7 @@ from typing import NamedTuple
 from insights.test.base import BaseTest
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import override_settings
 
 from insights.schema import InsightsQLQueryModifiers, MaterializationMode, PersonsArgMaxVersion, PersonsOnEventsMode
@@ -10,10 +11,38 @@ from insights.schema import InsightsQLQueryModifiers, MaterializationMode, Perso
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.models import Cohort
+from products.cohorts.backend.models.cohort import Cohort
 
 
 class TestModifiers(BaseTest):
+    def _expected_browser_select(self, materialization_mode: MaterializationMode) -> str:
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            column = "events.properties.`$browser`"
+            source = "events_json AS events"
+            return f"SELECT {column} AS `$browser` FROM {source}"
+        elif materialization_mode == MaterializationMode.DISABLED:
+            return (
+                "SELECT replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), "
+                "'null'), '^\"|\"$', '') AS `$browser` FROM events"
+            )
+        else:
+            column = "events.`mat_$browser`"
+            source = "events"
+
+        if materialization_mode == MaterializationMode.LEGACY_NULL_AS_STRING:
+            expression = f"nullIf({column}, '')"
+        else:
+            expression = f"nullIf(nullIf({column}, ''), 'null')"
+
+        return f"SELECT {expression} AS `$browser` FROM {source}"
+
+    def _expected_events_person_properties_column(self) -> str:
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            # Whole-blob person_properties reads are reconstructed from the JSON column; assert the
+            # reconstruction reads the on-events column rather than pinning the full expression.
+            return "JSONExtractKeysAndValuesRaw(toJSONString(events.person_properties))"
+        return "events.person_properties AS properties"
+
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
     def test_create_default_modifiers_for_team_init(self):
         assert self.team.person_on_events_mode == PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_JOINED
@@ -112,7 +141,7 @@ class TestModifiers(BaseTest):
                 [
                     "events.event AS event",
                     "events.person_id AS id",
-                    "events.person_properties AS properties",
+                    self._expected_events_person_properties_column(),
                     "toTimeZone(events.person_created_at, %(insightsql_val_0)s) AS created_at",
                 ],
             ),
@@ -121,7 +150,7 @@ class TestModifiers(BaseTest):
                 [
                     "events.event AS event",
                     "if(not(empty(events__override.distinct_id)), events__override.person_id, events.person_id) AS id",
-                    "events.person_properties AS properties",
+                    self._expected_events_person_properties_column(),
                     "toTimeZone(events.person_created_at, %(insightsql_val_0)s) AS created_at",
                 ],
                 [
@@ -151,9 +180,10 @@ class TestModifiers(BaseTest):
                 pretty=False,
             ).datastore
             assert datastore_query is not None
-            assert f"SELECT {', '.join(test_case.expected_columns)} FROM" in datastore_query, (
-                f"PoE mode: {test_case.mode}"
-            )
+            # Columns are asserted individually: under the native-JSON schema the person_properties
+            # column prints as the whole-blob reconstruction, too large to pin as one SELECT string.
+            for expected_column in test_case.expected_columns:
+                assert expected_column in datastore_query, f"PoE mode: {test_case.mode}: {expected_column}"
             for value in test_case.other_expected_values:
                 assert value in datastore_query
 
@@ -226,6 +256,10 @@ class TestModifiers(BaseTest):
         assert "LEFT JOIN" in response.datastore
 
     def test_modifiers_materialization_mode(self):
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            self.skipTest("EE materialized-column helpers are not available")
         materialize("events", "$browser")
 
         response = execute_insightsql_query(
@@ -235,9 +269,7 @@ class TestModifiers(BaseTest):
             pretty=False,
         )
         assert response.datastore is not None
-        assert (
-            "SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` FROM events" in response.datastore
-        )
+        assert self._expected_browser_select(MaterializationMode.AUTO) in response.datastore
 
         response = execute_insightsql_query(
             "SELECT properties.$browser FROM events",
@@ -246,9 +278,7 @@ class TestModifiers(BaseTest):
             pretty=False,
         )
         assert response.datastore is not None
-        assert (
-            "SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` FROM events" in response.datastore
-        )
+        assert self._expected_browser_select(MaterializationMode.LEGACY_NULL_AS_NULL) in response.datastore
 
         response = execute_insightsql_query(
             "SELECT properties.$browser FROM events",
@@ -257,7 +287,7 @@ class TestModifiers(BaseTest):
             pretty=False,
         )
         assert response.datastore is not None
-        assert "SELECT nullIf(events.`mat_$browser`, '') AS `$browser` FROM events" in response.datastore
+        assert self._expected_browser_select(MaterializationMode.LEGACY_NULL_AS_STRING) in response.datastore
 
         response = execute_insightsql_query(
             "SELECT properties.$browser FROM events",
@@ -266,10 +296,7 @@ class TestModifiers(BaseTest):
             pretty=False,
         )
         assert response.datastore is not None
-        assert (
-            "SELECT replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '') AS `$browser` FROM events"
-            in response.datastore
-        )
+        assert self._expected_browser_select(MaterializationMode.DISABLED) in response.datastore
 
     def test_optimize_joined_filters(self):
         # no optimizations

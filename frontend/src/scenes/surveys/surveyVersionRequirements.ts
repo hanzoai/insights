@@ -99,8 +99,8 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         },
         unsupportedSdks: [
             { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
-            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2959' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/258' },
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/2959' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/258' },
         ],
         check: (s) => s.appearance?.fontFamily !== undefined && s.appearance?.fontFamily !== 'inherit',
     },
@@ -109,12 +109,11 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         sdkVersions: {
             'insights-js': '1.234.11',
             'insights-react-native': '4.27.0',
+            'insights-ios': '3.43.0',
+            'insights-android': '3.35.0',
+            insights_flutter: '5.18.0',
         },
-        unsupportedSdks: [
-            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/446' },
-            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/389' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/260' },
-        ],
+        unsupportedSdks: [],
         check: (s) => s.schedule === SurveySchedule.Always,
     },
     {
@@ -131,13 +130,31 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             (s.appearance?.tabPosition !== undefined && s.appearance?.tabPosition !== SurveyTabPosition.Right),
     },
     {
+        feature: 'Custom survey position',
+        sdkVersions: {
+            'insights-js': '1.245.0',
+            'insights-react-native': '4.43.13',
+        },
+        unsupportedSdks: [
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/581' },
+            { sdk: 'insights-android', issue: 'https://github.com/Insights/insights-android/issues/502' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/379' },
+        ],
+        // True when a non-default popover position is set. NextToTrigger is excluded
+        // here because it is covered by the "Feedback button surveys" entry above.
+        check: (s) =>
+            s.appearance?.position !== undefined &&
+            s.appearance?.position !== SurveyPosition.Right &&
+            s.appearance?.position !== SurveyPosition.NextToTrigger,
+    },
+    {
         feature: 'Partial response collection',
         sdkVersions: { 'insights-js': '1.240.0' },
         unsupportedSdks: [
-            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2962' },
-            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/447' },
-            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/390' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/261' },
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/2962' },
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/447' },
+            { sdk: 'insights-android', issue: 'https://github.com/Insights/insights-android/issues/390' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/261' },
         ],
         check: (s) => s.enable_partial_responses === true,
     },
@@ -148,9 +165,9 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'insights-react-native': '4.26.0',
         },
         unsupportedSdks: [
-            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/448' },
-            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/391' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/262' },
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/448' },
+            { sdk: 'insights-android', issue: 'https://github.com/Insights/insights-android/issues/391' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/262' },
         ],
         check: (s) =>
             s.questions.some(
@@ -168,20 +185,22 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'insights-react-native': '4.4.0',
         },
         unsupportedSdks: [
-            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/445' },
-            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/388' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/259' },
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/445' },
+            { sdk: 'insights-android', issue: 'https://github.com/Insights/insights-android/issues/388' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/259' },
         ],
         check: (s) => !!s.conditions?.linkedFlagVariant,
     },
     {
         feature: 'Event trigger property filters',
-        sdkVersions: { 'insights-js': '1.268.0', 'insights-react-native': '4.16.0' },
-        unsupportedSdks: [
-            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/449' },
-            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/392' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/263' },
-        ],
+        sdkVersions: {
+            'insights-js': '1.268.0',
+            'insights-react-native': '4.16.0',
+            'insights-android': '3.38.0',
+            'insights-ios': '3.47.0',
+            insights_flutter: '5.20.0',
+        },
+        unsupportedSdks: [],
         check: (s) =>
             (s.conditions?.events?.values?.length ?? 0) > 0 &&
             !!s.conditions?.events?.values?.some((e) => Object.keys(e.propertyFilters ?? {}).length > 0),
@@ -190,10 +209,10 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         feature: 'Cancellation events',
         sdkVersions: { 'insights-js': '1.299.0' },
         unsupportedSdks: [
-            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2964' },
-            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/450' },
-            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/393' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/264' },
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/2964' },
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/450' },
+            { sdk: 'insights-android', issue: 'https://github.com/Insights/insights-android/issues/393' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/264' },
         ],
         check: (s) => (s.conditions?.cancelEvents?.values?.length ?? 0) > 0,
     },
@@ -201,10 +220,10 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         feature: 'Targeting with actions',
         sdkVersions: { 'insights-js': '1.301.0' },
         unsupportedSdks: [
-            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2965' },
-            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/451' },
-            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/394' },
-            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/265' },
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/2965' },
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/451' },
+            { sdk: 'insights-android', issue: 'https://github.com/Insights/insights-android/issues/394' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/265' },
         ],
         check: (s) => (s.conditions?.actions?.values?.length ?? 0) > 0,
     },
@@ -214,11 +233,10 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'insights-js': '1.300.0',
             'insights-react-native': '4.15.0',
             'insights-ios': '3.38.0',
+            'insights-android': '3.49.0', // via insights-android-surveys-compose UI module
             insights_flutter: '5.13.0',
         },
-        unsupportedSdks: [
-            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
-        ],
+        unsupportedSdks: [],
         check: (s) => s.appearance?.inputBackground !== undefined || s.appearance?.inputTextColor !== undefined,
     },
     {
@@ -227,11 +245,10 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'insights-js': '1.310.1',
             'insights-react-native': '4.17.0',
             'insights-ios': '3.38.0',
+            'insights-android': '3.49.0', // via insights-android-surveys-compose UI module
             insights_flutter: '5.13.0',
         },
-        unsupportedSdks: [
-            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
-        ],
+        unsupportedSdks: [],
         check: (s) => s.appearance?.textColor !== undefined || s.appearance?.submitButtonTextColor !== undefined,
     },
     {
@@ -240,15 +257,65 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'insights-js': '1.326.0',
             'insights-react-native': '4.19.0',
             'insights-ios': '3.38.0',
+            'insights-android': '3.49.0', // via insights-android-surveys-compose UI module
             insights_flutter: '5.13.0',
         },
-        unsupportedSdks: [
-            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
-        ],
+        unsupportedSdks: [],
         check: (s) =>
             s.questions.some(
                 (q) => q.type === SurveyQuestionType.Rating && q.scale === SURVEY_RATING_SCALE.THUMB_2_POINT
             ),
+    },
+    {
+        feature: 'Shuffle questions',
+        sdkVersions: { 'insights-js': '1.131.5' },
+        unsupportedSdks: [
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/3162' },
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/492' },
+            { sdk: 'insights-android', issue: 'https://github.com/Insights/insights-android/issues/442' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/310' },
+        ],
+        check: (s) => s.appearance?.shuffleQuestions === true,
+    },
+    {
+        feature: 'Shuffle choice options',
+        sdkVersions: { 'insights-js': '1.131.5' },
+        unsupportedSdks: [
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/3162' },
+            { sdk: 'insights-ios', issue: 'https://github.com/Insights/insights-ios/issues/492' },
+            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI; flag exposed on display model
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/310' },
+        ],
+        check: (s) =>
+            s.questions.some(
+                (q) =>
+                    (q.type === SurveyQuestionType.SingleChoice || q.type === SurveyQuestionType.MultipleChoice) &&
+                    (q as MultipleSurveyQuestion).shuffleOptions === true
+            ),
+    },
+    {
+        feature: 'Survey wait period',
+        sdkVersions: {
+            'insights-js': '1.105.7',
+            'insights-ios': '3.44.0',
+            'insights-android': '3.35.0',
+            insights_flutter: '5.18.0',
+        },
+        unsupportedSdks: [{ sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/3192' }],
+        check: (s) => (s.conditions?.seenSurveyWaitPeriodInDays ?? 0) > 0,
+    },
+    {
+        feature: 'Delay survey popup',
+        sdkVersions: {
+            'insights-js': '1.141.0',
+            'insights-ios': '3.54.0',
+            'insights-android': '3.49.0',
+        },
+        unsupportedSdks: [
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/3193' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/Insights/insights-flutter/issues/322' },
+        ],
+        check: (s) => (s.appearance?.surveyPopupDelaySeconds ?? 0) > 0,
     },
     {
         feature: 'Response length validation',

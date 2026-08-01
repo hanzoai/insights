@@ -1,4 +1,4 @@
-from datastore_orm import migrations
+from infi.datastore_orm import migrations
 
 from insights.datastore.client import sync_execute
 from insights.datastore.client.migration_tools import run_sql_with_exceptions

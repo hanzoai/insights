@@ -1,12 +1,14 @@
 import { expectLogic } from 'kea-test-utils'
 
 import { propertyFilterLogic } from 'lib/components/PropertyFilters/propertyFilterLogic'
+import { recentTaxonomicFiltersLogic } from 'lib/components/TaxonomicFilter/recentTaxonomicFiltersLogic'
+import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
-import { AnyPropertyFilter, PropertyFilterType, PropertyOperator } from '~/types'
+import { AnyPropertyFilter, PropertyFilterType, PropertyFilterValue, PropertyOperator } from '~/types'
 
-const eventFilter = (key: string, value?: string, operator?: PropertyOperator): AnyPropertyFilter =>
+const eventFilter = (key: string, value?: PropertyFilterValue, operator?: PropertyOperator): AnyPropertyFilter =>
     ({
         key,
         type: PropertyFilterType.Event,
@@ -115,6 +117,24 @@ describe('propertyFilterLogic', () => {
             const filter = { key: '$browser', type: PropertyFilterType.Event } as AnyPropertyFilter
             const cb = await setFilterAndCheck(filter, false)
             expect(cb).not.toHaveBeenCalled()
+        })
+
+        it.each<[string, AnyPropertyFilter, false | 0]>([
+            [
+                'boolean false (e.g. flag dependency set to false)',
+                {
+                    key: '911',
+                    type: PropertyFilterType.Flag,
+                    operator: PropertyOperator.FlagEvaluatesTo,
+                    value: false,
+                } as AnyPropertyFilter,
+                false,
+            ],
+            ['number 0', eventFilter('$browser', 0, PropertyOperator.Exact), 0],
+        ])('calls onChange when the value is the falsy literal %s', async (_name, filter, expectedValue) => {
+            const cb = await setFilterAndCheck(filter, false)
+            expect(cb).toHaveBeenCalledTimes(1)
+            expect(cb.mock.calls[0][0][0]).toMatchObject({ value: expectedValue })
         })
     })
 
@@ -229,6 +249,78 @@ describe('propertyFilterLogic', () => {
             const calledWith = onChange.mock.calls[0][0]
             expect(calledWith).toHaveLength(1)
             expect(calledWith[0]).toMatchObject({ key: '$browser', value: 'Firefox' })
+        })
+    })
+
+    describe('records complete property filters to recent filters', () => {
+        let recentsLogic: ReturnType<typeof recentTaxonomicFiltersLogic.build>
+
+        beforeEach(() => {
+            localStorage.clear()
+            recentsLogic = recentTaxonomicFiltersLogic.build()
+            recentsLogic.mount()
+        })
+
+        afterEach(() => {
+            recentsLogic.unmount()
+        })
+
+        it('records a complete filter with key, operator, and value', async () => {
+            const logic = mountLogic({ propertyFilters: [{}] as AnyPropertyFilter[] })
+            logic.actions.setFilter(0, eventFilter('$browser', 'Chrome', PropertyOperator.Exact))
+            await expectLogic(logic).toFinishAllListeners()
+
+            const recents = recentsLogic.values.recentFilters
+            expect(recents).toHaveLength(1)
+            expect(recents[0].groupType).toBe(TaxonomicFilterGroupType.EventProperties)
+            expect(recents[0].groupName).toBe('Event properties')
+            expect(recents[0].value).toBe('$browser')
+            expect(recents[0].propertyFilter).toMatchObject({
+                key: '$browser',
+                value: 'Chrome',
+                operator: PropertyOperator.Exact,
+                type: PropertyFilterType.Event,
+            })
+        })
+
+        it('does not record a filter with only a key and no value', async () => {
+            const logic = mountLogic({ propertyFilters: [{}] as AnyPropertyFilter[] })
+            logic.actions.setFilter(0, eventFilter('$browser'))
+            await expectLogic(logic).toFinishAllListeners()
+
+            expect(recentsLogic.values.recentFilters).toHaveLength(0)
+        })
+
+        it('records an is_set filter without a value', async () => {
+            const logic = mountLogic({ propertyFilters: [{}] as AnyPropertyFilter[] })
+            logic.actions.setFilter(0, eventFilter('$browser', undefined, PropertyOperator.IsSet))
+            await expectLogic(logic).toFinishAllListeners()
+
+            const recents = recentsLogic.values.recentFilters
+            expect(recents).toHaveLength(1)
+            expect(recents[0].groupName).toBe('Event properties')
+            expect(recents[0].propertyFilter).toMatchObject({
+                key: '$browser',
+                operator: PropertyOperator.IsSet,
+                type: PropertyFilterType.Event,
+            })
+        })
+
+        it('uses the resolved flag label, not the raw flag ID, as the recent item name', async () => {
+            const logic = mountLogic({ propertyFilters: [{}] as AnyPropertyFilter[] })
+            logic.actions.setFilter(0, {
+                key: '2',
+                label: 'test-flag',
+                type: PropertyFilterType.Flag,
+                operator: PropertyOperator.FlagEvaluatesTo,
+                value: true,
+            })
+            await expectLogic(logic).toFinishAllListeners()
+
+            const recents = recentsLogic.values.recentFilters
+            expect(recents).toHaveLength(1)
+            expect(recents[0].value).toBe('2')
+            expect(recents[0].item).toMatchObject({ name: 'test-flag' })
         })
     })
 })

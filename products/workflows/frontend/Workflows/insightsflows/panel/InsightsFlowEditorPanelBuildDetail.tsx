@@ -11,30 +11,33 @@ import {
     Input,
     Label,
     Select,
+    Switch,
 } from '@hanzo/elements'
 
+import { EditableField } from 'lib/components/EditableField/EditableField'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { Field } from 'lib/elements/Field/Field'
 import { urls } from 'scenes/urls'
+
+import { ErrorBoundary } from '~/layout/ErrorBoundary'
 
 import { CategorySelect } from 'products/workflows/frontend/OptOuts/CategorySelect'
 
 import { workflowLogic } from '../../workflowLogic'
 import { InsightsFlowPropertyFilters } from '../filters/InsightsFlowFilters'
-import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { useInsightsFlowStep } from '../steps/InsightsFlowSteps'
-import { isOptOutEligibleAction } from '../steps/types'
+import { isEmailAction, isOptOutEligibleAction, isScheduleTrigger } from '../steps/types'
 import type { InsightsFlowAction } from '../types'
+import { hogFlowOutputMappingLogic } from './hogFlowOutputMappingLogic'
 import { OutputTestResultTree } from './OutputTestResultTree'
-import { insightsFlowOutputMappingLogic } from './insightsFlowOutputMappingLogic'
 
 export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
-    const { selectedNode, workflow, categories, categoriesLoading } = useValues(insightsFlowEditorLogic)
-    const { setWorkflowAction, setMode } = useActions(insightsFlowEditorLogic)
+    const { selectedNode, workflow, categories, categoriesLoading } = useValues(hogFlowEditorLogic)
+    const { setWorkflowAction, setMode } = useActions(hogFlowEditorLogic)
     const { logicProps } = useValues(workflowLogic)
-    const { mappings, pendingPath, testLoading, testError, testResultData, shakePickButton } = useValues(
-        insightsFlowOutputMappingLogic(logicProps)
-    )
+    const { mappings, pendingPath, testLoading, testError, testResultData, shakePickButton, pendingSuggestions } =
+        useValues(hogFlowOutputMappingLogic(logicProps))
     const {
         setSelectedActionId,
         setMappings,
@@ -45,7 +48,8 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
         assignPendingPathToMapping,
         cancelPendingPath,
         runOutputTest,
-    } = useActions(insightsFlowOutputMappingLogic(logicProps))
+        applySuggestion,
+    } = useActions(hogFlowOutputMappingLogic(logicProps))
 
     useEffect(() => {
         setSelectedActionId(selectedNode?.data.id ?? null)
@@ -59,11 +63,17 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
 
     const action = selectedNode.data
 
+    const isBranchingStep = ['conditional_branch', 'wait_until_condition', 'random_cohort_branch'].includes(action.type)
     const actionFilters = action.filters ?? {}
     const numberOfActionFilters =
         (actionFilters.events?.length ?? 0) +
         (actionFilters.properties?.length ?? 0) +
         (actionFilters.actions?.length ?? 0)
+    // Branching steps don't surface the skip-conditions accordion by default — it was a source of
+    // confusion with their own branch conditions. We still show it if legacy filters are already
+    // set, so users have a UI surface to review or clear them.
+    const hasLegacyBranchingFilters = isBranchingStep && numberOfActionFilters > 0
+    const hideFiltersPanel = isBranchingStep && !hasLegacyBranchingFilters
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
@@ -73,7 +83,45 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                 innerClassName="flex flex-col gap-2 p-3"
                 styledScrollbars
             >
-                {Step?.renderConfiguration(selectedNode)}
+                <div className="flex flex-col gap-1">
+                    <EditableField
+                        name="step-name"
+                        value={action.name}
+                        onSave={(value) => {
+                            const trimmed = value.trim()
+                            if (trimmed) {
+                                setWorkflowAction(action.id, { ...action, name: trimmed })
+                            }
+                        }}
+                        placeholder="Step name"
+                        minLength={1}
+                        saveOnBlur
+                        clickToEdit
+                        compactButtons
+                        compactIcon
+                        className="font-semibold text-base"
+                        data-attr="workflow-step-name"
+                    />
+                    {!isScheduleTrigger(action) && (
+                        <EditableField
+                            name="step-description"
+                            value={action.description || ''}
+                            onSave={(value) => setWorkflowAction(action.id, { ...action, description: value.trim() })}
+                            placeholder="Add a description (optional)"
+                            multiline
+                            saveOnBlur
+                            clickToEdit
+                            compactButtons
+                            compactIcon
+                            className="text-sm text-secondary"
+                            data-attr="workflow-step-description"
+                        />
+                    )}
+                </div>
+                <Divider className="my-2" />
+                <ErrorBoundary exceptionProps={{ feature: 'workflow-step-config' }}>
+                    {Step?.renderConfiguration(selectedNode)}
+                </ErrorBoundary>
             </ScrollableShadows>
 
             {isOptOutEligibleAction(action) && (
@@ -110,6 +158,26 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                 />
                             </div>
                         </Label>
+                    </div>
+                </>
+            )}
+
+            {isEmailAction(action) && (
+                <>
+                    <Divider className="my-0" />
+                    <div className="flex gap-2 justify-between items-center px-2 py-1">
+                        <Label info="Turn this off for emails that should never be tracked, such as transactional messages. When off, no tracking pixel is added and links are not rewritten, so opens and clicks won't appear in the workflow's metrics. Delivery, bounce, and unsubscribe events are still recorded. Marketing emails may additionally be sent untracked based on the email tracking consent setting in your environment settings.">
+                            Track opens and link clicks
+                        </Label>
+                        <Switch
+                            checked={action.config.tracking_enabled !== false}
+                            onChange={(checked) => {
+                                setWorkflowAction(action.id, {
+                                    ...action,
+                                    config: { ...action.config, tracking_enabled: checked },
+                                })
+                            }}
+                        />
                     </div>
                 </>
             )}
@@ -194,6 +262,24 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                     </Field.Pure>
                                                 </div>
                                             ))}
+                                            {pendingSuggestions.length > 0 && (
+                                                <div className="w-full">
+                                                    <p className="text-xs text-secondary mb-1">Suggested</p>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {pendingSuggestions.map((suggestion) => (
+                                                            <Button
+                                                                key={suggestion.key}
+                                                                size="xsmall"
+                                                                type="secondary"
+                                                                icon={<IconPlus />}
+                                                                onClick={() => applySuggestion(suggestion)}
+                                                            >
+                                                                {suggestion.label}
+                                                            </Button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                             <div className="flex gap-2 w-full">
                                                 <Button
                                                     icon={<IconPlus />}
@@ -295,31 +381,53 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                         </div>
                                     ),
                                 },
-                                {
-                                    key: 'filters',
-                                    header: (
-                                        <>
-                                            <span className="flex-1">Conditions</span>
-                                            <Badge.Number count={numberOfActionFilters} showZero={false} />
-                                        </>
-                                    ),
-                                    content: (
-                                        <div>
-                                            <p>
-                                                Add conditions to the step. If these conditions aren't met, the user
-                                                will skip this step and continue to the next one.
-                                            </p>
-                                            <InsightsFlowPropertyFilters
-                                                filtersKey={`action-skip-conditions-${action.id}`}
-                                                filters={action.filters ?? {}}
-                                                setFilters={(filters) =>
-                                                    setWorkflowAction(action.id, { ...action, filters })
-                                                }
-                                                buttonCopy="Add filter conditions"
-                                            />
-                                        </div>
-                                    ),
-                                },
+                                ...(hideFiltersPanel
+                                    ? []
+                                    : [
+                                          {
+                                              key: 'filters',
+                                              header: (
+                                                  <>
+                                                      <span className="flex-1">
+                                                          {hasLegacyBranchingFilters
+                                                              ? 'Legacy skip conditions'
+                                                              : 'Conditions'}
+                                                      </span>
+                                                      <Badge.Number
+                                                          count={numberOfActionFilters}
+                                                          showZero={false}
+                                                      />
+                                                  </>
+                                              ),
+                                              content: (
+                                                  <div>
+                                                      {hasLegacyBranchingFilters ? (
+                                                          <p>
+                                                              These skip conditions were set on this branching step
+                                                              before we removed the option. They still apply at runtime:
+                                                              if they aren't met, the user skips the entire branching
+                                                              step and continues to the next step. Clear them to hide
+                                                              this panel.
+                                                          </p>
+                                                      ) : (
+                                                          <p>
+                                                              Add conditions to the step. If these conditions aren't
+                                                              met, the user will skip this step and continue to the next
+                                                              one.
+                                                          </p>
+                                                      )}
+                                                      <InsightsFlowPropertyFilters
+                                                          filtersKey={`action-skip-conditions-${action.id}`}
+                                                          filters={action.filters ?? {}}
+                                                          setFilters={(filters) =>
+                                                              setWorkflowAction(action.id, { ...action, filters })
+                                                          }
+                                                          buttonCopy="Add filter conditions"
+                                                      />
+                                                  </div>
+                                              ),
+                                          },
+                                      ]),
                                 {
                                     key: 'on_error',
                                     header: <span className="flex-1">Error handling</span>,

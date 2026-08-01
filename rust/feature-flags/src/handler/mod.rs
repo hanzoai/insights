@@ -1,5 +1,6 @@
 pub mod authentication;
 pub mod billing;
+pub mod body_logger;
 pub mod canonical_log;
 pub mod config_response_builder;
 pub mod cookieless;
@@ -7,20 +8,25 @@ pub mod decoding;
 pub mod error_tracking;
 pub mod evaluation;
 pub mod flags;
+pub mod phases;
 pub mod properties;
 pub mod session_recording;
 pub mod types;
 
-pub use canonical_log::{run_with_canonical_log, with_canonical_log, FlagsCanonicalLogLine};
+pub use canonical_log::{
+    run_with_canonical_log, with_canonical_log, EvalCounters, FlagsCanonicalLogLine,
+};
 pub use types::*;
 
 use crate::{
     api::{errors::FlagError, types::FlagsResponse},
-    flags::flag_service::FlagService,
+    flags::{flag_matching::EvaluationType, flag_service::FlagService},
+    handler::phases::{Phase, PhaseGuard},
     metrics::consts::{FLAG_REQUESTS_COUNTER, FLAG_REQUESTS_LATENCY, FLAG_REQUEST_FAULTS_COUNTER},
+    team::team_models::Team,
 };
 use std::collections::HashMap;
-use tracing::{instrument, warn};
+use tracing::{debug, instrument};
 
 #[cfg(test)]
 use crate::handler::test_metrics::{histogram, inc};
@@ -53,6 +59,30 @@ struct MetricsData {
     team_id: Option<i32>,
     flags_disabled: Option<bool>,
     library: Library,
+    evaluation_type: Option<EvaluationType>,
+}
+
+fn stamp_body_sdk_info(
+    request: &crate::flags::flag_request::FlagRequest,
+    metrics_library: &mut Library,
+) {
+    let lib = request.extract_lib();
+    let lib_version = request.extract_lib_version();
+
+    if let Some(lib) = lib.as_deref() {
+        *metrics_library = Library::from_sdk_name(lib);
+    }
+
+    if lib.is_some() || lib_version.is_some() {
+        with_canonical_log(|log| {
+            if let Some(lib) = lib {
+                log.lib = Some(lib);
+            }
+            if let Some(lib_version) = lib_version {
+                log.lib_version = Some(lib_version);
+            }
+        });
+    }
 }
 
 fn record_metrics(
@@ -72,10 +102,18 @@ fn record_metrics(
 
     let library = data.library.to_string();
 
+    // "none" (not "not_available") because it means evaluation was intentionally skipped
+    // (flags disabled, quota limited, empty set), not that the value is unknown.
+    let evaluation_type = data
+        .evaluation_type
+        .map_or("none", EvaluationType::as_str)
+        .to_string();
+
     let labels = [
         ("flags_disabled".to_string(), flags_disabled),
         ("team_id".to_string(), team_id.clone()),
         ("library".to_string(), library),
+        ("evaluation_type".to_string(), evaluation_type),
     ];
 
     inc(FLAG_REQUESTS_COUNTER, &labels, 1);
@@ -101,6 +139,7 @@ async fn process_request_inner(
         team_id: None,
         flags_disabled: None,
         library,
+        evaluation_type: None,
     };
 
     let result = async {
@@ -111,10 +150,25 @@ async fn process_request_inner(
             context.state.database_pools.non_persons_reader.clone(),
             context.state.team_hypercache_reader.clone(),
             context.state.flags_hypercache_reader.clone(),
+            context.state.flag_definitions_cache.clone(),
+            context.state.team_negative_cache.clone(),
+            *context.state.config.skip_pg_team_fallback,
         );
 
-        let (original_distinct_id, team, request) =
-            authentication::parse_and_authenticate(&context, &flag_service).await?;
+        let (original_distinct_id, team, request) = {
+            // Phase boundary: covers token decoding, team verification
+            // (HyperCache → Redis → S3 → PG fallback), and distinct-id
+            // extraction. Drop records elapsed time into the canonical
+            // log; histogram emission is deferred to `emit_phase_metrics`
+            // so the metric carries a `team_id` label.
+            let _phase = PhaseGuard::enter(Phase::Auth);
+            authentication::parse_and_authenticate(
+                &context,
+                &flag_service,
+                &mut metrics_data.library,
+            )
+            .await?
+        };
 
         let distinct_id_for_logging = original_distinct_id
             .clone()
@@ -130,9 +184,10 @@ async fn process_request_inner(
                 .and_then(|v| v.as_str())
                 .map(|s| s.to_string())
         });
+        let device_id = request.extract_device_id();
         with_canonical_log(|log| {
             log.distinct_id = Some(distinct_id_for_logging.clone());
-            log.device_id = request.device_id.clone();
+            log.device_id = device_id.clone();
             log.anon_distinct_id = anon_distinct_id_for_logging;
         });
 
@@ -153,77 +208,126 @@ async fn process_request_inner(
         let flags_response = if request.is_flags_disabled() {
             with_canonical_log(|log| log.flags_disabled = true);
             FlagsResponse::new(false, HashMap::new(), None, context.request_id)
-        } else if let Some(quota_limited_response) =
-            billing::check_limits(&context, &team.api_token).await?
-        {
-            warn!("Request quota limited");
-            with_canonical_log(|log| log.quota_limited = true);
-            quota_limited_response
         } else {
-            let distinct_id = cookieless::handle_distinct_id(
-                &context,
-                &request,
-                &team,
-                original_distinct_id
-                    .expect("distinct_id should be present when flags are not disabled"),
-            )
-            .await?;
+            // Lift the billing-limits await out of the `else if let`
+            // chain so the phase guard scope is exactly that one await,
+            // matching the rest of the phases in this function.
+            let billing_limited = {
+                let _phase = PhaseGuard::enter(Phase::BillingCheck);
+                billing::check_limits(&context, &team.api_token).await?
+            };
 
-            tracing::debug!("Distinct ID resolved: {}", distinct_id);
+            if let Some(quota_limited_response) = billing_limited {
+                debug!("Request quota limited");
+                with_canonical_log(|log| log.quota_limited = true);
+                quota_limited_response
+            } else {
+                let distinct_id = {
+                    let _phase = PhaseGuard::enter(Phase::Cookieless);
+                    cookieless::handle_distinct_id(
+                        &context,
+                        &request,
+                        &team,
+                        original_distinct_id
+                            .expect("distinct_id should be present when flags are not disabled"),
+                    )
+                    .await?
+                };
 
-            let filtered_flags = flags::fetch_and_filter(
-                &flag_service,
-                team.id,
-                &context.meta,
-                &context.headers,
-                request.evaluation_runtime,
-                request.evaluation_contexts.as_ref(),
-            )
-            .await?;
+                tracing::debug!("Distinct ID resolved: {}", distinct_id);
 
-            tracing::debug!("Flags filtered: {} flags found", filtered_flags.flags.len());
+                // Compute auth status once to avoid repeated header parsing and allocation.
+                let is_internal = authentication::is_internal_request(&context);
 
-            let property_overrides = properties::prepare_overrides(&context, &request)?;
+                let override_defs = if is_internal {
+                    request.override_flags_definitions.as_ref()
+                } else {
+                    None
+                };
 
-            // Evaluate flags (this will return empty if is_flags_disabled is true)
-            let response = flags::evaluate_for_request(
-                &context.state,
-                team.id,
-                distinct_id.clone(),
-                request.device_id.clone(),
-                filtered_flags.clone(),
-                property_overrides.person_properties,
-                property_overrides.group_properties,
-                property_overrides.groups,
-                property_overrides.hash_key,
-                context.request_id,
-                request.is_flags_disabled(),
-                request.flag_keys.clone(),
-            )
-            .await;
+                let filtered_flags = {
+                    let _phase = PhaseGuard::enter(Phase::FetchAndFilter);
+                    flags::fetch_and_filter(
+                        &flag_service,
+                        team.id,
+                        &context.meta,
+                        &context.headers,
+                        request.evaluation_runtime,
+                        request.evaluation_contexts.as_ref(),
+                        override_defs,
+                    )
+                    .await?
+                };
 
-            // Only record billing if flags are not disabled
-            if !request.is_flags_disabled() {
-                billing::record_usage(&context, &filtered_flags, team.id, metrics_data.library)
-                    .await;
+                tracing::debug!("Flags filtered: {} flags found", filtered_flags.flags.len());
+
+                let property_overrides = properties::prepare_overrides(&context, &request)?;
+
+                // Evaluate flags (this will return empty if is_flags_disabled is true)
+                let response = {
+                    let _phase = PhaseGuard::enter(Phase::Evaluate);
+                    flags::evaluate_for_request(
+                        &context.state,
+                        team.id,
+                        // Interpret naive datetime filter values in the team timezone so flag
+                        // evaluation matches InsightsQL/Datastore cohort membership.
+                        team.parsed_timezone(),
+                        distinct_id.clone(),
+                        device_id.clone(),
+                        filtered_flags.clone(),
+                        property_overrides.person_properties,
+                        property_overrides.group_properties,
+                        property_overrides.groups,
+                        property_overrides.hash_key,
+                        context.request_id,
+                        request.is_flags_disabled(),
+                        request.flag_keys.clone(),
+                        Some(is_internal && context.meta.detailed_analysis.unwrap_or(false)),
+                        if is_internal {
+                            context.meta.only_use_override_person_properties
+                        } else {
+                            None
+                        },
+                    )
+                    .await?
+                };
+
+                {
+                    let _phase = PhaseGuard::enter(Phase::RecordBilling);
+                    billing::record_usage(
+                        &context,
+                        &filtered_flags,
+                        team.id,
+                        metrics_data.library,
+                        is_internal,
+                    );
+                }
+
+                response
             }
-
-            response
         };
 
         // Build the rest of the FlagsResponse with config from HyperCache.
         // When config=true, reads pre-computed config from Python's RemoteConfig.
         // On cache miss, returns fallback config.
-        let response =
+        let mut response = {
+            let _phase = PhaseGuard::enter(Phase::ConfigResponse);
             config_response_builder::build_response_from_cache(flags_response, &context, &team)
-                .await?;
+                .await?
+        };
 
-        // Populate canonical log with flag evaluation results
+        apply_minimal_flag_called_events(&mut response, &team);
+
+        // Populate canonical log with flag evaluation results and read back evaluation_type.
+        // If an earlier step errored (? above), we skip this and evaluation_type stays
+        // None → "none" in metrics. That's intentional: we don't need sequential/parallel
+        // breakdown for failed requests.
         with_canonical_log(|log| {
             log.flags_evaluated = response.flags.len();
             if response.quota_limited.is_some() {
                 log.quota_limited = true;
             }
+            metrics_data.evaluation_type = log.evaluation_type;
         });
 
         Ok(response)
@@ -233,8 +337,83 @@ async fn process_request_inner(
     (result, metrics_data)
 }
 
+/// Sets `minimal_flag_called_events: Some(true)` when the team is gated into slim
+/// `$feature_flag_called` events. Never sets `Some(false)` — absence is the "full events"
+/// signal for SDKs (see [`crate::api::types::FlagsResponse::minimal_flag_called_events`]).
+fn apply_minimal_flag_called_events(response: &mut FlagsResponse, team: &Team) {
+    if team.minimal_flag_called_events {
+        response.minimal_flag_called_events = Some(true);
+    }
+}
+
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod sdk_info_tests {
+    use crate::{flags::flag_request::FlagRequest, handler::Library};
+    use serde_json::json;
+
+    use super::{run_with_canonical_log, stamp_body_sdk_info, FlagsCanonicalLogLine};
+
+    #[tokio::test]
+    async fn body_sdk_info_overrides_existing_log_value() {
+        let request = FlagRequest::from_bytes(bytes::Bytes::from(
+            json!({
+                "token": "my_token1",
+                "distinct_id": "user123",
+                "person_properties": {
+                    "$lib": "web",
+                    "$lib_version": "body-1.0"
+                }
+            })
+            .to_string(),
+        ))
+        .expect("failed to parse request");
+        let log = FlagsCanonicalLogLine {
+            lib: Some("insights-node".to_string()),
+            lib_version: Some("fallback-1.0".to_string()),
+            ..Default::default()
+        };
+
+        let mut metrics_library = Library::InsightsNode;
+        let (_, final_log) = run_with_canonical_log(log, async {
+            stamp_body_sdk_info(&request, &mut metrics_library);
+        })
+        .await;
+
+        assert_eq!(metrics_library, Library::InsightsJs);
+        assert_eq!(final_log.lib.as_deref(), Some("web"));
+        assert_eq!(final_log.lib_version.as_deref(), Some("body-1.0"));
+    }
+
+    #[tokio::test]
+    async fn missing_body_sdk_info_keeps_existing_log_value() {
+        let request = FlagRequest::from_bytes(bytes::Bytes::from(
+            json!({
+                "token": "my_token1",
+                "distinct_id": "user123"
+            })
+            .to_string(),
+        ))
+        .expect("failed to parse request");
+        let log = FlagsCanonicalLogLine {
+            lib: Some("web".to_string()),
+            lib_version: Some("fallback-1.0".to_string()),
+            ..Default::default()
+        };
+
+        let mut metrics_library = Library::InsightsJs;
+        let (_, final_log) = run_with_canonical_log(log, async {
+            stamp_body_sdk_info(&request, &mut metrics_library);
+        })
+        .await;
+
+        assert_eq!(metrics_library, Library::InsightsJs);
+        assert_eq!(final_log.lib.as_deref(), Some("web"));
+        assert_eq!(final_log.lib_version.as_deref(), Some("fallback-1.0"));
+    }
+}
 
 #[cfg(test)]
 mod test_metrics {
@@ -317,6 +496,7 @@ mod metrics_tests {
             team_id: Some(123),
             flags_disabled: Some(false),
             library: Library::InsightsNode,
+            evaluation_type: Some(EvaluationType::Sequential),
         };
 
         // Call the real record_metrics function - it will use our test metrics functions
@@ -344,12 +524,18 @@ mod metrics_tests {
         assert!(counter
             .labels
             .contains(&("library".to_string(), "insights-node".to_string())));
+        assert!(counter
+            .labels
+            .contains(&("evaluation_type".to_string(), "sequential".to_string())));
 
         // Check the histogram metric
         let histogram = &metrics[1];
         assert_eq!(histogram.name, FLAG_REQUESTS_LATENCY);
         assert_eq!(histogram.metric_type, MetricType::Histogram);
         assert_eq!(histogram.value, 100.0);
+        assert!(histogram
+            .labels
+            .contains(&("evaluation_type".to_string(), "sequential".to_string())));
     }
 
     #[test]
@@ -366,6 +552,7 @@ mod metrics_tests {
             team_id: None,
             flags_disabled: None,
             library: Library::Other,
+            evaluation_type: None,
         };
 
         record_metrics(&result, data, std::time::Duration::from_millis(50));
@@ -373,7 +560,7 @@ mod metrics_tests {
         let metrics = get_recorded_metrics();
         assert_eq!(metrics.len(), 2);
 
-        // Both metrics should use "not_available" for missing values
+        // Both metrics should use "not_available" / "none" for missing values
         for metric in &metrics {
             assert!(metric
                 .labels
@@ -381,6 +568,9 @@ mod metrics_tests {
             assert!(metric
                 .labels
                 .contains(&("flags_disabled".to_string(), "not_available".to_string())));
+            assert!(metric
+                .labels
+                .contains(&("evaluation_type".to_string(), "none".to_string())));
         }
     }
 
@@ -393,6 +583,7 @@ mod metrics_tests {
             team_id: Some(456),
             flags_disabled: Some(true),
             library: Library::InsightsJs,
+            evaluation_type: Some(EvaluationType::Parallel),
         };
 
         record_metrics(&result, data, std::time::Duration::from_millis(200));
@@ -415,6 +606,23 @@ mod metrics_tests {
         assert!(fault_counter
             .labels
             .contains(&("team_id".to_string(), "456".to_string())));
+
+        // Verify counter and histogram carry the correct evaluation_type label
+        let counter = metrics
+            .iter()
+            .find(|m| m.name == FLAG_REQUESTS_COUNTER)
+            .expect("Should have counter");
+        assert!(counter
+            .labels
+            .contains(&("evaluation_type".to_string(), "parallel".to_string())));
+
+        let histogram = metrics
+            .iter()
+            .find(|m| m.name == FLAG_REQUESTS_LATENCY)
+            .expect("Should have histogram");
+        assert!(histogram
+            .labels
+            .contains(&("evaluation_type".to_string(), "parallel".to_string())));
     }
 
     #[test]
@@ -426,6 +634,7 @@ mod metrics_tests {
             team_id: None,
             flags_disabled: Some(false),
             library: Library::InsightsPython,
+            evaluation_type: None,
         };
 
         record_metrics(&result, data, std::time::Duration::from_millis(150));
@@ -455,6 +664,7 @@ mod metrics_tests {
             team_id: Some(789),
             flags_disabled: Some(false),
             library: Library::InsightsAndroid,
+            evaluation_type: Some(EvaluationType::Sequential),
         };
 
         record_metrics(&result, data, std::time::Duration::from_millis(75));

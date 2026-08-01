@@ -5,18 +5,20 @@ from insights.insightsql.database.database import Database
 
 from insights.models.organization import Organization
 from insights.models.team.team import Team
+from insights.models.user import User
 
-from products.data_warehouse.backend.insightsql_fixer_ai import _get_schema_description, _get_system_prompt, _get_user_prompt
+from products.data_warehouse.backend.max_tools import _get_schema_description, _get_system_prompt, _get_user_prompt
 
 
 @pytest.mark.django_db
 def test_get_schema_description(snapshot):
     org = Organization.objects.create(name="org")
     team = Team.objects.create(organization=org)
+    user = User.objects.create(email="test@test.com")
 
     query = "select * from events"
-    database = Database.create_for(team.id)
-    insightsql_context = InsightsQLContext(team_id=team.id, enable_select_queries=True, database=database)
+    database = Database.create_for(team=team, user=user)
+    insightsql_context = InsightsQLContext(team_id=team.id, user=user, enable_select_queries=True, database=database)
 
     res = _get_schema_description({"insightsql_query": query}, insightsql_context, database)
 

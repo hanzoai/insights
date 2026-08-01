@@ -1,13 +1,23 @@
 use axum::{extract::State, http::HeaderMap};
 use bytes::Bytes;
+use chrono_tz::Tz;
 use serde::Serialize;
 use serde_json::Value;
-use std::{collections::HashMap, fmt, net::IpAddr, sync::Arc};
+use std::{
+    collections::HashMap,
+    fmt,
+    net::IpAddr,
+    sync::{Arc, OnceLock},
+};
 use uuid::Uuid;
 
 use crate::{
-    api::types::FlagsQueryParams, cohorts::cohort_cache_manager::CohortCacheManager,
-    flags::flag_models::FeatureFlagList, router, utils::user_agent::UserAgentInfo,
+    api::types::FlagsQueryParams,
+    cohorts::{cohort_cache_manager::CohortCacheManager, membership::CohortMembershipProvider},
+    flags::{flag_group_type_mapping::GroupTypeCacheManager, flag_models::FeatureFlagList},
+    rayon_dispatcher::RayonDispatcher,
+    router,
+    utils::user_agent::UserAgentInfo,
 };
 
 pub struct RequestContext {
@@ -28,6 +38,16 @@ pub struct RequestContext {
 
     /// Request ID
     pub request_id: Uuid,
+
+    /// Side channel for body logging: when at least one team is opted into
+    /// `BodyLogger`, the endpoint installs an `Arc<OnceLock<Bytes>>` here and
+    /// keeps a clone. The decode step in `parse_and_authenticate` fills it
+    /// with the decoded body (post gzip + post base64). After the handler
+    /// completes, the endpoint reads from its clone and hands the bytes to
+    /// `BodyLogger::log_response`. This avoids decoding the body twice and
+    /// also ensures base64-wrapped bodies are logged as the JSON they
+    /// actually parsed as, not as the base64 string.
+    pub decoded_body_for_logging: Option<Arc<OnceLock<Bytes>>>,
 }
 
 /// Represents the various property overrides that can be passed around
@@ -43,6 +63,9 @@ pub struct RequestPropertyOverrides {
 /// Represents all context required for evaluating a set of feature flags.
 pub struct FeatureFlagEvaluationContext {
     pub team_id: i32,
+    /// Team timezone, used to interpret naive datetime filter values consistently
+    /// with InsightsQL/Datastore cohort evaluation.
+    pub team_timezone: Tz,
     pub distinct_id: String,
     pub device_id: Option<String>,
     pub feature_flags: FeatureFlagList,
@@ -51,6 +74,7 @@ pub struct FeatureFlagEvaluationContext {
     pub non_persons_reader: Arc<dyn common_database::Client + Send + Sync>,
     pub non_persons_writer: Arc<dyn common_database::Client + Send + Sync>,
     pub cohort_cache: Arc<CohortCacheManager>,
+    pub group_type_cache: Arc<GroupTypeCacheManager>,
     pub person_property_overrides: Option<HashMap<String, Value>>,
     pub group_property_overrides: Option<HashMap<String, HashMap<String, Value>>>,
     pub groups: Option<HashMap<String, Value>>,
@@ -62,6 +86,18 @@ pub struct FeatureFlagEvaluationContext {
     pub optimize_experience_continuity_lookups: bool,
     /// Flag count threshold for switching from sequential to parallel evaluation.
     pub parallel_eval_threshold: usize,
+    /// Dispatcher for bounded-concurrency Rayon batch evaluation.
+    pub rayon_dispatcher: RayonDispatcher,
+    /// When true, skip all writes to PostgreSQL and Redis.
+    pub skip_writes: bool,
+    /// Provider for realtime/behavioral cohort membership lookups.
+    pub cohort_membership_provider: Arc<dyn CohortMembershipProvider>,
+    /// Whether to enable realtime cohort evaluation.
+    pub enable_realtime_cohort_evaluation: bool,
+    /// Whether to include detailed condition analysis in flag evaluation results.
+    pub detailed_analysis: bool,
+    /// Whether to only use person properties from request payload, ignoring database properties.
+    pub only_use_override_person_properties: bool,
 }
 
 /// SDK type classification based on user-agent parsing.
@@ -90,6 +126,8 @@ pub enum Library {
     InsightsDotnet,
     /// insights-elixir SDK
     InsightsElixir,
+    /// insights-rs SDK
+    InsightsRs,
     /// insights-android SDK
     InsightsAndroid,
     /// insights-ios SDK
@@ -120,6 +158,7 @@ impl Library {
             Library::InsightsJava => "insights-java",
             Library::InsightsDotnet => "insights-dotnet",
             Library::InsightsElixir => "insights-elixir",
+            Library::InsightsRs => "insights-rs",
             Library::InsightsAndroid => "insights-android",
             Library::InsightsIos => "insights-ios",
             Library::InsightsReactNative => "insights-react-native",
@@ -142,6 +181,7 @@ impl Library {
         Library::InsightsJava,
         Library::InsightsDotnet,
         Library::InsightsElixir,
+        Library::InsightsRs,
         Library::InsightsAndroid,
         Library::InsightsIos,
         Library::InsightsReactNative,
@@ -209,7 +249,12 @@ impl Library {
     ///
     /// Uses `as_str()` as the source of truth to ensure consistency between
     /// parsing and serialization.
-    fn from_sdk_name(sdk_name: &str) -> Self {
+    pub(crate) fn from_sdk_name(sdk_name: &str) -> Self {
+        // insights-js reports its library as "web" in request body properties.
+        if sdk_name == "web" {
+            return Library::InsightsJs;
+        }
+
         // Check all known variants using as_str() as the source of truth
         for lib in Self::ALL_KNOWN {
             if lib.as_str() == sdk_name {
@@ -238,10 +283,12 @@ mod tests {
     #[case("insights-python/2.5.0", Library::InsightsPython)]
     #[case("insights-php/3.0.0", Library::InsightsPhp)]
     #[case("insights-ruby/2.3.0", Library::InsightsRuby)]
+    #[case("insights-ruby2.3.0", Library::InsightsRuby)]
     #[case("insights-go/1.0.0", Library::InsightsGo)]
     #[case("insights-java/1.2.0", Library::InsightsJava)]
     #[case("insights-dotnet/1.0.0", Library::InsightsDotnet)]
     #[case("insights-elixir/0.2.0", Library::InsightsElixir)]
+    #[case("insights-rs/0.10.0", Library::InsightsRs)]
     #[case("insights-server/1.0.0", Library::InsightsServer)]
     #[case("insights-server/3.2.1 (Android SDK)", Library::InsightsServer)]
     // Client-side SDKs
@@ -326,6 +373,7 @@ mod tests {
     #[case(Library::InsightsJava, "insights-java")]
     #[case(Library::InsightsDotnet, "insights-dotnet")]
     #[case(Library::InsightsElixir, "insights-elixir")]
+    #[case(Library::InsightsRs, "insights-rs")]
     #[case(Library::InsightsAndroid, "insights-android")]
     #[case(Library::InsightsIos, "insights-ios")]
     #[case(Library::InsightsReactNative, "insights-react-native")]
@@ -346,6 +394,7 @@ mod tests {
     #[case(Library::InsightsJava, "\"insights-java\"")]
     #[case(Library::InsightsDotnet, "\"insights-dotnet\"")]
     #[case(Library::InsightsElixir, "\"insights-elixir\"")]
+    #[case(Library::InsightsRs, "\"insights-rs\"")]
     #[case(Library::InsightsAndroid, "\"insights-android\"")]
     #[case(Library::InsightsIos, "\"insights-ios\"")]
     #[case(Library::InsightsReactNative, "\"insights-react-native\"")]
@@ -367,6 +416,11 @@ mod tests {
                 "from_sdk_name({sdk_name}) should return {lib:?}"
             );
         }
+    }
+
+    #[test]
+    fn test_from_sdk_name_maps_web_to_insights_js() {
+        assert_eq!(Library::from_sdk_name("web"), Library::InsightsJs);
     }
 
     #[test]

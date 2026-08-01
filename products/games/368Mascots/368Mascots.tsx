@@ -7,13 +7,18 @@ import { IconInfo } from '@hanzo/icons'
 import { Button } from 'lib/elements/Button'
 import { Tooltip } from 'lib/elements/Tooltip'
 
+import burningMoneyHogSrc from './sprites/burning-money-script.png'
+import policeHogSrc from './sprites/police-script.png'
+import sleepingHogSrc from './sprites/sleeping-script.png'
+import warningHogSrc from './sprites/warning-script.png'
+
 // ==========================================================================
-export type Icon = 'icon1' | 'icon2' | 'icon3' | 'icon4'
+export type Script = 'hog1' | 'hog2' | 'hog3' | 'hog4'
 export type Orientation = 'horizontal' | 'vertical'
 
 interface Piece {
     orientation: Orientation
-    cells: [Icon, Icon]
+    cells: [Script, Script]
 }
 
 interface DragPayload {
@@ -22,20 +27,20 @@ interface DragPayload {
 }
 
 const BOARD_SIZE = 6
-const EMOJIS: Icon[] = ['icon1', 'icon2', 'icon3', 'icon4']
+const EMOJIS: Script[] = ['hog1', 'hog2', 'hog3', 'hog4']
 
-const IMAGE_MAP: Record<Icon, string> = {
-    mascot1: '/static/mascot/burning-money-mascot.png',
-    mascot2: '/static/mascot/police-mascot.png',
-    mascot3: '/static/mascot/sleeping-mascot.png',
-    mascot4: '/static/mascot/warning-mascot.png',
+const IMAGE_MAP: Record<Script, string> = {
+    hog1: burningMoneyHogSrc,
+    hog2: policeHogSrc,
+    hog3: sleepingHogSrc,
+    hog4: warningHogSrc,
 }
 
-type Board = (Icon | null)[][] // 6×6 grid
+type Board = (Script | null)[][] // 6×6 grid
 
 // ==========================================================================
 // Helpers
-const makeEmptyBoard = (): Board => Array.from({ length: BOARD_SIZE }, () => Array<Icon | null>(BOARD_SIZE).fill(null))
+const makeEmptyBoard = (): Board => Array.from({ length: BOARD_SIZE }, () => Array<Script | null>(BOARD_SIZE).fill(null))
 
 // Generate a piece that **can actually be placed** on the current board.
 // Returns null if the board has no legal placement left.
@@ -64,7 +69,7 @@ const genPieceForBoard = (board: Board): Piece | null => {
     }
 
     const orientation = legalOrientations[Math.floor(Math.random() * legalOrientations.length)] as Orientation
-    const cells: [Icon, Icon] = [
+    const cells: [Script, Script] = [
         EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
         EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
     ]
@@ -378,14 +383,14 @@ const CritterMatchGame: React.FC = () => {
                                 </Button>
                             </>
                         ) : (
-                            '🎉 All the mascots are safe! Well done you! 🎉'
+                            '🎉 All the hogs are safe! Well done you! 🎉'
                         )
                     ) : (
-                        `${pointsLeft} mascots remaining`
+                        `${pointsLeft} hogs remaining`
                     )}
                     {!gameOver ? (
                         <Tooltip
-                            title="Drag the mascots onto the board. Get 3 in a row to save them. Heavily inspired by 368chickens.com"
+                            title="Drag the hogs onto the board. Get 3 in a row to save them. Heavily inspired by 368chickens.com"
                             delayMs={0}
                         >
                             <IconInfo className="ml-2" />

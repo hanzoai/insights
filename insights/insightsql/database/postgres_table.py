@@ -1,12 +1,28 @@
-from typing import Optional
+from functools import cache
+from typing import Optional, cast
 
 from django.conf import settings
 
+from psycopg.conninfo import conninfo_to_dict
+
+from insights.insightsql.base import Expr
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.models import FunctionCallTable
 from insights.insightsql.escape_sql import escape_insightsql_identifier
 
 from insights.person_db_router import PERSONS_DB_MODELS
+from insights.persons_db import persons_db_url
+from insights.scopes import APIScopeObject
+
+
+@cache
+def _pk_column_for_pg_table(postgres_table_name: str) -> Optional[str]:
+    """Look up the primary key column from the actual DB schema. Cached per process.
+    Returns None for tables with composite primary key."""
+    from django.db import connection
+
+    with connection.cursor() as cursor:
+        return connection.introspection.get_primary_key_column(cursor, postgres_table_name)
 
 
 def build_function_call(postgres_table_name: str, context: Optional[InsightsQLContext] = None):
@@ -25,17 +41,30 @@ def build_function_call(postgres_table_name: str, context: Optional[InsightsQLCo
     table = add_param(postgres_table_name)
 
     if settings.DEBUG or settings.TEST:
-        databases = settings.DATABASES
-        # Determine which database to use based on table name
+        address = add_param("db:5432")  # docker container for postgres from datastore
+
         # Extract model name from postgres table name (e.g., "insights_group" -> "group")
         model_name = postgres_table_name.replace("insights_", "")
-        db_name = "persons_db_writer" if model_name in PERSONS_DB_MODELS else "default"
-        database = databases[db_name]
+        if model_name in PERSONS_DB_MODELS:
+            # The persons DB is not a Django-managed connection. Source its credentials from the
+            # off-ORM URL (insights/persons_db.py), which conftest points at the test-prefixed
+            # persons DB under tests — mirroring the test DB name Django would have resolved.
+            # Index directly (not .get with a default): a missing critical field should raise a
+            # clear KeyError here rather than pass blank credentials that surface as an opaque
+            # Datastore connection error at query time.
+            conninfo = cast(dict[str, str], conninfo_to_dict(persons_db_url(writer=True)))
+            db = add_param(conninfo["dbname"])
+            user = add_param(conninfo["user"])
+            password = add_param(conninfo["password"])
+        else:
+            from django.db import connections
 
-        address = add_param("db:5432")  # docker container for postgres from datastore
-        db = add_param(database["NAME"])
-        user = add_param(database["USER"])
-        password = add_param(database["PASSWORD"])
+            database = settings.DATABASES["default"]
+            # during tests, django uses test-prefixed db name rather than the configured NAME
+            actual_db_name = connections["default"].settings_dict["NAME"]
+            db = add_param(actual_db_name)
+            user = add_param(database["USER"])
+            password = add_param(database["PASSWORD"])
     else:
         host_var = settings.DATASTORE_INSIGHTSQL_RDSPROXY_READ_HOST
         port_var = settings.DATASTORE_INSIGHTSQL_RDSPROXY_READ_PORT
@@ -57,6 +86,25 @@ def build_function_call(postgres_table_name: str, context: Optional[InsightsQLCo
 class PostgresTable(FunctionCallTable):
     requires_args: bool = False
     postgres_table_name: str
+    access_scope: Optional[APIScopeObject] = None
+    # Column that object-level access control filters ids against.
+    # Defaults to the primary key, which is correct when the table's rows ARE the access-controlled object
+    # (e.g. system.dashboards). Child tables that only expose a parent object's data set this
+    # to the foreign key pointing at that parent (e.g. system.dashboard_tiles -> "dashboard_id"),
+    # so denying the parent also hides its child rows.
+    access_control_id_field: Optional[str] = None
+    predicates: list[Expr] = []
+
+    def get_predicates(self) -> list[Expr]:
+        return self.predicates
+
+    @property
+    def primary_key(self) -> Optional[str]:
+        return _pk_column_for_pg_table(self.postgres_table_name)
+
+    @property
+    def access_control_id(self) -> Optional[str]:
+        return self.access_control_id_field or self.primary_key
 
     def to_printed_insightsql(self):
         return escape_insightsql_identifier(self.name)

@@ -1,23 +1,18 @@
+import insights from 'insights-js'
 import { useEffect, useState } from 'react'
-
-import insights from '@hanzo/insights'
 
 import { FeatureFlagKey } from 'lib/constants'
 
 const DEFAULT_API_KEY = 'sTMFPsFhdP1Ssg'
 
-const runningOnInsights = !!window.INSIGHTS_APP_CONTEXT
-const apiKey = runningOnInsights ? window.JS_INSIGHTS_API_KEY : DEFAULT_API_KEY
-// Off-Insights the toolbar has no telemetry destination of its own. Point the
-// internal client at the current origin and disable flag fetching so it makes
-// no network calls at all, rather than at a host this deployment does not run.
-const apiHost = (runningOnInsights ? window.JS_INSIGHTS_HOST : '') || window.location.origin
+const runningOnInsights = !!window.POSTFN_APP_CONTEXT
+const apiKey = runningOnInsights ? window.JS_POSTFN_API_KEY : DEFAULT_API_KEY
+const apiHost = runningOnInsights ? window.JS_POSTFN_HOST : 'https://internal-j.hanzo.ai'
 
 const initResult = insights.init(
     apiKey || DEFAULT_API_KEY,
     {
         api_host: apiHost,
-        advanced_disable_flags: !runningOnInsights,
         opt_out_capturing_by_default: true, // must call .opt_in_capturing() before any events are sent
         persistence: 'memory', // We don't want to persist anything, all events are in-memory
         persistence_name: apiKey + '_toolbar', // We don't need this but it ensures we don't accidentally mess with the standard persistence
@@ -36,7 +31,7 @@ const initResult = insights.init(
             // so customer sessions don't see it), but also respect the customer's
             // ph-no-capture marks
             blockClass: 'ph-internal-no-capture',
-            blockSelector: '.ph-no-capture:not(#__INSIGHTS_TOOLBAR__):not(#__INSIGHTS_TOOLBAR__ *)',
+            blockSelector: '.ph-no-capture:not(#__POSTFN_TOOLBAR__):not(#__POSTFN_TOOLBAR__ *)',
             maskAllInputs: true,
         },
     },
@@ -47,8 +42,20 @@ if (!initResult) {
 }
 export const toolbarInsightsJS = initResult
 
-if (runningOnInsights && window.JS_INSIGHTS_SELF_CAPTURE) {
+if (runningOnInsights && window.JS_POSTFN_SELF_CAPTURE) {
     toolbarInsightsJS.debug()
+}
+
+/** Capture an exception with a required toolbar context tag for filtering. */
+export function captureToolbarException(
+    error: unknown,
+    context: string,
+    additionalProperties?: Record<string, unknown>
+): void {
+    toolbarInsightsJS.captureException(error, {
+        toolbar_context: context,
+        ...additionalProperties,
+    })
 }
 
 export const useToolbarFeatureFlag = (flag: FeatureFlagKey, match?: string): boolean => {

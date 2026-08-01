@@ -1,9 +1,59 @@
 import { DateTime } from 'luxon'
 
+import { Team } from '../types'
+import { CdpInternalEvent } from './schema'
 import { LogEntry } from './types'
-import { fixLogDeduplication, gzipObject, sanitizeLogMessage, unGzipObject } from './utils'
+import {
+    convertInternalEventToInsightsFunctionInvocationGlobals,
+    fixLogDeduplication,
+    gzipObject,
+    sanitizeLogMessage,
+    unGzipObject,
+} from './utils'
 
 describe('Utils', () => {
+    test.each(['$error_tracking_issue_created', '$error_tracking_issue_reopened', '$error_tracking_issue_spiking'])(
+        'flattens exception properties for %s',
+        (eventName) => {
+            const data: CdpInternalEvent = {
+                team_id: 1,
+                event: {
+                    uuid: '018f0000-0000-7000-8000-000000000000',
+                    event: eventName,
+                    distinct_id: '018f0000-0000-7000-8000-000000000001',
+                    properties: {
+                        name: 'Test issue',
+                        issue_description: 'Test description',
+                        first_seen: '2026-07-20T09:00:00Z',
+                        assignee: '{"type":"user","id":42}',
+                        fingerprint: 'server-fingerprint',
+                        exception_props: {
+                            $exception_types: ['TypeError'],
+                            assignee: 'untrusted-assignee',
+                            fingerprint: 'untrusted-fingerprint',
+                        },
+                    },
+                    timestamp: '2026-07-20T10:00:00Z',
+                },
+            }
+
+            const globals = convertInternalEventToInsightsFunctionInvocationGlobals(
+                data,
+                { id: 1, name: 'Test project' } as Team,
+                'https://us.hanzo.ai'
+            )
+
+            expect(globals.event.properties).toEqual({
+                name: 'Test issue',
+                issue_description: 'Test description',
+                first_seen: '2026-07-20T09:00:00Z',
+                assignee: '{"type":"user","id":42}',
+                fingerprint: 'server-fingerprint',
+                $exception_types: ['TypeError'],
+            })
+        }
+    )
+
     describe('gzip compressions', () => {
         it("should compress and decompress a string using gzip's sync functions", async () => {
             const input = { foo: 'bar', foo2: 'bar' }
@@ -17,7 +67,7 @@ describe('Utils', () => {
         const commonProps: Omit<LogEntry, 'timestamp' | 'message'> = {
             team_id: 1,
             log_source: 'insights_function',
-            log_source_id: 'fn-1',
+            log_source_id: 'script-1',
             instance_id: 'inv-1',
             level: 'info' as const,
         }
@@ -37,7 +87,7 @@ describe('Utils', () => {
                     "instance_id": "inv-1",
                     "level": "info",
                     "log_source": "insights_function",
-                    "log_source_id": "fn-1",
+                    "log_source_id": "script-1",
                     "message": "First log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.000",
@@ -46,7 +96,7 @@ describe('Utils', () => {
                     "instance_id": "inv-1",
                     "level": "info",
                     "log_source": "insights_function",
-                    "log_source_id": "fn-1",
+                    "log_source_id": "script-1",
                     "message": "Second log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.001",
@@ -55,7 +105,7 @@ describe('Utils', () => {
                     "instance_id": "inv-1",
                     "level": "info",
                     "log_source": "insights_function",
-                    "log_source_id": "fn-1",
+                    "log_source_id": "script-1",
                     "message": "Third log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.002",
@@ -64,7 +114,7 @@ describe('Utils', () => {
                     "instance_id": "inv-1",
                     "level": "info",
                     "log_source": "insights_function",
-                    "log_source_id": "fn-1",
+                    "log_source_id": "script-1",
                     "message": "Duplicate log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.003",

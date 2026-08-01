@@ -8,25 +8,27 @@ import { Button, Checkbox, Select } from '@hanzo/elements'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
-import { OrganizationMembershipLevel } from 'lib/constants'
 import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { Label } from 'lib/elements/Label/Label'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 
-import { ExporterFormat } from '~/types'
+import { AccessControlLevel, AccessControlResourceType, ExporterFormat } from '~/types'
 
+import { buildBillingCsv, getUsageTypeOptions } from './billing-utils'
 import { BillingDataTable } from './BillingDataTable'
 import { BillingEarlyAccessBanner } from './BillingEarlyAccessBanner'
 import { BillingEmptyState } from './BillingEmptyState'
 import { BillingLineGraph } from './BillingLineGraph'
+import { billingLogic } from './billingLogic'
 import { BillingNoAccess } from './BillingNoAccess'
-import { buildBillingCsv } from './billing-utils'
 import { billingUsageLogic } from './billingUsageLogic'
-import { USAGE_TYPES } from './constants'
 
 export function BillingUsage(): JSX.Element {
+    const { minimumBillingAccessLevel } = useValues(billingLogic)
     const restrictionReason = useRestrictedArea({
-        minimumAccessLevel: OrganizationMembershipLevel.Admin,
+        minimumAccessLevel: minimumBillingAccessLevel,
         scope: RestrictionScope.Organization,
     })
     const logic = billingUsageLogic({ syncWithUrl: true })
@@ -48,6 +50,7 @@ export function BillingUsage(): JSX.Element {
         billingPeriodMarkers,
     } = useValues(logic)
     const { startExport } = useActions(exportsLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
     const {
         setFilters,
         setDateRange,
@@ -61,6 +64,12 @@ export function BillingUsage(): JSX.Element {
     if (restrictionReason) {
         return <BillingNoAccess title="Usage" reason={restrictionReason} />
     }
+
+    // Creating an export requires editor access to the export resource.
+    const exportAccessControlDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.Export,
+        AccessControlLevel.Editor
+    )
 
     const onExportCsv = (): void => {
         const csv = buildBillingCsv({
@@ -94,7 +103,7 @@ export function BillingUsage(): JSX.Element {
                             value={filters.usage_types || []}
                             onChange={(value) => setFilters({ usage_types: value })}
                             placeholder="All products"
-                            options={USAGE_TYPES.map((opt) => ({ key: opt.value, label: opt.label }))}
+                            options={getUsageTypeOptions(featureFlags)}
                             allowCustomValues={false}
                         />
                     </div>
@@ -187,7 +196,12 @@ export function BillingUsage(): JSX.Element {
                                 Clear filters
                             </Button>
                             {showSeries && (
-                                <Button type="secondary" size="medium" onClick={onExportCsv}>
+                                <Button
+                                    type="secondary"
+                                    size="medium"
+                                    onClick={onExportCsv}
+                                    disabledReason={exportAccessControlDisabledReason ?? undefined}
+                                >
                                     Export CSV
                                 </Button>
                             )}

@@ -1,4 +1,4 @@
-from datastore_orm import migrations
+from infi.datastore_orm import migrations
 
 from insights.datastore.client.connection import get_client_from_pool
 from insights.settings import DATASTORE_CLUSTER

@@ -2,12 +2,12 @@ import { DateTime } from 'luxon'
 import { Summary } from 'prom-client'
 import { gunzip, gzip } from 'zlib'
 
-import { sanitizeForUTF8 } from '~/utils/strings'
+import { parseJSON } from '~/common/utils/json-parse'
+import { sanitizeForUTF8 } from '~/common/utils/strings'
+import { UUIDT, castTimestampOrNow, clickHouseTimestampToISO } from '~/common/utils/utils'
 
 import { RawDatastoreEvent, Team, TimestampFormat } from '../types'
-import { parseJSON } from '../utils/json-parse'
-import { UUIDT, castTimestampOrNow, datastoreTimestampToISO } from '../utils/utils'
-import { CdpDataWarehouseEvent, CdpInternalEvent } from './schema'
+import { CdpInternalEvent } from './schema'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
 
 // ID of functions that are hidden from normal users and used by us for special testing
@@ -57,12 +57,12 @@ export function convertToInsightsFunctionInvocationGlobals(
     // so we need to handle that case
     const eventTimestamp = DateTime.fromISO(event.timestamp).isValid
         ? event.timestamp
-        : datastoreTimestampToISO(event.timestamp)
+        : clickHouseTimestampToISO(event.timestamp)
 
     const eventCapturedAt = event.captured_at
         ? DateTime.fromISO(event.captured_at).isValid
             ? event.captured_at
-            : datastoreTimestampToISO(event.captured_at)
+            : clickHouseTimestampToISO(event.captured_at)
         : null
 
     const context: InsightsFunctionInvocationGlobals = {
@@ -90,12 +90,10 @@ export function convertToInsightsFunctionInvocationGlobals(
 export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
     team,
     personId,
-    distinctId,
     siteUrl,
 }: {
     team: Team
     personId: string
-    distinctId: string
     siteUrl: string
 }): InsightsFunctionInvocationGlobals {
     const projectUrl = `${siteUrl}/project/${team.id}`
@@ -104,7 +102,7 @@ export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGloba
         id: personId,
         properties: {},
         name: '',
-        url: `${projectUrl}/person/${encodeURIComponent(distinctId)}`,
+        url: `${projectUrl}/person/${encodeURIComponent(personId)}`,
     }
 
     const context: InsightsFunctionInvocationGlobals = {
@@ -114,43 +112,15 @@ export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGloba
             url: projectUrl,
         },
         event: {
-            event: '$batch_insights_flow_invocation',
+            event: '$batch_hog_flow_invocation',
             properties: {},
             uuid: new UUIDT().toString(),
-            distinct_id: distinctId,
+            distinct_id: '', // Not applicable for batch processing but left here for compatibility
             elements_chain: '',
             timestamp: DateTime.now().toISO(),
             url: '',
         },
         person,
-    }
-
-    return context
-}
-
-export function convertDataWarehouseEventToInsightsFunctionInvocationGlobals(
-    event: CdpDataWarehouseEvent,
-    team: Team,
-    siteUrl: string
-): InsightsFunctionInvocationGlobals {
-    const data = event.properties
-    const projectUrl = `${siteUrl}/project/${team.id}`
-
-    const context: InsightsFunctionInvocationGlobals = {
-        project: {
-            id: team.id,
-            name: team.name,
-            url: projectUrl,
-        },
-        event: {
-            uuid: 'data-warehouse-table-uuid-do-not-use',
-            event: 'data-warehouse-table-event-do-not-use',
-            elements_chain: '', // Not applicable but left here for compatibility
-            distinct_id: 'data-warehouse-table-distinct-id-do-not-use',
-            properties: data,
-            timestamp: DateTime.now().toISO(),
-            url: '',
-        },
     }
 
     return context
@@ -185,7 +155,7 @@ export function convertInternalEventToInsightsFunctionInvocationGlobals(
         'exception_props' in properties &&
         typeof properties.exception_props === 'object'
     ) {
-        properties = { ...properties, ...properties.exception_props }
+        properties = { ...properties.exception_props, ...properties }
         delete properties.exception_props
     }
 
@@ -218,7 +188,7 @@ export const gzipObject = async <T extends object>(object: T): Promise<string> =
     )
     const res = buffer.toString('base64')
 
-    // NOTE: Base64 encoding isn't as efficient but we would need to change the stream producer/consumers to use ucs2 or something
+    // NOTE: Base64 encoding isn't as efficient but we would need to change the kafka producer/consumers to use ucs2 or something
     // as well in order to support binary data better
 
     return res
@@ -275,7 +245,11 @@ export function isNativeInsightsFunction(insightsFunction: Pick<InsightsFunction
 }
 
 export function isInternalErrorTrackingEvent(event: CdpInternalEvent['event']): boolean {
-    return ['$error_tracking_issue_created', '$error_tracking_issue_reopened'].includes(event.event)
+    return [
+        '$error_tracking_issue_created',
+        '$error_tracking_issue_reopened',
+        '$error_tracking_issue_spiking',
+    ].includes(event.event)
 }
 
 export function filterExists<T>(value: T): value is NonNullable<T> {

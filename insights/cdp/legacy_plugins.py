@@ -1,12 +1,12 @@
-from insights.api.insights_function import InsightsFunctionSerializer
-from insights.models.insights_function_template import InsightsFunctionTemplate
+from products.cdp.backend.api.insights_function import InsightsFunctionSerializer
+from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 
 
 def insights_function_from_plugin_config(plugin_config: dict, serializer_context: dict) -> InsightsFunctionSerializer:
     plugin = plugin_config["plugin"]
     # Attempts to find a related InsightsFunctionTemplate for the plugin config
 
-    plugin_id = plugin.url.replace("inline://", "").replace("https://github.com/Hanzo Insights/", "")
+    plugin_id = plugin.url.replace("inline://", "").replace("https://github.com/Insights/", "")
 
     # Inline plugins are named slightly differently so we fix it here
     if plugin_id == "semver-flattener":
@@ -29,7 +29,7 @@ def insights_function_from_plugin_config(plugin_config: dict, serializer_context
         "name": plugin.name,
         "description": template.description,
         "filters": template.filters,
-        "fn": template.code,
+        "script": template.code,
         "inputs": inputs,
         "enabled": plugin_config.get("enabled", True),
         "icon_url": template.icon_url,

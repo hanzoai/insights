@@ -1,114 +1,153 @@
-// @ts-nocheck
 import { Message } from 'node-rdkafka'
-import { Gauge } from 'prom-client'
+import { Gauge, Histogram } from 'prom-client'
 
-import { instrumentFn } from '~/common/tracing/tracing-utils'
-
-import { ScriptTransformerHub, ScriptTransformerService } from '../cdp/script-transformations/script-transformer.service'
-import { StreamConsumer } from '../stream/consumer'
-import { StreamProducerWrapper } from '../stream/producer'
+import { CommonConfig } from '~/common/config'
+import { GroupTypeManager } from '~/common/groups/group-type-manager'
+import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
+import { GroupRepository } from '~/common/groups/repositories/group-repository.interface'
+import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { KafkaConsumerInterface, createKafkaConsumer } from '~/common/kafka/consumer'
 import {
-    HealthCheckResult,
-    HealthCheckResultError,
-    Hub,
-    IngestionConsumerConfig,
-    PluginServerService,
-    PluginsServerConfig,
-} from '../types'
-import { EventIngestionRestrictionManager } from '../utils/event-ingestion-restrictions'
-import { EventSchemaEnforcementManager } from '../utils/event-schema-enforcement-manager'
-import { logger } from '../utils/logger'
-import { PromiseScheduler } from '../utils/promise-scheduler'
-import { BatchWritingGroupStore } from '../worker/ingestion/groups/batch-writing-group-store'
-import { BatchWritingPersonsStore } from '../worker/ingestion/persons/batch-writing-person-store'
-import { PersonsStore } from '../worker/ingestion/persons/persons-store'
+    AppMetricsOutput,
+    DlqOutput,
+    GroupsOutput,
+    IngestionWarningsOutput,
+    OverflowOutput,
+    TophogOutput,
+} from '~/common/outputs'
+import {
+    AiEventOutput,
+    AsyncOutput,
+    EventOutput,
+    PersonDistinctIdsOutput,
+    PersonMergeEventsOutput,
+    PersonsOutput,
+} from '~/common/outputs'
+import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
+import { PersonRepository } from '~/common/persons/repositories/person-repository'
+import { instrumentFn } from '~/common/tracing/tracing-utils'
+import { PostgresRouter } from '~/common/utils/db/postgres'
+import {
+    EventIngestionRestrictionManager,
+    EventIngestionRestrictionManagerComponent,
+} from '~/common/utils/event-ingestion-restrictions'
+import { EventSchemaEnforcementManager } from '~/common/utils/event-schema-enforcement-manager'
+import { logger } from '~/common/utils/logger'
+import { PromiseScheduler } from '~/common/utils/promise-scheduler'
+import { TeamManager } from '~/common/utils/team-manager'
+import { CookielessManager } from '~/ingestion/common/cookieless/cookieless-manager'
+import { BatchWritingGroupStore } from '~/ingestion/common/groups/batch-writing-group-store'
+import { BatchWritingPersonsStore } from '~/ingestion/common/persons/batch-writing-person-store'
+import { effectivePersonMergeEventsEnabled } from '~/ingestion/common/persons/person-merge-event'
+import { PersonsStore } from '~/ingestion/common/persons/persons-store'
+import { createKafkaDebugContext, createOkContext } from '~/ingestion/framework/helpers'
+import { TopHog } from '~/ingestion/framework/tophog'
 import {
     JoinedIngestionPipelineConfig,
     JoinedIngestionPipelineContext,
+    JoinedIngestionPipelineDeps,
     JoinedIngestionPipelineInput,
     createJoinedIngestionPipeline,
-} from './analytics'
-import { BatchPipeline } from './pipelines/batch-pipeline.interface'
-import { newBatchPipelineBuilder } from './pipelines/builders'
-import { createContext } from './pipelines/helpers'
-import { ok } from './pipelines/results'
-import { MainLaneOverflowRedirect } from './utils/overflow-redirect/main-lane-overflow-redirect'
-import { OverflowLaneOverflowRedirect } from './utils/overflow-redirect/overflow-lane-overflow-redirect'
-import { OverflowRedirectService } from './utils/overflow-redirect/overflow-redirect-service'
-import { RedisOverflowRepository } from './utils/overflow-redirect/overflow-redis-repository'
+} from '~/ingestion/pipelines/analytics'
+import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, PluginServerService, RedisPool } from '~/types'
 
-/**
- * Narrowed Hub type for IngestionConsumer.
- * This includes all fields needed by IngestionConsumer and its dependencies:
- * - ScriptTransformerService (via ScriptTransformerHub)
- * - BatchWritingGroupStore (via GroupHub)
- * - EventIngestionRestrictionManager
- * - StreamProducerWrapper
- * - BatchWritingPersonsStore
- * - Preprocessing and ingestion pipelines
- */
-export type IngestionConsumerHub = ScriptTransformerHub &
-    IngestionConsumerConfig &
-    Pick<
-        Hub,
-        // EventIngestionRestrictionManager
-        | 'redisPool'
-        // GroupHub (BatchWritingGroupStore)
-        | 'groupRepository'
-        | 'datastoreGroupRepository'
-        // StreamProducerWrapper.create
-        | 'STREAM_CLIENT_RACK'
-        // PreprocessingHub (additional fields not in ScriptTransformerHub)
-        | 'cookielessManager'
-        // BatchWritingPersonsStore
-        | 'personRepository'
-        // GroupTypeManager
-        | 'groupTypeManager'
-        // EventSchemaEnforcementManager
-        | 'postgres'
+import { EventFilterManager, EventFilterManagerComponent } from './common/event-filters'
+import {
+    FeatureFlagCalledDedupService,
+    createFeatureFlagCalledDedupService,
+} from './common/feature-flag-called-dedup/feature-flag-called-dedup-service'
+import { MainLaneOverflowRedirect } from './common/overflow-redirect/main-lane-overflow-redirect'
+import { OverflowLaneOverflowRedirect } from './common/overflow-redirect/overflow-lane-overflow-redirect'
+import { OverflowRedirectService } from './common/overflow-redirect/overflow-redirect-service'
+import { RedisOverflowRepository } from './common/overflow-redirect/overflow-redis-repository'
+import { createAnalyticsOverflowStrategies } from './common/overflow-redirect/overflow-strategy'
+import { AiEventSubpipelineFactory } from './common/subpipelines/ai-subpipeline.contract'
+import { IngestionConsumerConfig, IngestionOutputsConfig } from './config'
+
+export type IngestionConsumerFullConfig = IngestionConsumerConfig &
+    Pick<CommonConfig, 'KAFKA_CLIENT_RACK' | 'CDP_FN_WATCHER_SAMPLE_RATE'> &
+    // The general server builds the consumer from a config that includes IngestionOutputsConfig; the
+    // merge-events gate reads the topic, so surface it here rather than relying on the runtime shape.
+    Pick<IngestionOutputsConfig, 'INGESTION_OUTPUT_PERSON_MERGE_EVENTS_TOPIC'>
+
+export interface IngestionConsumerDeps {
+    postgres: PostgresRouter
+    redisPool: RedisPool
+    /** Dedicated pool for $feature_flag_called dedup claims; reuses redisPool when unset */
+    featureFlagCalledDedupRedisPool?: RedisPool
+    outputs: IngestionOutputs<
+        | EventOutput
+        | AiEventOutput
+        | IngestionWarningsOutput
+        | DlqOutput
+        | OverflowOutput
+        | AsyncOutput
+        | GroupsOutput
+        | PersonsOutput
+        | PersonDistinctIdsOutput
+        | PersonMergeEventsOutput
+        | AppMetricsOutput
+        | TophogOutput
     >
+    teamManager: TeamManager
+    groupTypeManager: GroupTypeManager
+    groupRepository: GroupRepository
+    datastoreGroupRepository: DatastoreGroupRepository
+    personRepository: PersonRepository
+    cookielessManager: CookielessManager
+    hogTransformer: HogTransformer
+    aiSubpipelineFactory: AiEventSubpipelineFactory
+}
 
-const latestOffsetTimestampGauge = new Gauge({
+export const latestOffsetTimestampGauge = new Gauge({
     name: 'latest_processed_timestamp_ms',
     help: 'Timestamp of the latest offset that has been committed.',
     labelNames: ['topic', 'partition', 'groupId'],
     aggregator: 'max',
 })
 
+const backgroundTaskProducesDuration = new Histogram({
+    name: 'ingestion_background_task_produces_duration_seconds',
+    help: 'Time waiting for scheduled Kafka produces in the background task',
+    labelNames: ['groupId'],
+    buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+})
+
 export class IngestionConsumer {
     protected name = 'ingestion-consumer'
     protected groupId: string
     protected topic: string
-    protected dlqTopic: string
-    protected overflowTopic?: string
-    protected streamConsumer: StreamConsumer
+    protected kafkaConsumer: KafkaConsumerInterface
     isStopping = false
-    protected streamProducer?: StreamProducerWrapper
-    protected streamOverflowProducer?: StreamProducerWrapper
-    public scriptTransformer: ScriptTransformerService
+    public hogTransformer: HogTransformer
     private overflowRedirectService?: OverflowRedirectService
     private overflowLaneTTLRefreshService?: OverflowRedirectService
+    private featureFlagCalledDedupService?: FeatureFlagCalledDedupService
     private tokenDistinctIdsToDrop: string[] = []
     private tokenDistinctIdsToSkipPersons: string[] = []
     private tokenDistinctIdsToForceOverflow: string[] = []
     private personsStore: PersonsStore
     public groupStore: BatchWritingGroupStore
-    private eventIngestionRestrictionManager: EventIngestionRestrictionManager
+    private eventFilterManagerComponent: EventFilterManagerComponent
+    private eventFilterManager!: EventFilterManager
+    private stopEventFilterManager?: () => Promise<void>
+    private eventIngestionRestrictionManagerComponent: EventIngestionRestrictionManagerComponent
+    private eventIngestionRestrictionManager!: EventIngestionRestrictionManager
+    private stopEventIngestionRestrictionManager?: () => Promise<void>
     private eventSchemaEnforcementManager: EventSchemaEnforcementManager
     public readonly promiseScheduler = new PromiseScheduler()
+    private topHog!: TopHog
 
-    private joinedPipeline!: BatchPipeline<
-        JoinedIngestionPipelineInput,
-        void,
-        JoinedIngestionPipelineContext,
-        JoinedIngestionPipelineContext
+    private joinedPipeline!: ReturnType<
+        typeof createJoinedIngestionPipeline<JoinedIngestionPipelineInput, JoinedIngestionPipelineContext>
     >
 
     constructor(
-        private hub: IngestionConsumerHub,
+        private config: IngestionConsumerFullConfig,
+        private deps: IngestionConsumerDeps,
         overrides: Partial<
             Pick<
-                PluginsServerConfig,
+                IngestionConsumerConfig,
                 | 'INGESTION_CONSUMER_GROUP_ID'
                 | 'INGESTION_CONSUMER_CONSUME_TOPIC'
                 | 'INGESTION_CONSUMER_OVERFLOW_TOPIC'
@@ -117,71 +156,91 @@ export class IngestionConsumer {
         > = {}
     ) {
         // The group and topic are configurable allowing for multiple ingestion consumers to be run in parallel
-        this.groupId = overrides.INGESTION_CONSUMER_GROUP_ID ?? hub.INGESTION_CONSUMER_GROUP_ID
-        this.topic = overrides.INGESTION_CONSUMER_CONSUME_TOPIC ?? hub.INGESTION_CONSUMER_CONSUME_TOPIC
-        this.overflowTopic = overrides.INGESTION_CONSUMER_OVERFLOW_TOPIC ?? hub.INGESTION_CONSUMER_OVERFLOW_TOPIC
-        this.dlqTopic = overrides.INGESTION_CONSUMER_DLQ_TOPIC ?? hub.INGESTION_CONSUMER_DLQ_TOPIC
-        this.tokenDistinctIdsToDrop = hub.DROP_EVENTS_BY_TOKEN_DISTINCT_ID.split(',').filter((x) => !!x)
-        this.tokenDistinctIdsToSkipPersons = hub.SKIP_PERSONS_PROCESSING_BY_TOKEN_DISTINCT_ID.split(',').filter(
+        this.groupId = overrides.INGESTION_CONSUMER_GROUP_ID ?? config.INGESTION_CONSUMER_GROUP_ID
+        this.topic = overrides.INGESTION_CONSUMER_CONSUME_TOPIC ?? config.INGESTION_CONSUMER_CONSUME_TOPIC
+        this.tokenDistinctIdsToDrop = config.DROP_EVENTS_BY_TOKEN_DISTINCT_ID.split(',').filter((x) => !!x)
+        this.tokenDistinctIdsToSkipPersons = config.SKIP_PERSONS_PROCESSING_BY_TOKEN_DISTINCT_ID.split(',').filter(
             (x) => !!x
         )
-        this.tokenDistinctIdsToForceOverflow = hub.INGESTION_FORCE_OVERFLOW_BY_TOKEN_DISTINCT_ID.split(',').filter(
+        this.tokenDistinctIdsToForceOverflow = config.INGESTION_FORCE_OVERFLOW_BY_TOKEN_DISTINCT_ID.split(',').filter(
             (x) => !!x
         )
-        this.eventIngestionRestrictionManager = new EventIngestionRestrictionManager(hub.redisPool, {
+        this.eventIngestionRestrictionManagerComponent = new EventIngestionRestrictionManagerComponent(deps.redisPool, {
             pipeline: 'analytics',
             staticDropEventTokens: this.tokenDistinctIdsToDrop,
             staticSkipPersonTokens: this.tokenDistinctIdsToSkipPersons,
             staticForceOverflowTokens: this.tokenDistinctIdsToForceOverflow,
         })
-        this.eventSchemaEnforcementManager = new EventSchemaEnforcementManager(hub.postgres)
+        this.eventFilterManagerComponent = new EventFilterManagerComponent(deps.postgres)
+        this.eventSchemaEnforcementManager = new EventSchemaEnforcementManager(deps.postgres)
 
         this.name = `ingestion-consumer-${this.topic}`
 
         // Create shared Redis repository for overflow redirect services
         const overflowRedisRepository = new RedisOverflowRepository({
-            redisPool: this.hub.redisPool,
-            redisTTLSeconds: this.hub.INGESTION_STATEFUL_OVERFLOW_KV_TTL_SECONDS,
+            redisPool: this.deps.redisPool,
+            redisTTLSeconds: this.config.INGESTION_STATEFUL_OVERFLOW_REDIS_TTL_SECONDS,
         })
 
-        // Create overflow redirect service only when overflow is enabled (main lane)
-        if (this.overflowEnabled()) {
+        // Overflow role for this consumer (redirect / consume / disabled).
+        const overflowMode = this.config.INGESTION_OVERFLOW_MODE
+
+        // Redirect hot partitions to the overflow topic (main lane).
+        if (overflowMode === 'redirect') {
             this.overflowRedirectService = new MainLaneOverflowRedirect({
                 redisRepository: overflowRedisRepository,
-                localCacheTTLSeconds: this.hub.INGESTION_STATEFUL_OVERFLOW_LOCAL_CACHE_TTL_SECONDS,
-                bucketCapacity: this.hub.EVENT_OVERFLOW_BUCKET_CAPACITY,
-                replenishRate: this.hub.EVENT_OVERFLOW_BUCKET_REPLENISH_RATE,
-                statefulEnabled: this.hub.INGESTION_STATEFUL_OVERFLOW_ENABLED,
+                localCacheTTLSeconds: this.config.INGESTION_STATEFUL_OVERFLOW_LOCAL_CACHE_TTL_SECONDS,
+                strategies: createAnalyticsOverflowStrategies({
+                    eventBucketCapacity: this.config.EVENT_OVERFLOW_BUCKET_CAPACITY,
+                    eventReplenishRate: this.config.EVENT_OVERFLOW_BUCKET_REPLENISH_RATE,
+                    mergeEventBucketCapacity: this.config.MERGE_EVENT_OVERFLOW_BUCKET_CAPACITY,
+                    mergeEventReplenishRate: this.config.MERGE_EVENT_OVERFLOW_BUCKET_REPLENISH_RATE,
+                }),
+                overflowType: 'events',
             })
         }
 
-        // Create TTL refresh service when consuming from overflow topic (overflow lane)
-        if (this.hub.INGESTION_LANE === 'overflow' && this.hub.INGESTION_STATEFUL_OVERFLOW_ENABLED) {
+        // Drain the overflow topic and refresh stateful TTLs (overflow lane).
+        if (overflowMode === 'consume') {
             this.overflowLaneTTLRefreshService = new OverflowLaneOverflowRedirect({
                 redisRepository: overflowRedisRepository,
+                overflowType: 'events',
             })
         }
 
-        this.scriptTransformer = new ScriptTransformerService(hub)
+        this.featureFlagCalledDedupService = createFeatureFlagCalledDedupService(
+            this.deps.featureFlagCalledDedupRedisPool ?? this.deps.redisPool,
+            this.config
+        )
 
-        this.personsStore = new BatchWritingPersonsStore(this.hub.personRepository, this.hub.streamProducer, {
-            dbWriteMode: this.hub.PERSON_BATCH_WRITING_DB_WRITE_MODE,
-            useBatchUpdates: this.hub.PERSON_BATCH_WRITING_USE_BATCH_UPDATES,
-            maxConcurrentUpdates: this.hub.PERSON_BATCH_WRITING_MAX_CONCURRENT_UPDATES,
-            maxOptimisticUpdateRetries: this.hub.PERSON_BATCH_WRITING_MAX_OPTIMISTIC_UPDATE_RETRIES,
-            optimisticUpdateRetryInterval: this.hub.PERSON_BATCH_WRITING_OPTIMISTIC_UPDATE_RETRY_INTERVAL_MS,
-            updateAllProperties: this.hub.PERSON_PROPERTIES_UPDATE_ALL,
+        this.hogTransformer = deps.hogTransformer
+
+        this.personsStore = new BatchWritingPersonsStore(this.deps.personRepository, this.deps.outputs, {
+            dbWriteMode: this.config.PERSON_BATCH_WRITING_DB_WRITE_MODE,
+            useBatchUpdates: this.config.PERSON_BATCH_WRITING_USE_BATCH_UPDATES,
+            maxConcurrentUpdates: this.config.PERSON_BATCH_WRITING_MAX_CONCURRENT_UPDATES,
+            maxOptimisticUpdateRetries: this.config.PERSON_BATCH_WRITING_MAX_OPTIMISTIC_UPDATE_RETRIES,
+            optimisticUpdateRetryInterval: this.config.PERSON_BATCH_WRITING_OPTIMISTIC_UPDATE_RETRY_INTERVAL_MS,
+            updateAllProperties: this.config.PERSON_PROPERTIES_UPDATE_ALL,
         })
 
-        this.groupStore = new BatchWritingGroupStore(this.hub, {
-            maxConcurrentUpdates: this.hub.GROUP_BATCH_WRITING_MAX_CONCURRENT_UPDATES,
-            maxOptimisticUpdateRetries: this.hub.GROUP_BATCH_WRITING_MAX_OPTIMISTIC_UPDATE_RETRIES,
-            optimisticUpdateRetryInterval: this.hub.GROUP_BATCH_WRITING_OPTIMISTIC_UPDATE_RETRY_INTERVAL_MS,
+        this.groupStore = new BatchWritingGroupStore(this.deps.groupRepository, this.deps.datastoreGroupRepository, {
+            useBatchUpdates: this.config.GROUP_BATCH_WRITING_USE_BATCH_UPDATES,
+            useBatchCreates: this.config.GROUP_BATCH_WRITING_USE_BATCH_CREATES,
+            maxConcurrentUpdates: this.config.GROUP_BATCH_WRITING_MAX_CONCURRENT_UPDATES,
+            maxOptimisticUpdateRetries: this.config.GROUP_BATCH_WRITING_MAX_OPTIMISTIC_UPDATE_RETRIES,
+            optimisticUpdateRetryInterval: this.config.GROUP_BATCH_WRITING_OPTIMISTIC_UPDATE_RETRY_INTERVAL_MS,
         })
 
-        this.streamConsumer = new StreamConsumer({
+        this.kafkaConsumer = createKafkaConsumer({
             groupId: this.groupId,
             topic: this.topic,
+        })
+
+        this.topHog = new TopHog({
+            outputs: this.deps.outputs,
+            pipeline: this.config.INGESTION_PIPELINE ?? 'unknown',
+            lane: this.config.INGESTION_LANE ?? 'unknown',
         })
     }
 
@@ -194,87 +253,134 @@ export class IngestionConsumer {
     }
 
     public async start(): Promise<void> {
-        await Promise.all([
-            this.scriptTransformer.start(),
-            StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK).then((producer) => {
-                this.streamProducer = producer
-            }),
-            // TRICKY: When we produce overflow events they are back to the stream we are consuming from
-            StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK, 'CONSUMER').then((producer) => {
-                this.streamOverflowProducer = producer
-            }),
-        ])
+        const startedRestrictions = await this.eventIngestionRestrictionManagerComponent.start()
+        this.eventIngestionRestrictionManager = startedRestrictions.value
+        this.stopEventIngestionRestrictionManager = startedRestrictions.stop
+        const startedFilters = await this.eventFilterManagerComponent.start()
+        this.eventFilterManager = startedFilters.value
+        this.stopEventFilterManager = startedFilters.stop
+        await this.hogTransformer.start()
 
-        // Initialize pipeline
+        this.topHog.start()
+
+        const outputs = this.deps.outputs
+
+        // Verify all output topics exist. When auto_create_topics_enabled=true
+        // (hobby/dev), this ensures topics are created before first produce.
+        // When auto-create is off (production), this catches misconfigurations early.
+        const topicFailures = await outputs.checkTopics()
+        if (topicFailures.length > 0) {
+            throw new Error(`Output topic verification failed for: ${topicFailures.join(', ')}`)
+        }
+
         const joinedPipelineConfig: JoinedIngestionPipelineConfig = {
-            hub: this.hub,
-            streamProducer: this.streamProducer!,
+            eventSchemaEnforcementEnabled: this.config.EVENT_SCHEMA_ENFORCEMENT_ENABLED,
+            overflowMode: this.config.INGESTION_OVERFLOW_MODE,
+            preservePartitionLocality: this.config.INGESTION_OVERFLOW_PRESERVE_PARTITION_LOCALITY,
+            personsPrefetchEnabled: this.config.PERSONS_PREFETCH_ENABLED,
+            groupsPrefetchEnabled: this.config.GROUPS_PREFETCH_ENABLED,
+            cdpHogWatcherSampleRate: this.config.CDP_FN_WATCHER_SAMPLE_RATE,
+            outputs,
+            perDistinctIdOptions: {
+                SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP: this.config.SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP,
+                PERSON_MERGE_MOVE_DISTINCT_ID_LIMIT: this.config.PERSON_MERGE_MOVE_DISTINCT_ID_LIMIT,
+                PERSON_MERGE_ASYNC_ENABLED: this.config.PERSON_MERGE_ASYNC_ENABLED,
+                PERSON_MERGE_SYNC_BATCH_SIZE: this.config.PERSON_MERGE_SYNC_BATCH_SIZE,
+                PERSON_MERGE_EVENTS_ENABLED: effectivePersonMergeEventsEnabled(this.config),
+                PERSON_MERGE_EVENTS_PARTITION_COUNT: this.config.PERSON_MERGE_EVENTS_PARTITION_COUNT,
+                PERSON_MERGE_EVENTS_TEAM_ALLOWLIST: this.config.PERSON_MERGE_EVENTS_TEAM_ALLOWLIST,
+                PERSON_MERGE_FOLD_ENABLED: this.config.PERSON_MERGE_FOLD_ENABLED,
+                PERSON_MERGE_FOLD_TEAM_ALLOWLIST: this.config.PERSON_MERGE_FOLD_TEAM_ALLOWLIST,
+                PERSON_MERGE_ALWAYS_V1_TEAM_ALLOWLIST: this.config.PERSON_MERGE_ALWAYS_V1_TEAM_ALLOWLIST,
+                PERSONLESS_WRITES_DISABLED_TEAMS: this.config.PERSONLESS_WRITES_DISABLED_TEAMS,
+                PERSON_JSONB_SIZE_ESTIMATE_ENABLE: this.config.PERSON_JSONB_SIZE_ESTIMATE_ENABLE,
+                PERSON_PROPERTIES_UPDATE_ALL: this.config.PERSON_PROPERTIES_UPDATE_ALL,
+                FLAG_CALLED_PERSONLESS_DEFAULT_TEAMS: this.config.FLAG_CALLED_PERSONLESS_DEFAULT_TEAMS,
+            },
+            concurrentBatches: this.config.INGESTION_WORKER_CONCURRENT_BATCHES,
+        }
+        const joinedPipelineDeps: JoinedIngestionPipelineDeps = {
             personsStore: this.personsStore,
             groupStore: this.groupStore,
-            scriptTransformer: this.scriptTransformer,
+            hogTransformer: this.hogTransformer,
+            aiSubpipelineFactory: this.deps.aiSubpipelineFactory,
+            eventFilterManager: this.eventFilterManager,
             eventIngestionRestrictionManager: this.eventIngestionRestrictionManager,
             eventSchemaEnforcementManager: this.eventSchemaEnforcementManager,
-            eventSchemaEnforcementEnabled: this.hub.EVENT_SCHEMA_ENFORCEMENT_ENABLED,
-            overflowEnabled: this.overflowEnabled(),
-            overflowTopic: this.overflowTopic || '',
-            dlqTopic: this.dlqTopic,
             promiseScheduler: this.promiseScheduler,
             overflowRedirectService: this.overflowRedirectService,
             overflowLaneTTLRefreshService: this.overflowLaneTTLRefreshService,
-            perDistinctIdOptions: {
-                DATASTORE_JSON_EVENTS_STREAM_TOPIC: this.hub.DATASTORE_JSON_EVENTS_STREAM_TOPIC,
-                DATASTORE_HEATMAPS_STREAM_TOPIC: this.hub.DATASTORE_HEATMAPS_STREAM_TOPIC,
-                SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP: this.hub.SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP,
-                TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE: this.hub.TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE,
-                PIPELINE_STEP_STALLED_LOG_TIMEOUT: this.hub.PIPELINE_STEP_STALLED_LOG_TIMEOUT,
-                PERSON_MERGE_MOVE_DISTINCT_ID_LIMIT: this.hub.PERSON_MERGE_MOVE_DISTINCT_ID_LIMIT,
-                PERSON_MERGE_ASYNC_ENABLED: this.hub.PERSON_MERGE_ASYNC_ENABLED,
-                PERSON_MERGE_ASYNC_TOPIC: this.hub.PERSON_MERGE_ASYNC_TOPIC,
-                PERSON_MERGE_SYNC_BATCH_SIZE: this.hub.PERSON_MERGE_SYNC_BATCH_SIZE,
-                PERSON_JSONB_SIZE_ESTIMATE_ENABLE: this.hub.PERSON_JSONB_SIZE_ESTIMATE_ENABLE,
-                PERSON_PROPERTIES_UPDATE_ALL: this.hub.PERSON_PROPERTIES_UPDATE_ALL,
-            },
-            teamManager: this.hub.teamManager,
-            groupTypeManager: this.hub.groupTypeManager,
-            groupId: this.groupId,
+            featureFlagCalledDedupService: this.featureFlagCalledDedupService,
+            teamManager: this.deps.teamManager,
+            cookielessManager: this.deps.cookielessManager,
+            groupTypeManager: this.deps.groupTypeManager,
+            topHog: this.topHog!,
         }
-        this.joinedPipeline = createJoinedIngestionPipeline(
-            newBatchPipelineBuilder<JoinedIngestionPipelineInput, JoinedIngestionPipelineContext>(),
-            joinedPipelineConfig
-        ).build()
+        this.joinedPipeline = createJoinedIngestionPipeline(joinedPipelineConfig, joinedPipelineDeps)
 
-        await this.streamConsumer.connect(async (messages) => {
+        await this.kafkaConsumer.connect(async (messages) => {
             return await instrumentFn(
                 {
                     key: `ingestionConsumer.handleEachBatch`,
                     sendException: false,
                 },
-                async () => await this.handleStreamBatch(messages)
+                async () => await this.handleKafkaBatch(messages)
             )
         })
     }
 
     public async stop(): Promise<void> {
+        if (this.isStopping) {
+            return
+        }
         logger.info('🔁', `${this.name} - stopping`)
         this.isStopping = true
 
         // Mark as stopping so that we don't actually process any more incoming messages, but still keep the process alive
         logger.info('🔁', `${this.name} - stopping batch consumer`)
-        await this.streamConsumer?.disconnect()
-        logger.info('🔁', `${this.name} - stopping stream producer`)
-        await this.streamProducer?.disconnect()
-        logger.info('🔁', `${this.name} - stopping stream overflow producer`)
-        await this.streamOverflowProducer?.disconnect()
+        await this.kafkaConsumer?.disconnect()
+        logger.info('🔁', `${this.name} - stopping tophog`)
+        await this.topHog.stop()
         logger.info('🔁', `${this.name} - stopping script transformer`)
-        await this.scriptTransformer.stop()
+        await this.hogTransformer.stop()
+        await this.stopEventFilterManager?.()
+        await this.stopEventIngestionRestrictionManager?.()
+        // Stores must be clean by now — flushBatchStoresStep runs after every
+        // batch as part of the pipeline. After disconnect, we cannot commit
+        // offsets, so writing dirty data here would produce duplicates on
+        // partition rebalance. shutdown() will throw if anything is dirty,
+        // which surfaces the drain-ordering bug without masking it.
+        try {
+            await this.personsStore.shutdown()
+        } catch (error) {
+            logger.error('🚨', `${this.name} - personsStore.shutdown() failed`, { error })
+        }
+        try {
+            await this.groupStore.shutdown()
+        } catch (error) {
+            logger.error('🚨', `${this.name} - groupStore.shutdown() failed`, { error })
+        }
         logger.info('👍', `${this.name} - stopped!`)
     }
 
-    public isHealthy(): HealthCheckResult {
-        if (!this.streamConsumer) {
-            return new HealthCheckResultError('Stream consumer not initialized', {})
+    public async isHealthy(): Promise<HealthCheckResult> {
+        if (!this.kafkaConsumer) {
+            return new HealthCheckResultError('Kafka consumer not initialized', {})
         }
-        return this.streamConsumer.isHealthy()
+
+        const consumerHealth = this.kafkaConsumer.isHealthy()
+        if (consumerHealth.isError()) {
+            return consumerHealth
+        }
+
+        if (process.env.INGESTION_OUTPUTS_PRODUCER_HEALTHCHECK === 'true') {
+            const failures = await this.deps.outputs.checkHealth()
+            if (failures.length > 0) {
+                return new HealthCheckResultError('Kafka producer(s) unhealthy', { failedProducers: failures })
+            }
+        }
+
+        return new HealthCheckResultOk()
     }
 
     private runInstrumented<T>(name: string, func: () => Promise<T>): Promise<T> {
@@ -302,15 +408,15 @@ export class IngestionConsumer {
             batchSize: partitionBatchSizes.get(partition) || 0,
         }))
 
-        logger.info('📖', `STREAM_BATCH_START: ${this.name}`, {
+        logger.info('📖', `KAFKA_BATCH_START: ${this.name}`, {
             pod: podName,
             totalMessages: messages.length,
             partitions: partitionData,
         })
     }
 
-    public async handleStreamBatch(messages: Message[]): Promise<{ backgroundTask?: Promise<any> }> {
-        if (this.hub.STREAM_BATCH_START_LOGGING_ENABLED) {
+    public async handleKafkaBatch(messages: Message[]): Promise<{ backgroundTask?: Promise<any> }> {
+        if (this.config.KAFKA_BATCH_START_LOGGING_ENABLED) {
             this.logBatchStart(messages)
         }
 
@@ -326,23 +432,42 @@ export class IngestionConsumer {
 
         return {
             backgroundTask: this.runInstrumented('awaitScheduledWork', async () => {
-                await Promise.all([this.promiseScheduler.waitForAll(), this.scriptTransformer.processInvocationResults()])
+                const labels = { groupId: this.groupId }
+                // Drains scheduled produces and the script transformer invocation results, which
+                // the pipeline's afterBatch flush step schedules as a side effect.
+                await timedHistogram(backgroundTaskProducesDuration, labels, () => this.promiseScheduler.waitForAll())
             }),
         }
     }
 
     private async runIngestionPipeline(messages: Message[]): Promise<void> {
-        const batch = messages.map((message) => createContext(ok({ message }), { message }))
+        const batch = messages.map((message) =>
+            createOkContext({ message }, { message, debugContext: createKafkaDebugContext(message) })
+        )
 
-        this.joinedPipeline.feed(batch)
+        const feedResult = await this.joinedPipeline.feed(batch)
+        if (!feedResult.ok) {
+            throw new Error(`Pipeline rejected batch: ${feedResult.reason}`)
+        }
 
-        // Drain the pipeline
-        while ((await this.joinedPipeline.next()) !== null) {
-            // Continue until all results are processed
+        // The pipeline handles its own side effects (scheduling them on the
+        // promise scheduler), so draining results is all that's left to do.
+        let result = await this.joinedPipeline.next()
+        while (result !== null) {
+            result = await this.joinedPipeline.next()
         }
     }
+}
 
-    private overflowEnabled(): boolean {
-        return !!this.hub.INGESTION_CONSUMER_OVERFLOW_TOPIC && this.hub.INGESTION_CONSUMER_OVERFLOW_TOPIC !== this.topic
+async function timedHistogram<T>(
+    histogram: Histogram,
+    labels: Record<string, string>,
+    fn: () => Promise<T>
+): Promise<T> {
+    const end = histogram.startTimer(labels)
+    try {
+        return await fn()
+    } finally {
+        end()
     }
 }

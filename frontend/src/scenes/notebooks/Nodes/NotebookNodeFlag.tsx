@@ -7,10 +7,10 @@ import { Divider } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { IconRecording, IconSurveys } from 'lib/elements/icons'
-import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
+import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
@@ -18,10 +18,9 @@ import { NotebookNodeProps, NotebookNodeType } from '../types'
 import { buildEarlyAccessFeatureContent } from './NotebookNodeEarlyAccessFeature'
 import { buildCodeExampleContent } from './NotebookNodeFlagCodeExample'
 import { notebookNodeFlagLogic } from './NotebookNodeFlagLogic'
+import { notebookNodeLogic } from './notebookNodeLogic'
 import { buildPlaylistContent } from './NotebookNodePlaylist'
 import { buildSurveyContent } from './NotebookNodeSurvey'
-import { notebookNodeLogic } from './notebookNodeLogic'
-import { INTEGER_REGEX_MATCH_GROUPS, OPTIONAL_PROJECT_NON_CAPTURE_GROUP } from './utils'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeFlagAttributes>): JSX.Element => {
     const { id } = attributes
@@ -153,12 +152,6 @@ export const NotebookNodeFlag = createInsightsWidgetNode<NotebookNodeFlagAttribu
     resizeable: false,
     attributes: {
         id: {},
-    },
-    pasteOptions: {
-        find: OPTIONAL_PROJECT_NON_CAPTURE_GROUP + urls.featureFlag(INTEGER_REGEX_MATCH_GROUPS),
-        getAttributes: async (match) => {
-            return { id: match[1] as FeatureFlagLogicProps['id'] }
-        },
     },
 })
 

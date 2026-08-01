@@ -1,5 +1,7 @@
 import { useActions } from 'kea'
 
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { RadioOption } from 'lib/elements/Radio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
@@ -9,7 +11,7 @@ import { TeamSettingRadio } from '../components/TeamSettingRadio'
 
 type PersonsJoinModeType = NonNullable<InsightsQLQueryModifiers['personsJoinMode']>
 
-const personsJoinOptions: RadioOption<PersonsJoinModeType>[] = [
+const PERSONS_JOIN_OPTIONS: RadioOption<PersonsJoinModeType>[] = [
     {
         value: 'inner',
         label: (
@@ -34,6 +36,14 @@ const personsJoinOptions: RadioOption<PersonsJoinModeType>[] = [
 
 export function PersonsJoinMode(): JSX.Element {
     const { reportPersonsJoinModeUpdated } = useActions(eventUsageLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
+    const personsJoinOptions = PERSONS_JOIN_OPTIONS.map((o) => ({
+        ...o,
+        disabledReason: restrictedReason ?? undefined,
+    }))
 
     return (
         <TeamSettingRadio

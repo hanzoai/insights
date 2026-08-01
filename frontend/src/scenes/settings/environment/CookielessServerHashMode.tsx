@@ -1,12 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { Banner } from '@hanzo/elements'
+
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Button } from 'lib/elements/Button'
 import { Radio, RadioOption } from 'lib/elements/Radio'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { AccessControlLevel, AccessControlResourceType, CookielessServerHashMode } from '~/types'
+import { CookielessServerHashMode } from '~/types'
 
 const options: RadioOption<CookielessServerHashMode>[] = [
     {
@@ -40,6 +43,10 @@ const optionsToShowByDefault = [CookielessServerHashMode.Stateful, CookielessSer
 export function CookielessServerHashModeSetting(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
     const { currentTeam } = useValues(teamLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     const savedSetting = currentTeam?.cookieless_server_hash_mode ?? CookielessServerHashMode.Disabled
     const [setting, setSetting] = useState<CookielessServerHashMode>(savedSetting)
@@ -48,31 +55,26 @@ export function CookielessServerHashModeSetting(): JSX.Element {
         updateCurrentTeam({ cookieless_server_hash_mode: newSetting })
     }
 
-    const optionsToShow = options.filter(
-        (option) => optionsToShowByDefault.includes(option.value) || option.value === setting
-    )
+    const optionsToShow = options
+        .filter((option) => optionsToShowByDefault.includes(option.value) || option.value === setting)
+        .map((option) => ({ ...option, disabledReason: restrictedReason ?? undefined }))
 
     return (
         <>
-            <AccessControlAction
-                resourceType={AccessControlResourceType.WebAnalytics}
-                minAccessLevel={AccessControlLevel.Editor}
-            >
-                <Radio value={setting} onChange={setSetting} options={optionsToShow} />
-            </AccessControlAction>
+            <Banner type="info" className="mb-4">
+                When Cookieless server hash mode is enabled, IP-based transformations like GeoIP enrichment and bot
+                detection will not enrich events. The IP is hashed into the distinct ID and stripped before
+                transformations run.
+            </Banner>
+            <Radio value={setting} onChange={setSetting} options={optionsToShow} />
             <div className="mt-4">
-                <AccessControlAction
-                    resourceType={AccessControlResourceType.WebAnalytics}
-                    minAccessLevel={AccessControlLevel.Editor}
+                <Button
+                    type="primary"
+                    onClick={() => handleChange(setting)}
+                    disabledReason={setting === savedSetting ? 'No changes to save' : restrictedReason}
                 >
-                    <Button
-                        type="primary"
-                        onClick={() => handleChange(setting)}
-                        disabledReason={setting === savedSetting ? 'No changes to save' : undefined}
-                    >
-                        Save
-                    </Button>
-                </AccessControlAction>
+                    Save
+                </Button>
             </div>
         </>
     )

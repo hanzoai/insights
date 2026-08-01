@@ -7,51 +7,58 @@ from celery import Celery
 from celery.canvas import Signature
 from celery.schedules import crontab
 
-from insights.approvals.tasks import expire_old_change_requests, validate_pending_change_requests
 from insights.caching.warming import schedule_warming_for_teams_task
 from insights.datastore.client.execute_async import QueryStatusManager
-from insights.tasks.alerts.checks import (
-    alerts_backlog_task,
-    check_alerts_task,
-    checks_cleanup_task,
-    reset_stuck_alerts_task,
+from insights.tasks.ai_observability_usage_report import send_ai_observability_usage_reports
+from insights.tasks.auth_token_cache_verification import verify_and_fix_auth_token_cache_task
+from insights.tasks.calculate_cohort import finalize_cohort_backfill_runs
+from insights.tasks.email import (
+    EXTERNAL_DATA_DIGEST_DAY_BOUNDARY_HOUR_UTC,
+    send_error_tracking_weekly_digest,
+    send_insights_functions_daily_digest,
+    send_matview_failure_digest,
 )
-from insights.tasks.commerce_billing import report_insights_usage_to_commerce
-from insights.tasks.email import send_error_tracking_weekly_digest, send_insights_functions_daily_digest
-from insights.tasks.feature_flags import (
-    cleanup_stale_flags_expiry_tracking_task,
-    compute_feature_flag_metrics,
-    refresh_expiring_flags_cache_entries,
-)
+from insights.tasks.gateway_credential import drain_gateway_credential_last_used_task, refresh_gateway_credentials
 from insights.tasks.hypercache_verification import (
+    verify_and_fix_flag_definitions_cache_task,
     verify_and_fix_flags_cache_task,
     verify_and_fix_team_metadata_cache_task,
 )
 from insights.tasks.integrations import refresh_integrations
-from insights.tasks.llm_analytics_usage_report import send_llm_analytics_usage_reports
-from insights.tasks.remote_config import sync_all_remote_configs
+from insights.tasks.js_snippet_versioning import sync_js_snippet_manifest
+from insights.tasks.remote_config import (
+    cleanup_stale_remote_config_expiry_tracking_task,
+    refresh_expiring_remote_config_cache_entries,
+    sync_all_remote_configs,
+)
 from insights.tasks.surveys import sync_all_surveys_cache
 from insights.tasks.tasks import (
     calculate_cohort,
     calculate_decide_usage,
+    capture_task_run_state_metrics,
     check_async_migration_health,
     clean_stale_partials,
     clear_datastore_deleted_person,
     clear_expired_sessions,
     datastore_clear_removed_data,
     datastore_errors_count,
+    datastore_materialize_columns,
     datastore_mutation_count,
     datastore_part_count,
     datastore_row_count,
+    datastore_send_license_usage,
+    delete_expired_delegation_invites,
+    delete_expired_exported_assets,
+    find_flags_with_enriched_analytics,
     ingestion_lag,
+    kill_stale_queued_task_runs,
     pg_plugin_server_query_timing,
-    pg_row_count,
     pg_table_cache_hit_rate,
     process_scheduled_changes,
     redis_celery_queue_depth,
     redis_heartbeat,
+    redispatch_orphaned_queued_task_runs,
     refresh_activity_log_fields_cache,
-    replay_count_metrics,
     send_org_usage_reports,
     start_poll_query_performance,
     stop_surveys_reached_target,
@@ -60,22 +67,68 @@ from insights.tasks.tasks import (
     update_event_partitions,
     update_survey_adaptive_sampling,
     update_survey_iteration,
-    verify_persons_data_in_sync,
 )
-from insights.tasks.team_access_cache_tasks import warm_all_team_access_caches_task
-from insights.tasks.team_metadata import (
-    cleanup_stale_expiry_tracking_task,
-    refresh_expiring_team_metadata_cache_entries,
-)
+from insights.tasks.team_llm_gateway_policy import refresh_expiring_llm_gateway_policy_cache_entries
+from insights.tasks.team_metadata import cleanup_stale_expiry_tracking_task, refresh_expiring_team_metadata_cache_entries
 from insights.utils import get_crontab, get_instance_region
 
-from products.endpoints.backend.tasks import deactivate_stale_materializations
+from products.approvals.backend.tasks import expire_old_change_requests, validate_pending_change_requests
+from products.conversations.backend.tasks import (
+    flush_pending_email_replies,
+    poll_teams_shared_channels,
+    wake_snoozed_tickets,
+)
+from products.data_modeling.backend.facade.tasks import cleanup_expired_test_saved_queries
+from products.data_warehouse.backend.facade.tasks import (
+    reconcile_all_managed_warehouse_tables_task,
+    send_external_data_failure_digest_catchup,
+)
+from products.endpoints.backend.facade.tasks import deactivate_stale_materializations
+from products.feature_flags.backend.tasks import (
+    cleanup_stale_flag_definitions_expiry_tracking_task,
+    cleanup_stale_flags_expiry_tracking_task,
+    compute_feature_flag_metrics,
+    drain_flag_definitions_rebuild_requests,
+    feature_flags_local_eval_canary_task,
+    refresh_expiring_flag_definitions_cache_entries,
+    refresh_expiring_flags_cache_entries,
+    sync_cross_region_flags_task,
+)
+from products.logs.backend.facade.tasks import logs_alert_events_cleanup_task
+from products.pulse.backend.tasks import mark_stale_pulse_briefs_failed
+from products.reminders.backend.tasks import process_due_reminders
+from products.signals.backend.tasks import (
+    pause_inactive_signal_scouts,
+    refresh_signal_repository_activity,
+    sync_pending_signals_refund_credits,
+)
+from products.stamphog.backend.facade.tasks import DAILY_DIGEST_CRONTAB, send_daily_digests
+from products.streamlit_apps.backend.facade.api import (
+    auto_restart_crashed_streamlit_sandboxes,
+    cleanup_deleted_streamlit_app_zips,
+    cleanup_expired_streamlit_oauth_tokens,
+    prune_old_streamlit_app_versions,
+    stop_idle_streamlit_sandboxes,
+)
+from products.tasks.backend.facade.tasks import (
+    bake_dev_stack_image_task,
+    reconcile_loop_trigger_schedules_task,
+    refresh_dev_stack_image_task,
+    refresh_stale_sandbox_custom_images_task,
+    sweep_loop_task_retention_task,
+)
+from products.web_analytics.backend.achievements.tasks import sweep_web_analytics_achievement_team_tracks
+from products.web_analytics.backend.tasks.heatmap_screenshot import (
+    reap_stale_prewarm_heatmaps,
+    report_stuck_heatmap_screenshots,
+)
 
 TWENTY_FOUR_HOURS = 24 * 60 * 60
 
 # Organizations with delayed data ingestion that need delayed usage report re-runs
 # This is a temporary solution until we switch event usage queries from timestamp to created_at
 DELAYED_ORGS_EU: list[str] = [
+    "018beddd-5eb1-0000-7953-5a5b982e80bf",
     "01975ab3-7ec5-0000-9751-a89cbc971419",
 ]
 DELAYED_ORGS_US: list[str] = []
@@ -156,6 +209,12 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
     if not settings.DEBUG:
         sender.add_periodic_task(10, redis_celery_queue_depth.s(), name="10 sec queue probe")
 
+    sender.add_periodic_task(
+        60,
+        capture_task_run_state_metrics.s(),
+        name="tasks run state metrics",
+    )
+
     sender.add_periodic_task(10, redis_heartbeat.s(), name="10 sec heartbeat")
     sender.add_periodic_task(
         QueryStatusManager.POLL_INTERVAL_SECONDS,
@@ -167,14 +226,6 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         crontab(hour="*", minute="0"),
         schedule_warming_for_teams_task.s(),
         name="schedule warming for largest teams",
-    )
-
-    # Team access cache warming - every 10 minutes
-    add_periodic_task_with_expiry(
-        sender,
-        crontab(minute="*/10"),
-        warm_all_team_access_caches_task.s(),
-        name="warm team access caches",
     )
 
     # Team metadata cache sync - hourly
@@ -189,6 +240,110 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         crontab(hour="3", minute="0"),
         cleanup_stale_expiry_tracking_task.s(),
         name="team metadata expiry tracking cleanup",
+    )
+
+    # LLM gateway policy cache sync - hourly at :05 to stagger from team_metadata at :00
+    sender.add_periodic_task(
+        crontab(hour="*", minute="5"),
+        refresh_expiring_llm_gateway_policy_cache_entries.s(),
+        name="llm-gateway policy cache sync",
+    )
+
+    # Gateway credential cache sync - hourly at :10 to stagger from the others
+    sender.add_periodic_task(
+        crontab(hour="*", minute="10"),
+        refresh_gateway_credentials.s(),
+        name="gateway credential cache sync",
+    )
+
+    # Gateway credential last-used drain - every 5 min; the only writer of last_used_at for gateway keys.
+    sender.add_periodic_task(
+        crontab(minute="*/5"),
+        drain_gateway_credential_last_used_task.s(),
+        name="gateway credential last-used drain",
+    )
+
+    # Stale QUEUED task run cleanup - hourly
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="0"),
+        kill_stale_queued_task_runs.s(),
+        name="kill stale queued task runs",
+    )
+
+    # Re-dispatch orphaned QUEUED task runs whose on_commit dispatch was lost - every 2 minutes
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/2"),
+        redispatch_orphaned_queued_task_runs.s(),
+        name="redispatch orphaned queued task runs",
+    )
+
+    # Refresh custom sandbox images after the VM base image digest changes.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/10"),
+        refresh_stale_sandbox_custom_images_task.s(),
+        name="refresh stale sandbox custom images",
+        expires_seconds=10 * 60,
+    )
+
+    # Rebake the prebaked dev-stack VM image nightly so the baked migration state
+    # stays close to master. No-ops unless the tasks-dev-stack-image-bake flag
+    # enables this deployment's region.
+    sender.add_periodic_task(
+        crontab(hour="6", minute="45"),
+        bake_dev_stack_image_task.s(),
+        name="bake prebaked dev-stack VM image",
+    )
+
+    # Fast lane mirroring the custom-image refresh above: rebake the prebaked
+    # dev-stack image when the VM base image digest changes (e.g. a new
+    # agent-server release), at most once per new digest.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/10"),
+        refresh_dev_stack_image_task.s(),
+        name="refresh prebaked dev-stack VM image on base change",
+        expires_seconds=10 * 60,
+    )
+
+    # Re-enqueue signals PR refunds whose billing credit sync hasn't landed - hourly at minute 25
+    sender.add_periodic_task(
+        crontab(hour="*", minute="25"),
+        sync_pending_signals_refund_credits.s(),
+        name="sync pending signals refund credits",
+    )
+
+    # Warn, then pause signals scouts that produce nothing anyone uses - daily at 6:15 AM
+    sender.add_periodic_task(
+        crontab(hour="6", minute="15"),
+        pause_inactive_signal_scouts.s(),
+        name="pause inactive signals scouts",
+    )
+
+    # Keep the signals repository area-activity cache warm - weekly, Monday early morning
+    sender.add_periodic_task(
+        crontab(day_of_week="mon", hour="5", minute="35"),
+        refresh_signal_repository_activity.s(),
+        name="refresh signals repository activity",
+    )
+
+    # Loop task retention sweep - daily at 4:30 AM
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(hour="4", minute="30"),
+        sweep_loop_task_retention_task.s(),
+        name="sweep loop task retention",
+    )
+
+    # Loop trigger schedule reconciliation - every 10 minutes, re-syncs schedules
+    # stranded pending/failed by a transient Temporal outage during create/edit.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/10"),
+        reconcile_loop_trigger_schedules_task.s(),
+        name="reconcile loop trigger schedules",
     )
 
     # Flags cache sync - hourly
@@ -212,8 +367,34 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="compute feature flag metrics",
     )
 
-    # HyperCache verification - split into separate tasks for independent time budgets
-    # Tasks have 1-hour time limits, so expiry must match
+    # Flag definitions cache refresh - hourly at minute 35
+    sender.add_periodic_task(
+        crontab(hour="*", minute="35"),
+        refresh_expiring_flag_definitions_cache_entries.s(),
+        name="refresh expiring flag definitions cache entries",
+    )
+
+    # Flag definitions cache expiry tracking cleanup - daily at 3:30 AM
+    sender.add_periodic_task(
+        crontab(hour="3", minute="30"),
+        cleanup_stale_flag_definitions_expiry_tracking_task.s(),
+        name="flag definitions cache expiry tracking cleanup",
+    )
+
+    # Remote config (array/config.json) cache refresh - hourly at minute 45
+    sender.add_periodic_task(
+        crontab(hour="*", minute="45"),
+        refresh_expiring_remote_config_cache_entries.s(),
+        name="refresh expiring remote config cache entries",
+    )
+
+    # Remote config cache expiry tracking cleanup - daily at 3:45 AM
+    sender.add_periodic_task(
+        crontab(hour="3", minute="45"),
+        cleanup_stale_remote_config_expiry_tracking_task.s(),
+        name="remote config cache expiry tracking cleanup",
+    )
+
     # Team metadata cache verification - hourly at minute 20
     add_periodic_task_with_expiry(
         sender,
@@ -231,6 +412,85 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         verify_and_fix_flags_cache_task.s(),
         name="verify and fix flags cache",
         expires_seconds=30 * 60,
+    )
+
+    # Flag definitions cache verification - hourly at minute 50
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(hour="*", minute="50"),
+        verify_and_fix_flag_definitions_cache_task.s(),
+        name="verify and fix flag definitions cache",
+        expires_seconds=60 * 60,
+    )
+
+    # Flag definitions self-heal - every minute. Drains the queue the Rust
+    # /flags/definitions endpoint fills on cache miss and rebuilds those caches,
+    # so a missing entry heals in ~1 min instead of waiting for the hourly verifier.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*"),
+        drain_flag_definitions_rebuild_requests.s(),
+        name="drain flag definitions rebuild requests",
+        expires_seconds=60,
+    )
+
+    # Feature flags local-eval canary - every 5 minutes
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/5"),
+        feature_flags_local_eval_canary_task.s(),
+        name="feature flags local-eval canary",
+        expires_seconds=5 * 60,
+    )
+
+    # Cross-region flags sync (EU only) - every 30s, matching the SDK's
+    # own default poll_interval so EU's local-eval freshness matches what a
+    # customer backend gets. Raw interval is safe here (sub-minute; see the
+    # warning on add_periodic_task_with_expiry above). Registered only in EU so
+    # US beat schedules don't carry a permanently-no-op entry. expires sheds
+    # queued ticks older than one interval, so a backed-up queue doesn't replay
+    # a burst of stale polls on recovery.
+    if get_instance_region() == "EU":
+        sender.add_periodic_task(
+            30,
+            sync_cross_region_flags_task.s(),
+            name="cross-region flags sync",
+            expires=30,
+        )
+
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/5"),
+        report_stuck_heatmap_screenshots.s(),
+        name="report stuck heatmap screenshots",
+        expires_seconds=5 * 60,
+    )
+
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/10"),
+        reap_stale_prewarm_heatmaps.s(),
+        name="reap stale prewarm heatmap screenshots",
+        expires_seconds=10 * 60,
+    )
+
+    # Auth token cache verification - every 6 hours at minute 40
+    # Verifies per-token auth cache entries against the database,
+    # deleting stale entries that signal-based invalidation may have missed.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(hour="*/6", minute="40"),
+        verify_and_fix_auth_token_cache_task.s(),
+        name="verify and fix auth token cache",
+        # expires_seconds omitted — defaults to 1.5x interval (9 h) so the safety-net
+        # task survives moderate worker downtime without being dropped.
+    )
+
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(hour="*/6", minute="20"),
+        sweep_web_analytics_achievement_team_tracks.s(),
+        name="web analytics achievements team-track sweep",
     )
 
     # Update events table partitions twice a week
@@ -255,19 +515,11 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
             name="send delayed org usage reports",
         )
 
-    # Send LLM Analytics usage reports daily at 4:15 AM UTC
+    # Send AI observability usage reports daily at 4:15 AM UTC
     sender.add_periodic_task(
         crontab(hour="4", minute="15"),
-        send_llm_analytics_usage_reports.s(),
+        send_ai_observability_usage_reports.s(),
         name="send llm analytics usage reports",
-    )
-
-    # Report per-org event usage to Commerce API for billing -- hourly at minute 50
-    add_periodic_task_with_expiry(
-        sender,
-        crontab(hour="*", minute="50"),
-        report_insights_usage_to_commerce.s(),
-        name="report insights usage to commerce",
     )
 
     # Send InsightsFunctions daily digest at 9:30 AM UTC (good for US and EU)
@@ -277,16 +529,45 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="send InsightsFunctions daily digest",
     )
 
+    # Send Error Tracking weekly digest at 8:30 AM UTC on Monday
     sender.add_periodic_task(
-        crontab(day_of_week="mon", hour="8", minute="30"),
+        crontab(hour="8", minute="30", day_of_week="mon"),
         send_error_tracking_weekly_digest.s(),
         name="send Error Tracking weekly digest",
     )
 
-    # Insights Cloud cron jobs
-    # NOTE: We can't use is_cloud here as some Django elements aren't loaded yet. We check in the task execution instead
-    # Verify that persons data is in sync every day at 4 AM UTC
-    sender.add_periodic_task(crontab(hour="4", minute="0"), verify_persons_data_in_sync.s())
+    # Send materialized view failure digest daily at morning local time per region
+    cloud_deployment = (settings.CLOUD_DEPLOYMENT or "").upper()
+    if cloud_deployment == "EU":
+        matview_digest_hour = "8"
+    elif cloud_deployment == "US":
+        matview_digest_hour = "14"
+    else:
+        matview_digest_hour = "9"
+
+    sender.add_periodic_task(
+        crontab(hour=matview_digest_hour, minute="0"),
+        send_matview_failure_digest.s(),
+        name="send matview failure digest",
+    )
+
+    # Just after the digest day rolls over (EXTERNAL_DATA_DIGEST_DAY_BOUNDARY_HOUR_UTC),
+    # when the date-keyed campaign block resets.
+    sender.add_periodic_task(
+        crontab(hour=str(EXTERNAL_DATA_DIGEST_DAY_BOUNDARY_HOUR_UTC), minute="15"),
+        send_external_data_failure_digest_catchup.s(),
+        name="send external data failure digest catch-up",
+    )
+
+    # Background net for tables created while nobody visits the warehouse status page. Each
+    # reconcile opens a real warehouse session (one worker pod, billed compute), so the sweep is
+    # deliberately infrequent — the 60s-coalesced status-read path is the interactive fast path.
+    sender.add_periodic_task(
+        crontab(minute="17,47"),
+        reconcile_all_managed_warehouse_tables_task.s(),
+        name="reconcile managed warehouse SQL editor tables",
+        expires=1800,
+    )
 
     # Every 30 minutes, send decide request counts to the main insights instance
     sender.add_periodic_task(
@@ -303,9 +584,9 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         expires=1800,  # 30 minutes - prevents stale tasks from running
     )
 
-    # Reset primary project data every Monday and Thursday at 5 AM UTC. Mon and Thu because doing this every day
+    # Reset master project data every Monday at Thursday at 5 AM UTC. Mon and Thu because doing this every day
     # would be too hard on Datastore, and those days ensure most users will have data at most 3 days old.
-    # sender.add_periodic_task(crontab(day_of_week="mon,thu", hour="5", minute="0"), demo_reset_primary_team.s())
+    # sender.add_periodic_task(crontab(day_of_week="mon,thu", hour="5", minute="0"), demo_reset_master_team.s())
 
     sender.add_periodic_task(crontab(day_of_week="fri", hour="0", minute="0"), clean_stale_partials.s())
 
@@ -352,12 +633,6 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
     add_periodic_task_with_expiry(
         sender,
         crontab(minute="*/2"),
-        pg_row_count.s(),
-        name="PG tables row counts",
-    )
-    add_periodic_task_with_expiry(
-        sender,
-        crontab(minute="*/2"),
         pg_table_cache_hit_rate.s(),
         name="PG table cache hit rate",
     )
@@ -386,15 +661,30 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
     add_periodic_task_with_expiry(
         sender,
         crontab(minute="*/2"),
+        finalize_cohort_backfill_runs.s(),
+        name="finalize cohort backfill runs",
+    )
+
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/2"),
         process_scheduled_changes.s(),
         name="process scheduled changes",
     )
 
     add_periodic_task_with_expiry(
         sender,
-        crontab(hour="*", minute="0"),
-        replay_count_metrics.s(),
-        name="replay_count_metrics",
+        crontab(minute="*"),
+        process_due_reminders.s(),
+        name="process due reminders",
+    )
+
+    # Reconcile pulse briefs stranded in GENERATING by an externally-terminated workflow.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*/15"),
+        mark_stale_pulse_briefs_failed.s(),
+        name="mark stale pulse briefs failed",
     )
 
     if clear_datastore_crontab := get_crontab(settings.CLEAR_DATASTORE_REMOVED_DATA_SCHEDULE_CRON):
@@ -436,28 +726,60 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
     )
 
     sender.add_periodic_task(
-        crontab(hour="*", minute="*/2"),
-        check_alerts_task.s(),
-        name="check_alerts_task",
+        crontab(hour="8", minute="15"),
+        logs_alert_events_cleanup_task.s(),
+        name="clean up old logs alert events",
     )
 
-    sender.add_periodic_task(
-        crontab(hour="*", minute="*/12"),
-        alerts_backlog_task.s(),
-        name="alerts_backlog_task",
-    )
+    if settings.EE_AVAILABLE:
+        sender.add_periodic_task(
+            crontab(hour="0", minute=str(randrange(0, 40))),
+            datastore_send_license_usage.s(),
+        )  # every day at a random minute past midnight. Randomize to avoid overloading license.hanzo.ai
+        sender.add_periodic_task(
+            crontab(hour="4", minute=str(randrange(0, 40))),
+            datastore_send_license_usage.s(),
+        )  # again a few hours later just to make sure
 
-    sender.add_periodic_task(
-        crontab(hour="*", minute="*/15"),
-        reset_stuck_alerts_task.s(),
-        name="reset_stuck_alerts_task",
-    )
+        materialize_columns_crontab = get_crontab(settings.MATERIALIZE_COLUMNS_SCHEDULE_CRON)
 
-    sender.add_periodic_task(
-        crontab(hour="8", minute="0"),
-        checks_cleanup_task.s(),
-        name="clean up old alert checks",
-    )
+        if materialize_columns_crontab:
+            sender.add_periodic_task(
+                materialize_columns_crontab,
+                datastore_materialize_columns.s(),
+                name="datastore materialize columns",
+            )
+
+        sender.add_periodic_task(
+            crontab(minute="10", hour="*/12"),
+            find_flags_with_enriched_analytics.s(),
+            name="find feature flags with enriched analytics",
+        )
+
+        sender.add_periodic_task(
+            # once a day a random minute after midnight
+            crontab(hour="0", minute=str(randrange(0, 40))),
+            delete_expired_exported_assets.s(),
+            name="delete expired exported assets",
+        )
+
+        # Daily cleanup of expired onboarding delegation invites. `pre_delete` re-enables
+        # the delegator's onboarding, so a missed sweep strands delegators on the "waiting
+        # for teammate" screen forever.
+        sender.add_periodic_task(
+            crontab(hour="1", minute=str(randrange(0, 40))),
+            delete_expired_delegation_invites.s(),
+            name="delete expired delegation invites",
+        )
+
+        from ee.tasks.scim_request_log_cleanup import cleanup_old_scim_request_logs
+
+        add_periodic_task_with_expiry(
+            sender,
+            crontab(minute="0"),
+            cleanup_old_scim_request_logs.s(),
+            name="clean up old SCIM request logs",
+        )
 
     # Check integrations to refresh every minute
     add_periodic_task_with_expiry(
@@ -471,6 +793,12 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         crontab(hour="0", minute=str(randrange(0, 40))),
         sync_all_remote_configs.s(),
         name="sync all remote configs",
+    )
+
+    sender.add_periodic_task(
+        crontab(hour="*", minute="*/5"),
+        sync_js_snippet_manifest.s(),
+        name="sync insights-js snippet manifest",
     )
 
     sender.add_periodic_task(
@@ -496,4 +824,79 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         crontab(hour="5", minute="0"),
         deactivate_stale_materializations.s(),
         name="deactivate stale endpoint materializations",
+    )
+
+    # Hard-delete expired test saved queries and their downstream objects
+    sender.add_periodic_task(
+        crontab(hour="3", minute="30"),
+        cleanup_expired_test_saved_queries.s(),
+        name="cleanup expired test saved queries",
+    )
+
+    # Reopen snoozed conversation tickets whose snooze period has expired
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*"),
+        wake_snoozed_tickets.s(),
+        name="wake snoozed conversation tickets",
+    )
+
+    # Re-drive queued outbound support email replies (survives a multi-day email provider outage)
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*"),
+        flush_pending_email_replies.s(),
+        name="flush pending conversation email replies",
+    )
+
+    # Pull ambient messages from MS Teams shared channels (which never push them
+    # over the bot webhook) into the ticket pipeline via Graph messages/delta.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(minute="*"),
+        poll_teams_shared_channels.s(),
+        name="poll teams shared channels",
+    )
+    # Delete expired Streamlit bridge OAuth tokens.
+    sender.add_periodic_task(
+        # Hourly because tokens have a 1-hour TTL and every connect_info
+        # call mints a fresh one.
+        crontab(hour="*", minute="55"),
+        cleanup_expired_streamlit_oauth_tokens.s(),
+        name="cleanup expired streamlit oauth tokens",
+    )
+
+    # Hard-delete S3 zips for Streamlit apps past their soft-delete retention.
+    sender.add_periodic_task(
+        crontab(hour="4", minute="10"),
+        cleanup_deleted_streamlit_app_zips.s(),
+        name="cleanup deleted streamlit app zips",
+    )
+
+    # Stop streamlit sandboxes left idle past their inactivity window.
+    sender.add_periodic_task(
+        crontab(minute="*/5"),
+        stop_idle_streamlit_sandboxes.s(),
+        name="stop idle streamlit sandboxes",
+    )
+
+    # Restart streamlit sandboxes that died on their own (Modal TTL timeout).
+    sender.add_periodic_task(
+        crontab(minute="*"),
+        auto_restart_crashed_streamlit_sandboxes.s(),
+        name="auto restart crashed streamlit sandboxes",
+    )
+
+    # Prune non-active streamlit app versions past their retention window.
+    sender.add_periodic_task(
+        crontab(hour="3", minute="0"),
+        prune_old_streamlit_app_versions.s(),
+        name="prune old streamlit app versions",
+    )
+
+    # Stamphog daily merged-PR digest fan-out.
+    sender.add_periodic_task(
+        DAILY_DIGEST_CRONTAB,
+        send_daily_digests.s(),
+        name="stamphog daily merged-pr digests",
     )

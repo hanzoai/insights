@@ -43,7 +43,7 @@ CREATE TABLE default.logs
     INDEX idx_message message TYPE tokenbf_v1(32768, 3, 0) GRANULARITY 1,
     INDEX idx_body_n3 body TYPE ngrambf_v1(3, 32768, 3, 0) GRANULARITY 1
 )
-ENGINE = SharedMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+ENGINE = SharedMergeTree('/datastore/tables/{uuid}/{shard}', '{replica}')
 PARTITION BY toDate(timestamp)
 ORDER BY (team_id, service_name, toUnixTimestamp(timestamp))
 SETTINGS index_granularity = 8192, allow_nullable_key = 0;
@@ -63,7 +63,7 @@ CREATE TABLE default.log_attributes
     INDEX idx_attribute_key_n3 attribute_key TYPE ngrambf_v1(3, 32768, 3, 0) GRANULARITY 1,
     INDEX idx_attribute_value_n3 attribute_value TYPE ngrambf_v1(3, 32768, 3, 0) GRANULARITY 1
 )
-ENGINE = SharedAggregatingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+ENGINE = SharedAggregatingMergeTree('/datastore/tables/{uuid}/{shard}', '{replica}')
 PARTITION BY toDate(time_bucket)
 ORDER BY (team_id, service_name, time_bucket, attribute_key, attribute_value)
 SETTINGS index_granularity = 8192;

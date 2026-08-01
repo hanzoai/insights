@@ -1,8 +1,8 @@
 import type { APIRequestContext, Page } from '@playwright/test'
 
-import { expect, test } from '../utils/playwright-test-base'
+import { expect, test } from '../utils/workspace-test-base'
 
-const VALID_PASSWORD = 'Str0ng-Pass-123%'
+const VALID_PASSWORD = 'hedgE-script-123%'
 
 const ensureExistingUser = async (request: APIRequestContext, email: string): Promise<void> => {
     await request.post('/api/signup/', {
@@ -44,16 +44,13 @@ test.describe('Signup', () => {
                 config: {
                     enable_collect_everything: true,
                 },
-                featureFlags: {
-                    'passkey-signup-enabled': true,
-                },
+                featureFlags: {},
                 isAuthenticated: false,
             }
             await route.fulfill({ json: response })
         })
-        await page.locator('[data-attr=menu-item-me]').click()
-        await page.locator('[data-attr=top-menu-item-logout]').click()
-        await expect(page).toHaveURL(/.*\/login/)
+        // Log out via cookies, not the account-menu UI, which flakes on slow/torn-down workers.
+        await page.context().clearCookies()
         await page.goto('/signup')
     })
 
@@ -80,14 +77,14 @@ test.describe('Signup', () => {
         await expect(page.locator('[data-attr=signup-auth-continue]')).toBeVisible()
         await page.locator('[data-attr=password]').fill('123')
         await page.locator('[data-attr=signup-auth-continue]').click()
-        await expect(page.getByText('Add another word or two')).toBeVisible()
+        await expect(page.getByText('Must be at least 8 characters long')).toBeVisible()
 
         await page.locator('[data-attr=password]').fill('123 abc def')
         await page.locator('[data-attr=signup-auth-continue]').click()
-        await expect(page.getByText('Add another word or two')).not.toBeVisible()
+        await expect(page.getByText('Must be at least 8 characters long')).not.toBeVisible()
     })
 
-    test.skip('Can create user account with first name, last name and organization name', async ({ page }) => {
+    test('Can create user account with first name, last name and organization name', async ({ page }) => {
         let signupRequestBody: string | null = null
 
         await page.route('/api/signup/', async (route) => {
@@ -140,6 +137,10 @@ test.describe('Signup', () => {
         expect(parsedBody.first_name).toEqual('Alice')
         expect(parsedBody.last_name).toEqual('Bob')
 
+        // Wait for the first signup navigation to complete before navigating away,
+        // otherwise page.goto('/signup') races with the in-progress navigation to
+        // /verify_email/ and causes net::ERR_ABORTED
+        await expect(page).toHaveURL(/\/verify_email\/[a-zA-Z0-9_.-]*/)
         await page.goto('/signup')
 
         // Try to recreate account with same email- should fail
@@ -192,7 +193,8 @@ test.describe('Signup', () => {
     })
 
     test('Can fill out all the fields on social login', async ({ page }) => {
-        await page.goto('/logout')
+        await page.context().clearCookies()
+        await page.goto('/')
         await expect(page).toHaveURL(/.*\/login/)
         await page.goto('/organization/confirm-creation?organization_name=&first_name=Test&email=test%40hanzo.ai')
 
@@ -209,9 +211,7 @@ test.describe('Signup', () => {
         )
     })
 
-    // TODO un-skip.
-    // Skipping test as it was failing on main, see https://insights.slack.com/archives/C0113360FFV/p1749742204672659
-    test.skip('Shows redirect notice if redirecting for maintenance', async ({ page }) => {
+    test('Shows redirect notice if redirecting for maintenance', async ({ page }) => {
         // Equivalent to setupFeatureFlags in Playwright
         await page.route('**/flags/*', async (route) => {
             const response = {
@@ -226,7 +226,8 @@ test.describe('Signup', () => {
             await route.fulfill({ json: response })
         })
 
-        await page.goto('/logout')
+        await page.context().clearCookies()
+        await page.goto('/')
         await expect(page).toHaveURL(/.*\/login/)
 
         // Modify window object before page load
@@ -234,7 +235,7 @@ test.describe('Signup', () => {
 
         // Inject cloud = true into the context
         await page.evaluate(() => {
-            const context = window['INSIGHTS_APP_CONTEXT']
+            const context = window['POSTFN_APP_CONTEXT']
             if (context && context.preflight) {
                 context.preflight.cloud = true
             }

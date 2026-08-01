@@ -3,13 +3,12 @@ import 'react-data-grid/lib/styles.css'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import DataGrid, { DataGridProps, RenderHeaderCellProps, SortColumn } from 'react-data-grid'
 
 import {
-    IconBolt,
     IconCode,
-    IconCode2,
+    IconColumns,
     IconCopy,
     IconDownload,
     IconExpand45,
@@ -18,49 +17,72 @@ import {
     IconMinus,
     IconPlus,
     IconShare,
+    IconScreen,
+    IconWarning,
 } from '@hanzo/icons'
-import { Button, Divider, Menu, Modal, Table, Tooltip } from '@hanzo/elements'
+import { Banner, Button, Divider, Menu, Modal, Table, Tooltip } from '@hanzo/elements'
 
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { JSONViewer } from 'lib/components/JSONViewer'
-import { FEATURE_FLAGS } from 'lib/constants'
-import { MenuOverlay } from 'lib/elements/Menu/Menu'
-import { LoadingBar } from 'lib/elements/LoadingBar'
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
+import { MCPUseCaseCard } from 'lib/components/MCPHint/MCPUseCaseCard'
+import { Resizer } from 'lib/components/Resizer/Resizer'
+import { type ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
+import { TZLabel } from 'lib/components/TZLabel'
 import { IconTableChart } from 'lib/elements/icons'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { Link } from 'lib/elements/Link'
+import { LoadingBar } from 'lib/elements/LoadingBar'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
-import { transformDataTableToDataTableRows } from 'lib/utils/dataTableTransformations'
 import { InsightErrorState, StatelessInsightLoadingState } from 'scenes/insights/EmptyStates'
 import { InsightsQLBoldNumber } from 'scenes/insights/views/BoldNumber/BoldNumber'
+import { urls } from 'scenes/urls'
 
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
-import { DateRange } from '~/queries/nodes/DataNode/DateRange'
+import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { ElapsedTime } from '~/queries/nodes/DataNode/ElapsedTime'
 import { LoadPreviewText } from '~/queries/nodes/DataNode/LoadNext'
 import { QueryExecutionDetails } from '~/queries/nodes/DataNode/QueryExecutionDetails'
-import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
-import { LineGraph } from '~/queries/nodes/DataVisualization/Components/Charts/LineGraph'
+import { DataTableRow } from '~/queries/nodes/DataTable/dataTableLogic'
+import { PieChart } from '~/queries/nodes/DataVisualization/Components/Charts/PieChart'
+import { SqlChart } from '~/queries/nodes/DataVisualization/Components/Charts/SqlChart'
 import { TwoDimensionalHeatmap } from '~/queries/nodes/DataVisualization/Components/Heatmap/TwoDimensionalHeatmap'
+import { seriesBreakdownLogic } from '~/queries/nodes/DataVisualization/Components/seriesBreakdownLogic'
 import { SideBar } from '~/queries/nodes/DataVisualization/Components/SideBar'
 import { Table } from '~/queries/nodes/DataVisualization/Components/Table'
 import { TableDisplay } from '~/queries/nodes/DataVisualization/Components/TableDisplay'
-import { seriesBreakdownLogic } from '~/queries/nodes/DataVisualization/Components/seriesBreakdownLogic'
 import { DataTableVisualizationProps } from '~/queries/nodes/DataVisualization/DataVisualization'
 import { dataVisualizationLogic } from '~/queries/nodes/DataVisualization/dataVisualizationLogic'
 import { displayLogic } from '~/queries/nodes/DataVisualization/displayLogic'
 import { renderInsightsQLX } from '~/queries/nodes/InsightsQLX/render'
-import { type DataTableNode, NodeKind } from '~/queries/schema/schema-general'
-import { InsightsQLQueryResponse } from '~/queries/schema/schema-general'
-import { ChartDisplayType, ExporterFormat } from '~/types'
+import {
+    type AccessControlFilterWarning,
+    type DataTableNode,
+    type DataWarehouseSyncWarning,
+    type InsightsQLQueryResponse,
+    NodeKind,
+} from '~/queries/schema/schema-general'
+import {
+    AccessControlLevel,
+    AccessControlResourceType,
+    ChartDisplayType,
+    ExporterFormat,
+    type ExportContext,
+} from '~/types'
 
-import { copyTableToCsv, copyTableToExcel, copyTableToJson } from '../../../queries/nodes/DataTable/clipboardUtils'
-import TabScroller from './TabScroller'
+import { WarehouseWizardHint } from 'products/data_warehouse/frontend/shared/components/WarehouseWizardHint'
+
+import {
+    copyTableToCsv,
+    copyTableToExcel,
+    copyTableToJson,
+    copyTableToMarkdown,
+} from '../../../queries/nodes/DataTable/clipboardUtils'
 import { FixErrorButton } from './components/FixErrorButton'
-import { Endpoint } from './output-pane-tabs/Endpoint'
-import { QueryInfo } from './output-pane-tabs/QueryInfo'
 import { OutputTab, outputPaneLogic } from './outputPaneLogic'
 import { sqlEditorLogic } from './sqlEditorLogic'
+import { trimRedundantTail } from './syncWarnings'
+import TabScroller from './TabScroller'
 
 interface RowDetailsModalProps {
     isOpen: boolean
@@ -69,6 +91,8 @@ interface RowDetailsModalProps {
     columns: string[]
     columnKeys: string[]
 }
+
+const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 
 const DATASTORE_TYPES = [
     'UUID',
@@ -112,6 +136,10 @@ const copyMap = {
         label: 'Excel',
         copyFn: copyTableToExcel,
     },
+    [ExporterFormat.MARKDOWN]: {
+        label: 'Markdown',
+        copyFn: copyTableToMarkdown,
+    },
 }
 
 const createDataTableQuery = (): DataTableNode => ({
@@ -121,6 +149,25 @@ const createDataTableQuery = (): DataTableNode => ({
         query: '',
     },
 })
+
+interface OutputTabConfig {
+    key: OutputTab
+    label: string
+    icon: JSX.Element
+}
+
+const outputTabs: OutputTabConfig[] = [
+    {
+        key: OutputTab.Results,
+        label: 'Results',
+        icon: <IconTableChart />,
+    },
+    {
+        key: OutputTab.Visualization,
+        label: 'Visualization',
+        icon: <IconGraph />,
+    },
+]
 
 const cleanDatastoreType = (type: string | undefined): string | undefined => {
     if (!type) {
@@ -154,6 +201,11 @@ const cleanDatastoreType = (type: string | undefined): string | undefined => {
     }
 
     return type.replace(/\(.+\)+/, '')
+}
+
+const isDateTimeType = (type: string | undefined): boolean => {
+    const cleanedType = cleanDatastoreType(type)
+    return cleanedType === 'DateTime' || cleanedType === 'DateTime32' || cleanedType === 'DateTime64'
 }
 
 function RowDetailsModal({ isOpen, onClose, row, columns, columnKeys }: RowDetailsModalProps): JSX.Element {
@@ -287,21 +339,254 @@ function RowDetailsModal({ isOpen, onClose, row, columns, columnKeys }: RowDetai
     )
 }
 
-export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
+interface OutputTabLabelProps {
+    tab: OutputTabConfig
+    active: boolean
+    onClick?: () => void
+}
+
+function OutputTabLabel({ tab, active, onClick }: OutputTabLabelProps): JSX.Element {
+    return (
+        <div
+            className={clsx(
+                'flex-1 flex-row flex items-center bold content-center px-2 pt-[3px] border-b-[medium] whitespace-nowrap',
+                {
+                    'font-semibold !border-brand-yellow': active,
+                    'border-transparent': !active,
+                    'cursor-pointer': !!onClick,
+                    'cursor-default': !onClick,
+                }
+            )}
+            onClick={onClick}
+        >
+            <span className="mr-1">{tab.icon}</span>
+            {tab.label}
+        </div>
+    )
+}
+
+interface SplitOutputToggleProps {
+    splitView: boolean
+    onClick: () => void
+}
+
+function SplitOutputToggle({ splitView, onClick }: SplitOutputToggleProps): JSX.Element {
+    return (
+        <Button
+            active={splitView}
+            className="self-center"
+            type="secondary"
+            size="small"
+            icon={splitView ? <IconScreen /> : <IconColumns />}
+            onClick={onClick}
+            tooltip={splitView ? 'Show one output at a time' : 'Show results and visualization side by side'}
+            data-attr="sql-editor-output-split-toggle"
+        />
+    )
+}
+
+interface VisualizationActionsProps {
+    hasColumns: boolean
+    settingsOpen: boolean
+    onToggleChartSettingsPanel: () => void
+}
+
+function VisualizationActions({
+    hasColumns,
+    settingsOpen,
+    onToggleChartSettingsPanel,
+}: VisualizationActionsProps): JSX.Element {
+    return (
+        <div className="flex justify-end flex-wrap">
+            <div className="flex gap-2 items-center flex-wrap">
+                <TableDisplay disabledReason={!hasColumns ? 'No results to visualize' : undefined} />
+
+                <Button
+                    disabledReason={!hasColumns ? 'No results to visualize' : undefined}
+                    type={settingsOpen ? 'primary' : 'secondary'}
+                    icon={<IconGear />}
+                    size="small"
+                    onClick={onToggleChartSettingsPanel}
+                    tooltip="Visualization settings"
+                    data-attr="sql-editor-visualization-settings-button"
+                />
+            </div>
+        </div>
+    )
+}
+
+/**
+ * Transforms DataTable format back to DataTableRow format for clipboard operations
+ */
+function transformDataTableToDataTableRows(rows: Record<string, any>[], columns: string[]): DataTableRow[] {
+    if (!columns.length || !rows.length) {
+        return []
+    }
+
+    return rows.map((row) => ({
+        result: columns.map((col, index) => {
+            // Handle both direct column access and column_index format
+            const columnKey = `${col}_${index}`
+            return row[columnKey] !== undefined ? row[columnKey] : row[col]
+        }),
+    }))
+}
+
+interface ResultsActionsProps {
+    response: InsightsQLQueryResponse | undefined
+    rows: Record<string, any>[]
+    hasColumns: boolean
+    exportContext: ExportContext | undefined
+    hasQueryInput: boolean
+    isEmbeddedMode: boolean
+    onShareTab?: () => void
+}
+
+function ResultsActions({
+    response,
+    rows,
+    hasColumns,
+    exportContext,
+    hasQueryInput,
+    isEmbeddedMode,
+    onShareTab,
+}: ResultsActionsProps): JSX.Element {
+    // Copying or exporting results requires editor access to the export resource.
+    const exportAccessControlDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.Export,
+        AccessControlLevel.Editor
+    )
+
+    return (
+        <>
+            <Menu
+                items={Object.values(copyMap).map(({ label, copyFn }) => ({
+                    label,
+                    onClick: () => {
+                        if (response?.columns && rows.length > 0) {
+                            const dataTableRows = transformDataTableToDataTableRows(rows, response.columns)
+                            const query = createDataTableQuery()
+                            copyFn(dataTableRows, response.columns, query)
+                        }
+                    },
+                }))}
+                placement="bottom-end"
+            >
+                <Button
+                    id="sql-editor-copy-dropdown"
+                    disabledReason={
+                        (!response?.columns || !rows.length ? 'No results to copy' : undefined) ??
+                        exportAccessControlDisabledReason ??
+                        undefined
+                    }
+                    type="secondary"
+                    size="small"
+                    icon={<IconCopy />}
+                />
+            </Menu>
+            {exportContext && (
+                <Tooltip title="Export the table results" className={!hasColumns ? 'hidden' : ''}>
+                    <ExportButton
+                        id="sql-editor-export"
+                        disabledReason={!hasColumns ? 'No results to export' : undefined}
+                        type="secondary"
+                        icon={<IconDownload />}
+                        sideIcon={null}
+                        buttonCopy=""
+                        size="small"
+                        items={[
+                            {
+                                export_format: ExporterFormat.CSV,
+                                export_context: exportContext,
+                            },
+                            {
+                                export_format: ExporterFormat.XLSX,
+                                export_context: exportContext,
+                            },
+                        ]}
+                    />
+                </Tooltip>
+            )}
+            {!isEmbeddedMode && onShareTab && (
+                <Tooltip title="Share your current query">
+                    <Button
+                        id="sql-editor-share"
+                        disabledReason={!hasQueryInput && 'No query to share'}
+                        type="secondary"
+                        size="small"
+                        icon={<IconShare />}
+                        onClick={onShareTab}
+                    />
+                </Tooltip>
+            )}
+        </>
+    )
+}
+
+interface OutputActionsProps {
+    activeTab: OutputTab
+    response: InsightsQLQueryResponse | undefined
+    rows: Record<string, any>[]
+    hasColumns: boolean
+    exportContext: ExportContext | undefined
+    hasQueryInput: boolean
+    isEmbeddedMode: boolean
+    settingsOpen: boolean
+    onShareTab?: () => void
+    onToggleChartSettingsPanel: () => void
+}
+
+function OutputActions({
+    activeTab,
+    response,
+    rows,
+    hasColumns,
+    exportContext,
+    hasQueryInput,
+    isEmbeddedMode,
+    settingsOpen,
+    onShareTab,
+    onToggleChartSettingsPanel,
+}: OutputActionsProps): JSX.Element | null {
+    if (activeTab === OutputTab.Visualization) {
+        return (
+            <VisualizationActions
+                hasColumns={hasColumns}
+                settingsOpen={settingsOpen}
+                onToggleChartSettingsPanel={onToggleChartSettingsPanel}
+            />
+        )
+    }
+
+    if (activeTab === OutputTab.Results) {
+        return (
+            <ResultsActions
+                response={response}
+                rows={rows}
+                hasColumns={hasColumns}
+                exportContext={exportContext}
+                hasQueryInput={hasQueryInput}
+                isEmbeddedMode={isEmbeddedMode}
+                onShareTab={onShareTab}
+            />
+        )
+    }
+
+    return null
+}
+
+interface OutputPaneProps {
+    tabId: string
+    showToolbar?: boolean
+    onShareTab?: () => void
+}
+
+export function OutputPane({ tabId, showToolbar = true, onShareTab }: OutputPaneProps): JSX.Element {
     const { activeTab } = useValues(outputPaneLogic)
     const { setActiveTab } = useActions(outputPaneLogic)
-    const { featureFlags } = useValues(featureFlagLogic)
 
-    const {
-        sourceQuery,
-        exportContext,
-        editingInsight,
-        insightLoading,
-        updateInsightButtonEnabled,
-        showLegacyFilters,
-        hasQueryInput,
-    } = useValues(sqlEditorLogic)
-    const { saveAsInsight, updateInsight, setSourceQuery, runQuery, shareTab } = useActions(sqlEditorLogic)
+    const { sourceQuery, exportContext, insightLoading, hasQueryInput, isEmbeddedMode } = useValues(sqlEditorLogic)
+    const { setSourceQuery } = useActions(sqlEditorLogic)
     const { isDarkModeOn } = useValues(themeLogic)
     const {
         response: dataNodeResponse,
@@ -310,10 +595,21 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
         queryId,
         pollResponse,
     } = useValues(dataNodeLogic)
-    const { queryCancelled } = useValues(dataVisualizationLogic)
+    const { queryCancelled, isChartSettingsPanelOpen } = useValues(dataVisualizationLogic)
     const { toggleChartSettingsPanel } = useActions(dataVisualizationLogic)
 
     const response = dataNodeResponse as InsightsQLQueryResponse | undefined
+    const splitPaneRef = useRef<HTMLDivElement>(null)
+    const splitView = activeTab === OutputTab.Both
+    const splitResizerProps = useMemo<ResizerLogicProps>(
+        () => ({
+            containerRef: splitPaneRef,
+            logicKey: `sql-editor-output-split-${tabId || 'default'}`,
+            placement: 'right' as const,
+        }),
+        [tabId]
+    )
+    const { desiredSize: splitPaneDesiredWidth } = useValues(resizerLogic(splitResizerProps))
 
     const [progressCache, setProgressCache] = useState<Record<string, number>>({})
 
@@ -324,6 +620,10 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
     const setProgress = useCallback((loadId: string, progress: number) => {
         setProgressCache((prev) => ({ ...prev, [loadId]: progress }))
     }, [])
+
+    const toggleVisualizationSettingsPanel = useCallback(() => {
+        toggleChartSettingsPanel()
+    }, [toggleChartSettingsPanel])
 
     const columns = useMemo(() => {
         const types = response?.types
@@ -349,6 +649,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
             },
             ...(response?.columns?.map((column: string, index: number) => {
                 const type = types?.[index]?.[1]
+                const isDateTimeColumn = isDateTimeType(type)
 
                 const maxContentLength = Math.max(
                     column.length,
@@ -429,6 +730,11 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                                 return <span className="text-red">Error parsing value</span>
                             }
                         }
+
+                        if (isDateTimeColumn && typeof value === 'string' && value) {
+                            return <TZLabel time={value} timestampStyle="absolute" />
+                        }
+
                         return value
                     },
                 }
@@ -461,226 +767,114 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
     }, [response])
 
     const hasColumns = columns.length > 1
+    const splitPaneWidth = splitPaneDesiredWidth ? `${Math.max(splitPaneDesiredWidth, 256)}px` : '50%'
+    const splitToggle = (
+        <SplitOutputToggle
+            splitView={splitView}
+            onClick={() => setActiveTab(splitView ? OutputTab.Results : OutputTab.Both)}
+        />
+    )
+    const sharedContentProps = {
+        responseError,
+        responseLoading,
+        response,
+        insightLoading,
+        sourceQuery,
+        queryCancelled,
+        columns,
+        rows,
+        isDarkModeOn,
+        vizKey,
+        setSourceQuery,
+        exportContext,
+        queryId,
+        pollResponse,
+        setProgress,
+        progress: queryId ? progressCache[queryId] : undefined,
+        showVisualizationSettings: showToolbar && isChartSettingsPanelOpen,
+        isEmbeddedMode,
+    }
+    const sharedActionsProps = {
+        response,
+        rows,
+        hasColumns,
+        exportContext,
+        hasQueryInput,
+        isEmbeddedMode,
+        settingsOpen: isChartSettingsPanelOpen,
+        onShareTab,
+        onToggleChartSettingsPanel: toggleVisualizationSettingsPanel,
+    }
+
+    const outputContent = splitView ? (
+        <div className="flex flex-1 min-h-0 bg-dark">
+            <div
+                ref={splitPaneRef}
+                className="relative flex min-w-64 flex-col bg-white dark:bg-black"
+                // eslint-disable-next-line react/forbid-dom-props
+                style={{ width: splitPaneWidth, maxWidth: 'calc(100% - 16rem)' }}
+            >
+                {showToolbar ? (
+                    <div className="flex flex-row justify-between align-center w-full min-h-[41px] overflow-y-auto border-r">
+                        <div className="flex min-h-[41px] gap-2 ml-4">
+                            {splitToggle}
+                            <OutputTabLabel tab={outputTabs[0]} active />
+                        </div>
+                        <div className="flex gap-2 py-1 px-4 flex-shrink-0">
+                            <OutputActions activeTab={OutputTab.Results} {...sharedActionsProps} />
+                        </div>
+                    </div>
+                ) : null}
+                <div className="flex flex-1 min-h-0 relative bg-dark border-r">
+                    <Content activeTab={OutputTab.Results} {...sharedContentProps} />
+                </div>
+                <Resizer {...splitResizerProps} />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col bg-white dark:bg-black">
+                {showToolbar ? (
+                    <div className="flex flex-row justify-between align-center w-full min-h-[41px] overflow-y-auto">
+                        <div className="flex min-h-[41px] gap-2 ml-4">
+                            <OutputTabLabel tab={outputTabs[1]} active />
+                        </div>
+                        <div className="flex gap-2 py-1 px-4 flex-shrink-0">
+                            <OutputActions activeTab={OutputTab.Visualization} {...sharedActionsProps} />
+                        </div>
+                    </div>
+                ) : null}
+                <div className="flex flex-1 min-h-0 relative bg-dark">
+                    <Content activeTab={OutputTab.Visualization} {...sharedContentProps} />
+                </div>
+            </div>
+        </div>
+    ) : (
+        <>
+            {showToolbar ? (
+                <div className="flex flex-row justify-between align-center w-full min-h-[41px] overflow-y-auto">
+                    <div className="flex min-h-[41px] gap-2 ml-4">
+                        {splitToggle}
+                        {outputTabs.map((tab) => (
+                            <OutputTabLabel
+                                key={tab.key}
+                                tab={tab}
+                                active={tab.key === activeTab}
+                                onClick={() => setActiveTab(tab.key)}
+                            />
+                        ))}
+                    </div>
+                    <div className="flex gap-2 py-1 px-4 flex-shrink-0">
+                        <OutputActions activeTab={activeTab} {...sharedActionsProps} />
+                    </div>
+                </div>
+            ) : null}
+            <div className="flex flex-1 min-h-0 relative bg-dark">
+                <Content activeTab={activeTab} {...sharedContentProps} />
+            </div>
+        </>
+    )
 
     return (
-        <div className="OutputPane flex flex-col w-full flex-1 bg-surface-primary">
-            <div className="flex flex-row justify-between align-center w-full min-h-[50px] overflow-y-auto">
-                <div className="flex min-h-[50px] gap-2 ml-4">
-                    {[
-                        {
-                            key: OutputTab.Results,
-                            label: 'Results',
-                            icon: <IconTableChart />,
-                        },
-                        {
-                            key: OutputTab.Visualization,
-                            label: 'Visualization',
-                            icon: <IconGraph />,
-                        },
-                        {
-                            key: OutputTab.Materialization,
-                            label: 'Materialization',
-                            icon: <IconBolt />,
-                        },
-                        {
-                            key: OutputTab.Endpoint,
-                            label: 'Endpoint',
-                            icon: <IconCode2 />,
-                            flag: FEATURE_FLAGS.ENDPOINTS,
-                        },
-                    ]
-                        .filter((tab) => !tab.flag || featureFlags[tab.flag])
-                        .map((tab) => (
-                            <div
-                                key={tab.key}
-                                className={clsx(
-                                    'flex-1 flex-row flex items-center bold content-center px-2 pt-[3px] cursor-pointer border-b-[medium] whitespace-nowrap',
-                                    {
-                                        'font-semibold !border-brand-yellow': tab.key === activeTab,
-                                        'border-transparent': tab.key !== activeTab,
-                                    }
-                                )}
-                                onClick={() => setActiveTab(tab.key)}
-                            >
-                                <span className="mr-1">{tab.icon}</span>
-                                {tab.label}
-                            </div>
-                        ))}
-                </div>
-                <div className="flex gap-2 py-2 px-4 flex-shrink-0">
-                    {showLegacyFilters && (
-                        <DateRange
-                            key="date-range"
-                            query={sourceQuery.source}
-                            setQuery={(query) => {
-                                setSourceQuery({
-                                    ...sourceQuery,
-                                    source: query,
-                                })
-                                runQuery(query.query)
-                            }}
-                        />
-                    )}
-                    {activeTab === OutputTab.Visualization && (
-                        <>
-                            <div className="flex justify-between flex-wrap">
-                                <div className="flex items-center" />
-                                <div className="flex items-center">
-                                    <div className="flex gap-2 items-center flex-wrap">
-                                        <TableDisplay
-                                            disabledReason={!hasColumns ? 'No results to visualize' : undefined}
-                                        />
-
-                                        <Button
-                                            disabledReason={!hasColumns ? 'No results to visualize' : undefined}
-                                            type="secondary"
-                                            icon={<IconGear />}
-                                            onClick={() => toggleChartSettingsPanel()}
-                                            tooltip="Visualization settings"
-                                        />
-                                        {editingInsight || insightLoading ? (
-                                            <Button
-                                                disabledReason={
-                                                    !updateInsightButtonEnabled
-                                                        ? 'No updates to save'
-                                                        : insightLoading
-                                                          ? 'Loading...'
-                                                          : undefined
-                                                }
-                                                loading={insightLoading}
-                                                type="primary"
-                                                onClick={() => updateInsight()}
-                                                id="sql-editor-update-insight"
-                                                sideAction={{
-                                                    dropdown: {
-                                                        placement: 'bottom-end',
-                                                        overlay: (
-                                                            <MenuOverlay
-                                                                items={[
-                                                                    {
-                                                                        label: 'Save as...',
-                                                                        onClick: () => saveAsInsight(),
-                                                                    },
-                                                                ]}
-                                                            />
-                                                        ),
-                                                    },
-                                                }}
-                                            >
-                                                Save insight
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                disabledReason={!hasColumns ? 'No results to save' : undefined}
-                                                type="primary"
-                                                onClick={() => saveAsInsight()}
-                                                id="sql-editor-save-insight"
-                                            >
-                                                Save insight
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
-                    {activeTab === OutputTab.Results && (
-                        <Button
-                            disabledReason={
-                                insightLoading
-                                    ? 'Loading insight...'
-                                    : !hasColumns && !editingInsight
-                                      ? 'No results to visualize'
-                                      : undefined
-                            }
-                            type="secondary"
-                            onClick={() => setActiveTab(OutputTab.Visualization)}
-                            id={`sql-editor-${editingInsight || insightLoading ? 'view' : 'create'}-insight`}
-                            icon={<IconGraph />}
-                        >
-                            {editingInsight || insightLoading ? 'View insight' : 'Create insight'}
-                        </Button>
-                    )}
-                    {activeTab === OutputTab.Results && (
-                        <Menu
-                            items={Object.values(copyMap).map(({ label, copyFn }) => ({
-                                label,
-                                onClick: () => {
-                                    if (response?.columns && rows.length > 0) {
-                                        const dataTableRows = transformDataTableToDataTableRows(rows, response.columns)
-                                        const query = createDataTableQuery()
-                                        copyFn(dataTableRows, response.columns, query)
-                                    }
-                                },
-                            }))}
-                            placement="bottom-end"
-                        >
-                            <Button
-                                id="sql-editor-copy-dropdown"
-                                disabledReason={!response?.columns || !rows.length ? 'No results to copy' : undefined}
-                                type="secondary"
-                                icon={<IconCopy />}
-                            />
-                        </Menu>
-                    )}
-                    {activeTab === OutputTab.Results && exportContext && (
-                        <Tooltip title="Export the table results" className={!hasColumns ? 'hidden' : ''}>
-                            <ExportButton
-                                id="sql-editor-export"
-                                disabledReason={!hasColumns ? 'No results to export' : undefined}
-                                type="secondary"
-                                icon={<IconDownload />}
-                                sideIcon={null}
-                                buttonCopy=""
-                                items={[
-                                    {
-                                        export_format: ExporterFormat.CSV,
-                                        export_context: exportContext,
-                                    },
-                                    {
-                                        export_format: ExporterFormat.XLSX,
-                                        export_context: exportContext,
-                                    },
-                                ]}
-                            />
-                        </Tooltip>
-                    )}
-                    {activeTab === OutputTab.Results && (
-                        <Tooltip title="Share your current query">
-                            <Button
-                                id="sql-editor-share"
-                                disabledReason={!hasQueryInput && 'No query to share'}
-                                type="secondary"
-                                icon={<IconShare />}
-                                onClick={() => shareTab()}
-                            />
-                        </Tooltip>
-                    )}
-                </div>
-            </div>
-            <div className="flex flex-1 relative bg-dark">
-                <Content
-                    activeTab={activeTab}
-                    responseError={responseError}
-                    responseLoading={responseLoading}
-                    response={response}
-                    insightLoading={insightLoading}
-                    sourceQuery={sourceQuery}
-                    queryCancelled={queryCancelled}
-                    columns={columns}
-                    rows={rows}
-                    isDarkModeOn={isDarkModeOn}
-                    vizKey={vizKey}
-                    setSourceQuery={setSourceQuery}
-                    exportContext={exportContext}
-                    saveAsInsight={saveAsInsight}
-                    queryId={queryId}
-                    pollResponse={pollResponse}
-                    tabId={tabId}
-                    setProgress={setProgress}
-                    progress={queryId ? progressCache[queryId] : undefined}
-                />
-            </div>
+        <div className="OutputPane flex flex-col w-full flex-1 min-h-0 bg-white dark:bg-black">
+            {outputContent}
             <div className="flex justify-between px-2 border-t">
                 <div>{response && !responseError ? <LoadPreviewText localResponse={response} /> : <></>}</div>
                 <div className="flex items-center gap-4">
@@ -700,15 +894,13 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
 }
 
 function InternalDataTableVisualization(
-    props: DataTableVisualizationProps & { onSaveInsight: () => void }
+    props: DataTableVisualizationProps & { showSettingsPanel: boolean }
 ): JSX.Element | null {
     const {
         query,
-        visualizationType,
-        showEditingUI,
+        effectiveVisualizationType,
         response,
         responseLoading,
-        isChartSettingsPanelOpen,
         xData,
         yData,
         chartSettings,
@@ -723,13 +915,13 @@ function InternalDataTableVisualization(
     let component: JSX.Element | null = null
 
     // TODO(@Gilbert09): Better loading support for all components - e.g. using the `loading` param of `Table`
-    if (!showEditingUI && (!response || responseLoading)) {
+    if (!response || responseLoading) {
         component = (
             <div className="flex flex-col flex-1 justify-center items-center bg-surface-primary h-full">
                 <LoadingBar />
             </div>
         )
-    } else if (visualizationType === ChartDisplayType.ActionsTable) {
+    } else if (effectiveVisualizationType === ChartDisplayType.ActionsTable) {
         component = (
             <Table
                 uniqueKey={props.uniqueKey}
@@ -740,36 +932,53 @@ function InternalDataTableVisualization(
             />
         )
     } else if (
-        visualizationType === ChartDisplayType.ActionsLineGraph ||
-        visualizationType === ChartDisplayType.ActionsBar ||
-        visualizationType === ChartDisplayType.ActionsAreaGraph ||
-        visualizationType === ChartDisplayType.ActionsStackedBar
+        effectiveVisualizationType === ChartDisplayType.ActionsLineGraph ||
+        effectiveVisualizationType === ChartDisplayType.ActionsBar ||
+        effectiveVisualizationType === ChartDisplayType.ActionsAreaGraph ||
+        effectiveVisualizationType === ChartDisplayType.ActionsStackedBar
     ) {
         const _xData = seriesBreakdownData.xData.data.length ? seriesBreakdownData.xData : xData
         const _yData = seriesBreakdownData.xData.data.length ? seriesBreakdownData.seriesData : yData
         component = (
-            <LineGraph
+            <SqlChart
                 className="p-2"
                 xData={_xData}
                 yData={_yData}
-                visualizationType={visualizationType}
+                visualizationType={effectiveVisualizationType}
                 chartSettings={chartSettings}
                 dashboardId={dashboardId}
                 goalLines={goalLines}
                 presetChartHeight={presetChartHeight}
             />
         )
-    } else if (visualizationType === ChartDisplayType.TwoDimensionalHeatmap) {
+    } else if (effectiveVisualizationType === ChartDisplayType.ActionsPie) {
+        const _xData = seriesBreakdownData.xData.data.length ? seriesBreakdownData.xData : xData
+        const _yData = seriesBreakdownData.seriesData.length ? seriesBreakdownData.seriesData : yData
+
+        component = (
+            <PieChart
+                className="p-2"
+                xData={_xData}
+                yData={_yData}
+                chartSettings={chartSettings}
+                presetChartHeight={presetChartHeight}
+            />
+        )
+    } else if (effectiveVisualizationType === ChartDisplayType.TwoDimensionalHeatmap) {
         component = <TwoDimensionalHeatmap />
-    } else if (visualizationType === ChartDisplayType.BoldNumber) {
+    } else if (effectiveVisualizationType === ChartDisplayType.BoldNumber) {
         component = <InsightsQLBoldNumber />
+    }
+
+    if (props.embedded && !props.showSettingsPanel) {
+        return <div className="DataVisualization InsightCard__viz">{component}</div>
     }
 
     return (
         <div className="DataVisualization h-full hide-scrollbar flex flex-1 gap-2">
             <div className="relative w-full flex flex-col gap-4 flex-1">
                 <div className="flex flex-1 flex-row overflow-auto hide-scrollbar">
-                    {isChartSettingsPanelOpen && (
+                    {props.showSettingsPanel && (
                         <>
                             <SideBar />
                             <Divider vertical className="h-full" />
@@ -782,6 +991,60 @@ function InternalDataTableVisualization(
     )
 }
 
+// The shared `warnings` field is a tagged union; render one banner per warning kind present.
+const QueryWarningsBanner = ({ warnings }: { warnings?: InsightsQLQueryResponse['warnings'] }): JSX.Element | null => {
+    if (!warnings || warnings.length === 0) {
+        return null
+    }
+    const syncWarnings = warnings.filter((w): w is DataWarehouseSyncWarning => w.type === 'warehouse_sync')
+    const acWarnings = warnings.filter((w): w is AccessControlFilterWarning => w.type === 'access_control')
+    return (
+        <>
+            {syncWarnings.length > 0 && (
+                <Banner
+                    type="warning"
+                    className="m-2 flex-shrink-0"
+                    data-attr="sql-editor-output-pane-sync-warnings"
+                >
+                    Some warehouse sources used by this query are out of date — results may not reflect current data:
+                    <ul className="list-disc pl-5">
+                        {syncWarnings.map((warning, index) => (
+                            <li key={`${warning.table_name}-${warning.schema_name}-${index}`}>
+                                {trimRedundantTail(warning.message)}
+                                {warning.source_id && (
+                                    <>
+                                        {' '}
+                                        <Link
+                                            to={urls.dataWarehouseSource(`managed-${warning.source_id}`)}
+                                            target="_blank"
+                                        >
+                                            Manage source
+                                        </Link>
+                                    </>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </Banner>
+            )}
+            {acWarnings.length > 0 && (
+                <Banner
+                    type="warning"
+                    className="m-2 flex-shrink-0"
+                    data-attr="sql-editor-output-pane-access-control-warnings"
+                >
+                    {/* The backend emits at most one access control warning; its message is the full sentence. */}
+                    {acWarnings.map((warning, index) => (
+                        <div key={index} className="font-semibold">
+                            {warning.message}
+                        </div>
+                    ))}
+                </Banner>
+            )}
+        </>
+    )
+}
+
 const ErrorState = ({ responseError, sourceQuery, queryCancelled, response }: any): JSX.Element | null => {
     const error = queryCancelled
         ? 'The query was cancelled'
@@ -791,15 +1054,33 @@ const ErrorState = ({ responseError, sourceQuery, queryCancelled, response }: an
 
     return (
         <div className={clsx('flex-1 absolute top-0 left-0 right-0 bottom-0 overflow-auto')}>
-            <InsightErrorState
-                query={sourceQuery}
-                excludeDetail
-                title={error}
-                excludeActions={queryCancelled} // Don't display fix/debugger buttons if the query was cancelled
-                fixWithAIComponent={
-                    <FixErrorButton contentOverride="Fix error with AI" type="primary" source="query-error" />
-                }
-            />
+            <div className="flex min-h-full flex-col justify-center">
+                <InsightErrorState
+                    query={sourceQuery}
+                    excludeDetail
+                    title={
+                        <pre className="text-xs bg-danger-highlight p-2 rounded overflow-auto max-h-40 max-w-[80%] mx-auto text-left whitespace-pre-wrap break-words">
+                            {error}
+                        </pre>
+                    }
+                    excludeActions={queryCancelled} // Don't display fix/debugger buttons if the query was cancelled
+                    fixWithAIComponent={
+                        <FixErrorButton contentOverride="Fix error with AI" type="primary" source="query-error" />
+                    }
+                />
+            </div>
+        </div>
+    )
+}
+
+const EmptyResultsState = (): JSX.Element => {
+    return (
+        <div
+            className="flex flex-1 justify-center items-center gap-2 border-t px-4 py-6 text-center"
+            data-attr="sql-editor-output-pane-no-rows-state"
+        >
+            <IconWarning className="text-warning text-lg" />
+            <span className="text-secondary">Query produced no results</span>
         </div>
     )
 }
@@ -815,18 +1096,17 @@ const Content = ({
     rows,
     isDarkModeOn,
     vizKey,
-    tabId,
     setSourceQuery,
     exportContext,
-    saveAsInsight,
     queryId,
     pollResponse,
     setProgress,
     progress,
     insightLoading,
+    showVisualizationSettings,
+    isEmbeddedMode,
 }: any): JSX.Element | null => {
     const [sortColumns, setSortColumns] = useState<SortColumn[]>([])
-    const { featureFlags } = useValues(featureFlagLogic)
 
     const sortedRows = useMemo(() => {
         if (!sortColumns.length) {
@@ -854,23 +1134,61 @@ const Content = ({
             return 0
         })
     }, [rows, sortColumns])
-    if (activeTab === OutputTab.Materialization) {
+    const hasError = queryCancelled || !!responseError || !!(response && 'error' in response && !!response.error)
+
+    if (hasError) {
         return (
-            <TabScroller>
-                <div className="px-6 py-4 border-t">
-                    <QueryInfo tabId={tabId} />
-                </div>
-            </TabScroller>
+            <ErrorState
+                responseError={responseError}
+                sourceQuery={sourceQuery}
+                queryCancelled={queryCancelled}
+                response={response}
+            />
         )
     }
 
-    if (featureFlags[FEATURE_FLAGS.ENDPOINTS] && activeTab === OutputTab.Endpoint) {
-        return (
-            <TabScroller>
-                <div className="px-6 py-4 border-t">
-                    <Endpoint tabId={tabId} />
+    if (activeTab === OutputTab.Visualization) {
+        if (!response && !responseLoading && !insightLoading) {
+            return (
+                <div
+                    className="flex flex-1 flex-col justify-center items-center border-t gap-4 p-4"
+                    data-attr="sql-editor-output-pane-empty-state"
+                >
+                    <span className="text-secondary">
+                        Query results will be visualized here. Press <KeyboardShortcut command enter /> to run the
+                        query.
+                    </span>
+                    <WarehouseWizardHint
+                        className="max-w-140"
+                        fallback={
+                            <MCPUseCaseCard
+                                surfaceKey="sql.execute"
+                                expiresAfterMs={ONE_DAY_IN_MILLISECONDS}
+                                className="max-w-140"
+                            />
+                        }
+                    />
                 </div>
-            </TabScroller>
+            )
+        }
+
+        return (
+            <div className="absolute inset-0 flex flex-col border-t overflow-hidden">
+                <QueryWarningsBanner warnings={response?.warnings} />
+                <div className="flex flex-col flex-1 min-h-0 hide-scrollbar overflow-auto">
+                    <InternalDataTableVisualization
+                        uniqueKey={vizKey}
+                        query={sourceQuery}
+                        setQuery={setSourceQuery}
+                        context={{}}
+                        cachedResults={undefined}
+                        exportContext={exportContext}
+                        editMode
+                        embedded={isEmbeddedMode}
+                        showSettingsPanel={showVisualizationSettings}
+                    />
+                </div>
+            </div>
         )
     }
 
@@ -887,17 +1205,6 @@ const Content = ({
         )
     }
 
-    if (responseError) {
-        return (
-            <ErrorState
-                responseError={responseError}
-                sourceQuery={sourceQuery}
-                queryCancelled={queryCancelled}
-                response={response}
-            />
-        )
-    }
-
     if (!response) {
         const msg =
             activeTab === OutputTab.Results
@@ -905,43 +1212,44 @@ const Content = ({
                 : 'Query results will be visualized here.'
         return (
             <div
-                className="flex flex-1 justify-center items-center border-t"
+                className="flex flex-1 flex-col justify-center items-center border-t px-4 py-6 gap-4 text-center"
                 data-attr="sql-editor-output-pane-empty-state"
             >
-                <span className="text-secondary mt-3">
-                    {msg} Press <KeyboardShortcut command enter /> to run the query.
+                <span className="text-secondary max-w-xl">
+                    {msg} Press <KeyboardShortcut command enter /> to run the query at your cursor. Separate multiple
+                    statements with <code>;</code> to run them independently.
                 </span>
+                <WarehouseWizardHint
+                    className="max-w-140"
+                    fallback={
+                        <MCPUseCaseCard
+                            surfaceKey="sql.execute"
+                            expiresAfterMs={ONE_DAY_IN_MILLISECONDS}
+                            className="max-w-140"
+                        />
+                    }
+                />
             </div>
         )
     }
 
     if (activeTab === OutputTab.Results) {
         return (
-            <TabScroller data-attr="sql-editor-output-pane-results">
-                <DataGrid
-                    className={clsx(isDarkModeOn ? 'rdg-dark h-full' : 'rdg-light h-full', 'ph-no-capture')}
-                    columns={columns}
-                    rows={sortedRows}
-                    sortColumns={sortColumns}
-                    onSortColumnsChange={setSortColumns}
-                />
-            </TabScroller>
-        )
-    }
-
-    if (activeTab === OutputTab.Visualization) {
-        return (
-            <div className="flex-1 absolute inset-0 hide-scrollbar border-t">
-                <InternalDataTableVisualization
-                    uniqueKey={vizKey}
-                    query={sourceQuery}
-                    setQuery={setSourceQuery}
-                    context={{}}
-                    cachedResults={undefined}
-                    exportContext={exportContext}
-                    onSaveInsight={saveAsInsight}
-                    editMode
-                />
+            <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden">
+                <QueryWarningsBanner warnings={response?.warnings} />
+                {rows.length === 0 ? (
+                    <EmptyResultsState />
+                ) : (
+                    <TabScroller data-attr="sql-editor-output-pane-results">
+                        <DataGrid
+                            className={clsx(isDarkModeOn ? 'rdg-dark h-full' : 'rdg-light h-full', 'ph-no-capture')}
+                            columns={columns}
+                            rows={sortedRows}
+                            sortColumns={sortColumns}
+                            onSortColumnsChange={setSortColumns}
+                        />
+                    </TabScroller>
+                )}
             </div>
         )
     }

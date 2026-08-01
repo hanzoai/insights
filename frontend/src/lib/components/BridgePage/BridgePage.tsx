@@ -1,12 +1,10 @@
 import './BridgePage.scss'
 
 import clsx from 'clsx'
-import { useValues } from 'kea'
 
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
-import { WelcomeLogo } from 'scenes/authentication/WelcomeLogo'
+import { WelcomeLogo } from 'scenes/authentication/shared/WelcomeLogo'
 
-export type BridgePageCommonProps = {
+export type BridgePageProps = {
     children?: React.ReactNode
     footer?: React.ReactNode
     header?: React.ReactNode
@@ -15,9 +13,6 @@ export type BridgePageCommonProps = {
     sideLogo?: boolean
     fixedWidth?: boolean
     leftContainerContent?: JSX.Element
-    mascot?: boolean // kept for call-site compat, ignored
-    message?: React.ReactNode // kept for call-site compat, ignored
-    theme?: 'default' | 'twig'
     style?: React.CSSProperties
 }
 
@@ -30,20 +25,10 @@ export function BridgePage({
     sideLogo = false,
     fixedWidth = true,
     leftContainerContent,
-    theme = 'default',
     style,
-}: BridgePageCommonProps): JSX.Element {
-    const { preflight: _preflight } = useValues(preflightLogic)
-
+}: BridgePageProps): JSX.Element {
     return (
-        <div
-            className={clsx(
-                'BridgePage',
-                fixedWidth && 'BridgePage--fixed-width',
-                theme === 'twig' && 'BridgePage--twig'
-            )}
-            style={style}
-        >
+        <div className={clsx('BridgePage', fixedWidth && 'BridgePage--fixed-width')} style={style}>
             <div className="BridgePage__main">
                 {leftContainerContent ? (
                     <div className="BridgePage__left-wrapper">

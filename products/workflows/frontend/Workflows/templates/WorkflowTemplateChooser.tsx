@@ -6,7 +6,7 @@ import { router } from 'kea-router'
 import { useState } from 'react'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import { Button, Dialog, Tag } from '@hanzo/elements'
+import { Dialog, Tag } from '@hanzo/elements'
 
 import { FallbackCoverImage } from 'lib/components/FallbackCoverImage/FallbackCoverImage'
 import { More } from 'lib/elements/Button/More'
@@ -16,7 +16,7 @@ import { Spinner } from 'lib/elements/Spinner'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import BlankWorkflowHog from 'public/blank-dashboard-mascot.png'
+import BlankWorkflowHog from 'public/blank-dashboard-script.png'
 
 import type { InsightsFlowTemplate } from '../insightsflows/types'
 import { newWorkflowLogic } from '../newWorkflowLogic'
@@ -28,8 +28,8 @@ interface WorkflowTemplateChooserProps {
 
 // Adapted from DashboardTemplateChooser.tsx; try to keep parity for a consistent user experience
 export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JSX.Element {
-    const { filteredTemplates, workflowTemplatesLoading, tagFilter, availableTags } = useValues(workflowTemplatesLogic)
-    const { deleteInsightsFlowTemplate, setTagFilter } = useActions(workflowTemplatesLogic)
+    const { filteredTemplates, workflowTemplatesLoading } = useValues(workflowTemplatesLogic)
+    const { deleteHogflowTemplate } = useActions(workflowTemplatesLogic)
     const { user } = useValues(userLogic)
 
     const { createWorkflowFromTemplate, createEmptyWorkflow } = useActions(newWorkflowLogic)
@@ -48,98 +48,77 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
     }
 
     return (
-        <div>
-            <div className="mb-4 flex flex-wrap gap-2">
-                {availableTags.length > 0 && (
-                    <Button
-                        type={tagFilter === null ? 'primary' : 'secondary'}
-                        onClick={() => setTagFilter(null)}
-                        size="small"
-                    >
-                        All
-                    </Button>
-                )}
-                {availableTags.map((tag) => (
-                    <Button
-                        key={tag}
-                        type={tagFilter === tag ? 'primary' : 'secondary'}
-                        onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
-                        size="small"
-                    >
-                        {tag}
-                    </Button>
-                ))}
-            </div>
-            <div className="WorkflowTemplateChooser">
-                {props.showEmptyWorkflow && (
+        <div className="WorkflowTemplateChooser">
+            {props.showEmptyWorkflow && (
+                <TemplateItem
+                    key={0}
+                    template={{
+                        name: 'Empty workflow',
+                        description: 'Create a blank workflow from scratch',
+                        image_url: BlankWorkflowHog,
+                        scope: 'team',
+                        tags: [],
+                    }}
+                    onClick={createEmptyWorkflow}
+                    index={0}
+                    data-attr="create-workflow-blank"
+                />
+            )}
+            {workflowTemplatesLoading ? (
+                <Spinner className="text-6xl" />
+            ) : (
+                filteredTemplates.map((template: InsightsFlowTemplate, index: number) => (
                     <TemplateItem
-                        key={0}
-                        template={{
-                            name: 'Empty workflow',
-                            description: 'Create a blank workflow from scratch',
-                            image_url: BlankWorkflowHog,
-                            scope: 'team',
-                            tags: [],
-                        }}
-                        onClick={createEmptyWorkflow}
-                        index={0}
-                        data-attr="create-workflow-blank"
-                    />
-                )}
-                {workflowTemplatesLoading ? (
-                    <Spinner className="text-6xl" />
-                ) : (
-                    filteredTemplates.map((template: InsightsFlowTemplate, index: number) => (
-                        <TemplateItem
-                            key={template.id}
-                            template={template}
-                            onClick={() => createWorkflowFromTemplate(template)}
-                            onEdit={
-                                canEditTemplate(template)
-                                    ? (e) => {
-                                          e.stopPropagation()
-                                          router.actions.push(urls.workflowNew(), { editTemplateId: template.id })
-                                      }
-                                    : undefined
-                            }
-                            onDelete={
-                                canDeleteTemplate(template)
-                                    ? (e) => {
-                                          e.stopPropagation()
-                                          Dialog.open({
-                                              title: 'Delete template?',
-                                              description: (
-                                                  <>
-                                                      Are you sure you want to delete "{template.name}"?
-                                                      <br />
-                                                      This action cannot be undone!
-                                                  </>
-                                              ),
-                                              primaryButton: {
-                                                  children: 'Delete',
-                                                  status: 'danger',
-                                                  onClick: async () => {
-                                                      try {
-                                                          await deleteInsightsFlowTemplate(template)
-                                                          toast.success(`Template "${template.name}" deleted`)
-                                                      } catch (error: any) {
-                                                          toast.error(
-                                                              `Failed to delete template: ${error.detail || error.message || 'Unknown error'}`
-                                                          )
-                                                      }
-                                                  },
+                        key={template.id}
+                        template={template}
+                        onClick={() => createWorkflowFromTemplate(template)}
+                        onEdit={
+                            canEditTemplate(template)
+                                ? (e) => {
+                                      e.stopPropagation()
+                                      router.actions.push(urls.workflowNew(), {
+                                          editTemplateId: template.id,
+                                      })
+                                  }
+                                : undefined
+                        }
+                        onDelete={
+                            canDeleteTemplate(template)
+                                ? (e) => {
+                                      e.stopPropagation()
+                                      Dialog.open({
+                                          title: 'Delete template?',
+                                          description: (
+                                              <>
+                                                  Are you sure you want to delete "{template.name}"?
+                                                  <br />
+                                                  This action cannot be undone!
+                                              </>
+                                          ),
+                                          primaryButton: {
+                                              children: 'Delete',
+                                              status: 'danger',
+                                              onClick: async () => {
+                                                  try {
+                                                      await deleteHogflowTemplate(template)
+                                                      toast.success(`Template "${template.name}" deleted`)
+                                                  } catch (error: any) {
+                                                      toast.error(
+                                                          `Failed to delete template: ${error.detail || error.message || 'Unknown error'}`
+                                                      )
+                                                  }
                                               },
-                                              secondaryButton: { children: 'Cancel' },
-                                          })
-                                      }
-                                    : undefined
-                            }
-                            index={props.showEmptyWorkflow ? index + 1 : index}
-                            data-attr="create-workflow-from-template"
-                        />
-                    ))
-                )}
-            </div>
+                                          },
+                                          secondaryButton: { children: 'Cancel' },
+                                      })
+                                  }
+                                : undefined
+                        }
+                        index={props.showEmptyWorkflow ? index + 1 : index}
+                        data-attr="create-workflow-from-template"
+                    />
+                ))
+            )}
         </div>
     )
 }
@@ -173,7 +152,7 @@ function TemplateItem({
 
     return (
         <div
-            className="cursor-pointer border rounded TemplateItem flex flex-col transition-all relative"
+            className="cursor-pointer border rounded TemplateItem flex flex-col transition-all relative overflow-hidden"
             onClick={onClick}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
@@ -235,14 +214,14 @@ function TemplateItem({
             </div>
 
             <h5 className="px-2 mb-1">{template?.name || 'Unnamed template'}</h5>
-            <div className="flex gap-x-1 px-2 mb-1 flex-wrap">
+            <div className="flex gap-x-1 gap-y-0.5 px-2 mb-1 flex-wrap">
                 {scopeTag && (
-                    <Tag key="scope" type="option">
+                    <Tag key="scope" type="option" className="shrink-0">
                         {scopeTag}
                     </Tag>
                 )}
                 {template.tags.map((tag) => (
-                    <Tag key={tag} type="default">
+                    <Tag key={tag} type="default" className="shrink-0">
                         {tag}
                     </Tag>
                 ))}

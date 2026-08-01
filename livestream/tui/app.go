@@ -9,10 +9,10 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/hanzoai/insights/livestream/tui/config"
-	"github.com/hanzoai/insights/livestream/tui/debug"
-	"github.com/hanzoai/insights/livestream/tui/sse"
-	"github.com/hanzoai/insights/livestream/tui/views"
+	"github.com/insights/insights/livestream/tui/config"
+	"github.com/insights/insights/livestream/tui/debug"
+	"github.com/insights/insights/livestream/tui/sse"
+	"github.com/insights/insights/livestream/tui/views"
 )
 
 type viewMode int

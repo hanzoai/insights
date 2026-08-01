@@ -4,18 +4,17 @@ use axum::http::HeaderMap;
 use axum::response::Json;
 use axum_client_ip::InsecureClientIp;
 use bytes::Bytes;
-use common_types::{CapturedEvent, HasEventName, TeamId};
-use flate2::read::GzDecoder;
+use common_types::{CapturedEvent, HasEventName};
 use futures::stream;
+use limiters::redis::QuotaResource;
 use metrics::{counter, histogram};
 use multer::{parse_boundary, Multipart};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashSet;
-use std::io::Read;
 use time::format_description::well_known::Iso8601;
 use time::OffsetDateTime;
-use tracing::{debug, warn};
+use tracing::{debug, error, warn};
 use uuid::Uuid;
 
 // Blob metrics
@@ -25,14 +24,18 @@ const AI_BLOB_TOTAL_BYTES_PER_EVENT: &str = "capture_ai_blob_total_bytes_per_eve
 const AI_BLOB_EVENTS_TOTAL: &str = "capture_ai_blob_events_total";
 
 use crate::api::{CaptureError, CaptureResponse, CaptureResponseCode};
-use crate::config::CaptureMode;
-use crate::event_restrictions::{AppliedRestrictions, EventContext as RestrictionEventContext};
+use crate::event_restrictions::{
+    AppliedRestrictions, EventContext as RestrictionEventContext, Pipeline,
+};
+use crate::events::overflow_stamping::stamp_overflow_reason;
 use crate::extractors::extract_body_with_timeout;
-use crate::prometheus::report_dropped_events;
+use crate::payload::decompression::decompress_gzip_to_bytes;
+use crate::prometheus::{report_dropped_events, report_internal_error_metrics};
 use crate::router::State as AppState;
 use crate::timestamp;
 use crate::token::validate_token;
 use crate::v0_request::{DataType, ProcessedEvent, ProcessedEventMetadata};
+use crate::v1::gateway_provenance as gp;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PartInfo {
@@ -126,6 +129,18 @@ pub async fn ai_handler(
     headers: HeaderMap,
     body: Body,
 ) -> Result<Json<AIEndpointResponse>, CaptureError> {
+    ai_handler_inner(state, ip, path, headers, body)
+        .await
+        .inspect_err(|err| report_internal_error_metrics(err.to_metric_tag(), "ai"))
+}
+
+async fn ai_handler_inner(
+    state: AppState,
+    ip: Option<InsecureClientIp>,
+    path: MatchedPath,
+    headers: HeaderMap,
+    body: Body,
+) -> Result<Json<AIEndpointResponse>, CaptureError> {
     debug!("Received request to /i/v0/ai endpoint");
 
     // Extract body with timed streaming (same pattern as analytics/recordings handlers)
@@ -142,9 +157,21 @@ pub async fn ai_handler(
 
     // Check for empty body
     if body.is_empty() {
-        warn!("AI endpoint received empty body");
         return Err(CaptureError::EmptyPayload);
     }
+
+    // Authenticate before any CPU/memory-intensive decompression work
+    let auth_header = headers
+        .get("authorization")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+
+    if !auth_header.starts_with("Bearer ") {
+        return Err(CaptureError::NoTokenError);
+    }
+
+    let token = &auth_header[7..]; // Remove "Bearer " prefix
+    validate_token(token)?;
 
     // Check for Content-Encoding header and decompress if needed
     let content_encoding = headers
@@ -154,7 +181,7 @@ pub async fn ai_handler(
 
     let decompressed_body = if content_encoding.eq_ignore_ascii_case("gzip") {
         debug!("Decompressing gzip-encoded request body");
-        decompress_gzip(&body)?
+        Bytes::from(decompress_gzip_to_bytes(&body, body_limit)?)
     } else {
         body
     };
@@ -166,10 +193,6 @@ pub async fn ai_handler(
         .unwrap_or("");
 
     if !content_type.starts_with("multipart/form-data") {
-        warn!(
-            "AI endpoint received non-multipart content type: {}",
-            content_type
-        );
         return Err(CaptureError::RequestDecodingError(
             "Content-Type must be multipart/form-data".to_string(),
         ));
@@ -177,41 +200,8 @@ pub async fn ai_handler(
 
     // Extract boundary from Content-Type header using multer's built-in parser
     let boundary = parse_boundary(content_type).map_err(|e| {
-        warn!("Failed to parse boundary from Content-Type: {}", e);
         CaptureError::RequestDecodingError(format!("Invalid boundary in Content-Type: {e}"))
     })?;
-
-    // Check for authentication
-    let auth_header = headers
-        .get("authorization")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
-
-    if !auth_header.starts_with("Bearer ") {
-        warn!("AI endpoint missing or invalid Authorization header");
-        return Err(CaptureError::NoTokenError);
-    }
-
-    // Extract and validate token
-    let token = &auth_header[7..]; // Remove "Bearer " prefix
-    validate_token(token)?;
-
-    // Positive token→team allow-list AND the tenant the AI blob store is keyed by.
-    // Unknown ⇒ reject (forged/unknown project key). Unavailable ⇒ reject (fail
-    // CLOSED — never write a PII AI blob we cannot bind to a validated team). Only
-    // `None` when no resolver is wired (setups that do not exercise the blob path).
-    let team_id: Option<TeamId> = match &state.team_resolver {
-        Some(resolver) => match resolver.resolve(token).await {
-            Ok(id) => Some(id),
-            Err(crate::team::TeamResolveError::Unknown) => return Err(CaptureError::UnknownToken),
-            Err(crate::team::TeamResolveError::Unavailable) => {
-                return Err(CaptureError::ServiceUnavailable(
-                    "team resolution unavailable".to_string(),
-                ))
-            }
-        },
-        None => None,
-    };
 
     // Capture body size for logging (before we move the Bytes)
     let body_size = decompressed_body.len();
@@ -236,10 +226,11 @@ pub async fn ai_handler(
             now_ts: state.timesource.current_time().timestamp(),
         };
 
-        let restrictions = service.get_restrictions(token, &event_ctx).await;
-        let applied = AppliedRestrictions::from_restrictions(restrictions, CaptureMode::Ai);
+        let applied = service
+            .get_restrictions(token, &event_ctx, Pipeline::Ai)
+            .await;
 
-        if applied.should_drop {
+        if applied.should_drop() {
             report_dropped_events("event_restriction_drop", 1);
             return Ok(Json(AIEndpointResponse {
                 accepted_parts: vec![],
@@ -264,18 +255,50 @@ pub async fn ai_handler(
         }));
     }
 
-    // Step 4: Check quota limiter - drop if over quota
-    // We pass a single-element vec and check if it's filtered out
-    let filtered = state
-        .quota_limiter
-        .check_and_filter(token, vec![event_metadata])
-        .await?;
+    // AI-gateway provenance: a fresh, valid signature marks the event trusted.
+    // Verify here, before the quota limiter, while distinct_id (in the signed tuple)
+    // is known; the outcome gates the limiter below and the stamp/strip before Kafka.
+    // sig + signed_at + request_id ride in headers.
+    // TODO: relocate gateway_provenance out of v1/ now the v0 path uses it too.
+    let gw_sig = gp::parse_signature(&headers);
+    let gw_outcome = match (state.ai_gateway_signing_secret.as_deref(), gw_sig.as_ref()) {
+        (Some(secret), Some(sig)) => gp::verify(
+            secret.as_bytes(),
+            token,
+            &event_metadata.distinct_id,
+            sig,
+            state.timesource.current_time(),
+        ),
+        _ => gp::Provenance::Invalid,
+    };
+    let gw_request_id = gw_sig.map(|s| s.request_id).unwrap_or_default();
+    let gw_trusted = gw_outcome == gp::Provenance::Verified && !gw_request_id.is_empty();
 
-    // If the event was filtered out by quota limiter, return billing limit error
-    let event_metadata = filtered
-        .into_iter()
-        .next()
-        .ok_or(CaptureError::BillingLimit)?;
+    // Step 4: quota limiter. Verified gateway events are wallet-billed, so they're
+    // exempt from the scoped LLM-events quota but still subject to the team's global
+    // Events quota (matching the v1 flow).
+    let event_metadata = if gw_trusted {
+        if state
+            .quota_limiter
+            .is_quota_limited_v1(token, &QuotaResource::Events)
+            .await
+        {
+            return Err(CaptureError::BillingLimit);
+        }
+        event_metadata
+    } else {
+        // We pass a single-element vec and check if it's filtered out
+        let filtered = state
+            .quota_limiter
+            .check_and_filter(token, vec![event_metadata])
+            .await?;
+
+        // If the event was filtered out by quota limiter, return billing limit error
+        filtered
+            .into_iter()
+            .next()
+            .ok_or(CaptureError::BillingLimit)?
+    };
 
     // Step 5: Retrieve and validate remaining multipart parts (continues parsing from multipart)
     let parts = retrieve_multipart_parts(
@@ -320,7 +343,7 @@ pub async fn ai_handler(
     // Upload blobs to S3 and insert URLs into event properties
     if !parsed.blob_parts.is_empty() {
         let blob_storage = state.ai_blob_storage.as_ref().ok_or_else(|| {
-            warn!("AI endpoint received blobs but S3 is not configured");
+            error!("AI endpoint received blobs but S3 is not configured");
             CaptureError::ServiceUnavailable("blob storage not configured".to_string())
         })?;
 
@@ -340,15 +363,11 @@ pub async fn ai_handler(
             })
             .collect();
 
-        // Upload blobs and get URLs, partitioned by the validated team_id. Without
-        // a resolved team there is no safe tenant to key by, so refuse rather than
-        // fall back to the old attacker-choosable hash(token) partition.
-        let team_id = team_id.ok_or_else(|| {
-            warn!("AI endpoint received blobs but no team resolver is configured");
-            CaptureError::ServiceUnavailable("team resolution required for AI blobs".to_string())
-        })?;
+        // Upload blobs and get URLs
+        // TODO: Replace token with team_id once secret key signing is implemented
+        // and we can resolve tokens to team IDs in capture
         let uploaded = blob_storage
-            .upload_blobs(team_id, &parsed.event_uuid.to_string(), blobs)
+            .upload_blobs(token, &parsed.event_uuid.to_string(), blobs)
             .await
             .map_err(|e| {
                 warn!("Failed to upload blobs to S3: {:?}", e);
@@ -366,20 +385,66 @@ pub async fn ai_handler(
         }
     }
 
+    // AI-gateway provenance: stamp the trusted marker (overwriting client values) on a
+    // verified event, else strip the whole $ai_gateway* namespace so a forged marker
+    // can't reach billing. The verified metric always fires; the strip metric only fires
+    // when a gateway prop was actually present, so ordinary $ai_* events stay silent.
+    if let Some(event_obj) = parsed.event.as_object_mut() {
+        if gw_trusted {
+            // A verified event was exempted from the LLM-events quota, so it must carry
+            // the stamp or billing would double-count it toward AIO. Guarantee a
+            // properties object here rather than relying on validate_event_structure
+            // having produced one, so the exemption and the stamp can't drift apart.
+            let properties = event_obj
+                .entry("properties")
+                .or_insert_with(|| Value::Object(serde_json::Map::new()));
+            if !properties.is_object() {
+                *properties = Value::Object(serde_json::Map::new());
+            }
+            if let Some(properties) = properties.as_object_mut() {
+                gp::stamp_verified(properties, &gw_request_id);
+                counter!(gp::PROVENANCE_METRIC, "reason" => "verified").increment(1);
+            }
+        } else if let Some(properties) = event_obj
+            .get_mut("properties")
+            .and_then(|p| p.as_object_mut())
+        {
+            let before = properties.len();
+            let forged = properties.contains_key(gp::VERIFIED_PROPERTY);
+            gp::strip_gateway(properties);
+            if properties.len() != before {
+                let reason = if forged {
+                    "forged"
+                } else if gw_outcome == gp::Provenance::Stale {
+                    "stale"
+                } else {
+                    "stripped"
+                };
+                counter!(gp::PROVENANCE_METRIC, "reason" => reason).increment(1);
+            }
+        }
+    }
+
     // Step 8: Build Kafka event
     // Extract IP address, defaulting to 127.0.0.1 if not available (e.g., in tests)
     let client_ip = ip
         .map(|InsecureClientIp(addr)| addr.to_string())
         .unwrap_or_else(|| "127.0.0.1".to_string());
-    let (accepted_parts, processed_event) = build_kafka_event(
-        parsed,
-        token,
-        &client_ip,
-        &state,
-        applied_restrictions.force_overflow,
-        applied_restrictions.skip_person_processing,
-        applied_restrictions.redirect_to_dlq,
-    )?;
+    let (accepted_parts, mut processed_event) =
+        build_kafka_event(parsed, token, &client_ip, &state, &applied_restrictions)?;
+
+    // Step 8b: Apply the in-process OverflowLimiter governor. The analytics
+    // pipeline stamps overflow reasons inside `process_events`, but AI
+    // bypasses that path, so we invoke the shared helper here to preserve
+    // OverflowLimiter parity on `capture-ai-*` deploys (where
+    // `OVERFLOW_ENABLED=true`). `force_overflow` already stamped on
+    // `processed_event.metadata` by `build_kafka_event` is honored by the
+    // helper's short-circuit.
+    stamp_overflow_reason(
+        std::slice::from_mut(&mut processed_event),
+        state.overflow_limiter.as_ref(),
+        state.ai_events_overflow_limiter.as_ref(),
+    );
 
     // Step 9: Send event to Kafka
     state.sink.send(processed_event).await.map_err(|e| {
@@ -407,24 +472,6 @@ pub async fn options() -> Result<CaptureResponse, CaptureError> {
     })
 }
 
-/// Decompress gzip-encoded body using streaming decompression
-fn decompress_gzip(compressed: &Bytes) -> Result<Bytes, CaptureError> {
-    let mut decoder = GzDecoder::new(&compressed[..]);
-    let mut decompressed = Vec::new();
-
-    decoder.read_to_end(&mut decompressed).map_err(|e| {
-        warn!("Failed to decompress gzip body: {}", e);
-        CaptureError::RequestDecodingError(format!("Failed to decompress gzip body: {e}"))
-    })?;
-
-    debug!(
-        "Decompressed {} bytes to {} bytes",
-        compressed.len(),
-        decompressed.len()
-    );
-    Ok(Bytes::from(decompressed))
-}
-
 /// Retrieve event metadata from the first multipart part for early checks.
 /// This parses only the 'event' part to extract event_name and distinct_id
 /// before processing the rest of the multipart body.
@@ -436,10 +483,7 @@ async fn retrieve_event_metadata(
     let field = multipart
         .next_field()
         .await
-        .map_err(|e| {
-            warn!("Multipart parsing error: {}", e);
-            CaptureError::RequestDecodingError(format!("Multipart parsing failed: {e}"))
-        })?
+        .map_err(|e| CaptureError::RequestDecodingError(format!("Multipart parsing failed: {e}")))?
         .ok_or_else(|| {
             CaptureError::RequestParsingError(
                 "Missing required 'event' part in multipart data".to_string(),
@@ -463,7 +507,6 @@ async fn retrieve_event_metadata(
 
     // Read the field data
     let field_data = field.bytes().await.map_err(|e| {
-        warn!("Failed to read event field data: {}", e);
         CaptureError::RequestDecodingError(format!("Failed to read field data: {e}"))
     })?;
 
@@ -515,9 +558,7 @@ fn build_kafka_event(
     token: &str,
     client_ip: &str,
     state: &AppState,
-    force_overflow: bool,
-    skip_person_processing: bool,
-    redirect_to_dlq: bool,
+    restrictions: &AppliedRestrictions,
 ) -> Result<(Vec<PartInfo>, ProcessedEvent), CaptureError> {
     // Get current time
     let now = state.timesource.current_time();
@@ -545,11 +586,12 @@ fn build_kafka_event(
         sent_at_utc,
         ignore_sent_at,
         now,
-    );
+    )
+    .timestamp;
 
     // Serialize the event to JSON (this is what goes in the "data" field)
     let data = serde_json::to_string(&parsed.event).map_err(|e| {
-        warn!("Failed to serialize AI event: {}", e);
+        error!("Failed to serialize AI event: {}", e);
         CaptureError::NonRetryableSinkError
     })?;
 
@@ -589,9 +631,13 @@ fn build_kafka_event(
         session_id: None,
         computed_timestamp: Some(computed_timestamp),
         event_name: parsed.event_name,
-        force_overflow,
-        skip_person_processing,
-        redirect_to_dlq,
+        force_overflow: restrictions.force_overflow(),
+        skip_person_processing: restrictions.skip_person_processing(),
+        redirect_to_dlq: restrictions.redirect_to_dlq(),
+        redirect_to_topic: restrictions.redirect_to_topic().map(|s| s.to_string()),
+        skip_heatmap_processing: false,
+        overflow_reason: None,
+        distinct_id_truncated_from: None,
     };
 
     // Create ProcessedEvent
@@ -621,13 +667,11 @@ fn process_event_part(
     }
 
     // Parse the event JSON
-    let event_json_str = std::str::from_utf8(&field_data).map_err(|e| {
-        warn!("Event part is not valid UTF-8: {}", e);
+    let event_json_str = std::str::from_utf8(&field_data).map_err(|_| {
         CaptureError::RequestParsingError("Event part must be valid UTF-8".to_string())
     })?;
 
-    let event_json = serde_json::from_str(event_json_str).map_err(|e| {
-        warn!("Event part is not valid JSON: {}", e);
+    let event_json = serde_json::from_str(event_json_str).map_err(|_| {
         CaptureError::RequestParsingError("Event part must be valid JSON".to_string())
     })?;
 
@@ -649,13 +693,11 @@ fn process_properties_part(
     content_encoding: Option<String>,
 ) -> Result<(Value, PartInfo), CaptureError> {
     // Parse the properties JSON
-    let properties_json_str = std::str::from_utf8(&field_data).map_err(|e| {
-        warn!("Properties part is not valid UTF-8: {}", e);
+    let properties_json_str = std::str::from_utf8(&field_data).map_err(|_| {
         CaptureError::RequestParsingError("Properties part must be valid UTF-8".to_string())
     })?;
 
-    let properties_json = serde_json::from_str(properties_json_str).map_err(|e| {
-        warn!("Properties part is not valid JSON: {}", e);
+    let properties_json = serde_json::from_str(properties_json_str).map_err(|_| {
         CaptureError::RequestParsingError("Properties part must be valid JSON".to_string())
     })?;
 
@@ -745,10 +787,11 @@ async fn retrieve_multipart_parts(
     accepted_parts.push(event_metadata.event_part_info);
 
     // Parse each part
-    while let Some(field) = multipart.next_field().await.map_err(|e| {
-        warn!("Multipart parsing error: {}", e);
-        CaptureError::RequestDecodingError(format!("Multipart parsing failed: {e}"))
-    })? {
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| CaptureError::RequestDecodingError(format!("Multipart parsing failed: {e}")))?
+    {
         part_count += 1;
 
         // Extract all field information before consuming the field
@@ -774,7 +817,6 @@ async fn retrieve_multipart_parts(
 
         // Read the field data to get the length (this consumes the field)
         let field_data = field.bytes().await.map_err(|e| {
-            warn!("Failed to read field data for '{}': {}", field_name, e);
             CaptureError::RequestDecodingError(format!("Failed to read field data: {e}"))
         })?;
 
@@ -815,8 +857,6 @@ async fn retrieve_multipart_parts(
             blob_parts.push(blob_part);
             accepted_parts.push(part_info);
         } else {
-            warn!("Unknown multipart field: {}", field_name);
-
             // Reject unknown fields that don't match expected patterns
             return Err(CaptureError::RequestParsingError(format!(
                 "Unknown multipart field: '{field_name}'. Expected 'event', 'event.properties', or 'event.properties.<property_name>'"
@@ -923,10 +963,8 @@ fn parse_multipart_data(
         .and_then(|v| v.as_str())
         .ok_or_else(|| CaptureError::RequestParsingError("Event UUID is required".to_string()))
         .and_then(|uuid_str| {
-            Uuid::parse_str(uuid_str).map_err(|e| {
-                warn!("Invalid UUID format: {}", e);
-                CaptureError::RequestParsingError(format!("Invalid UUID format: {e}"))
-            })
+            Uuid::parse_str(uuid_str)
+                .map_err(|e| CaptureError::RequestParsingError(format!("Invalid UUID format: {e}")))
         })?;
 
     let timestamp = event
@@ -963,7 +1001,6 @@ fn parse_multipart_data(
 fn validate_event_structure(event: &Value) -> Result<(), CaptureError> {
     // Check if event is an object
     let event_obj = event.as_object().ok_or_else(|| {
-        warn!("Event must be a JSON object");
         CaptureError::RequestParsingError("Event must be a JSON object".to_string())
     })?;
 
@@ -972,7 +1009,6 @@ fn validate_event_structure(event: &Value) -> Result<(), CaptureError> {
         .get("event")
         .and_then(|v| v.as_str())
         .ok_or_else(|| {
-            warn!("Event missing 'event' field");
             CaptureError::RequestParsingError("Event missing 'event' field".to_string())
         })?;
 
@@ -1005,7 +1041,6 @@ fn validate_event_structure(event: &Value) -> Result<(), CaptureError> {
         .get("distinct_id")
         .and_then(|v| v.as_str())
         .ok_or_else(|| {
-            warn!("Event missing 'distinct_id' field");
             CaptureError::RequestParsingError("Event missing 'distinct_id' field".to_string())
         })?;
 
@@ -1020,7 +1055,6 @@ fn validate_event_structure(event: &Value) -> Result<(), CaptureError> {
         .get("properties")
         .and_then(|v| v.as_object())
         .ok_or_else(|| {
-            warn!("Event missing 'properties' field");
             CaptureError::RequestParsingError("Event missing 'properties' field".to_string())
         })?;
 
@@ -1035,7 +1069,6 @@ fn validate_event_structure(event: &Value) -> Result<(), CaptureError> {
         .get("$ai_model")
         .and_then(|v| v.as_str())
         .ok_or_else(|| {
-            warn!("$ai_model must be a string");
             CaptureError::RequestParsingError("$ai_model must be a string".to_string())
         })?;
 

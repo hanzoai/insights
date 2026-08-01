@@ -4,8 +4,10 @@ from insights.insightsql import ast
 from insights.insightsql.constants import InsightsQLQuerySettings
 from insights.insightsql.parser import parse_expr
 
+from insights.credentials import AWSKeyPair
 
-def get_s3_function_call(s3_folder: str, s3_key: str | None, s3_secret: str | None, num_partitions: int) -> str:
+
+def get_s3_function_call(s3_folder: str, credentials: AWSKeyPair | None, num_partitions: int) -> str:
     """Generate the s3() function call for Datastore INSERT queries.
 
     When using keyless S3 auth (IAM roles), we omit credentials and Datastore uses the
@@ -15,10 +17,10 @@ def get_s3_function_call(s3_folder: str, s3_key: str | None, s3_secret: str | No
     parameter substitution, so %% produces a literal % in the final query.
     """
     s3_url = f"{s3_folder}/export_{{{{_partition_id}}}}.arrow"
-    if s3_key is not None and s3_secret is not None:
+    if credentials is not None:
         # Escape single quotes by doubling them (Datastore SQL escaping)
-        escaped_key = s3_key.replace("'", "''")
-        escaped_secret = s3_secret.replace("'", "''")
+        escaped_key = credentials.access_key_id.replace("'", "''")
+        escaped_secret = credentials.secret_access_key.replace("'", "''")
         s3_call = f"s3('{s3_url}', '{escaped_key}', '{escaped_secret}', 'ArrowStream')"
     else:
         s3_call = f"s3('{s3_url}', 'ArrowStream')"
@@ -963,3 +965,29 @@ SETTINGS
     optimize_aggregation_in_order=1,
     log_comment={log_comment}
 """)
+
+
+EVENT_COUNT_BY_INTERVAL = """
+SELECT
+    toStartOfInterval(_inserted_at, INTERVAL {interval}) AS interval_start,
+    interval_start + INTERVAL {interval} AS interval_end,
+    COUNT(*) as total_count
+FROM (
+    SELECT DISTINCT ON (team_id, event, cityHash64(events_recent.distinct_id), cityHash64(events_recent.uuid))
+        inserted_at AS _inserted_at
+    FROM
+        events_recent
+    PREWHERE
+        events_recent.inserted_at >= {overall_interval_start}::DateTime64
+        AND events_recent.inserted_at < {overall_interval_end}::DateTime64
+    WHERE
+        team_id = {team_id}::Int64
+        AND (length({include_events}::Array(String)) = 0 OR event IN {include_events}::Array(String))
+        AND (length({exclude_events}::Array(String)) = 0 OR event NOT IN {exclude_events}::Array(String))
+)
+GROUP BY interval_start
+ORDER BY interval_start ASC
+SETTINGS
+    max_replica_delay_for_distributed_queries=1,
+    optimize_aggregation_in_order=1
+"""

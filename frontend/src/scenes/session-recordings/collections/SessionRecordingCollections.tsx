@@ -17,12 +17,10 @@ import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { TZLabel } from 'lib/components/TZLabel'
-import { FEATURE_FLAGS } from 'lib/constants'
 import { More } from 'lib/elements/Button/More'
 import { TableColumn, TableColumns } from 'lib/elements/Table'
 import { createdByColumn } from 'lib/elements/Table/columnUtils'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { isObject } from 'lib/utils'
+import { isObject } from 'lib/utils/guards'
 import { urls } from 'scenes/urls'
 
 import {
@@ -136,7 +134,6 @@ export function SessionRecordingCollections(): JSX.Element {
     const { setSavedPlaylistsFilters, updatePlaylist, duplicatePlaylist, deletePlaylist } = useActions(
         sessionRecordingCollectionsLogic
     )
-    const { featureFlags } = useValues(featureFlagLogic)
 
     const columns: TableColumns<SessionRecordingPlaylistType> = [
         {
@@ -173,6 +170,7 @@ export function SessionRecordingCollections(): JSX.Element {
         {
             title: 'Last modified',
             sorter: true,
+            defaultSortOrder: -1,
             dataIndex: 'last_modified_at',
             width: 0,
             render: function Render(last_modified_at) {
@@ -280,14 +278,6 @@ export function SessionRecordingCollections(): JSX.Element {
                                         label: 'Automatic',
                                         value: 'synthetic',
                                     },
-                                    ...(featureFlags[FEATURE_FLAGS.REPLAY_NEW_DETECTED_URL_COLLECTIONS] === 'test'
-                                        ? [
-                                              {
-                                                  label: 'New URLs',
-                                                  value: 'new-urls',
-                                              },
-                                          ]
-                                        : []),
                                 ]}
                             />
                         </div>

@@ -1,63 +1,109 @@
 import '~/styles'
-
 import './Exporter.scss'
 
 import clsx from 'clsx'
 import { BindLogic, useValues } from 'kea'
-import { useEffect } from 'react'
+import { Suspense, useEffect, useSyncExternalStore } from 'react'
 
-import { Logo } from 'lib/brand/Logo'
-import { HeatmapCanvas } from 'lib/components/heatmaps/HeatmapCanvas'
+import { Logo } from 'lib/brand'
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { useThemedHtml } from 'lib/hooks/useThemedHtml'
+import { Markdown } from 'lib/elements/Markdown'
 import { Link } from 'lib/elements/Link'
-import { Dashboard } from 'scenes/dashboard/Dashboard'
-import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'
-import { SessionRecordingPlayerMode } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
+import { WrappingLoadingSkeleton } from 'lib/ui/WrappingLoadingSkeleton/WrappingLoadingSkeleton'
+import { humanFriendlyDuration } from 'lib/utils/durations'
+import { lazyWithRetry } from 'lib/utils/retryImport'
+import { AUTO_REFRESH_INITIAL_INTERVAL_SECONDS } from 'scenes/dashboard/dashboardConstants'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { ExportedInsight } from '~/exporter/ExportedInsight/ExportedInsight'
 import { ExporterLogin } from '~/exporter/ExporterLogin'
 import { ExportType, ExportedData } from '~/exporter/types'
-import { getQueryBasedDashboard } from '~/queries/nodes/InsightViz/utils'
-import { DashboardPlacement } from '~/types'
+import { isInsightVizNode, isTrendsQuery } from '~/queries/utils'
+import { ChartDisplayType } from '~/types'
 
 import { exporterViewLogic } from './exporterViewLogic'
 
-function ExportHeatmap(): JSX.Element {
-    const { exportedData, isLoading, screenshotUrl } = useValues(exporterViewLogic)
-    const { exportToken } = exportedData
+const LazyDashboardScene = lazyWithRetry(() => import('./scenes/ExporterDashboardScene'))
+const LazyHeatmapScene = lazyWithRetry(() => import('./scenes/ExporterHeatmapScene'))
+const LazyInsightScene = lazyWithRetry(() => import('./scenes/ExporterInsightScene'))
+const LazyNotebookScene = lazyWithRetry(() => import('./scenes/ExporterNotebookScene'))
+const LazyRecordingScene = lazyWithRetry(() => import('./scenes/ExporterRecordingScene'))
+const LazyInterviewScene = lazyWithRetry(() => import('./scenes/ExporterInterviewScene'))
+const LazyQueryScene = lazyWithRetry(() => import('./scenes/ExporterQueryScene'))
 
+function ExportedSceneSkeleton(): JSX.Element {
     return (
-        <div className="flex justify-center h-screen w-screen overflow-scroll heatmap-exporter relative">
-            <HeatmapCanvas positioning="absolute" widthOverride={null} context="in-app" exportToken={exportToken} />
-            {exportedData.heatmap_context?.heatmap_type === 'screenshot' ? (
-                <>{isLoading ? null : <img src={screenshotUrl ?? ''} alt="Heatmap" />}</>
-            ) : (
-                <iframe
-                    id="heatmap-iframe"
-                    ref={null}
-                    title="Heatmap export"
-                    className="h-screen bg-white w-screen"
-                    // eslint-disable-next-line react/forbid-dom-props
-                    src={exportedData.heatmap_url ?? ''}
-                    onLoad={() => {}}
-                    // these two sandbox values are necessary so that the site and toolbar can run
-                    // this is a very loose sandbox,
-                    // but we specify it so that at least other capabilities are denied
-                    sandbox="allow-scripts allow-same-origin"
-                    // we don't allow things such as camera access though
-                    allow=""
-                />
-            )}
-        </div>
+        <WrappingLoadingSkeleton fullWidth>
+            <span className="block w-full h-screen" />
+        </WrappingLoadingSkeleton>
     )
 }
 
+const PREFERS_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)'
+
+function subscribeToColorSchemeChanges(onChange: () => void): () => void {
+    const media = window.matchMedia?.(PREFERS_DARK_MEDIA_QUERY)
+    if (!media) {
+        return () => {}
+    }
+    // Shared/embedded pages are viewed from browsers we don't control; old WebKit (Safari < 14)
+    // only implements the legacy listener API, and throwing here would crash the whole page
+    if (typeof media.addEventListener !== 'function') {
+        media.addListener(onChange)
+        return () => media.removeListener(onChange)
+    }
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+}
+
+function getSystemPrefersDark(): boolean {
+    return typeof window !== 'undefined' && !!window.matchMedia?.(PREFERS_DARK_MEDIA_QUERY)?.matches
+}
+
+function useResolvedForcedTheme(theme?: 'light' | 'dark' | 'system'): 'light' | 'dark' | null {
+    // Subscribe so a shared page left open follows system light/dark switches without a reload
+    const systemPrefersDark = useSyncExternalStore(subscribeToColorSchemeChanges, getSystemPrefersDark)
+    if (theme === 'light' || theme === 'dark') {
+        return theme
+    }
+    if (theme !== 'system') {
+        return null
+    }
+    return systemPrefersDark ? 'dark' : 'light'
+}
+
 export function Exporter(props: ExportedData): JSX.Element {
-    // NOTE: Mounting the logic is important as it is used by sub-logics
-    const { type, dashboard, insight, recording, themes, accessToken, exportToken, ...exportOptions } = props
+    const {
+        type,
+        dashboard,
+        insight,
+        recording,
+        notebook,
+        insights,
+        inline_query_results: inlineQueryResults,
+        query,
+        query_results: queryResults,
+        themes,
+        accessToken,
+        exportToken,
+        interview,
+        ...exportOptions
+    } = props
     const { whitelabel, showInspector = false } = exportOptions
+    const forcedTheme = useResolvedForcedTheme(exportOptions.theme)
+
+    // A metric insight sizes to a compact card rather than filling the viewport, so drop the 100vh floor
+    // that would otherwise leave empty space below it (see Exporter.scss and ExportedInsight.scss).
+    // Applies to both saved insights and ad-hoc query exports — the image exporter narrows
+    // the screenshot viewport for both.
+    const metricQuery = insight?.query ?? query
+    const metric =
+        metricQuery &&
+        isInsightVizNode(metricQuery) &&
+        isTrendsQuery(metricQuery.source) &&
+        metricQuery.source.trendsFilter?.display === ChartDisplayType.Metric
+            ? metricQuery
+            : undefined
 
     const { currentTeam } = useValues(teamLogic)
     const { ref: elementRef, height, width } = useResizeObserver()
@@ -70,10 +116,31 @@ export function Exporter(props: ExportedData): JSX.Element {
         window.parent?.postMessage({ event: 'insights:dimensions', name: window.name, height, width }, '*')
     }, [height, width])
 
-    useThemedHtml(false)
+    useEffect(() => {
+        if (dashboard && (type === ExportType.Scene || type === ExportType.Embed)) {
+            const baseTitle = dashboard.name || 'Dashboard'
+            document.title = whitelabel ? baseTitle : `${baseTitle} • Insights`
+        } else if (insight && (type === ExportType.Scene || type === ExportType.Embed)) {
+            const baseTitle = insight.name || insight.derived_name || 'Insight'
+            document.title = whitelabel ? baseTitle : `${baseTitle} • Insights`
+        } else if (notebook && (type === ExportType.Scene || type === ExportType.Embed)) {
+            const baseTitle = notebook.title || 'Notebook'
+            document.title = whitelabel ? baseTitle : `${baseTitle} • Insights`
+        }
+    }, [dashboard, insight, notebook, type, whitelabel])
+
+    useThemedHtml(false, forcedTheme)
 
     if (type === ExportType.Unlock) {
         return <ExporterLogin whitelabel={whitelabel} />
+    }
+
+    if (type === ExportType.Interview && interview) {
+        return (
+            <Suspense fallback={<ExportedSceneSkeleton />}>
+                <LazyInterviewScene interview={interview} accessToken={accessToken} />
+            </Suspense>
+        )
     }
 
     return (
@@ -81,70 +148,113 @@ export function Exporter(props: ExportedData): JSX.Element {
             <div
                 className={clsx('Exporter', {
                     'Exporter--insight': !!insight,
+                    'Exporter--metric': !!metric,
                     'Exporter--dashboard': !!dashboard,
                     'Exporter--recording': !!recording,
+                    'Exporter--notebook': !!notebook,
                     'Exporter--heatmap': type === ExportType.Heatmap,
                 })}
                 ref={elementRef}
             >
-                {!whitelabel && dashboard ? (
+                {dashboard ? (
                     type === ExportType.Scene ? (
                         <div className="SharedDashboard-header">
-                            <Link
-                                to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard"
-                                target="_blank"
-                            >
-                                <Logo className="text-lg" />
-                            </Link>
+                            {!whitelabel && (
+                                <Link
+                                    to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard"
+                                    target="_blank"
+                                >
+                                    <Logo size="xs" />
+                                </Link>
+                            )}
                             <div className="SharedDashboard-header-title">
                                 <h1 className="mb-2" data-attr="dashboard-item-title">
                                     {dashboard.name}
                                 </h1>
-                                <span>{dashboard.description}</span>
+                                <Markdown lowKeyHeadings>{dashboard.description || ''}</Markdown>
                             </div>
-                            <span className="SharedDashboard-header-team">{currentTeam?.name}</span>
+                            <div className="SharedDashboard-header-team text-right">
+                                <span className="block">{currentTeam?.name}</span>
+                                <span className="block text-xs text-muted-alt">
+                                    Auto refresh every {humanFriendlyDuration(AUTO_REFRESH_INITIAL_INTERVAL_SECONDS)}
+                                </span>
+                            </div>
                         </div>
-                    ) : type === ExportType.Embed ? (
+                    ) : type === ExportType.Embed && !whitelabel ? (
                         <Link
                             to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard"
                             target="_blank"
                         >
-                            <Logo className="text-lg" />
+                            <Logo size="xs" />
                         </Link>
-                    ) : type === ExportType.Image ? (
+                    ) : type === ExportType.Image && !whitelabel ? (
                         <>
                             <h1 className="mb-2">{dashboard.name}</h1>
-                            <p>{dashboard.description}</p>
+                            <Markdown lowKeyHeadings>{dashboard.description || ''}</Markdown>
                         </>
                     ) : null
                 ) : null}
-                {insight ? (
-                    <ExportedInsight insight={insight} themes={themes!} exportOptions={exportOptions} />
+                {notebook ? (
+                    <div className="SharedNotebook">
+                        {!whitelabel && type === ExportType.Scene && (
+                            <div className="SharedDashboard-header">
+                                <Link
+                                    to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-notebook"
+                                    target="_blank"
+                                >
+                                    <Logo size="xs" />
+                                </Link>
+                                <div className="SharedDashboard-header-team text-right">
+                                    <span className="block">{currentTeam?.name}</span>
+                                </div>
+                            </div>
+                        )}
+                        <Suspense fallback={<ExportedSceneSkeleton />}>
+                            <LazyNotebookScene
+                                notebook={notebook}
+                                insights={insights}
+                                inline_query_results={inlineQueryResults}
+                            />
+                        </Suspense>
+                    </div>
+                ) : insight ? (
+                    <Suspense fallback={<ExportedSceneSkeleton />}>
+                        <LazyInsightScene insight={insight} themes={themes!} exportOptions={exportOptions} />
+                    </Suspense>
+                ) : query ? (
+                    <Suspense fallback={<ExportedSceneSkeleton />}>
+                        <LazyQueryScene
+                            query={query}
+                            queryResults={queryResults}
+                            themes={themes!}
+                            exportOptions={exportOptions}
+                        />
+                    </Suspense>
                 ) : dashboard ? (
-                    <Dashboard
-                        id={String(dashboard.id)}
-                        dashboard={getQueryBasedDashboard(dashboard)!}
-                        placement={type === ExportType.Image ? DashboardPlacement.Export : DashboardPlacement.Public}
-                        themes={themes}
-                    />
+                    <Suspense fallback={<ExportedSceneSkeleton />}>
+                        <LazyDashboardScene dashboard={dashboard} type={type} themes={themes} />
+                    </Suspense>
                 ) : recording ? (
-                    <SessionRecordingPlayer
-                        playerKey="exporter"
-                        sessionRecordingId={recording.id}
-                        mode={props.mode ?? SessionRecordingPlayerMode.Sharing}
-                        autoPlay={props.autoplay ?? false}
-                        withSidebar={showInspector}
-                        noBorder={props.noBorder ?? false}
-                        accessToken={exportToken}
-                    />
+                    <Suspense fallback={<ExportedSceneSkeleton />}>
+                        <LazyRecordingScene
+                            recording={recording}
+                            mode={props.mode}
+                            autoplay={props.autoplay}
+                            noBorder={props.noBorder}
+                            exportToken={exportToken}
+                            showInspector={showInspector}
+                        />
+                    </Suspense>
                 ) : type === ExportType.Heatmap ? (
-                    <ExportHeatmap />
+                    <Suspense fallback={<ExportedSceneSkeleton />}>
+                        <LazyHeatmapScene />
+                    </Suspense>
                 ) : (
                     <h1 className="text-center p-4">Something went wrong...</h1>
                 )}
                 {!whitelabel && dashboard && (
                     <div className="text-center pb-4">
-                        {type === ExportType.Image ? <Logo className="text-lg" /> : null}
+                        {type === ExportType.Image ? <Logo size="xs" /> : null}
                         <div>
                             Made with{' '}
                             <Link

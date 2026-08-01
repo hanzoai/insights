@@ -12,7 +12,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send data to RudderStack",
     icon_url="/static/services/rudderstack.png",
     category=["Custom"],
-    code_language="fn",
+    code_language="script",
     code="""
 fun getPayload() {
     let rudderPayload := {
@@ -133,12 +133,12 @@ if (res.status != 200 or res.body.ok == false) {
 
 
 class TemplateRudderstackMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/rudderstack-insights-plugin"
+    plugin_url = "https://github.com/Insights/rudderstack-insights-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("dataPlaneUrl", "https://hosted.rudderlabs.com")

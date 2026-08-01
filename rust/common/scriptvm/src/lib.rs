@@ -2,7 +2,9 @@ mod context;
 mod error;
 mod memory;
 mod ops;
+mod print;
 mod program;
+mod state;
 mod stl;
 mod util;
 mod values;
@@ -21,9 +23,21 @@ pub use vm::sync_execute;
 pub use vm::ScriptVM;
 pub use vm::StepOutcome;
 pub use vm::VmFailure;
+pub use vm::MAX_JSON_SERDE_DEPTH;
+
+// Suspend/resume (async-coroutine) execution and state serialization
+pub use state::Resumable;
+pub use state::VmSnapshot;
+pub use vm::execute_resumable;
+pub use vm::resume;
+
+// Canonical value printing (the `print(...)` oracle), used by the parity harness
+pub use print::escape_string;
+pub use print::print_hog_string_output;
+pub use print::print_hog_value;
 
 // STL - again, we expose a lot, because we want to make it easy to extend this
-pub use stl::iql_stl;
+pub use stl::hog_stl;
 pub use stl::native_func;
 pub use stl::stl;
 pub use stl::stl_map;

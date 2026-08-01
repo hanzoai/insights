@@ -9,7 +9,7 @@ from django.db.models.functions.comparison import Coalesce
 from insights.schema import (
     AutocompleteCompletionItem,
     AutocompleteCompletionItemKind,
-    InsightsLanguage,
+    HogLanguage,
     InsightsQLAutocomplete,
     InsightsQLAutocompleteResponse,
 )
@@ -31,8 +31,12 @@ from insights.insightsql.database.models import (
     StringDatabaseField,
     StringJSONDatabaseField,
     Table,
+    UUIDDatabaseField,
     VirtualTable,
 )
+from insights.insightsql.database.schema.events import EventsGroupSubTable, EventsPersonSubTable, EventsTable
+from insights.insightsql.database.schema.groups import GroupsTable
+from insights.insightsql.database.schema.persons import PersonsTable
 from insights.insightsql.filters import replace_filters
 from insights.insightsql.functions.mapping import ALL_EXPOSED_FUNCTION_NAMES
 from insights.insightsql.parser import parse_expr, parse_program, parse_select, parse_string_template
@@ -43,16 +47,77 @@ from insights.insightsql.visitor import TraversingVisitor, clone_expr
 
 from insights.exceptions_capture import capture_exception
 from insights.insightsql_queries.query_runner import get_query_runner
-from insights.models.insight_variable import InsightVariable
-from insights.models.property_definition import PropertyDefinition
 from insights.models.team.team import Team
+from insights.models.user import User
+
+from products.event_definitions.backend.models.property_definition import PropertyDefinition
+from products.product_analytics.backend.models.insight_variable import InsightVariable
 
 from common.scriptvm.python.stl import STL
 from common.scriptvm.python.stl.bytecode import BYTECODE_STL
 
-ALL_INSIGHTS_FUNCTIONS = sorted(list(STL.keys()) + list(BYTECODE_STL.keys()))
-MATCH_ANY_CHARACTER = "$$_INSIGHTS_ANY_$$"
+ALL_FN_FUNCTIONS = sorted(list(STL.keys()) + list(BYTECODE_STL.keys()))
+MATCH_ANY_CHARACTER = "$$_POSTFN_ANY_$$"
 PROPERTY_DEFINITION_LIMIT = 220
+
+
+def _get_direct_connection_metadata(context: InsightsQLContext) -> Optional[dict]:
+    metadata = context.direct_postgres_connection_metadata
+    if metadata is None and context.database is not None:
+        metadata = getattr(context.database, "_direct_connection_metadata", None)
+
+    return metadata if isinstance(metadata, dict) else None
+
+
+def get_connection_supported_functions(context: InsightsQLContext) -> list[str]:
+    metadata = _get_direct_connection_metadata(context)
+    if metadata is None:
+        return []
+
+    available_functions = metadata.get("available_functions")
+    if not isinstance(available_functions, list):
+        return []
+
+    return [function_name for function_name in available_functions if isinstance(function_name, str)]
+
+
+def get_available_functions(language: str, context: InsightsQLContext) -> list[str]:
+    if language == HogLanguage.FN_QL or language == HogLanguage.FN_QL_EXPR:
+        return sorted(set(ALL_EXPOSED_FUNCTION_NAMES) | set(get_connection_supported_functions(context)))
+
+    return ALL_FN_FUNCTIONS
+
+
+def get_direct_table_function_names(context: InsightsQLContext) -> list[str]:
+    metadata = _get_direct_connection_metadata(context)
+    if metadata is None:
+        return []
+
+    available_table_functions = metadata.get("available_table_functions")
+    if not isinstance(available_table_functions, list):
+        return []
+
+    return sorted({name for name in available_table_functions if isinstance(name, str)})
+
+
+def append_function_suggestions(
+    suggestions: list[AutocompleteCompletionItem], language: str, context: InsightsQLContext, prefix: str = ""
+) -> None:
+    available_functions = get_available_functions(language, context)
+    if prefix:
+        normalized_prefix = prefix.lower()
+        available_functions = [
+            function_name
+            for function_name in available_functions
+            if function_name.lower().startswith(normalized_prefix)
+        ]
+
+    extend_responses(
+        available_functions,
+        suggestions,
+        AutocompleteCompletionItemKind.FUNCTION,
+        insert_text=lambda key: f"{key}()",
+    )
 
 
 class GetNodeAtPositionTraverser(TraversingVisitor):
@@ -128,6 +193,8 @@ def convert_field_or_table_to_type_string(
         return "Float"
     if isinstance(field_or_table, StringDatabaseField):
         return "String"
+    if isinstance(field_or_table, UUIDDatabaseField):
+        return "String"
     if isinstance(field_or_table, DateTimeDatabaseField):
         return "DateTime"
     if isinstance(field_or_table, DateDatabaseField):
@@ -178,8 +245,11 @@ def get_table(context: InsightsQLContext, join_expr: ast.JoinExpr, ctes: Optiona
                         constant_field = constant_type_to_database_field(field.type, name)
                         new_fields[name] = constant_field
                         continue
-                    elif isinstance(field, ast.FieldType):
-                        underlying_field_name = field.name
+                    # `field` is already narrowed to FieldAliasType, so this elif is
+                    # provably dead — `FieldAliasType` and `FieldType` are sibling Type
+                    # subclasses. Kept as a defensive runtime guard; suppress for mypy.
+                    elif isinstance(field, ast.FieldType):  # type: ignore[unreachable]
+                        underlying_field_name = field.name  # type: ignore[unreachable]
                     else:
                         underlying_field_name = name
                 elif isinstance(field, ast.FieldType):
@@ -304,16 +374,7 @@ def append_table_field_to_response(
         insert_text=lambda key: f"`{key}`" if any(n in key for n in INSIGHTSQL_CHARACTERS_TO_BE_WRAPPED) else key,
     )
 
-    if language == InsightsLanguage.INSIGHTS_QL or language == InsightsLanguage.INSIGHTS_QL_EXPR:
-        available_functions = ALL_EXPOSED_FUNCTION_NAMES
-    else:
-        available_functions = ALL_INSIGHTS_FUNCTIONS
-    extend_responses(
-        available_functions,
-        suggestions,
-        AutocompleteCompletionItemKind.FUNCTION,
-        insert_text=lambda key: f"{key}()",
-    )
+    append_function_suggestions(suggestions=suggestions, language=language, context=context)
 
 
 def extend_responses(
@@ -378,14 +439,17 @@ class VariableFinder(TraversingVisitor):
         super().visit_variable_declaration(node)
 
 
-def gather_iql_variables_in_scope(root_node, node) -> list[str]:
+def gather_hog_variables_in_scope(root_node, node) -> list[str]:
     finder = VariableFinder(node)
     finder.visit(root_node)
     return list(finder.node_vars)
 
 
 def get_insightsql_autocomplete(
-    query: InsightsQLAutocomplete, team: Team, database_arg: Optional[Database] = None
+    query: InsightsQLAutocomplete,
+    team: Team,
+    user: Optional[User] = None,
+    database_arg: Optional[Database] = None,
 ) -> InsightsQLAutocompleteResponse:
     response = InsightsQLAutocompleteResponse(suggestions=[], incomplete_list=False)
     timings = InsightsQLTimings()
@@ -393,16 +457,21 @@ def get_insightsql_autocomplete(
     if database_arg is not None:
         database = database_arg
     else:
-        database = Database.create_for(team=team, timings=timings)
+        database = Database.create_for(team=team, user=user, timings=timings)
 
-    context = InsightsQLContext(team_id=team.pk, team=team, database=database, timings=timings)
+    context = InsightsQLContext(team_id=team.pk, team=team, user=user, database=database, timings=timings)
     if query.sourceQuery:
         if query.sourceQuery.kind == "InsightsQLQuery" and (
             query.sourceQuery.query is None or query.sourceQuery.query == ""
         ):
             source_query = parse_select("select 1")
         else:
-            source_query = get_query_runner(query=query.sourceQuery, team=team).to_query()
+            try:
+                source_query = get_query_runner(query=query.sourceQuery, team=team).to_query()
+            except Exception:
+                # A malformed source query (e.g. an unquoted reserved keyword used as an
+                # identifier) must not break autocomplete — degrade gracefully instead.
+                source_query = parse_select("select 1")
     else:
         source_query = parse_select("select 1")
 
@@ -420,27 +489,27 @@ def get_insightsql_autocomplete(
             query_end = query.endPosition + length_to_add
             select_ast: Optional[ast.AST] = None
 
-            if query.language == InsightsLanguage.INSIGHTS_QL:
+            if query.language == HogLanguage.FN_QL:
                 with timings.measure("parse_select"):
                     select_ast = parse_select(query_to_try, timings=timings)
                     root_node: ast.AST = select_ast
-            elif query.language == InsightsLanguage.INSIGHTS_QL_EXPR:
+            elif query.language == HogLanguage.FN_QL_EXPR:
                 with timings.measure("parse_expr"):
                     root_node = parse_expr(query_to_try, timings=timings)
                     select_ast = cast(ast.SelectQuery, clone_expr(source_query, clear_locations=True))
                     select_ast.select = [root_node]
-            elif query.language == InsightsLanguage.INSIGHTS_TEMPLATE:
+            elif query.language == HogLanguage.FN_TEMPLATE:
                 with timings.measure("parse_template"):
                     root_node = parse_string_template(query_to_try, timings=timings)
-            elif query.language == InsightsLanguage.LIQUID:
+            elif query.language == HogLanguage.LIQUID:
                 with timings.measure("parse_liquid"):
-                    # Liquid templates are handled similarly to Insights templates for autocomplete
+                    # Liquid templates are handled similarly to Script templates for autocomplete
                     # We treat them as string templates but with Liquid syntax
                     root_node = parse_string_template(query_to_try, timings=timings)
-            elif query.language == InsightsLanguage.INSIGHTS_SCRIPT:
+            elif query.language == HogLanguage.HOG:
                 with timings.measure("parse_program"):
                     root_node = parse_program(query_to_try, timings=timings)
-            elif query.language == InsightsLanguage.INSIGHTS_JSON:
+            elif query.language == HogLanguage.FN_JSON:
                 query_to_try, query_start, query_end = extract_json_row(query_to_try, query_start, query_end)
                 if query_to_try == "":
                     break
@@ -450,12 +519,12 @@ def get_insightsql_autocomplete(
 
             with timings.measure("find_node"):
                 # to account for the magic F' symbol we append to change antlr's mode
-                extra = 2 if query.language == InsightsLanguage.INSIGHTS_TEMPLATE else 0
+                extra = 2 if query.language == HogLanguage.FN_TEMPLATE else 0
                 find_node = GetNodeAtPositionTraverser(root_node, query_start + extra, query_end + extra)
             node = find_node.node
             parent_node = find_node.parent_node
 
-            if InsightsLanguage.INSIGHTS_TEMPLATE and isinstance(node, ast.Constant):
+            if HogLanguage.FN_TEMPLATE and isinstance(node, ast.Constant):
                 # Do not show suggestions if not inside the {} part in a template string
                 continue
 
@@ -478,18 +547,18 @@ def get_insightsql_autocomplete(
                         if loop_globals != query.globals:
                             break
 
-            if query.language in (InsightsLanguage.INSIGHTS_SCRIPT, InsightsLanguage.INSIGHTS_TEMPLATE, InsightsLanguage.LIQUID):
-                # For Insights Script and Liquid, first add all local variables in scope
-                iql_vars = gather_iql_variables_in_scope(root_node, node)
+            if query.language in (HogLanguage.HOG, HogLanguage.FN_TEMPLATE, HogLanguage.LIQUID):
+                # For Script and Liquid, first add all local variables in scope
+                hog_vars = gather_hog_variables_in_scope(root_node, node)
                 extend_responses(
-                    keys=iql_vars,
+                    keys=hog_vars,
                     suggestions=response.suggestions,
                     kind=AutocompleteCompletionItemKind.VARIABLE,
                 )
 
-                if query.language != InsightsLanguage.LIQUID:
+                if query.language != HogLanguage.LIQUID:
                     extend_responses(
-                        ALL_INSIGHTS_FUNCTIONS,
+                        ALL_FN_FUNCTIONS,
                         response.suggestions,
                         AutocompleteCompletionItemKind.FUNCTION,
                         insert_text=lambda key: f"{key}()",
@@ -507,7 +576,8 @@ def get_insightsql_autocomplete(
             if query.filters:
                 try:
                     select_ast = cast(
-                        ast.SelectQuery, replace_filters(cast(ast.SelectQuery, select_ast), query.filters, team)
+                        ast.SelectQuery,
+                        replace_filters(cast(ast.SelectQuery, select_ast), query.filters, team, database=database),
                     )
                 except Exception:
                     pass
@@ -536,6 +606,14 @@ def get_insightsql_autocomplete(
                 with timings.measure("select_field"):
                     table = get_table(context, nearest_select.select_from, ctes)
                     if table is None:
+                        if len(node.chain) == 1:
+                            prefix = "" if str(node.chain[0]) == MATCH_ANY_CHARACTER else str(node.chain[0])
+                            append_function_suggestions(
+                                suggestions=response.suggestions,
+                                language=query.language,
+                                context=context,
+                                prefix=prefix,
+                            )
                         continue
 
                     chain_len = len(node.chain)
@@ -581,14 +659,18 @@ def get_insightsql_autocomplete(
                             field = last_table.fields[str(chain_part)]
 
                             if isinstance(field, StringJSONDatabaseField):
-                                if last_table.to_printed_insightsql() == "events":
+                                if isinstance(last_table, EventsPersonSubTable):
+                                    property_type = PropertyDefinition.Type.PERSON
+                                elif isinstance(last_table, EventsGroupSubTable):
+                                    property_type = PropertyDefinition.Type.GROUP
+                                elif isinstance(last_table, EventsTable):
                                     if field.name == "person_properties":
                                         property_type = PropertyDefinition.Type.PERSON
                                     else:
                                         property_type = PropertyDefinition.Type.EVENT
-                                elif last_table.to_printed_insightsql() == "persons":
+                                elif isinstance(last_table, PersonsTable):
                                     property_type = PropertyDefinition.Type.PERSON
-                                elif last_table.to_printed_insightsql() == "groups":
+                                elif isinstance(last_table, GroupsTable):
                                     property_type = PropertyDefinition.Type.GROUP
                                 else:
                                     property_type = None
@@ -659,8 +741,10 @@ def get_insightsql_autocomplete(
             elif isinstance(node, ast.Field) and isinstance(parent_node, ast.JoinExpr):
                 # Handle table names
                 with timings.measure("table_name"):
-                    table_names = database.get_all_table_names()
-                    insights_table_names = database.get_insights_table_names()
+                    table_names = [name for name in database.get_all_table_names() if database.has_table(name)]
+                    insights_table_names = [
+                        name for name in database.get_insights_table_names() if database.has_table(name)
+                    ]
 
                     if len(node.chain) == 1:
                         extend_responses(
@@ -669,6 +753,15 @@ def get_insightsql_autocomplete(
                             kind=AutocompleteCompletionItemKind.FOLDER,
                             details=["Table"] * len(table_names),
                         )
+                        table_function_names = get_direct_table_function_names(context)
+                        if table_function_names:
+                            extend_responses(
+                                keys=table_function_names,
+                                suggestions=response.suggestions,
+                                kind=AutocompleteCompletionItemKind.FUNCTION,
+                                insert_text=lambda key: f"{key}()",
+                                details=["Table function"] * len(table_function_names),
+                            )
                     elif node.chain[0] in insights_table_names:
                         pass
                     else:

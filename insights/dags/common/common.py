@@ -1,26 +1,13 @@
+from collections.abc import Callable
 from contextlib import suppress
-from enum import Enum
+from datetime import datetime, timedelta
+from functools import wraps
 from typing import Optional
 
 import dagster
 
 from insights.datastore import query_tagging
 from insights.datastore.query_tagging import DagsterTags
-
-
-class JobOwners(str, Enum):
-    TEAM_ANALYTICS_PLATFORM = "team-analytics-platform"
-    TEAM_BILLING = "team-billing"
-    TEAM_DATASTORE = "team-datastore"
-    TEAM_DATA_STACK = "team-data-stack"
-    TEAM_ERROR_TRACKING = "team-error-tracking"
-    TEAM_EXPERIMENTS = "team-experiments"
-    TEAM_GROWTH = "team-growth"
-    TEAM_INGESTION = "team-ingestion"
-    TEAM_LLM_ANALYTICS = "team-llm-analytics"
-    TEAM_INSIGHTS_AI = "team-insights-ai"
-    TEAM_REVENUE_ANALYTICS = "team-revenue-analytics"
-    TEAM_WEB_ANALYTICS = "team-web-analytics"
 
 
 def dagster_tags(
@@ -93,3 +80,40 @@ def check_for_concurrent_runs(
         return dagster.SkipReason(f"Skipping {job_name} run because another run of the same job is already active")
 
     return None
+
+
+def skip_if_already_running(fn: Callable) -> Callable:
+    """
+    Decorator that skips schedule execution if a previous run is still active.
+
+    Usage:
+        @dagster.schedule(cron_schedule="0 0 * * *", job=my_job, execution_timezone="UTC")
+        @skip_if_already_running
+        def my_schedule(context: dagster.ScheduleEvaluationContext):
+            return dagster.RunRequest()
+    """
+
+    @wraps(fn)
+    def wrapper(context: dagster.ScheduleEvaluationContext):
+        skip_reason = check_for_concurrent_runs(context, tags={})
+        if skip_reason:
+            return skip_reason
+        return fn(context)
+
+    return wrapper
+
+
+def chunk_ranges(start: datetime, end: datetime, chunk_days: int) -> list[tuple[datetime, datetime]]:
+    """Split [start, end) into <=chunk_days sub-windows, newest first.
+
+    Newest-first so recent data (which carries the shortest TTL and is requested
+    most) is refreshed before older history is backfilled.
+    """
+    chunks = []
+    cur_end = end
+    step = timedelta(days=max(chunk_days, 1))
+    while cur_end > start:
+        cur_start = max(start, cur_end - step)
+        chunks.append((cur_start, cur_end))
+        cur_end = cur_start
+    return chunks

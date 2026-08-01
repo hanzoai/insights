@@ -1,6 +1,6 @@
 # LLM Gateway
 
-A standalone microservice for proxying LLM requests to Anthropic, OpenAI, and Google Gemini APIs.
+A standalone microservice for proxying LLM requests to Anthropic, OpenAI, OpenRouter, and Fireworks AI APIs.
 
 ## Quick start
 
@@ -16,7 +16,7 @@ uv run uvicorn llm_gateway.main:app --reload
 
 ```bash
 curl -X POST http://localhost:8080/v1/chat/completions \
-  -H "Authorization: Bearer phx_your_personal_api_key" \
+  -H "Authorization: Bearer phx_dev_local_test_api_key_1234567890abcdef" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4.1-mini",
@@ -36,6 +36,30 @@ The gateway supports two authentication methods:
 
 **Required Scope**: `llm_gateway:read`
 
+### Local development key
+
+When running via phrocs, a personal API key with the `llm_gateway:read` scope is **automatically provisioned** on startup.
+The key is deterministic and survives database resets:
+
+```text
+phx_dev_local_test_api_key_1234567890abcdef
+```
+
+You can use this key directly to make requests to the gateway locally.
+It is also available as `settings.DEV_API_KEY` in Django.
+
+In local dev (`DEBUG=True`), the gateway client defaults to `http://localhost:3308` and this key,
+so `get_llm_client(product=..., team_id=...)` works out of the box without setting any environment variables.
+
+You can also provision the key manually:
+
+```bash
+python manage.py setup_local_api_key --add-scopes llm_gateway:read
+```
+
+`--add-scopes` merges into existing scopes without removing any.
+`--scopes` replaces all scopes on the key.
+
 ## User attribution
 
 When using an OAuth Access Token, the user who's token it is is the user used for analytics and rate limiting.
@@ -48,7 +72,7 @@ When calling the gateway on behalf of end-users with a Personal API Key, **alway
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://gateway.insights.hanzo.ai/v1",
+    base_url="https://gateway.us.hanzo.ai/v1",
     api_key="phx_your_api_key",
 )
 
@@ -65,7 +89,7 @@ response = client.chat.completions.create(
 import OpenAI from 'openai'
 
 const client = new OpenAI({
-  baseURL: 'https://gateway.insights.hanzo.ai/v1',
+  baseURL: 'https://gateway.us.hanzo.ai/v1',
   apiKey: 'phx_your_api_key',
 })
 
@@ -82,7 +106,7 @@ const response = await client.chat.completions.create({
 import anthropic
 
 client = anthropic.Anthropic(
-    base_url="https://gateway.insights.hanzo.ai/v1",
+    base_url="https://gateway.us.hanzo.ai/v1",
     api_key="phx_your_api_key",
 )
 
@@ -94,6 +118,14 @@ response = client.messages.create(
 )
 ```
 
+## Feature flags
+
+The gateway supports feature flags via the `X-INSIGHTS-FLAG-*` headers. Feature flags are sent as `X-INSIGHTS-FLAG-<FLAG_KEY>: <VALUE>` headers and appear on Insights events as `$feature/<FLAG_KEY>: <VALUE>`.
+
+## Custom event properties
+
+The gateway supports capturing additional event properties to Insights via the `X-INSIGHTS-PROPERTY-*` headers. Event properties are sent as `X-INSIGHTS-PROPERTY-<PROPERTY_KEY>: <VALUE>` headers and appear on Insights events as `<PROPERTY_KEY>: <VALUE>`.
+
 ## API endpoints
 
 ### OpenAI-compatible
@@ -103,7 +135,8 @@ response = client.messages.create(
 
 ### Anthropic-compatible
 
-- `POST /v1/messages` - Anthropic Messages API
+- `POST /v1/messages` - Anthropic Messages API (supports Bedrock via `X-Insights-Provider`)
+- `POST /v1/messages/count_tokens` - Anthropic token counting API (supports Bedrock via `X-Insights-Provider`)
 
 ### Product-scoped endpoints
 
@@ -112,15 +145,156 @@ For product-specific rate limits and tracking:
 - `POST /{product}/v1/chat/completions`
 - `POST /{product}/v1/messages`
 
-Products: `llm_gateway` (default), `twig`, `wizard`, `django`
+The product name is extracted from the first path segment and recorded as `ai_product` on `$ai_generation` events. See [Products](#products) for the full list and how to add one.
 
 ## Supported models
 
-All OpenAI, Anthropic and Gemini chat models are supported.
+All OpenAI, Anthropic, OpenRouter, and Fireworks AI chat models are supported.
+OpenRouter and Fireworks models use the OpenAI-compatible `/v1/chat/completions` endpoint with model prefixes (`openrouter/` and `fireworks_ai/`).
+The `/v1/models` endpoint returns provider-specific model IDs from LiteLLM's model map.
+
+## OpenAI organization
+
+Set `LLM_GATEWAY_OPENAI_ORGANIZATION` to attribute all outbound OpenAI traffic
+to a specific OpenAI organization (e.g. a HIPAA-covered organization with
+Zero Data Retention enabled). The gateway exports this as `OPENAI_ORG_ID` at
+startup so the OpenAI SDK (via litellm) forwards it on every request.
+
+When unset, no organization is sent and OpenAI infers the org from the API key.
+
+The `organization` field is also in `FORBIDDEN_REQUEST_PARAMS`, so caller-supplied
+values are stripped — only the gateway-configured organization reaches OpenAI.
+
+## Bedrock provider
+
+AWS Bedrock is available as an alternative provider for the Anthropic endpoints.
+Instead of dedicated routes, set the `X-Insights-Provider: bedrock` header:
+
+```http
+X-Insights-Provider: bedrock
+```
+
+Anthropic model names (e.g. `claude-sonnet-4-6`) are automatically mapped to Bedrock model IDs.
+The gateway chooses the US or EU Bedrock profile based on `LLM_GATEWAY_BEDROCK_REGION_NAME` or the ambient AWS region.
+You can also pass a Bedrock model ID directly (e.g. `us.anthropic.claude-sonnet-4-6`).
+
+### Bedrock fallback
+
+Set `X-Insights-Use-Bedrock-Fallback: true` to automatically retry via Bedrock when the Anthropic provider returns a 5xx error:
+
+```http
+X-Insights-Use-Bedrock-Fallback: true
+```
+
+The fallback only triggers on server errors (5xx), not client errors (4xx).
+If both Anthropic and Bedrock fail, the original Anthropic error is returned.
+
+### Configuration
+
+To use Bedrock (either via `X-Insights-Provider` or `X-Insights-Use-Bedrock-Fallback`), configure one of:
+
+- `LLM_GATEWAY_BEDROCK_REGION_NAME`
+- `AWS_REGION`
+- `AWS_DEFAULT_REGION`
+
+Credentials are intentionally not loaded through `LLM_GATEWAY_*` settings in the gateway.
+Use your runtime's standard AWS authentication mechanism (e.g. IAM role, IRSA, ECS task role, or pre-existing `AWS_*` env vars provisioned by deployment).
+
+## GLM backends
+
+GLM is served under the public model id `@cf/zai-org/glm-5.2` on every surface (Anthropic Messages, chat/completions, Responses).
+Which backend serves a request is a gateway-internal decision made in `src/llm_gateway/glm_routing.py`:
+
+- **Cloudflare Workers AI** (the incumbent) — configure `LLM_GATEWAY_CLOUDFLARE_API_KEY` and `LLM_GATEWAY_CLOUDFLARE_ACCOUNT_ID`.
+- **Modal** (an OpenAI-compatible vLLM endpoint) — configure `LLM_GATEWAY_MODAL_API_BASE`, `LLM_GATEWAY_MODAL_KEY`, and `LLM_GATEWAY_MODAL_SECRET` (a [Modal proxy-token](https://modal.com/docs/guide/endpoints) pair, sent as `Modal-Key`/`Modal-Secret` headers).
+- **Baseten** (an OpenAI-compatible endpoint) - configure `LLM_GATEWAY_BASETEN_API_BASE` and `LLM_GATEWAY_BASETEN_API_KEY`.
+
+The `tasks-glm-baseten-inference` feature flag routes matching users to Baseten when its API key is configured. The flag is evaluated server-side, and caller-forwarded flag headers cannot select Baseten. Cloudflare or Modal must remain configured as the fallback for users who do not match the flag or when evaluation is unavailable.
+
+Two knobs opt traffic into Modal (OR semantics, both default off):
+
+- The `tasks-glm-modal-inference` feature flag, evaluated server-side against Insights (`LLM_GATEWAY_POSTFN_PROJECT_TOKEN`/`_HOST`) with a short per-user cache and a brief global backoff when evaluation fails. Caller-forwarded flag headers are not trusted for routing.
+- `LLM_GATEWAY_GLM_MODAL_TRAFFIC_FRACTION` (0..1, default 0), bucketed deterministically by user id; `LLM_GATEWAY_GLM_MODAL_PRODUCT_TRAFFIC_FRACTIONS` (e.g. `{"insights_code": 0.25}`) overrides it per product.
+
+If Cloudflare credentials are absent, Modal serves all GLM traffic regardless of the knobs.
+
+There are no cross-backend retries: a Modal-side failure surfaces to the caller unchanged (each backend's health stays independently visible under its `provider` metric label), and rollback is turning the flag/fraction back down.
+Smoke scripts: `scripts/glm_cf_smoke.py` (Cloudflare) and `scripts/glm_modal_smoke.py` (Modal).
+
+## Products
+
+Every request is scoped to a **product**. The product determines which models and auth methods are allowed, and is recorded as `ai_product` on `$ai_generation` events so you can filter costs per product.
+
+### Registered products
+
+Defined in `src/llm_gateway/products/config.py`:
+
+OAuth access is permitted only for products with an explicit `allowed_application_ids` allowlist. All other products are API-key-only by default.
+
+| Product              | Auth            | Models                     | Notes                           |
+| -------------------- | --------------- | -------------------------- | ------------------------------- |
+| `llm_gateway`        | API key only    | All                        | Default when no product in path |
+| `ci`                 | API key only    | All                        | CI / e2e test runs              |
+| `insights_code`       | OAuth only      | Restricted set             | Desktop coding agent            |
+| `background_agents`  | OAuth only      | Restricted set             | Cloud background agents         |
+| `onboarding`         | OAuth only      | claude-sonnet-5            | Unbilled setup wizard cloud run |
+| `wizard`             | API key + OAuth | All                        | Max AI assistant                |
+| `django`             | API key only    | All                        | Server-side Django calls        |
+| `growth`             | API key only    | All                        | Growth team                     |
+| `llma_translation`   | API key only    | gpt-4.1-mini               | AI observability translation    |
+| `llma_summarization` | API key only    | gpt-4.1-nano, gpt-4.1-mini | AI observability summarization  |
+| `llma_eval_summary`  | API key only    | gpt-5-mini                 | AI observability eval summary   |
+
+Aliases: `twig`, `array` resolve to `insights_code`; `slack-twig` resolves to `slack-insights-code`.
+
+### Adding a new product
+
+1. **Add to `PRODUCTS`** in `src/llm_gateway/products/config.py`:
+
+   ```python
+   "my_product": ProductConfig(
+       allowed_application_ids=frozenset({...}),  # empty/None = no OAuth apps allowed; list IDs to permit OAuth
+       allowed_models=None,                       # None = all models, or frozenset({...}) to restrict
+       allow_api_keys=True,                       # False = OAuth only
+   ),
+   ```
+
+2. **Add to `Product` type** in `insights/llm/gateway_client.py` (if calling from Django).
+
+3. **Route requests** to `/{my_product}/v1/...` — the gateway extracts the product from the URL path.
+
+That's it. Rate limiting defaults apply automatically (see below).
 
 ## Rate limiting
 
-Cost-based rate limiting is applied per user and per product, and you can specify custom rate limits for your product in it's config.
+Cost-based rate limiting is applied at two levels: **product-level** (shared across all users) and **user-level** (per end-user within a product).
+
+### Product-level limits
+
+A global cost cap for the entire product. Configured in `DEFAULT_PRODUCT_COST_LIMITS` in `src/llm_gateway/config.py`:
+
+```python
+"my_product": ProductCostLimit(limit_usd=1000.0, window_seconds=3600)  # $1000/hour
+```
+
+Products without an explicit entry fall back to **$1000 per 24 hours**.
+
+### User-level limits
+
+Per-user cost caps using a burst + sustained pattern. Configured in `DEFAULT_USER_COST_LIMITS` in `src/llm_gateway/config.py`:
+
+```python
+"my_product": UserCostLimit(
+    burst_limit_usd=100.0,        # Short-term cap
+    burst_window_seconds=86400,   # 24 hours
+    sustained_limit_usd=1000.0,   # Long-term cap
+    sustained_window_seconds=2592000,  # 30 days
+)
+```
+
+Products without an explicit entry fall back to the **default: $100/24h burst, $1000/30d sustained**.
+
+User-level limits only apply when an `end_user_id` is present (OAuth token holder, or `user` param in the request body).
 
 ## Error handling
 
@@ -151,10 +325,19 @@ For calling from Insights Django:
 ```python
 from insights.llm.gateway_client import get_llm_client
 
-client = get_llm_client()
+# Pass `team_id` to attribute the captured `$ai_generation` event to a specific
+# customer team: it sets the `x-insights-property-team_id` header on every request so
+# the usage reporter can break cost down per customer (the gateway PAK owns a single
+# internal team). Omit it to attribute to the key owner's team (the default).
+client = get_llm_client(product="my_product", team_id=team.id)
 response = client.chat.completions.create(
-    model="claude-opus-4-5",  # or any supported OpenAI, Anthropic or Gemini model
+    model="claude-opus-4-5",  # or any supported OpenAI, Anthropic, OpenRouter, or Fireworks AI model
     messages=[...],
     user=request.user.distinct_id,  # user for analytics and rate limiting
 )
 ```
+
+`ai_product` and `$ai_billable` are derived from the product config (`products/config.py`):
+the route sets `ai_product` from the `product` arg, and `$ai_billable` from whether that
+product has a `credit_bucket`. Set `credit_bucket` on the product config to bill its
+generations into that bucket; leave it `None` to keep them unbilled.

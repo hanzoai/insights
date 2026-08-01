@@ -6,8 +6,7 @@ import { Button } from 'lib/elements/Button'
 import { Modal } from 'lib/elements/Modal'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Table, TableColumns } from 'lib/elements/Table'
-import { humanFriendlyDetailedTime } from 'lib/utils'
-import { PersonDisplay } from 'scenes/persons/PersonDisplay'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 import { urls } from 'scenes/urls'
 
 export function HeatmapEventsPanel({ context, exportToken }: HeatmapDataLogicProps): JSX.Element | null {
@@ -43,7 +42,9 @@ export function HeatmapEventsPanel({ context, exportToken }: HeatmapDataLogicPro
             title: 'User',
             dataIndex: 'distinct_id',
             sorter: (a, b) => a.distinct_id.localeCompare(b.distinct_id),
-            render: (_, event) => <PersonDisplay person={{ distinct_id: event.distinct_id }} noPopover />,
+            // Not PersonDisplay: this panel ships in the toolbar bundle, and PersonDisplay drags in
+            // the person preview/notebook graph. With only a distinct_id it would render this same span.
+            render: (_, event) => <span className="ph-no-capture truncate">{event.distinct_id}</span>,
         },
         {
             title: '',

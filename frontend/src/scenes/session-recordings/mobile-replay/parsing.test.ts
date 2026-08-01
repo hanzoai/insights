@@ -1,10 +1,8 @@
-import {
-    parseEncodedSnapshots,
-    processAllSnapshots,
-} from 'scenes/session-recordings/player/snapshot-processing/process-all-snapshots'
-import { keyForSource } from 'scenes/session-recordings/player/snapshot-processing/source-key'
+import { keyForSource, processAllSnapshots } from '@hanzo/replay-shared'
 
-import { encodedWebSnapshotData } from './__mocks__/encoded-snapshot-data'
+import { parseEncodedSnapshots } from 'scenes/session-recordings/player/snapshot-processing/process-all-snapshots'
+
+import { encodedWebSnapshotData } from './__mocks__/encoded-mobile-snapshot-data'
 
 describe('snapshot parsing', () => {
     const sessionId = '12345'

@@ -1,7 +1,7 @@
 import itertools
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
-from typing import Optional
+from typing import Any, Optional, cast
 
 from django.db.models import Q
 
@@ -12,18 +12,26 @@ from celery.canvas import chain
 from prometheus_client import Counter, Gauge
 
 from insights.insightsql.constants import LimitContext
+from insights.insightsql.errors import TableAccessDeniedError
 
 from insights.api.services.query import process_query_dict
 from insights.caching.utils import largest_teams
-from insights.datastore.query_tagging import Feature, tag_queries
-from insights.errors import CHQueryErrorTooManySimultaneousQueries
+from insights.datastore.client.limit import ConcurrencyLimitExceeded
+from insights.datastore.query_tagging import Feature, get_team_query_tags, tag_queries
+from insights.errors import CH_TRANSIENT_ERRORS
+from insights.event_usage import EventSource
 from insights.exceptions_capture import capture_exception
-from insights.insightsql_queries.query_cache_base import QueryCacheManagerBase
 from insights.insightsql_queries.query_runner import ExecutionMode
-from insights.models import DashboardTile, Insight, Team
+from insights.models import Team
 from insights.ph_client import ph_scoped_capture
+from insights.query_cache.freshness_index import clean_up_stale_insights, get_stale_insights
+from insights.query_creator_access import creator_access_revoked, report_creator_access_revoked
 from insights.schema_migrations.upgrade_manager import upgrade_query
+from insights.scoping_audit import skip_team_scope_audit
 from insights.tasks.utils import CeleryQueue
+
+from products.dashboards.backend.models.dashboard_tile import DashboardTile
+from products.product_analytics.backend.models.insight import Insight
 
 logger = structlog.get_logger(__name__)
 
@@ -31,6 +39,7 @@ STALE_INSIGHTS_GAUGE = Gauge(
     "insights_cache_warming_stale_insights_gauge",
     "Number of stale insights present",
     ["team_id"],
+    multiprocess_mode="max",
 )
 PRIORITY_INSIGHTS_COUNTER = Counter(
     "insights_cache_warming_priority_insights",
@@ -40,6 +49,10 @@ PRIORITY_INSIGHTS_COUNTER = Counter(
 
 LAST_VIEWED_THRESHOLD = timedelta(days=7)
 SHARED_INSIGHTS_LAST_VIEWED_THRESHOLD = timedelta(days=3)
+
+# Datastore capacity/concurrency errors that should retry with backoff rather than fail the task.
+# DatastoreAtCapacity is included via CH_TRANSIENT_ERRORS (it's what codes 202/439 surface as).
+RETRIABLE_WARMING_ERRORS = (*CH_TRANSIENT_ERRORS, ConcurrencyLimitExceeded)
 
 
 def teams_enabled_for_cache_warming() -> list[int]:
@@ -75,7 +88,7 @@ def teams_enabled_for_cache_warming() -> list[int]:
     return enabled_team_ids
 
 
-def insights_to_keep_fresh(team: Team, shared_only: bool = False) -> Generator[tuple[int, Optional[int]], None, None]:
+def insights_to_keep_fresh(team: Team, shared_only: bool = False) -> Generator[tuple[int, Optional[int]]]:
     """
     This is the place to decide which insights should be kept warm for the provided team.
     The reasoning is that this will be a yes or no decision. If we need to keep it warm, we try our best
@@ -87,10 +100,10 @@ def insights_to_keep_fresh(team: Team, shared_only: bool = False) -> Generator[t
         LAST_VIEWED_THRESHOLD if not shared_only else SHARED_INSIGHTS_LAST_VIEWED_THRESHOLD
     )
 
-    QueryCacheManagerBase.clean_up_stale_insights(team_id=team.pk, threshold=threshold)
+    clean_up_stale_insights(team_id=team.pk, threshold=threshold)
 
     # get all insights currently in the cache for the team
-    combos = QueryCacheManagerBase.get_stale_insights(team_id=team.pk, limit=500)
+    combos = get_stale_insights(team_id=team.pk, limit=500)
 
     STALE_INSIGHTS_GAUGE.labels(team_id=team.pk).set(len(combos))
 
@@ -130,6 +143,7 @@ def insights_to_keep_fresh(team: Team, shared_only: bool = False) -> Generator[t
 
 
 @shared_task(ignore_result=True, expires=60 * 15)
+@skip_team_scope_audit
 def schedule_warming_for_teams_task():
     """
     Runs every hour and schedule warming for all insights (picked from insights_to_cache)
@@ -139,6 +153,13 @@ def schedule_warming_for_teams_task():
     so even though we might pick all insights for a team to recalculate,
     only the stale ones (determined by `staleness_threshold_map`) get recalculated.
     """
+    from insights.datastore.client.execute import KillSwitchLevel, get_kill_switch_level
+
+    kill_switch_level = get_kill_switch_level()
+    if kill_switch_level != KillSwitchLevel.OFF:
+        logger.info("kill_switch_on_skipping_cache_warming", level=kill_switch_level)
+        return
+
     team_ids = largest_teams(limit=10)
     threshold = datetime.now(UTC) - LAST_VIEWED_THRESHOLD
 
@@ -191,7 +212,7 @@ def schedule_warming_for_teams_task():
     queue=CeleryQueue.ANALYTICS_LIMITED.value,  # Important! Prevents Datastore from being overwhelmed
     ignore_result=True,
     expires=60 * 60,
-    autoretry_for=(CHQueryErrorTooManySimultaneousQueries,),
+    autoretry_for=RETRIABLE_WARMING_ERRORS,
     retry_backoff=2,
     retry_backoff_max=3,
     max_retries=3,
@@ -199,14 +220,19 @@ def schedule_warming_for_teams_task():
 def warm_insight_cache_task(insight_id: int, dashboard_id: Optional[int]):
     try:
         # nosemgrep: idor-lookup-without-team (Celery task, ID from internal scheduling)
-        insight = Insight.objects.get(pk=insight_id)
+        insight = Insight.objects.select_related("team__organization").get(pk=insight_id)
     except Insight.DoesNotExist:
         logger.info(f"Warming insight cache failed 404 insight not found: {insight_id}")
         return
 
     dashboard = None
 
-    tag_queries(team_id=insight.team_id, insight_id=insight.pk, trigger="warmingV2", feature=Feature.CACHE_WARMUP)
+    tag_queries(
+        **get_team_query_tags(insight.team),
+        insight_id=insight.pk,
+        trigger="warmingV2",
+        feature=Feature.CACHE_WARMUP,
+    )
     if dashboard_id:
         tag_queries(dashboard_id=dashboard_id)
         dashboard = insight.dashboards.filter(pk=dashboard_id).first()
@@ -217,15 +243,17 @@ def warm_insight_cache_task(insight_id: int, dashboard_id: Optional[int]):
         try:
             results = process_query_dict(
                 insight.team,
-                insight.query,
+                cast(dict[str, Any], insight.query),
                 dashboard_filters_json=dashboard.filters if dashboard is not None else None,
                 # We need an execution mode with recent cache:
                 # - in case someone refreshed after this task was triggered
                 # - if insight + dashboard combinations have the same cache key, we prevent needless recalculations
                 limit_context=LimitContext.QUERY_ASYNC,
                 execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
+                user=insight.created_by,
                 insight_id=insight_id,
                 dashboard_id=dashboard_id,
+                analytics_props={"source": EventSource.CACHE_WARMING},
             )
 
             is_cached = getattr(results, "is_cached", False)
@@ -250,7 +278,18 @@ def warm_insight_cache_task(insight_id: int, dashboard_id: Optional[int]):
                     },
                 )
 
-        except CHQueryErrorTooManySimultaneousQueries:
+        except RETRIABLE_WARMING_ERRORS:
             raise
         except Exception as e:
-            capture_exception(e)
+            # A revoked creator's access-denied error is a known limitation - report it as an event
+            # rather than surfacing it in error tracking.
+            if isinstance(e, TableAccessDeniedError) and creator_access_revoked(insight.created_by, insight.team):
+                report_creator_access_revoked(
+                    user=insight.created_by,
+                    team=insight.team,
+                    source="cache_warming",
+                    error=e,
+                    properties={"insight_id": insight.pk, "dashboard_id": dashboard_id},
+                )
+            else:
+                capture_exception(e)

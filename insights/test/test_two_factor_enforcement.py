@@ -16,8 +16,9 @@ from rest_framework.test import APIClient, APIRequestFactory
 from insights.auth import (
     PersonalAPIKeyAuthentication,
     ProjectSecretAPIKeyAuthentication,
+    ProjectSecretAPIKeyUser,
     SessionAuthentication,
-    TemporaryTokenAuthentication,
+    TeamSecretTokenAuthentication,
 )
 from insights.helpers.two_factor_session import (
     TWO_FACTOR_ENFORCEMENT_FROM_DATE,
@@ -26,7 +27,9 @@ from insights.helpers.two_factor_session import (
     is_two_factor_verified_in_session,
     set_two_factor_verified_in_session,
 )
-from insights.models import Organization, User
+from insights.models import Organization, Team, User
+from insights.models.project_secret_api_key import ProjectSecretAPIKey
+from insights.models.utils import hash_key_value
 
 
 class TestTwoFactorSessionUtils(TestCase):
@@ -228,7 +231,7 @@ class TestSessionAuthenticationTwoFactor(TestCase):
             "/api/users/@me/two_factor_validate/",
             "/logout/",
             "/api/logout/",
-            "/healthz",
+            "/_health/",
             "/static/css/app.css",
             "/uploaded_media/file.png",
         ]
@@ -443,19 +446,30 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         result = auth.authenticate(request)
         self.assertIsNone(result)
 
-    def test_temporary_token_authentication_bypasses_two_factor(self):
-        auth = TemporaryTokenAuthentication()
+    def test_team_secret_token_authentication_bypasses_two_factor(self):
+        auth = TeamSecretTokenAuthentication()
         request = self.factory.get("/api/users/@me/")
 
         result = auth.authenticate(request)
         self.assertIsNone(result)
 
     def test_project_secret_api_key_authentication_bypasses_two_factor(self):
+        org = Organization.objects.create(name="2fa-psak", enforce_2fa=True)
+        team = Team.objects.create(organization=org, name="t")
+        token = "phs_" + "p" * 35
+        ProjectSecretAPIKey.objects.create(
+            team=team, label="2fa", secure_value=hash_key_value(token), scopes=["endpoint:read"]
+        )
+
         auth = ProjectSecretAPIKeyAuthentication()
-        request = self.factory.get("/api/users/@me/")
+        request = self.factory.get(
+            f"/api/projects/{team.id}/endpoints/my_endpoint/run/", HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
 
         result = auth.authenticate(request)
-        self.assertIsNone(result)
+        assert result is not None
+        user, _ = result
+        self.assertIsInstance(user, ProjectSecretAPIKeyUser)
 
     def test_sso_authentication_backend_bypasses_two_factor(self):
         """Integration test: SSO authentication backends should bypass 2FA enforcement"""

@@ -25,7 +25,7 @@ class FormulaAST:
             map = {}
             for index, value in enumerate(consts):
                 map[chr(ord("`") + index + 1)] = value
-            result = self._evaluate(node.lower(), map)
+            result = self._evaluate(node.strip().lower(), map)
             res.append(result)
         return res
 
@@ -75,8 +75,10 @@ class FormulaAST:
                 return operand
             raise ValueError(f"Operator {unary_op.__class__.__name__} not supported")
 
-        elif isinstance(node, ast.Num):
-            return node.n
+        elif (
+            isinstance(node, ast.Constant) and isinstance(node.value, int | float) and not isinstance(node.value, bool)
+        ):
+            return node.value
 
         elif isinstance(node, ast.Name):
             try:

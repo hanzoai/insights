@@ -1,6 +1,7 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
+import { SDK_DEFAULTS_DATE } from './_snippets/sdkDefaults'
 
 export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, CalloutBox, dedent } = ctx
@@ -51,7 +52,7 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add your Insights API key and host to your `nuxt.config.js` file:</Markdown>
+                    <Markdown>Add your Insights project token and host to your `nuxt.config.js` file:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -61,9 +62,9 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
                                     export default defineNuxtConfig({
                                       runtimeConfig: {
                                         public: {
-                                          insightsPublicKey: '<ph_project_api_key>',
+                                          insightsPublicKey: '<ph_project_token>',
                                           insightsHost: '<ph_client_api_host>',
-                                          insightsDefaults: '2026-01-30'
+                                          insightsDefaults: '${SDK_DEFAULTS_DATE}'
                                         }
                                       }
                                     })
@@ -89,7 +90,7 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 file: 'plugins/insights.client.js',
                                 code: dedent`
                                     import { defineNuxtPlugin } from '#app'
-                                    import insights from '@hanzo/insights'
+                                    import insights from 'insights-js'
 
                                     export default defineNuxtPlugin(nuxtApp => {
                                       const runtimeConfig = useRuntimeConfig();

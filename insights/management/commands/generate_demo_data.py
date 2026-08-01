@@ -8,24 +8,37 @@ from time import monotonic
 from typing import Optional
 from urllib.parse import quote
 
+from django.conf import settings
 from django.core import exceptions
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import OperationalError
 
 from insights.api.person import PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES
-from insights.demo.matrix import Matrix, MatrixManager
-from insights.demo.products.hedgebox import HedgeboxMatrix
-from insights.demo.products.spikegpt import SpikeGPTMatrix
+from insights.health import get_pending_postgres_migrations
 from insights.management.commands.sync_feature_flags_from_api import sync_feature_flags_from_api
 from insights.models import User
 from insights.models.file_system.user_product_list import UserProductList
-from insights.models.group_type_mapping import GroupTypeMapping
 from insights.models.team.setup_tasks import SetupTaskId
 from insights.models.team.team import Team
 from insights.products import Products
 from insights.taxonomy.taxonomy import PERSON_PROPERTIES_ADAPTED_FROM_EVENT
 
+from products.demo.backend.facade.api import (
+    HedgeboxMatrix,
+    Matrix,
+    MatrixManager,
+    SpikeGPTMatrix,
+    get_group_type_mapping_count,
+    seed_dev_dashboard_templates,
+)
+
+from ee.datastore.materialized_columns.analyze import materialize_properties_task
 
 logging.getLogger("kafka").setLevel(logging.ERROR)  # Hide kafka-python's logspam
+
+# Deterministic project token for the locally seeded demo team, so SDKs/tools can target it without
+# looking up the random token. Only used for the freshly created demo account (not existing projects).
+DEMO_PROJECT_API_TOKEN = "phc_localinsightsprojecttoken"
 
 
 class Command(BaseCommand):
@@ -58,10 +71,15 @@ class Command(BaseCommand):
         )
         parser.add_argument("--dry-run", action="store_true", help="Don't save simulation results")
         parser.add_argument(
+            "--skip-migration-check",
+            action="store_true",
+            help="Skip the pre-flight check for unapplied Postgres migrations",
+        )
+        parser.add_argument(
             "--team-id",
             type=int,
             default=None,
-            help="If specified, an existing project with this ID will be used, and no new user will be created. If the ID is 0, data will be generated for the primary project (but insights etc. won't be created)",
+            help="If specified, an existing project with this ID will be used, and no new user will be created. If the ID is 0, data will be generated for the master project (but insights etc. won't be created)",
         )
         parser.add_argument(
             "--email",
@@ -114,6 +132,20 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         timer = monotonic()
+
+        if not options.get("skip_migration_check"):
+            try:
+                pending = get_pending_postgres_migrations()
+            except OperationalError:
+                pending = []  # DB unreachable — let the normal flow surface the connection error
+            if pending:
+                raise CommandError(
+                    f"{len(pending)} unapplied Postgres migration(s) (e.g. {pending[0]}). "
+                    "The dev database schema is behind the code, so demo data generation would fail. "
+                    "Run `python manage.py migrate` (or `insightscli migrations:sync`) first, "
+                    "or pass --skip-migration-check to bypass."
+                )
+
         seed = options.get("seed") or secrets.token_hex(16)
         now = options.get("now") or dt.datetime.now(dt.UTC)
         existing_team_id = options.get("team_id")
@@ -138,9 +170,7 @@ class Command(BaseCommand):
             days_past=options["days_past"],
             days_future=options["days_future"],
             n_clusters=options["n_clusters"],
-            group_type_index_offset=(
-                GroupTypeMapping.objects.filter(project_id=existing_team.project_id).count() if existing_team else 0
-            ),
+            group_type_index_offset=(get_group_type_mapping_count(existing_team.project_id) if existing_team else 0),
         )
         print("Running simulation...")
         matrix.simulate()
@@ -160,12 +190,18 @@ class Command(BaseCommand):
             try:
                 if existing_team_id is not None:
                     if existing_team_id == 0:
-                        matrix_manager.reset_primary()
+                        matrix_manager.reset_master()
                     else:
                         team = Team.objects.get(pk=existing_team_id)
                         user = team.organization.members.first()
+                        if user is None:
+                            raise ValueError(f"Project {existing_team_id} has no organization members")
                         matrix_manager.run_on_team(team, user)
                 else:
+                    # Hand the demo team a deterministic token in local dev only. In tests (e.g. Playwright
+                    # setup, which seeds many workspaces) and shared/cloud environments, keep random tokens
+                    # so runs don't fight over the unique token or mutate unrelated projects.
+                    demo_api_token = DEMO_PROJECT_API_TOKEN if (settings.DEBUG and not settings.TEST) else None
                     _organization, team, user = matrix_manager.ensure_account_and_save(
                         email,
                         "Employee 427",
@@ -173,6 +209,7 @@ class Command(BaseCommand):
                         is_staff=bool(options.get("staff")),
                         password=password,
                         email_collision_handling="disambiguate",
+                        api_token=demo_api_token,
                     )
 
                     # Optionally generate demo issues for issue tracker if extension is available
@@ -201,7 +238,7 @@ class Command(BaseCommand):
 
             if not options.get("skip_user_product_list"):
                 # Create UserProductList entries for all products
-                # Skip if existing_team_id == 0 (primary project reset)
+                # Skip if existing_team_id == 0 (master project reset)
                 if existing_team_id != 0 and team and user:
                     print("Creating UserProductList entries for all products...")
                     self.create_default_user_product_list(team, user)
@@ -212,18 +249,26 @@ class Command(BaseCommand):
                 print("Marking all quick start tasks as completed...")
                 self.complete_all_quick_start_tasks(team)
 
+            print("Seeding extra global dashboard templates (dev)...")
+            created_templates = seed_dev_dashboard_templates()
+            if created_templates:
+                print(f"Created dashboard templates: {', '.join(created_templates)}")
+            else:
+                print("Dashboard template seeds already present.")
+
             print(
                 "\nMaster project reset!\n"
                 if existing_team_id == 0
                 else (
-                    f"\nDemo data ready for project {team.name}!\n"
+                    f"\nDemo data ready for project {(team.name if team is not None else 'unknown project')}!\n"
                     if existing_team_id is not None
-                    else f"\nDemo data ready for {user.email}!\n\n"
+                    else f"\nDemo data ready for {(user.email if user is not None else 'unknown user')}!\n\n"
                     "Pre-fill the login form with this link:\n"
-                    f"http://localhost:8010/login?email={quote(user.email)}\n"
+                    f"http://localhost:8010/login?email={quote(user.email if user is not None else '')}\n"
                     f"The password is:\n{password}\n\n"
+                    f"The project API token is:\n{team.api_token if team is not None else 'unknown'}\n\n"
                     "If running demo mode (DEMO=1), log in instantly with this link:\n"
-                    f"http://localhost:8010/signup?email={quote(user.email)}\n"
+                    f"http://localhost:8010/signup?email={quote(user.email if user is not None else '')}\n"
                 )
             )
 

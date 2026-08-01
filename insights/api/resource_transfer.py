@@ -3,13 +3,14 @@ from typing import Any, cast
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
-from loginas.utils import is_impersonated_session
 from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from insights.api.documentation import _FallbackSerializer
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import action
+from insights.helpers.impersonation import is_impersonated
 from insights.models import Team, User
 from insights.models.activity_logging.activity_log import Change, Detail, log_activity
 from insights.models.resource_transfer.inter_project_transferer import (
@@ -54,6 +55,7 @@ class ResourceSearchSerializer(serializers.Serializer):
 
 class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
     scope_object = "INTERNAL"
+    serializer_class = _FallbackSerializer
 
     @action(detail=False, methods=["POST"])
     def preview(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -74,7 +76,10 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
 
         resource = self._get_source_resource(data["resource_kind"], data["resource_id"], source_team)
 
-        graph = list(build_resource_duplication_graph(resource, set()))
+        try:
+            graph = list(build_resource_duplication_graph(resource, set()))
+        except (ValueError, TypeError) as e:
+            raise exceptions.ValidationError(str(e))
         dag = dag_sort_duplication_graph(graph)
 
         self._check_access_controls(user, source_team, destination_team, dag)
@@ -104,7 +109,8 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                 dest_visitor = ResourceTransferVisitor.get_visitor(dest_kind)
                 if dest_visitor is not None:
                     try:
-                        dest_resource = dest_visitor.get_model().objects.get(pk=dest_pk)
+                        dest_model = cast(Any, dest_visitor.get_model())
+                        dest_resource = dest_model.objects.get(pk=dest_pk)
                         entry["suggested_substitution"] = {
                             "resource_kind": dest_kind,
                             "resource_id": str(dest_pk),
@@ -132,7 +138,10 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
 
         resource = self._get_source_resource(data["resource_kind"], data["resource_id"], source_team)
 
-        graph = list(build_resource_duplication_graph(resource, set()))
+        try:
+            graph = list(build_resource_duplication_graph(resource, set()))
+        except (ValueError, TypeError) as e:
+            raise exceptions.ValidationError(str(e))
         dag = dag_sort_duplication_graph(graph)
 
         self._check_access_controls(user, source_team, destination_team, dag)
@@ -160,7 +169,7 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
 
         substituted_dest_ids = {sub["destination_resource_id"] for sub in data["substitutions"]}
         resource_kind = data["resource_kind"]
-        was_impersonated = is_impersonated_session(request)
+        was_impersonated = is_impersonated(request)
 
         _log_destination_activity(
             mutable_results,
@@ -168,7 +177,6 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
             user=user,
             organization_id=self.organization_id,
             destination_team=destination_team,
-            source_team=source_team,
             was_impersonated=was_impersonated,
         )
 
@@ -178,7 +186,6 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
             user=user,
             organization_id=self.organization_id,
             source_team=source_team,
-            destination_team=destination_team,
             was_impersonated=was_impersonated,
         )
 
@@ -217,6 +224,9 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         if visitor.is_immutable():
             raise exceptions.ValidationError(f"Cannot search for immutable resource kind: {data['resource_kind']}")
 
+        if not visitor.user_facing:
+            raise exceptions.ValidationError(f"Cannot search for resource kind: {data['resource_kind']}")
+
         model = visitor.get_model()
 
         # model_to_resource accepts both instances and classes at runtime via _meta
@@ -227,7 +237,7 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                 raise exceptions.PermissionDenied(
                     f"You do not have read access to {visitor.kind} resources in this project"
                 )
-        qs = model.objects.filter(team=team)
+        qs = cast(Any, model).objects.filter(team=team)
 
         query = data.get("q", "").strip()
         if query:
@@ -251,9 +261,15 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
 
     def _get_team_in_org(self, team_id: int) -> Team:
         try:
-            return Team.objects.get(id=team_id, organization_id=self.organization_id)
+            team = Team.objects.get(id=team_id, organization_id=self.organization_id)
         except Team.DoesNotExist:
             raise exceptions.ValidationError(f"Team {team_id} not found in this organization")
+
+        uac = UserAccessControl(user=cast(User, self.request.user), team=team)
+        if not uac.check_access_level_for_object(team, required_level="member"):
+            raise exceptions.PermissionDenied("You don't have access to this project.")
+
+        return team
 
     def _get_source_resource(self, resource_kind: str, resource_id: str, source_team: Team) -> Any:
         visitor = ResourceTransferVisitor.get_visitor(resource_kind)
@@ -265,7 +281,7 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
 
         model = visitor.get_model()
         try:
-            return model.objects.get(pk=resource_id, team=source_team)
+            return cast(Any, model).objects.get(pk=resource_id, team=source_team)
         except ObjectDoesNotExist:
             raise exceptions.NotFound(f"{resource_kind} with id {resource_id} not found in source team")
 
@@ -320,7 +336,6 @@ def _log_destination_activity(
     user: User,
     organization_id: Any,
     destination_team: Team,
-    source_team: Team,
     was_impersonated: bool,
 ) -> None:
     from insights.models.activity_logging.model_activity import ModelActivityMixin
@@ -352,8 +367,6 @@ def _log_destination_activity(
                     Change(
                         type=visitor.kind,
                         action="created",
-                        field="source_team_id",
-                        after=source_team.pk,
                     )
                 ],
             ),
@@ -367,7 +380,6 @@ def _log_source_activity(
     user: User,
     organization_id: Any,
     source_team: Team,
-    destination_team: Team,
     was_impersonated: bool,
 ) -> None:
     visitor = ResourceTransferVisitor.get_visitor(resource_kind)
@@ -387,9 +399,7 @@ def _log_source_activity(
             changes=[
                 Change(
                     type=visitor.kind,
-                    action="changed",
-                    field="destination_team_id",
-                    after=destination_team.pk,
+                    action="copied",
                 )
             ],
         ),

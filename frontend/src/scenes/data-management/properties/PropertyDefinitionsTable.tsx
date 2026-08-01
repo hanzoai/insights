@@ -2,7 +2,7 @@ import './PropertyDefinitionsTable.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { Input, Select, Tag, Link } from '@hanzo/elements'
+import { Input, Select, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -12,8 +12,9 @@ import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { cn } from 'lib/utils/css-classes'
 import { DefinitionHeader, getPropertyDefinitionIcon } from 'scenes/data-management/events/DefinitionHeader'
 import { propertyDefinitionsTableLogic } from 'scenes/data-management/properties/propertyDefinitionsTableLogic'
-import { Scene } from 'scenes/sceneTypes'
+import { verifiedFilterFromOption, verifiedFilterValue, verifiedOptions } from 'scenes/data-management/utils'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -21,7 +22,7 @@ import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { PropertyDefinition } from '~/types'
 
 export function PropertyDefinitionsTable(): JSX.Element {
-    const { propertyDefinitions, propertyDefinitionsLoading, filters, propertyTypeOptions } =
+    const { propertyDefinitions, propertyDefinitionsLoading, filters, propertyTypeOptions, showVerifiedFilter } =
         useValues(propertyDefinitionsTableLogic)
     const { loadPropertyDefinitions, setFilters, setPropertyType } = useActions(propertyDefinitionsTableLogic)
 
@@ -38,11 +39,28 @@ export function PropertyDefinitionsTable(): JSX.Element {
             key: 'name',
             render: function Render(_, definition: PropertyDefinition) {
                 return (
-                    <DefinitionHeader
-                        definition={definition}
-                        to={urls.propertyDefinition(definition.id)}
-                        taxonomicGroupType={TaxonomicFilterGroupType.EventProperties}
-                    />
+                    <div className="flex items-center gap-2">
+                        <DefinitionHeader
+                            definition={definition}
+                            to={urls.propertyDefinition(definition.id)}
+                            taxonomicGroupType={TaxonomicFilterGroupType.EventProperties}
+                        />
+                        {definition.warehouse_origin && (
+                            <Tooltip
+                                title={`Populated from data warehouse${
+                                    definition.warehouse_origin.table_name
+                                        ? ` table ${definition.warehouse_origin.table_name}`
+                                        : ''
+                                }${
+                                    definition.warehouse_origin.last_synced_at
+                                        ? ` (last synced ${definition.warehouse_origin.last_synced_at})`
+                                        : ''
+                                }`}
+                            >
+                                <Tag type="completion">Warehouse</Tag>
+                            </Tooltip>
+                        )}
+                    </div>
                 )
             },
             sorter: (a, b) => a.name.localeCompare(b.name),
@@ -94,18 +112,38 @@ export function PropertyDefinitionsTable(): JSX.Element {
                     Query with SQL
                 </Link>
             </Banner>
-            <div className={cn('flex gap-2 flex-wrap')}>
+            <div className={cn('flex flex-wrap justify-between items-center gap-2')}>
                 <Input
                     type="search"
                     placeholder="Search for properties"
                     onChange={(e) => setFilters({ property: e || '' })}
                     value={filters.property}
+                    className="flex-1 min-w-60"
                 />
-                <Select
-                    options={propertyTypeOptions}
-                    value={`${filters.type}::${filters.group_type_index ?? ''}`}
-                    onSelect={setPropertyType}
-                />
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <Select
+                        options={propertyTypeOptions}
+                        value={`${filters.type}::${filters.group_type_index ?? ''}`}
+                        onSelect={setPropertyType}
+                    />
+                    {showVerifiedFilter && (
+                        <>
+                            <span>Status:</span>
+                            <Select
+                                value={verifiedFilterValue(filters.verified)}
+                                options={verifiedOptions}
+                                data-attr="property-verified-filter"
+                                dropdownMatchSelectWidth={false}
+                                onChange={(value) => {
+                                    setFilters({
+                                        verified: verifiedFilterFromOption(value),
+                                    })
+                                }}
+                                size="small"
+                            />
+                        </>
+                    )}
+                </div>
             </div>
             <Table
                 columns={columns}

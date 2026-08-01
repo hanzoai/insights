@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -65,7 +65,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                       },
                                     },
                                     insightsConfig: {
-                                      publicKey: '<ph_project_api_key>', // Find it in project settings https://insights.hanzo.ai/settings/project
+                                      publicKey: '<ph_project_token>', // Find it in project settings https://app.hanzo.ai/settings/project
                                       host: 'https://us.i.hanzo.ai', // Optional: defaults to https://us.i.hanzo.ai. Use https://eu.i.hanzo.ai for EU region
                                       clientConfig: {
                                         capture_exceptions: true, // Enables automatic exception capture on the client side (Vue)
@@ -75,8 +75,8 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                       },
                                       sourcemaps: {
                                         enabled: true,
-                                        project: '<ph_project_id>', // Your project ID from Insights settings https://insights.hanzo.ai/settings/environment#variables
-                                        personalApiKey: '<ph_personal_api_key>', // Your personal API key from Insights settings https://insights.hanzo.ai/settings/user-api-keys (requires organization:read and error_tracking:write scopes)
+                                        projectId: '<ph_project_id>', // Your project ID, found in your environment settings: https://app.hanzo.ai/settings/environment#variables
+                                        personalApiKey: '<ph_personal_api_key>', // Your personal API key from Insights settings https://app.hanzo.ai/settings/user-api-keys (requires organization:read and error_tracking:write scopes)
                                         releaseName: 'my-application', // Optional: defaults to git repository name
                                         releaseVersion: '1.0.0', // Optional: defaults to current git commit
                                       },
@@ -86,9 +86,9 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                             },
                         ]}
                     />
-                    <CalloutBox type="fyi" title="Personal API Key">
+                    <CalloutBox type="fyi" title="Personal API key">
                         <Markdown>
-                            Your Personal API Key will require `organization:read` and `error_tracking:write` scopes.
+                            Your personal API key will require `organization:read` and `error_tracking:write` scopes.
                         </Markdown>
                     </CalloutBox>
                     <Markdown>
@@ -193,7 +193,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
 
                         You can verify the injection is successful by checking your \`.mjs.map\` source map files for \`//# chunkId=\` comments. Make sure to serve these injected files in production, Insights will check for the \`//# chunkId\` comments to display the correct stack traces.
 
-                        [Check symbol sets in Insights](https://insights.hanzo.ai/settings/project-error-tracking#error-tracking-symbol-sets)
+                        [Check symbol sets in Insights](https://app.hanzo.ai/settings/project-error-tracking#error-tracking-symbol-sets)
                     `}
                 </Markdown>
             ),
@@ -207,7 +207,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                     {dedent`
                         Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                        [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                        [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                     `}
                 </Markdown>
             ),

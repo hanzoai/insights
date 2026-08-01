@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -10,18 +11,22 @@ import {
     copySnappyWASMFile,
     createHashlessEntrypoints,
     isDev,
+    reportTopChunks,
     startDevServer,
 } from '@hanzo/esbuilder'
 
-import { getToolbarBuildConfig } from './toolbar-config.mjs'
+import { finalizeToolbarBuild, getToolbarAppBuildConfig } from './toolbar-config.mjs'
 
 export const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Chunks below this size aren't worth a preload tag in the HTML document
+const PRELOAD_MIN_CHUNK_BYTES = 50 * 1024
 
 startDevServer(__dirname)
 copyPublicFolder(path.resolve(__dirname, 'public'), path.resolve(__dirname, 'dist'))
 
 copyPublicFolder(
-    path.resolve(__dirname, 'node_modules', '@hanzo', 'mascot-mode', 'assets'),
+    path.resolve(__dirname, 'node_modules', '@insights', 'mascot-mode', 'assets'),
     path.resolve(__dirname, 'dist', 'mascot-mode')
 )
 copySnappyWASMFile(__dirname)
@@ -35,6 +40,7 @@ await import('./build-products.mjs')
 const common = {
     absWorkingDir: __dirname,
     bundle: true,
+    writeMetaFile: !isDev,
 }
 
 await buildInParallel(
@@ -42,10 +48,11 @@ await buildInParallel(
         {
             name: 'Insights App',
             globalName: 'insightsApp',
-            entryPoints: ['src/index.tsx'],
+            entryPoints: ['src/index.tsx', 'src/sharedChunkAnchors.ts'],
             splitting: true,
             format: 'esm',
             outdir: path.resolve(__dirname, 'dist'),
+            heavy: true,
             ...common,
         },
         {
@@ -56,11 +63,36 @@ await buildInParallel(
             ...common,
         },
         {
+            name: 'Monaco Editor Worker',
+            entryPoints: ['src/lib/monaco/workers/editor.worker.ts'],
+            format: 'esm',
+            outfile: path.resolve(__dirname, 'dist', 'monacoEditorWorker.js'),
+            ...common,
+        },
+        {
+            name: 'Monaco JSON Worker',
+            entryPoints: ['src/lib/monaco/workers/json.worker.ts'],
+            format: 'esm',
+            outfile: path.resolve(__dirname, 'dist', 'monacoJsonWorker.js'),
+            ...common,
+        },
+        {
+            name: 'Monaco TypeScript Worker',
+            entryPoints: ['src/lib/monaco/workers/ts.worker.ts'],
+            format: 'esm',
+            outfile: path.resolve(__dirname, 'dist', 'monacoTsWorker.js'),
+            ...common,
+        },
+        {
             name: 'Exporter',
-            globalName: 'insightsExporter',
-            entryPoints: ['src/exporter/index.tsx'],
-            format: 'iife',
-            outfile: path.resolve(__dirname, 'dist', 'exporter.js'),
+            entryPoints: {
+                exporter: 'src/exporter/index.tsx',
+                exporterSharedChunkAnchors: 'src/sharedChunkAnchors.ts',
+            },
+            splitting: true,
+            format: 'esm',
+            outdir: path.resolve(__dirname, 'dist'),
+            heavy: true,
             ...common,
         },
         {
@@ -72,7 +104,7 @@ await buildInParallel(
             ...common,
         },
         {
-            ...getToolbarBuildConfig(__dirname),
+            ...getToolbarAppBuildConfig(__dirname),
             ...common,
         },
     ],
@@ -93,10 +125,17 @@ await buildInParallel(
                     console.error('Could not get entrypoint for bundle "Insights App."')
                     throw new Error('Could not get entrypoint for bundle "Insights App."')
                 }
+                if (!isDev) {
+                    reportTopChunks(buildResponse.outputs, { label: 'Insights App chunks' })
+                    writePreloadManifest(buildResponse.outputs)
+                }
                 writeIndexHtml(chunks, entrypoints)
             }
 
             if (config.name === 'Exporter') {
+                if (!isDev) {
+                    reportTopChunks(buildResponse.outputs, { label: 'Exporter chunks' })
+                }
                 writeExporterHtml(chunks, entrypoints)
             }
 
@@ -104,10 +143,67 @@ await buildInParallel(
                 writeRenderQueryHtml(chunks, entrypoints)
             }
 
+            if (config.name === 'Toolbar') {
+                await finalizeToolbarBuild(__dirname, buildResponse)
+            }
+
             createHashlessEntrypoints(__dirname, entrypoints)
         },
     }
 )
+
+/**
+ * Write dist/preload-manifest.json, read by the Django backend (insights/utils.py) to emit
+ * <link rel="preload"/"modulepreload"> tags so the boot chain (CSS, font, App and
+ * AuthenticatedShell chunks) is fetched in parallel instead of discovered as a waterfall.
+ * Paths are URL suffixes appended to `JS_URL + '/'`.
+ */
+export function writePreloadManifest(outputs = {}) {
+    const distDir = path.resolve(__dirname, 'dist')
+    // esbuild metafile paths are relative to absWorkingDir (= __dirname), not the invoking cwd
+    const toUrl = (outputPath) => `static/${path.relative(distDir, path.resolve(__dirname, outputPath))}`
+
+    const findEntryJs = (entryPoint) =>
+        Object.entries(outputs).find(([out, meta]) => meta.entryPoint === entryPoint && out.endsWith('.js'))
+
+    const collectChunkUrls = (entryPoint) => {
+        const found = findEntryJs(entryPoint)
+        if (!found) {
+            return []
+        }
+        const [outputPath, meta] = found
+        const urls = [toUrl(outputPath)]
+        for (const imp of meta.imports || []) {
+            if (imp.kind === 'import-statement' && (outputs[imp.path]?.bytes || 0) > PRELOAD_MIN_CHUNK_BYTES) {
+                urls.push(toUrl(imp.path))
+            }
+        }
+        return urls
+    }
+
+    const cssOutput = Object.keys(outputs).find((out) => /\/index(-[^./-]+)?\.css$/.test(out))
+    const fontOutput = Object.keys(outputs).find((out) => /\/Inter(-[^./-]+)?\.woff2$/.test(out))
+
+    const dedupe = (urls) => [...new Set(urls)]
+    const manifest = {
+        css: cssOutput ? toUrl(cssOutput) : '',
+        font: fontOutput ? toUrl(fontOutput) : '',
+        // Entry first: its modulepreload starts the fetch at preload-scan time, before the
+        // loader script at the end of <head> gets to import() it.
+        js: dedupe([...collectChunkUrls('src/index.tsx'), ...collectChunkUrls('src/scenes/App.tsx')]),
+        // The backend emits these only for authenticated requests
+        authenticatedJs: dedupe(collectChunkUrls('src/scenes/AuthenticatedShell.tsx')),
+    }
+    // An empty field means an entry point, chunk, or asset name drifted from the lookups above —
+    // failing the build beats shipping green with the optimization silently off.
+    for (const [key, value] of Object.entries(manifest)) {
+        if (value.length === 0) {
+            console.error(`preload-manifest.json field "${key}" resolved empty.`)
+            throw new Error(`preload-manifest.json field "${key}" resolved empty.`)
+        }
+    }
+    fs.writeFileSync(path.resolve(distDir, 'preload-manifest.json'), JSON.stringify(manifest, null, 2))
+}
 
 export function writeIndexHtml(chunks = {}, entrypoints = []) {
     copyIndexHtml(__dirname, 'src/index.html', 'dist/index.html', 'index', chunks, entrypoints)

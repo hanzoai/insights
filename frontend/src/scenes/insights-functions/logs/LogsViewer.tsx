@@ -1,4 +1,5 @@
 import { useActions, useValues } from 'kea'
+import { useMemo, useState } from 'react'
 
 import { IconCalendar, IconEye, IconList, IconRefresh, IconSearch, IconTableOfContents } from '@hanzo/icons'
 import {
@@ -16,13 +17,20 @@ import {
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconWithCount } from 'lib/elements/icons'
-import { pluralize } from 'lib/utils'
+import { IconArrowDown, IconArrowUp, IconWithCount } from 'lib/elements/icons'
+import { pluralize } from 'lib/utils/strings'
 
 import { LogEntryLevel } from '~/types'
 
 import { LogLevelsPicker } from './LogLevelsPicker'
-import { GroupedLogEntry, LOG_VIEWER_LIMIT, LogEntry, LogsViewerLogicProps, logsViewerLogic } from './logsViewerLogic'
+import {
+    GroupedLogEntry,
+    LOG_GROUP_LIMIT,
+    LOG_VIEWER_LIMIT,
+    LogEntry,
+    LogsViewerLogicProps,
+    logsViewerLogic,
+} from './logsViewerLogic'
 
 export const tagTypeForLevel = (level: LogEntryLevel): TagProps['type'] => {
     switch (level.toLowerCase()) {
@@ -58,10 +66,12 @@ export type LogsViewerProps = LogsViewerLogicProps & {
     hideDateFilter?: boolean
     hideLevelsFilter?: boolean
     hideInstanceIdColumn?: boolean
+    /** Initial display order. Defaults to newest-first; pass true for oldest-first. */
+    defaultAscending?: boolean
 }
 
 /**
- * NOTE: There is a loose attempt to keeep this generic so we can use it as an abstract log component in the future.
+ * NOTE: There is a loose attempt to keep this generic so we can use it as an abstract log component in the future.
  */
 
 export function LogsViewer({
@@ -71,6 +81,7 @@ export function LogsViewer({
     hideDateFilter,
     hideLevelsFilter,
     hideInstanceIdColumn,
+    defaultAscending = false,
     ...props
 }: LogsViewerProps): JSX.Element {
     const logic = logsViewerLogic(props)
@@ -87,6 +98,21 @@ export function LogsViewer({
         isGrouped,
     } = useValues(logic)
     const { revealHiddenLogs, loadOlderLogs, setFilters, setRowExpanded, setIsGrouped } = useActions(logic)
+
+    // Display order is a UI-only toggle — the fetch still pulls newest-first
+    // (that's what powers "load older" pagination). Ascending puts oldest at
+    // the top for following execution order; surfaces opt in via
+    // `defaultAscending`. We just reverse the array before handing it to
+    // Table.
+    const [ascending, setAscending] = useState(defaultAscending)
+    const orderedUngroupedLogs = useMemo(
+        () => (ascending ? [...unGroupedLogs].reverse() : unGroupedLogs),
+        [ascending, unGroupedLogs]
+    )
+    const orderedGroupedLogs = useMemo(
+        () => (ascending ? [...groupedLogs].reverse() : groupedLogs),
+        [ascending, groupedLogs]
+    )
 
     const groupedLogColumns: TableColumn<GroupedLogEntry, keyof GroupedLogEntry | undefined>[] = renderColumns([
         {
@@ -172,7 +198,9 @@ export function LogsViewer({
             center
             disabledReason={!isThereMoreToLoad ? "There's nothing more to load" : undefined}
         >
-            {isThereMoreToLoad ? `Load up to ${LOG_VIEWER_LIMIT} older entries` : 'No older entries'}
+            {isThereMoreToLoad
+                ? `Load up to ${isGrouped ? LOG_GROUP_LIMIT : LOG_VIEWER_LIMIT} older ${isGrouped ? 'groups' : 'entries'}`
+                : 'No older entries'}
         </Button>
     )
 
@@ -182,7 +210,7 @@ export function LogsViewer({
                 <div className="flex items-center gap-2 flex-1 min-w-100">
                     <Input
                         type="search"
-                        placeholder="Search messages or invocation ID…"
+                        placeholder={`Search messages or ${instanceLabel ? instanceLabel : 'invocation'} ID…`}
                         fullWidth
                         onChange={(value) => setFilters({ search: value })}
                         value={filters.search}
@@ -257,13 +285,20 @@ export function LogsViewer({
                         }
                         tooltip={`Show ${pluralize(hiddenLogs.length, 'newer entry', 'newer entries')}`}
                     />
+                    <Button
+                        size="small"
+                        type="secondary"
+                        icon={ascending ? <IconArrowDown /> : <IconArrowUp />}
+                        onClick={() => setAscending(!ascending)}
+                        tooltip={ascending ? 'Oldest first (click to reverse)' : 'Newest first (click to reverse)'}
+                    />
                 </div>
             </div>
 
             {isGrouped ? (
                 <Table
                     key="grouped"
-                    dataSource={groupedLogs}
+                    dataSource={orderedGroupedLogs}
                     loading={logsLoading}
                     className="ph-no-capture overflow-y-auto"
                     rowKey={(record) => record.instanceId}
@@ -299,7 +334,7 @@ export function LogsViewer({
                     instanceLabel={instanceLabel}
                     renderMessage={renderMessage}
                     key="ungrouped"
-                    dataSource={unGroupedLogs}
+                    dataSource={orderedUngroupedLogs}
                     loading={logsLoading}
                     className="ph-no-capture overflow-y-auto"
                     rowKey={(record, index) => `${record.timestamp.toISOString()}-${index}`}

@@ -7,8 +7,7 @@ import { Button } from 'lib/elements/Button'
 import { Table } from 'lib/elements/Table'
 import { Tag } from 'lib/elements/Tag'
 import { Tooltip } from 'lib/elements/Tooltip'
-
-import { humanFriendlyNumber } from '~/lib/utils'
+import { humanFriendlyNumber } from 'lib/utils/numbers'
 
 import { queryLogTableLogic } from './queryLogTableLogic'
 

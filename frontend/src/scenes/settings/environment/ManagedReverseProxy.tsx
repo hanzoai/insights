@@ -1,8 +1,9 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
+import { useMemo } from 'react'
 
-import { IconEllipsis, IconInfo } from '@hanzo/icons'
+import { IconCheckCircle, IconEllipsis, IconInfo, IconWarning, IconX } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -24,9 +25,14 @@ import { OrganizationMembershipLevel } from 'lib/constants'
 import { Field } from 'lib/elements/Field'
 import { Markdown } from 'lib/elements/Markdown'
 import { Link } from 'lib/elements/Link'
+import { isKeyOf } from 'lib/utils/guards'
+import { useMaxTool } from 'scenes/max/useMaxTool'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
-import { ProxyRecord, proxyLogic } from './proxyLogic'
+import { useAttachedContext } from 'products/insights_ai/frontend/api/logics'
+
+import { DiagnosticCheckResult, DiagnosticCheckStatus, DiagnosticReport, ProxyRecord, proxyLogic } from './proxyLogic'
+import { ProxySDKSetup } from './ProxySDKSetup'
 
 const statusText = {
     valid: 'live',
@@ -34,9 +40,17 @@ const statusText = {
 }
 
 export function ManagedReverseProxy(): JSX.Element {
-    const { cloudflareOptInAcknowledged, formState, proxyRecords, proxyRecordsLoading, maxProxyRecords } =
-        useValues(proxyLogic)
-    const { acknowledgeCloudflareOptIn, deleteRecord, showForm } = useActions(proxyLogic)
+    const {
+        shouldShowCloudflareOptIn,
+        formState,
+        proxyRecords,
+        proxyRecordsLoading,
+        maxProxyRecords,
+        diagnoseLoadingIds,
+        expandedRecordIds,
+    } = useValues(proxyLogic)
+    const { acknowledgeCloudflareOptIn, deleteRecord, retryRecord, diagnose, setRecordExpanded, showForm } =
+        useActions(proxyLogic)
     const { preflight } = useValues(preflightLogic)
 
     const cloudflareProxyEnabled = preflight?.instance_preferences?.cloudflare_proxy_enabled
@@ -49,6 +63,45 @@ export function ManagedReverseProxy(): JSX.Element {
     const maxRecordsReached = proxyRecords.length >= maxProxyRecords
 
     const recordsWithMessages = proxyRecords.filter((record) => !!record.message)
+    const validProxyRecords = proxyRecords.filter((record) => record.status === 'valid')
+
+    // Surface the diagnose_proxy MaxTool while this scene is mounted, with the visible
+    // records as context so Max can resolve "diagnose e.foo.com" to a record id.
+    useMaxTool({
+        identifier: 'diagnose_proxy',
+        active: proxyRecords.length > 0 && !restrictionReason,
+        context: useMemo(
+            () => ({
+                proxy_records: proxyRecords.map((r) => ({
+                    id: r.id,
+                    domain: r.domain,
+                    status: r.status,
+                    message: r.message,
+                })),
+            }),
+            [proxyRecords]
+        ),
+        suggestions: useMemo(() => {
+            const erroring = proxyRecords.find((r) => r.status === 'erroring' || r.status === 'timed_out')
+            if (erroring) {
+                return [`Why is ${erroring.domain} erroring?`]
+            }
+            return proxyRecords.length > 0 ? [`Diagnose ${proxyRecords[0].domain}`] : []
+        }, [proxyRecords]),
+    })
+
+    useAttachedContext(
+        [
+            {
+                type: 'proxy_records',
+                value: JSON.stringify(
+                    proxyRecords.map((r) => ({ id: r.id, domain: r.domain, status: r.status, message: r.message }))
+                ),
+                label: 'Reverse proxy records',
+            },
+        ],
+        { active: proxyRecords.length > 0 && !restrictionReason }
+    )
 
     const columns: TableColumns<ProxyRecord> = [
         {
@@ -75,7 +128,7 @@ export function ManagedReverseProxy(): JSX.Element {
                         )}
                     >
                         {status === 'issuing' && <Spinner />}
-                        <span className="capitalize">{statusText[status] || status}</span>
+                        <span className="capitalize">{isKeyOf(status, statusText) ? statusText[status] : status}</span>
                         {status === 'waiting' && (
                             <Tooltip title="Waiting for DNS records to be created">
                                 <IconInfo className="cursor-pointer" />
@@ -95,14 +148,28 @@ export function ManagedReverseProxy(): JSX.Element {
             width: 20,
             className: 'flex justify-center',
             render: function Render(_, { id, status }) {
+                const isDiagnosing = diagnoseLoadingIds.includes(id)
                 return (
                     status != 'deleting' &&
                     !restrictionReason && (
                         <Menu
                             items={[
                                 {
+                                    label: isDiagnosing ? 'Running diagnostics…' : 'Diagnose',
+                                    onClick: () => diagnose(id),
+                                    disabledReason: isDiagnosing ? 'A diagnostic is already running' : undefined,
+                                },
+                                ...(status === 'erroring' || status === 'timed_out'
+                                    ? [
+                                          {
+                                              label: 'Retry',
+                                              onClick: () => retryRecord(id),
+                                          },
+                                      ]
+                                    : []),
+                                {
                                     label: 'Delete',
-                                    status: 'danger',
+                                    status: 'danger' as const,
                                     onClick: () => {
                                         Dialog.open({
                                             title: 'Delete managed proxy',
@@ -131,7 +198,7 @@ export function ManagedReverseProxy(): JSX.Element {
     ]
 
     // Show opt-in banner if Cloudflare proxy is enabled but not yet acknowledged
-    if (cloudflareProxyEnabled && !cloudflareOptInAcknowledged) {
+    if (cloudflareProxyEnabled && shouldShowCloudflareOptIn) {
         return (
             <CloudflareOptInBanner onAcknowledge={acknowledgeCloudflareOptIn} restrictionReason={restrictionReason} />
         )
@@ -150,15 +217,29 @@ export function ManagedReverseProxy(): JSX.Element {
                 dataSource={proxyRecords}
                 expandable={{
                     expandedRowRender: (record) => <ExpandedRow record={record} />,
+                    isRowExpanded: (record) => (expandedRecordIds.includes(record.id) ? true : -1),
+                    onRowExpand: (record) => setRecordExpanded(record.id, true),
+                    onRowCollapse: (record) => setRecordExpanded(record.id, false),
                 }}
             />
 
             <WaitingRecords />
 
+            {validProxyRecords.length > 0 && (
+                <div className="flex flex-col gap-2 bg-surface-primary rounded border my-4 px-5 py-4">
+                    <div className="text-xl font-semibold leading-tight">Update your SDK configuration</div>
+                    <p className="text-secondary">
+                        Now that your proxy is live, update your SDK initialization to send data through your custom
+                        domain.
+                    </p>
+                    <ProxySDKSetup />
+                </div>
+            )}
+
             {formState === 'collapsed' ? (
                 maxRecordsReached ? (
                     <Banner type="info">
-                        There is a maximum of {maxProxyRecords} records allowed per organization.
+                        There is a maximum of {maxProxyRecords} proxy records allowed per organization.
                     </Banner>
                 ) : (
                     <div className="flex">
@@ -186,12 +267,12 @@ function CloudflareOptInBanner({
 
     return (
         <div className="bg-surface-primary rounded border px-5 py-4 space-y-4">
-            <div className="text-xl font-semibold leading-tight">Enable Managed Proxy (Beta)</div>
+            <div className="text-xl font-semibold leading-tight">Enable Managed Proxy</div>
             <p className="text-secondary">
                 This feature is disabled by default and has no effect unless you explicitly enable it.
             </p>
             <p>
-                By enabling this beta feature, you explicitly instruct us to route applicable traffic via{' '}
+                By enabling this feature, you explicitly instruct us to route applicable traffic via{' '}
                 <Link to="https://www.cloudflare.com" target="_blank">
                     Cloudflare
                 </Link>
@@ -201,23 +282,40 @@ function CloudflareOptInBanner({
             <div className="border rounded p-4 space-y-3 bg-surface-secondary">
                 <div className="font-semibold">Third-party processing (Cloudflare)</div>
                 <p className="text-sm">
-                    This beta feature routes certain customer and customer end-user traffic through Cloudflare, a
-                    third-party infrastructure provider, for the purpose of delivering the managed proxy functionality.
+                    This feature routes certain customer and customer end-user traffic through Cloudflare, a third-party
+                    infrastructure provider, for the purpose of delivering the managed proxy functionality. Cloudflare
+                    is listed as a{' '}
+                    <Link to="https://hanzo.ai/subprocessors" target="_blank">
+                        subprocessor
+                    </Link>{' '}
+                    referenced in our{' '}
+                    <Link to="https://hanzo.ai/dpa" target="_blank">
+                        Data Processing Agreement
+                    </Link>{' '}
+                    ("<strong>DPA</strong>") for this purpose.
                 </p>
                 <p className="text-sm">By enabling this feature, you:</p>
                 <ul className="text-sm list-disc pl-5 space-y-1">
                     <li>Explicitly instruct us to route applicable data through Cloudflare for this service;</li>
                     <li>
                         Acknowledge and agree that data processed as part of this feature will be transmitted to and
-                        processed by Cloudflare; and
+                        processed by Cloudflare, and that this processing may occur using Cloudflare infrastructure in
+                        multiple or dynamically assigned geographic locations as part of providing managed reverse proxy
+                        functionality, in accordance with our DPA; and
                     </li>
-                    <li>Understand that this feature is experimental (beta) and may change or be discontinued.</li>
+                    <li>
+                        Understand that traffic routed through this proxy is handled by Cloudflare as described in our
+                        DPA.
+                    </li>
                 </ul>
+            </div>
+            <div className="border rounded p-4 space-y-3 bg-surface-secondary">
+                <div className="font-semibold">HIPAA Disclaimer</div>
                 <p className="text-sm">
-                    Cloudflare is not currently listed as an Insights subprocessor for this feature, and you choose to
-                    enable this feature notwithstanding the foregoing. If we decide to make this functionality generally
-                    available, we will update our Data Processing Agreement and provide notice in accordance with its
-                    terms.
+                    This feature is not HIPAA-compliant and is not intended for the processing of Protected Health
+                    Information ("<strong>PHI</strong>"). Any Business Associate Agreement ("<strong>BAA</strong>") you
+                    may have entered into with Insights does not apply to this functionality. You agree not to use this
+                    feature with PHI.
                 </p>
             </div>
             <div className="space-y-3">
@@ -242,22 +340,40 @@ function CloudflareOptInBanner({
 }
 
 const ExpandedRow = ({ record }: { record: ProxyRecord }): JSX.Element => {
+    const { diagnosticReports, recordActiveTabs } = useValues(proxyLogic)
+    const { setRecordActiveTab } = useActions(proxyLogic)
+
+    const report = diagnosticReports[record.id]
+    const activeKey = recordActiveTabs[record.id] ?? 'cname'
+
+    const tabs = [
+        {
+            label: 'CNAME',
+            key: 'cname',
+            content: (
+                <CodeSnippet key={record.id} language={Language.HTTP}>
+                    {record.target_cname}
+                </CodeSnippet>
+            ),
+        },
+        ...(report
+            ? [
+                  {
+                      label: 'Diagnosis',
+                      key: 'diagnosis',
+                      content: <DiagnosticReportContent report={report} />,
+                  },
+              ]
+            : []),
+    ]
+
     return (
         <div className="pb-4 pr-4 space-y-2">
             <Tabs
                 size="small"
-                activeKey="cname"
-                tabs={[
-                    {
-                        label: 'CNAME',
-                        key: 'cname',
-                        content: (
-                            <CodeSnippet key={record.id} language={Language.HTTP}>
-                                {record.target_cname}
-                            </CodeSnippet>
-                        ),
-                    },
-                ]}
+                activeKey={activeKey}
+                onChange={(key) => setRecordActiveTab(record.id, key)}
+                tabs={tabs}
             />
             {record.status === 'waiting' && (
                 <DomainConnectBanner
@@ -291,13 +407,13 @@ function CreateRecordForm(): JSX.Element {
                         <ul className="list-disc pl-5 space-y-0.5 mb-1">
                             <li>
                                 <strong>Do not use</strong> subdomains containing words related to tracking, analytics,
-                                or advertising (e.g. <code>analytics.mydomain.com</code>,{' '}
-                                <code>insights.mydomain.com</code>). These are commonly blocked by ad-blockers and will
-                                cause data loss.
+                                advertising, or Insights (e.g. <code>analytics.mydomain.com</code>,{' '}
+                                <code>insights.mydomain.com</code>, or <code>ph.mydomain.com</code>). These are commonly
+                                blocked by ad-blockers and will cause data loss. The proxy will <strong>NOT</strong>{' '}
+                                achieve the intended effect if ad-blockers are blocking the domain.
                             </li>
                             <li>
-                                <strong>Use a generic subdomain</strong> such as <code>t.mydomain.com</code> or{' '}
-                                <code>app.mydomain.com</code> instead.
+                                <strong>Use a generic subdomain</strong> such as <code>t.mydomain.com</code> instead.
                             </li>
                         </ul>
                     </Banner>
@@ -364,6 +480,64 @@ const WaitingRecords = (): JSX.Element | null => {
                     </div>
                 ))}
             </div>
+            <div className="text-sm">
+                <strong>Important:</strong> If you are using a DNS provider like Cloudflare that offers proxy options
+                (orange cloud), make sure the proxy is <strong>disabled</strong> (gray cloud) for this domain. Enabling
+                the proxy at your DNS provider may interfere with the managed reverse proxy functionality.
+            </div>
+        </div>
+    )
+}
+
+const checkStatusIcon = (status: DiagnosticCheckStatus): JSX.Element => {
+    switch (status) {
+        case 'passed':
+            return <IconCheckCircle className="text-success" />
+        case 'warned':
+            return <IconWarning className="text-warning-dark" />
+        case 'failed':
+            return <IconX className="text-danger" />
+        case 'skipped':
+            return <IconInfo className="text-secondary" />
+    }
+}
+
+function DiagnosticReportContent({ report }: { report: DiagnosticReport }): JSX.Element {
+    return (
+        <div className="flex flex-col gap-3">
+            <div className="text-xs text-secondary">Ran {new Date(report.ran_at).toLocaleString()}</div>
+            <div className="flex flex-col gap-2">
+                {report.checks.map((check) => (
+                    <DiagnosticCheckRow key={check.id} check={check} />
+                ))}
+            </div>
+        </div>
+    )
+}
+
+function DiagnosticCheckRow({ check }: { check: DiagnosticCheckResult }): JSX.Element {
+    return (
+        <div className="border rounded p-3 flex flex-col gap-2 bg-surface-secondary">
+            <div className="flex items-center gap-2">
+                {checkStatusIcon(check.status)}
+                <span className="font-semibold">{check.name}</span>
+                <span className="text-xs text-secondary capitalize">({check.status})</span>
+            </div>
+            <Markdown className="text-sm">{check.detail}</Markdown>
+            {check.remediation && (
+                <div className="border-t pt-2 mt-1 flex flex-col gap-2">
+                    <Markdown className="text-sm font-semibold">{check.remediation.summary}</Markdown>
+                    {check.remediation.records.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                            {check.remediation.records.map((dnsRecord, i) => (
+                                <CodeSnippet key={i} language={Language.HTTP}>
+                                    {`${dnsRecord.name}\t${dnsRecord.type}\t${dnsRecord.value}`}
+                                </CodeSnippet>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

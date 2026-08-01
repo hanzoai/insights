@@ -1,8 +1,7 @@
-// @ts-nocheck
+import { InsightsFlowAction } from '~/cdp/schema/hogflow'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
-import { InsightsFlowAction } from '~/schema/insightsflow'
 
-import { findNextAction } from '../insightsflow-utils'
+import { findNextAction } from '../hogflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 type Action = Extract<InsightsFlowAction, { type: 'random_cohort_branch' }>
@@ -18,17 +17,25 @@ export class RandomCohortBranchHandler implements ActionHandler {
 }
 
 export function getRandomCohort(invocation: CyclotronJobInvocationInsightsFlow, action: Action): InsightsFlowAction {
+    // Programmatically-authored nodes can be stored without their cohorts array (the API doesn't
+    // require it on lenient saves); assign nothing and fall through the continue edge instead of
+    // crashing the run.
+    const cohorts = Array.isArray(action.config.cohorts) ? action.config.cohorts : []
+    if (cohorts.length === 0) {
+        return findNextAction(invocation.hogFlow, action.id)
+    }
+
     const random = Math.random() * 100 // 0-100
     let cumulativePercentage = 0
 
-    for (const [index, cohort] of action.config.cohorts.entries()) {
+    for (const [index, cohort] of cohorts.entries()) {
         cumulativePercentage += cohort.percentage
         if (random <= cumulativePercentage) {
-            return findNextAction(invocation.insightsFlow, action.id, index)
+            return findNextAction(invocation.hogFlow, action.id, index)
         }
     }
 
     // If we somehow get here (shouldn't happen if percentages add up to 100),
     // go to the last cohort
-    return findNextAction(invocation.insightsFlow, action.id, action.config.cohorts.length - 1)
+    return findNextAction(invocation.hogFlow, action.id, cohorts.length - 1)
 }

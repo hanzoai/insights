@@ -4,11 +4,12 @@ from typing import Any
 from django.db import transaction
 from django.db.models import Q
 
-from insights.api.insights_function import InsightsFunctionSerializer
-from insights.models.insights_function_template import InsightsFunctionTemplate
-from insights.models.insights_functions.insights_function import InsightsFunction
-from insights.models.plugin import PluginAttachment, PluginConfig
 from insights.models.team.team import Team
+
+from products.cdp.backend.api.insights_function import InsightsFunctionSerializer
+from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
+from products.cdp.backend.models.plugin import PluginAttachment, PluginConfig
 
 # python manage.py migrate_plugins_to_insights_functions --dry-run --test-mode --kind=transformation
 
@@ -33,7 +34,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 print("Skipping plugin", plugin_config["plugin__name"], "as it doesn't have a url")  # noqa: T201
                 continue
 
-            plugin_id = url.replace("inline://", "").replace("https://github.com/Hanzo Insights/", "")
+            plugin_id = url.replace("inline://", "").replace("https://github.com/Insights/", "")
             plugin_name = plugin_config["plugin__name"]
 
             # Inline plugins are named slightly differently so we fix it here
@@ -90,7 +91,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
             if InsightsFunction.objects.filter(
                 template_id=template.id, type=kind, team_id=team.id, enabled=True, deleted=False
             ).exists():
-                print(f"Skipping plugin {plugin_name} as it already exists as a custom function")  # noqa: T201
+                print(f"Skipping plugin {plugin_name} as it already exists as a script function")  # noqa: T201
                 continue
 
             data = {
@@ -99,7 +100,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 "name": plugin_name,
                 "description": template.description,
                 "filters": template.filters,
-                "fn": template.code,
+                "script": template.code,
                 "inputs": inputs,
                 "enabled": True,
                 "icon_url": template.icon_url,
@@ -107,7 +108,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 "execution_order": plugin_config["order"],
             }
 
-            print("Attempting to create custom function...")  # noqa: T201
+            print("Attempting to create script function...")  # noqa: T201
             print(json.dumps(data, indent=2))  # noqa: T201
 
             serializer = InsightsFunctionSerializer(
@@ -120,14 +121,14 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
         print(insights_functions)  # noqa: T201
 
         if not insights_functions:
-            print("No custom functions to create")  # noqa: T201
+            print("No script functions to create")  # noqa: T201
             return []
 
         if dry_run:
-            print("Dry run, not creating custom functions")  # noqa: T201
+            print("Dry run, not creating script functions")  # noqa: T201
             return insights_functions
 
-        print("Creating custom functions")  # noqa: T201
+        print("Creating script functions")  # noqa: T201
         InsightsFunction.objects.bulk_create(insights_functions)
 
         if not test_mode:

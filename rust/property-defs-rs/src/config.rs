@@ -9,18 +9,9 @@ pub struct Config {
     #[envconfig(nested = true)]
     pub continuous_profiling: ContinuousProfilingConfig,
 
-    // this maps to the original, shared CLOUD PG DB instance in production. When
-    // we migrate to the new persons DB, this won't change.
+    // this maps to the original, shared CLOUD PG DB instance in production.
     #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub database_url: String,
-
-    // when true, the service will point group type mappings resolution to the new persons DB
-    #[envconfig(default = "false")]
-    pub read_groups_from_persons_db: bool,
-
-    // connection string for the new persons DB; unused if not enabled with read_groups_from_persons_db
-    #[envconfig(default = "")]
-    pub database_persons_url: String,
 
     #[envconfig(default = "10")]
     pub max_pg_connections: u32,
@@ -90,6 +81,19 @@ pub struct Config {
     #[envconfig(default = "100000")]
     pub group_type_cache_size: usize,
 
+    // Negative cache for group-type resolution misses (personinsights returned no mapping).
+    // A new group type's $groupidentify can arrive here before its GroupTypeMapping is
+    // visible to personinsights's eventual read, so a miss is often a transient race, not
+    // terminal misuse. We cache the miss for this TTL so we neither hammer personinsights for
+    // repeated unresolvable keys nor block a legitimate new group for longer than the TTL:
+    // once the entry expires the next $groupidentify re-attempts resolution. Kept short on
+    // purpose (the mapping is committed to PG primary before we consume the event, so only
+    // replica lag remains).
+    #[envconfig(default = "30")]
+    pub group_type_negative_ttl_secs: u64,
+    #[envconfig(default = "100000")]
+    pub group_type_negative_cache_size: usize,
+
     #[envconfig(from = "BIND_HOST", default = "::")]
     pub host: String,
 
@@ -114,6 +118,24 @@ pub struct Config {
     // TODO: rename deploy cfg var to "write_batch_size" and update this after to complete the cutover!
     #[envconfig(default = "100")]
     pub write_batch_size: usize,
+
+    #[envconfig(default = "")]
+    pub personinsights_addr: String,
+
+    #[envconfig(default = "5000")]
+    pub personinsights_timeout_ms: u64,
+
+    #[envconfig(default = "5000")]
+    pub personinsights_connect_timeout_ms: u64,
+
+    #[envconfig(default = "2")]
+    pub personinsights_max_retries: u32,
+
+    #[envconfig(default = "50")]
+    pub personinsights_initial_backoff_ms: u64,
+
+    #[envconfig(default = "1000")]
+    pub personinsights_max_backoff_ms: u64,
 }
 
 #[derive(Clone)]

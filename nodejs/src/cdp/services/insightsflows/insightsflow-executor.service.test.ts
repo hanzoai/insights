@@ -1,29 +1,36 @@
 // sort-imports-ignore
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 
-import { FixtureInsightsFlowBuilder, SimpleInsightsFlowRepresentation } from '~/cdp/_tests/builders/insightsflow.builder'
-import { createScriptExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
-import { compileFn } from '~/cdp/templates/compiler'
+import { FixtureInsightsFlowBuilder, SimpleInsightsFlowRepresentation } from '~/cdp/_tests/builders/hogflow.builder'
+import { createHogExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
+import { compileHog } from '~/cdp/templates/compiler'
 import { template as insightsCaptureTemplate } from '~/cdp/templates/_destinations/insights_capture/insights-capture.template'
-import { InsightsFlow } from '~/schema/insightsflow'
+import { InsightsFlow } from '~/cdp/schema/hogflow'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
-import { fetch } from '~/utils/request'
-import { logger } from '../../../utils/logger'
+import { fetch } from '~/common/utils/request'
+import { logger } from '~/common/utils/logger'
 import { Hub } from '../../../types'
-import { createHub } from '../../../utils/db/hub'
+import { createHub } from '~/common/utils/db/hub'
 import { FN_FILTERS_EXAMPLES } from '../../_tests/examples'
 import { createExampleInsightsFlowInvocation } from '../../_tests/fixtures-insightsflows'
-import { ScriptExecutorService } from '../script-executor.service'
-import { InsightsFunctionTemplateManagerService } from '../managers/insights-function-template-manager.service'
+import { HogExecutorService } from '../script-executor.service'
+import { HogInputsService } from '../script-inputs.service'
+import { EmailService } from '../messaging/email.service'
+import { EmailTrackingCodeSigner } from '../messaging/helpers/tracking-code'
+import { RecipientTokensService } from '../messaging/recipient-tokens.service'
+import { InsightsFunctionTemplateManagerService } from '../managers/script-function-template-manager.service'
 import { RecipientsManagerService } from '../managers/recipients-manager.service'
+import { TeamWorkflowsConfigService } from '../managers/team-workflows-config.service'
+import { EmailSuppressionService, emailSuppressionConfigFromEnv } from '../messaging/email-suppression.service'
+import { EmailValidationService } from '../messaging/email-validation.service'
 import { RecipientPreferencesService } from '../messaging/recipient-preferences.service'
-import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './insightsflow-executor.service'
-import { InsightsFlowFunctionsService } from './insightsflow-functions.service'
+import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './hogflow-executor.service'
+import { InsightsFlowFunctionsService } from './hogflow-functions.service'
 
 // Mock before importing fetch
-jest.mock('~/utils/request', () => {
-    const original = jest.requireActual('~/utils/request')
+jest.mock('~/common/utils/request', () => {
+    const original = jest.requireActual('~/common/utils/request')
     return {
         ...original,
         fetch: jest.fn().mockImplementation((url, options) => {
@@ -37,7 +44,7 @@ const cleanLogs = (logs: string[]): string[] => {
     return logs.map((log) => log.replace(/Function completed in \d+(\.\d+)?ms/, 'Function completed in REPLACEDms'))
 }
 
-describe('Customflow Executor', () => {
+describe('Hogflow Executor', () => {
     let executor: InsightsFlowExecutorService
     let hub: Hub
     const mockFetch = jest.mocked(fetch)
@@ -57,18 +64,62 @@ describe('Customflow Executor', () => {
         hub = await createHub({
             SITE_URL: 'http://localhost:8000',
         })
-        const scriptExecutor = new ScriptExecutorService(hub)
+        const hogInputsService = new HogInputsService(
+            hub.integrationManager,
+            new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL),
+            hub.encryptedFields
+        )
+        const emailSuppressionService = new EmailSuppressionService(hub.postgres, emailSuppressionConfigFromEnv())
+        const emailService = new EmailService(
+            {
+                sesAccessKeyId: hub.SES_ACCESS_KEY_ID,
+                sesSecretAccessKey: hub.SES_SECRET_ACCESS_KEY,
+                sesRegion: hub.SES_REGION,
+                sesEndpoint: hub.SES_ENDPOINT,
+                sesTrackedConfigurationSet: hub.SES_TRACKED_CONFIGURATION_SET,
+                sesUntrackedConfigurationSet: hub.SES_UNTRACKED_CONFIGURATION_SET,
+                sesTenantAttributionEnabled: hub.EMAIL_SES_TENANT_ATTRIBUTION_ENABLED,
+            },
+            hub.integrationManager,
+            new TeamWorkflowsConfigService(hub.postgres),
+            hub.ENCRYPTION_SALT_KEYS,
+            hub.SITE_URL,
+            new EmailTrackingCodeSigner(hub.ENCRYPTION_SALT_KEYS, hub.CDP_EMAIL_TRACKING_URL),
+            emailSuppressionService,
+            new RecipientsManagerService(hub.postgres)
+        )
+        const recipientTokensService = new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL)
+        const hogExecutor = new HogExecutorService(
+            {
+                hogCostTimingUpperMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
+                googleAdwordsDeveloperToken: hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
+                fetchRetries: hub.CDP_FETCH_RETRIES,
+                fetchBackoffBaseMs: hub.CDP_FETCH_BACKOFF_BASE_MS,
+                fetchBackoffMaxMs: hub.CDP_FETCH_BACKOFF_MAX_MS,
+            },
+            { teamManager: hub.teamManager, siteUrl: hub.SITE_URL },
+            hogInputsService,
+            emailService,
+            recipientTokensService,
+            undefined as any
+        )
         const insightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(hub.postgres)
-        const insightsFlowFunctionsService = new InsightsFlowFunctionsService(
+        const hogFlowFunctionsService = new InsightsFlowFunctionsService(
             hub.SITE_URL,
             insightsFunctionTemplateManager,
-            scriptExecutor
+            hogExecutor
         )
         const recipientsManager = new RecipientsManagerService(hub.postgres)
-        const recipientPreferencesService = new RecipientPreferencesService(recipientsManager)
+        const recipientPreferencesService = new RecipientPreferencesService(recipientsManager, emailSuppressionService)
+        // Stubbed to always allow: this suite covers executor routing and flow control,
+        // not MX validation (email-validation.service.test.ts does), and the real
+        // service would fire live DNS lookups for the fixture recipients here.
+        const emailValidationService = {
+            getSkipReason: () => Promise.resolve(null),
+        } as unknown as EmailValidationService
 
         await insertInsightsFunctionTemplate(hub.postgres, {
-            id: 'template-test-customflow-executor',
+            id: 'template-test-hogflow-executor',
             name: 'Test Template',
             code: `
             print(f'Hello, {inputs.name}!')
@@ -83,7 +134,7 @@ describe('Customflow Executor', () => {
         })
 
         await insertInsightsFunctionTemplate(hub.postgres, {
-            id: 'template-test-customflow-executor-async',
+            id: 'template-test-hogflow-executor-async',
             name: 'Test template multi fetch',
             code: `
             print(f'Hello, {inputs.name}!')
@@ -102,14 +153,18 @@ describe('Customflow Executor', () => {
 
         await insertInsightsFunctionTemplate(hub.postgres, insightsCaptureTemplate)
 
-        executor = new InsightsFlowExecutorService(insightsFlowFunctionsService, recipientPreferencesService)
+        executor = new InsightsFlowExecutorService(
+            hogFlowFunctionsService,
+            recipientPreferencesService,
+            emailValidationService
+        )
     })
 
     describe('general event processing', () => {
-        let insightsFlow: InsightsFlow
+        let hogFlow: InsightsFlow
 
         beforeEach(async () => {
-            insightsFlow = new FixtureInsightsFlowBuilder()
+            hogFlow = new FixtureInsightsFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -123,11 +178,11 @@ describe('Customflow Executor', () => {
                         function_id_1: {
                             type: 'function',
                             config: {
-                                template_id: 'template-test-customflow-executor',
+                                template_id: 'template-test-hogflow-executor',
                                 inputs: {
                                     name: {
                                         value: `Mr {event?.properties?.name}`,
-                                        bytecode: await compileFn(`return f'Mr {event?.properties?.name}'`),
+                                        bytecode: await compileHog(`return f'Mr {event?.properties?.name}'`),
                                     },
                                 },
                             },
@@ -154,10 +209,65 @@ describe('Customflow Executor', () => {
                 .build()
         })
 
-        it('can execute a simple customflow', async () => {
-            const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+        it('resuming past a completed action does not re-execute it (no double-send on recovery)', async () => {
+            // A recovered poison-pill run resumes from where it stalled. currentAction
+            // sits AFTER function_id_1 (which does a fetch), so replay must resume at
+            // exit and must NOT re-run that fetch — otherwise a recovered flow re-sends
+            // an email/webhook that already went out.
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                 event: {
-                    ...createScriptExecutionGlobals().event,
+                    ...createHogExecutionGlobals().event,
+                    properties: {
+                        name: 'John Doe',
+                    },
+                    timestamp: '2026-01-30T20:20:20.200Z',
+                },
+            })
+            invocation.state.currentAction = {
+                id: 'exit',
+                startedAtTimestamp: DateTime.now().toMillis(),
+            }
+
+            const result = await executor.execute(invocation)
+
+            expect(result.finished).toBe(true)
+            expect(result.invocation.state.currentAction?.id).toBe('exit')
+            // The fetch-doing action before the resume point must not run again.
+            expect(mockFetch).toHaveBeenCalledTimes(0)
+            expect(result.logs.map((log) => log.message)).not.toContain('Executing action [Action:function_id_1]')
+        })
+
+        it('resuming a rerun onto an action removed by a later flow edit fails safe without re-running anything', async () => {
+            // #70792 restores currentAction on rerun. If the flow was edited after the run
+            // recorded its globals and the resume-point action was deleted, ensureCurrentAction
+            // can't find the id. The safe outcome is a finished, errored result — never a
+            // restart from the trigger (which would re-send) and never a hang.
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
+                event: {
+                    ...createHogExecutionGlobals().event,
+                    properties: {
+                        name: 'John Doe',
+                    },
+                },
+            })
+            invocation.state.currentAction = {
+                id: 'action_removed_by_edit',
+                startedAtTimestamp: DateTime.now().toMillis(),
+            }
+
+            const result = await executor.execute(invocation)
+
+            expect(result.finished).toBe(true)
+            expect(result.error).toContain('action_removed_by_edit')
+            // Nothing already done gets re-run: the fetch-doing action never executes.
+            expect(mockFetch).toHaveBeenCalledTimes(0)
+            expect(result.logs.map((log) => log.message)).not.toContain('Executing action [Action:function_id_1]')
+        })
+
+        it('can execute a simple hogflow', async () => {
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
+                event: {
+                    ...createHogExecutionGlobals().event,
                     properties: {
                         name: 'John Doe',
                     },
@@ -169,6 +279,8 @@ describe('Customflow Executor', () => {
 
             expect(result).toEqual({
                 capturedInsightsEvents: [],
+                warehouseWebhookPayloads: [],
+                emailAssets: [],
                 invocation: {
                     state: {
                         actionStepCount: 1,
@@ -190,7 +302,7 @@ describe('Customflow Executor', () => {
                     },
                     id: expect.any(String),
                     teamId: 1,
-                    insightsFlow: invocation.insightsFlow,
+                    hogFlow: invocation.hogFlow,
                     person: {
                         id: 'person_id',
                         name: 'John Doe',
@@ -200,8 +312,8 @@ describe('Customflow Executor', () => {
                         url: '',
                     },
                     filterGlobals: expect.any(Object),
-                    functionId: invocation.insightsFlow.id,
-                    queue: 'customflow',
+                    functionId: invocation.hogFlow.id,
+                    queue: 'hogflow',
                     queueMetadata: undefined,
                     queueScheduledAt: undefined,
                     queueSource: undefined,
@@ -211,7 +323,7 @@ describe('Customflow Executor', () => {
                 finished: true,
                 logs: [
                     {
-                        level: 'debug',
+                        level: 'info',
                         message:
                             'Starting workflow execution at trigger for [Person:person_id|John Doe] on [Event:uuid|test|2026-01-30T20:20:20.200Z]',
                         timestamp: expect.any(DateTime),
@@ -254,24 +366,31 @@ describe('Customflow Executor', () => {
                 ],
                 metrics: [
                     {
-                        team_id: insightsFlow.team_id,
-                        app_source_id: insightsFlow.id,
-                        instance_id: expect.any(String),
+                        team_id: hogFlow.team_id,
+                        app_source_id: hogFlow.id,
+                        metric_kind: 'other',
+                        metric_name: 'fetch',
+                        count: 1,
+                    },
+                    {
+                        team_id: hogFlow.team_id,
+                        app_source_id: hogFlow.id,
+                        instance_id: 'function_id_1',
                         metric_kind: 'fetch',
                         metric_name: 'billable_invocation',
                         count: 1,
                     },
                     {
-                        team_id: insightsFlow.team_id,
-                        app_source_id: insightsFlow.id,
+                        team_id: hogFlow.team_id,
+                        app_source_id: hogFlow.id,
                         instance_id: 'function_id_1',
                         metric_kind: 'success',
                         metric_name: 'succeeded',
                         count: 1,
                     },
                     {
-                        team_id: insightsFlow.team_id,
-                        app_source_id: insightsFlow.id,
+                        team_id: hogFlow.team_id,
+                        app_source_id: hogFlow.id,
                         instance_id: 'exit',
                         metric_kind: 'success',
                         metric_name: 'succeeded',
@@ -281,13 +400,13 @@ describe('Customflow Executor', () => {
             })
         })
 
-        it('can execute a customflow with async function delays', async () => {
-            const action = insightsFlow.actions.find((action) => action.id === 'function_id_1')!
-            ;(action.config as any).template_id = 'template-test-customflow-executor-async'
+        it('can execute a hogflow with async function delays', async () => {
+            const action = hogFlow.actions.find((action) => action.id === 'function_id_1')!
+            ;(action.config as any).template_id = 'template-test-hogflow-executor-async'
 
-            const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                 event: {
-                    ...createScriptExecutionGlobals().event,
+                    ...createHogExecutionGlobals().event,
                     properties: {
                         name: 'John Doe',
                     },
@@ -342,14 +461,14 @@ describe('Customflow Executor', () => {
 
         describe('action filtering', () => {
             beforeEach(() => {
-                const action = insightsFlow.actions.find((action) => action.id === 'function_id_1')!
+                const action = hogFlow.actions.find((action) => action.id === 'function_id_1')!
                 action.filters = FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters
             })
 
             it('should only run the action if the provided filters match', async () => {
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         event: '$pageview',
                         properties: {
                             $current_url: 'https://hanzo.ai',
@@ -361,7 +480,9 @@ describe('Customflow Executor', () => {
 
                 expect(result.finished).toEqual(true)
                 expect(mockFetch).toHaveBeenCalledTimes(1)
-                expect(result.metrics.find((x) => x.instance_id === 'function_id_1')).toMatchObject({
+                expect(
+                    result.metrics.find((x) => x.instance_id === 'function_id_1' && x.metric_name === 'succeeded')
+                ).toMatchObject({
                     count: 1,
                     instance_id: 'function_id_1',
                     metric_kind: 'success',
@@ -370,9 +491,9 @@ describe('Customflow Executor', () => {
             })
 
             it('should skip the action if the filters do not match', async () => {
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         event: 'not-a-pageview',
                         properties: {
                             $current_url: 'https://hanzo.ai',
@@ -395,9 +516,9 @@ describe('Customflow Executor', () => {
 
         describe('executeTest', () => {
             it('executes only a single step at a time', async () => {
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         properties: {
                             name: 'Debug User',
                         },
@@ -436,6 +557,32 @@ describe('Customflow Executor', () => {
                     'Workflow completed',
                 ])
             })
+
+            it('surfaces the matcher wake event in the resume log', async () => {
+                const invocation = createExampleInsightsFlowInvocation(hogFlow, {
+                    event: {
+                        ...createHogExecutionGlobals().event,
+                        properties: { name: 'Debug User' },
+                        timestamp: '2026-01-30T20:20:20.200Z',
+                    },
+                })
+                // Woken by the matcher: the resume log should emit a linkable
+                // [Event:uuid|name|timestamp] token, not just echo the trigger event.
+                invocation.state.currentAction = {
+                    id: 'function_id_1',
+                    startedAtTimestamp: DateTime.now().toMillis(),
+                    eventMatched: true,
+                    eventMatchedEvent: 'subscription created',
+                    eventMatchedEventUuid: 'wake-uuid-123',
+                    eventMatchedEventTimestamp: '2026-01-30T21:00:00.000Z',
+                }
+
+                const result = await executor.execute(invocation)
+
+                expect(result.logs[0].message).toBe(
+                    'Resuming workflow execution at [Action:function_id_1] on [Event:uuid|test|2026-01-30T20:20:20.200Z] (woken by [Event:wake-uuid-123|subscription created|2026-01-30T21:00:00.000Z])'
+                )
+            })
         })
     })
 
@@ -469,12 +616,574 @@ describe('Customflow Executor', () => {
                 .build()
         }
 
+        describe('workflow definition changed mid-run', () => {
+            const buildFlow = (): InsightsFlow =>
+                createInsightsFlow({
+                    actions: {},
+                    edges: [
+                        { from: 'trigger', to: 'delay', type: 'continue' },
+                        { from: 'delay', to: 'exit', type: 'continue' },
+                    ],
+                })
+
+            it.each([
+                [
+                    'the current action was deleted',
+                    (hogFlow: InsightsFlow) => {
+                        hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
+                    },
+                ],
+                [
+                    'the current action no longer has a continue edge',
+                    (hogFlow: InsightsFlow) => {
+                        hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
+                    },
+                ],
+            ])('exits gracefully when %s', async (_desc, mutateFlow) => {
+                const hogFlow = buildFlow()
+                const invocation = createExampleInsightsFlowInvocation(hogFlow)
+                // Parked on the delay long enough that it has elapsed, so the handler advances
+                invocation.state.currentAction = {
+                    id: 'delay',
+                    startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
+                }
+                mutateFlow(hogFlow)
+                // The flow was edited after the run arrived at the step - the live-edit case
+                hogFlow.updated_at = DateTime.now().toMillis()
+
+                const result = await executor.execute(invocation)
+
+                expect(result.finished).toBe(true)
+                expect(result.error).toBeUndefined()
+                const exitMetric = result.metrics.find((m) => m.metric_name === 'exited_workflow_changed')
+                expect(exitMetric).toMatchObject({ metric_kind: 'other', instance_id: 'delay' })
+                expect(result.metrics.map((m) => m.metric_name)).not.toContain('failed')
+                expect(result.logs.filter((l) => l.level === 'error')).toEqual([])
+                expect(result.logs.map((l) => l.message).join('\n')).toContain('Workflow exited')
+            })
+
+            it('still fails the run when the graph was malformed all along (no edit since the step started)', async () => {
+                const hogFlow = buildFlow()
+                const invocation = createExampleInsightsFlowInvocation(hogFlow)
+                invocation.state.currentAction = {
+                    id: 'delay',
+                    startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
+                }
+                hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
+                // No edit since the run arrived: the missing edge is a bad definition, not a live edit
+                hogFlow.updated_at = DateTime.now().minus({ hours: 4 }).toMillis()
+
+                const result = await executor.execute(invocation)
+
+                expect(result.finished).toBe(true)
+                expect(result.error).toBe('No next action found for action delay')
+                expect(result.metrics.map((m) => m.metric_name)).toContain('failed')
+                expect(result.metrics.map((m) => m.metric_name)).not.toContain('exited_workflow_changed')
+            })
+
+            describe('skip-forward for deleted steps (action_redirects)', () => {
+                const parkOnDeleted = (
+                    hogFlow: InsightsFlow,
+                    actionId = 'delay'
+                ): ReturnType<typeof createExampleInsightsFlowInvocation> => {
+                    const invocation = createExampleInsightsFlowInvocation(hogFlow)
+                    invocation.state.currentAction = {
+                        id: actionId,
+                        startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
+                    }
+                    hogFlow.actions = hogFlow.actions.filter((action) => action.id !== actionId)
+                    hogFlow.updated_at = DateTime.now().toMillis()
+                    return invocation
+                }
+
+                // A run can be parked on any async step type. The redirect never inspects the
+                // deleted step - it was removed before the run executed it - so every park type
+                // must take the identical path: same metric, same log, same landing spot.
+                it.each([
+                    ['delay', { type: 'delay', config: { delay_duration: '2h' } }],
+                    [
+                        'wait_until_condition',
+                        {
+                            type: 'wait_until_condition',
+                            config: {
+                                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                                max_wait_duration: '10m',
+                            },
+                        },
+                    ],
+                    [
+                        'wait_until_time_window',
+                        {
+                            type: 'wait_until_time_window',
+                            config: { time: ['10:00', '11:00'], day: 'any', timezone: 'UTC' },
+                        },
+                    ],
+                ] as const)(
+                    'continues at the surviving successor instead of exiting (parked on %s)',
+                    async (_parkType, parkedAction) => {
+                        const hogFlow = createInsightsFlow({
+                            actions: { parked: parkedAction as any },
+                            edges: [
+                                { from: 'trigger', to: 'parked', type: 'continue' },
+                                { from: 'parked', to: 'exit', type: 'continue' },
+                            ],
+                        })
+                        const invocation = parkOnDeleted(hogFlow, 'parked')
+                        hogFlow.action_redirects = { parked: 'exit' }
+
+                        const result = await executor.execute(invocation)
+
+                        expect(result.finished).toBe(true)
+                        expect(result.error).toBeUndefined()
+                        const redirectMetric = result.metrics.find(
+                            (m) => m.metric_name === 'redirected_workflow_changed'
+                        )
+                        expect(redirectMetric).toMatchObject({ metric_kind: 'other', instance_id: 'parked' })
+                        expect(result.metrics.map((m) => m.metric_name)).not.toContain('exited_workflow_changed')
+                        expect(result.metrics.map((m) => m.metric_name)).not.toContain('failed')
+                        expect(result.logs.map((l) => l.message).join('\n')).toContain('continuing at [Action:exit]')
+                    }
+                )
+
+                it('enters the redirect target fresh, so a delay there parks from redirect time', async () => {
+                    // The run spent 3h on the deleted step; the 2h delay it redirects into must still
+                    // park for its full 2h rather than treating the old step entry time as its own
+                    const hogFlow = createInsightsFlow({
+                        actions: { delay_2: { type: 'delay', config: { delay_duration: '2h' } } },
+                        edges: [
+                            { from: 'trigger', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'delay_2', type: 'continue' },
+                            { from: 'delay_2', to: 'exit', type: 'continue' },
+                        ],
+                    })
+                    const invocation = parkOnDeleted(hogFlow)
+                    hogFlow.action_redirects = { delay: 'delay_2' }
+
+                    const result = await executor.execute(invocation)
+
+                    expect(result.finished).toBe(false)
+                    expect(result.invocation.queueScheduledAt?.toMillis()).toEqual(
+                        DateTime.now().plus({ hours: 2 }).toMillis()
+                    )
+                })
+
+                it.each([
+                    [
+                        'the dead position has no map entry',
+                        (hogFlow: InsightsFlow) => {
+                            hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
+                        },
+                    ],
+                    [
+                        'the surviving position lost its edge (map keys are deleted steps only)',
+                        (hogFlow: InsightsFlow) => {
+                            hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
+                        },
+                    ],
+                ])('still exits gracefully when %s', async (_desc, mutateFlow) => {
+                    const hogFlow = buildFlow()
+                    const invocation = createExampleInsightsFlowInvocation(hogFlow)
+                    invocation.state.currentAction = {
+                        id: 'delay',
+                        startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
+                    }
+                    mutateFlow(hogFlow)
+                    hogFlow.updated_at = DateTime.now().toMillis()
+                    // An entry for an unrelated deleted step must not capture this run
+                    hogFlow.action_redirects = { some_other_step: 'exit' }
+
+                    const result = await executor.execute(invocation)
+
+                    expect(result.finished).toBe(true)
+                    expect(result.error).toBeUndefined()
+                    expect(result.metrics.map((m) => m.metric_name)).toContain('exited_workflow_changed')
+                    expect(result.metrics.map((m) => m.metric_name)).not.toContain('redirected_workflow_changed')
+                })
+
+                it('never redirects a graph that was malformed all along, even with a map entry', async () => {
+                    const hogFlow = buildFlow()
+                    const invocation = createExampleInsightsFlowInvocation(hogFlow)
+                    invocation.state.currentAction = {
+                        id: 'delay',
+                        startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
+                    }
+                    hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
+                    hogFlow.action_redirects = { delay: 'exit' }
+                    // No edit since the run arrived: the timestamp guard must run before any redirect
+                    hogFlow.updated_at = DateTime.now().minus({ hours: 4 }).toMillis()
+
+                    const result = await executor.execute(invocation)
+
+                    expect(result.finished).toBe(true)
+                    expect(result.error).toBe('Action delay not found')
+                    // Deleting the current action itself throws in ensureCurrentAction, before the
+                    // per-action failure metric is emitted - so the loud failure surfaces via
+                    // result.error rather than a 'failed' metric (unlike a deleted *edge*, which
+                    // throws inside the action handler where the metric is tracked).
+                    expect(result.metrics.map((m) => m.metric_name)).not.toContain('redirected_workflow_changed')
+                })
+
+                it('fails the run (no loop) when the redirect target itself dead-ends', async () => {
+                    // The target enters with a fresh step timestamp, so its own structural miss no
+                    // longer classifies as a live edit - it must surface as a plain failure. Uses a
+                    // trigger target so the dead end throws synchronously on entry (a delay would
+                    // park first and only fail on the next wake, which one execute() can't observe).
+                    const hogFlow = createInsightsFlow({
+                        actions: { hop: { type: 'trigger', config: { type: 'schedule' } } },
+                        edges: [
+                            { from: 'trigger', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'hop', type: 'continue' },
+                            { from: 'hop', to: 'exit', type: 'continue' },
+                        ],
+                    })
+                    const invocation = parkOnDeleted(hogFlow)
+                    hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'hop')
+                    hogFlow.action_redirects = { delay: 'hop' }
+
+                    const result = await executor.execute(invocation)
+
+                    expect(result.finished).toBe(true)
+                    expect(result.error).toBe('No next action found for action hop')
+                    expect(result.metrics.map((m) => m.metric_name)).toContain('redirected_workflow_changed')
+                    expect(result.metrics.map((m) => m.metric_name)).toContain('failed')
+                })
+            })
+        })
+
+        // The follow-live contract: the worker re-reads live config on every wake, so edits made
+        // while a run is parked take effect the next time that run executes. These tests pin the
+        // per-edit-type semantics down as a contract rather than emergent behavior. Note the wake
+        // itself still happens at the originally scheduled time - only what happens ON wake is
+        // recomputed from the edited config.
+        describe('follow-live contract: edits picked up on wake', () => {
+            const parkAt = (
+                hogFlow: InsightsFlow,
+                actionId: string,
+                agoMs: number
+            ): ReturnType<typeof createExampleInsightsFlowInvocation> => {
+                const invocation = createExampleInsightsFlowInvocation(hogFlow)
+                invocation.state.currentAction = {
+                    id: actionId,
+
+                    startedAtTimestamp: DateTime.now().minus({ milliseconds: agoMs }).toMillis(),
+                }
+                return invocation
+            }
+
+            const editFlow = (hogFlow: InsightsFlow, mutate: (hogFlow: InsightsFlow) => void): void => {
+                mutate(hogFlow)
+                hogFlow.updated_at = DateTime.now().toMillis()
+            }
+
+            describe('delay duration edits', () => {
+                const buildDelayFlow = (duration: string): InsightsFlow =>
+                    createInsightsFlow({
+                        actions: { delay: { type: 'delay', config: { delay_duration: duration } } },
+                        edges: [
+                            { from: 'trigger', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'exit', type: 'continue' },
+                        ],
+                    })
+
+                it.each([
+                    // parkedAgo is relative to the fixed test clock; expectedParkOffsetMs is relative
+                    // to the step's startedAtTimestamp (null = the run advances instead of re-parking)
+                    {
+                        name: 'a shortened delay that has already elapsed advances on wake with no extra wait',
+                        initial: '7d',
+                        edited: '1d',
+                        parkedAgo: { days: 3 },
+                        expectedParkOffsetMs: null,
+                    },
+                    {
+                        name: 'a shortened delay still pending re-parks at startedAt + new duration',
+                        initial: '7d',
+                        edited: '5d',
+                        parkedAgo: { days: 3 },
+                        expectedParkOffsetMs: 5 * 24 * 60 * 60 * 1000,
+                    },
+                    {
+                        name: 'a lengthened delay woken at its old expiry re-parks for the remainder',
+                        initial: '1d',
+                        edited: '7d',
+                        parkedAgo: { days: 1, minutes: 1 },
+                        expectedParkOffsetMs: 7 * 24 * 60 * 60 * 1000,
+                    },
+                ])('$name', async ({ initial, edited, parkedAgo, expectedParkOffsetMs }) => {
+                    const hogFlow = buildDelayFlow(initial)
+                    const invocation = parkAt(hogFlow, 'delay', Duration.fromObject(parkedAgo).toMillis())
+                    editFlow(hogFlow, (flow) => {
+                        const delayAction = flow.actions.find((a) => a.id === 'delay')!
+                        ;(delayAction.config as any).delay_duration = edited
+                    })
+
+                    const result = await executor.execute(invocation)
+
+                    if (expectedParkOffsetMs === null) {
+                        expect(result.finished).toBe(true)
+                        expect(result.error).toBeUndefined()
+                        expect(result.invocation.queueScheduledAt).toBeUndefined()
+                        expect(result.invocation.state.currentAction?.id).toBe('exit')
+                    } else {
+                        expect(result.finished).toBe(false)
+                        expect(result.invocation.queueScheduledAt?.toMillis()).toBe(
+                            invocation.state.currentAction!.startedAtTimestamp + expectedParkOffsetMs
+                        )
+                        // Parked without advancing: the run is still standing on the delay step
+                        expect(result.invocation.state.currentAction?.id).toBe('delay')
+                    }
+                })
+            })
+
+            describe('wait_until_time_window edits', () => {
+                // The fixed test clock is 2025-01-01T00:00:00Z (a Wednesday)
+                const buildWindowFlow = (config: Record<string, any>): InsightsFlow =>
+                    createInsightsFlow({
+                        actions: { window: { type: 'wait_until_time_window', config } },
+                        edges: [
+                            { from: 'trigger', to: 'window', type: 'continue' },
+                            { from: 'window', to: 'exit', type: 'continue' },
+                        ],
+                    })
+
+                it.each([
+                    {
+                        name: 'a window edited to be open now advances on wake',
+                        edited: { time: 'any', day: 'any', timezone: 'UTC' },
+                        expectedParkIso: null,
+                    },
+                    {
+                        name: 'an edited window re-parks at the new window start',
+                        edited: { time: ['05:00', '06:00'], day: 'any', timezone: 'UTC' },
+                        expectedParkIso: '2025-01-01T05:00:00.000Z',
+                    },
+                ])('$name', async ({ edited, expectedParkIso }) => {
+                    // Parked on a window that is closed at the fixed test time
+                    const hogFlow = buildWindowFlow({ time: ['10:00', '11:00'], day: 'any', timezone: 'UTC' })
+                    const invocation = parkAt(hogFlow, 'window', 60 * 60 * 1000)
+                    editFlow(hogFlow, (flow) => {
+                        const windowAction = flow.actions.find((a) => a.id === 'window')!
+                        windowAction.config = edited as any
+                    })
+
+                    const result = await executor.execute(invocation)
+
+                    if (expectedParkIso === null) {
+                        expect(result.finished).toBe(true)
+                        expect(result.error).toBeUndefined()
+                        expect(result.invocation.state.currentAction?.id).toBe('exit')
+                    } else {
+                        expect(result.finished).toBe(false)
+                        expect(result.invocation.queueScheduledAt?.toUTC().toISO()).toBe(expectedParkIso)
+                        expect(result.invocation.state.currentAction?.id).toBe('window')
+                    }
+                })
+            })
+
+            describe('graph edits around the run position', () => {
+                const buildFlow = (): InsightsFlow =>
+                    createInsightsFlow({
+                        actions: {},
+                        edges: [
+                            { from: 'trigger', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'exit', type: 'continue' },
+                        ],
+                    })
+
+                const addDelayAction = (hogFlow: InsightsFlow, id: string): void => {
+                    hogFlow.actions.push({
+                        id,
+                        name: id,
+                        description: id,
+                        type: 'delay',
+                        config: { delay_duration: '2h' },
+                        created_at: Date.now(),
+                        updated_at: Date.now(),
+                        on_error: 'continue',
+                    } as any)
+                }
+
+                it('a step inserted after the run position executes when reached (live edges are followed)', async () => {
+                    const hogFlow = buildFlow()
+                    // Parked on the (2h) delay long enough that it advances on wake
+                    const invocation = parkAt(hogFlow, 'delay', 3 * 60 * 60 * 1000)
+                    editFlow(hogFlow, (flow) => {
+                        addDelayAction(flow, 'delay_b')
+                        flow.edges = [
+                            { from: 'trigger', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'delay_b', type: 'continue' },
+                            { from: 'delay_b', to: 'exit', type: 'continue' },
+                        ]
+                    })
+
+                    const result = await executor.execute(invocation)
+
+                    // The run advanced onto the inserted step and parked there for its full duration
+                    expect(result.finished).toBe(false)
+                    expect(result.invocation.state.currentAction?.id).toBe('delay_b')
+                    expect(result.invocation.queueScheduledAt?.toMillis()).toBe(
+                        DateTime.now().plus({ hours: 2 }).toMillis()
+                    )
+                })
+
+                it('a step inserted behind the run position never executes for it (the past does not re-run)', async () => {
+                    const hogFlow = buildFlow()
+                    const invocation = parkAt(hogFlow, 'delay', 3 * 60 * 60 * 1000)
+                    editFlow(hogFlow, (flow) => {
+                        addDelayAction(flow, 'delay_early')
+                        flow.edges = [
+                            { from: 'trigger', to: 'delay_early', type: 'continue' },
+                            { from: 'delay_early', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'exit', type: 'continue' },
+                        ]
+                    })
+
+                    const result = await executor.execute(invocation)
+
+                    expect(result.finished).toBe(true)
+                    expect(result.error).toBeUndefined()
+                    expect(result.invocation.queueScheduledAt).toBeUndefined()
+                    expect(result.logs.map((l) => l.message).join('\n')).not.toContain('delay_early')
+                })
+            })
+
+            it('an in-progress function step completes with the inputs rendered before the edit', async () => {
+                // Two fetches so the function pauses mid-execution: the run parks between them
+                // with its rendered inputs stored in insightsFunctionState
+                await insertInsightsFunctionTemplate(hub.postgres, {
+                    id: 'template-test-follow-live-paused',
+                    name: 'Prints an input before and after an async pause',
+                    code: `
+                    print('Rendered as', inputs.name);
+                    fetch('https://hanzo.ai');
+                    fetch('https://hanzo.ai');
+                    print('Still', inputs.name);`,
+                    inputs_schema: [{ key: 'name', type: 'string', required: true }],
+                })
+
+                const hogFlow = createInsightsFlow({
+                    actions: {
+                        function_1: {
+                            type: 'function',
+                            config: {
+                                template_id: 'template-test-follow-live-paused',
+                                inputs: {
+                                    name: { value: 'Original', bytecode: await compileHog(`return 'Original'`) },
+                                },
+                            },
+                        },
+                    },
+                    edges: [
+                        { from: 'trigger', to: 'function_1', type: 'continue' },
+                        { from: 'function_1', to: 'exit', type: 'continue' },
+                    ],
+                })
+
+                const invocation = createExampleInsightsFlowInvocation(hogFlow)
+
+                // First execution renders the inputs and pauses inside the function at the fetch
+                const pausedResult = await executor.execute(invocation)
+                expect(pausedResult.finished).toBe(false)
+                expect(pausedResult.invocation.state.currentAction?.insightsFunctionState).toEqual(expect.any(Object))
+                expect(pausedResult.logs.map((l) => l.message).join('\n')).toContain('Rendered as, Original')
+
+                // Edit the input while the run is paused inside the step
+                editFlow(hogFlow, (flow) => {
+                    const action = flow.actions.find((a) => a.id === 'function_1')!
+                    ;(action.config as any).inputs.name.value = 'Edited'
+                })
+                ;(hogFlow.actions.find((a) => a.id === 'function_1')!.config as any).inputs.name.bytecode =
+                    await compileHog(`return 'Edited'`)
+
+                // The continuation completes as prepared: inputs were rendered at step entry
+                const result = await executor.execute(pausedResult.invocation)
+                expect(result.finished).toBe(true)
+                expect(result.error).toBeUndefined()
+                const messages = result.logs.map((l) => l.message).join('\n')
+                expect(messages).toContain('Still, Original')
+                expect(messages).not.toContain('Edited')
+            })
+
+            // The cases above wake at the natural time; these wake EARLY — as the timing-edit
+            // reschedule sweep (#66380) and the subscription matcher do. Early wake must be
+            // behaviourally idempotent: the run re-parks at its unchanged target (never advancing
+            // currentAction, so the job row's action_id keeps naming the wait step), or runs the
+            // step's new handler when the type changed under it. Bulk-rescheduling parked jobs is
+            // only safe while these hold.
+            describe('early wakes (reschedule sweep contract)', () => {
+                it('a delay woken early with unchanged config re-parks at its original target', async () => {
+                    const hogFlow = createInsightsFlow({
+                        actions: { delay: { type: 'delay', config: { delay_duration: '7d' } } },
+                        edges: [
+                            { from: 'trigger', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'exit', type: 'continue' },
+                        ],
+                    })
+                    const invocation = parkAt(hogFlow, 'delay', Duration.fromObject({ days: 2 }).toMillis())
+
+                    const result = await executor.execute(invocation)
+
+                    expect(result.finished).toBe(false)
+                    expect(result.invocation.queueScheduledAt?.toMillis()).toBe(
+                        invocation.state.currentAction!.startedAtTimestamp + Duration.fromObject({ days: 7 }).toMillis()
+                    )
+                    expect(result.invocation.state.currentAction?.id).toBe('delay')
+                })
+
+                it('a time window woken early with unchanged config re-parks at the original window start', async () => {
+                    // The window is closed at the fixed test time (2025-01-01T00:00:00Z)
+                    const hogFlow = createInsightsFlow({
+                        actions: {
+                            window: {
+                                type: 'wait_until_time_window',
+                                config: { time: ['10:00', '11:00'], day: 'any', timezone: 'UTC' },
+                            },
+                        },
+                        edges: [
+                            { from: 'trigger', to: 'window', type: 'continue' },
+                            { from: 'window', to: 'exit', type: 'continue' },
+                        ],
+                    })
+                    const invocation = parkAt(hogFlow, 'window', 60 * 60 * 1000)
+
+                    const result = await executor.execute(invocation)
+
+                    expect(result.finished).toBe(false)
+                    expect(result.invocation.queueScheduledAt?.toUTC().toISO()).toBe('2025-01-01T10:00:00.000Z')
+                    expect(result.invocation.state.currentAction?.id).toBe('window')
+                })
+
+                it("a step whose type changed while a run was parked on it runs the new type's handler on wake", async () => {
+                    const hogFlow = createInsightsFlow({
+                        actions: { delay: { type: 'delay', config: { delay_duration: '7d' } } },
+                        edges: [
+                            { from: 'trigger', to: 'delay', type: 'continue' },
+                            { from: 'delay', to: 'exit', type: 'continue' },
+                        ],
+                    })
+                    const invocation = parkAt(hogFlow, 'delay', Duration.fromObject({ days: 2 }).toMillis())
+                    editFlow(hogFlow, (flow) => {
+                        const action = flow.actions.find((a) => a.id === 'delay')!
+                        action.type = 'wait_until_time_window'
+                        action.config = { time: 'any', day: 'any', timezone: 'UTC' } as any
+                    })
+
+                    const result = await executor.execute(invocation)
+
+                    // The always-open window handler runs and the run advances
+                    expect(result.finished).toBe(true)
+                    expect(result.error).toBeUndefined()
+                    expect(result.invocation.state.currentAction?.id).toBe('exit')
+                })
+            })
+        })
+
         describe('early exit conditions', () => {
-            let insightsFlow: InsightsFlow
+            let hogFlow: InsightsFlow
 
             beforeEach(async () => {
                 // Setup: exit if person no longer matches trigger filters
-                insightsFlow = new FixtureInsightsFlowBuilder()
+                hogFlow = new FixtureInsightsFlowBuilder()
                     .withExitCondition('exit_only_at_end')
                     .withWorkflow({
                         actions: {
@@ -488,11 +1197,11 @@ describe('Customflow Executor', () => {
                             function_id_1: {
                                 type: 'function',
                                 config: {
-                                    template_id: 'template-test-customflow-executor',
+                                    template_id: 'template-test-hogflow-executor',
                                     inputs: {
                                         name: {
                                             value: `Mr {event?.properties?.name}`,
-                                            bytecode: await compileFn(`return f'Mr {event?.properties?.name}'`),
+                                            bytecode: await compileHog(`return f'Mr {event?.properties?.name}'`),
                                         },
                                     },
                                 },
@@ -511,9 +1220,9 @@ describe('Customflow Executor', () => {
             })
 
             it('should not exit early if exit condition is exit_only_at_end', async () => {
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         event: '$pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -522,16 +1231,17 @@ describe('Customflow Executor', () => {
                 // Step 1: run first action (function_id_1)
                 const result1 = await executor.execute(invocation)
                 expect(result1.finished).toBe(true)
-                // Metrics: 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
+                // Metrics: 'fetch' from function_id_1, 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
                 expect(result1.metrics.map((m) => m.metric_name)).toEqual([
+                    'fetch',
                     'billable_invocation',
                     'succeeded',
                     'succeeded',
                 ])
 
-                const invocation2 = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation2 = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         event: 'not-a-pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -540,8 +1250,9 @@ describe('Customflow Executor', () => {
                 // Step 2: run again, should NOT exit early due to exit_only_at_end
                 const result2 = await executor.execute(invocation2)
                 expect(result2.finished).toBe(true)
-                // Metrics: 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
+                // Metrics: 'fetch' from function_id_1, 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
                 expect(result2.metrics.map((m) => m.metric_name)).toEqual([
+                    'fetch',
                     'billable_invocation',
                     'succeeded',
                     'succeeded',
@@ -549,57 +1260,83 @@ describe('Customflow Executor', () => {
             })
 
             it('should exit early if exit condition is exit_on_conversion', async () => {
-                insightsFlow.exit_condition = 'exit_on_conversion'
-                insightsFlow.conversion = {
-                    window_minutes: 10,
-                    filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters,
+                hogFlow.exit_condition = 'exit_on_conversion'
+                hogFlow.conversion = {
+                    filters: [
+                        {
+                            key: '$browser',
+                            type: 'person',
+                            value: ['Chrome'],
+                            operator: 'exact',
+                        },
+                    ],
+                    bytecode: ['_H', 1, 32, 'Chrome', 32, '$browser', 32, 'properties', 32, 'person', 1, 3, 11],
+                    window_minutes: null,
                 }
 
-                // Simulate a non-conversion event
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
-                    event: {
-                        ...createScriptExecutionGlobals().event,
-                        event: '$not-a-pageview',
-                        properties: { name: 'John Doe', $current_url: 'https://hanzo.ai', conversion: true },
+                // Person does not match conversion filters yet
+                const invocation = createExampleInsightsFlowInvocation(
+                    hogFlow,
+                    {
+                        event: {
+                            ...createHogExecutionGlobals().event,
+                            event: '$pageview',
+                            properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                        },
                     },
-                })
+                    {
+                        properties: {
+                            $browser: 'Firefox',
+                        },
+                    }
+                )
 
                 const result1 = await executor.execute(invocation)
                 expect(result1.finished).toBe(true)
-                // Metrics: 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
+                // Metrics: 'fetch' from function_id_1, 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
                 expect(result1.metrics.map((m) => m.metric_name)).toEqual([
+                    'fetch',
                     'billable_invocation',
                     'succeeded',
                     'succeeded',
                 ])
 
-                const invocation2 = createExampleInsightsFlowInvocation(insightsFlow, {
-                    event: {
-                        ...createScriptExecutionGlobals().event,
-                        event: '$pageview',
-                        properties: { name: 'John Doe', $current_url: 'https://hanzo.ai', conversion: true },
+                const invocation2 = createExampleInsightsFlowInvocation(
+                    hogFlow,
+                    {
+                        event: {
+                            ...createHogExecutionGlobals().event,
+                            event: '$pageview',
+                            properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                        },
                     },
-                })
+                    {
+                        properties: {
+                            $browser: 'Chrome',
+                        },
+                    }
+                )
                 const result2 = await executor.execute(invocation2)
                 expect(result2.finished).toBe(true)
-                expect(result2.metrics.map((m) => m.metric_name)).toEqual(['early_exit'])
+                // The property-based conversion is also counted on the exit path
+                expect(result2.metrics.map((m) => m.metric_name)).toEqual(['early_exit', 'conversion'])
                 expect(result2.logs.map((log) => log.message)).toMatchInlineSnapshot(`
                     [
-                      "Workflow exited early due to exit condition: exit_on_conversion (Person matches conversion filters)",
+                      "Workflow exited early due to exit condition: exit_on_conversion ([Person:person_id|John Doe] matches conversion filters)",
                     ]
                 `)
             })
 
             it('should exit early if exit condition is exit_on_trigger_not_matched', async () => {
-                insightsFlow.exit_condition = 'exit_on_trigger_not_matched'
-                insightsFlow.trigger = {
+                hogFlow.exit_condition = 'exit_on_trigger_not_matched'
+                hogFlow.trigger = {
                     type: 'event',
                     filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                 }
 
-                const invocation1 = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation1 = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         event: '$pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -608,14 +1345,15 @@ describe('Customflow Executor', () => {
                 const result1 = await executor.execute(invocation1)
                 expect(result1.finished).toBe(true)
                 expect(result1.metrics.map((m) => m.metric_name)).toEqual([
+                    'fetch',
                     'billable_invocation',
                     'succeeded',
                     'succeeded',
                 ])
 
-                const invocation2 = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation2 = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         event: '$not-a-pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -626,63 +1364,185 @@ describe('Customflow Executor', () => {
                 expect(result2.metrics.map((m) => m.metric_name)).toEqual(['early_exit'])
                 expect(result2.logs.map((log) => log.message)).toMatchInlineSnapshot(`
                     [
-                      "Workflow exited early due to exit condition: exit_on_trigger_not_matched (Person no longer matches trigger filters)",
+                      "Workflow exited early due to exit condition: exit_on_trigger_not_matched ([Person:person_id|John Doe] no longer matches trigger filters)",
                     ]
                 `)
             })
 
             it('should exit early if exit condition is exit_on_trigger_not_matched_or_conversion', async () => {
-                // Setup: exit if person no longer matches trigger filters or conversion event is seen
-                insightsFlow.exit_condition = 'exit_on_trigger_not_matched_or_conversion'
-                insightsFlow.trigger = {
+                // Setup: exit if person no longer matches trigger filters or person matches conversion filters
+                hogFlow.exit_condition = 'exit_on_trigger_not_matched_or_conversion'
+                hogFlow.trigger = {
                     type: 'event',
                     filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
                 }
-                insightsFlow.conversion = {
-                    window_minutes: 10,
-                    filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters,
+                hogFlow.conversion = {
+                    filters: [
+                        {
+                            key: '$browser',
+                            type: 'person',
+                            value: ['Chrome'],
+                            operator: 'exact',
+                        },
+                    ],
+                    bytecode: ['_H', 1, 32, 'Chrome', 32, '$browser', 32, 'properties', 32, 'person', 1, 3, 11],
+                    window_minutes: null,
                 }
 
-                // Simulate person data changing so they no longer match the trigger filter
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
-                    event: {
-                        ...createScriptExecutionGlobals().event,
-                        event: '$not-a-pageview',
-                        properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                // Person does not match conversion filters yet
+                const invocation = createExampleInsightsFlowInvocation(
+                    hogFlow,
+                    {
+                        event: {
+                            ...createHogExecutionGlobals().event,
+                            event: '$not-a-pageview',
+                            properties: { $current_url: 'https://hanzo.ai' },
+                        },
                     },
-                })
+                    {
+                        properties: {
+                            $browser: 'Firefox',
+                        },
+                    }
+                )
 
                 const result1 = await executor.execute(invocation)
                 expect(result1.finished).toBe(true)
-                // Metrics: 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
+                // Metrics: 'fetch' from function_id_1, 'billable_invocation' from function_id_1, 'succeeded' from function_id_1, 'succeeded' from exit action
                 expect(result1.metrics.map((m) => m.metric_name)).toEqual([
+                    'fetch',
                     'billable_invocation',
                     'succeeded',
                     'succeeded',
                 ])
 
-                const invocation2 = createExampleInsightsFlowInvocation(insightsFlow, {
-                    event: {
-                        ...createScriptExecutionGlobals().event,
-                        event: '$pageview',
-                        properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                const invocation2 = createExampleInsightsFlowInvocation(
+                    hogFlow,
+                    {
+                        event: {
+                            ...createHogExecutionGlobals().event,
+                            event: '$not-a-pageview',
+                            properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                        },
                     },
-                })
+                    {
+                        properties: {
+                            $browser: 'Chrome',
+                        },
+                    }
+                )
 
                 const result2 = await executor.execute(invocation2)
                 expect(result2.finished).toBe(true)
-                expect(result2.metrics.map((m) => m.metric_name)).toEqual(['early_exit'])
+                // The property-based conversion is also counted on the exit path
+                expect(result2.metrics.map((m) => m.metric_name)).toEqual(['early_exit', 'conversion'])
                 expect(result2.logs.map((log) => log.message)).toMatchInlineSnapshot(`
                     [
-                      "Workflow exited early due to exit condition: exit_on_trigger_not_matched_or_conversion (Person matches conversion filters)",
+                      "Workflow exited early due to exit condition: exit_on_trigger_not_matched_or_conversion ([Person:person_id|John Doe] matches conversion filters)",
                     ]
                 `)
             })
 
+            it('counts a property-based conversion without exiting when exit condition is exit_only_at_end', async () => {
+                hogFlow.exit_condition = 'exit_only_at_end'
+                hogFlow.conversion = {
+                    filters: [{ key: '$browser', type: 'person', value: ['Chrome'], operator: 'exact' }],
+                    bytecode: ['_H', 1, 32, 'Chrome', 32, '$browser', 32, 'properties', 32, 'person', 1, 3, 11],
+                    window_minutes: null,
+                }
+
+                const invocation = createExampleInsightsFlowInvocation(
+                    hogFlow,
+                    {
+                        event: {
+                            ...createHogExecutionGlobals().event,
+                            event: '$pageview',
+                            properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                        },
+                    },
+                    { properties: { $browser: 'Chrome' } }
+                )
+
+                const result = await executor.execute(invocation)
+                // The run completes normally (no early exit) but the conversion is counted exactly once
+                expect(result.finished).toBe(true)
+                expect(result.metrics.map((m) => m.metric_name)).toEqual([
+                    'conversion',
+                    'fetch',
+                    'billable_invocation',
+                    'succeeded',
+                    'succeeded',
+                ])
+                expect(result.metrics.filter((m) => m.metric_name === 'conversion')).toHaveLength(1)
+                expect(invocation.state.conversionCounted).toBe(true)
+                // The conversion is also surfaced as a billable $workflows_conversion event exactly once.
+                const conversionEvents = result.capturedInsightsEvents.filter((e) => e.event === '$workflows_conversion')
+                expect(conversionEvents).toHaveLength(1)
+                expect(conversionEvents[0]).toMatchObject({
+                    distinct_id: 'distinct_id',
+                    properties: { $workflow_id: hogFlow.id, $workflow_conversion_type: 'property' },
+                })
+            })
+
+            it('does not re-count a property-based conversion on a resume that already counted', async () => {
+                hogFlow.exit_condition = 'exit_only_at_end'
+                hogFlow.conversion = {
+                    filters: [{ key: '$browser', type: 'person', value: ['Chrome'], operator: 'exact' }],
+                    bytecode: ['_H', 1, 32, 'Chrome', 32, '$browser', 32, 'properties', 32, 'person', 1, 3, 11],
+                    window_minutes: null,
+                }
+
+                const invocation = createExampleInsightsFlowInvocation(
+                    hogFlow,
+                    {
+                        event: {
+                            ...createHogExecutionGlobals().event,
+                            event: '$pageview',
+                            properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                        },
+                    },
+                    { properties: { $browser: 'Chrome' } }
+                )
+                // Simulate a prior step in this run having already counted the conversion
+                invocation.state.conversionCounted = true
+
+                const result = await executor.execute(invocation)
+                expect(result.finished).toBe(true)
+                expect(result.metrics.map((m) => m.metric_name)).not.toContain('conversion')
+            })
+
+            it('does not count event-based conversions in the executor (counted by the matcher)', async () => {
+                hogFlow.exit_condition = 'exit_only_at_end'
+                // Event-based conversion goal: no property filters/bytecode, so the executor's
+                // property path never matches. The matcher flags the run via conversionMatched.
+                hogFlow.conversion = {
+                    filters: [],
+                    bytecode: [],
+                    window_minutes: null,
+                    events: [{ filters: { bytecode: ['_H', 1, 29] } }],
+                }
+
+                const invocation = createExampleInsightsFlowInvocation(hogFlow, {
+                    event: {
+                        ...createHogExecutionGlobals().event,
+                        event: '$pageview',
+                        properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
+                    },
+                })
+                invocation.state.conversionMatched = true
+
+                const result = await executor.execute(invocation)
+                expect(result.finished).toBe(true)
+                // No conversion metric from the executor; the flag is consumed, not double-counted
+                expect(result.metrics.map((m) => m.metric_name)).not.toContain('conversion')
+                expect(invocation.state.conversionMatched).toBe(false)
+                expect(invocation.state.conversionCounted).toBeUndefined()
+            })
+
             describe('on_error handling', () => {
-                let insightsFlow: InsightsFlow
+                let hogFlow: InsightsFlow
                 beforeEach(async () => {
-                    insightsFlow = new FixtureInsightsFlowBuilder()
+                    hogFlow = new FixtureInsightsFlowBuilder()
                         .withWorkflow({
                             actions: {
                                 trigger: {
@@ -695,11 +1555,11 @@ describe('Customflow Executor', () => {
                                 function_id_1: {
                                     type: 'function',
                                     config: {
-                                        template_id: 'template-test-customflow-executor',
+                                        template_id: 'template-test-hogflow-executor',
                                         inputs: {
                                             name: {
                                                 value: `Mr {event?.properties?.name}`,
-                                                bytecode: await compileFn(`raise Exception('fail!')`),
+                                                bytecode: await compileHog(`raise Exception('fail!')`),
                                             },
                                         },
                                     },
@@ -730,7 +1590,7 @@ describe('Customflow Executor', () => {
 
                 describe('execute error handling when error is returned, not thrown', () => {
                     it('continues to next action when on_error is continue', async () => {
-                        const action = insightsFlow.actions.find((a) => a.id === 'function_id_1')!
+                        const action = hogFlow.actions.find((a) => a.id === 'function_id_1')!
                         action.on_error = 'continue'
 
                         // Mock the handler to return an error in the result
@@ -739,9 +1599,9 @@ describe('Customflow Executor', () => {
                             error: new Error('Mocked handler error'),
                         })
 
-                        const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                        const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                             event: {
-                                ...createScriptExecutionGlobals().event,
+                                ...createHogExecutionGlobals().event,
                                 properties: { name: 'Test User' },
                             },
                         })
@@ -766,7 +1626,7 @@ describe('Customflow Executor', () => {
                     })
 
                     it('does NOT continue to next action when on_error is abort', async () => {
-                        const action = insightsFlow.actions.find((a) => a.id === 'function_id_1')!
+                        const action = hogFlow.actions.find((a) => a.id === 'function_id_1')!
                         action.on_error = 'abort'
 
                         // Mock the handler to return an error in the result
@@ -775,9 +1635,9 @@ describe('Customflow Executor', () => {
                             error: new Error('Mocked handler error'),
                         })
 
-                        const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                        const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                             event: {
-                                ...createScriptExecutionGlobals().event,
+                                ...createHogExecutionGlobals().event,
                                 properties: { name: 'Test User' },
                             },
                         })
@@ -809,7 +1669,7 @@ describe('Customflow Executor', () => {
                         expect(loggerErrorSpy).toHaveBeenCalledWith(
                             '🦔',
                             expect.stringContaining(
-                                `[InsightsFlowExecutor] Error executing custom flow ${insightsFlow.id} - ${insightsFlow.name}. Event: '`
+                                `[InsightsFlowExecutor] Error executing script flow ${hogFlow.id} - ${hogFlow.name}. Event: '`
                             ),
                             expect.any(Error)
                         )
@@ -919,7 +1779,8 @@ describe('Customflow Executor', () => {
                     {
                         finished: false,
                         scheduledAt: DateTime.fromISO('2025-01-01T02:00:00.000Z').toUTC(),
-                        nextActionId: 'exit',
+                        // Still pending, so the delay parks without advancing currentAction
+                        nextActionId: 'delay',
                     },
                 ],
                 [
@@ -984,10 +1845,10 @@ describe('Customflow Executor', () => {
             it.each(cases)(
                 'should run %s action',
                 async (actionId, simpleFlow, { nextActionId, finished, scheduledAt }) => {
-                    const insightsFlow = createInsightsFlow(simpleFlow)
-                    const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                    const hogFlow = createInsightsFlow(simpleFlow)
+                    const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                         event: {
-                            ...createScriptExecutionGlobals().event,
+                            ...createHogExecutionGlobals().event,
                             event: '$pageview',
                             properties: {
                                 $current_url: 'https://hanzo.ai',
@@ -1013,8 +1874,8 @@ describe('Customflow Executor', () => {
         })
 
         describe('capturedInsightsEvents', () => {
-            it('should collect capturedInsightsEvents from custom function actions', async () => {
-                const insightsFlow = createInsightsFlow({
+            it('should collect capturedInsightsEvents from script function actions', async () => {
+                const hogFlow = createInsightsFlow({
                     actions: {
                         capture_function: {
                             type: 'function',
@@ -1051,9 +1912,9 @@ describe('Customflow Executor', () => {
                     ],
                 })
 
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+                const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                     event: {
-                        ...createScriptExecutionGlobals().event,
+                        ...createHogExecutionGlobals().event,
                         properties: { user_name: 'Test User', value: 'test-value-123' },
                     },
                 })
@@ -1076,8 +1937,8 @@ describe('Customflow Executor', () => {
                 })
             })
 
-            it('should collect capturedInsightsEvents from multiple custom function actions', async () => {
-                const insightsFlow = createInsightsFlow({
+            it('should collect capturedInsightsEvents from multiple script function actions', async () => {
+                const hogFlow = createInsightsFlow({
                     actions: {
                         capture_function_1: {
                             type: 'function',
@@ -1125,7 +1986,7 @@ describe('Customflow Executor', () => {
                     ],
                 })
 
-                const invocation = createExampleInsightsFlowInvocation(insightsFlow)
+                const invocation = createExampleInsightsFlowInvocation(hogFlow)
 
                 const result = await executor.execute(invocation)
 
@@ -1148,10 +2009,10 @@ describe('Customflow Executor', () => {
     })
 
     describe('filter_test_accounts', () => {
-        let insightsFlow: InsightsFlow
+        let hogFlow: InsightsFlow
 
         beforeEach(async () => {
-            insightsFlow = new FixtureInsightsFlowBuilder()
+            hogFlow = new FixtureInsightsFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -1166,11 +2027,11 @@ describe('Customflow Executor', () => {
                         function_id_1: {
                             type: 'function',
                             config: {
-                                template_id: 'template-test-customflow-executor',
+                                template_id: 'template-test-hogflow-executor',
                                 inputs: {
                                     name: {
                                         value: `Mr {event?.properties?.name}`,
-                                        bytecode: await compileFn(`return f'Mr {event?.properties?.name}'`),
+                                        bytecode: await compileHog(`return f'Mr {event?.properties?.name}'`),
                                     },
                                 },
                             },
@@ -1199,7 +2060,7 @@ describe('Customflow Executor', () => {
 
         it('should filter out internal users with @hanzo.ai email', async () => {
             // Create globals with internal user email
-            const globals = createScriptExecutionGlobals({
+            const globals = createHogExecutionGlobals({
                 event: {
                     uuid: 'uuid',
                     event: '$pageview',
@@ -1221,7 +2082,7 @@ describe('Customflow Executor', () => {
                 },
             })
 
-            const result = await executor.buildInsightsFlowInvocations([insightsFlow], globals)
+            const result = await executor.buildInsightsFlowInvocations([hogFlow], globals)
 
             // Should not match because email contains @hanzo.ai
             expect(result.invocations).toHaveLength(0)
@@ -1229,7 +2090,7 @@ describe('Customflow Executor', () => {
 
         it('should allow external users without @hanzo.ai email', async () => {
             // Create globals with external user email
-            const globals = createScriptExecutionGlobals({
+            const globals = createHogExecutionGlobals({
                 event: {
                     uuid: 'uuid',
                     event: '$pageview',
@@ -1251,17 +2112,52 @@ describe('Customflow Executor', () => {
                 },
             })
 
-            const result = await executor.buildInsightsFlowInvocations([insightsFlow], globals)
+            const result = await executor.buildInsightsFlowInvocations([hogFlow], globals)
 
             // Should match because email doesn't contain @hanzo.ai
             expect(result.invocations).toHaveLength(1)
-            expect(result.invocations[0].insightsFlow.id).toBe(insightsFlow.id)
+            expect(result.invocations[0].hogFlow.id).toBe(hogFlow.id)
+        })
+    })
+
+    describe('data-warehouse-table trigger', () => {
+        // Trigger-source compatibility is decided by the pipeline's eligibilityFn (per consumer),
+        // not the executor — coverage for source matching lives in the consumer tests. Here we just
+        // assert that when a warehouse-trigger flow with always-true filters is handed to the
+        // executor with warehouse-row globals, an invocation is produced.
+        it('builds an invocation when filter bytecode evaluates true for warehouse-row globals', async () => {
+            const hogFlow = new FixtureInsightsFlowBuilder()
+                .withSimpleWorkflow({
+                    trigger: {
+                        type: 'data-warehouse-table',
+                        table_name: 'postgres.table_1',
+                        // Always-true bytecode (return true) like the no-filter data warehouse example
+                        filters: { properties: [], bytecode: ['_h', 29] } as any,
+                    },
+                })
+                .build()
+            const globals = createHogExecutionGlobals({
+                event: {
+                    uuid: 'row-uuid-0001',
+                    event: '$warehouse_source_row',
+                    distinct_id: '',
+                    elements_chain: '',
+                    timestamp: new Date().toISOString(),
+                    url: '',
+                    properties: { column1: 'value1', column2: 123, $source_table: 'postgres.table_1' },
+                },
+            })
+
+            const result = await executor.buildInsightsFlowInvocations([hogFlow], globals)
+
+            expect(result.invocations).toHaveLength(1)
+            expect(result.invocations[0].hogFlow.id).toBe(hogFlow.id)
         })
     })
 
     describe('variable merging', () => {
         it('merges default and provided variables correctly', () => {
-            const insightsFlow: InsightsFlow = new FixtureInsightsFlowBuilder()
+            const hogFlow: InsightsFlow = new FixtureInsightsFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -1282,7 +2178,7 @@ describe('Customflow Executor', () => {
                 .build()
 
             // Set variables directly with required fields
-            insightsFlow.variables = [
+            hogFlow.variables = [
                 { key: 'foo', default: 'bar', type: 'string', label: 'foo' },
                 { key: 'baz', default: 123, type: 'number', label: 'baz' },
                 { key: 'overrideMe', default: 'defaultValue', type: 'string', label: 'overrideMe' },
@@ -1305,7 +2201,7 @@ describe('Customflow Executor', () => {
                     extra: 'shouldBeIncluded',
                 },
             }
-            const invocation = createInsightsFlowInvocation(globals, insightsFlow, {} as any)
+            const invocation = createInsightsFlowInvocation(globals, hogFlow, {} as any)
             expect(invocation.state.variables).toEqual({
                 foo: 'bar',
                 baz: 123,
@@ -1315,12 +2211,54 @@ describe('Customflow Executor', () => {
         })
     })
 
+    describe('group propagation', () => {
+        it('carries groups from globals onto the invocation', () => {
+            const hogFlow: InsightsFlow = new FixtureInsightsFlowBuilder()
+                .withWorkflow({
+                    actions: {
+                        trigger: { type: 'trigger', config: { type: 'event', filters: {} } },
+                        exit: { type: 'exit', config: {} },
+                    },
+                    edges: [{ from: 'trigger', to: 'exit', type: 'continue' }],
+                })
+                .build()
+
+            const groups = {
+                organization: {
+                    id: 'acme-123',
+                    type: 'organization',
+                    index: 0,
+                    url: '',
+                    properties: {},
+                },
+            }
+            const globals = {
+                event: {
+                    event: 'test',
+                    properties: {},
+                    url: '',
+                    distinct_id: '',
+                    timestamp: '',
+                    uuid: '',
+                    elements_chain: '',
+                },
+                project: { id: 1, name: 'Test Project', url: '' },
+                person: { id: 'person_id', name: 'John Doe', properties: {}, url: '' },
+                groups,
+            }
+
+            const invocation = createInsightsFlowInvocation(globals, hogFlow, {} as any)
+
+            expect(invocation.groups).toEqual(groups)
+        })
+    })
+
     describe('output variable mapping', () => {
-        let insightsFlowBuilder: (outputVariable: any) => Promise<InsightsFlow>
+        let hogFlowBuilder: (outputVariable: any) => Promise<InsightsFlow>
 
         beforeEach(async () => {
-            const nameBytecode = await compileFn(`return 'Test'`)
-            insightsFlowBuilder = (outputVariable: any) => {
+            const nameBytecode = await compileHog(`return 'Test'`)
+            hogFlowBuilder = (outputVariable: any) => {
                 return Promise.resolve(
                     new FixtureInsightsFlowBuilder()
                         .withWorkflow({
@@ -1335,7 +2273,7 @@ describe('Customflow Executor', () => {
                                 action_1: {
                                     type: 'function',
                                     config: {
-                                        template_id: 'template-test-customflow-executor',
+                                        template_id: 'template-test-hogflow-executor',
                                         inputs: {
                                             name: {
                                                 value: 'Test',
@@ -1360,10 +2298,10 @@ describe('Customflow Executor', () => {
             }
         })
 
-        const executeToCompletion = async (insightsFlow: InsightsFlow) => {
-            const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+        const executeToCompletion = async (hogFlow: InsightsFlow) => {
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                 event: {
-                    ...createScriptExecutionGlobals().event,
+                    ...createHogExecutionGlobals().event,
                     properties: { name: 'Test' },
                 },
             })
@@ -1375,65 +2313,65 @@ describe('Customflow Executor', () => {
         }
 
         it('stores full result in variable with single object output_variable', async () => {
-            const insightsFlow = await insightsFlowBuilder({ key: 'response', result_path: null })
-            const result = await executeToCompletion(insightsFlow)
+            const hogFlow = await hogFlowBuilder({ key: 'response', result_path: null })
+            const result = await executeToCompletion(hogFlow)
 
             expect(result.invocation.state.variables?.response).toBeDefined()
             expect(result.invocation.state.variables?.response).toHaveProperty('status', 200)
         })
 
         it('stores extracted value via result_path', async () => {
-            const insightsFlow = await insightsFlowBuilder({ key: 'http_status', result_path: 'status' })
-            const result = await executeToCompletion(insightsFlow)
+            const hogFlow = await hogFlowBuilder({ key: 'http_status', result_path: 'status' })
+            const result = await executeToCompletion(hogFlow)
 
             expect(result.invocation.state.variables).toEqual({ http_status: 200 })
         })
 
         it('stores multiple variables from array output_variable', async () => {
-            const insightsFlow = await insightsFlowBuilder([
+            const hogFlow = await hogFlowBuilder([
                 { key: 'http_status', result_path: 'status' },
                 { key: 'response_body', result_path: 'body' },
             ])
-            const result = await executeToCompletion(insightsFlow)
+            const result = await executeToCompletion(hogFlow)
 
             expect(result.invocation.state.variables?.http_status).toBe(200)
             expect(result.invocation.state.variables?.response_body).toBeDefined()
         })
 
         it('spreads object result into prefixed variables', async () => {
-            const insightsFlow = await insightsFlowBuilder({ key: 'resp', result_path: 'body', spread: true })
-            const result = await executeToCompletion(insightsFlow)
+            const hogFlow = await hogFlowBuilder({ key: 'resp', result_path: 'body', spread: true })
+            const result = await executeToCompletion(hogFlow)
 
             // body is { status: 200 } so spread should create resp_status
             expect(result.invocation.state.variables?.resp_status).toBe(200)
         })
 
         it('skips entries with empty key in array form', async () => {
-            const insightsFlow = await insightsFlowBuilder([
+            const hogFlow = await hogFlowBuilder([
                 { key: '', result_path: 'status' },
                 { key: 'http_status', result_path: 'status' },
             ])
-            const result = await executeToCompletion(insightsFlow)
+            const result = await executeToCompletion(hogFlow)
 
             expect(result.invocation.state.variables).toEqual({ http_status: 200 })
         })
 
         it('does nothing when output_variable is undefined', async () => {
-            const insightsFlow = await insightsFlowBuilder(undefined)
-            const result = await executeToCompletion(insightsFlow)
+            const hogFlow = await hogFlowBuilder(undefined)
+            const result = await executeToCompletion(hogFlow)
 
             expect(result.invocation.state.variables).toBeUndefined()
         })
 
         it('errors and exits when total variable size exceeds 5KB with on_error=abort', async () => {
-            const insightsFlow = await insightsFlowBuilder({ key: 'response', result_path: null })
+            const hogFlow = await hogFlowBuilder({ key: 'response', result_path: null })
             // Set action to abort on error
-            const action = insightsFlow.actions.find((a) => a.id === 'action_1')!
+            const action = hogFlow.actions.find((a) => a.id === 'action_1')!
             action.on_error = 'abort'
 
-            const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                 event: {
-                    ...createScriptExecutionGlobals().event,
+                    ...createHogExecutionGlobals().event,
                     properties: { name: 'Test' },
                 },
             })
@@ -1450,10 +2388,10 @@ describe('Customflow Executor', () => {
         })
 
         it('errors but continues when total variable size exceeds 5KB with on_error=continue', async () => {
-            const insightsFlow = await insightsFlowBuilder({ key: 'response', result_path: null })
-            const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+            const hogFlow = await hogFlowBuilder({ key: 'response', result_path: null })
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                 event: {
-                    ...createScriptExecutionGlobals().event,
+                    ...createHogExecutionGlobals().event,
                     properties: { name: 'Test' },
                 },
             })
@@ -1480,7 +2418,7 @@ describe('Customflow Executor', () => {
                 inputs_schema: [],
             })
 
-            const insightsFlow = new FixtureInsightsFlowBuilder()
+            const hogFlow = new FixtureInsightsFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -1510,7 +2448,7 @@ describe('Customflow Executor', () => {
                 })
                 .build()
 
-            const result = await executeToCompletion(insightsFlow)
+            const result = await executeToCompletion(hogFlow)
 
             // No variables should be set since no result was produced
             expect(result.invocation.state.variables).toBeUndefined()
@@ -1541,8 +2479,8 @@ describe('Customflow Executor', () => {
                 .build()
         }
 
-        it('should record billing metrics for both regular custom functions and email functions', async () => {
-            const team = await getFirstTeam(hub)
+        it('should record billing metrics for both regular script functions and email functions', async () => {
+            const team = await getFirstTeam(hub.postgres)
 
             await insertIntegration(hub.postgres, team.id, {
                 id: 1,
@@ -1572,10 +2510,7 @@ describe('Customflow Executor', () => {
                                 email: '',
                                 name: '',
                             },
-                            from: {
-                                email: '',
-                                name: '',
-                            },
+                            from: {},
                             replyTo: '',
                             subject: '',
                             preheader: '',
@@ -1589,8 +2524,8 @@ describe('Customflow Executor', () => {
                 ],
             })
 
-            // Create a workflow with 2 regular custom function actions and 2 email actions
-            const insightsFlow = createInsightsFlow({
+            // Create a workflow with 2 regular script function actions and 2 email actions
+            const hogFlow = createInsightsFlow({
                 actions: {
                     function_1: {
                         type: 'function',
@@ -1623,7 +2558,6 @@ describe('Customflow Executor', () => {
                                         },
                                         from: {
                                             integrationId: 1,
-                                            email: 'test@hanzo.ai',
                                         },
                                         subject: 'Test Email 1',
                                         text: 'Test Text 1',
@@ -1646,7 +2580,6 @@ describe('Customflow Executor', () => {
                                         },
                                         from: {
                                             integrationId: 1,
-                                            email: 'test@hanzo.ai',
                                         },
                                         subject: 'Test Email 2',
                                         text: 'Test Text 2',
@@ -1666,9 +2599,9 @@ describe('Customflow Executor', () => {
                 ],
             })
 
-            const invocation = createExampleInsightsFlowInvocation(insightsFlow, {
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
                 event: {
-                    ...createScriptExecutionGlobals().event,
+                    ...createHogExecutionGlobals().event,
                     event: '$pageview',
                     properties: {
                         $current_url: 'https://hanzo.ai',
@@ -1676,24 +2609,233 @@ describe('Customflow Executor', () => {
                 },
             })
 
-            // There are 4 async actions, so we need to execute multiple times until finished
+            // Each execute call returns the metrics for one queue segment, and email
+            // actions route through the dedicated email queue — so we accumulate metrics
+            // across every segment to assert the total billing over the whole run.
             let result = await executor.execute(invocation)
+            const metrics = [...result.metrics]
             while (!result.finished) {
                 result = await executor.execute(result.invocation)
+                metrics.push(...result.metrics)
             }
 
             expect(result.finished).toBe(true)
             expect(result.error).toBeUndefined()
 
-            // Verify we have billing metrics for both custom functions and email actions
-            const fetchBilling = result.metrics.filter(
+            // Verify we have billing metrics for both script functions and email actions
+            const fetchBilling = metrics.filter(
                 (m) => m.metric_kind === 'fetch' && m.metric_name === 'billable_invocation'
             )
             expect(fetchBilling).toHaveLength(2)
-            const emailBilling = result.metrics.filter(
+            const emailBilling = metrics.filter(
                 (m) => m.metric_kind === 'email' && m.metric_name === 'billable_invocation'
             )
             expect(emailBilling).toHaveLength(2)
+        })
+    })
+
+    describe('email queue routing', () => {
+        it('should route email actions to the email queue', async () => {
+            const team = await getFirstTeam(hub.postgres)
+
+            await insertIntegration(hub.postgres, team.id, {
+                id: 1,
+                kind: 'email',
+                config: {
+                    email: 'test@hanzo.ai',
+                    name: 'Test User',
+                    domain: 'hanzo.ai',
+                    verified: true,
+                    provider: 'maildev',
+                },
+            })
+
+            await insertInsightsFunctionTemplate(hub.postgres, {
+                id: 'template-email-routing-test',
+                name: 'Email Routing Test',
+                code: `sendEmail(inputs.email)`,
+                inputs_schema: [
+                    {
+                        type: 'native_email',
+                        key: 'email',
+                        label: 'Email message',
+                        integration: 'email',
+                        required: true,
+                        default: {
+                            to: { email: '', name: '' },
+                            from: { email: '', name: '' },
+                            subject: '',
+                            text: 'Hello!',
+                            html: '<div>Hello!</div>',
+                        },
+                        secret: false,
+                        description: '',
+                        templating: 'liquid',
+                    },
+                ],
+            })
+
+            const hogFlow = new FixtureInsightsFlowBuilder()
+                .withTeamId(team.id)
+                .withExitCondition('exit_only_at_end')
+                .withWorkflow({
+                    actions: {
+                        trigger: {
+                            type: 'trigger',
+                            config: {
+                                type: 'event',
+                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                            },
+                        },
+                        email_1: {
+                            type: 'function_email',
+                            config: {
+                                template_id: 'template-email-routing-test',
+                                inputs: {
+                                    email: {
+                                        value: {
+                                            to: { email: 'recipient@example.com', name: 'Recipient' },
+                                            from: { integrationId: 1, email: 'test@hanzo.ai' },
+                                            subject: 'Test Email',
+                                            text: 'Test',
+                                            html: '<p>Test</p>',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    edges: [
+                        { from: 'trigger', to: 'email_1', type: 'continue' },
+                        { from: 'email_1', to: 'exit', type: 'continue' },
+                    ],
+                })
+                .build()
+
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
+                event: {
+                    ...createHogExecutionGlobals().event,
+                    event: '$pageview',
+                },
+            })
+
+            const result = await executor.execute(invocation)
+
+            // Should be routed to email queue, not finished
+            expect(result.finished).toBe(false)
+            expect(result.invocation.queue).toBe('email')
+            expect(result.invocation.queueMetadata?.originQueue).toBeDefined()
+            expect(result.invocation.queueParameters).toBeDefined()
+            expect(result.invocation.queueParameters?.type).toBe('email')
+        })
+
+        it('should complete the full round-trip: hogflow → email queue → email sent → workflow continues', async () => {
+            const team = await getFirstTeam(hub.postgres)
+
+            await insertIntegration(hub.postgres, team.id, {
+                id: 1,
+                kind: 'email',
+                config: {
+                    email: 'test@hanzo.ai',
+                    name: 'Test User',
+                    domain: 'hanzo.ai',
+                    verified: true,
+                    provider: 'maildev',
+                },
+            })
+
+            await insertInsightsFunctionTemplate(hub.postgres, {
+                id: 'template-email-routing-test',
+                name: 'Email Routing Test',
+                code: `sendEmail(inputs.email)`,
+                inputs_schema: [
+                    {
+                        type: 'native_email',
+                        key: 'email',
+                        label: 'Email message',
+                        integration: 'email',
+                        required: true,
+                        default: {
+                            to: { email: '', name: '' },
+                            from: { email: '', name: '' },
+                            subject: '',
+                            text: 'Hello!',
+                            html: '<div>Hello!</div>',
+                        },
+                        secret: false,
+                        description: '',
+                        templating: 'liquid',
+                    },
+                ],
+            })
+
+            const hogFlow = new FixtureInsightsFlowBuilder()
+                .withTeamId(team.id)
+                .withExitCondition('exit_only_at_end')
+                .withWorkflow({
+                    actions: {
+                        trigger: {
+                            type: 'trigger',
+                            config: {
+                                type: 'event',
+                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                            },
+                        },
+                        email_1: {
+                            type: 'function_email',
+                            config: {
+                                template_id: 'template-email-routing-test',
+                                inputs: {
+                                    email: {
+                                        value: {
+                                            to: { email: 'recipient@example.com', name: 'Recipient' },
+                                            from: { integrationId: 1, email: 'test@hanzo.ai' },
+                                            subject: 'Test Email',
+                                            text: 'Test text',
+                                            html: '<p>Test html</p>',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        exit: {
+                            type: 'exit',
+                            config: {},
+                        },
+                    },
+                    edges: [
+                        { from: 'trigger', to: 'email_1', type: 'continue' },
+                        { from: 'email_1', to: 'exit', type: 'continue' },
+                    ],
+                })
+                .build()
+
+            const invocation = createExampleInsightsFlowInvocation(hogFlow, {
+                event: {
+                    ...createHogExecutionGlobals().event,
+                    event: '$pageview',
+                },
+            })
+
+            // Step 1: Hogflow worker executes (queue !== 'email') — should route to email queue
+            const hogflowResult = await executor.execute(invocation)
+            expect(hogflowResult.finished).toBe(false)
+            expect(hogflowResult.invocation.queue).toBe('email')
+            expect(hogflowResult.invocation.queueParameters?.type).toBe('email')
+
+            // Step 2: Email worker picks up the job (queue === 'email') — should send inline and continue
+            let emailResult = await executor.execute(hogflowResult.invocation)
+            while (!emailResult.finished) {
+                emailResult = await executor.execute(emailResult.invocation)
+            }
+
+            // Workflow should complete
+            expect(emailResult.finished).toBe(true)
+            expect(emailResult.error).toBeUndefined()
+
+            // Verify email_sent metric was emitted
+            const emailSentMetrics = emailResult.metrics.filter((m) => m.metric_name === 'email_sent')
+            expect(emailSentMetrics).toHaveLength(1)
         })
     })
 })

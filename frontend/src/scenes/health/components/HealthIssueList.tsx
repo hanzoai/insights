@@ -1,26 +1,20 @@
-import { useValues } from 'kea'
+import { useActions, useValues } from 'kea'
 
-import { Banner, Collapse, Skeleton, Tag } from '@hanzo/elements'
+import { Banner, Button, Collapse, Skeleton, Tag } from '@hanzo/elements'
 
+import { urls } from 'scenes/urls'
+
+import { CATEGORY_DETAIL_CONFIG } from '../categoryDetail/categoryDetailConfig'
 import { CATEGORY_ORDER, HEALTH_CATEGORY_CONFIG, categoryForKind } from '../healthCategories'
 import type { HealthIssueCategory } from '../healthCategories'
 import { healthSceneLogic } from '../healthSceneLogic'
-import { severityToTagType } from '../healthUtils'
-import type { HealthIssue, HealthIssueSeverity } from '../types'
-import { SEVERITY_ORDER } from '../types'
+import { severityToTagType, worstSeverity } from '../healthUtils'
+import type { HealthIssue } from '../types'
 import { HealthIssueCard } from './HealthIssueCard'
-
-const worstSeverity = (issues: HealthIssue[]): HealthIssueSeverity => {
-    for (const severity of SEVERITY_ORDER) {
-        if (issues.some((i) => i.severity === severity)) {
-            return severity
-        }
-    }
-    return 'info'
-}
 
 export const HealthIssueList = (): JSX.Element => {
     const { issues, healthIssuesLoading, healthIssues } = useValues(healthSceneLogic)
+    const { dismissIssue, undismissIssue, loadHealthIssues } = useActions(healthSceneLogic)
 
     if (healthIssuesLoading && !healthIssues) {
         return (
@@ -34,7 +28,9 @@ export const HealthIssueList = (): JSX.Element => {
 
     if (!healthIssuesLoading && healthIssues === null) {
         return (
-            <Banner type="warning">Error loading health information. Please try refreshing the page.</Banner>
+            <Banner type="warning" action={{ children: 'Retry', onClick: () => loadHealthIssues() }}>
+                We couldn't load your health information. This is usually temporary — retry to try again.
+            </Banner>
         )
     }
 
@@ -59,7 +55,7 @@ export const HealthIssueList = (): JSX.Element => {
     const populatedCategories = CATEGORY_ORDER.filter((cat) => groupedByCategory[cat])
 
     return (
-        <div className="flex flex-col gap-4 max-w-3xl">
+        <div className="flex flex-col gap-4">
             {populatedCategories.map((category) => {
                 const categoryIssues = groupedByCategory[category]!
                 const config = HEALTH_CATEGORY_CONFIG[category]
@@ -78,16 +74,32 @@ export const HealthIssueList = (): JSX.Element => {
                                             <span className="font-medium">{config.label}</span>
                                             <span className="text-xs text-muted">({categoryIssues.length})</span>
                                         </div>
-                                        <Tag type={severityToTagType(worst)} size="small">
-                                            {worst}
-                                        </Tag>
+                                        <div className="flex items-center gap-2">
+                                            <Tag type={severityToTagType(worst)} size="small">
+                                                {worst}
+                                            </Tag>
+                                            <Button
+                                                type="tertiary"
+                                                size="xsmall"
+                                                to={
+                                                    CATEGORY_DETAIL_CONFIG[category]?.redirectUrl ??
+                                                    urls.healthCategory(category)
+                                                }
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                View details
+                                            </Button>
+                                        </div>
                                     </div>
                                 ),
                                 content: (
-                                    <div className="divide-y divide-border -m-4">
-                                        {categoryIssues.map((issue) => (
-                                            <HealthIssueCard key={issue.id} issue={issue} />
-                                        ))}
+                                    <div className="-m-4">
+                                        <CategoryContent
+                                            category={category}
+                                            issues={categoryIssues}
+                                            onDismiss={dismissIssue}
+                                            onUndismiss={undismissIssue}
+                                        />
                                     </div>
                                 ),
                             },
@@ -95,6 +107,30 @@ export const HealthIssueList = (): JSX.Element => {
                     />
                 )
             })}
+        </div>
+    )
+}
+
+function CategoryContent({
+    category,
+    issues,
+    onDismiss,
+    onUndismiss,
+}: {
+    category: HealthIssueCategory
+    issues: HealthIssue[]
+    onDismiss: (id: string) => void
+    onUndismiss: (id: string) => void
+}): JSX.Element {
+    const TableComponent = CATEGORY_DETAIL_CONFIG[category]?.tableComponent
+    if (TableComponent) {
+        return <TableComponent issues={issues} onDismiss={onDismiss} onUndismiss={onUndismiss} />
+    }
+    return (
+        <div className="divide-y divide-border">
+            {issues.map((issue) => (
+                <HealthIssueCard key={issue.id} issue={issue} onDismiss={onDismiss} onUndismiss={onUndismiss} />
+            ))}
         </div>
     )
 }

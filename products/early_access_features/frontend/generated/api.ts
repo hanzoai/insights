@@ -1,3 +1,4 @@
+import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
 /**
  * Auto-generated from the Django backend OpenAPI schema.
  * To modify these types, update the Django serializers or views, then run:
@@ -7,7 +8,6 @@
  * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
-import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
 import type {
     EarlyAccessFeatureApi,
     EarlyAccessFeatureListParams,
@@ -38,7 +38,7 @@ export const getEarlyAccessFeatureListUrl = (projectId: string, params?: EarlyAc
 
     Object.entries(params || {}).forEach(([key, value]) => {
         if (value !== undefined) {
-            normalizedParams.append(key, value === null ? 'null' : value.toString())
+            normalizedParams.append(key, value === null ? 'null' : String(value))
         }
     })
 
@@ -117,7 +117,7 @@ export const getEarlyAccessFeaturePartialUpdateUrl = (projectId: string, id: str
 export const earlyAccessFeaturePartialUpdate = async (
     projectId: string,
     id: string,
-    patchedEarlyAccessFeatureApi: NonReadonly<PatchedEarlyAccessFeatureApi>,
+    patchedEarlyAccessFeatureApi?: NonReadonly<PatchedEarlyAccessFeatureApi>,
     options?: RequestInit
 ): Promise<EarlyAccessFeatureApi> => {
     return apiMutator<EarlyAccessFeatureApi>(getEarlyAccessFeaturePartialUpdateUrl(projectId, id), {

@@ -16,13 +16,15 @@ from insights.insightsql.errors import ExposedInsightsQLError
 
 from insights import celery, redis
 from insights.datastore.client.async_task_chain import add_task_to_on_commit
+from insights.datastore.client.limit import ConcurrencyLimitExceeded
 from insights.datastore.query_tagging import get_query_tags, tag_queries
-from insights.errors import CHQueryErrorTooManySimultaneousQueries, ExposedCHQueryError
+from insights.errors import ExposedCHQueryError
+from insights.exceptions import DatastoreAtCapacity
 from insights.exceptions_capture import capture_exception
 from insights.renderers import SafeJSONRenderer
-from insights.tasks.tasks import process_query_task
 
 if TYPE_CHECKING:
+    from insights.event_usage import AnalyticsProps
     from insights.models.team.team import Team
 
 logger = structlog.get_logger(__name__)
@@ -143,7 +145,10 @@ class QueryStatusManager:
         if not byte_results:
             raise QueryNotFoundError(f"Query {self.query_id} not found for team {self.team_id}")
 
-        query_status = QueryStatus(**json.loads(byte_results))
+        loaded = json.loads(byte_results)
+        # Drop unknown keys so a status written by a newer deploy (with extra fields) doesn't fail
+        # validation here — QueryStatus forbids extra fields.
+        query_status = QueryStatus(**{k: v for k, v in loaded.items() if k in QueryStatus.model_fields})
 
         if show_progress and not query_status.complete:
             query_status.query_progress = self.get_datastore_progresses()
@@ -180,6 +185,7 @@ def execute_process_query(
     query_json: dict,
     limit_context: Optional[LimitContext],
     is_query_service: bool = False,
+    analytics_props: Optional["AnalyticsProps"] = None,
 ):
     tag_queries(client_query_id=query_id, team_id=team_id, user_id=user_id)
     manager = QueryStatusManager(query_id, team_id)
@@ -225,6 +231,7 @@ def execute_process_query(
             dashboard_id=query_status.dashboard_id,
             user=user,
             is_query_service=is_query_service,
+            analytics_props=analytics_props,
         )
         if isinstance(results, BaseModel):
             results = results.model_dump(by_alias=True)
@@ -235,20 +242,37 @@ def execute_process_query(
             seconds=1
         )
         QUERY_PROCESS_TIME.labels(team=team_id).observe(process_duration)
-    except CHQueryErrorTooManySimultaneousQueries:
+    except (DatastoreAtCapacity, ConcurrencyLimitExceeded):
+        # Capacity/concurrency errors are transient — let them propagate so the enclosing
+        # Celery task (process_query_task) retries with backoff instead of being swallowed
+        # below as a "user-safe" APIException that never retries. Clear the assumed-complete
+        # flags stored in the finally below, or the retry would short-circuit at the
+        # `if query_status.complete: return` guard above and never re-run the query.
+        # If retries are exhausted, process_query_task's on_failure marks the status errored.
+        query_status.complete = False
+        query_status.error = False
         raise
     except Exception as err:
         from insights.rbac.user_access_control import UserAccessControlError
 
         query_status.results = None  # Clear results in case they are faulty
-        if (
-            isinstance(err, APIException | ExposedInsightsQLError | ExposedCHQueryError | UserAccessControlError)
-            or is_staff_user
-        ):
+        is_user_safe_error = isinstance(
+            err, APIException | ExposedInsightsQLError | ExposedCHQueryError | UserAccessControlError
+        )
+        if is_user_safe_error or is_staff_user:
             # We can only expose the error message if it's a known safe error OR if the user is Insights staff
             query_status.error_message = str(err)
+            if isinstance(err, APIException):
+                # get_codes() returns a list/dict for compound validation errors; only scalar codes
+                # are meaningful to the frontend, which matches on specific code strings.
+                codes = err.get_codes()
+                if isinstance(codes, str):
+                    query_status.error_code = codes
         logger.exception("Error processing query async", team_id=team_id, query_id=query_id, exc_info=True)
-        capture_exception(err)
+        if not is_user_safe_error:
+            # User-safe errors (e.g. a malformed InsightsQL query) are already returned to the user as a 400,
+            # so don't report them to error tracking — only genuine server-side failures belong there.
+            capture_exception(err)
         # Do not raise here, the task itself did its job and we cannot recover
     finally:
         query_status.end_time = datetime.datetime.now(datetime.UTC)
@@ -278,6 +302,7 @@ def enqueue_process_query_task(
     _test_only_bypass_celery: bool = False,
     is_query_service: bool = False,
     is_insights_ai: bool = False,
+    analytics_props: Optional["AnalyticsProps"] = None,
 ) -> QueryStatus:
     if not query_id:
         query_id = uuid.uuid4().hex
@@ -296,16 +321,24 @@ def enqueue_process_query_task(
             existing_query_id = manager.get_running_query_by_cache_key(cache_key)
             if existing_query_id:
                 query_status = get_query_status(team.id, existing_query_id)
-                hanzo_insights.capture(
-                    "query duplicate found",
-                    distinct_id=user_id,
-                    properties={
-                        "cache_key": cache_key,
-                        "query_id": existing_query_id,
-                        "query_json": query_json,
-                    },
-                )
-                return query_status
+                if not query_status.complete:
+                    # Only deduplicate against a query that is still in progress
+                    hanzo_insights.capture(
+                        "query duplicate found",
+                        distinct_id=user_id,
+                        properties={
+                            "cache_key": cache_key,
+                            "query_id": existing_query_id,
+                            "query_json": query_json,
+                        },
+                    )
+                    return query_status
+                # The previous task finished (or failed) — clean up the stale mapping and enqueue a new one
+                manager.unregister_cache_key_mapping(cache_key)
+    except QueryNotFoundError:
+        # The status for the mapped query_id expired before we could check it — clean up and re-enqueue
+        if cache_key:
+            manager.unregister_cache_key_mapping(cache_key)
     except Exception as e:
         capture_exception(e, {"cache_key": cache_key})
 
@@ -326,9 +359,20 @@ def enqueue_process_query_task(
         except Exception as e:
             capture_exception(e, {"cache_key": cache_key})
 
-    limit_context = LimitContext.INSIGHTS_AI if is_insights_ai else LimitContext.QUERY_ASYNC
+    # insights.tasks.__init__ eagerly imports every task module (celery autoimport), and this
+    # module loads at django.setup() via insights.datastore.client — keep the task graph off it.
+    from insights.tasks.tasks import process_query_task  # noqa: PLC0415
+
+    limit_context = LimitContext.POSTFN_AI if is_insights_ai else LimitContext.QUERY_ASYNC
     task_signature = process_query_task.si(
-        team.id, user_id, query_id, query_json, query_tags, is_query_service, limit_context
+        team.id,
+        user_id,
+        query_id,
+        query_json,
+        query_tags,
+        is_query_service,
+        limit_context,
+        analytics_props=analytics_props,
     )
 
     if _test_only_bypass_celery:

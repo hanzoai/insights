@@ -1,79 +1,28 @@
-import { env } from 'cloudflare:workers'
+export {
+    USER_AGENT,
+    type GetUserAgentOptions,
+    getUserAgent,
+    POSTFN_US_BASE_URL,
+    POSTFN_EU_BASE_URL,
+    toCloudRegion,
+    getBaseUrlForRegion,
+    getCustomApiBaseUrl,
+    getPublicBaseUrl,
+    isCloudApi,
+    isLocalApi,
+    MCP_DOCS_URL,
+    OAUTH_SCOPES_HIDDEN,
+    OAUTH_SCOPES_SUPPORTED,
+} from './oauth-constants'
 
-import type { CloudRegion } from '@/tools/types'
+import { resolveAuthorizationServerUrl } from './oauth-constants'
 
-// Region-specific Insights API base URLs
-export const INSIGHTS_US_BASE_URL = 'https://insights.hanzo.ai'
-export const INSIGHTS_EU_BASE_URL = 'https://insights.hanzo.ai'
+export const getAuthorizationServerUrl = (): string => resolveAuthorizationServerUrl()
 
-// Normalize a string to a valid CloudRegion, defaulting to 'us'
-export const toCloudRegion = (value: string | undefined | null): CloudRegion => {
-    const normalized = value?.toLowerCase()
-    if (normalized === 'eu') {
-        return 'eu'
-    }
-    return 'us'
-}
+export const MCP_SERVER_NAME = 'Insights'
+export const MCP_SERVER_VERSION = '1.0.0'
+export const MCP_ANALYTICS_SOURCE = 'insights_mcp_analytics'
 
-// Get the Insights base URL for a region
-export const getBaseUrlForRegion = (region: CloudRegion): string => {
-    return region === 'eu' ? INSIGHTS_EU_BASE_URL : INSIGHTS_US_BASE_URL
-}
-
-/**
- * Custom API base URL for self-hosted Insights instances.
- *
- * WARNING: In Insights Production, this should NOT be set.
- * The code automatically handles US/EU region routing via getAuthorizationServerUrl().
- * Only set this for self-hosted Insights deployments.
- */
-export const CUSTOM_API_BASE_URL = env.INSIGHTS_API_BASE_URL
-
-// Get the authorization server URL for OAuth, respecting CUSTOM_API_BASE_URL for self-hosted instances
-export const getAuthorizationServerUrl = (regionParam: string | null): string => {
-    if (CUSTOM_API_BASE_URL) {
-        return CUSTOM_API_BASE_URL
-    }
-
-    return getBaseUrlForRegion(toCloudRegion(regionParam))
-}
-
-// OAuth Authorization Server URL (where clients get tokens)
-// Defaults to CUSTOM_API_BASE_URL if not explicitly set
-export const OAUTH_AUTHORIZATION_SERVER_URL =
-    (env as unknown as Record<string, string | undefined>).OAUTH_AUTHORIZATION_SERVER_URL || CUSTOM_API_BASE_URL
-
-export const MCP_DOCS_URL = 'https://hanzo.ai/docs/model-context-protocol'
-
-// OAuth Protected Resource Metadata (RFC 9728)
-// Scopes that this resource server supports
-export const OAUTH_SCOPES_SUPPORTED = [
-    'openid',
-    'profile',
-    'email',
-    'introspection',
-    'action:read',
-    'action:write',
-    'dashboard:read',
-    'dashboard:write',
-    'error_tracking:read',
-    'error_tracking:write',
-    'event_definition:read',
-    'event_definition:write',
-    'experiment:read',
-    'experiment:write',
-    'feature_flag:read',
-    'feature_flag:write',
-    'insight:read',
-    'insight:write',
-    'logs:read',
-    'organization:read',
-    'project:read',
-    'property_definition:read',
-    'query:read',
-    'survey:read',
-    'survey:write',
-    'user:read',
-    'warehouse_table:read',
-    'warehouse_view:read',
-] as const
+// Gates the semantic layer (governed-metrics catalog) — no tool declares it, so it must be
+// joined into the evaluated flag set explicitly; instructions content branches on it.
+export const PRODUCT_DATA_CATALOG_FLAG = 'product-data-catalog'

@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.core.paginator import Paginator
 from django.db import transaction
 
-from insights.models.insights_flow.insights_flow import BILLABLE_ACTION_TYPES, InsightsFlow
+from products.workflows.backend.models.hog_flow.hog_flow import BILLABLE_ACTION_TYPES, InsightsFlow
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class Command(BaseCommand):
             help="Team ID to backfill InsightsFlows for (if not provided, processes all teams)",
         )
         parser.add_argument(
-            "--insights-flow-id",
+            "--script-flow-id",
             type=str,
             help="Specific InsightsFlow ID to backfill (if provided, only this flow is processed)",
         )
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         page_size = options["page_size"]
         dry_run = options["dry_run"]
         team_id = options.get("team_id")
-        insights_flow_id = options.get("insights_flow_id")
+        hog_flow_id = options.get("hog_flow_id")
 
         if dry_run:
             self.stdout.write(self.style.WARNING("Running in DRY RUN mode - no changes will be made"))
@@ -52,9 +52,9 @@ class Command(BaseCommand):
         queryset = InsightsFlow.objects.all()
 
         # Apply filters
-        if insights_flow_id:
-            queryset = queryset.filter(id=insights_flow_id)
-            self.stdout.write(f"Processing single InsightsFlow: {insights_flow_id}")
+        if hog_flow_id:
+            queryset = queryset.filter(id=hog_flow_id)
+            self.stdout.write(f"Processing single InsightsFlow: {hog_flow_id}")
         elif team_id:
             queryset = queryset.filter(team_id=team_id)
             self.stdout.write(f"Processing InsightsFlows for team: {team_id}")
@@ -79,15 +79,15 @@ class Command(BaseCommand):
 
             flows_to_update = []
 
-            for flow in page.object_list:
+            for hogflow in page.object_list:
                 try:
-                    if flow.actions:
+                    if hogflow.actions:
                         # Extract unique billable action types from the actions list
                         # Using centralized BILLABLE_ACTION_TYPES constant
                         billable_action_types = sorted(
                             {
                                 action.get("type", "")
-                                for action in flow.actions
+                                for action in hogflow.actions
                                 if isinstance(action, dict) and action.get("type") in BILLABLE_ACTION_TYPES
                             }
                         )
@@ -96,14 +96,14 @@ class Command(BaseCommand):
                         billable_action_types = []
 
                     # Only update if the computed value differs from the current value (compare as sets since order doesn't matter)
-                    if set(flow.billable_action_types or []) != set(billable_action_types):
-                        flow.billable_action_types = billable_action_types
-                        flows_to_update.append(flow)
+                    if set(hogflow.billable_action_types or []) != set(billable_action_types):
+                        hogflow.billable_action_types = billable_action_types
+                        flows_to_update.append(hogflow)
 
                 except Exception as e:
                     error_count += 1
                     logger.error(
-                        f"Error processing InsightsFlow id={flow.id}, team_id={flow.team_id}: {e}",
+                        f"Error processing InsightsFlow id={hogflow.id}, team_id={hogflow.team_id}: {e}",
                         exc_info=True,
                     )
 

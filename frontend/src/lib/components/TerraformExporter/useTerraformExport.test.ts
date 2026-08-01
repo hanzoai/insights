@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import api from '~/lib/api'
 
@@ -9,7 +9,7 @@ import * as insightHclExporter from './insightHclExporter'
 import { TerraformExportResource, useTerraformExport } from './useTerraformExport'
 
 jest.mock('~/lib/api')
-jest.mock('@hanzo/insights')
+jest.mock('insights-js')
 jest.mock('kea', () => ({
     ...jest.requireActual('kea'),
     useValues: jest.fn(),
@@ -21,12 +21,8 @@ describe('useTerraformExport', () => {
     beforeEach(() => {
         jest.clearAllMocks()
         ;(useValues as jest.Mock).mockReturnValue({ currentTeamId: 1 })
-        mockedApi.alerts = {
-            list: jest.fn().mockResolvedValue({ results: [] }),
-        } as any
-        mockedApi.insightsFunctions = {
-            list: jest.fn().mockResolvedValue({ results: [] }),
-        } as any
+        jest.spyOn(mockedApi.alerts, 'list').mockResolvedValue({ results: [] } as any)
+        jest.spyOn(mockedApi.insightsFunctions, 'list').mockResolvedValue({ results: [] } as any)
     })
 
     describe('error handling', () => {

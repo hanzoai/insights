@@ -5,16 +5,19 @@ use base64::{engine::general_purpose, Engine as _};
 use feature_flags::api::types::{FlagsResponse, LegacyFlagsResponse};
 use limiters::redis::ServiceName;
 use rand::Rng;
+
 use reqwest::StatusCode;
 use rstest::rstest;
 use serde_json::{json, Value};
 
 use crate::common::*;
 
+use feature_flags::cohorts::cohort_models::CohortType;
 use feature_flags::config::DEFAULT_TEST_CONFIG;
 use feature_flags::utils::test_utils::{
-    insert_config_in_hypercache, insert_flags_for_team_in_redis, insert_new_team_in_redis,
-    setup_pg_reader_client, setup_redis_client, TestContext,
+    insert_config_in_hypercache, insert_flags_for_team_in_redis,
+    insert_flags_with_metadata_for_team_in_redis, insert_new_team_in_redis, setup_pg_reader_client,
+    setup_redis_client, update_team_in_hypercache, TestContext,
 };
 
 pub mod common;
@@ -23,7 +26,7 @@ pub mod common;
 async fn it_handles_get_requests_with_minimal_response() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -77,7 +80,7 @@ async fn it_gets_legacy_response_for_v1_or_invalid_version(
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -142,7 +145,7 @@ async fn it_gets_v2_response_by_default_when_no_params() -> Result<()> {
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -231,7 +234,7 @@ async fn it_get_new_response_when_version_is_2_or_more(#[case] version: &str) ->
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -309,7 +312,7 @@ async fn it_rejects_invalid_headers_flag_request() -> Result<()> {
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -348,7 +351,7 @@ async fn it_rejects_invalid_headers_flag_request() -> Result<()> {
 #[tokio::test]
 async fn it_accepts_empty_distinct_id() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
     let distinct_id = "user_distinct_id".to_string();
@@ -385,7 +388,7 @@ async fn it_accepts_empty_distinct_id() -> Result<()> {
 #[tokio::test]
 async fn it_rejects_missing_distinct_id() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
     let server = ServerHandle::for_config(config).await;
@@ -418,10 +421,14 @@ async fn it_rejects_missing_token() -> Result<()> {
         .send_flags_request(payload.to_string(), Some("1"), None)
         .await;
     assert_eq!(StatusCode::UNAUTHORIZED, res.status());
+    let json_data = res.json::<Value>().await?;
+    assert_eq!(json_data["type"], "authentication_error");
+    assert_eq!(json_data["code"], "not_authenticated");
     assert_eq!(
-        res.text().await?,
+        json_data["detail"],
         "No API token provided. Please include a valid API token in your request."
     );
+    assert_eq!(json_data["attr"], Value::Null);
     Ok(())
 }
 
@@ -439,10 +446,14 @@ async fn it_rejects_invalid_token() -> Result<()> {
         .send_flags_request(payload.to_string(), Some("1"), None)
         .await;
     assert_eq!(StatusCode::UNAUTHORIZED, res.status());
+    let json_data = res.json::<Value>().await?;
+    assert_eq!(json_data["type"], "authentication_error");
+    assert_eq!(json_data["code"], "authentication_failed");
     assert_eq!(
-        res.text().await?,
+        json_data["detail"],
         "The provided API key is invalid or has expired. Please check your API key and try again."
     );
+    assert_eq!(json_data["attr"], Value::Null);
     Ok(())
 }
 
@@ -471,7 +482,7 @@ async fn it_handles_base64_auto_detection_fallback() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
 
     // Set up Redis and PostgreSQL clients
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -522,7 +533,7 @@ async fn it_handles_disable_flags_without_distinct_id() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
 
     // Set up Redis and PostgreSQL clients
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -638,7 +649,7 @@ async fn it_handles_multivariate_flags() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -723,7 +734,7 @@ async fn it_handles_flag_with_property_filter() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
     let context = TestContext::new(None).await;
@@ -818,7 +829,7 @@ async fn it_matches_flags_to_a_request_with_group_property_overrides() -> Result
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let context = TestContext::new(None).await;
     let team = context.insert_new_team(Some(team.id)).await.unwrap();
@@ -921,7 +932,7 @@ async fn it_matches_flags_to_a_request_with_group_property_overrides() -> Result
 async fn test_feature_flags_with_json_payloads() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "example_id".to_string();
-    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
 
     // Insert a new team into Redis and retrieve the team details
     let team = insert_new_team_in_redis(redis_client.clone())
@@ -1002,10 +1013,9 @@ async fn test_feature_flags_with_json_payloads() -> Result<()> {
 async fn test_feature_flags_with_group_relationships() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "example_id".to_string();
-    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
-    let team_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
+    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
     let context = TestContext::new(None).await;
-    let team = context.insert_new_team(Some(team_id)).await.unwrap();
+    let team = context.insert_new_team(None).await.unwrap();
 
     // need this for the test to work, since we look up the dinstinct_id <-> person_id in from the DB at the beginning
     // of the flag evaluation process
@@ -1021,7 +1031,7 @@ async fn test_feature_flags_with_group_relationships() -> Result<()> {
             team.id,
             "organization",
             "foo",
-            json!({"email": "insights.example.com"}),
+            json!({"email": "insights@example.com"}),
         )
         .await?;
 
@@ -1168,7 +1178,7 @@ async fn it_handles_not_contains_property_filter() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -1237,7 +1247,7 @@ async fn it_handles_not_equal_and_not_regex_property_filters() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
     let context = TestContext::new(None).await;
@@ -1284,7 +1294,7 @@ async fn it_handles_not_equal_and_not_regex_property_filters() -> Result<()> {
                         "properties": [
                             {
                                 "key": "email",
-                                "value": ".*@hanzo\.ai$",
+                                "value": ".*@insights\\.com$",
                                 "operator": "not_regex",
                                 "type": "person"
                             }
@@ -1382,7 +1392,7 @@ async fn it_handles_not_equal_and_not_regex_property_filters() -> Result<()> {
 async fn test_complex_regex_and_name_match_flag() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "example_id".to_string();
-    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
     let context = TestContext::new(None).await;
     let team = context.insert_new_team(None).await?;
     context
@@ -1516,10 +1526,10 @@ async fn test_complex_regex_and_name_match_flag() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_super_condition_with_complex_request() -> Result<()> {
+async fn test_feature_enrollment_with_complex_request() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "test_user".to_string();
-    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone()).await?;
     let context = TestContext::new(None).await;
     context.insert_new_team(Some(team.id)).await?;
@@ -1558,15 +1568,7 @@ async fn test_super_condition_with_complex_request() -> Result<()> {
                     "rollout_percentage": 100
                 }
             ],
-            "super_groups": [{
-                "properties": [{
-                    "key": "$feature_enrollment/my-flag",
-                    "type": "person",
-                    "value": ["true"],
-                    "operator": "exact"
-                }],
-                "rollout_percentage": 100
-            }]
+            "feature_enrollment": true
         }
     }]);
 
@@ -1582,13 +1584,13 @@ async fn test_super_condition_with_complex_request() -> Result<()> {
             "project": "01908d8e-a7fe-0000-403d-5de1f5feeb34",
             "organization": "01908d8e-a7ed-0000-5678-bb4cf061a2f6",
             "customer": "cus_IK2DWsWVn2ZM16",
-            "instance": "https://us.insights.hanzo.ai"
+            "instance": "https://us.hanzo.ai"
         },
         "person_properties": {
-            "$initial_referrer": "https://us.insights.hanzo.ai/admin/insights/user/106009/change/?_changelist_filters=q%3Dgtarasov.work",
-            "$initial_referring_domain": "us.insights.hanzo.ai",
-            "$initial_current_url": "https://us.insights.hanzo.ai/project/78189/settings/user",
-            "$initial_host": "us.insights.hanzo.ai",
+            "$initial_referrer": "https://us.hanzo.ai/admin/insights/user/106009/change/?_changelist_filters=q%3Dgtarasov.work",
+            "$initial_referring_domain": "us.hanzo.ai",
+            "$initial_current_url": "https://us.hanzo.ai/project/78189/settings/user",
+            "$initial_host": "us.hanzo.ai",
             "$initial_pathname": "/project/78189/settings/user",
             "$initial_utm_source": null,
             "$initial_utm_medium": null,
@@ -1621,7 +1623,7 @@ async fn test_super_condition_with_complex_request() -> Result<()> {
 #[tokio::test]
 async fn test_flag_matches_with_no_person_profile() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -1739,11 +1741,52 @@ async fn it_sets_quota_limited_in_legacy_and_v2() -> Result<()> {
 }
 
 #[tokio::test]
+async fn test_minimal_flag_called_events_reaches_v2_but_not_legacy_response() -> Result<()> {
+    let config = DEFAULT_TEST_CONFIG.clone();
+    let distinct_id = "user1".to_string();
+
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let mut team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    team.minimal_flag_called_events = true;
+    update_team_in_hypercache(client.clone(), &team).await?;
+    let token = team.api_token.clone();
+
+    let context = TestContext::new(None).await;
+    context.insert_new_team(Some(team.id)).await.unwrap();
+
+    let server = ServerHandle::for_config(config).await;
+
+    let payload = json!({
+        "token": token,
+        "distinct_id": distinct_id,
+    });
+
+    // V2 response: the gated team's signal is present and true.
+    let res = server
+        .send_flags_request(payload.to_string(), Some("2"), None)
+        .await;
+    assert_eq!(StatusCode::OK, res.status());
+    let v2: FlagsResponse = res.json().await?;
+    assert_eq!(v2.minimal_flag_called_events, Some(true));
+
+    // Legacy response (v=1): LegacyFlagsResponse doesn't carry the field at all, so a
+    // gated team's v1 clients never see the signal and keep sending full events.
+    let res = server
+        .send_flags_request(payload.to_string(), Some("1"), None)
+        .await;
+    assert_eq!(StatusCode::OK, res.status());
+    let json_data = res.json::<Value>().await?;
+    assert!(json_data.get("minimalFlagCalledEvents").is_none());
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn it_only_includes_config_fields_when_requested() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -1821,7 +1864,7 @@ async fn test_config_passthrough_enterprise_team() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "enterprise_user".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -1870,7 +1913,7 @@ async fn test_config_passthrough_enterprise_team() -> Result<()> {
             {"id": 1, "url": "/site_app/enterprise_token/"}
         ],
         "analytics": {
-            "endpoint": "https://analytics.insights.hanzo.ai"
+            "endpoint": "https://analytics.hanzo.ai"
         },
         "elementsChainAsString": true,
         "capturePerformance": {
@@ -1940,7 +1983,7 @@ async fn test_config_passthrough_enterprise_team() -> Result<()> {
     assert!(json_data["analytics"].is_object());
     assert_eq!(
         json_data["analytics"]["endpoint"],
-        json!("https://analytics.insights.hanzo.ai")
+        json!("https://analytics.hanzo.ai")
     );
 
     // Elements chain as string
@@ -2001,7 +2044,7 @@ async fn test_config_passthrough_minimal_team() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "minimal_user".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2085,7 +2128,7 @@ async fn test_config_passthrough_preserves_unknown_fields() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2152,7 +2195,7 @@ async fn test_config_cache_miss_returns_minimal_fallback() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2181,7 +2224,7 @@ async fn test_config_cache_miss_returns_minimal_fallback() -> Result<()> {
     let json_data = res.json::<Value>().await?;
 
     // Verify minimal fallback config fields are present
-    assert_eq!(json_data.get("token"), Some(&json!(token)));
+    assert!(json_data.get("token").is_none());
     assert_eq!(json_data.get("hasFeatureFlags"), Some(&json!(false))); // no flags configured
     assert_eq!(json_data.get("sessionRecording"), Some(&json!(false)));
     assert_eq!(json_data.get("surveys"), Some(&json!(false)));
@@ -2247,7 +2290,7 @@ async fn test_config_cache_miss_with_recordings_quota_limited() -> Result<()> {
     let json_data = res.json::<Value>().await?;
 
     // Verify fallback config fields are present (cache miss behavior)
-    assert_eq!(json_data.get("token"), Some(&json!(token)));
+    assert!(json_data.get("token").is_none());
     assert_eq!(json_data.get("sessionRecording"), Some(&json!(false)));
 
     // Critical assertion: quota_limited must include "recordings"
@@ -2268,7 +2311,7 @@ async fn test_config_cache_empty_config() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2310,7 +2353,7 @@ async fn test_disable_flags_returns_empty_response() -> Result<()> {
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2375,7 +2418,7 @@ async fn test_disable_flags_returns_empty_response_v2() -> Result<()> {
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2439,7 +2482,7 @@ async fn test_disable_flags_false_still_returns_flags() -> Result<()> {
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2505,7 +2548,7 @@ async fn test_disable_flags_with_config_still_returns_config_data() -> Result<()
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2600,7 +2643,7 @@ async fn test_disable_flags_with_config_v2_still_returns_config_data() -> Result
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2694,7 +2737,7 @@ async fn test_disable_flags_without_config_param_has_minimal_response() -> Resul
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2764,10 +2807,9 @@ async fn test_disable_flags_without_config_param_has_minimal_response() -> Resul
 async fn test_numeric_group_ids_work_correctly() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_with_numeric_group".to_string();
-    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
-    let team_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
+    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
     let context = TestContext::new(None).await;
-    let team = context.insert_new_team(Some(team_id)).await.unwrap();
+    let team = context.insert_new_team(None).await.unwrap();
 
     context
         .insert_person(team.id, distinct_id.clone(), None)
@@ -2923,16 +2965,16 @@ async fn test_numeric_group_ids_work_correctly() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_super_condition_property_overrides_bug_fix() -> Result<()> {
-    // This test specifically addresses the bug where super condition property overrides
+async fn test_feature_enrollment_property_overrides_bug_fix() -> Result<()> {
+    // This test specifically addresses the bug where feature enrollment property overrides
     // were ignored when evaluating flags. The bug was that if you sent:
-    // "$feature_enrollment/discussions": false
-    // as an override, it would be ignored if the flag's super_groups checked for that property.
+    // "$feature_enrollment/discussions-flag": false
+    // as an override, it would be ignored if the flag's feature_enrollment gate checked for that property.
 
     let config = DEFAULT_TEST_CONFIG.clone();
-    let distinct_id = "super_condition_user".to_string();
+    let distinct_id = "feature_enrollment_user".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -2945,7 +2987,7 @@ async fn test_super_condition_property_overrides_bug_fix() -> Result<()> {
             team.id,
             distinct_id.clone(),
             Some(json!({
-                "$feature_enrollment/discussions": true,  // DB has it as true
+                "$feature_enrollment/discussions-flag": true,  // DB has it as true
                 "email": "user@example.com"
             })),
         )
@@ -2967,15 +3009,7 @@ async fn test_super_condition_property_overrides_bug_fix() -> Result<()> {
                     "rollout_percentage": 100
                 }
             ],
-            "super_groups": [{
-                "properties": [{
-                    "key": "$feature_enrollment/discussions",
-                    "type": "person",
-                    "value": ["true"],
-                    "operator": "exact"
-                }],
-                "rollout_percentage": 100
-            }]
+            "feature_enrollment": true
         }
     }]);
 
@@ -3001,7 +3035,7 @@ async fn test_super_condition_property_overrides_bug_fix() -> Result<()> {
 
     let json_data = res.json::<Value>().await?;
 
-    // Should be enabled because DB has $feature_enrollment/discussions = true
+    // Should be enabled because DB has $feature_enrollment/discussions-flag = true
     assert_json_include!(
         actual: json_data,
         expected: json!({
@@ -3024,7 +3058,7 @@ async fn test_super_condition_property_overrides_bug_fix() -> Result<()> {
         "token": token,
         "distinct_id": distinct_id,
         "person_properties": {
-            "$feature_enrollment/discussions": false  // Override to false
+            "$feature_enrollment/discussions-flag": false  // Override to false
         }
     });
 
@@ -3063,7 +3097,7 @@ async fn test_super_condition_property_overrides_bug_fix() -> Result<()> {
             team.id,
             "another_user".to_string(),
             Some(json!({
-                "$feature_enrollment/discussions": false,  // DB has it as false
+                "$feature_enrollment/discussions-flag": false,  // DB has it as false
                 "email": "another@example.com"
             })),
         )
@@ -3074,7 +3108,7 @@ async fn test_super_condition_property_overrides_bug_fix() -> Result<()> {
         "token": token,
         "distinct_id": "another_user",
         "person_properties": {
-            "$feature_enrollment/discussions": true  // Override to true
+            "$feature_enrollment/discussions-flag": true  // Override to true
         }
     });
 
@@ -3118,7 +3152,7 @@ async fn test_property_override_bug_real_scenario() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "test_real_bug".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -3245,11 +3279,11 @@ async fn test_property_override_bug_real_scenario() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_super_condition_with_cohort_filters() -> Result<()> {
+async fn test_feature_enrollment_with_cohort_filters() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
-    let distinct_id = "super_condition_cohort_user".to_string();
+    let distinct_id = "feature_enrollment_cohort_user".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -3262,7 +3296,7 @@ async fn test_super_condition_with_cohort_filters() -> Result<()> {
             team.id,
             distinct_id.clone(),
             Some(json!({
-                "$feature_enrollment/discussions": false,  // Super condition property in DB
+                "$feature_enrollment/discussions-with-cohort": false,  // Super condition property in DB
                 "email": "user@example.com"
             })),
         )
@@ -3270,7 +3304,7 @@ async fn test_super_condition_with_cohort_filters() -> Result<()> {
         .unwrap();
 
     // Create a flag that matches your production example:
-    // - Has a super condition that checks "$feature_enrollment/discussions"
+    // - Has a super condition that checks "$feature_enrollment/discussions-with-cohort"
     // - Has a regular condition with a cohort filter
     let flag_json = json!([{
         "id": 1,
@@ -3291,15 +3325,7 @@ async fn test_super_condition_with_cohort_filters() -> Result<()> {
             }],
             "payloads": {},
             "multivariate": null,
-            "super_groups": [{
-                "properties": [{
-                    "key": "$feature_enrollment/discussions",
-                    "type": "person",
-                    "value": ["true"],
-                    "operator": "exact"
-                }],
-                "rollout_percentage": 100
-            }]
+            "feature_enrollment": true
         }
     }]);
 
@@ -3325,7 +3351,7 @@ async fn test_super_condition_with_cohort_filters() -> Result<()> {
 
     let json_data = res.json::<Value>().await?;
 
-    // Should be disabled because DB has $feature_enrollment/discussions = false
+    // Should be disabled because DB has $feature_enrollment/discussions-with-cohort = false
     assert_json_include!(
         actual: json_data,
         expected: json!({
@@ -3347,7 +3373,7 @@ async fn test_super_condition_with_cohort_filters() -> Result<()> {
         "token": token,
         "distinct_id": distinct_id,
         "person_properties": {
-            "$feature_enrollment/discussions": true  // Override super condition property to true
+            "$feature_enrollment/discussions-with-cohort": true  // Override super condition property to true
         }
     });
 
@@ -3364,8 +3390,8 @@ async fn test_super_condition_with_cohort_filters() -> Result<()> {
     let json_override = res_override.json::<Value>().await?;
 
     // This is the key test: the flag should now be enabled because:
-    // 1. Super condition can be evaluated from override (discussions = true)
-    // 2. Super condition matches, so we return early with super_condition_value
+    // 1. Feature enrollment can be evaluated from override (discussions = true)
+    // 2. Enrollment matches, so we return early with super_condition_value
     // 3. We don't even need to evaluate the cohort filter in the regular condition
     assert_json_include!(
         actual: json_override,
@@ -3388,7 +3414,7 @@ async fn test_super_condition_with_cohort_filters() -> Result<()> {
         "token": token,
         "distinct_id": distinct_id,
         "person_properties": {
-            "$feature_enrollment/discussions": false  // Override to false
+            "$feature_enrollment/discussions-with-cohort": false  // Override to false
         }
     });
 
@@ -3426,7 +3452,7 @@ async fn test_returns_empty_flags_when_no_active_flags_configured() -> Result<()
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -3573,7 +3599,7 @@ async fn test_group_key_property_matching() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let context = TestContext::new(None).await;
     let team = context.insert_new_team(Some(team.id)).await.unwrap();
@@ -3693,7 +3719,7 @@ async fn test_cohort_filter_with_regex_and_negation() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "test.user".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let pg_client = setup_pg_reader_client(None);
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
@@ -3902,7 +3928,7 @@ async fn test_flag_keys_should_include_dependency_graph() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -4010,7 +4036,24 @@ async fn test_flag_keys_should_include_dependency_graph() -> Result<()> {
         }
     ]);
 
-    insert_flags_for_team_in_redis(client, team.id, Some(flag_json.to_string())).await?;
+    // Dependency chain: parent(3) -> intermediate(2) -> leaf(1), independent(4) has no deps.
+    // Mirrors Django's precomputed metadata: stages ordered by depth, transitive deps resolved.
+    let evaluation_metadata = json!({
+        "dependency_stages": [
+            [LEAF_FLAG_ID, INDEPENDENT_FLAG_ID],
+            [INTERMEDIATE_FLAG_ID],
+            [PARENT_FLAG_ID]
+        ],
+        "flags_with_missing_deps": [],
+        "transitive_deps": {
+            LEAF_FLAG_ID.to_string(): [],
+            INTERMEDIATE_FLAG_ID.to_string(): [LEAF_FLAG_ID],
+            PARENT_FLAG_ID.to_string(): [INTERMEDIATE_FLAG_ID, LEAF_FLAG_ID],
+            INDEPENDENT_FLAG_ID.to_string(): []
+        }
+    });
+    insert_flags_with_metadata_for_team_in_redis(client, team.id, flag_json, evaluation_metadata)
+        .await?;
 
     let server = ServerHandle::for_config(config).await;
 
@@ -4128,7 +4171,7 @@ async fn test_flag_keys_to_evaluate_parameter() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -4249,7 +4292,7 @@ async fn it_handles_empty_query_parameters() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -4306,7 +4349,7 @@ async fn it_handles_boolean_query_params_as_truthy() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -4394,7 +4437,7 @@ async fn test_nested_cohort_targeting_with_days_since_paid_plan() -> Result<()> 
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "test_user_with_77_days".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let pg_client = setup_pg_reader_client(None);
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
@@ -4671,7 +4714,7 @@ async fn test_nested_cohort_targeting_with_days_since_paid_plan() -> Result<()> 
 async fn test_empty_distinct_id_flag_matching() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -4937,7 +4980,7 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "test_user_and_cohort".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let pg_client = setup_pg_reader_client(None);
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
@@ -5169,7 +5212,7 @@ async fn test_date_string_property_matching_with_is_date_after() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "test_user_123".to_string();
 
-    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -5297,7 +5340,7 @@ async fn it_includes_evaluated_at_timestamp_in_response() -> Result<()> {
 
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -5368,7 +5411,7 @@ async fn it_includes_evaluated_at_timestamp_in_response() -> Result<()> {
 #[tokio::test]
 async fn test_cohort_date_matching_with_milliseconds_format() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
 
     let distinct_id = "test_user".to_string();
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
@@ -5506,7 +5549,7 @@ async fn test_initial_property_population_respects_db_values(
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = format!("test_initial_props_{}", rand::thread_rng().gen::<u32>());
 
-    let client = setup_redis_client(Some(config.kv_url.clone())).await;
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -5590,6 +5633,671 @@ async fn test_initial_property_population_respects_db_values(
                     "reason": {
                         "code": expected_reason
                     }
+                }
+            }
+        })
+    );
+
+    Ok(())
+}
+
+/// Tests that `$os` and `$os_name` are mirrored at match time, so a flag condition
+/// keyed on either property matches a person row that carries only one of them.
+///
+/// Web SDKs report the OS as `$os`; mobile SDKs report it as `$os_name`, and
+/// ingestion stores only one of the two on the person. Matching does exact-key
+/// lookups, so without the mirror a mobile person (DB has only `$os_name`) would
+/// fall through on a `$os` filter, and vice versa.
+///
+/// Each case runs with experience continuity off and on. The on cases pin the
+/// scenario reported in https://github.com/Insights/insights/issues/55532, where
+/// matching reads properties from the persisted person row — exactly where a
+/// legacy `$os_name`-only mobile row used to miss a `$os` filter.
+#[rstest]
+// Person row has only $os_name (mobile); flag filters on $os -> should match.
+#[case::os_name_in_db_matches_os_filter(json!({"$os_name": "Android"}), "$os", "Android", false, true)]
+// Person row has only $os (web); flag filters on $os_name -> should match.
+#[case::os_in_db_matches_os_name_filter(json!({"$os": "iOS"}), "$os_name", "iOS", false, true)]
+// Person row has only $os_name; flag filters on $os for a different value -> no match.
+#[case::os_name_in_db_wrong_value_no_match(json!({"$os_name": "Android"}), "$os", "iOS", false, false)]
+// Same three under experience continuity (the #55532 path: matches the persisted person row).
+#[case::eec_os_name_in_db_matches_os_filter(json!({"$os_name": "Android"}), "$os", "Android", true, true)]
+#[case::eec_os_in_db_matches_os_name_filter(json!({"$os": "iOS"}), "$os_name", "iOS", true, true)]
+#[case::eec_os_name_in_db_wrong_value_no_match(json!({"$os_name": "Android"}), "$os", "iOS", true, false)]
+#[tokio::test]
+async fn test_os_name_aliases_os_at_match_time(
+    #[case] db_properties: Value,
+    #[case] filter_key: &str,
+    #[case] filter_value: &str,
+    #[case] ensure_experience_continuity: bool,
+    #[case] flag_should_match: bool,
+) -> Result<()> {
+    let config = DEFAULT_TEST_CONFIG.clone();
+    let distinct_id = format!("test_os_alias_{}", rand::thread_rng().gen::<u32>());
+
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    let token = team.api_token.clone();
+
+    let context = TestContext::new(None).await;
+    context.insert_new_team(Some(team.id)).await.unwrap();
+
+    context
+        .insert_person(team.id, distinct_id.clone(), Some(db_properties))
+        .await
+        .unwrap();
+
+    let flag_json = json!([
+        {
+            "id": 1,
+            "key": "os-flag",
+            "name": "Flag checking OS",
+            "active": true,
+            "deleted": false,
+            "team_id": team.id,
+            "ensure_experience_continuity": ensure_experience_continuity,
+            "filters": {
+                "groups": [
+                    {
+                        "properties": [
+                            {
+                                "key": filter_key,
+                                "value": filter_value,
+                                "operator": "exact",
+                                "type": "person"
+                            }
+                        ],
+                        "rollout_percentage": 100
+                    }
+                ],
+            },
+        }
+    ]);
+
+    insert_flags_for_team_in_redis(client, team.id, Some(flag_json.to_string())).await?;
+
+    let server = ServerHandle::for_config(config).await;
+
+    // No person_properties override: properties come purely from the DB person row,
+    // which is the experience-continuity path this bug affects.
+    let payload = json!({
+        "token": token,
+        "distinct_id": distinct_id,
+    });
+
+    let res = server
+        .send_flags_request(payload.to_string(), Some("2"), None)
+        .await;
+
+    if res.status() != StatusCode::OK {
+        let status = res.status();
+        let text = res.text().await?;
+        panic!("Non-200 response: {status}\nBody: {text}");
+    }
+
+    let json_data = res.json::<Value>().await?;
+
+    let expected_reason = if flag_should_match {
+        "condition_match"
+    } else {
+        "no_condition_match"
+    };
+
+    assert_json_include!(
+        actual: json_data,
+        expected: json!({
+            "errorsWhileComputingFlags": false,
+            "flags": {
+                "os-flag": {
+                    "key": "os-flag",
+                    "enabled": flag_should_match,
+                    "reason": {
+                        "code": expected_reason
+                    }
+                }
+            }
+        })
+    );
+
+    Ok(())
+}
+
+#[rstest]
+#[case(true)]
+#[case(false)]
+#[tokio::test]
+async fn test_skip_writes_suppresses_billing_redis_counter(
+    #[case] skip_writes: bool,
+) -> Result<()> {
+    use feature_flags::config::FlexBool;
+    use feature_flags::flags::flag_analytics::{current_bucket, get_team_request_key};
+    use feature_flags::flags::flag_request::FlagRequestType;
+
+    let mut config = DEFAULT_TEST_CONFIG.clone();
+    config.skip_writes = FlexBool(skip_writes);
+
+    let distinct_id = format!("billing_test_{}", rand::thread_rng().gen::<u32>());
+
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    let token = team.api_token.clone();
+
+    let context = TestContext::new(None).await;
+    context.insert_new_team(Some(team.id)).await.unwrap();
+    context
+        .insert_person(team.id, distinct_id.clone(), None)
+        .await
+        .unwrap();
+
+    let flag_json = json!([{
+        "id": 1,
+        "key": "billable-flag",
+        "name": "Billable Flag",
+        "active": true,
+        "deleted": false,
+        "team_id": team.id,
+        "filters": {
+            "groups": [{
+                "properties": [],
+                "rollout_percentage": 100
+            }],
+        },
+    }]);
+
+    insert_flags_for_team_in_redis(client.clone(), team.id, Some(flag_json.to_string())).await?;
+
+    // Clean billing key before request
+    let billing_key = get_team_request_key(team.id, FlagRequestType::Decide);
+    client.del(billing_key.clone()).await.unwrap();
+
+    let server = ServerHandle::for_config(config).await;
+
+    let payload = json!({
+        "token": token,
+        "distinct_id": distinct_id,
+    });
+
+    // Capture before the request — the HTTP roundtrip can cross a 2-minute bucket boundary.
+    let bucket_field = current_bucket().to_string();
+
+    let res = server
+        .send_flags_request(payload.to_string(), Some("2"), None)
+        .await;
+    assert_eq!(StatusCode::OK, res.status());
+
+    if skip_writes {
+        // Sleep ~5 flush windows so even a slow CI scheduler couldn't hide
+        // an erroneous `record()` behind a delayed first tick.
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        let counter = client.hget(billing_key, bucket_field).await;
+        assert!(
+            counter.is_err(),
+            "billing counter should NOT be incremented when skip_writes=true, got {counter:?}"
+        );
+    } else {
+        let counter = poll_for_billing_counter(&client, &billing_key, &bucket_field).await;
+        assert_eq!(
+            counter, "1",
+            "billing counter should be incremented when skip_writes=false"
+        );
+    }
+
+    Ok(())
+}
+
+/// Verifies that an SDK request lands counts at the team-level and the
+/// library-level Redis hashes in the production keyspace — the load-bearing
+/// invariant readers (`calculate_decide_usage`) consume. The aggregator's
+/// periodic flush is the only writer.
+#[tokio::test]
+async fn test_billing_increments_land_in_production_keyspace() -> Result<()> {
+    use feature_flags::config::FlexBool;
+    use feature_flags::flags::flag_analytics::{
+        current_bucket, get_team_request_key, get_team_request_library_key,
+    };
+    use feature_flags::flags::flag_request::FlagRequestType;
+    use feature_flags::handler::types::Library;
+
+    let mut config = DEFAULT_TEST_CONFIG.clone();
+    config.skip_writes = FlexBool(false);
+
+    let distinct_id = format!("billing_lib_test_{}", rand::thread_rng().gen::<u32>());
+
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    let token = team.api_token.clone();
+
+    let context = TestContext::new(None).await;
+    context.insert_new_team(Some(team.id)).await.unwrap();
+    context
+        .insert_person(team.id, distinct_id.clone(), None)
+        .await
+        .unwrap();
+
+    let flag_json = json!([{
+        "id": 1,
+        "key": "billable-flag",
+        "name": "Billable Flag",
+        "active": true,
+        "deleted": false,
+        "team_id": team.id,
+        "filters": {
+            "groups": [{
+                "properties": [],
+                "rollout_percentage": 100
+            }],
+        },
+    }]);
+    insert_flags_for_team_in_redis(client.clone(), team.id, Some(flag_json.to_string())).await?;
+
+    let team_key = get_team_request_key(team.id, FlagRequestType::Decide);
+    let library_key =
+        get_team_request_library_key(team.id, FlagRequestType::Decide, Library::InsightsNode);
+    client.del(team_key.clone()).await.unwrap();
+    client.del(library_key.clone()).await.unwrap();
+
+    let server = ServerHandle::for_config(config).await;
+
+    let payload = json!({
+        "token": token,
+        "distinct_id": distinct_id,
+    });
+
+    // Capture before the request — the HTTP roundtrip can cross a 2-minute bucket boundary.
+    let bucket_field = current_bucket().to_string();
+
+    // Direct reqwest call so we can set the SDK user-agent that drives
+    // Library::from_headers → Library::InsightsNode.
+    let http = reqwest::Client::new();
+    let res = http
+        .post(format!("http://{}/flags?v=2", server.addr))
+        .header("content-type", "application/json")
+        .header("user-agent", "insights-node/3.1.0")
+        .body(payload.to_string())
+        .send()
+        .await?;
+    assert_eq!(StatusCode::OK, res.status());
+
+    let team_counter = poll_for_billing_counter(&client, &team_key, &bucket_field).await;
+    assert_eq!(team_counter, "1", "team key should reflect one request");
+
+    let library_counter = poll_for_billing_counter(&client, &library_key, &bucket_field).await;
+    assert_eq!(
+        library_counter, "1",
+        "library key should reflect one request"
+    );
+
+    Ok(())
+}
+
+/// End-to-end shutdown-flush path. Sets a flush interval much longer than
+/// the test's runtime so the periodic flusher cannot fire — the only way
+/// the production billing counter can land in Redis is via
+/// `BillingAggregator::shutdown()` after axum's graceful drain. Catches a
+/// regression that drops the `billing_aggregator.shutdown().await` call in
+/// `serve()` or wires up the lifecycle ordering wrong (flushing before
+/// axum drains).
+#[tokio::test]
+async fn test_shutdown_flush_writes_production_billing_counter() -> Result<()> {
+    use feature_flags::config::FlexBool;
+    use feature_flags::flags::flag_analytics::{current_bucket, get_team_request_key};
+    use feature_flags::flags::flag_request::FlagRequestType;
+
+    let mut config = DEFAULT_TEST_CONFIG.clone();
+    config.skip_writes = FlexBool(false);
+    // Long enough that no periodic flush can fire during the test. If the
+    // counter shows up in Redis, the shutdown path is what put it there.
+    config.billing_flush_interval_ms = 60_000;
+
+    let distinct_id = format!("billing_shutdown_test_{}", rand::thread_rng().gen::<u32>());
+
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    let token = team.api_token.clone();
+
+    let context = TestContext::new(None).await;
+    context.insert_new_team(Some(team.id)).await.unwrap();
+    context
+        .insert_person(team.id, distinct_id.clone(), None)
+        .await
+        .unwrap();
+
+    let flag_json = json!([{
+        "id": 1,
+        "key": "billable-flag",
+        "name": "Billable Flag",
+        "active": true,
+        "deleted": false,
+        "team_id": team.id,
+        "filters": {
+            "groups": [{ "properties": [], "rollout_percentage": 100 }],
+        },
+    }]);
+    insert_flags_for_team_in_redis(client.clone(), team.id, Some(flag_json.to_string())).await?;
+
+    let billing_key = get_team_request_key(team.id, FlagRequestType::Decide);
+    let bucket_field = current_bucket().to_string();
+    client.del(billing_key.clone()).await.unwrap();
+
+    let server = ServerHandle::for_config(config).await;
+
+    let payload = json!({ "token": token, "distinct_id": distinct_id });
+    let res = server
+        .send_flags_request(payload.to_string(), Some("2"), None)
+        .await;
+    assert_eq!(StatusCode::OK, res.status());
+
+    // Confirm the periodic flusher has NOT yet landed the aggregator's
+    // write — sanity check that we're really exercising the shutdown
+    // path. With a 60s flush interval and immediate-after-request
+    // lookup, the target counter should still be missing.
+    let pre_shutdown = client.hget(billing_key.clone(), bucket_field.clone()).await;
+    assert!(
+        pre_shutdown.is_err(),
+        "billing counter at {billing_key} should NOT be in Redis before \
+         shutdown — the aggregator's periodic flusher is set to 60s and \
+         the test is faster than that. Got {pre_shutdown:?}, which means \
+         the flush window collapsed and this test no longer proves what \
+         it claims."
+    );
+
+    // Trigger graceful shutdown. axum drains in-flight requests, then
+    // `serve()` calls `billing_aggregator.shutdown().await` which performs
+    // the final flush to the production billing keyspace.
+    server.shutdown_now();
+
+    // Poll for the counter to land. The helper polls for ~1s
+    // (40 × 25ms) — the graceful-drain window plus a single shutdown
+    // flush against a healthy local Redis is well under that.
+    let counter = poll_for_billing_counter(&client, &billing_key, &bucket_field).await;
+    assert_eq!(
+        counter, "1",
+        "billing counter must reach Redis via the shutdown flush path"
+    );
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_api_cohort_flag_integration() -> Result<()> {
+    let config = DEFAULT_TEST_CONFIG.clone();
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    let token = team.api_token.clone();
+    let distinct_id = "test_user_api";
+
+    // Step 1: Verify API-like cohort serialization format (matches Django output)
+    let cohort_filters = json!({
+        "properties": {
+            "type": "AND",
+            "values": [
+                {
+                    "type": "OR",
+                    "values": [
+                        {
+                            "key": "email",
+                            "type": "person",
+                            "value": ["test@api.example.com"],
+                            "negation": false,
+                            "operator": "exact"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+
+    // Verify cohort structure matches Django API output
+    assert!(cohort_filters["properties"]["type"] == "AND");
+    assert!(cohort_filters["properties"]["values"].is_array());
+    assert!(cohort_filters["properties"]["values"][0]["type"] == "OR");
+
+    // Step 2: Create flag with API-like serialization that references a cohort
+    let flag_json = json!([{
+        "id": 1,
+        "key": "api-cohort-flag",
+        "name": "API Cohort Flag",
+        "active": true,
+        "deleted": false,
+        "team_id": team.id,
+        "filters": {
+            "groups": [
+                {
+                    "properties": [
+                        {
+                            "key": "email",
+                            "type": "person",
+                            "value": ["test@api.example.com"],
+                            "operator": "exact"
+                        }
+                    ],
+                    "rollout_percentage": 100,
+                    "variant": null
+                }
+            ],
+            "multivariate": null,
+            "aggregation_group_type_index": null,
+            "payloads": {}
+        }
+    }]);
+
+    // Verify flag structure matches Django API output
+    assert!(flag_json.is_array());
+    assert!(flag_json[0]["filters"]["groups"].is_array());
+    assert!(flag_json[0]["filters"]["groups"][0]["properties"].is_array());
+
+    insert_flags_for_team_in_redis(client.clone(), team.id, Some(flag_json.to_string())).await?;
+
+    // Step 3: Hit /flags with real request and verify flag evaluation
+    let server = ServerHandle::for_config(config).await;
+
+    let payload = json!({
+        "token": token,
+        "distinct_id": distinct_id,
+        "person_properties": {
+            "email": "test@api.example.com"
+        }
+    });
+
+    let response = server
+        .send_flags_request(payload.to_string(), Some("2"), None)
+        .await;
+
+    assert_eq!(StatusCode::OK, response.status());
+
+    let json_response = response.json::<Value>().await?;
+    assert!(json_response.get("flags").is_some());
+
+    // Verify the flag evaluated correctly - user should match the person property criteria
+    let flags = json_response["flags"].as_object().unwrap();
+    let flag_result = flags.get("api-cohort-flag").unwrap();
+    assert_eq!(
+        flag_result["enabled"],
+        Value::Bool(true),
+        "Flag should evaluate to enabled=true for user matching property criteria"
+    );
+    assert_eq!(flag_result["key"], "api-cohort-flag");
+    assert_eq!(flag_result["reason"]["code"], "condition_match");
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_api_cohort_flag_integration_no_match() -> Result<()> {
+    let config = DEFAULT_TEST_CONFIG.clone();
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    let token = team.api_token.clone();
+    let distinct_id = "test_user_no_match";
+
+    // Step 1: Create flag with API-like serialization that targets specific email
+    let flag_json = json!([{
+        "id": 1,
+        "key": "api-cohort-flag-no-match",
+        "name": "API Cohort Flag No Match",
+        "active": true,
+        "deleted": false,
+        "team_id": team.id,
+        "filters": {
+            "groups": [
+                {
+                    "properties": [
+                        {
+                            "key": "email",
+                            "type": "person",
+                            "value": ["test@api.example.com"],
+                            "operator": "exact"
+                        }
+                    ],
+                    "rollout_percentage": 100,
+                    "variant": null
+                }
+            ],
+            "multivariate": null,
+            "aggregation_group_type_index": null,
+            "payloads": {}
+        }
+    }]);
+
+    insert_flags_for_team_in_redis(client.clone(), team.id, Some(flag_json.to_string())).await?;
+
+    // Step 2: Hit /flags with user who doesn't match the criteria
+    let server = ServerHandle::for_config(config).await;
+
+    let payload = json!({
+        "token": token,
+        "distinct_id": distinct_id,
+        "person_properties": {
+            "email": "nomatch@different.com"
+        }
+    });
+
+    let response = server
+        .send_flags_request(payload.to_string(), Some("2"), None)
+        .await;
+
+    assert_eq!(StatusCode::OK, response.status());
+
+    let json_response = response.json::<Value>().await?;
+    assert!(json_response.get("flags").is_some());
+
+    // Verify the flag evaluated correctly - user should NOT match the person property criteria
+    let flags = json_response["flags"].as_object().unwrap();
+    let flag_result = flags.get("api-cohort-flag-no-match").unwrap();
+    assert_eq!(
+        flag_result["enabled"],
+        Value::Bool(false),
+        "Flag should evaluate to enabled=false for user NOT matching property criteria"
+    );
+    assert_eq!(flag_result["key"], "api-cohort-flag-no-match");
+    assert_eq!(flag_result["reason"]["code"], "no_condition_match");
+
+    Ok(())
+}
+
+/// A Realtime cohort without a backfill timestamp should fall through to dynamic
+/// filter evaluation rather than querying the cohort_membership table. This test
+/// inserts such a cohort with person-property filters, a person whose properties
+/// match, and a flag targeting that cohort, then verifies the flag evaluates to true.
+#[tokio::test]
+async fn test_realtime_cohort_without_backfill_falls_through_to_dynamic_eval() -> Result<()> {
+    let config = DEFAULT_TEST_CONFIG.clone();
+    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+
+    let distinct_id = "user_realtime_fallback".to_string();
+    let team = insert_new_team_in_redis(client.clone()).await.unwrap();
+    let token = team.api_token.clone();
+
+    let context = TestContext::new(None).await;
+    context.insert_new_team(Some(team.id)).await.unwrap();
+
+    // Insert a Realtime cohort with person-property filters but NO backfill timestamp.
+    // Without last_backfill_person_properties_at, the cohort should not be treated as
+    // realtime and should instead fall through to dynamic filter evaluation.
+    let cohort_filters = json!({
+        "properties": {
+            "type": "OR",
+            "values": [{
+                "type": "AND",
+                "values": [
+                    {
+                        "key": "plan",
+                        "type": "person",
+                        "value": ["enterprise"],
+                        "operator": "exact",
+                        "negation": false
+                    }
+                ]
+            }]
+        }
+    });
+
+    let cohort = context
+        .insert_cohort_with_type(
+            team.id,
+            Some("Realtime No Backfill".to_string()),
+            cohort_filters,
+            false,
+            Some(CohortType::Realtime),
+            None, // no backfill timestamp
+            None, // no events backfill timestamp
+        )
+        .await
+        .unwrap();
+
+    let flag_json = json!([{
+        "id": 1,
+        "key": "realtime-fallback-flag",
+        "name": "Realtime Fallback Flag",
+        "active": true,
+        "deleted": false,
+        "team_id": team.id,
+        "filters": {
+            "groups": [{
+                "properties": [{
+                    "key": "id",
+                    "type": "cohort",
+                    "value": cohort.id,
+                    "operator": "in"
+                }],
+                "rollout_percentage": 100
+            }]
+        }
+    }]);
+
+    insert_flags_for_team_in_redis(client.clone(), team.id, Some(flag_json.to_string())).await?;
+
+    context
+        .insert_person(
+            team.id,
+            distinct_id.clone(),
+            Some(json!({ "plan": "enterprise" })),
+        )
+        .await
+        .unwrap();
+
+    let server = ServerHandle::for_config(config).await;
+
+    let payload = json!({
+        "token": token,
+        "distinct_id": distinct_id,
+    });
+
+    let res = server
+        .send_flags_request(payload.to_string(), Some("2"), None)
+        .await;
+
+    assert_eq!(res.status(), StatusCode::OK);
+    let json_data = res.json::<Value>().await?;
+
+    assert_json_include!(
+        actual: json_data,
+        expected: json!({
+            "errorsWhileComputingFlags": false,
+            "flags": {
+                "realtime-fallback-flag": {
+                    "key": "realtime-fallback-flag",
+                    "enabled": true
                 }
             }
         })
