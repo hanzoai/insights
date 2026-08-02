@@ -70,6 +70,11 @@ jobs:
     # `hanzo-linux-amd64` matched no runner, so every job here queued forever —
     # which is why the deployed image sat at 1.52.2 while main moved on.
     runs-on: hanzo-build-linux-amd64
+    # Serialized above with cancel-in-progress false, so a run that hangs does
+    # not just burn a runner: it holds the release lock and no later commit can
+    # ship behind it. Generous against a cold cache on a tree that has doubled,
+    # short enough that a wedged build breaks the queue rather than the week.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
