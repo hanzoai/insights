@@ -77,27 +77,35 @@ export const REFRESH_INTERVAL = 60 * 1000 * 5 // 5 minutes
 // last one survived and every incident whose components were not tagged 'EU Cloud
 // 🇪🇺' was silently dropped. Deciding which incidents are relevant is the server's
 // job now; there is no second region to filter out.
-function worstStatus(summary: IncidentIoSummary): NormalizedStatus {
-    const hasOngoingIncidents = summary.ongoing_incidents.length > 0
-    const hasInProgressMaintenance = summary.in_progress_maintenances.length > 0
+export function worstStatus(summary: IncidentIoSummary): NormalizedStatus {
+    // Read through empty defaults rather than trusting the shape. This value is
+    // consumed by the navigation, so a throw in here does not break a widget --
+    // it unmounts the entire product, nav included. Nothing about reporting the
+    // platform's health is worth that, so the unhappy answer is 'operational'
+    // and a quiet widget.
+    const ongoing = summary.ongoing_incidents ?? []
+    const maintenances = summary.in_progress_maintenances ?? []
+
+    const hasOngoingIncidents = ongoing.length > 0
+    const hasInProgressMaintenance = maintenances.length > 0
 
     if (!hasOngoingIncidents && !hasInProgressMaintenance) {
         return 'operational'
     }
 
-    for (const incident of summary.ongoing_incidents) {
+    for (const incident of ongoing) {
         if (incident.current_worst_impact === 'full_outage') {
             return 'major_outage'
         }
     }
 
-    for (const incident of summary.ongoing_incidents) {
+    for (const incident of ongoing) {
         if (incident.current_worst_impact === 'partial_outage') {
             return 'partial_outage'
         }
     }
 
-    for (const incident of summary.ongoing_incidents) {
+    for (const incident of ongoing) {
         if (incident.current_worst_impact === 'degraded_performance') {
             return 'degraded_performance'
         }
@@ -126,10 +134,19 @@ export const sidePanelStatusIncidentIoLogic = kea<sidePanelStatusIncidentIoLogic
         summary: [
             null as IncidentIoSummary | null,
             {
-                loadSummary: async () => {
+                loadSummary: async (): Promise<IncidentIoSummary | null> => {
                     const response = await fetch(STATUS_SUMMARY_URL)
-                    const data: IncidentIoSummary = await response.json()
-                    return data
+                    // An error response is still JSON. This read used to parse a
+                    // 503 body -- {"status":503,"error":"..."} -- call it a
+                    // summary, and hand the navigation an object with no
+                    // ongoing_incidents, which took the whole product down. It
+                    // survived review because the endpoint sent no CORS header,
+                    // so fetch threw and this failed gracefully; the day the
+                    // header was added, a status outage became a product outage.
+                    if (!response.ok) {
+                        throw new Error(`status summary unavailable: ${response.status}`)
+                    }
+                    return await response.json()
                 },
             },
         ],
@@ -163,8 +180,8 @@ export const sidePanelStatusIncidentIoLogic = kea<sidePanelStatusIncidentIoLogic
                 if (status === 'operational') {
                     return 'All systems operational'
                 }
-                const incidentCount = summary.ongoing_incidents.length
-                const maintenanceCount = summary.in_progress_maintenances.length
+                const incidentCount = (summary.ongoing_incidents ?? []).length
+                const maintenanceCount = (summary.in_progress_maintenances ?? []).length
                 if (incidentCount > 0) {
                     return `${incidentCount} ongoing incident${incidentCount > 1 ? 's' : ''}`
                 }
