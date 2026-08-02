@@ -20,8 +20,6 @@ from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.logger import get_logger
 from insights.temporal.common.utils import close_db_connections
 
-from products.growth.backend.enrichment.core import enrich_organization
-from products.growth.backend.enrichment.providers import HarmonicEnrichmentProvider
 from products.growth.backend.enrichment.snapshot import SignupEnrichmentSnapshot, capture_signup_enrichment_snapshot
 from products.growth.backend.models import OrganizationEnrichment
 
@@ -102,31 +100,17 @@ async def enrich_signup_organization_activity(
     pha_client = get_client()
 
     try:
-        fields = await enrich_organization(
-            organization_id=inputs.organization_id,
-            domain=inputs.domain,
-            provider=HarmonicEnrichmentProvider(),
-            pha_client=pha_client,
-            is_recheck=is_recheck,
-            role_at_organization=inputs.role_at_organization,
-            geoip_country_code=inputs.geoip_country_code,
-            distinct_id=inputs.distinct_id,
-        )
-        filled = fields.to_dict() if fields else {}
-        matched = fields is not None
+        # No firmographic provider ships in this fork. The only implementation looked
+        # companies up through an enterprise-licensed client that is not carried (see
+        # products/growth/backend/enrichment/providers.py), so a domain lookup has no
+        # source and every signup reads as unmatched. The deterministic classifier below
+        # is first-party, so the at-signup snapshot still carries what we do know.
+        filled: dict[str, typing.Any] = {}
+        matched = False
 
         if not is_recheck:
             deterministic = await sync_to_async(_deterministic_company_type)(inputs.organization_id)
-            snapshot = SignupEnrichmentSnapshot(
-                company_type=(fields.company_type if fields else None) or deterministic,
-                headcount=fields.headcount if fields else None,
-                headcount_engineering=fields.headcount_engineering if fields else None,
-                industry=fields.industry if fields else None,
-                country=fields.country if fields else None,
-                founded_year=fields.founded_year if fields else None,
-                funding_stage=fields.funding_stage if fields else None,
-                is_yc_company=fields.is_yc_company if fields else None,
-            )
+            snapshot = SignupEnrichmentSnapshot(company_type=deterministic)
             await sync_to_async(capture_signup_enrichment_snapshot)(
                 pha_client,
                 organization_id=inputs.organization_id,

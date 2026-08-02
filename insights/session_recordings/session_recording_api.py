@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-import os
 import re
 import json
 import time
 import struct
 import asyncio
 import builtins
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import Generator
 from contextlib import contextmanager
-from json import JSONDecodeError
 from typing import Any, Literal, cast
 from urllib.parse import urlparse
 
@@ -21,9 +19,8 @@ from django.http import HttpResponse, JsonResponse
 import requests
 import structlog
 import hanzo_insights
-from asgiref.sync import async_to_sync
 from datastore_driver.errors import ServerException
-from drf_spectacular.utils import extend_schema, extend_schema_field
+from drf_spectacular.utils import extend_schema
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
     ChatCompletionMessageParam,
@@ -37,11 +34,9 @@ from rest_framework import exceptions, request, serializers, status, viewsets
 from rest_framework.exceptions import NotFound, Throttled
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.renderers import JSONRenderer
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.utils.encoders import JSONEncoder
-from temporalio.service import RPCError, RPCStatusCode
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 from insights.schema import (
@@ -60,7 +55,6 @@ from insights.insightsql.errors import ExposedInsightsQLError
 
 from insights.api.person import MinimalPersonSerializer
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.api.streaming import sse_streaming_response
 from insights.api.utils import ServerTimingsGathered, action, safe_datastore_string
 from insights.auth import (
     ExportRendererAuthentication,
@@ -71,7 +65,6 @@ from insights.auth import (
     SharingPasswordProtectedAuthentication,
 )
 from insights.datastore.query_tagging import Feature, Product, tag_queries
-from insights.cloud_utils import is_cloud
 from insights.errors import ExposedCHQueryError
 from insights.event_usage import report_user_action
 from insights.exceptions import DatastoreAtCapacity
@@ -81,7 +74,6 @@ from insights.models import Organization, Team, User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 from insights.models.comment import Comment
 from insights.models.person.util import get_persons_mapped_by_distinct_id
-from insights.models.team.extensions import get_or_create_team_extension
 from insights.models.utils import hash_key_value
 from insights.otel_metrics import OtelInstrumentFactory
 from insights.personinsights_client.caller_tag import personinsights_caller_tag
@@ -94,8 +86,6 @@ from insights.rate_limit import (
 )
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.rbac.user_access_control import UserAccessControlSerializerMixin
-from insights.session_recordings.ai_data.ai_regex_prompts import AI_REGEX_PROMPTS
-from insights.session_recordings.ai_data.ai_regex_schema import AiRegexSchema
 from insights.session_recordings.models.session_recording import SessionRecording
 from insights.session_recordings.models.session_recording_event import SessionRecordingViewed
 from insights.session_recordings.queries.session_recording_list_from_query import SessionRecordingListFromQuery
@@ -108,29 +98,11 @@ from insights.session_recordings.recordings.errors import BlockFetchError, Recor
 from insights.session_recordings.recordings.recording_api_client import RecordingApiClient, recording_api_client
 from insights.session_recordings.session_recording_v2_service import list_blocks, list_blocks_async
 from insights.session_recordings.utils import (
-    clean_prompt_whitespace,
     filter_from_params_to_query,
     gate_surfacing_score_order,
     query_as_params_to_dict,
     recordings_query_has_event_filters,
 )
-from insights.settings.session_replay import SESSION_REPLAY_AI_REGEX_MODEL
-from insights.temporal.common.client import async_connect
-from insights.temporal.session_replay.session_summary.workflow import (
-    SummarizeSingleSessionWorkflow,
-    execute_summarize_session_video_stream,
-)
-
-from products.replay.backend.models.team_session_summaries_config import TeamSessionSummariesConfig
-
-from ee.hogai.session_summaries.llm.call import get_openai_client
-from ee.hogai.session_summaries.session.output_data import OutcomeSerializer
-from ee.hogai.session_summaries.tracking import (
-    capture_session_summary_generated,
-    capture_session_summary_started,
-    generate_tracking_id,
-)
-from ee.hogai.session_summaries.utils import serialize_to_sse_event
 
 from ..models.product_intent.product_intent import ProductIntent
 from .queries.combine_session_ids_for_filtering import combine_session_id_filters
@@ -197,21 +169,6 @@ def _count_session_recording_throttled(location: str, auth_type: str) -> None:
 
 logger = structlog.get_logger(__name__)
 tracer = trace.get_tracer(__name__)
-
-
-async def _cancel_summary_workflow(workflow_id: str) -> None:
-    """Issue a Temporal cancel for the given workflow id.
-
-    Treats NOT_FOUND as success so the cancel endpoint stays idempotent —
-    the workflow may have already finished, been cancelled, or never started.
-    """
-    client = await async_connect()
-    handle = client.get_workflow_handle(workflow_id)
-    try:
-        await handle.cancel()
-    except RPCError as exc:
-        if exc.status != RPCStatusCode.NOT_FOUND:
-            raise
 
 
 def _request_auth_type(request) -> str:
@@ -370,7 +327,6 @@ class SessionRecordingSerializer(serializers.ModelSerializer, UserAccessControlS
             extra_summary_context__isnull=True,
         ).exists()
 
-    @extend_schema_field(OutcomeSerializer(allow_null=True))
     def get_summary_outcome(self, obj: SessionRecording) -> dict | None:
         return getattr(obj, "summary_outcome", None)
 
@@ -1606,171 +1562,6 @@ class SessionRecordingViewSet(
         except:
             return "unknown"
 
-    async def _generate_video_based_summary(
-        self,
-        session_id: str,
-        user: User,
-        tracking_id: str,
-        product_context: str | None = None,
-        custom_tags: dict[str, str] | None = None,
-        force_restart: bool = False,
-    ) -> AsyncGenerator[str]:
-        """Stream video-based summarization progress events and final summary to the client.
-
-        Progress events (``session-summary-progress``) carry the workflow's
-        current phase, a step counter, and — while the rasterizer is running —
-        fine-grained frame progress read from Temporal activity heartbeats.
-
-        This is implemented as an async generator so Django's ``StreamingHttpResponse``
-        under ASGI flushes each chunk as it is produced. A sync generator would
-        hit Django's ``list()``-materialize fallback path and buffer the entire
-        response server-side before any bytes reach the client.
-        """
-        success: bool | None = None
-        error_type: str | None = None
-        error_message: str | None = None
-        try:
-            async for chunk in execute_summarize_session_video_stream(
-                session_id=session_id,
-                user=user,
-                team=self.team,
-                force_restart=force_restart,
-                product_context=product_context,
-                custom_tags=custom_tags,
-            ):
-                if chunk.startswith("event: session-summary-stream"):
-                    success = True
-                elif chunk.startswith("event: session-summary-error"):
-                    success = False
-                    error_type = "stream_error"
-                yield chunk
-        except Exception as e:
-            success = False
-            error_type = type(e).__name__
-            error_message = str(e)
-            capture_exception(e)
-            yield serialize_to_sse_event(
-                event_label="session-summary-error",
-                event_data="Something went wrong while generating the summary. Please try again.",
-            )
-        finally:
-            if success is not None:
-                await asyncio.to_thread(
-                    capture_session_summary_generated,
-                    user=user,
-                    team=self.team,
-                    tracking_id=tracking_id,
-                    summary_source="dock",
-                    summary_type="single",
-                    session_ids=[session_id],
-                    video_based=True,
-                    success=success,
-                    error_type=error_type,
-                    error_message=error_message,
-                )
-
-    def _load_team_summary_config(self) -> tuple[str | None, dict[str, str] | None]:
-        team_config = get_or_create_team_extension(self.team, TeamSessionSummariesConfig)
-        product_context = (team_config.product_context or "").strip() or None
-        custom_tags = team_config.custom_tags or None
-        return product_context, custom_tags
-
-    @extend_schema(exclude=True)
-    @action(methods=["POST"], detail=True)
-    def summarize(self, request: request.Request, **kwargs):
-        if not request.user.is_authenticated:
-            raise exceptions.NotAuthenticated()
-        tag_queries(product=Product.REPLAY, feature=Feature.QUERY)
-
-        user = cast(User, request.user)
-
-        recording = self.get_object()
-
-        cache_key = f"summarize_recording_{self.team.pk}_{recording.session_id}"
-        # Check if the response is cached
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return Response(cached_response)
-
-        if not SessionReplayEvents().exists(session_id=str(recording.session_id), team=self.team):
-            raise exceptions.NotFound("Recording not found")
-
-        environment_is_allowed = settings.DEBUG or is_cloud()
-        has_openai_api_key = bool(os.environ.get("OPENAI_API_KEY"))
-        if not environment_is_allowed or not has_openai_api_key:
-            raise exceptions.ValidationError("session summary is only supported in Insights Cloud")
-        if not hanzo_insights.feature_enabled(
-            "replay-video-based-summarization",
-            str(user.distinct_id),
-            groups={"organization": str(self.team.organization_id)},
-            group_properties={"organization": {"id": str(self.team.organization_id)}},
-            send_feature_flag_events=False,
-        ):
-            raise exceptions.ValidationError("session summary is not enabled for this user")
-        session_id = str(recording.session_id)
-
-        # Per-team monthly hard cap as a cost backstop is enforced inside
-        # `execute_summarize_session_video_stream`, just before a *fresh*
-        # workflow start — gating it here would 402 cached-summary fast-path
-        # hits and silent-attach (`id_conflict_policy=USE_EXISTING`) cases that
-        # don't issue any LLM work.
-        tracking_id = generate_tracking_id()
-        force_restart = bool(request.data.get("force_restart", False)) if isinstance(request.data, dict) else False
-        product_context, custom_tags = self._load_team_summary_config()
-
-        capture_session_summary_started(
-            user=user,
-            team=self.team,
-            tracking_id=tracking_id,
-            summary_source="dock",
-            summary_type="single",
-            session_ids=[session_id],
-            video_based=True,
-        )
-        return sse_streaming_response(
-            self._generate_video_based_summary(
-                session_id, user, tracking_id, product_context, custom_tags, force_restart=force_restart
-            ),
-            endpoint="session_recording_summary",
-        )
-
-    @extend_schema(exclude=True)
-    @action(methods=["POST"], detail=True, url_path="summarize/cancel")
-    def cancel_summary(self, request: request.Request, **kwargs):
-        """Cancel an in-flight session summary Temporal workflow.
-
-        Idempotent: if the workflow doesn't exist (already finished, never started,
-        or already cancelled) we still return 200 so the client can fire-and-forget.
-        Stops billable LLM/rasterizer work that the user no longer cares about.
-        """
-        if not request.user.is_authenticated:
-            raise exceptions.NotAuthenticated()
-
-        recording = self.get_object()
-        session_id = str(recording.session_id)
-        workflow_id = SummarizeSingleSessionWorkflow.workflow_id_for(self.team.id, session_id)
-
-        try:
-            async_to_sync(_cancel_summary_workflow)(workflow_id)
-        except Exception as e:
-            # Don't surface raw Temporal error strings to the client — gRPC
-            # error messages can leak internal hostnames, namespaces, or TLS
-            # error details. Log the full exception server-side, return a
-            # generic message to the client.
-            logger.exception(
-                "session_summary_cancel_failed",
-                error=str(e),
-                team_id=self.team.id,
-                session_id=session_id,
-                workflow_id=workflow_id,
-            )
-            return Response(
-                {"cancelled": False, "error": "An internal server error occurred. Please try again later."},
-                status=500,
-            )
-
-        return Response({"cancelled": True})
-
     async def _stream_lts_blob_v2_to_client_async(
         self,
         blob_key: str,
@@ -1951,48 +1742,6 @@ class SessionRecordingViewSet(
         decompress: bool = True,
     ) -> HttpResponse:
         return asyncio.run(self._stream_lts_blob_v2_to_client_async(blob_key, decompress))
-
-    @extend_schema(
-        exclude=True,
-        description="Generate regex patterns using AI. This is in development and likely to change, you should not depend on this API.",
-    )
-    @action(methods=["POST"], detail=False, url_path="ai/regex")
-    def ai_regex(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        if not request.user.is_authenticated:
-            raise exceptions.NotAuthenticated()
-
-        if "regex" not in request.data:
-            raise exceptions.ValidationError("Missing required field: regex")
-
-        messages = create_openai_messages(
-            system_content=clean_prompt_whitespace(AI_REGEX_PROMPTS),
-            user_content=clean_prompt_whitespace(request.data["regex"]),
-        )
-
-        client = get_openai_client()
-
-        completion = client.beta.chat.completions.parse(
-            model=SESSION_REPLAY_AI_REGEX_MODEL,
-            messages=messages,
-            response_format=AiRegexSchema,
-            # need to type ignore before, this will be a WrappedParse
-            # but the type detection can't figure that out
-            insights_distinct_id=self._distinct_id_from_request(request),  # type: ignore
-            insights_properties={
-                "ai_product": "session_replay",
-                "ai_feature": "ai_regex",
-            },
-        )
-
-        if not completion.choices or not completion.choices[0].message.content:
-            raise exceptions.ValidationError("Invalid response from OpenAI")
-
-        try:
-            response_data = json.loads(completion.choices[0].message.content)
-        except JSONDecodeError:
-            raise exceptions.ValidationError("Invalid JSON response from OpenAI")
-
-        return Response(response_data)
 
 
 @tracer.start_as_current_span("load_recording_if_matches_filters")

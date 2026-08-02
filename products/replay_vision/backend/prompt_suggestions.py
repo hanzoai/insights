@@ -453,37 +453,9 @@ def _summary_access_error(state: _AgentToolState, session_id: str) -> dict[str, 
 def _tool_get_session_summary(state: _AgentToolState, session_id: str) -> dict[str, Any]:
     if session_id in state.summary_cache:
         return {"session_id": session_id, "summary": state.summary_cache[session_id]}
-    if _rated_observation_for_session(state, session_id) is None:
-        return {"error": "no rated observation for that session id on this scanner"}
-    denied = _summary_access_error(state, session_id)
-    if denied is not None:
-        return denied
-    # Deferred: heavy modules stay off the API import path. Summaries go through core helpers,
-    # since replay_vision must not import products.replay internals.
-    from insights.temporal.session_replay.session_summary.state import (
-        get_ready_summaries_from_db,  # noqa: PLC0415 (heavy temporal dep, see above)
-    )
-
-    from ee.hogai.session_summaries.session.stringify import (
-        SingleSessionSummaryStringifier,  # noqa: PLC0415 (heavy ee dep, see above)
-    )
-
-    cached = get_ready_summaries_from_db([session_id], team_id=state.scanner.team_id, extra_summary_context=None)
-    summary_json = cached[0].summary if cached else None
-    if summary_json is None:
-        # Only cold generation is budgeted; cached summaries above are cheap reads.
-        summary_user = state.summary_user if state.allow_cold_summaries else None
-        if summary_user is None:
-            return {"error": "no summary exists for this session yet and generating one is unavailable here"}
-        if state.cold_summaries_used >= _MAX_SUMMARIES_PER_RUN:
-            return {"error": "summary budget for this run is exhausted; decide with the context you have"}
-        remaining = state.deadline - time.monotonic()
-        if remaining < _COLD_SUMMARY_MIN_BUDGET_S:
-            return {"error": "not enough time left in this run to generate a summary; decide with the context you have"}
-        summary_json = _run_cold_summary(state, session_id, summary_user, timeout_s=remaining)
-    text = SingleSessionSummaryStringifier(summary_json).stringify_session()
-    state.summary_cache[session_id] = text
-    return {"session_id": session_id, "summary": text}
+    # Session summaries were produced and rendered by the enterprise summarization pipeline,
+    # so there is nothing to read or generate. The agent has the rated observations either way.
+    return {"error": "session summaries are not available in this deployment"}
 
 
 def _dispatch_agent_tool(state: _AgentToolState, call: types.FunctionCall) -> dict[str, Any]:

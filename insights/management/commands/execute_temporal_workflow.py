@@ -17,12 +17,9 @@ from insights.temporal.delete_persons import WORKFLOWS as DELETE_PERSONS_WORKFLO
 from insights.temporal.dlq_replay import WORKFLOWS as DLQ_REPLAY_WORKFLOWS
 from insights.temporal.event_screenshots import WORKFLOWS as EVENT_SCREENSHOTS_WORKFLOWS
 from insights.temporal.proxy_service import WORKFLOWS as PROXY_SERVICE_WORKFLOWS
-from insights.temporal.quota_limiting import WORKFLOWS as QUOTA_LIMITING_WORKFLOWS
-from insights.temporal.salesforce_enrichment import WORKFLOWS as SALESFORCE_ENRICHMENT_WORKFLOWS
 from insights.temporal.session_replay.delete_recordings import DELETE_RECORDINGS_WORKFLOWS
 from insights.temporal.session_replay.enforce_max_replay_retention import ENFORCE_MAX_REPLAY_RETENTION_WORKFLOWS
 from insights.temporal.session_replay.rasterize_recording import RASTERIZE_RECORDING_WORKFLOWS
-from insights.temporal.session_replay.summarization_sweep import SUMMARIZATION_SWEEP_WORKFLOWS
 from insights.temporal.session_replay.surfacing_scoring_sweep import SURFACING_SCORING_SWEEP_WORKFLOWS
 from insights.temporal.sync_events_retention import SYNC_EVENTS_RETENTION_WORKFLOWS
 from insights.temporal.tests.utils.workflow import WORKFLOWS as TEST_WORKFLOWS
@@ -143,9 +140,7 @@ class Command(BaseCommand):
             + PROXY_SERVICE_WORKFLOWS
             + DELETE_PERSONS_WORKFLOWS
             + USAGE_REPORTS_WORKFLOWS
-            + QUOTA_LIMITING_WORKFLOWS
             + AI_WORKFLOWS
-            + SALESFORCE_ENRICHMENT_WORKFLOWS
             + TEST_WORKFLOWS
             + DELETE_RECORDINGS_WORKFLOWS
             + ENFORCE_MAX_REPLAY_RETENTION_WORKFLOWS
@@ -156,7 +151,6 @@ class Command(BaseCommand):
             + EVENT_SCREENSHOTS_WORKFLOWS
             + LOGS_RETENTION_ENTITLEMENTS_WORKFLOWS
             + RASTERIZE_RECORDING_WORKFLOWS
-            + SUMMARIZATION_SWEEP_WORKFLOWS
             + WA_DIGEST_WORKFLOWS
             + ERROR_TRACKING_WORKFLOWS
             + SURFACING_SCORING_SWEEP_WORKFLOWS

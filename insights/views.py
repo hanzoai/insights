@@ -84,10 +84,9 @@ def noop(*args, **kwargs) -> None:
     return None
 
 
-try:
-    from ee.models.license import get_licensed_users_available
-except ImportError:
-    get_licensed_users_available = noop  # ty: ignore[invalid-assignment]
+# Seat counts were enforced against an enterprise license key; with no license there is no seat
+# limit to report.
+get_licensed_users_available = noop
 
 
 def login_required(view):
@@ -204,9 +203,7 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
         "redis": in_cloud or _traced("preflight.is_redis_alive", is_redis_alive) or settings.TEST,
         "plugins": in_cloud or _traced("preflight.is_plugin_server_alive", is_plugin_server_alive) or settings.TEST,
         "celery": in_cloud or _traced("preflight.is_celery_alive", is_celery_alive) or settings.TEST,
-        "datastore": in_cloud
-        or _traced("preflight.is_datastore_connected", is_datastore_connected)
-        or settings.TEST,
+        "datastore": in_cloud or _traced("preflight.is_datastore_connected", is_datastore_connected) or settings.TEST,
         "kafka": in_cloud or _traced("preflight.is_kafka_connected", is_kafka_connected),
         "db": in_cloud or _traced("preflight.is_postgres_alive", is_postgres_alive),
         "initiated": in_cloud or _traced("preflight.organization_exists", Organization.objects.exists),

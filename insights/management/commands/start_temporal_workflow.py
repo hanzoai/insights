@@ -14,14 +14,11 @@ from insights.temporal.dlq_replay import WORKFLOWS as DLQ_REPLAY_WORKFLOWS
 from insights.temporal.event_screenshots import WORKFLOWS as EVENT_SCREENSHOTS_WORKFLOWS
 from insights.temporal.health_checks import WORKFLOWS as HEALTH_CHECK_WORKFLOWS
 from insights.temporal.proxy_service import WORKFLOWS as PROXY_SERVICE_WORKFLOWS
-from insights.temporal.quota_limiting import WORKFLOWS as QUOTA_LIMITING_WORKFLOWS
-from insights.temporal.salesforce_enrichment import WORKFLOWS as SALESFORCE_ENRICHMENT_WORKFLOWS
 from insights.temporal.session_replay.count_playlist_items import COUNT_PLAYLIST_ITEMS_WORKFLOWS
 from insights.temporal.session_replay.delete_recordings import DELETE_RECORDINGS_WORKFLOWS
 from insights.temporal.session_replay.enforce_max_replay_retention import ENFORCE_MAX_REPLAY_RETENTION_WORKFLOWS
 from insights.temporal.session_replay.rasterize_recording import RASTERIZE_RECORDING_WORKFLOWS
 from insights.temporal.session_replay.replay_count_metrics import REPLAY_COUNT_METRICS_WORKFLOWS
-from insights.temporal.session_replay.summarization_sweep import SUMMARIZATION_SWEEP_WORKFLOWS
 from insights.temporal.session_replay.surfacing_scoring_sweep import SURFACING_SCORING_SWEEP_WORKFLOWS
 from insights.temporal.sync_events_retention import SYNC_EVENTS_RETENTION_WORKFLOWS
 from insights.temporal.sync_person_distinct_ids import WORKFLOWS as SYNC_PERSON_DISTINCT_IDS_WORKFLOWS
@@ -143,9 +140,7 @@ class Command(BaseCommand):
             + PROXY_SERVICE_WORKFLOWS
             + DELETE_PERSONS_WORKFLOWS
             + USAGE_REPORTS_WORKFLOWS
-            + QUOTA_LIMITING_WORKFLOWS
             + AI_WORKFLOWS
-            + SALESFORCE_ENRICHMENT_WORKFLOWS
             + SYNC_PERSON_DISTINCT_IDS_WORKFLOWS
             + TEST_WORKFLOWS
             + COUNT_PLAYLIST_ITEMS_WORKFLOWS
@@ -154,7 +149,6 @@ class Command(BaseCommand):
             + SYNC_EVENTS_RETENTION_WORKFLOWS
             + RASTERIZE_RECORDING_WORKFLOWS
             + REPLAY_COUNT_METRICS_WORKFLOWS
-            + SUMMARIZATION_SWEEP_WORKFLOWS
             + WEEKLY_DIGEST_WORKFLOWS
             + EVENT_SCREENSHOTS_WORKFLOWS
             + HEALTH_CHECK_WORKFLOWS

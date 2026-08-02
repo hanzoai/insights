@@ -25,13 +25,7 @@ def sync_members_to_billing(organization_id: str) -> None:
 @shared_task(ignore_result=True, rate_limit="5/s")
 @skip_team_scope_audit
 def sync_from_billing(organization_id: str) -> None:
-    from insights.cloud_utils import get_cached_instance_license
-    from insights.models import Organization
-
-    from ee.billing.billing_manager import BillingManager
-
-    license = get_cached_instance_license()
-    billing_manager = BillingManager(license, None)
-
-    organization = Organization.objects.get(id=organization_id)
-    billing_manager.get_billing(organization, {})
+    # Pulling an organization's plan down from the billing service is an enterprise
+    # feature this fork does not carry. Callers fan this out per organization on
+    # membership changes, so it stays a task and does nothing rather than raising.
+    pass

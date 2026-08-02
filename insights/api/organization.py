@@ -22,7 +22,7 @@ from insights.caching.organization_serializer_cache import (
     ORG_SERIALIZER_CACHE_TTL_SECONDS,
     _org_serializer_cache_version,
 )
-from insights.cloud_utils import get_cached_instance_license, is_cloud
+from insights.cloud_utils import is_cloud
 from insights.constants import INTERNAL_BOT_EMAIL_SUFFIX, AvailableFeature
 from insights.event_usage import (
     groups,
@@ -452,26 +452,12 @@ class OrganizationViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         return get_object_or_404(queryset, **filter_kwargs)
 
     def perform_destroy(self, organization: Organization):
-        from ee.billing.billing_manager import BillingManager
-
         # Check if bulk deletion operations are disabled via environment variable
         # Organizations contain teams, so we need to block organization deletion too
         if settings.DISABLE_BULK_DELETES:
             raise exceptions.ValidationError(
                 "Organization deletion is temporarily disabled during database migration. Please try again later."
             )
-
-        # Check if organization has an active billing subscription
-        if is_cloud():
-            license = get_cached_instance_license()
-            if license:
-                billing_manager = BillingManager(license)
-                billing = billing_manager.get_billing(organization)
-                if billing.get("has_active_subscription"):
-                    raise exceptions.ValidationError(
-                        "Cannot delete organization with an active subscription. "
-                        "Please cancel your subscription first in the billing page."
-                    )
 
         if organization.is_pending_deletion:
             raise exceptions.ValidationError("This organization is already being deleted.")
@@ -598,7 +584,9 @@ class OrganizationViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         # Members only — admins can enable Insights AI themselves, so there's nobody to ask.
         membership = OrganizationMembership.objects.filter(user=user, organization=organization).first()
         if membership is None or membership.level >= OrganizationMembership.Level.ADMIN:
-            raise exceptions.PermissionDenied("Only members can request access; admins can enable Insights AI directly.")
+            raise exceptions.PermissionDenied(
+                "Only members can request access; admins can enable Insights AI directly."
+            )
 
         send_insights_ai_access_request.delay(
             organization_id=str(organization.id),
