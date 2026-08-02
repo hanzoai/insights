@@ -14,12 +14,12 @@ progress is exactly when that is broken and this is most needed.
 
 from __future__ import annotations
 
-import contextlib
 import io
 import os
-import subprocess
 import sys
 import tempfile
+import contextlib
+import subprocess
 from importlib.machinery import SourceFileLoader
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
