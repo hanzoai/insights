@@ -1,4 +1,4 @@
-from infi.datastore_orm import migrations
+from datastore_orm import migrations
 
 from insights.datastore.client import sync_execute
 from insights.datastore.materialized_columns import get_materialized_column_for_property
