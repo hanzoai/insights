@@ -19,7 +19,7 @@ from insights.models.utils import generate_random_token_personal, hash_key_value
 from products.dashboards.backend.models.dashboard import Dashboard
 from products.notifications.backend.facade.api import NotificationType, Priority, TargetType
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 @patch("products.dashboards.backend.api.dashboard.create_notification")

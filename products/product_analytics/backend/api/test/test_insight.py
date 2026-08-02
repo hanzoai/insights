@@ -63,7 +63,7 @@ from products.dashboards.backend.models.dashboard_tile import DashboardTile, Tex
 from products.product_analytics.backend.models.insight import Insight, InsightViewed
 from products.product_analytics.backend.models.insight_variable import InsightVariable
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
@@ -4767,7 +4767,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         """
         from insights.models.organization import OrganizationMembership
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},

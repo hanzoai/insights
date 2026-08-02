@@ -30,7 +30,7 @@ from products.conversations.backend.cache import get_cached_resolved_groups, set
 from products.conversations.backend.models import Ticket, TicketAssignment
 from products.conversations.backend.models.constants import Channel, OrganizationIdSource
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 logger = structlog.get_logger(__name__)
 

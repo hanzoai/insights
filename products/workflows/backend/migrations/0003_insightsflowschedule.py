@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
-                    "hog_flow",
+                    "insights_flow",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE, related_name="schedules", to="insights.hogflow"
                     ),

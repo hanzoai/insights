@@ -10,7 +10,7 @@ from products.data_modeling.backend.facade.models import (
     DataWarehouseSavedQueryColumnAnnotation,
 )
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestDataWarehouseSavedQueryColumnAnnotation(APIBaseTest):

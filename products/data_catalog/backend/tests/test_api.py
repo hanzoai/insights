@@ -26,7 +26,7 @@ from products.data_catalog.backend.presentation.serializers import (
 )
 from products.product_analytics.backend.models.insight import Insight
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 _INSIGHTSQL = {"kind": "InsightsQLQuery", "query": "select count() from events"}
 _PROCESS_QUERY = "products.data_catalog.backend.logic.execution.process_query_dict"

@@ -346,7 +346,7 @@ class TestExternalTicketAPI(BaseTest):
     def test_get_ticket_returns_role_assignee(self):
         from products.conversations.backend.models import TicketAssignment
 
-        from ee.models.rbac.role import Role
+        from insights.models.ee_models import Role
 
         role = Role.objects.create(name="Support", organization=self.organization)
         TicketAssignment.objects.create(ticket=self.ticket, role=role)
@@ -562,7 +562,7 @@ class TestExternalTicketAPI(BaseTest):
         assert activity is not None
         trigger = activity.detail.get("trigger")
         assert trigger is not None
-        self.assertEqual(trigger["job_type"], "hog_flow")
+        self.assertEqual(trigger["job_type"], "insights_flow")
         self.assertEqual(trigger["job_id"], flow_id)
         # Only the id is stored; the display name is resolved from the workflow on the frontend.
         self.assertNotIn("name", trigger["payload"])
@@ -624,7 +624,7 @@ class TestExternalTicketAPI(BaseTest):
         assert tag_change is not None
         self.assertEqual(tag_change["action"], action)
         self.assertEqual(tag_change[direction], tag_name)
-        self.assertEqual(activity.detail["trigger"]["job_type"], "hog_flow")
+        self.assertEqual(activity.detail["trigger"]["job_type"], "insights_flow")
 
     def test_patch_tag_changes_write_tag_audit_entries(self):
         # Removals used to go through a bulk queryset delete, which skips the TaggedItem signal
@@ -652,7 +652,7 @@ class TestExternalTicketAPI(BaseTest):
         self.assertIn("deleted", audit_activities)
         deleted_detail = audit_activities["deleted"].detail
         assert deleted_detail is not None
-        self.assertEqual(deleted_detail["trigger"]["job_type"], "hog_flow")
+        self.assertEqual(deleted_detail["trigger"]["job_type"], "insights_flow")
 
     def test_workflow_trigger_does_not_leak_after_request(self):
         # The trigger thread-local must be cleared by the context manager, or attribution
@@ -679,7 +679,7 @@ class TestExternalTicketAPI(BaseTest):
 
         activity = self._latest_ticket_activity(activity="assigned")
         assert activity is not None
-        self.assertEqual(activity.detail["trigger"]["job_type"], "hog_flow")
+        self.assertEqual(activity.detail["trigger"]["job_type"], "insights_flow")
 
     def test_patch_unchanged_assignee_logs_no_activity(self):
         # Callers send the assignee whenever it's in the payload (the ticket UI always sends the

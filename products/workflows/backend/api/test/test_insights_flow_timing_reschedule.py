@@ -6,13 +6,13 @@ from parameterized import parameterized
 from insights.cdp.templates.insights_function_template import sync_template_to_db
 
 from products.cdp.backend.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 webhook_template = MOCK_NODE_TEMPLATES[0]
 
-TIMING_FLAG_PATH = "products.workflows.backend.api.hog_flow.use_workflows_timing_reschedule"
-REVISIONS_FLAG_PATH = "products.workflows.backend.api.hog_flow.use_workflows_revisions"
-TASK_PATH = "products.workflows.backend.api.hog_flow.reschedule_hog_flow_timing"
+TIMING_FLAG_PATH = "products.workflows.backend.api.insights_flow.use_workflows_timing_reschedule"
+REVISIONS_FLAG_PATH = "products.workflows.backend.api.insights_flow.use_workflows_revisions"
+TASK_PATH = "products.workflows.backend.api.insights_flow.reschedule_insights_flow_timing"
 
 
 def _actions(delay_duration: str = "7d", webhook_url: str = "https://example.com") -> list[dict]:
@@ -50,19 +50,19 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
 
     def _create_flow(self, activate: bool = True) -> str:
         create = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows",
+            f"/api/projects/{self.team.id}/insights_flows",
             {"name": "Test Flow", "actions": _actions(), "edges": _edges()},
         )
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
         if activate:
-            response = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"})
+            response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
             assert response.status_code == 200, response.json()
         return flow_id
 
     def _patch_actions(self, flow_id: str, delay_duration: str, webhook_url: str = "https://example.com", **extra):
         return self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": _actions(delay_duration=delay_duration, webhook_url=webhook_url)},
             **extra,
         )
@@ -71,7 +71,7 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
         # Graph content edits over MCP go through the surgical graph endpoint (a plain update
         # rejects actions/edges outright).
         return self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {"op": "update_action", "id": "delay_1", "patch": {"config": {"delay_duration": delay_duration}}}
@@ -92,7 +92,7 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
         assert mock_task.delay.call_count == 0, "the sweep must not start before the new config is committed"
         for callback in callbacks:
             callback()
-        mock_task.delay.assert_called_once_with(team_id=self.team.id, hog_flow_id=flow_id, action_ids=["delay_1"])
+        mock_task.delay.assert_called_once_with(team_id=self.team.id, insights_flow_id=flow_id, action_ids=["delay_1"])
 
     @parameterized.expand(
         [
@@ -147,20 +147,20 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
         mock_task.delay.assert_not_called()
 
         with patch(
-            "products.workflows.backend.api.hog_flow.get_hog_flow_in_flight_count",
+            "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count",
             side_effect=Exception("count service down"),
         ):
-            preview = self.client.post(f"/api/projects/{self.team.id}/hog_flows/{flow_id}/publish", {})
+            preview = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
         assert preview.status_code == 200, preview.json()
 
         with self.captureOnCommitCallbacks(execute=True):
             publish = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}/publish",
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
                 {"confirm": True, "confirm_token": preview.json()["confirm_token"]},
             )
 
         assert publish.status_code == 200, publish.json()
-        mock_task.delay.assert_called_once_with(team_id=self.team.id, hog_flow_id=flow_id, action_ids=["delay_1"])
+        mock_task.delay.assert_called_once_with(team_id=self.team.id, insights_flow_id=flow_id, action_ids=["delay_1"])
 
     @patch(TASK_PATH)
     @patch(TIMING_FLAG_PATH, return_value=True)
@@ -168,17 +168,17 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
         # Runs parked during a prior active period survive a disable, and timing edits made while
         # disabled never sweep - so the enable transition converges every timing step.
         flow_id = self._create_flow()
-        disable = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "draft"})
+        disable = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "draft"})
         assert disable.status_code == 200, disable.json()
         edit = self._patch_actions(flow_id, delay_duration="1d")
         assert edit.status_code == 200, edit.json()
         mock_task.delay.assert_not_called()
 
         with self.captureOnCommitCallbacks(execute=True):
-            enable = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"})
+            enable = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
 
         assert enable.status_code == 200, enable.json()
-        mock_task.delay.assert_called_once_with(team_id=self.team.id, hog_flow_id=flow_id, action_ids=["delay_1"])
+        mock_task.delay.assert_called_once_with(team_id=self.team.id, insights_flow_id=flow_id, action_ids=["delay_1"])
 
     @patch(TASK_PATH)
     @patch(TIMING_FLAG_PATH, return_value=True)
@@ -187,7 +187,7 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
                 {
                     "operations": [
                         {"op": "update_action", "id": "delay_1", "patch": {"config": {"delay_duration": "1d"}}}
@@ -196,4 +196,4 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
             )
 
         assert response.status_code == 200, response.json()
-        mock_task.delay.assert_called_once_with(team_id=self.team.id, hog_flow_id=flow_id, action_ids=["delay_1"])
+        mock_task.delay.assert_called_once_with(team_id=self.team.id, insights_flow_id=flow_id, action_ids=["delay_1"])

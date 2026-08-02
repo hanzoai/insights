@@ -15,7 +15,7 @@ from products.feature_flags.backend.models.feature_flag import FeatureFlag
 from products.feature_flags.backend.models.scheduled_change import ScheduledChange
 
 from ee.api.rbac.test.test_access_control import BaseAccessControlTest
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestScheduledChange(APIBaseTest):

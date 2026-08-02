@@ -16,10 +16,10 @@ from insights.models.project import Project
 from products.growth.backend.models import ProductPushCampaign
 
 if TYPE_CHECKING:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 else:
     try:
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
     except ImportError:
         AccessControl = None
 

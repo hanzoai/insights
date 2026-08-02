@@ -26,7 +26,7 @@ from products.error_tracking.backend.models import (
 )
 from products.error_tracking.backend.notifications import dispatch_issue_assigned_realtime
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 
 class CohortNotFoundError(Exception):

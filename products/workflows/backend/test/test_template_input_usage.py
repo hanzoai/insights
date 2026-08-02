@@ -1,7 +1,7 @@
 from insights.test.base import BaseTest
 
 from products.workflows.backend.models import InsightsFlow
-from products.workflows.backend.services.template_input_usage import get_hog_flows_referencing_template_input_keys
+from products.workflows.backend.services.template_input_usage import get_insights_flows_referencing_template_input_keys
 
 TEMPLATE_ID = "template-insights-update-account-property"
 
@@ -26,7 +26,7 @@ class TestTemplateInputUsage(BaseTest):
             name="Active flow", status="active", actions=[_account_property_action({"def-a": "1", "def-b": "2"})]
         )
 
-        usage = get_hog_flows_referencing_template_input_keys(self.team.id, TEMPLATE_ID, "properties")
+        usage = get_insights_flows_referencing_template_input_keys(self.team.id, TEMPLATE_ID, "properties")
 
         assert {ref.id for ref in usage["def-a"]} == {str(draft.id), str(active.id)}
         assert {ref.id for ref in usage["def-b"]} == {str(active.id)}
@@ -53,7 +53,7 @@ class TestTemplateInputUsage(BaseTest):
             ],
         )
 
-        usage = get_hog_flows_referencing_template_input_keys(self.team.id, TEMPLATE_ID, "properties")
+        usage = get_insights_flows_referencing_template_input_keys(self.team.id, TEMPLATE_ID, "properties")
 
         assert usage == {}
 
@@ -62,7 +62,7 @@ class TestTemplateInputUsage(BaseTest):
             name="Active flow", status="active", actions=[_account_property_action({"def-a": "1", "def-b": "2"})]
         )
 
-        usage = get_hog_flows_referencing_template_input_keys(
+        usage = get_insights_flows_referencing_template_input_keys(
             self.team.id, TEMPLATE_ID, "properties", only_value_key="def-a"
         )
 
@@ -73,6 +73,6 @@ class TestTemplateInputUsage(BaseTest):
         flow = self._create_flow(name="ours", status="active", actions=[_account_property_action({"def-a": "1"})])
         assert flow  # created for self.team
 
-        usage = get_hog_flows_referencing_template_input_keys(self.team.id + 1, TEMPLATE_ID, "properties")
+        usage = get_insights_flows_referencing_template_input_keys(self.team.id + 1, TEMPLATE_ID, "properties")
 
         assert usage == {}

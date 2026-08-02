@@ -29,7 +29,7 @@ class RecipientsResolver:
                 ).values_list("user_id", flat=True)
             )
         elif target_type == TargetType.ROLE:
-            from ee.models.rbac.role import RoleMembership
+            from insights.models.ee_models import RoleMembership
 
             return list(
                 RoleMembership.objects.filter(

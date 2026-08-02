@@ -20,12 +20,12 @@ class Migration(migrations.Migration):
                     sql=(
                         'ALTER TABLE "insights_emailreputationsnapshot" '
                         "DROP CONSTRAINT IF EXISTS "
-                        '"insights_emailreputat_hog_flow_id_bebb6dee_fk_insights_h";'
+                        '"insights_emailreputat_insights_flow_id_bebb6dee_fk_insights_h";'
                     ),
                     reverse_sql=(
                         'ALTER TABLE "insights_emailreputationsnapshot" '
-                        'ADD CONSTRAINT "insights_emailreputat_hog_flow_id_bebb6dee_fk_insights_h" '
-                        'FOREIGN KEY ("hog_flow_id") REFERENCES "insights_hogflow" ("id") '
+                        'ADD CONSTRAINT "insights_emailreputat_insights_flow_id_bebb6dee_fk_insights_h" '
+                        'FOREIGN KEY ("insights_flow_id") REFERENCES "insights_hogflow" ("id") '
                         "DEFERRABLE INITIALLY DEFERRED;"
                     ),
                 ),
