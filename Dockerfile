@@ -28,7 +28,7 @@ SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY frontend/package.json frontend/
 # The design system is its own workspace package (pnpm-workspace.yaml lists
 # frontend/@hanzo/*), and products/ depend on it as workspace:*. Without its
@@ -42,6 +42,17 @@ COPY patches/ patches/
 COPY common/ common/
 COPY products/ products/
 COPY docs/onboarding/ docs/onboarding/
+# @hanzo/quill, -charts and -components are workspace deps of the frontend and
+# live here, not under common/ or products/. The import brought them; this COPY
+# is the one upstream already carries for the same reason.
+COPY packages/quill/ packages/quill/
+# frontend depends on @hanzo/openapi-codegen as workspace:*, and pnpm-workspace
+# reaches it through `tools/*`. Upstream gets away with not copying it because
+# upstream installs --frozen-lockfile, which takes the link from the lockfile;
+# this stage re-resolves (see below), so the package has to actually be in the
+# workspace or the install stops on ERR_PNPM_WORKSPACE_PKG_NOT_FOUND. Only this
+# one member is named by the frontend, so only this one is copied.
+COPY tools/openapi-codegen/ tools/openapi-codegen/
 # Filter install — only @hanzo/frontend and its workspace deps. Drop
 # --frozen-lockfile because catalog `@parcel/transformer-typescript-types`
 # was bumped 2.16.4→2.13.3 to match scriptvm's pinned config-default.
@@ -89,20 +100,21 @@ RUN --mount=type=secret,id=insights_upload_sourcemaps_cli_api_key \
 #
 # ---------------------------------------------------------
 #
-# Build standalone Node.js scripts and their dependencies.
-# These scripts can be invoked from Python via subprocess.
+# Build the plugin transpiler.
+#
+# This stage used to also build nodejs/src/scripts, a standalone puppeteer
+# recorder Python called by subprocess. Upstream deleted that directory when it
+# replaced VideoExportWorkflow with RasterizeRecordingWorkflow and moved the
+# work into its own image — Dockerfile.recording-rasterizer, which this tree
+# carries. Nothing here imports the scripts, no manifest declares
+# puppeteer-screen-recorder, and the COPY of a directory that no longer exists
+# is what stopped the build.
 #
 FROM node:24.13.0-bookworm-slim AS node-scripts-build
 WORKDIR /code
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
-# Skip Puppeteer Chromium download - we would use system Chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
-COPY nodejs/src/scripts/ nodejs/src/scripts/
-RUN cd nodejs/src/scripts && npm install --omit=dev
-
-# Build plugin transpiler for site destinations/apps
-COPY .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY bin/turbo bin/turbo
 COPY patches/ patches/
 COPY common/esbuilder/ common/esbuilder/
@@ -167,6 +179,15 @@ RUN curl -L https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip 
 # Cache ID includes libxmlsec1 version to bust cache when system library changes
 COPY pyproject.toml uv.lock ./
 COPY common/insightsql_parser common/insightsql_parser/
+# uv validates workspace membership even with --no-dev, so every member named in
+# [tool.uv.workspace] has to be here. The upstream import introduced that table
+# — main has no workspace at all — which is why this line has no counterpart
+# there.
+COPY tools/insightscli tools/insightscli/
+COPY tools/owners tools/owners/
+# [tool.uv.sources] resolves insightsql-parser-rs to this directory, so it is a
+# dependency built from source in this stage rather than fetched as a wheel.
+COPY rust/insightsql/parser rust/insightsql/parser/
 RUN --mount=type=cache,id=uv-libxmlsec1.2.37-3,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project --no-binary-package lxml --no-binary-package xmlsec
 
@@ -343,9 +364,6 @@ COPY --from=frontend-build --chown=insights:insights /code/frontend/src/products
 # Copy the GeoLite2-City database from the fetch-geoip-db stage.
 COPY --from=fetch-geoip-db --chown=insights:insights /code/share/GeoLite2-City.mmdb /code/share/GeoLite2-City.mmdb
 
-# Copy standalone Node.js scripts and their dependencies.
-COPY --from=node-scripts-build --chown=insights:insights /code/nodejs/src/scripts /code/nodejs/src/scripts
-
 # Copy plugin transpiler (used by Django for site destinations/apps).
 # pnpm stores packages in node_modules/.pnpm/, workspace node_modules contain symlinks there.
 COPY --from=node-scripts-build --chown=insights:insights /code/node_modules /code/node_modules
@@ -363,14 +381,12 @@ COPY --chown=insights:insights common/scriptvm common/scriptvm/
 COPY --chown=insights:insights common/migration_utils common/migration_utils/
 COPY --chown=insights:insights products products/
 
-# Validate video export dependencies
+# Validate video export dependencies. The puppeteer half of this check went with
+# nodejs/src/scripts — see the node-scripts-build stage — so what is left is
+# what this image still carries.
 RUN ffmpeg -version
 RUN /python-runtime/bin/python -c "import playwright; print('Playwright package imported successfully')"
 RUN /python-runtime/bin/python -c "from playwright.sync_api import sync_playwright; print('Playwright sync API available')"
-RUN cd /code/nodejs/src/scripts && timeout 60s node -e "\
-  require('puppeteer'); \
-  require('puppeteer-screen-recorder'); \
-  console.log('Puppeteer and screen recorder available')"
 
 # Setup ENV.
 ENV NODE_ENV=production \
