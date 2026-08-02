@@ -18,8 +18,10 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
     scope_object = "INTERNAL"
 
     def create(self, request, *args, **kwargs) -> Response:
-        iql = request.data.get("iql")
-        program = parse_program(fn)
+        # `code` is the field the one caller sends (`api.fn.create` in lib/api.ts). Reading anything
+        # else compiles `None`; reading a name that was never bound raised before it got that far.
+        code = request.data.get("code")
+        program = parse_program(code)
         in_repl = request.data.get("in_repl", "false") in ("true", "True", True)
         locals = request.data.get("locals", []) or []
         try:
