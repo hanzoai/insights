@@ -12,8 +12,10 @@ import {
     Tooltip,
 } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { More } from 'lib/elements/Button/More'
 import { Dialog } from 'lib/elements/Dialog'
@@ -152,6 +154,12 @@ export function ApprovalPolicies(): JSX.Element {
             ),
         },
     ]
+
+    // "Add policy" would post to an absent endpoint, and the table can only ever show the empty
+    // state, so say the feature is not here rather than looking merely unconfigured.
+    if (!CAPABILITIES.approvals.available) {
+        return <Unavailable capability="approvals" />
+    }
 
     return (
         <PayGateMini feature={AvailableFeature.APPROVALS}>

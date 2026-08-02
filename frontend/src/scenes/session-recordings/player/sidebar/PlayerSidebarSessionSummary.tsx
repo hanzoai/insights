@@ -19,6 +19,8 @@ import {
 } from '@hanzo/icons'
 import { Banner, Divider, Tag, Link, Tooltip } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { Button } from 'lib/elements/Button'
 import { Spinner } from 'lib/elements/Spinner'
@@ -714,6 +716,10 @@ export function PlayerSidebarSessionSummary(): JSX.Element | null {
                 </>
             ) : sessionSummary ? (
                 <SessionSummary />
+            ) : !CAPABILITIES.sessionSummaries.available ? (
+                // Otherwise this is "Use AI to summarise this session" — a button whose request
+                // 404s. The recording itself is unaffected, which is what the copy points at.
+                <Unavailable capability="sessionSummaries" />
             ) : (
                 <LoadSessionSummaryButton />
             )}
