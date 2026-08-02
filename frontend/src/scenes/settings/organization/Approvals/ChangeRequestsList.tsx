@@ -3,7 +3,9 @@ import { router } from 'kea-router'
 
 import { Button, Dialog, Input, Select, Table, Tag, toast } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
 import { More } from 'lib/elements/Button/More'
@@ -115,6 +117,12 @@ export function ChangeRequestsList(): JSX.Element {
             },
         },
     ]
+
+    // Same absent endpoints as the policies pane; without this the list renders an empty grid
+    // with approve/reject controls that cannot reach anything.
+    if (!CAPABILITIES.approvals.available) {
+        return <Unavailable capability="approvals" />
+    }
 
     return (
         <PayGateMini feature={AvailableFeature.APPROVALS}>
