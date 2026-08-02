@@ -44,7 +44,19 @@ catalog:
     kea-waitfor: ^0.2.1
     kea-window-values: ^3.0.1
     # Insights packages
-    '@hanzo/icons': ^0.38.0
+    #
+    # Our icons are a published fork, so the specifier has to name it. The
+    # rename turns the import into `@hanzo/icons`, but the package that backs
+    # it is `@hanzo/insights-icons` -- a different package from the
+    # `@hanzo/icons` that also exists on npm, and the only one that renders an
+    # icon with `className="Icon"`. That class is the whole contract: the
+    # package draws its SVGs at width 100% with no height, so an icon is sized
+    # entirely by the `.Icon` rules in the design system, and one that arrives
+    # under any other class paints at its container's width.
+    #
+    # Version lines are not shared with upstream -- upstream's ^0.38.0 is their
+    # package's line; the fork's is 0.36.x -- so this does not track theirs.
+    '@hanzo/icons': npm:@hanzo/insights-icons@0.36.7
     '@hanzo/brand': 0.9.1
     '@hanzo/react': ^1.9.0
     insights-js: ^1.409.5
