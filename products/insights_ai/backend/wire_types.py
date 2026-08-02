@@ -77,3 +77,24 @@ class UserMessageParams(TypedDict):
 
 def is_user_message_params(params: object, method: str | None) -> TypeGuard[UserMessageParams]:
     return method == METHOD_USER_MESSAGE and isinstance(params, dict)
+
+
+# Emitted by the agent server when a turn ends. `_insights/` prefixes the notifications this
+# product adds on top of ACP, so a client that only speaks base ACP ignores them.
+TURN_COMPLETE_METHOD = "_insights/turn_complete"
+
+# Default `stopReason` in a turn-complete notification: the agent finished on its own, rather
+# than stopping against a limit (`max_tokens`) or being cancelled.
+STOP_REASON_END_TURN = "end_turn"
+
+
+def is_turn_complete(event: dict[str, Any]) -> bool:
+    """Whether a streamed agent event is the end-of-turn notification.
+
+    Checks the frame type as well as the method: the same method string appears inside frames
+    that are not notifications (a recorded result, say), and those do not end a turn.
+    """
+    if event.get("type") != "notification":
+        return False
+    notification = event.get("notification")
+    return isinstance(notification, dict) and notification.get("method") == TURN_COMPLETE_METHOD

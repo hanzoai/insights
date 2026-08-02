@@ -117,7 +117,7 @@ from products.notifications.backend.facade.api import (
 )
 from products.signals.backend.models import SignalSourceConfig
 
-from ee.api.rbac.access_control import AccessControlViewSetMixin
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 
 logger = structlog.get_logger(__name__)
 
@@ -1454,8 +1454,6 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
         return project.teams.get(id=project.id)
 
     def perform_destroy(self, project: Project):
-        from ee.billing.billing_manager import BillingManager
-
         # Check if bulk deletion operations are disabled via environment variable
         # Projects contain teams, so we need to block project deletion too
         if settings.DISABLE_BULK_DELETES:
@@ -1465,27 +1463,6 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
 
         if project.is_pending_deletion:
             raise exceptions.ValidationError("This project is already being deleted.")
-
-        # Block deletion of the last project in an org with an active subscription (cloud only).
-        # Fail open if the billing service is unreachable — a 500 here would create a worse stuck state.
-        is_last_project = project.organization.projects.count() == 1
-        license = get_cached_instance_license()
-        try:
-            has_active_subscription = (
-                settings.EE_AVAILABLE
-                and is_cloud()
-                and license
-                and BillingManager(license).get_billing(project.organization).get("has_active_subscription")
-            )
-        except Exception:
-            logger.exception("Failed to check billing status before project deletion; allowing deletion to proceed")
-            has_active_subscription = False
-
-        if is_last_project and has_active_subscription:
-            raise exceptions.ValidationError(
-                "Cannot delete the last project in an organization with an active subscription. "
-                "Please cancel your subscription first in the billing page."
-            )
 
         project_id = project.pk
         organization_id = project.organization_id

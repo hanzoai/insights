@@ -52,7 +52,7 @@ from insights.models.person.bulk_delete import (
     resolve_persons_for_deletion,
 )
 
-from ee.datastore.materialized_columns.columns import MaterializedColumnDetails
+from insights.datastore.materialized_column_types import MaterializedColumnDetails
 
 OWNER_TAG = {"owner": JobOwners.TEAM_DATASTORE.value}
 
@@ -294,8 +294,7 @@ def _get_affected_mat_columns(
     ``column_materializer::<table_column>::<prop>`` convention.  Pass
     ``table_column="person_properties"`` to discover columns materialised from
     ``events.person_properties``.  Comments live on the distributed ``events``
-    table while the DEFAULT expression lives on ``sharded_events`` (see
-    ``materialize()`` in ee/datastore/materialized_columns), so we cannot
+    table while the DEFAULT expression lives on ``sharded_events``, so we cannot
     filter by ``default_kind`` on the same row that carries the comment.
     The comment itself is a sufficient identifier — it is Insights-specific and the
     ``elements_chain::*`` family is excluded explicitly.

@@ -38,7 +38,7 @@ from products.tasks.backend.temporal.process_task.utils import (
     is_slack_interaction_state,
 )
 
-from ee.hogai.sandbox import is_turn_complete
+from products.insights_ai.backend.wire_types import is_turn_complete
 
 logger = structlog.get_logger(__name__)
 

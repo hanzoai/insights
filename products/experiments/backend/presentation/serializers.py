@@ -40,6 +40,7 @@ from products.experiments.backend.models.experiment import (
     Experiment,
     ExperimentHoldout,
     ExperimentMetricsRecalculation,
+    ExperimentToSavedMetric,
     experiment_has_legacy_metrics,
 )
 from products.experiments.backend.running_time_calculator import METRIC_TYPE_CHOICES
@@ -47,10 +48,41 @@ from products.experiments.backend.session_context import MAX_SESSION_CONTEXT_BAT
 from products.feature_flags.backend.api.feature_flag import MinimalFeatureFlagSerializer
 from products.feature_flags.backend.models.feature_flag import FeatureFlag, experiment_eligibility_error
 
-from ee.datastore.views.experiment_holdouts import ExperimentHoldoutSerializer
-from ee.datastore.views.experiment_saved_metrics import ExperimentToSavedMetricSerializer
-
 tracer = trace.get_tracer(__name__)
+
+
+class ExperimentHoldoutSerializer(serializers.ModelSerializer):
+    """A holdout group, as it is embedded in an experiment.
+
+    The models are core, but the standalone holdout endpoint and its writable serializer were part
+    of the enterprise edition. This read-only shape is what an experiment needs to describe the
+    holdout it belongs to.
+    """
+
+    created_by = UserBasicSerializer(read_only=True)
+
+    class Meta:
+        model = ExperimentHoldout
+        fields = ["id", "name", "description", "filters", "created_by", "created_at", "updated_at"]
+        read_only_fields = fields
+
+
+class ExperimentToSavedMetricSerializer(serializers.ModelSerializer):
+    """The join between an experiment and a shared saved metric.
+
+    `metadata` records what the experiment knew about the metric when it was attached (whether it
+    is primary, for instance), which is why the join is serialized rather than the metric alone.
+    `saved_metric` is written by id and read back alongside the metric's name and query, so a
+    caller rendering an experiment does not have to fetch each metric separately.
+    """
+
+    query = serializers.JSONField(source="saved_metric.query", read_only=True)
+    name = serializers.CharField(source="saved_metric.name", read_only=True)
+
+    class Meta:
+        model = ExperimentToSavedMetric
+        fields = ["id", "experiment", "saved_metric", "metadata", "name", "query", "created_at"]
+        read_only_fields = ["id", "name", "query", "created_at"]
 
 
 class _ExperimentApiMetricsList(PydanticRootModel):

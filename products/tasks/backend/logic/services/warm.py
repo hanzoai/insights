@@ -29,8 +29,6 @@ from products.tasks.backend.models import Task, TaskRun
 from products.tasks.backend.temporal.client import execute_task_processing_workflow
 from products.tasks.backend.temporal.process_task.utils import parse_run_state
 
-from ee.billing.quota_limiting import QuotaLimitingCaches, QuotaResource, is_team_limited
-
 logger = structlog.get_logger(__name__)
 
 
@@ -49,11 +47,8 @@ class WarmPoolCaps:
 
 
 def _ai_credits_checker(team: Team, user: User) -> None:
-    if is_team_limited(team.api_token, QuotaResource.AI_CREDITS, QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY):
-        raise QuotaLimitExceeded(
-            "Your organization reached its AI credit usage limit. Increase the limits in Billing settings, "
-            "or ask an org admin to do so."
-        )
+    # AI credits were a billing meter, which this fork does not carry, so nothing is ever exhausted.
+    return
 
 
 class SandboxWarmer:
