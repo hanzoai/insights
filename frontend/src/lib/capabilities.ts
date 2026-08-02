@@ -19,7 +19,7 @@ import { urls } from 'scenes/urls'
  * nobody is scheduled to keep is worse than a plain gap. When one genuinely ships, flip
  * `available` here and every surface that reads it comes back at once.
  */
-export type CapabilityKey = 'ai' | 'sessionSummaries' | 'subscriptions' | 'roles'
+export type CapabilityKey = 'ai' | 'sessionSummaries' | 'subscriptions' | 'roles' | 'approvals'
 
 export interface Capability {
     /** Surfaces read this to decide whether to render, and loaders to decide whether to fetch. */
@@ -63,5 +63,13 @@ export const CAPABILITIES: Record<CapabilityKey, Capability> = {
         title: 'Roles are not available',
         body: 'Access is granted per member and per project. Grouping members into roles is not part of Insights.',
         link: { to: () => urls.settings('organization-members'), label: 'Go to members' },
+    },
+    // Two settings panes and a routed scene, shown to every org admin, all reading endpoints that
+    // answer 404. Approvals also drew its approver lists from roles, so it could not have worked
+    // even if its own endpoints came back.
+    approvals: {
+        available: false,
+        title: 'Approvals are not available',
+        body: 'Changes apply as soon as they are made. Insights cannot hold one for review first. Every change is still recorded in the activity log.',
     },
 }
