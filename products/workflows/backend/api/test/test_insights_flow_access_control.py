@@ -11,9 +11,9 @@ from insights.models.organization import OrganizationMembership
 from insights.models.user import User
 from insights.rbac.user_access_control import ACCESS_CONTROL_RESOURCES, model_to_resource
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
-from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule
 
 try:
     from ee.models.rbac.access_control import AccessControl

@@ -18,8 +18,8 @@ from insights.models import User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
-from products.workflows.backend.api.hog_flow import InsightsFlowMaskingSerializer, InsightsFlowVariableSerializer
-from products.workflows.backend.models.hog_flow.hog_flow_template import InsightsFlowTemplate
+from products.workflows.backend.api.insights_flow import InsightsFlowMaskingSerializer, InsightsFlowVariableSerializer
+from products.workflows.backend.models.insights_flow.insights_flow_template import InsightsFlowTemplate
 from products.workflows.backend.templates import get_global_template_by_id, load_global_templates
 
 logger = structlog.get_logger(__name__)

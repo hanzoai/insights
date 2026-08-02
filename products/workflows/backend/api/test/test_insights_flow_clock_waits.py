@@ -2,7 +2,7 @@ from insights.test.base import APIBaseTest
 
 from parameterized import parameterized
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 TRIGGER = {
     "id": "trigger_node",
