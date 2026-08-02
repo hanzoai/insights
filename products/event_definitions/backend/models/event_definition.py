@@ -60,7 +60,7 @@ class EventDefinition(UUIDTModel):
                 name="insights_eventdef_enforce_idx",
                 condition=models.Q(enforcement_mode="reject"),
             ),
-            models.Index(fields=["team_id", "name"], name="insights_eventdef_team_name_idx"),
+            models.Index(fields=["team_id", "name"], name="eventdef_team_name_idx"),
         ]
         constraints = [
             UniqueConstraintByExpression(

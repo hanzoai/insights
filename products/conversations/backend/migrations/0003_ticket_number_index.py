@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
     operations = [
         AddIndexConcurrently(
             model_name="ticket",
-            index=models.Index(fields=["team", "-ticket_number"], name="insights_con_team_id_ticket_idx"),
+            index=models.Index(fields=["team", "-ticket_number"], name="con_team_id_ticket_idx"),
         ),
     ]
