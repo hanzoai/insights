@@ -13,6 +13,7 @@ from insights.api.query_performance_proxy import QueryPerformanceProxyViewSet
 from insights.api.routing import DefaultRouterPlusPlus, RouterRegistry
 from insights.api.sdk_health import SdkHealthViewSet
 from insights.api.wizard import http as wizard
+
 from ..session_recordings.session_recording_api import SessionRecordingViewSet
 from ..session_recordings.session_recording_external_reference_api import SessionRecordingExternalReferenceViewSet
 from ..session_recordings.session_recording_playlist_api import SessionRecordingPlaylistViewSet
@@ -29,10 +30,10 @@ from . import (
     event_definition,
     event_schema,
     health_issue,
-    script,
     identity_provider_config,
     ingestion_warnings,
     ingestion_warnings_v2,
+    insights_connection,
     instance_settings,
     instance_status,
     integration,
@@ -45,7 +46,6 @@ from . import (
     organization_member,
     organization_personal_api_key,
     personal_api_key,
-    insights_connection,
     project_secret_api_key,
     proxy_record,
     query,
@@ -53,6 +53,7 @@ from . import (
     resource_transfer,
     role_external_reference,
     schema_property_group,
+    script,
     search,
     sharing,
     tagged_item,

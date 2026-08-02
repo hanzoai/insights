@@ -21,6 +21,7 @@ from temporalio import activity
 from insights.event_usage import groups
 from insights.helpers.markdown_safety import strip_external_links_markdown
 from insights.models.team import Team
+from insights.security.untrusted import as_untrusted_data
 from insights.sync import database_sync_to_async
 
 from products.replay_vision.backend.models.replay_observation import ObservationStatus, ReplayObservation
@@ -35,8 +36,6 @@ from products.replay_vision.backend.temporal.vision_actions.types import (
     SynthesizeGroupSummaryInputs,
     SynthesizeGroupSummaryResult,
 )
-
-from insights.security.untrusted import as_untrusted_data
 
 logger = structlog.get_logger(__name__)
 

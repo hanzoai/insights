@@ -99,19 +99,6 @@ from .views import (
 
 logger = structlog.get_logger(__name__)
 
-ee_urlpatterns: list[Any] = []
-try:
-    from ee.urls import (
-        extend_api_router,
-        urlpatterns as ee_urlpatterns,
-    )
-except ImportError:
-    if settings.DEBUG:
-        logger.warn(f"Could not import ee.urls", exc_info=True)
-    pass
-else:
-    extend_api_router()
-
 
 GithubWebhookHandler = Callable[[HttpRequest, str, dict[str, Any], str], HttpResponse | None]
 
@@ -500,7 +487,6 @@ urlpatterns = [
     opt_slash_path("_stats", stats),
     opt_slash_path("_preflight", preflight_check),
     # ee
-    *ee_urlpatterns,
     # api
     path("api/unsubscribe", unsubscribe.unsubscribe),
     path("api/alerts/github", github.SecretAlert.as_view()),

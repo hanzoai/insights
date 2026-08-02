@@ -12,8 +12,8 @@ from django.utils.crypto import constant_time_compare, salted_hmac
 
 import structlog
 import hanzo_insights
-from loginas.utils import is_impersonated_session
 from hanzo_insights import capture_exception
+from loginas.utils import is_impersonated_session
 from prometheus_client import Counter
 from rest_framework.exceptions import PermissionDenied
 from two_factor.utils import default_device

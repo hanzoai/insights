@@ -67,7 +67,10 @@ from insights.tasks.tasks import (
     update_survey_iteration,
 )
 from insights.tasks.team_llm_gateway_policy import refresh_expiring_llm_gateway_policy_cache_entries
-from insights.tasks.team_metadata import cleanup_stale_expiry_tracking_task, refresh_expiring_team_metadata_cache_entries
+from insights.tasks.team_metadata import (
+    cleanup_stale_expiry_tracking_task,
+    refresh_expiring_team_metadata_cache_entries,
+)
 from insights.utils import get_crontab, get_instance_region
 
 from products.approvals.backend.tasks import expire_old_change_requests, validate_pending_change_requests

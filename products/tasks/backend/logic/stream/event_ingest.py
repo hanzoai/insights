@@ -17,6 +17,7 @@ from jwt import PyJWTError
 
 from insights.ph_client import ph_scoped_capture
 
+from products.insights_ai.backend.wire_types import is_turn_complete
 from products.tasks.backend.logic.services.connection_token import (
     SandboxEventIngestTokenPayload,
     validate_sandbox_event_ingest_token,
@@ -30,8 +31,6 @@ from products.tasks.backend.logic.stream.redis_stream import (
 )
 from products.tasks.backend.models import TaskRun
 from products.tasks.backend.push_dispatcher import notify_task_run_turn_completed
-
-from products.insights_ai.backend.wire_types import is_turn_complete
 
 logger = structlog.get_logger(__name__)
 
