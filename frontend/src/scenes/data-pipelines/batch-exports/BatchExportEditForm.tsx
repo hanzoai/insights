@@ -1,21 +1,79 @@
 import React from 'react'
 
+import { CalendarSelectInput, Checkbox, FileInput, Input, Link, Select, TextArea, Tooltip } from '@hanzo/elements'
 import { IconInfo } from '@hanzo/icons'
-import {
-    CalendarSelectInput,
-    Checkbox,
-    FileInput,
-    Input,
-    Select,
-    TextArea,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { Field } from 'lib/elements/Field'
 
 import { BatchExportConfigurationForm } from './types'
+
+const PARQUET_COMPRESSION = [
+    { value: 'zstd', label: 'zstd' },
+    { value: 'lz4', label: 'lz4' },
+    { value: 'snappy', label: 'snappy' },
+    { value: 'gzip', label: 'gzip' },
+    { value: 'brotli', label: 'brotli' },
+    { value: null, label: 'No compression' },
+]
+
+const JSONLINES_COMPRESSION = [
+    { value: 'gzip', label: 'gzip' },
+    { value: 'brotli', label: 'brotli' },
+    { value: null, label: 'No compression' },
+]
+
+type CompressionFieldProps = {
+    value: string | null
+    onChange: (value: string | null) => void
+    fileFormat: BatchExportConfigurationForm['file_format']
+    isNew: boolean
+    configurationChanged: boolean
+}
+
+// A component, not the Field render prop itself, because it holds an effect. A
+// render prop runs during the parent's render but is not a component, so the
+// effect belonged to the form -- and a render where Field declined to call its
+// child changed the form's hook count and crashed it with "rendered more hooks
+// than during the previous render".
+//
+// One component, used by both destinations that offer compression. It was the
+// same forty lines copied twice, so a change to the option list had to be made
+// in two places to be true.
+const CompressionField = ({
+    value,
+    onChange,
+    fileFormat,
+    isNew,
+    configurationChanged,
+}: CompressionFieldProps): JSX.Element => {
+    const options =
+        fileFormat === 'Parquet' ? PARQUET_COMPRESSION : fileFormat === 'JSONLines' ? JSONLINES_COMPRESSION : []
+
+    // Set defaults when the file format changes for new destinations.
+    React.useEffect(() => {
+        if (!configurationChanged) {
+            return
+        }
+        if (isNew && fileFormat === 'JSONLines') {
+            onChange(null)
+        } else if (isNew && fileFormat === 'Parquet') {
+            onChange('zstd')
+        } else if (!options.some((option) => option.value === value)) {
+            // the format changed and the compression carried over is not offered for it
+            onChange(null)
+        }
+    }, [configurationChanged, fileFormat, isNew]) // oxlint-disable-line react-hooks/exhaustive-deps
+
+    return (
+        <Select
+            options={options}
+            value={value}
+            onChange={onChange}
+            placeholder={!fileFormat ? 'Select file format first' : undefined}
+        />
+    )
+}
 
 export function BatchExportGeneralEditFields({
     isNew,
@@ -210,63 +268,15 @@ export function BatchExportsEditFields({
 
                     <div className="flex gap-4">
                         <Field name="compression" label="Compression" className="flex-1">
-                            {({ value, onChange }) => {
-                                const parquetCompressionOptions = [
-                                    { value: 'zstd', label: 'zstd' },
-                                    { value: 'lz4', label: 'lz4' },
-                                    { value: 'snappy', label: 'snappy' },
-                                    { value: 'gzip', label: 'gzip' },
-                                    { value: 'brotli', label: 'brotli' },
-                                    { value: null, label: 'No compression' },
-                                ]
-                                const jsonLinesCompressionOptions = [
-                                    { value: 'gzip', label: 'gzip' },
-                                    { value: 'brotli', label: 'brotli' },
-                                    { value: null, label: 'No compression' },
-                                ]
-                                const compressionOptions =
-                                    batchExportConfigForm.file_format === 'Parquet'
-                                        ? parquetCompressionOptions
-                                        : batchExportConfigForm.file_format === 'JSONLines'
-                                          ? jsonLinesCompressionOptions
-                                          : []
-
-                                const isSelectedCompressionOptionValid = (value: string | null): boolean => {
-                                    if (batchExportConfigForm.file_format === 'Parquet') {
-                                        return parquetCompressionOptions.some((option) => option.value === value)
-                                    } else if (batchExportConfigForm.file_format === 'JSONLines') {
-                                        return jsonLinesCompressionOptions.some((option) => option.value === value)
-                                    }
-                                    return false
-                                }
-
-                                // Set defaults when file format changes for new destinations
-                                React.useEffect(() => {
-                                    // Only run when configuration changes
-                                    if (!configurationChanged) {
-                                        return
-                                    }
-                                    if (isNew && batchExportConfigForm.file_format === 'JSONLines') {
-                                        onChange(null)
-                                    } else if (isNew && batchExportConfigForm.file_format === 'Parquet') {
-                                        onChange('zstd')
-                                    } else if (!isSelectedCompressionOptionValid(value)) {
-                                        // if file format is changed but existing compression is not valid, set to null
-                                        onChange(null)
-                                    }
-                                }, [configurationChanged, batchExportConfigForm.file_format, isNew]) // oxlint-disable-line react-hooks/exhaustive-deps
-
-                                return (
-                                    <Select
-                                        options={compressionOptions}
-                                        value={value}
-                                        onChange={onChange}
-                                        placeholder={
-                                            !batchExportConfigForm.file_format ? 'Select file format first' : undefined
-                                        }
-                                    />
-                                )
-                            }}
+                            {({ value, onChange }) => (
+                                <CompressionField
+                                    value={value}
+                                    onChange={onChange}
+                                    fileFormat={batchExportConfigForm.file_format}
+                                    isNew={isNew}
+                                    configurationChanged={configurationChanged}
+                                />
+                            )}
                         </Field>
 
                         <Field name="encryption" label="Encryption" className="flex-1">
@@ -620,9 +630,7 @@ export function BatchExportsEditFields({
                                         label="AWS Access Key ID"
                                         className="flex-1"
                                     >
-                                        <Input
-                                            placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'}
-                                        />
+                                        <Input placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'} />
                                     </Field>
 
                                     <Field
@@ -805,60 +813,15 @@ export function BatchExportsEditFields({
                     </div>
 
                     <Field name="compression" label="Compression">
-                        {({ value, onChange }) => {
-                            const parquetCompressionOptions = [
-                                { value: 'zstd', label: 'zstd' },
-                                { value: 'lz4', label: 'lz4' },
-                                { value: 'snappy', label: 'snappy' },
-                                { value: 'gzip', label: 'gzip' },
-                                { value: 'brotli', label: 'brotli' },
-                                { value: null, label: 'No compression' },
-                            ]
-                            const jsonLinesCompressionOptions = [
-                                { value: 'gzip', label: 'gzip' },
-                                { value: 'brotli', label: 'brotli' },
-                                { value: null, label: 'No compression' },
-                            ]
-                            const compressionOptions =
-                                batchExportConfigForm.file_format === 'Parquet'
-                                    ? parquetCompressionOptions
-                                    : batchExportConfigForm.file_format === 'JSONLines'
-                                      ? jsonLinesCompressionOptions
-                                      : []
-
-                            const isSelectedCompressionOptionValid = (val: string | null): boolean => {
-                                if (batchExportConfigForm.file_format === 'Parquet') {
-                                    return parquetCompressionOptions.some((option) => option.value === val)
-                                } else if (batchExportConfigForm.file_format === 'JSONLines') {
-                                    return jsonLinesCompressionOptions.some((option) => option.value === val)
-                                }
-                                return false
-                            }
-
-                            React.useEffect(() => {
-                                if (!configurationChanged) {
-                                    return
-                                }
-                                if (isNew && batchExportConfigForm.file_format === 'JSONLines') {
-                                    onChange(null)
-                                } else if (isNew && batchExportConfigForm.file_format === 'Parquet') {
-                                    onChange('zstd')
-                                } else if (!isSelectedCompressionOptionValid(value)) {
-                                    onChange(null)
-                                }
-                            }, [configurationChanged, batchExportConfigForm.file_format, isNew]) // oxlint-disable-line react-hooks/exhaustive-deps
-
-                            return (
-                                <Select
-                                    options={compressionOptions}
-                                    value={value}
-                                    onChange={onChange}
-                                    placeholder={
-                                        !batchExportConfigForm.file_format ? 'Select file format first' : undefined
-                                    }
-                                />
-                            )
-                        }}
+                        {({ value, onChange }) => (
+                            <CompressionField
+                                value={value}
+                                onChange={onChange}
+                                fileFormat={batchExportConfigForm.file_format}
+                                isNew={isNew}
+                                configurationChanged={configurationChanged}
+                            />
+                        )}
                     </Field>
                 </>
             ) : batchExportConfigForm.destination === 'HTTP' ? (
