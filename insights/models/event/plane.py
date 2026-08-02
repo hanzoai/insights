@@ -1,11 +1,20 @@
 """Projection of the Hanzo event plane onto the Insights event schema.
 
 An event is the fact; a message is the container it travels in. Every product's
-facts land in ONE place on the ONE warehouse — `event.event` on the Hanzo
-Datastore — with an envelope that is identical across `event.event`,
-`event.error`, `event.log` and `event.span`. It is a plain MergeTree family
+facts land in ONE place on the ONE warehouse — `event.fact` on the Hanzo
+Datastore — one row per thing that happened, whatever sort of thing it was. A
+`signal` column says which sort: `act` for something a person or a surface did,
+and `clip`, `error`, `log`, `span` for the rest. It is a plain MergeTree family
 table, so a materialized view over it fires on every insert: the unified stream
 reaches Insights with no second capture tier, no queue and no extra process.
+
+WHICH IS WHY EVERY VIEW BELOW NAMES ITS SIGNAL. It was four tables with an
+identical envelope, so a view that named `event.event` was reading product
+events by construction. With one table that is a PREDICATE, and a predicate can
+be forgotten — a projection that omits it would publish every log line and every
+span into the product-event stream. So the source is built in ONE place
+(`EVENT_FROM_SQL`) and the three views compose it rather than writing `FROM`
+themselves.
 
 `event_mv` writes through `writable_events`, the same Distributed write-side
 table the fork's own event views target (`events_json_mv`,
@@ -21,8 +30,9 @@ The same envelope also names the USER an event belongs to, so `user_mv` and
 `user_alias_mv` project the users out of it the same way — three views, one
 source, one set of identity expressions. See "the USER plane" below.
 
-Prerequisite: `event.event` must exist. Cloud owns the write path into it; this
-module only reads it, and deliberately does not declare it.
+Prerequisite: `event.fact` must exist. hanzoai/o11y owns its DDL and cloud owns
+the write path into it; this module only reads it, and deliberately declares
+neither.
 """
 
 from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
@@ -31,8 +41,20 @@ from insights.settings.data_stores import DATASTORE_DATABASE
 
 from .sql import WRITABLE_EVENTS_DATA_TABLE
 
-EVENT_TABLE = "event.event"
+EVENT_TABLE = "event.fact"
 EVENT_MV = "event_mv"
+
+# The one signal Insights projects. `act` and not `event`, because `event` is the
+# NAMESPACE the table lives in and a value cannot also be the set it belongs to:
+# `event.fact WHERE signal = 'event'` reads as a schema nobody finished naming.
+EVENT_SIGNAL = "act"
+
+# The source clause, written ONCE. Everything that reads the plane composes this
+# rather than naming the table, so the tenant-facing views cannot differ in which
+# rows they consider — and a fourth view added later inherits the predicate instead
+# of having to remember it.
+EVENT_FROM_SQL = f"FROM {EVENT_TABLE}"
+EVENT_SIGNAL_SQL = f"signal = '{EVENT_SIGNAL}'"
 
 # ── routing: which PROJECT an org's events land in ───────────────────────────
 #
@@ -266,7 +288,7 @@ def EVENT_COLUMNS(historical: bool) -> list[tuple[str, str]]:
 
 def EVENT_SELECT_SQL(historical: bool) -> str:
     projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in EVENT_COLUMNS(historical))
-    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}"
+    return f"SELECT\n    {projection}\n{EVENT_FROM_SQL}\nWHERE {EVENT_SIGNAL_SQL}"
 
 
 def ORG_PROJECT_TABLE_SQL() -> str:
@@ -485,12 +507,15 @@ USER_ALIAS_WHERE = (
 
 def USER_SELECT_SQL() -> str:
     projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_COLUMNS())
-    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}"
+    return f"SELECT\n    {projection}\n{EVENT_FROM_SQL}\nWHERE {EVENT_SIGNAL_SQL}"
 
 
 def USER_ALIAS_SELECT_SQL() -> str:
     projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_ALIAS_COLUMNS())
-    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE} AS {EVENT_SOURCE}\nWHERE {USER_ALIAS_WHERE}"
+    return (
+        f"SELECT\n    {projection}\n{EVENT_FROM_SQL} AS {EVENT_SOURCE}"
+        f"\nWHERE {EVENT_SOURCE}.{EVENT_SIGNAL_SQL} AND {USER_ALIAS_WHERE}"
+    )
 
 
 def USER_MV_SQL() -> str:
