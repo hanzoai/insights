@@ -3,10 +3,11 @@ import { router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
 import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
-import { IconArrowRight, IconSparkles } from '@hanzo/icons'
 import { Button, TextArea } from '@hanzo/elements'
+import { IconArrowRight, IconSparkles } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
+import { CAPABILITIES } from 'lib/capabilities'
 import { MCPUseCaseCard } from 'lib/components/MCPHint/MCPUseCaseCard'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -123,10 +124,15 @@ function SurveysEmptyStateContent(): JSX.Element {
                         </div>
 
                         <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
-                            <Button type="primary" icon={<IconSparkles />} onClick={() => openMax?.()}>
-                                Create your own custom survey with Insights AI
-                            </Button>
-                            <Button type="secondary" onClick={() => router.actions.push(urls.surveyWizard())}>
+                            {openMax && (
+                                <Button type="primary" icon={<IconSparkles />} onClick={openMax}>
+                                    Create your own custom survey with Insights AI
+                                </Button>
+                            )}
+                            <Button
+                                type={openMax ? 'secondary' : 'primary'}
+                                onClick={() => router.actions.push(urls.surveyWizard())}
+                            >
                                 See all other templates
                             </Button>
                         </div>
@@ -258,7 +264,9 @@ export function SurveysEmptyState(): JSX.Element {
         reportSurveyEmptyStateViewed()
     }, [reportSurveyEmptyStateViewed])
 
-    if (featureFlags[FEATURE_FLAGS.SURVEYS_AI_FIRST_EMPTY_STATE] === 'test') {
+    // The AI-first variant is a prompt box and nothing else, so it only makes sense while there is
+    // something to answer the prompt.
+    if (CAPABILITIES.aiTools.available && featureFlags[FEATURE_FLAGS.SURVEYS_AI_FIRST_EMPTY_STATE] === 'test') {
         return <SurveysEmptyStateAIContent />
     }
 

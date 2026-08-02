@@ -1,15 +1,17 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis, IconTrash } from '@hanzo/icons'
 import { Button, Input, Tag } from '@hanzo/elements'
+import { IconEllipsis, IconTrash } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { AllowTrainingCallout } from 'lib/components/AllowTrainingCallout/AllowTrainingCallout'
 import { MemberSelect } from 'lib/components/MemberSelect'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
+import { Link } from 'lib/elements/Link'
 import { Menu } from 'lib/elements/Menu'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { atColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
-import { Link } from 'lib/elements/Link'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { sceneConfigurations } from 'scenes/scenes'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -57,7 +59,13 @@ export function SessionGroupSummariesTable(): JSX.Element {
     const { loadSessionGroupSummaries, setFilters, tableSortingChanged, deleteSessionGroupSummary } = useActions(
         sessionGroupSummariesTableLogic
     )
-    useOnMountEffect(loadSessionGroupSummaries)
+    // Nothing links here without summarization, but the route still resolves, so a bookmark lands
+    // on the explanation rather than a table that can never fill.
+    useOnMountEffect(() => {
+        if (CAPABILITIES.sessionSummaries.available) {
+            loadSessionGroupSummaries()
+        }
+    })
     const columns: TableColumns<SessionGroupSummaryListItemType> = [
         titleColumn() as TableColumn<
             SessionGroupSummaryListItemType,
@@ -105,43 +113,49 @@ export function SessionGroupSummariesTable(): JSX.Element {
                 resourceType={{
                     type: config.iconType || 'notebook',
                 }}
-                actions={<Tag type="warning">BETA</Tag>}
+                actions={CAPABILITIES.sessionSummaries.available ? <Tag type="warning">BETA</Tag> : undefined}
             />
-            <AllowTrainingCallout featureName="Session summaries" />
-            <div className="deprecated-space-y-4">
-                <div className="flex justify-between gap-2 flex-wrap">
-                    <Input
-                        type="search"
-                        placeholder="Search for summaries"
-                        onChange={(s) => {
-                            setFilters({ search: s })
-                        }}
-                        value={filters.search}
-                        data-attr="session-group-summaries-search"
-                    />
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-2">
-                            <span>Created by:</span>
-                            <MemberSelect
-                                value={filters.createdBy}
-                                onChange={(user) => setFilters({ createdBy: user?.uuid || null })}
+            {!CAPABILITIES.sessionSummaries.available ? (
+                <Unavailable capability="sessionSummaries" />
+            ) : (
+                <>
+                    <AllowTrainingCallout featureName="Session summaries" />
+                    <div className="deprecated-space-y-4">
+                        <div className="flex justify-between gap-2 flex-wrap">
+                            <Input
+                                type="search"
+                                placeholder="Search for summaries"
+                                onChange={(s) => {
+                                    setFilters({ search: s })
+                                }}
+                                value={filters.search}
+                                data-attr="session-group-summaries-search"
                             />
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <div className="flex items-center gap-2">
+                                    <span>Created by:</span>
+                                    <MemberSelect
+                                        value={filters.createdBy}
+                                        onChange={(user) => setFilters({ createdBy: user?.uuid || null })}
+                                    />
+                                </div>
+                            </div>
                         </div>
+                        <Table
+                            data-attr="session-group-summaries-table"
+                            pagination={pagination}
+                            dataSource={sessionGroupSummaries}
+                            rowKey="id"
+                            columns={columns}
+                            loading={sessionGroupSummariesResponseLoading}
+                            defaultSorting={tableSorting}
+                            emptyState="No session group summaries matching your filters!"
+                            nouns={['summary', 'summaries']}
+                            onSort={tableSortingChanged}
+                        />
                     </div>
-                </div>
-                <Table
-                    data-attr="session-group-summaries-table"
-                    pagination={pagination}
-                    dataSource={sessionGroupSummaries}
-                    rowKey="id"
-                    columns={columns}
-                    loading={sessionGroupSummariesResponseLoading}
-                    defaultSorting={tableSorting}
-                    emptyState="No session group summaries matching your filters!"
-                    nouns={['summary', 'summaries']}
-                    onSort={tableSortingChanged}
-                />
-            </div>
+                </>
+            )}
         </SceneContent>
     )
 }

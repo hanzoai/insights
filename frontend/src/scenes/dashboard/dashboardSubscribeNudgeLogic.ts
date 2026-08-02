@@ -16,9 +16,10 @@ import { subscriptions } from 'kea-subscriptions'
 import { dashboardsSubscribeNudgeCreate } from '@hanzo/products-dashboards/frontend/generated/api'
 import type { DashboardSubscribeNudgeResponseApi } from '@hanzo/products-dashboards/frontend/generated/api.schemas'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import insights from 'lib/insights-typed'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import {
@@ -280,7 +281,11 @@ export const dashboardSubscribeNudgeLogic = kea<dashboardSubscribeNudgeLogicType
                 > | null,
                 canEditDashboard: boolean,
                 placement: DashboardPlacement
-            ): boolean => !!dashboard && canEditDashboard && placement === DashboardPlacement.Dashboard,
+            ): boolean =>
+                CAPABILITIES.subscriptions.available &&
+                !!dashboard &&
+                canEditDashboard &&
+                placement === DashboardPlacement.Dashboard,
         ],
         hasSubscriptionsFeature: [
             (s) => [s.hasAvailableFeature],

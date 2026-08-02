@@ -1,12 +1,13 @@
 import { Menu } from '@base-ui/react/menu'
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconDatabase, IconOpenSidebar, IconServer, IconShieldLock, IconSparkles } from '@hanzo/icons'
 import { ProfilePicture } from '@hanzo/elements'
+import { IconCopy, IconDatabase, IconOpenSidebar, IconServer, IconShieldLock, IconSparkles } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
-import { IconMenu, IconWithBadge } from 'lib/elements/icons'
 import { Badge } from 'lib/elements/Badge/Badge'
+import { IconMenu, IconWithBadge } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link/Link'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -101,19 +102,21 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                 <Label intent="menu" className="px-2">
                                     Help
                                 </Label>
-                                <Menu.Item
-                                    render={(props) => (
-                                        <Link
-                                            {...props}
-                                            to={urls.ai()}
-                                            buttonProps={{ menuItem: true }}
-                                            data-attr="more-menu-ask-ai-button"
-                                        >
-                                            Ask Insights AI
-                                            <IconSparkles className="text-ai" />
-                                        </Link>
-                                    )}
-                                />
+                                {CAPABILITIES.ai.available && (
+                                    <Menu.Item
+                                        render={(props) => (
+                                            <Link
+                                                {...props}
+                                                to={urls.ai()}
+                                                buttonProps={{ menuItem: true }}
+                                                data-attr="more-menu-ask-ai-button"
+                                            >
+                                                Ask Insights AI
+                                                <IconSparkles className="text-ai" />
+                                            </Link>
+                                        )}
+                                    />
+                                )}
                                 <Menu.Item
                                     onClick={() => openSidePanel(SidePanelTab.Support)}
                                     render={

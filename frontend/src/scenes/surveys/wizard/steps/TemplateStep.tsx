@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
+import { Button, SegmentedButton, Tag, TextArea } from '@hanzo/elements'
 import {
     IconArrowRight,
     IconChevronDown,
@@ -21,7 +22,6 @@ import {
     IconTrending,
     IconWarning,
 } from '@hanzo/icons'
-import { Button, SegmentedButton, Tag, TextArea } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -189,51 +189,55 @@ export function TemplateStep({ handleCustomizeMore }: { handleCustomizeMore: () 
                 </div>
             )}
 
-            <div className="flex items-center gap-4">
-                <div className="flex-1 border-t border-border" />
-                <span className="text-xs text-tertiary uppercase tracking-wide">
-                    or tell Insights AI what you want to learn
-                </span>
-                <div className="flex-1 border-t border-border" />
-            </div>
-
-            <div className="rounded-xl border-2 border-[var(--color-ai)]">
-                <label
-                    htmlFor="wizard-ai-prompt"
-                    className="flex flex-col cursor-text"
-                    onClick={() => textAreaRef.current?.focus()}
-                >
-                    <TextArea
-                        id="wizard-ai-prompt"
-                        ref={textAreaRef}
-                        value={prompt}
-                        onChange={setPrompt}
-                        onPressEnter={handleAiSubmit}
-                        placeholder="e.g., Create an NPS survey for users who completed onboarding"
-                        minRows={2}
-                        maxRows={5}
-                        className="!border-none !bg-transparent !shadow-none !rounded-none px-4 pt-4 pb-2 resize-none text-sm"
-                        hideFocus
-                        data-attr="wizard-ai-prompt-input"
-                    />
-                    <div className="flex items-center justify-between px-4 pb-3">
-                        <div className="flex items-center gap-1.5 text-xs text-tertiary">
-                            <IconSparkles className="text-ai size-3.5" />
-                            <span>Insights AI</span>
-                        </div>
-                        <Button
-                            type="primary"
-                            size="small"
-                            icon={<IconArrowRight />}
-                            onClick={handleAiSubmit}
-                            disabledReason={!prompt.trim() ? 'Describe the survey you want' : undefined}
-                            data-attr="wizard-ai-prompt-submit"
-                        >
-                            Create with AI
-                        </Button>
+            {openMax && (
+                <>
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1 border-t border-border" />
+                        <span className="text-xs text-tertiary uppercase tracking-wide">
+                            or tell Insights AI what you want to learn
+                        </span>
+                        <div className="flex-1 border-t border-border" />
                     </div>
-                </label>
-            </div>
+
+                    <div className="rounded-xl border-2 border-[var(--color-ai)]">
+                        <label
+                            htmlFor="wizard-ai-prompt"
+                            className="flex flex-col cursor-text"
+                            onClick={() => textAreaRef.current?.focus()}
+                        >
+                            <TextArea
+                                id="wizard-ai-prompt"
+                                ref={textAreaRef}
+                                value={prompt}
+                                onChange={setPrompt}
+                                onPressEnter={handleAiSubmit}
+                                placeholder="e.g., Create an NPS survey for users who completed onboarding"
+                                minRows={2}
+                                maxRows={5}
+                                className="!border-none !bg-transparent !shadow-none !rounded-none px-4 pt-4 pb-2 resize-none text-sm"
+                                hideFocus
+                                data-attr="wizard-ai-prompt-input"
+                            />
+                            <div className="flex items-center justify-between px-4 pb-3">
+                                <div className="flex items-center gap-1.5 text-xs text-tertiary">
+                                    <IconSparkles className="text-ai size-3.5" />
+                                    <span>Insights AI</span>
+                                </div>
+                                <Button
+                                    type="primary"
+                                    size="small"
+                                    icon={<IconArrowRight />}
+                                    onClick={handleAiSubmit}
+                                    disabledReason={!prompt.trim() ? 'Describe the survey you want' : undefined}
+                                    data-attr="wizard-ai-prompt-submit"
+                                >
+                                    Create with AI
+                                </Button>
+                            </div>
+                        </label>
+                    </div>
+                </>
+            )}
 
             <p className="text-center text-xs text-muted">
                 Need more control?{' '}

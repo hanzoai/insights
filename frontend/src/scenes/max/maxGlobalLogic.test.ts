@@ -2,6 +2,7 @@ import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -96,23 +97,18 @@ describe('maxGlobalLogic', () => {
     })
 
     describe('isMaxAvailable selector', () => {
+        // Insights AI answers from Hanzo AI, so a provider key on this instance says nothing about
+        // whether it works. Guards against a preflight gate creeping back in and hiding the
+        // assistant on every self-hosted instance.
         it.each([
-            { realm: 'a not-yet-loaded preflight', preflight: null, expected: true },
-            { realm: 'Insights Cloud', preflight: { cloud: true }, expected: true },
-            {
-                realm: 'self-hosted with an Anthropic key',
-                preflight: { cloud: false, is_debug: false, anthropic_available: true },
-                expected: true,
-            },
-            {
-                realm: 'self-hosted without a key',
-                preflight: { cloud: false, is_debug: false, anthropic_available: false },
-                expected: false,
-            },
-        ])('is $expected on $realm', async ({ preflight, expected }) => {
+            { realm: 'a not-yet-loaded preflight', preflight: null },
+            { realm: 'cloud', preflight: { cloud: true } },
+            { realm: 'self-hosted with a provider key', preflight: { cloud: false, anthropic_available: true } },
+            { realm: 'self-hosted without one', preflight: { cloud: false, anthropic_available: false } },
+        ])('ignores preflight: $realm', async ({ preflight }) => {
             preflightLogic.actions.loadPreflightSuccess(preflight as any)
 
-            await expectLogic(logic).toMatchValues({ isMaxAvailable: expected })
+            await expectLogic(logic).toMatchValues({ isMaxAvailable: CAPABILITIES.ai.available })
         })
     })
 

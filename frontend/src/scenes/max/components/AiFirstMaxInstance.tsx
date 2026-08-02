@@ -1,8 +1,9 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconOpenSidebar, IconShare } from '@hanzo/icons'
 import { Banner } from '@hanzo/elements'
+import { IconOpenSidebar, IconShare } from '@hanzo/icons'
 
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { Button } from 'lib/elements/Button'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
@@ -18,7 +19,6 @@ import { maxLogic } from '../maxLogic'
 import { MaxThreadLogicProps, maxThreadLogic } from '../maxThreadLogic'
 import { phaiAiComposerSeedLogic } from '../phaiAiComposerSeedLogic'
 import { Thread } from '../Thread'
-import { MaxNotConfigured } from './MaxNotConfigured'
 import { PhaiViewToggle } from './PhaiViewToggle'
 import { SidebarQuestionInputWithSuggestions } from './SidebarQuestionInputWithSuggestions'
 import { ThreadAutoScroller } from './ThreadAutoScroller'
@@ -99,6 +99,16 @@ export function AiFirstMaxInstance({ tabId }: AiFirstMaxInstanceProps): JSX.Elem
     const { startNewConversation } = useActions(maxLogic({ panelId: tabId }))
     const { isMaxAvailable, effectivePhaiView } = useValues(maxGlobalLogic)
 
+    // Ahead of the view split: neither view has anything to talk to when the assistant is
+    // unavailable, so the honest state stands in for both.
+    if (!isMaxAvailable) {
+        return (
+            <div className="flex grow overflow-hidden h-full">
+                <Unavailable capability="ai" />
+            </div>
+        )
+    }
+
     // On `/ai` the new view is the full TaskTracker product (tasks list + composer + run detail); a thin
     // bar keeps the toggle reachable so the user can drop back to the legacy chat.
     if (effectivePhaiView === 'new') {
@@ -128,16 +138,12 @@ export function AiFirstMaxInstance({ tabId }: AiFirstMaxInstanceProps): JSX.Elem
                 <BindLogic logic={maxThreadLogic} props={threadProps}>
                     <div className="flex flex-col grow overflow-hidden">
                         <ChatHeader conversationId={conversationId} tabId={tabId} />
-                        {isMaxAvailable ? (
-                            <ChatArea
-                                threadVisible={threadVisible}
-                                conversationId={conversationId}
-                                conversation={conversation}
-                                onStartNewConversation={startNewConversation}
-                            />
-                        ) : (
-                            <MaxNotConfigured />
-                        )}
+                        <ChatArea
+                            threadVisible={threadVisible}
+                            conversationId={conversationId}
+                            conversation={conversation}
+                            onStartNewConversation={startNewConversation}
+                        />
                     </div>
                 </BindLogic>
             </BindLogic>

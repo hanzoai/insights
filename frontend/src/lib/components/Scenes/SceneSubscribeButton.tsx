@@ -3,6 +3,7 @@ import { router } from 'kea-router'
 
 import { IconBell } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { IconWithCount } from 'lib/elements/icons/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { userLogic } from 'scenes/userLogic'
@@ -42,10 +43,14 @@ export function SceneSubscribeButton({
     insight,
     dashboardId,
     disabledReasons,
-}: SceneSubscribeButtonProps): JSX.Element {
+}: SceneSubscribeButtonProps): JSX.Element | null {
     const { push } = useActions(router)
     const { hasAvailableFeature } = useValues(userLogic)
     const hasSubscriptionsFeature = hasAvailableFeature(AvailableFeature.SUBSCRIPTIONS)
+
+    if (!CAPABILITIES.subscriptions.available) {
+        return null
+    }
 
     return (
         <ButtonPrimitive

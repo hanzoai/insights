@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
+import { Button, Link, Spinner, Select, Skeleton, Tag, Tooltip } from '@hanzo/elements'
 import {
     IconArrowRight,
     IconCheckCircle,
@@ -11,8 +12,8 @@ import {
     IconTerminal,
     IconWarning,
 } from '@hanzo/icons'
-import { Button, Link, Spinner, Select, Skeleton, Tag, Tooltip } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { TZLabel } from 'lib/components/TZLabel'
 import { Markdown } from 'lib/elements/Markdown'
 import { SignalNode } from 'scenes/debug/signals/types'
@@ -238,7 +239,7 @@ export function OpenTaskButton({
     const { openSidePanelMaxWithTaskBind } = useActions(maxGlobalLogic)
     const isTerminal = isTerminalRunStatus(runStatus)
 
-    if (isPiTaskRuntime(runtime)) {
+    if (isPiTaskRuntime(runtime) || !CAPABILITIES.ai.available) {
         return null
     }
 

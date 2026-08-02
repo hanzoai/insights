@@ -2,13 +2,15 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Menu, Modal, Link } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
+import { CAPABILITIES } from 'lib/capabilities'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { Tab, Tabs } from 'lib/elements/Tabs'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { Spinner } from 'lib/elements/Spinner'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -96,6 +98,23 @@ function SubscriptionsRowActions({ sub }: { sub: SubscriptionApi }): JSX.Element
 }
 
 export function SubscriptionsScene(): JSX.Element {
+    if (!CAPABILITIES.subscriptions.available) {
+        return (
+            <SceneContent>
+                <SceneTitleSection
+                    name={sceneConfigurations[Scene.Subscriptions].name}
+                    description={null}
+                    resourceType={{ type: 'inbox' }}
+                />
+                <Unavailable capability="subscriptions" />
+            </SceneContent>
+        )
+    }
+
+    return <SubscriptionsSceneContent />
+}
+
+function SubscriptionsSceneContent(): JSX.Element {
     const {
         subscriptions,
         subscriptionsLoading,

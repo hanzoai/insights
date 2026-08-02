@@ -1,18 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Banner, Button, Checkbox, Collapse, Input, Skeleton, Tag, Tooltip } from '@hanzo/elements'
 import { IconCheck, IconSearch, IconShare, IconSort, IconSparkles } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Checkbox,
-    Collapse,
-    Input,
-    Skeleton,
-    Tag,
-    Tooltip,
-} from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { IconPlayCircle } from 'lib/elements/icons'
 import { Menu } from 'lib/elements/Menu'
 import { debounce } from 'lib/utils/async'
@@ -511,6 +504,13 @@ export function SessionGroupSummary(): JSX.Element {
         return (
             <SceneContent>
                 <SessionGroupSummaryLoadingSkeleton />
+            </SceneContent>
+        )
+    }
+    if (!CAPABILITIES.sessionSummaries.available) {
+        return (
+            <SceneContent>
+                <Unavailable capability="sessionSummaries" />
             </SceneContent>
         )
     }

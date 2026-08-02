@@ -1,6 +1,7 @@
-import { IconCalendar, IconOpenSidebar } from '@hanzo/icons'
 import { Button, Card, Tag, Link } from '@hanzo/elements'
+import { IconCalendar, IconOpenSidebar } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { urls } from 'scenes/urls'
@@ -48,8 +49,14 @@ function ReportCard({ report, enabled }: { report: MCPRecurringReport; enabled: 
  * agents keep asking for, and how the tools are holding up. Both are summaries over a window, so
  * they stay useful on a quiet server and can't flood a channel the way a per-event alert can.
  */
-export function MCPRecurringReports(): JSX.Element {
+export function MCPRecurringReports(): JSX.Element | null {
     const aiSubscriptionsEnabled = useFeatureFlag('SUBSCRIPTION_AI_PROMPT')
+
+    // A scheduled written summary is a subscription; with none, the whole section would describe
+    // something this build can't deliver.
+    if (!CAPABILITIES.subscriptions.available) {
+        return null
+    }
 
     return (
         <section className="flex flex-col gap-2">

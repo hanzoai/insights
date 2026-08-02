@@ -1,8 +1,9 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { toast } from 'lib/elements/Toast'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -214,7 +215,7 @@ export const subscriptionSceneLogic = kea<subscriptionSceneLogicType>([
             {
                 loadSubscription: async () => {
                     const numericId = parseInt(props.id, 10)
-                    if (!Number.isFinite(numericId)) {
+                    if (!CAPABILITIES.subscriptions.available || !Number.isFinite(numericId)) {
                         return null
                     }
                     return await subscriptionsRetrieve(String(getCurrentTeamId()), numericId)

@@ -2,6 +2,7 @@ import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, redu
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 
@@ -194,6 +195,11 @@ export const rolesLogic = kea<rolesLogicType>([
     loaders(({ values, actions, asyncActions }) => ({
         roles: {
             loadRoles: async () => {
+                // Approvals and property access control connect to this logic, so the guard keeps
+                // working features from calling an endpoint that isn't there.
+                if (!CAPABILITIES.roles.available) {
+                    return []
+                }
                 const response = await api.roles.list()
                 return response?.results || []
             },

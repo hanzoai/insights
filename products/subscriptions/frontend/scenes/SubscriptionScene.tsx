@@ -3,7 +3,9 @@ import { router } from 'kea-router'
 
 import { Button, Tag } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { NotFound } from 'lib/components/NotFound'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -98,6 +100,14 @@ export function SubscriptionScene(): JSX.Element {
         useActions(subscriptionSceneLogic)
 
     const showNotFound = !subscriptionLoading && !subscription
+
+    if (!CAPABILITIES.subscriptions.available) {
+        return (
+            <SceneContent>
+                <Unavailable capability="subscriptions" />
+            </SceneContent>
+        )
+    }
 
     return (
         <SceneContent>

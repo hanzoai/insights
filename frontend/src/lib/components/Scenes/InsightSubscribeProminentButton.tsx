@@ -1,12 +1,13 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { IconBell, IconWarning } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconWithCount } from 'lib/elements/icons/icons'
 import { Button } from 'lib/elements/Button'
+import { IconWithCount } from 'lib/elements/icons/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
@@ -62,7 +63,7 @@ function SubscribeIcon({ insightShortId }: { insightShortId: InsightShortId }): 
 export function InsightSubscribeProminentButton({
     insightShortId,
     canCreateAlert,
-}: InsightSubscribeProminentButtonProps): JSX.Element {
+}: InsightSubscribeProminentButtonProps): JSX.Element | null {
     if (!canCreateAlert) {
         return <SubscribeButton insightShortId={insightShortId} />
     }
@@ -70,11 +71,32 @@ export function InsightSubscribeProminentButton({
     return <ExperimentButton insightShortId={insightShortId} />
 }
 
-function ExperimentButton({ insightShortId }: { insightShortId: InsightShortId }): JSX.Element {
+function ExperimentButton({ insightShortId }: { insightShortId: InsightShortId }): JSX.Element | null {
     const { push } = useActions(router)
     const { featureFlags } = useValues(featureFlagLogic)
     const notificationEntrypointVariant = featureFlags[FEATURE_FLAGS.INSIGHT_NOTIFICATION_ENTRYPOINT]
     const notificationLabel = notificationLabelForVariant(notificationEntrypointVariant)
+
+    if (notificationLabel && !CAPABILITIES.subscriptions.available) {
+        return (
+            <Button
+                type="secondary"
+                size="small"
+                icon={<IconWarning />}
+                data-attr="insight-alerts-prominent-button"
+                onClick={() => {
+                    insights.capture('insight notify prominent button clicked', {
+                        insight_short_id: insightShortId,
+                        option: 'alerts',
+                        header_copy: notificationLabel,
+                    })
+                    push(urls.insightAlerts(insightShortId))
+                }}
+            >
+                Alerts
+            </Button>
+        )
+    }
 
     if (notificationLabel) {
         return (
@@ -144,8 +166,12 @@ function ExperimentButton({ insightShortId }: { insightShortId: InsightShortId }
     return <SubscribeButton insightShortId={insightShortId} />
 }
 
-function SubscribeButton({ insightShortId }: { insightShortId: InsightShortId }): JSX.Element {
+function SubscribeButton({ insightShortId }: { insightShortId: InsightShortId }): JSX.Element | null {
     const { push } = useActions(router)
+
+    if (!CAPABILITIES.subscriptions.available) {
+        return null
+    }
 
     return (
         <Button

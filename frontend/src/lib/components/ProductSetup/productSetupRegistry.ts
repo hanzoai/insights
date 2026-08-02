@@ -1,3 +1,4 @@
+import { CAPABILITIES } from 'lib/capabilities'
 import { urls } from 'scenes/urls'
 
 import { AvailableSetupTaskIdsEnumApi as SetupTaskId } from '~/generated/core/api.schemas'
@@ -37,15 +38,18 @@ export const SET_UP_REVERSE_PROXY: SetupTask = {
  * These surface Insights's AI capabilities regardless of which product the user onboards with.
  */
 export const AI_TASKS: SetupTask[] = [
-    {
-        id: SetupTaskId.UseInsightsAi,
-        title: 'Try Insights AI',
-        description:
-            "Ask Max, Insights's AI assistant, to build insights, write SQL, and answer questions about your data.",
-        taskType: 'ai',
-        requiresManualCompletion: true,
-        getUrl: () => urls.ai(),
-    },
+    ...(CAPABILITIES.ai.available
+        ? [
+              {
+                  id: SetupTaskId.UseInsightsAi,
+                  title: 'Try Insights AI',
+                  description: 'Ask Insights AI to build insights, write SQL, and answer questions about your data.',
+                  taskType: 'ai' as const,
+                  requiresManualCompletion: true,
+                  getUrl: () => urls.ai(),
+              },
+          ]
+        : []),
     {
         id: SetupTaskId.UseInsightsCode,
         title: 'Try Insights Desktop',

@@ -13,6 +13,7 @@ import { EventConfiguration } from '@hanzo/products-revenue-analytics/frontend/s
 import { ExternalDataSourceConfiguration } from '@hanzo/products-revenue-analytics/frontend/settings/ExternalDataSourceConfiguration'
 import { FilterTestAccountsConfiguration as RevenueAnalyticsFilterTestAccountsConfiguration } from '@hanzo/products-revenue-analytics/frontend/settings/FilterTestAccountsConfiguration'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { BaseCurrency } from 'lib/components/BaseCurrency/BaseCurrency'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { FEATURE_SUPPORT } from 'lib/components/SupportedPlatforms/featureSupport'
@@ -180,7 +181,7 @@ import { UserDangerZone } from './user/UserDangerZone'
 import { UserDetails } from './user/UserDetails'
 import { WebAnalyticsAchievementsSetting } from './user/WebAnalyticsAchievementsSetting'
 
-export const SETTINGS_MAP: SettingSection[] = [
+const ALL_SETTINGS: SettingSection[] = [
     // ENVIRONMENT
     {
         level: 'environment',
@@ -810,8 +811,8 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Link to person',
                 description: (
                     <>
-                        The log attributes Insights reads to identify which person a log belongs to. A log is linked when
-                        any of these attributes matches one of the person&apos;s distinct IDs. Defaults to{' '}
+                        The log attributes Insights reads to identify which person a log belongs to. A log is linked
+                        when any of these attributes matches one of the person&apos;s distinct IDs. Defaults to{' '}
                         <code>insightsDistinctId</code>, the key the JavaScript and React Native SDKs auto-attach. Add
                         keys only if your backend pipeline emits the person identifier under different attributes.
                     </>
@@ -2169,3 +2170,11 @@ export const SETTINGS_MAP: SettingSection[] = [
         ],
     },
 ]
+
+/**
+ * Sections whose backend this build doesn't carry are dropped here rather than in each consumer,
+ * so settings navigation, search, and deep links all agree on what exists.
+ */
+export const SETTINGS_MAP: SettingSection[] = ALL_SETTINGS.filter(
+    (section) => section.id !== 'organization-roles' || CAPABILITIES.roles.available
+)

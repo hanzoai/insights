@@ -18,6 +18,7 @@ import {
 } from '@hanzo/icons'
 import { Button } from '@hanzo/quill'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { metalyticsLogic } from 'lib/components/Metalytics/metalyticsLogic'
@@ -217,7 +218,7 @@ function InsightSceneMenuBarInner({ insightLogicProps }: { insightLogicProps: In
                                         Static cohort
                                     </SceneMenuBarItem>
                                 )}
-                                {isSavedInsight && (
+                                {isSavedInsight && CAPABILITIES.subscriptions.available && (
                                     <SceneMenuBarItem
                                         onClick={() => push(urlForSubscriptions({ insightShortId: insight.short_id }))}
                                         data-attr={`${RESOURCE_TYPE}-menubar-subscribe`}

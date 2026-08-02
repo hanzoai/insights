@@ -2,9 +2,10 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconChevronDown, IconCopy, IconMagicWand, IconX } from '@hanzo/icons'
 import { Banner, Button, Spinner } from '@hanzo/elements'
+import { IconChevronDown, IconCopy, IconMagicWand, IconX } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { AllowTrainingCallout } from 'lib/components/AllowTrainingCallout/AllowTrainingCallout'
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
@@ -125,7 +126,7 @@ export function PlayerSummaryDock(): JSX.Element | null {
         reportAISessionSummaryViewed(sessionRecordingId, 'dock', summaryId)
     }, [sessionRecordingId, isOpen, hasRenderedSummary, summaryId, reportAISessionSummaryViewed])
 
-    if (!isEnabled) {
+    if (!isEnabled || !CAPABILITIES.sessionSummaries.available) {
         return null
     }
 

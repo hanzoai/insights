@@ -1,6 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import React from 'react'
 
+import { Banner, Link, Tooltip } from '@hanzo/elements'
 import {
     IconArrowLeft,
     IconChevronLeft,
@@ -10,8 +11,8 @@ import {
     IconShare,
     IconSidePanel,
 } from '@hanzo/icons'
-import { Banner, Link, Tooltip } from '@hanzo/elements'
 
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { Button } from 'lib/elements/Button'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -31,7 +32,6 @@ import { runnerPanelLogic } from 'products/insights_ai/frontend/api/logics'
 
 import { AiFirstMaxInstance } from './components/AiFirstMaxInstance'
 import { AnimatedBackButton } from './components/AnimatedBackButton'
-import { MaxNotConfigured } from './components/MaxNotConfigured'
 import { MAX_SIDE_PANEL_ID, PhaiSidePanelChat } from './components/PhaiSidePanelChat'
 import { PhaiViewToggle } from './components/PhaiViewToggle'
 import { SidebarQuestionInput } from './components/SidebarQuestionInput'
@@ -119,7 +119,7 @@ export const MaxInstance = React.memo(function MaxInstance({ sidePanel, tabId }:
     const headerBackDisabled = isNewView ? !panelCanGoBack : backButtonDisabled
 
     const content = !isMaxAvailable ? (
-        <MaxNotConfigured />
+        <Unavailable capability="ai" />
     ) : (
         <BindLogic logic={maxLogic} props={logicProps}>
             <BindLogic logic={maxThreadLogic} props={threadProps}>
@@ -188,7 +188,9 @@ export const MaxInstance = React.memo(function MaxInstance({ sidePanel, tabId }:
                     </AnimatedBackButton>
 
                     <Tooltip title={chatTitle || undefined} placement="bottom">
-                        <h3 className="flex-1 font-semibold mb-0 truncate text-sm ml-2">{chatTitle || 'Insights AI'}</h3>
+                        <h3 className="flex-1 font-semibold mb-0 truncate text-sm ml-2">
+                            {chatTitle || 'Insights AI'}
+                        </h3>
                     </Tooltip>
                 </div>
                 {conversationId && !conversationHistoryVisible && !threadVisible && (

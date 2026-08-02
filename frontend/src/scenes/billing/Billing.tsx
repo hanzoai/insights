@@ -7,13 +7,15 @@ import { router } from 'kea-router'
 import { useEffect } from 'react'
 
 import * as judge from '@hanzo/brand/hoggies/png/judge'
-import { IconDocument } from '@hanzo/icons'
 import { Button, Divider, Input, Link } from '@hanzo/elements'
+import { IconDocument } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
+import { CAPABILITIES } from 'lib/capabilities'
 import { StarHog } from 'lib/components/mascots'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { Banner } from 'lib/elements/Banner'
@@ -102,6 +104,12 @@ export function Billing(): JSX.Element {
         return <BillingNoAccess reason={restrictionReason} />
     }
 
+    // Nothing went wrong when there is no billing to retrieve, so say that rather than reporting a
+    // failure and pointing at sales. Self-hosted is redirected away above; this covers the rest.
+    if (!CAPABILITIES.billing.available) {
+        return <Unavailable capability="billing" />
+    }
+
     if (!billing && !billingLoading) {
         return (
             <div className="deprecated-space-y-4">
@@ -139,13 +147,7 @@ export function Billing(): JSX.Element {
                             <Input fullWidth autoFocus />
                         </Field>
 
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            loading={isActivateLicenseSubmitting}
-                            fullWidth
-                            center
-                        >
+                        <Button type="primary" htmlType="submit" loading={isActivateLicenseSubmitting} fullWidth center>
                             Activate license key
                         </Button>
                     </Form>

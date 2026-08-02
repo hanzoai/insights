@@ -1,13 +1,14 @@
 import './DashboardSubscribeButton.scss'
 
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { IconBell } from '@hanzo/icons'
 
-import { IconWithCount } from 'lib/elements/icons/icons'
+import { CAPABILITIES } from 'lib/capabilities'
 import { Button } from 'lib/elements/Button'
+import { IconWithCount } from 'lib/elements/icons/icons'
 import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature } from '~/types'
@@ -41,7 +42,7 @@ export function DashboardSubscribeButton(): JSX.Element | null {
     const { dashboard, canEditDashboard } = useValues(dashboardLogic)
     const { push } = useActions(router)
 
-    if (!dashboard || !canEditDashboard) {
+    if (!dashboard || !canEditDashboard || !CAPABILITIES.subscriptions.available) {
         return null
     }
 

@@ -4,6 +4,7 @@ import { router, urlToAction } from 'kea-router'
 
 import { Sorting } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic, type FeatureFlagsSet } from 'lib/logic/featureFlagLogic'
 import { trackedActionToUrl } from 'lib/logic/scenes/trackedActionToUrl'
@@ -455,6 +456,11 @@ export const subscriptionsSceneLogic = kea<subscriptionsSceneLogicType>([
             null as PaginatedSubscriptionListApi | null,
             {
                 loadSubscriptions: async () => {
+                    // The scene shows its honest state instead of a table, and the scene export
+                    // mounts this logic either way, so the guard belongs on the request.
+                    if (!CAPABILITIES.subscriptions.available) {
+                        return null
+                    }
                     const projectId = String(getCurrentTeamId())
                     let resourceType: SubscriptionsListResourceType | undefined
                     if (values.currentTab === SubscriptionsTab.Dashboard) {

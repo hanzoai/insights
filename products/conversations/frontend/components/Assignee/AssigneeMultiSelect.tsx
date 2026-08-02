@@ -1,9 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconPerson, IconPlusSmall } from '@hanzo/icons'
 import { Button, Checkbox, Dropdown, Input } from '@hanzo/elements'
+import { IconPerson, IconPlusSmall } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { urls } from 'scenes/urls'
 
 import { clearFilterButtonProps } from '../clearFilterButtonProps'
@@ -57,14 +58,7 @@ export function AssigneeMultiSelect({
             }}
             overlay={
                 <div className="max-w-100 deprecated-space-y-2">
-                    <Input
-                        type="search"
-                        placeholder="Search"
-                        autoFocus
-                        value={search}
-                        onChange={setSearch}
-                        fullWidth
-                    />
+                    <Input type="search" placeholder="Search" autoFocus value={search} onChange={setSearch} fullWidth />
                     <ul className="deprecated-space-y-2">
                         {currentUserMember && (
                             <li>
@@ -91,9 +85,7 @@ export function AssigneeMultiSelect({
                                 fullWidth
                                 role="menuitem"
                                 size="small"
-                                icon={
-                                    <Checkbox checked={isSelected('unassigned')} className="pointer-events-none" />
-                                }
+                                icon={<Checkbox checked={isSelected('unassigned')} className="pointer-events-none" />}
                                 disabledReason={isSelected('unassigned') ? undefined : selectionCapReason}
                                 onClick={() => toggleEntry('unassigned')}
                             >
@@ -103,25 +95,27 @@ export function AssigneeMultiSelect({
                                 </span>
                             </Button>
                         </li>
-                        <Section
-                            title="Roles"
-                            loading={rolesLoading}
-                            search={!!search}
-                            items={filteredRoles.map((role) => ({ id: role.id, type: 'role' as const, role }))}
-                            isSelected={isSelected}
-                            onToggle={toggleEntry}
-                            selectionCapReason={selectionCapReason}
-                            emptyState={
-                                <Button
-                                    fullWidth
-                                    size="small"
-                                    icon={<IconPlusSmall />}
-                                    to={urls.settings('organization-roles')}
-                                >
-                                    <div className="text-secondary">Create role</div>
-                                </Button>
-                            }
-                        />
+                        {CAPABILITIES.roles.available && (
+                            <Section
+                                title="Roles"
+                                loading={rolesLoading}
+                                search={!!search}
+                                items={filteredRoles.map((role) => ({ id: role.id, type: 'role' as const, role }))}
+                                isSelected={isSelected}
+                                onToggle={toggleEntry}
+                                selectionCapReason={selectionCapReason}
+                                emptyState={
+                                    <Button
+                                        fullWidth
+                                        size="small"
+                                        icon={<IconPlusSmall />}
+                                        to={urls.settings('organization-roles')}
+                                    >
+                                        <div className="text-secondary">Create role</div>
+                                    </Button>
+                                }
+                            />
+                        )}
                         {(!!search || membersLoading || filteredMembers.length > 0) && (
                             <Section
                                 title="Users"

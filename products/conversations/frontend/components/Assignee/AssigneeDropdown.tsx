@@ -1,8 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconX } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconPlusSmall, IconX } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { urls } from 'scenes/urls'
 
 import { AssigneeIconDisplay, AssigneeLabelDisplay } from './AssigneeDisplay'
@@ -25,13 +26,7 @@ export function AssigneeDropdown({ assignee, onChange }: AssigneeDropdownProps):
             <ul className="deprecated-space-y-2">
                 {assignee && (
                     <li>
-                        <Button
-                            fullWidth
-                            role="menuitem"
-                            size="small"
-                            icon={<IconX />}
-                            onClick={() => onChange(null)}
-                        >
+                        <Button fullWidth role="menuitem" size="small" icon={<IconX />} onClick={() => onChange(null)}>
                             Remove assignee
                         </Button>
                     </li>
@@ -53,29 +48,31 @@ export function AssigneeDropdown({ assignee, onChange }: AssigneeDropdownProps):
                     </li>
                 )}
 
-                <Section
-                    title="Roles"
-                    loading={rolesLoading}
-                    search={!!search}
-                    type="role"
-                    items={filteredRoles.map((role) => ({
-                        id: role.id,
-                        type: 'role' as const,
-                        role: role,
-                    }))}
-                    onSelect={onChange}
-                    activeId={assignee?.id}
-                    emptyState={
-                        <Button
-                            fullWidth
-                            size="small"
-                            icon={<IconPlusSmall />}
-                            to={urls.settings('organization-roles')}
-                        >
-                            <div className="text-secondary">Create role</div>
-                        </Button>
-                    }
-                />
+                {CAPABILITIES.roles.available && (
+                    <Section
+                        title="Roles"
+                        loading={rolesLoading}
+                        search={!!search}
+                        type="role"
+                        items={filteredRoles.map((role) => ({
+                            id: role.id,
+                            type: 'role' as const,
+                            role: role,
+                        }))}
+                        onSelect={onChange}
+                        activeId={assignee?.id}
+                        emptyState={
+                            <Button
+                                fullWidth
+                                size="small"
+                                icon={<IconPlusSmall />}
+                                to={urls.settings('organization-roles')}
+                            >
+                                <div className="text-secondary">Create role</div>
+                            </Button>
+                        }
+                    />
+                )}
 
                 {(!!search || membersLoading || otherFilteredMembers.length > 0) && (
                     <Section

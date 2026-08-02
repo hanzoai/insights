@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useRef } from 'react'
 
 import { IconWrench } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
+
 import { sidePanelLogic } from '~/layout/navigation-3000/sidepanel/sidePanelLogic'
 import { SidePanelTab } from '~/types'
 
@@ -40,7 +42,7 @@ export function useMaxTool({
     callback,
     clientExecution,
     suggestions,
-    active = true,
+    active: activeProp = true,
     initialMaxPrompt,
     onMaxOpen,
 }: UseMaxToolOptions): UseMaxToolReturn {
@@ -49,6 +51,10 @@ export function useMaxTool({
     const { sidePanelOpen, selectedTab } = useValues(sidePanelLogic)
     const { setActiveGroup, startNewConversation } = useActions(maxLogic({ panelId: SIDE_PANEL_PANEL_ID }))
 
+    // Every "ask AI to do this here" affordance in the app is a MaxTool, and each one needed a tool
+    // running inside Insights to answer it. Gating here is what keeps all of them from rendering a
+    // control that opens a panel with nothing behind it.
+    const active = activeProp && CAPABILITIES.aiTools.available
     const definition = getToolDefinition(identifier)
     const isMaxOpen = sidePanelOpen && selectedTab === SidePanelTab.Max
     const activeIdentifierRef = useRef<string | null>(null)

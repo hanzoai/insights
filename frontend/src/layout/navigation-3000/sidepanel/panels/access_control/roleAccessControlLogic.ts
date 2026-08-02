@@ -7,6 +7,7 @@ import { actionToUrl, router } from 'kea-router'
 import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -268,6 +269,11 @@ export const roleAccessControlLogic = kea<roleAccessControlLogicType>([
             [] as RoleType[],
             {
                 loadRoles: async () => {
+                    // Access control connects to this logic for its role rows, so the guard here is
+                    // what keeps a working panel from calling an endpoint that isn't there.
+                    if (!CAPABILITIES.roles.available) {
+                        return []
+                    }
                     const response = await api.roles.list()
                     return response?.results || []
                 },

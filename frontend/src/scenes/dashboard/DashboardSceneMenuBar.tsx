@@ -15,6 +15,7 @@ import {
 } from '@hanzo/icons'
 import { Button } from '@hanzo/quill'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { metalyticsLogic } from 'lib/components/Metalytics/metalyticsLogic'
@@ -148,13 +149,15 @@ function DashboardSceneMenuBarInner(): JSX.Element | null {
                                     <IconNotebook />
                                     Notebook from dashboard
                                 </SceneMenuBarItem>
-                                <SceneMenuBarItem
-                                    onClick={() => push(urlForSubscriptions({ dashboardId: dashboard.id }))}
-                                    data-attr={`${RESOURCE_TYPE}-menubar-subscribe`}
-                                >
-                                    <IconBell />
-                                    Subscription
-                                </SceneMenuBarItem>
+                                {CAPABILITIES.subscriptions.available && (
+                                    <SceneMenuBarItem
+                                        onClick={() => push(urlForSubscriptions({ dashboardId: dashboard.id }))}
+                                        data-attr={`${RESOURCE_TYPE}-menubar-subscribe`}
+                                    >
+                                        <IconBell />
+                                        Subscription
+                                    </SceneMenuBarItem>
+                                )}
                             </SceneMenuBarSubMenu>
                             <SceneMenuBarSeparator />
                         </>

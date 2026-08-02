@@ -1,10 +1,10 @@
+import insights from 'insights-js'
 import { useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { useEffect, useState } from 'react'
 
-import { IconMessage } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconMessage } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -136,7 +136,9 @@ export function SurveyOpportunityButton({
         shouldUseQuickCreate ? setModalOpen(true) : openMax?.()
     }
 
-    if (!funnelContext) {
+    // Without the quick-create modal this button's only action is to hand the funnel to Insights AI,
+    // so drop it rather than offer a click that goes nowhere.
+    if (!funnelContext || (!shouldUseQuickCreate && !openMax)) {
         return null
     }
 

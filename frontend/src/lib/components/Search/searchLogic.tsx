@@ -5,6 +5,7 @@ import { router } from 'kea-router'
 import { IconBell, IconClock, IconDownload, IconLeave, IconNotification } from '@hanzo/icons'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { commandLogic } from 'lib/components/Command/commandLogic'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { preflightLogic } from 'lib/logic/preflightLogic'
@@ -1027,17 +1028,21 @@ export const searchLogic = kea<searchLogicType>([
                     lastViewedAt: sceneLogViewsByRef['SavedInsights'] ?? null,
                     record: { type: 'alerts' },
                 },
-                {
-                    id: 'misc-subscriptions',
-                    name: 'Subscriptions',
-                    displayName: 'Subscriptions',
-                    category: 'misc',
-                    href: urls.subscriptions(),
-                    icon: <IconNotification />,
-                    itemType: null,
-                    lastViewedAt: sceneLogViewsByRef['Subscriptions'] ?? null,
-                    record: { type: 'subscriptions' },
-                },
+                ...(CAPABILITIES.subscriptions.available
+                    ? [
+                          {
+                              id: 'misc-subscriptions',
+                              name: 'Subscriptions',
+                              displayName: 'Subscriptions',
+                              category: 'misc' as const,
+                              href: urls.subscriptions(),
+                              icon: <IconNotification />,
+                              itemType: null,
+                              lastViewedAt: sceneLogViewsByRef['Subscriptions'] ?? null,
+                              record: { type: 'subscriptions' as const },
+                          },
+                      ]
+                    : []),
                 {
                     id: 'misc-logout',
                     name: 'Log out',

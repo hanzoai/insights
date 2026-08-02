@@ -2,14 +2,15 @@ import { useValues } from 'kea'
 
 import { IconPlusSmall, IconSparkles } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconInsightNumber, IconInsightPie, IconInsightTable, IconInsightWorldMap } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
 import { Dropdown } from 'lib/elements/Dropdown'
+import { IconInsightNumber, IconInsightPie, IconInsightTable, IconInsightWorldMap } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { cn } from 'lib/utils/css-classes'
@@ -268,8 +269,10 @@ function useQuestionSections(): QuestionSection[] {
         },
         {
             title: 'Build your own',
-            description: 'Write SQL against your data, or let AI build it.',
-            cards: [byType[InsightType.SQL], byType[InsightType.HOG], ai],
+            description: CAPABILITIES.ai.available
+                ? 'Write SQL against your data, or let AI build it.'
+                : 'Write SQL against your data.',
+            cards: [byType[InsightType.SQL], byType[InsightType.HOG], CAPABILITIES.ai.available ? ai : undefined],
         },
     ]
     return sections.map((section) => ({

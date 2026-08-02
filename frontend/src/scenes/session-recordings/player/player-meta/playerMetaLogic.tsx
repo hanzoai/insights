@@ -1,11 +1,12 @@
 import { aiSummaryMock } from './ai-summary.mock'
 
-import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import React from 'react'
 
 import { IconClock, IconCursorClick, IconHourglass, IconKeyboard, IconWarning } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Dayjs } from 'lib/dayjs'
@@ -47,8 +48,6 @@ const recordingPropertyKeys = ['click_count', 'keypress_count', 'console_error_c
 // The summary backend filters these out before summarizing, so mirror them here: the
 // "Summarize" button should be disabled when every event would be filtered away (otherwise
 // the user triggers a summary that fails with "This recording has no events to summarize").
-// Keep in sync with SESSION_SUMMARY_EVENT_BLOCKLIST and SESSION_EVENTS_REPLAY_CUTOFF_MS in
-// ee/hogai/session_summaries/constants.py.
 const SUMMARY_EVENT_MINI_FILTER_KEYS = [
     'events-insights',
     'events-custom',
@@ -449,6 +448,9 @@ export const playerMetaLogic = kea<playerMetaLogicType>([
                 >,
                 sessionPlayerData: import('~/types').SessionPlayerData
             ): string | undefined => {
+                if (!CAPABILITIES.sessionSummaries.available) {
+                    return CAPABILITIES.sessionSummaries.title
+                }
                 const eventItems = SUMMARY_EVENT_MINI_FILTER_KEYS.flatMap(
                     (key) => allItemsByMiniFilterKey[key] ?? []
                 ).filter((item): item is InspectorListItemEvent => item.type === 'events')
@@ -755,6 +757,11 @@ export const playerMetaLogic = kea<playerMetaLogicType>([
                 actions.markFeedbackGiven(props.sessionRecordingId)
             },
             summarizeSession: () => {
+                // A recording carrying `has_summary` triggers this on load, so the guard also stops
+                // an automatic request to an endpoint this build doesn't serve.
+                if (!CAPABILITIES.sessionSummaries.available) {
+                    return
+                }
                 // TODO: Remove after testing
                 const local = false
                 if (local) {

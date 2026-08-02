@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { memo } from 'react'
 
+import { Button, Spinner } from '@hanzo/elements'
 import {
     IconAIText,
     IconBug,
@@ -13,8 +14,8 @@ import {
     IconLive,
     IconPlusSmall,
 } from '@hanzo/icons'
-import { Button, Spinner } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { TZLabel } from 'lib/components/TZLabel'
 import { selectOutcome } from 'lib/components/ViewRecordingButton/sessionRecordingInfoLogic'
@@ -305,9 +306,9 @@ const RecordingSummaryIcon = memo(function RecordingSummaryIcon({
             </Tooltip>
         )
     }
-    // AI summaries are Insights Cloud only — hide the per-row trigger on self-hosted. The upsell
-    // lives on the replay page dock (PlayerSummaryDock) rather than repeating per list row.
-    if (!isCloudOrDev) {
+    // Nothing to trigger without summarization, and on Insights Cloud the trigger is cloud-only.
+    // A recording that already carries a summary still shows it above.
+    if (!CAPABILITIES.sessionSummaries.available || !isCloudOrDev) {
         return null
     }
     return (

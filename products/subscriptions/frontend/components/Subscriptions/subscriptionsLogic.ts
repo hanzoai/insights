@@ -2,6 +2,7 @@ import { MakeLogicType, BreakPointFunction, actions, afterMount, kea, key, liste
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { getInsightId } from 'scenes/insights/utils'
 
@@ -116,7 +117,7 @@ export const subscriptionsLogic = kea<subscriptionsLogicType>([
         subscriptions: {
             __default: [] as SubscriptionType[],
             loadSubscriptions: async (_?: any, breakpoint?: BreakPointFunction) => {
-                if (!props.dashboardId && !props.insightShortId) {
+                if (!CAPABILITIES.subscriptions.available || (!props.dashboardId && !props.insightShortId)) {
                     return []
                 }
 
@@ -136,7 +137,7 @@ export const subscriptionsLogic = kea<subscriptionsLogicType>([
         insightSubscriptions: {
             __default: [] as SubscriptionType[],
             loadInsightSubscriptions: async (_?: any, breakpoint?: BreakPointFunction) => {
-                if (!props.dashboardId) {
+                if (!CAPABILITIES.subscriptions.available || !props.dashboardId) {
                     return []
                 }
                 breakpoint?.()

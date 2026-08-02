@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { IconPlay, IconSparkles } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { Card } from 'lib/elements/Card'
 import { Link } from 'lib/elements/Link'
 import { INSIGHT_TYPE_URLS } from 'scenes/insights/utils'
@@ -166,17 +167,19 @@ export function InsightQuickStart(): JSX.Element {
                 className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 pb-16"
                 data-attr="insight-quick-start-page"
             >
-                <InsightOptionCard
-                    name="AI"
-                    description="Ask Insights AI to create insights using natural language and query any of your data."
-                    icon={IconSparkles}
-                    iconClassName="text-ai"
-                    url={urls.ai()}
-                    dataAttr="insight-option-ai"
-                    preview={AI_PREVIEW}
-                    docLink="https://hanzo.ai/docs/insights-ai"
-                    index={0}
-                />
+                {CAPABILITIES.ai.available && (
+                    <InsightOptionCard
+                        name="AI"
+                        description="Ask Insights AI to create insights using natural language and query any of your data."
+                        icon={IconSparkles}
+                        iconClassName="text-ai"
+                        url={urls.ai()}
+                        dataAttr="insight-option-ai"
+                        preview={AI_PREVIEW}
+                        docLink="https://hanzo.ai/docs/insights-ai"
+                        index={0}
+                    />
+                )}
                 {insightEntries.map(([insightType, metadata], index) => (
                     <InsightOptionCard
                         key={insightType}

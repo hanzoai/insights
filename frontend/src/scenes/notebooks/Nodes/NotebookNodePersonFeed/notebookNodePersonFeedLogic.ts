@@ -2,6 +2,7 @@ import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path,
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { pluralize } from 'lib/utils/strings'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SessionSummaryContent } from 'scenes/session-recordings/player/player-meta/types'
@@ -192,7 +193,10 @@ export const notebookNodePersonFeedLogic = kea<notebookNodePersonFeedLogicType>(
 
     selectors({
         // AI session summaries are Insights Cloud only, so hide the whole block on self-hosted.
-        canSummarize: [(s) => [s.isCloudOrDev], (isCloudOrDev: boolean | undefined): boolean => !!isCloudOrDev],
+        canSummarize: [
+            (s) => [s.isCloudOrDev],
+            (isCloudOrDev: boolean | undefined): boolean => CAPABILITIES.sessionSummaries.available && !!isCloudOrDev,
+        ],
         numSessionsWithRecording: [
             (s) => [s.sessionIdsWithRecording],
             (sessionIdsWithRecording: string[]) => sessionIdsWithRecording.length,

@@ -3,6 +3,7 @@ import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -129,6 +130,9 @@ export const sessionGroupSummarySceneLogic = kea<sessionGroupSummarySceneLogicTy
             null as SessionGroupSummaryType | null,
             {
                 loadSessionGroupSummary: async () => {
+                    if (!CAPABILITIES.sessionSummaries.available) {
+                        return null
+                    }
                     try {
                         return await api.sessionGroupSummaries.get(props.id)
                     } catch (error: any) {

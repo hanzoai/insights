@@ -4,13 +4,13 @@ import { router } from 'kea-router'
 import type { LocationChangedPayload } from 'kea-router/lib/types'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { toast } from 'lib/elements/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { organizationLogic } from 'scenes/organizationLogic'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { aiConsentLogic } from 'scenes/settings/organization/aiConsentLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -22,7 +22,7 @@ import { Conversation, ConversationDetail, SidePanelTab } from '~/types'
 import { conversationsDestroy } from 'products/conversations/frontend/generated/api'
 
 import type { FeatureFlagsSet } from '../../lib/logic/featureFlagLogic'
-import type { OrganizationType, PreflightStatus } from '../../types'
+import type { OrganizationType } from '../../types'
 import type { SceneConfig } from '../sceneTypes'
 import { TOOL_DEFINITIONS, ToolRegistration } from './max-constants'
 import { PHAI_VIEW_MODE_KEY } from './max-storage-keys'
@@ -96,8 +96,6 @@ export interface maxGlobalLogicValues {
     requestingAiAccess: boolean // aiConsentLogic
     featureFlags: FeatureFlagsSet // featureFlagLogic
     currentOrganization: OrganizationType | null // organizationLogic
-    isCloudOrDev: boolean | undefined // preflightLogic
-    preflight: PreflightStatus | null // preflightLogic
     sceneConfig: SceneConfig | null // sceneLogic
     sceneId: string | null // sceneLogic
     selectedTab: SidePanelTab | null // sidePanelStateLogic
@@ -234,7 +232,7 @@ export interface maxGlobalLogicActions {
 export interface maxGlobalLogicMeta {
     __keaTypeGenInternalSelectorTypes: {
         currentConversationId: (searchParams: Record<string, any>) => string | null
-        isMaxAvailable: (isCloudOrDev: boolean | undefined, preflight: PreflightStatus | null) => boolean
+        isMaxAvailable: () => boolean
         isOrganizationCreatedRecently: (currentOrganization: OrganizationType | null) => boolean
         shouldShowLiabilityNotice: (
             isOrganizationCreatedRecently: boolean,
@@ -276,8 +274,6 @@ export const maxGlobalLogic = kea<maxGlobalLogicType>([
             ['featureFlags'],
             sidePanelStateLogic,
             ['sidePanelOpen', 'selectedTab'],
-            preflightLogic,
-            ['preflight', 'isCloudOrDev'],
             aiConsentLogic,
             [
                 'dataProcessingAccepted',
@@ -319,6 +315,11 @@ export const maxGlobalLogic = kea<maxGlobalLogicType>([
                         doNotUpdateCurrentThread?: boolean
                     }
                 ) => {
+                    // This runs on mount everywhere the nav is, so without the guard an unavailable
+                    // assistant greets every page load with a failed request and an error toast.
+                    if (!CAPABILITIES.ai.available) {
+                        return []
+                    }
                     const response = await api.conversations.list()
                     return response.results.map((conversation) =>
                         mergeConversations(
@@ -329,6 +330,9 @@ export const maxGlobalLogic = kea<maxGlobalLogicType>([
                 },
 
                 loadConversation: async (conversationId: string) => {
+                    if (!CAPABILITIES.ai.available) {
+                        return values.conversationHistory
+                    }
                     const response = await api.conversations.get(conversationId)
                     if (!response) {
                         // The endpoint can return an empty body; a null in the history crashes consumers
@@ -448,15 +452,10 @@ export const maxGlobalLogic = kea<maxGlobalLogicType>([
             () => [router.selectors.searchParams],
             (searchParams: Record<string, any>): string | null => searchParams?.chat ?? null,
         ],
-        // On Cloud/dev a provider key is always present. On a self-hosted (hobby) instance Max only
-        // works once ANTHROPIC_API_KEY is configured, so we surface a "set the key" state instead.
-        // Treat a not-yet-loaded preflight (null) as available so the empty-state doesn't flash
-        // before preflight resolves — once loaded we gate on cloud/dev or the key being present.
-        isMaxAvailable: [
-            (s) => [s.isCloudOrDev, s.preflight],
-            (isCloudOrDev: boolean | undefined, preflight: null | import('~/types').PreflightStatus): boolean =>
-                !preflight || !!isCloudOrDev || !!preflight.anthropic_available,
-        ],
+        // Insights AI answers from Hanzo AI, not from a provider key set on this instance, so
+        // availability is a property of the build rather than of preflight. Everything that opens
+        // or links to the assistant reads this, so the capability alone decides.
+        isMaxAvailable: [() => [], (): boolean => CAPABILITIES.ai.available],
         isOrganizationCreatedRecently: [
             (s) => [s.currentOrganization],
             (currentOrganization: null | import('~/types').OrganizationType): boolean => {

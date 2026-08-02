@@ -1,7 +1,6 @@
 import { BindLogic, useActions, useAsyncActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconInfo, IconTrash } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -14,13 +13,15 @@ import {
     Table,
     Tooltip,
 } from '@hanzo/elements'
+import { IconInfo, IconTrash } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
 import { UserSelectItem } from 'lib/components/UserSelectItem'
+import { ProfileBubbles, ProfilePicture } from 'lib/elements/ProfilePicture'
 import { TableColumns } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { ProfileBubbles, ProfilePicture } from 'lib/elements/ProfilePicture'
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
 import { fullName } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
@@ -264,6 +265,16 @@ function AccessControlObjectUsers(): JSX.Element | null {
 }
 
 function AccessControlObjectRoles(): JSX.Element | null {
+    // Access control itself works per member and per project; only the role grouping is missing,
+    // so the rest of the panel stays and this section goes.
+    if (!CAPABILITIES.roles.available) {
+        return null
+    }
+
+    return <AccessControlObjectRolesTable />
+}
+
+function AccessControlObjectRolesTable(): JSX.Element | null {
     const {
         accessControlRoles,
         accessControlsLoading,
