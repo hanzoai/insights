@@ -94,9 +94,9 @@ class MessageSuppressionViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
     user. This viewset lets users see and edit the list for full visibility.
     """
 
-    scope_object = "hog_flow"
+    scope_object = "insights_flow"
     # Custom actions must declare their write status so TeamAndOrgViewSetMixin's AccessControlPermission
-    # checks hog_flow:write on the mutating endpoints; the default 'suppressions' list stays a read.
+    # checks insights_flow:write on the mutating endpoints; the default 'suppressions' list stays a read.
     scope_object_write_actions = ["add_suppression", "remove_suppression"]
     serializer_class = _FallbackSerializer
 
@@ -112,12 +112,12 @@ class MessageSuppressionViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
     def suppressions(self, request: Request, **kwargs: Any) -> Response:
         """List suppressed recipients for the team, most recently updated first."""
         # Resource-level check: `AccessControlPermission` only guarantees the caller has some
-        # hog_flow object access. Since this endpoint returns team-wide data (every suppressed
+        # insights_flow object access. Since this endpoint returns team-wide data (every suppressed
         # recipient + their SMTP diagnostics) with no per-workflow object, require project-wide
-        # hog_flow viewer access — otherwise a member granted access to a single workflow could
+        # insights_flow viewer access — otherwise a member granted access to a single workflow could
         # read the entire team's suppression list.
-        if not self.user_access_control.check_access_level_for_resource("hog_flow", "viewer"):
-            raise PermissionDenied("You need hog_flow viewer access to view the suppression list.")
+        if not self.user_access_control.check_access_level_for_resource("insights_flow", "viewer"):
+            raise PermissionDenied("You need insights_flow viewer access to view the suppression list.")
 
         suppressions = (
             MessageSuppression.objects.for_team(self.team_id)
@@ -142,11 +142,11 @@ class MessageSuppressionViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
     @action(detail=False, methods=["post"])
     def add_suppression(self, request: Request, **kwargs: Any) -> Response:
         """Manually suppress an email address so no workflow sends to it."""
-        # Team-wide mutation with no per-workflow object — require project-wide hog_flow editor
+        # Team-wide mutation with no per-workflow object — require project-wide insights_flow editor
         # access. Otherwise an editor grant on one workflow could add arbitrary addresses to the
         # team's suppression list, blocking unrelated (including transactional) delivery.
-        if not self.user_access_control.check_access_level_for_resource("hog_flow", "editor"):
-            raise PermissionDenied("You need hog_flow editor access to modify the suppression list.")
+        if not self.user_access_control.check_access_level_for_resource("insights_flow", "editor"):
+            raise PermissionDenied("You need insights_flow editor access to modify the suppression list.")
 
         serializer = AddSuppressionRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -192,8 +192,8 @@ class MessageSuppressionViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
     def remove_suppression(self, request: Request, **kwargs: Any) -> Response:
         """Remove an address from the suppression list so it can receive messages again."""
         # Same rationale as add_suppression — this is a team-wide mutation.
-        if not self.user_access_control.check_access_level_for_resource("hog_flow", "editor"):
-            raise PermissionDenied("You need hog_flow editor access to modify the suppression list.")
+        if not self.user_access_control.check_access_level_for_resource("insights_flow", "editor"):
+            raise PermissionDenied("You need insights_flow editor access to modify the suppression list.")
 
         serializer = AddSuppressionRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -14,7 +14,7 @@ from insights.models.user import User
 from insights.rbac.user_access_control import ACCESS_CONTROL_RESOURCES, AccessControlLevelResource
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

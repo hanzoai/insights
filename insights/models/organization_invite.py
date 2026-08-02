@@ -19,7 +19,7 @@ from insights.models.team import Team
 from insights.models.utils import UUIDTModel, sane_repr
 from insights.utils import absolute_uri
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 if TYPE_CHECKING:
     from insights.models import User

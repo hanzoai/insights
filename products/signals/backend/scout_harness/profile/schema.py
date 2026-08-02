@@ -341,7 +341,7 @@ class Inventory(_Section):
     recent_experiments: RecentExperiments
     recent_alerts: RecentAlerts
     recent_insights_functions: RecentInsightsFunctions
-    recent_hog_flows: RecentInsightsFlows
+    recent_insights_flows: RecentInsightsFlows
     recent_notebooks: RecentNotebooks
     recent_cohorts: RecentCohorts
     recent_actions: RecentActions

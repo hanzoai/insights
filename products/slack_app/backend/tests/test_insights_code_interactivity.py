@@ -34,10 +34,10 @@ from products.slack_app.backend.api import (
 from products.slack_app.backend.tests.helpers import sign_slack_request
 
 if TYPE_CHECKING:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 else:
     try:
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
     except ImportError:
         AccessControl = None
 

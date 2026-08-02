@@ -82,7 +82,7 @@ from products.user_interviews.backend.presentation.webhooks import (
     vapi_webhook,
 )
 from products.warehouse_sources.backend.presentation.views.public_source_configs import PublicSourceConfigViewSet
-from products.workflows.backend.api import hog_flow, hog_flow_template
+from products.workflows.backend.api import insights_flow, insights_flow_template
 
 from .utils import opt_slash_path, render_template
 from .views import (
@@ -576,8 +576,8 @@ urlpatterns = [
         insights_function_template.PublicInsightsFunctionTemplateViewSet.as_view({"get": "list"}),
     ),
     opt_slash_path(
-        "api/public_hog_flow_templates",
-        hog_flow_template.PublicInsightsFlowTemplateViewSet.as_view({"get": "list"}),
+        "api/public_insights_flow_templates",
+        insights_flow_template.PublicInsightsFlowTemplateViewSet.as_view({"get": "list"}),
     ),
     opt_slash_path(
         "api/public_source_configs",
@@ -604,20 +604,20 @@ urlpatterns = [
     ),
     # Internal service-to-service endpoints (authenticated with POSTFN_INTERNAL_SERVICE_TOKEN)
     path(
-        "api/projects/<str:team_id>/internal/hog_flows/user_blast_radius",
-        csrf_exempt(hog_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_user_blast_radius"})),
+        "api/projects/<str:team_id>/internal/insights_flows/user_blast_radius",
+        csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_user_blast_radius"})),
     ),
     path(
-        "api/projects/<str:team_id>/internal/hog_flows/user_blast_radius_persons",
-        csrf_exempt(hog_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_user_blast_radius_persons"})),
+        "api/projects/<str:team_id>/internal/insights_flows/user_blast_radius_persons",
+        csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_user_blast_radius_persons"})),
     ),
     path(
-        "api/internal/hog_flows/process_due_schedules",
-        csrf_exempt(hog_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_process_due_schedules"})),
+        "api/internal/insights_flows/process_due_schedules",
+        csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_process_due_schedules"})),
     ),
     path(
-        "api/projects/<str:team_id>/internal/hog_flows/batch_jobs/<str:batch_job_id>/status",
-        csrf_exempt(hog_flow.InternalInsightsFlowViewSet.as_view({"put": "internal_update_batch_job_status"})),
+        "api/projects/<str:team_id>/internal/insights_flows/batch_jobs/<str:batch_job_id>/status",
+        csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"put": "internal_update_batch_job_status"})),
     ),
     path(
         "api/projects/<str:team_id>/internal/signals/emit",

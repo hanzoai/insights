@@ -491,7 +491,7 @@ class TestRouteInsightsCodeEventToRelevantRegion(TestCase):
         # integration before the workflow starts.
         from insights.constants import AvailableFeature
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         ac_org = Organization.objects.create(name="AC Org")
         # The ``pre_save`` signal on ``Organization`` resets

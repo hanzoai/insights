@@ -75,7 +75,7 @@ class TestWelcomeEndpoint(APIBaseTest):
     def test_team_members_respect_member_list_visibility(self):
         from insights.constants import AvailableFeature
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         project_mate = User.objects.create_and_join(self.organization, "mate@example.com", None, "Mate")
         User.objects.create_and_join(self.organization, "hidden@example.com", None, "Hidden")

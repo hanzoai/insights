@@ -17,7 +17,7 @@ from products.ai_observability.backend.models.review_queues import ReviewQueue, 
 from products.ai_observability.backend.models.trace_reviews import TraceReview
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

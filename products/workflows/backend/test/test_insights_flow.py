@@ -6,7 +6,7 @@ from django.test import TestCase
 from insights.models.user import User
 
 from products.actions.backend.models.action import Action
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 class TestInsightsFlow(TestCase):
@@ -17,34 +17,34 @@ class TestInsightsFlow(TestCase):
         self.user = user
         self.org = org
 
-    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
-    def test_hog_flow_saved_receiver(self, mock_reload):
-        hog_flow = InsightsFlow.objects.create(name="Test Flow", team=self.team)
-        mock_reload.assert_called_once_with(team_id=self.team.id, hog_flow_ids=[str(hog_flow.id)])
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    def test_insights_flow_saved_receiver(self, mock_reload):
+        insights_flow = InsightsFlow.objects.create(name="Test Flow", team=self.team)
+        mock_reload.assert_called_once_with(team_id=self.team.id, insights_flow_ids=[str(insights_flow.id)])
 
-    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_draft_only_save_skips_worker_reload(self, mock_reload):
-        hog_flow = InsightsFlow.objects.create(name="Test Flow", team=self.team)
+        insights_flow = InsightsFlow.objects.create(name="Test Flow", team=self.team)
         mock_reload.reset_mock()
 
-        hog_flow.draft = {"name": "Draft name"}
-        hog_flow.save(update_fields=["draft", "draft_updated_at"])
+        insights_flow.draft = {"name": "Draft name"}
+        insights_flow.save(update_fields=["draft", "draft_updated_at"])
         mock_reload.assert_not_called()
 
-        hog_flow.save(update_fields=["draft", "name"])
-        mock_reload.assert_called_once_with(team_id=self.team.id, hog_flow_ids=[str(hog_flow.id)])
+        insights_flow.save(update_fields=["draft", "name"])
+        mock_reload.assert_called_once_with(team_id=self.team.id, insights_flow_ids=[str(insights_flow.id)])
 
-    @patch("products.workflows.backend.tasks.hog_flows.refresh_affected_hog_flows.delay")
+    @patch("products.workflows.backend.tasks.insights_flows.refresh_affected_insights_flows.delay")
     def test_action_saved_receiver(self, mock_refresh):
         action = Action.objects.create(team=self.team, name="Test Action")
         mock_refresh.assert_called_once_with(action_id=action.id)
 
-    @patch("products.workflows.backend.tasks.hog_flows.refresh_affected_hog_flows.delay")
+    @patch("products.workflows.backend.tasks.insights_flows.refresh_affected_insights_flows.delay")
     def test_team_saved_receiver(self, mock_refresh):
         self.team.save()
         mock_refresh.assert_called_once_with(team_id=self.team.id)
 
-    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_backfill_conversion_filters_to_events_command(self, _mock_reload):
         # Event-based conversion stored in the wrong slot (the legacy shape we're fixing).
         event_obj = {

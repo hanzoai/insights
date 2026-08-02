@@ -39,7 +39,7 @@ from products.exports.backend.models.exported_asset import ExportedAsset, get_re
 from products.notebooks.backend.models import Notebook
 from products.product_analytics.backend.models.insight import Insight
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 def mock_exporter_template(test_func):

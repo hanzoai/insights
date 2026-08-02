@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.core.paginator import Paginator
 from django.db import transaction
 
-from products.workflows.backend.models.hog_flow.hog_flow import BILLABLE_ACTION_TYPES, InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import BILLABLE_ACTION_TYPES, InsightsFlow
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         page_size = options["page_size"]
         dry_run = options["dry_run"]
         team_id = options.get("team_id")
-        hog_flow_id = options.get("hog_flow_id")
+        insights_flow_id = options.get("insights_flow_id")
 
         if dry_run:
             self.stdout.write(self.style.WARNING("Running in DRY RUN mode - no changes will be made"))
@@ -52,9 +52,9 @@ class Command(BaseCommand):
         queryset = InsightsFlow.objects.all()
 
         # Apply filters
-        if hog_flow_id:
-            queryset = queryset.filter(id=hog_flow_id)
-            self.stdout.write(f"Processing single InsightsFlow: {hog_flow_id}")
+        if insights_flow_id:
+            queryset = queryset.filter(id=insights_flow_id)
+            self.stdout.write(f"Processing single InsightsFlow: {insights_flow_id}")
         elif team_id:
             queryset = queryset.filter(team_id=team_id)
             self.stdout.write(f"Processing InsightsFlows for team: {team_id}")

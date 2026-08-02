@@ -1,4 +1,4 @@
-from products.workflows.backend.models.hog_flow_schedule.hog_flow_schedule import (
+from products.workflows.backend.models.insights_flow_schedule.insights_flow_schedule import (
     SCHEDULED_TRIGGER_TYPES,
     InsightsFlowSchedule,
 )

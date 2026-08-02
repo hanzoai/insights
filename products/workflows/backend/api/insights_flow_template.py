@@ -18,8 +18,8 @@ from insights.models import User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
-from products.workflows.backend.api.hog_flow import InsightsFlowMaskingSerializer, InsightsFlowVariableSerializer
-from products.workflows.backend.models.hog_flow.hog_flow_template import InsightsFlowTemplate
+from products.workflows.backend.api.insights_flow import InsightsFlowMaskingSerializer, InsightsFlowVariableSerializer
+from products.workflows.backend.models.insights_flow.insights_flow_template import InsightsFlowTemplate
 from products.workflows.backend.templates import get_global_template_by_id, load_global_templates
 
 logger = structlog.get_logger(__name__)
@@ -224,8 +224,8 @@ class InsightsFlowTemplateViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, viewset
     queryset = InsightsFlowTemplate.objects.all()
     serializer_class = InsightsFlowTemplateSerializer
     permission_classes = [PreventGlobalTemplateDatabaseOperations]
-    log_source = "hog_flow_template"
-    app_source = "hog_flow_template"
+    log_source = "insights_flow_template"
+    app_source = "insights_flow_template"
     http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     def dangerously_get_queryset(self):
@@ -300,7 +300,7 @@ class InsightsFlowTemplateViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, viewset
             # attributable per channel (web builder vs MCP vs raw API).
             report_user_action(
                 serializer.context["request"].user,
-                "hog_flow_template_created",
+                "insights_flow_template_created",
                 {
                     "workflow_template_id": str(serializer.instance.id),
                     "workflow_template_name": serializer.instance.name,
@@ -314,7 +314,7 @@ class InsightsFlowTemplateViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, viewset
                 request=serializer.context["request"],
             )
         except Exception as e:
-            logger.warning("Failed to capture hog_flow_template_created event", error=str(e))
+            logger.warning("Failed to capture insights_flow_template_created event", error=str(e))
 
     def perform_update(self, serializer):
         serializer.validated_data["team_id"] = self.team_id

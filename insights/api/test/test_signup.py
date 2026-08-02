@@ -33,7 +33,7 @@ from insights.utils import get_instance_realm
 
 from products.dashboards.backend.models.dashboard import Dashboard
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 MOCK_GITLAB_SSO_RESPONSE = {
     "access_token": "123",
