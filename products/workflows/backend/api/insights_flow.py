@@ -79,7 +79,7 @@ from products.notifications.backend.facade.api import publish_resource_edited
 from products.workflows.backend.api.action_redirects import compute_action_redirects
 from products.workflows.backend.api.graph_operations import apply_graph_operations
 from products.workflows.backend.api.graph_validation import validate_graph
-from products.workflows.backend.api.hog_flow_batch_job import InsightsFlowBatchJobSerializer
+from products.workflows.backend.api.insights_flow_batch_job import InsightsFlowBatchJobSerializer
 from products.workflows.backend.api.message_assets import (
     MessageAssetContentRequestSerializer,
     MessageAssetSerializer,
@@ -88,16 +88,16 @@ from products.workflows.backend.api.message_assets import (
     fetch_message_assets,
 )
 from products.workflows.backend.api.publish_impact import build_publish_impact
-from products.workflows.backend.models.hog_flow.hog_flow import (
+from products.workflows.backend.models.insights_flow.insights_flow import (
     BILLABLE_ACTION_TYPES,
     PERSON_DEPENDENT_ACTION_TYPES,
     SUPPORTED_ACTION_TYPES,
     TRIGGER_TYPES,
     InsightsFlow,
 )
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
-from products.workflows.backend.models.hog_flow_revision import InsightsFlowRevision
-from products.workflows.backend.models.hog_flow_schedule import SCHEDULED_TRIGGER_TYPES, InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_revision import InsightsFlowRevision
+from products.workflows.backend.models.insights_flow_schedule import SCHEDULED_TRIGGER_TYPES, InsightsFlowSchedule
 from products.workflows.backend.models.team_workflows_config import TeamWorkflowsConfig
 from products.workflows.backend.providers.ses import SESProvider
 from products.workflows.backend.services.batch_audience import (
@@ -114,7 +114,7 @@ from products.workflows.backend.services.timing_reschedule import (
     use_workflows_timing_reschedule,
 )
 from products.workflows.backend.services.wait_clock_conditions import find_clock_function
-from products.workflows.backend.tasks.hog_flows import reschedule_hog_flow_timing
+from products.workflows.backend.tasks.insights_flows import reschedule_hog_flow_timing
 from products.workflows.backend.utils.batch_trigger_limit import get_hogflow_batch_trigger_limit
 from products.workflows.backend.utils.rrule_utils import compute_next_occurrences, validate_rrule
 
@@ -3860,8 +3860,8 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
         """
         from django.db import transaction  # noqa: PLC0415
 
-        from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
-        from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule  # noqa: PLC0415
+        from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
+        from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule  # noqa: PLC0415
         from products.workflows.backend.utils.rrule_utils import compute_next_occurrences  # noqa: PLC0415
 
         def advance_next_run(schedule, after=None):
@@ -4016,7 +4016,7 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
 
         Accepts: { status: "completed" | "failed" }
         """
-        from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
+        from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
 
         if request.method != "PUT":
             return Response({"error": "Method not allowed"}, status=405)

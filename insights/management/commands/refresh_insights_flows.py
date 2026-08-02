@@ -6,8 +6,8 @@ from django.test import RequestFactory
 
 import structlog
 
-from products.workflows.backend.api.hog_flow import InsightsFlowSerializer
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.api.insights_flow import InsightsFlowSerializer
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 logger = structlog.get_logger(__name__)
 

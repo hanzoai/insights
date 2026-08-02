@@ -8,7 +8,7 @@ from insights.cdp.templates.insights_function_template import sync_template_to_d
 from insights.models.activity_logging.activity_log import ActivityLog
 
 from products.cdp.backend.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 webhook_template = MOCK_NODE_TEMPLATES[0]
 

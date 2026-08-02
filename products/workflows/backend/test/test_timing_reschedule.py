@@ -10,14 +10,14 @@ from parameterized import parameterized
 
 from insights.plugins.plugin_server_api import reschedule_hog_flow_parked_jobs
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 from products.workflows.backend.services.timing_reschedule import (
     get_all_timing_action_ids,
     get_timing_reschedule_action_ids,
     parse_delay_duration_seconds,
     use_workflows_timing_reschedule,
 )
-from products.workflows.backend.tasks.hog_flows import reschedule_hog_flow_timing
+from products.workflows.backend.tasks.insights_flows import reschedule_hog_flow_timing
 
 RESCHEDULE_CLIENT_PATH = "products.workflows.backend.tasks.hog_flows.reschedule_hog_flow_parked_jobs"
 
