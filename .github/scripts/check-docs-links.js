@@ -13,7 +13,7 @@ const path = require('path')
 const DOCS_ROOT = path.resolve(__dirname, '../../docs')
 const PUBLISHED_ROOT = path.join(DOCS_ROOT, 'published')
 const LINK_RE = /\[.*?\]\(([^)]+)\)/g
-const POSTFN_URL_RE = /https:\/\/insights\.com\/[^\s)"]+/g
+const INSIGHTS_URL_RE = /https:\/\/insights\.com\/[^\s)"]+/g
 const MAX_CONCURRENT = 10
 const RETRIES = 3
 const TIMEOUT_MS = 10_000
@@ -98,7 +98,7 @@ function findAbsoluteLinksToLocalDocs(files, publishedIndex) {
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf8')
         let match
-        const re = new RegExp(POSTFN_URL_RE.source, 'g')
+        const re = new RegExp(INSIGHTS_URL_RE.source, 'g')
         while ((match = re.exec(content)) !== null) {
             const url = match[0].replace(/[,.)]+$/, '')
             const urlPath = url.replace('https://hanzo.ai/', '').split('#')[0].replace(/\/$/, '')
@@ -115,7 +115,7 @@ function collectInsightsUrls(files) {
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf8')
         let match
-        while ((match = POSTFN_URL_RE.exec(content)) !== null) {
+        while ((match = INSIGHTS_URL_RE.exec(content)) !== null) {
             // Strip trailing punctuation that regex might capture
             let url = match[0].replace(/[,.)]+$/, '')
             urls.add(url)

@@ -1,4 +1,4 @@
-FN_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT = """
+INSIGHTS_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT = """
 The user is currently editing or creating a Script transformation function. They expect your help with writing and tweaking Script code.
 
 IMPORTANT: This is currently your primary task. Therefore `create_hog_transformation_function` is currently your primary tool.
@@ -10,7 +10,7 @@ NOTE: When calling the `create_hog_transformation_function` tool, do not provide
 After the tool completes, do NOT repeat the code, as the user can see it. Only summarize the changes, comprehensively, but in only one brief sentence.
 """
 
-FN_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT = """
+INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT = """
 The user is currently editing or creating input variables for a Script function. They expect your help with generating and managing input schemas.
 
 IMPORTANT: This is currently your primary task. Therefore `create_insights_function_inputs` is currently your primary tool.
@@ -22,7 +22,7 @@ NOTE: When calling the `create_insights_function_inputs` tool, do not provide an
 After the tool completes, do NOT repeat the schema, as the user can see it. Only summarize the changes, comprehensively, but in only one brief sentence.
 """
 
-FN_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT = """
+INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT = """
 The user is currently setting up filters for a Script function. They expect your help with configuring which events and properties should trigger the function.
 
 IMPORTANT: This is currently your primary task. Therefore `create_insights_function_filters` is currently your primary tool.
@@ -252,7 +252,7 @@ Here are a few key differences compared to other programming languages:
 
 """
 
-FN_EXAMPLE_MESSAGE = """
+INSIGHTS_EXAMPLE_MESSAGE = """
 Here are some valid Script code examples:
 // Example 1: PII Data Hashing
 // Get the properties to hash from inputs and split by comma
@@ -559,7 +559,7 @@ Correct structure:
 """
 DESTINATION_LIMITATIONS_MESSAGE = """Insights Destinations have access to the event properties, including person properties and group properties. Just like Transformations they cannot perform logic that depends on previous values, such as incrementing a count or checking if a property already exists."""
 
-FN_GRAMMAR_MESSAGE = """
+INSIGHTS_GRAMMAR_MESSAGE = """
 Here is the grammar for Script:
 parser grammar InsightsQLParser;
 options {
@@ -2597,7 +2597,7 @@ PROPERTY_FILTER_VERBOSE_NAME: dict[PropertyOperator, str] = {
 }
 """
 
-FN_FUNCTION_FILTERS_SYSTEM_PROMPT = """You are an expert at creating filters for Insights script functions.
+INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT = """You are an expert at creating filters for Insights script functions.
 
 Create filters based on the user's instructions. Return the filters as a JSON object with the following structure:
 {
@@ -2635,7 +2635,7 @@ Common operators:
 
 Return ONLY the JSON object inside <filters> tags. Do not add any other text or explanation."""
 
-FN_FUNCTION_INPUTS_SYSTEM_PROMPT = """You are an expert at creating input variable schemas for Insights script functions.
+INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT = """You are an expert at creating input variable schemas for Insights script functions.
 
 Your task is to analyze the script code and create appropriate input variable schemas based on the instructions.
 CRITICAL: You must extract the EXACT variable names used in the script code. Look for patterns like:

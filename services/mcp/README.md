@@ -28,10 +28,10 @@ npx @hanzo/wizard@latest mcp add
         "mcp-remote@latest",
         "https://mcp.hanzo.ai/mcp",
         "--header",
-        "Authorization:${POSTFN_AUTH_HEADER}"
+        "Authorization:${INSIGHTS_AUTH_HEADER}"
       ],
       "env": {
-        "POSTFN_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
+        "INSIGHTS_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
       }
     }
   }
@@ -55,11 +55,11 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { URL } from 'node:url'
 
-const AUTH = process.env.POSTFN_AUTH_HEADER // "Bearer phx_…"
+const AUTH = process.env.INSIGHTS_AUTH_HEADER // "Bearer phx_…"
 const MCP_URL = process.env.MCP_URL || 'https://mcp.hanzo.ai/mcp'
 
 if (!AUTH?.startsWith('Bearer ')) {
-  console.error('Set POSTFN_AUTH_HEADER="Bearer phx_..."')
+  console.error('Set INSIGHTS_AUTH_HEADER="Bearer phx_..."')
   process.exit(1)
 }
 
@@ -314,7 +314,7 @@ A stateless Cloudflare Worker in front of it only authenticates requests and rou
 
 ### Using self-hosted instances
 
-If you're using a self-hosted instance of Insights, you can specify a custom base URL by setting the `POSTFN_API_BASE_URL` environment variable when running the MCP server locally or on your own infrastructure, e.g. `POSTFN_API_BASE_URL=https://insights.example.com`
+If you're using a self-hosted instance of Insights, you can specify a custom base URL by setting the `INSIGHTS_API_BASE_URL` environment variable when running the MCP server locally or on your own infrastructure, e.g. `INSIGHTS_API_BASE_URL=https://insights.example.com`
 
 # Development
 
@@ -344,7 +344,7 @@ pnpm run dev:proxy
 To develop with warm loading for MCP resources (workflows, prompts, examples):
 
 1. Start the [context-mill](https://github.com/Insights/context-mill) dev server: `cd ../context-mill && npm run dev`
-2. Start the MCP server with local resources: `pnpm run dev:local-resources` (runs `bin/start-mcp-server` with `POSTFN_MCP_LOCAL_SKILLS_URL` pointed at context-mill)
+2. Start the MCP server with local resources: `pnpm run dev:local-resources` (runs `bin/start-mcp-server` with `INSIGHTS_MCP_LOCAL_SKILLS_URL` pointed at context-mill)
 
 Changes in the examples repo will be reflected on the next request.
 

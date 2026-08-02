@@ -56,8 +56,8 @@ function getSurveysAndroidSteps(ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'SampleApp.kt',
                                 code: dedent`
                                     val config = InsightsAndroidConfig(
-                                        apiKey = POSTFN_PROJECT_TOKEN,
-                                        host = POSTFN_HOST
+                                        apiKey = INSIGHTS_PROJECT_TOKEN,
+                                        host = INSIGHTS_HOST
                                     ).apply {
                                         surveys = true
                                     }

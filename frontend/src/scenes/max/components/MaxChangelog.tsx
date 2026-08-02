@@ -40,7 +40,7 @@ export function getAlertTagProps(severity: AlertEntry['severity']): {
 }
 
 export function MaxChangelog(): JSX.Element | null {
-    const changelogFlagEnabled = useFeatureFlag('POSTFN_AI_CHANGELOG')
+    const changelogFlagEnabled = useFeatureFlag('INSIGHTS_AI_CHANGELOG')
     const { entries, alerts, isOpen, hasUnread, hasAlerts, isVisible } = useValues(maxChangelogLogic)
     const { openChangelog, closeChangelog, dismissChangelog } = useActions(maxChangelogLogic)
     const displayedEntries = useMemo(() => entries.slice(0, 4), [entries])

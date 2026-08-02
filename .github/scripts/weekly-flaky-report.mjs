@@ -15,9 +15,9 @@
 
 import { execFileSync } from 'node:child_process'
 
-const HOST = (process.env.POSTFN_HOST || 'https://us.hanzo.ai').replace(/\/$/, '')
-const PROJECT_ID = process.env.POSTFN_PROJECT_ID || ''
-const API_KEY = process.env.POSTFN_API_KEY || ''
+const HOST = (process.env.INSIGHTS_HOST || 'https://us.hanzo.ai').replace(/\/$/, '')
+const PROJECT_ID = process.env.INSIGHTS_PROJECT_ID || ''
+const API_KEY = process.env.INSIGHTS_API_KEY || ''
 const SOURCE_ID = process.env.ENG_ANALYTICS_SOURCE_ID || ''
 // The synced runs table name carries the warehouse source prefix, which differs per project.
 const RUNS_TABLE = process.env.ENG_ANALYTICS_RUNS_TABLE || 'eng_analyticsgithub_workflow_runs'
@@ -360,7 +360,7 @@ async function postToSlack(blocks) {
 
 async function main() {
     if (!PROJECT_ID || !API_KEY) {
-        console.warn('POSTFN_PROJECT_ID / POSTFN_API_KEY not set — skipping report. Wire them to enable.')
+        console.warn('INSIGHTS_PROJECT_ID / INSIGHTS_API_KEY not set — skipping report. Wire them to enable.')
         return
     }
     const now = new Date()

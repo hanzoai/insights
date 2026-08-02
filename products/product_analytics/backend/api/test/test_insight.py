@@ -1632,7 +1632,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         mock_report_user_action.reset_mock()
 
-        self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}", HTTP_X_POSTFN_CLIENT="mcp")
+        self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}", HTTP_X_INSIGHTS_CLIENT="mcp")
 
         mock_report_user_action.assert_any_call(
             self.user,
@@ -4158,7 +4158,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_insight_returns_cached_types(self) -> None:
         insight = Insight.objects.create(
             query={
-                "kind": NodeKind.FN_QL_QUERY,
+                "kind": NodeKind.INSIGHTS_QL_QUERY,
                 "query": """
                         select toDate(timestamp) as timestamp, count()
                         from events

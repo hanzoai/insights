@@ -6,7 +6,7 @@
 # All other git subcommands (including the tool's own add/fetch/reset/
 # ls-remote/update-ref) pass straight through to the real git.
 #
-# Escape hatch: set POSTFN_ALLOW_UNSIGNED_GIT=1 to bypass (debugging only).
+# Escape hatch: set INSIGHTS_ALLOW_UNSIGNED_GIT=1 to bypass (debugging only).
 
 native_git=""
 for candidate in /usr/bin/git /usr/local/bin/git /bin/git; do
@@ -20,7 +20,7 @@ if [ -z "$native_git" ]; then
     exit 127
 fi
 
-if [ "${POSTFN_ALLOW_UNSIGNED_GIT:-}" = "1" ]; then
+if [ "${INSIGHTS_ALLOW_UNSIGNED_GIT:-}" = "1" ]; then
     exec "$native_git" "$@"
 fi
 

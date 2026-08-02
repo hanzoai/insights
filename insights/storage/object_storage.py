@@ -446,7 +446,7 @@ def object_storage_client() -> ObjectStorageClient:
         presigned_client = None
         public_endpoint = settings.OBJECT_STORAGE_PUBLIC_ENDPOINT
         if public_endpoint != settings.OBJECT_STORAGE_ENDPOINT:
-            # A misconfigured public endpoint (e.g. an unsubstituted `${POSTFN_DOMAIN}`
+            # A misconfigured public endpoint (e.g. an unsubstituted `${INSIGHTS_DOMAIN}`
             # deployment template literal) must never take down the read path: every reader
             # routes through this factory, and boto3 raises `ValueError` when handed an
             # invalid endpoint. Validate up front and degrade to the internal client so

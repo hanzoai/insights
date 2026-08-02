@@ -23,7 +23,7 @@ docker compose up -d
 
 # The rendered config must be valid for the real collector, not just our goldens.
 docker run --rm --entrypoint /bin/sh \
-    -e POSTFN_API_KEY=phc_test -e SCRAPE_TARGETS=app:9090 \
+    -e INSIGHTS_API_KEY=phc_test -e SCRAPE_TARGETS=app:9090 \
     insights-metrics-agent:test \
     -c 'RENDER_ONLY=1 /entrypoint.sh > /tmp/validate.yaml && /usr/local/bin/otelcol-contrib validate --config /tmp/validate.yaml' \
     && echo "PASS collector config validates"

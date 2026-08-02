@@ -204,7 +204,7 @@ export interface DateFilterState extends DateRange {
     interval: IntervalType
 }
 
-const teamId = window.POSTFN_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 const persistConfig = { persist: true, prefix: `${teamId}__` }
 
 const INITIAL_DATE_FROM = '-7d' as string | null

@@ -57,8 +57,8 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 language: 'bash',
                                 file: '.env.local',
                                 code: dedent`
-                                    NEXT_PUBLIC_POSTFN_PROJECT_TOKEN=<ph_project_token>
-                                    NEXT_PUBLIC_POSTFN_HOST=<ph_client_api_host>
+                                    NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN=<ph_project_token>
+                                    NEXT_PUBLIC_INSIGHTS_HOST=<ph_client_api_host>
                                 `,
                             },
                         ]}
@@ -93,8 +93,8 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             code: dedent`
                                                 import insights from 'insights-js'
 
-                                                insights.init(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN!, {
-                                                    api_host: process.env.NEXT_PUBLIC_POSTFN_HOST,
+                                                insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
+                                                    api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
                                                     defaults: '${SDK_DEFAULTS_DATE}'
                                                 })
                                             `,
@@ -124,8 +124,8 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
 
                                                 export function InsightsProvider({ children }: { children: React.ReactNode }) {
                                                   useEffect(() => {
-                                                    insights.init(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN as string, {
-                                                      api_host: process.env.NEXT_PUBLIC_POSTFN_HOST,
+                                                    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN as string, {
+                                                      api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
                                                       defaults: '${SDK_DEFAULTS_DATE}'
                                                     })
                                                   }, [])
@@ -188,8 +188,8 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 export default function App({ Component, pageProps }: AppProps) {
 
                                                   useEffect(() => {
-                                                    insights.init(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN as string, {
-                                                      api_host: process.env.NEXT_PUBLIC_POSTFN_HOST,
+                                                    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN as string, {
+                                                      api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
                                                       defaults: '${SDK_DEFAULTS_DATE}',
                                                       loaded: (insights) => {
                                                         if (process.env.NODE_ENV === 'development') insights.debug()
@@ -354,8 +354,8 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { Insights } from 'insights-node'
 
                                                 export async function POST(request: Request) {
-                                                    const insights = new Insights(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN!, {
-                                                        host: process.env.NEXT_PUBLIC_POSTFN_HOST
+                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
+                                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                                     })
 
                                                     insights.capture({
@@ -381,8 +381,8 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { Insights } from 'insights-node'
 
                                                 export async function myServerAction() {
-                                                    const insights = new Insights(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN!, {
-                                                        host: process.env.NEXT_PUBLIC_POSTFN_HOST
+                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
+                                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                                     })
 
                                                     insights.capture({
@@ -412,8 +412,8 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                     req: NextApiRequest,
                                                     res: NextApiResponse
                                                 ) {
-                                                    const insights = new Insights(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN!, {
-                                                        host: process.env.NEXT_PUBLIC_POSTFN_HOST
+                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
+                                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                                     })
 
                                                     insights.capture({

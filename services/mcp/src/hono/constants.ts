@@ -4,8 +4,8 @@ export {
     USER_AGENT,
     type GetUserAgentOptions,
     getUserAgent,
-    POSTFN_US_BASE_URL,
-    POSTFN_EU_BASE_URL,
+    INSIGHTS_US_BASE_URL,
+    INSIGHTS_EU_BASE_URL,
     toCloudRegion,
     getBaseUrlForRegion,
     getCustomApiBaseUrl,
@@ -21,13 +21,13 @@ export function getEnv(): Env {
         extras.TEST = process.env.TEST
     }
     return {
-        POSTFN_API_BASE_URL: process.env.POSTFN_API_BASE_URL || undefined,
-        POSTFN_PUBLIC_URL: process.env.POSTFN_PUBLIC_URL || undefined,
+        INSIGHTS_API_BASE_URL: process.env.INSIGHTS_API_BASE_URL || undefined,
+        INSIGHTS_PUBLIC_URL: process.env.INSIGHTS_PUBLIC_URL || undefined,
         MCP_APPS_BASE_URL: process.env.MCP_APPS_BASE_URL || undefined,
-        POSTFN_MCP_APPS_ANALYTICS_BASE_URL: process.env.POSTFN_MCP_APPS_ANALYTICS_BASE_URL || undefined,
-        POSTFN_UI_APPS_TOKEN: process.env.POSTFN_UI_APPS_TOKEN || undefined,
-        POSTFN_ANALYTICS_API_KEY: process.env.POSTFN_ANALYTICS_API_KEY || undefined,
-        POSTFN_ANALYTICS_HOST: process.env.POSTFN_ANALYTICS_HOST || undefined,
+        INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: process.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL || undefined,
+        INSIGHTS_UI_APPS_TOKEN: process.env.INSIGHTS_UI_APPS_TOKEN || undefined,
+        INSIGHTS_ANALYTICS_API_KEY: process.env.INSIGHTS_ANALYTICS_API_KEY || undefined,
+        INSIGHTS_ANALYTICS_HOST: process.env.INSIGHTS_ANALYTICS_HOST || undefined,
         ...extras,
     }
 }

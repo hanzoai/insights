@@ -108,7 +108,7 @@ ENV AGENTSH_SERVER=http://127.0.0.1:18080
 # common dev commands before it reaches the model. Claude runs auto-detect it on PATH
 # and route eligible Bash commands through it via a PreToolUse rewrite hook; Codex has
 # no command-rewrite channel, so its runs are told to prefix eligible commands in the
-# developer instructions instead. POSTFN_RTK=0 (set per run from the task processing
+# developer instructions instead. INSIGHTS_RTK=0 (set per run from the task processing
 # context) opts a run out of both.
 ARG RTK_VERSION=0.43.0
 RUN set -eux; \

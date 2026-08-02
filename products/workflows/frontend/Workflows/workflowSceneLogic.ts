@@ -88,7 +88,7 @@ export const workflowSceneLogic = kea<workflowSceneLogicType>([
             (id: WorkflowSceneLogicProps['id']): SidePanelSceneContext | null =>
                 id && id !== 'new'
                     ? {
-                          activity_scope: ActivityScope.FN_FLOW,
+                          activity_scope: ActivityScope.INSIGHTS_FLOW,
                           activity_item_id: id,
                           access_control_resource: 'hog_flow',
                           access_control_resource_id: id,

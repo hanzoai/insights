@@ -9,14 +9,14 @@ import robotHogSrc from './flappy-script/robot-script.png'
 
 const GAME_WIDTH = 450
 const GAME_HEIGHT = 450
-const FN_SIZE = 50
+const INSIGHTS_SIZE = 50
 const PIPE_WIDTH = 50
 const PIPE_GAP = 180
 const GRAVITY = 0.4
 const FLAP_STRENGTH = -5
 const PIPE_SPEED = 3
 const PIPE_SPAWN_DISTANCE = 200
-const FN_X = GAME_WIDTH / 4
+const INSIGHTS_X = GAME_WIDTH / 4
 const HIGH_SCORE_KEY = 'flappyHogHighScore'
 
 const COLORS = {
@@ -99,10 +99,10 @@ function calculateScore(distance: number): number {
 
 function getHogBounds(hogY: number): { left: number; right: number; top: number; bottom: number } {
     return {
-        left: FN_X - FN_SIZE / 2,
-        right: FN_X + FN_SIZE / 2,
-        top: hogY - FN_SIZE / 2,
-        bottom: hogY + FN_SIZE / 2,
+        left: INSIGHTS_X - INSIGHTS_SIZE / 2,
+        right: INSIGHTS_X + INSIGHTS_SIZE / 2,
+        top: hogY - INSIGHTS_SIZE / 2,
+        bottom: hogY + INSIGHTS_SIZE / 2,
     }
 }
 
@@ -172,15 +172,15 @@ function drawPipes(ctx: CanvasRenderingContext2D, pipes: Pipe[]): void {
 }
 
 function drawHog(ctx: CanvasRenderingContext2D, hogY: number, hogImage: HTMLImageElement | null): void {
-    const x = FN_X - FN_SIZE / 2
-    const y = hogY - FN_SIZE / 2
+    const x = INSIGHTS_X - INSIGHTS_SIZE / 2
+    const y = hogY - INSIGHTS_SIZE / 2
 
     if (hogImage?.complete) {
-        ctx.drawImage(hogImage, x, y, FN_SIZE, FN_SIZE)
+        ctx.drawImage(hogImage, x, y, INSIGHTS_SIZE, INSIGHTS_SIZE)
     } else {
         ctx.fillStyle = COLORS.fallbackHog
         ctx.beginPath()
-        ctx.arc(FN_X, hogY, FN_SIZE / 2, 0, Math.PI * 2)
+        ctx.arc(INSIGHTS_X, hogY, INSIGHTS_SIZE / 2, 0, Math.PI * 2)
         ctx.fill()
     }
 }

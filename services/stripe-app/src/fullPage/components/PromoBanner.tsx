@@ -1,6 +1,6 @@
 import { Box, Img, Inline, Link } from '@stripe/ui-extension-sdk/ui'
 
-import { POSTFN_ICON_SRC } from '../../constants'
+import { INSIGHTS_ICON_SRC } from '../../constants'
 
 interface Props {
     children: React.ReactNode
@@ -21,7 +21,7 @@ const PromoBanner = ({ children, hero }: Props): JSX.Element => (
     >
         {hero && (
             <Box css={{ stack: 'x', alignX: 'center' }}>
-                <Img src={POSTFN_ICON_SRC} alt="Insights" width="48" height="28" />
+                <Img src={INSIGHTS_ICON_SRC} alt="Insights" width="48" height="28" />
             </Box>
         )}
         {children}

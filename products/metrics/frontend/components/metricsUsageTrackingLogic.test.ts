@@ -62,10 +62,10 @@ describe('metricsUsageTrackingLogic', () => {
     let logic: ReturnType<typeof metricsUsageTrackingLogic.build>
 
     beforeEach(() => {
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             resource_access_control: {
-                ...window.POSTFN_APP_CONTEXT?.resource_access_control,
+                ...window.INSIGHTS_APP_CONTEXT?.resource_access_control,
                 [AccessControlResourceType.Metrics]: AccessControlLevel.Viewer,
                 [AccessControlResourceType.Insight]: AccessControlLevel.Editor,
             },

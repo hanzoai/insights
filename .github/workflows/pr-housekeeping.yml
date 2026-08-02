@@ -45,19 +45,19 @@ jobs:
         if: contains(fromJSON('["opened", "synchronize"]'), github.event.action)
         uses: ./.github/workflows/monitor-github-rate-limit.yml
         secrets:
-            POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
-            GH_APP_POSTFN_DEVEX_GENERAL_APP_ID: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_APP_ID }}
-            GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY }}
-            GH_APP_POSTFN_TESTS_APP_ID: ${{ secrets.GH_APP_POSTFN_TESTS_APP_ID }}
-            GH_APP_POSTFN_TESTS_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_TESTS_PRIVATE_KEY }}
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+            INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
+            GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID }}
+            GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_TESTS_APP_ID: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+            GH_APP_INSIGHTS_TESTS_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
             GH_APP_TELEMETRY_APP_ID: ${{ secrets.GH_APP_TELEMETRY_APP_ID }}
             GH_APP_TELEMETRY_PRIVATE_KEY: ${{ secrets.GH_APP_TELEMETRY_PRIVATE_KEY }}
-            GH_APP_POSTFN_SETUP_ACTIONS_APP_ID: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_APP_ID }}
-            GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY }}
-            GH_APP_POSTFN_PRODUCT_TESTS_APP_ID: ${{ secrets.GH_APP_POSTFN_PRODUCT_TESTS_APP_ID }}
-            GH_APP_POSTFN_PRODUCT_TESTS_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_PRODUCT_TESTS_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID }}
+            GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_PRODUCT_TESTS_APP_ID: ${{ secrets.GH_APP_INSIGHTS_PRODUCT_TESTS_APP_ID }}
+            GH_APP_INSIGHTS_PRODUCT_TESTS_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_PRODUCT_TESTS_PRIVATE_KEY }}
 
     flags-project-board:
         # No synchronize: board status only transitions on reviewer/draft
@@ -81,25 +81,25 @@ jobs:
         permissions:
             pull-requests: write
         secrets:
-            GH_APP_POSTFN_ASSIGN_REVIEWERS_APP_ID: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_APP_ID }}
-            GH_APP_POSTFN_ASSIGN_REVIEWERS_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_ASSIGN_REVIEWERS_APP_ID: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_APP_ID }}
+            GH_APP_INSIGHTS_ASSIGN_REVIEWERS_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_PRIVATE_KEY }}
 
     resolve-bot-comments:
         if: github.event.action == 'synchronize'
         uses: ./.github/workflows/pr-resolve-outdated-bot-comments.yml
         secrets:
-            GH_APP_POSTFN_REVIEW_COMMENT_RESOLVER_APP_ID: ${{ secrets.GH_APP_POSTFN_REVIEW_COMMENT_RESOLVER_APP_ID }}
-            GH_APP_POSTFN_REVIEW_COMMENT_RESOLVER_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_REVIEW_COMMENT_RESOLVER_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_REVIEW_COMMENT_RESOLVER_APP_ID: ${{ secrets.GH_APP_INSIGHTS_REVIEW_COMMENT_RESOLVER_APP_ID }}
+            GH_APP_INSIGHTS_REVIEW_COMMENT_RESOLVER_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_REVIEW_COMMENT_RESOLVER_PRIVATE_KEY }}
 
     migrations-separation:
         if: contains(fromJSON('["opened", "synchronize", "reopened"]'), github.event.action)
         uses: ./.github/workflows/ci-migrations-service-separation-check.yml
         secrets:
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
 
     release-plan:
         if: contains(fromJSON('["opened", "synchronize", "reopened"]'), github.event.action)
         uses: ./.github/workflows/release.yml
         secrets:
-            POSTFN_API_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
+            INSIGHTS_API_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}

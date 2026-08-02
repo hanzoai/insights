@@ -16,7 +16,7 @@ import {
 } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
     createHogExecutionGlobals,
@@ -95,9 +95,9 @@ describe('CdpEventsConsumer', () => {
         it('should not parse events for teams without script functions', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const events = [
@@ -110,9 +110,9 @@ describe('CdpEventsConsumer', () => {
 
             await insertInsightsFunction({
                 team_id: team2.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const invocations2 = await processor._parseKafkaBatch(events)
@@ -128,15 +128,15 @@ describe('CdpEventsConsumer', () => {
 
             beforeEach(async () => {
                 fnFetchNoFilters = await insertInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 })
 
                 fnPrinterPageviewFilters = await insertInsightsFunction({
-                    ...FN_EXAMPLES.input_printer,
-                    ...FN_INPUTS_EXAMPLES.secret_inputs,
-                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...INSIGHTS_EXAMPLES.input_printer,
+                    ...INSIGHTS_INPUTS_EXAMPLES.secret_inputs,
+                    ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
                 globals = createHogExecutionGlobals({
@@ -386,16 +386,16 @@ describe('CdpEventsConsumer', () => {
                 // Create functions for team2 (no data_pipelines feature)
                 fnFetchNoFilters = await insertInsightsFunction({
                     team_id: team2.id,
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 })
 
                 fnPrinterPageviewFilters = await insertInsightsFunction({
                     team_id: team2.id,
-                    ...FN_EXAMPLES.input_printer,
-                    ...FN_INPUTS_EXAMPLES.secret_inputs,
-                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...INSIGHTS_EXAMPLES.input_printer,
+                    ...INSIGHTS_INPUTS_EXAMPLES.secret_inputs,
+                    ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
                 // Globals for team2 (without data_pipelines)
@@ -518,9 +518,9 @@ describe('CdpEventsConsumer', () => {
 
             it('should filter out functions that error while filtering', async () => {
                 const erroringFunction = await insertInsightsFunction({
-                    ...FN_EXAMPLES.input_printer,
-                    ...FN_INPUTS_EXAMPLES.secret_inputs,
-                    ...FN_FILTERS_EXAMPLES.broken_filters,
+                    ...INSIGHTS_EXAMPLES.input_printer,
+                    ...INSIGHTS_INPUTS_EXAMPLES.secret_inputs,
+                    ...INSIGHTS_FILTERS_EXAMPLES.broken_filters,
                 })
                 await processor.processBatch([globals])
                 expect(mockProducerObserver.getProducedKafkaMessages()).toMatchObject([
@@ -647,7 +647,7 @@ describe('script flow processing', () => {
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                            filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                         },
                     })
                     .build()
@@ -690,7 +690,7 @@ describe('script flow processing', () => {
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                            filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                         },
                     })
                     .build()
@@ -748,7 +748,7 @@ describe('script flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             sendEmail: {
@@ -825,7 +825,7 @@ describe('script flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             delay: {
@@ -872,7 +872,7 @@ describe('script flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             delay: {
@@ -922,7 +922,7 @@ describe('script flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             sendEmail: {
@@ -965,7 +965,7 @@ describe('script flow processing', () => {
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                            filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                         },
                     })
                     .build()
@@ -1048,7 +1048,7 @@ describe('script flow processing', () => {
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                            filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                         },
                     })
                     .build()
@@ -1085,7 +1085,7 @@ describe('script flow processing', () => {
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                            filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                         },
                     })
                     .build()
@@ -1121,7 +1121,7 @@ describe('script flow processing', () => {
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                            filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                         },
                     })
                     .build()
@@ -1147,7 +1147,7 @@ describe('script flow processing', () => {
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                            filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                         },
                     })
                     .build()

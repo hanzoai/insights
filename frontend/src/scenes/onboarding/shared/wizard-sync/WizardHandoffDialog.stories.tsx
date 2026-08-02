@@ -13,7 +13,7 @@ const SAMPLE_REPORT = [
     '## What changed',
     '- Added `instrumentation-client.ts` with the Insights init',
     '- Wrapped the app in `InsightsProvider` in `app/providers.tsx`',
-    '- Added `NEXT_PUBLIC_POSTFN_KEY` to `.env.local`',
+    '- Added `NEXT_PUBLIC_INSIGHTS_KEY` to `.env.local`',
     '',
     '## Events instrumented',
     '| Event | Where |',

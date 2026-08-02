@@ -77,7 +77,7 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
                     {"op": "update_action", "id": "delay_1", "patch": {"config": {"delay_duration": delay_duration}}}
                 ]
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
     @patch(TASK_PATH)

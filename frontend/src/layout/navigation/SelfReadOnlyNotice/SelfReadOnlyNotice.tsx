@@ -26,7 +26,7 @@ function isFlagPersistedInStorybook(): boolean {
     if (typeof window === 'undefined' || !('__mockServiceWorker' in window)) {
         return true // not storybook — defer to the kea-state gate above
     }
-    const persisted = (window as { POSTFN_APP_CONTEXT?: { persisted_feature_flags?: string[] } }).POSTFN_APP_CONTEXT
+    const persisted = (window as { INSIGHTS_APP_CONTEXT?: { persisted_feature_flags?: string[] } }).INSIGHTS_APP_CONTEXT
         ?.persisted_feature_flags
     return Array.isArray(persisted) && persisted.includes(FEATURE_FLAGS.READ_ONLY_MODE)
 }

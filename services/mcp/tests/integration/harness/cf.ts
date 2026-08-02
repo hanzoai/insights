@@ -37,19 +37,19 @@ export async function startCfHarness(env: IntegrationEnv): Promise<IntegrationHa
         local: true,
         ip: '127.0.0.1',
         port,
-        // The CF Worker reads `POSTFN_API_BASE_URL` via the `cloudflare:workers`
+        // The CF Worker reads `INSIGHTS_API_BASE_URL` via the `cloudflare:workers`
         // env binding, not `process.env`. Pass it through `vars` so the binding
         // resolves to the local stack. `MCP_APPS_BASE_URL` overrides the value
         // hard-coded in `wrangler.jsonc` (which points at the production worker).
         vars: {
-            POSTFN_API_BASE_URL: env.apiBaseUrl,
+            INSIGHTS_API_BASE_URL: env.apiBaseUrl,
             MCP_APPS_BASE_URL: baseUrl.toString().replace(/\/$/, ''),
             // Match the workers vitest config — empty values keep observability
             // paths short-circuited and silence the analytics no-network warning.
-            POSTFN_ANALYTICS_API_KEY: '',
-            POSTFN_ANALYTICS_HOST: '',
-            POSTFN_MCP_APPS_ANALYTICS_BASE_URL: '',
-            POSTFN_UI_APPS_TOKEN: '',
+            INSIGHTS_ANALYTICS_API_KEY: '',
+            INSIGHTS_ANALYTICS_HOST: '',
+            INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: '',
+            INSIGHTS_UI_APPS_TOKEN: '',
             INKEEP_API_KEY: '',
         },
         experimental: {

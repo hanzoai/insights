@@ -428,7 +428,7 @@ class Insight(RootTeamMixin, FileSystemSyncMixin, models.Model):
         kind = self._unwrapped_query_kind()
         alertable_kinds = (
             NodeKind.TRENDS_QUERY,
-            NodeKind.FN_QL_QUERY,
+            NodeKind.INSIGHTS_QL_QUERY,
             NodeKind.FUNNELS_QUERY,
             NodeKind.METRICS_QUERY,
         )

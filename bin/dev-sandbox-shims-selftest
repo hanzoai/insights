@@ -48,12 +48,12 @@ check pass pnpm exec tsc
 check pass pnpm run install # a script named "install" is not `pnpm install`
 check pass pnpm
 
-# POSTFN_DEV_SANDBOX=0 disables all wrapping
-echo "-- with POSTFN_DEV_SANDBOX=0 --"
-POSTFN_DEV_SANDBOX=0
+# INSIGHTS_DEV_SANDBOX=0 disables all wrapping
+echo "-- with INSIGHTS_DEV_SANDBOX=0 --"
+INSIGHTS_DEV_SANDBOX=0
 check pass uv sync
 check pass pnpm install
-unset POSTFN_DEV_SANDBOX
+unset INSIGHTS_DEV_SANDBOX
 
 if [ "$fail" -ne 0 ]; then
     echo "dev-sandbox-shims self-test FAILED" >&2

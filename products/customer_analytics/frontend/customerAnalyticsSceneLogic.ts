@@ -74,7 +74,7 @@ const INITIAL_DATE_FILTER = {
     interval: INITIAL_INTERVAL,
 }
 
-const teamId = window.POSTFN_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 const persistConfig = { persist: true, prefix: `${teamId}_customer_analytics__` }
 
 const setQueryParams = (params: Record<string, string>): string => {

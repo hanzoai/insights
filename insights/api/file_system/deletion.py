@@ -20,7 +20,7 @@ LEGACY_FN_FUNCTION_TYPES = [
     "campaign",
     "source",
 ]
-FN_FUNCTION_TYPES = sorted(set(LEGACY_FN_FUNCTION_TYPES + list(InsightsFunctionType.values)))
+INSIGHTS_FUNCTION_TYPES = sorted(set(LEGACY_FN_FUNCTION_TYPES + list(InsightsFunctionType.values)))
 
 
 @dataclass(frozen=True)

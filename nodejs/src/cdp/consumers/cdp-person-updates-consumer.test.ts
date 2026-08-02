@@ -7,7 +7,7 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
     createDatastorePerson,
@@ -42,9 +42,9 @@ describe('CDP Person Updates Consumer', () => {
         await processor.start()
 
         insightsFunction = createInsightsFunction({
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             type: 'destination',
         })
 
@@ -112,9 +112,9 @@ describe('CDP Person Updates Consumer', () => {
     describe('processing', () => {
         it('should only run script functions that are filtering for person updates', async () => {
             const insightsFunctionEvents = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 type: 'destination',
             })
 

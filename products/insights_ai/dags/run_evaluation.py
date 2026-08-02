@@ -225,7 +225,7 @@ def spawn_evaluation_container(
                 "report": dagster.MarkdownMetadataValue(formatted_markdown),
             },
             tags={
-                "owner": JobOwners.TEAM_POSTFN_AI.value,
+                "owner": JobOwners.TEAM_INSIGHTS_AI.value,
             },
         )
     )
@@ -234,7 +234,7 @@ def spawn_evaluation_container(
 @dagster.job(
     description="Runs an AI evaluation",
     tags={
-        "owner": JobOwners.TEAM_POSTFN_AI.value,
+        "owner": JobOwners.TEAM_INSIGHTS_AI.value,
         "dagster/max_runtime": 60 * 60,  # 1 hour
     },
     executor_def=dagster.multiprocess_executor.configured({"max_concurrent": 4}),

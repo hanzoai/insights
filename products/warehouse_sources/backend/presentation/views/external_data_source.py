@@ -2089,7 +2089,7 @@ class ExternalDataSourceViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixi
         if created_via == ExternalDataSource.CreatedVia.MCP:
             transport_created_via = {
                 EventSource.WIZARD: ExternalDataSource.CreatedVia.WIZARD,
-                EventSource.POSTFN_CODE: ExternalDataSource.CreatedVia.SELF_DRIVING,
+                EventSource.INSIGHTS_CODE: ExternalDataSource.CreatedVia.SELF_DRIVING,
             }
             created_via = transport_created_via.get(get_event_source(request), created_via)
             # The wizard's `self-driving` onboarding program shares the generic `insights/wizard`

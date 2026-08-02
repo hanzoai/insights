@@ -11,7 +11,7 @@
 # Untouched: uv run, uv pip list, uv tool ...; pnpm dev/exec/<script> ...
 #
 # macOS-only: the uv()/pnpm() functions are defined only on Darwin (the sandbox
-# is a no-op elsewhere). Opt out with POSTFN_DEV_SANDBOX=0. Bypass a single call
+# is a no-op elsewhere). Opt out with INSIGHTS_DEV_SANDBOX=0. Bypass a single call
 # with `command uv ...` / `\uv ...`. Only the interactive shell is affected —
 # scripts, Makefiles, and the already-sandboxed dev stack are untouched.
 #
@@ -23,7 +23,7 @@
 # Pure decision logic — defined on every platform so it stays unit-testable on
 # Linux CI (see bin/dev-sandbox-shims-selftest). Returns 0 = sandbox, 1 = passthrough.
 _ph_sandbox_should_wrap() {
-    [ "${POSTFN_DEV_SANDBOX:-}" = "0" ] && return 1
+    [ "${INSIGHTS_DEV_SANDBOX:-}" = "0" ] && return 1
     local tool="$1"
     shift
     # First two non-flag tokens: sub1 is the subcommand, sub2 disambiguates `uv pip ...`.
@@ -65,7 +65,7 @@ if [ "$(uname -s)" = "Darwin" ]; then
         local tool="$1"
         shift
         if [ -n "$_PH_SANDBOX_PROJECT" ] && _ph_sandbox_should_wrap "$tool" "$@"; then
-            printf '\033[2m↪ running %s under dev sandbox (POSTFN_DEV_SANDBOX=0 to disable)\033[0m\n' "$tool" >&2
+            printf '\033[2m↪ running %s under dev sandbox (INSIGHTS_DEV_SANDBOX=0 to disable)\033[0m\n' "$tool" >&2
             "$_PH_SANDBOX_PROJECT/bin/dev-sandbox" "$(printf '%q ' "$tool" "$@")"
         else
             command "$tool" "$@"

@@ -12,7 +12,7 @@ import {
 } from './installationProgress'
 import { resetWizardSyncTelemetryForTests, runLocalSessionBookkeeping } from './installationProgressLogic'
 import { wizardActiveSessionDetectorLogic } from './wizardActiveSessionDetectorLogic'
-import { POSTFN_INTEGRATION_WORKFLOW_ID, SELF_DRIVING_WORKFLOW_ID } from './workflows'
+import { INSIGHTS_INTEGRATION_WORKFLOW_ID, SELF_DRIVING_WORKFLOW_ID } from './workflows'
 
 // Matches the fixtures' timestamps so sessions read as fresh where intended.
 const NOW = new Date('2026-01-01T00:00:30Z').getTime()
@@ -618,8 +618,8 @@ describe('installationProgressLogic merge', () => {
         it('marks the session current and reports detected once per session across redeliveries', () => {
             const actions = spyActions()
             const s = fresh({ session_id: 'dup' })
-            runLocalSessionBookkeeping(s, null, POSTFN_INTEGRATION_WORKFLOW_ID, actions)
-            runLocalSessionBookkeeping(s, s, POSTFN_INTEGRATION_WORKFLOW_ID, actions)
+            runLocalSessionBookkeeping(s, null, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions)
+            runLocalSessionBookkeeping(s, s, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions)
             expect(actions.markSessionCurrent).toHaveBeenCalledTimes(2)
             expect(actions.reportWizardSyncSessionDetected).toHaveBeenCalledTimes(1)
         })
@@ -629,7 +629,7 @@ describe('installationProgressLogic merge', () => {
             runLocalSessionBookkeeping(
                 session({ updated_at: '2020-01-01T00:00:00Z' }),
                 null,
-                POSTFN_INTEGRATION_WORKFLOW_ID,
+                INSIGHTS_INTEGRATION_WORKFLOW_ID,
                 actions
             )
             expect(actions.markSessionCurrent).not.toHaveBeenCalled()
@@ -640,10 +640,10 @@ describe('installationProgressLogic merge', () => {
             const actions = spyActions()
             const running = fresh({ session_id: 'fin', run_phase: 'running' })
             const done = fresh({ session_id: 'fin', run_phase: 'completed' })
-            runLocalSessionBookkeeping(done, null, POSTFN_INTEGRATION_WORKFLOW_ID, actions) // replayed terminal state: no transition
+            runLocalSessionBookkeeping(done, null, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions) // replayed terminal state: no transition
             expect(actions.reportWizardSyncSessionFinished).not.toHaveBeenCalled()
-            runLocalSessionBookkeeping(done, running, POSTFN_INTEGRATION_WORKFLOW_ID, actions)
-            runLocalSessionBookkeeping(done, running, POSTFN_INTEGRATION_WORKFLOW_ID, actions)
+            runLocalSessionBookkeeping(done, running, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions)
+            runLocalSessionBookkeeping(done, running, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions)
             expect(actions.reportWizardSyncSessionFinished).toHaveBeenCalledTimes(1)
         })
 
@@ -661,7 +661,7 @@ describe('installationProgressLogic merge', () => {
             const s = isFresh
                 ? fresh(overrides as Partial<WizardSessionDTOApi>)
                 : session(overrides as Partial<WizardSessionDTOApi>)
-            runLocalSessionBookkeeping(s, null, POSTFN_INTEGRATION_WORKFLOW_ID, actions)
+            runLocalSessionBookkeeping(s, null, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions)
             expect(actions.recordFinishedLocalRun).toHaveBeenCalledTimes(expectRecorded ? 1 : 0)
         })
 
@@ -672,7 +672,7 @@ describe('installationProgressLogic merge', () => {
             runLocalSessionBookkeeping(
                 fresh({ session_id: 'new-run', run_phase: 'running' }),
                 null,
-                POSTFN_INTEGRATION_WORKFLOW_ID,
+                INSIGHTS_INTEGRATION_WORKFLOW_ID,
                 actions
             )
             expect(actions.supersedeFinishedLocalRun).toHaveBeenCalledWith('new-run')
@@ -696,7 +696,7 @@ describe('installationProgressLogic merge', () => {
             ],
         ])('announces the handoff doc only for a %s', (_name, s, expectedCalls) => {
             const actions = spyActions()
-            runLocalSessionBookkeeping(s, null, POSTFN_INTEGRATION_WORKFLOW_ID, actions)
+            runLocalSessionBookkeeping(s, null, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions)
             expect(actions.handoffDocReceived).toHaveBeenCalledTimes(expectedCalls)
             if (expectedCalls > 0) {
                 expect(actions.handoffDocReceived).toHaveBeenCalledWith({
@@ -710,7 +710,7 @@ describe('installationProgressLogic merge', () => {
         it('tolerates a malformed session with null tasks', () => {
             const actions = spyActions()
             const s = fresh({ session_id: 'null-tasks', tasks: null as unknown as WizardSessionDTOApi['tasks'] })
-            expect(() => runLocalSessionBookkeeping(s, null, POSTFN_INTEGRATION_WORKFLOW_ID, actions)).not.toThrow()
+            expect(() => runLocalSessionBookkeeping(s, null, INSIGHTS_INTEGRATION_WORKFLOW_ID, actions)).not.toThrow()
             expect(actions.reportWizardSyncSessionDetected).toHaveBeenCalledWith(
                 expect.objectContaining({ taskCount: 0 })
             )
@@ -741,8 +741,8 @@ describe('installationProgressLogic merge', () => {
                 expect(detector.values.activeWorkflowId).toBe(SELF_DRIVING_WORKFLOW_ID)
                 expect(detector.values.hasActiveSession).toBe(true)
 
-                runLocalSessionBookkeeping(live('pi'), null, POSTFN_INTEGRATION_WORKFLOW_ID, spyActions())
-                expect(detector.values.activeWorkflowId).toBe(POSTFN_INTEGRATION_WORKFLOW_ID)
+                runLocalSessionBookkeeping(live('pi'), null, INSIGHTS_INTEGRATION_WORKFLOW_ID, spyActions())
+                expect(detector.values.activeWorkflowId).toBe(INSIGHTS_INTEGRATION_WORKFLOW_ID)
             } finally {
                 detector.unmount()
             }

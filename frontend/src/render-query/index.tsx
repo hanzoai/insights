@@ -11,7 +11,7 @@ import { RenderQueryApp } from './RenderQueryApp'
 
 // Disable tracking inside render-query frames. They are expected to run on third-party sites.
 // Without this, embeds would send events to app.hanzo.ai.
-window.JS_POSTFN_API_KEY = undefined
+window.JS_INSIGHTS_API_KEY = undefined
 
 loadInsightsJS()
 initKea({ replaceInitialPathInWindow: false })

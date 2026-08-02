@@ -65,8 +65,8 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                             import litellm
 
                             # Set Insights environment variables
-                            os.environ["POSTFN_API_KEY"] = "<ph_project_token>"
-                            os.environ["POSTFN_API_URL"] = "<ph_client_api_host>"
+                            os.environ["INSIGHTS_API_KEY"] = "<ph_project_token>"
+                            os.environ["INSIGHTS_API_URL"] = "<ph_client_api_host>"
 
                             # Enable Insights callbacks in LiteLLM
                             litellm.success_callback = ["insights"]

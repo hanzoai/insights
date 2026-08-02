@@ -23,7 +23,7 @@ const workflowLogItem = (changes: ActivityChange[]): ActivityLogItem => ({
 })
 
 const change = (field: string, before: unknown, after: unknown): ActivityChange =>
-    ({ type: ActivityScope.FN_FLOW, action: 'changed', field, before, after }) as ActivityChange
+    ({ type: ActivityScope.INSIGHTS_FLOW, action: 'changed', field, before, after }) as ActivityChange
 
 describe('workflowActivityDescriber', () => {
     // The backend masks `actions` because the graph can carry secret function inputs, so the log

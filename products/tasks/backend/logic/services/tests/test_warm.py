@@ -9,11 +9,11 @@ from products.tasks.backend.logic.services.warm import SandboxWarmer
 from products.tasks.backend.models import Task, TaskRun
 
 WARM = "products.tasks.backend.logic.services.warm"
-_CAPS = SandboxWarmer.ORIGIN_PRODUCT_CAPS[Task.OriginProduct.POSTFN_AI]
+_CAPS = SandboxWarmer.ORIGIN_PRODUCT_CAPS[Task.OriginProduct.INSIGHTS_AI]
 
 
 class TestSandboxWarmerWarm(APIBaseTest):
-    def _task(self, *, origin=Task.OriginProduct.POSTFN_AI, created_by=None) -> Task:
+    def _task(self, *, origin=Task.OriginProduct.INSIGHTS_AI, created_by=None) -> Task:
         return Task.objects.create(
             team=self.team,
             title="",
@@ -141,7 +141,7 @@ class TestSandboxWarmerAtCapacity(APIBaseTest):
             team=self.team,
             title="",
             description="",
-            origin_product=Task.OriginProduct.POSTFN_AI,
+            origin_product=Task.OriginProduct.INSIGHTS_AI,
             created_by=created_by or self.user,
         )
         extra = {"await_user_message": True} if warm else {}
@@ -152,7 +152,7 @@ class TestSandboxWarmerAtCapacity(APIBaseTest):
         return run
 
     def test_counts_only_warm_non_terminal_runs(self):
-        origin = Task.OriginProduct.POSTFN_AI
+        origin = Task.OriginProduct.INSIGHTS_AI
 
         # Terminal warm runs drop from the count via the status filter.
         for _ in range(_CAPS.per_user):
@@ -170,7 +170,7 @@ class TestSandboxWarmerAtCapacity(APIBaseTest):
         assert SandboxWarmer.at_capacity(origin, self.team, self.user) is True
 
     def test_per_org_cap_counts_across_users(self):
-        origin = Task.OriginProduct.POSTFN_AI
+        origin = Task.OriginProduct.INSIGHTS_AI
         other = self._create_user("warmer@hanzo.ai")
         for _ in range(_CAPS.per_org):
             self._warm_run_on_new_task(created_by=other)

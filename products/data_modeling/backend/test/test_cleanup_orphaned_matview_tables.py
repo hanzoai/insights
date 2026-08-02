@@ -84,7 +84,7 @@ class TestFindHalfDeletedMatviews(BaseTest):
         sq.refresh_from_db()
         join.refresh_from_db()
         assert sq.deleted_name == "done_view"
-        assert sq.name.startswith("POSTFN_DELETED_")
+        assert sq.name.startswith("INSIGHTS_DELETED_")
         assert join.deleted
         assert self._found() == set()
 
@@ -140,7 +140,7 @@ class TestFindHalfDeletedMatviews(BaseTest):
     def test_properly_deleted_query_with_ghost_node_is_excluded(self):
         # deleted_name is set => it went through the real soft_delete(); a lingering node here is a
         # separate, much larger population this cleanup must not touch.
-        sq = self._saved_query("POSTFN_DELETED_x", None, deleted=True)
+        sq = self._saved_query("INSIGHTS_DELETED_x", None, deleted=True)
         sq.deleted_name = "old_name"
         sq.save()
         self._node(sq)

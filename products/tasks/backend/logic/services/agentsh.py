@@ -213,7 +213,7 @@ def _get_debug_only_ports() -> list[int]:
     return ports
 
 
-_MANAGED_CREDENTIAL_ENV_KEYS = ("GH_TOKEN", "GITHUB_TOKEN", "POSTFN_PERSONAL_API_KEY")
+_MANAGED_CREDENTIAL_ENV_KEYS = ("GH_TOKEN", "GITHUB_TOKEN", "INSIGHTS_PERSONAL_API_KEY")
 _EXCLUDED_AGENT_ENV_KEYS = (
     *SANDBOX_AGENT_LAUNCH_UNSET_ENV_VARS,
     "BASH_ENV",
@@ -262,7 +262,7 @@ done < {quoted_github_env_file} 2>/dev/null
 
 while IFS= read -r -d $'\\0' line; do
   case "$line" in
-    POSTFN_PERSONAL_API_KEY=*) export "$line" ;;
+    INSIGHTS_PERSONAL_API_KEY=*) export "$line" ;;
   esac
 done < {quoted_oauth_env_file} 2>/dev/null
 exec "$@"
@@ -319,8 +319,8 @@ if [[ "${{BASH_SOURCE[0]}}" == "$0" ]]; then
     fi
   fi
 
-  if [[ -n "${{POSTFN_PERSONAL_API_KEY:-}}" ]]; then
-    printf 'POSTFN_PERSONAL_API_KEY=%s\\0' "$POSTFN_PERSONAL_API_KEY" > "$oauth_tmp"
+  if [[ -n "${{INSIGHTS_PERSONAL_API_KEY:-}}" ]]; then
+    printf 'INSIGHTS_PERSONAL_API_KEY=%s\\0' "$INSIGHTS_PERSONAL_API_KEY" > "$oauth_tmp"
   fi
   chmod 600 "$oauth_tmp"
   if [[ -e {quoted_oauth_env_file} || -L {quoted_oauth_env_file} ]]; then
@@ -523,7 +523,7 @@ def generate_policy_yaml(allowed_domains: list[str] | None = None) -> str:
                 "NODE_OPTIONS",
                 "NODE_ENV",
                 "NODE_PATH",
-                "POSTFN_*",
+                "INSIGHTS_*",
                 "JWT_PUBLIC_KEY",
                 "GITHUB_TOKEN",
                 "LLM_GATEWAY_URL",

@@ -38,8 +38,8 @@ const handle: CloudRunHandle = {
 // userLogic reads the bootstrapped user out of the app context, so seeding it there is how a test
 // picks which kind of account is looking at the run.
 function initAs(onboardingSkippedReason: OnboardingSkippedReason, team: TeamType = MOCK_DEFAULT_TEAM): void {
-    window.POSTFN_APP_CONTEXT = {
-        ...window.POSTFN_APP_CONTEXT,
+    window.INSIGHTS_APP_CONTEXT = {
+        ...window.INSIGHTS_APP_CONTEXT,
         current_user: { ...MOCK_DEFAULT_USER, onboarding_skipped_reason: onboardingSkippedReason },
     } as unknown as AppContext
     initKeaTests(true, team)

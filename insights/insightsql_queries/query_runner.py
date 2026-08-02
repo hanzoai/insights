@@ -1507,7 +1507,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
             cache_key=cache_manager.cache_key,
             refresh_requested=refresh_requested,
             is_query_service=self.is_query_service,
-            is_insights_ai=self.limit_context == LimitContext.POSTFN_AI,
+            is_insights_ai=self.limit_context == LimitContext.INSIGHTS_AI,
             analytics_props=analytics_props,
         )
 

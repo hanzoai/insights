@@ -58,16 +58,16 @@ export function overrideWithEnv(
     }
     const newConfig: PluginsServerConfig = { ...tmpConfig }
 
-    if (!newConfig.DATABASE_URL && !newConfig.POSTFN_DB_NAME) {
+    if (!newConfig.DATABASE_URL && !newConfig.INSIGHTS_DB_NAME) {
         throw Error(
-            'You must specify either DATABASE_URL or the database options POSTFN_DB_NAME, POSTFN_DB_USER, POSTFN_DB_PASSWORD, POSTFN_POSTGRES_HOST, POSTFN_POSTGRES_PORT!'
+            'You must specify either DATABASE_URL or the database options INSIGHTS_DB_NAME, INSIGHTS_DB_USER, INSIGHTS_DB_PASSWORD, INSIGHTS_POSTGRES_HOST, INSIGHTS_POSTGRES_PORT!'
         )
     }
 
     if (!newConfig.DATABASE_URL) {
-        const encodedUser = encodeURIComponent(newConfig.POSTFN_DB_USER)
-        const encodedPassword = encodeURIComponent(newConfig.POSTFN_DB_PASSWORD)
-        newConfig.DATABASE_URL = `postgres://${encodedUser}:${encodedPassword}@${newConfig.POSTFN_POSTGRES_HOST}:${newConfig.POSTFN_POSTGRES_PORT}/${newConfig.POSTFN_DB_NAME}`
+        const encodedUser = encodeURIComponent(newConfig.INSIGHTS_DB_USER)
+        const encodedPassword = encodeURIComponent(newConfig.INSIGHTS_DB_PASSWORD)
+        newConfig.DATABASE_URL = `postgres://${encodedUser}:${encodedPassword}@${newConfig.INSIGHTS_POSTGRES_HOST}:${newConfig.INSIGHTS_POSTGRES_PORT}/${newConfig.INSIGHTS_DB_NAME}`
     }
 
     if (

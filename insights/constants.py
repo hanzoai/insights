@@ -3,7 +3,7 @@ from typing import Literal
 
 from semantic_version import Version
 
-FROZEN_POSTFN_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
+FROZEN_INSIGHTS_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
 INTERNAL_BOT_EMAIL_SUFFIX = "@insightsbot.user"
 
 
@@ -53,7 +53,7 @@ class AvailableFeature(StrEnum):
     AUDIT_LOGS = "audit_logs"
     APPROVALS = "approvals"
     XAA_AUTHENTICATION = "xaa_authentication"
-    POSTFN_CODE_USAGE = "insights_code_usage"
+    INSIGHTS_CODE_USAGE = "insights_code_usage"
 
 
 LOGS_RETENTION_FEATURES_BY_DAYS: dict[int, AvailableFeature] = {

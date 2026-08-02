@@ -21,7 +21,7 @@ import {
     ERROR_TRACKING_TRIGGERS,
 } from './alertWizardConfig'
 
-const FN_FUNCTION_FILTER_LIST = ERROR_TRACKING_SUB_TEMPLATE_IDS.map(getFiltersFromSubTemplateId).filter(
+const INSIGHTS_FUNCTION_FILTER_LIST = ERROR_TRACKING_SUB_TEMPLATE_IDS.map(getFiltersFromSubTemplateId).filter(
     (f) => !!f
 ) as CyclotronJobFiltersType[]
 
@@ -84,7 +84,7 @@ function ErrorTrackingAlertingInner(): JSX.Element {
 
     return (
         <InsightsFunctionList
-            forceFilterGroups={FN_FUNCTION_FILTER_LIST}
+            forceFilterGroups={INSIGHTS_FUNCTION_FILTER_LIST}
             type="internal_destination"
             onDeleteInsightsFunction={(insightsFunction) => {
                 insights.capture('error_tracking_alert_deleted', {

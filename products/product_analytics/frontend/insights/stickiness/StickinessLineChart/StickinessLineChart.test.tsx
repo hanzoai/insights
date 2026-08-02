@@ -80,11 +80,11 @@ describe('StickinessLineChart', () => {
         describe('shared mode', () => {
             beforeEach(() => {
                 // Shared/exported pages set this global before React mounts; trendsDataLogic.hasPersonsModal reads it.
-                window.POSTFN_EXPORTED_DATA = { type: ExportType.Embed }
+                window.INSIGHTS_EXPORTED_DATA = { type: ExportType.Embed }
             })
 
             afterEach(() => {
-                delete (window as { POSTFN_EXPORTED_DATA?: unknown }).POSTFN_EXPORTED_DATA
+                delete (window as { INSIGHTS_EXPORTED_DATA?: unknown }).INSIGHTS_EXPORTED_DATA
             })
 
             it('clicking a data point does not open the persons modal', async () => {

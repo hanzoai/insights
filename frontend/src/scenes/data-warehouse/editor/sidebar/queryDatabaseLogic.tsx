@@ -24,7 +24,7 @@ import { FeatureFlagsSet, featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { createFuse, IFuseOptions } from 'lib/utils/fuseSearch'
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
-import { POSTFN_WAREHOUSE } from 'scenes/data-warehouse/editor/connectionSelectorLogic'
+import { INSIGHTS_WAREHOUSE } from 'scenes/data-warehouse/editor/connectionSelectorLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
@@ -235,7 +235,7 @@ const shouldHideFieldName = (fieldName: string): boolean => {
 }
 
 const shouldUseDirectConnectionTree = (connectionId: string | null): boolean => {
-    return !!connectionId && connectionId !== POSTFN_WAREHOUSE
+    return !!connectionId && connectionId !== INSIGHTS_WAREHOUSE
 }
 
 const createColumnNode = (

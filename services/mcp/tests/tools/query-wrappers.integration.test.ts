@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import type { ApiClient } from '@/api/client'
 import { GENERATED_TOOLS } from '@/tools/generated/query-wrappers'
-import { POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY, type Context } from '@/tools/types'
+import { INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, type Context } from '@/tools/types'
 
 import {
     TEST_ORG_ID,
@@ -39,7 +39,7 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
 
             // Formatted results should contain pipe-separated values (the formatter output)
             expect(typeof result.results).toBe('object')
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
         })
 
         it('should include pipe-separated table in formatted results', async () => {
@@ -52,8 +52,8 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
 
             // Formatted results should contain pipe-separated values (the formatter output)
             expect(typeof result.results).toBe('object')
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
-            expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
         })
 
         it('should execute trends with breakdown', async () => {
@@ -66,7 +66,7 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
                 },
             })) as any
 
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
         })
 
         it('should execute trends with a GroupNode', async () => {
@@ -101,7 +101,7 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
             })) as any
 
             expect(result).toHaveProperty('results')
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
         })
     })
 
@@ -121,8 +121,8 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
 
             // Formatted results should contain pipe-separated values (the formatter output)
             expect(typeof result.results).toBe('object')
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
-            expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
         })
 
         it('should execute a funnel with a GroupNode step using per-node property filters', async () => {
@@ -155,8 +155,8 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
 
             expect(result).toHaveProperty('results')
             expect(result).toHaveProperty('_insightsUrl')
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
-            expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
         })
     })
 
@@ -191,8 +191,8 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
 
             // Formatted results should contain pipe-separated values (the formatter output)
             expect(typeof result.results).toBe('object')
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
-            expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toContain('|')
         })
 
         it('should generate a valid Insights URL with StickinessQuery kind', async () => {
@@ -228,8 +228,8 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
 
             // Paths demo data can have pageviews without a path edge in the selected window.
             expect(typeof result.results).toBe('object')
-            expect(typeof result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
-            expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toMatch(/\||No data recorded for this time period\./)
+            expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+            expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toMatch(/\||No data recorded for this time period\./)
         })
 
         it('should execute a paths query with start point', async () => {

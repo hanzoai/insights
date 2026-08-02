@@ -45,7 +45,7 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '../../src/types'
 import { createRedisV2PoolFromConfig } from '../common/redis/redis-v2'
 import { FixtureInsightsFlowBuilder } from './_tests/builders/hogflow.builder'
-import { FN_FILTERS_EXAMPLES } from './_tests/examples'
+import { INSIGHTS_FILTERS_EXAMPLES } from './_tests/examples'
 import { createHogExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from './_tests/fixtures'
 import { insertInsightsFlow } from './_tests/fixtures-insightsflows'
 import { CdpApi } from './cdp-api'
@@ -349,7 +349,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
     const trigger = () =>
         ({
             type: 'trigger' as const,
-            config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+            config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
         }) as const
 
     const fetchAction = (url: string, method = 'POST') => ({
@@ -501,8 +501,8 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
                         type: 'conditional_branch',
                         config: {
                             conditions: [
-                                { filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters },
-                                { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                                { filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters },
+                                { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                             ],
                         },
                     },
@@ -791,7 +791,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
                         config: {
                             condition: {
                                 // Matches $pageview with "insights" in $current_url
-                                filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters,
+                                filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters,
                             },
                             max_wait_duration: '10s',
                         },
@@ -837,7 +837,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
                         config: {
                             condition: {
                                 // Requires $autocapture with "reload" in elements_chain_texts — won't match
-                                filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters,
+                                filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters,
                             },
                             max_wait_duration: '2s',
                         },
@@ -926,7 +926,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         it('wakes a parked job and takes the matched branch when a subscribed event fires', async () => {
             await createWaitUntilWorkflow({
                 // Property condition never matches the trigger event, so the job parks.
-                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                 events: [eventNameFilter('wakeup_event')],
                 max_wait_duration: '5m',
             })
@@ -945,7 +945,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         it('wakes a parked job whose wait entry is action-based (events empty, actions + bytecode set)', async () => {
             await createWaitUntilWorkflow({
                 // Property condition never matches the trigger event, so the job parks.
-                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                 // "Events to wait for" entry targets a Insights Action: filters.events is empty,
                 // filters.actions is set, and the compiled bytecode matches the action's event.
                 events: [actionFilter('action_wakeup_event', 3)],
@@ -968,7 +968,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             await createWaitUntilWorkflow({
                 // No events list — only a property-based condition. The matcher evaluates the
                 // condition against every incoming event, making property waits event-driven.
-                condition: { filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters },
+                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters },
                 max_wait_duration: '5m',
             })
             // Trigger with an event that does not satisfy the condition, so the job parks.
@@ -988,7 +988,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
 
         it('takes the timeout branch when neither events nor the condition match before max_wait', async () => {
             await createWaitUntilWorkflow({
-                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                 events: [eventNameFilter('never_fires')],
                 max_wait_duration: '2s',
             })
@@ -1006,7 +1006,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
 
         it('leaves the job parked when an event matches neither the events nor the condition', async () => {
             await createWaitUntilWorkflow({
-                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                 events: [eventNameFilter('wakeup_event')],
                 max_wait_duration: '5m',
             })
@@ -1028,7 +1028,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             // to always-true bytecode. Inserted directly so it bypasses the serializer strip — this
             // guards the matcher itself, which must NOT fire the workflow on every incoming event.
             await createWaitUntilWorkflow({
-                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                 events: [emptyEventFilter()],
                 max_wait_duration: '5m',
             })
@@ -1509,7 +1509,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             // wakes parked waits whose "events to wait for" name the signal, matched by distinct_id.
             await createWaitUntilWorkflow({
                 // Property condition never matches the trigger event, so the job parks until the signal.
-                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                 events: [eventNameFilter('$insight_alert_firing')],
                 max_wait_duration: '5m',
             })
@@ -2369,7 +2369,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: {
                         type: 'function_email',
@@ -2447,7 +2447,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: {
                         type: 'function_email',
@@ -2525,7 +2525,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: {
                         type: 'function_email',
@@ -2649,7 +2649,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: emailAction('First email'),
                     fetch_1: {
@@ -2769,7 +2769,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: emailAction('Ping-pong email 1'),
                     fetch_1: {
@@ -2877,7 +2877,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     delay_1: { type: 'delay', config: { delay_duration: '1s' } },
                     email_1: {
@@ -2976,14 +2976,14 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: emailAction('First email'),
                     wait_condition: {
                         type: 'wait_until_condition',
                         config: {
                             // Property condition never matches, so only the event can wake the job.
-                            condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                            condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                             events: [eventNameFilter('wakeup_event')],
                             // Long enough that the job stays parked for the whole test — the only way
                             // the second email sends is the matcher waking it, never a timeout.
@@ -3080,7 +3080,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: {
                         type: 'function_email',
@@ -3183,7 +3183,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: {
                         type: 'function_email',
@@ -3332,7 +3332,7 @@ describe('Workflows E2E (email queue)', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     email_1: {
                         type: 'function_email',
@@ -3400,7 +3400,7 @@ describe('Workflows E2E (email queue)', () => {
                     actions: {
                         trigger: {
                             type: 'trigger',
-                            config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                            config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                         },
                         email_1: {
                             type: 'function_email',
@@ -4294,7 +4294,7 @@ describe('Workflows E2E (janitor poison-pill recovery, postgres-v2)', () => {
 
         hub = await createHub()
         // The give-up record path is gated on this flag (off by default outside dev).
-        hub.FN_INVOCATION_RESULTS_ENABLED = true
+        hub.INSIGHTS_INVOCATION_RESULTS_ENABLED = true
 
         kafkaProducer = await ActualKafkaProducerWrapper.create(hub.KAFKA_CLIENT_RACK)
         mockProducerObserver = new KafkaProducerObserver(kafkaProducer)

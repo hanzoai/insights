@@ -49,7 +49,7 @@ const openUrls: Partial<Record<ActivityScope, (c: CommentType) => string | null>
     [ActivityScope.GROUP]: (c) =>
         c.item_context?.group_type_index && c.item_id ? urls.group(c.item_context.group_type_index, c.item_id) : null,
     [ActivityScope.PLUGIN]: (c) => (c.item_id ? urls.legacyPlugin(c.item_id) : null),
-    [ActivityScope.FN_FUNCTION]: (c) => (c.item_id ? urls.insightsFunction(c.item_id) : null),
+    [ActivityScope.INSIGHTS_FUNCTION]: (c) => (c.item_id ? urls.insightsFunction(c.item_id) : null),
     // These don't have specific item URLs:
     [ActivityScope.TEAM]: () => urls.settings('project'),
     [ActivityScope.DATA_MANAGEMENT]: () => urls.eventDefinitions(),

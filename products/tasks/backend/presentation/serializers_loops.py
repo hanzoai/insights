@@ -80,9 +80,9 @@ class LoopConnectorsSerializer(serializers.Serializer):
         help_text="MCP Store installation ids (Slack, Linear, etc.) available to this loop's runs.",
     )
     insights_mcp_scopes = serializers.ChoiceField(
-        choices=loops_facade.POSTFN_MCP_SCOPES_CHOICES,
+        choices=loops_facade.INSIGHTS_MCP_SCOPES_CHOICES,
         required=False,
-        default=loops_facade.DEFAULT_POSTFN_MCP_SCOPES,
+        default=loops_facade.DEFAULT_INSIGHTS_MCP_SCOPES,
         help_text="Scope of the Insights MCP access injected into this loop's runs.",
     )
 

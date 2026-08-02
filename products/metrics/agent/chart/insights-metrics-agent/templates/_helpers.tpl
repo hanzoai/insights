@@ -40,7 +40,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{/*
 The full collector config mounted at /etc/insights/config.yaml (the image
 entrypoint's full-override escape hatch). The API key is referenced as
-${env:POSTFN_API_KEY} and resolved by the collector from the pod env,
+${env:INSIGHTS_API_KEY} and resolved by the collector from the pod env,
 so it never appears in the ConfigMap.
 */}}
 {{/*
@@ -128,7 +128,7 @@ exporters:
         metrics_endpoint: '{{ .Values.insights.host }}{{ .Values.insights.ingestPath | default "/i/v1/metrics" }}'
         compression: gzip
         headers:
-            authorization: 'Bearer ${env:POSTFN_API_KEY}'
+            authorization: 'Bearer ${env:INSIGHTS_API_KEY}'
         {{- if .Values.persistence.enabled }}
         # Persist undelivered batches so a restart during an outage loses nothing.
         sending_queue:

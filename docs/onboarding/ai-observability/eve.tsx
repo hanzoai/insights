@@ -43,8 +43,8 @@ export const getEveSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            POSTFN_PROJECT_TOKEN=<ph_project_token>
-                            POSTFN_HOST=<ph_client_api_host>
+                            INSIGHTS_PROJECT_TOKEN=<ph_project_token>
+                            INSIGHTS_HOST=<ph_client_api_host>
                         `}
                     />
                 </>
@@ -78,8 +78,8 @@ export const getEveSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                   spanProcessors: [
                                     new SimpleSpanProcessor(
                                       new InsightsTraceExporter({
-                                        projectToken: process.env.POSTFN_PROJECT_TOKEN!,
-                                        host: process.env.POSTFN_HOST,
+                                        projectToken: process.env.INSIGHTS_PROJECT_TOKEN!,
+                                        host: process.env.INSIGHTS_HOST,
                                       })
                                     ),
                                   ],

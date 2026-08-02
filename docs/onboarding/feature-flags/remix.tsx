@@ -42,8 +42,8 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 code: dedent`
                                     import { Insights } from 'insights-node'
 
-                                    const insights = new Insights(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN!, {
-                                        host: process.env.NEXT_PUBLIC_POSTFN_HOST
+                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
+                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                     })
                                 `,
                             },

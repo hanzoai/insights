@@ -6,9 +6,9 @@ describe('createFeatureFlagCalledDedupRedisConnectionConfig', () => {
         INGESTION_FEATURE_FLAG_CALLED_DEDUP_REDIS_PORT: 6379,
         INGESTION_REDIS_HOST: '',
         INGESTION_REDIS_PORT: 6379,
-        POSTFN_REDIS_HOST: '',
-        POSTFN_REDIS_PORT: 6379,
-        POSTFN_REDIS_PASSWORD: '',
+        INSIGHTS_REDIS_HOST: '',
+        INSIGHTS_REDIS_PORT: 6379,
+        INSIGHTS_REDIS_PASSWORD: '',
         // nosemgrep: trailofbits.generic.redis-unencrypted-transport.redis-unencrypted-transport
         REDIS_URL: 'redis://localhost:6379',
     }

@@ -15,7 +15,7 @@ describe('workflowSceneLogic', () => {
         logic.mount()
 
         expect(logic.values.sidePanelContext).toEqual({
-            activity_scope: ActivityScope.FN_FLOW,
+            activity_scope: ActivityScope.INSIGHTS_FLOW,
             activity_item_id: '0190abcd-1234-7000-8000-000000000000',
             access_control_resource: 'hog_flow',
             access_control_resource_id: '0190abcd-1234-7000-8000-000000000000',

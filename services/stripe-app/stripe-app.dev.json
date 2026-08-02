@@ -1,10 +1,10 @@
 {
     "extends": "stripe-app.json",
     "constants": {
-        "POSTFN_US_BASE_URL": "http://localhost:8010",
-        "POSTFN_EU_BASE_URL": "http://localhost:8010",
-        "POSTFN_DASHBOARD_URL": "http://localhost:8010",
-        "POSTFN_NEW_SOURCE_URL": "http://localhost:8010/data-warehouse/new-source?kind=Stripe"
+        "INSIGHTS_US_BASE_URL": "http://localhost:8010",
+        "INSIGHTS_EU_BASE_URL": "http://localhost:8010",
+        "INSIGHTS_DASHBOARD_URL": "http://localhost:8010",
+        "INSIGHTS_NEW_SOURCE_URL": "http://localhost:8010/data-warehouse/new-source?kind=Stripe"
     },
     "ui_extension": {
         "content_security_policy": {

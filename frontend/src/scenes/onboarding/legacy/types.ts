@@ -92,7 +92,7 @@ export interface ProductOnboardingProvider {
  * Standard dedup keys for install steps. Products that share an SDK should use the
  * same key on their install descriptor so the user only has to install once.
  *
- *  - `INSTALL_POSTFN_JS`: every product backed by `insights-js` (the JS web SDK + its
+ *  - `INSTALL_INSIGHTS_JS`: every product backed by `insights-js` (the JS web SDK + its
  *    server/mobile counterparts in the same SDKInstructionsMap shape).
  *  - `INSTALL_OPENTELEMETRY`: products that send data via OTel collectors (currently
  *    Logs; expand as we add more).
@@ -103,6 +103,6 @@ export interface ProductOnboardingProvider {
  * "any event ingested." Workflows ships a custom AI-wizard install header.
  */
 export const INSTALL_DEDUP_KEYS = {
-    POSTFN_JS: 'install:insights-js',
+    INSIGHTS_JS: 'install:insights-js',
     OPENTELEMETRY: 'install:opentelemetry',
 } as const

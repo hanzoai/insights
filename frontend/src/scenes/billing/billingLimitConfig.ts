@@ -2,8 +2,8 @@ import { BillingProductV2AddonType, BillingProductV2Type, BillingType } from '~/
 
 const MAX_BILLING_LIMIT: number = 50000
 
-export const POSTFN_CODE_USAGE_PRODUCT_KEY = 'insights_code_usage'
-export const POSTFN_CODE_BILLING_LIMIT_MAX: number = 3000
+export const INSIGHTS_CODE_USAGE_PRODUCT_KEY = 'insights_code_usage'
+export const INSIGHTS_CODE_BILLING_LIMIT_MAX: number = 3000
 
 export type BillingLimitConfig = {
     max: number
@@ -31,21 +31,21 @@ const DEFAULT_BILLING_LIMIT_CONFIG: BillingLimitConfig = {
 type BillingLimitConfigResolver = (context: BillingLimitConfigContext) => Partial<BillingLimitConfig> | null
 
 const BILLING_LIMIT_CONFIG_BY_PRODUCT: Record<string, BillingLimitConfigResolver> = {
-    [POSTFN_CODE_USAGE_PRODUCT_KEY]: ({ billing, customLimitUsd, billingLimitNextPeriod }) => {
+    [INSIGHTS_CODE_USAGE_PRODUCT_KEY]: ({ billing, customLimitUsd, billingLimitNextPeriod }) => {
         if (!billing?.startup_program_label) {
             return null
         }
 
         return {
-            max: POSTFN_CODE_BILLING_LIMIT_MAX,
+            max: INSIGHTS_CODE_BILLING_LIMIT_MAX,
             help: 'Code billing limits can be set from $0 to $3,000 per month.',
             removalDisabledReason: "Code billing limits can't be removed. Set the limit to $0 instead.",
             maxExceededError: "Code billing limits can't exceed $3,000 per month.",
             currentAboveMaxNotice:
                 customLimitUsd !== null &&
-                customLimitUsd > POSTFN_CODE_BILLING_LIMIT_MAX &&
+                customLimitUsd > INSIGHTS_CODE_BILLING_LIMIT_MAX &&
                 billingLimitNextPeriod !== null &&
-                billingLimitNextPeriod <= POSTFN_CODE_BILLING_LIMIT_MAX
+                billingLimitNextPeriod <= INSIGHTS_CODE_BILLING_LIMIT_MAX
                     ? `Current usage is already above the Code billing limit cap, so this period's limit stays at $${customLimitUsd.toLocaleString()}. The $${billingLimitNextPeriod.toLocaleString()} limit starts next period.`
                     : null,
         }

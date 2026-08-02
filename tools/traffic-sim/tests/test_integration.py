@@ -71,7 +71,7 @@ def test_check_loading_detects_stubbed_insights(fixture_server):
             cloud=False,
             timeout_ms=30_000,
             run_id="itest",
-            insights_domains=cli.DEFAULT_POSTFN_DOMAINS,
+            insights_domains=cli.DEFAULT_INSIGHTS_DOMAINS,
         )
     )
     assert len(pages) == 1

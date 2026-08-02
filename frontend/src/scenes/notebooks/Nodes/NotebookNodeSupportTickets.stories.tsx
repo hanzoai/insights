@@ -165,7 +165,7 @@ const meta: Meta = {
     // from getAppContext().current_team (not an API call), so enable it in the app context here.
     // beforeEach runs before Kea mounts teamLogic; the cleanup restores it for other stories.
     beforeEach: () => {
-        const appContext = window.POSTFN_APP_CONTEXT
+        const appContext = window.INSIGHTS_APP_CONTEXT
         const originalTeam = appContext?.current_team
         if (appContext) {
             appContext.current_team = { ...MOCK_DEFAULT_TEAM, conversations_enabled: true }

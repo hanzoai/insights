@@ -117,10 +117,10 @@
         "type": "onboarding"
     },
     "constants": {
-        "POSTFN_DASHBOARD_URL": "https://app.hanzo.ai",
-        "POSTFN_EU_BASE_URL": "https://eu.hanzo.ai",
-        "POSTFN_NEW_SOURCE_URL": "https://app.hanzo.ai/data-warehouse/new-source?kind=Stripe",
-        "POSTFN_US_BASE_URL": "https://us.hanzo.ai"
+        "INSIGHTS_DASHBOARD_URL": "https://app.hanzo.ai",
+        "INSIGHTS_EU_BASE_URL": "https://eu.hanzo.ai",
+        "INSIGHTS_NEW_SOURCE_URL": "https://app.hanzo.ai/data-warehouse/new-source?kind=Stripe",
+        "INSIGHTS_US_BASE_URL": "https://us.hanzo.ai"
     },
     "allowed_redirect_uris": [
         "https://us.hanzo.ai/integrations/stripe/callback",

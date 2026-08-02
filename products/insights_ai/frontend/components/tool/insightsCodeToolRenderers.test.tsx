@@ -5,7 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { ToolCallMessage } from 'products/insights_ai/frontend/types/toolTypes'
 
 import { resolveToolCall } from '../../utils/toolResolver'
-import { InsightsCodeToolRenderer, POSTFN_CODE_TOOLS_SERVER } from './insightsCodeToolRenderers'
+import { InsightsCodeToolRenderer, INSIGHTS_CODE_TOOLS_SERVER } from './insightsCodeToolRenderers'
 import { lookupToolRenderer } from './toolRegistry'
 
 function textBlock(text: string): unknown {
@@ -13,7 +13,7 @@ function textBlock(text: string): unknown {
 }
 
 function qualified(tool: string): string {
-    return `mcp__${POSTFN_CODE_TOOLS_SERVER}__${tool}`
+    return `mcp__${INSIGHTS_CODE_TOOLS_SERVER}__${tool}`
 }
 
 function makeMessage(overrides: Partial<ToolCallMessage> = {}): ToolCallMessage {
@@ -151,7 +151,7 @@ describe('insights-code tool renderers', () => {
         ],
         [
             'native-mcp',
-            { rawServerName: POSTFN_CODE_TOOLS_SERVER, rawToolName: 'git_signed_commit', input: {}, meta: undefined },
+            { rawServerName: INSIGHTS_CODE_TOOLS_SERVER, rawToolName: 'git_signed_commit', input: {}, meta: undefined },
             'git_signed_commit',
         ],
     ])('resolves the %s key shape to the signed-commit renderer', (_label, toolCall, expectedKey) => {
