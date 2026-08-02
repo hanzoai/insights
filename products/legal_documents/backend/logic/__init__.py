@@ -15,14 +15,11 @@ from django.db.models import QuerySet
 import structlog
 import hanzo_insights
 
-from insights.cloud_utils import get_cached_instance_license
 from insights.email import EmailMessage, get_email_team_and_org_context, is_email_available
 from insights.event_usage import groups
 from insights.exceptions_capture import capture_exception
 from insights.models.organization import Organization, OrganizationMembership
 from insights.storage import object_storage
-
-from ee.billing.billing_manager import BillingManager
 
 from ..facade.enums import DocumentType
 from ..models import LegalDocument
@@ -70,11 +67,11 @@ def template_id_matches_document(document: LegalDocument, template_id: str) -> b
 
 
 def has_qualifying_baa_addon(organization: Organization) -> bool:
-    billing = BillingManager(get_cached_instance_license()).get_billing(organization)
-    for product in billing.get("products") or []:
-        for addon in product.get("addons") or []:
-            if addon.get("type") in BAA_ADDON_TYPES and addon.get("subscribed"):
-                return True
+    """Whether the org subscribes to an addon that entitles it to a BAA.
+
+    Always False: entitlements were read from the billing service, which this fork does not carry,
+    so no organization can be shown as qualifying.
+    """
     return False
 
 

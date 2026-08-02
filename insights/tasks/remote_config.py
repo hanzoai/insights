@@ -21,7 +21,7 @@ logger = structlog.get_logger(__name__)
     time_limit=360,
 )
 @skip_team_scope_audit
-def update_team_remote_config(team_id: int, bypass_recordings_quota_cache: bool = False) -> None:
+def update_team_remote_config(team_id: int) -> None:
     try:
         team = Team.objects.get(id=team_id)
     except Team.DoesNotExist:
@@ -33,7 +33,7 @@ def update_team_remote_config(team_id: int, bypass_recordings_quota_cache: bool 
     except RemoteConfig.DoesNotExist:
         remote_config = RemoteConfig(team=team)
 
-    remote_config.sync(bypass_recordings_quota_cache=bypass_recordings_quota_cache)
+    remote_config.sync()
 
 
 @shared_task(ignore_result=True, queue=CeleryQueue.DEFAULT.value)

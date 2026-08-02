@@ -66,7 +66,7 @@ from products.replay_vision.backend.temporal.types import ScannerResult, Scanner
 from products.tasks.backend.facade import api as tasks_facade
 from products.tasks.backend.facade.access import has_tasks_access
 
-from ee.hogai.utils.untrusted import as_untrusted_data
+from insights.security.untrusted import as_untrusted_data
 
 logger = structlog.get_logger(__name__)
 

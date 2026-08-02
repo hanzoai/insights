@@ -5,8 +5,6 @@ from django.apps import apps
 
 from rest_framework import decorators, exceptions
 
-# Preload to work around circular imports in `ee.hogai.{core.agent_modes,chat_agent,tools}`.
-import insights.temporal.ai  # noqa: F401
 from insights.api import data_color_theme, metalytics, my_notifications, project, user_integration, user_push_token
 from insights.api.csp_reporting import CSPReportingViewSet
 from insights.api.js_snippet import JsSnippetViewSet
@@ -15,12 +13,6 @@ from insights.api.query_performance_proxy import QueryPerformanceProxyViewSet
 from insights.api.routing import DefaultRouterPlusPlus, RouterRegistry
 from insights.api.sdk_health import SdkHealthViewSet
 from insights.api.wizard import http as wizard
-from insights.settings import EE_AVAILABLE
-
-from ee.api.quota_limits import QuotaLimitsViewSet
-from ee.api.session_summaries import SessionGroupSummaryViewSet, SingleSessionSummaryViewSet
-from ee.api.vercel import vercel_installation, vercel_product, vercel_proxy, vercel_resource
-
 from ..session_recordings.session_recording_api import SessionRecordingViewSet
 from ..session_recordings.session_recording_external_reference_api import SessionRecordingExternalReferenceViewSet
 from ..session_recordings.session_recording_playlist_api import SessionRecordingPlaylistViewSet
@@ -125,13 +117,8 @@ projects_router.register(
 
 # Seats (proxied to billing service)
 
-# Quota limits (project-scoped — backs the LLM gateway's QuotaResolver)
-projects_router.register(
-    r"quota_limits",
-    QuotaLimitsViewSet,
-    "project_quota_limits",
-    ["team_id"],
-)
+# Quota limits had no implementation outside the enterprise edition. Nothing meters usage here,
+# so the route is gone rather than answering with a limit it cannot enforce.
 # Self-driving turns products ON (via the `products-enable` MCP tool) before enabling their
 # signal sources. Gated by the narrow `product_enablement` scope, never `project:write`.
 projects_router.register(
@@ -447,44 +434,13 @@ projects_router.register(
 
 projects_router.register(r"sessions", SessionViewSet, "project_sessions", ["team_id"])
 
-if EE_AVAILABLE:
-    from ee.datastore.views.groups import GroupsTypesViewSet, GroupsViewSet, GroupUsageMetricViewSet
-    from ee.datastore.views.person import EnterprisePersonViewSet, LegacyEnterprisePersonViewSet
+# Person reads have one implementation. Upstream swapped in an enterprise viewset here; without
+# it the standard one serves every deployment.
+projects_router.register(r"persons", PersonViewSet, "project_persons", ["team_id"])
+router.register(r"person", LegacyPersonViewSet, "persons")
 
-    projects_router.register(r"groups", GroupsViewSet, "project_groups", ["team_id"])
-    group_types_router = projects_router.register(
-        r"groups_types", GroupsTypesViewSet, "project_groups_types", ["project_id"]
-    )
-    group_types_router.register(
-        r"metrics", GroupUsageMetricViewSet, "project_groups_metrics", ["project_id", "group_type_index"]
-    )
-    projects_router.register(r"persons", EnterprisePersonViewSet, "project_persons", ["team_id"])
-    router.register(r"person", LegacyEnterprisePersonViewSet, "persons")
-    vercel_installations_router = router.register(
-        r"vercel/v1/installations",
-        vercel_installation.VercelInstallationViewSet,
-        "vercel_installations",
-    )
-    vercel_installations_router.register(
-        r"resources",
-        vercel_resource.VercelResourceViewSet,
-        "vercel_installation_resources",
-        ["installation_id"],
-    )
-    router.register(
-        r"vercel/v1/products",
-        vercel_product.VercelProductViewSet,
-        "vercel_products",
-    )
-    router.register(
-        r"vercel/proxy",
-        vercel_proxy.VercelProxyViewSet,
-        "vercel_proxy",
-    )
-
-else:
-    projects_router.register(r"persons", PersonViewSet, "project_persons", ["team_id"])
-    router.register(r"person", LegacyPersonViewSet, "persons")
+# Group analytics and the Vercel marketplace integration had no implementation outside the
+# enterprise edition, so they register no routes and their scenes have no backend to call.
 
 # session_recordings sharing nest stays central — the session_recordings viewsets
 # still live under insights/session_recordings/ rather than in a product folder.
@@ -495,19 +451,7 @@ legacy_project_session_recordings_router.register(
     ["team_id", "recording_id"],
 )
 
-projects_router.register(
-    r"session_group_summaries",
-    SessionGroupSummaryViewSet,
-    "project_session_group_summaries",
-    ["project_id"],
-)
-
-projects_router.register(
-    r"single_session_summaries",
-    SingleSessionSummaryViewSet,
-    "project_single_session_summaries",
-    ["project_id"],
-)
+# AI session summaries were built on the enterprise assistant and register no routes here.
 
 projects_router.register(
     r"quick_filters",
