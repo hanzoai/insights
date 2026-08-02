@@ -42,6 +42,17 @@ COPY patches/ patches/
 COPY common/ common/
 COPY products/ products/
 COPY docs/onboarding/ docs/onboarding/
+# @hanzo/quill, -charts and -components are workspace deps of the frontend and
+# live here, not under common/ or products/. The import brought them; this COPY
+# is the one upstream already carries for the same reason.
+COPY packages/quill/ packages/quill/
+# frontend depends on @hanzo/openapi-codegen as workspace:*, and pnpm-workspace
+# reaches it through `tools/*`. Upstream gets away with not copying it because
+# upstream installs --frozen-lockfile, which takes the link from the lockfile;
+# this stage re-resolves (see below), so the package has to actually be in the
+# workspace or the install stops on ERR_PNPM_WORKSPACE_PKG_NOT_FOUND. Only this
+# one member is named by the frontend, so only this one is copied.
+COPY tools/openapi-codegen/ tools/openapi-codegen/
 # Filter install — only @hanzo/frontend and its workspace deps. Drop
 # --frozen-lockfile because catalog `@parcel/transformer-typescript-types`
 # was bumped 2.16.4→2.13.3 to match scriptvm's pinned config-default.
