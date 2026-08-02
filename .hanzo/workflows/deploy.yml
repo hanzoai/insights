@@ -227,3 +227,85 @@ jobs:
             esac
           done
           echo "::error::could not push the pin after 5 attempts"; exit 1
+
+  # DID IT ACTUALLY WORK? Everything above publishes an image and points
+  # production at it. Neither step opens the product.
+  #
+  # This is the only job that answers "does insights work" rather than "did the
+  # pipeline run". It waits for the commit it just built to be the one serving,
+  # then drives a real browser through every scene a signed-in user can reach and
+  # asserts each one MOUNTED -- React put something under #root, no error boundary
+  # caught a throw, no 5xx while it loaded. Every one of those scenes answers 200
+  # to a plain HTTP request whether or not it renders, because they all serve the
+  # same SPA shell, so a status check would have passed on a blank screen.
+  #
+  # It runs after the pin rather than gating it. The release has already shipped
+  # by this point; what this decides is whether we find out.
+  verify:
+    needs: build
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for this commit to be the one serving
+        id: rollout
+        env:
+          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
+          KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
+          KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+          LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
+        run: |
+          set -euo pipefail
+
+          KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
+            -H 'Content-Type: application/json' \
+            -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+            | jq -r '.accessToken // empty')
+          [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+
+          # The e2e account's password lives in KMS and nowhere else. It is a real
+          # account with a hashed password, not a shared human login.
+          PW=$(curl -fsS \
+            "${KMS_ENDPOINT}/v1/kms/orgs/${KMS_ORG}/secrets/insights/E2E_PASSWORD?env=${KMS_SECRET_ENV}" \
+            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.secret.value // empty')
+          [ -n "$PW" ] || { echo "::error::E2E_PASSWORD missing in KMS at ${KMS_ORG}/insights (env ${KMS_SECRET_ENV})"; exit 1; }
+          echo "::add-mask::${PW}"
+          echo "pw=${PW}" >> "$GITHUB_OUTPUT"
+
+          # /_preflight/ reports insights_version as null, so the only honest
+          # signal for "which code is live" is the git sha on instance_status,
+          # which needs a session. Short sha: that is the form it reports.
+          WANT=$(printf '%s' "${GITHUB_SHA}" | cut -c1-10)
+          JAR=$(mktemp)
+          for attempt in $(seq 1 60); do
+            curl -fsS -c "$JAR" -o /dev/null -X POST "${LIVE_URL}/api/login" \
+              -H 'Content-Type: application/json' \
+              -d "$(jq -n --arg p "$PW" '{email:"e2e@hanzo.ai",password:$p}')" || true
+            GOT=$(curl -fsS -b "$JAR" "${LIVE_URL}/api/instance_status" 2>/dev/null \
+              | jq -r '.results.overview[]? | select(.key=="insights_git_sha") | .value' || true)
+            if [ "$GOT" = "$WANT" ]; then
+              echo "serving ${GOT} after ~$((attempt * 20))s"; exit 0
+            fi
+            echo "serving ${GOT:-unknown}, waiting for ${WANT} (${attempt}/60)"
+            sleep 20
+          done
+          # Not a test failure -- the rollout never arrived, which is a different
+          # fault from the product being broken, and saying so saves the next
+          # person from debugging the wrong half.
+          echo "::error::${WANT} never became the serving commit; CD did not roll it out"
+          exit 1
+
+      - name: Drive the product
+        env:
+          LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
+          LOGIN_USERNAME: e2e@hanzo.ai
+          LOGIN_PASSWORD: ${{ steps.rollout.outputs.pw }}
+        run: |
+          set -euo pipefail
+          corepack enable
+          pnpm install --frozen-lockfile --filter @hanzo/playwright...
+          cd playwright
+          ./node_modules/.bin/playwright install --with-deps chromium
+          ./node_modules/.bin/playwright test -c live/live.config.ts
