@@ -27,7 +27,7 @@ dirs = "6.0.0"
 dunce = "1.0.5"
 inquire = "0.7.5"
 chrono = "0.4.42"
-insights-symbol-data = "0.5.0"
+insights-symbol-data = { package = "posthog-symbol-data", version = "0.5.0" }
 walkdir = "2.5.0"
 globset = "0.4"
 ratatui = "0.29.0"
@@ -53,7 +53,7 @@ tracing = "0.1.41"
 uuid = { version = "1.16.0", features = ["v7"] }
 thiserror = "2.0.12"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
-insights-rs = { version = "0.15.0", default-features = false, features = ["error-tracking"] }
+insights-rs = { package = "posthog-rs", version = "0.15.0", default-features = false, features = ["error-tracking"] }
 sha2 = "0.10.9"
 urlencoding = "2.1.3"
 rayon = "1.11.0"
