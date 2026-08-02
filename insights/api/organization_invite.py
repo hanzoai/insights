@@ -241,7 +241,7 @@ class OrganizationInviteSerializer(serializers.ModelSerializer):
                 # User is not an org admin/owner
                 pass
 
-            from ee.models.rbac.access_control import AccessControl
+            from insights.models.ee_models import AccessControl
 
             # Check if the team has an access control row that applies to the entire resource
             team_access_controls = AccessControl.objects.filter(

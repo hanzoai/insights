@@ -104,7 +104,7 @@ from products.notebooks.backend.facade import (
 # account -> ResourceNotebook -> notebook relation can't cross a data facade. All account-notebook
 # CRUD goes through `notebooks` (the facade). Tracked by the notebooks legacy-leak interface block.
 from products.notebooks.backend.models import ResourceNotebook
-from products.workflows.backend.services.template_input_usage import get_hog_flows_referencing_template_input_keys
+from products.workflows.backend.services.template_input_usage import get_insights_flows_referencing_template_input_keys
 
 from . import contracts
 
@@ -416,7 +416,7 @@ def create_external_account(
     existing = _get_external_account_by_external_id(team.pk, external_id)
     if existing is not None:
         return _to_external_account(existing), False
-    trigger = Trigger(job_type="hog_flow", job_id=workflow_id, payload={}) if workflow_id else None
+    trigger = Trigger(job_type="insights_flow", job_id=workflow_id, payload={}) if workflow_id else None
     account = create_account(
         team=team, name=_account_name_from_group(team, external_id), external_id=external_id, trigger=trigger
     )
@@ -995,10 +995,10 @@ def _can_read_workflow_references(user_access_control: "UserAccessControl") -> b
     """Whether the caller may see the workflows that reference a custom property.
 
     ``references`` exposes InsightsFlow metadata (id, name, status), so it's gated on the caller
-    having at least viewer access to the ``hog_flow`` resource — the property-definition API is
+    having at least viewer access to the ``insights_flow`` resource — the property-definition API is
     authorized as ``account``, and a caller without workflow read access must not enumerate
     workflows through it. Without RBAC restrictions this resolves to the default (allowed)."""
-    return user_access_control.check_access_level_for_resource("hog_flow", "viewer")
+    return user_access_control.check_access_level_for_resource("insights_flow", "viewer")
 
 
 def _custom_property_references_by_definition_id(
@@ -1007,7 +1007,7 @@ def _custom_property_references_by_definition_id(
     """Map each referenced definition id to the workflows that set it via the "Update account
     property" action. One scan of the team's workflows, matched by definition id. Pass
     ``definition_id`` to scan for just that one definition (the single-definition lookup)."""
-    usage = get_hog_flows_referencing_template_input_keys(
+    usage = get_insights_flows_referencing_template_input_keys(
         team_id, _ACCOUNT_PROPERTY_TEMPLATE_ID, _ACCOUNT_PROPERTY_INPUT_KEY, only_value_key=definition_id
     )
     return {

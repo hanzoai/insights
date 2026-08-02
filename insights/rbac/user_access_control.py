@@ -20,7 +20,7 @@ from insights.settings import EE_AVAILABLE
 if TYPE_CHECKING:
     from insights.models.file_system.file_system import FileSystem
 
-    from ee.models import AccessControl
+    from insights.models.ee_models import AccessControl
 
     _AccessControl = AccessControl
 else:
@@ -28,8 +28,8 @@ else:
 
 
 try:
-    from ee.models.rbac.access_control import AccessControl
-    from ee.models.rbac.role import RoleMembership
+    from insights.models.ee_models import AccessControl
+    from insights.models.ee_models import RoleMembership
 except ImportError:
     pass
 
@@ -70,7 +70,7 @@ ACCESS_CONTROL_RESOURCES: tuple[APIScopeObject, ...] = (
     "warehouse_objects",
     "feature_flag",
     "heatmap",
-    "hog_flow",
+    "insights_flow",
     "insight",
     "llm_analytics",
     "tagger",
@@ -184,7 +184,7 @@ def resource_to_display_name(resource: APIScopeObject) -> str:
     # Handle special cases
     if resource == "organization":
         return "organization"  # singular
-    if resource == "hog_flow":
+    if resource == "insights_flow":
         return "workflows"
     if resource == "ai_observability_clusters":
         return "AI trace clusters"
@@ -453,10 +453,10 @@ def model_to_resource(model: Model) -> Optional[APIScopeObject]:
         return "experiment_holdout"
     if name == "endpointversion":
         return "endpoint"
-    # The workflow scope is "hog_flow" but the model is "hogflow"; its batch jobs and schedules have no
+    # The workflow scope is "insights_flow" but the model is "hogflow"; its batch jobs and schedules have no
     # route of their own and inherit the parent workflow's access (same idea as endpointversion → endpoint).
     if name in ("hogflow", "hogflowbatchjob", "insightsflowschedule"):
-        return "hog_flow"
+        return "insights_flow"
     if name == "externaldatasource":
         return "external_data_source"
     if name == "datawarehousesavedquery":

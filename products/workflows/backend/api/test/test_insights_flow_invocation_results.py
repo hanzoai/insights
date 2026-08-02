@@ -14,7 +14,7 @@ from insights.models.hog_invocation_results.sql import INSERT_FN_INVOCATION_RESU
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 def create_hog_invocation_result(
@@ -22,7 +22,7 @@ def create_hog_invocation_result(
     function_id: str,
     invocation_id: str,
     *,
-    function_kind: str = "hog_flow",
+    function_kind: str = "insights_flow",
     invocation_status: str = "success",
     version: int = 1,
     is_deleted: int = 0,
@@ -69,19 +69,19 @@ def create_hog_invocation_result(
 class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.hog_flow = InsightsFlow.objects.create(team=self.team, name="Test Flow")
+        self.insights_flow = InsightsFlow.objects.create(team=self.team, name="Test Flow")
 
     def _list(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/hog_flows/{self.hog_flow.id}/invocation_results/", params)
+        return self.client.get(f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", params)
 
     def _detail(self, invocation_id: str):
         return self.client.get(
-            f"/api/projects/{self.team.id}/hog_flows/{self.hog_flow.id}/invocation_results/{invocation_id}/"
+            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/{invocation_id}/"
         )
 
     def _seed(self, invocation_id: str, **kwargs):
         create_hog_invocation_result(
-            team_id=self.team.pk, function_id=str(self.hog_flow.pk), invocation_id=invocation_id, **kwargs
+            team_id=self.team.pk, function_id=str(self.insights_flow.pk), invocation_id=invocation_id, **kwargs
         )
 
     def test_returns_empty_when_no_invocations(self):
@@ -187,7 +187,7 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         # Same team, but a insights_function invocation and a different flow id must not leak in.
         create_hog_invocation_result(
             team_id=self.team.pk,
-            function_id=str(self.hog_flow.pk),
+            function_id=str(self.insights_flow.pk),
             invocation_id="inv-fn",
             function_kind="insights_function",
         )
@@ -228,21 +228,21 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
 
     def test_personal_api_key_requires_person_read_scope(self):
         # Invocation inspection exposes distinct_id / person_id and the triggering payload, so a
-        # hog_flow:read-only token must not be able to enumerate who a workflow ran for — person:read
+        # insights_flow:read-only token must not be able to enumerate who a workflow ran for — person:read
         # is also required.
         self._seed("inv-1")
         key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="hog_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["hog_flow:read"]
+            label="insights_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["insights_flow:read"]
         )
         headers = {"authorization": f"Bearer {key}"}
         list_res = self.client.get(
-            f"/api/projects/{self.team.id}/hog_flows/{self.hog_flow.id}/invocation_results/", headers=headers
+            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
         )
         assert list_res.status_code == 403, list_res.json()
         assert "person:read" in list_res.json().get("detail", "")
         detail_res = self.client.get(
-            f"/api/projects/{self.team.id}/hog_flows/{self.hog_flow.id}/invocation_results/inv-1/", headers=headers
+            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/", headers=headers
         )
         assert detail_res.status_code == 403, detail_res.json()
         assert "person:read" in detail_res.json().get("detail", "")
@@ -251,19 +251,19 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         self._seed("inv-1", invocation_globals='{"event": {"event": "$pageview"}}')
         key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="hog_flow + person",
+            label="insights_flow + person",
             user=self.user,
             secure_value=hash_key_value(key),
-            scopes=["hog_flow:read", "person:read"],
+            scopes=["insights_flow:read", "person:read"],
         )
         headers = {"authorization": f"Bearer {key}"}
         list_res = self.client.get(
-            f"/api/projects/{self.team.id}/hog_flows/{self.hog_flow.id}/invocation_results/", headers=headers
+            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
         )
         assert list_res.status_code == 200, list_res.json()
         assert {r["invocation_id"] for r in list_res.json()} == {"inv-1"}
         detail_res = self.client.get(
-            f"/api/projects/{self.team.id}/hog_flows/{self.hog_flow.id}/invocation_results/inv-1/", headers=headers
+            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/", headers=headers
         )
         assert detail_res.status_code == 200, detail_res.json()
         assert detail_res.json()["invocation_id"] == "inv-1"

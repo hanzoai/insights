@@ -688,7 +688,7 @@ class TestCustomPropertyDefinitionReferences(BaseTest):
         ]
 
     def test_references_hidden_without_workflow_read_access(self):
-        # references expose InsightsFlow metadata, so a caller without hog_flow read access sees none.
+        # references expose InsightsFlow metadata, so a caller without insights_flow read access sees none.
         plan = create_custom_property_definition(team_id=self.team.id, name="Plan")
         self._create_workflow_setting(str(plan.id))
 

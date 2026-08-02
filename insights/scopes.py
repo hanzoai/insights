@@ -58,7 +58,7 @@ APIScopeObject = Literal[
     "group",
     "health_issue",
     "heatmap",
-    "hog_flow",
+    "insights_flow",
     "insights_function",
     "ingestion_warning",
     "insight",

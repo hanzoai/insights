@@ -34,7 +34,7 @@ from products.experiments.backend.session_context import (
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
 from ee.api.test.base import APILicensedTest
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 RECORDING_START = datetime(2026, 1, 1, 10, 0, 0, tzinfo=UTC)
 RECORDING_END = datetime(2026, 1, 1, 10, 30, 0, tzinfo=UTC)

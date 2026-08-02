@@ -19,7 +19,7 @@ from rest_framework.test import APIClient
 from insights.constants import AvailableFeature
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

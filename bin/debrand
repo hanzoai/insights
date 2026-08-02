@@ -77,6 +77,10 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("HogFunction", "InsightsFunction"),
     ("hogFunction", "insightsFunction"),
     ("hog_function", "insights_function"),
+    # Both spellings are needed here, not just in PATH_RENAMES: renaming the
+    # directory alone leaves `from .hog_flow.hog_flow import ...` pointing at a
+    # path that no longer exists.
+    ("hog_flow", "insights_flow"),
     ("hogflows", "insightsflows"),
     ("HogFlow", "InsightsFlow"),
     ("hogvm", "scriptvm"),

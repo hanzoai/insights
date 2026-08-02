@@ -12,7 +12,7 @@ from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value
 from insights.test.persons import create_person
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 def create_message_asset(
@@ -21,7 +21,7 @@ def create_message_asset(
     invocation_id: str,
     *,
     action_id: str = "email-step",
-    function_kind: str = "hog_flow",
+    function_kind: str = "insights_flow",
     parent_run_id: str = "",
     kind: str = "email",
     distinct_id: str = "user-1",
@@ -59,17 +59,17 @@ def create_message_asset(
 class TestMessageAssets(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.hog_flow = InsightsFlow.objects.create(team=self.team, name="Test Flow")
+        self.insights_flow = InsightsFlow.objects.create(team=self.team, name="Test Flow")
 
     def _base(self) -> str:
-        return f"/api/projects/{self.team.id}/hog_flows/{self.hog_flow.id}"
+        return f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}"
 
     def _list(self, params=None):
         return self.client.get(f"{self._base()}/assets/", params)
 
     def _seed(self, invocation_id: str, **kwargs):
         create_message_asset(
-            team_id=self.team.pk, function_id=str(self.hog_flow.pk), invocation_id=invocation_id, **kwargs
+            team_id=self.team.pk, function_id=str(self.insights_flow.pk), invocation_id=invocation_id, **kwargs
         )
 
     def test_returns_empty_when_no_assets(self):
@@ -148,7 +148,7 @@ class TestMessageAssets(DatastoreTestMixin, APIBaseTest):
         self._seed("inv-mine")
         create_message_asset(
             team_id=self.team.pk,
-            function_id=str(self.hog_flow.pk),
+            function_id=str(self.insights_flow.pk),
             invocation_id="inv-fn",
             function_kind="insights_function",
         )
@@ -209,7 +209,7 @@ class TestMessageAssets(DatastoreTestMixin, APIBaseTest):
         self._seed("inv-1", action_id="step-a")
         key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="hog_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["hog_flow:read"]
+            label="insights_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["insights_flow:read"]
         )
         res = self.client.get(f"{self._base()}/{path}", headers={"authorization": f"Bearer {key}"})
         assert res.status_code == 403, res.json()
@@ -220,7 +220,7 @@ class TestPersonEmails(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         self.person = create_person(team=self.team, distinct_ids=["distinct-1"], properties={"email": "p@example.com"})
-        self.hog_flow = InsightsFlow.objects.create(team=self.team, name="Welcome flow")
+        self.insights_flow = InsightsFlow.objects.create(team=self.team, name="Welcome flow")
 
     def _emails(self, params=None):
         return self.client.get(f"/api/projects/{self.team.id}/persons/{self.person.uuid}/emails/", params)
@@ -228,7 +228,7 @@ class TestPersonEmails(DatastoreTestMixin, APIBaseTest):
     def _seed(self, invocation_id: str, *, person_id: Optional[str] = None, **kwargs):
         create_message_asset(
             team_id=self.team.pk,
-            function_id=str(self.hog_flow.pk),
+            function_id=str(self.insights_flow.pk),
             invocation_id=invocation_id,
             person_id=person_id or str(self.person.uuid),
             **kwargs,
@@ -247,10 +247,10 @@ class TestPersonEmails(DatastoreTestMixin, APIBaseTest):
         assert row["invocation_id"] == "inv-1"
         assert row["subject"] == "Hello"
         assert row["recipient"] == "p@example.com"
-        assert row["function_id"] == str(self.hog_flow.pk)
+        assert row["function_id"] == str(self.insights_flow.pk)
         # Workflow name is enriched from Postgres so the tab shows "Test Flow" instead of a UUID.
         # A regression here would put raw workflow IDs in front of users.
-        assert row["function_name"] == self.hog_flow.name
+        assert row["function_name"] == self.insights_flow.name
         assert "html" not in row
 
     def test_function_name_empty_when_workflow_deleted(self):
@@ -275,7 +275,7 @@ class TestPersonEmails(DatastoreTestMixin, APIBaseTest):
         self._seed("mine")
         create_message_asset(
             team_id=self.team.pk + 9999,
-            function_id=str(self.hog_flow.pk),
+            function_id=str(self.insights_flow.pk),
             invocation_id="other-team",
             person_id=str(self.person.uuid),
         )
@@ -320,7 +320,7 @@ class TestPersonEmails(DatastoreTestMixin, APIBaseTest):
             label="no person scope",
             user=self.user,
             secure_value=hash_key_value(key),
-            scopes=["hog_flow:read"],
+            scopes=["insights_flow:read"],
         )
         res = self.client.get(
             f"/api/projects/{self.team.id}/persons/{self.person.uuid}/emails/",
