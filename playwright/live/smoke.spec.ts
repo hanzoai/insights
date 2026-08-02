@@ -32,6 +32,20 @@ async function open(page: Page, path: string): Promise<void> {
             message: `nothing rendered under #root at ${path}`,
         })
         .toBeGreaterThan(0)
+
+    // ...and then let the SCENE render, which is a separate event.
+    //
+    // This wait is the whole test. #root gets its first child the moment the app
+    // shell paints, which is almost immediately and is true even when the scene
+    // inside it is about to throw. Asserting health at that point asked "did the
+    // shell mount" and answered yes for scenes that crash a second later: this
+    // suite passed feature flags, users and cohorts green while all three were
+    // rendering "An error has occurred". A false green is worse than no test.
+    await page.waitForLoadState('networkidle', { timeout: 60_000 }).catch(() => {
+        // Some scenes hold a poll or a socket open and never go idle. That is not
+        // a failure -- fall through to the settle below and assert on what is there.
+    })
+    await page.waitForTimeout(2_000)
 }
 
 async function expectHealthy(page: Page, w: Watch, path: string): Promise<void> {
