@@ -12,7 +12,6 @@ from django.utils.translation import gettext_lazy as _
 from django_deprecate_fields import deprecate_field
 from rest_framework.exceptions import ValidationError
 
-from insights.cloud_utils import get_cached_instance_license, is_cloud
 from insights.constants import AvailableFeature
 from insights.exceptions_capture import capture_exception
 from insights.helpers.email_utils import EmailLookupHandler, EmailNormalizer
@@ -598,10 +597,8 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):  # type: ignore
                 self.save()
 
     def update_billing_organization_users(self, organization: Organization) -> None:
-        from ee.billing.billing_manager import BillingManager  # avoid circular import
-
-        if is_cloud() and get_cached_instance_license() is not None:
-            BillingManager(get_cached_instance_license(), self).update_billing_organization_users(organization)
+        """Mirror this org's members into the billing service. No-op: there is no billing service."""
+        return
 
     def get_analytics_metadata(self):
         team_member_count_all: int = (

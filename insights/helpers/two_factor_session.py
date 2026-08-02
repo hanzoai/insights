@@ -12,8 +12,8 @@ from django.utils.crypto import constant_time_compare, salted_hmac
 
 import structlog
 import hanzo_insights
-from loginas.utils import is_impersonated_session
 from hanzo_insights import capture_exception
+from loginas.utils import is_impersonated_session
 from prometheus_client import Counter
 from rest_framework.exceptions import PermissionDenied
 from two_factor.utils import default_device
@@ -273,13 +273,7 @@ def is_sso_authentication_backend(request: HttpRequest):
     if not hasattr(request, "session"):
         return False
 
-    # Check if we're in EE, if yes, use the EE settings, otherwise use the insights settings
-    try:
-        from ee import settings
-
-        SSO_AUTHENTICATION_BACKENDS = settings.AUTHENTICATION_BACKENDS
-    except ImportError:
-        SSO_AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS
+    SSO_AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS
 
     # Remove the non-SSO backends from the list
     SSO_AUTHENTICATION_BACKENDS = list(set(SSO_AUTHENTICATION_BACKENDS) - set(NON_SSO_AUTHENTICATION_BACKENDS))
