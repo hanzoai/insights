@@ -360,7 +360,9 @@ export const RecordingsUniversalFiltersEmbed = ({ ...props }: ReplayUniversalFil
                 onChange={(activeKey) => setActiveFilterTab(activeKey)}
                 size="small"
                 tabs={tabs}
-                barClassName="sticky top-0 z-10 bg-primary"
+                // Sticky: paint it as the canvas it sits on, not the ground.
+                // See SceneStickyBar for the full reasoning.
+                barClassName="sticky top-0 z-10 bg-[var(--scene-layout-background,var(--color-bg-primary))]"
                 rightSlot={<Button icon={<IconX />} size="small" onClick={() => setIsFiltersExpanded(false)} />}
             />
         </div>

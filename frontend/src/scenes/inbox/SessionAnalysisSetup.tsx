@@ -78,7 +78,11 @@ function SessionAnalysisSetupChat(): JSX.Element {
 
             <div
                 className={`w-full max-w-3xl mx-auto px-3 transition-all duration-300 ease-out z-50 ${
-                    hasMessages ? 'sticky bottom-0 bg-primary py-2 max-w-none' : ''
+                    hasMessages
+                        ? // Sticky: paint it as the canvas it sits on, not the ground.
+                          // See SceneStickyBar for the full reasoning.
+                          'sticky bottom-0 bg-[var(--scene-layout-background,var(--color-bg-primary))] py-2 max-w-none'
+                        : ''
                 }`}
             >
                 <SidebarQuestionInput />
