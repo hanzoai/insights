@@ -18,11 +18,16 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
     scope_object = "INTERNAL"
 
     def create(self, request, *args, **kwargs) -> Response:
-        iql = request.data.get("iql")
-        program = parse_program(fn)
+        # `code` is the field the one caller sends (`api.fn.create` in lib/api.ts). Reading anything
+        # else compiles `None`; reading a name that was never bound raised before it got that far.
+        code = request.data.get("code")
         in_repl = request.data.get("in_repl", "false") in ("true", "True", True)
         locals = request.data.get("locals", []) or []
         try:
+            # Parsing is inside the handler because the input is the caller's, and a program that
+            # does not parse is a bad request, not a server fault. Outside it, every syntax error
+            # was a 500 carrying no reason.
+            program = parse_program(code)
             compiled = create_bytecode(
                 program,
                 supported_functions={"sleep", "fetch", "insightsCapture", "run"},
@@ -38,7 +43,11 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
         except ExposedInsightsQLError as e:
-            return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
+            # `str(e)`, not `e.message`: `BaseInsightsQLError` annotates `message` but its
+            # constructor never assigns it, so reading it raised `AttributeError` and turned every
+            # exposable error into a 500. This is how the other handler renders one too
+            # (`batch_exports/http.py`).
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Failed to compile script: {e}", exc_info=True, error=e)
             return Response({"error": "Internal error when compiling script"}, status=status.HTTP_400_BAD_REQUEST)

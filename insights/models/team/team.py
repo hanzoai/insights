@@ -18,8 +18,8 @@ import pytz
 import pydantic
 import hanzo_insights
 
-from insights.datastore.query_tagging import tag_queries
 from insights.cloud_utils import is_cloud
+from insights.datastore.query_tagging import tag_queries
 from insights.helpers.dashboard_templates import create_dashboard_from_template
 from insights.helpers.session_recording_playlist_templates import DEFAULT_PLAYLISTS
 from insights.models.dashboard import Dashboard
@@ -943,9 +943,13 @@ class Team(UUIDTClassicModel):
         create_data_for_demo_team.delay(self.id, initiating_user.id, cache_key)
 
     def all_users_with_access(self) -> QuerySet["User"]:
+        # Imported here rather than at module scope because these are the `managed=False` models
+        # over the `ee_*` tables, which must not be imported before the app registry is ready. Their
+        # uses below outlived the import when `ee/` went, so every call to this raised `NameError` —
+        # including the one the request path makes.
+        from insights.models.ee_models import AccessControl, RoleMembership
         from insights.models.organization import OrganizationMembership
         from insights.models.user import User
-
 
         # First, check if the team is private
         team_is_private = AccessControl.objects.filter(

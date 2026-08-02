@@ -4,11 +4,18 @@ import { urls } from 'scenes/urls'
 /**
  * What this build of Insights carries, and the honest thing to say where it doesn't.
  *
- * Everything listed here as unavailable was implemented in upstream's separately-licensed `ee/`
- * tree, which this fork does not ship. Their endpoints are absent, not failing — `/subscriptions/`,
- * `/roles/`, `/session_summaries/` and `/conversations/` all answer 404 while a working endpoint
- * answers 401/403. So a surface for one of these must not fire a request and must not offer a
- * control that cannot work.
+ * Everything listed here as unavailable went with upstream's separately-licensed `ee/` tree, which
+ * this fork does not ship. Mostly that means the endpoints are absent rather than failing —
+ * `/subscriptions/`, `/roles/`, `/session_summaries/`, `/conversations/` and `/groups/` all answer
+ * 404 while a working endpoint answers 401/403. So a surface for one of these must not fire a
+ * request and must not offer a control that cannot work.
+ *
+ * Absent is not the only way to be unavailable, though, so check before assuming it: `approvals`
+ * below answers 401 and is unavailable for a different reason entirely.
+ *
+ * This is about what the build carries, so it is the frontend half of one answer. The backend half
+ * is `PRODUCT_FEATURES` in `insights/models/organization.py`, which lists the features that ARE
+ * carried; a capability here should be absent from that list, and vice versa.
  *
  * Two ways to read a capability. Where an entry point can simply go away (a nav item, a button),
  * check `available` and don't render it. Where someone can still land on the surface — a bookmark,
@@ -19,7 +26,7 @@ import { urls } from 'scenes/urls'
  * nobody is scheduled to keep is worse than a plain gap. When one genuinely ships, flip
  * `available` here and every surface that reads it comes back at once.
  */
-export type CapabilityKey = 'ai' | 'sessionSummaries' | 'subscriptions' | 'roles' | 'approvals'
+export type CapabilityKey = 'ai' | 'sessionSummaries' | 'subscriptions' | 'roles' | 'approvals' | 'groups'
 
 export interface Capability {
     /** Surfaces read this to decide whether to render, and loaders to decide whether to fetch. */
@@ -64,12 +71,28 @@ export const CAPABILITIES: Record<CapabilityKey, Capability> = {
         body: 'Access is granted per member and per project. Grouping members into roles is not part of Insights.',
         link: { to: () => urls.settings('organization-members'), label: 'Go to members' },
     },
-    // Two settings panes and a routed scene, shown to every org admin, all reading endpoints that
-    // answer 404. Approvals also drew its approver lists from roles, so it could not have worked
-    // even if its own endpoints came back.
+    // The exception to the paragraph above: approvals is the one entry here whose endpoints are
+    // NOT absent. `change_requests` and `approval_policies` are registered on the environments
+    // router and answer 401, and `PremiumFeaturePermission` only enforces on cloud, so they are
+    // open. What left with `ee/` was the roles the policy pointed at, and the code that reads them
+    // stayed: `ApprovalPolicy.bypass_roles` is gone from the model, yet `PolicyEngine.evaluate`
+    // reads it on its first line and `ApprovalPolicySerializer` still declares a field for it. So a
+    // policy raises the moment it is asked to hold a change — which is exactly when it matters.
+    //
+    // That makes this the one capability here that is a repair rather than a port: drop the role
+    // pickers and the two reads, and approvals can be listed in `PRODUCT_FEATURES` and turned on.
     approvals: {
         available: false,
         title: 'Approvals are not available',
         body: 'Changes apply as soon as they are made. Insights cannot hold one for review first. Every change is still recorded in the activity log.',
+    },
+    // No groups viewset was ported: `/groups/`, `/groups_types/`, `/groups/find` and
+    // `/groups/related` all answer 404, and no group type can be created. The upstream surface
+    // treats this as an upsell — "Upgrade now", pointing at billing — which is wrong twice over
+    // here, since there is no plan to buy and buying one would not add the endpoints.
+    groups: {
+        available: false,
+        title: 'Group analytics is not available',
+        body: 'Insights cannot roll users up into companies or accounts. Analysis is per user and per event, and every insight, cohort and recording works on that basis.',
     },
 }

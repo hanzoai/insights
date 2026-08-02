@@ -1,5 +1,6 @@
 import { connect, kea, path, selectors } from 'kea'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -53,6 +54,11 @@ export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>(
         groupTabs: [
             (s) => [s.groupTypes, s.groupsAccessStatus, s.aggregationLabel],
             (groupTypes, groupsAccessStatus, aggregationLabel): PersonsManagementTab[] => {
+                // No groups endpoint answers, so this tab has nothing to show.
+                if (!CAPABILITIES.groups.available) {
+                    return []
+                }
+
                 const showGroupsIntroductionPage = [
                     GroupsAccessStatus.HasAccess,
                     GroupsAccessStatus.HasGroupTypes,
