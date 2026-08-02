@@ -155,13 +155,13 @@ def hog_flow_deleted(sender, instance: InsightsFlow, **kwargs):
 
 @receiver(post_save, sender=Action)
 def action_saved_for_hog_flows(sender, instance: Action, created, **kwargs):
-    from products.workflows.backend.tasks.hog_flows import refresh_affected_hog_flows  # noqa: PLC0415
+    from products.workflows.backend.tasks.insights_flows import refresh_affected_hog_flows  # noqa: PLC0415
 
     refresh_affected_hog_flows.delay(action_id=instance.id)
 
 
 @receiver(post_save, sender=Team)
 def team_saved_for_hog_flows(sender, instance: Team, created, **kwargs):
-    from products.workflows.backend.tasks.hog_flows import refresh_affected_hog_flows  # noqa: PLC0415
+    from products.workflows.backend.tasks.insights_flows import refresh_affected_hog_flows  # noqa: PLC0415
 
     refresh_affected_hog_flows.delay(team_id=instance.id)
