@@ -334,7 +334,7 @@ GENERATED_DASHBOARD_PREFIX = "Generated Dashboard"
 
 ENRICHED_DASHBOARD_INSIGHT_IDENTIFIER = "Feature Viewed"
 
-PERMITTED_FORUM_DOMAINS = ["localhost", "hanzo.ai"]
+PERMITTED_FORUM_DOMAINS: list[str] = []
 
 INVITE_DAYS_VALIDITY = 3  # number of days for which team invites are valid
 
