@@ -5,6 +5,7 @@ from urllib.parse import urlencode, urlparse
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import render
 from django.template import loader
 from django.urls import include, path, re_path
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -744,6 +745,49 @@ if settings.TEST:
 urlpatterns.append(
     opt_slash_path("sign-up", RedirectView.as_view(url="/signup", permanent=True, query_string=True)),
 )
+
+
+# Hanzo IAM is the only login, so /login goes straight to the OIDC handshake
+# rather than rendering the SPA's login scene. The scene exists to offer a
+# choice of providers; with one provider it renders a blank page while the
+# bundle loads and then redirects anyway.
+def _login_oidc_redirect(request: HttpRequest) -> HttpResponseRedirect:
+    next_url = request.GET.get("next", "/")
+    return HttpResponseRedirect(f"/login/oidc/?next={next_url}")
+
+
+urlpatterns.append(path("login", _login_oidc_redirect))
+
+
+@ensure_csrf_cookie
+def root(request: HttpRequest) -> HttpResponse:
+    """`/` — the app for a signed-in user, the marketing landing for everyone else.
+
+    Anonymous `/` otherwise falls through to the catch-all below and bounces
+    straight to SSO, so the product has no public face at all: the only thing an
+    unauthenticated visitor can see is a login screen. Signed-in behaviour is
+    unchanged — same `home` view, same SPA.
+
+    The CTAs point at surfaces that actually work. Plans deliberately leave for
+    hanzo.ai/pricing rather than this app's own billing pages: `/api/billing`
+    is not served here, so an in-app upgrade funnel would dead-end, and a funnel
+    into nothing is worse than a link out.
+    """
+    if request.user.is_authenticated:
+        return home(request)
+    return render(
+        request,
+        "landing.html",
+        {
+            "login_url": "/login",
+            "plans_url": "https://hanzo.ai/pricing",
+            "docs_url": "https://docs.hanzo.ai",
+            "source_url": "https://github.com/hanzoai/insights",
+        },
+    )
+
+
+urlpatterns.append(re_path(r"^$", root))
 
 # Routes added individually to remove login requirement
 frontend_unauthenticated_routes = [
