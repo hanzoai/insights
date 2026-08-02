@@ -3,6 +3,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { IconSparkles } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { Progress } from 'lib/elements/Progress'
 import { pluralize } from 'lib/utils'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
@@ -45,6 +47,12 @@ export function AISessionSummary({ personId }: { personId: string }): JSX.Elemen
 function AISummaryIdle(): JSX.Element {
     const { numSessionsWithRecording } = useValues(notebookNodePersonFeedLogic)
     const { summarizeSessions } = useActions(notebookNodePersonFeedLogic)
+
+    // The other half of the session-summary surface: same absent endpoint as the replay sidebar,
+    // reached from a person's feed in a notebook. Without this it offers "Summarize sessions".
+    if (!CAPABILITIES.sessionSummaries.available) {
+        return <Unavailable capability="sessionSummaries" />
+    }
 
     return (
         <div className="flex items-center justify-between">
