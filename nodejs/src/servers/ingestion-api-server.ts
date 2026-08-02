@@ -111,8 +111,8 @@ export type IngestionApiServerConfig = BaseServerConfig &
         | 'LAZY_LOADER_DEFAULT_BUFFER_MS'
         | 'LAZY_LOADER_MAX_SIZE'
         | 'TASK_TIMEOUT'
-        | 'POSTFN_API_KEY'
-        | 'POSTFN_HOST_URL'
+        | 'INSIGHTS_API_KEY'
+        | 'INSIGHTS_HOST_URL'
         | 'HEALTHCHECK_MAX_STALE_SECONDS'
         | 'KAFKA_HEALTHCHECK_SECONDS'
     >

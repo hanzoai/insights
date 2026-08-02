@@ -12,7 +12,7 @@ describe('actionsLogic', () => {
     let logic: ReturnType<typeof actionsLogic.build>
 
     beforeEach(() => {
-        window.POSTFN_APP_CONTEXT = { current_user: MOCK_DEFAULT_USER } as unknown as AppContext
+        window.INSIGHTS_APP_CONTEXT = { current_user: MOCK_DEFAULT_USER } as unknown as AppContext
 
         useMocks({
             get: {

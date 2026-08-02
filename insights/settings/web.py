@@ -252,11 +252,22 @@ WSGI_APPLICATION = "insights.wsgi.application"
 
 AUTHENTICATION_BACKENDS: list[str] = [
     "axes.backends.AxesStandaloneBackend",
-    "social_core.backends.github.GithubOAuth2",
-    "social_core.backends.gitlab.GitLabOAuth2",
+    # Hanzo IAM (hanzo.id) is the single federated login. Upstream's per-vendor
+    # OAuth backends are not wired: this deployment has one identity provider,
+    # and a second one would be a second place to revoke an account from.
+    "social_core.backends.open_id_connect.OpenIdConnectAuth",
     "django.contrib.auth.backends.ModelBackend",
     "insights.auth.WebauthnBackend",
 ]
+
+# Hanzo IAM OIDC SSO (social-auth). All five come from the deployment; the
+# secret is delivered from KMS at hanzo//insights-secrets.
+SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: str | None = os.getenv("SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
+SOCIAL_AUTH_OIDC_KEY: str | None = os.getenv("SOCIAL_AUTH_OIDC_KEY")
+SOCIAL_AUTH_OIDC_SECRET: str | None = os.getenv("SOCIAL_AUTH_OIDC_SECRET")
+SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
+SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
+SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
 
 AUTH_USER_MODEL = "insights.User"
 
@@ -279,13 +290,14 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.social_details",
     "social_core.pipeline.social_auth.social_uid",
     "social_core.pipeline.social_auth.auth_allowed",
-    "ee.api.authentication.social_auth_allowed",
     "social_core.pipeline.social_auth.social_user",
     "social_core.pipeline.social_auth.associate_by_email",
     "insights.api.signup.social_create_user",
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
+    # Hanzo IAM: map the OIDC org claim -> Organization + Team + Membership.
+    "insights.api.iam_org_pipeline.iam_org_assign",
     "insights.api.authentication.social_login_notification",
 )
 
@@ -980,11 +992,11 @@ REMOTE_CONFIG_CDN_PURGE_TOKEN = get_from_env("REMOTE_CONFIG_CDN_PURGE_TOKEN", ""
 REMOTE_CONFIG_CDN_PURGE_DOMAINS = get_list(os.getenv("REMOTE_CONFIG_CDN_PURGE_DOMAINS", ""))
 
 # Versioned insights-js S3 bucket — enables versioned JS content serving when set
-POSTFN_JS_S3_BUCKET = get_from_env("POSTFN_JS_S3_BUCKET", "")
+INSIGHTS_JS_S3_BUCKET = get_from_env("INSIGHTS_JS_S3_BUCKET", "")
 # CDN cache control for array.js responses
-POSTFN_JS_CDN_MAX_AGE = int(os.getenv("POSTFN_JS_CDN_MAX_AGE", "3600"))
-POSTFN_JS_CDN_STALE_WHILE_REVALIDATE = int(os.getenv("POSTFN_JS_CDN_STALE_WHILE_REVALIDATE", "86400"))
-POSTFN_JS_CDN_STALE_IF_ERROR = int(os.getenv("POSTFN_JS_CDN_STALE_IF_ERROR", "86400"))
+INSIGHTS_JS_CDN_MAX_AGE = int(os.getenv("INSIGHTS_JS_CDN_MAX_AGE", "3600"))
+INSIGHTS_JS_CDN_STALE_WHILE_REVALIDATE = int(os.getenv("INSIGHTS_JS_CDN_STALE_WHILE_REVALIDATE", "86400"))
+INSIGHTS_JS_CDN_STALE_IF_ERROR = int(os.getenv("INSIGHTS_JS_CDN_STALE_IF_ERROR", "86400"))
 
 ####
 # /capture
@@ -1042,11 +1054,11 @@ ALLOW_DEV_LOGIN = get_from_env("ALLOW_DEV_LOGIN", False, type_cast=str_to_bool)
 
 # temporary flag to control new UUID version setting in insights-js
 # is set to v7 to test new generation but can be set to "og" to revert
-POSTFN_JS_UUID_VERSION = os.getenv("POSTFN_JS_UUID_VERSION", "v7")
+INSIGHTS_JS_UUID_VERSION = os.getenv("INSIGHTS_JS_UUID_VERSION", "v7")
 
 # Feature flag to enable InsightsFunctions daily digest email for specific teams
 # Comma-separated list of team IDs that should receive the digest
-FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS", ""))
+INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS", ""))
 
 # Maximum audience size for InsightsFlow batch triggers. Default that applies to all teams unless they
 # opt in to the elevated value below. Only used to inform the frontend UI; no backend enforcement.

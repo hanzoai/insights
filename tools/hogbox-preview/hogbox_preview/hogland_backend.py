@@ -115,7 +115,7 @@ class HoglandBackend(PreviewBackend):
         oidc_audience: str | None = None,
     ):
         super().__init__(web_port=web_port)
-        # Hogland() reads FN_TOKEN / FN_HOST from env; --host/--token override.
+        # Hogland() reads INSIGHTS_TOKEN / INSIGHTS_HOST from env; --host/--token override.
         # A generous timeout is required: create() blocks server-side until the
         # restore completes (tens of seconds), which trips the SDK's short
         # default and raises httpx.ReadTimeout mid-restore.
@@ -123,7 +123,7 @@ class HoglandBackend(PreviewBackend):
         self._timeout = timeout
         # In CI the bearer is a short-lived GitHub OIDC JWT; the bring-up outlives
         # it (restore alone eats minutes), so exec/write_file re-mint on 401.
-        self._oidc_audience = oidc_audience or os.environ.get("FN_OIDC_AUDIENCE")
+        self._oidc_audience = oidc_audience or os.environ.get("INSIGHTS_OIDC_AUDIENCE")
         self._client = Hogland(token=token, base_url=host, timeout=timeout)
         self.snapshot = snapshot
         # The golden is pinned to this sizing; restore must MATCH it exactly
@@ -505,7 +505,7 @@ class HoglandBackend(PreviewBackend):
         alone eats minutes before the first stack step), so exec/write_file
         re-mint on 401. The request URL + token are valid for the whole job, so
         this can be called as often as needed. The audience must match the
-        deploy's github_oidc TrustMapping (FN_OIDC_AUDIENCE)."""
+        deploy's github_oidc TrustMapping (INSIGHTS_OIDC_AUDIENCE)."""
         url = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_URL")
         rtok = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN")
         if not (url and rtok and self._oidc_audience):

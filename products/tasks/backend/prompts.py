@@ -219,8 +219,8 @@ Insights will not receive any data until these two are set:
 
 | Name                        | Value                      |
 | --------------------------- | -------------------------- |
-| `NEXT_PUBLIC_POSTFN_TOKEN` | `phc_abc123def456`         |
-| `NEXT_PUBLIC_POSTFN_HOST`  | `https://us.i.hanzo.ai` |
+| `NEXT_PUBLIC_INSIGHTS_TOKEN` | `phc_abc123def456`         |
+| `NEXT_PUBLIC_INSIGHTS_HOST`  | `https://us.i.hanzo.ai` |
 
 To set them:
 
@@ -247,8 +247,8 @@ commands locally instead of using the dashboard. For Vercel the commands look li
 is piped in; `production` is the target environment):
 
 ```bash
-echo "phc_abc123def456" | npx vercel env add NEXT_PUBLIC_POSTFN_TOKEN production
-echo "https://us.i.hanzo.ai" | npx vercel env add NEXT_PUBLIC_POSTFN_HOST production
+echo "phc_abc123def456" | npx vercel env add NEXT_PUBLIC_INSIGHTS_TOKEN production
+echo "https://us.i.hanzo.ai" | npx vercel env add NEXT_PUBLIC_INSIGHTS_HOST production
 ```
 
 For any other language (assume a technical reader - be direct, no env-var explainer):
@@ -261,8 +261,8 @@ committed), so these must be set in your deployment environment:
 
 | Name            | Value                      |
 | --------------- | -------------------------- |
-| `POSTFN_TOKEN` | `phc_abc123def456`         |
-| `POSTFN_HOST`  | `https://us.i.hanzo.ai` |
+| `INSIGHTS_TOKEN` | `phc_abc123def456`         |
+| `INSIGHTS_HOST`  | `https://us.i.hanzo.ai` |
 
 Add them wherever you inject runtime config for this service (compose file, task definition,
 Kubernetes secret, etc.) and redeploy.

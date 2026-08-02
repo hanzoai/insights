@@ -2136,7 +2136,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                     'Connect another Insights project (in another region or your own) to act in it through its API, for example to dispatch tasks that must run there.',
                 component: <PersonalInsightsConnections />,
                 keywords: ['insights', 'integration', 'connect', 'region', 'cross-region', 'task', 'personal'],
-                flag: 'POSTFN_CONNECT',
+                flag: 'INSIGHTS_CONNECT',
             },
         ],
     },

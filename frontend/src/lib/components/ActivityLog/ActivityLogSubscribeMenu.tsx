@@ -4,7 +4,7 @@ import { IconBell } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
 
 import { MenuItems } from 'lib/elements/Menu/Menu'
-import { FN_FUNCTION_SUB_TEMPLATES } from 'scenes/insights-functions/sub-templates/sub-templates'
+import { INSIGHTS_FUNCTION_SUB_TEMPLATES } from 'scenes/insights-functions/sub-templates/sub-templates'
 import { urls } from 'scenes/urls'
 
 import { CyclotronJobFilterPropertyFilter } from '~/types'
@@ -26,7 +26,7 @@ export function ActivityLogSubscribeMenu({
     iconOnly = false,
     'data-attr': dataAttr,
 }: ActivityLogSubscribeMenuProps): JSX.Element {
-    const templateItems = FN_FUNCTION_SUB_TEMPLATES['activity-log'].map((subTemplate) => {
+    const templateItems = INSIGHTS_FUNCTION_SUB_TEMPLATES['activity-log'].map((subTemplate) => {
         const filters = {
             events: subTemplate.filters?.events || [{ id: '$activity_log_entry_created', type: 'events' as const }],
             properties,

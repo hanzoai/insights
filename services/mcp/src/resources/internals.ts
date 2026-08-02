@@ -26,7 +26,7 @@ async function defaultArchiveLoader(url: string, noStore: boolean): Promise<Uint
  * single-writer coordination. The in-memory `cachedResources` still acts
  * as a per-process fast path on top of that layer.
  *
- * `localUrl` (`POSTFN_MCP_LOCAL_SKILLS_URL`) always bypasses both caches.
+ * `localUrl` (`INSIGHTS_MCP_LOCAL_SKILLS_URL`) always bypasses both caches.
  */
 export async function fetchContextMillResources(localUrl?: string, archiveLoader?: ArchiveLoader): Promise<Unzipped> {
     const url = localUrl || CONTEXT_MILL_URL

@@ -37,11 +37,11 @@ on:
                 type: boolean
                 default: true
         secrets:
-            POSTFN_API_TOKEN:
+            INSIGHTS_API_TOKEN:
                 required: false
-            POSTFN_DEVEX_PROJECT_API_TOKEN:
+            INSIGHTS_DEVEX_PROJECT_API_TOKEN:
                 required: false
-            POSTFN_UPLOAD_SYMBOLS_CLI_API_KEY:
+            INSIGHTS_UPLOAD_SYMBOLS_CLI_API_KEY:
                 required: false
         outputs:
             digests:
@@ -163,7 +163,7 @@ jobs:
             - name: Prepare symbol upload token
               id: symbols
               env:
-                  TOKEN: ${{ secrets.POSTFN_UPLOAD_SYMBOLS_CLI_API_KEY }}
+                  TOKEN: ${{ secrets.INSIGHTS_UPLOAD_SYMBOLS_CLI_API_KEY }}
                   ENABLED: ${{ github.event_name != 'pull_request' && vars.CD_DEPLOY_ENABLED == 'true' }}
               run: |
                   if [ "$ENABLED" = "true" ] && [ -n "$TOKEN" ]; then
@@ -219,7 +219,7 @@ jobs:
               if: failure() && github.event_name != 'pull_request'
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_API_TOKEN }}
                   event: ${{ inputs.event-name }}
                   properties: ${{ steps.failure-props.outputs.json }}
             - name: Report failure to DevEx Insights
@@ -227,7 +227,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
                   event: ${{ inputs.event-name }}
                   properties: ${{ steps.failure-props.outputs.json }}
 

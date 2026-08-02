@@ -291,7 +291,7 @@ class UpsertAlertTool(MaxTool):
                 enabled=action.enabled,
                 skip_weekend=action.skip_weekend,
             )
-            await sync_to_async(alert.report_created)(user, {"source": EventSource.POSTFN_AI})
+            await sync_to_async(alert.report_created)(user, {"source": EventSource.INSIGHTS_AI})
 
             status = "enabled" if action.enabled else "disabled (draft)"
             alert_url = f"/insights/{insight.short_id}/alerts?alert_id={alert.id}"
@@ -395,7 +395,7 @@ class UpsertAlertTool(MaxTool):
             alert.next_check_at = None
             update_fields.append("next_check_at")
             await sync_to_async(alert.save)(update_fields=update_fields)
-            await sync_to_async(alert.report_updated)(self._user, {"source": EventSource.POSTFN_AI})
+            await sync_to_async(alert.report_updated)(self._user, {"source": EventSource.INSIGHTS_AI})
 
             insight = await sync_to_async(lambda: alert.insight)()
             alert_url = f"/insights/{insight.short_id}/alerts?alert_id={alert.id}"

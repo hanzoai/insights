@@ -1792,7 +1792,7 @@ class TestActivityLoggingMiddleware(APIBaseTest):
         self.middleware = ActivityLoggingMiddleware(get_response)
 
     def test_captures_x_insights_client_header(self):
-        request = self.factory.get("/", HTTP_X_POSTFN_CLIENT="insights-js/1.234.0")
+        request = self.factory.get("/", HTTP_X_INSIGHTS_CLIENT="insights-js/1.234.0")
         request.user = self.user
         self.middleware(request)
         self.assertEqual(self.captured["client"], "insights-js/1.234.0")
@@ -1809,7 +1809,7 @@ class TestActivityLoggingMiddleware(APIBaseTest):
         from insights.models.activity_logging.utils import ACTIVITY_LOG_CLIENT_MAX_LENGTH
 
         long_value = "x" * (ACTIVITY_LOG_CLIENT_MAX_LENGTH * 4)
-        request = self.factory.get("/", HTTP_X_POSTFN_CLIENT=long_value)
+        request = self.factory.get("/", HTTP_X_INSIGHTS_CLIENT=long_value)
         request.user = self.user
         self.middleware(request)
         self.assertEqual(self.captured["client"], "x" * ACTIVITY_LOG_CLIENT_MAX_LENGTH)
@@ -2269,21 +2269,21 @@ class TestPerRequestLoggingContextMiddlewareMcpHeaders(APIBaseTest):
             (
                 "both_headers_present",
                 {
-                    "HTTP_X_POSTFN_MCP_SESSION_ID": "abc123session",
-                    "HTTP_X_POSTFN_MCP_CONVERSATION_ID": "01984ad9-bda4-7000-8000-abcdef012345",
+                    "HTTP_X_INSIGHTS_MCP_SESSION_ID": "abc123session",
+                    "HTTP_X_INSIGHTS_MCP_CONVERSATION_ID": "01984ad9-bda4-7000-8000-abcdef012345",
                 },
                 "abc123session",
                 "01984ad9-bda4-7000-8000-abcdef012345",
             ),
             (
                 "session_id_alone",
-                {"HTTP_X_POSTFN_MCP_SESSION_ID": "abc123session"},
+                {"HTTP_X_INSIGHTS_MCP_SESSION_ID": "abc123session"},
                 "abc123session",
                 None,
             ),
             (
                 "conversation_id_alone",
-                {"HTTP_X_POSTFN_MCP_CONVERSATION_ID": "01984ad9-bda4-7000-8000-abcdef012345"},
+                {"HTTP_X_INSIGHTS_MCP_CONVERSATION_ID": "01984ad9-bda4-7000-8000-abcdef012345"},
                 None,
                 "01984ad9-bda4-7000-8000-abcdef012345",
             ),

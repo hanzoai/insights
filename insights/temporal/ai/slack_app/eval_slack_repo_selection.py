@@ -80,7 +80,7 @@ django.setup()
 from django.conf import settings
 
 from insights.models import Team
-from insights.temporal.ai.slack_app import POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE
+from insights.temporal.ai.slack_app import INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE
 from insights.temporal.ai.slack_app.activities.classifiers import classify_task_needs_repo
 
 from products.slack_app.backend.api import _extract_explicit_repo
@@ -489,7 +489,7 @@ class Command:
             ),
             ("crashed", "Agent failed: TimeoutError"),
         ]:
-            picker_guidance = f"_{reason}_\n\n{POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE}"
+            picker_guidance = f"_{reason}_\n\n{INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE}"
             self.stdout.write(self.style.HTTP_INFO(f"    [{label}]"))
             for line in picker_guidance.splitlines():
                 self.stdout.write(f"      {line}")

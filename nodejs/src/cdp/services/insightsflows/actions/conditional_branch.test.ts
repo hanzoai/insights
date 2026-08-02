@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
-import { FN_FILTERS_EXAMPLES } from '~/cdp/_tests/examples'
+import { INSIGHTS_FILTERS_EXAMPLES } from '~/cdp/_tests/examples'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
 import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
@@ -41,7 +41,7 @@ describe('action.conditional_branch', () => {
                         config: {
                             conditions: [
                                 {
-                                    filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // Match for pageviews
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // Match for pageviews
                                 },
                             ], // Filled by tests
                         },
@@ -144,10 +144,10 @@ describe('action.conditional_branch', () => {
         it('should ignore conditions that do not match', async () => {
             action.config.conditions = [
                 {
-                    filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters, // No match
+                    filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters, // No match
                 },
                 {
-                    filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // No match
+                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // No match
                 },
             ]
 
@@ -160,10 +160,10 @@ describe('action.conditional_branch', () => {
         it('should execute the first matching branch when multiple conditions match', async () => {
             action.config.conditions = [
                 {
-                    filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // Match
+                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // Match
                 },
                 {
-                    filters: FN_FILTERS_EXAMPLES.no_filters.filters, // Also matches (always true)
+                    filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters, // Also matches (always true)
                 },
             ]
 
@@ -187,7 +187,7 @@ describe('action.conditional_branch', () => {
                             type: 'wait_until_condition',
                             config: {
                                 condition: {
-                                    filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters, // no match
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters, // no match
                                 },
                                 max_wait_duration: '10m',
                             },
@@ -253,7 +253,7 @@ describe('action.conditional_branch', () => {
         it('does not fire immediately when the condition has no properties (always-true bytecode)', async () => {
             // An empty property condition compiles to always-true bytecode. It must not match on
             // entry and advance the wait; the step should park until an event wakes it or it times out.
-            waitAction.config.condition = { filters: FN_FILTERS_EXAMPLES.no_filters.filters }
+            waitAction.config.condition = { filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters }
 
             const result = await handler.execute({
                 invocation: waitInvocation,

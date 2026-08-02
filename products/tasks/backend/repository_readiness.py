@@ -80,9 +80,9 @@ IGNORED_PATH_PREFIXES = (
     "vendor/",
 )
 
-POSTFN_INIT_PATTERN = re.compile(r"insights\.init\s*\(", re.IGNORECASE)
-POSTFN_CAPTURE_PATTERN = re.compile(r"insights\.capture\s*\(", re.IGNORECASE)
-POSTFN_CAPTURE_EVENT_PATTERN = re.compile(r'insights\.capture\s*\(\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE)
+INSIGHTS_INIT_PATTERN = re.compile(r"insights\.init\s*\(", re.IGNORECASE)
+INSIGHTS_CAPTURE_PATTERN = re.compile(r"insights\.capture\s*\(", re.IGNORECASE)
+INSIGHTS_CAPTURE_EVENT_PATTERN = re.compile(r'insights\.capture\s*\(\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE)
 ERROR_SIGNAL_PATTERNS = (
     re.compile(r"insights\.captureexception\s*\(", re.IGNORECASE),
     re.compile(r"sentry\.init\s*\(", re.IGNORECASE),
@@ -255,16 +255,16 @@ def _scan_repository(integration: Integration, repository: str) -> tuple[Reposit
             continue
 
         scanned += 1
-        if POSTFN_INIT_PATTERN.search(content):
+        if INSIGHTS_INIT_PATTERN.search(content):
             found_insights_init = True
-        if POSTFN_CAPTURE_PATTERN.search(content):
+        if INSIGHTS_CAPTURE_PATTERN.search(content):
             found_insights_capture = True
         for pattern in ERROR_SIGNAL_PATTERNS:
             if pattern.search(content):
                 found_error_signal = True
                 break
 
-        for match in POSTFN_CAPTURE_EVENT_PATTERN.findall(content):
+        for match in INSIGHTS_CAPTURE_EVENT_PATTERN.findall(content):
             cleaned = match.strip()
             if cleaned:
                 event_names.add(cleaned)

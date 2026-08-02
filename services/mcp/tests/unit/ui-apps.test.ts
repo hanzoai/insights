@@ -77,11 +77,11 @@ describe('ui-apps', () => {
             return {
                 env: {
                     MCP_APPS_BASE_URL: undefined,
-                    POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-                    POSTFN_UI_APPS_TOKEN: undefined,
-                    POSTFN_API_BASE_URL: undefined,
-                    POSTFN_ANALYTICS_API_KEY: undefined,
-                    POSTFN_ANALYTICS_HOST: undefined,
+                    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+                    INSIGHTS_UI_APPS_TOKEN: undefined,
+                    INSIGHTS_API_BASE_URL: undefined,
+                    INSIGHTS_ANALYTICS_API_KEY: undefined,
+                    INSIGHTS_ANALYTICS_HOST: undefined,
                     ...env,
                 },
             }
@@ -149,7 +149,7 @@ describe('ui-apps', () => {
             const server = createMockServer()
             const context = createMockContext({
                 MCP_APPS_BASE_URL: 'https://mcp.hanzo.ai',
-                POSTFN_MCP_APPS_ANALYTICS_BASE_URL: 'https://us.i.hanzo.ai',
+                INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: 'https://us.i.hanzo.ai',
             })
 
             await registerUiAppResources(server as any, context as any)

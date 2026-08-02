@@ -14,7 +14,7 @@ from django.db import models
 from insights.management.migration_analysis.operations import is_unmanaged_model
 
 # Apps owned by Insights where policies are enforced
-POSTFN_OWNED_APPS = ["insights", "ee"]
+INSIGHTS_OWNED_APPS = ["insights", "ee"]
 
 
 def is_insights_app(app_label: str, migration=None) -> bool:
@@ -24,7 +24,7 @@ def is_insights_app(app_label: str, migration=None) -> bool:
         app_label: The Django app label (e.g., 'insights', 'endpoints')
         migration: Optional migration class to check module path for product apps
     """
-    if app_label in POSTFN_OWNED_APPS:
+    if app_label in INSIGHTS_OWNED_APPS:
         return True
 
     # Product apps have short labels like 'endpoints' but modules under 'products.*'
@@ -299,7 +299,7 @@ class ConcurrentIndexIdempotencyPolicy(MigrationPolicy):
     # encode the idempotency guarantees this policy enforces (indisvalid
     # recovery + IF [NOT] EXISTS + timeout disabling) at the operation
     # level, so they are explicitly exempt from the static SQL check.
-    POSTFN_SAFE_HELPER_OPS = {
+    INSIGHTS_SAFE_HELPER_OPS = {
         "CreateIndexConcurrently",
         "DropIndexConcurrently",
         "SafeAddIndexConcurrently",
@@ -361,7 +361,7 @@ class ConcurrentIndexIdempotencyPolicy(MigrationPolicy):
     def _check_single_operation(self, op) -> list[str]:
         op_type = op.__class__.__name__
 
-        if op_type in self.POSTFN_SAFE_HELPER_OPS:
+        if op_type in self.INSIGHTS_SAFE_HELPER_OPS:
             # The helpers handle indisvalid recovery + IF [NOT] EXISTS +
             # timeout disabling internally. Trust the type, skip the SQL
             # check (which would false-positive on the helper's display SQL).
@@ -684,7 +684,7 @@ class HotTableAlterPolicy(MigrationPolicy):
 # incident class. Prefer the helper-plus-pointer over documenting complexity.
 
 # Registry of all Insights policies
-POSTFN_POLICIES = [
+INSIGHTS_POLICIES = [
     UUIDPrimaryKeyPolicy(),
     AtomicFalsePolicy(),
     ConcurrentIndexIdempotencyPolicy(),

@@ -54,7 +54,7 @@ const Onboarding = ({ environment }: ExtensionContextValue): JSX.Element => {
             description="Connect this Stripe account from your Insights dashboard to see product analytics data alongside your customers."
             primaryAction={{
                 label: 'Open Insights',
-                href: constants.POSTFN_DASHBOARD_URL,
+                href: constants.INSIGHTS_DASHBOARD_URL,
                 target: '_blank',
             }}
         />

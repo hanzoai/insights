@@ -213,7 +213,7 @@ def _prepare_launch(ctx: TaskProcessingContext, scopes: InsightsMcpScopes, sandb
     event_ingest_token: str | None = None
     # When the agent-proxy is configured, route the sandbox ingest POST to it instead of the
     # Django ASGI short-circuit. Only meaningful once sequenced ingest is enabled. Unset means
-    # the agent falls back to POSTFN_API_URL (Django).
+    # the agent falls back to INSIGHTS_API_URL (Django).
     event_ingest_url: str | None = settings.TASKS_AGENT_PROXY_INGEST_URL if event_stream_ingest_enabled else None
     # Fetched once; serves both the ingest token and the imported MCP servers below.
     task_run = TaskRun.objects.filter(id=ctx.run_id, task_id=ctx.task_id, team_id=ctx.team_id).first()

@@ -66,7 +66,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
                     }
                 ]
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
     # ── Draft routing ────────────────────────────────────────────────
@@ -128,7 +128,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed live"},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
         flow = InsightsFlow.objects.get(pk=flow_id)
@@ -141,7 +141,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "draft", "name": "Renamed"},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 400, response.json()
 
@@ -164,7 +164,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
                 ],
                 "base_updated_at": stale,
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 409, response.json()
 
@@ -186,7 +186,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
                     }
                 ]
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
 
@@ -214,7 +214,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
                     }
                 ]
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
 
@@ -237,7 +237,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
                     }
                 ]
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 400, response.json()
 
@@ -309,7 +309,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         stage = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert stage.status_code == 200, stage.json()
 
@@ -514,7 +514,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
         flow = InsightsFlow.objects.get(pk=flow_id)

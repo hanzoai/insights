@@ -285,7 +285,7 @@ def handler500(request):
     return HttpResponseServerError(template.render({"request": request}, request))
 
 
-APP_POSTFN_HOST = "app.hanzo.ai"
+APP_INSIGHTS_HOST = "app.hanzo.ai"
 # Canonical per-region hosts a `ph_current_instance` cookie is allowed to resolve to.
 # Restricting to this set keeps the cookie from being turned into an open redirect.
 _REGION_HOSTS = {"us.hanzo.ai", "eu.hanzo.ai"}
@@ -313,7 +313,7 @@ def app_region_redirect(request: HttpRequest) -> HttpResponseRedirect | None:
     bounced to /login on US first, and only the login page honors the cookie."""
     if request.method not in ("GET", "HEAD"):
         return None
-    if request.get_host().split(":")[0] != APP_POSTFN_HOST:
+    if request.get_host().split(":")[0] != APP_INSIGHTS_HOST:
         return None
 
     target_host = region_host_from_current_instance(request.COOKIES.get("ph_current_instance"))
@@ -602,7 +602,7 @@ urlpatterns = [
         "internal/notebooks/data_plane/query/<str:query_id>/",
         csrf_exempt(notebook_sql_v2_data_plane_status),
     ),
-    # Internal service-to-service endpoints (authenticated with POSTFN_INTERNAL_SERVICE_TOKEN)
+    # Internal service-to-service endpoints (authenticated with INSIGHTS_INTERNAL_SERVICE_TOKEN)
     path(
         "api/projects/<str:team_id>/internal/insights_flows/user_blast_radius",
         csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_user_blast_radius"})),
@@ -772,6 +772,49 @@ if settings.TEST:
 urlpatterns.append(
     opt_slash_path("sign-up", RedirectView.as_view(url="/signup", permanent=True, query_string=True)),
 )
+
+
+# Hanzo IAM is the only login, so /login goes straight to the OIDC handshake
+# rather than rendering the SPA's login scene. The scene exists to offer a
+# choice of providers; with one provider it renders a blank page while the
+# bundle loads and then redirects anyway.
+def _login_oidc_redirect(request: HttpRequest) -> HttpResponseRedirect:
+    next_url = request.GET.get("next", "/")
+    return HttpResponseRedirect(f"/login/oidc/?next={next_url}")
+
+
+urlpatterns.append(path("login", _login_oidc_redirect))
+
+
+@ensure_csrf_cookie
+def root(request: HttpRequest) -> HttpResponse:
+    """`/` — the app for a signed-in user, the marketing landing for everyone else.
+
+    Anonymous `/` otherwise falls through to the catch-all below and bounces
+    straight to SSO, so the product has no public face at all: the only thing an
+    unauthenticated visitor can see is a login screen. Signed-in behaviour is
+    unchanged — same `home` view, same SPA.
+
+    The CTAs point at surfaces that actually work. Plans deliberately leave for
+    hanzo.ai/pricing rather than this app's own billing pages: `/api/billing`
+    is not served here, so an in-app upgrade funnel would dead-end, and a funnel
+    into nothing is worse than a link out.
+    """
+    if request.user.is_authenticated:
+        return home(request)
+    return render(
+        request,
+        "landing.html",
+        {
+            "login_url": "/login",
+            "plans_url": "https://hanzo.ai/pricing",
+            "docs_url": "https://docs.hanzo.ai",
+            "source_url": "https://github.com/hanzoai/insights",
+        },
+    )
+
+
+urlpatterns.append(re_path(r"^$", root))
 
 # Routes added individually to remove login requirement
 frontend_unauthenticated_routes = [

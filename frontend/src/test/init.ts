@@ -24,9 +24,9 @@ export function initKeaTests(
     organizationForWindowContext?: OrganizationType
 ): void {
     dayjs.tz.setDefault('UTC')
-    const existingAppContext = window.POSTFN_APP_CONTEXT
+    const existingAppContext = window.INSIGHTS_APP_CONTEXT
     const orgToUse = organizationForWindowContext ?? MOCK_DEFAULT_ORGANIZATION
-    window.POSTFN_APP_CONTEXT = {
+    window.INSIGHTS_APP_CONTEXT = {
         ...existingAppContext,
         current_team: teamForWindowContext,
         current_project: projectForWindowContext,

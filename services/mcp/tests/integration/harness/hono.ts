@@ -36,7 +36,7 @@ async function startTestRedis(): Promise<InstanceType<typeof Redis>> {
 }
 
 export async function startHonoHarness(env: IntegrationEnv): Promise<IntegrationHarness> {
-    process.env.POSTFN_API_BASE_URL = env.apiBaseUrl
+    process.env.INSIGHTS_API_BASE_URL = env.apiBaseUrl
 
     // Start a temporary listener on port 0 to discover a free port, then
     // set MCP_APPS_BASE_URL before creating the app so the ResourceCatalog

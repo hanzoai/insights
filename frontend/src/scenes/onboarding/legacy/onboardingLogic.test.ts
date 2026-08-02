@@ -19,7 +19,7 @@ import { INSTALL_DEDUP_KEYS } from './types'
  *
  * Test focus:
  *   1. Flow shape per single product and representative multi-product combos
- *   2. Install-step dedup behaviour (POSTFN_JS, OPENTELEMETRY, no-dedup)
+ *   2. Install-step dedup behaviour (INSIGHTS_JS, OPENTELEMETRY, no-dedup)
  *   3. Bucket sort: all installs first, the primary product's install first among them
  *   4. URL parsing defenses (cap, dedupe, filter)
  *   5. Navigation correctness (next/prev, bad stepId reconciliation)
@@ -105,7 +105,7 @@ describe('onboardingLogic — flow composition', () => {
         })
     })
 
-    describe('install-step dedup — POSTFN_JS', () => {
+    describe('install-step dedup — INSIGHTS_JS', () => {
         it('collapses two insights-js installs into one survivor (PA primary + WA secondary)', () => {
             logic.actions.setProductKey(ProductKey.PRODUCT_ANALYTICS)
             logic.actions.setSecondaryProductKeys([ProductKey.WEB_ANALYTICS])
@@ -113,7 +113,7 @@ describe('onboardingLogic — flow composition', () => {
             const installs = logic.values.flow.filter((s) => s.stepKey === OnboardingStepKey.INSTALL)
             expect(installs).toHaveLength(1)
             expect(installs[0].id).toBe('install:product_analytics')
-            expect(installs[0].dedupKey).toBe(INSTALL_DEDUP_KEYS.POSTFN_JS)
+            expect(installs[0].dedupKey).toBe(INSTALL_DEDUP_KEYS.INSIGHTS_JS)
         })
 
         it('credits dropped products via additionalProductKeys', () => {
@@ -162,11 +162,11 @@ describe('onboardingLogic — flow composition', () => {
 
             const installs = logic.values.flow.filter((s) => s.stepKey === OnboardingStepKey.INSTALL)
             expect(installs).toHaveLength(1)
-            expect(installs[0].dedupKey).toBe(INSTALL_DEDUP_KEYS.POSTFN_JS)
+            expect(installs[0].dedupKey).toBe(INSTALL_DEDUP_KEYS.INSIGHTS_JS)
         })
 
         it('does not attach extras when only the primary contributes (no other products in dedup group)', () => {
-            // PA alone has dedupKey POSTFN_JS but no other insights-js product to merge with.
+            // PA alone has dedupKey INSIGHTS_JS but no other insights-js product to merge with.
             // Survivor should NOT carry additionalProductKeys / additionalSetupTaskIds since
             // there's nothing to add (productKeys.length === 1, setupTaskIds.length === 0).
             logic.actions.setProductKey(ProductKey.PRODUCT_ANALYTICS)
@@ -190,7 +190,7 @@ describe('onboardingLogic — flow composition', () => {
             const installs = logic.values.flow.filter((s) => s.stepKey === OnboardingStepKey.INSTALL)
             expect(installs).toHaveLength(2)
             expect(installs.map((s) => s.dedupKey)).toEqual([
-                INSTALL_DEDUP_KEYS.POSTFN_JS,
+                INSTALL_DEDUP_KEYS.INSIGHTS_JS,
                 INSTALL_DEDUP_KEYS.OPENTELEMETRY,
             ])
         })

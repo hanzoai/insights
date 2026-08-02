@@ -247,12 +247,12 @@ class QueryViewSet(QueryCoalescingMixin, TeamAndOrgViewSetMixin, PydanticModelMi
             analytics_props = get_request_analytics_properties(request)
             query_dict = query.model_dump()
 
-            if data.limit_context == SchemaLimitContext.POSTFN_AI:
-                limit_context: LimitContext | None = LimitContext.POSTFN_AI
+            if data.limit_context == SchemaLimitContext.INSIGHTS_AI:
+                limit_context: LimitContext | None = LimitContext.INSIGHTS_AI
                 # Max's insight tiles run in the browser, so the request looks like a session
                 # web request and get_event_source classifies it as "web". Attribute it to
                 # insights_ai instead, matching the server-side executor's tagging.
-                analytics_props["source"] = EventSource.POSTFN_AI
+                analytics_props["source"] = EventSource.INSIGHTS_AI
             elif (
                 is_async_query(query_dict)
                 or is_insight_actors_query(query_dict)

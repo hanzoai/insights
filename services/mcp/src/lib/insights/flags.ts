@@ -71,7 +71,7 @@ function parseFlagOverridesJson(raw: string | undefined): EvaluatedFlags {
 /**
  * Dev/test-only feature-flag overrides, merged on top of the insights-node
  * evaluation so flags can be forced for local dev and evals — where the
- * analytics client is disabled (no `POSTFN_ANALYTICS_*`) and every flag would
+ * analytics client is disabled (no `INSIGHTS_ANALYTICS_*`) and every flag would
  * otherwise resolve to `false`.
  *
  * Sources, later wins: the `FEATURE_FLAG_OVERRIDES` env/Cloudflare var

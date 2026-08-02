@@ -50,7 +50,7 @@ def _get_db_events_per_page(
         offset=offset,
     )
     runner = SessionBatchEventsQueryRunner(query=query, team=team)
-    response = runner.run(analytics_props={"source": EventSource.POSTFN_AI})
+    response = runner.run(analytics_props={"source": EventSource.INSIGHTS_AI})
     if not isinstance(response, CachedSessionBatchEventsQueryResponse):
         msg = (
             f"Failed to fetch events for sessions {logging_session_ids(session_ids)} in team {team.id} "

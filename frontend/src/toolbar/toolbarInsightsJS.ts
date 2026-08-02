@@ -5,9 +5,9 @@ import { FeatureFlagKey } from 'lib/constants'
 
 const DEFAULT_API_KEY = 'sTMFPsFhdP1Ssg'
 
-const runningOnInsights = !!window.POSTFN_APP_CONTEXT
-const apiKey = runningOnInsights ? window.JS_POSTFN_API_KEY : DEFAULT_API_KEY
-const apiHost = runningOnInsights ? window.JS_POSTFN_HOST : 'https://internal-j.hanzo.ai'
+const runningOnInsights = !!window.INSIGHTS_APP_CONTEXT
+const apiKey = runningOnInsights ? window.JS_INSIGHTS_API_KEY : DEFAULT_API_KEY
+const apiHost = runningOnInsights ? window.JS_INSIGHTS_HOST : 'https://internal-j.hanzo.ai'
 
 const initResult = insights.init(
     apiKey || DEFAULT_API_KEY,
@@ -31,7 +31,7 @@ const initResult = insights.init(
             // so customer sessions don't see it), but also respect the customer's
             // ph-no-capture marks
             blockClass: 'ph-internal-no-capture',
-            blockSelector: '.ph-no-capture:not(#__POSTFN_TOOLBAR__):not(#__POSTFN_TOOLBAR__ *)',
+            blockSelector: '.ph-no-capture:not(#__INSIGHTS_TOOLBAR__):not(#__INSIGHTS_TOOLBAR__ *)',
             maskAllInputs: true,
         },
     },
@@ -42,7 +42,7 @@ if (!initResult) {
 }
 export const toolbarInsightsJS = initResult
 
-if (runningOnInsights && window.JS_POSTFN_SELF_CAPTURE) {
+if (runningOnInsights && window.JS_INSIGHTS_SELF_CAPTURE) {
     toolbarInsightsJS.debug()
 }
 

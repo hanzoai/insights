@@ -36,7 +36,7 @@ const FEATURE_PREVIEW_WARNINGS: Record<string, FeaturePreviewWarning> = {
     },
 }
 
-const hasInsightsJsFailedToLoadFeaturePreviews = (): boolean => !!window.POSTFN_GLOBAL_ERRORS?.onFeatureFlagsLoadError
+const hasInsightsJsFailedToLoadFeaturePreviews = (): boolean => !!window.INSIGHTS_GLOBAL_ERRORS?.onFeatureFlagsLoadError
 
 // Feature previews can be linked to by using hash in the url
 // example external link: https://app.hanzo.ai/settings/user-feature-previews#llm-analytics

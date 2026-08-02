@@ -462,12 +462,12 @@ export const loginLogic = kea<loginLogicType>([
     listeners(({ values, actions }) => ({
         submitLoginSuccess: () => {
             handleLoginRedirect()
-            // Reload the page after login to ensure POSTFN_APP_CONTEXT is set correctly.
+            // Reload the page after login to ensure INSIGHTS_APP_CONTEXT is set correctly.
             window.location.reload()
         },
         submitCodeVerificationSuccess: () => {
             handleLoginRedirect()
-            // Reload the page after login to ensure POSTFN_APP_CONTEXT is set correctly.
+            // Reload the page after login to ensure INSIGHTS_APP_CONTEXT is set correctly.
             window.location.reload()
         },
         exitCodeVerification: () => {

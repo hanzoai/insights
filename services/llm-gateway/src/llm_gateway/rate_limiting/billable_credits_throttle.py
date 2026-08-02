@@ -8,7 +8,7 @@ _BUCKET_EXHAUSTED_DETAIL = {
         "Your team has used its monthly Insights AI credits. "
         "Top up at https://app.hanzo.ai/organization/billing to continue."
     ),
-    CreditBucket.POSTFN_CODE_CREDITS: (
+    CreditBucket.INSIGHTS_CODE_CREDITS: (
         "Your team has reached its Insights Desktop usage limit for this billing period. "
         "See https://app.hanzo.ai/organization/billing for your usage and limits."
     ),

@@ -259,9 +259,9 @@ class TestGetEventSource(BaseTest):
             ("terraform", "insights/terraform-provider 1.0", EventSource.TERRAFORM),
             ("cli_exact", "insights-cli", EventSource.CLI),
             ("wizard", "insights/wizard 1.0", EventSource.WIZARD),
-            ("insights_code", "insights/code 1.2.3", EventSource.POSTFN_CODE),
-            ("hog_dev_subdomain", "insights/desktop.script.dev 0.1.0", EventSource.POSTFN_CODE),
-            ("hog_dev_complex", "insights/my-app.script.dev", EventSource.POSTFN_CODE),
+            ("insights_code", "insights/code 1.2.3", EventSource.INSIGHTS_CODE),
+            ("hog_dev_subdomain", "insights/desktop.script.dev 0.1.0", EventSource.INSIGHTS_CODE),
+            ("hog_dev_complex", "insights/my-app.script.dev", EventSource.INSIGHTS_CODE),
             ("mcp_server", "insights/mcp-server 1.0", EventSource.MCP),
             ("unknown_ua_falls_through_to_api", "some-random-agent/1.0", EventSource.API),
         ]
@@ -291,7 +291,7 @@ class TestGetEventSource(BaseTest):
 
     def test_x_insights_client_mcp_header_returns_mcp_source(self):
         factory = APIRequestFactory()
-        request = factory.get("/fake", HTTP_X_POSTFN_CLIENT="mcp")
+        request = factory.get("/fake", HTTP_X_INSIGHTS_CLIENT="mcp")
         assert get_event_source(request) == EventSource.MCP
 
     @parameterized.expand(
@@ -305,7 +305,7 @@ class TestGetEventSource(BaseTest):
         request = factory.get(
             "/fake",
             HTTP_USER_AGENT="insights/mcp-server; version: 1.0.0",
-            HTTP_X_POSTFN_MCP_CONSUMER=consumer,
+            HTTP_X_INSIGHTS_MCP_CONSUMER=consumer,
         )
         assert get_event_source(request) == expected
 
@@ -331,15 +331,15 @@ class TestGetEventSource(BaseTest):
                 "insights_code_with_mcp_ua_and_header",
                 "insights/code 1.2.3 insights/mcp-server",
                 "mcp",
-                EventSource.POSTFN_CODE,
+                EventSource.INSIGHTS_CODE,
             ),
             (
                 "insights_code_with_mcp_ua_no_header",
                 "insights/code 1.2.3 insights/mcp-server",
                 None,
-                EventSource.POSTFN_CODE,
+                EventSource.INSIGHTS_CODE,
             ),
-            ("insights_code_no_mcp_ua_with_header", "insights/code 1.2.3", "mcp", EventSource.POSTFN_CODE),
+            ("insights_code_no_mcp_ua_with_header", "insights/code 1.2.3", "mcp", EventSource.INSIGHTS_CODE),
         ]
     )
     def test_outer_caller_user_agent_wins_over_mcp_signals(self, _name, user_agent, x_insights_client, expected):
@@ -348,7 +348,7 @@ class TestGetEventSource(BaseTest):
         factory = APIRequestFactory()
         kwargs = {"HTTP_USER_AGENT": user_agent}
         if x_insights_client is not None:
-            kwargs["HTTP_X_POSTFN_CLIENT"] = x_insights_client
+            kwargs["HTTP_X_INSIGHTS_CLIENT"] = x_insights_client
         request = factory.get("/fake", **kwargs)
         assert get_event_source(request) == expected
 
@@ -390,7 +390,7 @@ class TestIsWizardSelfDrivingProgram(BaseTest):
         factory = APIRequestFactory()
         kwargs = {"HTTP_USER_AGENT": user_agent}
         if mcp_user_agent is not None:
-            kwargs["HTTP_X_POSTFN_MCP_USER_AGENT"] = mcp_user_agent
+            kwargs["HTTP_X_INSIGHTS_MCP_USER_AGENT"] = mcp_user_agent
         request = factory.get("/fake", **kwargs)
         assert is_wizard_self_driving_program(request) is expected
 
@@ -400,11 +400,11 @@ class TestGetMcpProperties(BaseTest):
         factory = APIRequestFactory()
         request = factory.get(
             "/fake",
-            HTTP_X_POSTFN_MCP_USER_AGENT="insights/cursor 1.0",
-            HTTP_X_POSTFN_MCP_CLIENT_NAME="claude-code",
-            HTTP_X_POSTFN_MCP_CLIENT_VERSION="1.2.3",
-            HTTP_X_POSTFN_MCP_PROTOCOL_VERSION="2025-03-26",
-            HTTP_X_POSTFN_MCP_OAUTH_CLIENT_NAME="Claude Code (insights)",
+            HTTP_X_INSIGHTS_MCP_USER_AGENT="insights/cursor 1.0",
+            HTTP_X_INSIGHTS_MCP_CLIENT_NAME="claude-code",
+            HTTP_X_INSIGHTS_MCP_CLIENT_VERSION="1.2.3",
+            HTTP_X_INSIGHTS_MCP_PROTOCOL_VERSION="2025-03-26",
+            HTTP_X_INSIGHTS_MCP_OAUTH_CLIENT_NAME="Claude Code (insights)",
         )
         assert get_mcp_properties(request) == {
             "mcp_user_agent": "insights/cursor 1.0",

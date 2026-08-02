@@ -23,7 +23,7 @@ def _mock_response(status_code: int, json_data: dict | list | None = None, json_
     return response
 
 
-@override_settings(CLOUD_DEPLOYMENT="EU", POSTFN_FLAGS_PROJECT_SECRET_TOKEN="phs_test_token")
+@override_settings(CLOUD_DEPLOYMENT="EU", INSIGHTS_FLAGS_PROJECT_SECRET_TOKEN="phs_test_token")
 class TestSyncCrossRegionFlags(BaseTest):
     def setUp(self):
         super().setUp()
@@ -38,7 +38,7 @@ class TestSyncCrossRegionFlags(BaseTest):
 
         mock_get.assert_not_called()
 
-    @override_settings(POSTFN_FLAGS_PROJECT_SECRET_TOKEN="")
+    @override_settings(INSIGHTS_FLAGS_PROJECT_SECRET_TOKEN="")
     def test_no_op_without_token(self):
         # Before the charts secret is provisioned, this would otherwise send a
         # request with an empty bearer token every 30s.

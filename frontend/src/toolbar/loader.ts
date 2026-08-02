@@ -26,7 +26,7 @@ type ToolbarModule = typeof import('~/toolbar/index')
 const scriptSrc = (document.currentScript as HTMLScriptElement | null)?.src
 
 function resolveAppUrl(fileName: string): string {
-    const base = scriptSrc || __POSTFN_TOOLBAR_PUBLIC_PATH__
+    const base = scriptSrc || __INSIGHTS_TOOLBAR_PUBLIC_PATH__
     if (!base) {
         throw new Error('Insights toolbar loader could not determine its own URL')
     }
@@ -49,7 +49,7 @@ let appPromise: Promise<ToolbarModule> | null = null
 
 function loadApp(): Promise<ToolbarModule> {
     if (!appPromise) {
-        appPromise = importWithRetry(resolveAppUrl(__POSTFN_TOOLBAR_APP_ENTRY__), 2, 300)
+        appPromise = importWithRetry(resolveAppUrl(__INSIGHTS_TOOLBAR_APP_ENTRY__), 2, 300)
             .catch(() => {
                 // Version-skew fallback: a cached loader can reference a hashed entry that no
                 // longer exists on the origin after a deploy. The hashless copy always points at

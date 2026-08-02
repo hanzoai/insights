@@ -10,9 +10,9 @@ from temporalio.exceptions import WorkflowAlreadyStartedError
 
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.search_attributes import (
-    POSTFN_SCANNER_ID_KEY,
-    POSTFN_SESSION_RECORDING_ID_KEY,
-    POSTFN_TEAM_ID_KEY,
+    INSIGHTS_SCANNER_ID_KEY,
+    INSIGHTS_SESSION_RECORDING_ID_KEY,
+    INSIGHTS_TEAM_ID_KEY,
 )
 
 with wf.unsafe.imports_passed_through():
@@ -213,9 +213,9 @@ class SweepScannerWorkflow(InsightsWorkflow):
                 execution_timeout=APPLY_SCANNER_EXECUTION_TIMEOUT,
                 search_attributes=TypedSearchAttributes(
                     search_attributes=[
-                        SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=inputs.team_id),
-                        SearchAttributePair(key=POSTFN_SESSION_RECORDING_ID_KEY, value=candidate.session_id),
-                        SearchAttributePair(key=POSTFN_SCANNER_ID_KEY, value=str(inputs.scanner_id)),
+                        SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=inputs.team_id),
+                        SearchAttributePair(key=INSIGHTS_SESSION_RECORDING_ID_KEY, value=candidate.session_id),
+                        SearchAttributePair(key=INSIGHTS_SCANNER_ID_KEY, value=str(inputs.scanner_id)),
                     ]
                 ),
             )

@@ -117,7 +117,7 @@ class HobbyTester:
         """Return bash script to resolve the insights-node image tag.
 
         ci-nodejs-container.yml tags images as pr-<number> for PRs.
-        Checks DockerHub for that tag; if found, exports POSTFN_NODE_TAG
+        Checks DockerHub for that tag; if found, exports INSIGHTS_NODE_TAG
         so the hobby-installer writes it to .env and docker-compose uses
         the branch image. Otherwise falls back to 'latest'.
         """
@@ -130,10 +130,10 @@ class HobbyTester:
             f"https://hub.docker.com/v2/repositories/insights/insights-node/tags/{tag} "
             "> /dev/null 2>&1; then "
             f"echo insights-node image found on DockerHub with tag {tag}; "
-            f"export POSTFN_NODE_TAG={tag}; "
+            f"export INSIGHTS_NODE_TAG={tag}; "
             "else "
             "echo insights-node image not found, using latest; "
-            "export POSTFN_NODE_TAG=latest; "
+            "export INSIGHTS_NODE_TAG=latest; "
             "fi"
         )
 
@@ -528,12 +528,12 @@ runcmd:
 
         # Update .env file with new image tag
         update_env_cmd = (
-            f"cd /hobby && sed -i 's/^POSTFN_APP_TAG=.*/POSTFN_APP_TAG={new_sha}/' .env && grep POSTFN_APP_TAG .env"
+            f"cd /hobby && sed -i 's/^INSIGHTS_APP_TAG=.*/INSIGHTS_APP_TAG={new_sha}/' .env && grep INSIGHTS_APP_TAG .env"
         )
         result = self.run_ssh_command(update_env_cmd, timeout=30)
         if result["exit_code"] != 0:
             raise RuntimeError(f"Failed to update .env: {result['stderr']}")
-        print(f"✅ Updated POSTFN_APP_TAG to {new_sha}")
+        print(f"✅ Updated INSIGHTS_APP_TAG to {new_sha}")
 
         # Resolve node image tag: ci-nodejs-container.yml tags as pr-<number> for PRs
         pr_tag = f"pr-{self.pr_number}" if self.pr_number and self.pr_number != "unknown" else None
@@ -548,22 +548,22 @@ runcmd:
             node_tag = "latest"
             print(f"ℹ️ Node image not found for {candidate_tag}, falling back to tag: latest")
 
-        # Update or add POSTFN_NODE_TAG in .env
+        # Update or add INSIGHTS_NODE_TAG in .env
         update_node_tag_cmd = (
             f"cd /hobby && "
-            f"if grep -q '^POSTFN_NODE_TAG=' .env; then "
-            f"  sed -i 's/^POSTFN_NODE_TAG=.*/POSTFN_NODE_TAG={node_tag}/' .env; "
+            f"if grep -q '^INSIGHTS_NODE_TAG=' .env; then "
+            f"  sed -i 's/^INSIGHTS_NODE_TAG=.*/INSIGHTS_NODE_TAG={node_tag}/' .env; "
             f"else "
-            f"  echo 'POSTFN_NODE_TAG={node_tag}' >> .env; "
-            f"fi && grep POSTFN_NODE_TAG .env"
+            f"  echo 'INSIGHTS_NODE_TAG={node_tag}' >> .env; "
+            f"fi && grep INSIGHTS_NODE_TAG .env"
         )
         result = self.run_ssh_command(update_node_tag_cmd, timeout=30)
         if result["exit_code"] != 0:
-            raise RuntimeError(f"Failed to update POSTFN_NODE_TAG: {result['stderr']}")
-        print(f"✅ Updated POSTFN_NODE_TAG to {node_tag}")
+            raise RuntimeError(f"Failed to update INSIGHTS_NODE_TAG: {result['stderr']}")
+        print(f"✅ Updated INSIGHTS_NODE_TAG to {node_tag}")
 
         # Update the baked-in image tags in docker-compose.yml.
-        # The hobby-installer substitutes $POSTFN_APP_TAG and $POSTFN_NODE_TAG literally
+        # The hobby-installer substitutes $INSIGHTS_APP_TAG and $INSIGHTS_NODE_TAG literally
         # into docker-compose.yml at install time, so updating .env alone has no effect on
         # which image docker-compose pull/up uses.
         print("📝 Updating baked-in image tags in docker-compose.yml...")

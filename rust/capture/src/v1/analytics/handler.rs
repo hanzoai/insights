@@ -122,10 +122,10 @@ fn log_and_return_header_error(
     path: &MatchedPath,
 ) -> v1::Error {
     let token = raw_header_str(headers, header::AUTHORIZATION.as_str());
-    let request_id = raw_header_str(headers, POSTFN_REQUEST_ID);
-    let sdk_info = raw_header_str(headers, POSTFN_SDK_INFO);
-    let attempt = raw_header_str(headers, POSTFN_ATTEMPT);
-    let client_ts = raw_header_str(headers, POSTFN_REQUEST_TIMESTAMP);
+    let request_id = raw_header_str(headers, INSIGHTS_REQUEST_ID);
+    let sdk_info = raw_header_str(headers, INSIGHTS_SDK_INFO);
+    let attempt = raw_header_str(headers, INSIGHTS_ATTEMPT);
+    let client_ts = raw_header_str(headers, INSIGHTS_REQUEST_TIMESTAMP);
     let user_agent = raw_header_str(headers, "user-agent");
     let content_type = raw_header_str(headers, "content-type");
     let content_encoding = raw_header_str(headers, "content-encoding");
@@ -203,10 +203,10 @@ mod tests {
             .header("Authorization", "Bearer phc_test_token")
             .header("Content-Type", "application/json")
             .header("X-Forwarded-For", "127.0.0.1")
-            .header(POSTFN_SDK_INFO, "insights-rs/1.0.0")
-            .header(POSTFN_ATTEMPT, "1")
-            .header(POSTFN_REQUEST_ID, Uuid::new_v4().to_string())
-            .header(POSTFN_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
+            .header(INSIGHTS_SDK_INFO, "insights-rs/1.0.0")
+            .header(INSIGHTS_ATTEMPT, "1")
+            .header(INSIGHTS_REQUEST_ID, Uuid::new_v4().to_string())
+            .header(INSIGHTS_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
             .header("User-Agent", "test-agent/1.0")
     }
 
@@ -270,10 +270,10 @@ mod tests {
             .uri(CAPTURE_V1_PATH)
             .header("Content-Type", "application/json")
             .header("X-Forwarded-For", "127.0.0.1")
-            .header(POSTFN_SDK_INFO, "insights-rs/1.0.0")
-            .header(POSTFN_ATTEMPT, "1")
-            .header(POSTFN_REQUEST_ID, Uuid::new_v4().to_string())
-            .header(POSTFN_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
+            .header(INSIGHTS_SDK_INFO, "insights-rs/1.0.0")
+            .header(INSIGHTS_ATTEMPT, "1")
+            .header(INSIGHTS_REQUEST_ID, Uuid::new_v4().to_string())
+            .header(INSIGHTS_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
             .header("User-Agent", "test-agent/1.0")
             .body(Body::from(payload))
             .unwrap();
@@ -361,10 +361,10 @@ mod tests {
             .header("Content-Type", "application/json")
             .header("Content-Encoding", "gzip")
             .header("X-Forwarded-For", "127.0.0.1")
-            .header(POSTFN_SDK_INFO, "insights-rs/1.0.0")
-            .header(POSTFN_ATTEMPT, "1")
-            .header(POSTFN_REQUEST_ID, Uuid::new_v4().to_string())
-            .header(POSTFN_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
+            .header(INSIGHTS_SDK_INFO, "insights-rs/1.0.0")
+            .header(INSIGHTS_ATTEMPT, "1")
+            .header(INSIGHTS_REQUEST_ID, Uuid::new_v4().to_string())
+            .header(INSIGHTS_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
             .header("User-Agent", "test-agent/1.0")
             .body(Body::from(compressed))
             .unwrap();
@@ -392,10 +392,10 @@ mod tests {
             .header("Content-Type", "application/json")
             .header("Content-Encoding", "zstd")
             .header("X-Forwarded-For", "127.0.0.1")
-            .header(POSTFN_SDK_INFO, "insights-rs/1.0.0")
-            .header(POSTFN_ATTEMPT, "1")
-            .header(POSTFN_REQUEST_ID, Uuid::new_v4().to_string())
-            .header(POSTFN_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
+            .header(INSIGHTS_SDK_INFO, "insights-rs/1.0.0")
+            .header(INSIGHTS_ATTEMPT, "1")
+            .header(INSIGHTS_REQUEST_ID, Uuid::new_v4().to_string())
+            .header(INSIGHTS_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
             .header("User-Agent", "test-agent/1.0")
             .body(Body::from(compressed))
             .unwrap();
@@ -419,10 +419,10 @@ mod tests {
             .header("Content-Type", "application/json")
             .header("Content-Encoding", "lz4")
             .header("X-Forwarded-For", "127.0.0.1")
-            .header(POSTFN_SDK_INFO, "insights-rs/1.0.0")
-            .header(POSTFN_ATTEMPT, "1")
-            .header(POSTFN_REQUEST_ID, Uuid::new_v4().to_string())
-            .header(POSTFN_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
+            .header(INSIGHTS_SDK_INFO, "insights-rs/1.0.0")
+            .header(INSIGHTS_ATTEMPT, "1")
+            .header(INSIGHTS_REQUEST_ID, Uuid::new_v4().to_string())
+            .header(INSIGHTS_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
             .header("User-Agent", "test-agent/1.0")
             .body(Body::from(payload))
             .unwrap();

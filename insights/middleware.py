@@ -344,7 +344,7 @@ class AutoProjectMiddleware:
         user.current_team = new_team
         user.current_organization_id = new_team.organization_id
         user.save()
-        # Information for POSTFN_APP_CONTEXT
+        # Information for INSIGHTS_APP_CONTEXT
         request.switched_team = old_team_id  # type: ignore
 
     def can_switch_to_team(self, new_team: Team, request: HttpRequest):

@@ -12,7 +12,7 @@ import { Experiment, ActionStepType, ExperimentStatus } from '~/types'
 
 import { ActionStepPropertyKey } from './actions/ActionStep'
 
-export const TOOLBAR_ID = '__POSTFN_TOOLBAR__'
+export const TOOLBAR_ID = '__INSIGHTS_TOOLBAR__'
 
 // Props arrive via the `__insights=<base64>` URL fragment, so the static type is not
 // load-bearing at runtime — verify before storing strings that flow into auth headers.

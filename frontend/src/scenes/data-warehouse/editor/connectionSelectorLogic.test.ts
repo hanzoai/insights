@@ -10,7 +10,7 @@ import {
     connectionSelectorLogic,
     getConnectionSelectorValue,
     LOADING_CONNECTIONS,
-    POSTFN_WAREHOUSE,
+    INSIGHTS_WAREHOUSE,
 } from './connectionSelectorLogic'
 
 jest.mock('products/warehouse_sources/frontend/generated/api', () => ({
@@ -67,7 +67,7 @@ describe('connectionSelectorLogic', () => {
         expect(mockConnectionsList).toHaveBeenCalledTimes(1)
         expect(logic.values.connectionSelectOptions[0].options).toEqual(
             expect.arrayContaining([
-                expect.objectContaining({ value: POSTFN_WAREHOUSE }),
+                expect.objectContaining({ value: INSIGHTS_WAREHOUSE }),
                 expect.objectContaining({
                     value: 'conn-123',
                     label: 'warehouse (Postgres)',
@@ -127,6 +127,6 @@ describe('connectionSelectorLogic', () => {
                 false,
                 'missing'
             )
-        ).toEqual(POSTFN_WAREHOUSE)
+        ).toEqual(INSIGHTS_WAREHOUSE)
     })
 })

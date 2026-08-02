@@ -61,8 +61,8 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'bash',
                                 file: '.env',
                                 code: dedent`
-                                    VITE_POSTFN_PROJECT_TOKEN=<ph_project_token>
-                                    VITE_POSTFN_HOST=<ph_client_api_host>
+                                    VITE_INSIGHTS_PROJECT_TOKEN=<ph_project_token>
+                                    VITE_INSIGHTS_HOST=<ph_client_api_host>
                                 `,
                             },
                         ]}
@@ -92,13 +92,13 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                     import { InsightsProvider } from '@hanzo/react'
 
                                     const options = {
-                                      api_host: import.meta.env.VITE_POSTFN_HOST,
+                                      api_host: import.meta.env.VITE_INSIGHTS_HOST,
                                       defaults: '${SDK_DEFAULTS_DATE}',
                                     } as const
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <InsightsProvider apiKey={import.meta.env.VITE_POSTFN_PROJECT_TOKEN} options={options}>
+                                        <InsightsProvider apiKey={import.meta.env.VITE_INSIGHTS_PROJECT_TOKEN} options={options}>
                                           <App />
                                         </InsightsProvider>
                                       </StrictMode>

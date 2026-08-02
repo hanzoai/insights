@@ -2218,7 +2218,7 @@ reviewhog label on a non-fork Insights/insights PR
 `tools/pr-approval-agent/`) is **self-contained in CI**: `uv run` a standalone Claude-Agent-SDK script on the runner;
 its own dedicated GitHub App (`GH_APP_PR_APPROVAL_AGENT_*`), its own `STAMPFN_ANTHROPIC_API_KEY`, and `github.token`
 (github-actions[bot]) **for approvals** (App-bot approvals show `author_association: NONE`, so don't count toward
-branch protection). Its `POSTFN_API_TOKEN` is an **analytics ingestion key** (`hanzo_insights.capture`) — **not**
+branch protection). Its `INSIGHTS_API_TOKEN` is an **analytics ingestion key** (`hanzo_insights.capture`) — **not**
 endpoint auth, so **Stamphog is no precedent for the trigger credential** (it never calls an app endpoint).
 **Borrowed:** the label trigger, the non-fork + bot-author gates, run-script-from-master untrusted-code safety,
 **`head_sha`-pinned review posting** (`commit_id=` avoids force-push drift), and the v2 label lifecycle. **Differs:**
@@ -3290,7 +3290,7 @@ plan's mechanism analysis still held; only the target stage flipped (find, not j
 - The in-sandbox agent is `@hanzo/agent` (`products/tasks/scripts/runAgent.mjs`; installed in
   `products/tasks/backend/sandbox/images/Dockerfile.sandbox-base`). It reads three env vars set by
   `build_agent_runtime_env_prefix` (`products/tasks/backend/logic/services/sandbox.py:148-150`):
-  **`POSTFN_CODE_PROVIDER` / `POSTFN_CODE_MODEL` / `POSTFN_CODE_REASONING_EFFORT`**.
+  **`INSIGHTS_CODE_PROVIDER` / `INSIGHTS_CODE_MODEL` / `INSIGHTS_CODE_REASONING_EFFORT`**.
 - These flow from `TaskRun.state` → `TaskProcessingContext.{provider,model,reasoning_effort}`
   (`…/activities/get_task_processing_context.py:100-116,200-203`) → `sandbox.start_agent_server(provider=…, model=…,
 reasoning_effort=…)` (`…/activities/start_agent_server.py:245-247`). **Verified end-to-end for this change** — the pins
@@ -3362,7 +3362,7 @@ the model pins: `CustomPromptSandboxContext.initial_permission_mode` → `create
 **Adversarial review (ultracode; the confidence gate).** A 4-lens workflow (routing correctness / scope containment /
 convention + import safety / test quality) → each finding independently refuted by 2 skeptics. Result: **1 confirmed
 finding — the routing-contract test gap above (a test gap, not a prod bug)** — now closed. 0 production bugs; the
-end-to-end routing chain to `POSTFN_CODE_*` was verified real, not cosmetic.
+end-to-end routing chain to `INSIGHTS_CODE_*` was verified real, not cosmetic.
 
 **Risks (surface at e2e; none block the change).**
 
@@ -3411,14 +3411,14 @@ adapter (`claude → anthropic`, `codex → openai`), never set by hand.
   registry at unit time.
 - **Transport into the sandbox:** `Task._build_task` writes `extra_state[{runtime_adapter, provider, model,
 reasoning_effort}]` → `get_task_processing_context` reads it back → `start_agent_server` →
-  `build_agent_runtime_env_prefix` (`logic/services/sandbox.py`) emits `env POSTFN_CODE_{RUNTIME_ADAPTER,PROVIDER,MODEL,
+  `build_agent_runtime_env_prefix` (`logic/services/sandbox.py`) emits `env INSIGHTS_CODE_{RUNTIME_ADAPTER,PROVIDER,MODEL,
 REASONING_EFFORT}=…` prefixed onto the agent launch command (guarded by `test_agentsh.py`).
 
 **`@hanzo/agent` — where they are consumed + applied (the Insights Desktop monorepo, _not_ this repo).** Clone via
-`LOCAL_POSTFN_CODE_MONOREPO_ROOT` (legacy alias `LOCAL_TWIG_MONOREPO_ROOT`); package `packages/agent`
+`LOCAL_INSIGHTS_CODE_MONOREPO_ROOT` (legacy alias `LOCAL_TWIG_MONOREPO_ROOT`); package `packages/agent`
 (npm `@hanzo/agent`, baked into `Dockerfile.sandbox-base`).
 
-- **Entry `src/server/bin.ts`:** reads + zod-validates `POSTFN_CODE_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}`, guards
+- **Entry `src/server/bin.ts`:** reads + zod-validates `INSIGHTS_CODE_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}`, guards
   with `isSupportedReasoningEffort` (`src/adapters/reasoning-effort.ts` — the agent-side mirror of the Python registry;
   it hard-errors server startup on an unsupported combo), then constructs `new AgentServer({runtimeAdapter, model,
 reasoningEffort})`.

@@ -9,7 +9,7 @@ import { PropertyFilterBaseValue, PropertyFilterType, PropertyOperator, WebAnaly
 
 import { DeviceType, INITIAL_WEB_ANALYTICS_FILTER } from './common'
 
-const teamId = window.POSTFN_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 const persistConfig = { persist: true, prefix: `${teamId}__` }
 
 const eventFilter = (key: string, value: string | string[]): WebAnalyticsPropertyFilter => ({

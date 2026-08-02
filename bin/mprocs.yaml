@@ -249,7 +249,7 @@ procs:
     # tools/insightscli-commands/insightscli_commands/devenv/generator.py. Edit it there and run
     # `insightscli dev:regenerate-mprocs`; CI pre-flight fails if the two drift apart.
     docker-compose:
-        shell: 'if [ "${POSTFN_SANDBOX:-}" = "1" ]; then echo "Sandbox: infra managed by docker compose externally" && echo "docker-compose ready" && sleep infinity; else docker compose -p insights -f docker-compose.dev.yml -f docker-compose.profiles.yml --profile dev_tools --profile etcd --profile localstack --profile observability --profile replay --profile temporal up --pull always -d || { echo "docker compose up failed (see the error above). A common cause: another stack or process holding a required port (see the pre-flight output from bin/start). Inspect with: docker ps --all"; exit 1; } && echo "docker-compose ready" && docker compose -p insights -f docker-compose.dev.yml -f docker-compose.profiles.yml --profile dev_tools --profile etcd --profile localstack --profile observability --profile replay --profile temporal logs --tail=100 -f; fi'
+        shell: 'if [ "${INSIGHTS_SANDBOX:-}" = "1" ]; then echo "Sandbox: infra managed by docker compose externally" && echo "docker-compose ready" && sleep infinity; else docker compose -p insights -f docker-compose.dev.yml -f docker-compose.profiles.yml --profile dev_tools --profile etcd --profile localstack --profile observability --profile replay --profile temporal up --pull always -d || { echo "docker compose up failed (see the error above). A common cause: another stack or process holding a required port (see the pre-flight output from bin/start). Inspect with: docker ps --all"; exit 1; } && echo "docker-compose ready" && docker compose -p insights -f docker-compose.dev.yml -f docker-compose.profiles.yml --profile dev_tools --profile etcd --profile localstack --profile observability --profile replay --profile temporal logs --tail=100 -f; fi'
         capability: core_infra
         ready_pattern: 'docker-compose ready'
         groups:
@@ -529,8 +529,8 @@ procs:
         env:
             LLM_GATEWAY_DEBUG: 'true'
             LLM_GATEWAY_TEAM_RATE_LIMIT_MULTIPLIERS: '{"1": 10}'
-            LLM_GATEWAY_POSTFN_PROJECT_TOKEN: 'phc_localinsightsprojecttoken'
-            LLM_GATEWAY_POSTFN_HOST: 'http://localhost:8010'
+            LLM_GATEWAY_INSIGHTS_PROJECT_TOKEN: 'phc_localinsightsprojecttoken'
+            LLM_GATEWAY_INSIGHTS_HOST: 'http://localhost:8010'
 
     agent-proxy:
         shell: 'bin/wait-for-docker --only redis7 && pnpm --filter @hanzo/agent-proxy dev'

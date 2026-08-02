@@ -500,7 +500,7 @@ class DebugCHQueries(viewsets.ViewSet):
         return Response(self._serialize_precomputation_team(team, enabled, arr_by_org))
 
     # Team ID for Insights's own project, which has data warehouse billing tables
-    _POSTFN_INTERNAL_TEAM_ID = 2
+    _INSIGHTS_INTERNAL_TEAM_ID = 2
 
     def _fetch_org_arr(self, org_ids: set[str]) -> dict[str, int]:
         """Fetch current confirmed ARR per organization from data warehouse billing tables.
@@ -509,7 +509,7 @@ class DebugCHQueries(viewsets.ViewSet):
         Returns empty dict if unavailable (e.g. local dev or missing tables).
         """
         try:
-            team = Team.objects.get(id=self._POSTFN_INTERNAL_TEAM_ID)
+            team = Team.objects.get(id=self._INSIGHTS_INTERNAL_TEAM_ID)
         except Team.DoesNotExist:
             return {}
 

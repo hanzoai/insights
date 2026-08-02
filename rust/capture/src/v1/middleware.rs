@@ -9,11 +9,11 @@ use axum::middleware::Next;
 use axum::response::Response;
 use chrono::Utc;
 
-use crate::v1::constants::{CAPTURE_V1_RESPONSE_TIME, POSTFN_REQUEST_ID};
+use crate::v1::constants::{CAPTURE_V1_RESPONSE_TIME, INSIGHTS_REQUEST_ID};
 
 pub async fn v1_common_headers(req: Request, next: Next) -> Response {
     let received_at = Utc::now();
-    let request_id = req.headers().get(POSTFN_REQUEST_ID).cloned();
+    let request_id = req.headers().get(INSIGHTS_REQUEST_ID).cloned();
 
     let mut response = next.run(req).await;
 
@@ -22,7 +22,7 @@ pub async fn v1_common_headers(req: Request, next: Next) -> Response {
         headers.insert(header::DATE, date_val);
     }
     if let Some(id) = request_id {
-        headers.insert(POSTFN_REQUEST_ID, id);
+        headers.insert(INSIGHTS_REQUEST_ID, id);
     }
     response
 }
@@ -63,7 +63,7 @@ mod tests {
     use uuid::Uuid;
 
     use super::{v1_common_headers, v1_track_response_time};
-    use crate::v1::constants::POSTFN_REQUEST_ID;
+    use crate::v1::constants::INSIGHTS_REQUEST_ID;
 
     fn test_router() -> Router {
         Router::new()
@@ -125,7 +125,7 @@ mod tests {
             .oneshot(
                 Request::builder()
                     .uri("/test")
-                    .header(POSTFN_REQUEST_ID, HeaderValue::from_str(&id).unwrap())
+                    .header(INSIGHTS_REQUEST_ID, HeaderValue::from_str(&id).unwrap())
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
         let returned = resp
             .headers()
-            .get(POSTFN_REQUEST_ID)
+            .get(INSIGHTS_REQUEST_ID)
             .expect("Insights-Request-Id missing on response");
         assert_eq!(returned.to_str().unwrap(), id);
     }
@@ -149,7 +149,7 @@ mod tests {
 
         assert_eq!(resp.status(), StatusCode::OK);
         assert!(
-            resp.headers().get(POSTFN_REQUEST_ID).is_none(),
+            resp.headers().get(INSIGHTS_REQUEST_ID).is_none(),
             "Insights-Request-Id should not be set when absent from request"
         );
     }

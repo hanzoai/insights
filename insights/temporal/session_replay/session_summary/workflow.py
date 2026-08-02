@@ -33,7 +33,7 @@ from insights.session_recordings.queries.session_replay_events import SessionRep
 from insights.sync import database_sync_to_async
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.client import async_connect
-from insights.temporal.common.search_attributes import POSTFN_SESSION_RECORDING_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SESSION_RECORDING_ID_KEY, INSIGHTS_TEAM_ID_KEY
 from insights.temporal.session_replay.rasterize_recording.types import RasterizeRecordingInputs
 from insights.temporal.session_replay.session_summary.activities.capture_timing import (
     CaptureTimingInputs,
@@ -391,8 +391,8 @@ async def ensure_llm_single_session_summary(
         execution_timeout=timedelta(minutes=30),
         search_attributes=TypedSearchAttributes(
             search_attributes=[
-                SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=video_inputs.team_id),
-                SearchAttributePair(key=POSTFN_SESSION_RECORDING_ID_KEY, value=video_inputs.session_id),
+                SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=video_inputs.team_id),
+                SearchAttributePair(key=INSIGHTS_SESSION_RECORDING_ID_KEY, value=video_inputs.session_id),
             ]
         ),
     )
@@ -590,7 +590,7 @@ async def _start_video_summary_workflow(
         task_queue=settings.SESSION_REPLAY_TASK_QUEUE,
         retry_policy=retry_policy,
         search_attributes=TypedSearchAttributes(
-            search_attributes=[SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=inputs.team_id)]
+            search_attributes=[SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=inputs.team_id)]
         ),
     )
     return handle
@@ -617,7 +617,7 @@ async def _execute_single_session_summary_workflow(inputs: SingleSessionSummaryI
         task_queue=settings.SESSION_REPLAY_TASK_QUEUE,
         retry_policy=retry_policy,
         search_attributes=TypedSearchAttributes(
-            search_attributes=[SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=inputs.team_id)]
+            search_attributes=[SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=inputs.team_id)]
         ),
     )
 

@@ -54,7 +54,7 @@ jobs:
                   image-name: insights-mcp
                   # Publishes only from the default branch — assume the role and touch ECR only there;
                   # labeled PRs still build (push=false) without assuming it.
-                  aws-role-to-assume: ${{ vars.AWS_ECR_POSTFN_MASTER_PUBLISH_IAM_ROLE }}
+                  aws-role-to-assume: ${{ vars.AWS_ECR_INSIGHTS_MASTER_PUBLISH_IAM_ROLE }}
                   push-to-ecr: ${{ github.ref == 'refs/heads/master' }}
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   dockerhub-username: ${{ secrets.DOCKERHUB_USER }}

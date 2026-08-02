@@ -52,7 +52,7 @@ def test_insights_ai_task_keeps_member_token_and_insights_ai_oauth_application(
         id="task-id",
         created_by=MagicMock(),
         team_id=123,
-        origin_product=Task.OriginProduct.POSTFN_AI,
+        origin_product=Task.OriginProduct.INSIGHTS_AI,
     )
 
     assert create_oauth_access_token(task) == "token"
