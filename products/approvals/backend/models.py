@@ -166,7 +166,7 @@ class ApprovalPolicy(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     bypass_org_membership_levels = models.JSONField(default=list)
 
     bypass_roles = models.ManyToManyField(
-        "ee.Role",
+        "insights.Role",
         blank=True,
         related_name="bypass_policies",
         db_table="insights_approvalpolicy_bypass_roles",  # pinned to pre-move physical M2M table name, do not rename
