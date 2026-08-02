@@ -47,7 +47,7 @@ def mock_exporter_template(test_func):
     Decorator to mock render_template for sharing tests.
 
     This provides a simplified version of the exporter template that always includes
-    the exported_data in both window.POSTFN_EXPORTED_DATA and the response body,
+    the exported_data in both window.INSIGHTS_EXPORTED_DATA and the response body,
     simulating what the actual built exporter.html template would do.
     """
 
@@ -65,12 +65,12 @@ def mock_exporter_template(test_func):
         <script id="insights-exported-data" type="application/json">{exported_data_str}</script>
         <script>
             try {{
-                window.POSTFN_EXPORTED_DATA = JSON.parse(
+                window.INSIGHTS_EXPORTED_DATA = JSON.parse(
                     JSON.parse(document.getElementById('insights-exported-data').textContent)
                 );
             }} catch (e) {{
                 console.error('Failed to parse exported data:', e);
-                window.POSTFN_EXPORTED_DATA = {{}};
+                window.INSIGHTS_EXPORTED_DATA = {{}};
             }}
         </script>
     </head>
@@ -1204,7 +1204,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
         Render and subscription_delivery tokens are internal-purpose and bypass the org-level public-sharing
         block, but each is pinned to a single URL surface so an intercepted token can't be repurposed.
         """
-        mock_render_template.return_value = HttpResponse("<html><body>POSTFN_EXPORTED_DATA</body></html>")
+        mock_render_template.return_value = HttpResponse("<html><body>INSIGHTS_EXPORTED_DATA</body></html>")
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ORGANIZATION_SECURITY_SETTINGS, "name": "organization_security_settings"},

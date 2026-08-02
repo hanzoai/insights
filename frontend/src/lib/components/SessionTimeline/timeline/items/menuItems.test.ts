@@ -2,13 +2,13 @@ import { buildOpenInActivityTabMenuItem } from './menuItems'
 
 describe('buildOpenInActivityTabMenuItem', () => {
     beforeEach(() => {
-        window.POSTFN_APP_CONTEXT = {
+        window.INSIGHTS_APP_CONTEXT = {
             current_team: { id: 1 },
         } as any
     })
 
     afterEach(() => {
-        delete window.POSTFN_APP_CONTEXT
+        delete window.INSIGHTS_APP_CONTEXT
     })
 
     it('returns no menu items when event context is missing', () => {

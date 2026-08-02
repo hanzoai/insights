@@ -2,8 +2,8 @@ from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
 from insights.models.hog_invocation_results.sql import (
     DISTRIBUTED_FN_INVOCATION_RESULTS_TABLE_SQL,
-    FN_INVOCATION_RESULTS_DATA_TABLE_SQL,
-    FN_INVOCATION_RESULTS_MV_SQL,
+    INSIGHTS_INVOCATION_RESULTS_DATA_TABLE_SQL,
+    INSIGHTS_INVOCATION_RESULTS_MV_SQL,
     KAFKA_FN_INVOCATION_RESULTS_TABLE_SQL,
 )
 
@@ -16,7 +16,7 @@ from insights.models.hog_invocation_results.sql import (
 operations = [
     # 1. Local replicated data table on AUX.
     run_sql_with_exceptions(
-        FN_INVOCATION_RESULTS_DATA_TABLE_SQL(),
+        INSIGHTS_INVOCATION_RESULTS_DATA_TABLE_SQL(),
         node_roles=[NodeRole.AUX],
     ),
     # 2. Kafka engine table on AUX (warpstream-shared).
@@ -26,7 +26,7 @@ operations = [
     ),
     # 3. MV on AUX (kafka -> data table).
     run_sql_with_exceptions(
-        FN_INVOCATION_RESULTS_MV_SQL(),
+        INSIGHTS_INVOCATION_RESULTS_MV_SQL(),
         node_roles=[NodeRole.AUX],
     ),
     # 4. Distributed read alias on AUX and DATA so both cluster's queries reach

@@ -78,9 +78,9 @@ describe('RequestContext', () => {
             mockMe.mockClear()
         })
 
-        it('passes POSTFN_PUBLIC_URL as publicBaseUrl to the ApiClient', async () => {
-            process.env.POSTFN_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
-            process.env.POSTFN_PUBLIC_URL = 'https://us.hanzo.ai'
+        it('passes INSIGHTS_PUBLIC_URL as publicBaseUrl to the ApiClient', async () => {
+            process.env.INSIGHTS_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
+            process.env.INSIGHTS_PUBLIC_URL = 'https://us.hanzo.ai'
 
             mockMe.mockResolvedValue({ success: true, data: { distinct_id: 'user-1' } })
             const ctx = new RequestContext(fakeRedis(), env, makeProps())
@@ -92,9 +92,9 @@ describe('RequestContext', () => {
             expect(config.publicBaseUrl).toBe('https://us.hanzo.ai')
         })
 
-        it('falls back to POSTFN_API_BASE_URL when POSTFN_PUBLIC_URL is not set', async () => {
-            process.env.POSTFN_API_BASE_URL = 'https://us.hanzo.ai'
-            delete process.env.POSTFN_PUBLIC_URL
+        it('falls back to INSIGHTS_API_BASE_URL when INSIGHTS_PUBLIC_URL is not set', async () => {
+            process.env.INSIGHTS_API_BASE_URL = 'https://us.hanzo.ai'
+            delete process.env.INSIGHTS_PUBLIC_URL
 
             mockMe.mockResolvedValue({ success: true, data: { distinct_id: 'user-1' } })
             const ctx = new RequestContext(fakeRedis(), env, makeProps())

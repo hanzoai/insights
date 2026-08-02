@@ -65,7 +65,7 @@ export const NoPermission: Story = {
         }),
     ],
     beforeEach: () => {
-        const appContext = window.POSTFN_APP_CONTEXT
+        const appContext = window.INSIGHTS_APP_CONTEXT
         const originalTeam = appContext?.current_team
         if (appContext) {
             appContext.current_team = memberTeam

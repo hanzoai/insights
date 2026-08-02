@@ -11,8 +11,8 @@ import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { convertToInsightsFunctionInvocationGlobals } from 'scenes/insights-functions/configuration/insightsFunctionConfigurationLogic'
 import { DESTINATION_OPTIONS, DestinationKey } from 'scenes/insights-functions/list/newNotificationDialogLogic'
 import {
-    FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
-    FN_FUNCTION_SUB_TEMPLATES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATES,
 } from 'scenes/insights-functions/sub-templates/sub-templates'
 import { NEW_SURVEY } from 'scenes/surveys/constants'
 import {
@@ -632,7 +632,7 @@ function createSurveyNotificationPayload({
         throw new Error('Unsupported destination')
     }
 
-    const subTemplate = FN_FUNCTION_SUB_TEMPLATES['survey-response'].find(
+    const subTemplate = INSIGHTS_FUNCTION_SUB_TEMPLATES['survey-response'].find(
         (subTemplateValue) => subTemplateValue.template_id === destinationOption.templateId
     )
 
@@ -677,7 +677,7 @@ function createSurveyNotificationPayload({
 
     return {
         template_id: destinationOption.templateId,
-        type: FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'].type,
+        type: INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'].type,
         name: notificationNameFor(destination, surveyName),
         description: subTemplate?.description ?? `Survey notification for ${destinationOption.label}`,
         inputs,

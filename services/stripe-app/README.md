@@ -40,7 +40,7 @@ Key files:
 - `insights/models/integration.py` — `StripeIntegration` class: writes and clears secrets in Stripe
 - `insights/api/integration.py` — triggers `write_insights_secrets()` after Stripe OAuth callback
 - `insights/settings/integrations.py` — env vars (`STRIPE_APP_CLIENT_ID`, `STRIPE_APP_SECRET_KEY`,
-  `STRIPE_POSTFN_OAUTH_CLIENT_ID`, `STRIPE_APP_OVERRIDE_AUTHORIZE_URL`)
+  `STRIPE_INSIGHTS_OAUTH_CLIENT_ID`, `STRIPE_APP_OVERRIDE_AUTHORIZE_URL`)
 
 ### Stripe App (this directory)
 
@@ -121,7 +121,7 @@ If you need fresh ones, run the command manually with `--force`:
 python manage.py generate_stripe_app_tokens --team-id=1 --force
 ```
 
-On first run, if `STRIPE_POSTFN_OAUTH_CLIENT_ID` is not set,
+On first run, if `STRIPE_INSIGHTS_OAUTH_CLIENT_ID` is not set,
 the command will automatically create an `OAuthApplication`
 and write its `client_id` to your `.env`.
 
@@ -151,7 +151,7 @@ The trick is to temporarily route through a production URL and then redirect bac
    ```bash
    STRIPE_APP_CLIENT_ID=ca_...           # from Stripe Apps dashboard
    STRIPE_APP_SECRET_KEY=sk_test_...     # from Stripe API keys
-   STRIPE_POSTFN_OAUTH_CLIENT_ID=...   # auto-created by the management command, or create manually
+   STRIPE_INSIGHTS_OAUTH_CLIENT_ID=...   # auto-created by the management command, or create manually
    STRIPE_APP_OVERRIDE_AUTHORIZE_URL=https://marketplace.stripe.com/oauth/v2/chnlink_.../authorize
    ```
 
@@ -205,5 +205,5 @@ This creates a `package-lock.json` (required by Stripe) and uploads the app.
 | ----------------------------------- | ------------------------------------------------------------------------- |
 | `STRIPE_APP_CLIENT_ID`              | Stripe App OAuth client ID (from Stripe Apps dashboard)                   |
 | `STRIPE_APP_SECRET_KEY`             | Stripe API secret key for token exchange                                  |
-| `STRIPE_POSTFN_OAUTH_CLIENT_ID`    | Client ID of the Insights OAuthApplication used by the Stripe App          |
+| `STRIPE_INSIGHTS_OAUTH_CLIENT_ID`    | Client ID of the Insights OAuthApplication used by the Stripe App          |
 | `STRIPE_APP_OVERRIDE_AUTHORIZE_URL` | Channel link authorize URL (required for non-published app installations) |

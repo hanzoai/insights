@@ -183,7 +183,7 @@ export function getToolbarAppBuildConfig(dirname) {
         // `global` / `process.env.NODE_ENV` substitutions.
         define: {
             ...commonConfig.define,
-            __POSTFN_TOOLBAR_PUBLIC_PATH__: JSON.stringify(toolbarPublicPathOverride),
+            __INSIGHTS_TOOLBAR_PUBLIC_PATH__: JSON.stringify(toolbarPublicPathOverride),
         },
         writeMetaFile: true,
         extraPlugins: [createToolbarModulePlugin(dirname)],
@@ -240,8 +240,8 @@ export async function finalizeToolbarBuild(dirname, buildResponse) {
         tsconfig: commonConfig.tsconfig,
         define: {
             ...commonConfig.define,
-            __POSTFN_TOOLBAR_PUBLIC_PATH__: JSON.stringify(toolbarPublicPathOverride),
-            __POSTFN_TOOLBAR_APP_ENTRY__: JSON.stringify(path.basename(entryJs)),
+            __INSIGHTS_TOOLBAR_PUBLIC_PATH__: JSON.stringify(toolbarPublicPathOverride),
+            __INSIGHTS_TOOLBAR_APP_ENTRY__: JSON.stringify(path.basename(entryJs)),
         },
     })
 }

@@ -56,7 +56,7 @@ insights_worktree_borrow() {
 
     if [ ! -d node_modules/.pnpm ] && [ -d "$_ph_main/node_modules/.pnpm" ]; then
         if cmp -s pnpm-lock.yaml "$_ph_main/pnpm-lock.yaml"; then
-            POSTFN_BORROW_NODE=1
+            INSIGHTS_BORROW_NODE=1
             PATH="$_ph_main/node_modules/.bin:$PATH"
             echo "worktree: borrowing node_modules from $_ph_main (lockfiles match)" >&2
         else

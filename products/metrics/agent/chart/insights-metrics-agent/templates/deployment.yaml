@@ -52,7 +52,7 @@ spec:
                           drop:
                               - ALL
                   env:
-                      - name: POSTFN_API_KEY
+                      - name: INSIGHTS_API_KEY
                         valueFrom:
                             secretKeyRef:
                                 name: {{ include "insights-metrics-agent.secretName" . }}

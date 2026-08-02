@@ -706,7 +706,7 @@ describe('maxThreadLogic', () => {
                 max_queue_messages: 2,
             })
             featureFlagLogic.actions.setFeatureFlags([], {
-                [FEATURE_FLAGS.POSTFN_AI_QUEUE_MESSAGES_SYSTEM]: true,
+                [FEATURE_FLAGS.INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM]: true,
             })
         })
 
@@ -3804,7 +3804,7 @@ describe('maxThreadLogic', () => {
         })
 
         it('markTurnComplete drains the sandbox queue combined, without an optimistic echo', async () => {
-            // No POSTFN_AI_QUEUE_MESSAGES_SYSTEM flag — sandbox queueing is flag-independent.
+            // No INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM flag — sandbox queueing is flag-independent.
             jest.spyOn(api.conversations.queue, 'clear').mockResolvedValue({ messages: [], max_queue_messages: 2 })
 
             const sandboxStreamInstance = await startSandboxTurn()
@@ -3831,7 +3831,7 @@ describe('maxThreadLogic', () => {
         it('handleStreamError does NOT drain the sandbox queue (no clearQueuedMessages, no askMax)', async () => {
             featureFlagLogic.mount()
             featureFlagLogic.actions.setFeatureFlags([], {
-                [FEATURE_FLAGS.POSTFN_AI_QUEUE_MESSAGES_SYSTEM]: true,
+                [FEATURE_FLAGS.INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM]: true,
             })
 
             const sandboxStreamInstance = await startSandboxTurn()

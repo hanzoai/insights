@@ -5,7 +5,7 @@
 #
 # The whole original shell command (operators and all) is passed as a single
 # argument and run via `bash -c`. On by default; opt out by setting
-# POSTFN_DEV_SANDBOX=0 in .env.local. The generator (insightscli dev:generate) wraps
+# INSIGHTS_DEV_SANDBOX=0 in .env.local. The generator (insightscli dev:generate) wraps
 # Python/Node service commands with this script unless opted out.
 #
 # The base profile denies all reads under $HOME. Because the repo lives under
@@ -152,7 +152,7 @@ if [[ "$rendered" -nt "$stamp" ]]; then
     if "${sandbox[@]}" /usr/bin/true >/dev/null 2>&1; then
         touch "$stamp" 2>/dev/null || true
     else
-        echo "⚠️  dev sandbox failed to initialize — running WITHOUT sandbox. Set POSTFN_DEV_SANDBOX=0 to silence." >&2
+        echo "⚠️  dev sandbox failed to initialize — running WITHOUT sandbox. Set INSIGHTS_DEV_SANDBOX=0 to silence." >&2
         run_unsandboxed
     fi
 fi

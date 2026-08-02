@@ -33,8 +33,8 @@ npm install
 The app automatically fetches the Insights API key from your local database at build/dev time. You can configure the database connection and team ID using these environment variables:
 
 ```env
-NEXT_PUBLIC_POSTFN_HOST # Insights host (default: http://localhost:8010)
-NEXT_PUBLIC_POSTFN_KEY  # Insights API key, fetched automatically on `npm run dev`
+NEXT_PUBLIC_INSIGHTS_HOST # Insights host (default: http://localhost:8010)
+NEXT_PUBLIC_INSIGHTS_KEY  # Insights API key, fetched automatically on `npm run dev`
 DEMO_TEAM_ID             # Team ID to fetch token from (default: latest team)
 ```
 
@@ -43,9 +43,9 @@ DEMO_TEAM_ID             # Team ID to fetch token from (default: latest team)
 To manually fetch the key or force a re-fetch, run:
 
 ```bash
-# Fetch if .env.local doesn't exist or doesn't have key NEXT_PUBLIC_POSTFN_KEY
+# Fetch if .env.local doesn't exist or doesn't have key NEXT_PUBLIC_INSIGHTS_KEY
 npm run fetch-insights-key
-# Force re-fetch even if NEXT_PUBLIC_POSTFN_KEY set in .env.local
+# Force re-fetch even if NEXT_PUBLIC_INSIGHTS_KEY set in .env.local
 FORCE_FETCH_KEY=1 npm run fetch-insights-key
 ```
 
@@ -61,4 +61,4 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 
 ## Generating session recordings
 
-The app is instrumented as long as `npm run dev` has `NEXT_PUBLIC_POSTFN_KEY` set. Just interact normally and recordings will be captured in your Insights instance.
+The app is instrumented as long as `npm run dev` has `NEXT_PUBLIC_INSIGHTS_KEY` set. Just interact normally and recordings will be captured in your Insights instance.

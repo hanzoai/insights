@@ -21,14 +21,14 @@ export function humanizeInsightsFunctionType(type: InsightsFunctionTypeType, plu
 }
 
 /** Default char cap for a config blob attached to the Insights AI agent as context. */
-export const FN_FUNCTION_CONTEXT_MAX_CHARS = 10_000
+export const INSIGHTS_FUNCTION_CONTEXT_MAX_CHARS = 10_000
 
 /**
  * Caps a stringified config blob before it's registered as Insights AI attached context, so a pathological
  * script source or inputs payload can't bloat the agent's context window. These are keyed entity-style items
  * (not `type: 'text'`), so they're sent once per run rather than every turn; the cap is a safety ceiling.
  */
-export function truncateInsightsFunctionContext(value: string, max: number = FN_FUNCTION_CONTEXT_MAX_CHARS): string {
+export function truncateInsightsFunctionContext(value: string, max: number = INSIGHTS_FUNCTION_CONTEXT_MAX_CHARS): string {
     return value.length > max ? value.slice(0, max) + '… (truncated)' : value
 }
 

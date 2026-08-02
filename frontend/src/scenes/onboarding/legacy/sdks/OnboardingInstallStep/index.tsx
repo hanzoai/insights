@@ -66,7 +66,7 @@ export const OnboardingInstallStep: OnboardingStepComponentType<OnboardingInstal
         : undefined
     // The shared insights-js step gets a generic "Install" title — naming it after
     // the dedup-survivor product would mislead users installing several at once.
-    const isSdkInstallStep = currentFlowStep?.dedupKey === INSTALL_DEDUP_KEYS.POSTFN_JS
+    const isSdkInstallStep = currentFlowStep?.dedupKey === INSTALL_DEDUP_KEYS.INSIGHTS_JS
     const installTitle = isSdkInstallStep ? 'Install' : productName ? `Install ${productName}` : 'Install your SDK'
 
     const installationCompleteFromTeam = useInstallationComplete(teamPropertyToVerify)

@@ -27,7 +27,7 @@ export const getHonoSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                             file: 'index.ts',
                             code: dedent`
                               import { Insights } from 'insights-node'
-                              const insights = new Insights(process.env.POSTFN_TOKEN, { host: 'https://us.i.hanzo.ai' })
+                              const insights = new Insights(process.env.INSIGHTS_TOKEN, { host: 'https://us.i.hanzo.ai' })
                               app.onError(async (err, c) => {
                                 insights.captureException(err, 'user_distinct_id_with_err_rethrow', {
                                   path: c.req.path,

@@ -24,14 +24,14 @@ describe('RootErrorBoundary', () => {
             configurable: true,
             writable: true,
         })
-        window.JS_POSTFN_API_KEY = 'test-api-key'
-        window.JS_POSTFN_HOST = 'https://us.example.com'
+        window.JS_INSIGHTS_API_KEY = 'test-api-key'
+        window.JS_INSIGHTS_HOST = 'https://us.example.com'
     })
 
     afterEach(() => {
         consoleErrorSpy.mockRestore()
-        delete window.JS_POSTFN_API_KEY
-        delete window.JS_POSTFN_HOST
+        delete window.JS_INSIGHTS_API_KEY
+        delete window.JS_INSIGHTS_HOST
         cleanup()
     })
 
@@ -77,7 +77,7 @@ describe('RootErrorBoundary', () => {
     })
 
     it('does not report when capture is opted out', () => {
-        delete window.JS_POSTFN_API_KEY
+        delete window.JS_INSIGHTS_API_KEY
 
         render(
             <RootErrorBoundary>

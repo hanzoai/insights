@@ -97,13 +97,13 @@ jobs:
                 type=sha
             timeout-minutes: 30
         secrets:
-            POSTFN_API_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
-            POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+            INSIGHTS_API_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
+            INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
             # Deliberately reuses the frontend sourcemap upload key: sourcemaps and
             # native symbols go through the same symbol-set upload API on the same
             # internal project, so there is no separate org secret to create.
-            # Rotating POSTFN_UPLOAD_SOURCEMAPS_CLI_API_KEY affects both uploads.
-            POSTFN_UPLOAD_SYMBOLS_CLI_API_KEY: ${{ secrets.POSTFN_UPLOAD_SOURCEMAPS_CLI_API_KEY }}
+            # Rotating INSIGHTS_UPLOAD_SOURCEMAPS_CLI_API_KEY affects both uploads.
+            INSIGHTS_UPLOAD_SYMBOLS_CLI_API_KEY: ${{ secrets.INSIGHTS_UPLOAD_SOURCEMAPS_CLI_API_KEY }}
         permissions:
             id-token: write
             contents: read

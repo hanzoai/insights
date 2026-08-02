@@ -363,7 +363,7 @@ def enqueue_process_query_task(
     # module loads at django.setup() via insights.datastore.client — keep the task graph off it.
     from insights.tasks.tasks import process_query_task  # noqa: PLC0415
 
-    limit_context = LimitContext.POSTFN_AI if is_insights_ai else LimitContext.QUERY_ASYNC
+    limit_context = LimitContext.INSIGHTS_AI if is_insights_ai else LimitContext.QUERY_ASYNC
     task_signature = process_query_task.si(
         team.id,
         user_id,

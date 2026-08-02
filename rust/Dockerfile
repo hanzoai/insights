@@ -62,7 +62,7 @@ RUN --mount=type=secret,id=SCCACHE_WEBDAV_ENDPOINT,required=false \
 
 # Upload native debug symbols (with source context) to Insights error tracking,
 # so panics and exceptions captured by common-insights symbolicate server-side.
-# They go to the internal Insights project (POSTFN_CLI_ENV_ID=2 on US cloud),
+# They go to the internal Insights project (INSIGHTS_CLI_ENV_ID=2 on US cloud),
 # the same project the frontend sourcemap upload in the root Dockerfile targets.
 # Runs only when CI mounts the upload token (master builds on the canonical
 # deploy repo — see _rust-build-images.yml); PR and local builds skip it.
@@ -80,10 +80,10 @@ RUN --mount=type=secret,id=SCCACHE_WEBDAV_ENDPOINT,required=false \
 # layer; token-less builds keep a constant empty value and stay cached.
 #
 # The CLI installer is pinned to an immutable release tag and checksum-verified
-# before execution. To upgrade, change POSTFN_CLI_VERSION and recompute:
+# before execution. To upgrade, change INSIGHTS_CLI_VERSION and recompute:
 #   curl -LsSf "https://github.com/Insights/insights/releases/download/insights-cli%2Fv<X.Y.Z>/insights-cli-installer.sh" | sha256sum
-ARG POSTFN_CLI_VERSION=0.8.1
-ARG POSTFN_CLI_INSTALLER_SHA256=b1f1781a78a37930884db3ad412d9508a9ac015b01339455a7357cd0b23d9c92
+ARG INSIGHTS_CLI_VERSION=0.8.1
+ARG INSIGHTS_CLI_INSTALLER_SHA256=b1f1781a78a37930884db3ad412d9508a9ac015b01339455a7357cd0b23d9c92
 ARG SYMBOL_UPLOAD_TRIGGER=""
 RUN --mount=type=secret,id=insights_upload_symbols_cli_api_key \
     --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
@@ -92,12 +92,12 @@ RUN --mount=type=secret,id=insights_upload_symbols_cli_api_key \
         echo "No symbol upload trigger/token; skipping native symbol upload"; \
     elif ( \
         curl --proto '=https' --tlsv1.2 -LsSf -o /tmp/insights-cli-installer.sh \
-            "https://github.com/Insights/insights/releases/download/insights-cli%2Fv${POSTFN_CLI_VERSION}/insights-cli-installer.sh" && \
-        echo "${POSTFN_CLI_INSTALLER_SHA256}  /tmp/insights-cli-installer.sh" | sha256sum -c - && \
+            "https://github.com/Insights/insights/releases/download/insights-cli%2Fv${INSIGHTS_CLI_VERSION}/insights-cli-installer.sh" && \
+        echo "${INSIGHTS_CLI_INSTALLER_SHA256}  /tmp/insights-cli-installer.sh" | sha256sum -c - && \
         sh /tmp/insights-cli-installer.sh && \
         export PATH="/root/.insights:$PATH" && \
-        export POSTFN_CLI_TOKEN="$(cat /run/secrets/insights_upload_symbols_cli_api_key)" && \
-        export POSTFN_CLI_ENV_ID=2 && \
+        export INSIGHTS_CLI_TOKEN="$(cat /run/secrets/insights_upload_symbols_cli_api_key)" && \
+        export INSIGHTS_CLI_ENV_ID=2 && \
         mkdir -p /tmp/insights-symbols && \
         cp "target/release/$BIN" /tmp/insights-symbols/ && \
         insights-cli symbol-sets upload \

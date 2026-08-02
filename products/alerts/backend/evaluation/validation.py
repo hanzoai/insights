@@ -81,7 +81,7 @@ def _validate_condition_threshold_compatibility(
 def _validate_insightsql_alert_config(ctx: _AlertConfigValidationContext) -> None:
     # SQL insights own their time window; there is no series_index or ongoing-interval concept,
     # so the query kind, evaluation mode, condition/threshold compatibility, and bounds are validated.
-    if ctx.query_kind != NodeKind.FN_QL_QUERY:
+    if ctx.query_kind != NodeKind.INSIGHTS_QL_QUERY:
         raise ValueError(f"SQL alert config requires a InsightsQLQuery insight, got '{ctx.query_kind}'")
     try:
         parsed = InsightsQLAlertConfig.model_validate(ctx.config)

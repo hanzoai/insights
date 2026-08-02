@@ -9,8 +9,8 @@ import api from 'lib/api'
 import { HealthIssueKind, KIND_LABELS } from 'scenes/health/healthCategories'
 import { SAMPLE_GLOBALS_CONTEXTS } from 'scenes/insights-functions/configuration/sampleGlobalsContexts'
 import {
-    FN_FUNCTION_SUB_TEMPLATES,
-    FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
 } from 'scenes/insights-functions/sub-templates/sub-templates'
 
 import {
@@ -78,7 +78,7 @@ function hasSubTemplateForDestination(
     triggerKey: InsightsFunctionSubTemplateIdType,
     destination: WizardDestination
 ): boolean {
-    const subTemplates = FN_FUNCTION_SUB_TEMPLATES[triggerKey]
+    const subTemplates = INSIGHTS_FUNCTION_SUB_TEMPLATES[triggerKey]
     return subTemplates?.some((t) => t.template_id === destination.templateId) ?? false
 }
 
@@ -488,7 +488,7 @@ export const alertWizardLogic = kea<alertWizardLogicType>([
             {
                 loadExistingAlerts: async () => {
                     const filters = logicProps.subTemplateIds
-                        .map((id) => FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[id]?.filters)
+                        .map((id) => INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[id]?.filters)
                         .filter(Boolean)
 
                     const response = await api.insightsFunctions.list({
@@ -587,7 +587,7 @@ export const alertWizardLogic = kea<alertWizardLogicType>([
                 if (!destination) {
                     return null
                 }
-                const subTemplates = FN_FUNCTION_SUB_TEMPLATES[selectedTriggerKey]
+                const subTemplates = INSIGHTS_FUNCTION_SUB_TEMPLATES[selectedTriggerKey]
                 return subTemplates?.find((t) => t.template_id === destination.templateId) ?? null
             },
         ],
@@ -670,7 +670,7 @@ export const alertWizardLogic = kea<alertWizardLogicType>([
             }
 
             const destination = values.allDestinations.find((d) => d.key === destinationKey)!
-            const subTemplates = FN_FUNCTION_SUB_TEMPLATES[triggerKey]
+            const subTemplates = INSIGHTS_FUNCTION_SUB_TEMPLATES[triggerKey]
             const subTemplate = subTemplates.find((t) => t.template_id === destination.templateId)
 
             if (!subTemplate) {
@@ -757,7 +757,7 @@ export const alertWizardLogic = kea<alertWizardLogicType>([
                 }
 
                 const destination = values.allDestinations.find((d) => d.key === destinationKey)!
-                const subTemplates = FN_FUNCTION_SUB_TEMPLATES[triggerKey]
+                const subTemplates = INSIGHTS_FUNCTION_SUB_TEMPLATES[triggerKey]
                 const subTemplate = subTemplates.find((t) => t.template_id === destination.templateId)
 
                 if (!subTemplate) {

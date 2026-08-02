@@ -56,10 +56,10 @@ const PICKER_ITEMS = [
 ]
 
 const setResourceAccess = (overrides: Partial<Record<AccessControlResourceType, AccessControlLevel>>): void => {
-    window.POSTFN_APP_CONTEXT = {
-        ...window.POSTFN_APP_CONTEXT,
+    window.INSIGHTS_APP_CONTEXT = {
+        ...window.INSIGHTS_APP_CONTEXT,
         resource_access_control: {
-            ...window.POSTFN_APP_CONTEXT?.resource_access_control,
+            ...window.INSIGHTS_APP_CONTEXT?.resource_access_control,
             [AccessControlResourceType.Metrics]: AccessControlLevel.Viewer,
             [AccessControlResourceType.Insight]: AccessControlLevel.Editor,
             [AccessControlResourceType.Tracing]: AccessControlLevel.Viewer,

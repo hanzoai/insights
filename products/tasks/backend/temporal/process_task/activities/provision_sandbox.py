@@ -318,11 +318,11 @@ def _build_environment_variables(
     ctx: TaskProcessingContext, task: Task, github_token: str, access_token: str
 ) -> dict[str, str]:
     environment_variables = {
-        "POSTFN_PERSONAL_API_KEY": access_token,
-        "POSTFN_API_URL": get_sandbox_api_url(),
-        "POSTFN_PROJECT_ID": str(ctx.team_id),
-        "POSTFN_TASK_ID": str(ctx.task_id),
-        "POSTFN_TASK_RUN_ID": str(ctx.run_id),
+        "INSIGHTS_PERSONAL_API_KEY": access_token,
+        "INSIGHTS_API_URL": get_sandbox_api_url(),
+        "INSIGHTS_PROJECT_ID": str(ctx.team_id),
+        "INSIGHTS_TASK_ID": str(ctx.task_id),
+        "INSIGHTS_TASK_RUN_ID": str(ctx.run_id),
         "JWT_PUBLIC_KEY": get_sandbox_jwt_public_key(),
     }
 
@@ -363,7 +363,7 @@ def _build_environment_variables(
         # Local eval runs pin models per unit; the agent's overload rescue would silently switch a
         # session to the fallback model mid-run, breaking prompt-cache sharing (model is part of
         # the cache key) and cost attribution. Rely on Temporal retries instead.
-        environment_variables["POSTFN_DISABLE_MODEL_FALLBACK"] = "1"
+        environment_variables["INSIGHTS_DISABLE_MODEL_FALLBACK"] = "1"
 
     if ctx.agent_otel_telemetry_enabled:
         environment_variables.update(get_sandbox_otel_env_vars())
@@ -375,15 +375,15 @@ def _build_environment_variables(
 
     run_state = parse_run_state(ctx.state)
     if run_state.resume_from_run_id:
-        environment_variables["POSTFN_RESUME_RUN_ID"] = run_state.resume_from_run_id
+        environment_variables["INSIGHTS_RESUME_RUN_ID"] = run_state.resume_from_run_id
     elif run_state.handoff_resumed:
-        environment_variables["POSTFN_RESUME_RUN_ID"] = str(ctx.run_id)
+        environment_variables["INSIGHTS_RESUME_RUN_ID"] = str(ctx.run_id)
 
     # Cloud wizard runs get a SEPARATE token, minted under the wizard's own OAuth app with the
     # wizard's scopes, so the wizard's access stays independent of the agent's sandbox token above.
-    # The run_wizard activity reads it from POSTFN_WIZARD_API_KEY in the sandbox env.
+    # The run_wizard activity reads it from INSIGHTS_WIZARD_API_KEY in the sandbox env.
     if ctx.wizard_config is not None:
-        environment_variables["POSTFN_WIZARD_API_KEY"] = create_wizard_oauth_access_token(task)
+        environment_variables["INSIGHTS_WIZARD_API_KEY"] = create_wizard_oauth_access_token(task)
 
     return environment_variables
 
@@ -509,7 +509,7 @@ def prepare_sandbox_for_repository(input: PrepareSandboxForRepositoryInput) -> P
                 "effective_snapshot_mount_path": snapshot_mount_path,
                 "handoff_resumed": run_state.handoff_resumed,
                 "resume_from_run_id": run_state.resume_from_run_id,
-                "insights_resume_run_id_set": "POSTFN_RESUME_RUN_ID" in environment_variables,
+                "insights_resume_run_id_set": "INSIGHTS_RESUME_RUN_ID" in environment_variables,
                 "used_snapshot": used_snapshot,
             },
         )
@@ -814,7 +814,7 @@ def checkout_branch_in_sandbox(input: CheckoutBranchInSandboxInput) -> CheckoutB
 def inject_fresh_tokens_on_resume(input: InjectFreshTokensOnResumeInput) -> None:
     """Refresh credentials inside a sandbox that was restored from a snapshot.
 
-    Modal secrets deliver fresh ``GITHUB_TOKEN`` / ``POSTFN_PERSONAL_API_KEY``
+    Modal secrets deliver fresh ``GITHUB_TOKEN`` / ``INSIGHTS_PERSONAL_API_KEY``
     env vars to the new sandbox process, but the snapshotted filesystem can
     still carry stale tokens that Modal does not own. In particular the
     previous run's ``.git/config`` embeds ``x-access-token:<OLD_TOKEN>`` in

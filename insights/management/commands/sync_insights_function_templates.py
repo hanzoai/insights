@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.cdp.templates import FN_FUNCTION_TEMPLATES
+from insights.cdp.templates import INSIGHTS_FUNCTION_TEMPLATES
 from insights.cdp.templates.insights_function_template import sync_template_to_db
 from insights.plugins.plugin_server_api import get_insights_function_templates
 
@@ -70,8 +70,8 @@ class Command(BaseCommand):
         all_templates: list[dict] = []
         current_template_ids = set()
 
-        # Process templates from FN_FUNCTION_TEMPLATES (Python templates)
-        for template_dc in FN_FUNCTION_TEMPLATES:
+        # Process templates from INSIGHTS_FUNCTION_TEMPLATES (Python templates)
+        for template_dc in INSIGHTS_FUNCTION_TEMPLATES:
             if not self.should_include_python_template(template_dc):
                 continue
 

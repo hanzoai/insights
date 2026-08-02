@@ -114,9 +114,9 @@ class TestDockerSandboxUnit:
     @pytest.mark.parametrize(
         "command",
         [
-            "env POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=secret-token ./node_modules/.bin/agent-server",
-            "bash -c 'env POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=secret-token ./node_modules/.bin/agent-server'",
-            "env POSTFN_TASK_RUN_EVENT_INGEST_TOKEN='secret token' ./node_modules/.bin/agent-server",
+            "env INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=secret-token ./node_modules/.bin/agent-server",
+            "bash -c 'env INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=secret-token ./node_modules/.bin/agent-server'",
+            "env INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN='secret token' ./node_modules/.bin/agent-server",
         ],
     )
     def test_redact_sandbox_command_hides_event_ingest_token(self, command):
@@ -124,7 +124,7 @@ class TestDockerSandboxUnit:
 
         assert "secret-token" not in redacted
         assert "secret token" not in redacted
-        assert "POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=<redacted>" in redacted
+        assert "INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=<redacted>" in redacted
 
     @pytest.mark.parametrize(
         "input_url,expected_url",
@@ -148,7 +148,7 @@ class TestDockerSandboxUnit:
             package_path = tmp_path / "packages" / package_name
             package_path.mkdir(parents=True)
             (package_path / "package.json").touch()
-        monkeypatch.setenv("LOCAL_POSTFN_CODE_MONOREPO_ROOT", str(tmp_path))
+        monkeypatch.setenv("LOCAL_INSIGHTS_CODE_MONOREPO_ROOT", str(tmp_path))
 
         assert DockerSandbox._get_local_insights_code_root() == str(tmp_path)
 
@@ -188,8 +188,8 @@ class TestDockerSandboxUnit:
             name="test-sandbox",
             template=SandboxTemplate.DEFAULT_BASE,
             environment_variables={
-                "POSTFN_API_URL": "http://localhost:8000",
-                "POSTFN_PROJECT_ID": "1",
+                "INSIGHTS_API_URL": "http://localhost:8000",
+                "INSIGHTS_PROJECT_ID": "1",
             },
         )
 
@@ -200,13 +200,13 @@ class TestDockerSandboxUnit:
         docker_args = docker_run_call[0][0]
 
         env_args = " ".join(docker_args)
-        assert "POSTFN_API_URL=http://host.docker.internal:8000" in env_args
-        assert "POSTFN_PROJECT_ID=1" in env_args
+        assert "INSIGHTS_API_URL=http://host.docker.internal:8000" in env_args
+        assert "INSIGHTS_PROJECT_ID=1" in env_args
 
     @patch("products.tasks.backend.logic.services.docker_sandbox.subprocess.run")
     @patch("products.tasks.backend.logic.services.docker_sandbox.os.path.exists")
     def test_create_transforms_callback_url_env_vars(self, mock_exists, mock_run):
-        # Streamlit sandboxes call back to Insights via POSTFN_SITE_URL and the
+        # Streamlit sandboxes call back to Insights via INSIGHTS_SITE_URL and the
         # OTEL endpoint. Inside Docker, localhost is the container itself, so
         # these must be rewritten to host.docker.internal or introspection and
         # bridge queries fail.
@@ -217,9 +217,9 @@ class TestDockerSandboxUnit:
             name="test-streamlit",
             template=SandboxTemplate.STREAMLIT_BASE,
             environment_variables={
-                "POSTFN_SITE_URL": "http://localhost:8000",
+                "INSIGHTS_SITE_URL": "http://localhost:8000",
                 "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT": "http://localhost:8000/i/v1/logs",
-                "POSTFN_TEAM_ID": "1",
+                "INSIGHTS_TEAM_ID": "1",
             },
         )
 
@@ -227,10 +227,10 @@ class TestDockerSandboxUnit:
             DockerSandbox.create(config)
 
         env_args = " ".join(mock_run.call_args_list[-1][0][0])
-        assert "POSTFN_SITE_URL=http://host.docker.internal:8000" in env_args
+        assert "INSIGHTS_SITE_URL=http://host.docker.internal:8000" in env_args
         assert "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://host.docker.internal:8000/i/v1/logs" in env_args
         # Non-URL env vars must pass through untouched.
-        assert "POSTFN_TEAM_ID=1" in env_args
+        assert "INSIGHTS_TEAM_ID=1" in env_args
 
     @patch("products.tasks.backend.logic.services.docker_sandbox.subprocess.run")
     def test_create_raises_clear_error_when_image_missing(self, mock_run):
@@ -304,9 +304,9 @@ class TestDockerSandboxUnit:
         sandbox.config = SandboxConfig(name="test")
 
         with pytest.raises(SandboxExecutionError) as exc:
-            sandbox.execute("env POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=secret-token agent-server")
+            sandbox.execute("env INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=secret-token agent-server")
 
-        assert exc.value.context["command"] == "env POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=<redacted> agent-server"
+        assert exc.value.context["command"] == "env INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=<redacted> agent-server"
         assert "secret-token" not in exc.value.context["command"]
 
     @pytest.mark.parametrize(
@@ -409,7 +409,7 @@ class TestDockerSandboxUnit:
                 assert shlex.quote(repo_path) in command
                 assert shlex.quote(task_id) in command
                 assert shlex.quote(run_id) in command
-                assert "POSTFN_SANDBOX_ID=abc123" in command
+                assert "INSIGHTS_SANDBOX_ID=abc123" in command
                 assert "--sandboxId" not in command
                 assert shlex.quote(mode) in command
                 assert "--createPr true" in command
@@ -689,23 +689,23 @@ class TestDockerSandboxUnit:
                 )
 
         command = _agent_server_launch_command(mock_execute)
-        assert "POSTFN_AGENT_RUNTIME=pi" in command
-        assert "POSTFN_SANDBOX_ID=abc123" in command
-        assert "POSTFN_CODE_RUNTIME_ADAPTER=codex" in command
-        assert "POSTFN_CODE_PROVIDER=openai" in command
-        assert "POSTFN_CODE_MODEL=gpt-5.3-codex" in command
-        assert "POSTFN_CODE_REASONING_EFFORT=medium" in command
-        assert "POSTFN_CODE_CONTEXT_WINDOW=1m" in command
-        assert "POSTFN_CODE_FAST_MODE=true" in command
-        assert "POSTFN_CODE_INITIAL_PERMISSION_MODE=plan" in command
-        assert "POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=ingest-token" in command
+        assert "INSIGHTS_AGENT_RUNTIME=pi" in command
+        assert "INSIGHTS_SANDBOX_ID=abc123" in command
+        assert "INSIGHTS_CODE_RUNTIME_ADAPTER=codex" in command
+        assert "INSIGHTS_CODE_PROVIDER=openai" in command
+        assert "INSIGHTS_CODE_MODEL=gpt-5.3-codex" in command
+        assert "INSIGHTS_CODE_REASONING_EFFORT=medium" in command
+        assert "INSIGHTS_CODE_CONTEXT_WINDOW=1m" in command
+        assert "INSIGHTS_CODE_FAST_MODE=true" in command
+        assert "INSIGHTS_CODE_INITIAL_PERMISSION_MODE=plan" in command
+        assert "INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=ingest-token" in command
         # The host proxy URL is rewritten so it resolves from inside the container.
-        assert "POSTFN_TASK_RUN_EVENT_INGEST_URL=http://host.docker.internal:8003" in command
+        assert "INSIGHTS_TASK_RUN_EVENT_INGEST_URL=http://host.docker.internal:8003" in command
 
     @pytest.mark.parametrize(
         "fast_mode, expected_env",
         [
-            (False, "POSTFN_CODE_FAST_MODE=false"),
+            (False, "INSIGHTS_CODE_FAST_MODE=false"),
             (None, None),
         ],
     )
@@ -731,7 +731,7 @@ class TestDockerSandboxUnit:
         if expected_env is not None:
             assert expected_env in command
         else:
-            assert "POSTFN_CODE_FAST_MODE" not in command
+            assert "INSIGHTS_CODE_FAST_MODE" not in command
 
     @pytest.mark.parametrize(
         "keep_stream_open, expected_env_present",
@@ -760,9 +760,9 @@ class TestDockerSandboxUnit:
 
         command = _agent_server_launch_command(mock_execute)
         if expected_env_present:
-            assert "POSTFN_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN=true" in command
+            assert "INSIGHTS_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN=true" in command
         else:
-            assert "POSTFN_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN" not in command
+            assert "INSIGHTS_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN" not in command
 
 
 @pytest.mark.skipif(is_ci() or not docker_available(), reason="Docker sandbox tests only run locally, not in CI")
@@ -823,7 +823,7 @@ class TestDockerSandboxIntegration:
             name="insights-test-docker-env",
             environment_variables={
                 "TEST_VAR": "test_value",
-                "POSTFN_API_URL": "http://localhost:8000",
+                "INSIGHTS_API_URL": "http://localhost:8000",
             },
         )
 
@@ -831,7 +831,7 @@ class TestDockerSandboxIntegration:
             result = sandbox.execute("echo $TEST_VAR")
             assert "test_value" in result.stdout
 
-            result = sandbox.execute("echo $POSTFN_API_URL")
+            result = sandbox.execute("echo $INSIGHTS_API_URL")
             assert "host.docker.internal" in result.stdout
 
     def test_snapshot_create_and_use(self):

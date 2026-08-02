@@ -96,7 +96,7 @@ export interface InsightsFunctionConfigurationLogicProps {
 
 export const EVENT_VOLUME_DAILY_WARNING_THRESHOLD = 1000
 const UNSAVED_CONFIGURATION_TTL = 1000 * 60 * 5
-export const FN_CODE_SIZE_LIMIT = 100 * 1024 // 100KB to match backend limit
+export const INSIGHTS_CODE_SIZE_LIMIT = 100 * 1024 // 100KB to match backend limit
 
 const VALIDATION_RULES = {
     SITE_DESTINATION_REQUIRES_MAPPINGS: (data: InsightsFunctionConfigurationType) =>
@@ -1254,10 +1254,10 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 // Check HOG code size immediately before submission
                 if (data.script) {
                     const hogSize = new Blob([data.script]).size
-                    if (hogSize > FN_CODE_SIZE_LIMIT) {
+                    if (hogSize > INSIGHTS_CODE_SIZE_LIMIT) {
                         toast.error(
                             `Script code exceeds maximum size of ${
-                                FN_CODE_SIZE_LIMIT / 1024
+                                INSIGHTS_CODE_SIZE_LIMIT / 1024
                             }KB. Please simplify your code or contact support to increase the limit.`
                         )
                         return

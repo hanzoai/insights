@@ -99,8 +99,8 @@ def test_is_high_frequency_interval_property(interval, expected):
         (NodeKind.TRENDS_QUERY, None, True, ALWAYS),
         (NodeKind.FUNNELS_QUERY, None, False, IF_STALE),
         (NodeKind.FUNNELS_QUERY, None, True, ALWAYS),
-        (NodeKind.FN_QL_QUERY, None, False, IF_STALE),
-        (NodeKind.FN_QL_QUERY, None, True, ALWAYS),
+        (NodeKind.INSIGHTS_QL_QUERY, None, False, IF_STALE),
+        (NodeKind.INSIGHTS_QL_QUERY, None, True, ALWAYS),
     ],
 )
 def test_resolve_execution_mode(kind, interval, high_frequency, expected):

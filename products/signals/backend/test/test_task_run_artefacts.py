@@ -170,10 +170,10 @@ class TestTaskRunArtefacts(BaseTest):
             team_id=self.team.id,
             report_id=str(report.id),
             task_id=str(task.id),
-            billing_exempt_reason=SignalReport.BillingExemptReason.POSTFN_ONBOARDING,
+            billing_exempt_reason=SignalReport.BillingExemptReason.INSIGHTS_ONBOARDING,
         )
         report.refresh_from_db()
-        assert report.billing_exempt_reason == SignalReport.BillingExemptReason.POSTFN_ONBOARDING
+        assert report.billing_exempt_reason == SignalReport.BillingExemptReason.INSIGHTS_ONBOARDING
 
     def _final_report(self) -> CustomAgentFinalReport:
         return CustomAgentFinalReport(

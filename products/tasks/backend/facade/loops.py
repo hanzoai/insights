@@ -64,8 +64,8 @@ LoopFireResult = loop_runs.LoopFireResult
 
 DEFAULT_MAX_FIX_ITERATIONS = 3
 MAX_FIX_ITERATIONS_CEILING = 10
-DEFAULT_POSTFN_MCP_SCOPES = "read_only"
-POSTFN_MCP_SCOPES_CHOICES = ("read_only", "full")
+DEFAULT_INSIGHTS_MCP_SCOPES = "read_only"
+INSIGHTS_MCP_SCOPES_CHOICES = ("read_only", "full")
 NOTIFICATION_CHANNELS = ("push", "email", "slack")
 NOTIFICATION_EVENTS = ("run_completed", "run_failed", "pr_created", "needs_attention")
 ALLOWED_GITHUB_TRIGGER_EVENTS = ("issues", "issue_comment", "pull_request", "push")
@@ -178,7 +178,7 @@ class LoopBehaviorsDTO:
 @dataclass(frozen=True)
 class LoopConnectorsDTO:
     mcp_installation_ids: list[str] = Field(default_factory=list)
-    insights_mcp_scopes: str = DEFAULT_POSTFN_MCP_SCOPES
+    insights_mcp_scopes: str = DEFAULT_INSIGHTS_MCP_SCOPES
 
 
 @dataclass(frozen=True)
@@ -359,7 +359,7 @@ def _connectors_dto(raw: dict | None) -> LoopConnectorsDTO:
     mcp_installation_ids = raw.get("mcp_installation_ids")
     return LoopConnectorsDTO(
         mcp_installation_ids=[str(x) for x in mcp_installation_ids] if isinstance(mcp_installation_ids, list) else [],
-        insights_mcp_scopes=raw.get("insights_mcp_scopes") or DEFAULT_POSTFN_MCP_SCOPES,
+        insights_mcp_scopes=raw.get("insights_mcp_scopes") or DEFAULT_INSIGHTS_MCP_SCOPES,
     )
 
 
@@ -1538,7 +1538,7 @@ __all__ = [
     "MAX_LOOP_REPOSITORIES",
     "NOTIFICATION_CHANNELS",
     "NOTIFICATION_EVENTS",
-    "POSTFN_MCP_SCOPES_CHOICES",
+    "INSIGHTS_MCP_SCOPES_CHOICES",
     "LoopBehaviorsDTO",
     "LoopConnectorsDTO",
     "LoopContextOutputsDTO",

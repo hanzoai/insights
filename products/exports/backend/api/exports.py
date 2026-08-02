@@ -29,7 +29,7 @@ from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from insights.settings.temporal import TEMPORAL_WORKFLOW_MAX_ATTEMPTS
 from insights.slo.types import SloArea, SloConfig, SloOperation
 from insights.temporal.common.client import async_connect
-from insights.temporal.common.search_attributes import POSTFN_SESSION_RECORDING_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SESSION_RECORDING_ID_KEY, INSIGHTS_TEAM_ID_KEY
 from insights.temporal.exports.workflows import ExportAssetWorkflow, ExportAssetWorkflowInputs
 from insights.temporal.session_replay.rasterize_recording.types import RasterizeRecordingInputs
 
@@ -252,8 +252,8 @@ class ExportedAssetSerializer(UserAccessControlSerializerMixin, serializers.Mode
                         execution_timeout=timedelta(hours=1),
                         search_attributes=TypedSearchAttributes(
                             search_attributes=[
-                                SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=team.id),
-                                SearchAttributePair(key=POSTFN_SESSION_RECORDING_ID_KEY, value=session_recording_id),
+                                SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=team.id),
+                                SearchAttributePair(key=INSIGHTS_SESSION_RECORDING_ID_KEY, value=session_recording_id),
                             ]
                         ),
                     )

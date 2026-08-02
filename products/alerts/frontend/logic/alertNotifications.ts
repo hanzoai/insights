@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 import { INSIGHT_ALERT_FIRING_EVENT_ID, INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID } from 'lib/constants'
 import {
-    FN_FUNCTION_SUB_TEMPLATES,
-    FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
 } from 'scenes/insights-functions/sub-templates/sub-templates'
 
 import { CyclotronJobFiltersType, InsightsFunctionType, PropertyFilterType, PropertyOperator } from '~/types'
@@ -96,7 +96,7 @@ export const buildAlertFilterConfig = (alertId: string): CyclotronJobFiltersType
 // Default inputs the alert wizard pre-fills for a destination, sourced from the shared sub-template
 // (single source of truth with the full destination picker).
 const subTemplateInputs = (templateId: string): NonNullable<InsightsFunctionType['inputs']> =>
-    FN_FUNCTION_SUB_TEMPLATES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID].find((t) => t.template_id === templateId)
+    INSIGHTS_FUNCTION_SUB_TEMPLATES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID].find((t) => t.template_id === templateId)
         ?.inputs ?? {}
 
 export type PendingAlertNotification =
@@ -124,7 +124,7 @@ export function buildInsightsFunctionPayload(
     alertName: string | undefined,
     notification: PendingAlertNotification
 ): Partial<InsightsFunctionType> {
-    const commonProps = FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]
+    const commonProps = INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]
     return {
         type: commonProps.type,
         enabled: true,

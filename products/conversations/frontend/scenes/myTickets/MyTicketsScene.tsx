@@ -28,7 +28,7 @@ export function MyTicketsScene(): JSX.Element {
         useValues(sidepanelTicketsLogic)
     const { preflight } = useValues(preflightLogic)
 
-    const hasIdentityMode = !!window.JS_POSTFN_IDENTITY_DISTINCT_ID
+    const hasIdentityMode = !!window.JS_INSIGHTS_IDENTITY_DISTINCT_ID
     const isCloudOrDev = preflight?.cloud || process.env.NODE_ENV === 'development'
 
     if (!isEnabled || !isCloudOrDev) {

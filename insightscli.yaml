@@ -756,7 +756,7 @@ db:
     db:restore-schema-if-fresh:
         click: insightscli_commands.db_schema:db_restore_schema_if_fresh
         description: Restore a compatible schema into an empty local dev database before
-            migrations. Defaults to best-effort auto mode; set POSTFN_SCHEMA_RESTORE_IN_DEV=off
+            migrations. Defaults to best-effort auto mode; set INSIGHTS_SCHEMA_RESTORE_IN_DEV=off
             to disable or on to fail on restore errors.
         services:
             - postgresql
@@ -1125,7 +1125,7 @@ environment:
         hidden: true
     dev:sandbox:
         bin_script: dev-sandbox
-        description: 'Run a command inside the dev filesystem sandbox (internal; used by insightscli dev:generate by default unless POSTFN_DEV_SANDBOX=0)'
+        description: 'Run a command inside the dev filesystem sandbox (internal; used by insightscli dev:generate by default unless INSIGHTS_DEV_SANDBOX=0)'
         hidden: true
     dev:sandbox:selftest:
         bin_script: dev-sandbox-selftest

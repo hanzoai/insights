@@ -18,7 +18,7 @@ from products.product_analytics.backend.models.insight import Insight
 # Each insight kind that supports threshold alerts maps to one extractor. The comparator is shared.
 EXTRACTORS: dict[NodeKind, Extractor] = {
     NodeKind.TRENDS_QUERY: TrendsExtractor(),
-    NodeKind.FN_QL_QUERY: InsightsQLExtractor(),
+    NodeKind.INSIGHTS_QL_QUERY: InsightsQLExtractor(),
     NodeKind.FUNNELS_QUERY: FunnelsExtractor(),
     NodeKind.METRICS_QUERY: MetricsExtractor(),
 }
@@ -29,7 +29,7 @@ EXTRACTORS: dict[NodeKind, Extractor] = {
 # (simulate_detector_on_insight) calls simulate() — so adding a kind here makes it work in both.
 DETECTOR_EXTRACTORS: dict[NodeKind, DetectorExtractor] = {
     NodeKind.TRENDS_QUERY: TrendsDetectorExtractor(),
-    NodeKind.FN_QL_QUERY: InsightsQLDetectorExtractor(),
+    NodeKind.INSIGHTS_QL_QUERY: InsightsQLDetectorExtractor(),
 }
 
 

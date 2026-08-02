@@ -8,7 +8,7 @@ import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, createKafkaMessage } from '../_tests/fixtures'
 import { insertInsightsFlow as _insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { CdpDataWarehouseEvent } from '../schema'
@@ -103,9 +103,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         it('should parse valid data warehouse events', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' })
@@ -137,9 +137,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         it('should not parse events for teams that do not exist', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(99999)
@@ -162,9 +162,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         it('should filter by team correctly', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const events = [
@@ -179,9 +179,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
             await insertInsightsFunction({
                 team_id: team2.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const invocations2 = await processor._parseKafkaBatch(events)
@@ -192,22 +192,22 @@ describe('CdpDatawarehouseEventsConsumer', () => {
     describe('filterInsightsFunction', () => {
         it('should filter for data-warehouse-table source', async () => {
             const fnWithDataWarehouseFilter = await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters,
-                filters: { ...FN_FILTERS_EXAMPLES.no_filters.filters, source: 'events' },
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
+                filters: { ...INSIGHTS_FILTERS_EXAMPLES.no_filters.filters, source: 'events' },
             })
 
             await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const event = createDataWarehouseEvent(team.id)
@@ -228,9 +228,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
         beforeEach(async () => {
             fnFetchNoFilters = await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' })
@@ -346,9 +346,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         it('should bill once per event when multiple destinations match', async () => {
             // Add a second function that also matches
             const fnSecondDestination = await insertInsightsFunction({
-                ...FN_EXAMPLES.input_printer,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.input_printer,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const { invocations } = await processor.processBatch([globals])
@@ -437,16 +437,16 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             // Create functions for team2 (no data_pipelines feature)
             fnFetchNoFilters = await insertInsightsFunction({
                 team_id: team2.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             fnDataWarehouseFunction = await insertInsightsFunction({
                 team_id: team2.id,
-                ...FN_EXAMPLES.input_printer,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.input_printer,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             // Globals for team2 (without data_pipelines)

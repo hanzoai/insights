@@ -288,7 +288,7 @@ export const login2FALogic = kea<login2FALogicType>([
     listeners(({ values }) => ({
         submitTwofactortokenSuccess: () => {
             handleLoginRedirect()
-            // Reload the page after login to ensure POSTFN_APP_CONTEXT is set correctly.
+            // Reload the page after login to ensure INSIGHTS_APP_CONTEXT is set correctly.
             window.location.reload()
         },
         beginPasskey2FASuccess: () => {
@@ -300,7 +300,7 @@ export const login2FALogic = kea<login2FALogicType>([
                 return
             }
             handleLoginRedirect()
-            // Reload the page after login to ensure POSTFN_APP_CONTEXT is set correctly.
+            // Reload the page after login to ensure INSIGHTS_APP_CONTEXT is set correctly.
             window.location.reload()
         },
     })),

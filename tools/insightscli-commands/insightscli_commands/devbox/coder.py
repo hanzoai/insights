@@ -93,12 +93,12 @@ REGION_NAME_SUFFIXES: dict[str, str] = {
 _RESERVED_LABEL_SUFFIXES: tuple[str, ...] = tuple(s for s in REGION_NAME_SUFFIXES.values() if s)
 
 # Per-user Coder secret holding the SSH public key used to sign commits inside
-# workspaces. Injected as the POSTFN_GIT_SIGNING_KEY env var on every workspace
+# workspaces. Injected as the INSIGHTS_GIT_SIGNING_KEY env var on every workspace
 # start (including coder task runs); the workspace template reads it to populate
 # user.signingkey. The matching private key never leaves 1Password. The `GIT_`
 # prefix is reserved by Coder, so the workspace-side env name cannot start with
 # it.
-GIT_SIGNING_KEY_SECRET = "POSTFN_GIT_SIGNING_KEY"
+GIT_SIGNING_KEY_SECRET = "INSIGHTS_GIT_SIGNING_KEY"
 
 
 # Coder rejects --parameter values for keys the chosen template does not

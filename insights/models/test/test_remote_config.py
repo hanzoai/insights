@@ -468,8 +468,8 @@ class TestRemoteConfigSurveys(_RemoteConfigBase):
         assert actual_surveys == expected_surveys
 
 
-@override_settings(POSTFN_JS_S3_BUCKET="")
-@override_settings(POSTFN_JS_S3_BUCKET="")
+@override_settings(INSIGHTS_JS_S3_BUCKET="")
+@override_settings(INSIGHTS_JS_S3_BUCKET="")
 class TestRemoteConfigCaching(_RemoteConfigBase):
     def setUp(self):
         super().setUp()

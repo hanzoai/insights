@@ -14,7 +14,7 @@ class TestPublish(SimpleTestCase):
     def tearDown(self):
         cache.delete(REDIS_POINTER_MAP_KEY)
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.validate_version_artifacts")
     @patch("insights.management.commands.js_snippet_version.s3_write")
     @patch("insights.management.commands.js_snippet_version.s3_read")
@@ -42,7 +42,7 @@ class TestPublish(SimpleTestCase):
         backup = json.loads(manifest_call[0][1])
         assert backup["pointers"]["1"] == "1.359.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.validate_version_artifacts")
     @patch("insights.management.commands.js_snippet_version.s3_write")
     @patch("insights.management.commands.js_snippet_version.s3_read")
@@ -59,7 +59,7 @@ class TestPublish(SimpleTestCase):
         assert written[0]["version"] == "1.358.0"
         assert written[1]["version"] == "1.359.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.validate_version_artifacts")
     def test_publish_fails_when_artifacts_missing(self, mock_validate):
         mock_validate.return_value = False
@@ -69,7 +69,7 @@ class TestPublish(SimpleTestCase):
 
         assert "artifacts" in str(ctx.exception).lower()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.validate_version_artifacts")
     @patch("insights.management.commands.js_snippet_version.s3_read")
     def test_publish_fails_for_duplicate_version(self, mock_read, mock_validate):
@@ -82,14 +82,14 @@ class TestPublish(SimpleTestCase):
 
         assert "already exists" in str(ctx.exception).lower()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="")
     def test_publish_fails_when_bucket_not_configured(self):
         with self.assertRaises(CommandError) as ctx:
             call_command("js_snippet_version", "publish", "1.359.0")
 
-        assert "POSTFN_JS_S3_BUCKET" in str(ctx.exception)
+        assert "INSIGHTS_JS_S3_BUCKET" in str(ctx.exception)
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.remote_config.RemoteConfig.purge_cdn_by_tag")
     @patch("insights.management.commands.js_snippet_version.validate_version_artifacts")
     @patch("insights.management.commands.js_snippet_version.s3_write")
@@ -106,7 +106,7 @@ class TestPublish(SimpleTestCase):
         assert "insights-js-1.359" in purged_tags
         assert "insights-js-1.358" not in purged_tags
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.remote_config.RemoteConfig.purge_cdn_by_tag")
     @patch("insights.management.commands.js_snippet_version.validate_version_artifacts")
     @patch("insights.management.commands.js_snippet_version.s3_write")
@@ -119,7 +119,7 @@ class TestPublish(SimpleTestCase):
 
         mock_purge.assert_not_called()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.validate_version_artifacts")
     @patch("insights.management.commands.js_snippet_version.s3_write")
     @patch("insights.management.commands.js_snippet_version.s3_read")
@@ -137,7 +137,7 @@ class TestYank(SimpleTestCase):
     def tearDown(self):
         cache.delete(REDIS_POINTER_MAP_KEY)
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.s3_write")
     @patch("insights.management.commands.js_snippet_version.s3_read")
     def test_yanks_version(self, mock_read, mock_write):
@@ -161,7 +161,7 @@ class TestYank(SimpleTestCase):
         assert "1.359.0" not in manifest["versions"]
         assert "1.358.0" in manifest["versions"]
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.s3_read")
     def test_yank_fails_when_version_not_found(self, mock_read):
         mock_read.return_value = json.dumps([])
@@ -171,14 +171,14 @@ class TestYank(SimpleTestCase):
 
         assert "not found" in str(ctx.exception).lower()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="")
     def test_yank_fails_when_bucket_not_configured(self):
         with self.assertRaises(CommandError) as ctx:
             call_command("js_snippet_version", "yank", "1.359.0")
 
-        assert "POSTFN_JS_S3_BUCKET" in str(ctx.exception)
+        assert "INSIGHTS_JS_S3_BUCKET" in str(ctx.exception)
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.remote_config.RemoteConfig.purge_cdn_by_tag")
     @patch("insights.management.commands.js_snippet_version.s3_write")
     @patch("insights.management.commands.js_snippet_version.s3_read")
@@ -196,7 +196,7 @@ class TestYank(SimpleTestCase):
         assert "insights-js-1.359" in purged_tags
         assert "insights-js-1.358" not in purged_tags
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.s3_write")
     @patch("insights.management.commands.js_snippet_version.s3_read")
     def test_yank_dry_run_does_not_write(self, mock_read, mock_write):
@@ -213,14 +213,14 @@ class TestYank(SimpleTestCase):
 
 
 class TestSync(SimpleTestCase):
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.sync_manifest_from_s3")
     def test_sync_runs_successfully(self, mock_sync):
         mock_sync.return_value = {"versions": ["1.358.0"], "pointers": {"1": "1.358.0"}}
         call_command("js_snippet_version", "sync")
         mock_sync.assert_called_once()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.management.commands.js_snippet_version.sync_manifest_from_s3")
     def test_sync_raises_command_error_on_manifest_sync_error(self, mock_sync):
         mock_sync.side_effect = ManifestSyncError("versions.json not found in S3")

@@ -5,7 +5,7 @@ from typing import Any
 from rest_framework.exceptions import PermissionDenied
 
 from insights.api.file_system.deletion import (
-    FN_FUNCTION_TYPES,
+    INSIGHTS_FUNCTION_TYPES,
     DeletionContext,
     RestoreContext,
     register_file_system_type,
@@ -472,7 +472,7 @@ def register_core_file_system_types() -> None:
     register_post_delete_hook("task", _task_post_delete)
     register_post_restore_hook("task", _task_post_restore)
 
-    for hog_type in FN_FUNCTION_TYPES:
+    for hog_type in INSIGHTS_FUNCTION_TYPES:
         type_string = f"insights_function/{hog_type}"
         register_file_system_type(
             type_string,

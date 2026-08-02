@@ -317,12 +317,12 @@ Read this before testing another model (Sonnet, a new Codex model, a different e
 - **Transport into the sandbox:** `Task._build_task` writes `extra_state[{runtime_adapter, provider, model,
 reasoning_effort}]` → `get_task_processing_context` reads it back → `start_agent_server` →
   `build_agent_runtime_env_prefix` (`logic/services/sandbox.py`) emits
-  `POSTFN_CODE_{RUNTIME_ADAPTER,PROVIDER,MODEL,REASONING_EFFORT}` env prefixed onto the agent launch command.
+  `INSIGHTS_CODE_{RUNTIME_ADAPTER,PROVIDER,MODEL,REASONING_EFFORT}` env prefixed onto the agent launch command.
 
 **`@hanzo/agent` — where they are consumed + applied** (the Insights Desktop monorepo, _not_ this repo; clone via
-`LOCAL_POSTFN_CODE_MONOREPO_ROOT`, package `packages/agent`, baked into `Dockerfile.sandbox-base`).
+`LOCAL_INSIGHTS_CODE_MONOREPO_ROOT`, package `packages/agent`, baked into `Dockerfile.sandbox-base`).
 
-- **Entry `src/server/bin.ts`** reads + zod-validates `POSTFN_CODE_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}`, guards
+- **Entry `src/server/bin.ts`** reads + zod-validates `INSIGHTS_CODE_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}`, guards
   with `isSupportedReasoningEffort` (`src/adapters/reasoning-effort.ts` — the agent-side mirror of the Python
   registry; hard-errors server startup on an unsupported combo), then constructs the `AgentServer`.
 - **Adapter split `src/server/agent-server.ts`:** Codex → `src/adapters/codex/spawn.ts::buildConfigArgs` pushes
