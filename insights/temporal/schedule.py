@@ -637,6 +637,7 @@ if settings.CLOUD_DEPLOYMENT:
     schedules.append(create_run_usage_reports_schedule)
     schedules.append(create_finalize_usage_reports_schedule)
 
+
 async def a_init_general_queue_schedules():
     temporal = await async_connect()
     try:

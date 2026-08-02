@@ -1,4 +1,4 @@
-from datetime import UTC, timedelta
+from datetime import timedelta
 
 from django import forms
 from django.apps import apps

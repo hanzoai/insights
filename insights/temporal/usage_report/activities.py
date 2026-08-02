@@ -6,7 +6,6 @@ metadata) or the local `aggregator` / `storage` modules. Heavy logic lives
 elsewhere so these stay easy to read and mock in tests.
 """
 
-import json
 import time
 import asyncio
 from typing import Any
@@ -238,25 +237,9 @@ async def enqueue_pointer_message(inputs: EnqueuePointerInputs) -> None:
         if inputs.ctx.workflow_started_at is not None:
             pointer["workflow_started_at"] = inputs.ctx.workflow_started_at.isoformat()
 
-        @sync_to_async
-        def send() -> None:
-            from ee.sqs.SQSProducer import get_sqs_producer
-
-            producer = get_sqs_producer(SQS_QUEUE_NAME)
-            if producer is None:
-                raise RuntimeError(f"SQS producer for queue '{SQS_QUEUE_NAME}' is not configured")
-            response = producer.send_message(
-                message_body=json.dumps(pointer, separators=(",", ":")),
-                message_attributes={
-                    "content_type": "application/json",
-                    "schema_version": str(SQS_POINTER_VERSION),
-                    "run_id": inputs.ctx.run_id,
-                },
-            )
-            if response is None:
-                raise RuntimeError("SQS send_message returned no response")
-
-        await send()
+        # The pointer is consumed by the billing service, an enterprise feature this fork
+        # does not carry, so there is no queue to publish it to. The aggregate above is still
+        # written, which is what the usage reports themselves read.
         # Best-effort from here down: the pointer is already delivered, so a
         # metric-layer failure must not fail the activity — Temporal would
         # retry it and send billing a duplicate pointer.
