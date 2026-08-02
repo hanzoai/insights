@@ -21,9 +21,9 @@ dependencies = [
     "celery==5.6.3",
     "celery-redbeat==2.3.3",
     "certifi==2026.1.4",
-    "datastore-connect==0.8.17",
-    "datastore-driver==0.2.10",
-    "datastore-pool==0.5.3",
+    "datastore-connect",
+    "datastore-driver",
+    "datastore-pool",
     "circular-dict==1.9",
     "cryptography==46.0.7",
     "dagster==1.10.18",
@@ -54,7 +54,7 @@ dependencies = [
     "djangorestframework-dataclasses~=1.4.0",
     "dlt==1.18.2",
     "dnspython==2.6.1",
-    "drf-exceptions-script==0.4.0",
+    "drf-exceptions-hog==0.4.0",
     "drf-extensions~=0.8.0",
     "drf-spectacular~=0.29.0",
     "geoip2==4.6.0",
@@ -67,10 +67,10 @@ dependencies = [
     "grimp~=3.14",
     "grpcio~=1.71.0",
     "gspread==6.2.1",
-    "insightsql-parser==1.3.83",
-    "insightsql-parser-rs==1.3.106",  # built from rust/insightsql/parser via the build-insightsql-parser-rs workflow + published to PyPI; rebuild locally with `uv pip install -e rust/insightsql/parser` when iterating
+    "insightsql-parser",
+    "insightsql-parser-rs",  # built from rust/insightsql/parser
     "humanize~=4.12.3",
-    "infi-datastore-orm",
+    "datastore-orm",
     "jsonref==1.1.0",
     "kafka-python==2.3.0",
     "kombu==5.6.2",
@@ -100,7 +100,7 @@ dependencies = [
     "paramiko~=3.5.0",
     "pillow==12.2.0",
     "protobuf~=5.29.6",
-    "hanzo_insights==7.30.1",
+    "hanzo_insights",
     "polars==1.37.1",
     "psycopg2-binary==2.9.10",
     "psycopg[binary]==3.2.4",
@@ -302,7 +302,13 @@ members = ["tools/insightscli", "tools/owners"]
 [tool.uv.sources]
 insightscli = { workspace = true }
 insights-owners = { workspace = true }
-infi-datastore-orm = { git = "https://github.com/PostHog/infi.clickhouse_orm", rev = "4e3996becf66bf5c26580aff12a80425d9d56fe5" }
+datastore-orm = { git = "https://github.com/hanzoai/datastore-orm", rev = "7d6b25e39d3f2fa1d76810c1c5a7c5f80c27f042" }
+datastore-driver = { git = "https://github.com/hanzo-ds/driver", rev = "119df3f" }
+datastore-connect = { git = "https://github.com/hanzo-ds/connect", rev = "ccbd4b5" }
+datastore-pool = { git = "https://github.com/hanzo-ds/pool", rev = "7260d56" }
+insightsql-parser = { path = "common/insightsql_parser" }
+insightsql-parser-rs = { path = "rust/insightsql/parser" }
+hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "main" }
 # pytest-split: pinned to Insights's fork (immutable tag) for the order-preserving
 # optimal_chunks split. Fork: Insights/pytest-split (of jerry-git/pytest-split).
 # To pull upstream fixes: rebase the fork's feat branch onto upstream, cut the next

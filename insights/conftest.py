@@ -17,7 +17,7 @@ except ImportError:  # fail-open: runs without tools/insightscli-commands on pyt
 from django.conf import settings
 from django.core.management.commands.flush import Command as FlushCommand
 
-from infi.datastore_orm import Database
+from datastore_orm import Database
 
 from insights.datastore.client import sync_execute
 from insights.test import flush_lock_guard

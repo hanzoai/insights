@@ -3,7 +3,7 @@ from insights.test.base import BaseTest
 
 from django.test import SimpleTestCase
 
-from infi.datastore_orm.utils import import_submodules
+from datastore_orm.utils import import_submodules
 
 from insights.async_migrations.definition import AsyncMigrationDefinition, AsyncMigrationOperation
 from insights.async_migrations.setup import (
