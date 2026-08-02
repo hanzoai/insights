@@ -10,7 +10,7 @@ from insights.models import Organization, Team, User
 
 from products.cdp.backend.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
-from products.workflows.backend.models.hog_flow.hog_flow_template import InsightsFlowTemplate
+from products.workflows.backend.models.insights_flow.insights_flow_template import InsightsFlowTemplate
 from products.workflows.backend.templates import clear_template_cache, load_global_templates
 
 webhook_template = MOCK_NODE_TEMPLATES[0]

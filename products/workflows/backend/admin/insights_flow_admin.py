@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule
 
 
 class InsightsFlowScheduleInline(admin.TabularInline):

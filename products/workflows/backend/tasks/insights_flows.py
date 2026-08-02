@@ -11,7 +11,7 @@ from insights.scoping_audit import skip_team_scope_audit
 from insights.tasks.utils import CeleryQueue
 
 from products.actions.backend.models.action import Action
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 logger = get_logger(__name__)
 

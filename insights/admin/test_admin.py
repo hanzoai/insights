@@ -29,9 +29,9 @@ from products.product_analytics.backend.models.insight import Insight
 from products.product_tours.backend.models import ProductTour
 from products.surveys.backend.models import Survey
 from products.warehouse_sources.backend.facade.models import DataWarehouseTable, ExternalDataSchema
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow.hog_flow_template import InsightsFlowTemplate
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow_template import InsightsFlowTemplate
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
 
 
 class TestOAuthSidebarRegrouping(BaseTest):

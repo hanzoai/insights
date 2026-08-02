@@ -12,7 +12,7 @@ from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value
 from insights.test.persons import create_person
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 def create_message_asset(

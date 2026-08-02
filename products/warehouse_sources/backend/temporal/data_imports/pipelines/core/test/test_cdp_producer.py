@@ -21,7 +21,7 @@ from products.warehouse_sources.backend.temporal.data_imports.pipelines.core.cdp
 from products.warehouse_sources.backend.temporal.data_imports.sources.postgres.source import PostgresSource
 from products.warehouse_sources.backend.temporal.data_imports.util import InsightsInternalDatabaseError
 from products.warehouse_sources.backend.types import ExternalDataSourceType
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 def _patch_async_producer_scope(mock_producer):

@@ -4,8 +4,8 @@ from django.test import TestCase
 
 from insights.models.user import User
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
 
 
 class TestInsightsFlowBatchJob(TestCase):
@@ -73,7 +73,7 @@ class TestInsightsFlowBatchJob(TestCase):
         # Disconnect the signal temporarily to test it
         from django.db.models.signals import post_save
 
-        from products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job import (
+        from products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job import (
             handle_hog_flow_batch_job_created,
         )
 
