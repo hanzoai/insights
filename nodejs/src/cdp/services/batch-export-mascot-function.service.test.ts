@@ -6,7 +6,7 @@ import { Server } from 'http'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '~/cdp/_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '~/cdp/_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, insertBatchExport } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
 import { InsightsFunctionType } from '~/cdp/types'
@@ -76,9 +76,9 @@ describe('BatchExportInsightsFunctionService', () => {
 
         insightsFunction = await insertInsightsFunction({
             name: 'test batch export script function',
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             batch_export_id: batchExportId,
         })
     })
@@ -154,9 +154,9 @@ describe('BatchExportInsightsFunctionService', () => {
         it('returns 404 for script function without batch_export_id', async () => {
             const nonBatchFunction = await insertInsightsFunction({
                 name: 'non-batch script function',
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const res = await supertest(app)

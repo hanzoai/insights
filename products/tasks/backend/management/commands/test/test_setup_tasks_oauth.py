@@ -10,11 +10,11 @@ from insights.models.oauth import OAuthApplicationAuthBrand
 from insights.temporal.oauth import (
     ARRAY_APP_CLIENT_ID_DEV,
     ARRAY_APP_ID_DEV,
-    POSTFN_AI_APP_CLIENT_ID_DEV,
-    POSTFN_AI_APP_ID_DEV,
+    INSIGHTS_AI_APP_CLIENT_ID_DEV,
+    INSIGHTS_AI_APP_ID_DEV,
 )
 
-DEV_CLIENT_IDS = [ARRAY_APP_CLIENT_ID_DEV, POSTFN_AI_APP_CLIENT_ID_DEV]
+DEV_CLIENT_IDS = [ARRAY_APP_CLIENT_ID_DEV, INSIGHTS_AI_APP_CLIENT_ID_DEV]
 
 
 @override_settings(DEBUG=False, CLOUD_DEPLOYMENT="DEV")
@@ -34,8 +34,8 @@ class TestSetupTasksOAuth(TestCase):
             ),
             (
                 "insights_ai",
-                POSTFN_AI_APP_CLIENT_ID_DEV,
-                POSTFN_AI_APP_ID_DEV,
+                INSIGHTS_AI_APP_CLIENT_ID_DEV,
+                INSIGHTS_AI_APP_ID_DEV,
                 {
                     "name": "Insights AI Dev App",
                     "client_type": OAuthApplication.CLIENT_CONFIDENTIAL,
@@ -80,7 +80,7 @@ class TestSetupTasksOAuth(TestCase):
 
     def test_warns_when_an_existing_app_has_the_wrong_id(self) -> None:
         OAuthApplication.objects.create(
-            client_id=POSTFN_AI_APP_CLIENT_ID_DEV,
+            client_id=INSIGHTS_AI_APP_CLIENT_ID_DEV,
             name="Insights AI Dev App",
             client_type=OAuthApplication.CLIENT_CONFIDENTIAL,
             authorization_grant_type=OAuthApplication.GRANT_AUTHORIZATION_CODE,
@@ -91,4 +91,4 @@ class TestSetupTasksOAuth(TestCase):
         out = StringIO()
         call_command("setup_tasks_oauth", stdout=out)
 
-        assert f"expected {POSTFN_AI_APP_ID_DEV}" in out.getvalue()
+        assert f"expected {INSIGHTS_AI_APP_ID_DEV}" in out.getvalue()

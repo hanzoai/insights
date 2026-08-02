@@ -49,17 +49,17 @@ export type Env = {
      * The code automatically handles US/EU region routing via getAuthorizationServerUrl().
      * Only set this for self-hosted Insights deployments.
      */
-    POSTFN_API_BASE_URL: string | undefined
+    INSIGHTS_API_BASE_URL: string | undefined
     /**
      * Public-facing Insights URL used when rendering links the user clicks
      * (e.g. `_insightsUrl` in tool responses).
      *
-     * When `POSTFN_API_BASE_URL` is set to a cluster-internal hostname for outbound
+     * When `INSIGHTS_API_BASE_URL` is set to a cluster-internal hostname for outbound
      * API traffic (the Hono deployment in Insights Production), this should be set to
      * the corresponding public URL (e.g. https://us.hanzo.ai) so rendered links
-     * remain clickable. Falls back to `POSTFN_API_BASE_URL` when unset.
+     * remain clickable. Falls back to `INSIGHTS_API_BASE_URL` when unset.
      */
-    POSTFN_PUBLIC_URL: string | undefined
+    INSIGHTS_PUBLIC_URL: string | undefined
     /**
      * Base URL for serving MCP UI app static assets.
      * When using Workers Static Assets, this is the Worker's own public URL.
@@ -70,21 +70,21 @@ export type Env = {
      * Insights base URL for MCP Apps analytics (used for CSP and analytics ingestion).
      * For local development, set to http://localhost:8010.
      */
-    POSTFN_MCP_APPS_ANALYTICS_BASE_URL: string | undefined
+    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: string | undefined
     /**
      * Insights API token for MCP Apps analytics (used for CSP and analytics ingestion).
      */
-    POSTFN_UI_APPS_TOKEN: string | undefined
+    INSIGHTS_UI_APPS_TOKEN: string | undefined
     /**
      * Insights API key for dev/self-hosted analytics.
      * Falls back to the production US key if not set.
      */
-    POSTFN_ANALYTICS_API_KEY: string | undefined
+    INSIGHTS_ANALYTICS_API_KEY: string | undefined
     /**
      * Insights host for dev/self-hosted analytics.
      * Falls back to the production US host if not set.
      */
-    POSTFN_ANALYTICS_HOST: string | undefined
+    INSIGHTS_ANALYTICS_HOST: string | undefined
 }
 
 export type Context = {
@@ -139,9 +139,9 @@ export type ToolUiMeta = {
     visibility?: ('model' | 'app')[]
 }
 
-export const POSTFN_META_KEY = 'com.insights.mcp' as const
-export const POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY = '__formatted_results_override' as const
-export const POSTFN_INFORMATIONAL_RESPONSE_KEY = '__informational_response' as const
+export const INSIGHTS_META_KEY = 'com.insights.mcp' as const
+export const INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY = '__formatted_results_override' as const
+export const INSIGHTS_INFORMATIONAL_RESPONSE_KEY = '__informational_response' as const
 
 export type InsightsToolMeta = {
     /**
@@ -160,5 +160,5 @@ export type ToolMeta = {
     ui?: ToolUiMeta
 
     /** Insights-specific tool metadata under a namespaced key. */
-    [POSTFN_META_KEY]?: InsightsToolMeta
+    [INSIGHTS_META_KEY]?: InsightsToolMeta
 }

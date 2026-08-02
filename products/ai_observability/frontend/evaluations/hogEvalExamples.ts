@@ -6,10 +6,10 @@ export interface HogEvalExample {
     source: string
 }
 
-export const FN_EVAL_EXAMPLES: readonly HogEvalExample[] = examples
+export const INSIGHTS_EVAL_EXAMPLES: readonly HogEvalExample[] = examples
 
 export function getHogEvalExample(key: string): HogEvalExample {
-    const example = FN_EVAL_EXAMPLES.find((candidate) => candidate.key === key)
+    const example = INSIGHTS_EVAL_EXAMPLES.find((candidate) => candidate.key === key)
     if (!example) {
         throw new Error(`Unknown Script evaluation example: ${key}`)
     }

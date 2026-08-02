@@ -23,7 +23,7 @@ jest.mock('lib/api', () => ({
 
 const mockApi = api.insightsFunctions as jest.Mocked<typeof api.insightsFunctions>
 
-const FN_TEMPLATE: InsightsFunctionTemplateType = {
+const INSIGHTS_TEMPLATE: InsightsFunctionTemplateType = {
     free: false,
     status: 'beta',
     id: 'template-webhook',
@@ -103,10 +103,10 @@ const FN_TEMPLATE: InsightsFunctionTemplateType = {
     icon_url: '/static/insights-icon.svg',
 }
 
-const FN_FUNCTION: InsightsFunctionType = {
-    ...FN_TEMPLATE,
-    script: FN_TEMPLATE.code,
-    description: typeof FN_TEMPLATE.description === 'string' ? FN_TEMPLATE.description : '',
+const INSIGHTS_FUNCTION: InsightsFunctionType = {
+    ...INSIGHTS_TEMPLATE,
+    script: INSIGHTS_TEMPLATE.code,
+    description: typeof INSIGHTS_TEMPLATE.description === 'string' ? INSIGHTS_TEMPLATE.description : '',
     created_at: '2021-09-29T14:00:00Z',
     created_by: {} as any,
     id: '123-456-789',
@@ -122,9 +122,9 @@ describe('insightsFunctionConfigurationLogic', () => {
         beforeEach(() => {
             initKeaTests()
 
-            mockApi.getTemplate.mockReturnValue(Promise.resolve(FN_TEMPLATE))
-            mockApi.create.mockReturnValue(Promise.resolve(FN_FUNCTION))
-            mockApi.update.mockReturnValue(Promise.resolve(FN_FUNCTION))
+            mockApi.getTemplate.mockReturnValue(Promise.resolve(INSIGHTS_TEMPLATE))
+            mockApi.create.mockReturnValue(Promise.resolve(INSIGHTS_FUNCTION))
+            mockApi.update.mockReturnValue(Promise.resolve(INSIGHTS_FUNCTION))
 
             logic = insightsFunctionConfigurationLogic({
                 templateId: 'test',
@@ -135,15 +135,15 @@ describe('insightsFunctionConfigurationLogic', () => {
             logic.mount()
             await expectLogic(logic).toDispatchActions(['loadTemplate', 'loadTemplateSuccess'])
 
-            expect(logic.values.template).toEqual(FN_TEMPLATE)
+            expect(logic.values.template).toEqual(INSIGHTS_TEMPLATE)
             expect(logic.values.configuration).toEqual({
-                name: FN_TEMPLATE.name,
-                type: FN_TEMPLATE.type,
-                description: FN_TEMPLATE.description,
-                inputs_schema: FN_TEMPLATE.inputs_schema,
+                name: INSIGHTS_TEMPLATE.name,
+                type: INSIGHTS_TEMPLATE.type,
+                description: INSIGHTS_TEMPLATE.description,
+                inputs_schema: INSIGHTS_TEMPLATE.inputs_schema,
                 filters: null,
-                script: FN_TEMPLATE.code,
-                icon_url: FN_TEMPLATE.icon_url,
+                script: INSIGHTS_TEMPLATE.code,
+                icon_url: INSIGHTS_TEMPLATE.icon_url,
                 inputs: {
                     method: { value: 'POST' },
                     body: {

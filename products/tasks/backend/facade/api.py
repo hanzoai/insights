@@ -3117,7 +3117,7 @@ def get_task_run_sandbox_connection(
 # Relay control verbs whose outcome Insights AI funnels track. Captured here (gated on
 # origin_product) so the generic relay stays product-agnostic while the conversation layer stops
 # firing them as the renderer drives permission/cancel through `runs/{run}/command/`.
-_POSTFN_AI_RELAY_TELEMETRY_METHODS: frozenset[str] = frozenset({"cancel", "permission_response"})
+_INSIGHTS_AI_RELAY_TELEMETRY_METHODS: frozenset[str] = frozenset({"cancel", "permission_response"})
 
 
 def capture_relay_command_telemetry(
@@ -3138,10 +3138,10 @@ def capture_relay_command_telemetry(
     semantics: a cancel is recorded only when it actually reached the agent, while a permission
     response is recorded with its forward ``success`` either way.
     """
-    if method not in _POSTFN_AI_RELAY_TELEMETRY_METHODS:
+    if method not in _INSIGHTS_AI_RELAY_TELEMETRY_METHODS:
         return
     run = _get_visible_run(run_id, task_id, team_id)
-    if run is None or run.task.origin_product != Task.OriginProduct.POSTFN_AI:
+    if run is None or run.task.origin_product != Task.OriginProduct.INSIGHTS_AI:
         return
 
     params = params or {}

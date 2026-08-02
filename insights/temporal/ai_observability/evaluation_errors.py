@@ -101,13 +101,13 @@ USER_ERROR_SPECS: dict[str, EvaluationErrorSpec] = {
         error_type="hog_error",
         owner="user",
         safe_message="The Script evaluation code failed. Fix the code before re-enabling this evaluation.",
-        status_reason=EvaluationStatusReason.FN_ERROR,
+        status_reason=EvaluationStatusReason.INSIGHTS_ERROR,
         disables_evaluation=True,
     ),
 }
 
 
-POSTFN_ERROR_SPECS: dict[str, EvaluationErrorSpec] = {
+INSIGHTS_ERROR_SPECS: dict[str, EvaluationErrorSpec] = {
     "parse_error": EvaluationErrorSpec(
         error_type="parse_error",
         owner="insights",
@@ -128,7 +128,7 @@ POSTFN_ERROR_SPECS: dict[str, EvaluationErrorSpec] = {
 
 EVALUATION_ERROR_SPECS: dict[str, EvaluationErrorSpec] = {
     **USER_ERROR_SPECS,
-    **POSTFN_ERROR_SPECS,
+    **INSIGHTS_ERROR_SPECS,
 }
 
 

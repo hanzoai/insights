@@ -17,7 +17,7 @@ def _patch_candidates(github: object | None, candidates: list[str]):
 
 
 async def _run(message: str) -> str | None:
-    return await select_repository_for_message(1, 2, message, origin_product=Task.OriginProduct.POSTFN_AI)
+    return await select_repository_for_message(1, 2, message, origin_product=Task.OriginProduct.INSIGHTS_AI)
 
 
 class TestSelectRepositoryForMessage:

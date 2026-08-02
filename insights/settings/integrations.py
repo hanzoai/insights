@@ -100,12 +100,12 @@ ATLASSIAN_APP_CLIENT_SECRET = get_from_env("ATLASSIAN_APP_CLIENT_SECRET", "")
 # - STRIPE_APP_CLIENT_ID: The app's public client ID, used in the OAuth authorize redirect URL
 # - STRIPE_APP_OVERRIDE_AUTHORIZE_URL: Optional override for testing (e.g., with a channel link URL)
 # - STRIPE_APP_SECRET_KEY: API secret key used for HTTP Basic auth during live token exchange/refresh
-# - STRIPE_POSTFN_OAUTH_CLIENT_ID: Client ID of the Insights OAuthApplication for Stripe to authenticate with Insights APIs
+# - STRIPE_INSIGHTS_OAUTH_CLIENT_ID: Client ID of the Insights OAuthApplication for Stripe to authenticate with Insights APIs
 # - STRIPE_SIGNING_SECRET: Used to verify the authenticity of incoming webhook/agentic provisioning requests from Stripe
 STRIPE_APP_CLIENT_ID = get_from_env("STRIPE_APP_CLIENT_ID", "")
 STRIPE_APP_OVERRIDE_AUTHORIZE_URL = get_from_env("STRIPE_APP_OVERRIDE_AUTHORIZE_URL", "")
 STRIPE_APP_SECRET_KEY = get_from_env("STRIPE_APP_SECRET_KEY", "")
-STRIPE_POSTFN_OAUTH_CLIENT_ID = get_from_env("STRIPE_POSTFN_OAUTH_CLIENT_ID", "")
+STRIPE_INSIGHTS_OAUTH_CLIENT_ID = get_from_env("STRIPE_INSIGHTS_OAUTH_CLIENT_ID", "")
 STRIPE_SIGNING_SECRET = get_from_env("STRIPE_SIGNING_SECRET", "")
 
 # WorkOS Radar (bot/fraud detection for auth flows)
@@ -159,17 +159,17 @@ HEATMAP_BROWSERLESS_BLOCK_ADS = get_from_env("HEATMAP_BROWSERLESS_BLOCK_ADS", Fa
 # plus its public base URL. One entry per region a user may connect TO (your own included). Empty
 # defaults keep the app importable until the OAuthApplications are provisioned in each region, in
 # which case the connect flow fails closed for the unconfigured region.
-POSTFN_CONNECT_OAUTH_CLIENT_ID_US = get_from_env("POSTFN_CONNECT_OAUTH_CLIENT_ID_US", "")
-POSTFN_CONNECT_OAUTH_CLIENT_SECRET_US = get_from_env("POSTFN_CONNECT_OAUTH_CLIENT_SECRET_US", "")
-POSTFN_CONNECT_OAUTH_CLIENT_ID_EU = get_from_env("POSTFN_CONNECT_OAUTH_CLIENT_ID_EU", "")
-POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU = get_from_env("POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU", "")
-POSTFN_CONNECT_OAUTH_CLIENT_ID_DEV = get_from_env("POSTFN_CONNECT_OAUTH_CLIENT_ID_DEV", "")
-POSTFN_CONNECT_OAUTH_CLIENT_SECRET_DEV = get_from_env("POSTFN_CONNECT_OAUTH_CLIENT_SECRET_DEV", "")
+INSIGHTS_CONNECT_OAUTH_CLIENT_ID_US = get_from_env("INSIGHTS_CONNECT_OAUTH_CLIENT_ID_US", "")
+INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_US = get_from_env("INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_US", "")
+INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU = get_from_env("INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU", "")
+INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU = get_from_env("INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU", "")
+INSIGHTS_CONNECT_OAUTH_CLIENT_ID_DEV = get_from_env("INSIGHTS_CONNECT_OAUTH_CLIENT_ID_DEV", "")
+INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_DEV = get_from_env("INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_DEV", "")
 # Public base URL of each target cell's OAuth server. DEV points at the local instance so the flow
 # is exercisable end to end against a single dev stack; override via env for a custom dev host.
-POSTFN_CONNECT_BASE_URL_US = get_from_env("POSTFN_CONNECT_BASE_URL_US", "https://us.hanzo.ai")
-POSTFN_CONNECT_BASE_URL_EU = get_from_env("POSTFN_CONNECT_BASE_URL_EU", "https://eu.hanzo.ai")
-POSTFN_CONNECT_BASE_URL_DEV = get_from_env("POSTFN_CONNECT_BASE_URL_DEV", "http://localhost:8000")
+INSIGHTS_CONNECT_BASE_URL_US = get_from_env("INSIGHTS_CONNECT_BASE_URL_US", "https://us.hanzo.ai")
+INSIGHTS_CONNECT_BASE_URL_EU = get_from_env("INSIGHTS_CONNECT_BASE_URL_EU", "https://eu.hanzo.ai")
+INSIGHTS_CONNECT_BASE_URL_DEV = get_from_env("INSIGHTS_CONNECT_BASE_URL_DEV", "http://localhost:8000")
 
 # Legacy OAuth client credentials kept alive during an app or secret rotation.
 # Refreshes fall back to these when the primary credentials fail, so tokens issued

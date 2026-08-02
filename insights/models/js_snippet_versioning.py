@@ -36,7 +36,7 @@ def _get_s3_client():
 def s3_read(key: str, *, missing_ok: bool = False) -> Optional[str]:
     """Read a UTF-8 object from the JS S3 bucket."""
     try:
-        response = _get_s3_client().get_object(Bucket=settings.POSTFN_JS_S3_BUCKET, Key=key)
+        response = _get_s3_client().get_object(Bucket=settings.INSIGHTS_JS_S3_BUCKET, Key=key)
         return response["Body"].read().decode("utf-8")
     except ClientError as e:
         if e.response.get("Error", {}).get("Code") == "NoSuchKey" and missing_ok:
@@ -51,7 +51,7 @@ def s3_read(key: str, *, missing_ok: bool = False) -> Optional[str]:
 def s3_write(key: str, content: str) -> None:
     """Write a UTF-8 string to the JS S3 bucket."""
     try:
-        _get_s3_client().put_object(Bucket=settings.POSTFN_JS_S3_BUCKET, Key=key, Body=content)
+        _get_s3_client().put_object(Bucket=settings.INSIGHTS_JS_S3_BUCKET, Key=key, Body=content)
     except Exception as e:
         capture_exception(e, additional_properties={"tag": "js_snippet_versioning", "s3_op": "write", "key": key})
         raise ObjectStorageError("write failed") from e
@@ -60,7 +60,7 @@ def s3_write(key: str, content: str) -> None:
 def s3_head(key: str) -> bool:
     """Check whether an object exists in the JS S3 bucket."""
     try:
-        _get_s3_client().head_object(Bucket=settings.POSTFN_JS_S3_BUCKET, Key=key)
+        _get_s3_client().head_object(Bucket=settings.INSIGHTS_JS_S3_BUCKET, Key=key)
         return True
     except ClientError as e:
         if e.response.get("Error", {}).get("Code") == "404":
@@ -334,7 +334,7 @@ def _get_manifest() -> Optional[CachedManifest]:
             )
 
     # Redis miss or error — try S3 recovery (throttled by negative cache TTL)
-    if settings.POSTFN_JS_S3_BUCKET:
+    if settings.INSIGHTS_JS_S3_BUCKET:
         recovered = _recover_manifest_from_s3()
         if recovered is not None:
             _cached_manifest = recovered
@@ -346,7 +346,7 @@ def _get_manifest() -> Optional[CachedManifest]:
 
 def validate_version_artifacts(version: str) -> bool:
     """Check that the required artifacts exist in S3 for a given version."""
-    if not settings.POSTFN_JS_S3_BUCKET:
+    if not settings.INSIGHTS_JS_S3_BUCKET:
         return False
     return s3_head(array_js_path(version))
 
@@ -484,7 +484,7 @@ def resolve_version(requested_version: Optional[str], *, strict: bool = False) -
 
     Returns None if the version can't be resolved or isn't known.
     """
-    if not settings.POSTFN_JS_S3_BUCKET:
+    if not settings.INSIGHTS_JS_S3_BUCKET:
         return None
 
     manifest = _get_manifest()

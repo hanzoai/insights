@@ -12,11 +12,11 @@ import {
     isMouseActivity,
 } from '~/ingestion/pipelines/sessionreplay/rrweb-types'
 
-const POSTFN_NETWORK_PLUGIN = 'insights/network@1'
+const INSIGHTS_NETWORK_PLUGIN = 'insights/network@1'
 const RRWEB_NETWORK_PLUGIN = 'rrweb/network@1'
 
-const POSTFN_NETWORK_DURATION_KEY = 39
-const POSTFN_NETWORK_STATUS_KEY = 21
+const INSIGHTS_NETWORK_DURATION_KEY = 39
+const INSIGHTS_NETWORK_STATUS_KEY = 21
 
 export const MAX_UNIQUE_VALUES = 1000
 
@@ -709,14 +709,14 @@ export class SessionFeatureRecorder {
             for (const req of requests) {
                 this.processNetworkRequest(req.duration, req.status ?? req.responseStatus)
             }
-        } else if (plugin === POSTFN_NETWORK_PLUGIN) {
+        } else if (plugin === INSIGHTS_NETWORK_PLUGIN) {
             const payload = e.data?.payload
             if (!payload) {
                 return
             }
             this.processNetworkRequest(
-                payload[POSTFN_NETWORK_DURATION_KEY] as number | undefined,
-                payload[POSTFN_NETWORK_STATUS_KEY] as number | undefined
+                payload[INSIGHTS_NETWORK_DURATION_KEY] as number | undefined,
+                payload[INSIGHTS_NETWORK_STATUS_KEY] as number | undefined
             )
         }
     }

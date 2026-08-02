@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 import { compactTraceResults } from '@/lib/trace-compaction'
 import {
-    POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY,
-    POSTFN_META_KEY,
+    INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY,
+    INSIGHTS_META_KEY,
     type Context,
     type ToolBase,
     type ZodObjectAny,
@@ -157,12 +157,12 @@ export function createQueryWrapper<T extends ZodObjectAny>(config: QueryWrapperC
                 results,
                 _insightsUrl: buildInsightUrl('InsightVizNode', query, baseUrl, config.urlPrefix),
                 ...(data.warnings ? { warnings: data.warnings } : {}),
-                ...(shouldSurfaceFormatted ? { [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: data.formatted_results } : {}),
+                ...(shouldSurfaceFormatted ? { [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: data.formatted_results } : {}),
             }
         },
         _meta: {
             ...(config.uiResourceUri ? { ui: { resourceUri: config.uiResourceUri } } : {}),
-            ...(config.outputFormat ? { [POSTFN_META_KEY]: { outputFormat: config.outputFormat } } : {}),
+            ...(config.outputFormat ? { [INSIGHTS_META_KEY]: { outputFormat: config.outputFormat } } : {}),
         },
     })
 }

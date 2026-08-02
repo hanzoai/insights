@@ -442,7 +442,7 @@ def _handle_restore_failure(exc: Exception, *, mode: ArtifactMode) -> None:
 
 
 def _effective_mode(mode: str | None) -> ArtifactMode:
-    value = mode or os.environ.get("POSTFN_SCHEMA_RESTORE_IN_DEV", "auto")
+    value = mode or os.environ.get("INSIGHTS_SCHEMA_RESTORE_IN_DEV", "auto")
     if value not in {"off", "auto", "on"}:
         raise click.UsageError("mode must be one of: off, auto, on")
     return cast(ArtifactMode, value)
@@ -497,7 +497,7 @@ def _confirm_restore_schema(yes: bool) -> bool:
 
 
 def _effective_base_branch(base_branch: str | None) -> str:
-    return base_branch or os.environ.get("POSTFN_SCHEMA_RESTORE_BASE_BRANCH") or DEFAULT_BASE_BRANCH
+    return base_branch or os.environ.get("INSIGHTS_SCHEMA_RESTORE_BASE_BRANCH") or DEFAULT_BASE_BRANCH
 
 
 # insightscli's CompositeCommand wrapper forwards --yes/-y to every child step
@@ -519,7 +519,7 @@ _insightscli_yes_compat = click.option(
     "--base-branch",
     default=None,
     help="Source branch of the workflow run to pull artifacts from. "
-    "Defaults to POSTFN_SCHEMA_RESTORE_BASE_BRANCH or master.",
+    "Defaults to INSIGHTS_SCHEMA_RESTORE_BASE_BRANCH or master.",
 )
 @_insightscli_yes_compat
 def db_download_schema(base_branch: str | None) -> None:
@@ -557,7 +557,7 @@ def db_restore_schema_fresh() -> None:
     "--mode",
     type=click.Choice(["off", "auto", "on"]),
     default=None,
-    help="Restore mode. Defaults to POSTFN_SCHEMA_RESTORE_IN_DEV or auto.",
+    help="Restore mode. Defaults to INSIGHTS_SCHEMA_RESTORE_IN_DEV or auto.",
 )
 @click.option("--target-db", default="insights", show_default=True, help="Database to inspect and restore")
 @_insightscli_yes_compat

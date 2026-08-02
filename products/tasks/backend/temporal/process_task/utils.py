@@ -675,7 +675,7 @@ def _resolve_mcp_consumer(interaction_origin: str | None) -> str:
     origin) is treated as Insights Desktop. Only `"insights-code"` is a UI-apps host
     on the MCP server — it gates UI-apps payload emission, so `"insights_ai"` and
     `"slack"` deliberately don't get UI apps. Keep the `"insights-code"` literal
-    in sync with `POSTFN_CODE_CONSUMER` in
+    in sync with `INSIGHTS_CODE_CONSUMER` in
     `services/mcp/src/lib/client-detection.ts`.
     """
     if interaction_origin == "slack":
@@ -1170,9 +1170,9 @@ def build_sandbox_environment_variables(
 
     env_vars.update(
         {
-            "POSTFN_PERSONAL_API_KEY": access_token,
-            "POSTFN_API_URL": get_sandbox_api_url(),
-            "POSTFN_PROJECT_ID": str(team_id),
+            "INSIGHTS_PERSONAL_API_KEY": access_token,
+            "INSIGHTS_API_URL": get_sandbox_api_url(),
+            "INSIGHTS_PROJECT_ID": str(team_id),
             "JWT_PUBLIC_KEY": get_sandbox_jwt_public_key(),
         }
     )
@@ -1191,18 +1191,18 @@ def build_sandbox_environment_variables(
 def get_sandbox_otel_env_vars() -> dict[str, str]:
     """OTLP config for agent-server run telemetry (Insights Logs/APM).
 
-    Deliberately POSTFN_-prefixed rather than the standard OTEL_* names: the
+    Deliberately INSIGHTS_-prefixed rather than the standard OTEL_* names: the
     sandbox env is inherited by user processes, and standard OTEL_* vars would
     make any OTel SDK in user code auto-export into our telemetry project.
     """
     if not (settings.SANDBOX_AGENT_OTEL_LOGS_URL and settings.SANDBOX_AGENT_OTEL_LOGS_TOKEN):
         return {}
     env_vars = {
-        "POSTFN_AGENT_OTEL_LOGS_URL": settings.SANDBOX_AGENT_OTEL_LOGS_URL,
-        "POSTFN_AGENT_OTEL_LOGS_TOKEN": settings.SANDBOX_AGENT_OTEL_LOGS_TOKEN,
+        "INSIGHTS_AGENT_OTEL_LOGS_URL": settings.SANDBOX_AGENT_OTEL_LOGS_URL,
+        "INSIGHTS_AGENT_OTEL_LOGS_TOKEN": settings.SANDBOX_AGENT_OTEL_LOGS_TOKEN,
     }
     if settings.SANDBOX_AGENT_OTEL_TRACES_URL:
-        env_vars["POSTFN_AGENT_OTEL_TRACES_URL"] = settings.SANDBOX_AGENT_OTEL_TRACES_URL
+        env_vars["INSIGHTS_AGENT_OTEL_TRACES_URL"] = settings.SANDBOX_AGENT_OTEL_TRACES_URL
     return env_vars
 
 

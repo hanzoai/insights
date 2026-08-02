@@ -44,7 +44,7 @@ export const manifest: ProductManifest = {
             name: 'Sources',
             description:
                 'Import data into Insights from external sources including webhooks, application connectors, and self-managed databases.',
-            activityScope: ActivityScope.FN_FUNCTION,
+            activityScope: ActivityScope.INSIGHTS_FUNCTION,
             iconType: 'data_pipeline',
         },
         DataWarehouseSource: {

@@ -126,7 +126,7 @@ pub async fn config_endpoint(
 
 /// `GET /array/:token/config.js` — returns JS wrapper around config.
 ///
-/// Wraps the config JSON in an IIFE that sets `window._POSTFN_REMOTE_CONFIG[token]`
+/// Wraps the config JSON in an IIFE that sets `window._INSIGHTS_REMOTE_CONFIG[token]`
 /// with the config and site apps. This is what the SDK snippet loads.
 ///
 /// Response headers: same cache headers + `Content-Type: application/javascript`
@@ -206,8 +206,8 @@ pub async fn config_js_endpoint(
 
     let js_content = format!(
         "(function() {{\n\
-         \x20 window._POSTFN_REMOTE_CONFIG = window._POSTFN_REMOTE_CONFIG || {{}};\n\
-         \x20 window._POSTFN_REMOTE_CONFIG['{token}'] = {{\n\
+         \x20 window._INSIGHTS_REMOTE_CONFIG = window._INSIGHTS_REMOTE_CONFIG || {{}};\n\
+         \x20 window._INSIGHTS_REMOTE_CONFIG['{token}'] = {{\n\
          \x20   config: {config_json},\n\
          \x20   siteApps: [{site_apps_joined}]\n\
          \x20 }}\n\
@@ -242,15 +242,15 @@ mod tests {
 
         let js = format!(
             "(function() {{\n\
-             \x20 window._POSTFN_REMOTE_CONFIG = window._POSTFN_REMOTE_CONFIG || {{}};\n\
-             \x20 window._POSTFN_REMOTE_CONFIG['{token}'] = {{\n\
+             \x20 window._INSIGHTS_REMOTE_CONFIG = window._INSIGHTS_REMOTE_CONFIG || {{}};\n\
+             \x20 window._INSIGHTS_REMOTE_CONFIG['{token}'] = {{\n\
              \x20   config: {config_json},\n\
              \x20   siteApps: [{site_apps_joined}]\n\
              \x20 }}\n\
              }})();"
         );
 
-        assert!(js.contains("window._POSTFN_REMOTE_CONFIG"));
+        assert!(js.contains("window._INSIGHTS_REMOTE_CONFIG"));
         assert!(js.contains("phc_test123"));
         assert!(js.contains("\"sessionRecording\":true"));
         assert!(js.contains("siteApps: []"));
@@ -264,8 +264,8 @@ mod tests {
 
         let js = format!(
             "(function() {{\n\
-             \x20 window._POSTFN_REMOTE_CONFIG = window._POSTFN_REMOTE_CONFIG || {{}};\n\
-             \x20 window._POSTFN_REMOTE_CONFIG['{token}'] = {{\n\
+             \x20 window._INSIGHTS_REMOTE_CONFIG = window._INSIGHTS_REMOTE_CONFIG || {{}};\n\
+             \x20 window._INSIGHTS_REMOTE_CONFIG['{token}'] = {{\n\
              \x20   config: {config_json},\n\
              \x20   siteApps: [{site_apps_joined}]\n\
              \x20 }}\n\
@@ -392,7 +392,7 @@ mod tests {
             "application/javascript"
         );
 
-        assert!(body.contains("window._POSTFN_REMOTE_CONFIG"));
+        assert!(body.contains("window._INSIGHTS_REMOTE_CONFIG"));
         assert!(body.contains(token));
         assert!(body.contains("siteApps: [function() { return 1; }]"));
         // siteApps metadata should be removed from config JSON

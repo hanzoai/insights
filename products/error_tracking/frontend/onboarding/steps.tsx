@@ -24,7 +24,7 @@ export const errorTrackingOnboarding: ProductOnboardingProvider = {
             // those products are also picked, only one install step is shown — but the
             // `EnableErrorTracking` task still gets ticked because the dedup pass merges
             // setupTaskIds from dropped descriptors into the survivor.
-            dedupKey: INSTALL_DEDUP_KEYS.POSTFN_JS,
+            dedupKey: INSTALL_DEDUP_KEYS.INSIGHTS_JS,
             render: () => (
                 <OnboardingInstallStep
                     sdkInstructionMap={ErrorTrackingSDKInstructions}

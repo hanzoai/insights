@@ -19,38 +19,38 @@ declare global {
     // when the toolbar is built by insights-js's release workflow as part of a
     // self-contained, version-pinned bundle. Used by the toolbar to load
     // sibling files (currently just toolbar.css) from the same versioned URL.
-    const __POSTFN_TOOLBAR_PUBLIC_PATH__: string
+    const __INSIGHTS_TOOLBAR_PUBLIC_PATH__: string
 
     // Build-time constant injected into the toolbar loader (frontend/src/toolbar/loader.ts):
     // the basename of the toolbar app's ESM entry inside dist/toolbar/ — hashed in prod
     // builds (e.g. `toolbar-app-ABC123.js`), plain `toolbar-app.js` in dev. See
     // finalizeToolbarBuild in frontend/toolbar-config.mjs.
-    const __POSTFN_TOOLBAR_APP_ENTRY__: string
+    const __INSIGHTS_TOOLBAR_APP_ENTRY__: string
 
     interface Window {
         JS_URL?: string
-        JS_POSTFN_API_KEY?: string
-        JS_POSTFN_HOST?: string
-        JS_POSTFN_UI_HOST?: string
-        JS_POSTFN_SELF_CAPTURE?: boolean
-        JS_POSTFN_IDENTITY_DISTINCT_ID?: string
-        JS_POSTFN_IDENTITY_HASH?: string
+        JS_INSIGHTS_API_KEY?: string
+        JS_INSIGHTS_HOST?: string
+        JS_INSIGHTS_UI_HOST?: string
+        JS_INSIGHTS_SELF_CAPTURE?: boolean
+        JS_INSIGHTS_IDENTITY_DISTINCT_ID?: string
+        JS_INSIGHTS_IDENTITY_HASH?: string
         JS_CAPTURE_TIME_TO_SEE_DATA?: boolean
         insights?: insights
         ESBUILD_LOAD_SCRIPT: (name) => void
         ESBUILD_LOAD_CHUNKS: (name) => void
         ESBUILD_LOADED_CHUNKS: Set<string>
-        POSTFN_EXPORTED_DATA: ExportedData
-        POSTFN_USER_IDENTITY_WITH_FLAGS?: {
+        INSIGHTS_EXPORTED_DATA: ExportedData
+        INSIGHTS_USER_IDENTITY_WITH_FLAGS?: {
             distinctID: string
             isIdentifiedID: boolean
             featureFlags: Record<string, boolean | string>
         }
         IMPERSONATED_SESSION?: boolean
-        POSTFN_JS_UUID_VERSION?: string
+        INSIGHTS_JS_UUID_VERSION?: string
 
         // These are used to track global errors across the app.
         // Can be used to determine whether we should show warnings in different places in the app.
-        POSTFN_GLOBAL_ERRORS?: Record<string, boolean>
+        INSIGHTS_GLOBAL_ERRORS?: Record<string, boolean>
     }
 }

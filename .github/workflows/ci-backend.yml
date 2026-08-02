@@ -123,8 +123,8 @@ jobs:
               id: app-token
               if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
             - uses: ./.github/actions/paths-filter
               id: filter
               if: github.event_name != 'push' # Run all tests on master push
@@ -433,8 +433,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Install pnpm dependencies
@@ -818,8 +818,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PRODUCT_TESTS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PRODUCT_TESTS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PRODUCT_TESTS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PRODUCT_TESTS_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Install pnpm dependencies
@@ -1127,8 +1127,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Set up Python
@@ -1258,8 +1258,8 @@ jobs:
               id: app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_PRIVATE_KEY }}
                   owner: ${{ github.repository_owner }}
                   repositories: ${{ github.event.repository.name }}
 
@@ -1357,8 +1357,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Set up Python
@@ -1669,8 +1669,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_TESTS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_TESTS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
 
             - name: Publish Migration risk check
               # Migration risk classification is published as a GitHub check on
@@ -1997,8 +1997,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Set up Python
@@ -2126,8 +2126,8 @@ jobs:
               id: openapi-app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_TESTS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_TESTS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
 
             - name: Disable auto-merge before OpenAPI type commit
               if: steps.openapi-check.outputs.needs-commit == 'true'
@@ -2558,8 +2558,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Set up Python
@@ -3239,8 +3239,8 @@ jobs:
               id: app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_TESTS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_TESTS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
 
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -3583,7 +3583,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_API_TOKEN }}
                   event: 'insights-ci-running-time'
                   capture-run-duration: true
                   capture-job-durations: true
@@ -3595,7 +3595,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
                   event: 'insights-ci-running-time'
                   capture-run-duration: true
                   capture-job-durations: true
@@ -3622,7 +3622,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
                   event: 'insights-ci-test-selection'
                   properties: |
                       {
@@ -3702,10 +3702,10 @@ jobs:
               if: steps.timing-reporter.outputs.available == 'true'
               continue-on-error: true
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
-                  # dual emission while per-test traces migrate to the project behind POSTFN_API_TOKEN
-                  POSTFN_CI_TRACES_EXTRA_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
-                  POSTFN_OTLP_TRACES_ENDPOINT: ${{ vars.POSTFN_OTLP_TRACES_ENDPOINT || 'https://us.i.hanzo.ai/i/v1/traces' }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
+                  # dual emission while per-test traces migrate to the project behind INSIGHTS_API_TOKEN
+                  INSIGHTS_CI_TRACES_EXTRA_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
+                  INSIGHTS_OTLP_TRACES_ENDPOINT: ${{ vars.INSIGHTS_OTLP_TRACES_ENDPOINT || 'https://us.i.hanzo.ai/i/v1/traces' }}
               run: |
                   uv run --script .github/scripts/report_test_timings.py \
                       --min-duration-seconds=0.5 \

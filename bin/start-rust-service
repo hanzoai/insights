@@ -197,8 +197,8 @@ case "$RS_SVC" in
     export KAFKA_HOSTS="$DEFAULT_KAFKA"
     export KAFKA_CONSUMER_OFFSET_RESET="${KAFKA_CONSUMER_OFFSET_RESET:-earliest}"
     export METRICS_PORT="${METRICS_PORT:-9107}"
-    export POSTFN_API_KEY="${CYMBAL_NOTIFICATIONS_POSTFN_API_KEY:-phc_localinsightsprojecttoken}"
-    export POSTFN_ENDPOINT="${CYMBAL_NOTIFICATIONS_POSTFN_ENDPOINT:-http://localhost:3307}"
+    export INSIGHTS_API_KEY="${CYMBAL_NOTIFICATIONS_INSIGHTS_API_KEY:-phc_localinsightsprojecttoken}"
+    export INSIGHTS_ENDPOINT="${CYMBAL_NOTIFICATIONS_INSIGHTS_ENDPOINT:-http://localhost:3307}"
     export TEMPORAL_HOST="${TEMPORAL_HOST:-temporal}"
     ;;
 

@@ -25,7 +25,7 @@ AI_GATEWAY_REPO="${AI_GATEWAY_REPO:-$HOME/Development/ai-gateway}"
 # port 6381). Django must publish there too — same instance, or no match.
 GATEWAY_REDIS_URL="${AI_GATEWAY_REDIS_URL:-redis://localhost:6381}"
 # Deterministic so reruns + DB resets stay idempotent and the published blob's
-# hash matches the runner's dev-default POSTFN_AI_GATEWAY_KEY (config.ts).
+# hash matches the runner's dev-default INSIGHTS_AI_GATEWAY_KEY (config.ts).
 DEV_PHS="${DEV_GATEWAY_PHS:-phs_localgatewaye2elocalgatewaye2e0001}"
 TOPUP_USD="${AI_GATEWAY_DEV_TOPUP_USD:-100.00}"
 

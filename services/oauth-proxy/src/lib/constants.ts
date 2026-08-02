@@ -1,11 +1,11 @@
 export type Region = 'us' | 'eu'
 
-export const POSTFN_US_BASE_URL = 'https://us.hanzo.ai'
-export const POSTFN_EU_BASE_URL = 'https://eu.hanzo.ai'
+export const INSIGHTS_US_BASE_URL = 'https://us.hanzo.ai'
+export const INSIGHTS_EU_BASE_URL = 'https://eu.hanzo.ai'
 
 export const REGION_BASE_URLS: Record<Region, string> = {
-    us: POSTFN_US_BASE_URL,
-    eu: POSTFN_EU_BASE_URL,
+    us: INSIGHTS_US_BASE_URL,
+    eu: INSIGHTS_EU_BASE_URL,
 }
 
 export function toRegion(value: string | undefined | null): Region {

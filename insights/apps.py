@@ -61,7 +61,7 @@ class InsightsConfig(AppConfig):
         # Fall back to DEV_API_KEY in debug so feature flags work locally without manual env setup.
         # DEV_API_KEY lives in ee/settings.py — getattr returns None in OSS mode.
         hanzo_insights.personal_api_key = os.environ.get(
-            "POSTFN_PERSONAL_API_KEY",
+            "INSIGHTS_PERSONAL_API_KEY",
             getattr(settings, "DEV_API_KEY", None) if settings.DEBUG else None,
         )
         hanzo_insights.poll_interval = 90  # ty: ignore[invalid-assignment]

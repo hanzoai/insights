@@ -322,7 +322,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, UpdatedMetaFields, 
         self.deleted = True
         self.deleted_at = datetime.now()
         self.deleted_name = self.name
-        self.name = f"POSTFN_DELETED_{uuid.uuid4()}"
+        self.name = f"INSIGHTS_DELETED_{uuid.uuid4()}"
 
         self.save()
 

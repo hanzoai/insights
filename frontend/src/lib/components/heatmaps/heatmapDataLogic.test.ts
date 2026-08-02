@@ -32,11 +32,11 @@ describe('heatmapApiPath', () => {
     let priorAppContext: AppContext | undefined
 
     beforeEach(() => {
-        priorAppContext = window.POSTFN_APP_CONTEXT
+        priorAppContext = window.INSIGHTS_APP_CONTEXT
     })
 
     afterEach(() => {
-        window.POSTFN_APP_CONTEXT = priorAppContext
+        window.INSIGHTS_APP_CONTEXT = priorAppContext
     })
 
     it.each([
@@ -50,7 +50,7 @@ describe('heatmapApiPath', () => {
         ['in-app', null, '', '/api/heatmap/'],
         ['in-app', null, 'events/', '/api/heatmap/events/'],
     ] as const)('context %s with team %s and endpoint %s resolves %s', (context, teamId, endpoint, expected) => {
-        window.POSTFN_APP_CONTEXT = (teamId === null
+        window.INSIGHTS_APP_CONTEXT = (teamId === null
             ? undefined
             : { current_team: { id: teamId } }) as unknown as AppContext
 

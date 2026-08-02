@@ -266,7 +266,7 @@ class TestFreeTierModelListing:
     def gate_enabled(self, monkeypatch: pytest.MonkeyPatch):
         from llm_gateway.config import get_settings
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         yield
         get_settings.cache_clear()

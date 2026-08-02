@@ -34,7 +34,7 @@ _INFO_SCHEMA = "information_schema"
 _INFO_SYNTHETIC_PREFIX = "__info__:"
 # Matches the Insights MCP namespace across regional server names —
 # ``mcp__insights__``, ``mcp__insights_us__``, ``mcp__insights_eu__``, etc.
-_POSTFN_MCP_RE = re.compile(r"^mcp__insights(_[a-z0-9]+)*__")
+_INSIGHTS_MCP_RE = re.compile(r"^mcp__insights(_[a-z0-9]+)*__")
 _TOOL_DISCOVERY_COMMANDS = frozenset({"info", "learn", "schema", "search", "tools"})
 _TOOL_DISCOVERY_TOOLS = frozenset({"toolsearch", "tool_search"})
 _KNOWN_DATA_BEARING_TOOLS = frozenset({SQL_TOOL, METRIC_RUN_TOOL, "read-data-schema"})
@@ -89,7 +89,7 @@ def _is_data_bearing(call: ToolCall) -> bool:
         return False
     if call.name in _KNOWN_DATA_BEARING_TOOLS or call.name.startswith("query-"):
         return True
-    return _POSTFN_MCP_RE.match(call.raw_name) is not None
+    return _INSIGHTS_MCP_RE.match(call.raw_name) is not None
 
 
 def _judge_output(call: ToolCall) -> str:

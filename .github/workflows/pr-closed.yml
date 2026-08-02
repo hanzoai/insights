@@ -46,8 +46,8 @@ jobs:
             deployments: read # the had-a-preview gate lists the PR's deployments
             id-token: write # OIDC for the tailnet join + hogplane token
         env:
-            FN_HOST: https://hogland.mascot-kitefin.ts.net
-            FN_OIDC_AUDIENCE: hogland.prod-us.insights.dev
+            INSIGHTS_HOST: https://hogland.mascot-kitefin.ts.net
+            INSIGHTS_OIDC_AUDIENCE: hogland.prod-us.insights.dev
             PR: ${{ github.event.pull_request.number }}
         steps:
             # Credential-free gate: only PRs that actually had a preview (labeled
@@ -91,14 +91,14 @@ jobs:
                   token=""
                   for attempt in 1 2 3; do
                     token=$(curl -sf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-                      "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${FN_OIDC_AUDIENCE}" | jq -r '.value') || token=""
+                      "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${INSIGHTS_OIDC_AUDIENCE}" | jq -r '.value') || token=""
                     [ -n "$token" ] && [ "$token" != "null" ] && break
                     echo "::warning::OIDC mint attempt ${attempt} failed; retrying"
                     [ "$attempt" -lt 3 ] && sleep 5
                   done
                   [ -n "$token" ] && [ "$token" != "null" ] || { echo "::error::OIDC mint failed after 3 attempts"; exit 1; }
                   echo "::add-mask::$token"
-                  echo "FN_TOKEN=$token" >> "$GITHUB_ENV"
+                  echo "INSIGHTS_TOKEN=$token" >> "$GITHUB_ENV"
             # uv (repo convention): --no-project skips the monorepo sync, --with
             # pins the first-party SDK (exempted from the 7-day soak in [tool.uv]).
             - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
@@ -108,7 +108,7 @@ jobs:
             - name: Destroy preview box + pen
               if: steps.gate.outputs.had_preview == 'true'
               working-directory: tools/hogbox-preview
-              run: uv run --no-project --with insights-hogland==0.3.0 --python 3.12 python -m hogbox_preview --host "$FN_HOST" --name "preview-pr-${PR}" destroy
+              run: uv run --no-project --with insights-hogland==0.3.0 --python 3.12 python -m hogbox_preview --host "$INSIGHTS_HOST" --name "preview-pr-${PR}" destroy
 
     disable-canary-flags:
         name: Disable feature flags canary
@@ -183,6 +183,6 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{secrets.POSTFN_DEVEX_PROJECT_API_TOKEN}}
+                  insights-token: ${{secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN}}
                   event: 'insights-ci-pr-stats'
                   properties: '{"prAgeInSeconds": ${{ env.pr_age }}, "isRevert": ${{env.is_revert}}, "prTitle": ${{ env.pr_title_escaped }}, "prNumber": "${{ github.event.pull_request.number}}"  }'

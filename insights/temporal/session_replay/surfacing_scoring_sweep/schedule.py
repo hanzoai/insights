@@ -32,7 +32,7 @@ from temporalio.common import SearchAttributePair, TypedSearchAttributes
 
 from insights.temporal.common.client import async_connect
 from insights.temporal.common.schedule import a_create_schedule, a_delete_schedule, a_schedule_exists, a_update_schedule
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_TYPE_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_TYPE_KEY
 from insights.temporal.session_replay.surfacing_scoring_sweep.constants import (
     SCHEDULE_ID,
     SCHEDULE_INTERVAL,
@@ -71,7 +71,7 @@ async def create_surfacing_scoring_sweep_schedule(client: Client) -> None:
     """
     schedule = _build_schedule()
     search_attributes = TypedSearchAttributes(
-        search_attributes=[SearchAttributePair(key=POSTFN_SCHEDULE_TYPE_KEY, value=SCHEDULE_TYPE)]
+        search_attributes=[SearchAttributePair(key=INSIGHTS_SCHEDULE_TYPE_KEY, value=SCHEDULE_TYPE)]
     )
     if await a_schedule_exists(client, SCHEDULE_ID):
         await a_update_schedule(client, SCHEDULE_ID, schedule, search_attributes=search_attributes)

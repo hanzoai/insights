@@ -9,9 +9,9 @@ services:
     agent:
         image: insights-metrics-agent:test
         environment:
-            POSTFN_API_KEY: phc_test
-            POSTFN_HOST: http://sink:4318
-            POSTFN_INGEST_PATH: /v1/metrics
+            INSIGHTS_API_KEY: phc_test
+            INSIGHTS_HOST: http://sink:4318
+            INSIGHTS_INGEST_PATH: /v1/metrics
             SCRAPE_TARGETS: fixture:9464
             SCRAPE_INTERVAL: 1s
             PERSIST_QUEUE: '1'

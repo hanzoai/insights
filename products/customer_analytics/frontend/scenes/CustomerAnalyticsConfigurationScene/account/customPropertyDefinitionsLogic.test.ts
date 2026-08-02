@@ -96,8 +96,8 @@ describe('customPropertyDefinitionsLogic', () => {
     }
 
     beforeEach(() => {
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             current_team: MOCK_DEFAULT_TEAM,
             current_user: MOCK_DEFAULT_USER,
         } as any

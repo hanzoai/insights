@@ -39,9 +39,9 @@ MAX_SELECT_NOTEBOOK_MATERIALIZE_LIMIT = 500000  # 500k rows
 # Max limit for LLM traces
 MAX_SELECT_TRACES_LIMIT_EXPORT = 10000  # 10k traces
 # Max limit for Insights AI queries
-MAX_SELECT_POSTFN_AI_LIMIT = 500  # 500 rows
+MAX_SELECT_INSIGHTS_AI_LIMIT = 500  # 500 rows
 # Default limit for Insights AI queries
-DEFAULT_POSTFN_AI_RETURNED_ROWS = 100
+DEFAULT_INSIGHTS_AI_RETURNED_ROWS = 100
 # Max amount of memory usage when doing group by before swapping to disk. Only used in certain queries
 MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY = 22 * 1024 * 1024 * 1024
 
@@ -87,7 +87,7 @@ class LimitContext(StrEnum):
     NOTEBOOK_MATERIALIZE = "notebook_materialize"
     SAVED_QUERY = "saved_query"
     RETENTION = "retention"
-    POSTFN_AI = "insights_ai"
+    INSIGHTS_AI = "insights_ai"
 
 
 def get_max_limit_for_context(limit_context: LimitContext) -> int:
@@ -108,8 +108,8 @@ def get_max_limit_for_context(limit_context: LimitContext) -> int:
         return MAX_SELECT_RETENTION_LIMIT  # 100k
     elif limit_context == LimitContext.SAVED_QUERY:
         return sys.maxsize  # Max python int
-    elif limit_context == LimitContext.POSTFN_AI:
-        return MAX_SELECT_POSTFN_AI_LIMIT  # 500
+    elif limit_context == LimitContext.INSIGHTS_AI:
+        return MAX_SELECT_INSIGHTS_AI_LIMIT  # 500
     else:
         raise ValueError(f"Unexpected LimitContext value: {limit_context}")
 
@@ -120,8 +120,8 @@ def get_default_limit_for_context(limit_context: LimitContext) -> int:
         return CSV_EXPORT_LIMIT
     elif limit_context in (LimitContext.QUERY, LimitContext.QUERY_ASYNC):
         return DEFAULT_RETURNED_ROWS  # 100
-    elif limit_context == LimitContext.POSTFN_AI:
-        return DEFAULT_POSTFN_AI_RETURNED_ROWS  # 100
+    elif limit_context == LimitContext.INSIGHTS_AI:
+        return DEFAULT_INSIGHTS_AI_RETURNED_ROWS  # 100
     elif limit_context == LimitContext.HEATMAPS:
         return MAX_SELECT_HEATMAPS_LIMIT  # 1M
     elif limit_context == LimitContext.COHORT_CALCULATION:

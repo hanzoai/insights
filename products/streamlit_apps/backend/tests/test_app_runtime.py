@@ -675,7 +675,7 @@ class TestBuildSandboxConfig(BaseTest):
 
     def test_config_does_not_inject_bridge_env_vars(self):
         """The bridge token is delivered via /run/bridge_token (file-based),
-        never as an env var. POSTFN_BRIDGE_URL was removed too — the in-sandbox
+        never as an env var. INSIGHTS_BRIDGE_URL was removed too — the in-sandbox
         shim talks to the localhost auth proxy instead.
         """
         from products.streamlit_apps.backend.logic.app_runtime import _build_sandbox_config
@@ -685,12 +685,12 @@ class TestBuildSandboxConfig(BaseTest):
 
         config = _build_sandbox_config(app, version)
         assert config.environment_variables is not None
-        assert "POSTFN_BRIDGE_URL" not in config.environment_variables
-        assert "POSTFN_BRIDGE_TOKEN" not in config.environment_variables
-        assert config.environment_variables["POSTFN_TEAM_ID"] == str(app.team_id)
+        assert "INSIGHTS_BRIDGE_URL" not in config.environment_variables
+        assert "INSIGHTS_BRIDGE_TOKEN" not in config.environment_variables
+        assert config.environment_variables["INSIGHTS_TEAM_ID"] == str(app.team_id)
 
     def test_config_injects_streamlit_client_id(self):
-        """The proxy needs POSTFN_STREAMLIT_CLIENT_ID to reject tokens minted
+        """The proxy needs INSIGHTS_STREAMLIT_CLIENT_ID to reject tokens minted
         against other OAuth applications even when they carry matching
         scoped_teams. Missing this env var makes the proxy refuse to start."""
         from products.streamlit_apps.backend.logic.app_runtime import _build_sandbox_config
@@ -701,7 +701,7 @@ class TestBuildSandboxConfig(BaseTest):
 
         config = _build_sandbox_config(app, version)
         assert config.environment_variables is not None
-        assert config.environment_variables["POSTFN_STREAMLIT_CLIENT_ID"] == STREAMLIT_OAUTH_CLIENT_ID
+        assert config.environment_variables["INSIGHTS_STREAMLIT_CLIENT_ID"] == STREAMLIT_OAUTH_CLIENT_ID
 
     def test_config_includes_otel_env_vars(self):
         from products.streamlit_apps.backend.logic.app_runtime import _build_sandbox_config

@@ -481,7 +481,7 @@ class Integration(models.Model):
         SLACK = "slack"
         # Deprecated — kept in choices to avoid a no-op migration. The runtime no longer creates
         # or reads this kind; see `products/slack_app/backend/api.py` for the live integration.
-        SLACK_POSTFN_CODE = "slack-insights-code"
+        SLACK_INSIGHTS_CODE = "slack-insights-code"
         SNAPCHAT = "snapchat"
         SNOWFLAKE = "snowflake"
         STRIPE = "stripe"
@@ -629,7 +629,7 @@ def _build_insights_slack_scope() -> str:
     return ",".join(scopes)
 
 
-POSTFN_SLACK_SCOPE = _build_insights_slack_scope()
+INSIGHTS_SLACK_SCOPE = _build_insights_slack_scope()
 
 
 def _salesforce_instance_host(instance_url: str | None) -> str | None:
@@ -673,22 +673,22 @@ SALESFORCE_OAUTH_KINDS = ("salesforce", "pardot")
 # target region is the authorization server (its /oauth/authorize, /oauth/token, /oauth/userinfo,
 # /oauth/revoke already exist). `openid`+`email` are always requested on top of the user-selected
 # scopes so /oauth/userinfo can identify the connected account (`sub`/`email`).
-POSTFN_CONNECT_KIND = "insights"
-# `DEV` points at a local/self-hosted cell (`POSTFN_CONNECT_BASE_URL_DEV` defaults to
+INSIGHTS_CONNECT_KIND = "insights"
+# `DEV` points at a local/self-hosted cell (`INSIGHTS_CONNECT_BASE_URL_DEV` defaults to
 # http://localhost:8000) and the token exchange is a server-side POST, so a production instance must
 # never treat `DEV` as a real, connectable region — otherwise an org member could point the backend
 # at a URL of their choosing. Gate it behind an explicit dev/test context rather than relying on the
 # client id/secret env vars being unset.
-_POSTFN_CONNECT_ALLOW_DEV = bool(settings.DEBUG or settings.TEST or settings.E2E_TESTING)
-POSTFN_CONNECT_ALLOWED_REGIONS = ("US", "EU", *(("DEV",) if _POSTFN_CONNECT_ALLOW_DEV else ()))
-POSTFN_CONNECT_DEFAULT_SCOPES = ("task:read", "task:write")
-POSTFN_CONNECT_IDENTITY_SCOPES = ("openid", "email")
+_INSIGHTS_CONNECT_ALLOW_DEV = bool(settings.DEBUG or settings.TEST or settings.E2E_TESTING)
+INSIGHTS_CONNECT_ALLOWED_REGIONS = ("US", "EU", *(("DEV",) if _INSIGHTS_CONNECT_ALLOW_DEV else ()))
+INSIGHTS_CONNECT_DEFAULT_SCOPES = ("task:read", "task:write")
+INSIGHTS_CONNECT_IDENTITY_SCOPES = ("openid", "email")
 # A connection can proxy any request the granted scopes allow, so the user may pick from the full set
 # of user-grantable OAuth scopes (the same set the consent screen advertises — excludes internal,
 # hidden, and privileged scopes). The real bound is enforced twice more downstream: the target cell's
 # OAuthApplication.allowed_scopes at consent time, and the target's per-request scope checks. Identity
 # scopes are auto-added and not part of this set.
-POSTFN_CONNECT_GRANTABLE_SCOPES = frozenset(get_oauth_scopes_supported())
+INSIGHTS_CONNECT_GRANTABLE_SCOPES = frozenset(get_oauth_scopes_supported())
 
 
 def _insights_connect_target(region: str | None) -> tuple[str, str, str]:
@@ -699,25 +699,25 @@ def _insights_connect_target(region: str | None) -> tuple[str, str, str]:
     the wrong cell.
     """
     normalized = (region or "").upper()
-    if normalized == "DEV" and not _POSTFN_CONNECT_ALLOW_DEV:
+    if normalized == "DEV" and not _INSIGHTS_CONNECT_ALLOW_DEV:
         # Defense in depth: even if a `DEV` region row somehow reaches here in production, refuse to
         # resolve it so the backend never POSTs a token exchange to the dev base URL.
         raise NotImplementedError("Insights connect DEV region is only available in dev/test")
     targets = {
         "US": (
-            settings.POSTFN_CONNECT_BASE_URL_US,
-            settings.POSTFN_CONNECT_OAUTH_CLIENT_ID_US,
-            settings.POSTFN_CONNECT_OAUTH_CLIENT_SECRET_US,
+            settings.INSIGHTS_CONNECT_BASE_URL_US,
+            settings.INSIGHTS_CONNECT_OAUTH_CLIENT_ID_US,
+            settings.INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_US,
         ),
         "EU": (
-            settings.POSTFN_CONNECT_BASE_URL_EU,
-            settings.POSTFN_CONNECT_OAUTH_CLIENT_ID_EU,
-            settings.POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU,
+            settings.INSIGHTS_CONNECT_BASE_URL_EU,
+            settings.INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU,
+            settings.INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU,
         ),
         "DEV": (
-            settings.POSTFN_CONNECT_BASE_URL_DEV,
-            settings.POSTFN_CONNECT_OAUTH_CLIENT_ID_DEV,
-            settings.POSTFN_CONNECT_OAUTH_CLIENT_SECRET_DEV,
+            settings.INSIGHTS_CONNECT_BASE_URL_DEV,
+            settings.INSIGHTS_CONNECT_OAUTH_CLIENT_ID_DEV,
+            settings.INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_DEV,
         ),
     }
     if normalized not in targets:
@@ -795,7 +795,7 @@ class OauthIntegration:
                 client_secret=client_secret,
                 # Default only; authorize_url overrides with the user-selected scopes (plus the
                 # identity scopes). Token exchange/refresh don't send scope, so this is unused there.
-                scope=" ".join([*POSTFN_CONNECT_DEFAULT_SCOPES, *POSTFN_CONNECT_IDENTITY_SCOPES]),
+                scope=" ".join([*INSIGHTS_CONNECT_DEFAULT_SCOPES, *INSIGHTS_CONNECT_IDENTITY_SCOPES]),
                 id_path="sub",
                 name_path="email",
                 pkce=True,
@@ -817,7 +817,7 @@ class OauthIntegration:
                 token_url="https://slack.com/api/oauth.v2.access",
                 client_id=from_settings["SLACK_APP_CLIENT_ID"],
                 client_secret=from_settings["SLACK_APP_CLIENT_SECRET"],
-                scope=POSTFN_SLACK_SCOPE,
+                scope=INSIGHTS_SLACK_SCOPE,
                 id_path="team.id",
                 name_path="team.name",
             )
@@ -1209,8 +1209,8 @@ class OauthIntegration:
             # connecting cell) needs to know which region to exchange the code against — carry it
             # in state. Always append the identity scopes so /oauth/userinfo can name the account.
             state_payload["region"] = (region or "").upper()
-            requested = list(scopes) if scopes else list(POSTFN_CONNECT_DEFAULT_SCOPES)
-            scope = " ".join(dict.fromkeys([*requested, *POSTFN_CONNECT_IDENTITY_SCOPES]))
+            requested = list(scopes) if scopes else list(INSIGHTS_CONNECT_DEFAULT_SCOPES)
+            scope = " ".join(dict.fromkeys([*requested, *INSIGHTS_CONNECT_IDENTITY_SCOPES]))
 
         if kind == "tiktok-ads":
             # TikTok uses different parameter names
@@ -4693,8 +4693,8 @@ class StripeIntegration:
         access_tokens.delete()
 
     def _get_insights_oauth_app(self):
-        if settings.STRIPE_POSTFN_OAUTH_CLIENT_ID:
-            return OAuthApplication.objects.filter(client_id=settings.STRIPE_POSTFN_OAUTH_CLIENT_ID).first()
+        if settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID:
+            return OAuthApplication.objects.filter(client_id=settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID).first()
 
         return None
 

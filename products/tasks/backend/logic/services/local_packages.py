@@ -1,6 +1,6 @@
 """Utilities for overlaying local agent packages into sandbox builds.
 
-When LOCAL_POSTFN_CODE_MONOREPO_ROOT is set, the agent-server inside
+When LOCAL_INSIGHTS_CODE_MONOREPO_ROOT is set, the agent-server inside
 sandboxes is built from the local Twig monorepo instead of the published
 npm package.  This lets developers iterate on agent-server changes
 without publishing first.
@@ -51,7 +51,7 @@ def get_local_insights_code_packages() -> tuple[LocalPackage, ...] | None:
     if not settings.DEBUG:
         return None
 
-    monorepo_root = os.environ.get("LOCAL_POSTFN_CODE_MONOREPO_ROOT", os.environ.get("LOCAL_TWIG_MONOREPO_ROOT", ""))
+    monorepo_root = os.environ.get("LOCAL_INSIGHTS_CODE_MONOREPO_ROOT", os.environ.get("LOCAL_TWIG_MONOREPO_ROOT", ""))
     if not monorepo_root or not Path(monorepo_root).is_dir():
         return None
 
@@ -66,7 +66,7 @@ def get_local_insights_code_packages() -> tuple[LocalPackage, ...] | None:
     )
 
     if missing := [p.name for p in packages if not p.source_path.is_dir()]:
-        logger.warning(f"LOCAL_POSTFN_CODE_MONOREPO_ROOT set but missing packages: {missing}")
+        logger.warning(f"LOCAL_INSIGHTS_CODE_MONOREPO_ROOT set but missing packages: {missing}")
         return None
 
     if missing := [p.name for p in packages if not p.build_output_path.is_dir()]:

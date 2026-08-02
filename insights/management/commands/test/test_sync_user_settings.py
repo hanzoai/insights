@@ -121,7 +121,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test using API key from environment variable"""
         self._mock_cloud_api_responses(mock_get)
 
-        with patch.dict("os.environ", {"POSTFN_PERSONAL_API_KEY": "env_key"}):
+        with patch.dict("os.environ", {"INSIGHTS_PERSONAL_API_KEY": "env_key"}):
             call_command("sync_user_settings")
 
         # Verify it worked

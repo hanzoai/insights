@@ -14,7 +14,7 @@ from llm_gateway.rate_limiting.cost_throttles import CostStatus, UserCostBurstTh
 from llm_gateway.rate_limiting.runner import ThrottleRunner
 from llm_gateway.rate_limiting.throttles import ThrottleContext
 from llm_gateway.services.plan_resolver import (
-    POSTFN_CODE_PRODUCT,
+    INSIGHTS_CODE_PRODUCT,
     PlanResolver,
     is_pro_plan,
     parse_iso_utc,
@@ -161,7 +161,7 @@ async def invalidate_plan_cache(
     request: Request,
     user: Annotated[AuthenticatedUser, Depends(get_authenticated_user)],
 ) -> dict[str, bool]:
-    if product != POSTFN_CODE_PRODUCT:
+    if product != INSIGHTS_CODE_PRODUCT:
         raise HTTPException(status_code=404, detail="Plan cache not available for this product")
     plan_resolver: PlanResolver = request.app.state.plan_resolver
     await plan_resolver.invalidate(user.user_id)

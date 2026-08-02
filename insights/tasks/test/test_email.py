@@ -1364,7 +1364,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
 
         # Test 1: Enable digest for this team - should send email since there are failures
         # There are 3 users at this point (self.user, creator_user, editor_user)
-        with self.settings(FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
+        with self.settings(INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
             send_insights_functions_daily_digest()
 
         # Each user gets their own email (3 users = 3 emails)
@@ -1383,13 +1383,13 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         mocked_email_messages.clear()
 
         # Test 2: Team not in allowlist - should not send email
-        with self.settings(FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["999"]):
+        with self.settings(INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["999"]):
             send_insights_functions_daily_digest()
 
         assert len(mocked_email_messages) == 0
 
         # Test 3: Empty allowlist (default behavior) - should send email since there are failures
-        with self.settings(FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[]):
+        with self.settings(INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[]):
             send_insights_functions_daily_digest()
 
         # Each user gets their own email (3 users = 3 emails)
@@ -1402,7 +1402,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         mocked_email_messages.clear()
 
         # Test 4: Using '*' in allowlist - should send email to all teams with failures
-        with self.settings(FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["*"]):
+        with self.settings(INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["*"]):
             send_insights_functions_daily_digest()
 
         # Each user gets their own email (3 users = 3 emails)
@@ -1684,7 +1684,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
             count=5,
         )
 
-        with self.settings(FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
+        with self.settings(INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
             send_insights_functions_daily_digest()
 
         assert len(mocked_email_messages) == 0

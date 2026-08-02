@@ -47,18 +47,18 @@ def postgres_config(host: str) -> dict:
 
     return {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_from_env("POSTFN_DB_NAME"),
-        "USER": os.getenv("POSTFN_DB_USER", "postgres"),
-        "PASSWORD": os.getenv("POSTFN_DB_PASSWORD", ""),
+        "NAME": get_from_env("INSIGHTS_DB_NAME"),
+        "USER": os.getenv("INSIGHTS_DB_USER", "postgres"),
+        "PASSWORD": os.getenv("INSIGHTS_DB_PASSWORD", ""),
         "HOST": host,
-        "PORT": os.getenv("POSTFN_POSTGRES_PORT", "5432"),
+        "PORT": os.getenv("INSIGHTS_POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 0,
         "DISABLE_SERVER_SIDE_CURSORS": DISABLE_SERVER_SIDE_CURSORS,
         "SSL_OPTIONS": {
-            "sslmode": os.getenv("POSTFN_POSTGRES_SSL_MODE", None),
-            "sslrootcert": os.getenv("POSTFN_POSTGRES_CLI_SSL_CA", None),
-            "sslcert": os.getenv("POSTFN_POSTGRES_CLI_SSL_CRT", None),
-            "sslkey": os.getenv("POSTFN_POSTGRES_CLI_SSL_KEY", None),
+            "sslmode": os.getenv("INSIGHTS_POSTGRES_SSL_MODE", None),
+            "sslrootcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CA", None),
+            "sslcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CRT", None),
+            "sslkey": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_KEY", None),
         },
         "TEST": {
             "MIRROR": "default",
@@ -89,8 +89,8 @@ if DATABASE_URL:
     if DISABLE_SERVER_SIDE_CURSORS:
         DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
-elif os.getenv("POSTFN_DB_NAME"):
-    DATABASES = {"default": postgres_config(os.getenv("POSTFN_POSTGRES_HOST", "localhost"))}
+elif os.getenv("INSIGHTS_DB_NAME"):
+    DATABASES = {"default": postgres_config(os.getenv("INSIGHTS_POSTGRES_HOST", "localhost"))}
 
     ssl_configurations = []
     for ssl_option, value in DATABASES["default"]["SSL_OPTIONS"].items():
@@ -113,7 +113,7 @@ elif os.getenv("POSTFN_DB_NAME"):
     )
 else:
     raise ImproperlyConfigured(
-        f'The environment vars "DATABASE_URL" or "POSTFN_DB_NAME" are absolutely required to run this software'
+        f'The environment vars "DATABASE_URL" or "INSIGHTS_DB_NAME" are absolutely required to run this software'
     )
 
 DATABASE_ROUTERS: list[str] = []
@@ -121,7 +121,7 @@ DATABASE_ROUTERS: list[str] = []
 # Configure the database which will be used as a read replica.
 # This should have all the same config as our main writer DB, just use a different host.
 # Our database router will point here.
-read_host = os.getenv("POSTFN_POSTGRES_READ_HOST")
+read_host = os.getenv("INSIGHTS_POSTGRES_READ_HOST")
 if read_host:
     DATABASES["replica"] = postgres_config(read_host)
     DATABASE_ROUTERS.append("insights.dbrouter.ReplicaRouter")
@@ -129,13 +129,13 @@ if read_host:
 # Configure a direct database connection bypassing PgBouncer.
 # This allows using PGOPTIONS like lock_timeout which PgBouncer doesn't support.
 # Used for migrations: python manage.py migrate --database=default_direct
-direct_host = os.getenv("POSTFN_POSTGRES_DIRECT_HOST")
+direct_host = os.getenv("INSIGHTS_POSTGRES_DIRECT_HOST")
 if direct_host:
-    # Copy from default database config (works with both DATABASE_URL and POSTFN_DB_NAME setups)
+    # Copy from default database config (works with both DATABASE_URL and INSIGHTS_DB_NAME setups)
     DATABASES["default_direct"] = DATABASES["default"].copy()
     # Override host and port for direct connection (bypassing PgBouncer)
     DATABASES["default_direct"]["HOST"] = direct_host
-    DATABASES["default_direct"]["PORT"] = os.getenv("POSTFN_POSTGRES_DIRECT_PORT", "5432")
+    DATABASES["default_direct"]["PORT"] = os.getenv("INSIGHTS_POSTGRES_DIRECT_PORT", "5432")
     # Disable server-side cursors is not needed for direct connection
     DATABASES["default_direct"]["DISABLE_SERVER_SIDE_CURSORS"] = False
     # Set lock_timeout for migrations to fail fast on lock contention
@@ -462,27 +462,27 @@ if TEST or DEBUG or IS_COLLECT_STATIC:
 else:
     REDIS_URL = os.getenv("REDIS_URL", "")
 
-if not REDIS_URL and get_from_env("POSTFN_REDIS_HOST", ""):
+if not REDIS_URL and get_from_env("INSIGHTS_REDIS_HOST", ""):
     REDIS_URL = "redis://:{}@{}:{}/".format(
-        os.getenv("POSTFN_REDIS_PASSWORD", ""),
-        os.getenv("POSTFN_REDIS_HOST", ""),
-        os.getenv("POSTFN_REDIS_PORT", "6379"),
+        os.getenv("INSIGHTS_REDIS_PASSWORD", ""),
+        os.getenv("INSIGHTS_REDIS_HOST", ""),
+        os.getenv("INSIGHTS_REDIS_PORT", "6379"),
     )
 
 SESSION_RECORDING_REDIS_URL = REDIS_URL
 
-if get_from_env("POSTFN_SESSION_RECORDING_REDIS_HOST", ""):
+if get_from_env("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""):
     SESSION_RECORDING_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("POSTFN_SESSION_RECORDING_REDIS_HOST", ""),
-        os.getenv("POSTFN_SESSION_RECORDING_REDIS_PORT", "6379"),
+        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""),
+        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_PORT", "6379"),
     )
 
 REPLAY_VISION_REDIS_URL = REDIS_URL
 
-if get_from_env("POSTFN_REPLAY_VISION_REDIS_HOST", ""):
+if get_from_env("INSIGHTS_REPLAY_VISION_REDIS_HOST", ""):
     REPLAY_VISION_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("POSTFN_REPLAY_VISION_REDIS_HOST", ""),
-        os.getenv("POSTFN_REPLAY_VISION_REDIS_PORT", "6379"),
+        os.getenv("INSIGHTS_REPLAY_VISION_REDIS_HOST", ""),
+        os.getenv("INSIGHTS_REPLAY_VISION_REDIS_PORT", "6379"),
     )
 
 # The LLM gateway caches per-team quota state in its own Redis (llm_gateway/services/quota_resolver.py).
@@ -491,7 +491,7 @@ LLM_GATEWAY_REDIS_URL = os.getenv("LLM_GATEWAY_REDIS_URL", REDIS_URL)
 
 if not REDIS_URL:
     raise ImproperlyConfigured(
-        "Env var REDIS_URL or POSTFN_REDIS_HOST is absolutely required to run this software.\n"
+        "Env var REDIS_URL or INSIGHTS_REDIS_HOST is absolutely required to run this software.\n"
         "If upgrading from Insights 1.0.10 or earlier, see here: "
         "https://hanzo.ai/docs/deployment/upgrading-insights#upgrading-from-before-1011"
     )

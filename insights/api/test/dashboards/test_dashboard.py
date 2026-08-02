@@ -116,7 +116,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "test"})
         mock_report_user_action.reset_mock()
 
-        self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/", HTTP_X_POSTFN_CLIENT="mcp")
+        self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/", HTTP_X_INSIGHTS_CLIENT="mcp")
 
         mock_report_user_action.assert_any_call(
             self.user,

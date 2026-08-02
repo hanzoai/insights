@@ -56,11 +56,11 @@ const context = { repo: { owner: 'Insights', repo: 'insights' } }
 
 describe('monitor-github-rate-limit', () => {
     beforeEach(() => {
-        delete process.env.POSTFN_DEVEX_PROJECT_API_TOKEN
+        delete process.env.INSIGHTS_DEVEX_PROJECT_API_TOKEN
     })
 
     it('emits one event per resource with the expected payload shape', async () => {
-        process.env.POSTFN_DEVEX_PROJECT_API_TOKEN = 'devex-key'
+        process.env.INSIGHTS_DEVEX_PROJECT_API_TOKEN = 'devex-key'
         const captured = []
         const fetchMock = recordingFn((_url, opts) => {
             captured.push(JSON.parse(opts.body))
@@ -93,7 +93,7 @@ describe('monitor-github-rate-limit', () => {
     })
 
     it('tags emissions with the offload bucket source when overridden', async () => {
-        process.env.POSTFN_DEVEX_PROJECT_API_TOKEN = 'devex-key'
+        process.env.INSIGHTS_DEVEX_PROJECT_API_TOKEN = 'devex-key'
         const captured = []
         const fetchMock = recordingFn((_url, opts) => {
             captured.push(JSON.parse(opts.body))
@@ -113,7 +113,7 @@ describe('monitor-github-rate-limit', () => {
     })
 
     it('counts capture failures without aborting later emissions', async () => {
-        process.env.POSTFN_DEVEX_PROJECT_API_TOKEN = 'devex-key'
+        process.env.INSIGHTS_DEVEX_PROJECT_API_TOKEN = 'devex-key'
         let calls = 0
         const fetchMock = recordingFn(() =>
             ++calls === 1
@@ -134,7 +134,7 @@ describe('monitor-github-rate-limit', () => {
     })
 
     it('captures the triggering event context on each sample', async () => {
-        process.env.POSTFN_DEVEX_PROJECT_API_TOKEN = 'devex-key'
+        process.env.INSIGHTS_DEVEX_PROJECT_API_TOKEN = 'devex-key'
         const captured = []
         const fetchMock = recordingFn((_url, opts) => {
             captured.push(JSON.parse(opts.body))
@@ -199,6 +199,6 @@ describe('monitor-github-rate-limit', () => {
         await monitor({ github, context, core }, { now: () => T_BASE, fetch: fetchMock })
 
         assert.equal(fetchMock.calls.length, 0)
-        assert.ok(calledWithStringContaining(core.warning, 'POSTFN_DEVEX_PROJECT_API_TOKEN'))
+        assert.ok(calledWithStringContaining(core.warning, 'INSIGHTS_DEVEX_PROJECT_API_TOKEN'))
     })
 })

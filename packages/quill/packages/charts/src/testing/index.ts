@@ -10,7 +10,7 @@ export {
     createDefaultTooltipAccessor,
     createHogChartTooltip,
     getHogChartTooltip,
-    FN_CHARTS_TOOLTIP_SELECTOR,
+    INSIGHTS_CHARTS_TOOLTIP_SELECTOR,
     waitForHogChartTooltip,
 } from './tooltip'
 export type { DefaultTooltipAccessor, HogChartTooltip } from './tooltip'

@@ -441,13 +441,13 @@ describe('trendsDataLogic', () => {
                 // in place when the selector first computes (as on real shared pages, where
                 // Django injects it before React runs). The outer beforeEach has already
                 // mounted everything, so remount with the global in place.
-                window.POSTFN_EXPORTED_DATA = { type: ExportType.Embed }
+                window.INSIGHTS_EXPORTED_DATA = { type: ExportType.Embed }
                 initKeaTests(false)
                 await initTrendsDataLogic()
             })
 
             afterEach(() => {
-                delete (window as { POSTFN_EXPORTED_DATA?: unknown }).POSTFN_EXPORTED_DATA
+                delete (window as { INSIGHTS_EXPORTED_DATA?: unknown }).INSIGHTS_EXPORTED_DATA
             })
 
             it('is false', async () => {

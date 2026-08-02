@@ -10,7 +10,7 @@ import { defineAuthTests, defineResilienceTests, type ProtocolTestHarness } from
 //   - Real workerd via `wrangler unstable_dev` running `src/index.ts`
 //   - Real `@hono/node-server` listener running `createApp(redis)` behind it
 //   - Real Redis (TEST_REDIS_URL / db TEST_REDIS_DB, default localhost:6379 db 15)
-//   - Real local Insights stack at TEST_POSTFN_API_BASE_URL (default localhost:8010)
+//   - Real local Insights stack at TEST_INSIGHTS_API_BASE_URL (default localhost:8010)
 //
 // Nothing is mocked. The Worker is configured with `MCP_HONO_URL` pointing at
 // the in-process Hono, so authenticated `/mcp` traffic travels the full
@@ -23,7 +23,7 @@ import { defineAuthTests, defineResilienceTests, type ProtocolTestHarness } from
 //
 // Boot the local Insights stack with `./bin/start` and have a local Redis
 // listening on 6379 before running this suite. Ensure `.env.test` (or the
-// integration env) defines `TEST_POSTFN_PERSONAL_API_KEY` / `TEST_ORG_ID` /
+// integration env) defines `TEST_INSIGHTS_PERSONAL_API_KEY` / `TEST_ORG_ID` /
 // `TEST_PROJECT_ID`.
 
 let env: IntegrationEnv

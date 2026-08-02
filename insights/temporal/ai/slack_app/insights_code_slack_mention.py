@@ -7,7 +7,7 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 
 from insights.temporal.ai.slack_app import (
-    POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE,
+    INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE,
     InsightsCodeSlackMentionWorkflowInputs,
     block_insights_code_task_if_no_personal_github_activity,
     cascade_insights_code_repository_activity,
@@ -27,8 +27,8 @@ from insights.temporal.ai.slack_app import (
 )
 from insights.temporal.common.base import InsightsWorkflow
 
-POSTFN_CODE_SLACK_MENTION_TIMEOUT_SECONDS = 10 * 60
-POSTFN_CODE_SLACK_PICKER_TIMEOUT_MINUTES = 15
+INSIGHTS_CODE_SLACK_MENTION_TIMEOUT_SECONDS = 10 * 60
+INSIGHTS_CODE_SLACK_PICKER_TIMEOUT_MINUTES = 15
 
 # Temporal patch ID — an arbitrary string recorded in workflow history.
 _PATCH_ID_FILE_ONLY_FOLLOWUP_BYPASS = "slack-file-only-followup-bypass-v1"
@@ -88,7 +88,7 @@ class InsightsCodeSlackMentionWorkflow(InsightsWorkflow):
             try:
                 await workflow.wait_condition(
                     lambda: self._authorship_resolved,
-                    timeout=timedelta(minutes=POSTFN_CODE_SLACK_PICKER_TIMEOUT_MINUTES),
+                    timeout=timedelta(minutes=INSIGHTS_CODE_SLACK_PICKER_TIMEOUT_MINUTES),
                 )
             except TimeoutError:
                 await _execute_insights_code_activity(
@@ -275,7 +275,7 @@ class InsightsCodeSlackMentionWorkflow(InsightsWorkflow):
                     else:
                         # Agent crashed/timed out/hallucinated — italicize its reason
                         # above the picker guidance so the user sees why.
-                        picker_guidance = f"_{outcome.reason}_\n\n{POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE}"
+                        picker_guidance = f"_{outcome.reason}_\n\n{INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE}"
                         await _execute_insights_code_activity(
                             post_insights_code_repo_picker_activity,
                             inputs,
@@ -291,7 +291,7 @@ class InsightsCodeSlackMentionWorkflow(InsightsWorkflow):
                         try:
                             await workflow.wait_condition(
                                 lambda: self._repo_selection_resolved,
-                                timeout=timedelta(minutes=POSTFN_CODE_SLACK_PICKER_TIMEOUT_MINUTES),
+                                timeout=timedelta(minutes=INSIGHTS_CODE_SLACK_PICKER_TIMEOUT_MINUTES),
                             )
                         except TimeoutError:
                             await _execute_insights_code_activity(
@@ -356,7 +356,7 @@ async def _execute_insights_code_activity(activity_fn: Any, *args: Any) -> Any:
     return await workflow.execute_activity(
         activity_fn,
         args=args,
-        start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_MENTION_TIMEOUT_SECONDS),
+        start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_MENTION_TIMEOUT_SECONDS),
         retry_policy=RetryPolicy(maximum_attempts=3),
     )
 
@@ -371,7 +371,7 @@ async def _execute_insights_code_agent_activity(activity_fn: Any, *args: Any) ->
     return await workflow.execute_activity(
         activity_fn,
         args=args,
-        start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_MENTION_TIMEOUT_SECONDS),
+        start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_MENTION_TIMEOUT_SECONDS),
         heartbeat_timeout=timedelta(minutes=5),
         retry_policy=RetryPolicy(maximum_attempts=1),
     )

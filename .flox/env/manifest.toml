@@ -57,7 +57,7 @@ watchman = { pkg-path = "watchman" } # Fast file watching for Django/Celery auto
 # scripts.
 [vars]
 DEBUG = "1"
-POSTFN_SKIP_MIGRATION_CHECKS = "1"
+INSIGHTS_SKIP_MIGRATION_CHECKS = "1"
 FLAGS_REDIS_URL = "redis://localhost:6379/1"
 # CH client default DB. Matches docker-compose convention — without it,
 # Django queries unqualified `events` / `log_entries` etc. resolve against

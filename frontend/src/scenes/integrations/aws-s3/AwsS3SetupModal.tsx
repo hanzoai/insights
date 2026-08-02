@@ -11,7 +11,7 @@ import { Region } from '~/types'
 
 import { AwsS3SetupModalLogicProps, awsS3SetupModalLogic } from './awsS3SetupModalLogic'
 
-const POSTFN_ROLE_ARN_BY_REGION: Partial<Record<Region, string>> = {
+const INSIGHTS_ROLE_ARN_BY_REGION: Partial<Record<Region, string>> = {
     [Region.US]: 'arn:aws:iam::309986977637:role/insights-external-batch-exports',
     [Region.EU]: 'arn:aws:iam::623789312881:role/insights-external-batch-exports',
 }
@@ -23,7 +23,7 @@ export const AwsS3SetupModal = (props: AwsS3SetupModalLogicProps): JSX.Element =
     const { authMode, isAwsS3IntegrationSubmitting } = useValues(logic)
     const { setAuthMode, submitAwsS3Integration } = useActions(logic)
 
-    const insightsRoleArn = preflight?.region ? POSTFN_ROLE_ARN_BY_REGION[preflight.region] : undefined
+    const insightsRoleArn = preflight?.region ? INSIGHTS_ROLE_ARN_BY_REGION[preflight.region] : undefined
 
     return (
         <Modal

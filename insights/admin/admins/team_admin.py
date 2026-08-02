@@ -51,7 +51,7 @@ from insights.personinsights_client.proto import (
 from insights.storage.gateway_credential_cache import validate_overspend_allowance_usd
 from insights.tasks.email import send_email_sending_suspended, send_email_sending_unsuspended
 from insights.temporal.common.client import sync_connect
-from insights.temporal.common.search_attributes import POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_TEAM_ID_KEY
 from insights.temporal.session_replay.delete_recordings.object_storage import store_session_id_chunks
 from insights.temporal.session_replay.delete_recordings.types import (
     DeletionConfig,
@@ -1346,7 +1346,7 @@ class TeamAdmin(admin.ModelAdmin):
             workflow_id = f"delete-recordings-{team.id}-{uuid.uuid4()}"
             config = DeletionConfig(reason=reason, dry_run=dry_run, deleted_by=request.user.email)
             team_search_attrs = TypedSearchAttributes(
-                search_attributes=[SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=team.id)]
+                search_attributes=[SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=team.id)]
             )
 
             if workflow_type == "person":

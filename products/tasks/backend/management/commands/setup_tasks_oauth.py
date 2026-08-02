@@ -5,13 +5,13 @@ from insights.models.oauth import OAuthApplicationAuthBrand
 from insights.temporal.oauth import (
     ARRAY_APP_CLIENT_ID_DEV,
     ARRAY_APP_ID_DEV,
-    POSTFN_AI_APP_CLIENT_ID_DEV,
-    POSTFN_AI_APP_ID_DEV,
+    INSIGHTS_AI_APP_CLIENT_ID_DEV,
+    INSIGHTS_AI_APP_ID_DEV,
 )
 from insights.utils import get_instance_region
 
 ARRAY_REDIRECT_URIS = "http://localhost:8237/callback http://localhost:8239/callback"
-POSTFN_AI_REDIRECT_URIS = "http://localhost:8000/authorize"
+INSIGHTS_AI_REDIRECT_URIS = "http://localhost:8000/authorize"
 
 # Skipped rather than failed, so the unconditional call in bin/migrate is safe.
 PRODUCTION_REGIONS = frozenset({"US", "EU"})
@@ -38,13 +38,13 @@ class Command(BaseCommand):
             },
         )
         self._setup_app(
-            POSTFN_AI_APP_CLIENT_ID_DEV,
+            INSIGHTS_AI_APP_CLIENT_ID_DEV,
             {
-                "id": POSTFN_AI_APP_ID_DEV,
+                "id": INSIGHTS_AI_APP_ID_DEV,
                 "name": "Insights AI Dev App",
                 "client_type": OAuthApplication.CLIENT_CONFIDENTIAL,
                 "authorization_grant_type": OAuthApplication.GRANT_AUTHORIZATION_CODE,
-                "redirect_uris": POSTFN_AI_REDIRECT_URIS,
+                "redirect_uris": INSIGHTS_AI_REDIRECT_URIS,
                 "algorithm": "RS256",
                 "auth_brand": OAuthApplicationAuthBrand.INSIGHTS.value,
                 "is_verified": True,

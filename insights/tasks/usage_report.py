@@ -1413,7 +1413,7 @@ def get_teams_with_ai_event_count_in_period(
 # AI billing markup: 20% markup on top of cost
 AI_COST_MARKUP_PERCENT = 0.2
 # Insights Desktop bills model costs as pure pass-through: no markup
-POSTFN_CODE_COST_MARKUP_PERCENT = 0.0
+INSIGHTS_CODE_COST_MARKUP_PERCENT = 0.0
 # Tools excluded from AI billing (traces with only these tools are not billed)
 AI_BILLING_EXCLUDED_TOOLS = ["summarize_sessions", "search"]
 AI_BILLING_INSTANCE_GROUP_TYPE = "instance"
@@ -1429,7 +1429,7 @@ CLOUD_REGION_TO_URL = {
 
 
 # ai_product values that roll into Insights AI (Max) billing credits.
-POSTFN_AI_PRODUCTS = [
+INSIGHTS_AI_PRODUCTS = [
     "insights_ai",
     "slack_app",
     "subscriptions",
@@ -1440,7 +1440,7 @@ POSTFN_AI_PRODUCTS = [
 ]
 
 # ai_product values billed as Insights Desktop credits.
-POSTFN_CODE_AI_PRODUCTS = ["insights_code"]
+INSIGHTS_CODE_AI_PRODUCTS = ["insights_code"]
 
 
 def get_ai_billing_instance_group_type_index(team_id: int) -> int | None:
@@ -1666,11 +1666,11 @@ def get_teams_with_ai_credits_used_in_period(
     begin: datetime,
     end: datetime,
 ) -> list[tuple[int, int]]:
-    """Insights AI (Max) billing credits — events tagged with an ai_product in POSTFN_AI_PRODUCTS."""
+    """Insights AI (Max) billing credits — events tagged with an ai_product in INSIGHTS_AI_PRODUCTS."""
     return _get_teams_with_ai_credits_for_products(
         begin,
         end,
-        ai_products=POSTFN_AI_PRODUCTS,
+        ai_products=INSIGHTS_AI_PRODUCTS,
         usage_report_tag="ai_credits",
     )
 
@@ -1712,10 +1712,10 @@ def get_teams_with_insights_code_credits_used_in_period(
     return _get_teams_with_ai_credits_for_products(
         begin,
         end,
-        ai_products=POSTFN_CODE_AI_PRODUCTS,
+        ai_products=INSIGHTS_CODE_AI_PRODUCTS,
         usage_report_tag="insights_code_credits",
-        product_tag=Product.POSTFN_CODE,
-        markup_percent=POSTFN_CODE_COST_MARKUP_PERCENT,
+        product_tag=Product.INSIGHTS_CODE,
+        markup_percent=INSIGHTS_CODE_COST_MARKUP_PERCENT,
     )
 
 

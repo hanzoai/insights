@@ -35,31 +35,31 @@ impl MaterializeStep {
 
 #[derive(Error, Debug)]
 pub enum ApiProxyError {
-    #[error("POSTFN_API_CLI_PATH is set but empty.")]
+    #[error("INSIGHTS_API_CLI_PATH is set but empty.")]
     ConfiguredPathEmpty,
-    #[error("POSTFN_API_CLI_PATH is set to `{path}`, but that file could not be found.")]
+    #[error("INSIGHTS_API_CLI_PATH is set to `{path}`, but that file could not be found.")]
     ConfiguredPathMissing {
         path: String,
         #[source]
         source: io::Error,
     },
-    #[error("POSTFN_API_CLI_PATH is set to `{path}`, but it is not a file.")]
+    #[error("INSIGHTS_API_CLI_PATH is set to `{path}`, but it is not a file.")]
     ConfiguredPathNotAFile { path: String },
     #[error(
         "This insights-cli build does not embed the Insights API CLI bundle, and no previously \
          installed bundle was found. Reinstall insights-cli from an official release, or set \
-         POSTFN_API_CLI_PATH to a trusted bundle."
+         INSIGHTS_API_CLI_PATH to a trusted bundle."
     )]
     BundleNotEmbedded,
     #[error(
         "Could not determine a home directory to install the Insights API CLI bundle into. Set \
-         POSTFN_HOME to a writable directory, or POSTFN_API_CLI_PATH to a trusted bundle."
+         INSIGHTS_HOME to a writable directory, or INSIGHTS_API_CLI_PATH to a trusted bundle."
     )]
     HomeDirUnavailable,
     #[error(
         "Failed to install the Insights API CLI bundle to `{path}`. Make sure the directory is \
          writable (sandboxed environments often block writes to the home directory), set \
-         POSTFN_HOME to a writable directory, or set POSTFN_API_CLI_PATH to a trusted bundle."
+         INSIGHTS_HOME to a writable directory, or set INSIGHTS_API_CLI_PATH to a trusted bundle."
     )]
     MaterializeFailed {
         step: MaterializeStep,
@@ -209,7 +209,7 @@ fn resolve_script(
 }
 
 fn find_script() -> Result<PathBuf, ApiProxyError> {
-    if let Some(path) = env::var_os("POSTFN_API_CLI_PATH") {
+    if let Some(path) = env::var_os("INSIGHTS_API_CLI_PATH") {
         if path.is_empty() {
             return Err(ApiProxyError::ConfiguredPathEmpty);
         }
@@ -245,33 +245,33 @@ fn inject_credentials(cmd: &mut Command, invocation_context: Option<&InvocationC
     let config = &invocation_context.config;
 
     if !has_any_env(&[
-        "POSTFN_API_KEY",
-        "POSTFN_CLI_API_KEY",
-        "POSTFN_CLI_TOKEN",
+        "INSIGHTS_API_KEY",
+        "INSIGHTS_CLI_API_KEY",
+        "INSIGHTS_CLI_TOKEN",
     ]) {
-        cmd.env("POSTFN_CLI_API_KEY", &config.api_key);
+        cmd.env("INSIGHTS_CLI_API_KEY", &config.api_key);
     }
 
     if !has_any_env(&[
-        "POSTFN_PROJECT_ID",
-        "POSTFN_CLI_PROJECT_ID",
-        "POSTFN_CLI_ENV_ID",
+        "INSIGHTS_PROJECT_ID",
+        "INSIGHTS_CLI_PROJECT_ID",
+        "INSIGHTS_CLI_ENV_ID",
     ]) {
-        cmd.env("POSTFN_CLI_PROJECT_ID", &config.env_id);
+        cmd.env("INSIGHTS_CLI_PROJECT_ID", &config.env_id);
     }
 
-    if !has_any_env(&["POSTFN_HOST", "POSTFN_CLI_HOST"]) {
-        cmd.env("POSTFN_CLI_HOST", &config.host);
+    if !has_any_env(&["INSIGHTS_HOST", "INSIGHTS_CLI_HOST"]) {
+        cmd.env("INSIGHTS_CLI_HOST", &config.host);
     }
 }
 
 fn inject_analytics_env(cmd: &mut Command) {
-    if let Some(token) = option_env!("POSTFN_API_TOKEN") {
-        if env::var_os("POSTFN_ANALYTICS_API_KEY").is_none() {
-            cmd.env("POSTFN_ANALYTICS_API_KEY", token);
+    if let Some(token) = option_env!("INSIGHTS_API_TOKEN") {
+        if env::var_os("INSIGHTS_ANALYTICS_API_KEY").is_none() {
+            cmd.env("INSIGHTS_ANALYTICS_API_KEY", token);
         }
-        if env::var_os("POSTFN_ANALYTICS_HOST").is_none() {
-            cmd.env("POSTFN_ANALYTICS_HOST", ANALYTICS_HOST);
+        if env::var_os("INSIGHTS_ANALYTICS_HOST").is_none() {
+            cmd.env("INSIGHTS_ANALYTICS_HOST", ANALYTICS_HOST);
         }
     }
 }
@@ -288,16 +288,16 @@ pub fn run(
     let mut cmd = Command::new("node");
     cmd.arg(script);
     cmd.args(args);
-    cmd.env("POSTFN_CLI_VERSION", env!("CARGO_PKG_VERSION"));
+    cmd.env("INSIGHTS_CLI_VERSION", env!("CARGO_PKG_VERSION"));
     // Lets the Node script tag its analytics with this invocation, joining them
     // to the Rust-side telemetry for the same run.
-    cmd.env("POSTFN_CLI_INVOCATION_ID", current_invocation_id());
+    cmd.env("INSIGHTS_CLI_INVOCATION_ID", current_invocation_id());
 
     inject_credentials(&mut cmd, invocation_context);
     inject_analytics_env(&mut cmd);
 
     if let Some(host) = host_override {
-        cmd.env("POSTFN_CLI_HOST", host);
+        cmd.env("INSIGHTS_CLI_HOST", host);
     }
 
     let status = cmd.status().map_err(|source| {
@@ -321,7 +321,7 @@ mod tests {
 
     use super::*;
 
-    static POSTFN_HOME_ENV_LOCK: Mutex<()> = Mutex::new(());
+    static INSIGHTS_HOME_ENV_LOCK: Mutex<()> = Mutex::new(());
 
     struct EnvVarGuard {
         name: &'static str,
@@ -372,9 +372,9 @@ mod tests {
 
     #[test]
     fn default_install_dir_honors_insights_home() {
-        let _lock = POSTFN_HOME_ENV_LOCK.lock().expect("lock POSTFN_HOME");
+        let _lock = INSIGHTS_HOME_ENV_LOCK.lock().expect("lock INSIGHTS_HOME");
         let temp_dir = tempfile::tempdir().expect("create temp dir");
-        let _guard = EnvVarGuard::set("POSTFN_HOME", temp_dir.path());
+        let _guard = EnvVarGuard::set("INSIGHTS_HOME", temp_dir.path());
 
         assert_eq!(default_install_dir(), Some(temp_dir.path().to_path_buf()));
     }

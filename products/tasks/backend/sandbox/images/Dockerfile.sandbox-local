@@ -1,6 +1,6 @@
 # Dockerfile for local agent development - builds on top of sandbox-base
 # This image should be rebuilt when the local agent package changes
-# Set LOCAL_POSTFN_CODE_MONOREPO_ROOT to the path to the Insights Desktop monorepo to use this in DockerSandbox
+# Set LOCAL_INSIGHTS_CODE_MONOREPO_ROOT to the path to the Insights Desktop monorepo to use this in DockerSandbox
 
 FROM insights-sandbox-base
 

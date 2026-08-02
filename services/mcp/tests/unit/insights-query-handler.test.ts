@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { queryHandler } from '@/tools/insights/query'
-import { type Context, POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY } from '@/tools/types'
+import { type Context, INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY } from '@/tools/types'
 
 const filtersOverrideObject = { date_from: '-7d' }
 const variablesOverrideObject = {
@@ -29,7 +29,7 @@ interface QueryResult {
     results: unknown
     insight: { url: string }
     _insightsUrl: string
-    [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]?: string
+    [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]?: string
 }
 
 function createContext(overrides?: { getData?: unknown; queryData?: unknown }): MockHandles {
@@ -59,7 +59,7 @@ function createContext(overrides?: { getData?: unknown; queryData?: unknown }): 
             getOrgID: vi.fn(),
             getRegion: vi.fn().mockResolvedValue('us'),
         },
-        env: { POSTFN_BASE_URL: 'https://us.hanzo.ai' },
+        env: { INSIGHTS_BASE_URL: 'https://us.hanzo.ai' },
         sessionManager: {},
         cache: {},
         getDistinctId: async () => 'test',
@@ -191,7 +191,7 @@ describe('queryHandler — result shape for UI rendering', () => {
         // The UI app's structuredContent must carry the structured shape its guards expect,
         // not the formatted string — otherwise the table can't render.
         expect(result.results).toEqual({ columns: ['c'], results: [[1]] })
-        expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe(formatted)
+        expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe(formatted)
     })
 
     it('keeps structured results for a DataVisualizationNode-wrapped InsightsQL insight in optimized output', async () => {
@@ -207,7 +207,7 @@ describe('queryHandler — result shape for UI rendering', () => {
         const result = (await queryHandler(context, { insightId: '42', output_format: 'optimized' })) as QueryResult
 
         expect(result.results).toEqual({ columns: ['org_id', 'cost'], results: [['a', 1]] })
-        expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe(formatted)
+        expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe(formatted)
     })
 
     it('does not surface the formatted override in json output', async () => {
@@ -218,7 +218,7 @@ describe('queryHandler — result shape for UI rendering', () => {
         const result = (await queryHandler(context, { insightId: '42', output_format: 'json' })) as QueryResult
 
         expect(result.results).toEqual({ columns: ['c'], results: [[1]] })
-        expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBeUndefined()
+        expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBeUndefined()
     })
 
     it('passes the raw results array through for trends insights', async () => {
@@ -236,7 +236,7 @@ describe('queryHandler — result shape for UI rendering', () => {
 
         expect(result.results).toBe(trendsResults)
         expect(result.query).toEqual({ kind: 'TrendsQuery' })
-        expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe(formatted)
+        expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe(formatted)
     })
 
     it.each([

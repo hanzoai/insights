@@ -24,10 +24,10 @@ function getSurveysIOSSteps(ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'swift',
                                 file: 'AppDelegate.swift',
                                 code: dedent`
-                                    let POSTFN_PROJECT_TOKEN = "<ph_project_token>"
+                                    let INSIGHTS_PROJECT_TOKEN = "<ph_project_token>"
                                     // usually 'https://us.i.hanzo.ai' or 'https://eu.i.hanzo.ai'
-                                    let POSTFN_HOST = "<ph_client_api_host>"
-                                    let config = InsightsConfig(projectToken: POSTFN_PROJECT_TOKEN, host: POSTFN_HOST)
+                                    let INSIGHTS_HOST = "<ph_client_api_host>"
+                                    let config = InsightsConfig(projectToken: INSIGHTS_PROJECT_TOKEN, host: INSIGHTS_HOST)
 
                                     // Surveys require iOS 15.0 or later
                                     if #available(iOS 15.0, *) {

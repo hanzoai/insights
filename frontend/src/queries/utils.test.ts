@@ -23,7 +23,7 @@ import {
     supportsBarValueStacking,
 } from './utils'
 
-window.POSTFN_APP_CONTEXT = { current_team: { id: MOCK_TEAM_ID } } as unknown as AppContext
+window.INSIGHTS_APP_CONTEXT = { current_team: { id: MOCK_TEAM_ID } } as unknown as AppContext
 
 describe('insightsql tag', () => {
     // In beforeEach (not describe scope): mounting at collection time fires the preflight

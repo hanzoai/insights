@@ -128,11 +128,11 @@ def _build_sandbox_config(app: StreamlitApp, version: StreamlitAppVersion) -> Sa
         outbound_domain_allowlist=_outbound_allowlist(callback_url, otel_endpoint),
         # TODO: We might need to allow the creator of the Streamlit to add more env vars.
         environment_variables={
-            "POSTFN_SITE_URL": callback_url,
+            "INSIGHTS_SITE_URL": callback_url,
             # Per-sandbox team + app bindings; the auth proxy refuses tokens
             # that don't match both, so leaks can't unlock this sandbox.
-            "POSTFN_TEAM_ID": str(app.team_id),
-            "POSTFN_STREAMLIT_CLIENT_ID": get_streamlit_oauth_app().client_id,
+            "INSIGHTS_TEAM_ID": str(app.team_id),
+            "INSIGHTS_STREAMLIT_CLIENT_ID": get_streamlit_oauth_app().client_id,
             # Standard OTEL env vars — read directly by the SDK in the proxy.
             "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT": otel_endpoint,
             "OTEL_EXPORTER_OTLP_HEADERS": f"authorization=Bearer {otel_token}",
