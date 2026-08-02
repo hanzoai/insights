@@ -5,6 +5,7 @@ from urllib.parse import urlencode, urlparse
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import render
 from django.template import loader
 from django.urls import include, path, re_path
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -356,6 +357,33 @@ def home_with_region_redirect(request: HttpRequest, *args: Any, **kwargs: Any) -
     if region_redirect is not None:
         return region_redirect
     return _login_required_render_home(request, *args, **kwargs)
+
+
+@ensure_csrf_cookie
+def root(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    """`/` — the app for a signed-in user, the marketing landing for everyone else.
+
+    Anonymous `/` otherwise falls through to the catch-all below and bounces
+    straight to SSO, so the product has no public face at all: the only thing an
+    unauthenticated visitor can see is a login screen. Signed-in behaviour is
+    whatever the catch-all already did, so the split cannot change it.
+
+    The CTAs point at surfaces that actually work. Plans deliberately leave for
+    hanzo.ai/pricing rather than this app's own billing pages: `/api/billing` is
+    not served here, so an in-app upgrade funnel would dead-end.
+    """
+    if request.user.is_authenticated:
+        return home_with_region_redirect(request, *args, **kwargs)
+    return render(
+        request,
+        "landing.html",
+        {
+            "login_url": "/login",
+            "plans_url": "https://hanzo.ai/pricing",
+            "docs_url": "https://docs.hanzo.ai",
+            "source_url": "https://github.com/hanzoai/insights",
+        },
+    )
 
 
 _CONNECT_REDIRECT_ALLOWED_KINDS = {"github", "slack", "linear"}
@@ -765,5 +793,9 @@ frontend_unauthenticated_routes = [
 ]
 for route in frontend_unauthenticated_routes:
     urlpatterns.append(re_path(route, home))
+
+# Anchored, and before the catch-all below, which is the only pattern it could
+# lose to: `^.*` matches the empty path too, and first match wins.
+urlpatterns.append(re_path(r"^$", root))
 
 urlpatterns.append(re_path(r"^.*", home_with_region_redirect))
