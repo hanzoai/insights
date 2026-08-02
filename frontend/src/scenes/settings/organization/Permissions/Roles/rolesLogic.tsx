@@ -2,6 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 
@@ -57,6 +58,12 @@ export const rolesLogic = kea<rolesLogicType>([
     loaders(({ values, actions, asyncActions }) => ({
         roles: {
             loadRoles: async () => {
+                // `/roles/` is absent in this build, so asking on mount only produced a toast.
+                // Guarded at the loader because the create/update/delete listeners all reload
+                // through this one action.
+                if (!CAPABILITIES.roles.available) {
+                    return []
+                }
                 const response = await api.roles.list()
                 return response?.results || []
             },
