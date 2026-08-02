@@ -8,16 +8,16 @@
             // we JSON serialize on the server since there may be objects like Queries
             // that need special handling in python in order to be serialized into the template
             try {
-                window.POSTFN_EXPORTED_DATA = JSON.parse(
+                window.INSIGHTS_EXPORTED_DATA = JSON.parse(
                     JSON.parse(document.getElementById('insights-exported-data').textContent)
                 )
             } catch (e) {
                 console.error('Failed to parse exported data:', e)
-                window.POSTFN_EXPORTED_DATA = {}
+                window.INSIGHTS_EXPORTED_DATA = {}
             }
 
-            if (window.POSTFN_EXPORTED_DATA.rootClassName) {
-                document.documentElement.className += ' ' + window.POSTFN_EXPORTED_DATA.rootClassName
+            if (window.INSIGHTS_EXPORTED_DATA.rootClassName) {
+                document.documentElement.className += ' ' + window.INSIGHTS_EXPORTED_DATA.rootClassName
             }
         </script>
         {% include "head.html" %} {% if add_og_tags %}

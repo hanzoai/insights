@@ -17,13 +17,13 @@ from insights.temporal.common.utils import close_db_connections
 
 logger = structlog.get_logger(__name__)
 
-POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE = (
+INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE = (
     "Please select the repository for this task. "
     "Or click *No repo needed* to continue without one. "
     "Or @mention me again and include the exact repository as `org/repo`. "
     'You can also add routing rules with `@Insights rules add "description" [org/repo]`.'
 )
-POSTFN_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE = "Select the repository for this routing rule."
+INSIGHTS_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE = "Select the repository for this routing rule."
 
 
 @activity.defn

@@ -1,5 +1,5 @@
 import {
-    POSTFN_EXEC_TOOL_RE,
+    INSIGHTS_EXEC_TOOL_RE,
     formatInsightsExecBody,
     getInsightsExecDisplay,
 } from '../components/tool/insightsExecDisplay'
@@ -46,7 +46,7 @@ export function getPermissionDisplay(request: PermissionRequestRecord): Permissi
         }
     }
 
-    if (POSTFN_EXEC_TOOL_RE.test(request.toolName)) {
+    if (INSIGHTS_EXEC_TOOL_RE.test(request.toolName)) {
         const insightsDisplay = getInsightsExecDisplay(request.rawToolCall.input)
         if (insightsDisplay) {
             return {

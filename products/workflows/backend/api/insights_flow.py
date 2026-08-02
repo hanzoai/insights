@@ -623,7 +623,7 @@ _FN_FLOW_WAIT_UNTIL_EVENT_SCHEMA = {
     },
 }
 
-FN_FLOW_ACTION_CONFIG_SCHEMA = {
+INSIGHTS_FLOW_ACTION_CONFIG_SCHEMA = {
     "anyOf": [
         {
             "type": "object",
@@ -674,7 +674,7 @@ FN_FLOW_ACTION_CONFIG_SCHEMA = {
 }
 
 
-@extend_schema_field(FN_FLOW_ACTION_CONFIG_SCHEMA)
+@extend_schema_field(INSIGHTS_FLOW_ACTION_CONFIG_SCHEMA)
 class InsightsFlowActionConfigField(serializers.JSONField):
     # Runtime stays a lenient JSONField: per-type validation lives in InsightsFlowActionSerializer.validate.
     pass
@@ -2234,7 +2234,7 @@ _AUDIENCE_CONFIRM_SALT = "hogflow-batch-audience"
 # the harness, not self-reported by the model). These get the audience-confirm gate; the web builder
 # has its own confirm UI, and headless callers (raw API keys, Terraform) dispatch in one call.
 AGENT_EVENT_SOURCES = frozenset(
-    {EventSource.MCP, EventSource.POSTFN_CODE, EventSource.WIZARD, EventSource.CLI, EventSource.POSTFN_AI}
+    {EventSource.MCP, EventSource.INSIGHTS_CODE, EventSource.WIZARD, EventSource.CLI, EventSource.INSIGHTS_AI}
 )
 
 

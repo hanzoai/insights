@@ -25,8 +25,8 @@ export const getOpenTelemetrySteps = (ctx: OnboardingComponentsContext): StepDef
                                 file: 'Docker',
                                 code: dedent`
                                     docker run -d --name insights-metrics-agent \\
-                                      -e POSTFN_API_KEY=<ph_project_token> \\
-                                      -e POSTFN_HOST=<ph_client_api_host> \\
+                                      -e INSIGHTS_API_KEY=<ph_project_token> \\
+                                      -e INSIGHTS_HOST=<ph_client_api_host> \\
                                       -e SCRAPE_TARGETS=your-app:9090,your-worker:9091 \\
                                       insights/metrics-agent:latest
                                 `,

@@ -12,7 +12,7 @@ import { isLLMEvent } from './utils'
 const AI_COST_MARKUP_PERCENT = 0.2
 
 // ai_product → markup fraction applied on top of cost. Mirrors the billing whitelists
-// in insights/tasks/usage_report.py (POSTFN_AI_PRODUCTS at 20%, POSTFN_CODE_AI_PRODUCTS
+// in insights/tasks/usage_report.py (INSIGHTS_AI_PRODUCTS at 20%, INSIGHTS_CODE_AI_PRODUCTS
 // at cost) — keep in sync. Billable generations whose ai_product is missing or not listed
 // here are NOT billed by the usage reporter, so they're excluded from the totals entirely.
 const AI_PRODUCT_MARKUP: Record<string, number> = {
@@ -81,7 +81,7 @@ interface BillingCalculations {
 export function useInsightsAIBillingCalculations(enrichedTree: EnrichedTraceTreeNode[] | null): BillingCalculations {
     const { featureFlags } = useValues(featureFlagLogic)
 
-    const showBillingInfo = !!featureFlags[FEATURE_FLAGS.POSTFN_AI_BILLING_DISPLAY]
+    const showBillingInfo = !!featureFlags[FEATURE_FLAGS.INSIGHTS_AI_BILLING_DISPLAY]
 
     // Compute total billed USD and per-product markup across billed generations in the tree
     const { totalCostUsd, markupUsd } = useMemo(() => {

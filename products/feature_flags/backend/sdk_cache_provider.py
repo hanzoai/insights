@@ -89,7 +89,7 @@ class HyperCacheFlagProvider:
                     logger.warning(
                         "sdk_flag_provider_zero_flags",
                         team_id=team_id,
-                        hint="resolved self-team has no flag definitions; run sync_feature_flags_from_api or set POSTFN_SELF_TEAM_ID",
+                        hint="resolved self-team has no flag definitions; run sync_feature_flags_from_api or set INSIGHTS_SELF_TEAM_ID",
                     )
                     self._logged_zero_flags = True
                 return result
@@ -102,7 +102,7 @@ class HyperCacheFlagProvider:
             return None
         except ObjectDoesNotExist:
             # Self-hosted/local instances often lack the configured self team
-            # (POSTFN_SELF_TEAM_ID, default 2). Returning None lets the SDK fall back to its API fetch.
+            # (INSIGHTS_SELF_TEAM_ID, default 2). Returning None lets the SDK fall back to its API fetch.
             logger.debug("hypercache_flag_provider_team_missing", team_id=self._team_id)
             return None
         except Exception:

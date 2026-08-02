@@ -77,8 +77,8 @@ const NoMetricsPrompt = ({ className }: { className?: string }): JSX.Element | n
     const apiKey = currentTeam?.api_token ?? '<your project API key>'
     const dockerSnippet = [
         'docker run -d --name insights-metrics-agent \\',
-        `  -e POSTFN_API_KEY=${apiKey} \\`,
-        `  -e POSTFN_HOST=${apiHostOrigin()} \\`,
+        `  -e INSIGHTS_API_KEY=${apiKey} \\`,
+        `  -e INSIGHTS_HOST=${apiHostOrigin()} \\`,
         '  -e SCRAPE_TARGETS=your-app:9090 \\',
         '  insights/metrics-agent:latest',
     ].join('\n')

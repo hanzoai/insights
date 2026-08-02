@@ -74,7 +74,7 @@ class Product(StrEnum):
     NOTEBOOKS = "notebooks"
     PIPELINE_DESTINATIONS = "pipeline_destinations"
     PLATFORM_AND_SUPPORT = "platform_and_support"
-    POSTFN_CODE = "insights_code"
+    INSIGHTS_CODE = "insights_code"
     PRODUCT_ANALYTICS = "product_analytics"
     REPLAY = "replay"
     REPLAY_VISION = "replay_vision"
@@ -133,7 +133,7 @@ class Feature(StrEnum):
     ENDPOINT_EXECUTION = "endpoint_execution"  # external API callers (personal_api_key or oauth)
     ENDPOINT_PLAYGROUND = "endpoint_playground"  # frontend Playground tab (browser session auth)
     ENDPOINT_LAST_EXECUTION = "endpoint_last_execution"  # Usage tab query_log lookup
-    POSTFN_AI = "insights_ai"
+    INSIGHTS_AI = "insights_ai"
     MCP = "mcp"
     SEMANTIC_SEARCH = "semantic_search"
 
@@ -286,10 +286,10 @@ def kind_fallback_tags(kind: NodeKind) -> FallbackTags | None:
             return {"product": Product.MCP_ANALYTICS}
         case (
             # not attributable on their own
-            NodeKind.FN_QL_QUERY
-            | NodeKind.FN_QL_METADATA
-            | NodeKind.FN_QL_AUTOCOMPLETE
-            | NodeKind.FN_QUERY
+            NodeKind.INSIGHTS_QL_QUERY
+            | NodeKind.INSIGHTS_QL_METADATA
+            | NodeKind.INSIGHTS_QL_AUTOCOMPLETE
+            | NodeKind.INSIGHTS_QUERY
             | NodeKind.DATABASE_SCHEMA_QUERY
             | NodeKind.PROPERTY_VALUES_QUERY
             | NodeKind.USAGE_METRICS_QUERY
@@ -748,7 +748,7 @@ def add_fallback_query_tags(tags: QueryTags) -> None:
 
     if (
         tags.product is None
-        and tags.query_type == NodeKind.FN_QL_QUERY.value
+        and tags.query_type == NodeKind.INSIGHTS_QL_QUERY.value
         and (features := tags.insightsql_features) is not None
     ):
         events_set, tables_set = set(features.events), set(features.tables)

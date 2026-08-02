@@ -19,13 +19,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-POSTFN_SYMBOL_DATA_MAGIC = b"insights_error_tracking"
+INSIGHTS_SYMBOL_DATA_MAGIC = b"insights_error_tracking"
 JAVASCRIPT_SUFFIXES = {".js", ".mjs", ".cjs"}
 MAX_INLINE_VALUE_LENGTH = 240
 
 CHUNK_ID_RE = re.compile(r"chunkId=([^\s]+)")
 SOURCE_MAPPING_URL_RE = re.compile(r"sourceMappingURL=([^\s]+)")
-POSTFN_CHUNK_IDS_RE = re.compile(r"_insightsChunkIds")
+INSIGHTS_CHUNK_IDS_RE = re.compile(r"_insightsChunkIds")
 
 
 def summarize_sourcemap_text(text: str) -> dict[str, Any]:
@@ -77,7 +77,7 @@ def summarize_js_text(text: str) -> dict[str, Any]:
         "bytes": len(text.encode("utf-8")),
         "chunk_ids": chunk_ids[:10],
         "chunk_id_count": len(chunk_ids),
-        "has_insights_chunk_id_map": bool(POSTFN_CHUNK_IDS_RE.search(text)),
+        "has_insights_chunk_id_map": bool(INSIGHTS_CHUNK_IDS_RE.search(text)),
         "source_mapping_urls": [truncate(url) for url in source_mapping_urls[:10]],
         "source_mapping_url_count": len(source_mapping_urls),
     }
@@ -87,7 +87,7 @@ def inspect_path(path: Path) -> list[dict[str, Any]]:
     data = path.read_bytes()
     base: dict[str, Any] = {"path": str(path), "bytes": len(data)}
 
-    if data.startswith(POSTFN_SYMBOL_DATA_MAGIC):
+    if data.startswith(INSIGHTS_SYMBOL_DATA_MAGIC):
         return [
             {
                 **base,

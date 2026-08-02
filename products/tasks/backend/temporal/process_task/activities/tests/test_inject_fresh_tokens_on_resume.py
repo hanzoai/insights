@@ -61,7 +61,7 @@ class TestInjectFreshTokensOnResumeActivity:
 
         assert [call.args for call in sandbox.write_file.call_args_list] == [
             (GITHUB_ENV_FILE, b"GITHUB_TOKEN=ghs_new\x00GH_TOKEN=ghs_new\x00"),
-            (OAUTH_ENV_FILE, b"POSTFN_PERSONAL_API_KEY=oauth_new\x00"),
+            (OAUTH_ENV_FILE, b"INSIGHTS_PERSONAL_API_KEY=oauth_new\x00"),
         ]
         assert [call.args[0] for call in sandbox.execute.call_args_list[1:]] == [
             f"chmod 600 {GITHUB_ENV_FILE}",
@@ -105,7 +105,7 @@ class TestInjectFreshTokensOnResumeActivity:
         assert "x-access-token" not in remote_command
         assert [call.args for call in sandbox.write_file.call_args_list] == [
             (GITHUB_ENV_FILE, b""),
-            (OAUTH_ENV_FILE, b"POSTFN_PERSONAL_API_KEY=oauth_new\x00"),
+            (OAUTH_ENV_FILE, b"INSIGHTS_PERSONAL_API_KEY=oauth_new\x00"),
         ]
 
     def test_logs_warning_when_remote_url_update_fails(self, activity_environment, task_context, test_task, sandbox):
@@ -194,7 +194,7 @@ class TestInjectFreshTokensOnResumeActivity:
         assert prepared.github_token == "gho_user"
         assert prepared.environment_variables["GITHUB_TOKEN"] == "gho_user"
         assert prepared.environment_variables["GH_TOKEN"] == "gho_user"
-        assert prepared.environment_variables["POSTFN_PERSONAL_API_KEY"] == "oauth_new"
+        assert prepared.environment_variables["INSIGHTS_PERSONAL_API_KEY"] == "oauth_new"
 
     def test_prepare_sandbox_injects_team_github_token_without_repository(
         self, activity_environment, team, user, github_integration
@@ -251,7 +251,7 @@ class TestInjectFreshTokensOnResumeActivity:
         assert prepared.github_token == "ghs_team"
         assert prepared.environment_variables["GITHUB_TOKEN"] == "ghs_team"
         assert prepared.environment_variables["GH_TOKEN"] == "ghs_team"
-        assert prepared.environment_variables["POSTFN_PERSONAL_API_KEY"] == "oauth_new"
+        assert prepared.environment_variables["INSIGHTS_PERSONAL_API_KEY"] == "oauth_new"
 
     def test_build_environment_variables_ignores_other_users_private_sandbox_environment(
         self, task_context, test_task, test_task_run
@@ -293,8 +293,8 @@ class TestInjectFreshTokensOnResumeActivity:
         ):
             environment_variables = _build_environment_variables(task_context, test_task, "", "oauth_new")
 
-        assert environment_variables["POSTFN_PERSONAL_API_KEY"] == "oauth_new"
-        assert environment_variables["POSTFN_API_URL"] == "https://sandbox.example.com"
-        assert environment_variables["POSTFN_TASK_ID"] == str(test_task.id)
-        assert environment_variables["POSTFN_TASK_RUN_ID"] == str(test_task_run.id)
+        assert environment_variables["INSIGHTS_PERSONAL_API_KEY"] == "oauth_new"
+        assert environment_variables["INSIGHTS_API_URL"] == "https://sandbox.example.com"
+        assert environment_variables["INSIGHTS_TASK_ID"] == str(test_task.id)
+        assert environment_variables["INSIGHTS_TASK_RUN_ID"] == str(test_task_run.id)
         assert "SECRET_KEY" not in environment_variables

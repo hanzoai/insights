@@ -271,7 +271,7 @@ class TestEvaluationReportApi(APIBaseTest):
 
     def test_mcp_list_returns_slim_payload(self):
         self._create_report(rrule="FREQ=DAILY", timezone_name="UTC")
-        response = self.client.get(self.base_url, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.get(self.base_url, HTTP_X_INSIGHTS_CLIENT="mcp")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)

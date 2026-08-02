@@ -8,7 +8,7 @@ from insights.storage.object_storage import is_usable_endpoint
 def check_object_storage_public_endpoint(app_configs, **kwargs):
     """Catch a misconfigured OBJECT_STORAGE_PUBLIC_ENDPOINT at startup rather than in user traffic.
 
-    An unsubstituted deployment template literal (e.g. `https://${POSTFN_DOMAIN}`) makes boto3
+    An unsubstituted deployment template literal (e.g. `https://${INSIGHTS_DOMAIN}`) makes boto3
     raise `ValueError` on client construction, which previously surfaced as 500s on every
     hypercache-backed read. Failing the system check makes the bad rollout obvious immediately.
     """

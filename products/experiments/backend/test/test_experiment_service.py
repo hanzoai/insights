@@ -2156,10 +2156,10 @@ class TestExperimentService(APIBaseTest):
         # event_source must still emit, attributed to that channel, even without a request.
         experiment = self._create_draft_experiment()
         service = self._service()
-        service.update_experiment(experiment, {"name": "Renamed by AI"}, event_source=EventSource.POSTFN_AI)
+        service.update_experiment(experiment, {"name": "Renamed by AI"}, event_source=EventSource.INSIGHTS_AI)
 
         event = self._updated_events(mock_report_user_action)[0]
-        assert event.args[2]["source"] == EventSource.POSTFN_AI
+        assert event.args[2]["source"] == EventSource.INSIGHTS_AI
         assert "name" in event.args[2]["changed_fields"]
         assert event.kwargs["request"] is None
 

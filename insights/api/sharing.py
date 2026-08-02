@@ -272,7 +272,7 @@ def get_global_themes():
 def build_shared_app_context(team: Team, request: Request) -> dict[str, Any]:
     """
     Build app context for shared dashboards/insights similar to what render_template creates.
-    This provides the same structure as window.POSTFN_APP_CONTEXT.
+    This provides the same structure as window.INSIGHTS_APP_CONTEXT.
     """
     from django.conf import settings
 

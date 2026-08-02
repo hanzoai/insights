@@ -42,7 +42,7 @@ only. D deliberately changes BOTH stages at once — it tests a pipeline tier, n
 
 `claude-fable-5` was already in the tasks registry (low–max) and the agent package, **but absent from BOTH
 local llm-gateway allowlists** — sandbox agents authenticate as product `insights_code` (verified in the
-gateway's cost logs), and neither `_POSTFN_CODE_AGENT_MODELS` nor `background_agents` listed fable-5.
+gateway's cost logs), and neither `_INSIGHTS_CODE_AGENT_MODELS` nor `background_agents` listed fable-5.
 Without the gateway entry the agent's `sanitizedModel` silently falls back to Opus — a fallback run looks
 normal. Fix: add `"claude-fable-5"` to both sets in
 `services/llm-gateway/src/llm_gateway/products/config.py` (commit-worthy parity — Insights Desktop's composer

@@ -7,7 +7,7 @@ this tool (see ``requirements.txt``); if it isn't installed the capture degrades
 to a no-op. Every failure is swallowed — telemetry must never delay or break
 connecting to a pod. The project API key embedded here is a write-only ingestion
 key (the same kind shipped in client SDKs), overridable per-environment via
-``TOOLBOX_POSTFN_API_KEY`` / ``TOOLBOX_POSTFN_HOST``.
+``TOOLBOX_INSIGHTS_API_KEY`` / ``TOOLBOX_INSIGHTS_HOST``.
 """
 
 import os
@@ -71,8 +71,8 @@ def _capture_survey_response(client, distinct_id: str, answer: str) -> None:
 
 def capture_invocation(distinct_id: str, properties: dict) -> None:
     """Fire a single best-effort capture event via the Insights SDK. Never raises."""
-    api_key = os.environ.get("TOOLBOX_POSTFN_API_KEY", DEFAULT_API_KEY)
-    host = os.environ.get("TOOLBOX_POSTFN_HOST", DEFAULT_HOST)
+    api_key = os.environ.get("TOOLBOX_INSIGHTS_API_KEY", DEFAULT_API_KEY)
+    host = os.environ.get("TOOLBOX_INSIGHTS_HOST", DEFAULT_HOST)
     if not api_key or api_key == "phc_REPLACE_ME":
         # No real key configured — stay silent rather than spamming a dead endpoint.
         print("📊 Telemetry skipped: no Insights API key configured.")  # noqa: T201

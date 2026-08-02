@@ -5,7 +5,7 @@ import { closeHub, createHub } from '~/common/utils/db/hub'
 import { delay } from '~/common/utils/utils'
 import { Hub } from '~/types'
 
-import { FN_FLOW_MASK_EXAMPLES, FN_MASK_EXAMPLES } from '../../_tests/examples'
+import { INSIGHTS_FLOW_MASK_EXAMPLES, INSIGHTS_MASK_EXAMPLES } from '../../_tests/examples'
 import { createExampleInvocation, createHogExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
 import { createExampleInsightsFlowInvocation } from '../../_tests/fixtures-insightsflows'
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../../types'
@@ -91,7 +91,7 @@ describe('HogMasker', () => {
 
         it('should only allow one invocation call when masked for one function', async () => {
             const functionWithAllMasking = createInsightsFunction({
-                ...FN_MASK_EXAMPLES.all,
+                ...INSIGHTS_MASK_EXAMPLES.all,
             })
 
             const invocation1 = createExampleInvocation(
@@ -122,10 +122,10 @@ describe('HogMasker', () => {
 
         it('allow multiple functions for the same globals', async () => {
             const functionWithAllMasking = createInsightsFunction({
-                ...FN_MASK_EXAMPLES.all,
+                ...INSIGHTS_MASK_EXAMPLES.all,
             })
             const functionWithAllMasking2 = createInsightsFunction({
-                ...FN_MASK_EXAMPLES.all,
+                ...INSIGHTS_MASK_EXAMPLES.all,
             })
             const functionWithNoMasking = createInsightsFunction({})
             const globals = createHogExecutionGlobals()
@@ -155,21 +155,21 @@ describe('HogMasker', () => {
             beforeEach(() => {
                 insightsFunctionPerson = createInsightsFunction({
                     masking: {
-                        ...FN_MASK_EXAMPLES.person.masking!,
+                        ...INSIGHTS_MASK_EXAMPLES.person.masking!,
                         ttl: 1,
                     },
                 })
 
                 insightsFunctionPersonAndEvent = createInsightsFunction({
                     masking: {
-                        ...FN_MASK_EXAMPLES.personAndEvent.masking!,
+                        ...INSIGHTS_MASK_EXAMPLES.personAndEvent.masking!,
                         ttl: 1,
                     },
                 })
 
                 insightsFunctionAll = createInsightsFunction({
                     masking: {
-                        ...FN_MASK_EXAMPLES.all.masking!,
+                        ...INSIGHTS_MASK_EXAMPLES.all.masking!,
                         ttl: 1,
                     },
                 })
@@ -257,12 +257,12 @@ describe('HogMasker', () => {
                 it.each([
                     {
                         name: 'per person per day',
-                        example: FN_MASK_EXAMPLES.personPerDay,
+                        example: INSIGHTS_MASK_EXAMPLES.personPerDay,
                         globals: [{ person: { id: '1' } as any }, { person: { id: '2' } as any }],
                     },
                     {
                         name: 'per person per event name per day',
-                        example: FN_MASK_EXAMPLES.personPerEventPerDay,
+                        example: INSIGHTS_MASK_EXAMPLES.personPerEventPerDay,
                         globals: [
                             { person: { id: '1' } as any, event: { event: '$pageview' } as any },
                             { person: { id: '1' } as any, event: { event: '$autocapture' } as any },
@@ -287,7 +287,7 @@ describe('HogMasker', () => {
 
                 it('should allow events on different calendar days', async () => {
                     const insightsFunctionPersonPerDay = createInsightsFunction({
-                        ...FN_MASK_EXAMPLES.personPerDay,
+                        ...INSIGHTS_MASK_EXAMPLES.personPerDay,
                     })
 
                     const globals = createHogExecutionGlobals({
@@ -336,7 +336,7 @@ describe('HogMasker', () => {
                     it('should default to 1 day when ttl is null', async () => {
                         const insightsFunction = createInsightsFunction({
                             masking: {
-                                ...FN_MASK_EXAMPLES.all.masking!,
+                                ...INSIGHTS_MASK_EXAMPLES.all.masking!,
                                 ttl: null,
                             },
                         })
@@ -348,7 +348,7 @@ describe('HogMasker', () => {
                     it('should cap at 1 day max', async () => {
                         const insightsFunction = createInsightsFunction({
                             masking: {
-                                ...FN_MASK_EXAMPLES.all.masking!,
+                                ...INSIGHTS_MASK_EXAMPLES.all.masking!,
                                 ttl: 60 * 60 * 24 * 365, // 1 year
                             },
                         })
@@ -373,7 +373,7 @@ describe('HogMasker', () => {
                             },
                         },
                         trigger_masking: {
-                            ...FN_FLOW_MASK_EXAMPLES.onceEver.trigger_masking!,
+                            ...INSIGHTS_FLOW_MASK_EXAMPLES.onceEver.trigger_masking!,
                             ttl,
                         },
                         exit_condition: 'exit_only_at_end',
@@ -419,17 +419,17 @@ describe('HogMasker', () => {
                     hogFlowEvery = {
                         ...base,
                         id: 'hf_every',
-                        trigger_masking: { ...FN_FLOW_MASK_EXAMPLES.everyTime.trigger_masking },
+                        trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.everyTime.trigger_masking },
                     } as InsightsFlow
                     hogFlowOncePer = {
                         ...base,
                         id: 'hf_once_per',
-                        trigger_masking: { ...FN_FLOW_MASK_EXAMPLES.oncePerTimePeriod.trigger_masking, ttl: 1 },
+                        trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.oncePerTimePeriod.trigger_masking, ttl: 1 },
                     } as InsightsFlow
                     hogFlowOnceEver = {
                         ...base,
                         id: 'hf_once_ever',
-                        trigger_masking: { ...FN_FLOW_MASK_EXAMPLES.onceEver.trigger_masking },
+                        trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.onceEver.trigger_masking },
                     } as InsightsFlow
                 })
 
@@ -473,7 +473,7 @@ describe('HogMasker', () => {
                     const hogFlowPerDay = {
                         ...base,
                         id: 'hf_per_day',
-                        trigger_masking: { ...FN_FLOW_MASK_EXAMPLES.oncePerCalendarDay.trigger_masking },
+                        trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.oncePerCalendarDay.trigger_masking },
                     } as InsightsFlow
 
                     const inv = createExampleInsightsFlowInvocation(hogFlowPerDay)

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
 
-from insights.cdp.templates import FN_FUNCTION_TEMPLATES
+from insights.cdp.templates import INSIGHTS_FUNCTION_TEMPLATES
 from insights.management.commands.sync_insights_function_templates import (
     TEST_INCLUDE_NODEJS_TEMPLATE_IDS,
     TEST_INCLUDE_PYTHON_TEMPLATE_IDS,
@@ -159,10 +159,10 @@ class TestSyncInsightsFunctionTemplates:
 
         call_command("sync_insights_function_templates")
 
-        # Find the slack template in FN_FUNCTION_TEMPLATES
-        slack_template = next((t for t in FN_FUNCTION_TEMPLATES if t.id == TEST_INCLUDE_PYTHON_TEMPLATE_IDS[0]), None)
+        # Find the slack template in INSIGHTS_FUNCTION_TEMPLATES
+        slack_template = next((t for t in INSIGHTS_FUNCTION_TEMPLATES if t.id == TEST_INCLUDE_PYTHON_TEMPLATE_IDS[0]), None)
         assert slack_template is not None, (
-            f"Template {TEST_INCLUDE_PYTHON_TEMPLATE_IDS[0]} not found in FN_FUNCTION_TEMPLATES"
+            f"Template {TEST_INCLUDE_PYTHON_TEMPLATE_IDS[0]} not found in INSIGHTS_FUNCTION_TEMPLATES"
         )
 
         # Check that the template was stored correctly

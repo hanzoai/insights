@@ -28,7 +28,7 @@ class _FakeRequest:
         self.successful_authenticator = authenticator
         self.META = {}
         if mcp_consumer is not None:
-            self.META["HTTP_X_POSTFN_MCP_CONSUMER"] = mcp_consumer
+            self.META["HTTP_X_INSIGHTS_MCP_CONSUMER"] = mcp_consumer
 
 
 def _fake_request(authenticator, mcp_consumer=None) -> Request:

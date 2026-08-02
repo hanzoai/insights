@@ -38,7 +38,7 @@ func NewEnvConfig(domain, version string) (*EnvConfig, error) {
 
 	tlsBlock := os.Getenv("TLS_BLOCK")
 
-	nodeTag := os.Getenv("POSTFN_NODE_TAG")
+	nodeTag := os.Getenv("INSIGHTS_NODE_TAG")
 	if nodeTag == "" {
 		nodeTag = "latest"
 	}
@@ -56,15 +56,15 @@ func NewEnvConfig(domain, version string) (*EnvConfig, error) {
 }
 
 func (c *EnvConfig) WriteEnvFile() error {
-	content := fmt.Sprintf(`POSTFN_SECRET=%s
+	content := fmt.Sprintf(`INSIGHTS_SECRET=%s
 ENCRYPTION_SALT_KEYS=%s
 DOMAIN=%s
 TLS_BLOCK=%s
 REGISTRY_URL=%s
 CADDY_TLS_BLOCK=%s
 CADDY_HOST="%s, http://, https://"
-POSTFN_APP_TAG=%s
-POSTFN_NODE_TAG=%s
+INSIGHTS_APP_TAG=%s
+INSIGHTS_NODE_TAG=%s
 SESSION_RECORDING_V2_METADATA_SWITCHOVER=%s
 `,
 		c.InsightsSecret,
@@ -85,13 +85,13 @@ SESSION_RECORDING_V2_METADATA_SWITCHOVER=%s
 func LoadExistingEnv() map[string]string {
 	values := make(map[string]string)
 	keys := []string{
-		"POSTFN_SECRET",
+		"INSIGHTS_SECRET",
 		"ENCRYPTION_SALT_KEYS",
 		"DOMAIN",
 		"TLS_BLOCK",
 		"REGISTRY_URL",
-		"POSTFN_APP_TAG",
-		"POSTFN_NODE_TAG",
+		"INSIGHTS_APP_TAG",
+		"INSIGHTS_NODE_TAG",
 		"SESSION_RECORDING_V2_METADATA_SWITCHOVER",
 		"SESSION_RECORDING_STORAGE_MIGRATED_TO_SEAWEEDFS",
 	}
@@ -146,7 +146,7 @@ func UpdateEnvForUpgrade(version string) error {
 	}
 
 	if version != "" {
-		if err := UpdateEnvValue("POSTFN_APP_TAG", version); err != nil {
+		if err := UpdateEnvValue("INSIGHTS_APP_TAG", version); err != nil {
 			return err
 		}
 	}
@@ -203,7 +203,7 @@ func FixEnvQuoting() error {
 }
 
 func ValidateEnvForUpgrade() error {
-	required := []string{"POSTFN_SECRET", "DOMAIN"}
+	required := []string{"INSIGHTS_SECRET", "DOMAIN"}
 	for _, key := range required {
 		if ReadEnvValue(key) == "" {
 			return fmt.Errorf("missing required env var: %s", key)

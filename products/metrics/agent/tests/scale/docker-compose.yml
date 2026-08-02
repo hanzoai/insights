@@ -20,9 +20,9 @@ services:
     shard0:
         image: insights-metrics-agent:test
         environment: &shard-env
-            POSTFN_API_KEY: phc_test
-            POSTFN_HOST: http://sink:4318
-            POSTFN_INGEST_PATH: /v1/metrics
+            INSIGHTS_API_KEY: phc_test
+            INSIGHTS_HOST: http://sink:4318
+            INSIGHTS_INGEST_PATH: /v1/metrics
             SCRAPE_TARGETS: '${SCRAPE_TARGETS}'
             SCRAPE_INTERVAL: 2s
             SHARD_COUNT: '4'
@@ -35,7 +35,7 @@ services:
         image: insights-metrics-agent:test
         environment:
             <<: *shard-env
-            POSTFN_HOST: http://sink:4418
+            INSIGHTS_HOST: http://sink:4418
         hostname: agent-1
         depends_on: [farm, sink]
 
@@ -43,7 +43,7 @@ services:
         image: insights-metrics-agent:test
         environment:
             <<: *shard-env
-            POSTFN_HOST: http://sink:4518
+            INSIGHTS_HOST: http://sink:4518
         hostname: agent-2
         depends_on: [farm, sink]
 
@@ -51,6 +51,6 @@ services:
         image: insights-metrics-agent:test
         environment:
             <<: *shard-env
-            POSTFN_HOST: http://sink:4618
+            INSIGHTS_HOST: http://sink:4618
         hostname: agent-3
         depends_on: [farm, sink]

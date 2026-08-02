@@ -7,19 +7,19 @@
 // legacy results keep their exact pre-stateless wire shape (no `resultType`,
 // no `_meta` server identity leaking across dialects).
 //
-// Usage: POSTFN_PERSONAL_API_KEY=phx_... MCP_URL=http://localhost:8787/mcp \
+// Usage: INSIGHTS_PERSONAL_API_KEY=phx_... MCP_URL=http://localhost:8787/mcp \
 //        ../../node_modules/.bin/tsx legacy-smoke.mts
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { LATEST_PROTOCOL_VERSION } from '@modelcontextprotocol/sdk/types.js'
 
 const MCP_URL = process.env.MCP_URL ?? 'http://localhost:8787/mcp'
-const TOKEN = process.env.POSTFN_PERSONAL_API_KEY
+const TOKEN = process.env.INSIGHTS_PERSONAL_API_KEY
 const STATELESS_VERSION = '2026-07-28'
 const META_SERVER_INFO = 'io.modelcontextprotocol/serverInfo'
 
 if (!TOKEN) {
-    console.error('POSTFN_PERSONAL_API_KEY is required')
+    console.error('INSIGHTS_PERSONAL_API_KEY is required')
     process.exit(1)
 }
 

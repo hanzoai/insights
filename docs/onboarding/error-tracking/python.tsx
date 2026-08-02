@@ -139,7 +139,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             />
                             <Markdown>
                                 {dedent`
-                                    By default, the middleware captures exceptions and sends them to Insights. Disable with \`POSTFN_MW_CAPTURE_EXCEPTIONS = False\`. Use \`POSTFN_MW_EXTRA_TAGS\`, \`POSTFN_MW_REQUEST_FILTER\`, and \`POSTFN_MW_TAG_MAP\` to customize. See the [Django integration docs](https://hanzo.ai/docs/libraries/django) for full configuration.
+                                    By default, the middleware captures exceptions and sends them to Insights. Disable with \`INSIGHTS_MW_CAPTURE_EXCEPTIONS = False\`. Use \`INSIGHTS_MW_EXTRA_TAGS\`, \`INSIGHTS_MW_REQUEST_FILTER\`, and \`INSIGHTS_MW_TAG_MAP\` to customize. See the [Django integration docs](https://hanzo.ai/docs/libraries/django) for full configuration.
                                 `}
                             </Markdown>
                         </Tab.Panel>

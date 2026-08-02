@@ -82,10 +82,10 @@ jobs:
             TERRAFORM_VERSION: '1.13.0'
             TERRAGRUNT_VERSION: '0.93.12'
             # Insights provider auth
-            POSTFN_PROVIDER_POSTFN_API_KEY: ${{ secrets.POSTFN_PROVIDER_POSTFN_API_KEY }}
+            INSIGHTS_PROVIDER_INSIGHTS_API_KEY: ${{ secrets.INSIGHTS_PROVIDER_INSIGHTS_API_KEY }}
             # Terragrunt S3 backend config (to manage .tfstate)
-            POSTFN_PROVIDER_TF_STATE_BUCKET: ${{ secrets.POSTFN_PROVIDER_TF_STATE_BUCKET }}
-            POSTFN_PROVIDER_TF_STATE_REGION: ${{ secrets.POSTFN_PROVIDER_TF_STATE_REGION }}
+            INSIGHTS_PROVIDER_TF_STATE_BUCKET: ${{ secrets.INSIGHTS_PROVIDER_TF_STATE_BUCKET }}
+            INSIGHTS_PROVIDER_TF_STATE_REGION: ${{ secrets.INSIGHTS_PROVIDER_TF_STATE_REGION }}
         steps:
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -93,8 +93,8 @@ jobs:
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
               with:
-                  aws-region: ${{ secrets.POSTFN_PROVIDER_TF_STATE_REGION }}
-                  role-to-assume: ${{ secrets.POSTFN_PROVIDER_TF_AWS_ROLE_ARN }}
+                  aws-region: ${{ secrets.INSIGHTS_PROVIDER_TF_STATE_REGION }}
+                  role-to-assume: ${{ secrets.INSIGHTS_PROVIDER_TF_AWS_ROLE_ARN }}
                   role-duration-seconds: 3600
 
             - name: Plan Terraform ${{ matrix.working_dir }}

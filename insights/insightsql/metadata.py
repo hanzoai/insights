@@ -84,17 +84,17 @@ def get_insightsql_metadata(
         if query.language == HogLanguage.HOG:
             program = parse_program(query.query)
             create_bytecode(program, supported_functions={"fetch", "insightsCapture"}, args=[], context=context)
-        elif query.language == HogLanguage.FN_TEMPLATE:
+        elif query.language == HogLanguage.INSIGHTS_TEMPLATE:
             string = parse_string_template(query.query)
             create_bytecode(string, supported_functions={"fetch", "insightsCapture"}, args=[], context=context)
-        elif query.language == HogLanguage.FN_QL_EXPR:
+        elif query.language == HogLanguage.INSIGHTS_QL_EXPR:
             node = parse_expr(query.query)
             if query.sourceQuery is not None:
                 source_query = get_query_runner(query=query.sourceQuery, team=team).to_query()
                 process_expr_on_table(node, context=context, source_query=source_query)
             else:
                 process_expr_on_table(node, context=context)
-        elif query.language == HogLanguage.FN_QL:
+        elif query.language == HogLanguage.INSIGHTS_QL:
             if not insightsql_ast:
                 insightsql_ast = parse_select(query.query)
                 finder = find_placeholders(insightsql_ast)
@@ -154,7 +154,7 @@ def get_insightsql_metadata(
             response.isValid = len(response.errors) == 0
 
     # We add a magic "F'" start prefix to get Antlr into the right parsing mode, subtract it now
-    if query.language == HogLanguage.FN_TEMPLATE:
+    if query.language == HogLanguage.INSIGHTS_TEMPLATE:
         for err in response.errors:
             if err.start is not None and err.end is not None and err.start > 0:
                 err.start -= 2
@@ -182,7 +182,7 @@ def enrich_insightsql_validation_error(
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query=query.query,
                 modifiers=query.modifiers,
                 filters=query.filters,

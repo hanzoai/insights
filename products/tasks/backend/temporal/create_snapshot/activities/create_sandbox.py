@@ -40,9 +40,9 @@ def create_sandbox(input: CreateSandboxInput) -> CreateSandboxOutput:
 
         environment_variables = {
             "GITHUB_TOKEN": github_token,
-            "POSTFN_PERSONAL_API_KEY": access_token,
-            "POSTFN_API_URL": get_sandbox_api_url(),
-            "POSTFN_PROJECT_ID": str(ctx.team_id),
+            "INSIGHTS_PERSONAL_API_KEY": access_token,
+            "INSIGHTS_API_URL": get_sandbox_api_url(),
+            "INSIGHTS_PROJECT_ID": str(ctx.team_id),
         }
 
         config = SandboxConfig(

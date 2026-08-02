@@ -168,7 +168,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
 
-        mcp_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_POSTFN_CLIENT="mcp")
+        mcp_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_INSIGHTS_CLIENT="mcp")
         assert mcp_response.status_code == 200, mcp_response.json()
         result = mcp_response.json()["results"][0]
         assert "actions" not in result
@@ -205,14 +205,14 @@ class TestInsightsFlowAPI(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": trigger_only},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 400, response.json()
         assert "workflows-patch-graph" in response.json()["detail"]
 
         # Metadata stays editable over MCP, and the web builder keeps sending full graphs.
         mcp_rename = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"}, HTTP_X_POSTFN_CLIENT="mcp"
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"}, HTTP_X_INSIGHTS_CLIENT="mcp"
         )
         assert mcp_rename.status_code == 200, mcp_rename.json()
         web_actions = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": trigger_only})
@@ -225,7 +225,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # handler envelope.
         insights_flow, _ = self._create_insights_flow_with_action({"template_id": "template-webhook", "inputs": {}})
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
 
         assert response.status_code == 400, response.json()
         body = response.json()
@@ -257,7 +257,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, action = self._create_insights_flow_with_action({"template_id": template_id, "inputs": {}})
         action["type"] = action_type
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
 
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
@@ -1366,7 +1366,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed via MCP"},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 400, response.json()
         assert "active workflow isn't supported via MCP" in response.json()["detail"]
@@ -1377,7 +1377,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": target_status},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == target_status
@@ -1391,7 +1391,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed via MCP"},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
         assert response.json()["name"] == "Renamed via MCP"
@@ -1410,7 +1410,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
         insights_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
         assert response.status_code == 400, response.json()
         assert "one-shot active workflows via MCP" in response.json()["detail"]
 
@@ -1418,7 +1418,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "draft"
 
@@ -1442,7 +1442,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed", "status": "active"},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 400, response.json()
         assert "workflows-enable / workflows-disable / workflows-archive" in response.json()["detail"]
@@ -1514,7 +1514,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         return self.client.patch(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": operations},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
             **extra,
         )
 
@@ -2097,7 +2097,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         insights_flow = {"name": "Test Batch Flow", "status": "draft", "actions": [trigger_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
         assert response.status_code == 400, response.json()
         assert "event" in response.json()["detail"].lower()
 
@@ -2210,7 +2210,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_insights_flow_batch_trigger_behavioral_cohort_rejected_for_mcp_draft(self):
         # Draft is lenient for the UI builder but enforced for programmatic (MCP) callers.
         cohort = self._make_cohort(behavioral=True)
-        response = self._post_batch_with_cohort(cohort.pk, status="draft", HTTP_X_POSTFN_CLIENT="mcp")
+        response = self._post_batch_with_cohort(cohort.pk, status="draft", HTTP_X_INSIGHTS_CLIENT="mcp")
         assert response.status_code == 400, response.json()
         assert "behavior" in response.json()["detail"].lower()
 
@@ -2241,7 +2241,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # at create for programmatic callers, instead of silently storing a filter that won't compile and
         # only surfacing the failure at enable (which reads to the caller as a successful create).
         cohort = self._make_cohort(behavioral=True)
-        response = self._post_event_trigger_with_cohort(cohort.pk, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self._post_event_trigger_with_cohort(cohort.pk, HTTP_X_INSIGHTS_CLIENT="mcp")
         assert response.status_code == 400, response.json()
         assert "cohort" in str(response.json()).lower()
 
@@ -2829,7 +2829,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         no_token = self.client.post(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert no_token.status_code == 400, no_token.json()
         assert "workflows-blast-radius" in no_token.json()["detail"]
@@ -2843,7 +2843,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         narrow_token = self.client.post(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"confirm_token": narrow_preview.json()["confirm_token"]},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert narrow_token.status_code == 400, narrow_token.json()
         assert "audience changed" in narrow_token.json()["detail"]
@@ -2855,7 +2855,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         group_semantics = self.client.post(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"confirm_token": group_semantics_token},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert group_semantics.status_code == 400, group_semantics.json()
         assert "audience changed" in group_semantics.json()["detail"]
@@ -2871,7 +2871,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             # Caller-supplied filters are ignored: the job snapshots the trigger filters it fans out to.
             {"filters": {"properties": []}, "confirm_token": token},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert dispatched.status_code == 200, dispatched.json()
         assert dispatched.json()["filters"] == trigger_filters
@@ -2886,7 +2886,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         no_token_schedule = self.client.post(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
             schedule_body,
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert no_token_schedule.status_code == 400, no_token_schedule.json()
         assert "workflows-blast-radius" in no_token_schedule.json()["detail"]
@@ -2894,7 +2894,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         scheduled = self.client.post(
             f"/api/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
             {**schedule_body, "confirm_token": token},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert scheduled.status_code == 201, scheduled.json()
 
@@ -2908,7 +2908,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         draft_schedule = self.client.post(
             f"/api/projects/{self.team.id}/insights_flows/{draft_create.json()['id']}/schedules",
             {**schedule_body, "confirm_token": token},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert draft_schedule.status_code == 400, draft_schedule.json()
         assert "active" in draft_schedule.json()["detail"].lower()
@@ -3914,7 +3914,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
                     }
                 ]
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert stage.status_code == 200, stage.json()
 
@@ -4021,7 +4021,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
                         }
                     ]
                 },
-                HTTP_X_POSTFN_CLIENT="mcp",
+                HTTP_X_INSIGHTS_CLIENT="mcp",
             ).status_code
             == 200
         )
@@ -4147,7 +4147,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
 
         # MCP list (summary serializer) omits actions but still returns trigger, so it can't re-derive
         # the mask from actions - the trigger must be masked independently or the secret leaks here.
-        listing = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_POSTFN_CLIENT="mcp").json()
+        listing = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_INSIGHTS_CLIENT="mcp").json()
         row = next(r for r in listing["results"] if r["id"] == str(flow.id))
         assert "actions" not in row
         assert row["trigger"]["inputs"]["api_key"] == {"secret": True}

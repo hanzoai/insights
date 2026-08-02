@@ -70,8 +70,8 @@ jobs:
               id: app-token
               if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
             - uses: ./.github/actions/paths-filter
               id: filter
               if: github.event_name != 'push' # Run all tests on master push
@@ -383,8 +383,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Set up Node.js
@@ -575,7 +575,7 @@ jobs:
                   (github.event_name != 'pull_request' && github.repository == 'Insights/insights')
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{secrets.POSTFN_API_TOKEN}}
+                  insights-token: ${{secrets.INSIGHTS_API_TOKEN}}
                   event: 'insights-ci-frontend-bundle-size'
                   properties: |
                       {
@@ -592,7 +592,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
                   event: 'insights-ci-frontend-bundle-size'
                   properties: |
                       {
@@ -712,8 +712,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Install pnpm dependencies
@@ -922,9 +922,9 @@ jobs:
               if: steps.test-reporter.outputs.available == 'true'
               continue-on-error: true
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
-                  POSTFN_CI_TRACES_EXTRA_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
-                  POSTFN_OTLP_TRACES_ENDPOINT: ${{ vars.POSTFN_OTLP_TRACES_ENDPOINT || 'https://us.i.hanzo.ai/i/v1/traces' }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_CI_TRACES_EXTRA_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
+                  INSIGHTS_OTLP_TRACES_ENDPOINT: ${{ vars.INSIGHTS_OTLP_TRACES_ENDPOINT || 'https://us.i.hanzo.ai/i/v1/traces' }}
               run: |
                   uv run --script .github/scripts/report_test_timings.py \
                       --runner=jest \
@@ -963,7 +963,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_API_TOKEN }}
                   event: 'insights-ci-running-time'
                   capture-run-duration: true
                   capture-job-durations: true
@@ -975,7 +975,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
                   event: 'insights-ci-running-time'
                   capture-run-duration: true
                   capture-job-durations: true

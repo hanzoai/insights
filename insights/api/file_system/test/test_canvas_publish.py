@@ -230,7 +230,7 @@ class TestDesktopCanvasPublishAPI(APIBaseTest):
         item_id = self._create_dashboard(meta={"channelId": "chan-1"})
         self._authenticate_as_sandbox()
 
-        self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_POSTFN_TASK_ID=str(task.id))
+        self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_INSIGHTS_TASK_ID=str(task.id))
 
         messages = self._thread_messages(task)
         self.assertEqual(messages.count(), 1)
@@ -242,7 +242,7 @@ class TestDesktopCanvasPublishAPI(APIBaseTest):
         )
 
         # A second publish updates the canvas, it doesn't create it again.
-        self.client.patch(self._canvas_url(item_id), {"code": "v2"}, HTTP_X_POSTFN_TASK_ID=str(task.id))
+        self.client.patch(self._canvas_url(item_id), {"code": "v2"}, HTTP_X_INSIGHTS_TASK_ID=str(task.id))
         self.assertEqual(messages.count(), 1)
 
     @patch("products.tasks.backend.facade.api.hanzo_insights.feature_enabled", return_value=True)
@@ -251,7 +251,7 @@ class TestDesktopCanvasPublishAPI(APIBaseTest):
         item_id = self._create_dashboard()  # no channelId stamp — rows created before the app stamped it
         self._authenticate_as_sandbox()
 
-        self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_POSTFN_TASK_ID=str(task.id))
+        self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_INSIGHTS_TASK_ID=str(task.id))
 
         folder = FileSystem.objects.get(team=self.team, path="MyChannel", type="folder")
         message = self._thread_messages(task).get()
@@ -273,7 +273,7 @@ class TestDesktopCanvasPublishAPI(APIBaseTest):
         item_id = self._create_dashboard()
         self._authenticate_as_sandbox()
 
-        self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_POSTFN_TASK_ID=str(task.id))
+        self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_INSIGHTS_TASK_ID=str(task.id))
 
         self.assertFalse(self._thread_messages(task).exists())
 
@@ -285,7 +285,7 @@ class TestDesktopCanvasPublishAPI(APIBaseTest):
         task = self._create_task()
         item_id = self._create_dashboard()
 
-        response = self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_POSTFN_TASK_ID=str(task.id))
+        response = self.client.patch(self._canvas_url(item_id), {"code": "v1"}, HTTP_X_INSIGHTS_TASK_ID=str(task.id))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(self._thread_messages(task).exists())

@@ -178,14 +178,14 @@ for (const key of ['Edit', 'Write', 'NotebookEdit', 'MultiEdit']) {
 // Insights single-exec discovery verbs. `resolveToolKey` parses `exec tools|search|info|schema` into
 // these sentinel keys; InsightsExecRenderer (inside the built-in chunk) derives the friendly label and
 // input preview from the command. Registered so they get a fitting icon instead of the wrench fallback.
-const POSTFN_EXEC_VERBS: { key: string; displayName: string; icon: JSX.Element }[] = [
+const INSIGHTS_EXEC_VERBS: { key: string; displayName: string; icon: JSX.Element }[] = [
     { key: '__insights_exec_tools__', displayName: 'List tools', icon: <IconListCheck /> },
     { key: '__insights_exec_search__', displayName: 'Search tools', icon: <IconSearch /> },
     { key: '__insights_exec_info__', displayName: 'Read tool', icon: <IconDocument /> },
     { key: '__insights_exec_schema__', displayName: 'Inspect schema', icon: <IconDocument /> },
     { key: '__insights_exec_unknown__', displayName: 'Run command', icon: <IconWrench /> },
 ]
-for (const { key, displayName, icon } of POSTFN_EXEC_VERBS) {
+for (const { key, displayName, icon } of INSIGHTS_EXEC_VERBS) {
     toolRegistry.register({ key, displayName, icon, Renderer: BuiltinToolRenderer })
 }
 
@@ -195,16 +195,16 @@ for (const { key, displayName, icon } of POSTFN_EXEC_VERBS) {
 // MCP path. Renderers live in their own lazy chunk.
 // Inlined rather than imported from the renderer module so registration stays a string-only side
 // effect — importing it would statically pull the lazy renderer chunk into this one.
-const POSTFN_CODE_TOOLS_SERVER = 'insights-code-tools'
-const POSTFN_CODE_TOOLS: { name: string; displayName: string; icon: JSX.Element }[] = [
+const INSIGHTS_CODE_TOOLS_SERVER = 'insights-code-tools'
+const INSIGHTS_CODE_TOOLS: { name: string; displayName: string; icon: JSX.Element }[] = [
     { name: 'git_signed_commit', displayName: 'Signed commits', icon: <IconCommit /> },
     { name: 'git_signed_merge', displayName: 'Signed merge', icon: <IconGitBranch /> },
     { name: 'git_signed_rewrite', displayName: 'Signed force-update', icon: <IconGitBranch /> },
     { name: 'clone_repo', displayName: 'Clone repository', icon: <IconGithub /> },
     { name: 'list_repos', displayName: 'List repositories', icon: <IconGithub /> },
 ]
-for (const { name, displayName, icon } of POSTFN_CODE_TOOLS) {
-    for (const key of [name, `mcp__${POSTFN_CODE_TOOLS_SERVER}__${name}`]) {
+for (const { name, displayName, icon } of INSIGHTS_CODE_TOOLS) {
+    for (const key of [name, `mcp__${INSIGHTS_CODE_TOOLS_SERVER}__${name}`]) {
         toolRegistry.register({ key, displayName, icon, Renderer: InsightsCodeToolRenderer })
     }
 }

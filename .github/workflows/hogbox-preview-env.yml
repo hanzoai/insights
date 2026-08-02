@@ -50,7 +50,7 @@
 # --- PREREQS (tracked out of band) ----------------------------------------------
 #   - vars.TS_HOGLAND_CI_CLIENT_ID / TS_HOGLAND_CI_AUDIENCE  (tailnet join)
 #   - the golden is referenced by its global alias `insights-preview-golden`
-#   - target hogland deploy has FN_GITHUB_OIDC_AUDIENCE + a github_oidc
+#   - target hogland deploy has INSIGHTS_GITHUB_OIDC_AUDIENCE + a github_oidc
 #     TrustMapping for Insights/insights on prod-us
 #   - frontend PRs auto-preview; `hogbox-preview` forces it for any paths,
 #     `no-preview` opts out (see the TRIGGER section above)
@@ -101,8 +101,8 @@ permissions:
 
 env:
     # prod-us: the golden lives here and the box edge is live here.
-    FN_HOST: https://hogland.mascot-kitefin.ts.net
-    FN_OIDC_AUDIENCE: hogland.prod-us.insights.dev
+    INSIGHTS_HOST: https://hogland.mascot-kitefin.ts.net
+    INSIGHTS_OIDC_AUDIENCE: hogland.prod-us.insights.dev
     PR: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
 
 jobs:
@@ -387,7 +387,7 @@ jobs:
 
     # ----------------------------------------------------------------------------
     # TRUSTED deploy: the only job that holds hogland credentials (id-token →
-    # tailnet + FN_TOKEN). It checks out the DEFAULT branch — never the PR — so
+    # tailnet + INSIGHTS_TOKEN). It checks out the DEFAULT branch — never the PR — so
     # no PR-controlled code executes in credential scope (same reasoning as the
     # teardown job below and pr-closed.yml). The PR's contribution enters only
     # as data: the dist artifact from build-frontend, and the in-box
@@ -451,7 +451,7 @@ jobs:
                               `with the hogland token in scope.`);
                       }
 
-            # Trusted checkout: the tool code that runs with FN_TOKEN comes from
+            # Trusted checkout: the tool code that runs with INSIGHTS_TOKEN comes from
             # the default branch, never the PR.
             # A blip is infra: bring-up then fails into the failure reporter, not a red X.
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -481,14 +481,14 @@ jobs:
                   token=""
                   for attempt in 1 2 3; do
                     token=$(curl -sf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-                      "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${FN_OIDC_AUDIENCE}" | jq -r '.value') || token=""
+                      "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${INSIGHTS_OIDC_AUDIENCE}" | jq -r '.value') || token=""
                     [ -n "$token" ] && [ "$token" != "null" ] && break
                     echo "::warning::OIDC mint attempt ${attempt} failed; retrying"
                     [ "$attempt" -lt 3 ] && sleep 5
                   done
                   [ -n "$token" ] && [ "$token" != "null" ] || { echo "::error::OIDC mint failed after 3 attempts"; exit 1; }
                   echo "::add-mask::$token"
-                  echo "FN_TOKEN=$token" >> "$GITHUB_ENV"
+                  echo "INSIGHTS_TOKEN=$token" >> "$GITHUB_ENV"
 
             # uv (repo convention) instead of pip — no separate install step.
             # --no-project skips the insights monorepo (don't sync it); --with pins
@@ -515,7 +515,7 @@ jobs:
                   # per-stage visibility; stdout stays the url=/box_id=/pen_id= contract.
                   out=$(uv run --no-project --with insights-hogland==0.3.0 --python 3.12 \
                     python -m hogbox_preview \
-                    --host "$FN_HOST" \
+                    --host "$INSIGHTS_HOST" \
                     --name "preview-pr-${PR}" \
                     --snapshot "alias:insights-preview-golden" \
                     --cpus 8 --memory-mib 16384 --disk-gib 100 \
@@ -598,7 +598,7 @@ jobs:
                   # Resolves the live box by pen name (preview-pr-<n>) — no restore.
                   uv run --no-project --with insights-hogland==0.3.0 --python 3.12 \
                     python -m hogbox_preview \
-                    --host "$FN_HOST" \
+                    --host "$INSIGHTS_HOST" \
                     --name "preview-pr-${PR}" \
                     swap-frontend --frontend-dist "${RUNNER_TEMP}/fe-dist/frontend-dist.tgz"
 
@@ -633,7 +633,7 @@ jobs:
                   PEN: ${{ steps.build.outputs.pen_id }}
                   SWAP: ${{ steps.fe.outputs.swap }}
                   # The hogland admin/console host (same value as the OIDC audience).
-                  CONSOLE_HOST: ${{ env.FN_OIDC_AUDIENCE }}
+                  CONSOLE_HOST: ${{ env.INSIGHTS_OIDC_AUDIENCE }}
               with:
                   script: |
                       const pr = Number(process.env.PR);
@@ -766,14 +766,14 @@ jobs:
                   token=""
                   for attempt in 1 2 3; do
                     token=$(curl -sf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-                      "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${FN_OIDC_AUDIENCE}" | jq -r '.value') || token=""
+                      "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${INSIGHTS_OIDC_AUDIENCE}" | jq -r '.value') || token=""
                     [ -n "$token" ] && [ "$token" != "null" ] && break
                     echo "::warning::OIDC mint attempt ${attempt} failed; retrying"
                     [ "$attempt" -lt 3 ] && sleep 5
                   done
                   [ -n "$token" ] && [ "$token" != "null" ] || { echo "::error::OIDC mint failed after 3 attempts"; exit 1; }
                   echo "::add-mask::$token"
-                  echo "FN_TOKEN=$token" >> "$GITHUB_ENV"
+                  echo "INSIGHTS_TOKEN=$token" >> "$GITHUB_ENV"
             - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
               continue-on-error: true
               with:
@@ -781,7 +781,7 @@ jobs:
             - name: Destroy preview box + pen
               continue-on-error: true
               working-directory: tools/hogbox-preview
-              run: uv run --no-project --with insights-hogland==0.3.0 --python 3.12 python -m hogbox_preview --host "$FN_HOST" --name "preview-pr-${PR}" destroy
+              run: uv run --no-project --with insights-hogland==0.3.0 --python 3.12 python -m hogbox_preview --host "$INSIGHTS_HOST" --name "preview-pr-${PR}" destroy
 
             # Don't leave a green "ready" Deployment + comment pointing at a box
             # that no longer exists: mark every deployment of this PR's

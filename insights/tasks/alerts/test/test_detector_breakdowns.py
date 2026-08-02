@@ -409,7 +409,7 @@ class TestSimulateDetectorBreakdowns:
     def test_simulates_a_insightsql_insight_through_the_registry(
         self, mock_calc: MagicMock, _mock_upgrade: MagicMock
     ) -> None:
-        # Exercises the InsightsQLDetectorExtractor.simulate() dispatch route end-to-end: a FN_QL_QUERY
+        # Exercises the InsightsQLDetectorExtractor.simulate() dispatch route end-to-end: a INSIGHTS_QL_QUERY
         # insight resolves to the SQL extractor via DETECTOR_EXTRACTORS and scores its own rows.
         rows = [[v] for v in [*([10.0, 11.0, 10.0, 9.0] * 10), 500.0]]  # 41 single-column rows, spike last
         mock_calc.return_value = MagicMock(result=rows, columns=["value"])

@@ -48,11 +48,11 @@ jobs:
             NODE_ENV: production
             npm_config_arch: arm64
             npm_config_platform: darwin
-            VITE_POSTFN_API_KEY: ${{ secrets.VITE_POSTFN_API_KEY }}
-            VITE_POSTFN_API_HOST: ${{ secrets.VITE_POSTFN_API_HOST }}
-            POSTFN_SOURCEMAP_API_KEY: ${{ secrets.DESKTOP_POSTFN_SOURCEMAP_API_KEY }}
-            POSTFN_ENV_ID: ${{ secrets.DESKTOP_POSTFN_ENV_ID }}
-            POSTFN_HOST: ${{ secrets.DESKTOP_POSTFN_HOST }}
+            VITE_INSIGHTS_API_KEY: ${{ secrets.VITE_INSIGHTS_API_KEY }}
+            VITE_INSIGHTS_API_HOST: ${{ secrets.VITE_INSIGHTS_API_HOST }}
+            INSIGHTS_SOURCEMAP_API_KEY: ${{ secrets.DESKTOP_INSIGHTS_SOURCEMAP_API_KEY }}
+            INSIGHTS_ENV_ID: ${{ secrets.DESKTOP_INSIGHTS_ENV_ID }}
+            INSIGHTS_HOST: ${{ secrets.DESKTOP_INSIGHTS_HOST }}
             CSC_LINK: ${{ secrets.APPLE_CODESIGN_CERT_BASE64 }}
             CSC_KEY_PASSWORD: ${{ secrets.APPLE_CODESIGN_CERT_PASSWORD }}
             APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

@@ -172,7 +172,7 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
     // Track if the recording has ended to be able to reliably get it from the BE and stop the recording
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            ;(window as any).__POSTFN_RECORDING_ENDED__ = endReached
+            ;(window as any).__INSIGHTS_RECORDING_ENDED__ = endReached
         }
     }, [endReached])
 

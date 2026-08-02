@@ -76,7 +76,7 @@ the always-merged baseline instead (below), so the empty callback can't clobber 
 > Treat "How to use it" above as the contract, not this.
 
 `withFeatureFlags` → `setFeatureFlags` (`frontend/src/mocks/browser.tsx`) writes the
-flags (array or record) straight to `window.POSTFN_APP_CONTEXT.persisted_feature_flags`.
+flags (array or record) straight to `window.INSIGHTS_APP_CONTEXT.persisted_feature_flags`.
 `getPersistedFeatureFlags` (`frontend/src/lib/logic/featureFlagLogic.ts`) reads that as
 `featureFlagLogic`'s initial value and `spyOnFeatureFlags` always merges it as the
 baseline — so both booleans and pinned variants survive the empty `onFeatureFlags`

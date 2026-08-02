@@ -10,7 +10,7 @@ export { isInsightsExecTool } from '../components/tool/insightsExecDisplay'
  *
  * The agent-server relays a permission request here in two cases: the exec sub-tool matched the
  * server's `--insightsExecPermissionRegex` (relayed in every non-background run regardless of
- * permission mode — see `POSTFN_EXEC_PERMISSION_REGEX` in `products/tasks/backend/constants.py`,
+ * permission mode — see `INSIGHTS_EXEC_PERMISSION_REGEX` in `products/tasks/backend/constants.py`,
  * which must stay in sync with the destructive verbs and persist tools below), or the run's
  * permission mode relays manual approvals and a client is connected. This policy decides which
  * relayed requests auto-approve and which surface the approval card: built-ins and read-only
@@ -24,15 +24,15 @@ export function isFullAutoMode(mode: string | null | undefined): boolean {
 }
 
 /** A sub-tool is destructive when one of these verbs appears as a whole `-`-bounded segment. */
-const POSTFN_DESTRUCTIVE_SUBTOOL_RE = /(^|-)(partial-update|update|patch|delete|destroy)(-|$)/i
+const INSIGHTS_DESTRUCTIVE_SUBTOOL_RE = /(^|-)(partial-update|update|patch|delete|destroy)(-|$)/i
 
 /**
  * Destructive-annotated sub-tools whose names carry no destructive verb segment (publish, ship,
- * merge, archive, …). Mirrors `POSTFN_EXEC_DESTRUCTIVE_SUB_TOOLS` in
+ * merge, archive, …). Mirrors `INSIGHTS_EXEC_DESTRUCTIVE_SUB_TOOLS` in
  * `products/tasks/backend/constants.py`, which a backend test keeps complete against the
  * `annotations.destructive: true` tools in `products/*\/mcp/*.yaml` — update both together.
  */
-const POSTFN_DESTRUCTIVE_SUB_TOOLS = new Set([
+const INSIGHTS_DESTRUCTIVE_SUB_TOOLS = new Set([
     // confirmed_action tools register only `<name>-execute` (and `-prepare`); the bare name is
     // never a runtime tool, so the destructive `-execute` variant is what must be gated.
     'change-requests-approve-execute',
@@ -62,13 +62,13 @@ const POSTFN_DESTRUCTIVE_SUB_TOOLS = new Set([
 ])
 
 export function isInsightsDestructiveSubTool(subTool: string): boolean {
-    return POSTFN_DESTRUCTIVE_SUBTOOL_RE.test(subTool) || POSTFN_DESTRUCTIVE_SUB_TOOLS.has(subTool.toLowerCase())
+    return INSIGHTS_DESTRUCTIVE_SUBTOOL_RE.test(subTool) || INSIGHTS_DESTRUCTIVE_SUB_TOOLS.has(subTool.toLowerCase())
 }
 
 export type PermissionDecision = 'auto_allow' | 'prompt'
 
 /** Read-only exec discovery verbs — safe to auto-approve since they never mutate Insights data. */
-const POSTFN_EXEC_READ_ONLY_KEYS = new Set([
+const INSIGHTS_EXEC_READ_ONLY_KEYS = new Set([
     '__insights_exec_tools__',
     '__insights_exec_search__',
     '__insights_exec_info__',
@@ -98,7 +98,7 @@ export function defaultPermissionDecision(record: PermissionRequestRecord): Perm
 
     const isExec = isInsightsExecTool(toolName) || innerToolName != null || resolvedKey.startsWith('__insights_exec_')
     if (isExec) {
-        if (POSTFN_EXEC_READ_ONLY_KEYS.has(resolvedKey)) {
+        if (INSIGHTS_EXEC_READ_ONLY_KEYS.has(resolvedKey)) {
             return 'auto_allow'
         }
         // A resolved `call <sub-tool>`: auto-approve only non-mutating sub-tools.
@@ -125,7 +125,7 @@ export function defaultPermissionDecision(record: PermissionRequestRecord): Perm
  * `routePermissionRequest` forces the prompt path for foreground streams. Scoped to the product
  * families from the apply-back migration plan — every enabled tool that persists new content
  * (create/copy/add) or publishes to end users (launch/stop). To extend it, add the sub-tool name
- * here AND to `POSTFN_EXEC_PERMISSION_REGEX` in `products/tasks/backend/constants.py` — the
+ * here AND to `INSIGHTS_EXEC_PERMISSION_REGEX` in `products/tasks/backend/constants.py` — the
  * server only relays sub-tools matching that regex, so a name missing there never reaches this
  * gate in modes that don't relay manual approvals.
  */

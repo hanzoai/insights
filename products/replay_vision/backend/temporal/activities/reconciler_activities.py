@@ -5,7 +5,7 @@ from temporalio import activity
 
 from insights.sync import database_sync_to_async
 from insights.temporal.common.client import async_connect
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_FINGERPRINT_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_FINGERPRINT_KEY
 
 from products.replay_vision.backend.temporal.constants import (
     SCANNER_SCHEDULE_ID_PREFIX,
@@ -47,7 +47,7 @@ def _schedule_fingerprint(listing: object) -> str | None:
         )
         return None
     for pair in attrs:
-        if pair.key.name == POSTFN_SCHEDULE_FINGERPRINT_KEY.name:
+        if pair.key.name == INSIGHTS_SCHEDULE_FINGERPRINT_KEY.name:
             return pair.value
     return None
 

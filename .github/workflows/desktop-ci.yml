@@ -31,28 +31,28 @@ jobs:
     build:
         uses: ./.github/workflows/desktop-build.yml
         secrets:
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
 
     quality:
         uses: ./.github/workflows/desktop-quality.yml
         secrets:
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
 
     typecheck:
         uses: ./.github/workflows/desktop-typecheck.yml
         secrets:
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
 
     test:
         uses: ./.github/workflows/desktop-test.yml
         secrets:
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
-            POSTFN_CODE_E2E_GATEWAY_PERSONAL_API_KEY: ${{ secrets.POSTFN_CODE_E2E_GATEWAY_PERSONAL_API_KEY }}
-            POSTFN_CODE_E2E_GATEWAY_URL: ${{ secrets.POSTFN_CODE_E2E_GATEWAY_URL }}
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
+            INSIGHTS_CODE_E2E_GATEWAY_PERSONAL_API_KEY: ${{ secrets.INSIGHTS_CODE_E2E_GATEWAY_PERSONAL_API_KEY }}
+            INSIGHTS_CODE_E2E_GATEWAY_URL: ${{ secrets.INSIGHTS_CODE_E2E_GATEWAY_URL }}
             TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN }}
 
     # Umbrella gate for the whole desktop suite: the one check name to require in

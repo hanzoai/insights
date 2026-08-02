@@ -30,12 +30,12 @@ describe('HogInvocationResultsService', () => {
 
     beforeEach(() => {
         outputs = buildOutputsMock()
-        service = new HogInvocationResultsService(outputs, { FN_INVOCATION_RESULTS_ENABLED: true })
+        service = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
     })
 
     describe('feature flag', () => {
-        it('produces nothing when FN_INVOCATION_RESULTS_ENABLED is false', async () => {
-            service = new HogInvocationResultsService(outputs, { FN_INVOCATION_RESULTS_ENABLED: false })
+        it('produces nothing when INSIGHTS_INVOCATION_RESULTS_ENABLED is false', async () => {
+            service = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: false })
 
             const invocation = createExampleInvocation()
             service.queueLifecycleRow(invocation, 'running')
@@ -84,7 +84,7 @@ describe('HogInvocationResultsService', () => {
         })
 
         it('returns false when recording is disabled', async () => {
-            service = new HogInvocationResultsService(outputs, { FN_INVOCATION_RESULTS_ENABLED: false })
+            service = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: false })
             const ok = await service.recordTerminalFailureDurably(createExampleInvocation(), { error: 'boom' })
             expect(ok).toBe(false)
             expect(outputs.produce).not.toHaveBeenCalled()

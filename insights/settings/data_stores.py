@@ -47,18 +47,18 @@ def postgres_config(host: str) -> dict:
 
     return {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_from_env("POSTFN_DB_NAME"),
-        "USER": os.getenv("POSTFN_DB_USER", "postgres"),
-        "PASSWORD": os.getenv("POSTFN_DB_PASSWORD", ""),
+        "NAME": get_from_env("INSIGHTS_DB_NAME"),
+        "USER": os.getenv("INSIGHTS_DB_USER", "postgres"),
+        "PASSWORD": os.getenv("INSIGHTS_DB_PASSWORD", ""),
         "HOST": host,
-        "PORT": os.getenv("POSTFN_POSTGRES_PORT", "5432"),
+        "PORT": os.getenv("INSIGHTS_POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 0,
         "DISABLE_SERVER_SIDE_CURSORS": DISABLE_SERVER_SIDE_CURSORS,
         "SSL_OPTIONS": {
-            "sslmode": os.getenv("POSTFN_POSTGRES_SSL_MODE", None),
-            "sslrootcert": os.getenv("POSTFN_POSTGRES_CLI_SSL_CA", None),
-            "sslcert": os.getenv("POSTFN_POSTGRES_CLI_SSL_CRT", None),
-            "sslkey": os.getenv("POSTFN_POSTGRES_CLI_SSL_KEY", None),
+            "sslmode": os.getenv("INSIGHTS_POSTGRES_SSL_MODE", None),
+            "sslrootcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CA", None),
+            "sslcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CRT", None),
+            "sslkey": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_KEY", None),
         },
         "TEST": {
             "MIRROR": "default",
@@ -89,8 +89,8 @@ if DATABASE_URL:
     if DISABLE_SERVER_SIDE_CURSORS:
         DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
-elif os.getenv("POSTFN_DB_NAME"):
-    DATABASES = {"default": postgres_config(os.getenv("POSTFN_POSTGRES_HOST", "localhost"))}
+elif os.getenv("INSIGHTS_DB_NAME"):
+    DATABASES = {"default": postgres_config(os.getenv("INSIGHTS_POSTGRES_HOST", "localhost"))}
 
     ssl_configurations = []
     for ssl_option, value in DATABASES["default"]["SSL_OPTIONS"].items():
@@ -113,7 +113,7 @@ elif os.getenv("POSTFN_DB_NAME"):
     )
 else:
     raise ImproperlyConfigured(
-        f'The environment vars "DATABASE_URL" or "POSTFN_DB_NAME" are absolutely required to run this software'
+        f'The environment vars "DATABASE_URL" or "INSIGHTS_DB_NAME" are absolutely required to run this software'
     )
 
 DATABASE_ROUTERS: list[str] = []
@@ -121,7 +121,7 @@ DATABASE_ROUTERS: list[str] = []
 # Configure the database which will be used as a read replica.
 # This should have all the same config as our main writer DB, just use a different host.
 # Our database router will point here.
-read_host = os.getenv("POSTFN_POSTGRES_READ_HOST")
+read_host = os.getenv("INSIGHTS_POSTGRES_READ_HOST")
 if read_host:
     DATABASES["replica"] = postgres_config(read_host)
     DATABASE_ROUTERS.append("insights.dbrouter.ReplicaRouter")
@@ -129,13 +129,13 @@ if read_host:
 # Configure a direct database connection bypassing PgBouncer.
 # This allows using PGOPTIONS like lock_timeout which PgBouncer doesn't support.
 # Used for migrations: python manage.py migrate --database=default_direct
-direct_host = os.getenv("POSTFN_POSTGRES_DIRECT_HOST")
+direct_host = os.getenv("INSIGHTS_POSTGRES_DIRECT_HOST")
 if direct_host:
-    # Copy from default database config (works with both DATABASE_URL and POSTFN_DB_NAME setups)
+    # Copy from default database config (works with both DATABASE_URL and INSIGHTS_DB_NAME setups)
     DATABASES["default_direct"] = DATABASES["default"].copy()
     # Override host and port for direct connection (bypassing PgBouncer)
     DATABASES["default_direct"]["HOST"] = direct_host
-    DATABASES["default_direct"]["PORT"] = os.getenv("POSTFN_POSTGRES_DIRECT_PORT", "5432")
+    DATABASES["default_direct"]["PORT"] = os.getenv("INSIGHTS_POSTGRES_DIRECT_PORT", "5432")
     # Disable server-side cursors is not needed for direct connection
     DATABASES["default_direct"]["DISABLE_SERVER_SIDE_CURSORS"] = False
     # Set lock_timeout for migrations to fail fast on lock contention
@@ -302,6 +302,17 @@ DATASTORE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", DATASTORE_
 DATASTORE_USER: str = os.getenv("DATASTORE_USER", "default")
 DATASTORE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", "")
 DATASTORE_DATABASE: str = DATASTORE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", "default")
+
+# Fail closed on a shared-datastore misconfiguration. The `insights` database is
+# co-resident with o11y and analytics on the shared Hanzo Datastore, so falling
+# back to "default" or "system" would point migrations and queries at another
+# tenant's data — a DDL statement there is not recoverable by retrying with the
+# right value. An unset database is a deploy bug, so it stops the process.
+if not TEST and not IS_COLLECT_STATIC and DATASTORE_DATABASE in ("", "default", "system"):
+    raise ImproperlyConfigured(
+        f"DATASTORE_DATABASE must name an explicit Insights database "
+        f"(got {DATASTORE_DATABASE!r}); refusing to run against a shared/system database."
+    )
 DATASTORE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", "insights")
 DATASTORE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", "insights_migrations")
 DATASTORE_SATELLITE_CLUSTERS: list[str] = [
@@ -456,12 +467,16 @@ TOKENS_HISTORICAL_DATA = os.getenv("TOKENS_HISTORICAL_DATA", "").split(",")
 # Hanzo KV is the ONE key/value + cache + celery-broker backend. It speaks the
 # Redis (RESP) wire protocol, so the kv:// URL is normalized to redis:// for the
 # RESP drivers (redis-py / django_redis / celery). Config surface is KV_URL —
-# never REDIS_URL. REDIS_URL below is the derived RESP connection URL, not an env.
+# never REDIS_URL. The REDIS_* names below are derived RESP connection URLs, not
+# env vars: reading REDIS_URL from the environment would be a second way to
+# configure one thing, and the loser would be silent.
 def _kv_to_resp(url: str) -> str:
     """Map Hanzo KV's kv:// scheme to the redis:// RESP wire the driver speaks."""
     return "redis://" + url[len("kv://") :] if url.startswith("kv://") else url
 
 
+# The last case happens on a fresh deploy that has not provisioned KV yet:
+# collectstatic runs before there is anything to connect to.
 if TEST or DEBUG or IS_COLLECT_STATIC:
     if PYTEST_XDIST_WORKER_NUM is not None:
         KV_URL = os.getenv("KV_URL", f"kv://localhost/{PYTEST_XDIST_WORKER_NUM}")
@@ -500,10 +515,11 @@ if get_from_env("INSIGHTS_REPLAY_VISION_KV_HOST", ""):
         )
     )
 
-# The LLM gateway caches per-team quota state in its own KV instance
-# (llm_gateway/services/quota_resolver.py). The central default only suits
-# single-instance setups; cloud must point this at the gateway's own.
-LLM_GATEWAY_REDIS_URL = _kv_to_resp(os.getenv("LLM_GATEWAY_KV_URL", KV_URL))
+# The LLM gateway caches per-team quota state in its own store (llm_gateway/services/quota_resolver.py).
+# The central default only suits single-instance setups; cloud must point this at the gateway's own.
+# Kept under its upstream name like the other optional secondary pools below: only the primary
+# connection and the INSIGHTS_-prefixed family are ours to name.
+LLM_GATEWAY_REDIS_URL = os.getenv("LLM_GATEWAY_REDIS_URL", REDIS_URL)
 
 if not REDIS_URL:
     raise ImproperlyConfigured(

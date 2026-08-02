@@ -67,9 +67,9 @@ export const describerFor = (logItem?: ActivityLogItem): Describer | undefined =
             return dashboardActivityDescriber
         case ActivityScope.FEATURE_FLAG:
             return flagActivityDescriber
-        case ActivityScope.FN_FUNCTION:
+        case ActivityScope.INSIGHTS_FUNCTION:
             return insightsFunctionActivityDescriber
-        case ActivityScope.FN_FLOW:
+        case ActivityScope.INSIGHTS_FLOW:
             return workflowActivityDescriber
         case ActivityScope.COHORT:
             return cohortActivityDescriber

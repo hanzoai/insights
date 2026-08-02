@@ -51,10 +51,10 @@ from insights.models.integration import (
     ANTHROPIC_WORKSPACE_LABEL_MAX_LENGTH,
     ERROR_TOKEN_REFRESH_FAILED,
     GITHUB_REPOSITORY_REFRESH_COOLDOWN_SECONDS,
-    POSTFN_CONNECT_ALLOWED_REGIONS,
-    POSTFN_CONNECT_DEFAULT_SCOPES,
-    POSTFN_CONNECT_GRANTABLE_SCOPES,
-    POSTFN_CONNECT_KIND,
+    INSIGHTS_CONNECT_ALLOWED_REGIONS,
+    INSIGHTS_CONNECT_DEFAULT_SCOPES,
+    INSIGHTS_CONNECT_GRANTABLE_SCOPES,
+    INSIGHTS_CONNECT_KIND,
     SLACK_INTEGRATION_KINDS,
     AnthropicIntegration,
     ApplePushIntegration,
@@ -414,7 +414,7 @@ class IntegrationSerializer(serializers.ModelSerializer, UserAccessControlSerial
         read_only_fields = ["id", "created_at", "created_by", "errors", "display_name"]
 
     def validate_kind(self, value: str) -> str:
-        if value == Integration.IntegrationKind.SLACK_POSTFN_CODE.value:
+        if value == Integration.IntegrationKind.SLACK_INSIGHTS_CODE.value:
             raise ValidationError("This integration kind is deprecated and can no longer be created.")
         return value
 
@@ -1017,7 +1017,7 @@ class IntegrationViewSet(
         # creator. Unlike team-shared integrations, don't expose other members' connections in
         # list/retrieve — scope `insights` rows to the requesting user. Other kinds stay team-visible.
         user_id = getattr(self.request.user, "id", None)
-        return queryset.exclude(Q(kind=POSTFN_CONNECT_KIND) & ~Q(created_by_id=user_id))
+        return queryset.exclude(Q(kind=INSIGHTS_CONNECT_KIND) & ~Q(created_by_id=user_id))
 
     def handle_exception(self, exc: Exception) -> Response:
         # GitHub rate limits surface from any GitHub-backed action (teams, repos, branches, refresh);
@@ -1138,16 +1138,16 @@ class IntegrationViewSet(
             scopes: list[str] | None = None
             if kind == "insights":
                 region = (request.GET.get("region") or "").upper()
-                if region not in POSTFN_CONNECT_ALLOWED_REGIONS:
-                    raise ValidationError(f"region must be one of {', '.join(POSTFN_CONNECT_ALLOWED_REGIONS)}")
+                if region not in INSIGHTS_CONNECT_ALLOWED_REGIONS:
+                    raise ValidationError(f"region must be one of {', '.join(INSIGHTS_CONNECT_ALLOWED_REGIONS)}")
                 raw_scopes = (request.GET.get("scopes") or "").strip()
                 if raw_scopes == "full":
-                    scopes = sorted(POSTFN_CONNECT_GRANTABLE_SCOPES)
+                    scopes = sorted(INSIGHTS_CONNECT_GRANTABLE_SCOPES)
                 elif raw_scopes == "read_only":
-                    scopes = sorted(s for s in POSTFN_CONNECT_GRANTABLE_SCOPES if s.endswith(":read"))
+                    scopes = sorted(s for s in INSIGHTS_CONNECT_GRANTABLE_SCOPES if s.endswith(":read"))
                 else:
-                    scopes = [s for s in re.split(r"[,\s]+", raw_scopes) if s] or list(POSTFN_CONNECT_DEFAULT_SCOPES)
-                    invalid = [s for s in scopes if s not in POSTFN_CONNECT_GRANTABLE_SCOPES]
+                    scopes = [s for s in re.split(r"[,\s]+", raw_scopes) if s] or list(INSIGHTS_CONNECT_DEFAULT_SCOPES)
+                    invalid = [s for s in scopes if s not in INSIGHTS_CONNECT_GRANTABLE_SCOPES]
                     if invalid:
                         raise ValidationError(f"Unsupported connection scopes: {', '.join(invalid)}")
             try:

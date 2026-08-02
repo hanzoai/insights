@@ -94,7 +94,7 @@ export class RequestContext {
                 baseUrl = customApiBaseUrl
             } else if (process.env.NODE_ENV === 'production') {
                 throw new Error(
-                    'POSTFN_API_BASE_URL must be set in production — Hono deployments are regional and do not auto-detect.'
+                    'INSIGHTS_API_BASE_URL must be set in production — Hono deployments are regional and do not auto-detect.'
                 )
             } else {
                 baseUrl = 'http://localhost:8010'

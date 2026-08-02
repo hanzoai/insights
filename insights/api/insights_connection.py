@@ -31,7 +31,7 @@ from rest_framework.throttling import BaseThrottle
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication, SessionAuthentication
-from insights.models.integration import POSTFN_CONNECT_KIND, Integration, OauthIntegration, insights_connect_base_url
+from insights.models.integration import INSIGHTS_CONNECT_KIND, Integration, OauthIntegration, insights_connect_base_url
 from insights.permissions import get_authenticator_scopes
 from insights.rate_limit import InsightsConnectionForwardThrottle
 
@@ -165,7 +165,7 @@ class InsightsConnectionViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet)
         if pk is None:
             raise NotFound("No Insights connection with that id in this project.")
         try:
-            integration = Integration.objects.get(team_id=self.team_id, id=pk, kind=POSTFN_CONNECT_KIND)
+            integration = Integration.objects.get(team_id=self.team_id, id=pk, kind=INSIGHTS_CONNECT_KIND)
         except (Integration.DoesNotExist, ValueError, ValidationError):
             raise NotFound("No Insights connection with that id in this project.")
         # A connection acts as the user who consented to it. Restrict use to that user so a broad,

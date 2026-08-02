@@ -20,7 +20,7 @@ export function TicketsList({ selectedTicketId = null }: TicketsListProps): JSX.
     const { tickets, ticketsLoading, canCreateTicket } = useValues(sidepanelTicketsLogic)
     const { setCurrentTicket, setView } = useActions(sidepanelTicketsLogic)
 
-    const hasIdentityMode = !!window.JS_POSTFN_IDENTITY_DISTINCT_ID
+    const hasIdentityMode = !!window.JS_INSIGHTS_IDENTITY_DISTINCT_ID
 
     if (!hasIdentityMode && (!insights.conversations || !insights.conversations.isAvailable())) {
         return (

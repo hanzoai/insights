@@ -62,12 +62,12 @@ For Claude Code, one entry per region you support:
     "insights-us": {
       "type": "http",
       "url": "https://mcp.hanzo.ai/mcp",
-      "headers": { "Authorization": "Bearer ${POSTFN_SUPPORT_PAT_US}" }
+      "headers": { "Authorization": "Bearer ${INSIGHTS_SUPPORT_PAT_US}" }
     },
     "insights-eu": {
       "type": "http",
       "url": "https://mcp.hanzo.ai/mcp",
-      "headers": { "Authorization": "Bearer ${POSTFN_SUPPORT_PAT_EU}" }
+      "headers": { "Authorization": "Bearer ${INSIGHTS_SUPPORT_PAT_EU}" }
     }
   }
 }

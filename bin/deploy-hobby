@@ -7,7 +7,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Automatically restart without asking.
 # this gets around needrestart command halting for user input
 export RESTART_MODE=l
-export POSTFN_APP_TAG="${POSTFN_APP_TAG:-latest}"
+export INSIGHTS_APP_TAG="${INSIGHTS_APP_TAG:-latest}"
 
 # Talk to the user
 echo "Welcome to the single instance Insights installer 🦔"
@@ -20,17 +20,17 @@ echo ""
 
 if [ -n "$1" ]
 then
-    export POSTFN_APP_TAG=$1
+    export INSIGHTS_APP_TAG=$1
 else
     echo "What version of Insights would you like to install? (We default to 'latest')"
     echo "You can check out available versions here: https://hub.docker.com/r/insights/insights/tags"
-    read -r POSTFN_APP_TAG_READ
-    if [ -z "$POSTFN_APP_TAG_READ" ]
+    read -r INSIGHTS_APP_TAG_READ
+    if [ -z "$INSIGHTS_APP_TAG_READ" ]
     then
-        echo "Using default and installing $POSTFN_APP_TAG"
+        echo "Using default and installing $INSIGHTS_APP_TAG"
     else
-        export POSTFN_APP_TAG=$POSTFN_APP_TAG_READ
-        echo "Using provided tag: $POSTFN_APP_TAG"
+        export INSIGHTS_APP_TAG=$INSIGHTS_APP_TAG_READ
+        echo "Using provided tag: $INSIGHTS_APP_TAG"
     fi
 fi
 
@@ -81,14 +81,14 @@ sudo apt install -y git
 git clone --filter=blob:none https://github.com/Insights/insights.git &> /dev/null || true
 cd insights
 
-if [[ "$POSTFN_APP_TAG" = "latest-release" ]]
+if [[ "$INSIGHTS_APP_TAG" = "latest-release" ]]
 then
     git fetch --tags
     latestReleaseTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     echo "Checking out latest Insights release: $latestReleaseTag"
     echo "Warning Insights don't create tagged releases anymore. It's way better to use 'latest' than 'latest-release'"
     git checkout "$latestReleaseTag"
-elif [[ "$POSTFN_APP_TAG" = "latest" ]]
+elif [[ "$INSIGHTS_APP_TAG" = "latest" ]]
 then
     echo "Fetching latest changes from origin"
     git fetch origin
@@ -100,12 +100,12 @@ then
         echo "On detached HEAD: $(git rev-parse --short HEAD)"
     fi
     echo "Now on commit: $(git rev-parse --short HEAD)"
-elif [[ "$POSTFN_APP_TAG" =~ ^[0-9a-f]{40}$ ]]
+elif [[ "$INSIGHTS_APP_TAG" =~ ^[0-9a-f]{40}$ ]]
 then
-    echo "Checking out specific commit hash: $POSTFN_APP_TAG"
-    git checkout "$POSTFN_APP_TAG"
+    echo "Checking out specific commit hash: $INSIGHTS_APP_TAG"
+    git checkout "$INSIGHTS_APP_TAG"
 else
-    releaseTag="${POSTFN_APP_TAG/release-/""}"
+    releaseTag="${INSIGHTS_APP_TAG/release-/""}"
     git fetch --tags
     echo "Checking out Insights release: $releaseTag"
     git checkout "$releaseTag"
@@ -124,7 +124,7 @@ then
 fi
 
 # Write .env only on a fresh install. On a re-run (e.g. after a partial
-# failure) preserve the existing file, so POSTFN_SECRET and
+# failure) preserve the existing file, so INSIGHTS_SECRET and
 # ENCRYPTION_SALT_KEYS are not regenerated, as it would invalidate active
 # sessions and corrupt encrypted data on a live instance.
 # Mirrors the FileExists(".env") guard in bin/hobby-installer.
@@ -152,14 +152,14 @@ else
         echo
     fi
 
-    POSTFN_SECRET=$(head -c 28 /dev/urandom | sha224sum -b | head -c 56)
+    INSIGHTS_SECRET=$(head -c 28 /dev/urandom | sha224sum -b | head -c 56)
     ENCRYPTION_SALT_KEYS=$(openssl rand -hex 16)
     # Dedicated browserless token so a compromise of the rendering container can't yield
-    # Django's SECRET_KEY (the compose file falls back to POSTFN_SECRET when unset, for
+    # Django's SECRET_KEY (the compose file falls back to INSIGHTS_SECRET when unset, for
     # installs whose .env predates this variable).
     BROWSERLESS_SECRET=$(openssl rand -hex 32)
     cat > .env <<EOF
-POSTFN_SECRET=$POSTFN_SECRET
+INSIGHTS_SECRET=$INSIGHTS_SECRET
 ENCRYPTION_SALT_KEYS=$ENCRYPTION_SALT_KEYS
 BROWSERLESS_SECRET=$BROWSERLESS_SECRET
 DOMAIN=$DOMAIN
@@ -167,7 +167,7 @@ TLS_BLOCK=$TLS_BLOCK
 REGISTRY_URL=$REGISTRY_URL
 CADDY_TLS_BLOCK=$TLS_BLOCK
 CADDY_HOST="$DOMAIN, http://, https://"
-POSTFN_APP_TAG=$POSTFN_APP_TAG
+INSIGHTS_APP_TAG=$INSIGHTS_APP_TAG
 EOF
     # Only persist AI keys that were actually provided — skip writing a blank
     # ANTHROPIC_API_KEY= line that would just clutter .env with an empty assignment.

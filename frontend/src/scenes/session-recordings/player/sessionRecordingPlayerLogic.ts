@@ -1943,7 +1943,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
 
                 // For video export: expose resolution via global variable
                 if (typeof window !== 'undefined') {
-                    ;(window as any).__POSTFN_RESOLUTION__ = resolution
+                    ;(window as any).__INSIGHTS_RESOLUTION__ = resolution
                 }
 
                 return resolution

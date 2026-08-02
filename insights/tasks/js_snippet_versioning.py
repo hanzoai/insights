@@ -13,7 +13,7 @@ logger = structlog.get_logger(__name__)
 @shared_task(ignore_result=True, queue=CeleryQueue.DEFAULT.value)
 def sync_js_snippet_manifest() -> None:
     """Read versions.json from S3, compute pointer map, update Redis if changed."""
-    if not settings.POSTFN_JS_S3_BUCKET:
+    if not settings.INSIGHTS_JS_S3_BUCKET:
         return
 
     try:

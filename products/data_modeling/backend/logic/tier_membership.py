@@ -16,7 +16,7 @@ from datetime import timedelta
 
 from temporalio.client import Client, ScheduleActionStartWorkflow, ScheduleListActionStartWorkflow
 
-from insights.temporal.common.search_attributes import POSTFN_DAG_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_DAG_ID_KEY
 
 from products.data_modeling.backend.logic.cohort_scheduling import bucket_into_cadence_tiers, is_tier_schedule_id
 from products.data_modeling.backend.logic.freshness import (
@@ -94,7 +94,7 @@ async def _decode_node_ids(temporal: Client, action: object) -> list[str] | None
 async def read_live_tiers(temporal: Client, dag_id: str) -> list[LiveTier]:
     """List a DAG's execute-dag schedules and read each one's live node set from Temporal."""
     tiers: list[LiveTier] = []
-    schedules = await temporal.list_schedules(query=f"{POSTFN_DAG_ID_KEY.name} = '{dag_id}'")
+    schedules = await temporal.list_schedules(query=f"{INSIGHTS_DAG_ID_KEY.name} = '{dag_id}'")
     async for listing in schedules:
         action = listing.schedule.action if listing.schedule else None
         if not (

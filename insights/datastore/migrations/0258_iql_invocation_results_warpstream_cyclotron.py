@@ -4,8 +4,8 @@ from insights.models.hog_invocation_results.sql import (
     DISTRIBUTED_FN_INVOCATION_RESULTS_TABLE_SQL,
     DROP_FN_INVOCATION_RESULTS_MV_SQL,
     DROP_KAFKA_FN_INVOCATION_RESULTS_TABLE_SQL,
-    FN_INVOCATION_RESULTS_DATA_TABLE_SQL,
-    FN_INVOCATION_RESULTS_MV_SQL,
+    INSIGHTS_INVOCATION_RESULTS_DATA_TABLE_SQL,
+    INSIGHTS_INVOCATION_RESULTS_MV_SQL,
     KAFKA_FN_INVOCATION_RESULTS_TABLE_SQL,
 )
 
@@ -24,7 +24,7 @@ from insights.models.hog_invocation_results.sql import (
 operations = [
     # Ensure the local data table the MV targets exists.
     run_sql_with_exceptions(
-        FN_INVOCATION_RESULTS_DATA_TABLE_SQL(),
+        INSIGHTS_INVOCATION_RESULTS_DATA_TABLE_SQL(),
         node_roles=[NodeRole.AUX],
     ),
     # Drop the MV first — it reads from the Kafka engine table.
@@ -43,7 +43,7 @@ operations = [
     ),
     # Recreate the MV (kafka -> data table).
     run_sql_with_exceptions(
-        FN_INVOCATION_RESULTS_MV_SQL(),
+        INSIGHTS_INVOCATION_RESULTS_MV_SQL(),
         node_roles=[NodeRole.AUX],
     ),
     # Ensure the distributed read alias exists (InsightsQL queries resolve through it).

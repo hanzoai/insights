@@ -780,7 +780,7 @@ def _emit_shard_span(
 
 # Each token receives an identical copy of the spans (trace IDs are deterministic) —
 # transitional dual emission while CI telemetry moves projects.
-TOKEN_ENV_VARS = ("POSTFN_DEVEX_PROJECT_API_TOKEN", "POSTFN_CI_TRACES_EXTRA_TOKEN")
+TOKEN_ENV_VARS = ("INSIGHTS_DEVEX_PROJECT_API_TOKEN", "INSIGHTS_CI_TRACES_EXTRA_TOKEN")
 
 
 def emission_tokens(env: Mapping[str, str]) -> list[str]:
@@ -806,8 +806,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--otlp-endpoint",
-        default=os.environ.get("POSTFN_OTLP_TRACES_ENDPOINT", DEFAULT_OTLP_ENDPOINT),
-        help=f"OTLP /v1/traces endpoint (default: $POSTFN_OTLP_TRACES_ENDPOINT or {DEFAULT_OTLP_ENDPOINT})",
+        default=os.environ.get("INSIGHTS_OTLP_TRACES_ENDPOINT", DEFAULT_OTLP_ENDPOINT),
+        help=f"OTLP /v1/traces endpoint (default: $INSIGHTS_OTLP_TRACES_ENDPOINT or {DEFAULT_OTLP_ENDPOINT})",
     )
     parser.add_argument("--dry-run", action="store_true", help="parse and summarize, do not emit")
     parser.add_argument(

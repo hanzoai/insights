@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 
 
 def _dev_sandbox_enabled() -> bool:
-    """Dev filesystem sandbox is on by default; opt out with POSTFN_DEV_SANDBOX=0 (strict)."""
-    return os.getenv("POSTFN_DEV_SANDBOX") != "0"
+    """Dev filesystem sandbox is on by default; opt out with INSIGHTS_DEV_SANDBOX=0 (strict)."""
+    return os.getenv("INSIGHTS_DEV_SANDBOX") != "0"
 
 
 class DevenvConfig(BaseModel):
@@ -94,7 +94,7 @@ def _build_docker_compose_shell(profiles: list[str]) -> str:
         "exit 1"
     )
     dev_cmd = f'{up_cmd} || {{ {fail_cmd}; }} && echo "{_READY_MARKER}" && {logs_cmd}'
-    return f'if [ "${{POSTFN_SANDBOX:-}}" = "1" ]; then {sandbox_cmd}; else {dev_cmd}; fi'
+    return f'if [ "${{INSIGHTS_SANDBOX:-}}" = "1" ]; then {sandbox_cmd}; else {dev_cmd}; fi'
 
 
 # bin/mprocs.yaml has no intent resolution: every proc in it autostarts, so it
@@ -344,7 +344,7 @@ class MprocsGenerator(ConfigGenerator):
         reset = r"\033[0m"
 
         # Reflect the *effective* dependency-sandbox state: on by default (opt out
-        # with POSTFN_DEV_SANDBOX=0) AND on macOS with sandbox-exec (the wrapper
+        # with INSIGHTS_DEV_SANDBOX=0) AND on macOS with sandbox-exec (the wrapper
         # no-ops elsewhere). Mirrors the gate in _add_sandbox_wrapper, so the banner
         # can't claim isolation the platform won't deliver.
         sandbox_enabled = _dev_sandbox_enabled()
@@ -354,7 +354,7 @@ class MprocsGenerator(ConfigGenerator):
         elif sandbox_enabled:
             sandbox_status = f"{gray}off — unsupported on this platform{reset}"
         else:
-            sandbox_status = f"{gray}off{reset} {gray}(POSTFN_DEV_SANDBOX=0; unset to re-enable){reset}"
+            sandbox_status = f"{gray}off{reset} {gray}(INSIGHTS_DEV_SANDBOX=0; unset to re-enable){reset}"
 
         news_url = "https://raw.githubusercontent.com/insights/insights/master/devenv/news.txt"
         news_local = "devenv/news.txt"
@@ -378,7 +378,7 @@ printf '{gray}  ─────────────────────�
 printf '  {bold}Path:{reset}      {gray}%s{reset}\\n' "${{REPOSITORY_ROOT:-$PWD}}"
 printf '  {bold}Products:{reset}  {blue}{", ".join(products)}{reset}\\n'
 printf '  {bold}Processes:{reset} {process_count} active\\n'
-if [ -n "${{_POSTFN_OP_RESOLVED:-}}" ]; then
+if [ -n "${{_INSIGHTS_OP_RESOLVED:-}}" ]; then
     printf '  {bold}Secrets:{reset}   {blue}1Password{reset} {gray}(op run){reset}\\n'
 else
     printf '  {bold}Secrets:{reset}   {gray}local .env files{reset}\\n'
@@ -511,13 +511,13 @@ printf '  {gray}Run {reset}{blue}insightscli dev:setup{reset}{gray} to tailor th
 
     # Procs excluded from the sandbox by default: they need the docker socket the
     # profile denies (e.g. temporal-worker running Insights Desktop tasks with
-    # SANDBOX_PROVIDER=docker). POSTFN_DEV_SANDBOX_EXCLUDE adds more on top.
+    # SANDBOX_PROVIDER=docker). INSIGHTS_DEV_SANDBOX_EXCLUDE adds more on top.
     _SANDBOX_DEFAULT_EXCLUDES = frozenset({"temporal-worker"})
 
     def _add_sandbox_wrapper(self, proc_config: dict[str, Any], name: str = "") -> dict[str, Any]:
         """Wrap a service command in bin/dev-sandbox (macOS Seatbelt) by default.
 
-        On by default; opt out globally with POSTFN_DEV_SANDBOX=0 (e.g. in
+        On by default; opt out globally with INSIGHTS_DEV_SANDBOX=0 (e.g. in
         .env.local). A proc is wrapped only if it declares ``sandbox: true`` in the
         registry — an explicit, reviewable per-proc boundary rather than one inferred
         from the cosmetic ``groups.tech`` field (which is optional, so a forgotten
@@ -528,7 +528,7 @@ printf '  {gray}Run {reset}{blue}insightscli dev:setup{reset}{gray} to tailor th
 
         Some procs are excluded by default (``_SANDBOX_DEFAULT_EXCLUDES``) because
         they need the docker socket the profile denies, e.g. temporal-worker running
-        Insights Desktop tasks with SANDBOX_PROVIDER=docker. POSTFN_DEV_SANDBOX_EXCLUDE
+        Insights Desktop tasks with SANDBOX_PROVIDER=docker. INSIGHTS_DEV_SANDBOX_EXCLUDE
         (comma-separated proc names) opts additional procs back out. Excluded procs
         run fully unsandboxed, so the dependency-isolation guarantee no longer covers
         them.
@@ -547,7 +547,7 @@ printf '  {gray}Run {reset}{blue}insightscli dev:setup{reset}{gray} to tailor th
         # emitted proc config (which phrocs/mprocs would otherwise see).
         should_sandbox = bool(proc_config.pop("sandbox", False))
         excluded = set(self._SANDBOX_DEFAULT_EXCLUDES)
-        excluded |= {p.strip() for p in os.getenv("POSTFN_DEV_SANDBOX_EXCLUDE", "").split(",") if p.strip()}
+        excluded |= {p.strip() for p in os.getenv("INSIGHTS_DEV_SANDBOX_EXCLUDE", "").split(",") if p.strip()}
         if not _dev_sandbox_enabled() or not should_sandbox or (name and name in excluded):
             return proc_config
 

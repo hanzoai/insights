@@ -250,7 +250,7 @@ To force-push after a rebase/conflict fix: call the git_signed_rewrite tool.
 
 Agents should stage changes with `git add`, then use the `git_signed_commit` tool to create signed commits. For force-pushing after a rebase or conflict resolution, use the `git_signed_rewrite` tool instead.
 
-**Debugging escape hatch**: Set `POSTFN_ALLOW_UNSIGNED_GIT=1` in the sandbox environment to bypass this restriction. This is intended for debugging only and should not be used in production.
+**Debugging escape hatch**: Set `INSIGHTS_ALLOW_UNSIGNED_GIT=1` in the sandbox environment to bypass this restriction. This is intended for debugging only and should not be used in production.
 
 ### Sandbox isolation
 

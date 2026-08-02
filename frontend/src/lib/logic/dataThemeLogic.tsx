@@ -190,8 +190,8 @@ export const dataThemeLogic = kea<dataThemeLogicType>([
         ],
     }),
     afterMount(({ actions }) => {
-        if (typeof window !== 'undefined' && window.POSTFN_RENDER_QUERY_PAYLOAD?.themes) {
-            actions.setThemes(window.POSTFN_RENDER_QUERY_PAYLOAD?.themes)
+        if (typeof window !== 'undefined' && window.INSIGHTS_RENDER_QUERY_PAYLOAD?.themes) {
+            actions.setThemes(window.INSIGHTS_RENDER_QUERY_PAYLOAD?.themes)
         } else {
             actions.loadThemes()
         }

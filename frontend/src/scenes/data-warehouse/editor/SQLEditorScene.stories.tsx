@@ -10,7 +10,7 @@ import { AccessControlLevel, AccessControlResourceType } from '~/types'
 // The SQL editor scene gates on warehouse-objects access; grant it on the storybook app context
 // before the story mounts and restore the original on unmount so story order can't leak.
 const grantWarehouseAccess: Decorator = function GrantWarehouseAccess(Story): JSX.Element {
-    const appContext = (window as any).POSTFN_APP_CONTEXT
+    const appContext = (window as any).INSIGHTS_APP_CONTEXT
     const original = useRef<{ value: unknown }>()
     if (appContext && !original.current) {
         original.current = { value: appContext.resource_access_control }

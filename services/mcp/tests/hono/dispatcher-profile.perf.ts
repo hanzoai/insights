@@ -179,9 +179,9 @@ describe('McpDispatcher profiling', () => {
         originalFetch = globalThis.fetch
         globalThis.fetch = createMockFetch()
 
-        process.env.POSTFN_API_BASE_URL = 'http://localhost:19876'
-        process.env.POSTFN_ANALYTICS_API_KEY = 'phc_test'
-        process.env.POSTFN_ANALYTICS_HOST = 'http://localhost:19876'
+        process.env.INSIGHTS_API_BASE_URL = 'http://localhost:19876'
+        process.env.INSIGHTS_ANALYTICS_API_KEY = 'phc_test'
+        process.env.INSIGHTS_ANALYTICS_HOST = 'http://localhost:19876'
 
         const redis = new MockRedis()
         catalog = new ToolCatalog()
