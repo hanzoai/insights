@@ -11,6 +11,9 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
     testDir: '.',
+    // live/ targets a DEPLOYED insights and has its own config. Collecting it here
+    // would point production tests at localhost and fail the local suite.
+    testIgnore: 'live/**',
     /* 
         Maximum time one test can run for. 
         Shorter timeout in local dev since it's annoying to wait 90 seconds for a test to run.
