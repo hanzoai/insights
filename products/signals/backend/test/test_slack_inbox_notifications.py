@@ -33,7 +33,7 @@ from products.signals.backend.slack_inbox_notifications import (
 )
 from products.signals.backend.tasks import send_reviewer_added_slack_notifications
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 @pytest.mark.parametrize(

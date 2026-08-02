@@ -15,8 +15,8 @@ from insights.models.team.team_caching import get_team_in_cache, set_team_in_cac
 from insights.models.user import User
 
 from ee.models.explicit_team_membership import ExplicitTeamMembership
-from ee.models.rbac.access_control import AccessControl
-from ee.models.rbac.role import Role, RoleMembership
+from insights.models.ee_models import AccessControl
+from insights.models.ee_models import Role, RoleMembership
 
 
 class TestCoreEvent(BaseTest):

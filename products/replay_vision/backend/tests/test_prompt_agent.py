@@ -29,7 +29,7 @@ from products.replay_vision.backend.prompt_suggestions import (
 from products.replay_vision.backend.proposers import get_proposer
 from products.replay_vision.backend.tests.test_api import _VisionAPITestCase
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 def _call(name: str, args: dict[str, Any]) -> types.FunctionCall:

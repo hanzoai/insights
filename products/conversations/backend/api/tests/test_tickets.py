@@ -36,8 +36,8 @@ from products.conversations.backend.models.constants import Channel, ChannelDeta
 from products.conversations.backend.person_lookup import PERSON_EMAIL_LOOKUP_QUERY, _get_persons_by_email
 
 from ee.datastore.materialized_columns.columns import get_bloom_filter_lower_index_name
-from ee.models.rbac.access_control import AccessControl
-from ee.models.rbac.role import Role
+from insights.models.ee_models import AccessControl
+from insights.models.ee_models import Role
 
 
 # Patch on_commit to execute immediately in tests

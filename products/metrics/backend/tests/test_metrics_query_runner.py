@@ -29,7 +29,7 @@ from products.metrics.backend.facade.enums import AttributeScope, FilterOp, Metr
 from products.metrics.backend.insightsql_queries.metrics_query_runner import MetricsQueryRunner
 from products.metrics.backend.tests._seeder import seed_metric
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestMetricsQueryRunner(DatastoreTestMixin, APIBaseTest):

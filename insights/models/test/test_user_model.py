@@ -10,7 +10,7 @@ from insights.models import Team, User
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.user import default_ui_configuration_for_new_users
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestUser(BaseTest):

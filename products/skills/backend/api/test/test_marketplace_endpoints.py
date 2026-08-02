@@ -20,7 +20,7 @@ from insights.models.organization import Organization, OrganizationMembership
 from insights.models.team import Team
 from insights.models.utils import hash_key_value
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 from ...api.skill_serializers import validate_skill_file_path
 from ...api.skill_services import archive_skill

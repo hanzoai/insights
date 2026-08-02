@@ -96,7 +96,7 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         approver_roles = policy.get("roles", [])
         if approver_roles:
             try:
-                from ee.models.rbac.role import RoleMembership
+                from insights.models.ee_models import RoleMembership
 
                 # Coerce both sides to strings: role IDs come back from the policy snapshot as JSON strings
                 # but RoleMembership.role_id is a UUID, so a raw set intersection always misses.
@@ -231,7 +231,7 @@ class ApprovalPolicySerializer(serializers.ModelSerializer):
             return value
 
         try:
-            from ee.models.rbac.role import Role
+            from insights.models.ee_models import Role
         except ImportError:
             raise serializers.ValidationError("RBAC roles are not available")
 

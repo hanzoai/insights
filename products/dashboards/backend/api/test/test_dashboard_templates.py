@@ -21,7 +21,7 @@ from products.dashboards.backend.api.dashboard_templates import (
 )
 from products.dashboards.backend.models.dashboard_templates import DashboardTemplate
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 def assert_template_equals(received, expected):

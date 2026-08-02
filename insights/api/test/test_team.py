@@ -42,7 +42,7 @@ from insights.utils import get_instance_realm
 
 from products.dashboards.backend.models.dashboard import Dashboard
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 def team_api_test_factory():
@@ -1315,7 +1315,7 @@ def team_api_test_factory():
         def test_can_complete_product_onboarding_as_member(
             self, mock_report_user_action: MagicMock, mock_report_user_action_legacy_endpoint: MagicMock
         ) -> None:
-            from ee.models.rbac.access_control import AccessControl
+            from insights.models.ee_models import AccessControl
 
             self.organization_membership.level = OrganizationMembership.Level.MEMBER
             self.organization_membership.save()
