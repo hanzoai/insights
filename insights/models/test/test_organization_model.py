@@ -130,10 +130,22 @@ class TestOrganization(BaseTest):
         ):
             assert not new_org.is_feature_available(feature), feature
 
-    def test_each_organization_gets_its_own_feature_list(self):
-        # Assigning the module-level list itself would let one org's edit reach every org.
-        new_org, _, _ = Organization.objects.bootstrap(self.user)
-        assert new_org.update_available_product_features() is not PRODUCT_FEATURES
+    def test_each_organization_gets_its_own_feature_entries(self):
+        """Down to the entries, not just the list holding them.
+
+        A shallow copy passes an identity check on the list and still shares every dict inside it,
+        so editing one organization's entry would edit every organization's and the constant.
+        """
+        one = Organization(name="one")
+        another = Organization(name="another")
+        one.update_available_product_features()
+        another.update_available_product_features()
+
+        assert one.available_product_features is not PRODUCT_FEATURES
+        one.available_product_features[0]["limit"] = 999
+
+        assert another.available_product_features[0]["limit"] is None
+        assert PRODUCT_FEATURES[0]["limit"] is None
 
     def test_session_age_caching(self):
         # Test caching when session_cookie_age is set
