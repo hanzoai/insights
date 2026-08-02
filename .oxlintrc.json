@@ -123,10 +123,6 @@
                         "message": "use utility classes instead"
                     },
                     {
-                        "element": "Tabs",
-                        "message": "use <Tabs> instead"
-                    },
-                    {
                         "element": "Space",
                         "message": "use flex or space utility classes instead"
                     },
@@ -135,24 +131,8 @@
                         "message": "use Spinner instead"
                     },
                     {
-                        "element": "Badge",
-                        "message": "use Badge instead"
-                    },
-                    {
                         "element": "InputNumber",
                         "message": "use Input with type=\"number\" instead"
-                    },
-                    {
-                        "element": "Collapse",
-                        "message": "use <Collapse> instead"
-                    },
-                    {
-                        "element": "Slider",
-                        "message": "use <Slider> instead"
-                    },
-                    {
-                        "element": "Checkbox",
-                        "message": "use <Checkbox> instead"
                     },
                     {
                         "element": "MonacoEditor",
@@ -175,10 +155,6 @@
                         "message": "use <Link> instead"
                     },
                     {
-                        "element": "Tag",
-                        "message": "use <Tag> instead"
-                    },
-                    {
                         "element": "Alert",
                         "message": "use <Banner> instead"
                     },
@@ -187,40 +163,8 @@
                         "message": "use <JSONViewer> for dark mode support instead"
                     },
                     {
-                        "element": "Radio",
-                        "message": "use <Radio> instead"
-                    },
-                    {
-                        "element": "Skeleton",
-                        "message": "use <Skeleton> instead"
-                    },
-                    {
-                        "element": "Divider",
-                        "message": "use <Divider> instead"
-                    },
-                    {
                         "element": "Popconfirm",
                         "message": "use <Dialog> instead"
-                    },
-                    {
-                        "element": "Button",
-                        "message": "use <Button> instead"
-                    },
-                    {
-                        "element": "Input",
-                        "message": "use <Input> instead"
-                    },
-                    {
-                        "element": "Modal",
-                        "message": "use <Modal> or <Dialog> instead"
-                    },
-                    {
-                        "element": "Select",
-                        "message": "use <Select> instead"
-                    },
-                    {
-                        "element": "Progress",
-                        "message": "use <Progress> instead"
                     }
                 ]
             }
