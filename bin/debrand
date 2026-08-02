@@ -640,6 +640,33 @@ def licences_unlaundered(root: str) -> int:
     return 1 if hit else 0
 
 
+# The notice MIT obliges us to carry, and the file that has to carry it.
+REQUIRED_NOTICE = "PostHog Inc."
+LICENCE_PATH = "LICENSE"
+
+
+def licence_notice_survives(root: str) -> int:
+    """Refuse a LICENSE that has dropped the notice MIT obliges us to pass on.
+
+    The other half of the invariant above: laundering rewrites the holder's
+    name, this catches it being removed outright, and a rewrite that collapses
+    two copyright lines into one does both at once. Either way the file still
+    reads as a valid licence, so it is asserted positively rather than left to
+    the absence of a rule.
+    """
+    path = os.path.join(root, LICENCE_PATH)
+    if not os.path.exists(path):
+        print(f"FAIL: {LICENCE_PATH} is missing")
+        return 1
+    if REQUIRED_NOTICE not in open(path, encoding="utf-8").read():
+        print(
+            f"FAIL: {LICENCE_PATH} no longer carries the upstream copyright notice "
+            f"({REQUIRED_NOTICE!r}). MIT grants us the code on condition it travels with it."
+        )
+        return 1
+    return 0
+
+
 def path_rules_have_content_counterparts() -> int:
     """Refuse a path rename that content rewriting does not make.
 
@@ -688,6 +715,7 @@ def check(root: str) -> int:
     if attribution:
         print(f"attribution: {len(attribution)} licence files name the upstream, as MIT requires")
     bad += licences_unlaundered(root)
+    bad += licence_notice_survives(root)
     if pending:
         print(f"PENDING: {len(pending)} dependency manifests still name upstream packages.")
         print("    Each needs a decision: take it from upstream, or host it under our name.")
