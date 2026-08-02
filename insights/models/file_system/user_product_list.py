@@ -397,7 +397,7 @@ class UserProductList(UUIDModel, UpdatedMetaFields):
         return created_items
 
 
-@receiver(post_save, sender="ee.AccessControl")
+@receiver(post_save, sender="insights.AccessControl")
 def access_control_created(sender, instance, created, **kwargs):
     """
     Handle AccessControl creation to seed UserProductList for users gaining access to a team.
