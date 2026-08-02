@@ -491,8 +491,38 @@ def apply(root: str, dry: bool) -> tuple[int, int]:
                 continue
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             os.replace(src, dst)
-        subprocess.run(["git", "add", "-A", "."], cwd=root, check=True, capture_output=True)
+        stage(root, [rewrite_path(r) for r in files])
     return edited, renamed
+
+
+def stage(root: str, expected: list[str]) -> None:
+    """Stage the tree without letting an ignore rule quietly eat a file.
+
+    `git add -A` skips ignored paths, so a file whose name happens to match a
+    pattern lands on disk, stages nothing, and leaves the repository with no
+    diff to notice. The user's global excludes file makes that worse than a
+    local mistake: it is machine-specific, so the same command produces a
+    different tree on a different laptop, and `tags` is a common enough entry
+    to have already cost us a directory here.
+
+    So the fork's contents are decided by the fork: the repo's own .gitignore
+    is shared and reviewed and still applies, while machine-local config is
+    switched off for this one command. The sweep afterwards catches whatever
+    an in-repo rule would still have dropped, because a path this program
+    owns is ours to track by definition.
+    """
+    add = ["git", "-c", "core.excludesFile=/dev/null", "add"]
+    subprocess.run([*add, "-A", "."], cwd=root, check=True, capture_output=True)
+    tracked = set(tracked_files(root))
+    lost = [p for p in expected
+            if p not in tracked and os.path.lexists(os.path.join(root, p))]
+    if lost:
+        print(f"rescued {len(lost)} files an in-repo ignore rule would have dropped")
+        for p in lost[:20]:
+            print(f"    {p}")
+        for i in range(0, len(lost), 2000):
+            subprocess.run([*add, "-f", "--", *lost[i:i + 2000]],
+                           cwd=root, check=True, capture_output=True)
 
 
 LAUNDERED = re.compile(r"^.*copyright.*\binsights\b.*$", re.IGNORECASE | re.MULTILINE)
