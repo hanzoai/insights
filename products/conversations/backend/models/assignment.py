@@ -6,7 +6,7 @@ from insights.models.utils import UUIDTModel
 class TicketAssignment(UUIDTModel):
     ticket = models.OneToOneField("conversations.Ticket", on_delete=models.CASCADE, related_name="assignment")
     user = models.ForeignKey("insights.User", null=True, on_delete=models.CASCADE)
-    role = models.ForeignKey("ee.Role", null=True, on_delete=models.CASCADE)
+    role = models.ForeignKey("insights.Role", null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
