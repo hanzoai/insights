@@ -87,7 +87,7 @@ const config: StorybookConfig = {
                     public: path.resolve(FRONTEND, 'public'),
                     products: path.resolve(REPO_ROOT, 'products'),
                     '@common': path.resolve(REPO_ROOT, 'common'),
-                    '@hanzo/elements': path.resolve(FRONTEND, '@insights', 'elements', 'src'),
+                    '@hanzo/elements': path.resolve(FRONTEND, '@hanzo', 'elements', 'src'),
                     '@hanzo/mcp-ui': path.resolve(REPO_ROOT, 'services', 'mcp', 'src', 'ui-apps', 'lib'),
                     '@hanzo/shared-onboarding': path.resolve(REPO_ROOT, 'docs', 'onboarding'),
                     '@hanzo/quill': path.resolve(REPO_ROOT, 'packages', 'quill', 'packages', 'quill', 'src'),
