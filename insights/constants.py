@@ -334,7 +334,10 @@ GENERATED_DASHBOARD_PREFIX = "Generated Dashboard"
 
 ENRICHED_DASHBOARD_INSIGHT_IDENTIFIER = "Feature Viewed"
 
-PERMITTED_FORUM_DOMAINS = ["localhost", "hanzo.ai"]
+# Empty on purpose: this deployment runs no forum, so no host is a permitted
+# forum redirect target. The toolbar guard in insights/urls.py reads this, and an
+# empty list makes every forum_login redirect fail closed.
+PERMITTED_FORUM_DOMAINS: list[str] = []
 
 INVITE_DAYS_VALIDITY = 3  # number of days for which team invites are valid
 
