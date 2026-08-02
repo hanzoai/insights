@@ -145,7 +145,7 @@ from products.tasks.backend.presentation.serializers import (
     WizardCloudRunSerializer,
 )
 
-from ee.hogai.utils.aio import async_to_sync
+from insights.api.streaming import async_to_sync
 
 
 class OctetStreamParser(BaseParser):

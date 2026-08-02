@@ -2161,20 +2161,9 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
         if self.team.pk and self.team.pk == 117239:
             return 20  # Matches org-level limit
 
-        if not settings.EE_AVAILABLE or not settings.API_QUERIES_ENABLED:
-            return None
-
-        from insights.constants import AvailableFeature
-
-        from ee.billing.quota_limiting import QuotaLimitingCaches, QuotaResource, list_limited_team_attributes
-
-        if self.team.api_token in list_limited_team_attributes(
-            QuotaResource.API_QUERIES, QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY
-        ):
-            return 0
-
-        feature = self.team.organization.get_available_feature(AvailableFeature.API_QUERIES_CONCURRENCY)
-        return feature.get("limit") if feature else None
+        # Per-team API query concurrency was sold as part of a billing plan, and the quota state it
+        # read lived in the enterprise edition. With no plans and no quotas, no team is capped.
+        return None
 
     @abstractmethod
     def to_query(self) -> ast.SelectQuery | ast.SelectSetQuery:

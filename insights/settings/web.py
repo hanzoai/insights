@@ -205,14 +205,6 @@ if DEBUG:
     # rebase_migration command
     INSTALLED_APPS.append("django_linear_migrations")
 
-# Append Enterprise Edition as an app if available
-try:
-    from ee.apps import EnterpriseConfig  # noqa: F401
-except ImportError:
-    pass
-else:
-    INSTALLED_APPS.append("ee.apps.EnterpriseConfig")
-
 # Use django-extensions if it exists
 try:
     import django_extensions  # noqa: F401

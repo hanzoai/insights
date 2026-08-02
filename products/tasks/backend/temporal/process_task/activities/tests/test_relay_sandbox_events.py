@@ -35,7 +35,7 @@ from products.tasks.backend.temporal.process_task.workflow import (
     ProcessTaskWorkflow,
 )
 
-from ee.hogai.sandbox import TURN_COMPLETE_METHOD
+from products.insights_ai.backend.wire_types import TURN_COMPLETE_METHOD
 
 relay_sandbox_events_module = importlib.import_module(
     "products.tasks.backend.temporal.process_task.activities.relay_sandbox_events"

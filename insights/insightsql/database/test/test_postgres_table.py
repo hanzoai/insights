@@ -29,7 +29,7 @@ from insights.insightsql.query import create_default_modifiers_for_team
 
 from insights.rbac.user_access_control import RESOURCE_INHERITANCE_MAP
 
-from ee.api.rbac.access_control import AccessControlViewSetMixin
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 
 ALL_POSTGRES_SYSTEM_TABLES: list[tuple[str, PostgresTable]] = [
     (name, node.table) for name, node in SystemTables().children.items() if isinstance(node.table, PostgresTable)
