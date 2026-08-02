@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         AddIndexConcurrently(
             model_name="eventdefinition",
-            index=models.Index(fields=["team_id", "name"], name="insights_eventdef_team_name_idx"),
+            index=models.Index(fields=["team_id", "name"], name="eventdef_team_name_idx"),
         ),
     ]
