@@ -160,7 +160,20 @@ REVIEWFN_GITHUB_BOT_LOGIN: str = get_from_env("REVIEWFN_GITHUB_BOT_LOGIN", "")
 SALT_KEY = get_list(os.getenv("SALT_KEY", "0123456789abcdefghijklmnopqrstuvwxyz"))
 # We provide a default as it is needed for hobby deployments. Each entry must be exactly 32 bytes
 # (used directly as a Fernet key) — enforced by check_encryption_salt_keys in encrypted_fields.py.
-ENCRYPTION_SALT_KEYS = get_list(os.getenv("ENCRYPTION_SALT_KEYS", "00beef0000beef0000beef0000beef00"))
+DEFAULT_ENCRYPTION_SALT_KEY = "00beef0000beef0000beef0000beef00"
+ENCRYPTION_SALT_KEYS = get_list(os.getenv("ENCRYPTION_SALT_KEYS", DEFAULT_ENCRYPTION_SALT_KEY))
+
+# The default is published in every copy of this source, so a deployment that keeps it encrypts
+# integration, OAuth, and data-warehouse credentials under a key any reader already has. Fail
+# closed in production for the same reason, and in the same shape, as the SECRET_KEY guard above.
+if (
+    not DEBUG
+    and not TEST
+    and not STATIC_COLLECTION
+    and (not ENCRYPTION_SALT_KEYS or ENCRYPTION_SALT_KEYS == [DEFAULT_ENCRYPTION_SALT_KEY])
+):
+    logger.critical("You are using the default/empty ENCRYPTION_SALT_KEYS in a production environment!")
+    sys.exit("[ERROR] Default/empty ENCRYPTION_SALT_KEYS in production. Stopping Django server…\n")
 
 INTERNAL_IPS = ["127.0.0.1", "172.18.0.1"]  # Docker IP
 if os.getenv("CORS_ALLOWED_ORIGINS", False):
