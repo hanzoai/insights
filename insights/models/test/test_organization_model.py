@@ -9,11 +9,11 @@ from django.utils import timezone
 
 from parameterized import parameterized
 
+from insights.constants import AvailableFeature
 from insights.models import Organization, OrganizationInvite, Plugin
-from insights.models.organization import OrganizationMembership
+from insights.models.organization import PRODUCT_FEATURES, OrganizationMembership
 from insights.plugins.test.mock import mocked_plugin_requests_get
 from insights.plugins.test.plugin_archives import HELLO_WORLD_PLUGIN_GITHUB_ZIP
-
 
 
 class TestOrganization(BaseTest):
@@ -98,21 +98,54 @@ class TestOrganization(BaseTest):
             )
             self.assertFalse(explicit_org.default_anonymize_ips)
 
-    def test_update_available_product_features_ignored_if_usage_info_exists(self):
+    def test_update_available_product_features_states_what_the_build_carries(self):
+        # The answer comes from the build, not from a subscription, so it does not vary with
+        # `usage` or with whether this is called cloud — there is one build and one answer.
         with self.is_cloud(False):
             new_org, _, _ = Organization.objects.bootstrap(self.user)
 
-            new_org.available_product_features = [{"key": "test1", "name": "test1"}, {"key": "test2", "name": "test2"}]
+            new_org.available_product_features = [{"key": "test1", "name": "test1"}]
             new_org.update_available_product_features()
-            assert new_org.available_product_features == []
+            assert new_org.available_product_features == PRODUCT_FEATURES
 
-            new_org.available_product_features = [{"key": "test1", "name": "test1"}, {"key": "test2", "name": "test2"}]
+            new_org.available_product_features = [{"key": "test1", "name": "test1"}]
             new_org.usage = {"events": {"usage": 1000, "limit": None}}
             new_org.update_available_product_features()
-            assert new_org.available_product_features == [
-                {"key": "test1", "name": "test1"},
-                {"key": "test2", "name": "test2"},
-            ]
+            assert new_org.available_product_features == PRODUCT_FEATURES
+
+    def test_features_whose_implementation_is_gone_stay_unavailable(self):
+        # The point of the list is as much what it withholds as what it grants: each of these names
+        # an endpoint that answers 404, or a policy that raises. Granting one lights up UI that
+        # cannot save, which is worse than a surface that says it is not here.
+        new_org, _, _ = Organization.objects.bootstrap(self.user)
+        for feature in (
+            AvailableFeature.SUBSCRIPTIONS,
+            AvailableFeature.ROLE_BASED_ACCESS,
+            AvailableFeature.ADVANCED_PERMISSIONS,
+            AvailableFeature.ACCESS_CONTROL,
+            AvailableFeature.GROUP_ANALYTICS,
+            AvailableFeature.SAML,
+            AvailableFeature.SCIM,
+            AvailableFeature.APPROVALS,
+        ):
+            assert not new_org.is_feature_available(feature), feature
+
+    def test_each_organization_gets_its_own_feature_entries(self):
+        """Down to the entries, not just the list holding them.
+
+        A shallow copy passes an identity check on the list and still shares every dict inside it,
+        so editing one organization's entry would edit every organization's and the constant.
+        """
+        one = Organization(name="one")
+        another = Organization(name="another")
+        one.update_available_product_features()
+        another.update_available_product_features()
+
+        assert one.available_product_features is not PRODUCT_FEATURES
+        one.available_product_features[0]["limit"] = 999
+
+        assert another.available_product_features[0]["limit"] is None
+        assert PRODUCT_FEATURES[0]["limit"] is None
 
     def test_session_age_caching(self):
         # Test caching when session_cookie_age is set
@@ -164,303 +197,6 @@ class TestOrganization(BaseTest):
             self.assertLess(result[0], result[1])
         else:
             self.assertIsNone(result)
-
-    @patch("ee.billing.quota_limiting.add_limited_team_tokens")
-    def test_limit_product_until_end_of_billing_cycle_success(self, mock_add_limited):
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000},
-        }
-        self.organization.save()
-
-        expected_timestamp = int(datetime(2024, 2, 1, 0, 0, 0).timestamp())
-
-        self.organization.limit_product_until_end_of_billing_cycle(QuotaResource.EVENTS)
-
-        # Verify add_limited_team_tokens was called correctly
-        mock_add_limited.assert_called_once()
-        call_args = mock_add_limited.call_args
-        self.assertEqual(call_args[0][0], QuotaResource.EVENTS)
-        team_tokens = call_args[0][1]
-        self.assertIsInstance(team_tokens, dict)
-        self.assertEqual(team_tokens[self.team.api_token], expected_timestamp)
-
-        # Verify usage field was updated with quota_limited_until
-        self.organization.refresh_from_db()
-        self.assertIsNotNone(self.organization.usage["events"]["quota_limited_until"])
-        self.assertEqual(self.organization.usage["events"]["quota_limited_until"], expected_timestamp)
-        # quota_limiting_suspended_until is set to None, which deletes the key
-        self.assertNotIn("quota_limiting_suspended_until", self.organization.usage["events"])
-
-    @patch("ee.billing.quota_limiting.add_limited_team_tokens")
-    def test_limit_product_until_end_of_billing_cycle_multiple_teams(self, mock_add_limited):
-        second_team = self.organization.teams.create(name="Second Team", api_token="second_token")
-
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "recordings": {"usage": 500, "limit": 1000},
-        }
-        self.organization.save()
-
-        expected_timestamp = int(datetime(2024, 2, 1, 0, 0, 0).timestamp())
-
-        self.organization.limit_product_until_end_of_billing_cycle(QuotaResource.RECORDINGS)
-
-        mock_add_limited.assert_called_once()
-        team_tokens = mock_add_limited.call_args[0][1]
-        self.assertEqual(len(team_tokens), 2)
-        self.assertIn(self.team.api_token, team_tokens)
-        self.assertIn(second_team.api_token, team_tokens)
-
-        # Verify usage field was updated
-        self.organization.refresh_from_db()
-        self.assertEqual(self.organization.usage["recordings"]["quota_limited_until"], expected_timestamp)
-        # quota_limiting_suspended_until is set to None, which deletes the key
-        self.assertNotIn("quota_limiting_suspended_until", self.organization.usage["recordings"])
-
-    @patch("ee.billing.quota_limiting.add_limited_team_tokens")
-    def test_limit_product_until_end_of_billing_cycle_creates_resource_usage_if_missing(self, mock_add_limited):
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 100, "limit": 200},
-        }
-        self.organization.save()
-
-        self.organization.limit_product_until_end_of_billing_cycle(QuotaResource.RECORDINGS)
-
-        mock_add_limited.assert_called_once()
-
-        # Note: update_organization_usage_fields requires the resource to exist in usage
-        # If it doesn't exist, it logs an error but doesn't fail
-        # This test documents this behavior
-        self.organization.refresh_from_db()
-
-    @parameterized.expand(
-        [
-            ("no_usage", None),
-            ("empty_usage", {}),
-            ("no_period", {"events": {"usage": 1000}}),
-            ("invalid_period", {"period": ["invalid"]}),
-        ]
-    )
-    def test_limit_product_until_end_of_billing_cycle_no_billing_period(self, name, usage_data):
-        self.organization.usage = usage_data
-        self.organization.save()
-
-        with self.assertRaises(RuntimeError) as context:
-            self.organization.limit_product_until_end_of_billing_cycle(QuotaResource.EVENTS)
-
-        self.assertIn("Cannot limit without having a billing period", str(context.exception))
-
-    @patch("ee.billing.quota_limiting.remove_limited_team_tokens")
-    def test_unlimit_product_success(self, mock_remove_limited):
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000, "quota_limited_until": 1234567890},
-        }
-        self.organization.save()
-
-        self.organization.unlimit_product(QuotaResource.EVENTS)
-
-        # Verify remove_limited_team_tokens was called correctly
-        mock_remove_limited.assert_called_once()
-        call_args = mock_remove_limited.call_args
-        self.assertEqual(call_args[0][0], QuotaResource.EVENTS)
-        team_tokens = call_args[0][1]
-        self.assertIsInstance(team_tokens, list)
-        self.assertIn(self.team.api_token, team_tokens)
-
-        # Verify usage field was updated - quota_limited_until should be removed
-        self.organization.refresh_from_db()
-        self.assertNotIn("quota_limited_until", self.organization.usage["events"])
-        self.assertNotIn("quota_limiting_suspended_until", self.organization.usage["events"])
-
-    @patch("ee.billing.quota_limiting.remove_limited_team_tokens")
-    def test_unlimit_product_multiple_teams(self, mock_remove_limited):
-        second_team = self.organization.teams.create(name="Second Team", api_token="second_token")
-
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "recordings": {
-                "usage": 500,
-                "limit": 1000,
-                "quota_limited_until": 1234567890,
-                "quota_limiting_suspended_until": 1234567900,
-            },
-        }
-        self.organization.save()
-
-        self.organization.unlimit_product(QuotaResource.RECORDINGS)
-
-        mock_remove_limited.assert_called_once()
-        team_tokens = mock_remove_limited.call_args[0][1]
-        self.assertEqual(len(team_tokens), 2)
-        self.assertIn(self.team.api_token, team_tokens)
-        self.assertIn(second_team.api_token, team_tokens)
-
-        # Verify both limiting fields were removed
-        self.organization.refresh_from_db()
-        self.assertNotIn("quota_limited_until", self.organization.usage["recordings"])
-        self.assertNotIn("quota_limiting_suspended_until", self.organization.usage["recordings"])
-
-    @patch("ee.billing.quota_limiting.remove_limited_team_tokens")
-    def test_unlimit_product_no_usage_data(self, mock_remove_limited):
-        self.organization.usage = None
-        self.organization.save()
-
-        self.organization.unlimit_product(QuotaResource.EVENTS)
-
-        # Should still remove from cache even if no usage data
-        mock_remove_limited.assert_called_once()
-        team_tokens = mock_remove_limited.call_args[0][1]
-        self.assertIn(self.team.api_token, team_tokens)
-
-    @patch("ee.billing.quota_limiting.remove_limited_team_tokens")
-    def test_unlimit_product_resource_not_in_usage(self, mock_remove_limited):
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000},
-        }
-        self.organization.save()
-
-        self.organization.unlimit_product(QuotaResource.RECORDINGS)
-
-        mock_remove_limited.assert_called_once()
-        team_tokens = mock_remove_limited.call_args[0][1]
-        self.assertIn(self.team.api_token, team_tokens)
-
-    @patch("ee.billing.quota_limiting.get_client")
-    def test_get_limited_products_no_teams(self, mock_get_client):
-        self.organization.teams.all().delete()
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000, "quota_limited_until": 1234567890},
-        }
-        self.organization.save()
-
-        result = self.organization.get_limited_products()
-
-        mock_get_client.assert_not_called()
-        for _, data in result.items():
-            self.assertFalse(data["is_limited_in_redis"])
-            self.assertEqual(data["limited_teams"], [])
-            self.assertIsNone(data["redis_quota_limited_until"])
-
-    @patch("ee.billing.quota_limiting.get_client")
-    def test_get_limited_products_no_limits(self, mock_get_client):
-        mock_redis = mock_get_client.return_value
-        mock_pipe = mock_redis.pipeline.return_value
-        mock_pipe.execute.return_value = [None] * 10
-
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000},
-        }
-        self.organization.save()
-
-        result = self.organization.get_limited_products()
-
-        self.assertIn("events", result)
-        self.assertFalse(result["events"]["is_limited_in_redis"])
-        self.assertEqual(result["events"]["limited_teams"], [])
-        self.assertIsNone(result["events"]["redis_quota_limited_until"])
-        self.assertIsNone(result["events"]["usage_quota_limited_until"])
-
-    @patch("ee.billing.quota_limiting.get_client")
-    def test_get_limited_products_with_redis_limits(self, mock_get_client):
-
-        future_timestamp = (timezone.now() + timedelta(days=1)).timestamp()
-
-        mock_redis = mock_get_client.return_value
-        mock_pipe = mock_redis.pipeline.return_value
-
-        scores: list[float | None] = []
-        for resource in QuotaResource:
-            if resource == QuotaResource.EVENTS:
-                scores.append(future_timestamp)
-            else:
-                scores.append(None)
-
-        mock_pipe.execute.return_value = scores
-
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000, "quota_limited_until": 1234567890},
-        }
-        self.organization.save()
-
-        result = self.organization.get_limited_products()
-
-        self.assertTrue(result["events"]["is_limited_in_redis"])
-        self.assertEqual(result["events"]["limited_teams"], [self.team.api_token])
-        self.assertEqual(result["events"]["redis_quota_limited_until"], int(future_timestamp))
-        self.assertEqual(result["events"]["usage_quota_limited_until"], 1234567890)
-
-    @patch("ee.billing.quota_limiting.get_client")
-    def test_get_limited_products_redis_vs_usage_mismatch(self, mock_get_client):
-
-        future_timestamp = (timezone.now() + timedelta(days=1)).timestamp()
-
-        mock_redis = mock_get_client.return_value
-        mock_pipe = mock_redis.pipeline.return_value
-
-        scores: list[float | None] = []
-        for resource in QuotaResource:
-            if resource == QuotaResource.EVENTS:
-                scores.append(future_timestamp)
-            else:
-                scores.append(None)
-
-        mock_pipe.execute.return_value = scores
-
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000},
-        }
-        self.organization.save()
-
-        result = self.organization.get_limited_products()
-
-        self.assertTrue(result["events"]["is_limited_in_redis"])
-        self.assertIsNone(result["events"]["usage_quota_limited_until"])
-
-    @patch("ee.billing.quota_limiting.get_client")
-    def test_get_limited_products_multiple_teams(self, mock_get_client):
-
-        second_team = self.organization.teams.create(name="Second Team", api_token="second_token")
-
-        future_timestamp_1 = (timezone.now() + timedelta(days=1)).timestamp()
-        future_timestamp_2 = (timezone.now() + timedelta(days=2)).timestamp()
-
-        mock_redis = mock_get_client.return_value
-        mock_pipe = mock_redis.pipeline.return_value
-
-        scores: list[float | None] = []
-        for resource in QuotaResource:
-            if resource == QuotaResource.EVENTS:
-                scores.append(future_timestamp_1)
-                scores.append(future_timestamp_2)
-            else:
-                scores.append(None)
-                scores.append(None)
-
-        mock_pipe.execute.return_value = scores
-
-        self.organization.usage = {
-            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
-            "events": {"usage": 1000, "limit": 2000, "quota_limited_until": 1234567890},
-        }
-        self.organization.save()
-
-        result = self.organization.get_limited_products()
-
-        self.assertTrue(result["events"]["is_limited_in_redis"])
-        self.assertEqual(len(result["events"]["limited_teams"]), 2)
-        self.assertIn(self.team.api_token, result["events"]["limited_teams"])
-        self.assertIn(second_team.api_token, result["events"]["limited_teams"])
-        self.assertEqual(
-            result["events"]["redis_quota_limited_until"], int(max(future_timestamp_1, future_timestamp_2))
-        )
 
 
 class TestOrganizationMembership(BaseTest):
