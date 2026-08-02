@@ -80,6 +80,11 @@ const SCENES: { name: string; path: string }[] = [
     { name: 'project settings', path: '/settings/project' },
     { name: 'organization settings', path: '/settings/organization' },
     { name: 'user settings', path: '/settings/user' },
+    // Billing does not apply to a self-hosted deployment and redirects away. It is
+    // here because it used to redirect from inside render, which looped until the
+    // tab stopped answering -- a scene that wedges the browser is worth a test even
+    // when its job is to send you somewhere else.
+    { name: 'billing', path: '/organization/billing' },
 ]
 
 test.describe('a deployed insights', () => {
