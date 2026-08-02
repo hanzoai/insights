@@ -884,7 +884,7 @@ class AccessControlPermission(ScopeBasePermission):
         return False
 
 
-_raw = os.environ.get("POSTFN_FEATURE_FLAGS_FORCE_ENABLED", "")
+_raw = os.environ.get("INSIGHTS_FEATURE_FLAGS_FORCE_ENABLED", "")
 _FORCE_ENABLED_FLAGS: frozenset[str] = frozenset(f.strip() for f in _raw.split(",") if f.strip())
 
 

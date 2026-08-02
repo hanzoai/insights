@@ -35,30 +35,30 @@ pub struct Cli {
     skip_ssl_verification: bool,
 
     /// Set the number of requests per minute for the Insights API Client.
-    #[arg(long, env = "POSTFN_CLIENT_RATE_LIMIT")]
+    #[arg(long, env = "INSIGHTS_CLIENT_RATE_LIMIT")]
     rate_limit: Option<usize>,
 
     /// Load Insights credentials from this dotenv-style file when not present in the process
     /// environment. Prefer this over the `--env-file` alias: the npm package runs the binary
     /// through a `node` wrapper, and Node's own built-in `--env-file` flag intercepts that spelling.
-    /// Also settable as `POSTFN_CLI_DOTENV_FILE`, for callers that control the environment but
+    /// Also settable as `INSIGHTS_CLI_DOTENV_FILE`, for callers that control the environment but
     /// not the command line (e.g. an Xcode build phase invoking the iOS SDK's upload-symbols.sh).
     #[arg(
         long = "dotenv-file",
         alias = "env-file",
         value_name = "PATH",
-        env = "POSTFN_CLI_DOTENV_FILE"
+        env = "INSIGHTS_CLI_DOTENV_FILE"
     )]
     env_file: Option<PathBuf>,
 
     /// Skip artifact processing and upload (sourcemap, dSYM, hermes, proguard) without contacting
     /// Insights or requiring credentials. Intended for CI gates that bundle to catch regressions but
     /// must not (or cannot) upload. Not for release builds. Pass it before the subcommand
-    /// (`insights-cli --dry-run hermes upload ...`) or set `POSTFN_CLI_DRY_RUN`. This is distinct
+    /// (`insights-cli --dry-run hermes upload ...`) or set `INSIGHTS_CLI_DRY_RUN`. This is distinct
     /// from the `exp endpoints` `--dry-run`, which previews endpoint changes.
     #[arg(
         long,
-        env = "POSTFN_CLI_DRY_RUN",
+        env = "INSIGHTS_CLI_DRY_RUN",
         value_parser = clap::builder::BoolishValueParser::new(),
         num_args = 0..=1,
         require_equals = true,
@@ -93,13 +93,13 @@ fn dry_run_skipped_command(command: &Commands) -> Option<&'static str> {
 }
 
 // These are the API key env vars recognized by the Node `insights-cli api` bundle.
-// Rust auth only reads the POSTFN_CLI_* aliases; this check is deliberately about
+// Rust auth only reads the INSIGHTS_CLI_* aliases; this check is deliberately about
 // whether the child process already has a usable key, so we avoid loading and mixing
 // stored credentials.
 const API_KEY_ENV_VARS: &[&str] = &[
-    "POSTFN_API_KEY",
-    "POSTFN_CLI_API_KEY",
-    "POSTFN_CLI_TOKEN",
+    "INSIGHTS_API_KEY",
+    "INSIGHTS_CLI_API_KEY",
+    "INSIGHTS_CLI_TOKEN",
 ];
 
 fn api_command_needs_stored_credentials_with_env(
@@ -122,7 +122,7 @@ fn api_command_needs_stored_credentials(args: &[String]) -> bool {
 #[derive(Subcommand)]
 pub enum Commands {
     /// Interactively authenticate with Insights, storing a personal API token locally. You can also use the
-    /// environment variables `POSTFN_CLI_API_KEY` and `POSTFN_CLI_PROJECT_ID`
+    /// environment variables `INSIGHTS_CLI_API_KEY` and `INSIGHTS_CLI_PROJECT_ID`
     Login,
 
     /// Experimental commands, not quite ready for prime time
@@ -360,7 +360,7 @@ impl Cli {
         if self.dry_run {
             if let Some(kind) = dry_run_skipped_command(&self.command) {
                 warn!(
-                    "Dry run enabled (--dry-run / POSTFN_CLI_DRY_RUN): skipping {kind} upload. \
+                    "Dry run enabled (--dry-run / INSIGHTS_CLI_DRY_RUN): skipping {kind} upload. \
                      Nothing was sent to Insights and no credentials were used. \
                      Do not use --dry-run for release builds."
                 );
@@ -542,7 +542,7 @@ mod tests {
             .expect("dry_run arg should exist");
         assert_eq!(
             arg.get_env(),
-            Some(std::ffi::OsStr::new("POSTFN_CLI_DRY_RUN"))
+            Some(std::ffi::OsStr::new("INSIGHTS_CLI_DRY_RUN"))
         );
     }
 
@@ -555,7 +555,7 @@ mod tests {
             .expect("env_file arg should exist");
         assert_eq!(
             arg.get_env(),
-            Some(std::ffi::OsStr::new("POSTFN_CLI_DOTENV_FILE"))
+            Some(std::ffi::OsStr::new("INSIGHTS_CLI_DOTENV_FILE"))
         );
     }
 
@@ -663,7 +663,7 @@ mod tests {
         ));
         assert!(!api_command_needs_stored_credentials_with_env(
             &call_args,
-            |name| name == "POSTFN_API_KEY"
+            |name| name == "INSIGHTS_API_KEY"
         ));
 
         let dry_run_args = [

@@ -86,11 +86,11 @@ export type CommonConfig = BaseServerConfig & {
     PERSONS_READONLY_DATABASE_URL: string
     PLUGIN_STORAGE_DATABASE_URL: string
     POSTGRES_CONNECTION_POOL_SIZE: number
-    POSTFN_DB_NAME: string | null
-    POSTFN_DB_USER: string
-    POSTFN_DB_PASSWORD: string
-    POSTFN_POSTGRES_HOST: string
-    POSTFN_POSTGRES_PORT: number
+    INSIGHTS_DB_NAME: string | null
+    INSIGHTS_DB_USER: string
+    INSIGHTS_DB_PASSWORD: string
+    INSIGHTS_POSTGRES_HOST: string
+    INSIGHTS_POSTGRES_PORT: number
     POSTGRES_BEHAVIORAL_COHORTS_HOST: string
     POSTGRES_BEHAVIORAL_COHORTS_USER: string
     POSTGRES_BEHAVIORAL_COHORTS_PASSWORD: string
@@ -116,9 +116,9 @@ export type CommonConfig = BaseServerConfig & {
     REDIS_URL: string
     INGESTION_REDIS_HOST: string
     INGESTION_REDIS_PORT: number
-    POSTFN_REDIS_PASSWORD: string
-    POSTFN_REDIS_HOST: string
-    POSTFN_REDIS_PORT: number
+    INSIGHTS_REDIS_PASSWORD: string
+    INSIGHTS_REDIS_HOST: string
+    INSIGHTS_REDIS_PORT: number
     REDIS_POOL_MIN_SIZE: number
     REDIS_POOL_MAX_SIZE: number
 
@@ -180,8 +180,8 @@ export type CommonConfig = BaseServerConfig & {
     EXTERNAL_REQUEST_CONNECTIONS: number
 
     // Insights analytics
-    POSTFN_API_KEY: string
-    POSTFN_HOST_URL: string
+    INSIGHTS_API_KEY: string
+    INSIGHTS_HOST_URL: string
     OTEL_SERVICE_NAME: string | null
     OTEL_SERVICE_ENVIRONMENT: string | null
 
@@ -257,11 +257,11 @@ export function getDefaultCommonConfig(): CommonConfig {
               : '',
         PLUGIN_STORAGE_DATABASE_URL: '',
         POSTGRES_CONNECTION_POOL_SIZE: 10,
-        POSTFN_DB_NAME: null,
-        POSTFN_DB_USER: 'postgres',
-        POSTFN_DB_PASSWORD: '',
-        POSTFN_POSTGRES_HOST: 'localhost',
-        POSTFN_POSTGRES_PORT: 5432,
+        INSIGHTS_DB_NAME: null,
+        INSIGHTS_DB_USER: 'postgres',
+        INSIGHTS_DB_PASSWORD: '',
+        INSIGHTS_POSTGRES_HOST: 'localhost',
+        INSIGHTS_POSTGRES_PORT: 5432,
         POSTGRES_BEHAVIORAL_COHORTS_HOST: 'localhost',
         POSTGRES_BEHAVIORAL_COHORTS_USER: 'postgres',
         POSTGRES_BEHAVIORAL_COHORTS_PASSWORD: '',
@@ -289,9 +289,9 @@ export function getDefaultCommonConfig(): CommonConfig {
         REDIS_URL: 'redis://127.0.0.1',
         INGESTION_REDIS_HOST: '',
         INGESTION_REDIS_PORT: 6379,
-        POSTFN_REDIS_PASSWORD: '',
-        POSTFN_REDIS_HOST: '',
-        POSTFN_REDIS_PORT: 6379,
+        INSIGHTS_REDIS_PASSWORD: '',
+        INSIGHTS_REDIS_HOST: '',
+        INSIGHTS_REDIS_PORT: 6379,
         REDIS_POOL_MIN_SIZE: 1,
         REDIS_POOL_MAX_SIZE: 3,
 
@@ -355,8 +355,8 @@ export function getDefaultCommonConfig(): CommonConfig {
         EXTERNAL_REQUEST_CONNECTIONS: 500,
 
         // Insights analytics
-        POSTFN_API_KEY: '',
-        POSTFN_HOST_URL: 'http://localhost:8010',
+        INSIGHTS_API_KEY: '',
+        INSIGHTS_HOST_URL: 'http://localhost:8010',
         OTEL_SERVICE_NAME: null,
         OTEL_SERVICE_ENVIRONMENT: null,
 

@@ -25,7 +25,7 @@ export enum OriginProduct {
     SIGNAL_REPORT = 'signal_report',
     // Tasks created autonomously by the headless Signals Scout — team-scoped, visible to everyone.
     SIGNALS_SCOUT = 'signals_scout',
-    POSTFN_AI = 'insights_ai',
+    INSIGHTS_AI = 'insights_ai',
     // "Create fix task" on the MCP analytics tool-quality failure drill-down.
     MCP_ANALYTICS = 'mcp_analytics',
 }

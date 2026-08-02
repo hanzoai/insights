@@ -38,7 +38,7 @@ from insights.exceptions_capture import capture_exception
 from insights.ph_client import feature_enabled_or_false
 from insights.temporal.common.client import async_connect, sync_connect
 from insights.temporal.common.schedule import a_create_schedule, a_delete_schedule, a_update_schedule, delete_schedule
-from insights.temporal.common.search_attributes import POSTFN_DAG_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_DAG_ID_KEY
 
 from products.data_modeling.backend.logic.cohort_scheduling import (
     ScheduleReconcilePlan,
@@ -402,7 +402,7 @@ async def _apply_reconciliation(
 
 
 async def _list_execute_dag_schedule_ids(temporal: Client, dag_id: str) -> set[str]:
-    schedules = await temporal.list_schedules(query=f"{POSTFN_DAG_ID_KEY.name} = '{dag_id}'")
+    schedules = await temporal.list_schedules(query=f"{INSIGHTS_DAG_ID_KEY.name} = '{dag_id}'")
     ids: set[str] = set()
     async for listing in schedules:
         action = listing.schedule.action if listing.schedule else None

@@ -14,7 +14,7 @@ export const experimentsOnboarding: ProductOnboardingProvider = {
             productKey: ProductKey.EXPERIMENTS,
             stepKey: OnboardingStepKey.INSTALL,
             role: ctx.role,
-            dedupKey: INSTALL_DEDUP_KEYS.POSTFN_JS,
+            dedupKey: INSTALL_DEDUP_KEYS.INSIGHTS_JS,
             render: () => <OnboardingInstallStep sdkInstructionMap={ExperimentsSDKInstructions} />,
         },
     ],

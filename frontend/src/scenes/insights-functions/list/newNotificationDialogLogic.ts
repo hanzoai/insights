@@ -10,7 +10,7 @@ import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { CyclotronJobFiltersType, InsightsFunctionSubTemplateIdType, InsightsFunctionType } from '~/types'
 
 import type { IntegrationType } from '../../../types'
-import { FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES, FN_FUNCTION_SUB_TEMPLATES } from '../sub-templates/sub-templates'
+import { INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES, INSIGHTS_FUNCTION_SUB_TEMPLATES } from '../sub-templates/sub-templates'
 
 export type DestinationKey = 'slack' | 'discord' | 'microsoft-teams' | 'webhook'
 
@@ -174,10 +174,10 @@ export const newNotificationDialogLogic = kea<newNotificationDialogLogicType>([
                 }
 
                 const template = await api.insightsFunctions.getTemplate(destinationOption.templateId)
-                const subTemplate = FN_FUNCTION_SUB_TEMPLATES[props.subTemplateId].find(
+                const subTemplate = INSIGHTS_FUNCTION_SUB_TEMPLATES[props.subTemplateId].find(
                     (st) => st.template_id === destinationOption.templateId
                 )
-                const commonProps = FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[props.subTemplateId]
+                const commonProps = INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[props.subTemplateId]
 
                 // Build inputs from template defaults
                 const inputs: Record<string, { value: unknown }> = {}

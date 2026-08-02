@@ -11,7 +11,7 @@ from asgiref.sync import sync_to_async
 
 from insights.temporal.common.client import async_connect
 from insights.temporal.common.schedule import a_delete_schedule
-from insights.temporal.common.search_attributes import POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_TEAM_ID_KEY
 
 from products.data_modeling.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
 
@@ -214,7 +214,7 @@ class Command(BaseCommand):
                     handle = temporal.get_schedule_handle(schedule_id)
                     desc = await handle.describe()
                     # Try search attributes first (fast path)
-                    team_id_attr = desc.typed_search_attributes.get(POSTFN_TEAM_ID_KEY)
+                    team_id_attr = desc.typed_search_attributes.get(INSIGHTS_TEAM_ID_KEY)
                     if team_id_attr is not None:
                         return team_id_attr
                     # Fall back to decoding payload (slow path for old schedules)

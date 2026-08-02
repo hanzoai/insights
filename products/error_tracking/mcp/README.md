@@ -5,5 +5,5 @@
 Maintainer notes:
 
 - Tool descriptions and the `authoring-error-tracking-alerts` skill ship to external MCP clients — never reference repo paths or internal code in them.
-- The block payloads embedded in the create-tool description and in `products/error_tracking/skills/authoring-error-tracking-alerts/references/block-templates.md` mirror `FN_FUNCTION_SUB_TEMPLATES` (error-tracking entries) in `frontend/src/scenes/insights-functions/sub-templates/sub-templates.ts` — keep them in sync when the sub-templates change.
+- The block payloads embedded in the create-tool description and in `products/error_tracking/skills/authoring-error-tracking-alerts/references/block-templates.md` mirror `INSIGHTS_FUNCTION_SUB_TEMPLATES` (error-tracking entries) in `frontend/src/scenes/insights-functions/sub-templates/sub-templates.ts` — keep them in sync when the sub-templates change.
 - Comments in `error_tracking_alerts.yaml` do not survive `scaffold-yaml --sync-all` (the file is re-emitted with a fixed header), which is why these notes live here.

@@ -23,7 +23,7 @@ from insights.exceptions import QuotaLimitExceeded
 from insights.models import User
 from insights.rate_limit import AIBurstRateThrottle, AISustainedRateThrottle
 from insights.temporal.common.client import sync_connect
-from insights.temporal.common.search_attributes import POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_TEAM_ID_KEY
 
 from products.replay_vision.backend.api.scanners import _scanner_config_error_message
 from products.replay_vision.backend.billing import observation_credits_for_model
@@ -459,7 +459,7 @@ class ReplayScannerPromptSuggestionViewSet(
                 task_queue=settings.REPLAY_VISION_TASK_QUEUE,
                 execution_timeout=EVALUATE_PROMPT_SUGGESTION_EXECUTION_TIMEOUT,
                 search_attributes=TypedSearchAttributes(
-                    search_attributes=[SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=scanner.team_id)]
+                    search_attributes=[SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=scanner.team_id)]
                 ),
             )
         except WorkflowAlreadyStartedError:

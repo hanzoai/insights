@@ -209,9 +209,9 @@ def get_sandbox_for_repository(input: GetSandboxForRepositoryInput) -> GetSandbo
             )
 
         environment_variables = {
-            "POSTFN_PERSONAL_API_KEY": access_token,
-            "POSTFN_API_URL": get_sandbox_api_url(),
-            "POSTFN_PROJECT_ID": str(ctx.team_id),
+            "INSIGHTS_PERSONAL_API_KEY": access_token,
+            "INSIGHTS_API_URL": get_sandbox_api_url(),
+            "INSIGHTS_PROJECT_ID": str(ctx.team_id),
             "JWT_PUBLIC_KEY": get_sandbox_jwt_public_key(),
         }
 
@@ -250,9 +250,9 @@ def get_sandbox_for_repository(input: GetSandboxForRepositoryInput) -> GetSandbo
         # Set resume run ID independently of snapshot so conversation history
         # can be rebuilt from logs even when the filesystem snapshot has expired.
         if run_state.resume_from_run_id:
-            environment_variables["POSTFN_RESUME_RUN_ID"] = run_state.resume_from_run_id
+            environment_variables["INSIGHTS_RESUME_RUN_ID"] = run_state.resume_from_run_id
         elif run_state.handoff_resumed:
-            environment_variables["POSTFN_RESUME_RUN_ID"] = str(ctx.run_id)
+            environment_variables["INSIGHTS_RESUME_RUN_ID"] = str(ctx.run_id)
 
         # Check for resume snapshot (takes priority over integration-level snapshots)
         resume_snapshot_ext_id = run_state.snapshot_external_id

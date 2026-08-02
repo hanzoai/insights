@@ -185,7 +185,7 @@ services:
             # --- Sandbox identity ---
             SANDBOX_UID: '${SANDBOX_UID:-1000}'
             SANDBOX_GID: '${SANDBOX_GID:-1000}'
-            POSTFN_SANDBOX: '1'
+            INSIGHTS_SANDBOX: '1'
             # 1 during a cache-backed `create`: the setup window waits for the
             # background Datastore restore to land before migrating.
             SANDBOX_USE_CACHE: '${SANDBOX_USE_CACHE:-0}'

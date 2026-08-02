@@ -28,7 +28,7 @@ def _populate_monorepo(root: Path, *, with_dist: bool = True, package_names: tup
 def _env(*, debug: bool, monorepo_root: str | None) -> Iterator[None]:
     with patch("products.tasks.backend.logic.services.local_packages.settings") as s:
         s.DEBUG = debug
-        env = {"LOCAL_POSTFN_CODE_MONOREPO_ROOT": monorepo_root or "", "LOCAL_TWIG_MONOREPO_ROOT": ""}
+        env = {"LOCAL_INSIGHTS_CODE_MONOREPO_ROOT": monorepo_root or "", "LOCAL_TWIG_MONOREPO_ROOT": ""}
         with patch.dict("os.environ", env):
             yield
 

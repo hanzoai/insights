@@ -116,11 +116,11 @@ def test_download_diagnostics_on_no_compatible_artifact(monkeypatch: pytest.Monk
 
 
 def test_effective_base_branch_prefers_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("POSTFN_SCHEMA_RESTORE_BASE_BRANCH", "release-26.1")
+    monkeypatch.setenv("INSIGHTS_SCHEMA_RESTORE_BASE_BRANCH", "release-26.1")
     assert db_schema._effective_base_branch(None) == "release-26.1"
     assert db_schema._effective_base_branch("override") == "override"
 
-    monkeypatch.delenv("POSTFN_SCHEMA_RESTORE_BASE_BRANCH", raising=False)
+    monkeypatch.delenv("INSIGHTS_SCHEMA_RESTORE_BASE_BRANCH", raising=False)
     assert db_schema._effective_base_branch(None) == db_schema.DEFAULT_BASE_BRANCH
 
 

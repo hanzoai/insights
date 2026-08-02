@@ -2695,8 +2695,8 @@ const api = {
             if (
                 [
                     ActivityScope.PLUGIN,
-                    ActivityScope.FN_FUNCTION,
-                    ActivityScope.FN_FLOW,
+                    ActivityScope.INSIGHTS_FUNCTION,
+                    ActivityScope.INSIGHTS_FLOW,
                     ActivityScope.EXPERIMENT,
                     ActivityScope.TAG,
                     ActivityScope.BATCH_EXPORT,

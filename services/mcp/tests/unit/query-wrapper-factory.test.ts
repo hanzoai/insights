@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { createQueryWrapper } from '@/tools/query-wrapper-factory'
 import type { Context } from '@/tools/types'
-import { POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY, POSTFN_META_KEY } from '@/tools/types'
+import { INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, INSIGHTS_META_KEY } from '@/tools/types'
 
 describe('createQueryWrapper _meta', () => {
     const schema = z.object({ kind: z.string() })
@@ -12,14 +12,14 @@ describe('createQueryWrapper _meta', () => {
         const factory = createQueryWrapper({ name: 'test', schema, kind: 'TestQuery', outputFormat: value })
 
         const tool = factory()
-        expect(tool._meta![POSTFN_META_KEY]!.outputFormat).toBe(value)
+        expect(tool._meta![INSIGHTS_META_KEY]!.outputFormat).toBe(value)
     })
 
     it('omits outputFormat from _meta when not provided', () => {
         const factory = createQueryWrapper({ name: 'test', schema, kind: 'TestQuery' })
 
         const tool = factory()
-        expect(tool._meta?.[POSTFN_META_KEY]?.outputFormat).toBeUndefined()
+        expect(tool._meta?.[INSIGHTS_META_KEY]?.outputFormat).toBeUndefined()
     })
 
     it('sets both uiResourceUri and outputFormat in _meta', () => {
@@ -34,7 +34,7 @@ describe('createQueryWrapper _meta', () => {
         const tool = factory()
         expect(tool._meta).toEqual({
             ui: { resourceUri: 'ui://insights/test.html' },
-            [POSTFN_META_KEY]: { outputFormat: 'json' },
+            [INSIGHTS_META_KEY]: { outputFormat: 'json' },
         })
     })
 })
@@ -264,7 +264,7 @@ describe('createQueryWrapper output_format handling', () => {
             series: [{ kind: 'EventsNode', event: '$pageview' }],
         })) as any
 
-        expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('formatted-text')
+        expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('formatted-text')
     })
 
     it('skips formatted_results when caller requests output_format: json', async () => {
@@ -283,7 +283,7 @@ describe('createQueryWrapper output_format handling', () => {
             output_format: 'json',
         })) as any
 
-        expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBeUndefined()
+        expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBeUndefined()
     })
 
     it('surfaces formatted_results when caller overrides config json with optimized', async () => {
@@ -302,7 +302,7 @@ describe('createQueryWrapper output_format handling', () => {
             output_format: 'optimized',
         })) as any
 
-        expect(result[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('formatted-text')
+        expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('formatted-text')
     })
 })
 

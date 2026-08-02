@@ -342,7 +342,7 @@ class RemoteConfig(UUIDTModel):
         # MARK: Snippet versioning: store requested version, resolved at request time
         # Keep this internal metadata while snippet version pinning is enabled. insights-js <= 1.369.1 read only
         # the sibling `resolved` field; >= 1.369.2 reads neither field.
-        if settings.POSTFN_JS_S3_BUCKET:
+        if settings.INSIGHTS_JS_S3_BUCKET:
             snippet_config = get_or_create_team_extension(team, TeamJsSnippetConfig)
             config["sdkVersion"] = {"requested": snippet_config.js_snippet_version or DEFAULT_SNIPPET_VERSION}
 

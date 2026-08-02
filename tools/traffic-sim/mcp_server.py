@@ -74,7 +74,7 @@ async def simulate_new_user(
     url: str,
     visits: int = 3,
     interval: float = 5.0,
-    insights_host: str = cli.DEFAULT_POSTFN_HOST,
+    insights_host: str = cli.DEFAULT_INSIGHTS_HOST,
     verbose: bool = False,
 ) -> dict[str, Any]:
     """Send N fresh-browser visits to a URL and report which Insights events fired.
@@ -112,7 +112,7 @@ async def simulate_returning_user(
     url: str,
     page_views: int = 3,
     interval: float = 5.0,
-    insights_host: str = cli.DEFAULT_POSTFN_HOST,
+    insights_host: str = cli.DEFAULT_INSIGHTS_HOST,
     verbose: bool = False,
 ) -> dict[str, Any]:
     """Send N page views from a single returning user and report which Insights events fired.
@@ -146,7 +146,7 @@ async def simulate_returning_user(
 @mcp.tool()
 async def check_insights_loading(
     urls: list[str],
-    insights_host: str = cli.DEFAULT_POSTFN_HOST,
+    insights_host: str = cli.DEFAULT_INSIGHTS_HOST,
     verbose: bool = False,
 ) -> dict[str, Any]:
     """Inspect how the Insights snippet is loaded on each URL.

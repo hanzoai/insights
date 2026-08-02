@@ -300,7 +300,7 @@ describe('taxonomicFilterPinnedPropertiesLogic', () => {
             if (freshStorage) {
                 localStorage.clear()
             }
-            window.POSTFN_APP_CONTEXT = {
+            window.INSIGHTS_APP_CONTEXT = {
                 has_pageview: hasPageview,
                 has_person_email: hasPersonEmail,
             } as unknown as AppContext
@@ -315,7 +315,7 @@ describe('taxonomicFilterPinnedPropertiesLogic', () => {
         }
 
         afterEach(() => {
-            window.POSTFN_APP_CONTEXT = undefined as unknown as AppContext
+            window.INSIGHTS_APP_CONTEXT = undefined as unknown as AppContext
         })
 
         it.each([
@@ -405,7 +405,7 @@ describe('taxonomicFilterPinnedPropertiesLogic', () => {
             logic.unmount()
             localStorage.clear()
             localStorage.setItem(OLD_PERSIST_KEY, JSON.stringify(['name', '$os']))
-            window.POSTFN_APP_CONTEXT = { has_pageview: true, has_person_email: true } as unknown as AppContext
+            window.INSIGHTS_APP_CONTEXT = { has_pageview: true, has_person_email: true } as unknown as AppContext
 
             initKeaTests()
             featureFlagLogic.mount()

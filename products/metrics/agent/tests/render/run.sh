@@ -67,13 +67,13 @@ expect_failure() {
 }
 
 new_case_dir
-run_render minimal POSTFN_API_KEY=phc_test SCRAPE_TARGETS=app:9090
+run_render minimal INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS=app:9090
 
 # Every render exposes the collector's own metrics on :8888 for self-monitoring.
 if [ "$UPDATE" != "1" ]; then
     new_case_dir
     tele=$(env -i PATH="$PATH" CONFIG_DIR="$CASE_DIR" RENDER_ONLY=1 \
-        POSTFN_API_KEY=phc_test SCRAPE_TARGETS=app:9090 \
+        INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS=app:9090 \
         sh "$AGENT_DIR/entrypoint.sh" 2>/dev/null | grep -c 'port: 8888')
     if [ "$tele" -ge 1 ]; then
         echo "PASS self-telemetry-port"
@@ -86,35 +86,35 @@ fi
 
 # Comma-separated targets with stray whitespace and an empty entry get trimmed.
 new_case_dir
-run_render multi POSTFN_API_KEY=phc_test SCRAPE_TARGETS='app:9090, worker:9091 ,,db-exporter:9187'
+run_render multi INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS='app:9090, worker:9091 ,,db-exporter:9187'
 
 new_case_dir
-run_render debug POSTFN_API_KEY=phc_test SCRAPE_TARGETS=app:9090 POSTFN_DEBUG=1
+run_render debug INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS=app:9090 INSIGHTS_DEBUG=1
 
 # Single quotes in a target are doubled so the rendered YAML stays valid.
 new_case_dir
-run_render quoted-target POSTFN_API_KEY=phc_test "SCRAPE_TARGETS=app's-host:9090"
+run_render quoted-target INSIGHTS_API_KEY=phc_test "SCRAPE_TARGETS=app's-host:9090"
 
 # PERSIST_QUEUE backs the export queue with disk so a restart during a
 # Insights outage loses nothing.
 new_case_dir
-run_render persist-queue POSTFN_API_KEY=phc_test SCRAPE_TARGETS=app:9090 PERSIST_QUEUE=1
+run_render persist-queue INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS=app:9090 PERSIST_QUEUE=1
 
 # Sharding: SHARD_COUNT/SHARD_INDEX partition targets via hashmod so N agents
 # split the target set with no coordination, no duplicates, and no gaps.
 new_case_dir
-run_render sharded POSTFN_API_KEY=phc_test SCRAPE_TARGETS='app:9090, worker:9091' SHARD_COUNT=4 SHARD_INDEX=2
+run_render sharded INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS='app:9090, worker:9091' SHARD_COUNT=4 SHARD_INDEX=2
 
 # The shard index falls back to the trailing ordinal of the hostname
 # (StatefulSet pods are named <name>-<ordinal>).
 new_case_dir
-run_render sharded-hostname POSTFN_API_KEY=phc_test SCRAPE_TARGETS='app:9090, worker:9091' SHARD_COUNT=4 HOSTNAME=insights-metrics-agent-3
+run_render sharded-hostname INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS='app:9090, worker:9091' SHARD_COUNT=4 HOSTNAME=insights-metrics-agent-3
 
 new_case_dir
-expect_failure shard-index-out-of-range 'SHARD_INDEX must be less than SHARD_COUNT' POSTFN_API_KEY=phc_test SCRAPE_TARGETS=app:9090 SHARD_COUNT=2 SHARD_INDEX=2
+expect_failure shard-index-out-of-range 'SHARD_INDEX must be less than SHARD_COUNT' INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS=app:9090 SHARD_COUNT=2 SHARD_INDEX=2
 
 new_case_dir
-expect_failure shard-index-underivable 'SHARD_INDEX' POSTFN_API_KEY=phc_test SCRAPE_TARGETS=app:9090 SHARD_COUNT=2 HOSTNAME=nodigits
+expect_failure shard-index-underivable 'SHARD_INDEX' INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS=app:9090 SHARD_COUNT=2 HOSTNAME=nodigits
 
 # A mounted scrape_configs.yaml replaces the env-generated job verbatim
 # (re-indented under the receiver), and SCRAPE_TARGETS is not required.
@@ -125,7 +125,7 @@ cat >"$CASE_DIR/scrape_configs.yaml" <<'EOF'
   static_configs:
       - targets: ['legacy:8080']
 EOF
-run_render mounted-scrape-configs POSTFN_API_KEY=phc_test
+run_render mounted-scrape-configs INSIGHTS_API_KEY=phc_test
 
 # A mounted config.yaml wins over everything and is used verbatim; no env vars
 # are required because the file may carry its own ${env:...} references.
@@ -134,13 +134,13 @@ cp golden/full-override.yaml "$CASE_DIR/config.yaml"
 run_render full-override
 
 new_case_dir
-expect_failure missing-api-key POSTFN_API_KEY SCRAPE_TARGETS=app:9090
+expect_failure missing-api-key INSIGHTS_API_KEY SCRAPE_TARGETS=app:9090
 
 new_case_dir
-expect_failure missing-targets SCRAPE_TARGETS POSTFN_API_KEY=phc_test
+expect_failure missing-targets SCRAPE_TARGETS INSIGHTS_API_KEY=phc_test
 
 new_case_dir
-expect_failure empty-targets SCRAPE_TARGETS POSTFN_API_KEY=phc_test SCRAPE_TARGETS=' , '
+expect_failure empty-targets SCRAPE_TARGETS INSIGHTS_API_KEY=phc_test SCRAPE_TARGETS=' , '
 
 echo
 echo "render tests: $PASS passed, $FAIL failed"

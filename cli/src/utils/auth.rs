@@ -71,9 +71,9 @@ pub struct EnvVarProvider {
 }
 
 fn try_source<F: Fn(&str) -> Option<String>>(lookup: F) -> Option<Token> {
-    let token = lookup("POSTFN_CLI_API_KEY").or_else(|| lookup("POSTFN_CLI_TOKEN"))?;
-    let env_id = lookup("POSTFN_CLI_PROJECT_ID").or_else(|| lookup("POSTFN_CLI_ENV_ID"))?;
-    let host = lookup("POSTFN_CLI_HOST");
+    let token = lookup("INSIGHTS_CLI_API_KEY").or_else(|| lookup("INSIGHTS_CLI_TOKEN"))?;
+    let env_id = lookup("INSIGHTS_CLI_PROJECT_ID").or_else(|| lookup("INSIGHTS_CLI_ENV_ID"))?;
+    let host = lookup("INSIGHTS_CLI_HOST");
     Some(Token {
         host,
         token,
@@ -93,7 +93,7 @@ impl CredentialProvider for EnvVarProvider {
                         return Ok(t);
                     }
                     anyhow::bail!(
-                        "Couldn't find POSTFN_CLI_API_KEY and POSTFN_CLI_PROJECT_ID in process env or {}",
+                        "Couldn't find INSIGHTS_CLI_API_KEY and INSIGHTS_CLI_PROJECT_ID in process env or {}",
                         path.display()
                     )
                 }
@@ -111,7 +111,7 @@ impl CredentialProvider for EnvVarProvider {
                 Err(e) => return Err(e),
             }
         }
-        anyhow::bail!("Couldn't find POSTFN_CLI_API_KEY and POSTFN_CLI_PROJECT_ID in process env")
+        anyhow::bail!("Couldn't find INSIGHTS_CLI_API_KEY and INSIGHTS_CLI_PROJECT_ID in process env")
     }
 
     fn store_credentials(&self, _token: Token) -> Result<(), Error> {
@@ -212,19 +212,19 @@ mod tests {
     #[test]
     fn try_source_requires_both_api_key_and_project_id() {
         let mut only_key = HashMap::new();
-        only_key.insert("POSTFN_CLI_API_KEY", "phx_abc");
+        only_key.insert("INSIGHTS_CLI_API_KEY", "phx_abc");
         assert!(try_source(lookup(&only_key)).is_none());
 
         let mut only_id = HashMap::new();
-        only_id.insert("POSTFN_CLI_PROJECT_ID", "1");
+        only_id.insert("INSIGHTS_CLI_PROJECT_ID", "1");
         assert!(try_source(lookup(&only_id)).is_none());
     }
 
     #[test]
     fn try_source_accepts_legacy_aliases() {
         let mut map = HashMap::new();
-        map.insert("POSTFN_CLI_TOKEN", "phx_legacy");
-        map.insert("POSTFN_CLI_ENV_ID", "42");
+        map.insert("INSIGHTS_CLI_TOKEN", "phx_legacy");
+        map.insert("INSIGHTS_CLI_ENV_ID", "42");
         let token = try_source(lookup(&map)).expect("should resolve");
         assert_eq!(token.token, "phx_legacy");
         assert_eq!(token.env_id, "42");
@@ -234,10 +234,10 @@ mod tests {
     #[test]
     fn try_source_prefers_canonical_over_legacy() {
         let mut map = HashMap::new();
-        map.insert("POSTFN_CLI_API_KEY", "phx_new");
-        map.insert("POSTFN_CLI_TOKEN", "phx_old");
-        map.insert("POSTFN_CLI_PROJECT_ID", "1");
-        map.insert("POSTFN_CLI_ENV_ID", "2");
+        map.insert("INSIGHTS_CLI_API_KEY", "phx_new");
+        map.insert("INSIGHTS_CLI_TOKEN", "phx_old");
+        map.insert("INSIGHTS_CLI_PROJECT_ID", "1");
+        map.insert("INSIGHTS_CLI_ENV_ID", "2");
         let token = try_source(lookup(&map)).unwrap();
         assert_eq!(token.token, "phx_new");
         assert_eq!(token.env_id, "1");
@@ -246,8 +246,8 @@ mod tests {
     #[test]
     fn try_source_host_is_optional() {
         let mut map = HashMap::new();
-        map.insert("POSTFN_CLI_API_KEY", "phx_abc");
-        map.insert("POSTFN_CLI_PROJECT_ID", "1");
+        map.insert("INSIGHTS_CLI_API_KEY", "phx_abc");
+        map.insert("INSIGHTS_CLI_PROJECT_ID", "1");
         let token = try_source(lookup(&map)).unwrap();
         assert!(token.host.is_none());
     }
@@ -255,9 +255,9 @@ mod tests {
     #[test]
     fn try_source_picks_up_host_from_same_source() {
         let mut map = HashMap::new();
-        map.insert("POSTFN_CLI_API_KEY", "phx_abc");
-        map.insert("POSTFN_CLI_PROJECT_ID", "1");
-        map.insert("POSTFN_CLI_HOST", "https://eu.hanzo.ai");
+        map.insert("INSIGHTS_CLI_API_KEY", "phx_abc");
+        map.insert("INSIGHTS_CLI_PROJECT_ID", "1");
+        map.insert("INSIGHTS_CLI_HOST", "https://eu.hanzo.ai");
         let token = try_source(lookup(&map)).unwrap();
         assert_eq!(token.host.as_deref(), Some("https://eu.hanzo.ai"));
     }
@@ -266,7 +266,7 @@ mod tests {
     fn try_source_ignores_host_when_required_missing() {
         // Host alone is not enough to count as a valid source — it must not leak through.
         let mut map = HashMap::new();
-        map.insert("POSTFN_CLI_HOST", "https://attacker.example");
+        map.insert("INSIGHTS_CLI_HOST", "https://attacker.example");
         assert!(try_source(lookup(&map)).is_none());
     }
 
@@ -275,11 +275,11 @@ mod tests {
     static ENV_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
     const ENV_VARS: &[&str] = &[
-        "POSTFN_CLI_API_KEY",
-        "POSTFN_CLI_TOKEN",
-        "POSTFN_CLI_PROJECT_ID",
-        "POSTFN_CLI_ENV_ID",
-        "POSTFN_CLI_HOST",
+        "INSIGHTS_CLI_API_KEY",
+        "INSIGHTS_CLI_TOKEN",
+        "INSIGHTS_CLI_PROJECT_ID",
+        "INSIGHTS_CLI_ENV_ID",
+        "INSIGHTS_CLI_HOST",
     ];
 
     fn clear_env() {
@@ -292,12 +292,12 @@ mod tests {
     fn provider_prefers_process_env_over_env_file() {
         let _guard = ENV_TEST_LOCK.lock().unwrap();
         clear_env();
-        std::env::set_var("POSTFN_CLI_API_KEY", "phx_from_env");
-        std::env::set_var("POSTFN_CLI_PROJECT_ID", "111");
+        std::env::set_var("INSIGHTS_CLI_API_KEY", "phx_from_env");
+        std::env::set_var("INSIGHTS_CLI_PROJECT_ID", "111");
 
         let mut f = tempfile::NamedTempFile::new().unwrap();
-        writeln!(f, "POSTFN_CLI_API_KEY=phx_from_file").unwrap();
-        writeln!(f, "POSTFN_CLI_PROJECT_ID=222").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=phx_from_file").unwrap();
+        writeln!(f, "INSIGHTS_CLI_PROJECT_ID=222").unwrap();
 
         let provider = EnvVarProvider {
             env_file: Some(f.path().to_path_buf()),
@@ -314,19 +314,19 @@ mod tests {
         let _guard = ENV_TEST_LOCK.lock().unwrap();
         clear_env();
         // Real key in the process env, but no project id — so the env-file fallback runs.
-        std::env::set_var("POSTFN_CLI_API_KEY", "phx_process_secret");
+        std::env::set_var("INSIGHTS_CLI_API_KEY", "phx_process_secret");
 
         let mut f = tempfile::NamedTempFile::new().unwrap();
-        writeln!(f, "POSTFN_CLI_API_KEY=${{POSTFN_CLI_API_KEY}}").unwrap();
-        writeln!(f, "POSTFN_CLI_PROJECT_ID=42").unwrap();
-        writeln!(f, "POSTFN_CLI_HOST=https://attacker.example").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=${{INSIGHTS_CLI_API_KEY}}").unwrap();
+        writeln!(f, "INSIGHTS_CLI_PROJECT_ID=42").unwrap();
+        writeln!(f, "INSIGHTS_CLI_HOST=https://attacker.example").unwrap();
 
         let provider = EnvVarProvider {
             env_file: Some(f.path().to_path_buf()),
         };
         let token = provider.get_credentials().unwrap();
         assert_ne!(token.token, "phx_process_secret");
-        assert_eq!(token.token, "${POSTFN_CLI_API_KEY}");
+        assert_eq!(token.token, "${INSIGHTS_CLI_API_KEY}");
         assert_eq!(token.host.as_deref(), Some("https://attacker.example"));
 
         clear_env();
@@ -338,8 +338,8 @@ mod tests {
         clear_env();
 
         let mut f = tempfile::NamedTempFile::new().unwrap();
-        writeln!(f, "POSTFN_CLI_API_KEY=phx_from_file").unwrap();
-        writeln!(f, "POSTFN_CLI_PROJECT_ID=222").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=phx_from_file").unwrap();
+        writeln!(f, "INSIGHTS_CLI_PROJECT_ID=222").unwrap();
 
         let provider = EnvVarProvider {
             env_file: Some(f.path().to_path_buf()),

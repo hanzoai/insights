@@ -20,8 +20,8 @@ import type { ToolRendererProps } from './toolRegistry'
  * and linked repo rows. Registered in `toolRegistry` under both the bare and the `mcp__<server>__`
  * qualified key, since the resolver yields either depending on the wire adapter.
  */
-export const POSTFN_CODE_TOOLS_SERVER = 'insights-code-tools'
-const QUALIFIED_PREFIX = `mcp__${POSTFN_CODE_TOOLS_SERVER}__`
+export const INSIGHTS_CODE_TOOLS_SERVER = 'insights-code-tools'
+const QUALIFIED_PREFIX = `mcp__${INSIGHTS_CODE_TOOLS_SERVER}__`
 
 type SignedGitTool = 'git_signed_commit' | 'git_signed_merge' | 'git_signed_rewrite'
 

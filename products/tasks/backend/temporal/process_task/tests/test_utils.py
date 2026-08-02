@@ -1186,9 +1186,9 @@ class TestBuildSandboxEnvironmentVariables(SimpleTestCase):
         ):
             env = build_sandbox_environment_variables(None, "access-token", 1, otel_telemetry_enabled=True)
 
-        assert env["POSTFN_AGENT_OTEL_LOGS_URL"] == "https://us.i.hanzo.ai/i/v1/logs"
-        assert env["POSTFN_AGENT_OTEL_LOGS_TOKEN"] == "phc_telemetry"
-        assert env["POSTFN_AGENT_OTEL_TRACES_URL"] == "https://us.i.hanzo.ai/i/v1/traces"
+        assert env["INSIGHTS_AGENT_OTEL_LOGS_URL"] == "https://us.i.hanzo.ai/i/v1/logs"
+        assert env["INSIGHTS_AGENT_OTEL_LOGS_TOKEN"] == "phc_telemetry"
+        assert env["INSIGHTS_AGENT_OTEL_TRACES_URL"] == "https://us.i.hanzo.ai/i/v1/traces"
 
     @patch(
         "products.tasks.backend.logic.services.connection_token.get_sandbox_jwt_public_key",
@@ -1206,7 +1206,7 @@ class TestBuildSandboxEnvironmentVariables(SimpleTestCase):
         ):
             env = build_sandbox_environment_variables(None, "access-token", 1, otel_telemetry_enabled=True)
 
-        assert not any(key.startswith("POSTFN_AGENT_OTEL_") for key in env)
+        assert not any(key.startswith("INSIGHTS_AGENT_OTEL_") for key in env)
 
     @patch(
         "products.tasks.backend.logic.services.connection_token.get_sandbox_jwt_public_key",
@@ -1224,4 +1224,4 @@ class TestBuildSandboxEnvironmentVariables(SimpleTestCase):
         ):
             env = build_sandbox_environment_variables(None, "access-token", 1)
 
-        assert not any(key.startswith("POSTFN_AGENT_OTEL_") for key in env)
+        assert not any(key.startswith("INSIGHTS_AGENT_OTEL_") for key in env)

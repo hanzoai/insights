@@ -48,7 +48,7 @@ export type RerunStatusValue = 'running' | 'succeeded' | 'failed'
  * `invocation_ids` is an OPTIONAL additional restriction. When set, the
  * paginator pulls only those ids within the window — a UI "rerun these
  * specific failed runs" affordance. Server-side cap on the list size is
- * enforced via `FN_INVOCATION_RERUN_MAX_COUNT`.
+ * enforced via `INSIGHTS_INVOCATION_RERUN_MAX_COUNT`.
  */
 export interface RerunFilter {
     window_start: string

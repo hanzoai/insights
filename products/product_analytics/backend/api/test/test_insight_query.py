@@ -347,7 +347,7 @@ class TestInsight(DatastoreTestMixin, LicensedTestMixin, APIBaseTest, QueryMatch
         response = self.client.post(
             f"/api/projects/{self.team.id}/insights/",
             data={"name": "Test insight", "favorited": False, "saved": True, "query": query},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -369,7 +369,7 @@ class TestInsight(DatastoreTestMixin, LicensedTestMixin, APIBaseTest, QueryMatch
                     "volumeResolution": 60,
                 },
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST

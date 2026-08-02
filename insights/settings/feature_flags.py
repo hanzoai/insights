@@ -113,4 +113,4 @@ FEATURE_FLAGS_CANARY_TEAM_ID: int | None = get_from_env("FEATURE_FLAGS_CANARY_TE
 # poll team 2's flag definitions from the US region, since team 2 lives only in the
 # US Postgres. Unset disables the sync. Not needed on US, where team 2's HyperCache
 # entry is built locally via the normal signal-driven path.
-POSTFN_FLAGS_PROJECT_SECRET_TOKEN: str = get_from_env("POSTFN_FLAGS_PROJECT_SECRET_TOKEN", "")
+INSIGHTS_FLAGS_PROJECT_SECRET_TOKEN: str = get_from_env("INSIGHTS_FLAGS_PROJECT_SECRET_TOKEN", "")

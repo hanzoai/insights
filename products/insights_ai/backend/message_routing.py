@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 logger = structlog.get_logger(__name__)
 
 DEFAULT_INITIAL_PERMISSION_MODE: InitialPermissionMode = "auto"
-POSTFN_AI_INTERACTION_ORIGIN = tasks_facade.TaskOriginProduct.POSTFN_AI.value
+INSIGHTS_AI_INTERACTION_ORIGIN = tasks_facade.TaskOriginProduct.INSIGHTS_AI.value
 
 # A Insights AI sandbox session is a live chat: if the user goes quiet for this long
 # they've moved on, so the Run's workflow times out and reclaims the sandbox. Passed
@@ -197,8 +197,8 @@ class SandboxSession(BaseSandboxService):
         """
         # Gate before creating the Task: an over-quota or over-cap warm must not leave the conversation
         # with a runless Task that the next message can't continue. The facade re-checks both.
-        warm_facade.enforce_warm_quota(tasks_facade.TaskOriginProduct.POSTFN_AI, self.team.pk, self.user.pk)
-        if warm_facade.warm_pool_at_capacity(tasks_facade.TaskOriginProduct.POSTFN_AI, self.team.pk, self.user.pk):
+        warm_facade.enforce_warm_quota(tasks_facade.TaskOriginProduct.INSIGHTS_AI, self.team.pk, self.user.pk)
+        if warm_facade.warm_pool_at_capacity(tasks_facade.TaskOriginProduct.INSIGHTS_AI, self.team.pk, self.user.pk):
             logger.info(
                 "sandbox_warm_capacity_reached",
                 conversation_id=str(self.conversation.id),
@@ -214,7 +214,7 @@ class SandboxSession(BaseSandboxService):
                 task_id = tasks_facade.create_task_without_run(
                     team=self.team,
                     user_id=self.user.pk,
-                    origin_product=tasks_facade.TaskOriginProduct.POSTFN_AI,
+                    origin_product=tasks_facade.TaskOriginProduct.INSIGHTS_AI,
                     repository=None,
                 )
                 locked.task_id = task_id
@@ -229,7 +229,7 @@ class SandboxSession(BaseSandboxService):
                 self.team.pk,
                 self.user.pk,
                 extra_state={
-                    "interaction_origin": POSTFN_AI_INTERACTION_ORIGIN,
+                    "interaction_origin": INSIGHTS_AI_INTERACTION_ORIGIN,
                     "systemPrompt": system_prompt,
                     "initial_permission_mode": initial_permission_mode,
                     "inactivity_timeout_seconds": SANDBOX_INACTIVITY_TIMEOUT_SECONDS,
@@ -278,12 +278,12 @@ class SandboxSession(BaseSandboxService):
             team=self.team,
             title=content[:80],
             description=content,
-            origin_product=tasks_facade.TaskOriginProduct.POSTFN_AI,
+            origin_product=tasks_facade.TaskOriginProduct.INSIGHTS_AI,
             user_id=self.user.pk,
             repository=repository,
             create_pr=False,
             mode="interactive",
-            interaction_origin=POSTFN_AI_INTERACTION_ORIGIN,
+            interaction_origin=INSIGHTS_AI_INTERACTION_ORIGIN,
             inactivity_timeout_seconds=SANDBOX_INACTIVITY_TIMEOUT_SECONDS,
             # Defer the workflow so the initial run state can carry the Insights AI keys.
             start_workflow=False,
@@ -301,7 +301,7 @@ class SandboxSession(BaseSandboxService):
             system_prompt=system_prompt,
             attached_context=attached_context,
             initial_permission_mode=initial_permission_mode,
-            interaction_origin=POSTFN_AI_INTERACTION_ORIGIN,
+            interaction_origin=INSIGHTS_AI_INTERACTION_ORIGIN,
             pending_user_message=wrapped,
         )
         state_updates = ph_state.model_dump(mode="json", by_alias=True, exclude_unset=True)
@@ -457,7 +457,7 @@ class SandboxSession(BaseSandboxService):
                 run = current
 
             extra_state: dict[str, Any] = {
-                "interaction_origin": POSTFN_AI_INTERACTION_ORIGIN,
+                "interaction_origin": INSIGHTS_AI_INTERACTION_ORIGIN,
                 "resume_from_run_id": str(run.id),
                 "pending_user_message": wrapped,
                 "systemPrompt": system_prompt,

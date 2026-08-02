@@ -52,7 +52,7 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
 ## 2026-07-06 · harness smoke: LOCAL agent build in sandboxes + surprise partial cross-sandbox cache sharing ✅
 
 - **Purpose:** NOT a quality run — verify the two-repo harness dev loop for the prompt-caching program
-  (`eval/experiments/2026-07-prompt-caching/HARNESS.md`): `LOCAL_POSTFN_CODE_MONOREPO_ROOT` overlay ->
+  (`eval/experiments/2026-07-prompt-caching/HARNESS.md`): `LOCAL_INSIGHTS_CODE_MONOREPO_ROOT` overlay ->
   locally built `@hanzo/agent` (clean, unpatched `main`) runs the review sandboxes. Quality not comparable
   to the log above (different PR).
 - **Run 1 (#63625): environmental failure** — the frozen sample PR merged 2026-07-03, branch deleted, all

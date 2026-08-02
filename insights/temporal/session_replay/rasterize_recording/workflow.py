@@ -5,7 +5,7 @@ import temporalio.workflow as wf
 from temporalio import common
 
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.search_attributes import POSTFN_SESSION_RECORDING_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SESSION_RECORDING_ID_KEY, INSIGHTS_TEAM_ID_KEY
 
 with wf.unsafe.imports_passed_through():
     from django.conf import settings
@@ -91,8 +91,8 @@ class RasterizeRecordingWorkflow(InsightsWorkflow):
             return
         if info.attempt < max_attempts:
             return
-        session_id = info.typed_search_attributes.get(POSTFN_SESSION_RECORDING_ID_KEY)
-        team_id = info.typed_search_attributes.get(POSTFN_TEAM_ID_KEY)
+        session_id = info.typed_search_attributes.get(INSIGHTS_SESSION_RECORDING_ID_KEY)
+        team_id = info.typed_search_attributes.get(INSIGHTS_TEAM_ID_KEY)
         if session_id is None or team_id is None:
             return
         try:
@@ -107,8 +107,8 @@ class RasterizeRecordingWorkflow(InsightsWorkflow):
 
     async def _maybe_clear_stuck_counter(self) -> None:
         info = wf.info()
-        session_id = info.typed_search_attributes.get(POSTFN_SESSION_RECORDING_ID_KEY)
-        team_id = info.typed_search_attributes.get(POSTFN_TEAM_ID_KEY)
+        session_id = info.typed_search_attributes.get(INSIGHTS_SESSION_RECORDING_ID_KEY)
+        team_id = info.typed_search_attributes.get(INSIGHTS_TEAM_ID_KEY)
         if session_id is None or team_id is None:
             return
         try:

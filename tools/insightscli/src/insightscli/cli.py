@@ -255,8 +255,8 @@ def telemetry_status() -> None:
     # Show which mechanism controls the state
     if telemetry.is_ci():
         click.echo("Controlled by: CI environment detected")
-    elif os.environ.get("POSTFN_TELEMETRY_OPT_OUT") == "1":
-        click.echo("Controlled by: POSTFN_TELEMETRY_OPT_OUT=1")
+    elif os.environ.get("INSIGHTS_TELEMETRY_OPT_OUT") == "1":
+        click.echo("Controlled by: INSIGHTS_TELEMETRY_OPT_OUT=1")
     elif os.environ.get("DO_NOT_TRACK") == "1":
         click.echo("Controlled by: DO_NOT_TRACK=1")
     else:

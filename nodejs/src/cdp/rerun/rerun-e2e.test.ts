@@ -19,7 +19,7 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
 import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
-import { FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
     createHogExecutionGlobals,
@@ -151,7 +151,7 @@ describe('CDP script invocation rerun e2e', () => {
         hub.CDP_CYCLOTRON_COMPRESS_KAFKA_DATA = true
         hub.CYCLOTRON_DATABASE_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron'
         hub.CYCLOTRON_NODE_DATABASE_URL = NODE_DB_URL
-        hub.FN_INVOCATION_RESULTS_ENABLED = true
+        hub.INSIGHTS_INVOCATION_RESULTS_ENABLED = true
 
         // Clean any stale rerun wrapper jobs from prior runs.
         nodeAssertPool = new Pool({ connectionString: NODE_DB_URL })
@@ -170,9 +170,9 @@ describe('CDP script invocation rerun e2e', () => {
             type: 'destination',
             script,
             bytecode: await compileHog(script),
-            inputs_schema: FN_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? [],
-            inputs: FN_INPUTS_EXAMPLES.simple_fetch.inputs,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            inputs_schema: INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? [],
+            inputs: INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
         })
 
         kafkaQueue = new CyclotronJobQueueKafka(hub.KAFKA_CLIENT_RACK, hub, hub.CONSUMER_BATCH_SIZE)
@@ -378,7 +378,7 @@ describe('CDP script invocation rerun e2e', () => {
                     bytecode: await compileHog('return person.properties.foo ?? event.properties.foo'),
                 },
             },
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
         })
 
         mockFetch.mockResolvedValue({
@@ -522,7 +522,7 @@ describe('CDP script invocation rerun e2e', () => {
                 actions: {
                     trigger: {
                         type: 'trigger',
-                        config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                        config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                     },
                     function_1: {
                         type: 'function',

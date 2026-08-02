@@ -12,7 +12,7 @@ from parameterized import parameterized
 
 from insights.schema import DatastoreQueryProgress, QueryStatus
 
-from insights.insightsql.constants import DEFAULT_POSTFN_AI_RETURNED_ROWS
+from insights.insightsql.constants import DEFAULT_INSIGHTS_AI_RETURNED_ROWS
 from insights.insightsql.errors import ExposedInsightsQLError
 
 from insights.datastore.client import (
@@ -212,7 +212,7 @@ class DatastoreClientTestCase(TestCase, DatastoreTestMixin):
         self.assertFalse(result.error, result.error_message or "<no error message>")
         self.assertTrue(result.complete)
         assert result.results is not None
-        self.assertEqual(len(result.results["results"]), DEFAULT_POSTFN_AI_RETURNED_ROWS)
+        self.assertEqual(len(result.results["results"]), DEFAULT_INSIGHTS_AI_RETURNED_ROWS)
 
     def test_async_query_insights_ai_limit_with_explicit_limit(self):
         query = build_query("SELECT arrayJoin(range(1, 100001)) LIMIT 300")

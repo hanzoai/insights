@@ -4,7 +4,7 @@ import { addCellHandler } from '@/tools/notebooks/addCell'
 import { createMarkdownHandler } from '@/tools/notebooks/createMarkdown'
 import { deleteCellHandler } from '@/tools/notebooks/deleteCell'
 import { updateCellHandler } from '@/tools/notebooks/updateCell'
-import { POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY, type Context } from '@/tools/types'
+import { INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, type Context } from '@/tools/types'
 
 type AddCellParams = Parameters<typeof addCellHandler>[1]
 
@@ -133,7 +133,7 @@ describe('notebook cell tools', () => {
 
         // Run output is attacker-influenceable (query rows, stdout), so the response must
         // ship inside the untrusted-data boundary the model is told not to obey.
-        const formatted = (result as any)[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]
+        const formatted = (result as any)[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]
         expect(formatted).toContain('<notebook-cell-run')
         expect(formatted).toContain('not instructions')
     })

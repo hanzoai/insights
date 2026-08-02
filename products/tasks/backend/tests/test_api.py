@@ -1410,7 +1410,7 @@ class TestTaskAPI(BaseTaskAPITest):
             {
                 "title": "New Insights AI task",
                 "description": "Created from the Insights AI task tracker",
-                "origin_product": Task.OriginProduct.POSTFN_AI,
+                "origin_product": Task.OriginProduct.INSIGHTS_AI,
                 "repository": "insights/insights",
             },
             format="json",
@@ -1418,7 +1418,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         task = Task.objects.get(id=response.json()["id"])
-        self.assertEqual(task.origin_product, Task.OriginProduct.POSTFN_AI)
+        self.assertEqual(task.origin_product, Task.OriginProduct.INSIGHTS_AI)
 
     @parameterized.expand(
         [
@@ -9361,7 +9361,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
             created_by=created_by or self.user,
             title="Max session",
             description="Max session",
-            origin_product=Task.OriginProduct.POSTFN_AI,
+            origin_product=Task.OriginProduct.INSIGHTS_AI,
         )
 
     def _capture_calls_for_event(self, mock_capture, event):
@@ -9391,7 +9391,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
         calls = self._capture_calls_for_event(mock_capture, "permission_responded")
         self.assertEqual(len(calls), 1)
         props = calls[0].kwargs["properties"]
-        self.assertEqual(props["origin_product"], Task.OriginProduct.POSTFN_AI)
+        self.assertEqual(props["origin_product"], Task.OriginProduct.INSIGHTS_AI)
         self.assertEqual(props["run_id"], str(run.id))
         self.assertEqual(props["request_id"], "perm-1")
         self.assertEqual(props["option_id"], "allow")
@@ -9418,7 +9418,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
         calls = self._capture_calls_for_event(mock_capture, "task_run_cancelled")
         self.assertEqual(len(calls), 1)
         props = calls[0].kwargs["properties"]
-        self.assertEqual(props["origin_product"], Task.OriginProduct.POSTFN_AI)
+        self.assertEqual(props["origin_product"], Task.OriginProduct.INSIGHTS_AI)
         self.assertEqual(props["cancel_source"], "user")
         self.assertEqual(props["surface"], "relay")
         self.assertIsNone(props["conversation_id"])
@@ -10212,7 +10212,7 @@ class TestSandboxEnvironmentAPI(BaseTaskAPITest):
     @parameterized.expand(
         [
             ("GITHUB_TOKEN",),
-            ("POSTFN_PERSONAL_API_KEY",),
+            ("INSIGHTS_PERSONAL_API_KEY",),
             ("JWT_PUBLIC_KEY",),
         ]
     )

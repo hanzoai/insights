@@ -22,12 +22,12 @@ export default defineConfig({
                     // Override secrets loaded from .env. Empty values
                     // make init()'s analytics / observability paths short-
                     // circuit cleanly.
-                    POSTFN_API_BASE_URL: '',
-                    POSTFN_PUBLIC_URL: '',
-                    POSTFN_ANALYTICS_API_KEY: '',
-                    POSTFN_ANALYTICS_HOST: '',
-                    POSTFN_MCP_APPS_ANALYTICS_BASE_URL: '',
-                    POSTFN_UI_APPS_TOKEN: '',
+                    INSIGHTS_API_BASE_URL: '',
+                    INSIGHTS_PUBLIC_URL: '',
+                    INSIGHTS_ANALYTICS_API_KEY: '',
+                    INSIGHTS_ANALYTICS_HOST: '',
+                    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: '',
+                    INSIGHTS_UI_APPS_TOKEN: '',
                     // Generic test marker. Code can short-circuit features
                     // that need real network (e.g. context-mill GitHub
                     // fetch in src/resources/index.ts).

@@ -57,7 +57,7 @@ jobs:
             tag_sort: version
         secrets:
             slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
-            insights_project_api_key: ${{ secrets.POSTFN_PROJECT_API_KEY }}
+            insights_project_api_key: ${{ secrets.INSIGHTS_PROJECT_API_KEY }}
 
     cli-release-preview:
         name: Generate CLI release preview
@@ -151,8 +151,8 @@ jobs:
               id: app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_POSTFN_CLI_RELEASER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_POSTFN_CLI_RELEASER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_INSIGHTS_CLI_RELEASER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_INSIGHTS_CLI_RELEASER_PRIVATE_KEY }}
 
             - name: Checkout repository
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -272,7 +272,7 @@ jobs:
               if: failure()
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: '${{ secrets.POSTFN_PROJECT_API_KEY }}'
+                  insights-token: '${{ secrets.INSIGHTS_PROJECT_API_KEY }}'
                   event: 'insights-cli-github-release-workflow-failure'
                   properties: >-
                       {
@@ -386,7 +386,7 @@ jobs:
         container: ${{ matrix.container && matrix.container.image || null }}
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            POSTFN_API_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
+            INSIGHTS_API_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
             BUILD_MANIFEST_NAME: target/distrib/${{ join(matrix.targets, '-') }}-dist-manifest.json
         steps:
             - name: enable windows longpaths
@@ -506,7 +506,7 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             BUILD_MANIFEST_NAME: target/distrib/global-dist-manifest.json
-            POSTFN_API_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
+            INSIGHTS_API_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:
@@ -578,8 +578,8 @@ jobs:
               id: app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_RELEASER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_RELEASER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_RELEASER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_RELEASER_PRIVATE_KEY }}
 
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:

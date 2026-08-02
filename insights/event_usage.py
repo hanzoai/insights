@@ -273,8 +273,8 @@ class EventSource(StrEnum):
     WEB = "web"
     API = "api"
     CLI = "cli"
-    POSTFN_AI = "insights_ai"
-    POSTFN_CODE = "insights_code"
+    INSIGHTS_AI = "insights_ai"
+    INSIGHTS_CODE = "insights_code"
     TERRAFORM = "terraform"
     MCP = "mcp"
     WIZARD = "wizard"
@@ -312,7 +312,7 @@ AnalyticsProps = TypedDict(
     total=False,
 )
 
-_POSTFN_CODE_UA_RE = re.compile(r"insights/(code|[\w.-]+\.script\.dev)")
+_INSIGHTS_CODE_UA_RE = re.compile(r"insights/(code|[\w.-]+\.script\.dev)")
 
 # The wizard appends `program: <id>` to its user-agent so the backend can tell the
 # self-driving onboarding program apart from other wizard programs (they all share the
@@ -332,8 +332,8 @@ def get_event_source(request) -> EventSource:
         return EventSource.TERRAFORM
     if "insights/wizard" in user_agent:
         return EventSource.WIZARD
-    if _POSTFN_CODE_UA_RE.search(user_agent):
-        return EventSource.POSTFN_CODE
+    if _INSIGHTS_CODE_UA_RE.search(user_agent):
+        return EventSource.INSIGHTS_CODE
     if user_agent == "insights-cli" or request.headers.get("X-Insights-Mcp-Consumer") == "insights-cli":
         return EventSource.CLI
     if "insights/mcp-server" in user_agent or request.headers.get("X-Insights-Client") == "mcp":

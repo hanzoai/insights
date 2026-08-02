@@ -9,7 +9,7 @@ from insights.datastore.kafka_engine import (
 from insights.datastore.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_FN_INVOCATION_RESULTS
 
-FN_INVOCATION_RESULTS_TTL_DAYS = 30
+INSIGHTS_INVOCATION_RESULTS_TTL_DAYS = 30
 
 # Naming convention mirrors `property_values` — the AUX-resident, non-sharded
 # table family:
@@ -20,27 +20,27 @@ FN_INVOCATION_RESULTS_TTL_DAYS = 30
 #   * `hog_invocation_results_mv` — MV on AUX, kafka → data table.
 #   * `hog_invocation_results` — distributed read alias on AUX + DATA. This is
 #     the name InsightsQL emits and the name the replay paginator queries.
-FN_INVOCATION_RESULTS_TABLE = "hog_invocation_results"
-FN_INVOCATION_RESULTS_DATA_TABLE = f"{FN_INVOCATION_RESULTS_TABLE}_data"
-KAFKA_FN_INVOCATION_RESULTS_TABLE = f"kafka_{FN_INVOCATION_RESULTS_TABLE}"
-FN_INVOCATION_RESULTS_MV_TABLE = f"{FN_INVOCATION_RESULTS_TABLE}_mv"
+INSIGHTS_INVOCATION_RESULTS_TABLE = "hog_invocation_results"
+INSIGHTS_INVOCATION_RESULTS_DATA_TABLE = f"{INSIGHTS_INVOCATION_RESULTS_TABLE}_data"
+KAFKA_FN_INVOCATION_RESULTS_TABLE = f"kafka_{INSIGHTS_INVOCATION_RESULTS_TABLE}"
+INSIGHTS_INVOCATION_RESULTS_MV_TABLE = f"{INSIGHTS_INVOCATION_RESULTS_TABLE}_mv"
 
 
 def DROP_FN_INVOCATION_RESULTS_MV_SQL() -> str:
-    return f"DROP TABLE IF EXISTS {FN_INVOCATION_RESULTS_MV_TABLE}"
+    return f"DROP TABLE IF EXISTS {INSIGHTS_INVOCATION_RESULTS_MV_TABLE}"
 
 
 def DROP_KAFKA_FN_INVOCATION_RESULTS_TABLE_SQL() -> str:
     return f"DROP TABLE IF EXISTS {KAFKA_FN_INVOCATION_RESULTS_TABLE}"
 
 
-def FN_INVOCATION_RESULTS_ENGINE() -> ReplacingMergeTree:
+def INSIGHTS_INVOCATION_RESULTS_ENGINE() -> ReplacingMergeTree:
     # ReplicatedReplacingMergeTree on the AUX cluster — single shard, two
     # replicas. The `version` column tie-breaks: lifecycle rows for the same
     # invocation_id (start + finish, plus any replay attempts) collapse to the
     # latest version at merge time.
     return ReplacingMergeTree(
-        FN_INVOCATION_RESULTS_DATA_TABLE,
+        INSIGHTS_INVOCATION_RESULTS_DATA_TABLE,
         ver="version",
         replication_scheme=ReplicationScheme.REPLICATED,
     )
@@ -56,7 +56,7 @@ def FN_INVOCATION_RESULTS_ENGINE() -> ReplacingMergeTree:
 # scheduled time with `min(scheduled_at)` post-merge — every lifecycle row
 # for a given invocation carries this column verbatim so `argMax(..., version)`
 # returns it correctly regardless of merge state.
-FN_INVOCATION_RESULTS_KAFKA_COLUMNS = """
+INSIGHTS_INVOCATION_RESULTS_KAFKA_COLUMNS = """
     team_id Int64,
     function_kind LowCardinality(String),
     function_id String,
@@ -84,9 +84,9 @@ FN_INVOCATION_RESULTS_KAFKA_COLUMNS = """
 # The actual data lives on AUX. ZSTD on the two large String columns. Skipping
 # indexes match the listing/replay query shape — see the runs-v2 logic for
 # the canonical select.
-FN_INVOCATION_RESULTS_DATA_TABLE_SQL = lambda: (
+INSIGHTS_INVOCATION_RESULTS_DATA_TABLE_SQL = lambda: (
     f"""
-CREATE TABLE IF NOT EXISTS {FN_INVOCATION_RESULTS_DATA_TABLE}
+CREATE TABLE IF NOT EXISTS {INSIGHTS_INVOCATION_RESULTS_DATA_TABLE}
 (
     team_id Int64,
     function_kind LowCardinality(String),
@@ -115,10 +115,10 @@ CREATE TABLE IF NOT EXISTS {FN_INVOCATION_RESULTS_DATA_TABLE}
     INDEX is_retry_idx   is_retry    TYPE set(2)             GRANULARITY 1
     {KAFKA_COLUMNS_WITH_PARTITION}
 )
-ENGINE = {FN_INVOCATION_RESULTS_ENGINE()}
+ENGINE = {INSIGHTS_INVOCATION_RESULTS_ENGINE()}
 PARTITION BY toYYYYMMDD(scheduled_at)
 ORDER BY (team_id, function_kind, function_id, invocation_id)
-{ttl_period("scheduled_at", FN_INVOCATION_RESULTS_TTL_DAYS, unit="DAY")}
+{ttl_period("scheduled_at", INSIGHTS_INVOCATION_RESULTS_TTL_DAYS, unit="DAY")}
 SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1
 """
 )
@@ -130,12 +130,12 @@ SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1
 # engine routes lookups to the AUX replicas.
 DISTRIBUTED_FN_INVOCATION_RESULTS_TABLE_SQL = lambda: (
     f"""
-CREATE TABLE IF NOT EXISTS {FN_INVOCATION_RESULTS_TABLE}
+CREATE TABLE IF NOT EXISTS {INSIGHTS_INVOCATION_RESULTS_TABLE}
 (
-    {FN_INVOCATION_RESULTS_KAFKA_COLUMNS}
+    {INSIGHTS_INVOCATION_RESULTS_KAFKA_COLUMNS}
     {KAFKA_COLUMNS_WITH_PARTITION}
 )
-ENGINE = {Distributed(data_table=FN_INVOCATION_RESULTS_DATA_TABLE, cluster=settings.DATASTORE_AUX_CLUSTER)}
+ENGINE = {Distributed(data_table=INSIGHTS_INVOCATION_RESULTS_DATA_TABLE, cluster=settings.DATASTORE_AUX_CLUSTER)}
 """
 )
 
@@ -148,7 +148,7 @@ KAFKA_FN_INVOCATION_RESULTS_TABLE_SQL = lambda: (
     f"""
 CREATE TABLE IF NOT EXISTS {KAFKA_FN_INVOCATION_RESULTS_TABLE}
 (
-    {FN_INVOCATION_RESULTS_KAFKA_COLUMNS}
+    {INSIGHTS_INVOCATION_RESULTS_KAFKA_COLUMNS}
 )
 ENGINE = {
         kafka_engine(
@@ -165,9 +165,9 @@ SETTINGS kafka_skip_broken_messages = 100
 # MV runs on AUX, writes straight into the local data table. No writable
 # distributed wrapper needed — single-shard cluster means there's nothing to
 # fan out to.
-FN_INVOCATION_RESULTS_MV_SQL = lambda target_table=FN_INVOCATION_RESULTS_DATA_TABLE: (
+INSIGHTS_INVOCATION_RESULTS_MV_SQL = lambda target_table=INSIGHTS_INVOCATION_RESULTS_DATA_TABLE: (
     f"""
-CREATE MATERIALIZED VIEW IF NOT EXISTS {FN_INVOCATION_RESULTS_MV_TABLE}
+CREATE MATERIALIZED VIEW IF NOT EXISTS {INSIGHTS_INVOCATION_RESULTS_MV_TABLE}
 TO {target_table}
 AS SELECT
     team_id,
@@ -204,13 +204,13 @@ FROM {KAFKA_FN_INVOCATION_RESULTS_TABLE}
 )
 
 
-TRUNCATE_FN_INVOCATION_RESULTS_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS {FN_INVOCATION_RESULTS_DATA_TABLE}"
+TRUNCATE_FN_INVOCATION_RESULTS_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS {INSIGHTS_INVOCATION_RESULTS_DATA_TABLE}"
 
 
 # Direct insert used by tests / any bypass-Kafka producer. Writes go to the
 # local data table (the distributed read alias isn't writable).
 INSERT_FN_INVOCATION_RESULT_SQL = f"""
-INSERT INTO {FN_INVOCATION_RESULTS_DATA_TABLE} (
+INSERT INTO {INSIGHTS_INVOCATION_RESULTS_DATA_TABLE} (
     team_id,
     function_kind,
     function_id,

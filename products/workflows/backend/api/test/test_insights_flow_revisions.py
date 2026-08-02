@@ -89,7 +89,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
                     }
                 ]
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
 
@@ -190,7 +190,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
     def test_non_content_writes_do_not_append_revisions(self, _name, path_suffix, payload, client_header):
         flow_id = self._create_active_flow()
         with patch(FLAG_PATH, return_value=True):
-            extra = {"HTTP_X_POSTFN_CLIENT": client_header} if client_header else {}
+            extra = {"HTTP_X_INSIGHTS_CLIENT": client_header} if client_header else {}
             response = self.client.patch(
                 f"/api/projects/{self.team.id}/hog_flows/{flow_id}{path_suffix}", payload, **extra
             )
@@ -303,7 +303,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         response = self.client.patch(
             f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert response.status_code == 200, response.json()
 

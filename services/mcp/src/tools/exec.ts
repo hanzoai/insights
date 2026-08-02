@@ -12,9 +12,9 @@ import { TOKEN_CHAR_LIMIT, listAvailablePaths, resolveSchemaPath, summarizeSchem
 import { isRegexPattern, searchToolsRanked, searchToolsRegex } from './tool-search'
 import type { ScopeGatedTool } from './toolDefinitions'
 import {
-    POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY,
-    POSTFN_INFORMATIONAL_RESPONSE_KEY,
-    POSTFN_META_KEY,
+    INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY,
+    INSIGHTS_INFORMATIONAL_RESPONSE_KEY,
+    INSIGHTS_META_KEY,
     type Context,
     type Tool,
     type ZodObjectAny,
@@ -573,7 +573,7 @@ export function createExecTool(
                     const useJson =
                         forceJson ||
                         strayOutputFormat === 'json' ||
-                        tool._meta?.[POSTFN_META_KEY]?.outputFormat === 'json'
+                        tool._meta?.[INSIGHTS_META_KEY]?.outputFormat === 'json'
                     // Fold the flag back into the tool's own `output_format` field when it has
                     // one: formatter-toggle tools then skip the server-side formatter (clean raw
                     // JSON, no `__formatted_results_override` duplication), and tools where the
@@ -626,12 +626,12 @@ export function createExecTool(
                     const durationMs = Date.now() - startedAt
                     const formattedOverride =
                         result !== null && typeof result === 'object'
-                            ? (result as Record<string, unknown>)[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]
+                            ? (result as Record<string, unknown>)[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]
                             : undefined
                     const isInformationalResponse =
                         result !== null &&
                         typeof result === 'object' &&
-                        (result as Record<string, unknown>)[POSTFN_INFORMATIONAL_RESPONSE_KEY] === true
+                        (result as Record<string, unknown>)[INSIGHTS_INFORMATIONAL_RESPONSE_KEY] === true
 
                     if (useJson && isInformationalResponse && typeof formattedOverride === 'string') {
                         const outputText = JSON.stringify({ content: formattedOverride })

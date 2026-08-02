@@ -25,13 +25,13 @@ fi
 loopback_re='^https?://(localhost|127\.0\.0\.1)([:/]|$)'
 if [ -n "${SITE_URL:-}" ] && ! [[ "${SITE_URL}" =~ $loopback_re ]]; then
     tmp=$(mktemp)
-    grep -Ev '^(POSTFN_API_BASE_URL|POSTFN_MCP_APPS_ANALYTICS_BASE_URL|POSTFN_ANALYTICS_HOST)=' .env > "$tmp" || true
+    grep -Ev '^(INSIGHTS_API_BASE_URL|INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL|INSIGHTS_ANALYTICS_HOST)=' .env > "$tmp" || true
     mv "$tmp" .env
     # Leading \n guards against the prior file missing a trailing newline.
     printf '\n%s\n%s\n%s\n' \
-        "POSTFN_API_BASE_URL=${SITE_URL}" \
-        "POSTFN_MCP_APPS_ANALYTICS_BASE_URL=${SITE_URL}" \
-        "POSTFN_ANALYTICS_HOST=${SITE_URL}" \
+        "INSIGHTS_API_BASE_URL=${SITE_URL}" \
+        "INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL=${SITE_URL}" \
+        "INSIGHTS_ANALYTICS_HOST=${SITE_URL}" \
         >> .env
 fi
 

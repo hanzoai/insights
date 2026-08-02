@@ -118,12 +118,12 @@ describe('sceneLogic', () => {
     })
 
     it('does not blanket deny the combined alerts scene without insight access', async () => {
-        const priorAppContext = window.POSTFN_APP_CONTEXT
+        const priorAppContext = window.INSIGHTS_APP_CONTEXT
         try {
-            window.POSTFN_APP_CONTEXT = {
-                ...window.POSTFN_APP_CONTEXT,
+            window.INSIGHTS_APP_CONTEXT = {
+                ...window.INSIGHTS_APP_CONTEXT,
                 effective_resource_access_control: {
-                    ...window.POSTFN_APP_CONTEXT?.effective_resource_access_control,
+                    ...window.INSIGHTS_APP_CONTEXT?.effective_resource_access_control,
                     [AccessControlResourceType.Insight]: AccessControlLevel.None,
                 },
             } as AppContext
@@ -135,7 +135,7 @@ describe('sceneLogic', () => {
                 activeSceneId: Scene.Alerts,
             })
         } finally {
-            window.POSTFN_APP_CONTEXT = priorAppContext
+            window.INSIGHTS_APP_CONTEXT = priorAppContext
         }
     })
 
@@ -168,13 +168,13 @@ describe('sceneLogic', () => {
 
         it('bootstraps the homepage from APP_CONTEXT so a direct /home visit redirects on first paint', async () => {
             logic.unmount()
-            const priorAppContext = window.POSTFN_APP_CONTEXT
+            const priorAppContext = window.INSIGHTS_APP_CONTEXT
             let bootstrappedHomepagePathname = ''
             let redirectedPathname = ''
             try {
                 initKeaTests()
-                window.POSTFN_APP_CONTEXT = {
-                    ...window.POSTFN_APP_CONTEXT,
+                window.INSIGHTS_APP_CONTEXT = {
+                    ...window.INSIGHTS_APP_CONTEXT,
                     homepage: dashboardHomepage,
                 } as unknown as AppContext
                 ;(api.get as jest.Mock).mockResolvedValue({ tabs: [], homepage: null })
@@ -192,7 +192,7 @@ describe('sceneLogic', () => {
                 await expectLogic(bootstrappedLogic).delay(1)
                 redirectedPathname = removeProjectIdIfPresent(router.values.location.pathname)
             } finally {
-                window.POSTFN_APP_CONTEXT = priorAppContext
+                window.INSIGHTS_APP_CONTEXT = priorAppContext
             }
             expect(bootstrappedHomepagePathname).toEqual(urls.dashboard(42))
             expect(redirectedPathname).toEqual(urls.dashboard(42))
@@ -203,13 +203,13 @@ describe('sceneLogic', () => {
         // pointing back home the two bounce off each other forever.
         it('ignores a bootstrapped homepage whose scene no longer ships', async () => {
             logic.unmount()
-            const priorAppContext = window.POSTFN_APP_CONTEXT
+            const priorAppContext = window.INSIGHTS_APP_CONTEXT
             let hadBootstrappedHomepage = true
             let redirectedPathname = ''
             try {
                 initKeaTests()
-                window.POSTFN_APP_CONTEXT = {
-                    ...window.POSTFN_APP_CONTEXT,
+                window.INSIGHTS_APP_CONTEXT = {
+                    ...window.INSIGHTS_APP_CONTEXT,
                     homepage: {
                         ...dashboardHomepage,
                         id: 'homepage-removed-scene',
@@ -229,7 +229,7 @@ describe('sceneLogic', () => {
                 await expectLogic(bootstrappedLogic).delay(1)
                 redirectedPathname = removeProjectIdIfPresent(router.values.location.pathname)
             } finally {
-                window.POSTFN_APP_CONTEXT = priorAppContext
+                window.INSIGHTS_APP_CONTEXT = priorAppContext
             }
             expect(hadBootstrappedHomepage).toBe(false)
             expect(redirectedPathname).toEqual(urls.projectHomepage())

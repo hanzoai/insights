@@ -149,8 +149,8 @@ HTTP:
 - `insights-cli exp endpoints {list,get,pull,push,diff}` — inspect endpoints, or manage them as YAML
   files in version control (GitOps-style)
 
-Auth uses the same personal API key, via `insights-cli login` or the `POSTFN_CLI_API_KEY` /
-`POSTFN_CLI_PROJECT_ID` / `POSTFN_CLI_HOST` env vars. (These live under `exp` — experimental, may
+Auth uses the same personal API key, via `insights-cli login` or the `INSIGHTS_CLI_API_KEY` /
+`INSIGHTS_CLI_PROJECT_ID` / `INSIGHTS_CLI_HOST` env vars. (These live under `exp` — experimental, may
 change.)
 
 ## Error responses to handle

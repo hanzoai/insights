@@ -135,8 +135,8 @@ export function computeMoveEdges(
     return newEdges
 }
 
-export const FN_FLOW_EDITOR_MODES = ['build', 'variables', 'test', 'metrics', 'logs'] as const
-export type InsightsFlowEditorMode = (typeof FN_FLOW_EDITOR_MODES)[number]
+export const INSIGHTS_FLOW_EDITOR_MODES = ['build', 'variables', 'test', 'metrics', 'logs'] as const
+export type InsightsFlowEditorMode = (typeof INSIGHTS_FLOW_EDITOR_MODES)[number]
 export type InsightsFlowEditorActionMetrics = {
     actionId: string
     succeeded: number
@@ -2784,7 +2784,7 @@ export const hogFlowEditorLogic = kea<hogFlowEditorLogicType>([
             if (node !== values.selectedNodeId) {
                 actions.setSelectedNodeId(node ?? null)
             }
-            if (mode && FN_FLOW_EDITOR_MODES.includes(mode as InsightsFlowEditorMode) && mode !== values.mode) {
+            if (mode && INSIGHTS_FLOW_EDITOR_MODES.includes(mode as InsightsFlowEditorMode) && mode !== values.mode) {
                 actions.setMode(mode as InsightsFlowEditorMode)
             }
         }

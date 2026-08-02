@@ -1,7 +1,7 @@
 from temporalio.client import Client
 from temporalio.common import SearchAttributePair, TypedSearchAttributes
 
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_TYPE_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_TYPE_KEY
 
 from products.replay_vision.backend.temporal.gemini_cleanup_sweep.constants import (
     SCHEDULE_ID,
@@ -25,6 +25,6 @@ async def create_replay_vision_gemini_cleanup_sweep_schedule(client: Client) -> 
         interval=SCHEDULE_INTERVAL,
         execution_timeout=WORKFLOW_EXECUTION_TIMEOUT,
         search_attributes=TypedSearchAttributes(
-            search_attributes=[SearchAttributePair(key=POSTFN_SCHEDULE_TYPE_KEY, value=SCHEDULE_TYPE)]
+            search_attributes=[SearchAttributePair(key=INSIGHTS_SCHEDULE_TYPE_KEY, value=SCHEDULE_TYPE)]
         ),
     )

@@ -9,7 +9,7 @@ from insights.temporal.ai.slack_app.activities.onboarding import run_insights_sl
 from insights.temporal.ai.slack_app.types import InsightsSlackInboxOnboardingInputs
 from insights.temporal.common.base import InsightsWorkflow
 
-POSTFN_SLACK_INBOX_ONBOARDING_TIMEOUT_SECONDS = 5 * 60
+INSIGHTS_SLACK_INBOX_ONBOARDING_TIMEOUT_SECONDS = 5 * 60
 logger = structlog.get_logger(__name__)
 
 
@@ -25,7 +25,7 @@ class InsightsSlackInboxOnboardingWorkflow(InsightsWorkflow):
         await workflow.execute_activity(
             run_insights_slack_inbox_onboarding_activity,
             args=(inputs,),
-            start_to_close_timeout=timedelta(seconds=POSTFN_SLACK_INBOX_ONBOARDING_TIMEOUT_SECONDS),
+            start_to_close_timeout=timedelta(seconds=INSIGHTS_SLACK_INBOX_ONBOARDING_TIMEOUT_SECONDS),
             # Single attempt: the onboarding DM isn't idempotent, so a retry after a post-then-crash
             # would re-DM the installer. Onboarding is best-effort, so we accept "no retry" over a dup DM.
             retry_policy=RetryPolicy(maximum_attempts=1),

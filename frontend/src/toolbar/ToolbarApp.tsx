@@ -44,7 +44,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
                   // references (fonts) are relative, so they only resolve alongside the
                   // toolbar/assets/ directory it was built with.
                   //
-                  // When __POSTFN_TOOLBAR_PUBLIC_PATH__ is baked in at build
+                  // When __INSIGHTS_TOOLBAR_PUBLIC_PATH__ is baked in at build
                   // time (insights-js versioned bundle), load the CSS from the
                   // same versioned URL as the JS bundle. The version is the
                   // cache key, so no cache-busting query param is needed.
@@ -52,8 +52,8 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
                   // Otherwise (i.e. insights/insights's own deploys), fall back to
                   // serving it from the API host alongside toolbar.js, with a
                   // 5-minute cache-buster on the unversioned URL.
-                  if (__POSTFN_TOOLBAR_PUBLIC_PATH__) {
-                      styleLink.href = `${__POSTFN_TOOLBAR_PUBLIC_PATH__}toolbar/toolbar-app.css`
+                  if (__INSIGHTS_TOOLBAR_PUBLIC_PATH__) {
+                      styleLink.href = `${__INSIGHTS_TOOLBAR_PUBLIC_PATH__}toolbar/toolbar-app.css`
                   } else {
                       const fiveMinutesInMillis = 5 * 60 * 1000
                       const timestampToNearestFiveMinutes =

@@ -97,7 +97,7 @@ class Command(BaseCommand):
             title=f"[{stamp}] Refund test: billing-exempt (Free badge, health check)",
             repository=repository,
             pr_number=pr_base + 4,
-            exempt_reason=SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK,
+            exempt_reason=SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK,
         )
         no_pr = self._make_report(team, title=f"[{stamp}] Refund test: no PR yet (exemption target)")
 

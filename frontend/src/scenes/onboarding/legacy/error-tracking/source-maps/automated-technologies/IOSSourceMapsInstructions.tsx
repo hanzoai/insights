@@ -46,7 +46,7 @@ export function IOSSourceMapsInstructions(): JSX.Element {
                     <tbody>
                         <tr className="border-b">
                             <td className="py-2 px-2">
-                                <code>POSTFN_CLI_HOST</code>
+                                <code>INSIGHTS_CLI_HOST</code>
                             </td>
                             <td className="py-2 px-2">
                                 The Insights host to connect to (default: https://us.hanzo.ai)
@@ -54,13 +54,13 @@ export function IOSSourceMapsInstructions(): JSX.Element {
                         </tr>
                         <tr className="border-b">
                             <td className="py-2 px-2">
-                                <code>POSTFN_CLI_PROJECT_ID</code>
+                                <code>INSIGHTS_CLI_PROJECT_ID</code>
                             </td>
                             <td className="py-2 px-2">Insights project ID</td>
                         </tr>
                         <tr className="border-b">
                             <td className="py-2 px-2">
-                                <code>POSTFN_CLI_API_KEY</code>
+                                <code>INSIGHTS_CLI_API_KEY</code>
                             </td>
                             <td className="py-2 px-2">
                                 <strong>Personal API key</strong> with <code>error_tracking:write</code> and{' '}
@@ -138,7 +138,7 @@ export function IOSSourceMapsInstructions(): JSX.Element {
             <h3>4. Optional: Include source code context</h3>
             <p>
                 By default, only debug symbols are uploaded. To include source code snippets in your stack traces (for
-                better debugging context), set the <code>POSTFN_INCLUDE_SOURCE</code> environment variable:
+                better debugging context), set the <code>INSIGHTS_INCLUDE_SOURCE</code> environment variable:
             </p>
             <ol className="list-decimal list-inside space-y-1 my-2 ml-2">
                 <li>In the Run Script build phase, click the chevron to expand</li>
@@ -148,13 +148,13 @@ export function IOSSourceMapsInstructions(): JSX.Element {
             <h4 className="text-sm font-semibold mt-4 mb-2">Swift Package Manager:</h4>
             <CodeSnippet language={Language.Bash}>
                 {
-                    'POSTFN_INCLUDE_SOURCE=1 ${BUILD_DIR%/Build/*}/SourcePackages/checkouts/insights-ios/build-tools/upload-symbols.sh'
+                    'INSIGHTS_INCLUDE_SOURCE=1 ${BUILD_DIR%/Build/*}/SourcePackages/checkouts/insights-ios/build-tools/upload-symbols.sh'
                 }
             </CodeSnippet>
 
             <h4 className="text-sm font-semibold mt-4 mb-2">CocoaPods:</h4>
             <CodeSnippet language={Language.Bash}>
-                {'POSTFN_INCLUDE_SOURCE=1 ${PODS_ROOT}/Insights/build-tools/upload-symbols.sh'}
+                {'INSIGHTS_INCLUDE_SOURCE=1 ${PODS_ROOT}/Insights/build-tools/upload-symbols.sh'}
             </CodeSnippet>
 
             <p className="text-sm text-muted mt-2">

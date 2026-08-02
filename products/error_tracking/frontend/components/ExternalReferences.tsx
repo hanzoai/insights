@@ -34,7 +34,7 @@ type onSubmitFormType = (integrationId: number, config: Record<string, string>) 
 type ErrorTrackingIntegrationKind = (typeof ERROR_TRACKING_INTEGRATIONS)[number]
 type ErrorTrackingIntegration = IntegrationType & { kind: ErrorTrackingIntegrationKind }
 
-const POSTFN_HTML_LINE_BREAKS = '\n<br/>\n<br/>\n'
+const INSIGHTS_HTML_LINE_BREAKS = '\n<br/>\n<br/>\n'
 
 const EXTERNAL_REFERENCE_FORM_BUILDERS: Record<
     ErrorTrackingIntegrationKind,
@@ -166,7 +166,7 @@ function getIssueUrl(fingerprints: ErrorTrackingFingerprint[]): string {
 }
 
 function getIssueMarkdownBody(issue: ErrorTrackingRelationalIssue, issueUrl: string): string {
-    return `${issue.description ?? ''}${POSTFN_HTML_LINE_BREAKS}**Insights issue:** ${issueUrl}`
+    return `${issue.description ?? ''}${INSIGHTS_HTML_LINE_BREAKS}**Insights issue:** ${issueUrl}`
 }
 
 function getIssuePlaintextBody(issue: ErrorTrackingRelationalIssue, issueUrl: string): string {

@@ -198,7 +198,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
         query = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query="select event from events",
-            language=HogLanguage.FN_QL,
+            language=HogLanguage.INSIGHTS_QL,
             startPosition=6,
             endPosition=6,
         )
@@ -764,10 +764,10 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
             },
         )
         mock_process_query_model.assert_called_once()
-        self.assertEqual(mock_process_query_model.call_args[1]["limit_context"], LimitContext.POSTFN_AI)
+        self.assertEqual(mock_process_query_model.call_args[1]["limit_context"], LimitContext.INSIGHTS_AI)
         # The insights_ai limit context also retags the analytics source, so Max's insight tiles
         # (browser session requests that would otherwise read as "web") are attributed to insights_ai.
-        self.assertEqual(mock_process_query_model.call_args[1]["analytics_props"]["source"], EventSource.POSTFN_AI)
+        self.assertEqual(mock_process_query_model.call_args[1]["analytics_props"]["source"], EventSource.INSIGHTS_AI)
 
     @patch("insights.api.query.process_query_model")
     def test_query_limit_context_default(self, mock_process_query_model):
@@ -1349,7 +1349,7 @@ class TestQueryLLMFormatting(DatastoreTestMixin, APIBaseTest):
         response = self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {"query": {"kind": "TrendsQuery", "series": [{"kind": "EventsNode", "event": "$pageview"}]}},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1371,7 +1371,7 @@ class TestQueryLLMFormatting(DatastoreTestMixin, APIBaseTest):
         response = self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {"query": {"kind": "InsightsQLQuery", "query": "select event, count() from events group by event"}},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1417,7 +1417,7 @@ class TestQueryLLMFormatting(DatastoreTestMixin, APIBaseTest):
         response = self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {"query": {"kind": "EventsQuery", "select": ["event"]}},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1449,7 +1449,7 @@ class TestQueryLLMFormatting(DatastoreTestMixin, APIBaseTest):
         response = self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {"query": {"kind": "TrendsQuery", "series": [{"kind": "EventsNode", "event": "$pageview"}]}},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1486,7 +1486,7 @@ class TestQueryLLMFormatting(DatastoreTestMixin, APIBaseTest):
                     "dateRange": {"date_from": "2026-07-02T00:00:00Z", "date_to": date_to},
                 }
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1540,7 +1540,7 @@ class TestMcpProductTaggingEndToEnd(DatastoreTestMixin, APIBaseTest):
         response = self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT 1"}},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1554,7 +1554,7 @@ class TestMcpProductTaggingEndToEnd(DatastoreTestMixin, APIBaseTest):
         response = self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {"query": {"kind": "EventsQuery", "select": ["event"]}},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1573,7 +1573,7 @@ class TestMcpProductTaggingEndToEnd(DatastoreTestMixin, APIBaseTest):
                     "tags": {"scene": "SQLEditor"},
                 }
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         self.assertEqual(response.status_code, 200)

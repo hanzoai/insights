@@ -45,10 +45,10 @@ describe('accountsViewsLogic', () => {
     }
 
     beforeEach(() => {
-        // Set up POSTFN_APP_CONTEXT with MOCK_DEFAULT_USER before initKeaTests so
+        // Set up INSIGHTS_APP_CONTEXT with MOCK_DEFAULT_USER before initKeaTests so
         // the user is pre-loaded (mirrors how the app bootstraps in production).
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             current_team: MOCK_DEFAULT_TEAM,
             current_user: MOCK_DEFAULT_USER,
         } as any

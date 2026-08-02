@@ -540,7 +540,7 @@ async fn test_config_js_with_site_apps() -> anyhow::Result<()> {
     let body = resp.text().await?;
     // JS wrapper structure
     assert!(body.starts_with("(function() {"));
-    assert!(body.contains(&format!("window._POSTFN_REMOTE_CONFIG['{token}']")));
+    assert!(body.contains(&format!("window._INSIGHTS_REMOTE_CONFIG['{token}']")));
     // Site apps JS should be in the siteApps array (raw JS, not JSON)
     assert!(body.contains("siteApps: ["));
     assert!(body.contains("init: function(config)"));
