@@ -51,7 +51,7 @@ assert_contains default-single-replica 'replicas: 1' "$out"
 assert_contains default-pod-discovery 'kubernetes_sd_configs' "$out"
 assert_contains default-annotation-relabel '__meta_kubernetes_pod_annotation_prometheus_io_scrape' "$out"
 assert_contains default-openmetrics-pinned 'scrape_protocols: [OpenMetricsText1.0.0, OpenMetricsText0.0.1, PrometheusText0.0.4]' "$out"
-assert_contains default-key-via-env-reference '${env:POSTFN_API_KEY}' "$out"
+assert_contains default-key-via-env-reference '${env:INSIGHTS_API_KEY}' "$out"
 assert_contains default-key-in-secret 'insights-api-key:' "$out"
 assert_contains default-secret-env-ref 'secretKeyRef' "$out"
 assert_contains default-config-checksum 'checksum/config:' "$out"
@@ -133,8 +133,8 @@ static=$(render --set insights.apiKey=phc_test --set shards=3 -f values/static-t
 assert_contains sharded-static-job-hashmod 'action: hashmod' "$static"
 
 # --- podEnv passthrough: extra agent env vars ---
-out=$(render --set insights.apiKey=phc_test --set podEnv.POSTFN_DEBUG=1 --set podEnv.SCRAPE_JOB_NAME=custom)
-assert_contains podenv-debug 'name: POSTFN_DEBUG' "$out"
+out=$(render --set insights.apiKey=phc_test --set podEnv.INSIGHTS_DEBUG=1 --set podEnv.SCRAPE_JOB_NAME=custom)
+assert_contains podenv-debug 'name: INSIGHTS_DEBUG' "$out"
 assert_contains podenv-jobname 'name: SCRAPE_JOB_NAME' "$out"
 assert_contains podenv-jobname-value 'value: "custom"' "$out"
 

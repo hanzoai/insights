@@ -20,22 +20,22 @@ export type IntegrationEnv = {
 }
 
 export function loadIntegrationEnv(): IntegrationEnv {
-    const apiToken = process.env.TEST_POSTFN_PERSONAL_API_KEY
+    const apiToken = process.env.TEST_INSIGHTS_PERSONAL_API_KEY
     const orgId = process.env.TEST_ORG_ID
     const projectId = process.env.TEST_PROJECT_ID
 
     if (!apiToken || !orgId || !projectId) {
         throw new Error(
-            'Integration tests require TEST_POSTFN_PERSONAL_API_KEY, TEST_ORG_ID, and TEST_PROJECT_ID to be set. ' +
+            'Integration tests require TEST_INSIGHTS_PERSONAL_API_KEY, TEST_ORG_ID, and TEST_PROJECT_ID to be set. ' +
                 'See tests/shared/test-utils.ts for how the existing tool integration tests source these.'
         )
     }
 
     return {
         apiToken,
-        apiToken2: process.env.TEST_POSTFN_PERSONAL_API_KEY_2 || undefined,
+        apiToken2: process.env.TEST_INSIGHTS_PERSONAL_API_KEY_2 || undefined,
         orgId,
         projectId,
-        apiBaseUrl: process.env.TEST_POSTFN_API_BASE_URL || 'http://localhost:8010',
+        apiBaseUrl: process.env.TEST_INSIGHTS_API_BASE_URL || 'http://localhost:8010',
     }
 }

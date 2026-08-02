@@ -9,7 +9,7 @@ from temporalio.common import RetryPolicy
 
 from insights.temporal.common.base import InsightsWorkflow
 
-POSTFN_CODE_SLACK_INTERACTIVITY_TIMEOUT_SECONDS = 5 * 60
+INSIGHTS_CODE_SLACK_INTERACTIVITY_TIMEOUT_SECONDS = 5 * 60
 logger = structlog.get_logger(__name__)
 
 
@@ -30,7 +30,7 @@ class InsightsCodeSlackTerminateTaskWorkflow(InsightsWorkflow):
         await workflow.execute_activity(
             process_insights_code_terminate_task_activity,
             args=(inputs,),
-            start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_INTERACTIVITY_TIMEOUT_SECONDS),
+            start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_INTERACTIVITY_TIMEOUT_SECONDS),
             retry_policy=RetryPolicy(maximum_attempts=3),
         )
 

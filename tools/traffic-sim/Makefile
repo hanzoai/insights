@@ -19,24 +19,24 @@ help:
 	@echo "  VISITS=10                 Override new-user visit count"
 	@echo "  PAGE_VIEWS=5              Override returning-user page-view count"
 	@echo "  INTERVAL=60               Override seconds between visits"
-	@echo "  POSTFN_HOST=https://...  Override Insights ingestion host"
+	@echo "  INSIGHTS_HOST=https://...  Override Insights ingestion host"
 
 VISITS ?= 3
 PAGE_VIEWS ?= 3
 INTERVAL ?= 5
-POSTFN_HOST ?= https://us.i.hanzo.ai
+INSIGHTS_HOST ?= https://us.i.hanzo.ai
 
 new-user:
 	@if [ -z "$(URL)" ]; then echo "URL=... is required"; exit 1; fi
-	$(PYTHON) cli.py new-user --url "$(URL)" --visits $(VISITS) --interval $(INTERVAL) --insights-host "$(POSTFN_HOST)"
+	$(PYTHON) cli.py new-user --url "$(URL)" --visits $(VISITS) --interval $(INTERVAL) --insights-host "$(INSIGHTS_HOST)"
 
 returning-user:
 	@if [ -z "$(URL)" ]; then echo "URL=... is required"; exit 1; fi
-	$(PYTHON) cli.py returning-user --url "$(URL)" --page-views $(PAGE_VIEWS) --interval $(INTERVAL) --insights-host "$(POSTFN_HOST)"
+	$(PYTHON) cli.py returning-user --url "$(URL)" --page-views $(PAGE_VIEWS) --interval $(INTERVAL) --insights-host "$(INSIGHTS_HOST)"
 
 check-loading:
 	@if [ -z "$(URL)" ]; then echo "URL=... is required (or pass --urls-file ...)"; exit 1; fi
-	$(PYTHON) cli.py check-loading --url "$(URL)" --insights-host "$(POSTFN_HOST)"
+	$(PYTHON) cli.py check-loading --url "$(URL)" --insights-host "$(INSIGHTS_HOST)"
 
 test:
 	$(PYTHON) -m pytest tests/test_cli.py -q

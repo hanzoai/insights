@@ -41,7 +41,7 @@ log = logging.getLogger("auth_proxy")
 LISTEN_PORT = 8080
 BRIDGE_LISTEN_PORT = 8181  # 127.0.0.1-only; never tunneled by Modal
 STREAMLIT_UPSTREAM = "http://localhost:8501"  # the Streamlit server this proxy fronts
-POSTFN_SITE_URL = os.environ.get("POSTFN_SITE_URL", "")
+INSIGHTS_SITE_URL = os.environ.get("INSIGHTS_SITE_URL", "")
 BRIDGE_TOKEN_PATH = "/run/bridge_token"
 
 INTROSPECTION_CACHE_TTL = 60.0  # short revocation window, low per-request overhead
@@ -168,7 +168,7 @@ def _resolve_otel_endpoint() -> str | None:
     """Return the OTLP logs endpoint.
 
     Preference: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT (full URL, region-aware),
-    OTEL_EXPORTER_OTLP_ENDPOINT (base URL), then POSTFN_SITE_URL fallback.
+    OTEL_EXPORTER_OTLP_ENDPOINT (base URL), then INSIGHTS_SITE_URL fallback.
     """
     explicit = os.environ.get("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT")
     if explicit:
@@ -176,8 +176,8 @@ def _resolve_otel_endpoint() -> str | None:
     base = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
     if base:
         return base.rstrip("/") + OTEL_LOG_PATH
-    if POSTFN_SITE_URL:
-        return POSTFN_SITE_URL.rstrip("/") + OTEL_LOG_PATH
+    if INSIGHTS_SITE_URL:
+        return INSIGHTS_SITE_URL.rstrip("/") + OTEL_LOG_PATH
     return None
 
 
@@ -319,8 +319,8 @@ async def _introspect_token(
     caller-supplied expectations — per-sandbox team binding, cross-application
     rejection, and per-purpose (iframe vs bridge) scope binding all run here.
     """
-    if not POSTFN_SITE_URL:
-        log.warning("introspect: POSTFN_SITE_URL not set, rejecting token")
+    if not INSIGHTS_SITE_URL:
+        log.warning("introspect: INSIGHTS_SITE_URL not set, rejecting token")
         return None
 
     now = time.monotonic()
@@ -338,7 +338,7 @@ async def _introspect_token(
         log.warning("introspect: circuit open, rejecting token without upstream call")
         return None
 
-    url = f"{POSTFN_SITE_URL}/oauth/introspect/"
+    url = f"{INSIGHTS_SITE_URL}/oauth/introspect/"
     # Token in both Bearer and body = self-introspection, which OAuthIntrospectTokenView
     # allows without the `introspection` scope.
     headers = {
@@ -596,7 +596,7 @@ async def _bridge_query_handler(request: web.Request) -> web.Response:
     """
     if _bridge_token is None:
         return web.json_response({"error": "Bridge not configured."}, status=503)
-    if not POSTFN_SITE_URL:
+    if not INSIGHTS_SITE_URL:
         return web.json_response({"error": "Bridge not configured."}, status=503)
 
     body_bytes = await request.read()
@@ -612,7 +612,7 @@ async def _bridge_query_handler(request: web.Request) -> web.Response:
     if not isinstance(query, str) or not query.strip():
         return web.json_response({"error": "Missing or empty 'query' field."}, status=400)
 
-    target = f"{POSTFN_SITE_URL.rstrip('/')}/api/streamlit_bridge/query/"
+    target = f"{INSIGHTS_SITE_URL.rstrip('/')}/api/streamlit_bridge/query/"
     headers = {
         "Authorization": f"Bearer {_bridge_token}",
         "Content-Type": "application/json",
@@ -663,18 +663,18 @@ async def _close_client_session(app: web.Application) -> None:
 
 
 def _read_required_config() -> tuple[int, str]:
-    """Read POSTFN_TEAM_ID and POSTFN_STREAMLIT_CLIENT_ID, or RuntimeError at boot."""
-    team_id_raw = os.environ.get("POSTFN_TEAM_ID", "").strip()
+    """Read INSIGHTS_TEAM_ID and INSIGHTS_STREAMLIT_CLIENT_ID, or RuntimeError at boot."""
+    team_id_raw = os.environ.get("INSIGHTS_TEAM_ID", "").strip()
     try:
         team_id = int(team_id_raw)
     except ValueError:
         team_id = 0
     if team_id <= 0:
-        raise RuntimeError(f"POSTFN_TEAM_ID env var must be a positive integer (got {team_id_raw!r})")
+        raise RuntimeError(f"INSIGHTS_TEAM_ID env var must be a positive integer (got {team_id_raw!r})")
 
-    client_id = os.environ.get("POSTFN_STREAMLIT_CLIENT_ID", "").strip()
+    client_id = os.environ.get("INSIGHTS_STREAMLIT_CLIENT_ID", "").strip()
     if not client_id:
-        raise RuntimeError("POSTFN_STREAMLIT_CLIENT_ID env var must be set")
+        raise RuntimeError("INSIGHTS_STREAMLIT_CLIENT_ID env var must be set")
 
     return team_id, client_id
 
@@ -723,7 +723,7 @@ async def _run_both_apps(
         "auth proxy listening on 0.0.0.0:%d, bridge on 127.0.0.1:%d SITE_URL=%s",
         main_port,
         bridge_port,
-        POSTFN_SITE_URL,
+        INSIGHTS_SITE_URL,
     )
 
     try:

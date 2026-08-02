@@ -23,7 +23,7 @@ set -euo pipefail
 
 # In a sandbox container, infra is managed by docker compose externally
 # and is guaranteed healthy via depends_on health checks.
-if [[ "${POSTFN_SANDBOX:-}" == "1" ]]; then
+if [[ "${INSIGHTS_SANDBOX:-}" == "1" ]]; then
     echo "Sandbox: infrastructure already running"
     exit 0
 fi

@@ -43,10 +43,10 @@ describe('metricsSamplesLogic', () => {
     let logic: ReturnType<typeof metricsSamplesLogic.build>
 
     beforeEach(() => {
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             resource_access_control: {
-                ...window.POSTFN_APP_CONTEXT?.resource_access_control,
+                ...window.INSIGHTS_APP_CONTEXT?.resource_access_control,
                 [AccessControlResourceType.Metrics]: AccessControlLevel.Viewer,
             },
         } as AppContext
@@ -89,10 +89,10 @@ describe('metricsSamplesLogic', () => {
     })
 
     it('does not call the API without metrics viewer access', async () => {
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             resource_access_control: {
-                ...window.POSTFN_APP_CONTEXT?.resource_access_control,
+                ...window.INSIGHTS_APP_CONTEXT?.resource_access_control,
                 [AccessControlResourceType.Metrics]: AccessControlLevel.None,
             },
         } as AppContext

@@ -37,11 +37,11 @@ jobs:
             NODE_ENV: production
             npm_config_arch: ${{ matrix.arch }}
             npm_config_platform: darwin
-            VITE_POSTFN_API_KEY: ${{ secrets.VITE_POSTFN_API_KEY }}
-            VITE_POSTFN_API_HOST: ${{ secrets.VITE_POSTFN_API_HOST }}
-            POSTFN_SOURCEMAP_API_KEY: ${{ secrets.DESKTOP_POSTFN_SOURCEMAP_API_KEY }}
-            POSTFN_ENV_ID: ${{ secrets.DESKTOP_POSTFN_ENV_ID }}
-            POSTFN_HOST: ${{ secrets.DESKTOP_POSTFN_HOST }}
+            VITE_INSIGHTS_API_KEY: ${{ secrets.VITE_INSIGHTS_API_KEY }}
+            VITE_INSIGHTS_API_HOST: ${{ secrets.VITE_INSIGHTS_API_HOST }}
+            INSIGHTS_SOURCEMAP_API_KEY: ${{ secrets.DESKTOP_INSIGHTS_SOURCEMAP_API_KEY }}
+            INSIGHTS_ENV_ID: ${{ secrets.DESKTOP_INSIGHTS_ENV_ID }}
+            INSIGHTS_HOST: ${{ secrets.DESKTOP_INSIGHTS_HOST }}
             CSC_LINK: ${{ secrets.APPLE_CODESIGN_CERT_BASE64 }}
             CSC_KEY_PASSWORD: ${{ secrets.APPLE_CODESIGN_CERT_PASSWORD }}
             APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -183,8 +183,8 @@ jobs:
         env:
             NODE_OPTIONS: '--max-old-space-size=8192'
             NODE_ENV: production
-            VITE_POSTFN_API_KEY: ${{ secrets.VITE_POSTFN_API_KEY }}
-            VITE_POSTFN_API_HOST: ${{ secrets.VITE_POSTFN_API_HOST }}
+            VITE_INSIGHTS_API_KEY: ${{ secrets.VITE_INSIGHTS_API_KEY }}
+            VITE_INSIGHTS_API_HOST: ${{ secrets.VITE_INSIGHTS_API_HOST }}
         steps:
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -253,8 +253,8 @@ jobs:
         env:
             NODE_OPTIONS: '--max-old-space-size=8192'
             NODE_ENV: production
-            VITE_POSTFN_API_KEY: ${{ secrets.VITE_POSTFN_API_KEY }}
-            VITE_POSTFN_API_HOST: ${{ secrets.VITE_POSTFN_API_HOST }}
+            VITE_INSIGHTS_API_KEY: ${{ secrets.VITE_INSIGHTS_API_KEY }}
+            VITE_INSIGHTS_API_HOST: ${{ secrets.VITE_INSIGHTS_API_HOST }}
         steps:
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

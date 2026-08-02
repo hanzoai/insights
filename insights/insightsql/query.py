@@ -316,7 +316,7 @@ class InsightsQLQueryExecutor:
             LimitContext.QUERY_ASYNC,
             LimitContext.SAVED_QUERY,
             LimitContext.RETENTION,
-            LimitContext.POSTFN_AI,
+            LimitContext.INSIGHTS_AI,
         ):
             settings.max_execution_time = max(settings.max_execution_time or 0, INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME)
 
@@ -487,7 +487,7 @@ class InsightsQLQueryExecutor:
             LimitContext.QUERY_ASYNC,
             LimitContext.SAVED_QUERY,
             LimitContext.RETENTION,
-            LimitContext.POSTFN_AI,
+            LimitContext.INSIGHTS_AI,
         ):
             settings.max_execution_time = max(settings.max_execution_time or 0, INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME)
 
@@ -712,7 +712,7 @@ class InsightsQLQueryExecutor:
                 from insights.insightsql.metadata import get_insightsql_metadata
 
                 self.metadata = get_insightsql_metadata(
-                    InsightsQLMetadata(language=HogLanguage.FN_QL, query=self.insightsql, debug=True),
+                    InsightsQLMetadata(language=HogLanguage.INSIGHTS_QL, query=self.insightsql, debug=True),
                     self.team,
                     user=self.user,
                     insightsql_ast=self.select_query,

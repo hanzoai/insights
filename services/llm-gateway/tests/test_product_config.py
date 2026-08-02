@@ -6,12 +6,12 @@ from fastapi import HTTPException
 from llm_gateway.products.config import (
     ALLOWED_PRODUCTS,
     BEDROCK_MODELS,
-    POSTFN_AI_DEV_APP_ID,
-    POSTFN_AI_EU_APP_ID,
-    POSTFN_AI_US_APP_ID,
-    POSTFN_CODE_DEV_APP_ID,
-    POSTFN_CODE_EU_APP_ID,
-    POSTFN_CODE_US_APP_ID,
+    INSIGHTS_AI_DEV_APP_ID,
+    INSIGHTS_AI_EU_APP_ID,
+    INSIGHTS_AI_US_APP_ID,
+    INSIGHTS_CODE_DEV_APP_ID,
+    INSIGHTS_CODE_EU_APP_ID,
+    INSIGHTS_CODE_US_APP_ID,
     PRODUCT_ALIASES,
     PRODUCTS,
     TWIG_EU_APP_ID,
@@ -52,8 +52,8 @@ class TestCheckProductAccess:
             # insights_code requires OAuth with valid app ID
             ("insights_code", "personal_api_key", None, None, False, "requires OAuth"),
             ("insights_code", "oauth_access_token", "invalid-app-id", None, False, "not authorized"),
-            ("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, None, True, None),
-            ("insights_code", "oauth_access_token", POSTFN_CODE_EU_APP_ID, None, True, None),
+            ("insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, None, True, None),
+            ("insights_code", "oauth_access_token", INSIGHTS_CODE_EU_APP_ID, None, True, None),
             # wizard allows API keys and OAuth with valid app ID
             ("wizard", "personal_api_key", None, "claude-3-opus", True, None),
             ("wizard", "oauth_access_token", "invalid-app-id", None, False, "not authorized"),
@@ -68,7 +68,7 @@ class TestCheckProductAccess:
             (
                 "custom_image_scans",
                 "oauth_access_token",
-                POSTFN_CODE_US_APP_ID,
+                INSIGHTS_CODE_US_APP_ID,
                 "@cf/zai-org/glm-5.2",
                 False,
                 "server-minted",
@@ -83,23 +83,23 @@ class TestCheckProductAccess:
             ("signals", "personal_api_key", None, "claude-sonnet-4-5", True, None),
             ("signals", "personal_api_key", None, "claude-3-opus", True, None),
             ("signals", "oauth_access_token", "any-app-id", "claude-haiku-4-5", False, "not authorized"),
-            ("signals", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-haiku-4-5", True, None),
-            ("signals", "oauth_access_token", POSTFN_CODE_EU_APP_ID, "claude-sonnet-4-5", True, None),
+            ("signals", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-haiku-4-5", True, None),
+            ("signals", "oauth_access_token", INSIGHTS_CODE_EU_APP_ID, "claude-sonnet-4-5", True, None),
             # conversations: utility prompts (API key) and support-reply sandbox (array OAuth app)
             ("conversations", "personal_api_key", None, "claude-haiku-4-5", True, None),
             ("conversations", "personal_api_key", None, "claude-sonnet-4-6", True, None),
             ("conversations", "personal_api_key", None, "claude-sonnet-5", True, None),
             ("conversations", "personal_api_key", None, "claude-opus-4-8", False, "not allowed"),
             ("conversations", "oauth_access_token", "any-app-id", "claude-sonnet-5", False, "not authorized"),
-            ("conversations", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", True, None),
-            ("conversations", "oauth_access_token", POSTFN_CODE_EU_APP_ID, "claude-sonnet-4-6", True, None),
+            ("conversations", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-5", True, None),
+            ("conversations", "oauth_access_token", INSIGHTS_CODE_EU_APP_ID, "claude-sonnet-4-6", True, None),
             # insights_ai allows API keys with any model and OAuth from the Insights AI app.
             ("insights_ai", "personal_api_key", None, "claude-sonnet-4-5", True, None),
             ("insights_ai", "personal_api_key", None, "gpt-5.3-codex", True, None),
             ("insights_ai", "oauth_access_token", "any-app-id", "claude-sonnet-4-5", False, "not authorized"),
-            ("insights_ai", "oauth_access_token", POSTFN_AI_US_APP_ID, "claude-sonnet-4-5", True, None),
-            ("insights_ai", "oauth_access_token", POSTFN_AI_EU_APP_ID, "gpt-5.3-codex", True, None),
-            ("insights_ai", "oauth_access_token", POSTFN_AI_DEV_APP_ID, "claude-3-opus", True, None),
+            ("insights_ai", "oauth_access_token", INSIGHTS_AI_US_APP_ID, "claude-sonnet-4-5", True, None),
+            ("insights_ai", "oauth_access_token", INSIGHTS_AI_EU_APP_ID, "gpt-5.3-codex", True, None),
+            ("insights_ai", "oauth_access_token", INSIGHTS_AI_DEV_APP_ID, "claude-3-opus", True, None),
             # changelog_bot: shared-key auth, models pinned to the openai/-prefixed ids the curator
             # sends verbatim. Exact-match only: bare ids (no prefix) AND variant suffixes must be
             # rejected, or the cost pin doesn't hold.
@@ -154,7 +154,7 @@ class TestCheckProductAccess:
         ],
     )
     def test_insights_code_allows_restricted_models_with_valid_app_id(self, model: str):
-        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -169,7 +169,7 @@ class TestCheckProductAccess:
         ],
     )
     def test_insights_code_rejects_non_allowed_models(self, model: str):
-        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is False
         assert error is not None
         assert "not allowed" in error
@@ -195,7 +195,7 @@ class TestCheckProductAccess:
         ],
     )
     def test_insights_code_allows_configured_models(self, model: str):
-        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -209,7 +209,7 @@ class TestCheckProductAccess:
         ],
     )
     def test_insights_code_allows_dated_variants_via_prefix_matching(self, model: str):
-        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -223,7 +223,7 @@ class TestCheckProductAccess:
         ],
     )
     def test_model_matching_is_case_insensitive(self, model: str):
-        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -232,7 +232,7 @@ class TestCheckProductAccess:
         ["twig", "array"],
     )
     def test_legacy_aliases_resolve_to_insights_code(self, alias: str):
-        allowed, error = check_product_access(alias, "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-4-5")
+        allowed, error = check_product_access(alias, "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-4-5")
         assert allowed is True
         assert error is None
 
@@ -241,14 +241,14 @@ class TestCheckProductAccess:
         ["twig", "array"],
     )
     def test_legacy_aliases_reject_non_allowed_models(self, alias: str):
-        allowed, error = check_product_access(alias, "oauth_access_token", POSTFN_CODE_US_APP_ID, "gpt-4o")
+        allowed, error = check_product_access(alias, "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "gpt-4o")
         assert allowed is False
         assert error is not None
         assert "not allowed" in error
 
     @pytest.mark.parametrize("model", sorted(BEDROCK_MODELS))
     def test_insights_code_allows_bedrock_models(self, model: str):
-        allowed, error = check_product_access("insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -262,7 +262,7 @@ class TestCheckProductAccess:
         allowed, error = check_product_access(
             "insights_code",
             "oauth_access_token",
-            POSTFN_CODE_US_APP_ID,
+            INSIGHTS_CODE_US_APP_ID,
             "claude-3-opus",
             provider="bedrock",
         )
@@ -288,7 +288,7 @@ class TestCheckProductAccess:
         ],
     )
     def test_background_agents_allows_configured_models(self, model: str):
-        allowed, error = check_product_access("background_agents", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("background_agents", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -300,7 +300,7 @@ class TestCheckProductAccess:
 
     def test_background_agents_does_not_allow_claude_sonnet_4_6(self):
         allowed, error = check_product_access(
-            "background_agents", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-4-6"
+            "background_agents", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-4-6"
         )
         assert allowed is False
         assert error is not None
@@ -314,7 +314,7 @@ class TestCheckProductAccess:
         allowed, error = check_product_access(
             "background_agents",
             "oauth_access_token",
-            POSTFN_CODE_US_APP_ID,
+            INSIGHTS_CODE_US_APP_ID,
             "claude-sonnet-4-6",
             provider="bedrock",
         )
@@ -323,7 +323,7 @@ class TestCheckProductAccess:
 
     @pytest.mark.parametrize("model", sorted(BEDROCK_MODELS))
     def test_background_agents_allows_bedrock_models(self, model: str):
-        allowed, error = check_product_access("background_agents", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("background_agents", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -368,7 +368,7 @@ class TestCheckProductAccess:
         ],
     )
     def test_slack_app_allows_agent_models(self, model: str):
-        allowed, error = check_product_access("slack_app", "oauth_access_token", POSTFN_CODE_US_APP_ID, model)
+        allowed, error = check_product_access("slack_app", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, model)
         assert allowed is True
         assert error is None
 
@@ -389,9 +389,9 @@ class TestCheckProductAccess:
     @pytest.mark.parametrize(
         "application_id",
         [
-            POSTFN_AI_US_APP_ID,
-            POSTFN_AI_EU_APP_ID,
-            POSTFN_AI_DEV_APP_ID,
+            INSIGHTS_AI_US_APP_ID,
+            INSIGHTS_AI_EU_APP_ID,
+            INSIGHTS_AI_DEV_APP_ID,
         ],
     )
     def test_insights_ai_allows_oauth_apps(self, application_id: str):
@@ -401,7 +401,7 @@ class TestCheckProductAccess:
 
     def test_insights_ai_rejects_insights_code_oauth_app(self):
         allowed, error = check_product_access(
-            "insights_ai", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-4-5"
+            "insights_ai", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-4-5"
         )
         assert allowed is False
         assert error is not None
@@ -410,8 +410,8 @@ class TestCheckProductAccess:
 
 class TestBackwardsCompatibility:
     def test_twig_app_id_constants_are_aliases(self):
-        assert TWIG_US_APP_ID == POSTFN_CODE_US_APP_ID
-        assert TWIG_EU_APP_ID == POSTFN_CODE_EU_APP_ID
+        assert TWIG_US_APP_ID == INSIGHTS_CODE_US_APP_ID
+        assert TWIG_EU_APP_ID == INSIGHTS_CODE_EU_APP_ID
 
     @pytest.mark.parametrize(
         "alias,target",
@@ -477,7 +477,7 @@ class TestCheckFreeTierModelAccess:
     def gate_enabled(self, monkeypatch: pytest.MonkeyPatch):
         from llm_gateway.config import get_settings
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         yield
         get_settings.cache_clear()
@@ -486,7 +486,7 @@ class TestCheckFreeTierModelAccess:
         # the PR deploys inert: behavior changes only when the env flag flips
         from llm_gateway.config import get_settings
 
-        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        monkeypatch.delenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", raising=False)
         get_settings.cache_clear()
         allowed, error = check_free_tier_model_access(
             product="insights_code",
@@ -574,7 +574,7 @@ class TestServerCredentialRequirement:
     def gate_enabled(self, monkeypatch: pytest.MonkeyPatch):
         from llm_gateway.config import get_settings
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         yield
         get_settings.cache_clear()
@@ -584,7 +584,7 @@ class TestServerCredentialRequirement:
         # a desktop Code token (wildcard scope, no internal marker); claude-sonnet-5 is in every
         # sibling's model list, so the rejection is unambiguously the missing server credential
         allowed, error = check_product_access(
-            product, "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
+            product, "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
         )
         assert allowed is False
         assert error is not None and "server-minted" in error
@@ -592,7 +592,7 @@ class TestServerCredentialRequirement:
     @pytest.mark.parametrize("product", ["background_agents", "signals", "slack_app", "conversations", "onboarding"])
     def test_oauth_with_marker_is_allowed(self, product: str):
         allowed, error = check_product_access(
-            product, "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=self._MARKER_SCOPES
+            product, "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-5", scopes=self._MARKER_SCOPES
         )
         assert allowed is True
         assert error is None
@@ -600,7 +600,7 @@ class TestServerCredentialRequirement:
     def test_insights_code_does_not_require_the_marker(self):
         # desktop users reach insights_code with a marker-less token — must keep working
         allowed, error = check_product_access(
-            "insights_code", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
+            "insights_code", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
         )
         assert allowed is True
         assert error is None
@@ -617,10 +617,10 @@ class TestServerCredentialRequirement:
         # deploys inert: with the flag off, a marker-less token still reaches the siblings
         from llm_gateway.config import get_settings
 
-        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        monkeypatch.delenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", raising=False)
         get_settings.cache_clear()
         allowed, error = check_product_access(
-            "signals", "oauth_access_token", POSTFN_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
+            "signals", "oauth_access_token", INSIGHTS_CODE_US_APP_ID, "claude-sonnet-5", scopes=["*"]
         )
         assert allowed is True
         assert error is None
@@ -634,9 +634,9 @@ class TestServerCredentialRequirement:
     def test_gate_disabled_still_refuses_unconditional_products(self, product: str, monkeypatch: pytest.MonkeyPatch):
         from llm_gateway.config import get_settings
 
-        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        monkeypatch.delenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", raising=False)
         get_settings.cache_clear()
-        allowed, error = check_product_access(product, "oauth_access_token", POSTFN_CODE_US_APP_ID, None, scopes=["*"])
+        allowed, error = check_product_access(product, "oauth_access_token", INSIGHTS_CODE_US_APP_ID, None, scopes=["*"])
         assert allowed is False
         assert error is not None and "server-minted" in error
 
@@ -644,16 +644,16 @@ class TestServerCredentialRequirement:
     def test_gate_disabled_still_admits_server_minted_tokens(self, product: str, monkeypatch: pytest.MonkeyPatch):
         from llm_gateway.config import get_settings
 
-        monkeypatch.delenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", raising=False)
+        monkeypatch.delenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", raising=False)
         get_settings.cache_clear()
         allowed, error = check_product_access(
-            product, "oauth_access_token", POSTFN_CODE_US_APP_ID, None, scopes=self._MARKER_SCOPES
+            product, "oauth_access_token", INSIGHTS_CODE_US_APP_ID, None, scopes=self._MARKER_SCOPES
         )
         assert allowed is True
         assert error is None
 
 
-_CODE_APP_IDS = frozenset({POSTFN_CODE_DEV_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_US_APP_ID})
+_CODE_APP_IDS = frozenset({INSIGHTS_CODE_DEV_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_US_APP_ID})
 _CODE_APP_PRODUCTS = [
     name
     for name, config in PRODUCTS.items()

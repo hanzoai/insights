@@ -5,7 +5,7 @@
 // can reference them without a cross-submodule dependency.
 
 /// Header carrying SDK name/version metadata.
-pub const POSTFN_SDK_INFO: &str = "Insights-Sdk-Info";
+pub const INSIGHTS_SDK_INFO: &str = "Insights-Sdk-Info";
 
 /// Max accepted `Insights-Sdk-Info` length (real values are ~20 bytes). Longer
 /// values skip `$lib` injection so an oversized header can't be amplified
@@ -13,23 +13,23 @@ pub const POSTFN_SDK_INFO: &str = "Insights-Sdk-Info";
 pub(super) const MAX_SDK_INFO_LEN: usize = 200;
 
 /// Header indicating the SDK retry attempt number.
-pub const POSTFN_ATTEMPT: &str = "Insights-Attempt";
+pub const INSIGHTS_ATTEMPT: &str = "Insights-Attempt";
 
 /// Header carrying the SDK-generated unique request ID for deduplication.
-pub const POSTFN_REQUEST_ID: &str = "Insights-Request-Id";
+pub const INSIGHTS_REQUEST_ID: &str = "Insights-Request-Id";
 
 /// Header carrying the SDK-side timestamp of the request.
-pub const POSTFN_REQUEST_TIMESTAMP: &str = "Insights-Request-Timestamp";
+pub const INSIGHTS_REQUEST_TIMESTAMP: &str = "Insights-Request-Timestamp";
 
 /// AI-gateway provenance: lowercase-hex HMAC-SHA256 over the canonical tuple
 /// (token, distinct_id, request_id, signed_at). See `gateway_provenance::canonical`.
-pub const POSTFN_AI_GATEWAY_SIGNATURE: &str = "Insights-Ai-Gateway-Signature";
+pub const INSIGHTS_AI_GATEWAY_SIGNATURE: &str = "Insights-Ai-Gateway-Signature";
 
 /// AI-gateway provenance: RFC3339 timestamp the gateway signed at.
-pub const POSTFN_AI_GATEWAY_SIGNED_AT: &str = "Insights-Ai-Gateway-Signed-At";
+pub const INSIGHTS_AI_GATEWAY_SIGNED_AT: &str = "Insights-Ai-Gateway-Signed-At";
 
 /// AI-gateway provenance: per-call request id; billing dedups exemptions by it.
-pub const POSTFN_AI_GATEWAY_REQUEST_ID: &str = "Insights-Ai-Gateway-Request-Id";
+pub const INSIGHTS_AI_GATEWAY_REQUEST_ID: &str = "Insights-Ai-Gateway-Request-Id";
 
 // ---------------------------------------------------------------------------
 // Supported content encodings
@@ -49,10 +49,10 @@ pub const SUPPORTED_ENCODINGS: &[&str] = &["gzip", "deflate", "br", "zstd"];
 // Standard header names are inlined as &str because HeaderName::as_str() isn't const.
 // They correspond to header::AUTHORIZATION, header::CONTENT_TYPE, header::USER_AGENT.
 pub(super) const REQUIRED_HEADERS: &[&str] = &[
-    POSTFN_SDK_INFO,
-    POSTFN_ATTEMPT,
-    POSTFN_REQUEST_ID,
-    POSTFN_REQUEST_TIMESTAMP,
+    INSIGHTS_SDK_INFO,
+    INSIGHTS_ATTEMPT,
+    INSIGHTS_REQUEST_ID,
+    INSIGHTS_REQUEST_TIMESTAMP,
     "content-type",
     "user-agent",
 ];

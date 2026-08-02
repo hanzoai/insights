@@ -134,7 +134,7 @@ The Hono server serves MCP directly against the local API:
 
 ```bash
 cd services/mcp
-cp .dev.vars.example .dev.vars   # POSTFN_API_BASE_URL=http://localhost:8010
+cp .dev.vars.example .dev.vars   # INSIGHTS_API_BASE_URL=http://localhost:8010
 pnpm run dev:hono                # serves http://localhost:3001/mcp
 ```
 

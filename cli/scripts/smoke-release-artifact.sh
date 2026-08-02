@@ -134,7 +134,7 @@ if ! HOME="$tmpdir/installed-home" \
     INSTALLER_DOWNLOAD_URL="$server_url" \
     CARGO_DIST_FORCE_INSTALL_DIR="$tmpdir/installed" \
     INSTALLER_NO_MODIFY_PATH=1 \
-    POSTFN_CLI_DISABLE_UPDATE=1 \
+    INSIGHTS_CLI_DISABLE_UPDATE=1 \
     sh "$installer" --no-modify-path > "$tmpdir/installer.out" 2> "$tmpdir/installer.err"; then
     cat "$tmpdir/installer.out" >&2
     cat "$tmpdir/installer.err" >&2

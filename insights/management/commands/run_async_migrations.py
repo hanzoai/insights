@@ -10,7 +10,7 @@ from semantic_version.base import Version
 from insights.async_migrations.runner import complete_migration, is_migration_dependency_fulfilled, start_async_migration
 from insights.async_migrations.setup import ALL_ASYNC_MIGRATIONS, setup_async_migrations, setup_model
 from insights.datastore.query_tagging import Feature, Product, tags_context
-from insights.constants import FROZEN_POSTFN_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models.async_migration import (
     AsyncMigration,
     AsyncMigrationError,
@@ -32,7 +32,7 @@ def get_necessary_migrations() -> Sequence[AsyncMigration]:
 
         sm = setup_model(migration_name, definition)
 
-        if FROZEN_POSTFN_VERSION > Version(sm.insights_max_version):
+        if FROZEN_INSIGHTS_VERSION > Version(sm.insights_max_version):
             necessary_migrations.append(sm)
 
     return necessary_migrations

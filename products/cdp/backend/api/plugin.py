@@ -21,7 +21,7 @@ from rest_framework.response import Response
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import ClassicBehaviorBooleanFieldSerializer, action
-from insights.cdp.templates import FN_FUNCTION_MIGRATORS
+from insights.cdp.templates import INSIGHTS_FUNCTION_MIGRATORS
 from insights.event_usage import report_user_action
 from insights.helpers.impersonation import is_impersonated
 from insights.models import User
@@ -285,7 +285,7 @@ class PluginSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "latest_tag", "insights_function_migration_available"]
 
     def get_insights_function_migration_available(self, plugin: Plugin):
-        return FN_FUNCTION_MIGRATORS.get(plugin.url) is not None if plugin.url else False
+        return INSIGHTS_FUNCTION_MIGRATORS.get(plugin.url) is not None if plugin.url else False
 
     def get_url(self, plugin: Plugin) -> Optional[str]:
         # remove ?private_token=... from url
@@ -892,7 +892,7 @@ class PluginConfigViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     @action(methods=["POST"], url_path="migrate", detail=True)
     def migrate(self, request: request.Request, **kwargs):
         obj = self.get_object()
-        migrater = FN_FUNCTION_MIGRATORS.get(obj.plugin.url)
+        migrater = INSIGHTS_FUNCTION_MIGRATORS.get(obj.plugin.url)
 
         if not migrater:
             raise ValidationError("No migration available for this plugin")

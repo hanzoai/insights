@@ -72,8 +72,8 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     import litellm
 
                                     # Set environment variables
-                                    os.environ["POSTFN_API_KEY"] = "<ph_project_token>"
-                                    os.environ["POSTFN_API_URL"] = "<ph_client_api_host>"  # Optional, defaults to https://app.hanzo.ai
+                                    os.environ["INSIGHTS_API_KEY"] = "<ph_project_token>"
+                                    os.environ["INSIGHTS_API_URL"] = "<ph_client_api_host>"  # Optional, defaults to https://app.hanzo.ai
 
                                     # Enable Insights callbacks
                                     litellm.success_callback = ["insights"]
@@ -95,8 +95,8 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                       failure_callback: ["insights"]  # Optional: also log failures
 
                                     environment_variables:
-                                      POSTFN_API_KEY: "<ph_project_token>"
-                                      POSTFN_API_URL: "<ph_client_api_host>"  # Optional
+                                      INSIGHTS_API_KEY: "<ph_project_token>"
+                                      INSIGHTS_API_URL: "<ph_client_api_host>"  # Optional
                                 `,
                             },
                         ]}

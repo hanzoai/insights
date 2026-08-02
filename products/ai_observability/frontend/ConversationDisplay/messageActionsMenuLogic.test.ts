@@ -31,7 +31,7 @@ describe('messageActionsMenuLogic', () => {
     beforeEach(() => {
         jest.resetAllMocks()
         window.localStorage.clear()
-        window.POSTFN_APP_CONTEXT = undefined as unknown as AppContext
+        window.INSIGHTS_APP_CONTEXT = undefined as unknown as AppContext
 
         jest.spyOn(mockApi.aiObservability, 'translate').mockResolvedValue(mockTranslationResponse)
 

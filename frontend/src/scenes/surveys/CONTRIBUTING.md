@@ -101,10 +101,10 @@ Changes are picked up automatically via `package:watch`.
 
 ```bash
 # Adjust these paths to match your setup
-POSTFN_JS_DIR=~/src/insights-js
+INSIGHTS_JS_DIR=~/src/insights-js
 DOTCOM_DIR=~/src/dotcom
 
-TGZ_PATH="$POSTFN_JS_DIR/target/insights-js.tgz"
+TGZ_PATH="$INSIGHTS_JS_DIR/target/insights-js.tgz"
 sed -i '' "s|\"insights-js\": \".*\"|\"insights-js\": \"file:$TGZ_PATH\"|" "$DOTCOM_DIR/frontend/package.json"
 cd "$DOTCOM_DIR" && pnpm install
 # restart the frontend

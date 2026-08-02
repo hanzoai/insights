@@ -19,10 +19,10 @@ load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 # Initialize hanzo_insights default_client so the LLM wrapper (which requires it) works
 hanzo_insights.default_client = Insights(  # ty: ignore[invalid-assignment]
-    os.environ.get("POSTFN_PROJECT_API_KEY", "phx_unused"),
-    host=os.environ.get("POSTFN_HOST", "http://localhost:8010"),
+    os.environ.get("INSIGHTS_PROJECT_API_KEY", "phx_unused"),
+    host=os.environ.get("INSIGHTS_HOST", "http://localhost:8010"),
     disabled=True,
-    debug=bool(os.environ.get("POSTFN_DEBUG")),
+    debug=bool(os.environ.get("INSIGHTS_DEBUG")),
 )
 
 # Django settings are loaded before conftest, so .env vars aren't picked up.
@@ -67,7 +67,7 @@ def online(request):
 
 @pytest.fixture
 def insights_client(no_capture, db):
-    api_key = os.environ.get("POSTFN_PROJECT_API_KEY", "")
+    api_key = os.environ.get("INSIGHTS_PROJECT_API_KEY", "")
     if not api_key:
         last_team = Team.objects.order_by("-pk").first()
         if last_team:
@@ -77,10 +77,10 @@ def insights_client(no_capture, db):
             team = Team.objects.create(organization=org, name="Eval Team")
             api_key = team.api_token
     if not api_key and not no_capture:
-        raise ValueError("POSTFN_PROJECT_API_KEY needs to be set (or pass --no-capture).")
-    host = os.environ.get("POSTFN_HOST", "http://localhost:8010")
+        raise ValueError("INSIGHTS_PROJECT_API_KEY needs to be set (or pass --no-capture).")
+    host = os.environ.get("INSIGHTS_HOST", "http://localhost:8010")
     client = Insights(
-        api_key or "phx_unused", host=host, disabled=no_capture, debug=bool(os.environ.get("POSTFN_DEBUG"))
+        api_key or "phx_unused", host=host, disabled=no_capture, debug=bool(os.environ.get("INSIGHTS_DEBUG"))
     )
     yield client
     client.shutdown()

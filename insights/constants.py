@@ -3,7 +3,7 @@ from typing import Literal
 
 from semantic_version import Version
 
-FROZEN_POSTFN_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
+FROZEN_INSIGHTS_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
 INTERNAL_BOT_EMAIL_SUFFIX = "@insightsbot.user"
 
 
@@ -53,7 +53,7 @@ class AvailableFeature(StrEnum):
     AUDIT_LOGS = "audit_logs"
     APPROVALS = "approvals"
     XAA_AUTHENTICATION = "xaa_authentication"
-    POSTFN_CODE_USAGE = "insights_code_usage"
+    INSIGHTS_CODE_USAGE = "insights_code_usage"
 
 
 LOGS_RETENTION_FEATURES_BY_DAYS: dict[int, AvailableFeature] = {
@@ -334,10 +334,11 @@ GENERATED_DASHBOARD_PREFIX = "Generated Dashboard"
 
 ENRICHED_DASHBOARD_INSIGHT_IDENTIFIER = "Feature Viewed"
 
-# Empty on purpose, and load-bearing. This gates the forum-login redirect, and
-# every caller reads it as an allowlist, so an empty list fails closed: no host
-# is permitted and the forum path is unreachable. Adding an entry re-opens a
-# redirect flow whose account-linking half has been removed.
+# Empty on purpose, and load-bearing. This deployment runs no forum, so no host
+# is a permitted redirect target. The toolbar guard in insights/urls.py reads it
+# as an allowlist, so an empty list fails closed and the forum path is
+# unreachable. Adding an entry re-opens a redirect flow whose account-linking
+# half has been removed.
 PERMITTED_FORUM_DOMAINS: list[str] = []
 
 INVITE_DAYS_VALIDITY = 3  # number of days for which team invites are valid

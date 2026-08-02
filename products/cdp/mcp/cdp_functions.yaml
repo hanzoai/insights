@@ -48,7 +48,7 @@ tools:
                  # Slack. Channel id is preferred (e.g. C0123ABC); "#general" is also accepted.
                  # Override text + blocks with the same shape the alert-wizard UI uses, so
                  # agent-created and UI-created alerts produce identical Slack messages.
-                 # Source of truth: FN_FUNCTION_SUB_TEMPLATES['insight-alert-firing'] for
+                 # Source of truth: INSIGHTS_FUNCTION_SUB_TEMPLATES['insight-alert-firing'] for
                  # template-slack in frontend/src/scenes/insights-functions/sub-templates/sub-templates.ts.
                  inputs = {
                    "slack_workspace": {"value": <slack_integration_id_int>},
@@ -83,7 +83,7 @@ tools:
                  # Discord — incoming webhook URL (https://discord.com/api/webhooks/...). No integration.
                  # Override content with the same shape the alert-wizard UI uses, so agent-created and
                  # UI-created alerts produce identical Discord messages.
-                 # Source of truth: FN_FUNCTION_SUB_TEMPLATES['insight-alert-firing'] for
+                 # Source of truth: INSIGHTS_FUNCTION_SUB_TEMPLATES['insight-alert-firing'] for
                  # template-discord in frontend/src/scenes/insights-functions/sub-templates/sub-templates.ts.
                  inputs = {
                    "webhookUrl": {"value": "<discord_webhook_url>"},

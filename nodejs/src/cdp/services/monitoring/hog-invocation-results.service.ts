@@ -2,7 +2,7 @@ import { promisify } from 'node:util'
 import { gunzip, gzip } from 'node:zlib'
 import { Counter, Gauge } from 'prom-client'
 
-import { FN_INVOCATION_RESULTS_OUTPUT, HogInvocationResultsOutput } from '~/common/outputs'
+import { INSIGHTS_INVOCATION_RESULTS_OUTPUT, HogInvocationResultsOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { safeDatastoreString } from '~/common/utils/db/utils'
 import { parseJSON } from '~/common/utils/json-parse'
@@ -285,7 +285,7 @@ const sumDurationMs = (invocation: CyclotronJobInvocation): number | null => {
  * lines) — this one writes a single row per lifecycle event so the new
  * runs/invocations UI and the rerun path can read it back via InsightsQL.
  *
- * Off by default behind `config.FN_INVOCATION_RESULTS_ENABLED`. Producing
+ * Off by default behind `config.INSIGHTS_INVOCATION_RESULTS_ENABLED`. Producing
  * rows for filtered-out events is intentionally skipped — the worker only
  * calls into this service for invocations that are actually queued to run.
  */
@@ -294,7 +294,7 @@ export class HogInvocationResultsService {
 
     constructor(
         private outputs: IngestionOutputs<HogInvocationResultsServiceOutput>,
-        private config: { FN_INVOCATION_RESULTS_ENABLED: boolean }
+        private config: { INSIGHTS_INVOCATION_RESULTS_ENABLED: boolean }
     ) {}
 
     private functionIdFor(invocation: CyclotronJobInvocation): string {
@@ -330,7 +330,7 @@ export class HogInvocationResultsService {
             finishedAt?: Date
         } = {}
     ): void {
-        if (!this.config.FN_INVOCATION_RESULTS_ENABLED) {
+        if (!this.config.INSIGHTS_INVOCATION_RESULTS_ENABLED) {
             return
         }
 
@@ -438,7 +438,7 @@ export class HogInvocationResultsService {
         invocation: CyclotronJobInvocation,
         opts: { error?: unknown; errorKind?: string } = {}
     ): Promise<boolean> {
-        if (!this.config.FN_INVOCATION_RESULTS_ENABLED) {
+        if (!this.config.INSIGHTS_INVOCATION_RESULTS_ENABLED) {
             return false
         }
 
@@ -470,7 +470,7 @@ export class HogInvocationResultsService {
                 })
             )
         )
-        await this.outputs.produce(FN_INVOCATION_RESULTS_OUTPUT, {
+        await this.outputs.produce(INSIGHTS_INVOCATION_RESULTS_OUTPUT, {
             // Partition by invocation_id so all rows for a single invocation
             // land on the same Kafka partition (and the same Datastore shard).
             key: Buffer.from(row.invocation_id),
@@ -505,7 +505,7 @@ export class HogInvocationResultsService {
         finishedAt?: Date
         error?: unknown
     }): void {
-        if (!this.config.FN_INVOCATION_RESULTS_ENABLED) {
+        if (!this.config.INSIGHTS_INVOCATION_RESULTS_ENABLED) {
             return
         }
 
@@ -547,7 +547,7 @@ export class HogInvocationResultsService {
     }
 
     queueInvocationResults(results: CyclotronJobInvocationResult[]): void {
-        if (!this.config.FN_INVOCATION_RESULTS_ENABLED) {
+        if (!this.config.INSIGHTS_INVOCATION_RESULTS_ENABLED) {
             return
         }
 

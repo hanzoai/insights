@@ -13,10 +13,10 @@ Use this skill when auditing survey feature support across Insights SDKs for `su
 
 Before starting, verify the SDK paths are accessible. Run `ls` on each path:
 
-- `$POSTFN_JS_PATH`
-- `$POSTFN_IOS_PATH`
-- `$POSTFN_ANDROID_PATH`
-- `$POSTFN_FLUTTER_PATH`
+- `$INSIGHTS_JS_PATH`
+- `$INSIGHTS_IOS_PATH`
+- `$INSIGHTS_ANDROID_PATH`
+- `$INSIGHTS_FLUTTER_PATH`
 
 If any path is empty or doesn't exist, ask the user: "I need the path to [SDK repo] on your machine. Where is it located?"
 
@@ -25,10 +25,10 @@ Once you have all paths, ask the user if they'd like to save them for future ses
 ```json
 {
   "env": {
-    "POSTFN_JS_PATH": "/path/to/insights-js",
-    "POSTFN_IOS_PATH": "/path/to/insights-ios",
-    "POSTFN_ANDROID_PATH": "/path/to/insights-android",
-    "POSTFN_FLUTTER_PATH": "/path/to/insights-flutter"
+    "INSIGHTS_JS_PATH": "/path/to/insights-js",
+    "INSIGHTS_IOS_PATH": "/path/to/insights-ios",
+    "INSIGHTS_ANDROID_PATH": "/path/to/insights-android",
+    "INSIGHTS_FLUTTER_PATH": "/path/to/insights-flutter"
   },
   "permissions": {
     "allow": [
@@ -49,7 +49,7 @@ Once you have all paths, ask the user if they'd like to save them for future ses
 
 ## Using SDK Paths in Commands
 
-**IMPORTANT**: Environment variables like `$POSTFN_JS_PATH` do NOT expand reliably in Bash tool commands.
+**IMPORTANT**: Environment variables like `$INSIGHTS_JS_PATH` do NOT expand reliably in Bash tool commands.
 
 Instead of bash commands, prefer:
 
@@ -59,7 +59,7 @@ Instead of bash commands, prefer:
 If you must use bash, first expand the variable:
 
 ```bash
-echo $POSTFN_JS_PATH
+echo $INSIGHTS_JS_PATH
 ```
 
 Then use the echoed path directly in subsequent commands.
@@ -72,18 +72,18 @@ Survey SDK feature parity has no central tracking issue. Visibility lives at rep
 
 | SDK                  | Code Path                                | Changelog                                             |
 | -------------------- | ---------------------------------------- | ----------------------------------------------------- |
-| insights-js (browser) | `$POSTFN_JS_PATH/packages/browser`      | `$POSTFN_JS_PATH/packages/browser/CHANGELOG.md`      |
-| insights-react-native | `$POSTFN_JS_PATH/packages/react-native` | `$POSTFN_JS_PATH/packages/react-native/CHANGELOG.md` |
-| insights-ios          | `$POSTFN_IOS_PATH`                      | `$POSTFN_IOS_PATH/CHANGELOG.md`                      |
-| insights-android      | `$POSTFN_ANDROID_PATH`                  | `$POSTFN_ANDROID_PATH/CHANGELOG.md`                  |
-| insights-flutter      | `$POSTFN_FLUTTER_PATH`                  | `$POSTFN_FLUTTER_PATH/CHANGELOG.md`                  |
+| insights-js (browser) | `$INSIGHTS_JS_PATH/packages/browser`      | `$INSIGHTS_JS_PATH/packages/browser/CHANGELOG.md`      |
+| insights-react-native | `$INSIGHTS_JS_PATH/packages/react-native` | `$INSIGHTS_JS_PATH/packages/react-native/CHANGELOG.md` |
+| insights-ios          | `$INSIGHTS_IOS_PATH`                      | `$INSIGHTS_IOS_PATH/CHANGELOG.md`                      |
+| insights-android      | `$INSIGHTS_ANDROID_PATH`                  | `$INSIGHTS_ANDROID_PATH/CHANGELOG.md`                  |
+| insights-flutter      | `$INSIGHTS_FLUTTER_PATH`                  | `$INSIGHTS_FLUTTER_PATH/CHANGELOG.md`                  |
 
 ## Flutter Native Dependencies
 
 Flutter wraps native SDKs. Check dependency versions in:
 
-- iOS: `$POSTFN_FLUTTER_PATH/ios/insights_flutter.podspec` (look for `s.dependency 'Insights'`)
-- Android: `$POSTFN_FLUTTER_PATH/android/build.gradle` (look for `insights-android` dependency)
+- iOS: `$INSIGHTS_FLUTTER_PATH/ios/insights_flutter.podspec` (look for `s.dependency 'Insights'`)
+- Android: `$INSIGHTS_FLUTTER_PATH/android/build.gradle` (look for `insights-android` dependency)
 
 ## Audit Process
 
@@ -118,7 +118,7 @@ git tag --contains COMMIT_HASH | sort -V | head -3
 
 ```bash
 # Find when Flutter started requiring iOS version X.Y.Z
-cd $POSTFN_FLUTTER_PATH && git log --oneline -p -- "ios/insights_flutter.podspec" | grep -B10 "X.Y.Z"
+cd $INSIGHTS_FLUTTER_PATH && git log --oneline -p -- "ios/insights_flutter.podspec" | grep -B10 "X.Y.Z"
 
 # Get the Flutter version for that commit
 git tag --contains COMMIT_HASH | sort -V | head -1
@@ -140,12 +140,12 @@ For SDKs with built-in rendering, a feature must be **actually implemented in th
 
 Key files to check for survey filtering logic:
 
-- **insights-js (browser)**: `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - utility functions like `canActivateRepeatedly`, `getSurveySeen`, `hasEvents`
-- **insights-js (browser)**: `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys.tsx` - main survey logic
-- **insights-react-native**: `$POSTFN_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts` - main filtering logic
-- **insights-react-native**: `$POSTFN_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - utility functions like `canActivateRepeatedly`, `hasEvents`
-- **insights-ios**: `$POSTFN_IOS_PATH/Insights/Surveys/InsightsSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
-- **insights-android**: `$POSTFN_ANDROID_PATH/insights-android/src/main/java/com/insights/android/surveys/InsightsSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
+- **insights-js (browser)**: `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - utility functions like `canActivateRepeatedly`, `getSurveySeen`, `hasEvents`
+- **insights-js (browser)**: `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys.tsx` - main survey logic
+- **insights-react-native**: `$INSIGHTS_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts` - main filtering logic
+- **insights-react-native**: `$INSIGHTS_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - utility functions like `canActivateRepeatedly`, `hasEvents`
+- **insights-ios**: `$INSIGHTS_IOS_PATH/Insights/Surveys/InsightsSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
+- **insights-android**: `$INSIGHTS_ANDROID_PATH/insights-android/src/main/java/com/insights/android/surveys/InsightsSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
 
 **Key utility functions to compare across SDKs:**
 
@@ -159,11 +159,11 @@ Key files to check for survey filtering logic:
 
 **Key files to check for survey rendering logic:**
 
-- **insights-js (browser)**: `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - `getDisplayOrderQuestions()`, `getDisplayOrderChoices()`
-- **insights-react-native**: `$POSTFN_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - `getDisplayOrderQuestions()`, `getDisplayOrderChoices()`
-- **insights-ios**: `$POSTFN_IOS_PATH/Insights/Surveys/QuestionTypes.swift` - `SingleChoiceQuestionView`, `MultipleChoiceQuestionView`; `$POSTFN_IOS_PATH/Insights/Surveys/SurveySheet.swift` - question ordering
-- **insights-android**: No built-in UI — only check display model exposure in `$POSTFN_ANDROID_PATH/insights/src/main/java/com/insights/surveys/InsightsDisplaySurveyQuestion.kt` and `InsightsDisplaySurveyAppearance.kt`
-- **insights-flutter**: `$POSTFN_FLUTTER_PATH/lib/src/surveys/widgets/survey_bottom_sheet.dart` - question ordering; `$POSTFN_FLUTTER_PATH/lib/src/surveys/widgets/choice_question.dart` - choice rendering
+- **insights-js (browser)**: `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - `getDisplayOrderQuestions()`, `getDisplayOrderChoices()`
+- **insights-react-native**: `$INSIGHTS_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - `getDisplayOrderQuestions()`, `getDisplayOrderChoices()`
+- **insights-ios**: `$INSIGHTS_IOS_PATH/Insights/Surveys/QuestionTypes.swift` - `SingleChoiceQuestionView`, `MultipleChoiceQuestionView`; `$INSIGHTS_IOS_PATH/Insights/Surveys/SurveySheet.swift` - question ordering
+- **insights-android**: No built-in UI — only check display model exposure in `$INSIGHTS_ANDROID_PATH/insights/src/main/java/com/insights/surveys/InsightsDisplaySurveyQuestion.kt` and `InsightsDisplaySurveyAppearance.kt`
+- **insights-flutter**: `$INSIGHTS_FLUTTER_PATH/lib/src/surveys/widgets/survey_bottom_sheet.dart` - question ordering; `$INSIGHTS_FLUTTER_PATH/lib/src/surveys/widgets/choice_question.dart` - choice rendering
 
 What to look for:
 
@@ -179,8 +179,8 @@ What to look for:
 
 When auditing a feature:
 
-1. First check `$POSTFN_JS_PATH/packages/browser/src/extensions/surveys.ts` to understand the complete, correct behavior
-2. Then compare mobile SDKs against insights-react-native (`$POSTFN_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts`) which is the reference for mobile-specific implementations
+1. First check `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys.ts` to understand the complete, correct behavior
+2. Then compare mobile SDKs against insights-react-native (`$INSIGHTS_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts`) which is the reference for mobile-specific implementations
 
 ## Web-Only vs Cross-Platform Features
 

@@ -211,7 +211,7 @@ value `mcp` is upgraded based on the caller:
 
 | Caller                                       | Transport                  | `created_via`  |
 | -------------------------------------------- | -------------------------- | -------------- |
-| Insights Desktop app inbox (`insights/code`)   | `EventSource.POSTFN_CODE` | `self_driving` |
+| Insights Desktop app inbox (`insights/code`)   | `EventSource.INSIGHTS_CODE` | `self_driving` |
 | `npx @hanzo/wizard` (self-driving program) | `EventSource.WIZARD`       | `self_driving` |
 | Other MCP clients                            | `EventSource.MCP`          | `mcp`          |
 

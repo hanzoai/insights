@@ -41,7 +41,7 @@ export const getLogsSqlEditorTabId = (id: string): string => `logs-sql-editor-${
 
 // Scope the viewer id (and so its persisted state: pinned logs, filters, config) per project.
 // A static id would persist across projects in the same browser, leaking one project's pinned log payloads into another.
-export const LOGS_SCENE_VIEWER_ID = `logs-scene-${window.POSTFN_APP_CONTEXT?.current_team?.id ?? 'unknown'}`
+export const LOGS_SCENE_VIEWER_ID = `logs-scene-${window.INSIGHTS_APP_CONTEXT?.current_team?.id ?? 'unknown'}`
 
 const VALID_VIEW_MODES: LogsViewerViewMode[] = ['logs', 'patterns', 'group']
 

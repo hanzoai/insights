@@ -8,9 +8,9 @@ receivers:
 
 exporters:
     otlphttp:
-        metrics_endpoint: '${env:POSTFN_HOST:-https://us.i.hanzo.ai}/i/v1/metrics'
+        metrics_endpoint: '${env:INSIGHTS_HOST:-https://us.i.hanzo.ai}/i/v1/metrics'
         headers:
-            authorization: 'Bearer ${env:POSTFN_API_KEY}'
+            authorization: 'Bearer ${env:INSIGHTS_API_KEY}'
 
 service:
     pipelines:

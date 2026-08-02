@@ -27,7 +27,7 @@ The command line interface for Insights 🦔
 Usage: insights-cli [OPTIONS] <COMMAND>
 
 Commands:
-  login        Interactively authenticate with Insights, storing a personal API token locally. You can also use the environment variables `POSTFN_CLI_API_KEY` and `POSTFN_CLI_PROJECT_ID`
+  login        Interactively authenticate with Insights, storing a personal API token locally. You can also use the environment variables `INSIGHTS_CLI_API_KEY` and `INSIGHTS_CLI_PROJECT_ID`
   exp          Experimental commands, not quite ready for prime time
   sourcemap    Upload a directory of bundled chunks to Insights
   dsym         Upload Apple dSYM debug symbol files to Insights
@@ -41,9 +41,9 @@ Options:
       --host <HOST>              The Insights host to connect to
       --no-fail                  Disable non-zero exit codes on errors. Use with caution
       --skip-ssl-verification    Skip SSL certificate verification when talking to the Insights API. Use only with self-signed certificates
-      --rate-limit <RATE_LIMIT>  Set the number of requests per minute for the Insights API Client [env: POSTFN_CLIENT_RATE_LIMIT=]
-      --dotenv-file <PATH>       Load Insights credentials from this dotenv-style file when not present in the process environment. Prefer this over the `--env-file` alias: the npm package runs the binary through a `node` wrapper, and Node's own built-in `--env-file` flag intercepts that spelling. Also settable as `POSTFN_CLI_DOTENV_FILE`, for callers that control the environment but not the command line (e.g. an Xcode build phase invoking the iOS SDK's upload-symbols.sh) [env: POSTFN_CLI_DOTENV_FILE=]
-      --dry-run[=<DRY_RUN>]      Skip artifact processing and upload (sourcemap, dSYM, hermes, proguard) without contacting Insights or requiring credentials. Intended for CI gates that bundle to catch regressions but must not (or cannot) upload. Not for release builds. Pass it before the subcommand (`insights-cli --dry-run hermes upload ...`) or set `POSTFN_CLI_DRY_RUN`. This is distinct from the `exp endpoints` `--dry-run`, which previews endpoint changes [env: POSTFN_CLI_DRY_RUN=] [default: false] [possible values: true, false]
+      --rate-limit <RATE_LIMIT>  Set the number of requests per minute for the Insights API Client [env: INSIGHTS_CLIENT_RATE_LIMIT=]
+      --dotenv-file <PATH>       Load Insights credentials from this dotenv-style file when not present in the process environment. Prefer this over the `--env-file` alias: the npm package runs the binary through a `node` wrapper, and Node's own built-in `--env-file` flag intercepts that spelling. Also settable as `INSIGHTS_CLI_DOTENV_FILE`, for callers that control the environment but not the command line (e.g. an Xcode build phase invoking the iOS SDK's upload-symbols.sh) [env: INSIGHTS_CLI_DOTENV_FILE=]
+      --dry-run[=<DRY_RUN>]      Skip artifact processing and upload (sourcemap, dSYM, hermes, proguard) without contacting Insights or requiring credentials. Intended for CI gates that bundle to catch regressions but must not (or cannot) upload. Not for release builds. Pass it before the subcommand (`insights-cli --dry-run hermes upload ...`) or set `INSIGHTS_CLI_DRY_RUN`. This is distinct from the `exp endpoints` `--dry-run`, which previews endpoint changes [env: INSIGHTS_CLI_DRY_RUN=] [default: false] [possible values: true, false]
   -h, --help                     Print help
   -V, --version                  Print version
 ```
@@ -52,11 +52,11 @@ Options:
 
 You can authenticate with Insights interactively for using the CLI locally, but if you'd like to use it in a CI/CD pipeline, we recommend using these environment variables:
 
-- `POSTFN_CLI_HOST`: The Insights host to connect to [default: https://us.hanzo.ai]
-- `POSTFN_CLI_API_KEY`: [A insights personal API key.](https://hanzo.ai/docs/api#private-endpoint-authentication) (also accepts `POSTFN_CLI_TOKEN` for backward compatibility)
-- `POSTFN_CLI_PROJECT_ID`: The ID number of the project/environment to connect to. E.g. the "2" in `https://us.hanzo.ai/project/2` (also accepts `POSTFN_CLI_ENV_ID` for backward compatibility)
+- `INSIGHTS_CLI_HOST`: The Insights host to connect to [default: https://us.hanzo.ai]
+- `INSIGHTS_CLI_API_KEY`: [A insights personal API key.](https://hanzo.ai/docs/api#private-endpoint-authentication) (also accepts `INSIGHTS_CLI_TOKEN` for backward compatibility)
+- `INSIGHTS_CLI_PROJECT_ID`: The ID number of the project/environment to connect to. E.g. the "2" in `https://us.hanzo.ai/project/2` (also accepts `INSIGHTS_CLI_ENV_ID` for backward compatibility)
 
-These variables can also be loaded from a dotenv-style file via `--dotenv-file <PATH>` (e.g. `insights-cli --dotenv-file .env query ...`) or the `POSTFN_CLI_DOTENV_FILE` environment variable. The process environment always wins; the file is only consulted if the required variables aren't set. `POSTFN_CLI_HOST` is only read from the same source that supplied the rest, so a stray host in the file cannot redirect a key supplied by the process env.
+These variables can also be loaded from a dotenv-style file via `--dotenv-file <PATH>` (e.g. `insights-cli --dotenv-file .env query ...`) or the `INSIGHTS_CLI_DOTENV_FILE` environment variable. The process environment always wins; the file is only consulted if the required variables aren't set. `INSIGHTS_CLI_HOST` is only read from the same source that supplied the rest, so a stray host in the file cannot redirect a key supplied by the process env.
 
 Full precedence: CLI args → process env → `--dotenv-file` → `~/.insights/credentials.json` (from `insights-cli login`).
 
@@ -81,17 +81,17 @@ Sourcemap uploads run up to 10 file uploads at a time by default. Set a differen
 insights-cli sourcemap process --directory ./dist --concurrency 32
 ```
 
-For build integrations such as `@hanzo/nextjs-config`, set `POSTFN_CLI_SOURCEMAP_UPLOAD_CONCURRENCY` in the build environment instead:
+For build integrations such as `@hanzo/nextjs-config`, set `INSIGHTS_CLI_SOURCEMAP_UPLOAD_CONCURRENCY` in the build environment instead:
 
 ```bash
-POSTFN_CLI_SOURCEMAP_UPLOAD_CONCURRENCY=32 npm run build
+INSIGHTS_CLI_SOURCEMAP_UPLOAD_CONCURRENCY=32 npm run build
 ```
 
 The CLI flag takes precedence over the environment variable. Both require a value greater than zero. This setting applies only to plain sourcemap uploads; other CLI concurrency remains unchanged.
 
 ## Skipping uploads (dry run)
 
-Pass `--dry-run` before the subcommand (`insights-cli --dry-run hermes upload ...`), or set `POSTFN_CLI_DRY_RUN=true`, to turn the upload commands — `sourcemap`, `dsym`, `hermes`, and `proguard` — into a no-op.
+Pass `--dry-run` before the subcommand (`insights-cli --dry-run hermes upload ...`), or set `INSIGHTS_CLI_DRY_RUN=true`, to turn the upload commands — `sourcemap`, `dsym`, `hermes`, and `proguard` — into a no-op.
 The CLI logs that it skipped the upload and exits `0` without contacting Insights or requiring credentials.
 (This top-level flag is separate from the `exp endpoints` `--dry-run`, which previews endpoint changes.)
 

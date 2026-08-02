@@ -1338,7 +1338,7 @@ class TestBuildFlagProvider(TestCase):
         Organization.objects.all().delete()
         flag_definitions_hypercache.clear_cache(EU_CROSS_REGION_MIRROR_CACHE_KEY, kinds=["redis", "s3"])
 
-    @patch.dict(os.environ, {"POSTFN_SELF_TEAM_ID": "5"}, clear=False)
+    @patch.dict(os.environ, {"INSIGHTS_SELF_TEAM_ID": "5"}, clear=False)
     @override_settings(SELF_CAPTURE=True, E2E_TESTING=False)
     def test_explicit_env_team_id_wins_over_self_capture(self):
         assert _build_flag_provider()._resolve_team_id() == 5
@@ -1346,7 +1346,7 @@ class TestBuildFlagProvider(TestCase):
     @patch.dict(os.environ, {}, clear=False)
     @override_settings(SELF_CAPTURE=True, E2E_TESTING=False)
     def test_self_capture_routes_to_dogfood_first_team(self):
-        os.environ.pop("POSTFN_SELF_TEAM_ID", None)
+        os.environ.pop("INSIGHTS_SELF_TEAM_ID", None)
         organization = Organization.objects.create(name="Org")
         first_team = Team.objects.create(organization=organization, name="First")
 
@@ -1365,21 +1365,21 @@ class TestBuildFlagProvider(TestCase):
         # sentinel-keyed mirror that cross_region_flag_sync writes, not literal team
         # id 2 -- which on EU belongs to a real, unrelated team. Every other region
         # falls back to the canonical Insights-internal team 2.
-        os.environ.pop("POSTFN_SELF_TEAM_ID", None)
+        os.environ.pop("INSIGHTS_SELF_TEAM_ID", None)
         with override_settings(SELF_CAPTURE=False, E2E_TESTING=False, CLOUD_DEPLOYMENT=cloud_deployment):
             assert _build_flag_provider()._resolve_team_id() == expected_key
 
     @patch.dict(os.environ, {}, clear=False)
     @override_settings(SELF_CAPTURE=True, E2E_TESTING=True)
     def test_e2e_overrides_self_capture_to_team_2(self):
-        os.environ.pop("POSTFN_SELF_TEAM_ID", None)
+        os.environ.pop("INSIGHTS_SELF_TEAM_ID", None)
 
         assert _build_flag_provider()._resolve_team_id() == 2
 
     @patch.dict(os.environ, {}, clear=False)
     @override_settings(SELF_CAPTURE=False, E2E_TESTING=False, CLOUD_DEPLOYMENT="EU")
     def test_eu_region_provider_reads_back_payload_written_under_sentinel_key(self):
-        os.environ.pop("POSTFN_SELF_TEAM_ID", None)
+        os.environ.pop("INSIGHTS_SELF_TEAM_ID", None)
         payload = {"flags": [{"key": "mirrored-flag"}], "group_type_mapping": {}, "cohorts": {}}
         flag_definitions_hypercache.set_cache_value(EU_CROSS_REGION_MIRROR_CACHE_KEY, payload)
 
@@ -1387,7 +1387,7 @@ class TestBuildFlagProvider(TestCase):
         assert definitions is not None
         assert dict(definitions) == payload
 
-    @patch.dict(os.environ, {"POSTFN_SELF_TEAM_ID": "5"}, clear=False)
+    @patch.dict(os.environ, {"INSIGHTS_SELF_TEAM_ID": "5"}, clear=False)
     @override_settings(SELF_CAPTURE=False, E2E_TESTING=False, CLOUD_DEPLOYMENT="EU")
     def test_explicit_env_team_id_wins_over_eu_region(self):
         assert _build_flag_provider()._resolve_team_id() == 5

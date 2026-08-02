@@ -19,7 +19,7 @@ import { forSnapshot } from '../../tests/helpers/snapshots'
 import { createTeam, getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
 import { Hub, Team } from '../types'
 import { FixtureInsightsFlowBuilder } from './_tests/builders/hogflow.builder'
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from './_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from './_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
     createInsightsFunction,
@@ -118,16 +118,16 @@ describe('CDP API', () => {
 
         insightsFunction = await insertInsightsFunction({
             name: 'test script function',
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
         })
 
         insightsFunctionMultiFetch = await insertInsightsFunction({
             name: 'test script function multi fetch',
-            ...FN_EXAMPLES.recursive_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.recursive_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
         })
     })
 
@@ -262,9 +262,9 @@ describe('CDP API', () => {
 
         insightsFunction = await insertInsightsFunction({
             name: 'test script function',
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_fetch,
-            ...FN_FILTERS_EXAMPLES.elements_text_filter,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.elements_text_filter,
         })
 
         const res = await supertest(app)
@@ -331,9 +331,9 @@ describe('CDP API', () => {
         })
 
         insightsFunction = await insertInsightsFunction({
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_google_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_google_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
         })
 
         const res = await supertest(app)
@@ -366,9 +366,9 @@ describe('CDP API', () => {
 
     it('doesnt include enriched values in the mock response', async () => {
         insightsFunction = await insertInsightsFunction({
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_google_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_google_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
         })
 
         const res = await supertest(app)
@@ -400,21 +400,21 @@ describe('CDP API', () => {
 
     it('handles mappings', async () => {
         const insightsFunction = await insertInsightsFunction({
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             mappings: [
                 {
                     // Filters for pageview or autocapture
-                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 },
                 {
                     // No filters so should match all events
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 },
                 {
                     // Broken filters so shouldn't match
-                    ...FN_FILTERS_EXAMPLES.broken_filters,
+                    ...INSIGHTS_FILTERS_EXAMPLES.broken_filters,
                 },
             ],
         })
@@ -460,9 +460,9 @@ describe('CDP API', () => {
 
     it('doesnt include enriched values in the mock response', async () => {
         insightsFunction = await insertInsightsFunction({
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_INPUTS_EXAMPLES.simple_google_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_INPUTS_EXAMPLES.simple_google_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
         })
 
         const res = await supertest(app)
@@ -518,8 +518,8 @@ describe('CDP API', () => {
 
         const insightsFunctionWithSecret = await insertInsightsFunction({
             name: 'test script function with secret in headers',
-            ...FN_EXAMPLES.simple_fetch,
-            ...FN_FILTERS_EXAMPLES.no_filters,
+            ...INSIGHTS_EXAMPLES.simple_fetch,
+            ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             inputs_schema: [
                 { key: 'url', type: 'string', label: 'URL', secret: false, required: true },
                 { key: 'access_token', type: 'string', label: 'Access token', secret: true, required: true },
@@ -1673,7 +1673,7 @@ describe('CDP API', () => {
                     actions: {
                         trigger: {
                             type: 'trigger',
-                            config: { type: 'event', filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {} },
+                            config: { type: 'event', filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {} },
                         },
                         email_1: {
                             type: 'function_email',

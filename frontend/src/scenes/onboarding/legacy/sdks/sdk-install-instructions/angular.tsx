@@ -15,7 +15,7 @@ function EnvVarsSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.Bash}>
-            {[`POSTFN_PROJECT_TOKEN=${currentTeam?.api_token}`, `POSTFN_HOST=${apiHostOrigin()}`].join('\n')}
+            {[`INSIGHTS_PROJECT_TOKEN=${currentTeam?.api_token}`, `INSIGHTS_HOST=${apiHostOrigin()}`].join('\n')}
         </CodeSnippet>
     )
 }
@@ -33,9 +33,9 @@ import { AppComponent } from './app/app.component';
 import insights from 'insights-js'
 
 insights.init(
-  process.env.POSTFN_PROJECT_TOKEN,
+  process.env.INSIGHTS_PROJECT_TOKEN,
   {
-    api_host:process.env.POSTFN_HOST,
+    api_host:process.env.INSIGHTS_HOST,
     ${
         !isPersonProfilesDisabled
             ? `person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well`

@@ -16,7 +16,7 @@ use serde_json::{Map, Value};
 use sha2::Sha256;
 
 use super::constants::{
-    POSTFN_AI_GATEWAY_REQUEST_ID, POSTFN_AI_GATEWAY_SIGNATURE, POSTFN_AI_GATEWAY_SIGNED_AT,
+    INSIGHTS_AI_GATEWAY_REQUEST_ID, INSIGHTS_AI_GATEWAY_SIGNATURE, INSIGHTS_AI_GATEWAY_SIGNED_AT,
 };
 
 type HmacSha256 = Hmac<Sha256>;
@@ -66,9 +66,9 @@ pub struct GatewaySignature {
 /// present; `request_id` defaults to empty when absent (untrusted downstream).
 pub fn parse_signature(headers: &HeaderMap) -> Option<GatewaySignature> {
     Some(GatewaySignature {
-        signature: header_str(headers, POSTFN_AI_GATEWAY_SIGNATURE)?,
-        signed_at: header_str(headers, POSTFN_AI_GATEWAY_SIGNED_AT)?,
-        request_id: header_str(headers, POSTFN_AI_GATEWAY_REQUEST_ID).unwrap_or_default(),
+        signature: header_str(headers, INSIGHTS_AI_GATEWAY_SIGNATURE)?,
+        signed_at: header_str(headers, INSIGHTS_AI_GATEWAY_SIGNED_AT)?,
+        request_id: header_str(headers, INSIGHTS_AI_GATEWAY_REQUEST_ID).unwrap_or_default(),
     })
 }
 
@@ -519,10 +519,10 @@ mod tests {
     fn parse_requires_signature_and_signed_at() {
         let mut headers = HeaderMap::new();
         assert!(parse_signature(&headers).is_none());
-        headers.insert(POSTFN_AI_GATEWAY_SIGNATURE, "abc".parse().unwrap());
+        headers.insert(INSIGHTS_AI_GATEWAY_SIGNATURE, "abc".parse().unwrap());
         assert!(parse_signature(&headers).is_none());
         headers.insert(
-            POSTFN_AI_GATEWAY_SIGNED_AT,
+            INSIGHTS_AI_GATEWAY_SIGNED_AT,
             "2026-05-28T10:00:00Z".parse().unwrap(),
         );
         let sig = parse_signature(&headers).unwrap();

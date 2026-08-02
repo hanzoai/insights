@@ -5,7 +5,7 @@ import { withUiApp } from '@/resources/ui-apps'
 import type { Insight } from '@/schema/insights'
 import { InsightQueryInputSchema } from '@/schema/tool-inputs'
 import { withInsightsUrl, type WithInsightsUrl } from '@/tools/tool-utils'
-import { type Context, POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY, type ToolBase } from '@/tools/types'
+import { type Context, INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, type ToolBase } from '@/tools/types'
 
 import { analyzeQuery } from '../shared'
 
@@ -18,7 +18,7 @@ type Result = WithInsightsUrl<{
     insight: Insight & { url: string }
     results: unknown
     warnings?: (DataWarehouseSyncWarning | AccessControlFilterWarning)[] | null
-    [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]?: string
+    [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]?: string
 }>
 
 // Accept either a pre-encoded JSON string or a plain object for the override
@@ -115,7 +115,7 @@ export const queryHandler: ToolBase<typeof schema, Result>['handler'] = async (c
             results,
             ...(queryResult.data.warnings ? { warnings: queryResult.data.warnings } : {}),
             ...(surfaceFormatted
-                ? { [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: queryResult.data.formatted_results }
+                ? { [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: queryResult.data.formatted_results }
                 : {}),
         },
         path

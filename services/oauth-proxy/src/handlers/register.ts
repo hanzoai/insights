@@ -1,4 +1,4 @@
-import { POSTFN_EU_BASE_URL, POSTFN_US_BASE_URL } from '@/lib/constants'
+import { INSIGHTS_EU_BASE_URL, INSIGHTS_US_BASE_URL } from '@/lib/constants'
 import type { ClientMapping } from '@/lib/kv'
 import { putClientMapping } from '@/lib/kv'
 
@@ -33,12 +33,12 @@ export async function handleRegister(request: Request, kv: KVNamespace): Promise
     }
 
     const [usResponse, euResponse] = await Promise.all([
-        fetch(`${POSTFN_US_BASE_URL}/oauth/register/`, {
+        fetch(`${INSIGHTS_US_BASE_URL}/oauth/register/`, {
             method: 'POST',
             headers,
             body: registrationBody,
         }),
-        fetch(`${POSTFN_EU_BASE_URL}/oauth/register/`, {
+        fetch(`${INSIGHTS_EU_BASE_URL}/oauth/register/`, {
             method: 'POST',
             headers: new Headers(headers),
             body: registrationBody,

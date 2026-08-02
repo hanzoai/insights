@@ -28,7 +28,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                     language: 'swift',
                                     file: 'AppDelegate.swift',
                                     code: dedent`
-                                        let config = InsightsConfig(projectToken: POSTFN_PROJECT_TOKEN, host: POSTFN_HOST)
+                                        let config = InsightsConfig(projectToken: INSIGHTS_PROJECT_TOKEN, host: INSIGHTS_HOST)
                                         config.captureScreenViews = true
                                         InsightsSDK.shared.setup(config)
                                     `,

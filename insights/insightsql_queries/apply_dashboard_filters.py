@@ -319,7 +319,7 @@ def apply_dashboard_variables_to_dict(query: dict, variables_overrides: dict[str
         source = apply_dashboard_variables_to_dict(query["source"], variables_overrides, team)
         return {**query, "source": source}
 
-    if query.get("kind") == NodeKind.FN_QL_QUERY:
+    if query.get("kind") == NodeKind.INSIGHTS_QL_QUERY:
         query_variables: dict[str, dict] | None = query.get("variables")
         if query_variables is None:
             return query
@@ -366,7 +366,7 @@ def apply_dashboard_variables(query: Any, variables_overrides: dict[str, dict], 
         source = apply_dashboard_variables(query.source, variables_overrides, team)
         return query.model_copy(update={"source": source})
 
-    if getattr(query, "kind", None) == NodeKind.FN_QL_QUERY:
+    if getattr(query, "kind", None) == NodeKind.INSIGHTS_QL_QUERY:
         query_variables = getattr(query, "variables", None)
         if query_variables is None:
             return query

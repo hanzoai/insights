@@ -30,7 +30,7 @@ from insights.insightsql.database.models import (
 # column off the InsightsQL schema entirely costs nothing for rerun. If the runs UI
 # ever wants a "view payload" affordance, that should land as a server-side
 # endpoint that gates on the function's write permission, not as a InsightsQL query.
-FN_INVOCATION_RESULTS_FIELDS: dict[str, FieldOrTable] = {
+INSIGHTS_INVOCATION_RESULTS_FIELDS: dict[str, FieldOrTable] = {
     "team_id": IntegerDatabaseField(name="team_id", nullable=False),
     "function_kind": StringDatabaseField(name="function_kind", nullable=False),
     "function_id": StringDatabaseField(name="function_id", nullable=False),
@@ -55,7 +55,7 @@ FN_INVOCATION_RESULTS_FIELDS: dict[str, FieldOrTable] = {
 
 
 class HogInvocationResultsTable(Table):
-    fields: dict[str, FieldOrTable] = FN_INVOCATION_RESULTS_FIELDS
+    fields: dict[str, FieldOrTable] = INSIGHTS_INVOCATION_RESULTS_FIELDS
 
     def to_printed_datastore(self, context):
         return "hog_invocation_results"

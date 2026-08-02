@@ -157,8 +157,8 @@ func CopyComposeFiles() error {
 		return err
 	}
 
-	// Copy as-is — Docker Compose reads REGISTRY_URL, POSTFN_APP_TAG, and
-	// POSTFN_NODE_TAG from .env at runtime, so no substitution needed here.
+	// Copy as-is — Docker Compose reads REGISTRY_URL, INSIGHTS_APP_TAG, and
+	// INSIGHTS_NODE_TAG from .env at runtime, so no substitution needed here.
 	return copyFile("insights/docker-compose.hobby.yml", "docker-compose.yml")
 }
 

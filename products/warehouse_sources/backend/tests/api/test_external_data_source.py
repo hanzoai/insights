@@ -677,7 +677,7 @@ class TestExternalDataSource(APIBaseTest):
                     ],
                 },
             },
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         assert response.status_code == 201, response.json()
@@ -698,7 +698,7 @@ class TestExternalDataSource(APIBaseTest):
         response = self.client.patch(
             f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"description": "edited"},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
 
         assert response.status_code == 200, response.json()

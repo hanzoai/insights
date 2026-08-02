@@ -21,8 +21,8 @@ function NextEnvVarsSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Bash}>
             {[
-                `NEXT_PUBLIC_POSTFN_PROJECT_TOKEN=${currentTeam?.api_token}`,
-                `NEXT_PUBLIC_POSTFN_HOST=${apiHostOrigin()}`,
+                `NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN=${currentTeam?.api_token}`,
+                `NEXT_PUBLIC_INSIGHTS_HOST=${apiHostOrigin()}`,
             ].join('\n')}
         </CodeSnippet>
     )
@@ -43,8 +43,8 @@ import type { AppProps } from 'next/app'
 export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
-    insights.init(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN as string, {
-      api_host: process.env.NEXT_PUBLIC_POSTFN_HOST || '${apiHostOrigin()}',
+    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN as string, {
+      api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST || '${apiHostOrigin()}',
       ${
           isPersonProfilesDisabled
               ? ``
@@ -108,8 +108,8 @@ import { InsightsProvider as PHProvider } from '@hanzo/react'
 
 export function InsightsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    insights.init(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN as string, {
-      api_host: process.env.NEXT_PUBLIC_POSTFN_HOST || '${apiHostOrigin()}',
+    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN as string, {
+      api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST || '${apiHostOrigin()}',
       ${
           isPersonProfilesDisabled
               ? ``
@@ -136,8 +136,8 @@ function NextInstrumentationClientSnippet(): JSX.Element {
             {`// instrumentation-client.js
 import insights from 'insights-js'
 
-insights.init(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN, {
-    api_host: process.env.NEXT_PUBLIC_POSTFN_HOST,
+insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN, {
+    api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
     defaults: '${SDK_DEFAULTS_DATE}'
 });
             `}

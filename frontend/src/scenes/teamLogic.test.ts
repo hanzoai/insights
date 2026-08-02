@@ -35,8 +35,8 @@ describe('teamLogic', () => {
         beforeEach(() => {
             initKeaTests(false)
             // Simulate projectLogic not having loaded yet, as the rename must not depend on it
-            window.POSTFN_APP_CONTEXT = {
-                ...window.POSTFN_APP_CONTEXT,
+            window.INSIGHTS_APP_CONTEXT = {
+                ...window.INSIGHTS_APP_CONTEXT,
                 current_project: undefined,
             } as unknown as AppContext
             useMocks({
@@ -142,8 +142,8 @@ describe('teamLogic', () => {
         beforeEach(() => {
             initKeaTests(false)
             // Clear team context after initKeaTests so currentTeam starts as null
-            window.POSTFN_APP_CONTEXT = {
-                ...window.POSTFN_APP_CONTEXT,
+            window.INSIGHTS_APP_CONTEXT = {
+                ...window.INSIGHTS_APP_CONTEXT,
                 current_team: undefined,
             } as unknown as AppContext
             logic = teamLogic()

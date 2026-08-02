@@ -42,8 +42,8 @@ jobs:
               id: app-token
               if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
             - uses: ./.github/actions/paths-filter
               id: filter
               with:
@@ -143,7 +143,7 @@ jobs:
                   actions-id-token-request-url: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
                   push-image: ${{ github.repository == 'Insights/insights' }} # Don't push on forks due to lack of credentials
                   # PR-only publish role: any branch, but can ONLY push to insights-cloud-prs (not insights-cloud).
-                  aws-role-to-assume: ${{ vars.AWS_ECR_POSTFN_PRS_PUBLISH_IAM_ROLE }}
+                  aws-role-to-assume: ${{ vars.AWS_ECR_INSIGHTS_PRS_PUBLISH_IAM_ROLE }}
                   dockerhub-username: ${{ secrets.DOCKERHUB_USER }}
                   dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
                   pr-number: ${{ github.event.number }}

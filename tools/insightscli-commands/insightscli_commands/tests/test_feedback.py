@@ -21,8 +21,8 @@ from insightscli_commands import feedback
 def isolated_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # Keep get_anonymous_id() off the real ~/.config and pin a deterministic key.
     monkeypatch.setenv("HOME", str(tmp_path))
-    monkeypatch.setenv("POSTFN_TELEMETRY_API_KEY", "phc_test")
-    monkeypatch.delenv("POSTFN_TELEMETRY_HOST", raising=False)
+    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "phc_test")
+    monkeypatch.delenv("INSIGHTS_TELEMETRY_HOST", raising=False)
 
 
 def test_send_posts_wellformed_feedback_event(isolated_config: None) -> None:
@@ -52,7 +52,7 @@ def test_opt_out_uses_ephemeral_distinct_id(tmp_path: Path, monkeypatch: pytest.
     # persist a durable anonymous id on disk just to do it.
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("DO_NOT_TRACK", "1")
-    monkeypatch.setenv("POSTFN_TELEMETRY_API_KEY", "phc_test")
+    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "phc_test")
     with patch.object(feedback.requests, "post") as post:
         post.return_value.raise_for_status.return_value = None
         ok, _ = feedback._send("hi", None, {})
@@ -113,10 +113,10 @@ def test_endpoint_host_precedence(
     monkeypatch: pytest.MonkeyPatch, env_host: str | None, manifest_host: str | None, expected: str
 ) -> None:
     if env_host is None:
-        monkeypatch.delenv("POSTFN_TELEMETRY_HOST", raising=False)
+        monkeypatch.delenv("INSIGHTS_TELEMETRY_HOST", raising=False)
     else:
-        monkeypatch.setenv("POSTFN_TELEMETRY_HOST", env_host)
-    monkeypatch.setenv("POSTFN_TELEMETRY_API_KEY", "phc_test")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_HOST", env_host)
+    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "phc_test")
     # Omit the host key entirely when manifest_host is None so the `.get(..., default)`
     # fallback is exercised, rather than storing an explicit None that shadows it.
     telemetry_cfg: dict[str, str] = {"api_key": "phc_manifest"}

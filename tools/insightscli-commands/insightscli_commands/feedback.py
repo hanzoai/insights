@@ -34,8 +34,8 @@ _CATEGORIES = ("bug", "idea", "praise", "question", "other")
 def _endpoint() -> tuple[str, str]:
     """(host, api_key) for the feedback event, env override then manifest config."""
     cfg = get_manifest().config.get("telemetry", {}) or {}
-    host = os.environ.get("POSTFN_TELEMETRY_HOST") or cfg.get("host", _DEFAULT_HOST)
-    api_key = os.environ.get("POSTFN_TELEMETRY_API_KEY") or cfg.get("api_key", "")
+    host = os.environ.get("INSIGHTS_TELEMETRY_HOST") or cfg.get("host", _DEFAULT_HOST)
+    api_key = os.environ.get("INSIGHTS_TELEMETRY_API_KEY") or cfg.get("api_key", "")
     return host, api_key
 
 
@@ -44,7 +44,7 @@ def _distinct_id() -> str:
 
     Reuse the persisted anonymous telemetry id when telemetry is enabled, so
     feedback correlates with the sender's other insightscli events. Under opt-out
-    (DO_NOT_TRACK, POSTFN_TELEMETRY_OPT_OUT, disabled config, CI), don't mint or
+    (DO_NOT_TRACK, INSIGHTS_TELEMETRY_OPT_OUT, disabled config, CI), don't mint or
     persist a durable id just to send an explicit one-off — use a throwaway.
     """
     if telemetry.is_enabled():

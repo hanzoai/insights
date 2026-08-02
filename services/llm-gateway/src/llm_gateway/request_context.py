@@ -16,10 +16,10 @@ if TYPE_CHECKING:
 
 logger = structlog.get_logger(__name__)
 
-POSTFN_PROPERTY_PREFIX = "x-insights-property-"
-POSTFN_FLAG_PREFIX = "x-insights-flag-"
-POSTFN_PROVIDER_HEADER = "x-insights-provider"
-POSTFN_USE_BEDROCK_FALLBACK_HEADER = "x-insights-use-bedrock-fallback"
+INSIGHTS_PROPERTY_PREFIX = "x-insights-property-"
+INSIGHTS_FLAG_PREFIX = "x-insights-flag-"
+INSIGHTS_PROVIDER_HEADER = "x-insights-provider"
+INSIGHTS_USE_BEDROCK_FALLBACK_HEADER = "x-insights-use-bedrock-fallback"
 TRACEPARENT_HEADER = "traceparent"
 
 _VALID_PROVIDERS = ("anthropic", "bedrock", "cloudflare")
@@ -133,29 +133,29 @@ def _extract_headers_with_prefix(request: Request, prefix: str) -> dict[str, str
 
 
 def extract_insights_properties_from_headers(request: Request) -> dict[str, str]:
-    return _extract_headers_with_prefix(request, POSTFN_PROPERTY_PREFIX)
+    return _extract_headers_with_prefix(request, INSIGHTS_PROPERTY_PREFIX)
 
 
 def extract_insights_flags_from_headers(request: Request) -> dict[str, str]:
-    return _extract_headers_with_prefix(request, POSTFN_FLAG_PREFIX)
+    return _extract_headers_with_prefix(request, INSIGHTS_FLAG_PREFIX)
 
 
 def extract_insights_provider_from_headers(request: Request) -> str | None:
-    provider = request.headers.get(POSTFN_PROVIDER_HEADER)
+    provider = request.headers.get(INSIGHTS_PROVIDER_HEADER)
     if provider is None:
         return None
 
     expected = f"Expected one of: {', '.join(_VALID_PROVIDERS)}."
     normalized_provider = provider.strip().lower()
     if not normalized_provider:
-        raise ValueError(f"Invalid {POSTFN_PROVIDER_HEADER} header value. {expected}")
+        raise ValueError(f"Invalid {INSIGHTS_PROVIDER_HEADER} header value. {expected}")
     if normalized_provider not in _VALID_PROVIDERS:
-        raise ValueError(f"Invalid {POSTFN_PROVIDER_HEADER} header value '{provider}'. {expected}")
+        raise ValueError(f"Invalid {INSIGHTS_PROVIDER_HEADER} header value '{provider}'. {expected}")
     return normalized_provider
 
 
 def extract_insights_use_bedrock_fallback_from_headers(request: Request) -> bool | None:
-    use_bedrock_fallback = request.headers.get(POSTFN_USE_BEDROCK_FALLBACK_HEADER)
+    use_bedrock_fallback = request.headers.get(INSIGHTS_USE_BEDROCK_FALLBACK_HEADER)
     if use_bedrock_fallback is None:
         return None
 
@@ -165,7 +165,7 @@ def extract_insights_use_bedrock_fallback_from_headers(request: Request) -> bool
     if normalized_value == "false":
         return False
     raise ValueError(
-        f"Invalid {POSTFN_USE_BEDROCK_FALLBACK_HEADER} header value '{use_bedrock_fallback}'. Expected: true or false."
+        f"Invalid {INSIGHTS_USE_BEDROCK_FALLBACK_HEADER} header value '{use_bedrock_fallback}'. Expected: true or false."
     )
 
 

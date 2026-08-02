@@ -6,11 +6,11 @@ Events are queued in-process and sent as batch POSTs to a Insights-compatible
 
 Telemetry is **disabled** unless an API key is configured via the
 ``telemetry.api_key`` section of ``insightscli.yaml`` (or the
-``POSTFN_TELEMETRY_API_KEY`` env var). Standalone users of the insightscli
+``INSIGHTS_TELEMETRY_API_KEY`` env var). Standalone users of the insightscli
 framework never emit events to Insights's project by default.
 
 Opt-out precedence:
-    CI (any common provider) -> POSTFN_TELEMETRY_OPT_OUT=1 -> DO_NOT_TRACK=1 -> config enabled: false -> no api_key
+    CI (any common provider) -> INSIGHTS_TELEMETRY_OPT_OUT=1 -> DO_NOT_TRACK=1 -> config enabled: false -> no api_key
 
 Config file: ~/.config/insights/insightscli_telemetry.json
 """
@@ -104,14 +104,14 @@ class TelemetryClient:
 
     @property
     def _host(self) -> str:
-        env_host = os.environ.get("POSTFN_TELEMETRY_HOST")
+        env_host = os.environ.get("INSIGHTS_TELEMETRY_HOST")
         if env_host:
             return env_host
         return self._telemetry_config.get("host", _DEFAULT_HOST)
 
     @property
     def _api_key(self) -> str:
-        env_key = os.environ.get("POSTFN_TELEMETRY_API_KEY")
+        env_key = os.environ.get("INSIGHTS_TELEMETRY_API_KEY")
         if env_key:
             return env_key
         return self._telemetry_config.get("api_key", "")
@@ -119,7 +119,7 @@ class TelemetryClient:
     def is_enabled(self) -> bool:
         if is_ci():
             return False
-        if os.environ.get("POSTFN_TELEMETRY_OPT_OUT") == "1":
+        if os.environ.get("INSIGHTS_TELEMETRY_OPT_OUT") == "1":
             return False
         if os.environ.get("DO_NOT_TRACK") == "1":
             return False
@@ -158,7 +158,7 @@ class TelemetryClient:
 
     def show_first_run_notice_if_needed(self) -> None:
         # CI is auto-opted-out via is_ci(); the notice would be noise in build
-        # logs and instructs users to set POSTFN_TELEMETRY_OPT_OUT=1, which is
+        # logs and instructs users to set INSIGHTS_TELEMETRY_OPT_OUT=1, which is
         # redundant when the CI gate already disables tracking.
         if is_ci():
             return
@@ -174,7 +174,7 @@ class TelemetryClient:
             "\n"
             "You can opt out at any time:\n"
             "  insightscli telemetry:off          (persistent)\n"
-            "  POSTFN_TELEMETRY_OPT_OUT=1  (per-session / CI)\n"
+            "  INSIGHTS_TELEMETRY_OPT_OUT=1  (per-session / CI)\n"
             "  DO_NOT_TRACK=1               (cross-tool convention)\n"
             "\n"
             "Run `insightscli telemetry:status` for details.\n",

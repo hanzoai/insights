@@ -28,7 +28,7 @@ import { AppContext, EventDefinition, PropertyDefinition, PropertyFilterType } f
 import { infiniteListLogic } from './infiniteListLogic'
 import { recentTaxonomicFiltersLogic } from './recentTaxonomicFiltersLogic'
 
-window.POSTFN_APP_CONTEXT = {
+window.INSIGHTS_APP_CONTEXT = {
     current_team: { id: MOCK_TEAM_ID },
     current_project: { id: MOCK_TEAM_ID },
 } as unknown as AppContext

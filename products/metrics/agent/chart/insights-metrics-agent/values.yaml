@@ -35,7 +35,7 @@ scrape:
     extraScrapeConfigs: ''
 
 # Extra environment variables passed to the agent container, e.g.
-# {POSTFN_DEBUG: "1", SCRAPE_JOB_NAME: my-fleet}. See the image README for
+# {INSIGHTS_DEBUG: "1", SCRAPE_JOB_NAME: my-fleet}. See the image README for
 # the full env surface.
 podEnv: {}
 

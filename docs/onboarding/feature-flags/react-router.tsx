@@ -41,8 +41,8 @@ export const getReactRouterSteps = (ctx: OnboardingComponentsContext): StepDefin
                                     import type { Route } from './+types/example'
 
                                     export async function loader({ request }: Route.LoaderArgs) {
-                                        const insights = new Insights(process.env.VITE_POSTFN_PROJECT_TOKEN!, {
-                                            host: process.env.VITE_POSTFN_HOST
+                                        const insights = new Insights(process.env.VITE_INSIGHTS_PROJECT_TOKEN!, {
+                                            host: process.env.VITE_INSIGHTS_HOST
                                         })
 
                                         try {

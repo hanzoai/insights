@@ -10,7 +10,7 @@ import { useOpenAi } from '~/scenes/max/useOpenAi'
 import { urls } from '~/scenes/urls'
 
 import type { TestHogResultItemApi } from '../../generated/api.schemas'
-import { FN_EVAL_EXAMPLES } from '../hogEvalExamples'
+import { INSIGHTS_EVAL_EXAMPLES } from '../hogEvalExamples'
 import { llmEvaluationLogic } from '../llmEvaluationLogic'
 import type { EvaluationTarget } from '../types'
 
@@ -40,7 +40,7 @@ interface MonacoHogGlobalField {
 
 type MonacoHogGlobal = Record<string, MonacoHogGlobalField> | Record<string, MonacoHogGlobalField>[]
 
-const FN_EVAL_COMMON_GLOBAL_DEFINITIONS: readonly HogGlobalDefinition[] = [
+const INSIGHTS_EVAL_COMMON_GLOBAL_DEFINITIONS: readonly HogGlobalDefinition[] = [
     {
         name: 'evaluation_events',
         collection: 'array',
@@ -121,7 +121,7 @@ function resolveHogGlobalDescription(description: HogGlobalDescription, target: 
 
 function buildMonacoHogGlobals(target: EvaluationTarget): Record<string, MonacoHogGlobal> {
     return Object.fromEntries(
-        FN_EVAL_COMMON_GLOBAL_DEFINITIONS.map((globalDefinition) => {
+        INSIGHTS_EVAL_COMMON_GLOBAL_DEFINITIONS.map((globalDefinition) => {
             const fields = Object.fromEntries(
                 globalDefinition.fields.map((field) => [
                     field.name,
@@ -137,14 +137,14 @@ function buildMonacoHogGlobals(target: EvaluationTarget): Record<string, MonacoH
     ) as Record<string, MonacoHogGlobal>
 }
 
-const FN_EVAL_COMMON_GLOBALS_BY_TARGET = {
+const INSIGHTS_EVAL_COMMON_GLOBALS_BY_TARGET = {
     generation: buildMonacoHogGlobals('generation'),
     trace: buildMonacoHogGlobals('trace'),
 }
 
-const FN_EVAL_GLOBALS_BY_TARGET = {
+const INSIGHTS_EVAL_GLOBALS_BY_TARGET = {
     generation: {
-        ...FN_EVAL_COMMON_GLOBALS_BY_TARGET.generation,
+        ...INSIGHTS_EVAL_COMMON_GLOBALS_BY_TARGET.generation,
         // Compatibility globals kept for saved generation Script source.
         input: { type: 'string', description: 'The input to the LLM' },
         output: { type: 'string', description: 'The output from the LLM' },
@@ -156,7 +156,7 @@ const FN_EVAL_GLOBALS_BY_TARGET = {
         },
     },
     trace: {
-        ...FN_EVAL_COMMON_GLOBALS_BY_TARGET.trace,
+        ...INSIGHTS_EVAL_COMMON_GLOBALS_BY_TARGET.trace,
         // Compatibility globals kept for saved trace Script source.
         events: [
             {
@@ -323,7 +323,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                     language="script"
                     value={source}
                     onChange={(v) => setHogSource(v ?? '')}
-                    globals={FN_EVAL_GLOBALS_BY_TARGET[evaluation.target]}
+                    globals={INSIGHTS_EVAL_GLOBALS_BY_TARGET[evaluation.target]}
                     minHeight="12rem"
                     maxHeight="60vh"
                     options={{
@@ -400,7 +400,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                     </Link>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
-                    {FN_EVAL_EXAMPLES.map((example) => (
+                    {INSIGHTS_EVAL_EXAMPLES.map((example) => (
                         <Button
                             key={example.label}
                             type="secondary"
@@ -413,7 +413,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                 </div>
                 <h4 className="text-sm font-semibold mb-2">Available globals</h4>
                 <dl className="grid grid-cols-[max-content_minmax(0,1fr)] items-start gap-x-3 gap-y-2 text-sm text-muted">
-                    {FN_EVAL_COMMON_GLOBAL_DEFINITIONS.map((globalDefinition) => (
+                    {INSIGHTS_EVAL_COMMON_GLOBAL_DEFINITIONS.map((globalDefinition) => (
                         <Fragment key={globalDefinition.name}>
                             <dt>
                                 <code className={GLOBAL_NAME_CODE_CLASS}>{globalDefinition.name}</code>

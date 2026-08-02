@@ -52,11 +52,11 @@ mod tests {
     #[test]
     fn load_dotenv_parses_file() {
         let mut f = tempfile::NamedTempFile::new().unwrap();
-        writeln!(f, "POSTFN_CLI_API_KEY=phx_from_file").unwrap();
-        writeln!(f, "POSTFN_CLI_PROJECT_ID=99").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=phx_from_file").unwrap();
+        writeln!(f, "INSIGHTS_CLI_PROJECT_ID=99").unwrap();
         let map = load_dotenv(f.path()).unwrap();
-        assert_eq!(map.get("POSTFN_CLI_API_KEY").unwrap(), "phx_from_file");
-        assert_eq!(map.get("POSTFN_CLI_PROJECT_ID").unwrap(), "99");
+        assert_eq!(map.get("INSIGHTS_CLI_API_KEY").unwrap(), "phx_from_file");
+        assert_eq!(map.get("INSIGHTS_CLI_PROJECT_ID").unwrap(), "99");
     }
 
     #[test]
@@ -70,19 +70,19 @@ mod tests {
         let mut f = tempfile::NamedTempFile::new().unwrap();
         writeln!(f, "# a comment").unwrap();
         writeln!(f).unwrap();
-        writeln!(f, "POSTFN_CLI_API_KEY=\"phx_quoted\"").unwrap();
-        writeln!(f, "POSTFN_CLI_HOST='https://eu.hanzo.ai'").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=\"phx_quoted\"").unwrap();
+        writeln!(f, "INSIGHTS_CLI_HOST='https://eu.hanzo.ai'").unwrap();
         let map = load_dotenv(f.path()).unwrap();
-        assert_eq!(map.get("POSTFN_CLI_API_KEY").unwrap(), "phx_quoted");
+        assert_eq!(map.get("INSIGHTS_CLI_API_KEY").unwrap(), "phx_quoted");
         assert_eq!(
-            map.get("POSTFN_CLI_HOST").unwrap(),
+            map.get("INSIGHTS_CLI_HOST").unwrap(),
             "https://eu.hanzo.ai"
         );
     }
 
     #[test]
     fn load_dotenv_does_not_interpolate_process_env() {
-        let key = "POSTFN_CLI_DOTENV_TEST_INTERP";
+        let key = "INSIGHTS_CLI_DOTENV_TEST_INTERP";
         std::env::set_var(key, "secret_from_process");
 
         let mut f = tempfile::NamedTempFile::new().unwrap();

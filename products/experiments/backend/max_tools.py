@@ -154,7 +154,7 @@ class CreateExperimentTool(MaxTool):
                 running_time_calculation={
                     "minimum_detectable_effect": 30,
                 },
-                event_source=EventSource.POSTFN_AI,
+                event_source=EventSource.INSIGHTS_AI,
             )
 
         try:

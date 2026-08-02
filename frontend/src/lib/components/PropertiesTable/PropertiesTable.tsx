@@ -21,7 +21,7 @@ import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'
 import {
     KNOWN_PROMOTED_PROPERTY_PARENTS,
-    POSTFN_EVENT_PROMOTED_PROPERTIES,
+    INSIGHTS_EVENT_PROMOTED_PROPERTIES,
     isInsightsProperty,
 } from '~/taxonomy/taxonomy'
 import { PROPERTY_KEYS } from '~/taxonomy/taxonomy'
@@ -302,7 +302,7 @@ export function PropertiesTable({
                 return 0
             })
             if (parent) {
-                const promotedProperties = POSTFN_EVENT_PROMOTED_PROPERTIES[parent]
+                const promotedProperties = INSIGHTS_EVENT_PROMOTED_PROPERTIES[parent]
                 const promotedItems = promotedProperties?.length
                     ? entries
                           .filter(([key]) => promotedProperties.includes(key))

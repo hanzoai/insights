@@ -59,7 +59,7 @@ export const taskHistoryLogic = kea<taskHistoryLogicType>([
             {
                 loadHistory: async (_: void, breakpoint) => {
                     const response = await api.tasks.list({
-                        origin_product: OriginProduct.POSTFN_AI,
+                        origin_product: OriginProduct.INSIGHTS_AI,
                         created_by: values.user?.id,
                         limit: 20,
                     })

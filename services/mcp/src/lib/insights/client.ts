@@ -11,9 +11,9 @@ let _client: InsightsMCP | undefined
 // canonical `$mcp_*` event helpers.
 export const getInsightsClient = (): InsightsMCP => {
     if (!_client) {
-        _client = new InsightsMCP(env.POSTFN_ANALYTICS_API_KEY ?? '', {
-            disabled: !env.POSTFN_ANALYTICS_API_KEY || !env.POSTFN_ANALYTICS_HOST, // Disable if the API key or host is not set
-            ...(env.POSTFN_ANALYTICS_HOST ? { host: env.POSTFN_ANALYTICS_HOST } : {}),
+        _client = new InsightsMCP(env.INSIGHTS_ANALYTICS_API_KEY ?? '', {
+            disabled: !env.INSIGHTS_ANALYTICS_API_KEY || !env.INSIGHTS_ANALYTICS_HOST, // Disable if the API key or host is not set
+            ...(env.INSIGHTS_ANALYTICS_HOST ? { host: env.INSIGHTS_ANALYTICS_HOST } : {}),
             flushAt: 1,
             flushInterval: 0,
             // Tool errors already surface as `$mcp_is_error: true`; keep the SDK

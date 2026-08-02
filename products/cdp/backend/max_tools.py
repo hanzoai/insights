@@ -16,13 +16,13 @@ from products.cdp.backend.prompts import (
     EVENT_PROPERTY_TAXONOMY_MESSAGE,
     EVENT_TAXONOMY_MESSAGE,
     FILTER_TAXONOMY_MESSAGE,
-    FN_EXAMPLE_MESSAGE,
-    FN_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
-    FN_FUNCTION_FILTERS_SYSTEM_PROMPT,
-    FN_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
-    FN_FUNCTION_INPUTS_SYSTEM_PROMPT,
-    FN_GRAMMAR_MESSAGE,
-    FN_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    INSIGHTS_EXAMPLE_MESSAGE,
+    INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT,
+    INSIGHTS_GRAMMAR_MESSAGE,
+    INSIGHTS_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
     IDENTITY_MESSAGE_HOG,
     INPUT_SCHEMA_TYPES_MESSAGE,
     PERSON_TAXONOMY_MESSAGE,
@@ -56,7 +56,7 @@ class CreateHogTransformationFunctionTool(MaxTool):
     description: str = "Write or edit the script code to create your desired function and apply it to the current editor"
     args_schema: type[BaseModel] = CreateHogTransformationFunctionArgs
     context_prompt_template: str = (
-        FN_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT
+        INSIGHTS_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT
         + "\n\n"
         + TRANSFORMATION_STRUCTURE_MESSAGE
         + "\n\n"
@@ -74,10 +74,10 @@ class CreateHogTransformationFunctionTool(MaxTool):
             + TRANSFORMATION_STRUCTURE_MESSAGE
             + "\n</transformation_structure>\n\n"
             + "\n\n<example_hog_code>\n"
-            + FN_EXAMPLE_MESSAGE
+            + INSIGHTS_EXAMPLE_MESSAGE
             + "\n</example_hog_code>\n\n"
             + "\n\n<hog_grammar>\n"
-            + FN_GRAMMAR_MESSAGE
+            + INSIGHTS_GRAMMAR_MESSAGE
             + "\n</hog_grammar>\n\n"
             + "\n\n<current_hog_code>\n"
             + current_hog_code
@@ -159,14 +159,14 @@ class CreateInsightsFunctionFiltersTool(MaxTool):
         "Create or edit filters for script functions to specify which events and properties trigger the function"
     )
     args_schema: type[BaseModel] = CreateInsightsFunctionFiltersArgs
-    context_prompt_template: str = FN_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT
+    context_prompt_template: str = INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT
 
     def _run_impl(self, instructions: str) -> tuple[str, str]:
         current_filters = self.context.get("current_filters", "{}")
         function_type = self.context.get("function_type", "destination")
 
         system_content = (
-            FN_FUNCTION_FILTERS_SYSTEM_PROMPT
+            INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT
             + f"\n\nCurrent filters: {current_filters}"
             + f"\nFunction type: {function_type}"
             + "\n\n<event_taxonomy>\n"
@@ -256,14 +256,14 @@ class CreateInsightsFunctionInputsTool(MaxTool):
     name: str = "create_insights_function_inputs"
     description: str = "Generate or modify input variables for script functions based on the current code and requirements"
     args_schema: type[BaseModel] = CreateInsightsFunctionInputsArgs
-    context_prompt_template: str = FN_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT
+    context_prompt_template: str = INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT
 
     def _run_impl(self, instructions: str) -> tuple[str, list]:
         current_inputs_schema = self.context.get("current_inputs_schema", [])
         hog_code = self.context.get("hog_code", "")
 
         system_content = (
-            FN_FUNCTION_INPUTS_SYSTEM_PROMPT
+            INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT
             + f"\n\nCurrent script code:\n{hog_code}"
             + f"\nCurrent inputs schema:\n{current_inputs_schema}"
             + "\n\n<input_schema_types>\n"

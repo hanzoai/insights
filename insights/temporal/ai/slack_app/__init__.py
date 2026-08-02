@@ -7,8 +7,8 @@ in this package at module load time.
 
 from insights.temporal.ai.slack_app.activities import (
     CLASSIFIER_THREAD_HISTORY_MESSAGES,
-    POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE,
-    POSTFN_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
+    INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE,
+    INSIGHTS_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
     block_insights_code_task_if_no_personal_github_activity,
     cascade_insights_code_repository_activity,
     classify_message_is_agent_directed,
@@ -78,8 +78,8 @@ SLACK_APP_ACTIVITIES = [
 __all__ = [
     "CLASSIFIER_THREAD_HISTORY_MESSAGES",
     "SlackAppMessageReactionInput",
-    "POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE",
-    "POSTFN_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE",
+    "INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE",
+    "INSIGHTS_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE",
     "SLACK_APP_PROCESSING_REACTION",
     "SLACK_APP_QUEUED_REACTION",
     "InsightsCodeRepoCascadeOutcome",

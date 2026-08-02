@@ -1,6 +1,6 @@
 /**
  * Insights product taxonomy for the sandbox resources bar. Ported from the agent's
- * `POSTFN_PRODUCTS` (ids + labels are authoritative there) with icons sourced from
+ * `INSIGHTS_PRODUCTS` (ids + labels are authoritative there) with icons sourced from
  * `@hanzo/icons` (plus the in-house SQL icon). The `_insights/resources_used` wire frame already carries `{id, label}`, so this
  * map is the icon source plus a fallback label for any id the wire omits. Labels are NOT a
  * mechanical sentence-casing of the id (e.g. `llm_analytics → "AI observability"`,
@@ -48,7 +48,7 @@ export interface InsightsProductMeta {
     Icon: ComponentType<{ className?: string }>
 }
 
-export const POSTFN_PRODUCTS: Record<InsightsProductId, InsightsProductMeta> = {
+export const INSIGHTS_PRODUCTS: Record<InsightsProductId, InsightsProductMeta> = {
     product_analytics: { label: 'Product analytics', Icon: IconGraph },
     web_analytics: { label: 'Web analytics', Icon: IconPulse },
     feature_flags: { label: 'Feature flags', Icon: IconToggle },
@@ -70,7 +70,7 @@ export const FALLBACK_PRODUCT_ICON = IconLogomark
 
 /** Resolve a product id to its icon + display label, tolerating unknown ids (uses the wire label). */
 export function resolveProductMeta(id: string, wireLabel?: string): InsightsProductMeta {
-    const known = POSTFN_PRODUCTS[id as InsightsProductId]
+    const known = INSIGHTS_PRODUCTS[id as InsightsProductId]
     if (known) {
         return { label: wireLabel || known.label, Icon: known.Icon }
     }

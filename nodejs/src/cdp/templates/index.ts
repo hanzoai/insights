@@ -58,9 +58,9 @@ import { template as logDropBySeverityTemplate } from './_transformations_log/dr
 import { template as logPiiScrubTemplate } from './_transformations_log/pii-scrub/pii-scrub.template'
 import { template as logRedactAttributesTemplate } from './_transformations_log/redact-attributes/redact-attributes.template'
 
-export const FN_FUNCTION_TEMPLATES_COMING_SOON: InsightsFunctionTemplate[] = allComingSoonTemplates
+export const INSIGHTS_FUNCTION_TEMPLATES_COMING_SOON: InsightsFunctionTemplate[] = allComingSoonTemplates
 
-export const FN_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[] = [
+export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[] = [
     webhookTemplate,
     tiktokAdsTemplate,
     snapchatAdsTemplate,
@@ -98,7 +98,7 @@ export const FN_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[] = [
     closeTemplate,
 ]
 
-export const FN_FUNCTION_TEMPLATES_TRANSFORMATIONS: InsightsFunctionTemplate[] = [
+export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS: InsightsFunctionTemplate[] = [
     defaultTransformationTemplate,
     geoipTemplate,
     ipAnonymizationTemplate,
@@ -112,7 +112,7 @@ export const FN_FUNCTION_TEMPLATES_TRANSFORMATIONS: InsightsFunctionTemplate[] =
     urlNormalizationTemplate,
 ]
 
-export const FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_LOG: InsightsFunctionTemplate[] = [
+export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_LOG: InsightsFunctionTemplate[] = [
     logDefaultTemplate,
     logPiiScrubTemplate,
     logDropBySeverityTemplate,
@@ -135,22 +135,22 @@ export const NATIVE_FN_FUNCTIONS: (InsightsFunctionTemplate & NativeTemplate)[] 
     ],
 }))
 
-export const FN_FUNCTION_TEMPLATES_SOURCES: InsightsFunctionTemplate[] = [
+export const INSIGHTS_FUNCTION_TEMPLATES_SOURCES: InsightsFunctionTemplate[] = [
     incomingWebhookTemplate,
     stripeWebhookTemplate,
     vercelLogDrainTemplate,
     pixelTemplate,
 ]
 
-export const FN_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: InsightsFunctionTemplate[] = DESTINATION_PLUGINS.map(
+export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: InsightsFunctionTemplate[] = DESTINATION_PLUGINS.map(
     (x) => x.template
 )
 
-export const FN_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: InsightsFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
+export const INSIGHTS_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: InsightsFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
     (x) => x.template
 )
 
-export const FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: InsightsFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
+export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: InsightsFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
     (x) => x.template
 )
 
@@ -162,14 +162,14 @@ export const NATIVE_FN_FUNCTIONS_BY_ID = NATIVE_FN_FUNCTIONS.reduce(
     {} as Record<string, NativeTemplate>
 )
 
-export const FN_FUNCTION_TEMPLATES: InsightsFunctionTemplate[] = [
-    ...FN_FUNCTION_TEMPLATES_DESTINATIONS,
-    ...FN_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
-    ...FN_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
-    ...FN_FUNCTION_TEMPLATES_TRANSFORMATIONS,
-    ...FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
-    ...FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_LOG,
-    ...FN_FUNCTION_TEMPLATES_SOURCES,
-    ...FN_FUNCTION_TEMPLATES_COMING_SOON,
+export const INSIGHTS_FUNCTION_TEMPLATES: InsightsFunctionTemplate[] = [
+    ...INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS,
+    ...INSIGHTS_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
+    ...INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
+    ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS,
+    ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
+    ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_LOG,
+    ...INSIGHTS_FUNCTION_TEMPLATES_SOURCES,
+    ...INSIGHTS_FUNCTION_TEMPLATES_COMING_SOON,
     ...NATIVE_FN_FUNCTIONS,
 ]

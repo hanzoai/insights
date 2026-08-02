@@ -47,7 +47,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 import express from 'express'
                                 import { Insights, setupExpressErrorHandler } from 'insights-node'
                                 const app = express()
-                                const insights = new Insights(POSTFN_PROJECT_TOKEN)
+                                const insights = new Insights(INSIGHTS_PROJECT_TOKEN)
                                 setupExpressErrorHandler(insights, app)
                             `,
                         },

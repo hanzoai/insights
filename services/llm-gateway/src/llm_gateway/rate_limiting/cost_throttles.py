@@ -24,7 +24,7 @@ from llm_gateway.rate_limiting.throttles import (
     get_rate_limit_multiplier,
     is_usage_unlimited,
 )
-from llm_gateway.services.plan_resolver import POSTFN_CODE_PRODUCT, get_billing_period_number, is_pro_plan
+from llm_gateway.services.plan_resolver import INSIGHTS_CODE_PRODUCT, get_billing_period_number, is_pro_plan
 
 logger = structlog.get_logger(__name__)
 
@@ -40,14 +40,14 @@ class CostStatus:
 
 def _is_free_plan_throttled(context: ThrottleContext) -> bool:
     return (
-        context.product == POSTFN_CODE_PRODUCT
+        context.product == INSIGHTS_CODE_PRODUCT
         and not is_pro_plan(context.plan_key)
         and (context.seat_created_at is not None or context.seat_missing)
     )
 
 
 def _is_org_billed_seatless(context: ThrottleContext) -> bool:
-    return context.product == POSTFN_CODE_PRODUCT and context.seat_missing and context.code_usage_billed
+    return context.product == INSIGHTS_CODE_PRODUCT and context.seat_missing and context.code_usage_billed
 
 
 class CostThrottle(Throttle):
@@ -324,7 +324,7 @@ class UserCostSustainedThrottle(_UserCostThrottleBase):
         base_key = super()._get_cache_key(context)
         if not base_key:
             return base_key
-        if context.product == POSTFN_CODE_PRODUCT:
+        if context.product == INSIGHTS_CODE_PRODUCT:
             period = get_billing_period_number(
                 context.seat_created_at,
                 get_settings().billing_period_days,

@@ -13,7 +13,7 @@ from temporalio.common import RetryPolicy, SearchAttributePair, TypedSearchAttri
 from temporalio.exceptions import ApplicationError, WorkflowAlreadyStartedError
 
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.search_attributes import POSTFN_SESSION_RECORDING_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SESSION_RECORDING_ID_KEY, INSIGHTS_TEAM_ID_KEY
 from insights.temporal.session_replay.summarization_sweep.constants import (
     CHILD_DISPATCH_BATCH_SIZE,
     FIND_ACTIVITY_TIMEOUT,
@@ -146,8 +146,8 @@ class SummarizeTeamSessionsWorkflow(InsightsWorkflow):
                 task_queue=settings.SESSION_REPLAY_TASK_QUEUE,
                 search_attributes=TypedSearchAttributes(
                     search_attributes=[
-                        SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=team_id),
-                        SearchAttributePair(key=POSTFN_SESSION_RECORDING_ID_KEY, value=session_id),
+                        SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=team_id),
+                        SearchAttributePair(key=INSIGHTS_SESSION_RECORDING_ID_KEY, value=session_id),
                     ]
                 ),
                 # Covers all three retry attempts + backoff (10m + 15m + 15m) with headroom.
