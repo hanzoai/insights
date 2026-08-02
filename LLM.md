@@ -33,6 +33,108 @@ retirement of the served surface (`175eace7b`) is reversed; the ghcr publisher
 restored so CI builds the monolith `Dockerfile` and pushes to
 `ghcr.io/hanzoai/insights`.
 
+## Converging with upstream — the rename is a program, and it is gated
+
+This repo is a debranded fork of an upstream analytics monolith. Converging is a
+recurring job, so the rename is `bin/debrand` — a program you re-run — and not a
+memory anybody has to carry.
+
+**The number that makes this tractable: almost none of the history is ours.**
+
+```
+git rev-list --count origin/main            # 28,489 commits in the fork
+git rev-list --count 203fdd70b87..origin/main   # 210 of them are Hanzo's
+```
+
+Everything before `203fdd70b87` (2026-06-16) is inherited upstream history.
+`203fdd70b87` replaced the entire tree in one commit, so **there is no shared
+content history to merge** — which is exactly why convergence is "re-derive the
+rename on a fresh upstream tree, then replay ~210 commits", and not a merge.
+
+**`git merge-base` will lie to you.** It answers
+`86ebcf95b22afe4b9c546e140b71262c44952456` (2023-04-18) — a **six-file Rust
+repo** absorbed by an old subtree merge, not a divergence point. Do not date the
+fork from it. The content lineage is: upstream as of roughly 2026-02, debranded.
+
+### The remote
+
+`upstream` is a local clone, so fetching costs nothing and needs no network:
+
+```
+git remote get-url upstream      # /home/z/work/posthog/posthog
+git fetch upstream master
+```
+
+### Taking the next convergence
+
+Work in a dedicated worktree with its own index — never in a tree someone else
+has changes in, because step 3 stages the whole tree.
+
+```
+git worktree add ../insights-converge -b converge/<when> upstream/master
+cd ../insights-converge
+bin/debrand --stat        # 1. report: what would change, touching nothing
+bin/debrand               # 2. prune products we do not run, rewrite, rename
+bin/debrand --check       # 3. must print ok
+```
+
+Then replay the ~210 Hanzo commits onto it. Replay them as *intent*, not as
+patches: a commit that renames a file the new tree spells differently will not
+apply, and forcing it is what makes this fail. `bin/debrand` has already done
+every mechanical rename — what you are replaying is the behaviour.
+
+### What `bin/debrand --check` asserts
+
+Zero tracked paths name the upstream, and zero files carry it in content, except
+an allowlist of five. **The allowlist is not a place to put inconvenient files.**
+Each entry exists because the name genuinely must survive:
+
+- `bin/debrand` — the rules *are* the upstream names.
+- `LLM.md` — this file, which names the upstream in order to explain it.
+- `insights/management/commands/migrate_datastore.py` — `LEGACY_PACKAGE_NAMES`
+  reads migration rows **already written** under their original package names.
+  Renaming those strings orphans every applied migration.
+- two `sourcemap_with_nulls.jsdata` fixtures — gzipped; the old name is inside
+  the compressed bytes and rewriting it corrupts the archive the test reads.
+
+`--check` fails if the allowlist names a file that no longer exists, so it
+cannot rot into a list of excuses.
+
+Dependency manifests are reported as **PENDING**, never allowlisted — 25 of them
+on the converged base. Each names a package that has to resolve, so each is a
+decision (host it under our name, or keep taking it from upstream), and calling
+that an exemption would hide it.
+
+### Where it binds
+
+- `.hanzo/workflows/deploy.yml` runs `bin/debrand --check` **before the GHCR
+  login**. Absolute rule, blocks the build: a tree that fails must not become an
+  image, and failing in one second beats failing after a 60-minute build.
+- `.hanzo/workflows/names.yml` runs `--check --since <base>`, which adds the
+  **differential** rules — no change may reintroduce the `Lemon*` /`lemon-ui`
+  design-system prefix, or put `person`/`team` on a route we own.
+
+Those two are differential rather than absolute because the absolute form would
+be a lie: 2,353 files say `team` and 1,262 say `person`, since `team_id` and
+`person_id` are physical column names inside datastore sort keys and renaming
+them means rebuilding tables that hold real rows. A tree-wide rule would fail on
+a clean checkout, and **a gate that fails on a clean checkout on a
+self-deploying repo blocks every deploy** — worse than the rot it prevents. So
+the debt is grandfathered and a change may not add to it, and the rules sit off
+the deploy path where going red is loud and free.
+
+The thresholds were measured. Against all 210 Hanzo commits both rules fire
+**zero** times. The naive rule was measured too and rejected: whole-word
+`person`/`team` over the same commits flags **1,514** added lines, nearly all
+legitimate — a font licence saying "any person obtaining", a Storybook fixture
+named "Growth team", `#team-datastore` in a link. A guard that cries wolf gets
+deleted, which is how the rot got in.
+
+Deliberately quiet, so don't "fix" these: `LemonSqueezy` (a payment vendor),
+`LemonChiffon` (a CSS colour keyword), comment lines that explain a rename, and
+`team_id`/`person_id` themselves. Where a new line genuinely needs one of these
+names, mark it — `names: exempt — <why>` — and say why on the same line.
+
 ## Django → Go observability map (both planes live)
 
 | Django surface | Go replacement | Status |
