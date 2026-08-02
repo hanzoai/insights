@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("workflows", "0012_hogflow_encrypted_inputs"),
+        ("workflows", "0012_insightsflow_encrypted_inputs"),
     ]
 
     operations = [

@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("insights", "1247_oauthaccesstoken_token_idx"),
-        ("workflows", "0009_hogflow_action_redirects"),
+        ("workflows", "0009_insightsflow_action_redirects"),
     ]
 
     operations = [

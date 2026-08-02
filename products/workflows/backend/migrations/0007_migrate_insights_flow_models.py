@@ -11,7 +11,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("insights", "1185_fix_non_list_test_account_filters"),
-        ("workflows", "0006_drop_hogflowbatchjob_scheduled_at_column"),
+        ("workflows", "0006_drop_insightsflowbatchjob_scheduled_at_column"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

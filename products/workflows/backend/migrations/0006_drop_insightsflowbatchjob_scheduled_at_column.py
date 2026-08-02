@@ -3,7 +3,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("workflows", "0005_remove_hogflowbatchjob_scheduled_at"),
+        ("workflows", "0005_remove_insightsflowbatchjob_scheduled_at"),
     ]
 
     operations = [
