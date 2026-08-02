@@ -755,7 +755,9 @@ def add_PersonHogServiceServicer_to_server(servicer, server):
             response_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonVersionFloorResponse.SerializeToString,
         ),
     }
-    generic_handler = grpc.method_handlers_generic_handler("personinsights.service.v1.PersonHogService", rpc_method_handlers)
+    generic_handler = grpc.method_handlers_generic_handler(
+        "personinsights.service.v1.PersonHogService", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))
     server.add_registered_method_handlers("personinsights.service.v1.PersonHogService", rpc_method_handlers)
 
