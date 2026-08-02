@@ -42,6 +42,33 @@ blockExoticSubdeps: true
 linkWorkspacePackages: true
 trustPolicy: no-downgrade
 
+# no-downgrade refuses a version published after a version that carried stronger
+# trust evidence, on the reading that a package which used to sign and suddenly
+# does not may have been taken over. Two semver versions trip it for a reason
+# that is not a takeover, and neither can be pinned forward out of trouble:
+#
+#   7.5.1 shipped 2023-05-12 with provenance. The terminal security backports on
+#   the legacy lines -- 5.7.2 and 6.3.1 -- shipped 2023-07-10 without it, because
+#   those release paths predate the maintainer wiring provenance in. The policy
+#   compares across the whole package rather than per major, so it reads the
+#   older lines as a regression from the newer one.
+#
+# 5.7.2 and 6.3.1 are the LAST releases of 5.x and 6.x and no 5.x or 6.x release
+# is attested at all, so there is no trusted version on either line to move to.
+# The only pin available would be a major bump of a transitive dependency, which
+# trades a real compatibility risk for a metadata gap.
+#
+# Excluded by exact version, never by name alone, so a future semver release is
+# checked like anything else and this stays one reviewable line rather than a
+# blanket switch-off. Everything else in the tree is still checked.
+#
+# Both versions belong to ONE entry joined by `||`. The matcher returns on the
+# first rule whose NAME matches and hands back only that rule's version list, so
+# a second `semver@...` line below is dead -- listing them separately excludes
+# 5.7.2 and lets 6.3.1 fail, which is exactly how this first went wrong.
+trustPolicyExclude:
+    - semver@5.7.2 || 6.3.1
+
 catalog:
     # Kea ecosystem - state management
     kea: ^4.0.0-pre.6
@@ -162,6 +189,19 @@ overrides:
     # that dead line with no trust evidence, and trustPolicy: no-downgrade refuses
     # it. Pin the last trusted 2.x on this path rather than relax the policy.
     'tsup>rollup': '2.79.2'
+    # Same policy, same shape, one dependency deeper. @types/node@22.18.8 asks for
+    # undici-types ~6.21.0, and that tilde lands inside the one unattested stretch
+    # of the 6.x line: 6.17.0-6.19.2 carry provenance, 6.19.3-6.21.0 carry none,
+    # and 6.23.0 onward carry it again. no-downgrade reads a version with no
+    # evidence published after versions that had it as a possible takeover and
+    # stops the install, which is what took the frontend stage down.
+    #
+    # 6.23.0 is the nearest version that satisfies the policy: same major, the
+    # first attested release above the gap, and types-only, so nothing it carries
+    # reaches runtime. Pinning it keeps the check doing its job -- the alternative,
+    # relaxing trustPolicy, would switch the check off for every package here to
+    # settle one of them.
+    '@types/node>undici-types': '6.23.0'
     'fast-xml-parser@^4': '>=4.5.4'
     'fast-xml-parser@^5': '>=5.3.5'
     'jest-playwright-preset>playwright-core': '1.60.0'
