@@ -210,7 +210,7 @@ export const commonConfig = {
             name: 'brand-png-asset-urls',
             setup(build) {
                 build.onLoad(
-                    { filter: /@insights[\\/]brand[\\/]dist[\\/].*[\\/]png[\\/][^\\/]+\.mjs$/ },
+                    { filter: /@hanzo[\\/]brand[\\/]dist[\\/].*[\\/]png[\\/][^\\/]+\.mjs$/ },
                     async (args) => {
                         const source = await fs.readFile(args.path, 'utf8')
                         if (!source.includes('.png')) {

@@ -1,6 +1,6 @@
-from insights.test.base import APIBaseTest
-
 from django.test import Client
+
+from insights.test.base import APIBaseTest
 
 
 class TestLandingPage(APIBaseTest):
