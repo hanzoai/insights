@@ -11,7 +11,7 @@ from insights.constants import AvailableFeature
 from insights.models import Team, User
 from insights.models.organization import OrganizationMembership
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 from ...api.skill_serializers import DEFAULT_BODY_PAGE_LENGTH
 from ...api.skill_services import (

@@ -16,7 +16,7 @@ from insights.models.comment.utils import build_comment_item_url, extract_plain_
 from products.conversations.backend.models import Ticket
 from products.conversations.backend.models.constants import Channel, Status
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestComments(APIBaseTest, QueryMatchingTest):

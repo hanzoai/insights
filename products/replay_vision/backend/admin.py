@@ -85,7 +85,7 @@ class VisionActionAdmin(admin.ModelAdmin):
     list_select_related = ("team", "scanner")
     list_filter = ("trigger_type", "mode", "enabled")
     search_fields = ("name",)
-    raw_id_fields = ("team", "scanner", "hog_flow", "created_by")
+    raw_id_fields = ("team", "scanner", "insights_flow", "created_by")
     readonly_fields = ("id", "next_run_at", "last_run_at", "created_at", "updated_at")
 
 

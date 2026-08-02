@@ -292,7 +292,7 @@ class PolicyEngine:
         # Check bypass_roles (RBAC roles)
         if bypass_role_ids:
             try:
-                from ee.models.rbac.role import RoleMembership
+                from insights.models.ee_models import RoleMembership
             except ImportError:
                 pass
             else:
@@ -323,7 +323,7 @@ class PolicyEngine:
 
         if approver_config.get("roles"):
             try:
-                from ee.models.rbac.role import RoleMembership
+                from insights.models.ee_models import RoleMembership
             except ImportError:
                 return False
 

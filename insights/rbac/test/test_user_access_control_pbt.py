@@ -42,8 +42,8 @@ from insights.rbac.user_access_control import (
 from insights.scopes import APIScopeObject
 
 try:
-    from ee.models.rbac.access_control import AccessControl
-    from ee.models.rbac.role import Role, RoleMembership
+    from insights.models.ee_models import AccessControl
+    from insights.models.ee_models import Role, RoleMembership
 except ImportError:
     pass
 

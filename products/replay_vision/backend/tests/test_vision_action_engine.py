@@ -231,7 +231,7 @@ class TestEngineActivities(BaseTest):
     def test_validate_passes(self, _label: str, with_delivery: bool) -> None:
         # Delivery is optional: the persisted run is the in-app artifact (scanner digest, run history),
         # so an action without delivery_config must still synthesize. The gate also once checked the
-        # vestigial hog_flow_id (always null after the internal_destination rework), skipping everything.
+        # vestigial insights_flow_id (always null after the internal_destination rework), skipping everything.
         action = _action(
             self.team,
             name=f"validates-{_label}",

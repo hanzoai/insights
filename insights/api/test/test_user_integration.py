@@ -1255,7 +1255,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         from insights.models.organization import Organization, OrganizationMembership
         from insights.models.team import Team
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         ac_org = Organization.objects.create(name="AC Org")
         # ``pre_save`` on Organization resets ``available_product_features`` on

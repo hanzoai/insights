@@ -8,7 +8,7 @@ from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.project import Project
 from insights.models.user_scene_personalisation import UserScenePersonalisation
 
-from ee.models.rbac.role import Role, RoleMembership
+from insights.models.ee_models import Role, RoleMembership
 
 # ============================================================
 # idor-taint-user-input-to-model-get (ERROR - user input flows to lookup)

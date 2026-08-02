@@ -17,7 +17,7 @@ from products.workflows.backend.models import InsightsFlow, InsightsFlowBatchJob
 from products.workflows.backend.models.team_workflows_config import TeamWorkflowsConfig
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 
@@ -50,12 +50,12 @@ class TestEmailReputationAPI(APIBaseTest):
             provider.get_tenant_reputation.return_value = aws_tenant
         with (
             patch(
-                "products.workflows.backend.api.hog_flow.fetch_app_metric_totals_by_source",
+                "products.workflows.backend.api.insights_flow.fetch_app_metric_totals_by_source",
                 return_value=totals_by_source,
             ),
-            patch("products.workflows.backend.api.hog_flow.SESProvider", return_value=provider),
+            patch("products.workflows.backend.api.insights_flow.SESProvider", return_value=provider),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/hog_flows/reputation{query}")
+            response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/reputation{query}")
         assert response.status_code == status.HTTP_200_OK
         return response.json()
 
@@ -122,10 +122,10 @@ class TestEmailReputationAPI(APIBaseTest):
         provider = MagicMock()
         provider.get_tenant_reputation.side_effect = Exception("SES timeout")
         with (
-            patch("products.workflows.backend.api.hog_flow.fetch_app_metric_totals_by_source", return_value={}),
-            patch("products.workflows.backend.api.hog_flow.SESProvider", return_value=provider),
+            patch("products.workflows.backend.api.insights_flow.fetch_app_metric_totals_by_source", return_value={}),
+            patch("products.workflows.backend.api.insights_flow.SESProvider", return_value=provider),
         ):
-            url = f"/api/projects/{self.team.id}/hog_flows/reputation"
+            url = f"/api/projects/{self.team.id}/insights_flows/reputation"
             first = self.client.get(url)
             second = self.client.get(url)
 
@@ -136,12 +136,12 @@ class TestEmailReputationAPI(APIBaseTest):
     # Creating a InsightsFlowBatchJob fires a post_save signal that dispatches to the plugin server —
     # patched out like every other batch-job test, or CI fails on the outbound HTTP attempt.
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
     def test_reputation_endpoint_computes_rates_and_folds_batch_jobs_into_workflows(self, _mock_dispatch):
         flow = self._create_flow("Newsletter")
         batch_job = InsightsFlowBatchJob.objects.create(
-            team=self.team, hog_flow=flow, variables={}, filters={}, status="completed"
+            team=self.team, insights_flow=flow, variables={}, filters={}, status="completed"
         )
         other_flow = self._create_flow("Onboarding drip")
 
@@ -165,13 +165,13 @@ class TestEmailReputationAPI(APIBaseTest):
             "emails_sent": 2600,
         }
         # Worst first: the folded Newsletter row (complaints beat bounces) before the clean flow
-        assert [(row["hog_flow_name"], row["emails_sent"]) for row in data["workflows"]] == [
+        assert [(row["insights_flow_name"], row["emails_sent"]) for row in data["workflows"]] == [
             ("Newsletter", 1000),
             ("Onboarding drip", 1000),
         ]
         assert data["workflows"][0]["bounce_rate"] == 50 / 1000
         assert data["workflows"][0]["complaint_rate"] == 1 / 1000
-        assert data["workflows"][0]["hog_flow_id"] == str(flow.id)
+        assert data["workflows"][0]["insights_flow_id"] == str(flow.id)
 
     def test_reputation_endpoint_clamps_rates_when_trailing_feedback_exceeds_window_sends(self):
         # Bounces/complaints are recorded at webhook time: a workflow that mostly stopped sending
@@ -198,7 +198,7 @@ class TestEmailReputationAPI(APIBaseTest):
         )
 
         data = self._get_reputation({str(unnamed.id): {"email_sent": 10}})
-        assert [(row["hog_flow_id"], row["hog_flow_name"]) for row in data["workflows"]] == [(str(unnamed.id), "")]
+        assert [(row["insights_flow_id"], row["insights_flow_name"]) for row in data["workflows"]] == [(str(unnamed.id), "")]
 
     def test_reputation_endpoint_search_filters_before_the_cap(self):
         needle = self._create_flow("Quarterly newsletter")
@@ -209,10 +209,10 @@ class TestEmailReputationAPI(APIBaseTest):
 
         unfiltered = self._get_reputation(totals)
         assert len(unfiltered["workflows"]) == 50
-        assert all(row["hog_flow_name"] != "Quarterly newsletter" for row in unfiltered["workflows"])
+        assert all(row["insights_flow_name"] != "Quarterly newsletter" for row in unfiltered["workflows"])
 
         searched = self._get_reputation(totals, query="?search=newsLETTER")
-        assert [row["hog_flow_name"] for row in searched["workflows"]] == ["Quarterly newsletter"]
+        assert [row["insights_flow_name"] for row in searched["workflows"]] == ["Quarterly newsletter"]
 
     def test_reputation_endpoint_never_resolves_other_teams_workflows(self):
         other_team = Team.objects.create(organization=self.organization, name="other team")
@@ -273,10 +273,10 @@ class TestEmailReputationAccessControl(APIBaseTest):
             billable_action_types=["function_email"],
         )
         # Project-wide default of `none`; the member's only access is the one object grant.
-        AccessControl.objects.create(team=self.team, resource="hog_flow", resource_id=None, access_level="none")
+        AccessControl.objects.create(team=self.team, resource="insights_flow", resource_id=None, access_level="none")
         AccessControl.objects.create(
             team=self.team,
-            resource="hog_flow",
+            resource="insights_flow",
             resource_id=str(flow.id),
             access_level="viewer",
             organization_member=membership,
@@ -291,15 +291,15 @@ class TestEmailReputationAccessControl(APIBaseTest):
         }
         with (
             patch(
-                "products.workflows.backend.api.hog_flow.fetch_app_metric_totals_by_source",
+                "products.workflows.backend.api.insights_flow.fetch_app_metric_totals_by_source",
                 return_value={str(flow.id): {"email_sent": 100, "email_bounced_hard": 5}},
             ),
-            patch("products.workflows.backend.api.hog_flow.SESProvider", return_value=provider),
+            patch("products.workflows.backend.api.insights_flow.SESProvider", return_value=provider),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/hog_flows/reputation")
+            response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/reputation")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["aws"] is None
         assert data["reputation"] is None
-        assert [row["hog_flow_id"] for row in data["workflows"]] == [str(flow.id)]
+        assert [row["insights_flow_id"] for row in data["workflows"]] == [str(flow.id)]
