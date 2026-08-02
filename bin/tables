@@ -1,0 +1,507 @@
+#!/usr/bin/env python3
+"""Report the warehouse table names this tree declares, and refuse a versioned one.
+
+A `_v2` is a confession: two tables are the same thing and nobody deleted one.
+The rule is that a name is a value in a namespace — if a name needs a number to
+tell it apart from another name, the namespace is wrong, not the name.
+
+    bin/tables                  list every declared table name
+    bin/tables --versioned      list only the versioned ones, with their ledger entry
+    bin/tables --check          exit 1 on a versioned name that is not in the LEDGER
+    bin/tables --live           read the warehouse and check what is actually there
+
+Two modes because there are two ways a versioned name gets in, and neither one
+sees the other.
+
+`--check` reads SOURCE. It is pure — no database, no Django, no services — so it
+runs in CI on every change and in a shell on a laptop. That matters more than it
+sounds: the guard this replaces could not see a single one of the nine names it
+was written to stop, and a guard that needs a warehouse to run is a guard that
+gets skipped.
+
+`--live` reads `system.tables`. Source alone is not enough, because a migration
+can leave a table behind that no current source file creates: `query_log_archive_v2`
+holds 575 rows in production and appears in no CREATE statement in this tree. Only
+the warehouse knows it is there.
+
+Both modes read the same LEDGER, so there is one list of known names and one place
+to change it.
+
+WHY A LEDGER AND NOT A BAN. This repository deploys itself: main builds an image
+and cd.hanzo.ai rolls it. A rule that fails on a clean checkout would block every
+deploy, which is worse than the rot it prevents. The nine inherited names cannot
+be deleted in one commit — six of them are the live half of a dual-write migration
+whose cutover is a product decision. So the set is CLOSED instead of empty: every
+versioned name is written down with a disposition, and anything not on the list is
+a build failure. The ledger can only shrink, because an entry that no longer matches
+anything is also a failure (see --check). That is a ratchet rather than a promise.
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import ast
+import sys
+import argparse
+import warnings
+
+# --- the ledger ---------------------------------------------------------
+#
+# Every versioned name this tree or this warehouse is known to carry, and what
+# is going to happen to it.
+#
+# `where` is measured, not asserted, and it is the interesting column. SOURCE is
+# a name this tree spells; WAREHOUSE is a name only `system.tables` knows,
+# because a migration created it and no current file mentions it. The two sets
+# are different, and that difference is the whole reason the previous guard saw
+# nothing: it read a directory of Go files while every one of these lived in
+# Python, in a migration, or in the database itself.
+#
+# Adding a row here is how you would defeat this guard, which is the point: it
+# is one line, in one file, that a reviewer sees. Deleting a row is how the
+# number goes down.
+
+RENAME, KEEP = "rename", "keep"
+SOURCE, WAREHOUSE, BOTH = "source", "warehouse", "both"
+
+LEDGER: dict[str, tuple[str, str, str]] = {
+    # name: (where, disposition, why)
+    #
+    # --- retired by migration 0230, additive; an operator runs it -----------
+    "query_log_archive_v2": (
+        BOTH,
+        RENAME,
+        "superseded by query_log_archive; this tree already calls it "
+        "QUERY_LOG_ARCHIVE_OLD_TABLE. 575 rows, last written 2026-07-30, while "
+        "sharded_query_log_archive takes 1.9M rows and is still being written. "
+        "0230 RENAMEs it into the `retired` database: metadata-only, every row "
+        "kept, and the suffix leaves the live namespace.",
+    ),
+    "kafka_log_entries_v3": (
+        BOTH,
+        RENAME,
+        "the LIVE consumer of the `log_entries` topic, reading group "
+        "datastore_log_entries into writable_log_entries. The unsuffixed "
+        "kafka_log_entries is the stale duplicate: same topic, different group "
+        "(group1), same destination sharded_log_entries — so the topic is read "
+        "twice. 0230 drops the duplicate and renames this one onto the clean "
+        "name. A Kafka engine table stores no rows, so nothing is at risk.",
+    ),
+    "log_entries_v3_mv": (
+        BOTH,
+        RENAME,
+        "the materialized view of the pair above. A view stores no rows.",
+    ),
+    #
+    # --- dead, and cheaper to hold than to exhume ---------------------------
+    "log_entries_v2_test": (
+        SOURCE,
+        KEEP,
+        "already retired in the warehouse: migration 0201 dropped all three of "
+        "its tables and `system.tables` matches none of them. What is left is "
+        "insights/datastore/log_entries_v2_test.py, which exists only so that "
+        "migration 0110 still imports. Deleting it means moving 107 lines of "
+        "DDL into an applied migration to delete 107 lines of DDL — history "
+        "rewritten for no change in the warehouse. It retires when the "
+        "datastore migrations are squashed.",
+    ),
+    #
+    # --- held, with an exit condition --------------------------------------
+    #
+    # The sessions rewrite is a dual-write migration in flight: both tables are
+    # written on every event, and database.py resolves sessionTableVersion AUTO
+    # to V2, so v3 is written and not yet read. Renaming the successor while it
+    # is the successor just moves the confession. The exit is the cutover: when
+    # AUTO resolves to V3, the predecessor retires and the successor takes the
+    # plain name `raw_sessions`, which is the name a reader should have had all
+    # along. Until then these are held — declared, not accidental.
+    #
+    # Only the root is SOURCE. The other five are spelled nowhere: sessions_v3.py
+    # builds them by prefixing and suffixing TABLE_BASE_NAME_V3, so the string
+    # "sharded_raw_sessions_v3" does not occur in this tree at all. They are
+    # real tables regardless, which is what --live is for.
+    "raw_sessions_v3": (
+        BOTH,
+        KEEP,
+        "the successor session table, written on every event and read only when a "
+        "query asks for it by name. TABLE_BASE_NAME_V3 in sessions_v3.py is the "
+        "root the other five are built from. Retires at the V3 cutover, when it "
+        "takes the plain name raw_sessions.",
+    ),
+    "sharded_raw_sessions_v3": (
+        WAREHOUSE,
+        KEEP,
+        "the shard that actually stores raw_sessions_v3, keyed on an explicit "
+        "session_timestamp rather than one bit-shifted out of the session id. "
+        "Retires with its root.",
+    ),
+    "writable_raw_sessions_v3": (
+        WAREHOUSE,
+        KEEP,
+        "the write leg the two materialized views insert through. Holds no rows "
+        "of its own — Distributed over the shard. Retires with its root.",
+    ),
+    "raw_sessions_v3_mv": (
+        WAREHOUSE,
+        KEEP,
+        "aggregates sharded_events into raw_sessions_v3. Half of the dual write: "
+        "the other half feeds the predecessor. Retires with its root.",
+    ),
+    "raw_sessions_v3_recordings_mv": (
+        WAREHOUSE,
+        KEEP,
+        "the second feed, from sharded_session_replay_events. The predecessor has "
+        "no equivalent, so replay-derived sessions exist only here. Retires with "
+        "its root.",
+    ),
+    "raw_sessions_v3_v": (
+        WAREHOUSE,
+        KEEP,
+        "the read view that re-aggregates the shard, because a merge is not "
+        "guaranteed to have collapsed a session into one row. Retires with its root.",
+    ),
+}
+
+# --- what counts as a version suffix ------------------------------------
+#
+# `_v` and digits, at the end of a name or of one of its segments, so that
+# raw_sessions_v3_mv is caught by its middle. Case-insensitive because the
+# Python constants that mint these names shout: TABLE_BASE_NAME_V3.
+#
+# Deliberately NOT here, and NOT detected at all: a trailing bare digit.
+# `app_metrics2` and `person_distinct_id2` are the same disease with a different
+# spelling, and they are real, live and populated — measured, eight of them. But
+# every `metric_5m`, `series_1d` and `text_embedding_3_large_3072` in the same
+# warehouse is a legitimate grain or model name, and a rule that flags those is
+# a rule someone deletes. A guard that cries wolf gets deleted, which is how
+# nine names got in. Naming them here is the whole record of that decision:
+# a suffix this gate does not check is not a suffix this gate has blessed.
+VERSION = re.compile(r"_v[0-9]+(?:_|$)", re.IGNORECASE)
+
+# Names shaped like a table name, allowing the placeholders a templated DDL
+# statement carries: `{table_name}_v3_mv`, `%(table)s_v2`.
+NAME = r"(?:[A-Za-z0-9_]|\{[^{}\n]*\}|%\([a-z_]+\)s)+"
+
+# A CREATE, and only a CREATE. A DROP or a RENAME that names a versioned table
+# is the REMEDY — migration 0201 drops eleven of them and migration 0230 drops
+# two more, and reading those as violations would punish the cleanup and leave
+# the only way to pass being to never write the fix down.
+CREATE = re.compile(
+    r"CREATE\s+(?:OR\s+REPLACE\s+)?(?:MATERIALIZED\s+VIEW|VIEW|TABLE|DICTIONARY)"
+    rf"(?:\s+IF\s+NOT\s+EXISTS)?\s+(?:`?{NAME}`?\.)?`?(?P<name>{NAME})`?",
+    re.IGNORECASE,
+)
+
+# A materialized view's destination, which names a table without CREATEing it.
+DESTINATION = re.compile(rf"\bTO\s+(?:`?{NAME}`?\.)?`?(?P<name>{NAME})`?", re.IGNORECASE)
+
+# An identifier that holds a table name. TABLE_BASE_NAME_V3 is the root the six
+# raw_sessions_v3 objects are all built from, so this one rule reaches all six
+# through the f-strings that derive them.
+TABLE_ID = re.compile(r"(?:^|_)(?:TABLE|MV|VIEW|DICTIONARY)(?:_|$)|_TABLE_BASE_NAME")
+
+# Keyword arguments that fill a name into a templated statement.
+TABLE_KWARG = frozenset({"table_name", "view_name", "dest_table", "to_table", "data_table", "target_table"})
+
+# A name is one token. Without this, DROP_KAFKA_LOG_ENTRIES_V3_TABLE_SQL — whose
+# identifier says TABLE and whose value is a whole DROP statement — reads as a
+# table called "DROP TABLE IF EXISTS kafka_{}_v3".
+SHAPED = re.compile(r"^(?:[A-Za-z0-9_]|\{[^{}]*\}|%\([a-z_]+\)s)+$")
+
+SOURCE_SUFFIX = (".py", ".sql", ".go", ".ts", ".tsx")
+SKIP_DIR = frozenset({".git", "node_modules", "dist", "build", "__pycache__", ".mypy_cache", ".venv", ".ruff_cache"})
+# Test modules under a test directory. The gate's OWN test has to write down the
+# names it forbids in order to prove it catches them, and a rule that cannot be
+# tested without tripping itself cannot be trusted — the same reason debrand
+# exempts comments. Scoped to pytest modules INSIDE test/ so it stays narrow:
+# insights/datastore/log_entries_v2_test.py is named like a test and is not one,
+# it declares a real table, and it is still read.
+TEST_DIR = frozenset({"test", "tests"})
+
+
+def is_test_module(path: str, name: str) -> bool:
+    parts = set(path.replace(os.sep, "/").split("/"))
+    return bool(parts & TEST_DIR) and (name.startswith("test_") or name.endswith("_test.py"))
+
+
+class Hit:
+    __slots__ = ("name", "path", "line", "how")
+
+    def __init__(self, name: str, path: str, line: int, how: str) -> None:
+        self.name, self.path, self.line, self.how = name, path, line, how
+
+
+def versioned(name: str) -> bool:
+    return bool(VERSION.search(name))
+
+
+def base(name: str, path: str = "") -> str:
+    """The ledger key for a possibly-templated name.
+
+    `kafka_{LOG_ENTRIES_TABLE}_v3` is the table the warehouse calls
+    kafka_log_entries_v3; the placeholder is the part the template fills in.
+    Resolving it exactly would mean executing the module, which needs Django and
+    Redis — so a templated name matches a ledger key when the literal parts it
+    does carry appear in that key, in order.
+
+    A template must match exactly ONE key. `{table_name}_v3_mv` carries nothing
+    but the suffix, so it fits log_entries_v3_mv and raw_sessions_v3_mv alike;
+    taking the first would let a genuinely new `{x}_v3_mv` inherit an existing
+    row and pass unseen. When the name alone is ambiguous the FILE decides —
+    log_entries.py names log_entries — and when the file cannot decide either,
+    the name is returned unresolved and reported. Fails closed.
+    """
+    if "{" not in name and "%(" not in name:
+        return name
+    literal = [p for p in re.split(r"\{[^{}]*\}|%\([a-z_]+\)s", name) if p]
+    fits = []
+    for key in LEDGER:
+        rest = key
+        for part in literal:
+            i = rest.find(part)
+            if i < 0:
+                break
+            rest = rest[i + len(part) :]
+        else:
+            fits.append(key)
+    if len(fits) == 1:
+        return fits[0]
+    if len(fits) > 1 and path:
+        module = os.path.basename(path).rsplit(".", 1)[0]
+        named = [k for k in fits if module and module in k]
+        if len(named) == 1:
+            return named[0]
+    return name
+
+
+def scan_text(src: str, path: str, out: list[Hit], how: str = "ddl", first: int = 1) -> None:
+    """Every CREATE and every materialized-view destination in a blob of text.
+
+    `first` is the line the blob starts on, so a statement inside a Python string
+    reports the file's line and not the string's.
+    """
+    for rx, kind in ((CREATE, how), (DESTINATION, "destination")):
+        for m in rx.finditer(src):
+            name = m.group("name")
+            if versioned(name):
+                out.append(Hit(name, path, first + src[: m.start()].count("\n"), kind))
+
+
+def scan_python(src: str, path: str, out: list[Hit]) -> None:
+    """Names minted by Python: DDL inside string literals, and the constants,
+    functions and keyword arguments that carry a table name into one."""
+    try:
+        # A tree this size carries a few invalid escape sequences in regex and
+        # docstring literals. They are the file's business, not this gate's.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", SyntaxWarning)
+            tree = ast.parse(src)
+    except SyntaxError:
+        return
+
+    def literal(node: ast.AST) -> str | None:
+        """The name a node spells, with a `{}` where it interpolates."""
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.JoinedStr):
+            parts = []
+            for v in node.values:
+                if isinstance(v, ast.Constant) and isinstance(v.value, str):
+                    parts.append(v.value)
+                else:
+                    parts.append("{}")
+            return "".join(parts)
+        return None
+
+    def name_of(node: ast.AST) -> str | None:
+        """The node's value when it spells one table name and nothing else."""
+        v = literal(node)
+        return v if v and SHAPED.match(v) and versioned(v) else None
+
+    for node in ast.walk(tree):
+        # DDL written inside a string, templated or not.
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if "CREATE" in node.value.upper() or " TO " in node.value.upper():
+                scan_text(node.value, path, out, "ddl", node.lineno)
+        elif isinstance(node, ast.JoinedStr):
+            spelled = literal(node) or ""
+            if "CREATE" in spelled.upper():
+                scan_text(spelled, path, out, "ddl", node.lineno)
+
+        # A constant that holds a table name: TABLE_BASE_NAME_V3 = "raw_sessions_v3".
+        if isinstance(node, ast.Assign):
+            for t in node.targets:
+                if isinstance(t, ast.Name) and TABLE_ID.search(t.id):
+                    if v := name_of(node.value):
+                        out.append(Hit(v, path, node.lineno, "constant"))
+
+        # A function that returns one: def SHARDED_RAW_SESSIONS_TABLE_V3().
+        elif isinstance(node, ast.FunctionDef) and TABLE_ID.search(node.name):
+            for sub in ast.walk(node):
+                if isinstance(sub, ast.Return) and sub.value is not None:
+                    if v := name_of(sub.value):
+                        out.append(Hit(v, path, sub.lineno, "constant"))
+
+        # A name handed to a templated statement: table_name=f"kafka_{X}_v3".
+        elif isinstance(node, ast.keyword) and node.arg in TABLE_KWARG:
+            if v := name_of(node.value):
+                out.append(Hit(v, path, node.lineno, "argument"))
+
+
+def scan(root: str) -> list[Hit]:
+    out: list[Hit] = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIR]
+        for fn in sorted(filenames):
+            if not fn.endswith(SOURCE_SUFFIX):
+                continue
+            path = os.path.join(dirpath, fn)
+            if is_test_module(os.path.relpath(path, root), fn):
+                continue
+            try:
+                src = open(path, encoding="utf-8", errors="replace").read()
+            except OSError:
+                continue
+            rel = os.path.relpath(path, root)
+            if fn.endswith(".py"):
+                scan_python(src, rel, out)
+            else:
+                scan_text(src, rel, out)
+    return out
+
+
+# --- the warehouse ------------------------------------------------------
+
+
+def live(dsn: dict[str, str]) -> list[str]:
+    """Every table name the warehouse actually has.
+
+    Imported lazily so that --check, the mode CI runs, needs no driver at all.
+    """
+    from datastore_driver import Client  # type: ignore
+
+    client = Client(
+        host=dsn["host"],
+        port=int(dsn["port"]),
+        user=dsn["user"],
+        password=dsn["password"],
+        database=dsn["database"],
+    )
+    rows = client.execute(
+        "SELECT database, name FROM system.tables "
+        "WHERE database NOT IN ('system','INFORMATION_SCHEMA','information_schema') "
+        "ORDER BY database, name"
+    )
+    return [f"{db}.{name}" if db != dsn["database"] else name for db, name in rows]
+
+
+# --- reporting ----------------------------------------------------------
+
+
+def report(hits: list[Hit], names: set[str]) -> int:
+    """Compare what was found against the ledger. Non-zero means a build failure."""
+    unledgered: dict[str, Hit] = {}
+    seen: set[str] = set()
+    for h in hits:
+        key = base(h.name, h.path)
+        if key in LEDGER:
+            seen.add(key)
+            continue
+        unledgered.setdefault(h.name, h)
+    for n in names:
+        key = base(n.split(".")[-1])
+        if key in LEDGER:
+            seen.add(key)
+        elif versioned(key):
+            unledgered.setdefault(n, Hit(n, "system.tables", 0, "warehouse"))
+
+    bad = 0
+    for name, h in sorted(unledgered.items()):
+        site = f"{h.path}:{h.line}" if h.line else h.path
+        print(f"{site}: {name}")
+        print(
+            "    a version suffix means two spellings of one thing. Qualify by "
+            "namespace, never by number.\n"
+            "    If this table must exist alongside the one it versions, add it "
+            "to LEDGER in bin/tables\n    with the disposition that retires it."
+        )
+        bad += 1
+
+    # The ratchet: an entry matching nothing is debt that was paid and never
+    # written off, and a ledger that only grows is a list, not a gate.
+    #
+    # Only names this mode can actually see are held to it. A source scan cannot
+    # observe a WAREHOUSE row, and --live cannot observe a SOURCE one, so each
+    # mode retires only its own half. Without this the gate would demand the
+    # deletion of live rows every time it ran.
+    visible = {SOURCE, BOTH} if not names else {WAREHOUSE, BOTH}
+    for k in sorted(LEDGER):
+        if k not in seen and LEDGER[k][0] in visible:
+            print(f"LEDGER: {k} matches nothing — the debt is paid, delete the row")
+            bad += 1
+    return bad
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--root", default=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    ap.add_argument("--check", action="store_true", help="exit 1 on an unledgered versioned name")
+    ap.add_argument("--versioned", action="store_true", help="list versioned names and their ledger entry")
+    ap.add_argument("--live", action="store_true", help="read the warehouse instead of source")
+    ap.add_argument("--host", default=os.environ.get("DATASTORE_HOST", "localhost"))
+    ap.add_argument("--port", default=os.environ.get("DATASTORE_PORT", "9000"))
+    ap.add_argument("--user", default=os.environ.get("DATASTORE_USER", "default"))
+    ap.add_argument("--password", default=os.environ.get("DATASTORE_PASSWORD", ""))
+    ap.add_argument("--database", default=os.environ.get("DATASTORE_DATABASE", "insights"))
+    args = ap.parse_args()
+
+    hits = [] if args.live else scan(args.root)
+    names: set[str] = set()
+    if args.live:
+        names = set(
+            live(
+                {
+                    "host": args.host,
+                    "port": args.port,
+                    "user": args.user,
+                    "password": args.password,
+                    "database": args.database,
+                }
+            )
+        )
+
+    if args.check:
+        bad = report(hits, names)
+        if bad:
+            print(f"\n{bad} name(s) outside the ledger", file=sys.stderr)
+            return 1
+        held = sum(1 for _, (_, d, _) in LEDGER.items() if d == KEEP)
+        print(f"ok — {len(LEDGER)} versioned names, all ledgered ({held} held, {len(LEDGER) - held} retiring)")
+        return 0
+
+    if args.versioned:
+        found: dict[str, list[Hit]] = {}
+        for h in hits:
+            found.setdefault(base(h.name, h.path), []).append(h)
+        for n in sorted(names):
+            if versioned(n):
+                found.setdefault(base(n.split(".")[-1]), []).append(Hit(n, "system.tables", 0, "warehouse"))
+        for key in sorted(set(found) | set(LEDGER)):
+            row = LEDGER.get(key)
+            mark = f"{row[1]:6s}" if row else "UNLEDGERED"
+            sites = found.get(key, [])
+            print(f"{mark} {key:34s} {len(sites)} site(s)")
+            for h in sites[:4]:
+                print(f"         {h.path}:{h.line} ({h.how}) {h.name}")
+        return 0
+
+    for n in sorted(names):
+        print(n)
+    for h in sorted(hits, key=lambda h: (h.path, h.line)):
+        print(f"{h.path}:{h.line}\t{h.name}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

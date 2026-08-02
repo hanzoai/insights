@@ -1,0 +1,43 @@
+# names — refuse a version-suffixed table name.
+#
+#   bin/tables --check
+#
+# A `_v2` is a confession: two tables are the same thing and nobody deleted one.
+# The warehouse inherited nine of them from the fork. `bin/tables` carries the
+# list, the disposition for each and the reason, and fails on a tenth.
+#
+# WHY THIS IS NOT IN deploy.yml. This repository deploys itself: a push to main
+# builds an image and cd.hanzo.ai rolls it. A naming rule is a JUDGEMENT, and a
+# judgement should turn a branch red, never wedge production — the same split
+# bin/debrand draws between the brand invariant (absolute, on the deploy path)
+# and the vocabulary ratchet (differential, off it). If this job is wrong at
+# 3am, the cost is a red check and not a blocked deploy.
+#
+# It still runs on every push and every pull request, so a new name is caught
+# where names are chosen — at review — rather than in the warehouse six months
+# later, which is how the nine got there.
+#
+# The warehouse half (`bin/tables --live`, which reads system.tables and finds
+# names no source file mentions) is NOT here: it needs credentials, and CI does
+# not get warehouse credentials to run a lint. It is an operator command, and
+# the two names it alone can see are already written into the ledger.
+name: names
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tables:
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      # No dependencies and no services on purpose. bin/tables is stdlib-only —
+      # it reads source, it does not import the modules it reads — so this job
+      # cannot be broken by a database, a settings module or a driver, and it
+      # runs the same on a laptop as it does here.
+      - name: Refuse a version-suffixed table name
+        run: python3 bin/tables --check
