@@ -62,18 +62,23 @@ from insights.models.event.plane import (
     USER_ALIAS_MV_SQL,
     USER_BACKFILL_SQL,
     USER_MV_SQL,
+    provisioned,
 )
+
+# ONE reading of the app's records, so every view this migration creates routes
+# the same way. See the routing note in `plane.py`.
+ROUTING = provisioned()
 
 operations = [
     # The projection is compiled into the view's SELECT, so a changed version
     # only takes effect on a recreate.
     run_sql_with_exceptions(DROP_USER_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(USER_MV_SQL(), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
     run_sql_with_exceptions(DROP_USER_ALIAS_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(USER_ALIAS_MV_SQL(), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_ALIAS_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
     # Views first, so the backfill only ever overlaps them, and the overlap
     # collapses. Re-running is safe for the reason 0221 gives — and only for
     # rows whose routing has not changed since; see its BACKFILL SAFETY note.
-    run_sql_with_exceptions(USER_BACKFILL_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(USER_ALIAS_BACKFILL_SQL(), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_BACKFILL_SQL(ROUTING), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_ALIAS_BACKFILL_SQL(ROUTING), node_roles=[NodeRole.DATA]),
 ]
