@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.test.runner import DiscoverRunner as TestRunner
 
-from infi.datastore_orm import Database
+from datastore_orm import Database
 
 from insights.datastore.schema import (
     CREATE_DATA_QUERIES,

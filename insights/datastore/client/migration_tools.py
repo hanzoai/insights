@@ -2,7 +2,7 @@ import logging
 from functools import cache
 from typing import Optional
 
-from infi.datastore_orm import migrations
+from datastore_orm import migrations
 
 from insights import settings
 from insights.datastore.client.connection import DATA_NODE_ROLES, SINGLE_SHARD_DATA_NODE_ROLES, NodeRole

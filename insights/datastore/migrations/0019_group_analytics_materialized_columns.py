@@ -1,4 +1,4 @@
-from infi.datastore_orm import migrations
+from datastore_orm import migrations
 
 
 def create_materialized_columns(database):
