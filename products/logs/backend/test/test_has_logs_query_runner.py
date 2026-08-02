@@ -30,6 +30,17 @@ class TestHasLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
         runner = HasLogsQueryRunner(self.team)
         self.assertFalse(runner.run())
 
+    def test_has_logs_answers_no_when_the_table_is_not_there(self):
+        # A deployment without a logs table still has an answer to "does this team
+        # have logs", and it is no. Before this, the query raised straight out of a
+        # plain GET: /api/environments/:id/logs/has_logs/ returned 500 and the logs
+        # scene reported a server error where it should have shown an empty state.
+        with patch(
+            "products.logs.backend.has_logs_query_runner.execute_insightsql_query",
+            side_effect=Exception("Datastore error while executing query."),
+        ):
+            self.assertFalse(HasLogsQueryRunner(self.team).run())
+
     def test_has_logs_returns_true_when_logs_exist(self):
         # Insert a log entry
         with open(os.path.join(os.path.dirname(__file__), "test_logs.jsonnd")) as f:
