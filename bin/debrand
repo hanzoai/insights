@@ -44,6 +44,10 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("@posthog/hogvm", "@hanzo/scriptvm"),
     ("@posthog/icons", "@hanzo/icons"),
     ("@posthog/", "@hanzo/"),
+    # The scope on its own, so it agrees with the path rule. Without it the bare
+    # form falls through to the brand rule and becomes `@insights`, a scope that
+    # is nobody's, while the directory it names becomes `@hanzo`.
+    ("@posthog", "@hanzo"),
     # SDKs. The python SDK package is `hanzo_insights`; the browser SDK keeps
     # the product name.
     ("posthoganalytics", "hanzo_insights"),
@@ -126,7 +130,6 @@ PATH_RULES: list[tuple[str, str]] = [
     ("HogFlow", "InsightsFlow"),
     ("hogflows", "insightsflows"),
     ("hogflow", "insightsflow"),
-    ("hoghooks", "insightshooks"),
     ("PosthogStories", "InsightsStories"),
     ("personhog", "personinsights"),
     ("Hedgehog", "Mascot"),
@@ -627,8 +630,29 @@ def licences_unlaundered(root: str) -> int:
     return 1 if hit else 0
 
 
+def path_rules_have_content_counterparts() -> int:
+    """Refuse a path rename that content rewriting does not make.
+
+    A name is one value, so renaming it in only one of the two places it is
+    written leaves every reference to it pointing at something that is no
+    longer there. It fails twice over and both a long way from the rule: every
+    `from .x.x import` of the renamed module dangles, and so does every
+    migration dependency naming a renamed migration file, which Django reports
+    as NodeNotFoundError from `migrate` — at container start, under `set -e`.
+
+    Checked against the rules rather than the tree, because the tree only shows
+    the instances that exist today and the rule keeps producing more.
+    """
+    bad = [(old, new, rewrite_text(old)) for old, new in PATH_RULES if rewrite_text(old) != new]
+    if bad:
+        print(f"FAIL: {len(bad)} path rules rename something content rewriting leaves alone")
+        for old, new, got in bad:
+            print(f"    {old!r}: path -> {new!r}, but content -> {got!r}")
+    return 1 if bad else 0
+
+
 def check(root: str) -> int:
-    bad = 0
+    bad = path_rules_have_content_counterparts()
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1
