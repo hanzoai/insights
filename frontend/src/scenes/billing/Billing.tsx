@@ -76,9 +76,17 @@ export function Billing(): JSX.Element {
         }
     }, [!!billing]) // oxlint-disable-line react-hooks/exhaustive-deps
 
-    if (preflight && !isCloudOrDev) {
-        router.actions.push(urls.default())
-    }
+    // Billing does not apply to a self-hosted deployment, so leaving is the right
+    // answer -- but it has to happen in an effect. Called during render, the push
+    // schedules an update, the update re-renders, and the re-render pushes again:
+    // "Maximum update depth exceeded", thrown until the tab stops answering. Here
+    // that was not a rare path, it was every visit, because preflight is truthy
+    // and isCloudOrDev is false on every deployment we run.
+    useEffect(() => {
+        if (preflight && !isCloudOrDev) {
+            router.actions.push(urls.default())
+        }
+    }, [preflight, isCloudOrDev])
 
     if ((!billing && billingLoading) || couponsOverviewLoading) {
         return (
