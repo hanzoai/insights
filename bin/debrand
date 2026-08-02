@@ -26,6 +26,7 @@ import os
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 
 # --- content rules ------------------------------------------------------
 #
@@ -80,9 +81,14 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("personhog", "personinsights"),
     ("PostholgStories", "InsightsStories"),
     ("PosthogStories", "InsightsStories"),
-    # Design system.
+    # Design system. `Lemon` is upstream's prefix for it; ours is `elements`.
+    # These name the system itself, so they resolve to the system's name. The
+    # component prefix is stripped by LEMON_RULES below, which would otherwise
+    # reduce these to a bare `UI`/`Skin`, so they must be consumed first.
+    ("Lemon UI", "Elements"),
     ("lemon-ui", "elements"),
-    ("lemonToast", "toast"),
+    ("lemon-skin", "elements-skin"),
+    ("lemonSkin", "elementsSkin"),
     # Core brand. Last, so the compounds above win.
     ("POSTHOG", "INSIGHTS"),
     ("PostHog", "Insights"),
@@ -92,10 +98,41 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("posthog", "insights"),
 ]
 
-# Applied after the table above. `Lemon<Component>` is the design-system
-# prefix strip: LemonButton -> Button. `hog` alone means a script.
-CONTENT_REGEX: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
+# A rule's replacement is a literal, or a function of the match where the
+# result depends on what was matched.
+Replacement = str | Callable[[re.Match[str]], str]
+
+# Lemon Squeezy is a payment vendor we integrate with, not our design system.
+# Its name is its identity, like the upstream URLs in PRESERVE, so the strip
+# below steps over it -- otherwise `LemonSqueezySource` becomes `SqueezySource`
+# and names a company that does not exist.
+VENDOR = "Squeezy"
+
+
+def _decapitalize(m: re.Match[str]) -> str:
+    return m.group(1).lower()
+
+
+# `Lemon` is upstream's design-system prefix and carries no meaning of its own:
+# LemonButton is the Button, `Lemon Badge` in a Storybook title is the Badge,
+# and lemonBannerLogic is the bannerLogic. Stripping it is what leaves the
+# components named after what they are.
+#
+# Deliberately not `\b`-anchored: the prefix also appears mid-identifier, where
+# the component name is the tail of a larger one -- HighlightedLemonMarkdown is
+# the Highlighted Markdown. A word boundary would miss exactly those.
+#
+# The lowercase form decapitalizes rather than dropping, because it prefixes
+# camelCase identifiers: lemonToast -> toast, not Toast.
+LEMON_RULES: list[tuple[re.Pattern[str], Replacement]] = [
+    (re.compile(rf"Lemon (?!{VENDOR})(?=[A-Z])"), ""),
+    (re.compile(rf"Lemon(?!{VENDOR})(?=[A-Z])"), ""),
+    (re.compile(r"lemon([A-Z])"), _decapitalize),
+]
+
+# Applied after the table above. `hog` alone means a script.
+CONTENT_REGEX: list[tuple[re.Pattern[str], Replacement]] = [
+    *LEMON_RULES,
     (re.compile(r"\bhog\b"), "script"),
     (re.compile(r"\bHog\b"), "Script"),
 ]
@@ -131,6 +168,7 @@ PATH_RULES: list[tuple[str, str]] = [
     ("hogvm", "scriptvm"),
     ("hogli", "insightscli"),
     ("lemon-ui", "elements"),
+    ("lemon-skin", "elements-skin"),
     ("clickhouse", "datastore"),
     ("ClickHouse", "Datastore"),
     ("posthoganalytics", "hanzo_insights"),
@@ -140,6 +178,11 @@ PATH_RULES: list[tuple[str, str]] = [
     ("Posthog", "Insights"),
     ("posthog", "insights"),
 ]
+
+# The design-system prefix strip applies to paths exactly as it does to code:
+# the file holding the Button is Button.tsx. Content and path must agree here or
+# the imports the content rules rewrite would point at names no file carries.
+PATH_REGEX: list[tuple[re.Pattern[str], Replacement]] = [*LEMON_RULES]
 
 # A bare `hog` in a path means different things in different places, so it is
 # never rewritten blanket. Sprite assets are the mascot, script programs carry
@@ -266,6 +309,27 @@ SKIP_CONTENT_SUFFIX = (
 )
 SKIP_CONTENT_NAMES = {"pnpm-lock.yaml", "uv.lock", "Cargo.lock", "package-lock.json", "poetry.lock"}
 
+# A licence is the one text in the tree that is not ours to rewrite. The MIT
+# grant we hold this code under is conditioned on carrying the original
+# copyright notice forward, so renaming the upstream company inside a licence
+# both breaks that condition and asserts our copyright over their code. It is
+# also invisible: the file still reads like a valid licence.
+#
+# This is structural, not an allowlist entry, because the allowlist is a list
+# someone can add to and this must not be opt-out-able. Paths still rename —
+# a licence that moves with its directory is fine. Only the bytes are frozen.
+
+LICENCE_FILE = re.compile(
+    r"^(licen[cs]e|copying|copyright|notice)"     # the notice itself
+    r"([-_][a-z0-9\-]+)?"                         # an optional variant: LICENSE-MIT
+    r"(\.(md|txt|rst|markdown))?$",               # prose only: license.py is a module
+    re.IGNORECASE,
+)
+
+
+def is_licence(path: str) -> bool:
+    return bool(LICENCE_FILE.match(os.path.basename(path)))
+
 
 def tracked_files(root: str) -> list[str]:
     out = subprocess.run(
@@ -326,6 +390,8 @@ def rewrite_path(p: str) -> str:
         p = os.path.join(os.path.dirname(p), PATH_EXACT_RULES[base])
     for old, new in PATH_RULES:
         p = p.replace(old, new)
+    for pat, rep in PATH_REGEX:
+        p = pat.sub(rep, p)
     for old, new in PATH_SCOPED_RULES:
         p = p.replace(old, new)
     for old, new in PATH_SUFFIX_RULES:
@@ -440,7 +506,7 @@ def apply(root: str, dry: bool) -> tuple[int, int]:
         src = os.path.join(root, rel)
         if not os.path.isfile(src) or os.path.islink(src):
             continue
-        if not skip_content(rel) and rel not in CONTENT_ALLOWLIST:
+        if not skip_content(rel) and not is_licence(rel) and rel not in CONTENT_ALLOWLIST:
             try:
                 raw = open(src, "rb").read()
                 text = raw.decode("utf-8")
@@ -471,8 +537,62 @@ def apply(root: str, dry: bool) -> tuple[int, int]:
     return edited, renamed
 
 
+LAUNDERED = re.compile(r"^.*copyright.*\binsights\b.*$", re.IGNORECASE | re.MULTILINE)
+
+
+def licences_unlaundered(root: str) -> int:
+    """Refuse a licence that attributes someone else's code to our brand.
+
+    This is the exact shape of the bug the refusal above prevents, asserted
+    from the other side: a rename that reaches a copyright line reads as a
+    valid licence afterwards, so nothing else in the tree would notice.
+    """
+    hit = []
+    for rel in tracked_files(root):
+        if not is_licence(rel):
+            continue
+        try:
+            text = open(os.path.join(root, rel), encoding="utf-8").read()
+        except (UnicodeDecodeError, OSError):
+            continue
+        hit += [(rel, m.group(0).strip()) for m in LAUNDERED.finditer(text)]
+    if hit:
+        print(f"FAIL: {len(hit)} licence copyright lines name our brand over someone else's code")
+        for rel, line in hit[:20]:
+            print(f"    {rel}: {line}")
+    return 1 if hit else 0
+
+
+# The notice MIT obliges us to carry, and the file that has to carry it.
+REQUIRED_NOTICE = "PostHog Inc."
+LICENCE_PATH = "LICENSE"
+
+
+def licence_notice_survives(root: str) -> int:
+    """Refuse a LICENSE that has dropped the notice MIT obliges us to pass on.
+
+    The other half of the invariant above: laundering rewrites the holder's
+    name, this catches it being removed outright, and a rewrite that collapses
+    two copyright lines into one does both at once. Either way the file still
+    reads as a valid licence, so it is asserted positively rather than left to
+    the absence of a rule.
+    """
+    path = os.path.join(root, LICENCE_PATH)
+    if not os.path.exists(path):
+        print(f"FAIL: {LICENCE_PATH} is missing")
+        return 1
+    if REQUIRED_NOTICE not in open(path, encoding="utf-8").read():
+        print(
+            f"FAIL: {LICENCE_PATH} no longer carries the upstream copyright notice "
+            f"({REQUIRED_NOTICE!r}). MIT grants us the code on condition it travels with it."
+        )
+        return 1
+    return 0
+
+
 def check(root: str) -> int:
-    bad = 0
+    bad = licences_unlaundered(root)
+    bad += licence_notice_survives(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1
@@ -491,6 +611,10 @@ def check(root: str) -> int:
         b = os.path.basename(p)
         return b in MANIFESTS or b in SKIP_CONTENT_NAMES
 
+    # A licence naming the upstream is the licence working, so it is not a leak.
+    # The two checks above assert the opposite direction: that the name is still
+    # there, and that it is not ours.
+    hits = [h for h in hits if not is_licence(h)]
     pending = sorted(h for h in hits if h not in CONTENT_ALLOWLIST and is_manifest(h))
     leaked = [h for h in hits if h not in CONTENT_ALLOWLIST and not is_manifest(h)]
     if pending:
