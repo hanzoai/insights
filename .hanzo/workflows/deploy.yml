@@ -73,6 +73,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The debrand is an invariant, not a memory. This fork exists as a rename
+      # of an upstream tree, and every convergence re-imports tens of thousands
+      # of files that still carry the old name — so the brand comes back a few
+      # files at a time unless something refuses it. bin/debrand holds the rules
+      # and this is where they bind: a tree that fails must not become an image.
+      #
+      # First, and before the GHCR login: it costs about a second, needs no
+      # credential, and failing here wastes nothing. Failing after a 30-60
+      # minute build wastes the build.
+      #
+      # Bare `--check` on purpose. It asserts only what is absolutely true of
+      # every tree we ship — zero tracked paths and zero unallowlisted files
+      # name the upstream — which is a fact this tree either has or does not.
+      # The differential naming rules live in names.yml, off the deploy path,
+      # because they encode a judgement and a judgement must never be able to
+      # wedge production. Verified on the runner image
+      # (catthehacker/ubuntu:act-24.04): Python 3.12.3, git 2.54.0.
+      - name: Names
+        run: python3 bin/debrand --check
+
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
