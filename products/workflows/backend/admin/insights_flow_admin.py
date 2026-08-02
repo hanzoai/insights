@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule
 
 
 class InsightsFlowScheduleInline(admin.TabularInline):
@@ -64,9 +64,9 @@ class InsightsFlowAdmin(admin.ModelAdmin):
     )
 
     @admin.display(description="Team")
-    def team_link(self, hog_flow: InsightsFlow):
+    def team_link(self, insights_flow: InsightsFlow):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:insights_team_change", args=[hog_flow.team.pk]),
-            hog_flow.team.name,
+            reverse("admin:insights_team_change", args=[insights_flow.team.pk]),
+            insights_flow.team.name,
         )

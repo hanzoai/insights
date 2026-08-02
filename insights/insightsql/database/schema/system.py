@@ -1070,10 +1070,10 @@ annotations: PostgresTable = PostgresTable(
     },
 )
 
-hog_flows: PostgresTable = PostgresTable(
-    name="hog_flows",
+insights_flows: PostgresTable = PostgresTable(
+    name="insights_flows",
     postgres_table_name="insights_hogflow",
-    access_scope="hog_flow",
+    access_scope="insights_flow",
     description="Script flows: multi-step automation/messaging workflows; one row per flow, with its graph of actions and edges.",
     fields={
         "id": StringDatabaseField(name="id", description="Flow UUID."),
@@ -2264,7 +2264,7 @@ class SystemTables(TableNode):
         "groups": TableNode(name="groups", table=groups),
         "group_type_mappings": TableNode(name="group_type_mappings", table=group_type_mappings),
         "information_schema": information_schema_node(),
-        "hog_flows": TableNode(name="hog_flows", table=hog_flows),
+        "insights_flows": TableNode(name="insights_flows", table=insights_flows),
         "insights_functions": TableNode(name="insights_functions", table=insights_functions),
         "ingestion_warnings": TableNode(name="ingestion_warnings", table=IngestionWarningsTable()),
         "integrations": TableNode(name="integrations", table=integrations),

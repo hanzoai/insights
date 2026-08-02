@@ -30,7 +30,7 @@ from products.product_analytics.backend.models.insight import Insight
 from products.warehouse_sources.backend.facade.models import DataWarehouseTable, ExternalDataSource
 from products.warehouse_sources.backend.facade.types import ExternalDataSourceType
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 _INSIGHTSQL = {"kind": "InsightsQLQuery", "query": "select count() from events"}
 _COLUMNS = {"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}}

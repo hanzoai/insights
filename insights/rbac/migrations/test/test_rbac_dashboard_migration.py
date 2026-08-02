@@ -10,8 +10,8 @@ from insights.rbac.migrations.rbac_dashboard_migration import rbac_dashboard_acc
 from products.dashboards.backend.models.dashboard import Dashboard
 
 try:
-    from ee.models.dashboard_privilege import DashboardPrivilege
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import DashboardPrivilege
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

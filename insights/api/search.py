@@ -26,7 +26,7 @@ from products.feature_flags.backend.models.feature_flag import FeatureFlag
 from products.notebooks.backend.models import Notebook
 from products.product_analytics.backend.models.insight import Insight
 from products.surveys.backend.models import Survey
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 LIMIT = 25
 
@@ -90,7 +90,7 @@ ENTITY_MAP: dict[str, EntityConfig] = {
         "search_fields": {"name": "A", "description": "C"},
         "extra_fields": ["name", "description"],
     },
-    "hog_flow": {
+    "insights_flow": {
         "klass": InsightsFlow,
         "search_fields": {"name": "A", "description": "C"},
         "extra_fields": ["name", "description"],

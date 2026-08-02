@@ -68,7 +68,7 @@ class TestAccessControlSystemTables(BaseTest):
         assert "annotations" not in system_node.children
         assert "data_warehouse_sources" not in system_node.children
         assert "actions" not in system_node.children
-        assert "hog_flows" not in system_node.children
+        assert "insights_flows" not in system_node.children
         assert "notebooks" not in system_node.children
         assert "error_tracking_issues" not in system_node.children
         assert "support_tickets" not in system_node.children
@@ -82,7 +82,7 @@ class TestAccessControlSystemTables(BaseTest):
         assert "system.annotations" in database._denied_tables
         assert "system.data_warehouse_sources" in database._denied_tables
         assert "system.actions" in database._denied_tables
-        assert "system.hog_flows" in database._denied_tables
+        assert "system.insights_flows" in database._denied_tables
         assert "system.notebooks" in database._denied_tables
         assert "system.error_tracking_issues" in database._denied_tables
         assert "system.support_tickets" in database._denied_tables
@@ -157,7 +157,7 @@ class TestAccessControlGuard(BaseTest):
         from insights.datastore.client.escape import substitute_params_for_display
         from insights.constants import AvailableFeature
 
-        from ee.models import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
@@ -213,7 +213,7 @@ class TestAccessControlGuard(BaseTest):
 
         from insights.constants import AvailableFeature
 
-        from ee.models import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
@@ -286,7 +286,7 @@ class TestAccessControlGuard(BaseTest):
 
         from insights.constants import AvailableFeature
 
-        from ee.models import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
@@ -329,7 +329,7 @@ class TestDeniedTableError(BaseTest):
         """When a table is denied, error should say 'no access' not 'unknown'."""
         from insights.constants import AvailableFeature
 
-        from ee.models import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Enable access control feature
         self.organization.available_product_features = [
@@ -475,7 +475,7 @@ class TestWarehouseTableAccessControl(BaseTest):
         )
 
     def _create_ac(self, *, resource, access_level, resource_id=None, role=None, member=None):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         return AccessControl.objects.create(
             team=self.team,
@@ -667,7 +667,7 @@ class TestWarehouseTableAccessControlFlagOff(BaseTest):
 
     @patch("hanzo_insights.feature_enabled", new=Mock(return_value=False))
     def test_warehouse_table_acl_off_keeps_all_tables(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Even an explicit deny row should be ignored when the FF is off.
         membership = OrganizationMembership.objects.get(user=self.user, organization=self.organization)
@@ -719,7 +719,7 @@ class TestWarehouseAccessControlEndToEnd(BaseTest):
     def test_execute_insightsql_query_raises_on_denied_warehouse_table(self):
         from insights.insightsql.query import execute_insightsql_query
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         AccessControl.objects.create(
             team=self.team,
@@ -750,7 +750,7 @@ class TestWarehouseAccessControlEndToEnd(BaseTest):
 
         from products.data_tools.backend.models.join import DataWarehouseJoin
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         DataWarehouseJoin.objects.create(
             team=self.team,
@@ -783,7 +783,7 @@ class TestWarehouseAccessControlEndToEnd(BaseTest):
         from insights.insightsql.context import InsightsQLContext
         from insights.insightsql.query import execute_insightsql_query
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         AccessControl.objects.create(
             team=self.team,
@@ -845,7 +845,7 @@ class TestWarehouseViewAccessControl(BaseTest):
         )
 
     def _create_ac(self, *, resource, access_level, resource_id=None, role=None, member=None):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         return AccessControl.objects.create(
             team=self.team,

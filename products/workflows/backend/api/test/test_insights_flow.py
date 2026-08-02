@@ -24,17 +24,17 @@ from insights.test.fixtures import create_app_metric2
 from products.actions.backend.models.action import Action
 from products.cdp.backend.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from products.cohorts.backend.models.cohort import Cohort
-from products.workflows.backend.api.hog_flow import (
+from products.workflows.backend.api.insights_flow import (
     InsightsFlowActionSerializer,
     _should_validate_strictly,
     mint_audience_confirm_token,
 )
-from products.workflows.backend.models.hog_flow.hog_flow import SUPPORTED_ACTION_TYPES, InsightsFlow
-from products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow.insights_flow import SUPPORTED_ACTION_TYPES, InsightsFlow
+from products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job import InsightsFlowBatchJob
 
 webhook_template = MOCK_NODE_TEMPLATES[0]
 
-_REVISIONS_FLAG_PATH = "products.workflows.backend.api.hog_flow.use_workflows_revisions"
+_REVISIONS_FLAG_PATH = "products.workflows.backend.api.insights_flow.use_workflows_revisions"
 _SECRET_TEMPLATE_ID = "template-secret-webhook"
 
 
@@ -65,7 +65,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         sync_template_to_db(template_slack)
         sync_template_to_db(webhook_template)
 
-    def _create_hog_flow_with_action(self, action_config: dict):
+    def _create_insights_flow_with_action(self, action_config: dict):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -84,20 +84,20 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": action_config,
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow",
             "actions": [trigger_action, action],
         }
 
-        return hog_flow, action
+        return insights_flow, action
 
-    @patch("products.workflows.backend.api.hog_flow.publish_resource_edited")
+    @patch("products.workflows.backend.api.insights_flow.publish_resource_edited")
     def test_emits_resource_edited_on_create_and_update(self, mock_emit):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
 
-        create_response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
@@ -109,7 +109,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         mock_emit.reset_mock()
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed"},
         )
         assert update_response.status_code == 200, update_response.json()
@@ -118,10 +118,10 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert mock_emit.call_args.kwargs["resource_id"] == str(flow_id)
 
     def _create_simple_flow(self) -> str:
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         return response.json()["id"]
 
@@ -139,7 +139,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         InsightsFlow.objects.create(team=self.team, name="Password reset", created_by=self.user)
         InsightsFlow.objects.create(team=self.team, name="Digest", description="quarterly summary", created_by=self.user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/hog_flows?search={search}")
+        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows?search={search}")
         assert response.status_code == 200, response.json()
         assert {flow["name"] for flow in response.json()["results"]} == expected_names
 
@@ -148,7 +148,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         InsightsFlow.objects.create(team=self.team, name="Mine", created_by=self.user)
         InsightsFlow.objects.create(team=self.team, name="Theirs", created_by=other_user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/hog_flows?created_by={other_user.uuid}")
+        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows?created_by={other_user.uuid}")
         assert response.status_code == 200, response.json()
         assert {flow["name"] for flow in response.json()["results"]} == {"Theirs"}
 
@@ -156,7 +156,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # A webhook action whose headers carry a bearer token — the kind of credential-like value
         # that must not leak from a workflow *listing*.
         secret = "Bearer super-secret-token-abc123"
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {
@@ -165,10 +165,10 @@ class TestInsightsFlowAPI(APIBaseTest):
                 },
             }
         )
-        create_response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
 
-        mcp_response = self.client.get(f"/api/projects/{self.team.id}/hog_flows", HTTP_X_POSTFN_CLIENT="mcp")
+        mcp_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_POSTFN_CLIENT="mcp")
         assert mcp_response.status_code == 200, mcp_response.json()
         result = mcp_response.json()["results"][0]
         assert "actions" not in result
@@ -178,7 +178,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # The web app / raw API still get the full graph they rely on (e.g. client-side duplication) —
         # and it does carry the secret, proving the MCP omission above is the summary serializer at
         # work, not validation quietly dropping the header.
-        web_response = self.client.get(f"/api/projects/{self.team.id}/hog_flows")
+        web_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows")
         assert web_response.status_code == 200, web_response.json()
         assert "actions" in web_response.json()["results"][0]
         assert secret in web_response.content.decode()
@@ -203,7 +203,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             }
         ]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": trigger_only},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -212,10 +212,10 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # Metadata stays editable over MCP, and the web builder keeps sending full graphs.
         mcp_rename = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"name": "Renamed"}, HTTP_X_POSTFN_CLIENT="mcp"
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"}, HTTP_X_POSTFN_CLIENT="mcp"
         )
         assert mcp_rename.status_code == 200, mcp_rename.json()
-        web_actions = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"actions": trigger_only})
+        web_actions = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": trigger_only})
         assert web_actions.status_code == 200, web_actions.json()
 
     def test_invalid_action_input_error_carries_the_field_message(self):
@@ -223,9 +223,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         # actual message (what is wrong with which field), not a bare code: agents retry blind
         # on "invalid_input" and thrash. Locks the whole pipeline serializer -> exception
         # handler envelope.
-        hog_flow, _ = self._create_hog_flow_with_action({"template_id": "template-webhook", "inputs": {}})
+        insights_flow, _ = self._create_insights_flow_with_action({"template_id": "template-webhook", "inputs": {}})
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
 
         assert response.status_code == 400, response.json()
         body = response.json()
@@ -254,10 +254,10 @@ class TestInsightsFlowAPI(APIBaseTest):
         # config.template_id, where only the fixed literal is valid - the bare "Template not
         # found" left them retrying formats blind. The error must name the literal and point
         # UUID-holders at config.template_uuid.
-        hog_flow, action = self._create_hog_flow_with_action({"template_id": template_id, "inputs": {}})
+        insights_flow, action = self._create_insights_flow_with_action({"template_id": template_id, "inputs": {}})
         action["type"] = action_type
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
 
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
@@ -272,7 +272,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # A client that based its edit on an older copy is rejected rather than clobbering the newer one.
         stale_response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Stale edit", "base_updated_at": stale},
         )
         assert stale_response.status_code == 409, stale_response.json()
@@ -280,7 +280,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # A client whose base matches the current server copy proceeds.
         fresh_response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Fresh edit", "base_updated_at": current},
         )
         assert fresh_response.status_code == 200, fresh_response.json()
@@ -294,7 +294,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert stale  # we hold a stale view but send no base
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Ungated edit"},
         )
         assert response.status_code == 200, response.json()
@@ -309,19 +309,19 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "+" not in naive and not naive.endswith("Z")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Naive base edit", "base_updated_at": naive},
         )
         assert response.status_code == 200, response.json()
         assert InsightsFlow.objects.get(pk=flow_id).name == "Naive base edit"
 
-    def test_hog_flow_function_trigger_check(self):
-        hog_flow = {
+    def test_insights_flow_function_trigger_check(self):
+        insights_flow = {
             "name": "Test Flow",
             "actions": [],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions",
@@ -330,7 +330,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "type": "validation_error",
         }
 
-    def test_hog_flow_function_trigger_copied_from_action(self):
+    def test_insights_flow_function_trigger_copied_from_action(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -344,13 +344,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow",
             "status": "active",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         trigger_action_expectation = {
             "id": "trigger_node",
@@ -407,8 +407,8 @@ class TestInsightsFlowAPI(APIBaseTest):
             ("empty_string", {"delay_duration": ""}),
         ]
     )
-    def test_hog_flow_delay_validation_rejects_malformed_config(self, _name, bad_config):
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", self._make_delay_flow(bad_config))
+    def test_insights_flow_delay_validation_rejects_malformed_config(self, _name, bad_config):
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._make_delay_flow(bad_config))
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__config",
@@ -429,9 +429,9 @@ class TestInsightsFlowAPI(APIBaseTest):
             ("fractional", "1.5h"),
         ]
     )
-    def test_hog_flow_delay_validation_accepts_canonical_config(self, _name, delay_duration):
+    def test_insights_flow_delay_validation_accepts_canonical_config(self, _name, delay_duration):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows",
+            f"/api/projects/{self.team.id}/insights_flows",
             self._make_delay_flow({"delay_duration": delay_duration}),
         )
         assert response.status_code == 201, response.json()
@@ -448,7 +448,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # whole flow row unparseable for the worker.
         flow = self._make_delay_flow({"delay_duration": "5m"})
         flow["actions"][1]["output_variable"] = sent
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", flow)
         assert response.status_code == 201, response.json()
         assert response.json()["actions"][1]["output_variable"] == stored
 
@@ -463,29 +463,29 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_output_variable_invalid_shapes_rejected(self, _name, sent):
         flow = self._make_delay_flow({"delay_duration": "5m"})
         flow["actions"][1]["output_variable"] = sent
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", flow)
         assert response.status_code == 400, response.json()
         assert "output_variable" in str(response.json())
 
-    def test_hog_flow_delay_validation_lenient_for_drafts(self):
+    def test_insights_flow_delay_validation_lenient_for_drafts(self):
         # status omitted defaults to draft; draft mode lets users save WIP with invalid configs
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows",
+            f"/api/projects/{self.team.id}/insights_flows",
             self._make_delay_flow({"inputs": {"duration": {"value": 1800}}}, status=None),
         )
         assert response.status_code == 201, response.json()
 
-    def test_hog_flow_function_validation(self):
-        hog_flow, action = self._create_hog_flow_with_action(
+    def test_insights_flow_function_validation(self):
+        insights_flow, action = self._create_insights_flow_with_action(
             {
                 "template_id": "missing",
                 "inputs": {},
             }
         )
-        hog_flow["status"] = "active"
+        insights_flow["status"] = "active"
 
         # Check that the template is found but missing required inputs
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__template_id",
@@ -495,14 +495,14 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
 
         # Check that the template is found but missing required inputs
-        hog_flow, action = self._create_hog_flow_with_action(
+        insights_flow, action = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {},
             }
         )
-        hog_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow["status"] = "active"
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__inputs__url",
@@ -512,7 +512,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
 
     def test_activating_draft_with_invalid_template_names_offending_step(self):
-        hog_flow, action = self._create_hog_flow_with_action(
+        insights_flow, action = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 # Liquid-style syntax in a Script-templated input: web drafts store it leniently,
@@ -521,44 +521,44 @@ class TestInsightsFlowAPI(APIBaseTest):
             }
         )
         action["name"] = "Send webhook"
-        create_response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         # Status-only activation (the workflows list toggle) re-validates the stored actions
-        response = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"})
+        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
         assert "Send webhook" in detail, response.json()
         assert "Invalid template" in detail, response.json()
 
-    def test_hog_flow_bytecode_compilation(self):
-        hog_flow, action = self._create_hog_flow_with_action(
+    def test_insights_flow_bytecode_compilation(self):
+        insights_flow, action = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        hog_flow["status"] = "active"
+        insights_flow["status"] = "active"
 
         action["filters"] = {
             "properties": [{"key": "event", "type": "event_metadata", "value": ["custom_event"], "operator": "exact"}]
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
-        hog_flow = InsightsFlow.objects.get(pk=response.json()["id"])
+        insights_flow = InsightsFlow.objects.get(pk=response.json()["id"])
 
-        assert hog_flow.trigger["filters"].get("bytecode") == ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11]
+        assert insights_flow.trigger["filters"].get("bytecode") == ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11]
 
-        assert hog_flow.actions[1]["filters"].get("bytecode") == ["_H", 1, 32, "custom_event", 32, "event", 1, 1, 11]
+        assert insights_flow.actions[1]["filters"].get("bytecode") == ["_H", 1, 32, "custom_event", 32, "event", 1, 1, 11]
 
-        assert hog_flow.actions[1]["config"]["inputs"] == {
+        assert insights_flow.actions[1]["config"]["inputs"] == {
             "url": {"order": 0, "value": "https://example.com", "bytecode": ["_H", 1, 32, "https://example.com"]}
         }
 
-    def test_hog_flow_conversion_filters_compiles_bytecode_on_create(self):
+    def test_insights_flow_conversion_filters_compiles_bytecode_on_create(self):
         expected_conversion_bytecode = [
             "_H",
             1,
@@ -575,14 +575,14 @@ class TestInsightsFlowAPI(APIBaseTest):
             11,
         ]
 
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        hog_flow["status"] = "active"
-        hog_flow["conversion"] = {
+        insights_flow["status"] = "active"
+        insights_flow["conversion"] = {
             "filters": [
                 {
                     "key": "$browser",
@@ -594,7 +594,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "window_minutes": None,
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         conversion = response.json()["conversion"]
@@ -618,7 +618,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         assert flow_conversion["bytecode"] == expected_conversion_bytecode
 
-    def test_hog_flow_conversion_event_object_in_filters_is_relocated(self):
+    def test_insights_flow_conversion_event_object_in_filters_is_relocated(self):
         # A client (e.g. an LLM via MCP) that sends an event-based conversion goal as an object in
         # the property slot must not be rejected by the typed conversion field, nor persist the
         # malformed shape: it is relocated to conversion.events and compiled, and conversion.filters
@@ -628,13 +628,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             "events": [{"id": "purchase", "name": "purchase", "type": "events", "order": 0}],
             "source": "events",
         }
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        hog_flow["status"] = "active"
-        hog_flow["conversion"] = {"filters": event_obj, "window_minutes": None}
+        insights_flow["status"] = "active"
+        insights_flow["conversion"] = {"filters": event_obj, "window_minutes": None}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion = response.json()["conversion"]
@@ -645,22 +645,22 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert moved["bytecode"], moved
         assert "purchase" in moved["bytecode"]
 
-    def test_hog_flow_conversion_client_supplied_bytecode_is_ignored(self):
+    def test_insights_flow_conversion_client_supplied_bytecode_is_ignored(self):
         # Top-level conversion bytecode is read-only: the matcher executes it, so a client must not
         # be able to persist bytecode that didn't come from server-side compilation of filters.
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        hog_flow["status"] = "active"
-        hog_flow["conversion"] = {"filters": [], "window_minutes": 60, "bytecode": ["_H", 1, 32, "injected"]}
+        insights_flow["status"] = "active"
+        insights_flow["conversion"] = {"filters": [], "window_minutes": 60, "bytecode": ["_H", 1, 32, "injected"]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion = response.json()["conversion"]
         assert conversion["bytecode"] == [], conversion
 
-    def test_hog_flow_conversion_filters_compiles_bytecode_on_update(self):
+    def test_insights_flow_conversion_filters_compiles_bytecode_on_update(self):
         expected_conversion_bytecode = [
             "_H",
             1,
@@ -677,20 +677,20 @@ class TestInsightsFlowAPI(APIBaseTest):
             11,
         ]
 
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        hog_flow["status"] = "active"
+        insights_flow["status"] = "active"
 
-        create_response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {
                 "conversion": {
                     "filters": [
@@ -728,7 +728,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         assert flow_conversion["bytecode"] == expected_conversion_bytecode
 
-    def test_hog_flow_conditional_branch_filters_bytecode(self):
+    def test_insights_flow_conditional_branch_filters_bytecode(self):
         conditional_action = {
             "id": "cond_1",
             "name": "cond_1",
@@ -765,13 +765,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow",
             "status": "active",
             "actions": [trigger_action, conditional_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conditions = response.json()["actions"][1]["config"]["conditions"]
@@ -779,7 +779,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "bytecode" in conditions[0]["filters"], conditions[0]["filters"]
         assert conditions[0]["filters"]["bytecode"] == ["_H", 1, 32, "custom_event", 32, "event", 1, 1, 11]
 
-    def test_hog_flow_wait_until_condition_defaults_missing_condition(self):
+    def test_insights_flow_wait_until_condition_defaults_missing_condition(self):
         # An events-only wait omits 'condition'; the FE always seeds it and StepWaitUntilCondition
         # assumes it, so the serializer defaults it to {filters: None} to keep one canonical shape.
         wait_action = {
@@ -802,15 +802,15 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]},
             },
         }
-        hog_flow = {"name": "Test Flow", "actions": [trigger_action, wait_action]}
+        insights_flow = {"name": "Test Flow", "actions": [trigger_action, wait_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         wait = next(a for a in response.json()["actions"] if a["type"] == "wait_until_condition")
         assert wait["config"]["condition"] == {"filters": None}, wait["config"]
 
-    def test_hog_flow_conditional_branch_condition_missing_filters_rejected(self):
+    def test_insights_flow_conditional_branch_condition_missing_filters_rejected(self):
         # A bare {properties: [...]} (no 'filters' wrapper) compiles to always-false; reject it in strict mode.
         conditional_action = {
             "id": "cond_1",
@@ -831,12 +831,12 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]},
             },
         }
-        hog_flow = {"name": "Test Flow", "status": "active", "actions": [trigger_action, conditional_action]}
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow = {"name": "Test Flow", "status": "active", "actions": [trigger_action, conditional_action]}
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert "filters" in response.json()["detail"]
 
-    def test_hog_flow_conditional_branch_missing_filters_allowed_for_web_draft(self):
+    def test_insights_flow_conditional_branch_missing_filters_allowed_for_web_draft(self):
         # Web-builder drafts stay lenient — an incomplete condition mid-edit must still save.
         conditional_action = {
             "id": "cond_1",
@@ -854,8 +854,8 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
         # Default test client uses session auth → EventSource.WEB → lenient draft validation.
-        hog_flow = {"name": "Test Flow", "status": "draft", "actions": [trigger_action, conditional_action]}
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow = {"name": "Test Flow", "status": "draft", "actions": [trigger_action, conditional_action]}
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
     @parameterized.expand(
@@ -882,7 +882,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             ),
         ]
     )
-    def test_hog_flow_branch_action_missing_branch_array_rejected_when_strict(
+    def test_insights_flow_branch_action_missing_branch_array_rejected_when_strict(
         self, _name, action_type, config, expected_key
     ):
         branch_action = {"id": "branch_1", "name": "branch_1", "type": action_type, "config": config}
@@ -895,12 +895,12 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]},
             },
         }
-        hog_flow = {"name": "Test Flow", "status": "active", "actions": [trigger_action, branch_action]}
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow = {"name": "Test Flow", "status": "active", "actions": [trigger_action, branch_action]}
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert expected_key in response.json()["detail"]
 
-    def test_hog_flow_branch_action_missing_branch_array_allowed_for_web_draft(self):
+    def test_insights_flow_branch_action_missing_branch_array_allowed_for_web_draft(self):
         # The web builder saves incomplete nodes mid-edit; a draft save must not reject them.
         branch_actions = [
             {"id": "cond_1", "name": "cond_1", "type": "conditional_branch", "config": {}},
@@ -915,11 +915,11 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]},
             },
         }
-        hog_flow = {"name": "Test Flow", "status": "draft", "actions": [trigger_action, *branch_actions]}
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow = {"name": "Test Flow", "status": "draft", "actions": [trigger_action, *branch_actions]}
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
-    def test_hog_flow_single_condition_field(self):
+    def test_insights_flow_single_condition_field(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -954,13 +954,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Single Condition",
             "status": "active",
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         condition = response.json()["actions"][1]["config"]["condition"]
@@ -968,7 +968,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "bytecode" in condition["filters"], condition["filters"]
         assert condition["filters"]["bytecode"] == ["_H", 1, 32, "custom_event", 32, "event", 1, 1, 11]
 
-    def test_hog_flow_condition_and_conditions_mutually_exclusive(self):
+    def test_insights_flow_condition_and_conditions_mutually_exclusive(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1017,13 +1017,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Mutually Exclusive",
             "status": "active",
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
         data = response.json()
@@ -1031,7 +1031,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert data["code"] == "invalid_input"
         assert data["type"] == "validation_error"
 
-    def test_hog_flow_wait_until_events_filters_bytecode(self):
+    def test_insights_flow_wait_until_events_filters_bytecode(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1076,13 +1076,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Wait Events Bytecode",
             "status": "active",
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         events = response.json()["actions"][1]["config"]["events"]
@@ -1094,7 +1094,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "plan" in bytecode, bytecode
         assert "growth" in bytecode, bytecode
 
-    def test_hog_flow_wait_until_drops_empty_events_entry(self):
+    def test_insights_flow_wait_until_drops_empty_events_entry(self):
         # An "events to wait for" entry that references no events compiles to always-true bytecode,
         # which would wake the job on every incoming event. It must be dropped on save; a real entry
         # alongside it is kept.
@@ -1139,20 +1139,20 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Drop Empty Wait Events",
             "status": "active",
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         events = response.json()["actions"][1]["config"]["events"]
         assert len(events) == 1, events
         assert "subscription created" in events[0]["filters"]["bytecode"], events[0]["filters"]
 
-    def test_hog_flow_wait_until_keeps_action_only_entry(self):
+    def test_insights_flow_wait_until_keeps_action_only_entry(self):
         # An "events to wait for" entry can target a Insights Action instead of an event: filters.actions
         # is set and filters.events is empty. That is a real wait and must be kept (and its bytecode
         # compiled), while a truly-empty entry alongside it is still dropped.
@@ -1180,13 +1180,13 @@ class TestInsightsFlowAPI(APIBaseTest):
                 ],
             },
         }
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Keep Action Wait Entry",
             "status": "active",
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         events = response.json()["actions"][1]["config"]["events"]
@@ -1194,7 +1194,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert events[0]["filters"]["actions"] == [{"id": str(action.id), "type": "actions", "order": 0}]
         assert events[0]["filters"]["bytecode"], events[0]["filters"]
 
-    def test_hog_flow_conversion_events_filters_bytecode(self):
+    def test_insights_flow_conversion_events_filters_bytecode(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1207,7 +1207,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Conversion Events Bytecode",
             "status": "active",
             "actions": [trigger_action],
@@ -1238,7 +1238,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion_events = response.json()["conversion"]["events"]
@@ -1250,7 +1250,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "tier" in bytecode, bytecode
         assert "enterprise" in bytecode, bytecode
 
-    def test_hog_flow_conversion_drops_empty_keeps_action_event(self):
+    def test_insights_flow_conversion_drops_empty_keeps_action_event(self):
         # Same always-true guard as wait_until: a conversion "events" entry targeting nothing is
         # dropped (it would convert on every event), while an action-based entry is kept and compiled.
         action = Action.objects.create(team=self.team, name="Converted via action", steps_json=[{"event": "converted"}])
@@ -1263,7 +1263,7 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]},
             },
         }
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Conversion Drop Empty Keep Action",
             "status": "active",
             "actions": [trigger_action],
@@ -1276,7 +1276,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion_events = response.json()["conversion"]["events"]
@@ -1284,7 +1284,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert conversion_events[0]["filters"]["actions"] == [{"id": str(action.id), "type": "actions", "order": 0}]
         assert conversion_events[0]["filters"]["bytecode"], conversion_events[0]["filters"]
 
-    def test_hog_flow_draft_conversion_event_strips_client_supplied_bytecode(self):
+    def test_insights_flow_draft_conversion_event_strips_client_supplied_bytecode(self):
         # A draft with invalid conversion-event filters must not persist client-supplied
         # bytecode: conversion is not revalidated on a status-only activation, so it would
         # otherwise activate unvalidated and the matcher would execute it.
@@ -1300,7 +1300,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow Draft Conversion Bytecode Injection",
             # No status => draft, so invalid filters are tolerated rather than rejected.
             "actions": [trigger_action],
@@ -1321,50 +1321,50 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         filters = response.json()["conversion"]["events"][0]["filters"]
         assert "bytecode" not in filters, filters
 
-    def test_hog_flow_enable_disable(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+    def test_insights_flow_enable_disable(self):
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         assert response.json()["status"] == "draft"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{response.json()['id']}", {"status": "active"}
+            f"/api/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "active"}
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == "active"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{response.json()['id']}", {"status": "draft"}
+            f"/api/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "draft"}
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == "draft"
 
-    def _create_active_hog_flow(self) -> str:
-        hog_flow, _ = self._create_hog_flow_with_action(
+    def _create_active_insights_flow(self) -> str:
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
-        activate = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"})
+        activate = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert activate.status_code == 200, activate.json()
         return flow_id
 
     def test_mcp_cannot_modify_active_workflow(self):
         # Active workflows are read-only via MCP for now — editing risks breaking already-scheduled runs.
-        flow_id = self._create_active_hog_flow()
+        flow_id = self._create_active_insights_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed via MCP"},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -1373,9 +1373,9 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     @parameterized.expand([("disable_to_draft", "draft"), ("archive", "archived")])
     def test_mcp_can_disable_active_workflow(self, _name, target_status):
-        flow_id = self._create_active_hog_flow()
+        flow_id = self._create_active_insights_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": target_status},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -1383,13 +1383,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert response.json()["status"] == target_status
 
     def test_mcp_can_modify_draft_workflow(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{create.json()['id']}",
+            f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed via MCP"},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -1397,50 +1397,50 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert response.json()["name"] == "Renamed via MCP"
 
     def test_non_mcp_can_modify_active_workflow(self):
-        flow_id = self._create_active_hog_flow()
+        flow_id = self._create_active_insights_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed via UI"},
         )
         assert response.status_code == 200, response.json()
         assert response.json()["name"] == "Renamed via UI"
 
     def test_mcp_cannot_create_active_workflow(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        hog_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        insights_flow["status"] = "active"
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
         assert response.status_code == 400, response.json()
         assert "one-shot active workflows via MCP" in response.json()["detail"]
 
     def test_mcp_can_create_draft_workflow(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "draft"
 
     def test_non_mcp_can_create_active_workflow(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        hog_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow["status"] = "active"
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "active"
 
     def test_mcp_cannot_mix_status_with_other_field_updates(self):
         # Status changes must route through the lifecycle tools — a mixed status + field PATCH is rejected
         # (here on a draft, so it's the status-mixing guard rather than the active-workflow read-only guard).
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{create.json()['id']}",
+            f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed", "status": "active"},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -1448,13 +1448,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "workflows-enable / workflows-disable / workflows-archive" in response.json()["detail"]
 
     def test_non_mcp_can_mix_status_with_other_field_updates(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{create.json()['id']}",
+            f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed", "status": "active"},
         )
         assert response.status_code == 200, response.json()
@@ -1462,20 +1462,20 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert response.json()["name"] == "Renamed"
 
     def test_edges_validation_accepts_list_of_edges(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        hog_flow["edges"] = [{"from": "trigger_node", "to": "action_1", "type": "continue"}]
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow["edges"] = [{"from": "trigger_node", "to": "action_1", "type": "continue"}]
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["edges"] == [{"from": "trigger_node", "to": "action_1", "type": "continue"}]
 
     def test_edges_validation_rejects_non_list(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        hog_flow["edges"] = "not-an-array"
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow["edges"] = "not-an-array"
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json()["attr"] == "edges"
 
@@ -1506,13 +1506,13 @@ class TestInsightsFlowAPI(APIBaseTest):
                 {"from": "action_1", "to": "exit_1", "type": "continue"},
             ],
         }
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", flow)
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", flow)
         assert create.status_code == 201, create.json()
         return create.json()["id"]
 
     def _patch_graph(self, flow_id: str, operations: list[dict], **extra):
         return self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": operations},
             HTTP_X_POSTFN_CLIENT="mcp",
             **extra,
@@ -1537,7 +1537,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert actions["trigger_node"]["type"] == "trigger"
         assert "exit_1" in actions
 
-    @patch("products.workflows.backend.api.hog_flow.publish_resource_edited")
+    @patch("products.workflows.backend.api.insights_flow.publish_resource_edited")
     def test_graph_update_emits_resource_edited(self, mock_emit):
         # The surgical /graph path is the primary MCP edit route, so it must emit the same
         # "edited elsewhere" signal as the full update path — otherwise an open builder never
@@ -1594,15 +1594,15 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert response.status_code == 400, response.json()
 
     def test_graph_mcp_cannot_edit_active_workflow(self):
-        flow_id = self._create_active_hog_flow()
+        flow_id = self._create_active_insights_flow()
         response = self._patch_graph(flow_id, [{"op": "update_action", "id": "action_1", "patch": {"name": "x"}}])
         assert response.status_code == 400, response.json()
         assert "active workflow isn't supported via MCP" in response.json()["detail"]
 
     def test_graph_non_mcp_can_edit_active_workflow(self):
-        flow_id = self._create_active_hog_flow()
+        flow_id = self._create_active_insights_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "update_action", "id": "action_1", "patch": {"name": "Renamed via UI"}}]},
         )
         assert response.status_code == 200, response.json()
@@ -1636,16 +1636,16 @@ class TestInsightsFlowAPI(APIBaseTest):
         # Option B: the full create/PATCH path no longer hard-blocks on graph structure — only the surgical
         # /graph endpoint enforces. A dangling edge is logged, not rejected, so callers (incl. the web UI on
         # an active save) aren't trapped by pre-existing corruption.
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", self._flow_with_dangling_edge("active"))
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_with_dangling_edge("active"))
         assert response.status_code == 201, response.json()
 
     def test_full_patch_with_invalid_graph_is_lenient(self):
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", self._flow_with_dangling_edge("draft"))
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_with_dangling_edge("draft"))
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
         # Re-saving the (already structurally-broken) flow as active must succeed — the user isn't blocked
         # from editing a workflow whose graph corruption they didn't introduce.
-        response = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"})
+        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert response.status_code == 200, response.json()
         assert InsightsFlow.objects.get(pk=flow_id).status == "active"
 
@@ -1708,18 +1708,18 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "missing its resolution edge" in str(response.json())
 
     def test_can_call_a_test_invocation(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
 
-        with patch("products.workflows.backend.api.hog_flow.create_hog_flow_invocation_test") as mock_invoke:
+        with patch("products.workflows.backend.api.insights_flow.create_insights_flow_invocation_test") as mock_invoke:
             mock_invoke.return_value = MagicMock(status_code=200, json=lambda: {"status": "success"})
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}/invocations/",
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/invocations/",
                 data={
                     "globals": {"event": {"event": "$pageview", "distinct_id": "test-distinct-id"}},
                     "mock_async_functions": True,
@@ -1731,12 +1731,12 @@ class TestInsightsFlowAPI(APIBaseTest):
 
             assert mock_invoke.call_count == 1
             assert mock_invoke.call_args.kwargs["team_id"] == self.team.id
-            assert mock_invoke.call_args.kwargs["hog_flow_id"] == flow_id
+            assert mock_invoke.call_args.kwargs["insights_flow_id"] == flow_id
             payload = mock_invoke.call_args.kwargs["payload"]
             assert payload["globals"] == {"event": {"event": "$pageview", "distinct_id": "test-distinct-id"}}
             assert payload["mock_async_functions"] is True
 
-    def test_hog_flow_conditional_event_filter_rejected(self):
+    def test_insights_flow_conditional_event_filter_rejected(self):
         conditional_action = {
             "id": "cond_1",
             "name": "cond_1",
@@ -1766,13 +1766,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Flow",
             "status": "active",
             "actions": [trigger_action, conditional_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__non_field_errors",
@@ -1781,7 +1781,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "type": "validation_error",
         }
 
-    def test_hog_flow_batch_trigger_valid_filters(self):
+    def test_insights_flow_batch_trigger_valid_filters(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1794,17 +1794,17 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Batch Flow",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["trigger"]["type"] == "batch"
         assert response.json()["trigger"]["filters"]["properties"][0]["key"] == "email"
 
-    def test_hog_flow_batch_trigger_without_filters(self):
+    def test_insights_flow_batch_trigger_without_filters(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1814,16 +1814,16 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Batch Flow",
             "status": "active",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
-    def test_hog_flow_batch_trigger_filters_not_dict(self):
+    def test_insights_flow_batch_trigger_filters_not_dict(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1834,13 +1834,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Batch Flow",
             "status": "active",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters",
@@ -1849,7 +1849,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "type": "validation_error",
         }
 
-    def test_hog_flow_batch_trigger_properties_not_array(self):
+    def test_insights_flow_batch_trigger_properties_not_array(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1862,13 +1862,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test Batch Flow",
             "status": "active",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters__properties",
@@ -1877,7 +1877,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "type": "validation_error",
         }
 
-    def test_hog_flow_data_warehouse_table_trigger_valid(self):
+    def test_insights_flow_data_warehouse_table_trigger_valid(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1889,13 +1889,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test DWH Flow",
             "status": "active",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         trigger = response.json()["trigger"]
         assert trigger["type"] == "data-warehouse-table"
@@ -1904,7 +1904,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert trigger["filters"]["source"] == "data-warehouse-table"
         assert "bytecode" in trigger["filters"]
 
-    def test_hog_flow_data_warehouse_table_trigger_without_table_name(self):
+    def test_insights_flow_data_warehouse_table_trigger_without_table_name(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1915,13 +1915,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test DWH Flow",
             "status": "active",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__table_name",
@@ -1930,7 +1930,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "type": "validation_error",
         }
 
-    def test_hog_flow_data_warehouse_table_trigger_draft_allows_missing_table_name(self):
+    def test_insights_flow_data_warehouse_table_trigger_draft_allows_missing_table_name(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1941,16 +1941,16 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test DWH Flow",
             "status": "draft",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
-    def test_hog_flow_data_warehouse_table_trigger_filters_not_dict(self):
+    def test_insights_flow_data_warehouse_table_trigger_filters_not_dict(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -1962,13 +1962,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test DWH Flow",
             "status": "active",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters",
@@ -1983,7 +1983,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             ("random_cohort_branch", {"cohorts": [{"percentage": 50}]}),
         ]
     )
-    def test_hog_flow_data_warehouse_table_trigger_rejects_person_dependent_steps(self, action_type, action_config):
+    def test_insights_flow_data_warehouse_table_trigger_rejects_person_dependent_steps(self, action_type, action_config):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -2001,18 +2001,18 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": action_config,
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test DWH Flow",
             "status": "active",
             "actions": [trigger_action, person_dependent_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json()["attr"] == "actions"
         assert action_type in response.json()["detail"]
 
-    def test_hog_flow_data_warehouse_table_trigger_draft_allows_person_dependent_steps(self):
+    def test_insights_flow_data_warehouse_table_trigger_draft_allows_person_dependent_steps(self):
         # Drafts are not executed, so we defer the hard rejection until activation.
         trigger_action = {
             "id": "trigger_node",
@@ -2031,16 +2031,16 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": {"cohorts": [{"percentage": 50}]},
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test DWH Flow",
             "status": "draft",
             "actions": [trigger_action, person_dependent_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
-    def test_hog_flow_data_warehouse_table_trigger_forces_exit_only_at_end(self):
+    def test_insights_flow_data_warehouse_table_trigger_forces_exit_only_at_end(self):
         # Other exit conditions re-evaluate trigger/conversion filters that may reference person
         # data, so warehouse-triggered flows are coerced to exit_only_at_end regardless of input.
         trigger_action = {
@@ -2054,14 +2054,14 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Test DWH Flow",
             "status": "active",
             "exit_condition": "exit_on_conversion",
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["exit_condition"] == "exit_only_at_end"
 
@@ -2071,20 +2071,20 @@ class TestInsightsFlowAPI(APIBaseTest):
             ("actions", {"actions": [{"id": "5", "type": "actions"}]}),
         ]
     )
-    def test_hog_flow_batch_trigger_rejects_event_behavior_filters(self, _name, extra_filters):
+    def test_insights_flow_batch_trigger_rejects_event_behavior_filters(self, _name, extra_filters):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
             "type": "trigger",
             "config": {"type": "batch", "filters": {"properties": [], **extra_filters}},
         }
-        hog_flow = {"name": "Test Batch Flow", "status": "active", "actions": [trigger_action]}
+        insights_flow = {"name": "Test Batch Flow", "status": "active", "actions": [trigger_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert "event" in response.json()["detail"].lower()
 
-    def test_hog_flow_batch_trigger_event_filters_rejected_for_mcp_draft(self):
+    def test_insights_flow_batch_trigger_event_filters_rejected_for_mcp_draft(self):
         # Same draft discriminator as behavioral cohorts: enforced for programmatic callers, lenient for the UI.
         trigger_action = {
             "id": "trigger_node",
@@ -2095,13 +2095,13 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"properties": [], "events": [{"id": "$pageview", "type": "events"}]},
             },
         }
-        hog_flow = {"name": "Test Batch Flow", "status": "draft", "actions": [trigger_action]}
+        insights_flow = {"name": "Test Batch Flow", "status": "draft", "actions": [trigger_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow, HTTP_X_POSTFN_CLIENT="mcp")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_POSTFN_CLIENT="mcp")
         assert response.status_code == 400, response.json()
         assert "event" in response.json()["detail"].lower()
 
-    def test_hog_flow_batch_trigger_allows_empty_properties_audience(self):
+    def test_insights_flow_batch_trigger_allows_empty_properties_audience(self):
         # Empty properties = broadcast to everyone, a legitimate batch audience — must not be rejected.
         trigger_action = {
             "id": "trigger_node",
@@ -2112,9 +2112,9 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"properties": []},
             },
         }
-        hog_flow = {"name": "Test Batch Flow", "status": "active", "actions": [trigger_action]}
+        insights_flow = {"name": "Test Batch Flow", "status": "active", "actions": [trigger_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
     def _make_cohort(self, *, behavioral=False, static=False, nested_cohort_id=None) -> Cohort:
@@ -2170,17 +2170,17 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "filters": {"properties": [{"key": "id", "type": "cohort", "value": cohort_id, "operator": "in"}]},
             },
         }
-        hog_flow = {"name": "Test Batch Flow", "status": status, "actions": [trigger_action]}
-        return self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow, **extra)
+        insights_flow = {"name": "Test Batch Flow", "status": status, "actions": [trigger_action]}
+        return self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, **extra)
 
     @parameterized.expand(["batch", "schedule"])
-    def test_hog_flow_audience_rejects_behavioral_cohort(self, trigger_type: str):
+    def test_insights_flow_audience_rejects_behavioral_cohort(self, trigger_type: str):
         cohort = self._make_cohort(behavioral=True)
         response = self._post_batch_with_cohort(cohort.pk, trigger_type=trigger_type)
         assert response.status_code == 400, response.json()
         assert "behavior" in response.json()["detail"].lower()
 
-    def test_hog_flow_batch_trigger_rejects_nested_behavioral_cohort(self):
+    def test_insights_flow_batch_trigger_rejects_nested_behavioral_cohort(self):
         behavioral = self._make_cohort(behavioral=True)
         wrapper = self._make_cohort(nested_cohort_id=behavioral.pk)
         response = self._post_batch_with_cohort(wrapper.pk)
@@ -2188,33 +2188,33 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "behavior" in response.json()["detail"].lower()
 
     @parameterized.expand([("static", {"static": True}), ("property-based", {})])
-    def test_hog_flow_batch_trigger_allows_non_behavioral_cohort(self, _name, cohort_kwargs):
+    def test_insights_flow_batch_trigger_allows_non_behavioral_cohort(self, _name, cohort_kwargs):
         cohort = self._make_cohort(**cohort_kwargs)
         response = self._post_batch_with_cohort(cohort.pk)
         assert response.status_code == 201, response.json()
 
     @parameterized.expand(["batch", "schedule"])
-    def test_hog_flow_audience_allows_behavioral_static_cohort(self, trigger_type: str):
+    def test_insights_flow_audience_allows_behavioral_static_cohort(self, trigger_type: str):
         # A static cohort built from behavioral criteria keeps its behavioral filter definition, but its
         # membership is frozen and precalculated, so it's a valid audience — the error even recommends it.
         cohort = self._make_cohort(behavioral=True, static=True)
         response = self._post_batch_with_cohort(cohort.pk, trigger_type=trigger_type)
         assert response.status_code == 201, response.json()
 
-    def test_hog_flow_batch_trigger_allows_wrapper_of_static_behavioral_cohort(self):
+    def test_insights_flow_batch_trigger_allows_wrapper_of_static_behavioral_cohort(self):
         behavioral_static = self._make_cohort(behavioral=True, static=True)
         wrapper = self._make_cohort(nested_cohort_id=behavioral_static.pk)
         response = self._post_batch_with_cohort(wrapper.pk)
         assert response.status_code == 201, response.json()
 
-    def test_hog_flow_batch_trigger_behavioral_cohort_rejected_for_mcp_draft(self):
+    def test_insights_flow_batch_trigger_behavioral_cohort_rejected_for_mcp_draft(self):
         # Draft is lenient for the UI builder but enforced for programmatic (MCP) callers.
         cohort = self._make_cohort(behavioral=True)
         response = self._post_batch_with_cohort(cohort.pk, status="draft", HTTP_X_POSTFN_CLIENT="mcp")
         assert response.status_code == 400, response.json()
         assert "behavior" in response.json()["detail"].lower()
 
-    def test_hog_flow_batch_trigger_behavioral_cohort_allowed_for_web_draft(self):
+    def test_insights_flow_batch_trigger_behavioral_cohort_allowed_for_web_draft(self):
         # Web UI must be able to save incomplete draft graphs without the guard firing.
         cohort = self._make_cohort(behavioral=True)
         response = self._post_batch_with_cohort(cohort.pk, status="draft")
@@ -2233,10 +2233,10 @@ class TestInsightsFlowAPI(APIBaseTest):
                 },
             },
         }
-        hog_flow = {"name": "Test Event Flow", "status": status, "actions": [trigger_action]}
-        return self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow, **extra)
+        insights_flow = {"name": "Test Event Flow", "status": status, "actions": [trigger_action]}
+        return self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, **extra)
 
-    def test_hog_flow_event_trigger_cohort_filter_rejected_for_mcp_draft(self):
+    def test_insights_flow_event_trigger_cohort_filter_rejected_for_mcp_draft(self):
         # Cohorts can't be evaluated in real-time event filters. Generalized strict validation rejects this
         # at create for programmatic callers, instead of silently storing a filter that won't compile and
         # only surfacing the failure at enable (which reads to the caller as a successful create).
@@ -2245,7 +2245,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert response.status_code == 400, response.json()
         assert "cohort" in str(response.json()).lower()
 
-    def test_hog_flow_event_trigger_cohort_filter_allowed_for_web_draft(self):
+    def test_insights_flow_event_trigger_cohort_filter_allowed_for_web_draft(self):
         # Web builder drafts stay lenient so incomplete graphs can be saved mid-edit.
         cohort = self._make_cohort(behavioral=True)
         response = self._post_event_trigger_with_cohort(cohort.pk)
@@ -2266,22 +2266,22 @@ class TestInsightsFlowAPI(APIBaseTest):
         context = {} if event_source is None else {"event_source": event_source}
         assert _should_validate_strictly(context, is_draft) is expected_strict
 
-    def test_hog_flow_user_blast_radius_requires_filters(self):
-        with patch("products.workflows.backend.api.hog_flow.get_user_blast_radius") as mock_get_user_blast_radius:
-            response = self.client.post(f"/api/projects/{self.team.id}/hog_flows/user_blast_radius", {})
+    def test_insights_flow_user_blast_radius_requires_filters(self):
+        with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
+            response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/user_blast_radius", {})
 
         assert response.status_code == 400, response.json()
         assert response.json().get("attr") == "filters"
         mock_get_user_blast_radius.assert_not_called()
 
-    def test_hog_flow_user_blast_radius_returns_counts(self):
-        with patch("products.workflows.backend.api.hog_flow.get_user_blast_radius") as mock_get_user_blast_radius:
+    def test_insights_flow_user_blast_radius_returns_counts(self):
+        with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
             from products.feature_flags.backend.user_blast_radius import BlastRadiusResult  # noqa: PLC0415
 
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=4, total=10)
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
             )
 
@@ -2297,33 +2297,33 @@ class TestInsightsFlowAPI(APIBaseTest):
         HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
         HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set(),
     )
-    def test_hog_flow_user_blast_radius_returns_default_limit_for_unlisted_team(self):
-        with patch("products.workflows.backend.api.hog_flow.get_user_blast_radius") as mock_get_user_blast_radius:
+    def test_insights_flow_user_blast_radius_returns_default_limit_for_unlisted_team(self):
+        with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
             from products.feature_flags.backend.user_blast_radius import BlastRadiusResult  # noqa: PLC0415
 
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=0, total=0)
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
             )
 
         assert response.status_code == 200, response.json()
         assert response.json()["limit"] == 5000
 
-    def test_hog_flow_user_blast_radius_returns_elevated_limit_for_listed_team(self):
+    def test_insights_flow_user_blast_radius_returns_elevated_limit_for_listed_team(self):
         with (
             override_settings(
                 HOGFLOW_BATCH_TRIGGER_LIMIT=5000,
                 HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
                 HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
             ),
-            patch("products.workflows.backend.api.hog_flow.get_user_blast_radius") as mock_get_user_blast_radius,
+            patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius,
         ):
             from products.feature_flags.backend.user_blast_radius import BlastRadiusResult  # noqa: PLC0415
 
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=0, total=0)
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
             )
 
@@ -2331,14 +2331,14 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert response.json()["limit"] == 50000
 
     def test_user_blast_radius_personal_api_key_requires_person_read_scope(self):
-        # Sizing an audience queries person data, so a hog_flow:read-only token must NOT be able to use
+        # Sizing an audience queries person data, so a insights_flow:read-only token must NOT be able to use
         # this as a person-count oracle — person:read is also required.
         key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="hog_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["hog_flow:read"]
+            label="insights_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["insights_flow:read"]
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
             {"filters": {"properties": []}},
             headers={"authorization": f"Bearer {key}"},
         )
@@ -2348,17 +2348,17 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_user_blast_radius_personal_api_key_with_person_read_scope_allowed(self):
         key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="hog_flow + person",
+            label="insights_flow + person",
             user=self.user,
             secure_value=hash_key_value(key),
-            scopes=["hog_flow:read", "person:read"],
+            scopes=["insights_flow:read", "person:read"],
         )
-        with patch("products.workflows.backend.api.hog_flow.get_user_blast_radius") as mock_get_user_blast_radius:
+        with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
             from products.feature_flags.backend.user_blast_radius import BlastRadiusResult  # noqa: PLC0415
 
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=1, total=10)
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
                 headers={"authorization": f"Bearer {key}"},
             )
@@ -2380,12 +2380,12 @@ class TestInsightsFlowAPI(APIBaseTest):
             ),
         ]
     )
-    def test_hog_flow_user_blast_radius_rejects_flag_condition(self, _name, properties):
+    def test_insights_flow_user_blast_radius_rejects_flag_condition(self, _name, properties):
         # Feature flags can't be sized as a static batch audience — reject with a clean 400 before
         # the condition reaches the blast-radius query (where it would otherwise 500).
-        with patch("products.workflows.backend.api.hog_flow.get_user_blast_radius") as mock_get_user_blast_radius:
+        with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": properties}},
             )
 
@@ -2395,9 +2395,9 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     def test_internal_user_blast_radius_rejects_flag_condition(self):
-        with patch("products.workflows.backend.api.hog_flow.get_user_blast_radius") as mock_get_user_blast_radius:
+        with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/hog_flows/user_blast_radius",
+                f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius",
                 {"filters": {"properties": [{"key": "my-other-flag", "type": "flag", "value": "true"}]}},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2410,10 +2410,10 @@ class TestInsightsFlowAPI(APIBaseTest):
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     def test_internal_user_blast_radius_persons_rejects_flag_condition(self):
         with patch(
-            "products.workflows.backend.api.hog_flow.get_user_blast_radius_persons"
+            "products.workflows.backend.api.insights_flow.get_user_blast_radius_persons"
         ) as mock_get_user_blast_radius_persons:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/hog_flows/user_blast_radius_persons",
+                f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
                 {"filters": {"properties": [{"key": "my-other-flag", "type": "flag", "value": "true"}]}},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2433,18 +2433,18 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_internal_user_blast_radius_persons_query_selection(self, _name, flag_enabled):
         with (
             patch(
-                "products.workflows.backend.api.hog_flow.use_workflows_batch_audience_query",
+                "products.workflows.backend.api.insights_flow.use_workflows_batch_audience_query",
                 return_value=flag_enabled,
             ),
             patch(
-                "products.workflows.backend.api.hog_flow.get_batch_audience_person_ids", return_value=["id-1"]
+                "products.workflows.backend.api.insights_flow.get_batch_audience_person_ids", return_value=["id-1"]
             ) as mock_workflows_query,
             patch(
-                "products.workflows.backend.api.hog_flow.get_user_blast_radius_persons", return_value=["id-1"]
+                "products.workflows.backend.api.insights_flow.get_user_blast_radius_persons", return_value=["id-1"]
             ) as mock_legacy_query,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/hog_flows/user_blast_radius_persons",
+                f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
                 {"filters": {"properties": []}, "dedupe_key": "email"},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2470,15 +2470,15 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         with (
             patch(
-                "products.workflows.backend.api.hog_flow.use_workflows_batch_audience_query",
+                "products.workflows.backend.api.insights_flow.use_workflows_batch_audience_query",
                 return_value=flag_enabled,
             ),
             patch(
-                "products.workflows.backend.api.hog_flow.get_user_blast_radius",
+                "products.workflows.backend.api.insights_flow.get_user_blast_radius",
                 return_value=BlastRadiusResult(affected=5, total=10),
             ) as mock_legacy_count,
             patch(
-                "products.workflows.backend.api.hog_flow.get_batch_audience_count", return_value=3
+                "products.workflows.backend.api.insights_flow.get_batch_audience_count", return_value=3
             ) as mock_deduped_count,
             patch(
                 "insights.models.team.team.Team.persons_seen_so_far",
@@ -2487,7 +2487,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}, "dedupe_key": "email"},
             )
 
@@ -2506,7 +2506,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     def test_user_blast_radius_rejects_unsupported_dedupe_key(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
             {"filters": {"properties": []}, "dedupe_key": "phone"},
         )
 
@@ -2515,7 +2515,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     def test_internal_user_blast_radius_persons_rejects_unsupported_dedupe_key(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/internal/hog_flows/user_blast_radius_persons",
+            f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
             {"filters": {"properties": []}, "dedupe_key": "phone"},
             format="json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2526,14 +2526,14 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
     def test_internal_update_batch_job_status_marks_completed(self, _mock_dispatch):
-        hog_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
-        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=hog_flow, status="active")
+        insights_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
+        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=insights_flow, status="active")
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/hog_flows/batch_jobs/{batch_job.id}/status",
+            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "completed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2547,14 +2547,14 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
     def test_internal_update_batch_job_status_is_idempotent_when_already_terminal(self, _mock_dispatch):
-        hog_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
-        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=hog_flow, status="completed")
+        insights_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
+        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=insights_flow, status="completed")
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/hog_flows/batch_jobs/{batch_job.id}/status",
+            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "failed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2569,14 +2569,14 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
     def test_internal_update_batch_job_status_rejects_invalid_status(self, _mock_dispatch):
-        hog_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
-        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=hog_flow, status="active")
+        insights_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
+        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=insights_flow, status="active")
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/hog_flows/batch_jobs/{batch_job.id}/status",
+            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "active"},  # not a terminal state
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2589,7 +2589,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     def test_internal_update_batch_job_status_returns_404_for_missing_job(self):
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/hog_flows/batch_jobs/00000000-0000-0000-0000-000000000000/status",
+            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/00000000-0000-0000-0000-000000000000/status",
             {"status": "completed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2601,7 +2601,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_internal_update_batch_job_status_returns_404_for_invalid_uuid(self):
         # `not-a-uuid` reaches UUIDField → ValidationError, must surface as 404 not 500.
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/hog_flows/batch_jobs/not-a-uuid/status",
+            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/not-a-uuid/status",
             {"status": "completed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2610,15 +2610,15 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert response.status_code == 404, response.json()
 
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
     def test_internal_update_batch_job_status_requires_internal_api_secret(self, _mock_dispatch):
-        hog_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
-        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=hog_flow, status="active")
+        insights_flow = InsightsFlow.objects.create(team=self.team, name="Test", trigger={}, actions=[], edges=[])
+        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=insights_flow, status="active")
 
         # No INTERNAL_API_SECRET header → unauthenticated
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/hog_flows/batch_jobs/{batch_job.id}/status",
+            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "completed"},
             content_type="application/json",
         )
@@ -2663,12 +2663,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         ]
 
         # Try to set billable_action_types manually (should be ignored)
-        hog_flow = {
+        insights_flow = {
             "name": "Test Billable Types",
             "actions": actions,
             "billable_action_types": ["fake_type", "another_fake"],  # Client tries to override
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         # Should have only unique billable types (deduped), client override ignored
@@ -2710,8 +2710,8 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         ]
 
-        hog_flow = {"name": "Test Update Billable Types", "actions": initial_actions}
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow = {"name": "Test Update Billable Types", "actions": initial_actions}
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
         assert response.json()["billable_action_types"] == ["function"]
@@ -2719,7 +2719,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # Update to remove function action (no billable actions left)
         updated_actions = [trigger_action]
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"actions": updated_actions}
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": updated_actions}
         )
         assert update_response.status_code == 200, update_response.json()
         assert update_response.json()["billable_action_types"] == []
@@ -2749,7 +2749,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # Try to override billable_action_types in update - should be ignored and recomputed
         override_response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {
                 "actions": complex_actions,
                 "billable_action_types": ["fake_type"],  # Try to override
@@ -2772,19 +2772,19 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     @override_settings(HOGFLOW_BATCH_TRIGGER_LIMIT=5000, HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set())
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
-    def test_post_hog_flow_batch_jobs_endpoint_creates_job(self, mock_create_invocation):
-        flow_id = self._create_active_hog_flow()
+    def test_post_insights_flow_batch_jobs_endpoint_creates_job(self, mock_create_invocation):
+        flow_id = self._create_active_insights_flow()
 
         batch_job_data = {
             "variables": [{"key": "first_name", "value": "Test"}],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs", batch_job_data)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data)
 
         assert response.status_code == 200, response.json()
-        assert response.json()["hog_flow"] == flow_id
+        assert response.json()["insights_flow"] == flow_id
         assert response.json()["variables"] == batch_job_data["variables"]
         assert response.json()["status"] == "queued"
         mock_create_invocation.assert_called_once()
@@ -2792,17 +2792,17 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert mock_create_invocation.call_args.kwargs["max_audience_size"] == 5000
 
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
-    def test_post_hog_flow_batch_jobs_passes_elevated_audience_size(self, mock_create_invocation):
-        flow_id = self._create_active_hog_flow()
+    def test_post_insights_flow_batch_jobs_passes_elevated_audience_size(self, mock_create_invocation):
+        flow_id = self._create_active_insights_flow()
 
         with override_settings(
             HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
             HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
                 {"variables": [{"key": "first_name", "value": "Test"}]},
             )
 
@@ -2811,7 +2811,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert mock_create_invocation.call_args.kwargs["max_audience_size"] == 50000
 
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
     def test_programmatic_batch_dispatch_requires_audience_confirm_token(self, mock_create_invocation):
         # A batch run is an irreversible mass send. Agent surfaces must hold a token only the
@@ -2821,13 +2821,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         # invalidates earlier previews. The web builder (session auth) keeps its own confirm UI
         # (covered by the existing batch job tests, which run as WEB), and headless callers (raw API
         # keys) dispatch in one call - the gate targets agents, not automation.
-        flow_id = self._create_active_hog_flow()
-        trigger_filters = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{flow_id}").json()["trigger"][
+        flow_id = self._create_active_insights_flow()
+        trigger_filters = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}").json()["trigger"][
             "filters"
         ]
 
         no_token = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -2836,12 +2836,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         mock_create_invocation.assert_not_called()
 
         narrow_preview = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/user_blast_radius",
+            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
             {"filters": {"properties": [{"key": "email", "type": "person", "value": "x", "operator": "icontains"}]}},
         )
         assert narrow_preview.status_code == 200, narrow_preview.json()
         narrow_token = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"confirm_token": narrow_preview.json()["confirm_token"]},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -2853,7 +2853,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # person-scope send the dispatch runs - it must not authorize it.
         group_semantics_token = mint_audience_confirm_token(self.team.id, trigger_filters, group_type_index=0)
         group_semantics = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"confirm_token": group_semantics_token},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -2862,13 +2862,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         mock_create_invocation.assert_not_called()
 
         preview = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/user_blast_radius", {"filters": trigger_filters}
+            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius", {"filters": trigger_filters}
         )
         assert preview.status_code == 200, preview.json()
         token = preview.json()["confirm_token"]
 
         dispatched = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             # Caller-supplied filters are ignored: the job snapshots the trigger filters it fans out to.
             {"filters": {"properties": []}, "confirm_token": token},
             HTTP_X_POSTFN_CLIENT="mcp",
@@ -2884,7 +2884,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # check could be sidestepped by scheduling the send instead.
         schedule_body = {"rrule": "FREQ=DAILY;INTERVAL=1", "starts_at": "2026-08-01T00:00:00Z"}
         no_token_schedule = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/schedules",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
             schedule_body,
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -2892,7 +2892,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "workflows-blast-radius" in no_token_schedule.json()["detail"]
 
         scheduled = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/schedules",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
             {**schedule_body, "confirm_token": token},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -2900,13 +2900,13 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # A draft's trigger can still be edited after previewing, so a schedule staged on a draft
         # could fire on a broadened audience once enabled - programmatic scheduling requires active.
-        draft_flow, _ = self._create_hog_flow_with_action(
+        draft_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        draft_create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", draft_flow)
+        draft_create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", draft_flow)
         assert draft_create.status_code == 201, draft_create.json()
         draft_schedule = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{draft_create.json()['id']}/schedules",
+            f"/api/projects/{self.team.id}/insights_flows/{draft_create.json()['id']}/schedules",
             {**schedule_body, "confirm_token": token},
             HTTP_X_POSTFN_CLIENT="mcp",
         )
@@ -2921,11 +2921,11 @@ class TestInsightsFlowAPI(APIBaseTest):
             label="batch dispatch",
             user=self.user,
             secure_value=hash_key_value(api_key),
-            scopes=["hog_flow:write", "person:read"],
+            scopes=["insights_flow:write", "person:read"],
         )
         api_client = self.client_class()
         api_dispatch = api_client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {},
             headers={"authorization": f"Bearer {api_key}"},
         )
@@ -2937,69 +2937,69 @@ class TestInsightsFlowAPI(APIBaseTest):
         # isn't enough - person:read is required, same as the blast-radius preview.
         write_only_key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="write only", user=self.user, secure_value=hash_key_value(write_only_key), scopes=["hog_flow:write"]
+            label="write only", user=self.user, secure_value=hash_key_value(write_only_key), scopes=["insights_flow:write"]
         )
         write_only = api_client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {},
             headers={"authorization": f"Bearer {write_only_key}"},
         )
         assert write_only.status_code == 403, write_only.json()
         assert "person:read" in write_only.json().get("detail", "")
 
-    def test_post_hog_flow_batch_jobs_endpoint_rejects_non_active_workflow(self):
+    def test_post_insights_flow_batch_jobs_endpoint_rejects_non_active_workflow(self):
         # A batch run is gated on an enabled workflow — a draft (or archived) one can't start a broadcast.
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create_response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"variables": [{"key": "first_name", "value": "Test"}]},
         )
         assert response.status_code == 400, response.json()
         assert "active" in response.json()["detail"].lower()
 
-    def test_post_hog_flow_batch_jobs_endpoint_nonexistent_flow(self):
+    def test_post_insights_flow_batch_jobs_endpoint_nonexistent_flow(self):
         batch_job_data = {"variables": [{"key": "first_name", "value": "Test"}]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows/99999/batch_jobs", batch_job_data)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/99999/batch_jobs", batch_job_data)
 
         assert response.status_code == 404, response.json()
 
     @patch(
-        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
-    def test_get_hog_flow_batch_jobs_only_returns_jobs_for_flow(self, mock_create_invocation):
+    def test_get_insights_flow_batch_jobs_only_returns_jobs_for_flow(self, mock_create_invocation):
         # Both must be active — the batch_jobs POST is gated on an enabled workflow.
-        flow_id = self._create_active_hog_flow()
-        flow_id_2 = self._create_active_hog_flow()
+        flow_id = self._create_active_insights_flow()
+        flow_id_2 = self._create_active_insights_flow()
 
         # Create batch jobs for both flows
         batch_job_data_1 = {"variables": [{"key": "first_name", "value": "Test1"}]}
         batch_job_data_2 = {"variables": [{"key": "first_name", "value": "Test2"}]}
 
         job_response_1 = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs", batch_job_data_1
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data_1
         )
         assert job_response_1.status_code == 200, job_response_1.json()
 
         job_response_2 = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id_2}/batch_jobs", batch_job_data_2
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id_2}/batch_jobs", batch_job_data_2
         )
         assert job_response_2.status_code == 200, job_response_2.json()
 
         # Fetch jobs for the first flow
-        get_response = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{flow_id}/batch_jobs")
+        get_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs")
         assert get_response.status_code == 200, get_response.json()
         jobs = get_response.json()
         assert len(jobs) == 1
         assert jobs[0]["id"] == job_response_1.json()["id"]
 
-    def test_hog_flow_filter_test_accounts_compiles_bytecode(self):
+    def test_insights_flow_filter_test_accounts_compiles_bytecode(self):
         """Test that filter_test_accounts includes team's test account filters in bytecode"""
         # Set up test account filters on the team
         self.team.test_account_filters = [
@@ -3025,13 +3025,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow_without = {
+        insights_flow_without = {
             "name": "Test Flow Without Filter",
             "status": "active",
             "actions": [trigger_action_without_filter],
         }
 
-        response_without = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow_without)
+        response_without = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow_without)
         assert response_without.status_code == 201, response_without.json()
 
         # Bytecode should just check for $pageview event
@@ -3052,13 +3052,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        hog_flow_with = {
+        insights_flow_with = {
             "name": "Test Flow With Filter",
             "status": "active",
             "actions": [trigger_action_with_filter],
         }
 
-        response_with = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow_with)
+        response_with = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow_with)
         assert response_with.status_code == 201, response_with.json()
 
         # Bytecode should be in trigger.filters.bytecode
@@ -3074,20 +3074,20 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "email" in bytecode_with, "Bytecode should include email property check"
         assert "person" in bytecode_with, "Bytecode should include person property type"
 
-    def test_hog_flow_draft_compiles_bytecode_for_complete_actions(self):
-        hog_flow, action = self._create_hog_flow_with_action(
+    def test_insights_flow_draft_compiles_bytecode_for_complete_actions(self):
+        insights_flow, action = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        hog_flow["status"] = "draft"
+        insights_flow["status"] = "draft"
 
         action["filters"] = {
             "properties": [{"key": "event", "type": "event_metadata", "value": ["custom_event"], "operator": "exact"}]
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         flow = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -3100,22 +3100,22 @@ class TestInsightsFlowAPI(APIBaseTest):
             "url": {"order": 0, "value": "https://example.com", "bytecode": ["_H", 1, 32, "https://example.com"]}
         }
 
-    def test_hog_flow_draft_to_active_compiles_bytecode(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+    def test_insights_flow_draft_to_active_compiles_bytecode(self):
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        hog_flow["status"] = "draft"
+        insights_flow["status"] = "draft"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
 
         # Activate the draft — re-validation should compile bytecodes
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "active"},
         )
         assert response.status_code == 200, response.json()
@@ -3126,16 +3126,16 @@ class TestInsightsFlowAPI(APIBaseTest):
             "url": {"order": 0, "value": "https://example.com", "bytecode": ["_H", 1, 32, "https://example.com"]}
         }
 
-    def test_hog_flow_draft_partial_inputs_skips_input_bytecode(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+    def test_insights_flow_draft_partial_inputs_skips_input_bytecode(self):
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {},
             }
         )
-        hog_flow["status"] = "draft"
+        insights_flow["status"] = "draft"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         flow = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -3147,7 +3147,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # (is_valid() fails on the whole inputs serializer)
         assert flow.actions[1]["config"]["inputs"] == {}
 
-    def _get_hog_flow_activity(self, flow_id: Optional[str] = None) -> list:
+    def _get_insights_flow_activity(self, flow_id: Optional[str] = None) -> list:
         params: dict = {"scope": "InsightsFlow", "page": 1, "limit": 20}
         if flow_id:
             params["item_id"] = flow_id
@@ -3155,19 +3155,19 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert activity.status_code == status.HTTP_200_OK
         return activity.json().get("results")
 
-    def test_create_hog_flow_logs_activity(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+    def test_create_insights_flow_logs_activity(self):
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         flow_id = response.json()["id"]
         flow_name = response.json()["name"]
 
-        activity = self._get_hog_flow_activity(flow_id)
+        activity = self._get_insights_flow_activity(flow_id)
         assert len(activity) >= 1
 
         latest = activity[0]
@@ -3177,23 +3177,23 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert latest["detail"]["name"] == flow_name
         assert latest["detail"]["type"] == "standard"
 
-    def test_update_hog_flow_logs_activity(self):
-        hog_flow, _ = self._create_hog_flow_with_action(
+    def test_update_insights_flow_logs_activity(self):
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         flow_id = response.json()["id"]
         original_name = response.json()["name"]
 
         new_name = "Updated Flow Name"
-        update_response = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"name": new_name})
+        update_response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": new_name})
         assert update_response.status_code == status.HTTP_200_OK, update_response.json()
 
-        activity = self._get_hog_flow_activity(flow_id)
+        activity = self._get_insights_flow_activity(flow_id)
         assert len(activity) >= 2
 
         latest = activity[0]
@@ -3207,7 +3207,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert name_change["before"] == original_name
         assert name_change["after"] == new_name
 
-    def test_hog_flow_draft_allows_incomplete_actions(self):
+    def test_insights_flow_draft_allows_incomplete_actions(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -3226,17 +3226,17 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": {},
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Draft Flow",
             "status": "draft",
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "draft"
 
-    def test_hog_flow_active_rejects_incomplete_actions(self):
+    def test_insights_flow_active_rejects_incomplete_actions(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -3255,21 +3255,21 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": {},
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Active Flow",
             "status": "active",
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
-    def test_hog_flow_retrieve_does_not_leak_between_teams(self):
+    def test_insights_flow_retrieve_does_not_leak_between_teams(self):
         another_org = Organization.objects.create(name="other org")
         another_team = Team.objects.create(organization=another_org)
         another_user = User.objects.create_and_join(another_org, "other-script-flow@example.com", password="")
 
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
@@ -3277,19 +3277,19 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(another_user)
-        create_response = self.client.post(f"/api/projects/{another_team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         self.client.force_login(self.user)
-        response = self.client.get(f"/api/projects/{another_team.id}/hog_flows/{flow_id}")
+        response = self.client.get(f"/api/projects/{another_team.id}/insights_flows/{flow_id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_hog_flow_create_does_not_leak_between_teams(self):
+    def test_insights_flow_create_does_not_leak_between_teams(self):
         another_org = Organization.objects.create(name="other org")
         another_team = Team.objects.create(organization=another_org)
 
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
@@ -3297,15 +3297,15 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(self.user)
-        response = self.client.post(f"/api/projects/{another_team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_hog_flow_update_does_not_leak_between_teams(self):
+    def test_insights_flow_update_does_not_leak_between_teams(self):
         another_org = Organization.objects.create(name="other org")
         another_team = Team.objects.create(organization=another_org)
         another_user = User.objects.create_and_join(another_org, "other-script-flow-update@example.com", password="")
 
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
@@ -3313,23 +3313,23 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(another_user)
-        create_response = self.client.post(f"/api/projects/{another_team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         self.client.force_login(self.user)
         response = self.client.patch(
-            f"/api/projects/{another_team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{another_team.id}/insights_flows/{flow_id}",
             {"name": "updated by unauthorized user"},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_hog_flow_delete_does_not_leak_between_teams(self):
+    def test_insights_flow_delete_does_not_leak_between_teams(self):
         another_org = Organization.objects.create(name="other org")
         another_team = Team.objects.create(organization=another_org)
         another_user = User.objects.create_and_join(another_org, "other-script-flow-delete@example.com", password="")
 
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {
                 "template_id": "template-webhook",
                 "inputs": {"url": {"value": "https://example.com"}},
@@ -3337,15 +3337,15 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(another_user)
-        create_response = self.client.post(f"/api/projects/{another_team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         self.client.force_login(self.user)
-        response = self.client.delete(f"/api/projects/{another_team.id}/hog_flows/{flow_id}")
+        response = self.client.delete(f"/api/projects/{another_team.id}/insights_flows/{flow_id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_hog_flow_draft_invalid_can_be_archived(self):
+    def test_insights_flow_draft_invalid_can_be_archived(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -3364,25 +3364,25 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": {},
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Draft to Archive Flow",
             "status": "draft",
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
         assert response.json()["status"] == "draft"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "archived"},
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == "archived"
 
-    def test_hog_flow_draft_to_active_rejects_incomplete(self):
+    def test_insights_flow_draft_to_active_rejects_incomplete(self):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -3401,35 +3401,35 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": {},
         }
 
-        hog_flow = {
+        insights_flow = {
             "name": "Draft to Active Flow",
             "status": "draft",
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "active"},
         )
         assert response.status_code == 400, response.json()
 
     def _create_flow(self, name: str = "Test Flow", flow_status: str = "draft") -> str:
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}},
         )
-        hog_flow["name"] = name
-        hog_flow["status"] = flow_status
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow["name"] = name
+        insights_flow["status"] = flow_status
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         return response.json()["id"]
 
     def _archive_flow(self, flow_id: str) -> None:
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "archived"},
         )
         assert response.status_code == 200, response.json()
@@ -3440,7 +3440,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             self._archive_flow(fid)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": ids},
         )
         assert response.status_code == 200, response.json()
@@ -3448,17 +3448,17 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert InsightsFlow.objects.filter(id__in=ids).count() == 0
         assert ActivityLog.objects.filter(scope="InsightsFlow", activity="deleted", item_id__in=ids).count() == 3
 
-    @patch("products.workflows.backend.api.hog_flow.report_user_action")
+    @patch("products.workflows.backend.api.insights_flow.report_user_action")
     def test_delete_writes_deleted_activity_and_usage_event(self, mock_report):
         flow_id = self._create_flow(name="Doomed")
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/hog_flows/{flow_id}")
+        response = self.client.delete(f"/api/projects/{self.team.id}/insights_flows/{flow_id}")
         assert response.status_code == 204, response.content
         assert not InsightsFlow.objects.filter(id=flow_id).exists()
 
         entry = ActivityLog.objects.filter(scope="InsightsFlow", item_id=flow_id).order_by("-created_at").first()
         assert entry is not None and entry.activity == "deleted"
-        deleted_events = [c for c in mock_report.call_args_list if c.args[1] == "hog_flow_deleted"]
+        deleted_events = [c for c in mock_report.call_args_list if c.args[1] == "insights_flow_deleted"]
         assert len(deleted_events) == 1
         assert deleted_events[0].args[2]["workflow_id"] == flow_id
 
@@ -3472,7 +3472,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         flow_id = self._create_flow(flow_status=flow_status)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": [flow_id]},
         )
         assert response.status_code == 200, response.json()
@@ -3485,7 +3485,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         self._archive_flow(archived_id)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": [draft_id, archived_id]},
         )
         assert response.status_code == 200, response.json()
@@ -3495,21 +3495,21 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     def test_bulk_delete_rejects_empty_ids(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": []},
         )
         assert response.status_code == 400
 
     def test_bulk_delete_rejects_missing_ids(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
             {},
         )
         assert response.status_code == 400
 
     def test_bulk_delete_rejects_invalid_uuids(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": ["not-a-uuid", "also-bad"]},
         )
         assert response.status_code == 400
@@ -3520,17 +3520,17 @@ class TestInsightsFlowAPI(APIBaseTest):
         another_user = User.objects.create_and_join(another_org, "other-bulk-delete@example.com", password="")
 
         self.client.force_login(another_user)
-        hog_flow, _ = self._create_hog_flow_with_action(
+        insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}},
         )
-        create_response = self.client.post(f"/api/projects/{another_team.id}/hog_flows", hog_flow)
+        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201
         flow_id = create_response.json()["id"]
-        self.client.patch(f"/api/projects/{another_team.id}/hog_flows/{flow_id}", {"status": "archived"})
+        self.client.patch(f"/api/projects/{another_team.id}/insights_flows/{flow_id}", {"status": "archived"})
 
         self.client.force_login(self.user)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": [flow_id]},
         )
         assert response.status_code == 200, response.json()
@@ -3548,24 +3548,24 @@ class TestInsightsFlowAPI(APIBaseTest):
         self._archive_flow(flow_id)
 
         with (
-            patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers") as mock_reload,
+            patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers") as mock_reload,
             self.captureOnCommitCallbacks(execute=True),
         ):
             if delete_mode == "single_delete":
-                response = self.client.delete(f"/api/projects/{self.team.id}/hog_flows/{flow_id}")
+                response = self.client.delete(f"/api/projects/{self.team.id}/insights_flows/{flow_id}")
                 assert response.status_code == 204, response.content
             else:
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/hog_flows/bulk_delete",
+                    f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
                     {"ids": [flow_id]},
                 )
                 assert response.status_code == 200, response.json()
                 assert response.json()["deleted"] == 1
 
         assert not InsightsFlow.objects.filter(id=flow_id).exists()
-        mock_reload.assert_called_once_with(team_id=self.team.id, hog_flow_ids=[flow_id])
+        mock_reload.assert_called_once_with(team_id=self.team.id, insights_flow_ids=[flow_id])
 
-    def _base_hog_flow_with_variables(self, variables):
+    def _base_insights_flow_with_variables(self, variables):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -3612,8 +3612,8 @@ class TestInsightsFlowAPI(APIBaseTest):
         ]
     )
     def test_variables_validation(self, _name, variables, expected_status, expected_error):
-        hog_flow = self._base_hog_flow_with_variables(variables)
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        insights_flow = self._base_insights_flow_with_variables(variables)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == expected_status, response.json()
         if expected_error:
             assert response.json()["detail"] == expected_error
@@ -3647,15 +3647,15 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_unsupported_action_type_is_rejected_at_write_time(self, _name, action_type):
         # An action type with no worker handler can never run: it used to save fine and then kill
         # every run that reached it, silently dropping every step downstream.
-        hog_flow, _ = self._create_hog_flow_with_action({})
-        hog_flow["actions"][1] = {
+        insights_flow, _ = self._create_insights_flow_with_action({})
+        insights_flow["actions"][1] = {
             "id": "bad_node",
             "name": "Tag person",
             "type": action_type,
             "config": {"properties": {"onboarding_variant": "A"}},
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
@@ -3679,21 +3679,21 @@ class TestInsightsFlowAPI(APIBaseTest):
         # Closing the type field over a dict of choices makes an unhashable value (a JSON object or
         # array) raise TypeError out of the membership test. DRF only catches ValidationError, so it
         # escapes validation entirely and the endpoint 500s instead of rejecting the payload.
-        hog_flow, _ = self._create_hog_flow_with_action({})
-        hog_flow["actions"][1] = {"id": "bad_node", "name": "Tag person", "type": action_type, "config": {}}
+        insights_flow, _ = self._create_insights_flow_with_action({})
+        insights_flow["actions"][1] = {"id": "bad_node", "name": "Tag person", "type": action_type, "config": {}}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 400, response.json()
 
     def test_non_string_action_type_error_does_not_echo_the_payload(self):
         # The message interpolates the offending value, so a nested object would land in the response
         # body and the logs behind it.
-        hog_flow, _ = self._create_hog_flow_with_action({})
+        insights_flow, _ = self._create_insights_flow_with_action({})
         secret = "dont-echo-me-9f3a"
-        hog_flow["actions"][1] = {"id": "bad_node", "name": "Tag person", "type": {"k": secret}, "config": {}}
+        insights_flow["actions"][1] = {"id": "bad_node", "name": "Tag person", "type": {"k": secret}, "config": {}}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", hog_flow)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 400, response.json()
         assert secret not in response.json()["detail"]
@@ -3718,9 +3718,9 @@ class TestInsightsFlowGlobalStats(DatastoreTestMixin, APIBaseTest):
         self.flow_b = InsightsFlow.objects.create(team=self.team, name="Flow B")
 
     def _global(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/hog_flows/metrics/global/", params)
+        return self.client.get(f"/api/projects/{self.team.id}/insights_flows/metrics/global/", params)
 
-    def _seed(self, workflow_id, *, succeeded=0, failed=0, timestamp=None, team_id=None, app_source="hog_flow"):
+    def _seed(self, workflow_id, *, succeeded=0, failed=0, timestamp=None, team_id=None, app_source="insights_flow"):
         tid = team_id or self.team.pk
         if succeeded:
             create_app_metric2(
@@ -3795,15 +3795,15 @@ class TestInsightsFlowGlobalStats(DatastoreTestMixin, APIBaseTest):
         rows = self._global().json()
         assert {r["workflow_id"] for r in rows} == {str(self.flow_a.id)}
 
-    def test_personal_api_key_hog_flow_read_only_allowed(self):
-        # Aggregate counts carry no person data, so hog_flow:read alone is sufficient (no person:read).
+    def test_personal_api_key_insights_flow_read_only_allowed(self):
+        # Aggregate counts carry no person data, so insights_flow:read alone is sufficient (no person:read).
         self._seed(self.flow_a.id, failed=1)
         key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="hog_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["hog_flow:read"]
+            label="insights_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["insights_flow:read"]
         )
         res = self.client.get(
-            f"/api/projects/{self.team.id}/hog_flows/metrics/global/",
+            f"/api/projects/{self.team.id}/insights_flows/metrics/global/",
             headers={"authorization": f"Bearer {key}"},
         )
         assert res.status_code == status.HTTP_200_OK, res.json()
@@ -3844,17 +3844,17 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         return next(a for a in flow_json["actions"] if a["type"] == "function")["config"]["inputs"]
 
     def _create(self, api_key: str = "SUPER-SECRET") -> str:
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", self._flow_payload(api_key))
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_payload(api_key))
         assert response.status_code == 201, response.json()
         return response.json()["id"]
 
     def test_secret_action_input_is_encrypted_at_rest_and_masked_on_read(self):
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", self._flow_payload())
+        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_payload())
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
 
         # Masked on the create response and on retrieve; the non-secret input stays visible.
-        retrieve = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{flow_id}")
+        retrieve = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}")
         for body in (create.json(), retrieve.json()):
             inputs = self._function_inputs(body)
             assert inputs["api_key"] == {"secret": True}
@@ -3879,7 +3879,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
 
         payload = self._flow_payload()
         self._function_inputs(payload)["api_key"] = api_key_input
-        patch_res = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", payload)
+        patch_res = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", payload)
         assert patch_res.status_code == 200, patch_res.json()
 
         flow = InsightsFlow.objects.get(id=flow_id)
@@ -3888,7 +3888,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_metadata_only_update_leaves_secret_intact(self):
         # A PATCH that carries no actions must not clear the stored secret.
         flow_id = self._create()
-        patch_res = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"name": "Renamed"})
+        patch_res = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"})
         assert patch_res.status_code == 200, patch_res.json()
         flow = InsightsFlow.objects.get(id=flow_id)
         assert flow.encrypted_inputs["action_1"]["api_key"]["value"] == "SUPER-SECRET"
@@ -3897,14 +3897,14 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_publish_promotes_draft_secret_to_live_without_wiping(self, _flag):
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
 
         # Stage a draft (via MCP) that rotates the secret; live must stay untouched until publish.
         # Uses the /graph endpoint which is the MCP-sanctioned path for action edits.
         stage = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {
@@ -3924,13 +3924,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         assert "ROTATED-IN-DRAFT" not in json.dumps(flow.draft)
 
         with patch(
-            "products.workflows.backend.api.hog_flow.get_hog_flow_in_flight_count", side_effect=Exception("down")
+            "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count", side_effect=Exception("down")
         ):
-            confirm_token = self.client.post(f"/api/projects/{self.team.id}/hog_flows/{flow_id}/publish", {}).json()[
+            confirm_token = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {}).json()[
                 "confirm_token"
             ]
         publish = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/publish",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": confirm_token},
         )
         assert publish.status_code == 200, publish.json()
@@ -3943,7 +3943,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_activity_log_masks_secret_changes(self):
         flow_id = self._create()
         payload = self._flow_payload(api_key="ROTATED")
-        assert self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", payload).status_code == 200
+        assert self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", payload).status_code == 200
 
         activity = self.client.get(
             f"/api/projects/{self.team.pk}/activity_log",
@@ -3964,13 +3964,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
 
     def _publish_confirmed(self, flow_id: str):
         with patch(
-            "products.workflows.backend.api.hog_flow.get_hog_flow_in_flight_count", side_effect=Exception("down")
+            "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count", side_effect=Exception("down")
         ):
-            token = self.client.post(f"/api/projects/{self.team.id}/hog_flows/{flow_id}/publish", {}).json()[
+            token = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {}).json()[
                 "confirm_token"
             ]
         res = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/publish",
+            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": token},
         )
         assert res.status_code == 200, res.json()
@@ -3982,7 +3982,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # stay stripped, with the secret only in encrypted_inputs.
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
         flow = InsightsFlow.objects.get(id=flow_id)
@@ -3994,7 +3994,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_restore_reattaches_live_secret_not_historical(self, _flag):
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
 
@@ -4004,7 +4004,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # would never bump a version to restore.
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
                 {
                     "operations": [
                         {
@@ -4030,13 +4030,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         assert flow.encrypted_inputs["action_1"]["api_key"]["value"] == "ROTATED"
 
         # Restore the pre-rotation revision into the draft, then publish it.
-        restore = self.client.post(f"/api/projects/{self.team.id}/hog_flows/{flow_id}/revisions/1/restore", {})
+        restore = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
         assert restore.status_code == 200, restore.json()
         flow.refresh_from_db()
         assert flow.draft_encrypted_inputs is None  # restore clears stale draft secrets
 
         # The restored revision snapshot never carried the secret in plaintext.
-        revision = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{flow_id}/revisions/1").json()
+        revision = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1").json()
         rev_inputs = next(a for a in revision["content"]["actions"] if a["type"] == "function")["config"]["inputs"]
         assert "api_key" not in rev_inputs
 
@@ -4055,7 +4055,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # path - reject it outright on the normal write path (not just the /graph endpoint).
         payload = self._flow_payload()
         payload["actions"].append({**payload["actions"][1], "name": "dupe"})  # second action reuses action_1's id
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", payload)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", payload)
         assert response.status_code == 400, response.json()
         assert "Duplicate action id" in str(response.json())
 
@@ -4066,11 +4066,11 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # has to normalize both sides secret-free or every such save spuriously bumps the version.
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
         # GET returns the stored shape with the secret masked - exactly what a client resubmits.
-        masked_actions = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{flow_id}").json()["actions"]
+        masked_actions = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}").json()["actions"]
         assert next(a for a in masked_actions if a["type"] == "function")["config"]["inputs"]["api_key"] == {
             "secret": True
         }
@@ -4078,7 +4078,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # First resave settles any create-vs-update shape defaults; the second identical one is the no-op.
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"actions": masked_actions}
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": masked_actions}
             ).status_code
             == 200
         )
@@ -4086,7 +4086,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
 
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"actions": masked_actions}
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": masked_actions}
             ).status_code
             == 200
         )
@@ -4103,10 +4103,10 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         config = self._flow_payload()
         self._function_inputs(config)["api_key"] = {"secret": True}
 
-        with patch("products.workflows.backend.api.hog_flow.create_hog_flow_invocation_test") as mock_invoke:
+        with patch("products.workflows.backend.api.insights_flow.create_insights_flow_invocation_test") as mock_invoke:
             mock_invoke.return_value = MagicMock(status_code=200, json=lambda: {"status": "success"})
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_flows/{flow_id}/invocations/",
+                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/invocations/",
                 data={
                     "globals": {"event": {"event": "$pageview", "distinct_id": "d"}},
                     "mock_async_functions": True,
@@ -4141,13 +4141,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         )
 
         # Retrieve (full serializer, includes actions).
-        body = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{flow.id}").json()
+        body = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow.id}").json()
         assert body["trigger"]["inputs"]["api_key"] == {"secret": True}
         assert "TRIGGER-SECRET" not in json.dumps(body)
 
         # MCP list (summary serializer) omits actions but still returns trigger, so it can't re-derive
         # the mask from actions - the trigger must be masked independently or the secret leaks here.
-        listing = self.client.get(f"/api/projects/{self.team.id}/hog_flows", HTTP_X_POSTFN_CLIENT="mcp").json()
+        listing = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_POSTFN_CLIENT="mcp").json()
         row = next(r for r in listing["results"] if r["id"] == str(flow.id))
         assert "actions" not in row
         assert row["trigger"]["inputs"]["api_key"] == {"secret": True}
@@ -4197,13 +4197,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
             },
         }
         resp = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow.id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow.id}",
             {"actions": [trigger, changed_action]},
         )
         assert resp.status_code == 200, resp.json()
 
         # The bootstrap revision (v1) snapshots the prior legacy state - it must not carry the plaintext.
-        revision = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{flow.id}/revisions/1").json()
+        revision = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow.id}/revisions/1").json()
         rev_inputs = next(a for a in revision["content"]["actions"] if a["type"] == "function")["config"]["inputs"]
         assert "api_key" not in rev_inputs
         assert "LEGACY-SECRET" not in json.dumps(revision)

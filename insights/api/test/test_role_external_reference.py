@@ -5,7 +5,7 @@ from insights.models.organization import Organization, OrganizationMembership
 from insights.models.role_external_reference import RoleExternalReference
 
 from ee.api.test.base import APILicensedTest
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 
 class TestRoleExternalReferenceAPI(APILicensedTest):

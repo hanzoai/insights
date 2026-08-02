@@ -65,7 +65,7 @@ from products.notebooks.backend.temporal.sql_v2 import (
     mark_sql_v2_run_failed_activity,
 )
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 def _restrict_query_access(test: APIBaseTest) -> None:

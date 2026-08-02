@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from insights.api.shared import UserBasicSerializer
 
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
 
 logger = structlog.get_logger(__name__)
 
@@ -16,7 +16,7 @@ class InsightsFlowBatchJobSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "status",
-            "hog_flow",
+            "insights_flow",
             "filters",
             "variables",
             "created_at",
@@ -37,7 +37,7 @@ class InsightsFlowBatchJobSerializer(serializers.ModelSerializer):
                     "endpoints for run outcome."
                 )
             },
-            "hog_flow": {"help_text": "ID of the workflow this batch run belongs to."},
+            "insights_flow": {"help_text": "ID of the workflow this batch run belongs to."},
             "filters": {
                 "help_text": "Audience snapshot the run fanned out to, taken from the workflow's batch trigger filters."
             },

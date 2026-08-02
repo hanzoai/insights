@@ -24,7 +24,7 @@ from products.customer_analytics.backend.test.factories import create_account, c
 from products.notebooks.backend.models import Notebook, ResourceNotebook
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

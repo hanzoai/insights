@@ -2,7 +2,7 @@ from insights.test.base import APIBaseTest
 
 from parameterized import parameterized
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 TRIGGER = {
     "id": "trigger_node",
@@ -30,7 +30,7 @@ def wait_on(insightsql: str) -> dict:
 class TestClockBasedWaitRejection(APIBaseTest):
     def _post(self, wait: dict) -> tuple[int, dict]:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows",
+            f"/api/projects/{self.team.id}/insights_flows",
             {"name": "Test Flow", "status": "active", "actions": [TRIGGER, wait]},
         )
         return response.status_code, response.json()
@@ -95,7 +95,7 @@ class TestClockBasedWaitRejection(APIBaseTest):
         # Drafts from the web builder stay lenient so a half-built graph saves. The gate applies when
         # the flow is activated, which is the point at which the wait would actually run.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/hog_flows",
+            f"/api/projects/{self.team.id}/insights_flows",
             {
                 "name": "Test Flow",
                 "status": "draft",
@@ -129,7 +129,7 @@ class TestGrandfatheredClockWaits(APIBaseTest):
         flow = self._legacy_flow()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow.id}",
+            f"/api/projects/{self.team.id}/insights_flows/{flow.id}",
             {"description": "unrelated edit", "actions": flow.actions},
         )
 
@@ -139,7 +139,7 @@ class TestGrandfatheredClockWaits(APIBaseTest):
         # Activation re-runs the stored actions with full checks and submits no actions of its own.
         flow = self._legacy_flow(status="draft")
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow.id}", {"status": "active"})
+        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow.id}", {"status": "active"})
 
         assert response.status_code == 200, response.json()
 
@@ -149,7 +149,7 @@ class TestGrandfatheredClockWaits(APIBaseTest):
         flow = self._legacy_flow()
         edited = [TRIGGER, wait_on("now() >= toDateTime(person.properties.something_else)")]
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow.id}", {"actions": edited})
+        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow.id}", {"actions": edited})
 
         assert response.status_code == 400, response.json()
         assert "depends on the current time" in str(response.json())
@@ -160,7 +160,7 @@ class TestGrandfatheredClockWaits(APIBaseTest):
         added = dict(wait_on("now() >= toDateTime(person.properties.other_at)"), id="wait_2", name="wait_2")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow.id}", {"actions": [*flow.actions, added]}
+            f"/api/projects/{self.team.id}/insights_flows/{flow.id}", {"actions": [*flow.actions, added]}
         )
 
         assert response.status_code == 400, response.json()

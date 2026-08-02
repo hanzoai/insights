@@ -15,7 +15,7 @@ from insights.api.shared import UserBasicSerializer
 from insights.models.role_external_reference import RoleExternalReference
 from insights.permissions import OrganizationAdminWritePermissions, TimeSensitiveActionPermission
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 
 class OrganizationRoleScopedPrimaryKeyRelatedField(OrgScopedPrimaryKeyRelatedField):

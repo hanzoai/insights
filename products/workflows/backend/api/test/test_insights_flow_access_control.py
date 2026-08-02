@@ -11,12 +11,12 @@ from insights.models.organization import OrganizationMembership
 from insights.models.user import User
 from insights.rbac.user_access_control import ACCESS_CONTROL_RESOURCES, model_to_resource
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
-from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 
@@ -36,17 +36,17 @@ MISSING_SCHEDULE_ID = "00000000-0000-0000-0000-000000000000"
 
 
 class TestInsightsFlowResourceRegistration(SimpleTestCase):
-    def test_hog_flow_is_a_controllable_resource(self):
-        self.assertIn("hog_flow", ACCESS_CONTROL_RESOURCES)
+    def test_insights_flow_is_a_controllable_resource(self):
+        self.assertIn("insights_flow", ACCESS_CONTROL_RESOURCES)
 
-    def test_hog_flow_model_maps_to_hog_flow_resource(self):
-        self.assertEqual(model_to_resource(InsightsFlow()), "hog_flow")
+    def test_insights_flow_model_maps_to_insights_flow_resource(self):
+        self.assertEqual(model_to_resource(InsightsFlow()), "insights_flow")
 
     @parameterized.expand([("batch_job", InsightsFlowBatchJob), ("schedule", InsightsFlowSchedule)])
-    def test_child_models_inherit_parent_hog_flow_resource(self, _name, model_cls):
+    def test_child_models_inherit_parent_insights_flow_resource(self, _name, model_cls):
         # Batch jobs and schedules have no route of their own, so access control on them resolves to the
         # parent workflow resource via the model_to_resource override.
-        self.assertEqual(model_to_resource(model_cls()), "hog_flow")
+        self.assertEqual(model_to_resource(model_cls()), "insights_flow")
 
 
 @pytest.mark.ee
@@ -64,7 +64,7 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
         self.editor_user = User.objects.create_and_join(self.organization, "editor@hanzo.ai", "testtest")
         self.no_access_user = User.objects.create_and_join(self.organization, "noaccess@hanzo.ai", "testtest")
 
-        self.hog_flow = self._create_workflow(name="my_workflow")
+        self.insights_flow = self._create_workflow(name="my_workflow")
 
     def _create_workflow(self, name="my_workflow", state=InsightsFlow.State.DRAFT) -> InsightsFlow:
         return InsightsFlow.objects.create(
@@ -76,7 +76,7 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
             edges=[],
         )
 
-    def _create_access_control(self, user, resource="hog_flow", resource_id=None, access_level="viewer"):
+    def _create_access_control(self, user, resource="insights_flow", resource_id=None, access_level="viewer"):
         membership = OrganizationMembership.objects.get(user=user, organization=self.organization)
         return AccessControl.objects.create(
             team=self.team,
@@ -86,7 +86,7 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
             organization_member=membership,
         )
 
-    def _create_project_default(self, resource="hog_flow", access_level="none"):
+    def _create_project_default(self, resource="insights_flow", access_level="none"):
         return AccessControl.objects.create(
             team=self.team,
             resource=resource,
@@ -97,10 +97,10 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
         )
 
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.pk}/hog_flows"
+        return f"/api/projects/{self.team.pk}/insights_flows"
 
     def _detail_url(self, flow_id=None) -> str:
-        return f"/api/projects/{self.team.pk}/hog_flows/{flow_id or self.hog_flow.id}"
+        return f"/api/projects/{self.team.pk}/insights_flows/{flow_id or self.insights_flow.id}"
 
     def _create_payload(self, name="new_workflow") -> dict:
         return {"name": name, "actions": [TRIGGER_ACTION]}
@@ -151,12 +151,12 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
 
     def test_object_level_none_blocks_and_excludes_from_list(self):
         self._create_access_control(self.viewer_user, access_level="viewer")
-        self._create_access_control(self.viewer_user, resource_id=str(self.hog_flow.id), access_level="none")
+        self._create_access_control(self.viewer_user, resource_id=str(self.insights_flow.id), access_level="none")
         self.client.force_login(self.viewer_user)
 
         self.assertEqual(self.client.get(self._detail_url()).status_code, status.HTTP_403_FORBIDDEN)
         ids = [row["id"] for row in self.client.get(self._list_url()).json()["results"]]
-        self.assertNotIn(str(self.hog_flow.id), ids)
+        self.assertNotIn(str(self.insights_flow.id), ids)
 
     def test_create_blocked_without_resource_editor_access(self):
         # A project default of "none" leaves the member below editor, so create is rejected.
@@ -195,7 +195,7 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
     def test_custom_actions_enforce_object_level_access(self, _label, method, suffix, body):
         # An object-level "none" on the workflow must 403 every custom action — they all resolve the parent
         # workflow via self.get_object() first (and must not swallow the resulting PermissionDenied).
-        self._create_access_control(self.no_access_user, resource_id=str(self.hog_flow.id), access_level="none")
+        self._create_access_control(self.no_access_user, resource_id=str(self.insights_flow.id), access_level="none")
         self.client.force_login(self.no_access_user)
 
         url = self._detail_url() + suffix
@@ -233,7 +233,7 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
         # workflow". A viewer grant on a single workflow must not unlock the project-wide audience count:
         # the action requires resource-level workflow access.
         self._create_project_default(access_level="none")
-        self._create_access_control(self.no_access_user, resource_id=str(self.hog_flow.id), access_level="viewer")
+        self._create_access_control(self.no_access_user, resource_id=str(self.insights_flow.id), access_level="viewer")
         self.client.force_login(self.no_access_user)
 
         response = self.client.post(
@@ -245,7 +245,7 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
 
     def test_org_admin_bypasses_object_level_denial(self):
         # self.user is the organization owner; object-level denials never apply to org admins.
-        self._create_access_control(self.user, resource_id=str(self.hog_flow.id), access_level="none")
+        self._create_access_control(self.user, resource_id=str(self.insights_flow.id), access_level="none")
         self.client.force_login(self.user)
         self.assertEqual(self.client.get(self._detail_url()).status_code, status.HTTP_200_OK)
 
@@ -253,6 +253,6 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
         # Drop the entitlement — access control rows become inert and ordinary members regain access.
         self.organization.available_product_features = []
         self.organization.save()
-        self._create_access_control(self.no_access_user, resource_id=str(self.hog_flow.id), access_level="none")
+        self._create_access_control(self.no_access_user, resource_id=str(self.insights_flow.id), access_level="none")
         self.client.force_login(self.no_access_user)
         self.assertEqual(self.client.get(self._detail_url()).status_code, status.HTTP_200_OK)
