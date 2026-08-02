@@ -3,6 +3,7 @@ import { router } from 'kea-router'
 
 import { IconBell } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
 import { QueryBasedInsightModel } from '~/types'
@@ -15,8 +16,18 @@ interface SceneSubscribeButtonProps extends SubscriptionBaseProps, SceneDataAttr
     dashboardId?: number
 }
 
-export function SceneSubscribeButton({ dataAttrKey, insight, dashboardId }: SceneSubscribeButtonProps): JSX.Element {
+export function SceneSubscribeButton({
+    dataAttrKey,
+    insight,
+    dashboardId,
+}: SceneSubscribeButtonProps): JSX.Element | null {
     const { push } = useActions(router)
+
+    // A menu item on every insight and dashboard, opening a modal that can only report the
+    // capability is absent. An entry point that leads nowhere is better not drawn.
+    if (!CAPABILITIES.subscriptions.available) {
+        return null
+    }
 
     return (
         <ButtonPrimitive

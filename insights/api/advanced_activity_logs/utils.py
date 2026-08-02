@@ -6,11 +6,9 @@ from django.utils import timezone
 from insights.constants import AvailableFeature
 from insights.models import Organization
 
-from .constants import ADVANCED_ACTIVITY_LOGS_LOOKBACK_FALLBACK_LIMIT, ADVANCED_ACTIVITY_LOGS_LOOKBACK_FALLBACK_UNIT
-
 
 def get_activity_log_lookback_restriction(organization: Organization) -> Optional[datetime]:
-    """Get the lookback restriction date based on the AUDIT_LOGS feature."""
+    """The earliest activity this organization may read, or None for no restriction."""
     audit_log_feature = organization.get_available_feature(AvailableFeature.AUDIT_LOGS)
 
     if not audit_log_feature:
@@ -19,9 +17,14 @@ def get_activity_log_lookback_restriction(organization: Organization) -> Optiona
     limit = audit_log_feature.get("limit")
     unit = audit_log_feature.get("unit")
 
+    # A feature that states no limit places no restriction, exactly as it does for projects
+    # (`api/project.py`), alerts (`models/alert.py`) and replay retention
+    # (`session_recordings/data_retention.py`). This used to fall back to the smallest window
+    # billing ever sold, which inverted the gate: an organization WITHOUT the feature read its
+    # whole history, and one WITH it was silently cut to 60 days. There is no billing here to
+    # name a smaller window, and truncating an audit log is not something to infer.
     if limit is None or unit is None:
-        limit = ADVANCED_ACTIVITY_LOGS_LOOKBACK_FALLBACK_LIMIT
-        unit = ADVANCED_ACTIVITY_LOGS_LOOKBACK_FALLBACK_UNIT
+        return None
 
     unit_lower = unit.lower()
     if unit_lower in ("day", "days"):

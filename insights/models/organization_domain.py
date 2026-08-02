@@ -108,9 +108,16 @@ class OrganizationDomainManager(models.Manager):
                 return None
         else:
             sso_providers = get_instance_available_sso_providers()
-            if not sso_providers[candidate_sso_enforcement]:
+            # `.get`, not `[...]`. `sso_enforcement` is a plain CharField with no choices and no
+            # validator, so it holds whatever was written to it, while this map holds only the
+            # providers this instance builds — two of them. Indexing it raised `KeyError` for
+            # anything else, and this is read by `login/precheck`, which is unauthenticated: one
+            # unrecognised value would have answered 500 to everyone at that domain rather than
+            # letting them log in. An enforcement that names no provider cannot be honoured, which
+            # is the same conclusion this branch already reaches for one that is misconfigured.
+            if not sso_providers.get(candidate_sso_enforcement):
                 logger.warning(
-                    f"SSO is enforced for domain {domain} but the SSO provider ({candidate_sso_enforcement}) is not properly configured.",
+                    f"SSO is enforced for domain {domain} but the SSO provider ({candidate_sso_enforcement}) is not available.",
                     domain=domain,
                     candidate_sso_enforcement=candidate_sso_enforcement,
                 )
