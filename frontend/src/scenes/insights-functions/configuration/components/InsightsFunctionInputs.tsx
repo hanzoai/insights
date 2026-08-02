@@ -1,15 +1,14 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconPlus, IconX } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconCheck, IconPlus, IconX } from '@hanzo/icons'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
-import { PayGateButton } from 'lib/components/PayGateMini/PayGateButton'
 import MaxTool from 'scenes/max/MaxTool'
 
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
-import { AvailableFeature, CyclotronJobInputSchemaType } from '~/types'
+import { CyclotronJobInputSchemaType } from '~/types'
 
 import { insightsFunctionConfigurationLogic } from '../insightsFunctionConfigurationLogic'
 
@@ -43,9 +42,8 @@ export function InsightsFunctionInputs(): JSX.Element {
                 {usesGroups && !hasGroupsAddon ? (
                     <Banner type="warning">
                         <span className="flex gap-2 items-center">
-                            This function appears to use Groups but you do not have the Groups Analytics addon. Without
-                            it, you may see empty values where you use templates like {'"{groups.kind.properties}"'}
-                            <PayGateButton feature={AvailableFeature.GROUP_ANALYTICS} type="secondary" />
+                            This function appears to use groups, which this deployment does not serve. Templates like{' '}
+                            {'"{groups.kind.properties}"'} will resolve to empty values.
                         </span>
                     </Banner>
                 ) : null}
