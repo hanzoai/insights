@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
     operations = [
         AddIndexConcurrently(
             model_name="errortrackingissueassignment",
-            index=models.Index(fields=["team_id"], name="insights_et_assignment_team_idx"),
+            index=models.Index(fields=["team_id"], name="et_assignment_team_idx"),
         ),
     ]
