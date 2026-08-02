@@ -2,7 +2,7 @@ import { useActions, useMountedLogic, useValues } from 'kea'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { elapsedSecondsFrom } from 'lib/utils/datetime'
 import { inStorybookTestRunner } from 'lib/utils/dom'
 
@@ -83,13 +83,13 @@ export function useLocalWizardRunActive(workflowId?: string): boolean {
 }
 
 /**
- * Hogfetti for a PR merged while the user is watching, exactly once per mount. Gated on the live
+ * Confetti for a PR merged while the user is watching, exactly once per mount. Gated on the live
  * false → true transition: starts null so the first hydrated state (SSE replay / poll snapshot
  * arrives async after mount) arms the detector instead of reading as a transition — otherwise every
  * reload of a merged run re-fires. Quiet in the storybook test runner and under reduced motion.
  */
 export function useMergeCelebration(prMerged: boolean): { CelebrationComponent: React.FC } {
-    const { trigger: triggerHogfetti, HogfettiComponent } = useHogfetti()
+    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti()
     const prevMergedRef = useRef<boolean | null>(null)
     const mergeCelebratedRef = useRef(false)
     useEffect(() => {
@@ -102,7 +102,7 @@ export function useMergeCelebration(prMerged: boolean): { CelebrationComponent: 
             return
         }
         mergeCelebratedRef.current = true
-        triggerHogfetti()
-    }, [prMerged, triggerHogfetti])
-    return { CelebrationComponent: HogfettiComponent }
+        triggerConfetti()
+    }, [prMerged, triggerConfetti])
+    return { CelebrationComponent: ConfettiComponent }
 }
