@@ -73,7 +73,7 @@ const recapMock: WebAnalyticsRecapResponseApi = {
 const meta: Meta = {
     component: App,
     title: 'Scenes-App/Web Analytics/Weekly Recap',
-    // Animated scene (count-up + Hogfetti) — viewable in Storybook but excluded from visual snapshots.
+    // Animated scene (count-up + Confetti) — viewable in Storybook but excluded from visual snapshots.
     tags: ['test-skip'],
     parameters: {
         layout: 'fullscreen',

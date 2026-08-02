@@ -158,8 +158,6 @@ export const productRoutes: Record<string, [string, string]> = {
     '/error_tracking/alerts/new/:templateId': ['InsightsFunction', 'errorTrackingAlertNew'],
     '/feature_flags/templates': ['FeatureFlagTemplates', 'featureFlagTemplates'],
     '/feature_flags/staff': ['FeatureFlagsStaffTools', 'featureFlagsStaffTools'],
-    '/games/368mascots': ['Game368Mascots', 'game368Mascots'],
-    '/games/flappyhog': ['FlappyHog', 'flappyHog'],
     '/identity-matching': ['IdentityMatching', 'identityMatching'],
     '/legal': ['LegalDocuments', 'legalDocuments'],
     '/legal/new/:type': ['LegalDocumentNew', 'legalDocumentNew'],
@@ -652,8 +650,6 @@ export const productConfiguration: Record<string, any> = {
     ErrorTrackingFingerprint: { projectBased: true, name: 'Error tracking fingerprint' },
     FeatureFlagTemplates: { projectBased: true, name: 'Feature flag templates' },
     FeatureFlagsStaffTools: { instanceLevel: true, name: 'Flags staff tools' },
-    Game368Mascots: { name: '368Mascots', projectBased: true, activityScope: 'Games' },
-    FlappyHog: { name: 'FlappyHog', projectBased: true, activityScope: 'Games' },
     IdentityMatching: {
         name: 'Identity matching',
         projectBased: true,
@@ -1194,8 +1190,6 @@ export const productUrls = {
         }
         return `/feature_flags/new?${params.toString()}`
     },
-    game368mascots: (): string => `/games/368mascots`,
-    flappyHog: (): string => `/games/flappyhog`,
     groups: (groupTypeIndex: string | number): string => `/groups/${groupTypeIndex}`,
     groupsNew: (groupTypeIndex: string | number): string => `/groups/${groupTypeIndex}/new`,
     group: (groupTypeIndex: string | number, groupKey: string, encode: boolean = true, tab?: string | null): string =>
@@ -2441,8 +2435,6 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
 
 /** This const is auto-generated, as is the whole file */
 export const getTreeItemsGames = (): FileSystemImport[] => [
-    { path: '368 Mascots', href: urls.game368mascots() },
-    { path: 'Flappy Script', href: '/games/flappyhog' },
 ]
 
 /** This const is auto-generated, as is the whole file */
