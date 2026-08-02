@@ -7,7 +7,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("workflows", "0011_hogflowrevision"),
+        ("workflows", "0011_insightsflowrevision"),
     ]
 
     operations = [
