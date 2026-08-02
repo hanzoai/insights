@@ -42,6 +42,6 @@ class ZendeskImportJob(TeamScopedRootMixin, UUIDModel):
         app_label = "conversations"
         db_table = "insights_conversations_zendesk_import_job"
         indexes = [
-            models.Index(fields=["team", "-created_at"], name="insights_con_zd_import_team_idx"),
-            models.Index(fields=["team", "status"], name="insights_con_zd_import_stat_idx"),
+            models.Index(fields=["team", "-created_at"], name="con_zd_import_team_idx"),
+            models.Index(fields=["team", "status"], name="con_zd_import_stat_idx"),
         ]
