@@ -4,9 +4,9 @@ import { DraggableSyntheticListeners } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { BuiltLogic, useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
 import { useCallback, useState } from 'react'
 
+import { Badge, Checkbox, Divider, Link, Menu, Select, SelectOption, SelectOptions } from '@hanzo/elements'
 import {
     IconCopy,
     IconEllipsis,
@@ -16,16 +16,7 @@ import {
     IconTrash,
     IconWarning,
 } from '@hanzo/icons'
-import {
-    Badge,
-    Checkbox,
-    Divider,
-    Menu,
-    Select,
-    SelectOption,
-    SelectOptions,
-    Link,
-} from '@hanzo/elements'
+import insights from '@hanzo/insights'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
@@ -44,11 +35,11 @@ import {
     TaxonomicPopoverProps,
     TaxonomicStringPopover,
 } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Button, ButtonProps } from 'lib/elements/Button'
 import { Dropdown } from 'lib/elements/Dropdown'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { IconWithCount, SortableDragIcon } from 'lib/elements/icons'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { capitalizeFirstLetter, getEventNamesForAction } from 'lib/utils'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
@@ -86,9 +77,9 @@ import {
     EntityType,
     EntityTypes,
     FunnelExclusionLegacy,
-    InsightsQLMathType,
     InsightShortId,
     InsightType,
+    InsightsQLMathType,
     PropertyFilterType,
     PropertyFilterValue,
     PropertyMathType,
@@ -1361,7 +1352,7 @@ function useMathSelectorOptions({
     return [
         {
             options,
-            footer: !isGroupsEnabled ? <GroupIntroductionFooter needsUpgrade={needsUpgradeForGroups} /> : undefined,
+            footer: !isGroupsEnabled ? <GroupIntroductionFooter /> : undefined,
         },
     ]
 }
