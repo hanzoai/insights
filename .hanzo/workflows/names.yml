@@ -1,0 +1,76 @@
+# insights — the names must hold.
+#
+# This fork is a rename of an upstream tree, and a rename is only worth doing
+# once. Every convergence re-imports 41,743 upstream files that all say the old
+# name, so without a gate the brand comes back a few files at a time and nobody
+# sees it until it ships. `bin/debrand` holds the rules; this makes them
+# enforceable.
+#
+# GitHub Actions is disabled account-wide, so a green `.github/workflows/*`
+# gates nothing. This is a real check because it runs on the forge.
+#
+# TWO GATES, DELIBERATELY SEPARATE.
+#
+#   deploy.yml  runs `bin/debrand --check`, and the build stops if it fails.
+#               That rule is absolute — zero tracked paths and zero
+#               unallowlisted files name the upstream, on every tree we ship —
+#               so a violation is a fact, not an opinion, and an image must not
+#               be built from it.
+#
+#   this file   runs `--check --since`, which ADDS the differential rules: no
+#               change may reintroduce the design-system prefix we stripped, or
+#               put `person`/`team` on a route we own. Those encode a judgement,
+#               and a judgement belongs on a branch where a human can answer it
+#               — never on the path that ships. This job going red is loud and
+#               costs nothing; wedging a self-deploying repo over a naming call
+#               would cost a day.
+#
+# Scoped to main and pull requests on purpose. A mirror sync fires one push
+# event per ref, and this repo has 59 branches and 29 tags — an unscoped
+# trigger would enqueue 88 runs onto the shared FIFO and starve every other
+# repo's builds, which has happened here before.
+name: names
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Nothing here publishes anything, so superseding an in-flight run is free.
+concurrency:
+  group: insights-names-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The ratchet compares against the commit this change forked from, so
+          # that commit has to be in the clone. A shallow checkout reaches HEAD
+          # and not its ancestor, and `git diff` against a ref that is not there
+          # yields an empty diff — which reads exactly like a clean change.
+          # bin/debrand refuses that case rather than passing on nothing, so a
+          # shallow clone here would surface as a false red, not a silent pass.
+          fetch-depth: 0
+
+      - name: Names
+        env:
+          # A push event names the commit it moved from; a pull request names
+          # the commit it targets. Exactly one of these is set per event.
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          SINCE="${BASE:-${BEFORE:-}}"
+
+          # A branch's first push reports an all-zero "before" because there is
+          # no previous tip. There is genuinely nothing to compare, so check the
+          # tree invariant and say so, rather than inventing a base.
+          if [ -z "$SINCE" ] || [ "$SINCE" = "0000000000000000000000000000000000000000" ]; then
+            echo "no base commit on this event — checking the tree invariant only"
+            python3 bin/debrand --check
+          else
+            python3 bin/debrand --check --since "$SINCE"
+          fi
