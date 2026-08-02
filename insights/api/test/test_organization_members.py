@@ -47,7 +47,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
     def _restrict_member_list_visibility(self) -> tuple[User, User, User]:
         from insights.constants import AvailableFeature
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         project_mate = User.objects.create_and_join(self.organization, "mate@hanzo.ai", None)
         outsider = User.objects.create_and_join(self.organization, "outsider@hanzo.ai", None)
@@ -110,7 +110,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
     def test_open_project_keeps_all_members_visible_when_restricted(self):
         from insights.constants import AvailableFeature
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         other = User.objects.create_and_join(self.organization, "1@hanzo.ai", None)
         demoted = User.objects.create_and_join(self.organization, "demoted@hanzo.ai", None)

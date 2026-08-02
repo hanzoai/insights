@@ -57,7 +57,7 @@ class TestVisionActionModel(BaseTest):
         self.assertEqual(action.synthesis_config, {})
         self.assertEqual(action.delivery_config, [])
         self.assertIsNotNone(action.scanner)
-        self.assertIsNone(action.hog_flow)
+        self.assertIsNone(action.insights_flow)
 
     def test_default_selection_is_a_fresh_dict_per_instance(self) -> None:
         # Guards against the classic mutable-default footgun.

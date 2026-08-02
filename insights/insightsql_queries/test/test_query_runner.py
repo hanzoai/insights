@@ -75,7 +75,7 @@ from insights.query_cache.failures import (
 from insights.rbac.user_access_control import UserAccessControl, UserAccessControlError
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 from insights.slo.types import SloOutcome

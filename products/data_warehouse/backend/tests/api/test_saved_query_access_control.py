@@ -11,7 +11,7 @@ from products.data_tools.backend.models.datawarehouse_saved_query_folder import 
 from products.warehouse_sources.backend.tests.api._access_control_base import WarehouseAccessControlTestMixin
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

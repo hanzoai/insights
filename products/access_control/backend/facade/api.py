@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 
 from insights.models import OrganizationMembership, PropertyDefinition, Team
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 from ..models.property_access_control import PropertyAccessControl
 from ..property_access_control import is_property_access_control_enabled

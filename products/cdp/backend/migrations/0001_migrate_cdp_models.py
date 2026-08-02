@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("actions", "0001_migrate_actions_models"),
-        ("insights", "1187_migrate_hog_flow_models"),
+        ("insights", "1187_migrate_insights_flow_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

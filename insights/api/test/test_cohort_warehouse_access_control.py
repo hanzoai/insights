@@ -12,7 +12,7 @@ from products.cohorts.backend.models.util import insightsql_cohort_subquery_sql
 from products.data_tools.backend.models.join import DataWarehouseJoin
 from products.warehouse_sources.backend.facade.models import DataWarehouseCredential, DataWarehouseTable
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 # A behavioral filter whose insightsql event filter reads the warehouse table directly (cohort
 # filters reject the data_warehouse_* property types at the pydantic layer). Reaching the same

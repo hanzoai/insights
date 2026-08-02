@@ -128,14 +128,14 @@ def _workflow_id_from_request(request: Request) -> str | None:
     The header is caller-supplied, so only a well-formed UUID is accepted; worst case is a
     token holder attributing a write to another workflow id within its own team.
     """
-    hog_flow_id = request.headers.get(FN_FLOW_ID_HEADER)
-    if not hog_flow_id:
+    insights_flow_id = request.headers.get(FN_FLOW_ID_HEADER)
+    if not insights_flow_id:
         return None
     try:
-        uuid.UUID(hog_flow_id)
+        uuid.UUID(insights_flow_id)
     except (ValueError, TypeError):
         return None
-    return hog_flow_id
+    return insights_flow_id
 
 
 def _authenticate_team(request: Request) -> tuple[Team, None] | tuple[None, Response]:

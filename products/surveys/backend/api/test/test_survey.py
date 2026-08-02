@@ -39,7 +39,7 @@ from products.surveys.backend.api.survey import (
 )
 from products.surveys.backend.models import MAX_ITERATION_COUNT, Survey, SurveyResponseArchive
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestSurvey(APIBaseTest):

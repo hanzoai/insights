@@ -11,7 +11,7 @@ from insights.models.team.team import Team
 from insights.models.user import User
 
 from ee.models.explicit_team_membership import ExplicitTeamMembership
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestOrganizationInvite(BaseTest):

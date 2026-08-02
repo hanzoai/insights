@@ -82,7 +82,7 @@ from products.workflows.backend.api.message_assets import (
     PersonMessageAssetsRequestSerializer,
     fetch_message_assets_for_person,
 )
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 logger = structlog.get_logger(__name__)
 tracer = trace.get_tracer(__name__)

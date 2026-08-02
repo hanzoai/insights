@@ -25,7 +25,7 @@ from insights.models.team import Team
 from insights.models.utils import generate_random_token_personal
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 
