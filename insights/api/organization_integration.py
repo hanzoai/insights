@@ -10,7 +10,6 @@ from rest_framework.response import Response
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
-from insights.exceptions_capture import capture_exception
 from insights.models.integration import Integration
 from insights.models.organization_integration import OrganizationIntegration
 from insights.permissions import OrganizationAdminWritePermissions
@@ -87,40 +86,9 @@ class OrganizationIntegrationViewSet(
         return super().destroy(request, *args, **kwargs)
 
     def perform_destroy(self, instance: OrganizationIntegration) -> None:
-        is_marketplace = instance.config.get("type") != "connectable"
-
-        if is_marketplace and instance.integration_id:
-            from ee.billing.billing_manager import BillingServiceOpenInvoicesError
-            from ee.vercel.integration import VercelIntegration
-
-            try:
-                VercelIntegration.delete_installation(instance.integration_id)
-            except BillingServiceOpenInvoicesError as e:
-                # Expected business condition, not a crash: billing blocks deauthorization while
-                # invoices are unpaid. Mirror the marketplace DELETE API (409) so the UI disconnect
-                # can't sidestep the guard, and abort the local delete instead of capturing an error.
-                logger.warning(
-                    "organization_integration.delete_installation_blocked_by_open_invoices",
-                    organization_id=str(instance.organization_id),
-                    integration_id=instance.integration_id,
-                    reason=e.message,
-                )
-                raise OpenInvoicesError(detail=e.message)
-            except Exception as e:
-                capture_exception(
-                    e,
-                    {
-                        "organization_id": str(instance.organization_id),
-                        "integration_id": instance.integration_id,
-                    },
-                )
-                logger.warning(
-                    "organization_integration.delete_installation_failed",
-                    organization_id=str(instance.organization_id),
-                    integration_id=instance.integration_id,
-                    error=str(e),
-                )
-
+        # A marketplace installation used to be deauthorized at Vercel first, and billing
+        # could block that while invoices were unpaid. Both are enterprise features this fork
+        # does not carry, so the local rows are all there is to remove.
         team_integrations_deleted, _ = Integration.objects.filter(
             team__organization=instance.organization,
             kind=Integration.IntegrationKind.VERCEL,
@@ -160,45 +128,15 @@ class OrganizationIntegrationViewSet(
 
         from insights.models.integration import Integration as TeamIntegration
 
-        from ee.vercel.client import VercelAPIClient
-
-        teams_by_id: dict[int, Team] = {}
-        resources: dict[int, TeamIntegration] = {}
         for tid in {production_id, preview_id, development_id}:
-            teams_by_id[tid] = Team.objects.get(pk=tid, organization=org)
-            resources[tid], _ = TeamIntegration.objects.get_or_create(
-                team=teams_by_id[tid],
+            TeamIntegration.objects.get_or_create(
+                team=Team.objects.get(pk=tid, organization=org),
                 kind=TeamIntegration.IntegrationKind.VERCEL,
                 integration_id=str(tid),
                 defaults={"config": {"type": "connectable"}},
             )
 
-        integration.config["environment_mapping"] = {
-            "production": production_id,
-            "preview": preview_id,
-            "development": development_id,
-        }
-        integration.save(update_fields=["config"])
-
-        production_team = teams_by_id[production_id]
-        production_resource = resources[production_id]
-
-        access_token = integration.sensitive_config.get("credentials", {}).get(
-            "access_token"
-        ) or integration.config.get("credentials", {}).get("access_token")
-        if access_token and integration.integration_id:
-            from ee.api.vercel.vercel_connect import VercelConnectLinkViewSet
-
-            secrets = VercelConnectLinkViewSet._build_env_secrets(
-                teams_by_id, production_id, preview_id, development_id
-            )
-            client = VercelAPIClient(bearer_token=access_token)
-            client.import_resource(
-                integration_config_id=integration.integration_id,
-                resource_id=str(production_resource.pk),
-                product_id="insights",
-                name=production_team.name,
-                secrets=secrets,
-            )
+        # The mapping is stored, but pushing the resulting project tokens back to Vercel
+        # ran through the enterprise marketplace client, so nothing is imported there.
 
         return Response(OrganizationIntegrationSerializer(integration).data)

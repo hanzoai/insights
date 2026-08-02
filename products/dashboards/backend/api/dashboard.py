@@ -45,19 +45,17 @@ from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from insights.schema import InsightVizNode
-
 from insights.api.forbid_destroy_model import ForbidDestroyModel
 from insights.api.monitoring import Feature, monitor
 from insights.api.openapi_parameters import make_filters_override_param, make_variables_override_param
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import SearchMatchTypeSerializerMixin, UserBasicSerializer
 from insights.api.sharing_publish_gate import check_can_add_insight_to_shared_dashboard
-from insights.api.streaming import sse_streaming_response
+from insights.api.streaming import async_to_sync, sse_streaming_response
 from insights.api.tagged_item import TaggedItemSerializerMixin, TaggedItemViewSetMixin
 from insights.api.utils import action
-from insights.datastore.client.async_task_chain import task_chain_context
 from insights.constants import GENERATED_DASHBOARD_PREFIX
+from insights.datastore.client.async_task_chain import task_chain_context
 from insights.event_usage import EventSource, get_event_source, report_user_action
 from insights.exceptions_capture import capture_exception
 from insights.helpers import create_dashboard_from_template
@@ -72,7 +70,13 @@ from insights.helpers.trigram_search import (
 from insights.insightsql_queries.apply_dashboard_filters import normalize_dashboard_filters_properties
 from insights.insightsql_queries.refresh_policy import ComputeSurface
 from insights.models.file_system.constants import DEFAULT_SURFACE, surface_q
-from insights.models.file_system.file_system import FileSystem, create_or_update_file, delete_file, join_path, split_path
+from insights.models.file_system.file_system import (
+    FileSystem,
+    create_or_update_file,
+    delete_file,
+    join_path,
+    split_path,
+)
 from insights.models.quick_filter import QuickFilter
 from insights.models.tagged_item import TaggedItem
 from insights.models.team import Team
@@ -157,8 +161,6 @@ from products.product_analytics.backend.api.insight import (
 )
 from products.product_analytics.backend.models.insight import Insight
 from products.product_analytics.backend.models.insight_variable import InsightVariable
-
-from ee.hogai.utils.aio import async_to_sync
 
 logger = structlog.get_logger(__name__)
 
@@ -3299,22 +3301,9 @@ class DashboardsViewSet(
         return tile
 
     def _format_insight_for_llm(self, insight: Insight, insight_data: dict) -> str | None:
-        if not settings.EE_AVAILABLE:
-            return None
-        try:
-            from ee.hogai.context.insight.format import format_query_results_for_llm
-
-            query_dict = insight.query
-            if not query_dict:
-                return None
-            query = InsightVizNode.model_validate(query_dict)
-            if not query.source:
-                return None
-            result_dict = {"results": insight_data.get("result"), "columns": insight_data.get("columns")}
-            return format_query_results_for_llm(query.source, result_dict, self.team)
-        except Exception:
-            logger.warning("dashboard_run_insights_format_failed", exc_info=True, insight_id=insight.id)
-            return None
+        # The renderer that turned query results into model-readable text was part of the
+        # assistant this fork does not carry, so there is no LLM-shaped rendering to return.
+        return None
 
     @action(
         methods=["POST"],

@@ -24,7 +24,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from insights.api.monitoring import monitor
-from insights.api.streaming import sse_streaming_response
+from insights.api.streaming import SyncIterableToAsync, sse_streaming_response
 from insights.auth import SessionAuthentication
 from insights.event_usage import groups, report_user_action
 from insights.rate_limit import (
@@ -50,8 +50,6 @@ from products.ai_observability.backend.llm import (
 )
 from products.ai_observability.backend.llm.errors import UnsupportedProviderError
 from products.ai_observability.backend.models.provider_keys import LLMProvider, LLMProviderKey
-
-from ee.hogai.utils.asgi import SyncIterableToAsync
 
 logger = structlog.get_logger(__name__)
 

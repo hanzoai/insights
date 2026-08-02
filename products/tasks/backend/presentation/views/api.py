@@ -51,6 +51,8 @@ from products.exports.backend.facade.api import render_png_export
 
 if TYPE_CHECKING:
     from products.exports.backend.facade.api import ExportedAsset
+from insights.api.streaming import async_to_sync
+
 from products.tasks.backend.facade import (
     access as tasks_access,
     api as tasks_facade,
@@ -144,8 +146,6 @@ from products.tasks.backend.presentation.serializers import (
     WarmTaskResponseSerializer,
     WizardCloudRunSerializer,
 )
-
-from ee.hogai.utils.aio import async_to_sync
 
 
 class OctetStreamParser(BaseParser):

@@ -13,7 +13,6 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from insights.admin.inlines.organization_member_inline import OrganizationMemberForUserInline
 from insights.admin.inlines.personal_api_key_inline import PersonalAPIKeyInline
-from insights.admin.inlines.scim_provisioned_user_inline import SCIMProvisionedUserInline
 from insights.admin.inlines.totp_device_inline import TOTPDeviceInline
 from insights.admin.inlines.user_social_auth_inline import UserSocialAuthInline
 from insights.api.authentication import password_reset_token_generator
@@ -70,7 +69,6 @@ class UserAdmin(DjangoUserAdmin):
         PersonalAPIKeyInline,
         TOTPDeviceInline,
         UserSocialAuthInline,
-        SCIMProvisionedUserInline,
     ]
     fieldsets = (
         (
