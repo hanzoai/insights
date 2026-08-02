@@ -9,7 +9,7 @@ import { newDashboardLogic } from 'scenes/dashboard/newDashboardLogic'
 
 import { DashboardTemplateType, TemplateAvailabilityContext } from '~/types'
 
-import BlankDashboardHog from 'public/blank-dashboard-script.png'
+import BlankDashboardImage from 'public/blank-dashboard-mascot.png'
 
 import { runBlankDashboardFlow, runDashboardTemplateClickFlow } from './dashboardTemplateCreationFlows'
 import { TemplateItem } from './DashboardTemplateItem'
@@ -84,7 +84,7 @@ export function FeaturedTemplatesChooser({
                         template={{
                             template_name: 'Blank dashboard',
                             dashboard_description: 'Create a blank dashboard',
-                            image_url: BlankDashboardHog,
+                            image_url: BlankDashboardImage,
                         }}
                         onClick={createBlankDashboard}
                         index={0}

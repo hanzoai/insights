@@ -28,7 +28,11 @@ export function SidePanelPaneHeader({
         <header
             className={cn(
                 'scene-panel-pane-header border-b shrink-0 flex items-center justify-end',
-                'sticky top-0 h-[40px] bg-primary border-b-0 py-0 px-2 pb-px rounded justify-between m-0 mb-5 z-60 border border-primary/30',
+                // Sticky mask: this header covers the side panel's own content, so it is
+                // painted with the side panel's surface rather than the app ground. The
+                // panel is bg-surface-secondary (SidePanel.tsx); bg-primary put a black
+                // bar across the top of it in dark mode.
+                'sticky top-0 h-[40px] bg-surface-secondary border-b-0 py-0 px-2 pb-px rounded justify-between m-0 mb-5 z-60 border border-primary/30',
                 className
             )}
         >
