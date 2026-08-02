@@ -1,7 +1,6 @@
 import os
 import re
 import json
-import time
 import secrets
 import urllib.parse
 from base64 import b32encode
@@ -21,7 +20,6 @@ from django.utils import timezone as django_timezone
 from django.utils.html import escape
 from django.views.decorators.http import require_http_methods
 
-import jwt
 import pydantic
 import requests
 import structlog
@@ -69,7 +67,7 @@ from insights.auth import (
     SessionAuthentication,
     session_auth_required,
 )
-from insights.constants import INVITE_DAYS_VALIDITY, PERMITTED_FORUM_DOMAINS
+from insights.constants import INVITE_DAYS_VALIDITY
 from insights.email import is_email_available
 from insights.event_usage import (
     report_user_deleted_account,
@@ -1880,66 +1878,3 @@ def redirect_to_site(request):
         return JsonResponse({"toolbarParams": state})
     else:
         return redirect("{}#__insights={}".format(app_url, state))
-
-
-@session_auth_required
-def redirect_to_website(request):
-    team = request.user.team
-    app_url = request.GET.get("appUrl") or (team.app_urls and team.app_urls[0])
-
-    if not app_url:
-        return HttpResponse(status=404)
-
-    if not team or urllib.parse.urlparse(app_url).hostname not in PERMITTED_FORUM_DOMAINS:
-        logger.error(
-            "can_only_redirect_to_permitted_domain",
-            permitted_domains=team.app_urls,
-            app_url=app_url,
-            team_id=team.id,
-        )
-        return HttpResponse(f"Can only redirect to a permitted domain.", status=403)
-
-    token = ""
-
-    # check if a strapi id is attached
-    if request.user.strapi_id is None:
-        response = requests.request(
-            "POST",
-            "https://squeak.insights.cc/api/auth/local/register",
-            json={
-                "username": request.user.email,
-                "email": request.user.email,
-                "password": secrets.token_hex(32),
-                "firstName": request.user.first_name,
-                "lastName": request.user.last_name,
-            },
-            headers={"Content-Type": "application/json"},
-            timeout=10,
-        )
-
-        if response.status_code == 200:
-            json_data = response.json()
-            token = json_data["jwt"]
-            strapi_id = json_data["user"]["id"]
-            request.user.strapi_id = strapi_id
-            request.user.save()
-        else:
-            error_message = response.json()["error"]["message"]
-            if response.text and error_message == "Email or Username are already taken":
-                return redirect("https://hanzo.ai/auth?error=emailIsTaken")
-    else:
-        token = jwt.encode(
-            {
-                "id": request.user.strapi_id,
-                "iat": int(time.time()),
-                "exp": int((datetime.now() + timedelta(days=30)).timestamp()),
-            },
-            os.environ.get("JWT_SECRET_STRAPI", "random_fallback_secret"),
-            algorithm="HS256",
-        )
-
-    # pass the empty string as the safe param so that `//` is encoded correctly.
-    # see https://github.com/Insights/insights/issues/9671
-    userData = urllib.parse.quote(json.dumps({"jwt": token}), safe="")
-
-    return redirect("{}?userData={}&redirect={}".format("https://hanzo.ai/auth", userData, app_url))
