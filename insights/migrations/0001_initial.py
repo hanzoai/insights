@@ -1108,7 +1108,7 @@ class Migration(migrations.Migration):
                 ('exception', models.TextField(blank=True, null=True)),
                 ('exception_type', models.CharField(blank=True, max_length=255, null=True)),
                 ('failure_type', models.CharField(blank=True, max_length=255, null=True)),
-                ('access_token', models.CharField(blank=True, default=insights.models.exported_asset.get_default_access_token, max_length=400, null=True)),
+                ('access_token', models.CharField(blank=True, default=products.exports.backend.models.exported_asset.get_default_access_token, max_length=400, null=True)),
             ],
         ),
         migrations.CreateModel(
