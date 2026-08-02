@@ -45,7 +45,7 @@ LOOP_FIRED_RUN_EXCLUDED_SCOPES = frozenset({"loop:write"})
 
 
 def _oauth_application_for_task(task: Task) -> SandboxOAuthApplication:
-    if task.origin_product == Task.OriginProduct.POSTFN_AI:
+    if task.origin_product == Task.OriginProduct.INSIGHTS_AI:
         return "insights_ai"
     return "array"
 

@@ -18,9 +18,9 @@ mcps:
     - name: insights
       description: Insights hosted MCP — insights, flags, errors, SQL
       env:
-          - POSTFN_PERSONAL_API_KEY
+          - INSIGHTS_PERSONAL_API_KEY
       server:
           type: http
           url: https://mcp.hanzo.ai/mcp
           headers:
-              Authorization: 'Bearer ${POSTFN_PERSONAL_API_KEY}'
+              Authorization: 'Bearer ${INSIGHTS_PERSONAL_API_KEY}'

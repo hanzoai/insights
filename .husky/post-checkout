@@ -18,7 +18,7 @@ if [ -f "$HOOK_DIR/../bin/helpers/worktree-borrow.sh" ]; then
     insights_worktree_borrow node
 fi
 
-if [ "$POSTFN_BORROW_NODE" = "1" ]; then
+if [ "$INSIGHTS_BORROW_NODE" = "1" ]; then
     echo "husky: worktree detected, borrowing node_modules from main clone"
 else
     if ! command -v pnpm > /dev/null 2>&1; then

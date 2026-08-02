@@ -9,7 +9,7 @@ from insights.exceptions import Conflict, QuotaLimitExceeded
 
 from products.insights_ai.backend.context_wrapper import MAX_ATTACHED_ITEMS, MAX_TEXT_LENGTH
 from products.insights_ai.backend.message_routing import (
-    POSTFN_AI_INTERACTION_ORIGIN,
+    INSIGHTS_AI_INTERACTION_ORIGIN,
     SANDBOX_INACTIVITY_TIMEOUT_SECONDS,
     SandboxSession,
     lock_conversation_for_followup,
@@ -42,7 +42,7 @@ class TestOpenSandboxMessage(APIBaseTest):
             team=self.team,
             title="t",
             description="d",
-            origin_product=Task.OriginProduct.POSTFN_AI,
+            origin_product=Task.OriginProduct.INSIGHTS_AI,
             created_by=self.user,
         )
         run = task.create_run(mode="interactive")
@@ -75,18 +75,18 @@ class TestOpenSandboxMessage(APIBaseTest):
 
         # Task.create_and_run called with the Insights AI origin and no repo / no PR.
         _, kwargs = m_car.call_args
-        assert kwargs["origin_product"] == Task.OriginProduct.POSTFN_AI
+        assert kwargs["origin_product"] == Task.OriginProduct.INSIGHTS_AI
         assert kwargs["repository"] is None
         assert kwargs["create_pr"] is False
         assert kwargs["mode"] == "interactive"
         assert kwargs["start_workflow"] is False
-        assert kwargs["interaction_origin"] == POSTFN_AI_INTERACTION_ORIGIN
+        assert kwargs["interaction_origin"] == INSIGHTS_AI_INTERACTION_ORIGIN
         # The sandbox session pins its short interactivity window as a per-task override.
         assert kwargs["inactivity_timeout_seconds"] == SANDBOX_INACTIVITY_TIMEOUT_SECONDS
 
         # Run state enriched with the Insights AI per-Run keys; full undeduped context.
         run.refresh_from_db()
-        assert run.state["interaction_origin"] == POSTFN_AI_INTERACTION_ORIGIN
+        assert run.state["interaction_origin"] == INSIGHTS_AI_INTERACTION_ORIGIN
         assert run.state["systemPrompt"] == SYS_PROMPT
         assert run.state["initial_permission_mode"] == "auto"
         assert run.state["attached_context"] == [{"type": "dashboard", "id": 123, "name": "Funnel"}]
@@ -273,7 +273,7 @@ class TestOpenSandboxMessage(APIBaseTest):
         assert str(new_run.id) != str(run.id)
         assert new_run.state["resume_from_run_id"] == str(run.id)
         assert new_run.state["snapshot_external_id"] == "snap-9"
-        assert new_run.state["interaction_origin"] == POSTFN_AI_INTERACTION_ORIGIN
+        assert new_run.state["interaction_origin"] == INSIGHTS_AI_INTERACTION_ORIGIN
         assert new_run.state["systemPrompt"] == SYS_PROMPT
         assert new_run.state["initial_permission_mode"] == "auto"
         assert new_run.state["inactivity_timeout_seconds"] == SANDBOX_INACTIVITY_TIMEOUT_SECONDS
@@ -320,7 +320,7 @@ class TestOpenSandboxMessage(APIBaseTest):
             team=self.team,
             title="t",
             description="d",
-            origin_product=Task.OriginProduct.POSTFN_AI,
+            origin_product=Task.OriginProduct.INSIGHTS_AI,
             created_by=self.user,
         )
         self._attach_task(task)
@@ -423,7 +423,7 @@ class TestSandboxWarmViaOpen(APIBaseTest):
             team=self.team,
             title="t",
             description="d",
-            origin_product=Task.OriginProduct.POSTFN_AI,
+            origin_product=Task.OriginProduct.INSIGHTS_AI,
             created_by=self.user,
         )
         run = task.create_run(mode="interactive")
@@ -443,12 +443,12 @@ class TestSandboxWarmViaOpen(APIBaseTest):
         assert self.conversation.task_id is not None
         task = self.conversation.task
         assert task is not None
-        assert task.origin_product == Task.OriginProduct.POSTFN_AI
+        assert task.origin_product == Task.OriginProduct.INSIGHTS_AI
         run = task.latest_run
         assert run is not None
         assert str(run.id) == result.run_id
         assert result.just_created_run is True
-        assert run.state["interaction_origin"] == POSTFN_AI_INTERACTION_ORIGIN
+        assert run.state["interaction_origin"] == INSIGHTS_AI_INTERACTION_ORIGIN
         assert run.state["systemPrompt"] == SYS_PROMPT
         assert run.state["await_user_message"] is True
         assert run.state["initial_permission_mode"] == "auto"
@@ -540,14 +540,14 @@ class TestSandboxWarmViaOpen(APIBaseTest):
             team=self.team,
             title="",
             description="",
-            origin_product=Task.OriginProduct.POSTFN_AI,
+            origin_product=Task.OriginProduct.INSIGHTS_AI,
             created_by=created_by or self.user,
         )
         return task.create_run(mode="interactive", extra_state={"await_user_message": True})  # QUEUED
 
     def _fill_warm_pool(self, *, created_by=None) -> None:
         for _ in range(100):
-            if warm_facade.warm_pool_at_capacity(Task.OriginProduct.POSTFN_AI, self.team.id, self.user.id):
+            if warm_facade.warm_pool_at_capacity(Task.OriginProduct.INSIGHTS_AI, self.team.id, self.user.id):
                 return
             self._warm_run(created_by=created_by)
         self.fail("Warm pool did not reach capacity")
@@ -686,7 +686,7 @@ class TestSandboxFirstMessageConversion(APIBaseTest):
 
         task = self.conversation.task
         assert task is not None
-        assert task.origin_product == Task.OriginProduct.POSTFN_AI
+        assert task.origin_product == Task.OriginProduct.INSIGHTS_AI
         # The live first run, not a synthetic terminal one.
         assert task.runs.count() == 1
         first_run = task.runs.first()
@@ -720,7 +720,7 @@ class TestSandboxFirstMessageConversion(APIBaseTest):
             team=self.team,
             title="t",
             description="d",
-            origin_product=Task.OriginProduct.POSTFN_AI,
+            origin_product=Task.OriginProduct.INSIGHTS_AI,
             created_by=self.user,
         )
         Conversation.objects.filter(id=self.conversation.id).update(task=other_task)

@@ -213,7 +213,7 @@ The `tasks-glm-baseten-inference` feature flag routes matching users to Baseten 
 
 Two knobs opt traffic into Modal (OR semantics, both default off):
 
-- The `tasks-glm-modal-inference` feature flag, evaluated server-side against Insights (`LLM_GATEWAY_POSTFN_PROJECT_TOKEN`/`_HOST`) with a short per-user cache and a brief global backoff when evaluation fails. Caller-forwarded flag headers are not trusted for routing.
+- The `tasks-glm-modal-inference` feature flag, evaluated server-side against Insights (`LLM_GATEWAY_INSIGHTS_PROJECT_TOKEN`/`_HOST`) with a short per-user cache and a brief global backoff when evaluation fails. Caller-forwarded flag headers are not trusted for routing.
 - `LLM_GATEWAY_GLM_MODAL_TRAFFIC_FRACTION` (0..1, default 0), bucketed deterministically by user id; `LLM_GATEWAY_GLM_MODAL_PRODUCT_TRAFFIC_FRACTIONS` (e.g. `{"insights_code": 0.25}`) overrides it per product.
 
 If Cloudflare credentials are absent, Modal serves all GLM traffic regardless of the knobs.

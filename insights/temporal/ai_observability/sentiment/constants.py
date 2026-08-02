@@ -16,9 +16,9 @@ def _positive_int_env(name: str, default: int) -> int:
 MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 MODEL_MAX_TOKENS = 512  # context window for the cardiffnlp model
 LABELS = ["negative", "neutral", "positive"]
-ONNX_CACHE_DIR = Path(os.environ.get("POSTFN_SENTIMENT_MODEL_CACHE", "/tmp/insights-sentiment-onnx-cache"))
-ONNX_INTRA_OP_NUM_THREADS = _positive_int_env("POSTFN_SENTIMENT_ONNX_INTRA_OP_NUM_THREADS", 1)
-ONNX_INTER_OP_NUM_THREADS = _positive_int_env("POSTFN_SENTIMENT_ONNX_INTER_OP_NUM_THREADS", 1)
+ONNX_CACHE_DIR = Path(os.environ.get("INSIGHTS_SENTIMENT_MODEL_CACHE", "/tmp/insights-sentiment-onnx-cache"))
+ONNX_INTRA_OP_NUM_THREADS = _positive_int_env("INSIGHTS_SENTIMENT_ONNX_INTRA_OP_NUM_THREADS", 1)
+ONNX_INTER_OP_NUM_THREADS = _positive_int_env("INSIGHTS_SENTIMENT_ONNX_INTER_OP_NUM_THREADS", 1)
 
 # Extraction bounds
 MAX_USER_MESSAGES = 50

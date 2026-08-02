@@ -60,11 +60,11 @@ export function buildSessionReplayRedisPools(config: IngestionSessionReplayServe
     restrictionRedisPool: RedisPool
 } {
     const redisPool = createRedisPoolFromConfig({
-        connection: config.POSTFN_SESSION_RECORDING_REDIS_HOST
+        connection: config.INSIGHTS_SESSION_RECORDING_REDIS_HOST
             ? {
-                  url: config.POSTFN_SESSION_RECORDING_REDIS_HOST,
+                  url: config.INSIGHTS_SESSION_RECORDING_REDIS_HOST,
                   options: {
-                      port: config.POSTFN_SESSION_RECORDING_REDIS_PORT ?? 6379,
+                      port: config.INSIGHTS_SESSION_RECORDING_REDIS_PORT ?? 6379,
                       commandTimeout: config.SESSION_RECORDING_REDIS_TIMEOUT_MS,
                   },
                   name: 'session-recording-redis',
@@ -85,10 +85,10 @@ export function buildSessionReplayRedisPools(config: IngestionSessionReplayServe
                   options: { port: config.INGESTION_REDIS_PORT },
                   name: 'ingestion-redis',
               }
-            : config.POSTFN_REDIS_HOST
+            : config.INSIGHTS_REDIS_HOST
               ? {
-                    url: config.POSTFN_REDIS_HOST,
-                    options: { port: config.POSTFN_REDIS_PORT, password: config.POSTFN_REDIS_PASSWORD },
+                    url: config.INSIGHTS_REDIS_HOST,
+                    options: { port: config.INSIGHTS_REDIS_PORT, password: config.INSIGHTS_REDIS_PASSWORD },
                     name: 'ingestion-redis',
                 }
               : { url: config.REDIS_URL, name: 'ingestion-redis' },

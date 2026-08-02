@@ -68,7 +68,7 @@ toolchain_variables=(
     INFOPATH
     LDFLAGS
     LIBRARY_PATH
-    LOCAL_POSTFN_CODE_MONOREPO_ROOT
+    LOCAL_INSIGHTS_CODE_MONOREPO_ROOT
     MANPATH
     NIX_BIN
     NIX_PLUGINS
@@ -79,7 +79,7 @@ toolchain_variables=(
     PATH
     PATH_LOCALE
     PKG_CONFIG_PATH
-    POSTFN_SKIP_MIGRATION_CHECKS
+    INSIGHTS_SKIP_MIGRATION_CHECKS
     PROCESS_COMPOSE_BIN
     RUSTC_WRAPPER
     RUST_LOG
@@ -172,7 +172,7 @@ if is_dependency_change "$@"; then
         LANG="${LANG:-C.UTF-8}" \
         LOGNAME="${LOGNAME:-}" \
         PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
-        POSTFN_SKIP_DOTENV=1 \
+        INSIGHTS_SKIP_DOTENV=1 \
         SHELL="${SHELL:-/bin/bash}" \
         TMPDIR="${TMPDIR:-/tmp}" \
         USER="${USER:-}" \
@@ -282,7 +282,7 @@ exec env -i \
     LANG="${LANG:-C.UTF-8}" \
     LOGNAME="${LOGNAME:-}" \
     PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.local/bin" \
-    POSTFN_SKIP_DOTENV=1 \
+    INSIGHTS_SKIP_DOTENV=1 \
     SHELL="${SHELL:-/bin/bash}" \
     TMPDIR="${TMPDIR:-/tmp}" \
     USER="${USER:-}" \

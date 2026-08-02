@@ -68,9 +68,9 @@ fn set_telemetry_env_id(env_id: &str) {
 /// an arbitrary string from a misconfigured environment.
 pub fn set_telemetry_env_id_from_environment() {
     const ENV_ID_ENV_VARS: &[&str] = &[
-        "POSTFN_CLI_PROJECT_ID",
-        "POSTFN_CLI_ENV_ID",
-        "POSTFN_PROJECT_ID",
+        "INSIGHTS_CLI_PROJECT_ID",
+        "INSIGHTS_CLI_ENV_ID",
+        "INSIGHTS_PROJECT_ID",
     ];
 
     let Some(env_id) = ENV_ID_ENV_VARS
@@ -157,7 +157,7 @@ pub fn context() -> &'static InvocationContext {
 }
 
 pub fn init_insights_telemetry() {
-    let Some(token) = option_env!("POSTFN_API_TOKEN") else {
+    let Some(token) = option_env!("INSIGHTS_API_TOKEN") else {
         debug!("Insights api token not set at build time - is this a debug build?");
         return;
     };

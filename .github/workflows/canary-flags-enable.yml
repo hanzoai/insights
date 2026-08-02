@@ -82,8 +82,8 @@ jobs:
               id: app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_PRIVATE_KEY }}
 
             - name: Parse command and validate
               id: command
@@ -151,7 +151,7 @@ jobs:
                               } else {
                                   core.setFailed(
                                       `Failed to check team membership for Insights/${team}: ${e.message}. ` +
-                                      `The GH_APP_POSTFN_ASSIGN_REVIEWERS app may lack Organization > Members > Read permission.`
+                                      `The GH_APP_INSIGHTS_ASSIGN_REVIEWERS app may lack Organization > Members > Read permission.`
                                   );
                                   return;
                               }
@@ -490,8 +490,8 @@ jobs:
               if: (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && steps.pr_info.outputs.should_proceed == 'true'
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_PRIVATE_KEY }}
 
             - name: Verify canary label was authorized
               if: github.event_name == 'pull_request' && steps.pr_info.outputs.should_proceed == 'true'
@@ -614,7 +614,7 @@ jobs:
                               } else {
                                   core.setFailed(
                                       `Failed to check team membership for Insights/${team}: ${e.message}. ` +
-                                      `The GH_APP_POSTFN_ASSIGN_REVIEWERS app may lack Organization > Members > Read permission.`
+                                      `The GH_APP_INSIGHTS_ASSIGN_REVIEWERS app may lack Organization > Members > Read permission.`
                                   );
                                   return;
                               }

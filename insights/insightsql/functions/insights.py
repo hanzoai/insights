@@ -2,7 +2,7 @@ from insights.insightsql.ast import ArrayType, BooleanType, DateTimeType, DateTy
 
 from .core import InsightsQLFunctionMeta
 
-INSIGHTSQL_POSTFN_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
+INSIGHTSQL_INSIGHTS_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "matchesAction": InsightsQLFunctionMeta("matchesAction", 1, 1),
     "sparkline": InsightsQLFunctionMeta("sparkline", 1, 1),
     "recordingButton": InsightsQLFunctionMeta("recordingButton", 1, 2),

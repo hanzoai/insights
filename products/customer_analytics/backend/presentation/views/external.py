@@ -119,7 +119,7 @@ class ExternalAccountListAuthentication(ProjectSecretAPIKeyAuthentication):
         return result
 
 
-FN_FLOW_ID_HEADER = "X-Insights-Script-Flow-Id"
+INSIGHTS_FLOW_ID_HEADER = "X-Insights-Script-Flow-Id"
 
 
 def _workflow_id_from_request(request: Request) -> str | None:
@@ -128,7 +128,7 @@ def _workflow_id_from_request(request: Request) -> str | None:
     The header is caller-supplied, so only a well-formed UUID is accepted; worst case is a
     token holder attributing a write to another workflow id within its own team.
     """
-    hog_flow_id = request.headers.get(FN_FLOW_ID_HEADER)
+    hog_flow_id = request.headers.get(INSIGHTS_FLOW_ID_HEADER)
     if not hog_flow_id:
         return None
     try:

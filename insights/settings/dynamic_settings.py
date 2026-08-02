@@ -79,8 +79,8 @@ CONSTANCE_CONFIG = {
         "(Advanced) Whether having an async migration running, errored or required should prevent upgrades.",
         bool,
     ),
-    "ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION": (
-        get_from_env("ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION", False, type_cast=str_to_bool),
+    "ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION": (
+        get_from_env("ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION", False, type_cast=str_to_bool),
         "(Advanced) Whether to ignore async migrations insights version restrictions",
         bool,
     ),
@@ -346,7 +346,7 @@ SETTINGS_ALLOWING_API_OVERRIDE = (
     "ASYNC_MIGRATIONS_DISABLE_AUTO_ROLLBACK",
     "ASYNC_MIGRATIONS_AUTO_CONTINUE",
     "ASYNC_MIGRATIONS_BLOCK_UPGRADE",
-    "ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION",
+    "ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION",
     "EMAIL_ENABLED",
     "EMAIL_HOST",
     "EMAIL_PORT",

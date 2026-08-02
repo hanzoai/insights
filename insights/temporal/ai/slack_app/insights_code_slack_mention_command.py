@@ -5,7 +5,7 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 
 from insights.temporal.ai.slack_app import (
-    POSTFN_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
+    INSIGHTS_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
     InsightsCodeSlackMentionCommandWorkflowInputs,
     InsightsCodeSlackMentionWorkflowInputs,
     block_insights_code_task_if_no_personal_github_activity,
@@ -17,11 +17,11 @@ from insights.temporal.ai.slack_app import (
 )
 from insights.temporal.common.base import InsightsWorkflow
 
-POSTFN_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS = 60
+INSIGHTS_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS = 60
 # Matches the mention workflow's picker wait window so the bot's behaviour is
 # consistent across both flows. The lifetime of a command workflow that posts a
 # picker is bounded by this timeout.
-POSTFN_CODE_SLACK_COMMAND_PICKER_TIMEOUT_MINUTES = 25
+INSIGHTS_CODE_SLACK_COMMAND_PICKER_TIMEOUT_MINUTES = 25
 
 
 @workflow.defn(name="insights-code-slack-mention-command")
@@ -63,7 +63,7 @@ class InsightsCodeSlackMentionCommandWorkflow(InsightsWorkflow):
             user_id = await workflow.execute_activity(
                 resolve_insights_code_slack_command_user_activity,
                 args=[inputs],
-                start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
+                start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
                 retry_policy=RetryPolicy(maximum_attempts=3),
             )
             if user_id is None:
@@ -72,7 +72,7 @@ class InsightsCodeSlackMentionCommandWorkflow(InsightsWorkflow):
         result = await workflow.execute_activity(
             handle_insights_code_slack_mention_command_activity,
             args=[inputs, user_id],
-            start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
+            start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
             retry_policy=RetryPolicy(maximum_attempts=3),
         )
         if result.status != "needs_picker":
@@ -107,7 +107,7 @@ class InsightsCodeSlackMentionCommandWorkflow(InsightsWorkflow):
         blocked = await workflow.execute_activity(
             block_insights_code_task_if_no_personal_github_activity,
             args=[picker_inputs, channel, thread_ts, user_id, True],
-            start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
+            start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
             retry_policy=RetryPolicy(maximum_attempts=3),
         )
         if blocked:
@@ -122,24 +122,24 @@ class InsightsCodeSlackMentionCommandWorkflow(InsightsWorkflow):
                 slack_user_id,
                 inputs.event,
                 workflow.info().workflow_id,
-                POSTFN_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
+                INSIGHTS_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
                 False,
                 user_id,
             ],
-            start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
+            start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
             retry_policy=RetryPolicy(maximum_attempts=3),
         )
 
         try:
             await workflow.wait_condition(
                 lambda: self._repo_selection_resolved,
-                timeout=timedelta(minutes=POSTFN_CODE_SLACK_COMMAND_PICKER_TIMEOUT_MINUTES),
+                timeout=timedelta(minutes=INSIGHTS_CODE_SLACK_COMMAND_PICKER_TIMEOUT_MINUTES),
             )
         except TimeoutError:
             await workflow.execute_activity(
                 post_insights_code_picker_timeout_activity,
                 args=[picker_inputs, channel, thread_ts],
-                start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
+                start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
                 retry_policy=RetryPolicy(maximum_attempts=3),
             )
             return
@@ -150,6 +150,6 @@ class InsightsCodeSlackMentionCommandWorkflow(InsightsWorkflow):
         await workflow.execute_activity(
             create_insights_code_routing_rule_activity,
             args=[picker_inputs, channel, thread_ts, user_id, pending_rule_text, self._selected_repo],
-            start_to_close_timeout=timedelta(seconds=POSTFN_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
+            start_to_close_timeout=timedelta(seconds=INSIGHTS_CODE_SLACK_COMMAND_ACTIVITY_TIMEOUT_SECONDS),
             retry_policy=RetryPolicy(maximum_attempts=3),
         )

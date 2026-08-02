@@ -189,7 +189,7 @@ export const nonInsightsFunctionTemplatesLogic = kea<nonInsightsFunctionTemplate
             ): InsightsFunctionTemplateType[] => {
                 // HTTP is currently only used for Cloud to Cloud migrations and shouldn't be accessible to users
                 const httpEnabled =
-                    featureFlags[FEATURE_FLAGS.BATCH_EXPORTS_POSTFN_HTTP] || user?.is_impersonated || user?.is_staff
+                    featureFlags[FEATURE_FLAGS.BATCH_EXPORTS_INSIGHTS_HTTP] || user?.is_impersonated || user?.is_staff
 
                 const services = BATCH_EXPORT_SERVICE_NAMES.filter((service) => {
                     // Legacy alias — superseded in the picker by AwsS3 + S3Compatible. Kept in the

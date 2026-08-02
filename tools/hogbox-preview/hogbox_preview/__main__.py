@@ -2,13 +2,13 @@
 slots into the same CI flow.
 
     # one-shot: provision + bring Insights up, print the URL
-    python -m hogbox_preview up --branch "$BRANCH" --host "$FN_HOST"
+    python -m hogbox_preview up --branch "$BRANCH" --host "$INSIGHTS_HOST"
 
     # granular (debug / staged CI), reusing a box:
-    python -m hogbox_preview create  --host "$FN_HOST"
-    python -m hogbox_preview seed     --box-id box-xxxx --host "$FN_HOST"
-    python -m hogbox_preview health   --box-id box-xxxx --host "$FN_HOST"
-    python -m hogbox_preview destroy  --box-id box-xxxx --host "$FN_HOST"
+    python -m hogbox_preview create  --host "$INSIGHTS_HOST"
+    python -m hogbox_preview seed     --box-id box-xxxx --host "$INSIGHTS_HOST"
+    python -m hogbox_preview health   --box-id box-xxxx --host "$INSIGHTS_HOST"
+    python -m hogbox_preview destroy  --box-id box-xxxx --host "$INSIGHTS_HOST"
 
 Layer is chosen with --backend (hogland today). The stack is identical across
 layers — see stack.py.
@@ -28,7 +28,7 @@ from hogland import APIError, Hogland
 from .hogland_backend import HoglandBackend
 from .stack import InsightsPreviewStack
 
-DEFAULT_HOST = os.environ.get("FN_HOST", "https://hogland.mascot-kitefin.ts.net")
+DEFAULT_HOST = os.environ.get("INSIGHTS_HOST", "https://hogland.mascot-kitefin.ts.net")
 
 
 def build_backend(args: argparse.Namespace) -> HoglandBackend:

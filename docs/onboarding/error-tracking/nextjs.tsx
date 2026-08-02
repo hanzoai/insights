@@ -217,9 +217,9 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 export function getInsightsServer() {
                                   if (!insightsInstance) {
                                     insightsInstance = new Insights(
-                                      process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN,
+                                      process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN,
                                       {
-                                        host: process.env.NEXT_PUBLIC_POSTFN_HOST,
+                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
                                         flushAt: 1,
                                         flushInterval: 0,
                                       }

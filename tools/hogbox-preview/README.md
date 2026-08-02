@@ -138,21 +138,21 @@ cd tools/hogbox-preview
 # one-shot: provision (pen + box) + bring Insights up, print the URL. The CI flow
 # omits --frontend-dist and swaps the frontend in afterwards (below) so the FE
 # build runs in parallel; the flag stays for a single-shot local build.
-python -m hogbox_preview --host "$FN_HOST" --name "preview-pr-$PR" up \
+python -m hogbox_preview --host "$INSIGHTS_HOST" --name "preview-pr-$PR" up \
   --branch "pull/$PR/head" [--frontend-dist /path/to/frontend-dist.tgz] [--no-seed]
 
 # deferred frontend swap onto the already-up box (what CI runs once the parallel
 # build-frontend job finishes): resolves the live box by pen name, no restore.
-python -m hogbox_preview --host "$FN_HOST" --name "preview-pr-$PR" \
+python -m hogbox_preview --host "$INSIGHTS_HOST" --name "preview-pr-$PR" \
   swap-frontend --frontend-dist /path/to/frontend-dist.tgz
 
 # granular / staged (reuse a box):
-python -m hogbox_preview --host "$FN_HOST" --name "preview-pr-$PR" create
-python -m hogbox_preview --host "$FN_HOST" --name "preview-pr-$PR" health
-python -m hogbox_preview --host "$FN_HOST" --name "preview-pr-$PR" destroy   # box + pen
+python -m hogbox_preview --host "$INSIGHTS_HOST" --name "preview-pr-$PR" create
+python -m hogbox_preview --host "$INSIGHTS_HOST" --name "preview-pr-$PR" health
+python -m hogbox_preview --host "$INSIGHTS_HOST" --name "preview-pr-$PR" destroy   # box + pen
 
 # cron backstop: reap previews whose PR is closed (needs GITHUB_REPOSITORY + GH_TOKEN)
-python -m hogbox_preview --host "$FN_HOST" cleanup-stale
+python -m hogbox_preview --host "$INSIGHTS_HOST" cleanup-stale
 ```
 
 ## The golden (and why it's fast)

@@ -20,27 +20,27 @@ interface BadgeAgent {
     url?: string
 }
 
-const POSTFN_CODE_URL = 'https://hanzo.ai/code'
-const POSTFN_SLACK_URL = 'https://hanzo.ai/slack'
-const POSTFN_CODE_LOGO = <IconLogomark className="size-4 shrink-0 text-black dark:text-white" />
-const POSTFN_SLACK_LOGO = <IconSlack className="size-4 shrink-0" />
+const INSIGHTS_CODE_URL = 'https://hanzo.ai/code'
+const INSIGHTS_SLACK_URL = 'https://hanzo.ai/slack'
+const INSIGHTS_CODE_LOGO = <IconLogomark className="size-4 shrink-0 text-black dark:text-white" />
+const INSIGHTS_SLACK_LOGO = <IconSlack className="size-4 shrink-0" />
 
 // Show Insights Desktop + Slack more often to increase engagement
 // Also duplicate the entries to keep it in the screen for longer
 const AGENTS: BadgeAgent[] = [
-    { name: 'Insights Desktop', logo: POSTFN_CODE_LOGO, url: POSTFN_CODE_URL },
-    { name: 'Insights Desktop', logo: POSTFN_CODE_LOGO, url: POSTFN_CODE_URL },
-    { name: 'Slack', logo: POSTFN_SLACK_LOGO, url: POSTFN_SLACK_URL },
+    { name: 'Insights Desktop', logo: INSIGHTS_CODE_LOGO, url: INSIGHTS_CODE_URL },
+    { name: 'Insights Desktop', logo: INSIGHTS_CODE_LOGO, url: INSIGHTS_CODE_URL },
+    { name: 'Slack', logo: INSIGHTS_SLACK_LOGO, url: INSIGHTS_SLACK_URL },
     { name: 'Claude', logo: claudeLogo },
     { name: 'Cursor', logo: cursorLogo, logoClassName: 'dark:invert' },
-    { name: 'Insights Desktop', logo: POSTFN_CODE_LOGO, url: POSTFN_CODE_URL },
-    { name: 'Insights Desktop', logo: POSTFN_CODE_LOGO, url: POSTFN_CODE_URL },
-    { name: 'Slack', logo: POSTFN_SLACK_LOGO, url: POSTFN_SLACK_URL },
+    { name: 'Insights Desktop', logo: INSIGHTS_CODE_LOGO, url: INSIGHTS_CODE_URL },
+    { name: 'Insights Desktop', logo: INSIGHTS_CODE_LOGO, url: INSIGHTS_CODE_URL },
+    { name: 'Slack', logo: INSIGHTS_SLACK_LOGO, url: INSIGHTS_SLACK_URL },
     { name: 'Codex', logo: openaiLogo },
     { name: 'Gemini', logo: geminiLogo },
-    { name: 'Insights Desktop', logo: POSTFN_CODE_LOGO, url: POSTFN_CODE_URL },
-    { name: 'Insights Desktop', logo: POSTFN_CODE_LOGO, url: POSTFN_CODE_URL },
-    { name: 'Slack', logo: POSTFN_SLACK_LOGO, url: POSTFN_SLACK_URL },
+    { name: 'Insights Desktop', logo: INSIGHTS_CODE_LOGO, url: INSIGHTS_CODE_URL },
+    { name: 'Insights Desktop', logo: INSIGHTS_CODE_LOGO, url: INSIGHTS_CODE_URL },
+    { name: 'Slack', logo: INSIGHTS_SLACK_LOGO, url: INSIGHTS_SLACK_URL },
     { name: 'ChatGPT', logo: openaiLogo },
     { name: 'Claude Code', logo: claudeLogo },
 ]

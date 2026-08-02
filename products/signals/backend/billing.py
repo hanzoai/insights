@@ -104,7 +104,7 @@ class BillingExemptionError(Exception):
 # problems in Insights's own systems. v1 policy is this code constant; the report→scout link is the
 # runs' `emitted_report_ids` tally (report-channel scouts author their reports directly).
 BILLING_EXEMPT_SCOUT_SKILLS: dict[str, str] = {
-    "signals-scout-health-checks": SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK,
+    "signals-scout-health-checks": SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK,
 }
 
 # Same policy for the signal channel: sources owned by Insights systems (e.g. the temporal
@@ -114,8 +114,8 @@ BILLING_EXEMPT_SCOUT_SKILLS: dict[str, str] = {
 # only: an exempt-origin signal joining an existing report never flips it (and vice versa),
 # mirroring `mark_report_billing_exempt`'s first-reason-wins freeze.
 BILLING_EXEMPT_SOURCE_PRODUCTS: dict[str, str] = {
-    SignalSourceProduct.HEALTH_CHECKS: SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK,
-    SignalSourceProduct.ENGINEERING_ANALYTICS: SignalReport.BillingExemptReason.POSTFN_SYSTEM,
+    SignalSourceProduct.HEALTH_CHECKS: SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK,
+    SignalSourceProduct.ENGINEERING_ANALYTICS: SignalReport.BillingExemptReason.INSIGHTS_SYSTEM,
 }
 
 

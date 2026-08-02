@@ -6,7 +6,7 @@ from unittest import mock
 
 from temporalio.client import ScheduleAlreadyRunningError, ScheduleListActionStartWorkflow
 
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_TYPE_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_TYPE_KEY
 
 from products.data_modeling.backend.logic.cohort_scheduling import tier_schedule_id
 from products.data_modeling.backend.logic.freshness import UnsupportedFrequencyTargetError
@@ -74,7 +74,7 @@ class TestReconcileDagSchedules(BaseTest):
         # tagged with the schedule type: get_v2_scheduled_dag_ids' unscoped sweep filters on it,
         # so an untagged tier schedule would make its DAG look un-migrated
         created_attrs = {pair.key.name: pair.value for pair in create.call_args.kwargs["search_attributes"]}
-        self.assertEqual(created_attrs[POSTFN_SCHEDULE_TYPE_KEY.name], DATA_MODELING_EXECUTE_DAG_WORKFLOW)
+        self.assertEqual(created_attrs[INSIGHTS_SCHEDULE_TYPE_KEY.name], DATA_MODELING_EXECUTE_DAG_WORKFLOW)
 
         # the stale H1 schedule is removed; nothing to update
         update.assert_not_called()

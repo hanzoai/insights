@@ -54,7 +54,7 @@ import { RecipientTokensService } from './services/messaging/recipient-tokens.se
 import { HogWatcherService, HogWatcherState } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
-import { FN_FUNCTION_TEMPLATES } from './templates'
+import { INSIGHTS_FUNCTION_TEMPLATES } from './templates'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType, MinimalLogEntry } from './types'
 import {
     convertToInsightsFunctionInvocationGlobals,
@@ -209,7 +209,7 @@ export class CdpApi {
         if (this.config.CYCLOTRON_NODE_DATABASE_URL) {
             this.rerunJobManager = new RerunJobManager({
                 dbUrl: this.config.CYCLOTRON_NODE_DATABASE_URL,
-                maxCount: this.config.FN_INVOCATION_RERUN_MAX_COUNT,
+                maxCount: this.config.INSIGHTS_INVOCATION_RERUN_MAX_COUNT,
             })
             await this.rerunJobManager.connect()
         }
@@ -293,7 +293,7 @@ export class CdpApi {
     }
 
     private getInsightsFunctionTemplates = (req: ModifiedRequest, res: express.Response): void => {
-        res.json(FN_FUNCTION_TEMPLATES)
+        res.json(INSIGHTS_FUNCTION_TEMPLATES)
     }
 
     private getFunctionStatus =

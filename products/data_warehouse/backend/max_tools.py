@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.database import Database
 from insights.insightsql.errors import ExposedInsightsQLError, ResolutionError
-from insights.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_DATASTORE_FUNCTIONS, INSIGHTSQL_POSTFN_FUNCTIONS
+from insights.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_DATASTORE_FUNCTIONS, INSIGHTSQL_INSIGHTS_FUNCTIONS
 from insights.insightsql.metadata import get_table_names
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_and_print_ast
@@ -30,7 +30,7 @@ def get_insightsql_functions() -> str:
     ch_aggregations = list(INSIGHTSQL_AGGREGATIONS.keys())
     # Underscore-prefixed functions are internal/preview (matching ALL_EXPOSED_FUNCTION_NAMES): the fixer must not
     # write them into user queries — some are env-gated or temporary and would error or break at removal.
-    ph_functions = [name for name in INSIGHTSQL_POSTFN_FUNCTIONS if not name.startswith("_")]
+    ph_functions = [name for name in INSIGHTSQL_INSIGHTS_FUNCTIONS if not name.startswith("_")]
 
     _insightsql_functions = f"""InsightsQL defines what functions are available with most (but not all) having a 1:1 mapping to Datastore functions.
 These are the non-aggregated InsightsQL functions:

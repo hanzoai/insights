@@ -35,7 +35,7 @@ comparable across runs of the same benchmark `version`.
 
 Run the harness against a **seeded local or devbox stack**, never against a
 customer project. Local recipe: `NODE_ENV=development PORT=9876
-POSTFN_API_BASE_URL=http://localhost:8000 pnpm dev:hono`, personal API key as
+INSIGHTS_API_BASE_URL=http://localhost:8000 pnpm dev:hono`, personal API key as
 `LIVE_MCP_TOKEN`.
 
 ## One iteration

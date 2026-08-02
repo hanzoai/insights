@@ -168,8 +168,8 @@ A dedicated GitHub App installation is its own bucket — rate-limit headroom pl
   # forks can't read org secrets — fall back to github.token
   if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
   with:
-    client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-    private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+    client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+    private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
 
 # a later step consumes the token (falling back to github.token on forks):
 - uses: some-action@<sha>

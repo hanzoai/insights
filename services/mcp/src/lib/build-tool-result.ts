@@ -3,12 +3,12 @@ import { RESOURCE_URI_META_KEY } from '@modelcontextprotocol/ext-apps/server'
 import { estimateTokens } from '@/lib/estimate-tokens'
 import { formatResponse } from '@/lib/response'
 import { isPrepareConfirmedActionResult } from '@/tools/confirmed-action-runtime'
-import { POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY, POSTFN_META_KEY } from '@/tools/types'
+import { INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, INSIGHTS_META_KEY } from '@/tools/types'
 import { APP_DATA_META_KEY, type AnalyticsMetadata, type WithAnalytics } from '@/ui-apps/types'
 
 export interface ToolResultMeta {
     ui?: { resourceUri?: string }
-    [POSTFN_META_KEY]?: { outputFormat?: 'optimized' | 'json' }
+    [INSIGHTS_META_KEY]?: { outputFormat?: 'optimized' | 'json' }
 }
 
 export interface BuildToolResultOptions {
@@ -117,7 +117,7 @@ export function buildToolResultPayload(opts: BuildToolResultOptions): ToolResult
     const isStringResult = typeof handlerResult === 'string'
     const formattedResults: string | undefined = isStringResult
         ? undefined
-        : ((handlerResult as Record<string, unknown> | null | undefined)?.[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY] as
+        : ((handlerResult as Record<string, unknown> | null | undefined)?.[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY] as
               | string
               | undefined)
 
@@ -127,7 +127,7 @@ export function buildToolResultPayload(opts: BuildToolResultOptions): ToolResult
     } else if (Array.isArray(handlerResult)) {
         rawResult = [...handlerResult]
     } else {
-        const { [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: _ignored, ...rest } = (handlerResult ?? {}) as Record<
+        const { [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: _ignored, ...rest } = (handlerResult ?? {}) as Record<
             string,
             unknown
         >
@@ -138,7 +138,7 @@ export function buildToolResultPayload(opts: BuildToolResultOptions): ToolResult
     const hasUiResource = !!resourceUri
     // Caller's per-call `output_format` wins over the tool's YAML default in `_meta`.
     const callerOutputFormat = (params as { output_format?: 'optimized' | 'json' } | undefined)?.output_format
-    const effectiveOutputFormat = callerOutputFormat ?? toolMeta?.[POSTFN_META_KEY]?.outputFormat
+    const effectiveOutputFormat = callerOutputFormat ?? toolMeta?.[INSIGHTS_META_KEY]?.outputFormat
     const useJson = effectiveOutputFormat === 'json'
     const callerWantsJson = callerOutputFormat === 'json'
 

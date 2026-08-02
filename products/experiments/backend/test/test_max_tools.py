@@ -171,7 +171,7 @@ class TestCreateExperimentTool(APIBaseTest):
             "variant_count": 2,
             "created_at": ANY,
             "creation_mode": "new",
-            "source": EventSource.POSTFN_AI,
+            "source": EventSource.INSIGHTS_AI,
         }
         assert mock_report_user_action.call_args.kwargs["team"] == self.team
         assert mock_report_user_action.call_args.kwargs["request"] is None

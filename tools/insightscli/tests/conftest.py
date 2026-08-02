@@ -11,7 +11,7 @@ def _opt_out_of_real_telemetry(monkeypatch):
     # ~/.config/insights config and POST real events with the committed api_key.
     # Suites that exercise telemetry itself (test_telemetry.py) delete this var
     # in their own fixture and substitute an isolated tmp config.
-    monkeypatch.setenv("POSTFN_TELEMETRY_OPT_OUT", "1")
+    monkeypatch.setenv("INSIGHTS_TELEMETRY_OPT_OUT", "1")
 
 
 @pytest.fixture(autouse=True)

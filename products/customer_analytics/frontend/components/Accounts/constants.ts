@@ -19,7 +19,7 @@ export const DEFAULT_TILES: AccountsOverviewTile[] = [
 // pre-existing value once on mount (to seed the working state) and emits an
 // `OverviewTilesLocalStorageRead` tombstone. Once that event stops firing, no browser still carries
 // a legacy value and this read path (plus the prefix) can be deleted.
-const overviewTilesTeamId = window.POSTFN_APP_CONTEXT?.current_team?.id
+const overviewTilesTeamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 export const ACCOUNTS_OVERVIEW_LEGACY_TILES_PREFIX = `${overviewTilesTeamId}_customer_analytics_accounts_overview__`
 
 // Canonical analytics event names for the accounts list. Every `insights.capture`

@@ -22,10 +22,10 @@ from temporalio.common import SearchAttributePair, TypedSearchAttributes
 
 from insights.temporal.common.client import async_connect
 from insights.temporal.common.search_attributes import (
-    POSTFN_DAG_ID_KEY,
-    POSTFN_ORG_ID_KEY,
-    POSTFN_SCHEDULE_TYPE_KEY,
-    POSTFN_TEAM_ID_KEY,
+    INSIGHTS_DAG_ID_KEY,
+    INSIGHTS_ORG_ID_KEY,
+    INSIGHTS_SCHEDULE_TYPE_KEY,
+    INSIGHTS_TEAM_ID_KEY,
 )
 
 from products.data_modeling.backend.logic.cohort_scheduling import dag_id_from_schedule_id
@@ -43,10 +43,10 @@ DATA_MODELING_EXECUTE_DAG_WORKFLOW = "data-modeling-execute-dag"
 def dag_schedule_search_attributes(*, team_id: int, organization_id: str, dag_id: str) -> TypedSearchAttributes:
     return TypedSearchAttributes(
         search_attributes=[
-            SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=team_id),
-            SearchAttributePair(key=POSTFN_ORG_ID_KEY, value=organization_id),
-            SearchAttributePair(key=POSTFN_DAG_ID_KEY, value=dag_id),
-            SearchAttributePair(key=POSTFN_SCHEDULE_TYPE_KEY, value=DATA_MODELING_EXECUTE_DAG_WORKFLOW),
+            SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=team_id),
+            SearchAttributePair(key=INSIGHTS_ORG_ID_KEY, value=organization_id),
+            SearchAttributePair(key=INSIGHTS_DAG_ID_KEY, value=dag_id),
+            SearchAttributePair(key=INSIGHTS_SCHEDULE_TYPE_KEY, value=DATA_MODELING_EXECUTE_DAG_WORKFLOW),
         ]
     )
 
@@ -73,10 +73,10 @@ async def get_v2_scheduled_dag_ids(candidate_dag_ids: Collection[str] | None = N
         # Filtering on a search attribute (InsightsDagId) is supported server-side; filtering on
         # WorkflowType is not, so we still narrow to the execute-dag workflow client-side below.
         quoted = ", ".join(f"'{dag_id}'" for dag_id in candidate_dag_ids)
-        schedules = await temporal.list_schedules(query=f"{POSTFN_DAG_ID_KEY.name} IN ({quoted})")
+        schedules = await temporal.list_schedules(query=f"{INSIGHTS_DAG_ID_KEY.name} IN ({quoted})")
     else:
         schedules = await temporal.list_schedules(
-            query=f'{POSTFN_SCHEDULE_TYPE_KEY.name} = "{DATA_MODELING_EXECUTE_DAG_WORKFLOW}"'
+            query=f'{INSIGHTS_SCHEDULE_TYPE_KEY.name} = "{DATA_MODELING_EXECUTE_DAG_WORKFLOW}"'
         )
 
     dag_ids: set[str] = set()

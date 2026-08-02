@@ -82,12 +82,12 @@ const FullPage = ({ environment }: ExtensionContextValue): JSX.Element => {
                     descriptionActionLabel="Learn more"
                     primaryAction={{
                         label: 'Connect in Insights',
-                        href: constants.POSTFN_NEW_SOURCE_URL,
+                        href: constants.INSIGHTS_NEW_SOURCE_URL,
                         target: '_blank',
                     }}
                     secondaryAction={{
                         label: "Don't have an account? Sign up",
-                        href: constants.POSTFN_DASHBOARD_URL,
+                        href: constants.INSIGHTS_DASHBOARD_URL,
                         target: '_blank',
                     }}
                     footerContent={mode === 'test' ? <DevTokenEntry onSaved={loadConnection} /> : undefined}

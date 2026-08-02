@@ -77,7 +77,7 @@ class TestHyperCacheFlagProvider(SimpleTestCase):
     @patch("products.feature_flags.backend.sdk_cache_provider.logger")
     @patch("products.feature_flags.backend.local_evaluation.flag_definitions_hypercache")
     def test_get_flag_definitions_returns_none_on_missing_team(self, mock_hypercache, mock_logger):
-        # The self team (POSTFN_SELF_TEAM_ID, default 2) is absent on most local/self-hosted instances.
+        # The self team (INSIGHTS_SELF_TEAM_ID, default 2) is absent on most local/self-hosted instances.
         # Team.DoesNotExist subclasses ObjectDoesNotExist, so it must be caught and logged at debug, not error.
         self.provider._hypercache = None
         mock_hypercache.get_from_cache.side_effect = Team.DoesNotExist("Team matching query does not exist.")

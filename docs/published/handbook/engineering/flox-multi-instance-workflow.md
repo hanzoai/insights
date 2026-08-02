@@ -39,17 +39,17 @@ You only need the full setup below when you want to run the app in a worktree. F
 
 ### Worktree Location
 
-By default, worktrees are created in `~/.worktrees/insights/`. You can customize this location by setting the `POSTFN_WORKTREE_BASE` environment variable:
+By default, worktrees are created in `~/.worktrees/insights/`. You can customize this location by setting the `INSIGHTS_WORKTREE_BASE` environment variable:
 
 ```bash
 # In your shell profile (~/.zshrc or ~/.bashrc)
-export POSTFN_WORKTREE_BASE="/path/to/your/preferred/location"
+export INSIGHTS_WORKTREE_BASE="/path/to/your/preferred/location"
 ```
 
 For example:
 
 ```bash
-export POSTFN_WORKTREE_BASE="$HOME/code/worktrees"
+export INSIGHTS_WORKTREE_BASE="$HOME/code/worktrees"
 # Worktrees will be created in ~/code/worktrees/<branch-name>
 ```
 
@@ -210,7 +210,7 @@ phw remove pr-5678-teammate
 
 The `phw list` and `phw remove` commands work with **all** your Insights worktrees, regardless of where they were created. This is helpful if you:
 
-- Changed your `POSTFN_WORKTREE_BASE` setting after creating some worktrees
+- Changed your `INSIGHTS_WORKTREE_BASE` setting after creating some worktrees
 - Have worktrees in multiple locations
 - Want to clean up old worktrees from previous setups
 
@@ -222,7 +222,7 @@ ls ~/.worktrees/insights/
 # old-feature/  pr-1234-teammate/
 
 # You changed your worktree base
-export POSTFN_WORKTREE_BASE="$HOME/dev/worktrees"
+export INSIGHTS_WORKTREE_BASE="$HOME/dev/worktrees"
 
 # phw list still shows ALL worktrees
 phw list

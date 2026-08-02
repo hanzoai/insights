@@ -8,7 +8,7 @@
  */
 
 /** The SDK install — what the app-wide sync surfaces watch by default. */
-export const POSTFN_INTEGRATION_WORKFLOW_ID = 'insights-integration'
+export const INSIGHTS_INTEGRATION_WORKFLOW_ID = 'insights-integration'
 
 /** `wizard self-driving` — the program the self-driving onboarding runs. */
 export const SELF_DRIVING_WORKFLOW_ID = 'self-driving'
@@ -18,5 +18,5 @@ export const SELF_DRIVING_WORKFLOW_ID = 'self-driving'
  * consumer keeps watching the SDK install without passing anything.
  */
 export function resolveWorkflowId(workflowId?: string): string {
-    return workflowId ?? POSTFN_INTEGRATION_WORKFLOW_ID
+    return workflowId ?? INSIGHTS_INTEGRATION_WORKFLOW_ID
 }

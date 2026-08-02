@@ -546,7 +546,7 @@ class EvaluationReportViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewse
 
     @staticmethod
     def _is_mcp_request(request: Request) -> bool:
-        return request.META.get("HTTP_X_POSTFN_CLIENT") == "mcp"
+        return request.META.get("HTTP_X_INSIGHTS_CLIENT") == "mcp"
 
     def get_serializer_class(self):
         if self.action == "list" and self._is_mcp_request(self.request):

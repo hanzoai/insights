@@ -656,7 +656,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
         response = self.client.get(
             f"/api/environments/{self.team.id}/evaluations/",
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)

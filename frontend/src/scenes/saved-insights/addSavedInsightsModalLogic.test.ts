@@ -61,7 +61,7 @@ function useSetupWithUrlCapture(options: { userInsightCount?: number; variant?: 
         },
     })
     initKeaTests()
-    window.POSTFN_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
+    window.INSIGHTS_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
     if (variant) {
         enableVariant(variant)
     }
@@ -195,7 +195,7 @@ describe('addSavedInsightsModalLogic', () => {
                 },
             })
             initKeaTests()
-            window.POSTFN_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
+            window.INSIGHTS_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
             logic = addSavedInsightsModalLogic()
             logic.mount()
         })

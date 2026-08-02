@@ -171,7 +171,7 @@ describe('jest.quarantine', () => {
                             JEST_JUNIT_ADD_FILE_ATTRIBUTE: 'true',
                             JEST_JUNIT_SUITE_NAME: '{filepath}',
                             JEST_JUNIT_OUTPUT_NAME: 'junit.xml',
-                            POSTFN_TEST_QUARANTINE_PATH: quarantinePath,
+                            INSIGHTS_TEST_QUARANTINE_PATH: quarantinePath,
                         },
                     }
                 )

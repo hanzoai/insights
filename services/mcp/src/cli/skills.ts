@@ -21,7 +21,7 @@ export interface SkillInstallResult {
 }
 
 async function loadSkills(): Promise<{ archive: ReturnType<typeof unzipSync>; entries: ContextMillResource[] }> {
-    const archive = await fetchContextMillResources(process.env.POSTFN_MCP_LOCAL_SKILLS_URL)
+    const archive = await fetchContextMillResources(process.env.INSIGHTS_MCP_LOCAL_SKILLS_URL)
     const manifest = loadManifestFromArchive(archive)
     return { archive, entries: filterValidEntries(manifest.resources, archive) }
 }

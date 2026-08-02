@@ -258,7 +258,7 @@ export function Billing(): JSX.Element {
                     </div>
                 ))}
 
-            {featureFlags[FEATURE_FLAGS.POSTFN_CODE_BILLING] && (
+            {featureFlags[FEATURE_FLAGS.INSIGHTS_CODE_BILLING] && (
                 <div className="flex flex-wrap max-w-300 pb-8">
                     <div className="border border-primary rounded w-full bg-surface-primary">
                         <div className="border-b border-primary rounded-t p-4">

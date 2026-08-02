@@ -28,9 +28,9 @@ class TestInsightsConnectionForward:
     def setup_environment(self, db, settings):
         # pytest-style class (not a Django TestCase), so use the `settings` fixture rather than the
         # override_settings class decorator, which only works on SimpleTestCase subclasses.
-        settings.POSTFN_CONNECT_BASE_URL_EU = "https://eu.hanzo.ai"
-        settings.POSTFN_CONNECT_OAUTH_CLIENT_ID_EU = "eu-client-id"
-        settings.POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU = "eu-secret"
+        settings.INSIGHTS_CONNECT_BASE_URL_EU = "https://eu.hanzo.ai"
+        settings.INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU = "eu-client-id"
+        settings.INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU = "eu-secret"
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
         self.user = User.objects.create_and_join(
@@ -151,7 +151,7 @@ class TestInsightsConnectionForward:
                 self._forward_url(),
                 {"method": "GET", "path": "api/projects/2/insights/"},
                 content_type="application/json",
-                HTTP_X_POSTFN_CONNECTION="1",
+                HTTP_X_INSIGHTS_CONNECTION="1",
             )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         mock_request.assert_not_called()

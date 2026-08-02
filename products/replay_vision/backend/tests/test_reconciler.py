@@ -18,7 +18,7 @@ from temporalio.service import RPCError, RPCStatusCode
 from temporalio.testing import ActivityEnvironment
 
 from insights.models import Organization, Team
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_FINGERPRINT_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_FINGERPRINT_KEY
 
 from products.replay_vision.backend.models.replay_observation import (
     ObservationStatus,
@@ -128,7 +128,7 @@ def _fake_listing(*, schedule_id: str, workflow_name: str, fingerprint: str | No
     action = type("Action", (), {"workflow": workflow_name})()
     listing.schedule = type("Schedule", (), {"action": action})()
     pairs = (
-        [SearchAttributePair(key=POSTFN_SCHEDULE_FINGERPRINT_KEY, value=fingerprint)]
+        [SearchAttributePair(key=INSIGHTS_SCHEDULE_FINGERPRINT_KEY, value=fingerprint)]
         if fingerprint is not None
         else []
     )

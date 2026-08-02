@@ -24,7 +24,7 @@ import {
     HEALTH_ALERT_TRIGGERS,
 } from './healthAlertsWizardConfig'
 
-const FN_FUNCTION_FILTER_LIST = HEALTH_ALERT_SUB_TEMPLATE_IDS.map(getFiltersFromSubTemplateId).filter(
+const INSIGHTS_FUNCTION_FILTER_LIST = HEALTH_ALERT_SUB_TEMPLATE_IDS.map(getFiltersFromSubTemplateId).filter(
     (f) => !!f
 ) as CyclotronJobFiltersType[]
 
@@ -116,7 +116,7 @@ function HealthAlertsEntryPointInner(): JSX.Element {
 
     return (
         <InsightsFunctionList
-            forceFilterGroups={FN_FUNCTION_FILTER_LIST}
+            forceFilterGroups={INSIGHTS_FUNCTION_FILTER_LIST}
             type="internal_destination"
             returnTo={urls.healthAlerts(selectedKinds ?? undefined)}
             onDeleteInsightsFunction={(insightsFunction) => {

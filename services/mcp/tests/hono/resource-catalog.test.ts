@@ -48,7 +48,7 @@ import { makeRedisRateLimitStubs } from './helpers/redis-rate-limit-stubs'
 
 const mockEnv = {
     MCP_APPS_BASE_URL: 'https://apps.test',
-    POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
 } as any
 
 interface MockRedis extends RedisLike {

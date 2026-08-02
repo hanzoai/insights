@@ -55,7 +55,7 @@ pub async fn init(
             pod: std::env::var("POD_NAME")
                 .or_else(|_| std::env::var("HOSTNAME"))
                 .ok(),
-            region: std::env::var("POSTFN_REGION").ok(),
+            region: std::env::var("INSIGHTS_REGION").ok(),
         })
         .clone();
 

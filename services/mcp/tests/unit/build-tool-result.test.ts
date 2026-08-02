@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { EXEC_BUILT_PAYLOAD, markExecPayload, buildToolResultPayload, isToolCallPayload } from '@/lib/build-tool-result'
-import { POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY, POSTFN_META_KEY } from '@/tools/types'
+import { INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, INSIGHTS_META_KEY } from '@/tools/types'
 import { APP_DATA_META_KEY } from '@/ui-apps/types'
 
 // Simulates a `query-trends` handler return value: a UI-resource tool that
@@ -39,7 +39,7 @@ function queryTrendsHandlerResult(withFormatted = true): Record<string, unknown>
             },
         ],
         _insightsUrl: 'http://localhost:8010/project/1/insights/new#q=%7B...',
-        ...(withFormatted ? { [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: FORMATTED_TABLE } : {}),
+        ...(withFormatted ? { [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: FORMATTED_TABLE } : {}),
     }
 }
 
@@ -83,7 +83,7 @@ describe('buildToolResultPayload — query-trends for Claude Code', () => {
             _analytics: { distinctId: 'test-distinct-id', toolName: 'query-trends' },
         })
         // Override key must not leak into structuredContent.
-        expect(payload.structuredContent).not.toHaveProperty(POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY)
+        expect(payload.structuredContent).not.toHaveProperty(INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY)
     })
 
     it('keeps structuredContent when suppression is omitted', () => {
@@ -221,7 +221,7 @@ describe('buildToolResultPayload — inline-exec UI host (forceUiDataToMeta)', (
 describe('buildToolResultPayload — non-query use cases', () => {
     it('preserves array handler results', () => {
         const result = [{ id: 'template-1' }]
-        Object.defineProperty(result, POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY, {
+        Object.defineProperty(result, INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, {
             value: 'informational result',
             enumerable: false,
         })
@@ -257,10 +257,10 @@ describe('buildToolResultPayload — non-query use cases', () => {
 
     it('JSON-encodes rawResult when tool-level outputFormat=json is configured', () => {
         // For tools like `query-llm-traces-list` that advertise JSON output at the tool level
-        // (via `_meta[POSTFN_META_KEY].outputFormat === 'json'`), text is JSON, not TOON.
+        // (via `_meta[INSIGHTS_META_KEY].outputFormat === 'json'`), text is JSON, not TOON.
         const payload = buildToolResultPayload({
             handlerResult: { results: [], _insightsUrl: 'http://...' },
-            toolMeta: { [POSTFN_META_KEY]: { outputFormat: 'json' } },
+            toolMeta: { [INSIGHTS_META_KEY]: { outputFormat: 'json' } },
             toolName: 'query-llm-traces-list',
             params: {},
             suppressStructuredContentForFormattedResults: true,

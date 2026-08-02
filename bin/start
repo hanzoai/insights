@@ -17,10 +17,10 @@ export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-insights}"
 # in the op-run process, so if we held fd 9's flock here the re-exec'd child
 # bin/start would fail to acquire it.
 if [ -f "$REPOSITORY_ROOT/.env.local" ] && grep -q "op://" "$REPOSITORY_ROOT/.env.local" 2>/dev/null; then
-    if [ -z "$_POSTFN_OP_RESOLVED" ]; then
+    if [ -z "$_INSIGHTS_OP_RESOLVED" ]; then
         if command -v op &>/dev/null; then
             echo "🔐 Resolving secrets from .env.local via 1Password"
-            export _POSTFN_OP_RESOLVED=1
+            export _INSIGHTS_OP_RESOLVED=1
             exec op run --env-file="$REPOSITORY_ROOT/.env.local" -- "$0" "$@"
         else
             echo "⚠️  .env.local contains 1Password refs (op://) but 'op' CLI is not installed."
@@ -81,7 +81,7 @@ source_env_defaults() {
     return 0
 }
 # .env.local: already in env if processed by op run, otherwise source directly
-if [[ -f "$REPOSITORY_ROOT/.env.local" ]] && [[ -z "$_POSTFN_OP_RESOLVED" ]]; then
+if [[ -f "$REPOSITORY_ROOT/.env.local" ]] && [[ -z "$_INSIGHTS_OP_RESOLVED" ]]; then
     source_env_defaults "$REPOSITORY_ROOT/.env.local"
 elif [[ ! -f "$REPOSITORY_ROOT/.env.local" ]] && [[ -f "$REPOSITORY_ROOT/.env.local.example" ]]; then
     echo "💡 No .env.local found — running with committed defaults only."
@@ -283,7 +283,7 @@ else
     # Generate/regenerate config using insightscli (defaults to product_analytics if no config exists)
     # HOGLI_PROCESS_MANAGER is picked up by dev:generate for telemetry
     if command -v insightscli &>/dev/null; then
-        POSTFN_TELEMETRY_OPT_OUT=1 HOGLI_PROCESS_MANAGER="$PROCESS_MANAGER" insightscli dev:generate 2>/dev/null || true
+        INSIGHTS_TELEMETRY_OPT_OUT=1 HOGLI_PROCESS_MANAGER="$PROCESS_MANAGER" insightscli dev:generate 2>/dev/null || true
     fi
 
     if [[ -f "$GENERATED_CONFIG" ]]; then

@@ -1,6 +1,6 @@
 // Display names for Insights built-in event names.
 // Keep in sync with frontend/src/taxonomy/core-filter-definitions-by-group.json (events section).
-const POSTFN_EVENT_DISPLAY_NAMES: Record<string, string> = {
+const INSIGHTS_EVENT_DISPLAY_NAMES: Record<string, string> = {
     $$heatmap: 'Heatmap',
     $ai_embedding: 'AI embedding (LLM)',
     $ai_evaluation: 'AI evaluation (LLM)',
@@ -85,5 +85,5 @@ export function humanizeSeriesLabel(label: string | null | undefined): string {
     if (!label) {
         return ''
     }
-    return POSTFN_EVENT_DISPLAY_NAMES[label] ?? label
+    return INSIGHTS_EVENT_DISPLAY_NAMES[label] ?? label
 }

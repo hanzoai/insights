@@ -37,7 +37,7 @@ BAA_ADDON_TYPES = frozenset({"boost", "scale", "enterprise"})
 # Insights-side mailbox used both as the CC recipient on every signing envelope
 # and as the document owner. PandaDoc sends the signing email on behalf of the
 # owner, so this is the From address the signer sees.
-POSTFN_SIGNING_EMAIL = "privacy@hanzo.ai"
+INSIGHTS_SIGNING_EMAIL = "privacy@hanzo.ai"
 
 
 def _pandadoc_template_id_for(document_type: str) -> str:
@@ -379,10 +379,10 @@ def create_pandadoc_envelope(document: LegalDocument) -> str | None:
         created = client.create_document_from_template(
             template_id=template_id,
             name=f"Insights {document.document_type} — {document.company_name}",
-            owner_email=POSTFN_SIGNING_EMAIL,
+            owner_email=INSIGHTS_SIGNING_EMAIL,
             recipients=[
                 pandadoc_client.PandaDocRecipient(
-                    email=POSTFN_SIGNING_EMAIL, role=pandadoc_client.PandaDocRole.INSIGHTS
+                    email=INSIGHTS_SIGNING_EMAIL, role=pandadoc_client.PandaDocRole.INSIGHTS
                 ),
                 pandadoc_client.PandaDocRecipient(
                     email=document.representative_email, role=pandadoc_client.PandaDocRole.CLIENT
@@ -437,7 +437,7 @@ def send_pandadoc_envelope(document: LegalDocument) -> bool:
                 f"You can also forward this document to reassign it if needed.\n\n"
                 f"- The Insights Team"
             ),
-            sender_email=POSTFN_SIGNING_EMAIL,
+            sender_email=INSIGHTS_SIGNING_EMAIL,
         )
         return True
     except pandadoc_client.PandaDocError as exc:

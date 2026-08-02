@@ -20,7 +20,7 @@ const counterEncryptedInputsDecryptFailed = new Counter({
 })
 
 // TODO: Make sure we only have fields we truly need
-const FN_FLOW_FIELDS = [
+const INSIGHTS_FLOW_FIELDS = [
     'id',
     'team_id',
     'name',
@@ -173,7 +173,7 @@ export class InsightsFlowManagerService {
 
         const response = await this.postgres.query<InsightsFlow>(
             PostgresUse.COMMON_READ,
-            `SELECT ${FN_FLOW_FIELDS.join(', ')} FROM insights_hogflow WHERE id = ANY($1)`,
+            `SELECT ${INSIGHTS_FLOW_FIELDS.join(', ')} FROM insights_hogflow WHERE id = ANY($1)`,
             [ids],
             'fetchInsightsFlows'
         )

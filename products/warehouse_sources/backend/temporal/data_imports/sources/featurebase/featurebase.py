@@ -31,7 +31,7 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.featurebas
     FeaturebaseEndpointConfig,
 )
 
-POSTFN_WEBHOOK_NAME = "Insights data warehouse"
+INSIGHTS_WEBHOOK_NAME = "Insights data warehouse"
 
 # Hard cap on voters pages fetched per post to bound runaway pagination in the fan-out.
 MAX_VOTER_PAGES_PER_POST = 100
@@ -495,7 +495,7 @@ def create_webhook(api_key: str, webhook_url: str) -> WebhookCreationResult:
     session = _make_session(api_key)
     headers = _get_headers(api_key)
     payload = {
-        "name": POSTFN_WEBHOOK_NAME,
+        "name": INSIGHTS_WEBHOOK_NAME,
         "url": webhook_url,
         "description": "Streams Featurebase events into the Insights data warehouse",
         "topics": all_desired_webhook_topics(),

@@ -9,8 +9,8 @@ from insights.insightsql.parser import parse_expr, parse_select
 from products.revenue_analytics.backend.views.core import BuiltQuery, SourceHandle, view_prefix_for_source
 from products.revenue_analytics.backend.views.schemas.customer import SCHEMA
 from products.revenue_analytics.backend.views.sources.constants import (
-    POSTFN_PERSON_DISTINCT_ID_METADATA_KEY,
-    POSTFN_PERSON_DISTINCT_ID_SOURCE_METADATA_KEY,
+    INSIGHTS_PERSON_DISTINCT_ID_METADATA_KEY,
+    INSIGHTS_PERSON_DISTINCT_ID_SOURCE_METADATA_KEY,
 )
 from products.revenue_analytics.backend.views.sources.helpers import extract_json_string, get_cohort_expr
 from products.warehouse_sources.backend.facade.models import DataWarehouseTable, ExternalDataSchema
@@ -44,8 +44,8 @@ _ENRICHED_METADATA_EXPR = parse_expr(
     )
     """,
     placeholders={
-        "distinct_id_key": ast.Constant(value=POSTFN_PERSON_DISTINCT_ID_METADATA_KEY),
-        "source_key": ast.Constant(value=POSTFN_PERSON_DISTINCT_ID_SOURCE_METADATA_KEY),
+        "distinct_id_key": ast.Constant(value=INSIGHTS_PERSON_DISTINCT_ID_METADATA_KEY),
+        "source_key": ast.Constant(value=INSIGHTS_PERSON_DISTINCT_ID_SOURCE_METADATA_KEY),
     },
 )
 
@@ -306,7 +306,7 @@ def _build_child_union_leg(table_name: str, label: str) -> ast.SelectQuery | ast
         WHERE JSONExtractString(metadata, {{metadata_key}}) != ''
         """,
         placeholders={
-            "metadata_key": ast.Constant(value=POSTFN_PERSON_DISTINCT_ID_METADATA_KEY),
+            "metadata_key": ast.Constant(value=INSIGHTS_PERSON_DISTINCT_ID_METADATA_KEY),
             "label": ast.Constant(value=label),
         },
     )

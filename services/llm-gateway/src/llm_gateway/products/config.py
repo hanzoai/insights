@@ -21,7 +21,7 @@ class CreditBucket(StrEnum):
     """
 
     AI_CREDITS = "ai_credits"
-    POSTFN_CODE_CREDITS = "insights_code_credits"
+    INSIGHTS_CODE_CREDITS = "insights_code_credits"
 
 
 @dataclass(frozen=True)
@@ -52,21 +52,21 @@ class ProductConfig:
 BEDROCK_MODELS = BEDROCK_MODEL_IDS
 
 # OAuth application IDs per region
-POSTFN_CODE_US_APP_ID = "019a3066-4aa2-0000-ca70-48ecdcc519cf"
-POSTFN_CODE_EU_APP_ID = "019a3067-5be7-0000-33c7-c6743eb59a79"
-POSTFN_CODE_DEV_APP_ID = "019ebb47-c750-0000-e1ea-723a6ff112d3"
-TWIG_US_APP_ID = POSTFN_CODE_US_APP_ID
-TWIG_EU_APP_ID = POSTFN_CODE_EU_APP_ID
+INSIGHTS_CODE_US_APP_ID = "019a3066-4aa2-0000-ca70-48ecdcc519cf"
+INSIGHTS_CODE_EU_APP_ID = "019a3067-5be7-0000-33c7-c6743eb59a79"
+INSIGHTS_CODE_DEV_APP_ID = "019ebb47-c750-0000-e1ea-723a6ff112d3"
+TWIG_US_APP_ID = INSIGHTS_CODE_US_APP_ID
+TWIG_EU_APP_ID = INSIGHTS_CODE_EU_APP_ID
 WIZARD_US_APP_ID = "019a0c79-b69d-0000-f31b-b41345208c9d"
 WIZARD_EU_APP_ID = "019a12d0-6edd-0000-0458-86616af3a3db"
-POSTFN_AI_US_APP_ID = "019ee060-3a0e-0000-7e9c-4e6b48dfae66"
-POSTFN_AI_EU_APP_ID = "019ee061-5620-0000-1a0d-ab1160fceeb1"
-POSTFN_AI_DEV_APP_ID = "019edb1a-cce4-0000-1f6d-682061862da9"
+INSIGHTS_AI_US_APP_ID = "019ee060-3a0e-0000-7e9c-4e6b48dfae66"
+INSIGHTS_AI_EU_APP_ID = "019ee061-5620-0000-1a0d-ab1160fceeb1"
+INSIGHTS_AI_DEV_APP_ID = "019edb1a-cce4-0000-1f6d-682061862da9"
 
 # Shared by `insights_code` and `slack_app` — the agent that runs in the sandbox
 # is the same code regardless of where the task was initiated, so the model
 # allowlist is identical.
-_POSTFN_CODE_AGENT_MODELS: Final[frozenset[str]] = frozenset(
+_INSIGHTS_CODE_AGENT_MODELS: Final[frozenset[str]] = frozenset(
     {
         "claude-fable-5",
         "claude-opus-4-5",
@@ -118,12 +118,12 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
         allow_api_keys=True,
     ),
     "insights_code": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
-        allowed_models=_POSTFN_CODE_AGENT_MODELS | BEDROCK_MODELS,
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
+        allowed_models=_INSIGHTS_CODE_AGENT_MODELS | BEDROCK_MODELS,
         allow_api_keys=False,
         # Bills as insights_code credits (pass-through model costs, no markup) — see
         # get_teams_with_insights_code_credits_used_in_period in insights/tasks/usage_report.py.
-        credit_bucket=CreditBucket.POSTFN_CODE_CREDITS,
+        credit_bucket=CreditBucket.INSIGHTS_CODE_CREDITS,
     ),
     # Insights-initiated internal task runs (Task.internal=True without a more specific
     # origin route — e.g. the repo-selection agent). Deliberately unbilled: this is
@@ -131,7 +131,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
     # pricing later rather than insights_code's pass-through bucket. Interim spend
     # control is the product/user cost limits in llm_gateway/config.py.
     "background_agents": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
         allowed_models=frozenset(
             {
                 "claude-fable-5",
@@ -161,15 +161,15 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
     # `wizard_config` state key. Models stay narrow because a free bucket shouldn't reach
     # the whole fleet; claude-opus-4-8 is only the SDK's fallback for the pinned sonnet.
     "onboarding": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
         allowed_models=frozenset({"claude-sonnet-5", "claude-opus-4-8"}) | BEDROCK_MODELS,
         allow_api_keys=False,
         credit_bucket=None,
         requires_server_credential=True,
     ),
     "slack_app": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
-        allowed_models=_POSTFN_CODE_AGENT_MODELS | BEDROCK_MODELS,
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
+        allowed_models=_INSIGHTS_CODE_AGENT_MODELS | BEDROCK_MODELS,
         allow_api_keys=False,
         credit_bucket=CreditBucket.AI_CREDITS,
         requires_server_credential=True,
@@ -237,7 +237,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
         allow_api_keys=True,
     ),
     "signals": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
         allowed_models=None,  # any model — the signals pipeline picks models per stage (haiku, sonnet, ...)
         allow_api_keys=True,
         credit_bucket=None,
@@ -254,7 +254,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
     # short-lived OAuth token carrying the internal provenance marker; personal API keys and normal
     # Code OAuth tokens cannot spend this unbilled product's budget.
     "custom_image_scans": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
         allowed_models=frozenset({"@cf/zai-org/glm-5.2"}),
         allow_api_keys=False,
         credit_bucket=None,
@@ -268,7 +268,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
     "conversations": ProductConfig(
         # Sandbox support-reply tasks auth with the array (insights_code) OAuth app but
         # route through this product so draft spend rolls up with utility prompts.
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
         allowed_models=frozenset({"claude-haiku-4-5", "claude-sonnet-4-6", "claude-sonnet-5"}),
         allow_api_keys=True,
         # Deliberately unbilled: autonomous support-reply drafting is "work completed by
@@ -292,7 +292,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
         credit_bucket=None,
     ),
     "insights_ai": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_AI_US_APP_ID, POSTFN_AI_EU_APP_ID, POSTFN_AI_DEV_APP_ID}),
+        allowed_application_ids=frozenset({INSIGHTS_AI_US_APP_ID, INSIGHTS_AI_EU_APP_ID, INSIGHTS_AI_DEV_APP_ID}),
         allowed_models=None,  # any model
         allow_api_keys=True,
         credit_bucket=CreditBucket.AI_CREDITS,
@@ -320,7 +320,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
     # server-side with the internal marker, so a user's own Desktop OAuth token can't ride this route
     # around the insights_code free-tier gate.
     "stamphog": ProductConfig(
-        allowed_application_ids=frozenset({POSTFN_CODE_US_APP_ID, POSTFN_CODE_EU_APP_ID, POSTFN_CODE_DEV_APP_ID}),
+        allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
         allowed_models=frozenset({"claude-haiku-4-5", "claude-sonnet-5"}),
         allow_api_keys=True,
         credit_bucket=None,

@@ -9,7 +9,7 @@ name: Engineering analytics weekly digest
 # Requires (no-ops with a warning until set, so it never spams failures):
 #   - vars.ENG_ANALYTICS_PROJECT_ID — the Insights project with the GitHub data
 #     warehouse source connected (the one ingesting Insights/insights PR + CI data).
-#   - secrets.ENG_ANALYTICS_POSTFN_API_KEY — a personal API key scoped to
+#   - secrets.ENG_ANALYTICS_INSIGHTS_API_KEY — a personal API key scoped to
 #     engineering_analytics:read for that project.
 #   - secrets.SLACK_DEVEX_BOT_TOKEN — the existing DevEx Slack bot (already used by
 #     ci-alerts-devex).
@@ -51,10 +51,10 @@ jobs:
                   node-version-file: .nvmrc
 
             - name: Build and post weekly CI digest
-              # POSTFN_HOST and SLACK_CHANNEL (#alerts-devex) ride the script's defaults.
+              # INSIGHTS_HOST and SLACK_CHANNEL (#alerts-devex) ride the script's defaults.
               env:
-                  POSTFN_PROJECT_ID: ${{ vars.ENG_ANALYTICS_PROJECT_ID }}
-                  POSTFN_API_KEY: ${{ secrets.ENG_ANALYTICS_POSTFN_API_KEY }}
+                  INSIGHTS_PROJECT_ID: ${{ vars.ENG_ANALYTICS_PROJECT_ID }}
+                  INSIGHTS_API_KEY: ${{ secrets.ENG_ANALYTICS_INSIGHTS_API_KEY }}
                   # Optional: pin a specific GitHub source if the project has more than one.
                   ENG_ANALYTICS_SOURCE_ID: ${{ vars.ENG_ANALYTICS_SOURCE_ID }}
                   SLACK_BOT_TOKEN: ${{ secrets.SLACK_DEVEX_BOT_TOKEN }}

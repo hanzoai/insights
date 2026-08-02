@@ -16,11 +16,11 @@ import { insightsFunctionsRerunCreate } from 'products/cdp/frontend/generated/ap
 import type { HogInvocationRerunFilterStatusEnumApi } from 'products/cdp/frontend/generated/api.schemas'
 import { hogFlowsRerunCreate } from 'products/workflows/frontend/generated/api'
 
-export const FN_INVOCATIONS_PAGE_SIZE = 100
+export const INSIGHTS_INVOCATIONS_PAGE_SIZE = 100
 
 /** Display-side mirror of the backend cap. Backend enforces the actual limit via the
- * `FN_INVOCATION_RERUN_MAX_COUNT` env var (Django serializer + Node CDP config). */
-export const FN_INVOCATIONS_RERUN_MAX_COUNT = 10000
+ * `INSIGHTS_INVOCATION_RERUN_MAX_COUNT` env var (Django serializer + Node CDP config). */
+export const INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT = 10000
 
 export type RunStatus = 'running' | 'succeeded' | 'failed'
 
@@ -623,7 +623,7 @@ async function fetchRunsPage(
            ${optionalPersonClause}
            ${problemClauseFor(props, filters)}
         ${orderClause}
-        LIMIT ${FN_INVOCATIONS_PAGE_SIZE}
+        LIMIT ${INSIGHTS_INVOCATIONS_PAGE_SIZE}
         OFFSET ${offset}
     `
 
@@ -1056,7 +1056,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                     for (const row of rows) {
                         row.problem_log_level = priorLevels.get(row.invocation_id) ?? null
                     }
-                    actions.setHasMore(rows.length >= FN_INVOCATIONS_PAGE_SIZE)
+                    actions.setHasMore(rows.length >= INSIGHTS_INVOCATIONS_PAGE_SIZE)
                     return rows
                 },
                 loadMore: async (_, breakpoint) => {
@@ -1064,7 +1064,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                     const offset = values.runs.length
                     const newRows = await fetchRunsPage(props, values.filters, offset)
                     breakpoint()
-                    actions.setHasMore(newRows.length >= FN_INVOCATIONS_PAGE_SIZE)
+                    actions.setHasMore(newRows.length >= INSIGHTS_INVOCATIONS_PAGE_SIZE)
                     // Prior pages are already enriched — stash the new ids so
                     // `loadMoreSuccess` scopes the severity query to this page only.
                     cache.lastPageInvocationIds = newRows.map((r) => r.invocation_id)
@@ -1190,7 +1190,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
         ],
         canBulkRerun: [
             (s) => [s.selectedCount],
-            (selectedCount: number) => selectedCount > 0 && selectedCount <= FN_INVOCATIONS_RERUN_MAX_COUNT,
+            (selectedCount: number) => selectedCount > 0 && selectedCount <= INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT,
         ],
         rerunableSelectedIds: [
             (s) => [s.selectedIds, s.runs],
@@ -1289,8 +1289,8 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                 toast.warning('Nothing to rerun')
                 return
             }
-            if (invocationIds.length > FN_INVOCATIONS_RERUN_MAX_COUNT) {
-                toast.error(`Rerun request capped at ${FN_INVOCATIONS_RERUN_MAX_COUNT} invocations per request`)
+            if (invocationIds.length > INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT) {
+                toast.error(`Rerun request capped at ${INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT} invocations per request`)
                 return
             }
 

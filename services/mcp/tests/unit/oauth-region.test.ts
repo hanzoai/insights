@@ -17,50 +17,50 @@ describe('OAuth Region Routing', () => {
     })
 
     describe('isLocalApi', () => {
-        it('returns true when POSTFN_API_BASE_URL is localhost', () => {
-            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
+        it('returns true when INSIGHTS_API_BASE_URL is localhost', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'http://localhost:8010'
             expect(isLocalApi()).toBe(true)
         })
 
-        it('returns false when POSTFN_API_BASE_URL is a cloud URL', () => {
-            process.env.POSTFN_API_BASE_URL = 'https://us.hanzo.ai'
+        it('returns false when INSIGHTS_API_BASE_URL is a cloud URL', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'https://us.hanzo.ai'
             expect(isLocalApi()).toBe(false)
         })
 
-        it('returns false when POSTFN_API_BASE_URL is not set', () => {
-            delete process.env.POSTFN_API_BASE_URL
+        it('returns false when INSIGHTS_API_BASE_URL is not set', () => {
+            delete process.env.INSIGHTS_API_BASE_URL
             expect(isLocalApi()).toBe(false)
         })
     })
 
     describe('isCloudApi', () => {
-        it('returns true when POSTFN_API_BASE_URL is not set', () => {
-            delete process.env.POSTFN_API_BASE_URL
+        it('returns true when INSIGHTS_API_BASE_URL is not set', () => {
+            delete process.env.INSIGHTS_API_BASE_URL
             expect(isCloudApi()).toBe(true)
         })
 
         it('returns true for us.hanzo.ai', () => {
-            process.env.POSTFN_API_BASE_URL = 'https://us.hanzo.ai'
+            process.env.INSIGHTS_API_BASE_URL = 'https://us.hanzo.ai'
             expect(isCloudApi()).toBe(true)
         })
 
         it('returns true for eu.hanzo.ai', () => {
-            process.env.POSTFN_API_BASE_URL = 'https://eu.hanzo.ai'
+            process.env.INSIGHTS_API_BASE_URL = 'https://eu.hanzo.ai'
             expect(isCloudApi()).toBe(true)
         })
 
         it('returns true for internal cluster URL', () => {
-            process.env.POSTFN_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
+            process.env.INSIGHTS_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
             expect(isCloudApi()).toBe(true)
         })
 
         it('returns false for self-hosted domain', () => {
-            process.env.POSTFN_API_BASE_URL = 'https://insights.example.com'
+            process.env.INSIGHTS_API_BASE_URL = 'https://insights.example.com'
             expect(isCloudApi()).toBe(false)
         })
 
         it('returns false for localhost', () => {
-            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
+            process.env.INSIGHTS_API_BASE_URL = 'http://localhost:8010'
             expect(isCloudApi()).toBe(false)
         })
     })
@@ -92,48 +92,48 @@ describe('OAuth Region Routing', () => {
     })
 
     describe('getPublicBaseUrl', () => {
-        it('returns POSTFN_PUBLIC_URL when set', () => {
-            process.env.POSTFN_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
-            process.env.POSTFN_PUBLIC_URL = 'https://us.hanzo.ai'
+        it('returns INSIGHTS_PUBLIC_URL when set', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
+            process.env.INSIGHTS_PUBLIC_URL = 'https://us.hanzo.ai'
             expect(getPublicBaseUrl()).toBe('https://us.hanzo.ai')
         })
 
-        it('falls back to POSTFN_API_BASE_URL when POSTFN_PUBLIC_URL is not set', () => {
-            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
-            delete process.env.POSTFN_PUBLIC_URL
+        it('falls back to INSIGHTS_API_BASE_URL when INSIGHTS_PUBLIC_URL is not set', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'http://localhost:8010'
+            delete process.env.INSIGHTS_PUBLIC_URL
             expect(getPublicBaseUrl()).toBe('http://localhost:8010')
         })
 
         it('returns undefined when neither is set', () => {
-            delete process.env.POSTFN_API_BASE_URL
-            delete process.env.POSTFN_PUBLIC_URL
+            delete process.env.INSIGHTS_API_BASE_URL
+            delete process.env.INSIGHTS_PUBLIC_URL
             expect(getPublicBaseUrl()).toBeUndefined()
         })
     })
 
     describe('getAuthorizationServerUrl', () => {
-        it('returns localhost when POSTFN_API_BASE_URL is localhost', () => {
-            process.env.POSTFN_API_BASE_URL = 'http://localhost:8010'
+        it('returns localhost when INSIGHTS_API_BASE_URL is localhost', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'http://localhost:8010'
             expect(getAuthorizationServerUrl()).toBe('http://localhost:8010')
         })
 
-        it('returns oauth proxy URL when POSTFN_API_BASE_URL is a cloud URL', () => {
-            process.env.POSTFN_API_BASE_URL = 'https://us.hanzo.ai'
+        it('returns oauth proxy URL when INSIGHTS_API_BASE_URL is a cloud URL', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'https://us.hanzo.ai'
             expect(getAuthorizationServerUrl()).toBe('https://oauth.hanzo.ai')
         })
 
-        it('returns oauth proxy URL when POSTFN_API_BASE_URL is an internal cluster URL', () => {
-            process.env.POSTFN_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
+        it('returns oauth proxy URL when INSIGHTS_API_BASE_URL is an internal cluster URL', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'http://insights-web-django.insights.svc.cluster.local:8000'
             expect(getAuthorizationServerUrl()).toBe('https://oauth.hanzo.ai')
         })
 
-        it('returns self-hosted URL when POSTFN_API_BASE_URL is a custom domain', () => {
-            process.env.POSTFN_API_BASE_URL = 'https://insights.example.com'
+        it('returns self-hosted URL when INSIGHTS_API_BASE_URL is a custom domain', () => {
+            process.env.INSIGHTS_API_BASE_URL = 'https://insights.example.com'
             expect(getAuthorizationServerUrl()).toBe('https://insights.example.com')
         })
 
         it('returns oauth proxy URL when not set', () => {
-            delete process.env.POSTFN_API_BASE_URL
+            delete process.env.INSIGHTS_API_BASE_URL
             expect(getAuthorizationServerUrl()).toBe('https://oauth.hanzo.ai')
         })
     })

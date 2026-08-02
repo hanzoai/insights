@@ -91,7 +91,7 @@ function SessionTraceSentimentBar({ sentiment }: { sentiment?: LLMTrace['sentime
 
 function SessionSceneWrapper({ showBreadcrumb = false }: { showBreadcrumb?: boolean }): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
-    const showFeedback = !!featureFlags[FEATURE_FLAGS.POSTFN_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS]
+    const showFeedback = !!featureFlags[FEATURE_FLAGS.INSIGHTS_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS]
 
     const {
         traces,

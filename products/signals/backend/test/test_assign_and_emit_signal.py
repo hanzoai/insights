@@ -146,7 +146,7 @@ async def test_new_match_creates_and_immediately_promotes_when_above_threshold(a
 @pytest.mark.parametrize(
     "source_product,expected_reason",
     [
-        ("health_checks", SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK),
+        ("health_checks", SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK),
         ("conversations", None),
     ],
 )

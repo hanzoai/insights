@@ -97,19 +97,19 @@ export type CdpConfig = DatastoreConfig & {
     CDP_FETCH_BACKOFF_BASE_MS: number
     CDP_FETCH_BACKOFF_MAX_MS: number
     CDP_OVERFLOW_QUEUE_ENABLED: boolean
-    FN_FUNCTION_MONITORING_APP_METRICS_TOPIC: string
-    FN_FUNCTION_MONITORING_APP_METRICS_PRODUCER: CdpProducerName
-    FN_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: string
-    FN_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER: CdpProducerName
-    FN_INVOCATION_RESULTS_TOPIC: string
-    FN_INVOCATION_RESULTS_PRODUCER: CdpProducerName
-    FN_INVOCATION_RESULTS_ENABLED: boolean
+    INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC: string
+    INSIGHTS_FUNCTION_MONITORING_APP_METRICS_PRODUCER: CdpProducerName
+    INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: string
+    INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER: CdpProducerName
+    INSIGHTS_INVOCATION_RESULTS_TOPIC: string
+    INSIGHTS_INVOCATION_RESULTS_PRODUCER: CdpProducerName
+    INSIGHTS_INVOCATION_RESULTS_ENABLED: boolean
     // Message assets: rendered emails snapshotted to object storage + a metadata
     // row in the message_assets Datastore table, surfaced in the workflow
     // "Assets" tab.
     MESSAGE_ASSETS_TOPIC: string
     MESSAGE_ASSETS_PRODUCER: CdpProducerName
-    FN_INVOCATION_RERUN_MAX_COUNT: number
+    INSIGHTS_INVOCATION_RERUN_MAX_COUNT: number
     // How many rerun wrapper jobs the worker dequeues per cyclotron-v2 poll.
     // Kept small by default — each job runs a full Datastore query per page.
     CDP_RERUN_WORKER_BATCH_SIZE: number
@@ -260,25 +260,25 @@ export function getDefaultCdpConfig(): CdpConfig {
         CDP_FETCH_BACKOFF_BASE_MS: 1000,
         CDP_FETCH_BACKOFF_MAX_MS: 30000,
         CDP_OVERFLOW_QUEUE_ENABLED: false,
-        FN_FUNCTION_MONITORING_APP_METRICS_TOPIC: KAFKA_APP_METRICS_2,
-        FN_FUNCTION_MONITORING_APP_METRICS_PRODUCER: WARPSTREAM_INGESTION_PRODUCER,
-        FN_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: KAFKA_LOG_ENTRIES,
-        FN_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER: WARPSTREAM_INGESTION_PRODUCER,
-        FN_INVOCATION_RESULTS_TOPIC: KAFKA_FN_INVOCATION_RESULTS,
+        INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC: KAFKA_APP_METRICS_2,
+        INSIGHTS_FUNCTION_MONITORING_APP_METRICS_PRODUCER: WARPSTREAM_INGESTION_PRODUCER,
+        INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: KAFKA_LOG_ENTRIES,
+        INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER: WARPSTREAM_INGESTION_PRODUCER,
+        INSIGHTS_INVOCATION_RESULTS_TOPIC: KAFKA_FN_INVOCATION_RESULTS,
         // Cyclotron Warpstream cluster — Datastore consumes hog_invocation_results
         // from the warpstream_cyclotron named collection, so the producer must
         // target the same cluster.
-        FN_INVOCATION_RESULTS_PRODUCER: WARPSTREAM_CYCLOTRON_PRODUCER,
+        INSIGHTS_INVOCATION_RESULTS_PRODUCER: WARPSTREAM_CYCLOTRON_PRODUCER,
         // Off by default — flip to true once the table is migrated and we want to start writing.
         // Per-team rollout still happens at the call site.
-        FN_INVOCATION_RESULTS_ENABLED: isDevEnv() ? true : false,
+        INSIGHTS_INVOCATION_RESULTS_ENABLED: isDevEnv() ? true : false,
         MESSAGE_ASSETS_TOPIC: KAFKA_MESSAGE_ASSETS,
         // Same cyclotron Warpstream cluster as hog_invocation_results — Datastore
         // consumes message_assets from the warpstream_cyclotron named collection.
         MESSAGE_ASSETS_PRODUCER: WARPSTREAM_CYCLOTRON_PRODUCER,
         // Hard cap on rows a single rerun wrapper job will drain. Mirrors the
-        // Django serializer's FN_INVOCATION_RERUN_MAX_COUNT (same env var).
-        FN_INVOCATION_RERUN_MAX_COUNT: 10000,
+        // Django serializer's INSIGHTS_INVOCATION_RERUN_MAX_COUNT (same env var).
+        INSIGHTS_INVOCATION_RERUN_MAX_COUNT: 10000,
         // Small by default — rerun jobs are heavy (a full Datastore query per
         // page), so a replica drains one wrapper job at a time unless tuned up.
         CDP_RERUN_WORKER_BATCH_SIZE: 1,

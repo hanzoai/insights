@@ -60,8 +60,8 @@ import { InsightsFunctionMetrics } from './metrics/InsightsFunctionMetrics'
 import { InsightsFunctionSkeleton } from './misc/InsightsFunctionSkeleton'
 import { InsightsFunctionRuns } from './runs/InsightsFunctionRuns'
 
-const FN_FUNCTION_SCENE_TABS = ['configuration', 'metrics', 'runs', 'invocations', 'backfills', 'history'] as const
-export type InsightsFunctionSceneTab = (typeof FN_FUNCTION_SCENE_TABS)[number]
+const INSIGHTS_FUNCTION_SCENE_TABS = ['configuration', 'metrics', 'runs', 'invocations', 'backfills', 'history'] as const
+export type InsightsFunctionSceneTab = (typeof INSIGHTS_FUNCTION_SCENE_TABS)[number]
 
 const InsightsFunctionSceneMapping: Partial<
     Record<InsightsFunctionTypeType, { scene: Scene; url: () => string; newKind?: DataPipelinesNewSceneKind }>
@@ -394,7 +394,7 @@ export const insightsFunctionSceneLogic = kea<insightsFunctionSceneLogicType>([
         const reactToTabChange = (_: any, search: Record<string, string>): void => {
             const possibleTab = (search.tab ?? 'configuration') as InsightsFunctionSceneTab
 
-            let tab = FN_FUNCTION_SCENE_TABS.includes(possibleTab) ? possibleTab : 'configuration'
+            let tab = INSIGHTS_FUNCTION_SCENE_TABS.includes(possibleTab) ? possibleTab : 'configuration'
             if (tab === 'invocations' && values.type === 'transformation_log') {
                 tab = 'configuration'
             }
@@ -559,7 +559,7 @@ export function InsightsFunctionScene(): JSX.Element {
         {
             label: 'History',
             key: 'history',
-            content: <ActivityLog id={id} scope={ActivityScope.FN_FUNCTION} />,
+            content: <ActivityLog id={id} scope={ActivityScope.INSIGHTS_FUNCTION} />,
         },
     ]
 

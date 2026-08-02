@@ -41,7 +41,7 @@ export async function buildCliContext(config: CliConfig): Promise<Context> {
     const identityKey = cliIdentityKey(config.apiKey)
     const fallbackDistinctId = `insights-cli:${identityKey}`
     // Set by the Rust wrapper; joins these events to its telemetry for the same run.
-    const cliInvocationId = process.env.POSTFN_CLI_INVOCATION_ID
+    const cliInvocationId = process.env.INSIGHTS_CLI_INVOCATION_ID
     const cache = new MemoryCache<State>(`cli:${identityKey}:${config.host}`)
     await cache.setMany({
         ...(config.organizationId ? { orgId: config.organizationId } : {}),
@@ -53,7 +53,7 @@ export async function buildCliContext(config: CliConfig): Promise<Context> {
         baseUrl: config.host.replace(/\/+$/, ''),
         clientUserAgent: `insights-cli api`,
         mcpClientName: 'insights-cli',
-        mcpClientVersion: process.env.POSTFN_CLI_VERSION,
+        mcpClientVersion: process.env.INSIGHTS_CLI_VERSION,
         mcpConsumer: 'insights-cli',
     })
     const stateManager = new StateManager(cache, api)

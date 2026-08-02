@@ -1,7 +1,7 @@
 import { formatHclValue, sanitizeResourceName } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
 // Schema version this exporter targets - update when provider schema changes
-export const POSTFN_PROVIDER_VERSION = '1.0.6'
+export const INSIGHTS_PROVIDER_VERSION = '1.0.6'
 
 export interface HclExportResult {
     hcl: string
@@ -58,7 +58,7 @@ export function generateHCL<T, O extends HclExportOptions = HclExportOptions>(
 
     // Header comment with metadata
     lines.push(`# Terraform configuration for Insights ${exporter.resourceLabel}`)
-    lines.push(`# Compatible with insights provider v${POSTFN_PROVIDER_VERSION}`)
+    lines.push(`# Compatible with insights provider v${INSIGHTS_PROVIDER_VERSION}`)
     if (resourceId !== undefined) {
         lines.push(`# Source ${exporter.resourceLabel} ID: ${resourceId}`)
     }

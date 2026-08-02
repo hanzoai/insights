@@ -128,7 +128,7 @@ def classify_request_source(request: Request) -> tuple[str, dict[str, str | None
         return NotebookCreationSource.UI, {}
     return NotebookCreationSource.MCP, {
         "api_key_type": type(authenticator).__name__,
-        "mcp_consumer": request.META.get("HTTP_X_POSTFN_MCP_CONSUMER"),
+        "mcp_consumer": request.META.get("HTTP_X_INSIGHTS_MCP_CONSUMER"),
     }
 
 

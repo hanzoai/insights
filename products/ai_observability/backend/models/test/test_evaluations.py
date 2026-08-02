@@ -416,12 +416,12 @@ class TestEvaluationStatusCoercion(BaseTest):
         evaluation = self._create(enabled=True)
         evaluation.set_status(
             EvaluationStatus.ERROR,
-            EvaluationStatusReason.FN_ERROR,
+            EvaluationStatusReason.INSIGHTS_ERROR,
             "Must return boolean, got int: 42",
         )
         evaluation.refresh_from_db()
         self.assertEqual(evaluation.status, EvaluationStatus.ERROR)
-        self.assertEqual(evaluation.status_reason, EvaluationStatusReason.FN_ERROR)
+        self.assertEqual(evaluation.status_reason, EvaluationStatusReason.INSIGHTS_ERROR)
         self.assertEqual(evaluation.status_reason_detail, "Must return boolean, got int: 42")
         self.assertFalse(evaluation.enabled)
 

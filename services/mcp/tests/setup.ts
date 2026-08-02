@@ -8,11 +8,11 @@ config({ path: resolve(process.cwd(), '.env.test') })
 // Mock cloudflare:workers module for Node.js test environment
 vi.mock('cloudflare:workers', () => ({
     env: {
-        POSTFN_ANALYTICS_API_KEY: undefined,
-        POSTFN_ANALYTICS_HOST: undefined,
-        POSTFN_API_BASE_URL: undefined,
-        POSTFN_PUBLIC_URL: undefined,
-        POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-        POSTFN_UI_APPS_TOKEN: undefined,
+        INSIGHTS_ANALYTICS_API_KEY: undefined,
+        INSIGHTS_ANALYTICS_HOST: undefined,
+        INSIGHTS_API_BASE_URL: undefined,
+        INSIGHTS_PUBLIC_URL: undefined,
+        INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+        INSIGHTS_UI_APPS_TOKEN: undefined,
     },
 }))

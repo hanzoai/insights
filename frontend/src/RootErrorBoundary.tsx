@@ -10,11 +10,11 @@ import { isChunkLoadError } from 'lib/utils/isChunkLoadError'
  */
 function reportBootFailure(error: unknown): void {
     try {
-        const apiKey = window.JS_POSTFN_API_KEY
+        const apiKey = window.JS_INSIGHTS_API_KEY
         if (!apiKey) {
             return // capture is opted out for this instance
         }
-        const host = window.JS_POSTFN_HOST || window.location.origin
+        const host = window.JS_INSIGHTS_HOST || window.location.origin
         let distinctId: string | undefined
         try {
             // insights-js persistence — absent on a first visit or under cookie-only persistence

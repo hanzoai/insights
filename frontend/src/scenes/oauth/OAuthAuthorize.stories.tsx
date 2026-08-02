@@ -12,7 +12,7 @@ import { mswDecorator } from '~/mocks/browser'
 // the story (and its consent logic) mounts, and restored on unmount so story order can't leak.
 function withOAuthApplication(overrides: Record<string, unknown>): Decorator {
     return function OAuthApplicationDecorator(Story): JSX.Element {
-        const appContext = (window as any).POSTFN_APP_CONTEXT
+        const appContext = (window as any).INSIGHTS_APP_CONTEXT
         const original = useRef<{ value: unknown }>()
         if (!original.current) {
             original.current = { value: appContext.oauth_application }

@@ -199,7 +199,7 @@ export const FEATURE_FLAGS = {
     WEBHOOKS_DENYLIST: 'webhooks-denylist', // owner: #team-ingestion, used to disable webhooks for certain companies
 
     // Legacy flags, TBD if they need to be removed
-    BATCH_EXPORTS_POSTFN_HTTP: 'insights-http-batch-exports', // owner: #team-batch-exports
+    BATCH_EXPORTS_INSIGHTS_HTTP: 'insights-http-batch-exports', // owner: #team-batch-exports
     BILLING_SKIP_FORECASTING: 'billing-skip-forecasting', // owner: @zach
     BOX_PLOT_INSIGHT: 'box-plot-insight', // owner: @pauldambra #team-product-analytics
     COOKIELESS_SERVER_HASH_MODE_SETTING: 'cookieless-server-hash-mode-setting', // owner: #team-web-analytics
@@ -330,7 +330,7 @@ export const FEATURE_FLAGS = {
     FLAGGED_FEATURE_INDICATOR: 'flagged-feature-indicator', // owner: @benjackwhite
     GROUP_PROFILE_EXPERIMENT: 'group-profile-experiment', // owner: @arthurdedeus #team-customer-analytics
     HEALTH_ASK_AI: 'health-ask-ai', // owner: @jordanm-insights #team-web-analytics, gates the "Ask Insights AI" buttons on the Health overview
-    FN_INVOCATION_RESULTS_RUNS_TAB: 'script-invocation-results-runs-tab', // owner: #team-workflows
+    INSIGHTS_INVOCATION_RESULTS_RUNS_TAB: 'script-invocation-results-runs-tab', // owner: #team-workflows
     INSIGHTSQL_WAREHOUSE_ACCESS_CONTROL: 'insightsql-warehouse-access-control', // owner: @a-lider #team-platform-features, gates per-object access control for warehouse tables and views
     IDENTITY_MATCHING: 'identity-matching', // owner: @fercgomes #team-growth, gates new identity matching scene on marketing analytics
     INBOX_SLACK_NOTIFICATIONS: 'inbox-slack-notifications', // owner: #team-self-driving, gates the Slack notifications config card in the inbox
@@ -417,13 +417,13 @@ export const FEATURE_FLAGS = {
     PHAI_SANDBOX_MODE: 'phai-sandbox-mode', // owner: #team-insights-ai
     PHAI_TASKS: 'phai-tasks', // owner: #team-array
     PIPELINE_STATUS_PAGE: 'pipeline-status-page', // owner: @clr182 #team-support
-    POSTFN_AI_BILLING_DISPLAY: 'insights-ai-billing-display', // owner: #team-insights-ai
-    POSTFN_AI_CHANGELOG: 'insights-ai-changelog', // owner: #team-insights-ai
-    POSTFN_AI_CONVERSATION_FEEDBACK_CONFIG: 'insights-ai-conversation-feedback-config', // owner: #team-insights-ai
-    POSTFN_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS: 'insights-ai-conversation-feedback-llma-sessions', // owner: #team-insights-ai
-    POSTFN_AI_QUEUE_MESSAGES_SYSTEM: 'insights-ai-queue-messages-system', // owner: #team-insights-ai
-    POSTFN_CODE_BILLING: 'insights-code-billing', // owner: #team-insights-code
-    POSTFN_CONNECT: 'insights-connect', // owner: @Gilbert09, gates the "connect another Insights project" personal integration
+    INSIGHTS_AI_BILLING_DISPLAY: 'insights-ai-billing-display', // owner: #team-insights-ai
+    INSIGHTS_AI_CHANGELOG: 'insights-ai-changelog', // owner: #team-insights-ai
+    INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG: 'insights-ai-conversation-feedback-config', // owner: #team-insights-ai
+    INSIGHTS_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS: 'insights-ai-conversation-feedback-llma-sessions', // owner: #team-insights-ai
+    INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM: 'insights-ai-queue-messages-system', // owner: #team-insights-ai
+    INSIGHTS_CODE_BILLING: 'insights-code-billing', // owner: #team-insights-code
+    INSIGHTS_CONNECT: 'insights-connect', // owner: @Gilbert09, gates the "connect another Insights project" personal integration
     PRODUCT_ANALYTICS_DASHBOARD_COLORS: 'dashboard-colors', // owner: @thmsobrmlr #team-product-analytics
     PRODUCT_ANALYTICS_DASHBOARD_MODAL_SMART_DEFAULTS: 'product-analytics-dashboard-modal-smart-defaults', // owner: @sam #team-product-analytics
     PRODUCT_ANALYTICS_HIDE_WEEKENDS: 'product-analytics-hide-weekends', // owner: @kliment-slice #team-irl-events

@@ -19,7 +19,7 @@ set -euo pipefail
 url="${1:?bin/dev-open-when-ready: expected a URL as the first argument}"
 
 # Don't pop a browser in automated/headless contexts.
-if [[ -n "${CI:-}" || -n "${POSTFN_CODE:-}" ]]; then
+if [[ -n "${CI:-}" || -n "${INSIGHTS_CODE:-}" ]]; then
     exit 0
 fi
 

@@ -14,7 +14,7 @@ function ReactEnvVarsSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.Bash}>
-            {[`VITE_POSTFN_PROJECT_TOKEN=${currentTeam?.api_token}`, `VITE_POSTFN_HOST=${apiHostOrigin()}`].join(
+            {[`VITE_INSIGHTS_PROJECT_TOKEN=${currentTeam?.api_token}`, `VITE_INSIGHTS_HOST=${apiHostOrigin()}`].join(
                 '\n'
             )}
         </CodeSnippet>
@@ -31,13 +31,13 @@ import App from './App.jsx'
 import { InsightsProvider } from '@hanzo/react'
 
 const options = {
-  api_host: import.meta.env.VITE_POSTFN_HOST,
+  api_host: import.meta.env.VITE_INSIGHTS_HOST,
   defaults: '${SDK_DEFAULTS_DATE}',
 } as const
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <InsightsProvider apiKey={import.meta.env.VITE_POSTFN_PROJECT_TOKEN} options={options}>
+    <InsightsProvider apiKey={import.meta.env.VITE_INSIGHTS_PROJECT_TOKEN} options={options}>
       <App />
     </InsightsProvider>
   </StrictMode>
