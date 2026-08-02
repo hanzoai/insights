@@ -21,7 +21,6 @@ from django.db import transaction
 import structlog
 from rest_framework.exceptions import PermissionDenied, Throttled
 
-from insights.exceptions import QuotaLimitExceeded
 from insights.models.team import Team
 from insights.models.user import User
 

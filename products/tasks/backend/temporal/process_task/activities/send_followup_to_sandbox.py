@@ -14,6 +14,7 @@ from insights.models.user_integration import ReauthorizationRequired, UserIntegr
 from insights.temporal.common.utils import close_db_connections
 from insights.temporal.oauth import InsightsMcpScopes
 
+from products.insights_ai.backend.wire_types import STOP_REASON_END_TURN, TURN_COMPLETE_METHOD
 from products.tasks.backend.exceptions import CredentialUnavailableError
 from products.tasks.backend.logic.services.agent_command import (
     FOLLOWUP_TIMEOUT_SECONDS,
@@ -53,8 +54,6 @@ from products.tasks.backend.temporal.process_task.utils import (
     record_message_actor,
     sandbox_identity_scope,
 )
-
-from products.insights_ai.backend.wire_types import STOP_REASON_END_TURN, TURN_COMPLETE_METHOD
 
 logger = structlog.get_logger(__name__)
 

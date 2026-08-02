@@ -25,7 +25,6 @@ from django.db.models.functions import Substr
 from django.utils import timezone
 
 import structlog
-from langchain_core.messages import HumanMessage, SystemMessage
 
 from insights.api.embedding_worker import generate_embedding
 from insights.helpers.full_text_search import process_query
@@ -36,8 +35,6 @@ from insights.models.user import User
 from insights.ph_client import feature_enabled_or_false
 from insights.security.url_validation import is_url_allowed
 
-from ee.hogai.llm import MaxChatAnthropic
-
 from . import crawl, discover, file_parse, html_parse, url_fetch
 from .constants import (
     BK_DRILLDOWN_DEFAULT_RADIUS,
@@ -45,7 +42,6 @@ from .constants import (
     BK_EMBEDDING_DOCUMENT_TYPE,
     BK_EMBEDDING_MODEL,
     BK_EMBEDDING_PRODUCT,
-    BK_RERANK_MODEL,
     BK_RERANK_SNIPPET_CHARS,
     BK_RRF_K,
     BK_RRF_SCORE_FLOOR,
@@ -1988,58 +1984,14 @@ def rerank_chunks(
     top_k: int,
 ) -> list[KnowledgeSearchResult]:
     """
-    Listwise LLM rerank over BK search candidates. On any model/parse failure,
-    returns the input order (RRF order from ``search_knowledge``) trimmed to
-    ``top_k``.
+    Trim BK search candidates to ``top_k``, preserving the RRF order from
+    ``search_knowledge``.
+
+    A listwise LLM rerank used to run here. It went out with the enterprise model
+    client, and RRF order was always its fallback, so search keeps working with the
+    relevance it had whenever the rerank failed.
     """
-    if not results:
-        return []
-
-    top_k = max(1, top_k)
-    original_order = results
-    if len(results) == 1:
-        return original_order[:top_k]
-
-    if not team.organization.is_ai_data_processing_approved:
-        return original_order[:top_k]
-
-    valid_ids = {result.chunk_id for result in results}
-    id_to_result = {result.chunk_id: result for result in results}
-
-    try:
-        user = _resolve_active_org_user(team)
-        llm = MaxChatAnthropic(
-            model=BK_RERANK_MODEL,
-            streaming=False,
-            user=user,
-            team=team,
-            max_tokens=1024,
-            billable=False,
-            inject_context=False,
-        )
-        response = llm.invoke(
-            [
-                SystemMessage(content=_RERANK_SYSTEM_PROMPT),
-                HumanMessage(content=_build_rerank_user_prompt(query, results)),
-            ]
-        )
-        content = response.content
-        if isinstance(content, list):
-            content = "".join(str(item) for item in content)
-        ranked_ids = _parse_reranked_chunk_ids(str(content), valid_ids)
-        if ranked_ids is None:
-            return original_order[:top_k]
-
-        ranked_set = set(ranked_ids)
-        for result in original_order:
-            if result.chunk_id not in ranked_set:
-                ranked_ids.append(result.chunk_id)
-
-        reranked = [id_to_result[chunk_id] for chunk_id in ranked_ids]
-        return reranked[:top_k]
-    except Exception:
-        logger.warning("bk_rerank_failed", team_id=team.id, exc_info=True)
-        return original_order[:top_k]
+    return results[: max(1, top_k)]
 
 
 # ---------------------------------------------------------------------------

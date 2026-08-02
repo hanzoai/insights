@@ -35,6 +35,7 @@ from insights.event_usage import report_user_action
 from insights.models.team import Team
 from insights.models.user import User
 from insights.renderers import ServerSentEventRenderer
+from insights.security.untrusted import as_untrusted_data
 from insights.utils import relative_date_parse
 
 from products.replay_vision.backend.api.errors import ReplayVisionErrorSerializer
@@ -65,8 +66,6 @@ from products.replay_vision.backend.temporal.scanners.monitor import MonitorVerd
 from products.replay_vision.backend.temporal.types import ScannerResult, ScannerSnapshot
 from products.tasks.backend.facade import api as tasks_facade
 from products.tasks.backend.facade.access import has_tasks_access
-
-from insights.security.untrusted import as_untrusted_data
 
 logger = structlog.get_logger(__name__)
 
