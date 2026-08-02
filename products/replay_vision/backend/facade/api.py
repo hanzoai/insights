@@ -3,13 +3,12 @@ from typing import TYPE_CHECKING
 from django.db.models import Case, When
 
 from insights.rbac.user_access_control import UserAccessControl
+from insights.security.untrusted import as_untrusted_data
 
 from products.replay_vision.backend.feature_flag import is_replay_vision_enabled
 from products.replay_vision.backend.models.replay_observation import ObservationStatus, ReplayObservation
 from products.replay_vision.backend.models.replay_scanner import ReplayScanner, ScannerType
 from products.replay_vision.backend.observation_formatting import format_line, read_output
-
-from ee.hogai.utils.untrusted import as_untrusted_data
 
 if TYPE_CHECKING:
     from insights.models.team.team import Team

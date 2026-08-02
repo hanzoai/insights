@@ -15,7 +15,6 @@ from django.db import connection
 from django.db.models import Count, F, Q, Sum
 from django.db.models.functions import Coalesce
 
-import requests
 import structlog
 from cachetools import cached
 from celery import shared_task
@@ -25,17 +24,16 @@ from psycopg import sql
 from retry import retry
 
 from insights import version_requirement
+from insights.cloud_utils import get_cached_instance_license
+from insights.constants import FlagRequestType
 from insights.datastore.client import sync_execute
 from insights.datastore.client.connection import DatastoreUser, Workload
 from insights.datastore.query_tagging import Feature, Product, tags_context
-from insights.cloud_utils import get_cached_instance_license
-from insights.constants import FlagRequestType
 from insights.exceptions_capture import capture_exception
 from insights.logging.timing import timed_log
 from insights.models import OrganizationMembership, User
 from insights.models.event.new_events_schema import events_read_table, use_new_events_schema
 from insights.models.group_type_mapping import count_group_type_mappings_per_team, get_group_types_for_team
-from insights.models.organization import Organization
 from insights.models.property.util import get_property_string_expr
 from insights.models.team.team import Team
 from insights.models.utils import namedtuplefetchall
@@ -472,48 +470,12 @@ def get_ph_client(*args: Any, **kwargs: Any) -> InsightsClient:
 @shared_task(**USAGE_REPORT_TASK_KWARGS, max_retries=3, rate_limit="5/s")
 @skip_team_scope_audit
 def send_report_to_billing_service(org_id: str, report: dict[str, Any]) -> None:
-    if not settings.EE_AVAILABLE:
-        return
+    """Deliver an organization's usage report to the billing service.
 
-    from ee.billing.billing_manager import BillingManager, build_billing_token
-    from ee.billing.billing_types import BillingStatus
-    from ee.settings import BILLING_SERVICE_URL
-
-    try:
-        license = get_cached_instance_license()
-        if not license or not license.is_v2_license:
-            return
-
-        organization = Organization.objects.get(id=org_id)
-        if not organization:
-            return
-
-        token = build_billing_token(license, organization)
-        headers = {}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-
-        response = requests.post(f"{BILLING_SERVICE_URL}/api/usage", json=report, headers=headers, timeout=30)
-        if response.status_code != 200:
-            raise Exception(
-                f"Failed to send usage report to billing service code:{response.status_code} response:{response.text}"
-            )
-
-        response_data: BillingStatus = response.json()
-        BillingManager(license).update_org_details(organization, response_data)
-
-    except Exception as err:
-        logger.exception(
-            f"[Send Usage Report To Billing] Usage Report failed sending to Billing for organization: {org_id}: {err}"
-        )
-        capture_exception(err)
-        capture_event(
-            pha_client=get_ph_client(sync_mode=True),
-            name=f"organization usage report to billing service failure",
-            organization_id=org_id,
-            properties={"err": str(err)},
-        )
-        raise
+    The billing service is an enterprise feature this fork does not carry, so there is
+    nowhere to deliver to. Usage is still gathered and captured as events; only the
+    delivery is gone. Kept as a task because the report pipeline fans out to it per org.
+    """
 
 
 def _execute_split_query(
@@ -2932,7 +2894,9 @@ def _get_team_report(all_data: dict[str, Any], team: Team) -> UsageReportCounter
             team.id, 0
         ),
         insights_function_calls_in_period=all_data["teams_with_insights_function_calls_in_period"].get(team.id, 0),
-        insights_function_fetch_calls_in_period=all_data["teams_with_insights_function_fetch_calls_in_period"].get(team.id, 0),
+        insights_function_fetch_calls_in_period=all_data["teams_with_insights_function_fetch_calls_in_period"].get(
+            team.id, 0
+        ),
         cdp_billable_invocations_in_period=all_data["teams_with_cdp_billable_invocations_in_period"].get(team.id, 0),
         web_events_count_in_period=all_data["teams_with_web_events_count_in_period"].get(team.id, 0),
         web_lite_events_count_in_period=all_data["teams_with_web_lite_events_count_in_period"].get(team.id, 0),
@@ -2961,7 +2925,9 @@ def _get_team_report(all_data: dict[str, Any], team: Team) -> UsageReportCounter
         ai_event_count_in_period=all_data["teams_with_ai_event_count_in_period"].get(team.id, 0),
         ai_credits_used_in_period=all_data["teams_with_ai_credits_used_in_period"].get(team.id, 0),
         signals_credits_used_in_period=all_data["teams_with_signals_credits_used_in_period"].get(team.id, 0),
-        insights_code_credits_used_in_period=all_data["teams_with_insights_code_credits_used_in_period"].get(team.id, 0),
+        insights_code_credits_used_in_period=all_data["teams_with_insights_code_credits_used_in_period"].get(
+            team.id, 0
+        ),
         task_sandbox_seconds_in_period=all_data["teams_with_task_sandbox_seconds_in_period"].get(team.id, 0),
         task_sandbox_cpu_core_seconds_in_period=all_data["teams_with_task_sandbox_cpu_core_seconds_in_period"].get(
             team.id, 0
@@ -3141,14 +3107,8 @@ def send_all_org_usage_reports(
 
     instance_metadata = get_instance_metadata(period)
 
+    # Reports were also queued to the billing service over SQS, which went with it.
     producer = None
-    try:
-        if settings.EE_AVAILABLE:
-            from ee.sqs.SQSProducer import get_sqs_producer
-
-            producer = get_sqs_producer("usage_reports")
-    except Exception:
-        pass
 
     pha_client = get_ph_client(sync_mode=True)
 

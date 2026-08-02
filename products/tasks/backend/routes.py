@@ -2,7 +2,6 @@ from insights.api.routing import RouterRegistry
 
 import products.tasks.backend.presentation.views.api as tasks
 import products.tasks.backend.presentation.views.loops as loops
-import products.tasks.backend.presentation.views.seat_api as seats
 import products.tasks.backend.presentation.views.channels_api as channels
 
 
@@ -40,4 +39,3 @@ def register_routes(routers: RouterRegistry) -> None:
         r"sandbox_custom_images", tasks.SandboxCustomImageViewSet, "project_sandbox_custom_images", ["team_id"]
     )
     routers.root.register(r"code/invites", tasks.CodeInviteViewSet, "code_invites")
-    routers.root.register(r"seats", seats.SeatViewSet, "seats")

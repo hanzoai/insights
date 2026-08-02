@@ -3,15 +3,15 @@ import random
 import asyncio
 import threading
 from collections import deque
-from collections.abc import AsyncGenerator, AsyncIterable, AsyncIterator, Generator, Iterable, Iterator
+from collections.abc import AsyncGenerator, AsyncIterable, AsyncIterator, Callable, Generator, Iterable, Iterator
 from http import HTTPStatus
 from typing import TypeVar
 
-from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse, StreamingHttpResponse
 
+from asgiref.sync import sync_to_async
 from prometheus_client import Counter, Gauge, Histogram
 
 # What StreamingHttpResponse actually accepts: sync or async iterables of bytes or
@@ -402,3 +402,29 @@ class SyncIterableToAsync(AsyncIterator[T]):
             return next(iterator)
         except StopIteration:
             raise StopAsyncIteration
+
+
+def async_to_sync(make_stream: Callable[[], AsyncIterable[T]]) -> Iterator[T]:
+    """Adapt an async iterable to a blocking one for the WSGI server.
+
+    The inverse of `SyncIterableToAsync`, for the other half of every
+    `SERVER_GATEWAY_INTERFACE == "ASGI"` branch: under WSGI there is no running loop, so the
+    async stream is driven to completion on a private one. Takes a factory rather than the
+    iterable itself so the coroutine is created inside that loop — an async generator built on
+    one loop cannot be advanced on another.
+    """
+    loop = asyncio.new_event_loop()
+    try:
+        iterator = make_stream().__aiter__()
+        while True:
+            try:
+                yield loop.run_until_complete(iterator.__anext__())
+            except StopAsyncIteration:
+                return
+    finally:
+        # Let the generator run its own cleanup (aclose on the stream) before the loop closes,
+        # otherwise pending finalizers raise "Event loop is closed".
+        try:
+            loop.run_until_complete(loop.shutdown_asyncgens())
+        finally:
+            loop.close()

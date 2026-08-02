@@ -21,25 +21,13 @@ from temporalio.client import (
 )
 
 from insights.slo.types import SloArea, SloConfig, SloOperation
-from insights.temporal.ai.checkpoint_compaction.schedule import (
-    create_checkpoint_compaction_schedule,
-    should_register_checkpoint_compaction_schedule,
-)
 from insights.temporal.ai_observability.eval_reports.schedule import (
     create_count_trigger_schedule,
     create_eval_reports_schedule,
 )
-from insights.temporal.ai_observability.evaluation_clustering.schedule import (
-    create_evaluation_clustering_schedule,
-    create_evaluation_sampler_schedule,
-)
 from insights.temporal.ai_observability.trace_clustering.schedule import (
     create_generation_clustering_coordinator_schedule,
     create_trace_clustering_coordinator_schedule,
-)
-from insights.temporal.ai_observability.trace_summarization.schedule import (
-    create_batch_generation_summarization_schedule,
-    create_batch_trace_summarization_schedule,
 )
 from insights.temporal.alerts.schedule import (
     create_cleanup_alert_checks_schedule,
@@ -62,18 +50,10 @@ from insights.temporal.messaging.schedule import (
     create_reconcile_precalculated_data_schedule,
 )
 from insights.temporal.product_analytics.upgrade_queries_workflow import UpgradeQueriesWorkflowInputs
-from insights.temporal.quota_limiting.run_quota_limiting import RunQuotaLimitingInputs
-from insights.temporal.salesforce_enrichment.conversations_slack_workflow import ConversationsSlackEnrichmentInputs
-from insights.temporal.salesforce_enrichment.stripe_workflow import StripeEnrichmentInputs
-from insights.temporal.salesforce_enrichment.usage_workflow import UsageEnrichmentInputs
-from insights.temporal.salesforce_enrichment.workflow import SalesforceEnrichmentInputs
 from insights.temporal.session_replay.delete_recordings.types import PurgeDeletedMetadataInput
 from insights.temporal.session_replay.enforce_max_replay_retention.types import EnforceMaxReplayRetentionInput
 from insights.temporal.session_replay.gemini_cleanup_sweep import create_gemini_cleanup_sweep_schedule
 from insights.temporal.session_replay.replay_count_metrics.types import ReplayCountMetricsInput
-from insights.temporal.session_replay.summarization_sweep.reconciler import (
-    create_summarization_sweep_reconciler_schedule,
-)
 from insights.temporal.session_replay.surfacing_score_export_sweep.schedule import (
     create_surfacing_score_export_sweep_schedule,
 )
@@ -98,7 +78,6 @@ from products.error_tracking.backend.facade.temporal import (
     create_error_tracking_symbol_set_cleanup_schedule,
 )
 from products.experiments.backend.temporal.schedule import create_experiment_precompute_canary_schedule
-from products.exports.backend.temporal.subscriptions.types import ScheduleAllSubscriptionsWorkflowInputs
 from products.replay_vision.backend.temporal.estimates import create_replay_vision_estimates_schedule
 from products.replay_vision.backend.temporal.gemini_cleanup_sweep import (
     create_replay_vision_gemini_cleanup_sweep_schedule,
@@ -110,8 +89,6 @@ from products.signals.backend.temporal.agentic.schedule import create_signals_sc
 from products.web_analytics.backend.temporal.digest_notification.types import WADigestNotificationInput
 from products.web_analytics.backend.temporal.weekly_digest.types import WAWeeklyDigestInput
 
-from ee.billing.salesforce_enrichment.constants import DEFAULT_CHUNK_SIZE
-
 logger = structlog.get_logger(__name__)
 
 
@@ -119,59 +96,6 @@ async def cleanup_sync_vectors_schedule(client: Client):
     """Disabled: delete the actions embedding sync schedule. Any in-flight runs die on their own execution_timeout."""
     if await a_schedule_exists(client, "ai-sync-vectors-schedule"):
         await a_delete_schedule(client, "ai-sync-vectors-schedule")
-
-
-async def create_run_quota_limiting_schedule(client: Client):
-    """Create or update the schedule for the RunQuotaLimitingWorkflow.
-
-    This schedule runs every 15 minutes.
-    """
-    run_quota_limiting_schedule = Schedule(
-        action=ScheduleActionStartWorkflow(
-            "run-quota-limiting",
-            asdict(RunQuotaLimitingInputs()),
-            id="run-quota-limiting-schedule",
-            task_queue=settings.BILLING_TASK_QUEUE,
-        ),
-        spec=ScheduleSpec(cron_expressions=["10,25,40,55 * * * *"]),  # Run at minutes 10, 25, 40, and 55 of every hour
-    )
-
-    if await a_schedule_exists(client, "run-quota-limiting-schedule"):
-        await a_update_schedule(client, "run-quota-limiting-schedule", run_quota_limiting_schedule)
-    else:
-        await a_create_schedule(
-            client, "run-quota-limiting-schedule", run_quota_limiting_schedule, trigger_immediately=False
-        )
-
-
-async def create_schedule_all_subscriptions_schedule(client: Client):
-    """Create or update the schedule for the ScheduleAllSubscriptionsWorkflow.
-
-    This schedule runs every hour at the 55th minute to match the original Celery schedule.
-    """
-    schedule_all_subscriptions_schedule = Schedule(
-        action=ScheduleActionStartWorkflow(
-            "schedule-all-subscriptions",
-            asdict(ScheduleAllSubscriptionsWorkflowInputs()),
-            id="schedule-all-subscriptions-schedule",
-            task_queue=settings.ANALYTICS_PLATFORM_TASK_QUEUE,
-        ),
-        spec=ScheduleSpec(cron_expressions=["55 * * * *"]),  # Run at minute 55 of every hour
-        # ALLOW_ALL: if a previous run is still executing, start the new one anyway.
-        # Safe because child workflows use deterministic IDs (process-subscription-{id})
-        # and Temporal guarantees no two open workflows can share the same ID.
-        policy=SchedulePolicy(overlap=ScheduleOverlapPolicy.ALLOW_ALL),
-    )
-
-    if await a_schedule_exists(client, "schedule-all-subscriptions-schedule"):
-        await a_update_schedule(client, "schedule-all-subscriptions-schedule", schedule_all_subscriptions_schedule)
-    else:
-        await a_create_schedule(
-            client,
-            "schedule-all-subscriptions-schedule",
-            schedule_all_subscriptions_schedule,
-            trigger_immediately=False,
-        )
 
 
 async def create_upgrade_queries_schedule(client: Client):
@@ -193,150 +117,6 @@ async def create_upgrade_queries_schedule(client: Client):
         await a_update_schedule(client, "upgrade-queries-schedule", upgrade_queries_schedule)
     else:
         await a_create_schedule(client, "upgrade-queries-schedule", upgrade_queries_schedule, trigger_immediately=False)
-
-
-async def create_salesforce_enrichment_schedule(client: Client):
-    """Create or update the schedule for the Salesforce enrichment workflow.
-
-    This schedule runs every Sunday at 2 AM UTC with default chunk size.
-    """
-    salesforce_enrichment_schedule = Schedule(
-        action=ScheduleActionStartWorkflow(
-            "salesforce-enrichment-async",
-            SalesforceEnrichmentInputs(chunk_size=DEFAULT_CHUNK_SIZE),
-            id="salesforce-enrichment-schedule",
-            task_queue=settings.BILLING_TASK_QUEUE,
-        ),
-        spec=ScheduleSpec(
-            calendars=[
-                ScheduleCalendarSpec(
-                    comment="Sunday at 2 AM UTC",
-                    hour=[ScheduleRange(start=2, end=2)],
-                    day_of_week=[ScheduleRange(start=0, end=0)],
-                )
-            ]
-        ),
-    )
-
-    if await a_schedule_exists(client, "salesforce-enrichment-schedule"):
-        await a_update_schedule(client, "salesforce-enrichment-schedule", salesforce_enrichment_schedule)
-    else:
-        await a_create_schedule(
-            client, "salesforce-enrichment-schedule", salesforce_enrichment_schedule, trigger_immediately=False
-        )
-
-
-async def create_salesforce_usage_enrichment_schedule(client: Client):
-    """Create or update the schedule for the Salesforce usage enrichment workflow.
-
-    This schedule runs every Sunday at 6 AM UTC to enrich Salesforce accounts with
-    Insights usage signals.
-    """
-    salesforce_usage_enrichment_schedule = Schedule(
-        action=ScheduleActionStartWorkflow(
-            "salesforce-usage-enrichment",
-            asdict(UsageEnrichmentInputs()),
-            id="salesforce-usage-enrichment-schedule",
-            task_queue=settings.BILLING_TASK_QUEUE,
-        ),
-        spec=ScheduleSpec(
-            calendars=[
-                ScheduleCalendarSpec(
-                    comment="Sunday at 6 AM UTC",
-                    hour=[ScheduleRange(start=6, end=6)],
-                    day_of_week=[ScheduleRange(start=0, end=0)],
-                )
-            ]
-        ),
-    )
-
-    if await a_schedule_exists(client, "salesforce-usage-enrichment-schedule"):
-        await a_update_schedule(client, "salesforce-usage-enrichment-schedule", salesforce_usage_enrichment_schedule)
-    else:
-        await a_create_schedule(
-            client,
-            "salesforce-usage-enrichment-schedule",
-            salesforce_usage_enrichment_schedule,
-            trigger_immediately=False,
-        )
-
-
-async def create_salesforce_stripe_enrichment_schedule(client: Client):
-    """Create or update the schedule for the Salesforce stripe enrichment workflow.
-
-    Runs daily at 4 AM UTC to push Stripe customer data and billing customer
-    names to Salesforce Accounts. The workflow is incremental via a Redis
-    watermark, so a long backfill run is only expected on the first execution;
-    ``SKIP`` prevents the next day's run from starting while a backfill is still
-    in progress.
-    """
-    salesforce_stripe_enrichment_schedule = Schedule(
-        action=ScheduleActionStartWorkflow(
-            "salesforce-stripe-enrichment",
-            asdict(StripeEnrichmentInputs()),
-            id="salesforce-stripe-enrichment-schedule",
-            task_queue=settings.BILLING_TASK_QUEUE,
-        ),
-        spec=ScheduleSpec(
-            calendars=[
-                ScheduleCalendarSpec(
-                    comment="Daily at 4 AM UTC",
-                    hour=[ScheduleRange(start=4, end=4)],
-                )
-            ]
-        ),
-        policy=SchedulePolicy(overlap=ScheduleOverlapPolicy.SKIP),
-    )
-
-    if await a_schedule_exists(client, "salesforce-stripe-enrichment-schedule"):
-        await a_update_schedule(client, "salesforce-stripe-enrichment-schedule", salesforce_stripe_enrichment_schedule)
-    else:
-        await a_create_schedule(
-            client,
-            "salesforce-stripe-enrichment-schedule",
-            salesforce_stripe_enrichment_schedule,
-            trigger_immediately=False,
-        )
-
-
-async def create_salesforce_conversations_slack_enrichment_schedule(client: Client):
-    """Create or update the schedule for the Salesforce Conversations Slack enrichment workflow.
-
-    Runs daily at 5 AM UTC to push Conversations Slack support signals to
-    Salesforce Accounts. ``SKIP`` prevents overlapping runs if Slack API calls
-    or Salesforce updates take longer than expected.
-    """
-    salesforce_conversations_slack_enrichment_schedule = Schedule(
-        action=ScheduleActionStartWorkflow(
-            "salesforce-conversations-slack-enrichment",
-            asdict(ConversationsSlackEnrichmentInputs()),
-            id="salesforce-conversations-slack-enrichment-schedule",
-            task_queue=settings.BILLING_TASK_QUEUE,
-        ),
-        spec=ScheduleSpec(
-            calendars=[
-                ScheduleCalendarSpec(
-                    comment="Daily at 5 AM UTC",
-                    hour=[ScheduleRange(start=5, end=5)],
-                )
-            ]
-        ),
-        policy=SchedulePolicy(overlap=ScheduleOverlapPolicy.SKIP),
-    )
-
-    if await a_schedule_exists(client, "salesforce-conversations-slack-enrichment-schedule"):
-        await a_update_schedule(
-            client,
-            "salesforce-conversations-slack-enrichment-schedule",
-            salesforce_conversations_slack_enrichment_schedule,
-        )
-    else:
-        await a_create_schedule(
-            client,
-            "salesforce-conversations-slack-enrichment-schedule",
-            salesforce_conversations_slack_enrichment_schedule,
-            trigger_immediately=False,
-        )
 
 
 async def create_enforce_max_replay_retention_schedule(client: Client):
@@ -804,7 +584,6 @@ async def create_error_tracking_recommendations_refresh_schedule(client: Client)
 
 schedules = [
     cleanup_sync_vectors_schedule,
-    create_run_quota_limiting_schedule,
     create_upgrade_queries_schedule,
     create_count_all_playlists_schedule,
     create_error_tracking_recommendations_refresh_schedule,
@@ -812,17 +591,12 @@ schedules = [
     create_sync_events_retention_schedule,
     create_replay_count_metrics_schedule,
     create_weekly_digest_schedule,
-    create_batch_trace_summarization_schedule,
-    create_batch_generation_summarization_schedule,
     create_trace_clustering_coordinator_schedule,
     create_generation_clustering_coordinator_schedule,
     create_intent_clustering_coordinator_schedule,
     create_eval_reports_schedule,
     create_count_trigger_schedule,
-    create_evaluation_sampler_schedule,
-    create_evaluation_clustering_schedule,
     cleanup_legacy_session_summarization_schedules,
-    create_summarization_sweep_reconciler_schedule,
     create_surfacing_score_export_sweep_schedule,
     create_surfacing_scoring_sweep_schedule,
     create_ducklake_compaction_schedule,
@@ -862,20 +636,6 @@ if settings.CLOUD_DEPLOYMENT:
     schedules.append(create_replay_vision_gemini_cleanup_sweep_schedule)
     schedules.append(create_run_usage_reports_schedule)
     schedules.append(create_finalize_usage_reports_schedule)
-    if should_register_checkpoint_compaction_schedule():
-        schedules.append(create_checkpoint_compaction_schedule)
-
-if settings.EE_AVAILABLE:
-    schedules.append(create_schedule_all_subscriptions_schedule)
-    # Conversations tickets are region-local, so unlike the other (US-only) Salesforce
-    # writers this one runs per region — each region's tickets enrich that region's
-    # orgs, which map to disjoint Salesforce Accounts.
-    if settings.CLOUD_DEPLOYMENT in ("US", "EU"):
-        schedules.append(create_salesforce_conversations_slack_enrichment_schedule)
-    if settings.CLOUD_DEPLOYMENT == "US":
-        schedules.append(create_salesforce_enrichment_schedule)
-        schedules.append(create_salesforce_usage_enrichment_schedule)
-        schedules.append(create_salesforce_stripe_enrichment_schedule)
 
 
 async def a_init_general_queue_schedules():

@@ -17,6 +17,7 @@ from insights.security.outbound_proxy import internal_httpx_async_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.utils import close_db_connections
 
+from products.insights_ai.backend.wire_types import is_turn_complete
 from products.tasks.backend.constants import STREAM_VIA_PROXY_FEATURE_FLAG
 from products.tasks.backend.logic.services.connection_token import create_stream_read_token
 from products.tasks.backend.logic.stream.redis_stream import (
@@ -25,8 +26,6 @@ from products.tasks.backend.logic.stream.redis_stream import (
     get_task_run_stream_key,
 )
 from products.tasks.backend.models import TaskRun as TaskRunModel
-
-from ee.hogai.sandbox import is_turn_complete
 
 # Reuse the ACP event helpers, signal dispatcher, and SSE reconnect tuning from relay_sandbox_events
 # so the two relays derive/emit signals and drive their SSE transport from identical logic.

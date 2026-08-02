@@ -42,11 +42,9 @@ from insights.tasks.tasks import (
     clear_expired_sessions,
     datastore_clear_removed_data,
     datastore_errors_count,
-    datastore_materialize_columns,
     datastore_mutation_count,
     datastore_part_count,
     datastore_row_count,
-    datastore_send_license_usage,
     delete_expired_delegation_invites,
     delete_expired_exported_assets,
     find_flags_with_enriched_analytics,
@@ -69,7 +67,10 @@ from insights.tasks.tasks import (
     update_survey_iteration,
 )
 from insights.tasks.team_llm_gateway_policy import refresh_expiring_llm_gateway_policy_cache_entries
-from insights.tasks.team_metadata import cleanup_stale_expiry_tracking_task, refresh_expiring_team_metadata_cache_entries
+from insights.tasks.team_metadata import (
+    cleanup_stale_expiry_tracking_task,
+    refresh_expiring_team_metadata_cache_entries,
+)
 from insights.utils import get_crontab, get_instance_region
 
 from products.approvals.backend.tasks import expire_old_change_requests, validate_pending_change_requests
@@ -731,55 +732,27 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="clean up old logs alert events",
     )
 
-    if settings.EE_AVAILABLE:
-        sender.add_periodic_task(
-            crontab(hour="0", minute=str(randrange(0, 40))),
-            datastore_send_license_usage.s(),
-        )  # every day at a random minute past midnight. Randomize to avoid overloading license.hanzo.ai
-        sender.add_periodic_task(
-            crontab(hour="4", minute=str(randrange(0, 40))),
-            datastore_send_license_usage.s(),
-        )  # again a few hours later just to make sure
+    sender.add_periodic_task(
+        crontab(minute="10", hour="*/12"),
+        find_flags_with_enriched_analytics.s(),
+        name="find feature flags with enriched analytics",
+    )
 
-        materialize_columns_crontab = get_crontab(settings.MATERIALIZE_COLUMNS_SCHEDULE_CRON)
+    sender.add_periodic_task(
+        # once a day a random minute after midnight
+        crontab(hour="0", minute=str(randrange(0, 40))),
+        delete_expired_exported_assets.s(),
+        name="delete expired exported assets",
+    )
 
-        if materialize_columns_crontab:
-            sender.add_periodic_task(
-                materialize_columns_crontab,
-                datastore_materialize_columns.s(),
-                name="datastore materialize columns",
-            )
-
-        sender.add_periodic_task(
-            crontab(minute="10", hour="*/12"),
-            find_flags_with_enriched_analytics.s(),
-            name="find feature flags with enriched analytics",
-        )
-
-        sender.add_periodic_task(
-            # once a day a random minute after midnight
-            crontab(hour="0", minute=str(randrange(0, 40))),
-            delete_expired_exported_assets.s(),
-            name="delete expired exported assets",
-        )
-
-        # Daily cleanup of expired onboarding delegation invites. `pre_delete` re-enables
-        # the delegator's onboarding, so a missed sweep strands delegators on the "waiting
-        # for teammate" screen forever.
-        sender.add_periodic_task(
-            crontab(hour="1", minute=str(randrange(0, 40))),
-            delete_expired_delegation_invites.s(),
-            name="delete expired delegation invites",
-        )
-
-        from ee.tasks.scim_request_log_cleanup import cleanup_old_scim_request_logs
-
-        add_periodic_task_with_expiry(
-            sender,
-            crontab(minute="0"),
-            cleanup_old_scim_request_logs.s(),
-            name="clean up old SCIM request logs",
-        )
+    # Daily cleanup of expired onboarding delegation invites. `pre_delete` re-enables
+    # the delegator's onboarding, so a missed sweep strands delegators on the "waiting
+    # for teammate" screen forever.
+    sender.add_periodic_task(
+        crontab(hour="1", minute=str(randrange(0, 40))),
+        delete_expired_delegation_invites.s(),
+        name="delete expired delegation invites",
+    )
 
     # Check integrations to refresh every minute
     add_periodic_task_with_expiry(

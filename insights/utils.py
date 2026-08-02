@@ -1538,26 +1538,14 @@ def get_instance_available_sso_providers() -> dict[str, bool]:
         "google-oauth2": False,
     }
 
-    # Get license information
-    bypass_license: bool = is_cloud() or settings.DEMO
-    license = None
-    if not bypass_license:
-        try:
-            from ee.models.license import License
-        except ImportError:
-            pass
-        else:
-            license = License.objects.first_valid()
-
+    # Google SSO used to additionally require a license feature. There is no license to check, so
+    # a configured provider is simply available, the same as GitHub and GitLab above.
     if getattr(settings, "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", None) and getattr(
         settings,
         "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET",
         None,
     ):
-        if bypass_license or (license is not None and AvailableFeature.SOCIAL_SSO in license.available_features):
-            output["google-oauth2"] = True
-        else:
-            logger.warning("You have Google login set up, but not the required license!")
+        output["google-oauth2"] = True
 
     return output
 

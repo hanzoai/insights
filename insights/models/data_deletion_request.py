@@ -90,7 +90,9 @@ def compile_insightsql_predicate(obj, use_new_events_schema: bool = False) -> tu
     try:
         team = Team.objects.get(id=obj.team_id)
     except Team.DoesNotExist as exc:
-        raise ValidationError({"insightsql_predicate": "team no longer exists; cannot validate the predicate."}) from exc
+        raise ValidationError(
+            {"insightsql_predicate": "team no longer exists; cannot validate the predicate."}
+        ) from exc
     modifiers = create_default_modifiers_for_team(team)
     modifiers.personsOnEventsMode = PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_ON_EVENTS
     context = InsightsQLContext(
@@ -803,8 +805,7 @@ def discover_affected_mat_columns(properties: list[str], table_column: str) -> l
 
     from insights.datastore.client import sync_execute
     from insights.datastore.client.connection import DatastoreUser
-
-    from ee.datastore.materialized_columns.columns import MaterializedColumnDetails
+    from insights.datastore.materialized_column_types import MaterializedColumnDetails
 
     rows = sync_execute(
         """

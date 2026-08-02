@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import Any, Literal, Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
@@ -9,10 +9,6 @@ from django.db import models
 from insights.models.activity_logging.model_activity import ModelActivityMixin
 from insights.models.user import User
 from insights.models.utils import CreatedMetaFields, UUIDModel
-
-if TYPE_CHECKING:
-    from ee.hogai.session_summaries.session.output_data import SessionSummarySerializer
-    from ee.hogai.videos.session_moments import SessionMomentOutput
 
 
 @dataclass(frozen=True)
@@ -31,22 +27,6 @@ class SessionSummaryVisualConfirmationResult:
     created_at: str  # When the video was created, ISO format
     expires_after: str  # When the video will expire, ISO format
     model_id: str  # What model was used to analyze the video
-
-    @classmethod
-    def from_session_moment_output(
-        cls, session_moment_output: "SessionMomentOutput", event_uuid: str
-    ) -> "SessionSummaryVisualConfirmationResult":
-        return cls(
-            event_id=session_moment_output.moment_id,
-            event_uuid=event_uuid,
-            asset_id=session_moment_output.asset_id,
-            timestamp_s=session_moment_output.timestamp_s,
-            duration_s=session_moment_output.duration_s,
-            video_description=session_moment_output.video_description,
-            created_at=session_moment_output.created_at.isoformat(),
-            expires_after=session_moment_output.expires_after.isoformat(),
-            model_id=session_moment_output.model_id,
-        )
 
 
 FailedSessionCategory = Literal["skipped", "summarization_failed", "patterns_failed"]
@@ -117,7 +97,7 @@ class SingleSessionSummaryManager(models.Manager["SingleSessionSummary"]):
         self,
         team_id: int,
         session_id: str,
-        summary: "SessionSummarySerializer",
+        summary: Any,
         exception_event_ids: list[str],
         *,
         extra_summary_context: ExtraSummaryContext | None = None,
@@ -267,7 +247,7 @@ class SingleSessionSummary(ModelActivityMixin, CreatedMetaFields, UUIDModel):
     session_id = models.CharField(max_length=200, help_text="Session replay ID")
 
     # Summary content
-    summary = models.JSONField(help_text="Session summary in JSON format (SessionSummarySerializer schema)")
+    summary = models.JSONField(help_text="Session summary in JSON format")
 
     # Searchable exception events
     exception_event_ids = ArrayField(

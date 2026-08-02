@@ -62,8 +62,7 @@ from products.customer_analytics.backend.presentation.views.serializers import (
     EventStreamTestMessageSerializer,
     SupportTicketSerializer,
 )
-
-from ee.hogai.tools.create_notebook.tiptap import markdown_to_tiptap_nodes
+from products.notebooks.backend.markdown_conversion import build_markdown_notebook_content
 
 # Object-level access levels for the resource ViewSets, matching what
 # ``AccessControlPermission._get_required_access_level`` derives for these scope objects:
@@ -1217,16 +1216,20 @@ def _synthesize_notebook_content(text_content, existing_content):
     """When the caller passed Markdown ``text_content`` but no usable ProseMirror ``content``
     tree, build one from the Markdown. Agents calling the MCP notebook-create tool typically
     send ``text_content`` only (hand-writing ProseMirror is awkward), and NotebookScene only
-    renders ``content`` — so without this the result is a blank page. The tiptap helper lives
-    in ``ee.hogai`` and stays in the view so it never reaches the facade import path. Returns
-    ``None`` when the caller already supplied usable content (or no markdown)."""
+    renders ``content`` — so without this the result is a blank page. Returns ``None`` when the
+    caller already supplied usable content (or no markdown).
+
+    Built by the notebooks product's own converter, which keeps the Markdown in a markdown node
+    rather than flattening it into ProseMirror nodes up front. That is the same representation a
+    notebook created from Markdown anywhere else in the product carries, so these render and
+    round-trip back to Markdown identically."""
     has_usable_content = (
         isinstance(existing_content, dict)
         and existing_content.get("type") == "doc"
         and isinstance(existing_content.get("content"), list)
     )
     if text_content and not has_usable_content:
-        return {"type": "doc", "content": markdown_to_tiptap_nodes(text_content) or [{"type": "paragraph"}]}
+        return build_markdown_notebook_content(text_content)
     return None
 
 
