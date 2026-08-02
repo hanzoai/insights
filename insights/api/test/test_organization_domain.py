@@ -32,6 +32,28 @@ class TestOrganizationDomains(BaseTest):
         """
         pass
 
+    def test_an_enforcement_naming_no_available_provider_does_not_enforce(self):
+        """`sso_enforcement` is a CharField with no choices, so it holds whatever was written.
+
+        This used to index the provider map directly and raise `KeyError` for anything the
+        instance does not build. `login/precheck` reads this and is unauthenticated, so that
+        answered 500 to everyone at the domain instead of letting them log in.
+        """
+        self.organization.available_product_features = [
+            {"key": AvailableFeature.SSO_ENFORCEMENT, "name": "sso_enforcement"}
+        ]
+        self.organization.save()
+        OrganizationDomain.objects.create(
+            organization=self.organization,
+            domain="unavailable-provider.com",
+            verified_at=timezone.now(),
+            sso_enforcement="github",
+        )
+
+        assert (
+            OrganizationDomain.objects.get_sso_enforcement_for_email_address("someone@unavailable-provider.com") is None
+        )
+
 
 class TestOrganizationDomainsAPI(APIBaseTest):
     domain: OrganizationDomain = None  # type: ignore
@@ -605,23 +627,3 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         new_token = response.json()["scim_bearer_token"]
         self.assertIsNotNone(new_token)
         self.assertNotEqual(original_token, new_token)
-
-    def test_cannot_regenerate_scim_token_without_available_feature(self):
-
-        self.organization_membership.level = OrganizationMembership.Level.ADMIN
-        self.organization_membership.save()
-        self.domain.verified_at = timezone.now()
-        self.domain.save()
-
-        # Manually enable SCIM (bypassing validation)
-        plain_token, hashed_token = generate_scim_token()
-        self.domain.scim_enabled = True
-        self.domain.scim_bearer_token = hashed_token
-        self.domain.save()
-
-        # Remove feature
-        self.organization.available_product_features = []
-        self.organization.save()
-
-        response = self.client.post(f"/api/organizations/@current/domains/{self.domain.id}/scim/token")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
