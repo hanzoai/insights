@@ -24,13 +24,13 @@ from insights.test.fixtures import create_app_metric2
 from products.actions.backend.models.action import Action
 from products.cdp.backend.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from products.cohorts.backend.models.cohort import Cohort
-from products.workflows.backend.api.hog_flow import (
+from products.workflows.backend.api.insights_flow import (
     InsightsFlowActionSerializer,
     _should_validate_strictly,
     mint_audience_confirm_token,
 )
-from products.workflows.backend.models.hog_flow.hog_flow import SUPPORTED_ACTION_TYPES, InsightsFlow
-from products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow.insights_flow import SUPPORTED_ACTION_TYPES, InsightsFlow
+from products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job import InsightsFlowBatchJob
 
 webhook_template = MOCK_NODE_TEMPLATES[0]
 

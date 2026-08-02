@@ -9,9 +9,9 @@ from django.utils import timezone
 from parameterized import parameterized
 from rest_framework import status
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
-from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule
 
 BATCH_TRIGGER = {
     "type": "batch",
