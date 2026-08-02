@@ -163,7 +163,7 @@
     "chromium": 13.024,
     "webkit": 2.354
   },
-  "frontend/src/lib/components/Hogfetti/Hogfetti.stories.tsx": {
+  "frontend/src/lib/components/Confetti/Confetti.stories.tsx": {
     "chromium": 5.564,
     "webkit": 1.443
   },

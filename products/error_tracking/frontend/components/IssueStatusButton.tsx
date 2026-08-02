@@ -1,6 +1,6 @@
 import { Button, MenuOverlay } from '@hanzo/elements'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 
@@ -13,7 +13,7 @@ export const IssueStatusButton = ({
     status: ErrorTrackingIssue['status']
     onChange: (status: ErrorTrackingIssue['status']) => void
 }): JSX.Element => {
-    const { trigger, HogfettiComponent } = useHogfetti()
+    const { trigger, ConfettiComponent } = useConfetti()
 
     const handleResolve = (): void => {
         if (status === 'active') {
@@ -26,7 +26,7 @@ export const IssueStatusButton = ({
 
     return (
         <>
-            <HogfettiComponent />
+            <ConfettiComponent />
             <Button
                 type="primary"
                 onClick={handleResolve}
