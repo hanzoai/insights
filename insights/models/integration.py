@@ -4549,8 +4549,8 @@ class StripeIntegration:
             "ticket:read",
             "ticket:write",
             "user:read",
-            "hog_flow:read",
-            "hog_flow:write",
+            "insights_flow:read",
+            "insights_flow:write",
         ]
     )
 

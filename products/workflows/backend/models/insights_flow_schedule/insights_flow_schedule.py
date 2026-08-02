@@ -19,7 +19,7 @@ class InsightsFlowSchedule(RootTeamMixin, UUIDTModel):
         COMPLETED = "completed"  # RRULE exhausted (COUNT/UNTIL reached)
 
     team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
-    hog_flow = models.ForeignKey("workflows.InsightsFlow", on_delete=models.CASCADE, related_name="schedules")
+    insights_flow = models.ForeignKey("workflows.InsightsFlow", on_delete=models.CASCADE, related_name="schedules")
     rrule = models.TextField()
     starts_at = models.DateTimeField()
     timezone = models.CharField(max_length=64, default="UTC")

@@ -130,7 +130,7 @@ class VisionAction(TeamScopedRootMixin, UUIDModel):
         help_text="List of destination targets, e.g. [{type: 'slack', integration_id, channel}].",
     )
 
-    hog_flow = models.ForeignKey(
+    insights_flow = models.ForeignKey(
         "workflows.InsightsFlow",
         on_delete=models.SET_NULL,
         null=True,

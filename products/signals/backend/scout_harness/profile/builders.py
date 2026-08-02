@@ -13,7 +13,7 @@ Answers "what's turned on." **Aggregated recency** —
 `recent_activity` (per-scope counts off the activity log, cross-cutting orientation
 across every entity type). **Per-entity recent inventory** — `recent_dashboards`,
 `recent_surveys`, `recent_feature_flags`, `recent_experiments`, `recent_alerts`,
-`recent_insights_functions`, `recent_hog_flows`, `recent_notebooks`, `recent_cohorts`,
+`recent_insights_functions`, `recent_insights_flows`, `recent_notebooks`, `recent_cohorts`,
 `recent_actions`, `business_knowledge`, plus `top_events` and
 `existing_inbox_reports`. Light shape per entity: counts + 5 most-recently-modified
 items with name + status + timestamp. The agent gets MCP tools (`surveys-get-all`,
@@ -65,7 +65,7 @@ from products.signals.backend.scout_harness.profile.schema import Inventory
 from products.signals.backend.scout_harness.team_limits import withheld_skills_for_team
 from products.surveys.backend.models import Survey
 from products.warehouse_sources.backend.facade.models import ExternalDataJob, ExternalDataSchema, ExternalDataSource
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +148,7 @@ def build_inventory(team: Team) -> Inventory:
             "recent_experiments": _recent_experiments(team),
             "recent_alerts": _recent_alerts(team),
             "recent_insights_functions": _recent_insights_functions(team),
-            "recent_hog_flows": _recent_hog_flows(team),
+            "recent_insights_flows": _recent_insights_flows(team),
             "recent_notebooks": _recent_notebooks(team),
             "recent_cohorts": _recent_cohorts(team),
             "recent_actions": _recent_actions(team),
@@ -622,7 +622,7 @@ def _recent_insights_functions(team: Team) -> dict[str, Any]:
     }
 
 
-def _recent_hog_flows(team: Team) -> dict[str, Any]:
+def _recent_insights_flows(team: Team) -> dict[str, Any]:
     """Script flow (workflow) orientation — total + non-archived, plus 5 most-recent.
 
     InsightsFlow's `status` enum carries the flow's lifecycle state directly; we surface

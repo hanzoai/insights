@@ -18,7 +18,7 @@ from insights.utils import relative_date_parse_with_delta_mapping
 
 APP_SOURCE_TO_PRODUCT_KEY: dict[str, ProductKey] = {
     "insights_function": ProductKey.PIPELINE_DESTINATIONS,
-    "hog_flow": ProductKey.WORKFLOWS,
+    "insights_flow": ProductKey.WORKFLOWS,
     "batch_export": ProductKey.PIPELINE_BATCH_EXPORTS,
 }
 

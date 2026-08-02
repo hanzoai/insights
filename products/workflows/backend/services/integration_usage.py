@@ -57,7 +57,7 @@ def _action_references_integration(action: dict, integration_id: int, template_c
     return _function_action_references_integration(action, integration_id, template_cache)
 
 
-def get_active_hog_flows_using_integration(team_id: int, integration_id: int) -> list[InsightsFlow]:
+def get_active_insights_flows_using_integration(team_id: int, integration_id: int) -> list[InsightsFlow]:
     """Active workflows whose live config references the given integration."""
     template_cache: _TemplateCache = {}
     return [

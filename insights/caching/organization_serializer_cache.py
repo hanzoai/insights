@@ -21,9 +21,8 @@ from insights.models.project import Project
 from insights.models.team import Team
 from insights.utils import get_safe_cache
 
-from ee.models.explicit_team_membership import ExplicitTeamMembership
-from ee.models.rbac.access_control import AccessControl
-from ee.models.rbac.role import RoleMembership
+from insights.models.ee_models import AccessControl
+from insights.models.ee_models import RoleMembership
 
 ORG_SERIALIZER_CACHE_TTL_SECONDS = 60 * 60
 ORG_SERIALIZER_VERSION_TTL_SECONDS = 7 * 24 * 60 * 60
@@ -97,7 +96,8 @@ _INVALIDATION_SOURCES: list[tuple[type[Model], Callable[[Any], str | None]]] = [
     (Project, _instance_org_id),
     (OrganizationMembership, _instance_org_id),
     (AccessControl, _access_control_to_org_id),
-    (ExplicitTeamMembership, _team_id_to_org_id),
+    # ExplicitTeamMembership ships under ee/, which this distribution does not
+    # carry, so no row can exist to invalidate on.
     (RoleMembership, _role_id_to_org_id),
 ]
 

@@ -340,8 +340,8 @@ class TestActivityTriggerContext(BaseTest):
         super().tearDown()
 
     def test_nested_contexts_restore_the_outer_trigger(self):
-        outer = Trigger(job_type="hog_flow", job_id="outer", payload={})
-        inner = Trigger(job_type="hog_flow", job_id="inner", payload={})
+        outer = Trigger(job_type="insights_flow", job_id="outer", payload={})
+        inner = Trigger(job_type="insights_flow", job_id="inner", payload={})
 
         with ActivityTriggerContext(outer):
             with ActivityTriggerContext(inner):
@@ -350,7 +350,7 @@ class TestActivityTriggerContext(BaseTest):
         self.assertIsNone(activity_storage.get_trigger())
 
     def test_none_trigger_is_a_noop(self):
-        outer = Trigger(job_type="hog_flow", job_id="outer", payload={})
+        outer = Trigger(job_type="insights_flow", job_id="outer", payload={})
         with ActivityTriggerContext(outer):
             with ActivityTriggerContext(None):
                 self.assertEqual(activity_storage.get_trigger(), outer)

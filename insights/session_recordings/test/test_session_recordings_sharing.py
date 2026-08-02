@@ -19,7 +19,7 @@ from insights.session_recordings.models.session_recording_event import SessionRe
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

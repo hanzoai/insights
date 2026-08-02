@@ -4264,7 +4264,7 @@ class TestMCPScopeAdminGateWithAccessControlFeature(DatastoreTestMixin, APIBaseT
         assert shared.scope == "personal"
 
     def test_explicit_project_admin_can_unshare(self) -> None:
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         membership = self.user.organization_memberships.get(organization=self.organization)
         AccessControl.objects.create(

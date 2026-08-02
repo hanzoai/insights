@@ -7,7 +7,7 @@ from insights.models.organization import Organization, OrganizationMembership
 
 from products.dashboards.backend.models.dashboard import Dashboard
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 logger = structlog.get_logger(__name__)
 
@@ -65,7 +65,7 @@ def rbac_dashboard_access_control_migration(organization_id: int):
 
                     # Convert dashboard privileges to access control entries
                     try:
-                        from ee.models import DashboardPrivilege
+                        from insights.models.ee_models import DashboardPrivilege
 
                         dashboard_privileges = DashboardPrivilege.objects.filter(dashboard_id=dashboard.id)
 

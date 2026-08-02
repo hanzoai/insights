@@ -2706,7 +2706,7 @@ class TestKnownLoginDeviceCookieMiddleware(APIBaseTest):
         assert KNOWN_DEVICE_COOKIE.format(user_id=self.user.id) not in response.cookies
 
     def test_does_not_set_known_device_cookie_for_internal_api_user(self):
-        request = RequestFactory().get("/api/internal/hog_flows/process_due_schedules")
+        request = RequestFactory().get("/api/internal/insights_flows/process_due_schedules")
         SessionMiddleware(lambda r: HttpResponse()).process_request(request)
         # Simulate a session that *looks* logged-in to prove the synthetic-user guard wins on its own
         request.session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"

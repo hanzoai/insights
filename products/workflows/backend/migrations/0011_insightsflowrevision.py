@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "hog_flow",
+                    "insights_flow",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="revisions",
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
             options={
                 "constraints": [
                     models.UniqueConstraint(
-                        fields=("hog_flow", "version"),
+                        fields=("insights_flow", "version"),
                         name="unique_hogflow_revision_version",
                     )
                 ],

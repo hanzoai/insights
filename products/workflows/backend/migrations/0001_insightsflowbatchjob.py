@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "hog_flow",
+                    "insights_flow",
                     models.ForeignKey(to="insights.hogflow", on_delete=django.db.models.deletion.DO_NOTHING),
                 ),
                 (

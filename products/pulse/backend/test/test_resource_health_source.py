@@ -22,7 +22,7 @@ from products.product_analytics.backend.models.insight import Insight
 from products.pulse.backend.sources.base import EvidenceRef, EvidenceType, SourceItem
 from products.pulse.backend.sources.resource_health import STUCK_REFRESH_ATTEMPTS, ResourceHealthSource
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 _TRENDS_QUERY = {
     "kind": "InsightVizNode",
