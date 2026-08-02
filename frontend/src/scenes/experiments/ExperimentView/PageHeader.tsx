@@ -17,7 +17,7 @@ import {
 } from '@hanzo/icons'
 import { Button, Dialog, Divider, Switch, Link, Tooltip } from '@hanzo/elements'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -73,7 +73,7 @@ export function PageHeaderCustom(): JSX.Element {
         createExposureCohort,
         createExperimentDashboard,
         updateExperiment,
-        setHogfettiTrigger,
+        setConfettiTrigger,
     } = useActions(experimentLogic)
     // Promise-returning dispatch so the confirm dialogs can await completion (shouldAwaitSubmit).
     const { freezeExposure, unfreezeExposure } = useAsyncActions(experimentLogic)
@@ -84,10 +84,10 @@ export function PageHeaderCustom(): JSX.Element {
     const [duplicateModalOpen, setDuplicateModalOpen] = useState(false)
     const [copyToProjectModalOpen, setCopyToProjectModalOpen] = useState(false)
     const [surveyModalOpen, setSurveyModalOpen] = useState(false)
-    const { trigger, HogfettiComponent } = useHogfetti()
+    const { trigger, ConfettiComponent } = useConfetti()
 
     useOnMountEffect(() => {
-        setHogfettiTrigger(trigger)
+        setConfettiTrigger(trigger)
     })
 
     const exposureCohortId = experiment?.exposure_cohort
@@ -176,7 +176,7 @@ export function PageHeaderCustom(): JSX.Element {
                     </>
                 }
             />
-            <HogfettiComponent />
+            <ConfettiComponent />
 
             {experiment && (
                 <ScenePanel>

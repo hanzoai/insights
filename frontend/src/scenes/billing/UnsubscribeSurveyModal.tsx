@@ -17,7 +17,7 @@ import {
 } from '@hanzo/elements'
 
 import { HeartHog } from 'lib/components/mascots'
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 import { humanFriendlyCurrency } from 'lib/utils/numbers'
@@ -38,10 +38,10 @@ export const UnsubscribeSurveyModal = ({
 }: {
     product: BillingProductV2Type | BillingProductV2AddonType
 }): JSX.Element | null => {
-    const { trigger, HogfettiComponent } = useHogfetti()
+    const { trigger, ConfettiComponent } = useConfetti()
 
     const { surveyID, surveyResponse, isAddonProduct, unsubscribeModalStep, unsubscribeReasonQuestions } = useValues(
-        billingProductLogic({ product, hogfettiTrigger: trigger })
+        billingProductLogic({ product, confettiTrigger: trigger })
     )
     const {
         setSurveyResponse,
@@ -122,7 +122,7 @@ export const UnsubscribeSurveyModal = ({
 
     return (
         <>
-            <HogfettiComponent />
+            <ConfettiComponent />
             <Modal
                 onClose={() => {
                     reportSurveyDismissed(surveyID)

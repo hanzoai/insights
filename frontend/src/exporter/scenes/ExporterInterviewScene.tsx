@@ -6,7 +6,7 @@ import { Button, Input } from '@hanzo/elements'
 
 import { Logo } from 'lib/brand'
 import { pngHoggie } from 'lib/brand/hoggies'
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { uuid } from 'lib/utils/dom'
 import { fromParams } from 'lib/utils/url'
 
@@ -65,7 +65,7 @@ const isBenignEndOfCallError = (message: string): boolean =>
 // deserve confetti — it reads as desperate rather than thankful. Two minutes
 // is the rough point where the interviewee has given enough of a substantive
 // answer that we genuinely want to thank them for the time.
-const HOGFETTI_MIN_CALL_DURATION_MS = 2 * 60 * 1000
+const CONFETTI_MIN_CALL_DURATION_MS = 2 * 60 * 1000
 
 type CallState = 'already-replied' | 'idle' | 'loading' | 'connecting' | 'in-call' | 'ended' | 'error'
 
@@ -364,8 +364,8 @@ export default function ExporterInterviewScene({
     const lastPhaseRef = useRef<ConversationPhase>('thinking')
     const isMountedRef = useRef<boolean>(true)
     const callStartedAtRef = useRef<number | null>(null)
-    const hogfettiFiredRef = useRef<boolean>(false)
-    const { trigger: triggerHogfetti, HogfettiComponent } = useHogfetti({ count: 75, duration: 3000 })
+    const confettiFiredRef = useRef<boolean>(false)
+    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti({ count: 75, duration: 3000 })
 
     // Reused across a refresh so an interrupted call re-attaches to the same respondent instead of
     // spawning a duplicate. Only meaningful for shared links.
@@ -393,26 +393,26 @@ export default function ExporterInterviewScene({
     }, [state])
 
     useEffect(() => {
-        if (state !== 'ended' || hogfettiFiredRef.current) {
+        if (state !== 'ended' || confettiFiredRef.current) {
             return
         }
         const startedAt = callStartedAtRef.current
         if (startedAt === null) {
             return
         }
-        if (Date.now() - startedAt < HOGFETTI_MIN_CALL_DURATION_MS) {
+        if (Date.now() - startedAt < CONFETTI_MIN_CALL_DURATION_MS) {
             return
         }
         // Mark as fired before the early returns below so a resize-driven
-        // re-run cannot retrigger the celebration. `useHogfetti`'s `trigger`
+        // re-run cannot retrigger the celebration. `useConfetti`'s `trigger`
         // identity changes whenever `dimensions` updates (window resize),
         // and that dep change re-runs this effect while `state === 'ended'`.
-        hogfettiFiredRef.current = true
+        confettiFiredRef.current = true
         if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
             return
         }
-        triggerHogfetti()
-    }, [state, triggerHogfetti])
+        triggerConfetti()
+    }, [state, triggerConfetti])
 
     useEffect(() => {
         return () => {
@@ -433,7 +433,7 @@ export default function ExporterInterviewScene({
         agentTalkingRef.current = false
         lastPhaseRef.current = 'thinking'
         callStartedAtRef.current = null
-        hogfettiFiredRef.current = false
+        confettiFiredRef.current = false
         setConversationPhase('thinking')
         setState('loading')
         const body: StartCallBody = {}
@@ -547,7 +547,7 @@ export default function ExporterInterviewScene({
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-12">
-            <HogfettiComponent />
+            <ConfettiComponent />
             <div className="mb-8">
                 <Logo size="md" />
             </div>

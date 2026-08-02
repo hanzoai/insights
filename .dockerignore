@@ -16,7 +16,7 @@
 !dags
 !docs/onboarding
 !ee
-!frontend/@insights
+!frontend/@hanzo
 !frontend/*.*
 !frontend/.storybook
 !frontend/bin
