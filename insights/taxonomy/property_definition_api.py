@@ -630,24 +630,10 @@ class PropertyDefinitionViewSet(
                 ]
             )
 
+            # Verified/hidden flags and their ordering live on the enterprise property
+            # definition model, which this fork does not carry, so the base table is the
+            # only source and there is nothing to order by verified.
             order_by_verified = False
-            if EE_AVAILABLE:
-                from ee.models.property_definition import EnterprisePropertyDefinition
-
-                # Prevent fetching deprecated `tags` field. Tags are separately fetched in TaggedItemSerializerMixin
-                property_definition_fields = ", ".join(
-                    [
-                        f'{f.cached_col.alias}."{f.column}"'
-                        for f in EnterprisePropertyDefinition._meta.get_fields()
-                        if hasattr(f, "column")
-                        and f.column not in ["deprecated_tags", "tags"]
-                        and hasattr(f, "cached_col")
-                    ]
-                )
-
-                queryset = EnterprisePropertyDefinition.objects
-
-                order_by_verified = True
 
             span.set_attribute("ee_available", EE_AVAILABLE)
 
@@ -735,10 +721,6 @@ class PropertyDefinitionViewSet(
 
     def get_serializer_class(self) -> type[serializers.ModelSerializer]:
         serializer_class: type[serializers.ModelSerializer] = self.serializer_class
-        if EE_AVAILABLE:
-            from ee.api.ee_property_definition import EnterprisePropertyDefinitionSerializer
-
-            serializer_class = EnterprisePropertyDefinitionSerializer
         return serializer_class
 
     def _get_restricted_property_names(self, prop_type: str) -> set[str]:
@@ -773,25 +755,6 @@ class PropertyDefinitionViewSet(
             id=id,
             effective_project_id=self.project_id,
         )
-        if EE_AVAILABLE:
-            from ee.models.property_definition import EnterprisePropertyDefinition
-
-            enterprise_property = (
-                EnterprisePropertyDefinition.objects.alias(
-                    effective_project_id=Coalesce("project_id", "team_id", output_field=models.BigIntegerField())
-                )
-                .filter(id=id, effective_project_id=self.project_id)
-                .first()
-            )
-            if enterprise_property:
-                return enterprise_property
-            # Lazy-create enterprise row if it doesn't exist
-            new_enterprise_property = EnterprisePropertyDefinition(
-                propertydefinition_ptr_id=non_enterprise_property.id, description=""
-            )
-            new_enterprise_property.__dict__.update(non_enterprise_property.__dict__)
-            new_enterprise_property.save()
-            return new_enterprise_property
         return non_enterprise_property
 
     @extend_schema(parameters=[PropertyDefinitionQuerySerializer])

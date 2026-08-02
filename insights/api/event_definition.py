@@ -29,8 +29,8 @@ from insights.api.tagged_item import (
     apply_bulk_tag_changes,
 )
 from insights.api.utils import action
-from insights.datastore.client import sync_execute
 from insights.constants import EventDefinitionType
+from insights.datastore.client import sync_execute
 from insights.event_usage import report_user_action
 from insights.filters import TermSearchFilterBackend, term_search_filter_sql
 from insights.helpers.impersonation import is_impersonated
@@ -53,14 +53,9 @@ def create_event_definitions_sql(
 ) -> str:
     if order_expressions is None:
         order_expressions = []
-    if is_enterprise:
-        from ee.models import EnterpriseEventDefinition
-
-        ee_model = EnterpriseEventDefinition
-    else:
-        # telling mypy to ignore this...
-        # it's fine to assign EventDefinition
-        ee_model = EventDefinition  # type: ignore
+    # is_enterprise selected the enterprise definition model, which this fork does not
+    # carry, so every caller reads the same table.
+    ee_model = EventDefinition
 
     event_definition_fields = {
         f'"{f.column}"'
@@ -264,13 +259,7 @@ class EventDefinitionViewSet(
         if has_search_terms and not has_explicit_ordering:
             order_expressions = [("length(name)", "ASC"), *order_expressions]
 
-        event_definition_object_manager: Manager
-        if EE_AVAILABLE:
-            from ee.models.event_definition import EnterpriseEventDefinition
-
-            event_definition_object_manager = EnterpriseEventDefinition.objects
-        else:
-            event_definition_object_manager = EventDefinition.objects
+        event_definition_object_manager: Manager = EventDefinition.objects
 
         exclude_hidden = self.request.GET.get("exclude_hidden", "false").lower() == "true"
         if exclude_hidden and EE_AVAILABLE:
@@ -439,30 +428,7 @@ class EventDefinitionViewSet(
         return self._get_event_definition(id=self.kwargs["id"], team__project_id=self.project_id)
 
     def _get_event_definition(self, **filters) -> EventDefinition:
-        if EE_AVAILABLE:
-            from ee.models.event_definition import EnterpriseEventDefinition
-
-            enterprise_event = EnterpriseEventDefinition.objects.filter(**filters).first()
-            if enterprise_event:
-                return enterprise_event
-
-            non_enterprise_event = EventDefinition.objects.get(**filters)
-            new_enterprise_event = EnterpriseEventDefinition(
-                eventdefinition_ptr_id=non_enterprise_event.id, description=""
-            )
-            new_enterprise_event.__dict__.update(non_enterprise_event.__dict__)
-            new_enterprise_event.save()
-            return new_enterprise_event
-
         return EventDefinition.objects.get(**filters)
-
-    def get_serializer_class(self) -> type[serializers.ModelSerializer]:
-        serializer_class = self.serializer_class
-        if EE_AVAILABLE:
-            from ee.api.ee_event_definition import EnterpriseEventDefinitionSerializer
-
-            serializer_class = EnterpriseEventDefinitionSerializer  # type: ignore
-        return serializer_class
 
     @extend_schema(
         request=BulkUpdateTagsUUIDRequestSerializer,

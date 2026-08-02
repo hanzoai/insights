@@ -1,12 +1,10 @@
 from insights.api.routing import RouterRegistry
 
-from products.insights_ai.backend.api import MCPToolsViewSet
-
 
 def register_routes(routers: RouterRegistry) -> None:
-    routers.projects.register(
-        r"mcp_tools",
-        MCPToolsViewSet,
-        "project_mcp_tools",
-        ["team_id"],
-    )
+    """No routes.
+
+    The MCP tool surface this product registered was served by the enterprise tool
+    registry, which is not carried here. The app stays installed for its models, whose
+    tables hold existing conversations.
+    """

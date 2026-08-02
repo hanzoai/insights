@@ -22,10 +22,11 @@ from datastore_driver import Client
 # path, so it is the one that breaks without this.
 import insights.insightsql.compiler.bytecode  # noqa: F401
 
-from insights.datastore.adhoc_events_deletion import ADHOC_EVENTS_DELETION_TABLE
-from insights.datastore.cluster import AlterTableMutationRunner, DatastoreCluster, LightweightDeleteMutationRunner
 from insights.dags.common import JobOwners
 from insights.dags.deletes import deletes_job
+from insights.datastore.adhoc_events_deletion import ADHOC_EVENTS_DELETION_TABLE
+from insights.datastore.cluster import AlterTableMutationRunner, DatastoreCluster, LightweightDeleteMutationRunner
+from insights.datastore.materialized_column_types import MaterializedColumnDetails
 from insights.models.data_deletion_request import (
     AUTO_APPROVE_INTERVAL_MINUTES,
     DataDeletionRequest,
@@ -51,8 +52,6 @@ from insights.models.person.bulk_delete import (
     queue_person_recording_deletion,
     resolve_persons_for_deletion,
 )
-
-from insights.datastore.materialized_column_types import MaterializedColumnDetails
 
 OWNER_TAG = {"owner": JobOwners.TEAM_DATASTORE.value}
 
@@ -983,7 +982,9 @@ def verify_property_removal(
         return remaining, duplicates
 
     results = [
-        cluster.any_host(partial(check, table=table, json_schema=json_schema, insightsql_compiled=insightsql_compiled)).result()
+        cluster.any_host(
+            partial(check, table=table, json_schema=json_schema, insightsql_compiled=insightsql_compiled)
+        ).result()
         for table, json_schema, insightsql_compiled in targets
     ]
     remaining = sum(result[0] for result in results)

@@ -2,13 +2,12 @@ from typing import Any
 
 from unittest.mock import MagicMock, patch
 
+from products.insights_ai.backend.wire_types import TURN_COMPLETE_METHOD
 from products.tasks.backend.temporal.process_task.activities.slack_agent_design_signals import (
     SlackAgentDesignSignalEmitter,
     _event_method,
     _resume_position,
 )
-
-from products.insights_ai.backend.wire_types import TURN_COMPLETE_METHOD
 
 SLACK_CTX = {"channel": "C1", "integration_id": 7}
 

@@ -27,9 +27,8 @@ from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.query import create_default_modifiers_for_team
 
-from insights.rbac.user_access_control import RESOURCE_INHERITANCE_MAP
-
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.rbac.user_access_control import RESOURCE_INHERITANCE_MAP
 
 ALL_POSTGRES_SYSTEM_TABLES: list[tuple[str, PostgresTable]] = [
     (name, node.table) for name, node in SystemTables().children.items() if isinstance(node.table, PostgresTable)

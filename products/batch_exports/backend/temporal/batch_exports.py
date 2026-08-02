@@ -1,6 +1,5 @@
 import uuid
 import typing
-import asyncio
 import datetime as dt
 import operator
 import dataclasses
@@ -16,13 +15,12 @@ from temporalio.common import RetryPolicy
 
 from insights.kafka_client.routing import async_producer_scope
 from insights.kafka_client.topics import KAFKA_APP_METRICS2
-from insights.models.team.team import Team
 from insights.models.utils import UUIDT
 from insights.settings.base_variables import TEST
 from insights.sync import database_sync_to_async
 from insights.tasks.email import get_members_to_notify_for_pipeline_error, send_batch_export_run_failure
-from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.common.client import connect
+from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.common.logger import get_logger, get_write_only_logger
 
 from products.batch_exports.backend.models.batch_export import BatchExport, BatchExportRun
