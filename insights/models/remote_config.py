@@ -207,7 +207,7 @@ class RemoteConfig(UUIDTModel):
         }
 
     @tracer.start_as_current_span("RemoteConfig.build_config")
-    def build_config(self, bypass_recordings_quota_cache: bool = False) -> dict[str, Any]:
+    def build_config(self) -> dict[str, Any]:
         from insights.models.team import Team
         from insights.plugins.site import get_decide_site_apps
 
@@ -262,20 +262,6 @@ class RemoteConfig(UUIDTModel):
             session_recording_config_response = self._build_session_recording_config(team)
 
         config["sessionRecording"] = session_recording_config_response
-
-        # MARK: Quota limiting
-        if settings.EE_AVAILABLE:
-            from ee.billing.quota_limiting import QuotaLimitingCaches, QuotaResource, list_limited_team_attributes
-
-            limited_tokens_recordings = list_limited_team_attributes(
-                QuotaResource.RECORDINGS,
-                QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY,
-                use_cache=not bypass_recordings_quota_cache,
-            )
-
-            if team.api_token in limited_tokens_recordings:
-                config["quotaLimited"] = ["recordings"]
-                config["sessionRecording"] = False
 
         config["heatmaps"] = True if team.heatmaps_opt_in else False
 
@@ -396,7 +382,7 @@ class RemoteConfig(UUIDTModel):
 
         return site_apps_js + site_functions_js
 
-    def sync(self, force: bool = False, bypass_recordings_quota_cache: bool = False):
+    def sync(self, force: bool = False):
         """
         When called we sync to any configured CDNs as well as redis for the /decide endpoint.
         """
@@ -404,7 +390,7 @@ class RemoteConfig(UUIDTModel):
         logger.info(f"Syncing RemoteConfig for team {self.team_id}")
 
         try:
-            config = self.build_config(bypass_recordings_quota_cache=bypass_recordings_quota_cache)
+            config = self.build_config()
 
             if not force and config == self.config:
                 # Content is unchanged: skip S3 + CDN purge, but still re-stamp the Redis

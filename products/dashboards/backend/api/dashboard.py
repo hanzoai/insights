@@ -158,7 +158,7 @@ from products.product_analytics.backend.api.insight import (
 from products.product_analytics.backend.models.insight import Insight
 from products.product_analytics.backend.models.insight_variable import InsightVariable
 
-from ee.hogai.utils.aio import async_to_sync
+from insights.api.streaming import async_to_sync
 
 logger = structlog.get_logger(__name__)
 

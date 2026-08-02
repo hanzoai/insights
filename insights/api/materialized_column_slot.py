@@ -15,25 +15,17 @@ from insights.models import MaterializedColumnSlot, MaterializedColumnSlotState,
 from insights.models.activity_logging.activity_log import Change, Detail, log_activity
 from insights.models.materialized_column_slots import MAX_SLOTS_PER_TEAM
 from insights.permissions import IsStaffUserOrImpersonating
-from insights.settings import EE_AVAILABLE
-
-if EE_AVAILABLE:
-    from ee.datastore.materialized_columns.columns import get_materialized_columns
 
 logger = structlog.get_logger(__name__)
 
 
 def get_auto_materialized_property_names() -> set[str]:
-    """Get set of property names that are already auto-materialized by Insights."""
-    if not EE_AVAILABLE:
-        return set()
+    """Property names already auto-materialized into their own column.
 
-    try:
-        materialized_columns = get_materialized_columns("events")
-        return {col.details.property_name for col in materialized_columns.values()}
-    except Exception as e:
-        logger.warning("Failed to get auto-materialized columns", error=str(e))
-        return set()
+    Always empty: automatic materialization lived in the enterprise edition this fork does not
+    carry, so no property is claimed by it and every slot request is free to name any property.
+    """
+    return set()
 
 
 class PropertyDefinitionSerializer(serializers.ModelSerializer):
@@ -131,39 +123,12 @@ class MaterializedColumnSlotViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
 
     @action(methods=["GET"], detail=False)
     def auto_materialized(self, request, **kwargs):
-        """Get properties that Insights has automatically materialized.
+        """Properties automatically materialized into their own physical column.
 
-        These are managed by Insights's automatic materialization system and cannot be modified here.
-        Uses the same cached function that InsightsQL uses for query rewriting.
+        Always empty here: the registry that discovered and minted those columns was part of the
+        enterprise edition this fork does not carry, so nothing is auto-materialized.
         """
-        if not EE_AVAILABLE:
-            return response.Response([])
-
-        try:
-            # Get all auto-materialized columns using the cached function
-            # This is the same cache that InsightsQL uses (15 minute TTL with background refresh)
-            materialized_columns = get_materialized_columns("events")
-
-            # Only show properties column materialized columns (exclude person_properties)
-            results = []
-            for column in materialized_columns.values():
-                if column.details.table_column == "properties":
-                    results.append(
-                        {
-                            "column_name": column.name,
-                            "property_name": column.details.property_name,
-                            "table_column": column.details.table_column,
-                            "is_disabled": column.details.is_disabled,
-                            "is_nullable": column.is_nullable,
-                        }
-                    )
-
-            return response.Response(results)
-        except Exception as e:
-            logger.exception("Failed to get auto-materialized columns", error=str(e))
-            return response.Response(
-                {"error": "An internal error has occurred."}, status=http_status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        return response.Response([])
 
     def _validate_property_for_materialization(
         self,

@@ -56,8 +56,6 @@ from products.notifications.backend.facade.api import (
 )
 from products.notifications.backend.facade.enums import NotificationOnlyResourceType
 
-from ee.billing.quota_limiting import QuotaLimitingCaches, QuotaResource, list_limited_team_attributes
-
 LOGGER = get_write_only_logger(__name__)
 EXTERNAL_LOGGER = get_logger("EXTERNAL")
 
@@ -506,61 +504,15 @@ async def start_batch_export_run(inputs: StartBatchExportRunInputs) -> BatchExpo
         inputs.data_interval_end,
     )
 
-    if inputs.check_billing is True:
-        is_over_limit = await check_is_over_limit(inputs.team_id)
-    else:
-        is_over_limit = False
-
-    if is_over_limit:
-        run = await database_sync_to_async(create_batch_export_run)(
-            batch_export_id=uuid.UUID(inputs.batch_export_id),
-            data_interval_start=inputs.data_interval_start,
-            data_interval_end=inputs.data_interval_end,
-            status=BatchExportRun.Status.FAILED_BILLING,
-            backfill_id=uuid.UUID(inputs.backfill_id) if inputs.backfill_id else None,
-        )
-
-        logger.info("Over billing limit")
-        EXTERNAL_LOGGER.warning("Batch export run failed due to exceeding billing limits. No data has been exported.")
-
-        await try_produce_app_metrics(
-            status=BatchExportRun.Status.FAILED_BILLING,
-            team_id=inputs.team_id,
-            batch_export_id=inputs.batch_export_id,
-            batch_export_run_id=str(run.id),
-            rows_exported=0,
-        )
-
-        raise OverBillingLimitError(inputs.team_id)
-    else:
-        run = await database_sync_to_async(create_batch_export_run)(
-            batch_export_id=uuid.UUID(inputs.batch_export_id),
-            data_interval_start=inputs.data_interval_start,
-            data_interval_end=inputs.data_interval_end,
-            status=BatchExportRun.Status.STARTING,
-            backfill_id=uuid.UUID(inputs.backfill_id) if inputs.backfill_id else None,
-        )
-        return str(run.id)
-
-
-async def check_is_over_limit(team_id: int) -> bool:
-    """Check if team has exceeded billing limits.
-
-    If so, the batch export should not run.
-    """
-    team: Team = await Team.objects.aget(id=team_id)
-
-    # The ROWS_EXPORTED resource stores a team attribute for each team that has
-    # exceeded their quota and thus is limited. The term "attribute" refers to
-    # a team identifier, which in our case is the team's API token.
-    limited_team_tokens_rows_exported = await asyncio.to_thread(
-        list_limited_team_attributes, QuotaResource.ROWS_EXPORTED, QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY
+    # Row quotas were a billing construct, so an export is never blocked for exceeding one.
+    run = await database_sync_to_async(create_batch_export_run)(
+        batch_export_id=uuid.UUID(inputs.batch_export_id),
+        data_interval_start=inputs.data_interval_start,
+        data_interval_end=inputs.data_interval_end,
+        status=BatchExportRun.Status.STARTING,
+        backfill_id=uuid.UUID(inputs.backfill_id) if inputs.backfill_id else None,
     )
-
-    if team.api_token in limited_team_tokens_rows_exported:
-        return True
-
-    return False
+    return str(run.id)
 
 
 @dataclasses.dataclass
