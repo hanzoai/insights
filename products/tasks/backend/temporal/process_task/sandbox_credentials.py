@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 GITHUB_ENV_KEYS = ("GITHUB_TOKEN", "GH_TOKEN")
-OAUTH_ENV_KEY = "POSTFN_PERSONAL_API_KEY"
+OAUTH_ENV_KEY = "INSIGHTS_PERSONAL_API_KEY"
 
 # Refresh at half the token's server-side half-life so the in-sandbox copy never lapses mid-run.
 #   ghs_ = installation token (~1h) → 20 min; ghu_ = user-to-server token (~8h) → 2 h

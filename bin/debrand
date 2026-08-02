@@ -71,7 +71,16 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("HogFlow", "InsightsFlow"),
     ("hogvm", "scriptvm"),
     ("HogVM", "ScriptVM"),
-    ("HOG_", "FN_"),
+    # Ahead of HOG_, which would otherwise split POSTHOG_FOO into POST + HOG_
+    # and yield INSIGHTS_FOO — an env var no deployment sets. The live pods set
+    # INSIGHTS_SKIP_MIGRATION_CHECKS, read by bin/migrate-check on the container
+    # entrypoint, so getting this wrong stops the container rather than a feature.
+    ("POSTHOG", "INSIGHTS"),
+    # HOG_ names the script engine's constants. Measured against the shipped
+    # tree: every HOG_ name that has a counterpart there is spelled INSIGHTS_
+    # (HOG_QL -> INSIGHTS_QL, HOG_FUNCTION_TEMPLATES -> INSIGHTS_FUNCTION_TEMPLATES,
+    # 12 of 12 determinate cases); INSIGHTS_ appears nowhere in it.
+    ("HOG_", "INSIGHTS_"),
     # Mascot, CLI, person service.
     ("Hedgehog", "Mascot"),
     ("HedgeHog", "Mascot"),

@@ -90,7 +90,7 @@ export class CdpRerunWorkerConsumer extends CdpConsumerBase<PluginsServerConfig>
             this.invocationResultsService.invocationResultsRowsService,
             this.jobQueues,
             this.invocationResultsService.monitoringService,
-            this.config.FN_INVOCATION_RERUN_MAX_COUNT
+            this.config.INSIGHTS_INVOCATION_RERUN_MAX_COUNT
         )
 
         this.worker = new CyclotronV2Worker({

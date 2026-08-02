@@ -28,7 +28,7 @@ from insights.management.migration_analysis.operations import (
     ValidateConstraintAnalyzer,
     is_unmanaged_model,
 )
-from insights.management.migration_analysis.policies import POSTFN_POLICIES
+from insights.management.migration_analysis.policies import INSIGHTS_POLICIES
 from insights.management.migration_analysis.utils import OperationCategorizer
 
 
@@ -337,7 +337,7 @@ class RiskAnalyzer:
         """Check migration against Insights coding policies."""
         violations = []
 
-        for policy in POSTFN_POLICIES:
+        for policy in INSIGHTS_POLICIES:
             # Check migration-level policies (which internally check operations as needed)
             violations.extend(policy.check_migration(migration))
 

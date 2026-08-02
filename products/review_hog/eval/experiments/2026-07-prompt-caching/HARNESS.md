@@ -19,7 +19,7 @@ Source of truth: `docs/internal/sandboxes-setup-guide.md:190-256`.
 
 1. `.env` already has `SANDBOX_PROVIDER=MODAL_DOCKER` (DEBUG-only Modal subclass, app names `insights-sandbox-modal-docker-*`)
    and `SANDBOX_LLM_GATEWAY_URL=https://alexl-llmg.ngrok.dev` (ngrok tunnel to the local llm-gateway on :3308).
-   **`LOCAL_POSTFN_CODE_MONOREPO_ROOT=/Users/woutut/Documents/Code/code` is SET (added 2026-07-06, `.env` line 212;
+   **`LOCAL_INSIGHTS_CODE_MONOREPO_ROOT=/Users/woutut/Documents/Code/code` is SET (added 2026-07-06, `.env` line 212;
    documented in `.env.example:11-12`)** — the flox hook sources `.env` at activation, so changing it needs a full
    stack restart. With it set, sandboxes get the LOCAL agent build overlaid instead of the published package
    (Modal path: runtime overlay via `products/tasks/backend/logic/services/local_packages.py:42-77`, DEBUG-only,
@@ -32,7 +32,7 @@ Source of truth: `docs/internal/sandboxes-setup-guide.md:190-256`.
 3. Run the standard e2e (`run_review --pr-url ... --team-id 1 --user-id 1`, no `--publish`), ngrok up.
 4. Verify with the tripwire SQL below.
 
-Housekeeping: while `LOCAL_POSTFN_CODE_MONOREPO_ROOT` is set, EVERY local sandbox run uses the local build
+Housekeeping: while `LOCAL_INSIGHTS_CODE_MONOREPO_ROOT` is set, EVERY local sandbox run uses the local build
 (which drifts from npm `@latest`) — keep the code repo checkout clean/known during experiments and record the
 `agentVersion` fingerprint on every run.
 
@@ -75,7 +75,7 @@ Housekeeping: while `LOCAL_POSTFN_CODE_MONOREPO_ROOT` is set, EVERY local sandbo
   insights side may need nothing (artifact endpoint exists) or a `transcript_url` sibling to `log_url`.
 - Seed: new step 0 in `hydrateSessionJsonl` (`:654`, between the file-exists check `:668-684` and ACP reconstruction
   `:689`): download the referenced run's raw JSONL to `getSessionJsonlPath`, sanitize, done. Resume trigger already
-  flows (`POSTFN_RESUME_RUN_ID`, `provision_sandbox.py:253-256` -> `autoInitializeSession` `agent-server.ts:2442-2450`).
+  flows (`INSIGHTS_RESUME_RUN_ID`, `provision_sandbox.py:253-256` -> `autoInitializeSession` `agent-server.ts:2442-2450`).
 - Fork wiring already exists end to end: capabilities advertise fork/resume (`claude-agent.ts:295-305`),
   `unstable_forkSession` -> `createSession({resume, forkSession: true})` (`:347-359`, new uuidv7 on fork `:1654-1663`),
   `--replay-user-messages` always passed (`options.ts:443-446`). A seeded raw JSONL under the prior sessionId is
@@ -185,7 +185,7 @@ Reading of the evidence:
 ## Environment checklist (state on 2026-07-06)
 
 - Dev stack: UP (llm-gateway :3308, temporal-worker under nodemon, backend). Ngrok: UP (`https://alexl-llmg.ngrok.dev` -> 200).
-- `.env`: `SANDBOX_PROVIDER=MODAL_DOCKER` + `SANDBOX_LLM_GATEWAY_URL` set; `LOCAL_POSTFN_CODE_MONOREPO_ROOT` added 2026-07-06
+- `.env`: `SANDBOX_PROVIDER=MODAL_DOCKER` + `SANDBOX_LLM_GATEWAY_URL` set; `LOCAL_INSIGHTS_CODE_MONOREPO_ROOT` added 2026-07-06
   (line 212) and picked up after a full stack restart — the flox hook sources `.env` at ACTIVATION, so a nodemon respawn or
   phrocs process toggle does NOT re-read it; only a stack restart (or an export in the launching shell) does.
 - Code repo: clean on `main`, agent built via `pnpm turbo build --filter=@hanzo/agent...` (~10s), SDK 0.3.170 pinned.

@@ -26,7 +26,7 @@ from insights.temporal.common.schedule import (
     unpause_schedule,
     update_schedule,
 )
-from insights.temporal.common.search_attributes import POSTFN_DAG_ID_KEY, POSTFN_ORG_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_DAG_ID_KEY, INSIGHTS_ORG_ID_KEY, INSIGHTS_TEAM_ID_KEY
 
 from products.data_modeling.backend.facade.models import Node
 from products.data_modeling.backend.facade.tasks import build_schedule_spec
@@ -72,11 +72,11 @@ def get_saved_query_schedule(saved_query: "DataWarehouseSavedQuery") -> Schedule
 def get_saved_query_search_attributes(saved_query: "DataWarehouseSavedQuery") -> TypedSearchAttributes:
     dag_id = Node.objects.filter(saved_query=saved_query).values_list("dag_id", flat=True).first()
     search_attributes: list[SearchAttributePair] = [
-        SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=saved_query.team_id),
-        SearchAttributePair(key=POSTFN_ORG_ID_KEY, value=str(saved_query.team.organization_id)),
+        SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=saved_query.team_id),
+        SearchAttributePair(key=INSIGHTS_ORG_ID_KEY, value=str(saved_query.team.organization_id)),
     ]
     if dag_id:
-        search_attributes.append(SearchAttributePair(key=POSTFN_DAG_ID_KEY, value=str(dag_id)))
+        search_attributes.append(SearchAttributePair(key=INSIGHTS_DAG_ID_KEY, value=str(dag_id)))
     return TypedSearchAttributes(search_attributes=search_attributes)
 
 

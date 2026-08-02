@@ -24,7 +24,7 @@ from .conftest import (
     CLOUDFLARE_MAX_RETRIES,
     CLOUDFLARE_REQUEST_TIMEOUT,
     CLOUDFLARE_SMOKE_MODELS,
-    TEST_POSTFN_API_KEY,
+    TEST_INSIGHTS_API_KEY,
 )
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -84,12 +84,12 @@ class SDKTestConfig:
 def sdk_config(request) -> SDKTestConfig:
     if request.param == "anthropic":
         url = request.getfixturevalue("gateway_url")
-        client = Anthropic(api_key=TEST_POSTFN_API_KEY, base_url=url)
+        client = Anthropic(api_key=TEST_INSIGHTS_API_KEY, base_url=url)
         return SDKTestConfig(client=client, model="claude-haiku-4-5-20251001", provider="anthropic")
     elif request.param == "cloudflare":
         url = request.getfixturevalue("cloudflare_gateway_url")
         client = Anthropic(
-            api_key=TEST_POSTFN_API_KEY,
+            api_key=TEST_INSIGHTS_API_KEY,
             base_url=url,
             default_headers={"X-Insights-Provider": "cloudflare"},
             timeout=CLOUDFLARE_REQUEST_TIMEOUT,
@@ -99,7 +99,7 @@ def sdk_config(request) -> SDKTestConfig:
     else:
         url = request.getfixturevalue("bedrock_gateway_url")
         client = Anthropic(
-            api_key=TEST_POSTFN_API_KEY,
+            api_key=TEST_INSIGHTS_API_KEY,
             base_url=url,
             default_headers={"X-Insights-Provider": "bedrock"},
         )

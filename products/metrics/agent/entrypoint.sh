@@ -68,8 +68,8 @@ if [ -f "$CONFIG_DIR/config.yaml" ]; then
     finish "$CONFIG_DIR/config.yaml"
 fi
 
-if [ -z "${POSTFN_API_KEY:-}" ]; then
-    echo "error: POSTFN_API_KEY is required (your Insights project API key)" >&2
+if [ -z "${INSIGHTS_API_KEY:-}" ]; then
+    echo "error: INSIGHTS_API_KEY is required (your Insights project API key)" >&2
     exit 1
 fi
 
@@ -134,7 +134,7 @@ EOF
 fi
 
 DEBUG_ENABLED=0
-case "${POSTFN_DEBUG:-}" in
+case "${INSIGHTS_DEBUG:-}" in
     1 | true | TRUE | yes) DEBUG_ENABLED=1 ;;
 esac
 

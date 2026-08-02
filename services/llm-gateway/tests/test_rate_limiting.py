@@ -269,9 +269,9 @@ class TestFreeTierModelGateErrorBody:
         from llm_gateway.auth.models import AuthenticatedUser
         from llm_gateway.config import get_settings
         from llm_gateway.dependencies import get_authenticated_user
-        from llm_gateway.products.config import POSTFN_CODE_US_APP_ID
+        from llm_gateway.products.config import INSIGHTS_CODE_US_APP_ID
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         try:
             app = create_test_app(mock_db_pool)
@@ -283,7 +283,7 @@ class TestFreeTierModelGateErrorBody:
                 auth_method="oauth_access_token",
                 distinct_id="unbilled-user",
                 scopes=["*"],
-                application_id=POSTFN_CODE_US_APP_ID,
+                application_id=INSIGHTS_CODE_US_APP_ID,
             )
 
             with TestClient(app) as client:

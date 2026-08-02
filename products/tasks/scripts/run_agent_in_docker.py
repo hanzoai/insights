@@ -134,9 +134,9 @@ def main():
             template=SandboxTemplate.DEFAULT_BASE,
             environment_variables={
                 "GITHUB_TOKEN": github_token or "",
-                "POSTFN_PERSONAL_API_KEY": api_key_value,
-                "POSTFN_API_URL": "http://localhost:8000",  # Use 8000 directly, not 8010 (Caddy returns empty from Docker)
-                "POSTFN_PROJECT_ID": "1",
+                "INSIGHTS_PERSONAL_API_KEY": api_key_value,
+                "INSIGHTS_API_URL": "http://localhost:8000",  # Use 8000 directly, not 8010 (Caddy returns empty from Docker)
+                "INSIGHTS_PROJECT_ID": "1",
             },
         )
 

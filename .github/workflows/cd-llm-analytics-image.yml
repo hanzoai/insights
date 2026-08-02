@@ -60,16 +60,16 @@ jobs:
         # role; a labeled PR → insights-llm-analytics-prs via the any-branch prs role.
         env:
             ECR_IMAGE: ${{ github.ref == 'refs/heads/master' && 'insights-llm-analytics' || 'insights-llm-analytics-prs' }}
-            ECR_ROLE: ${{ github.ref == 'refs/heads/master' && vars.AWS_ECR_POSTFN_MASTER_PUBLISH_IAM_ROLE || vars.AWS_ECR_POSTFN_PRS_PUBLISH_IAM_ROLE }}
+            ECR_ROLE: ${{ github.ref == 'refs/heads/master' && vars.AWS_ECR_INSIGHTS_MASTER_PUBLISH_IAM_ROLE || vars.AWS_ECR_INSIGHTS_PRS_PUBLISH_IAM_ROLE }}
 
         steps:
             - name: Assert default-branch publish role is configured
               if: github.ref == 'refs/heads/master'
               env:
-                  DEFAULT_BRANCH_ROLE: ${{ vars.AWS_ECR_POSTFN_MASTER_PUBLISH_IAM_ROLE }}
+                  DEFAULT_BRANCH_ROLE: ${{ vars.AWS_ECR_INSIGHTS_MASTER_PUBLISH_IAM_ROLE }}
               run: |
                   if [[ -z "$DEFAULT_BRANCH_ROLE" ]]; then
-                    echo "::error::AWS_ECR_POSTFN_MASTER_PUBLISH_IAM_ROLE is not set — refusing to fall back to the PRS role on the default branch."
+                    echo "::error::AWS_ECR_INSIGHTS_MASTER_PUBLISH_IAM_ROLE is not set — refusing to fall back to the PRS role on the default branch."
                     exit 1
                   fi
 

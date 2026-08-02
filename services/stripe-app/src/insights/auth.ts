@@ -126,7 +126,7 @@ export async function clearCredentials(stripe: Stripe): Promise<void> {
 }
 
 export function getBaseUrlForRegion(region: Region, constants: AppConstants): string {
-    return region === 'eu' ? constants.POSTFN_EU_BASE_URL : constants.POSTFN_US_BASE_URL
+    return region === 'eu' ? constants.INSIGHTS_EU_BASE_URL : constants.INSIGHTS_US_BASE_URL
 }
 
 function accountScope(): Stripe.Apps.SecretCreateParams['scope'] {

@@ -1,4 +1,4 @@
-import { parseExecCall, parseExecCommand, POSTFN_EXEC_TOOL_RE } from '../components/tool/insightsExecDisplay'
+import { parseExecCall, parseExecCommand, INSIGHTS_EXEC_TOOL_RE } from '../components/tool/insightsExecDisplay'
 import type { PermissionRequestRecord } from '../types/streamTypes'
 
 export interface ResolvedToolKey {
@@ -47,9 +47,9 @@ export function resolveToolKey(
 ): ResolvedToolKey {
     const fullName = `mcp__${serverName}__${toolName}`
     const isInsightsExecTool =
-        POSTFN_EXEC_TOOL_RE.test(fullName) ||
-        POSTFN_EXEC_TOOL_RE.test(toolName) ||
-        (claudeToolName ? POSTFN_EXEC_TOOL_RE.test(claudeToolName) : false)
+        INSIGHTS_EXEC_TOOL_RE.test(fullName) ||
+        INSIGHTS_EXEC_TOOL_RE.test(toolName) ||
+        (claudeToolName ? INSIGHTS_EXEC_TOOL_RE.test(claudeToolName) : false)
 
     if (isInsightsExecTool && typeof input.command === 'string') {
         const { verb, rest } = parseExecCommand(input.command)

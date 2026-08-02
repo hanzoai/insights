@@ -174,4 +174,4 @@ BLOCKED_GEOIP_REGIONS = get_list(os.getenv("BLOCKED_GEOIP_REGIONS", ""))
 # SSRF protection: in dev/DEBUG, is_url_allowed() short-circuits and allows every URL so local
 # development can reach localhost services. Set this to run the production validation path in dev —
 # e.g. to reproduce or test SSRF fixes — without flipping DEBUG globally.
-FORCE_URL_VALIDATION: bool = get_from_env("POSTFN_FORCE_URL_VALIDATION", False, type_cast=str_to_bool)
+FORCE_URL_VALIDATION: bool = get_from_env("INSIGHTS_FORCE_URL_VALIDATION", False, type_cast=str_to_bool)

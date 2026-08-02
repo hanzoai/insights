@@ -14,8 +14,8 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
 export function onLoad({ inputs, insights }) {
     if (inputs.enable_debugging) {
         console.log("[Insights JS debugger site app] Enabling Insights.js debugging", insights)
-        globalThis.POSTFN_DEBUG = true
-        globalThis.__POSTFN_JS_DEBUGGER_ENABLED = true
+        globalThis.INSIGHTS_DEBUG = true
+        globalThis.__INSIGHTS_JS_DEBUGGER_ENABLED = true
     }
 
     if (inputs.capture_config) {

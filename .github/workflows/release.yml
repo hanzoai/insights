@@ -20,7 +20,7 @@ env:
 on:
     workflow_call:
         secrets:
-            POSTFN_API_TOKEN:
+            INSIGHTS_API_TOKEN:
                 required: false
 
 jobs:
@@ -110,7 +110,7 @@ jobs:
         container: ${{ matrix.container && matrix.container.image || null }}
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            POSTFN_API_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
+            INSIGHTS_API_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
             BUILD_MANIFEST_NAME: target/distrib/${{ join(matrix.targets, '-') }}-dist-manifest.json
         steps:
             - name: enable windows longpaths
@@ -227,7 +227,7 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             BUILD_MANIFEST_NAME: target/distrib/global-dist-manifest.json
-            POSTFN_API_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
+            INSIGHTS_API_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:

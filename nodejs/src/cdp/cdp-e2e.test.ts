@@ -18,7 +18,7 @@ import { CdpCyclotronWorker } from '../../src/cdp/consumers/cdp-cyclotron-worker
 import { CdpDatawarehouseEventsConsumer } from '../../src/cdp/consumers/cdp-data-warehouse-events.consumer'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../../src/cdp/types'
 import { Hub, Team } from '../../src/types'
-import { FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from './_tests/examples'
+import { INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from './_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
     createHogExecutionGlobals,
@@ -101,16 +101,16 @@ describe('CDP Consumer loop', () => {
                 script: script,
                 bytecode: await compileHog(script),
                 inputs_schema: [
-                    ...(FN_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
+                    ...(INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
                     { key: 'oauth', type: 'integration', label: 'Slack', secret: false, required: true },
                 ],
                 inputs: {
-                    ...FN_INPUTS_EXAMPLES.simple_fetch.inputs,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs,
                     oauth: {
                         value: 1,
                     },
                 },
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const kafkaQueue = new CyclotronJobQueueKafka(hub.KAFKA_CLIENT_RACK, hub, hub.CONSUMER_BATCH_SIZE)
@@ -360,7 +360,7 @@ describe('CDP Consumer loop', () => {
                             aws_secret_access_key: { value: 'aws_secret_access_key' },
                         })
                     ),
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 } as any)
 
                 await eventsConsumer.processBatch([globals])
@@ -483,7 +483,7 @@ describe('CDP Consumer loop', () => {
                         aws_secret_access_key: { value: SECRET_KEY },
                     })
                 ),
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             } as any)
 
             // The default `fnFetchNoFilters` from beforeEach also matches this event;
@@ -631,8 +631,8 @@ describe('CDP Consumer loop', () => {
                 type: 'destination',
                 script,
                 bytecode: await compileHog(script),
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const kafkaQueue = new CyclotronJobQueueKafka(hub.KAFKA_CLIENT_RACK, hub, hub.CONSUMER_BATCH_SIZE)

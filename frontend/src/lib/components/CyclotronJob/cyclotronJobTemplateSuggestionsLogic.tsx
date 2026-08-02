@@ -1,7 +1,7 @@
 import FuseClass from 'fuse.js'
 import { MakeLogicType, actions, kea, key, path, props, reducers, selectors } from 'kea'
 
-import { STL as FN_STL } from '@hanzo/scriptvm'
+import { STL as INSIGHTS_STL } from '@hanzo/scriptvm'
 
 import { createFuse } from 'lib/utils/fuseSearch'
 
@@ -23,7 +23,7 @@ export type CyclotronJobTemplateSuggestionsLogicProps = {
 // Helping kea-typegen navigate the exported default class for Fuse
 export interface Fuse extends FuseClass<CyclotronJobTemplateOption> {}
 
-const FN_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
+const INSIGHTS_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
     {
         key: 'ternary',
         example: `$1 = true ? 'Yes' : 'No'`,
@@ -36,7 +36,7 @@ const FN_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
     },
 ]
 
-const FN_STL_EXAMPLES: CyclotronJobTemplateOption[] = Object.entries(FN_STL).map(([key, value]) => ({
+const INSIGHTS_STL_EXAMPLES: CyclotronJobTemplateOption[] = Object.entries(INSIGHTS_STL).map(([key, value]) => ({
     key,
     example: value.example,
     description: value.description,
@@ -127,7 +127,7 @@ export const cyclotronJobTemplateSuggestionsLogic = kea<cyclotronJobTemplateSugg
         allOptions: [
             (_, p) => [p.templating],
             (templating: 'script' | 'liquid'): CyclotronJobTemplateOption[] => {
-                return templating === 'script' ? [...FN_USAGE_EXAMPLES, ...FN_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
+                return templating === 'script' ? [...INSIGHTS_USAGE_EXAMPLES, ...INSIGHTS_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
             },
         ],
 

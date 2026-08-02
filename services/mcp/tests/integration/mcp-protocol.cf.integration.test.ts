@@ -6,8 +6,8 @@ import { defineAuthTests, type ProtocolTestHarness } from './mcp-protocol-suite'
 
 // Auth-boundary test against the Cloudflare Workers entry point.
 //   - Real workerd via `wrangler unstable_dev`
-//   - Real Insights stack at `TEST_POSTFN_API_BASE_URL` (defaults to localhost:8010)
-//   - Real personal API key from `TEST_POSTFN_PERSONAL_API_KEY`
+//   - Real Insights stack at `TEST_INSIGHTS_API_BASE_URL` (defaults to localhost:8010)
+//   - Real personal API key from `TEST_INSIGHTS_PERSONAL_API_KEY`
 //
 // Boot the local Insights stack with `./bin/start` before running this suite.
 //

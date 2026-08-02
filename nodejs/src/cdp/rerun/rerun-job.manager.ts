@@ -16,7 +16,7 @@ export interface RerunJobManagerConfig {
     maxConnections?: number
     idleTimeoutMs?: number
     depthLimit?: number
-    /** Mirror of the Django serializer cap (FN_INVOCATION_RERUN_MAX_COUNT env var). */
+    /** Mirror of the Django serializer cap (INSIGHTS_INVOCATION_RERUN_MAX_COUNT env var). */
     maxCount: number
 }
 

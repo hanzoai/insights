@@ -191,10 +191,10 @@ export const feedbackPromptLogic = kea<feedbackPromptLogicType>([
         feedbackConfig: [
             () => [],
             (): FeedbackConfig | null => {
-                const payload = getFeatureFlagPayload(FEATURE_FLAGS.POSTFN_AI_CONVERSATION_FEEDBACK_CONFIG)
+                const payload = getFeatureFlagPayload(FEATURE_FLAGS.INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG)
                 if (!payload || typeof payload !== 'object') {
                     insights.captureException(
-                        new Error('POSTFN_AI_CONVERSATION_FEEDBACK_CONFIG feature flag is not set'),
+                        new Error('INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG feature flag is not set'),
                         { tags: { product: 'max_ai' } }
                     )
                     return null

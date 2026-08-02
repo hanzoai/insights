@@ -29,7 +29,7 @@ describe('shim consumer integration', () => {
         // initKeaTests now bootstraps a default org into current_user (to mirror production).
         // Without this, the real userLogic (which gets mounted despite the jest.mock shim)
         // would read that bootstrapped user and leak it into mascotModeLogic.
-        window.POSTFN_APP_CONTEXT = { current_user: null } as unknown as AppContext
+        window.INSIGHTS_APP_CONTEXT = { current_user: null } as unknown as AppContext
         initKeaTests(false)
         toolbarConfigLogic.build({ apiURL: 'http://localhost' }).mount()
         jest.clearAllMocks()

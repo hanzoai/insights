@@ -132,7 +132,7 @@ def test_backend_failure_yields_error_except_when_gates_deny(
     already DENIED — a deterministic denial outranks an unavailable reviewer."""
     monkeypatch.setattr(review_pr, "Reviewer", _RaisingReviewer)
     monkeypatch.setattr(review_pr.time, "sleep", lambda _s: None)
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
     pipeline.pr = _fake_pr(head_sha="abc123")
@@ -172,7 +172,7 @@ def test_turn_limit_error_not_retried(monkeypatch: pytest.MonkeyPatch, gate_verd
     monkeypatch.setattr(review_pr, "Reviewer", _TurnLimitReviewer)
     monkeypatch.setattr(_TurnLimitReviewer, "review", counting_review)
     monkeypatch.setattr(review_pr.time, "sleep", lambda _s: None)
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
     pipeline.pr = _fake_pr(head_sha="abc123")
@@ -196,7 +196,7 @@ def test_bot_author_refuses_before_classification(monkeypatch: pytest.MonkeyPatc
     """A bot-authored PR is hard-refused before any classification, gate, or
     LLM call — a human applying the stamphog label can't make the agent review
     bot output."""
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
 
     bot_pr = _fake_pr(head_sha="abc123")
     bot_pr.author = "mendral-app[bot]"
@@ -244,7 +244,7 @@ def test_no_wait_without_in_flight_bot_review(monkeypatch: pytest.MonkeyPatch, r
     # Waiting on a human 👀 would block for longer than any polling budget —
     # the LLM refuses over those instead — and waiting with nothing in flight
     # would slow every review down.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
     monkeypatch.setattr(review_pr.time, "sleep", lambda _s: pytest.fail("must not poll"))
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
@@ -258,7 +258,7 @@ def test_no_wait_without_in_flight_bot_review(monkeypatch: pytest.MonkeyPatch, r
 def test_waits_out_bot_eyes_race_then_proceeds(monkeypatch: pytest.MonkeyPatch) -> None:
     # Reviewer bots swap 👀 for a verdict reaction within minutes; refusing
     # during that window was ~26% of all denials in the week this landed.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
     monkeypatch.setattr(review_pr.time, "sleep", lambda _s: None)
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
@@ -279,7 +279,7 @@ def test_persistent_bot_eyes_yields_wait_not_refuse(monkeypatch: pytest.MonkeyPa
     # WAIT keeps the stamphog label (workflow skips the label-strip for it),
     # so a slow bot review retries on the next push instead of demanding a
     # human re-label — a REFUSE here would reintroduce the race friction.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
     monkeypatch.setattr(review_pr, "BOT_REVIEW_WAIT_BUDGET_SECONDS", 0)
     monkeypatch.setattr(review_pr.time, "sleep", lambda _s: None)
 
@@ -309,7 +309,7 @@ def test_dep_manifest_pr_gets_t1_scrutiny_not_t0(monkeypatch: pytest.MonkeyPatch
     # Manifests are .json/.cfg so the allow-list would classify them T0 and
     # skip the reviewer entirely — making the scripts/hooks REFUSE guard dead
     # code for exactly the files it exists to check. They must land T1.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
     monkeypatch.setattr(review_pr, "manifest_script_changes", lambda *a: [])
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
@@ -326,7 +326,7 @@ def test_dep_manifest_pr_gets_t1_scrutiny_not_t0(monkeypatch: pytest.MonkeyPatch
 def test_manifest_scripts_edit_hard_denies(monkeypatch: pytest.MonkeyPatch) -> None:
     # The deterministic scan is the first line against scripts/hook edits —
     # when it fires, the PR must land T2-never rather than the LLM-only path.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
     monkeypatch.setattr(review_pr, "manifest_script_changes", lambda paths, *a: list(paths))
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
@@ -365,7 +365,7 @@ def test_title_flags_respect_exempt_paths(
     # A connector-only PR legitimately says "stripe"/"oauth" in its title;
     # flagging it re-creates the friction the connector path exemption
     # exists to remove.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
     pr = _fake_pr(head_sha="abc123")
@@ -381,7 +381,7 @@ def test_title_flags_respect_exempt_paths(
 def test_gate_denied_pr_skips_the_wait(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     # A deny-listed PR can't be approved over an in-flight review, so waiting
     # 5 minutes before the inevitable REFUSE is pure runner cost.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
     # Stub the diff production: the review path would otherwise shell out to a real
     # `git diff` here, whose internal waiting trips the sleep trap below.
     diff_path = tmp_path / "diff.patch"
@@ -411,7 +411,7 @@ def test_gate_denied_pr_skips_the_wait(monkeypatch: pytest.MonkeyPatch, tmp_path
 def test_wait_refetch_reclassifies_before_review(monkeypatch: pytest.MonkeyPatch) -> None:
     # The wait loop refetches the PR; if the author pushed during the wait,
     # gates must run against the new file set, not the pre-wait snapshot.
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", False)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
     monkeypatch.setattr(review_pr.time, "sleep", lambda _s: None)
 
     class _ApprovingReviewer:
@@ -494,7 +494,7 @@ def test_capture_review_completed_includes_familiarity_and_provenance(
     # familiarity and provenance still None) breaks the provenance and
     # knowledge-trend dimensions silently.
     fake_insights = MagicMock()
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", True)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", True)
     monkeypatch.setattr(review_pr, "hanzo_insights", fake_insights, raising=False)
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")
@@ -553,7 +553,7 @@ def test_capture_review_completed_merges_server_extras_base_wins(monkeypatch: py
         '{"stamphog_runtime":"hosted","stamphog_repo":"spoofed/repo"}',
     )
     fake_insights = MagicMock()
-    monkeypatch.setattr(review_pr, "_POSTFN_AVAILABLE", True)
+    monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", True)
     monkeypatch.setattr(review_pr, "hanzo_insights", fake_insights, raising=False)
 
     pipeline = Pipeline(pr_number=1, repo="Insights/insights")

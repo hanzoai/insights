@@ -166,7 +166,7 @@ export function resolveEffectiveClientName(
 // Insights Desktop UI. Slack-launched runs send `"slack"` and insights_ai (Max) runs
 // send `"insights_ai"`; only Insights Desktop renders MCP UI apps, so this is the
 // sole consumer that gates UI-apps payload emission in single-exec mode.
-export const POSTFN_CODE_CONSUMER = 'insights-code'
+export const INSIGHTS_CODE_CONSUMER = 'insights-code'
 
 // Claude web/desktop and Cowork are MCP Apps hosts that render interactive UI
 // (iframes), so the `render-ui` tool is meaningful for them. They send
@@ -302,7 +302,7 @@ export class MCPClientProfile {
     }
 
     isInsightsCodeConsumer(): boolean {
-        return this.consumer === POSTFN_CODE_CONSUMER
+        return this.consumer === INSIGHTS_CODE_CONSUMER
     }
 
     isClaudeUiHost(): boolean {

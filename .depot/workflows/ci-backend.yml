@@ -835,7 +835,7 @@ jobs:
               uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
               with:
                   python-version: 3.13.13
-                  token: ${{ secrets.POSTFN_BOT_PAT }}
+                  token: ${{ secrets.INSIGHTS_BOT_PAT }}
             - name: Install uv
               id: setup-uv
               uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
@@ -1003,8 +1003,8 @@ jobs:
               id: app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_ASSIGN_REVIEWERS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_ASSIGN_REVIEWERS_PRIVATE_KEY }}
                   owner: ${{ github.repository_owner }}
                   repositories: ${{ github.event.repository.name }}
             - name: Set up Python

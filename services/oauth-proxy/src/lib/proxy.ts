@@ -1,4 +1,4 @@
-import { POSTFN_EU_BASE_URL, POSTFN_US_BASE_URL, type Region, baseUrlForRegion } from './constants'
+import { INSIGHTS_EU_BASE_URL, INSIGHTS_US_BASE_URL, type Region, baseUrlForRegion } from './constants'
 
 /**
  * Proxy a request to a specific region's Insights server.
@@ -85,7 +85,7 @@ export async function tryBothRegions(request: Request, path: string): Promise<{ 
     const headers = new Headers(request.headers)
     headers.delete('host')
 
-    const usUrl = new URL(path, POSTFN_US_BASE_URL)
+    const usUrl = new URL(path, INSIGHTS_US_BASE_URL)
     const usResponse = await fetch(usUrl.toString(), {
         method: 'POST',
         headers,
@@ -99,7 +99,7 @@ export async function tryBothRegions(request: Request, path: string): Promise<{ 
 
     const euHeaders = new Headers(request.headers)
     euHeaders.delete('host')
-    const euUrl = new URL(path, POSTFN_EU_BASE_URL)
+    const euUrl = new URL(path, INSIGHTS_EU_BASE_URL)
     const euResponse = await fetch(euUrl.toString(), {
         method: 'POST',
         headers: euHeaders,

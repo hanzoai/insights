@@ -10,12 +10,12 @@ describe('otel-metrics import chain', () => {
             NODE_ENV: process.env.NODE_ENV,
             DEBUG: process.env.DEBUG,
             DATABASE_URL: process.env.DATABASE_URL,
-            POSTFN_DB_NAME: process.env.POSTFN_DB_NAME,
+            INSIGHTS_DB_NAME: process.env.INSIGHTS_DB_NAME,
         }
         process.env.NODE_ENV = 'production'
         delete process.env.DEBUG
         delete process.env.DATABASE_URL
-        delete process.env.POSTFN_DB_NAME
+        delete process.env.INSIGHTS_DB_NAME
         let mod: typeof import('../otel-metrics') | undefined
         try {
             jest.isolateModules(() => {

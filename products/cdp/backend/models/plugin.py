@@ -16,7 +16,7 @@ from rest_framework.exceptions import ValidationError
 from semantic_version.base import SimpleSpec
 
 from insights.cloud_utils import is_cloud
-from insights.constants import FROZEN_POSTFN_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models.organization import Organization
 from insights.models.signals import mutable_receiver
 from insights.models.team import Team
@@ -106,9 +106,9 @@ def update_validated_data_from_url(validated_data: dict[str, Any], url: str) -> 
             spec = SimpleSpec(insights_version.replace(" ", ""))
         except ValueError:
             raise ValidationError(f'Invalid Insights semantic version requirement "{insights_version}"!')
-        if FROZEN_POSTFN_VERSION not in spec:
+        if FROZEN_INSIGHTS_VERSION not in spec:
             raise ValidationError(
-                f'Currently running Insights version {FROZEN_POSTFN_VERSION} does not match this plugin\'s semantic version requirement "{insights_version}".'
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement "{insights_version}".'
             )
 
     return plugin_json

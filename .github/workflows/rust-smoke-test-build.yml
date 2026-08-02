@@ -91,8 +91,8 @@ jobs:
             event-name: insights-rust-smoke-test-image-build
             extra-failure-props: '"pr": "${{ github.event.pull_request.number }}"'
         secrets:
-            POSTFN_API_TOKEN: ${{ secrets.POSTFN_API_TOKEN }}
-            POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+            INSIGHTS_API_TOKEN: ${{ secrets.INSIGHTS_API_TOKEN }}
+            INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
         permissions:
             id-token: write
             contents: read

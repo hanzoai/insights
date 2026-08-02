@@ -198,9 +198,9 @@ class SignalReport(UUIDModel):
         SUPPRESSED = "suppressed"
 
     class BillingExemptReason(models.TextChoices):
-        POSTFN_HEALTH_CHECK = "insights_health_check", "Insights health check"
-        POSTFN_ONBOARDING = "insights_onboarding", "Insights onboarding"
-        POSTFN_SYSTEM = "insights_system", "Insights system"
+        INSIGHTS_HEALTH_CHECK = "insights_health_check", "Insights health check"
+        INSIGHTS_ONBOARDING = "insights_onboarding", "Insights onboarding"
+        INSIGHTS_SYSTEM = "insights_system", "Insights system"
 
     team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=Status, default=Status.POTENTIAL)

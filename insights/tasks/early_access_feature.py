@@ -20,7 +20,7 @@ from products.surveys.backend.models import Survey
 
 logger = structlog.get_logger(__name__)
 
-POSTFN_TEAM_ID = 2
+INSIGHTS_TEAM_ID = 2
 
 # Gate for auto-creating a waitlist survey per "Coming Soon" (concept-stage) feature, and
 # for showing the email field in-app. Enable for Insights's own project first.
@@ -144,7 +144,7 @@ def send_events_for_early_access_feature_stage_change(feature_id: str, from_stag
     instance = EarlyAccessFeature.objects.get(id=feature_id)
 
     team_id = instance.team.id
-    send_events_for_change = team_id == POSTFN_TEAM_ID if is_cloud() else True
+    send_events_for_change = team_id == INSIGHTS_TEAM_ID if is_cloud() else True
     if not send_events_for_change:
         return
 

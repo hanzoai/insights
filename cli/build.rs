@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 // Debug token, used to get metrics for debug builds - team 89529
-const DEBUG_POSTFN_API_TOKEN: &str = "phc_raG2H9V246hkNZk6K89DZGG98qQyPrKKlicifGlpOXA";
+const DEBUG_INSIGHTS_API_TOKEN: &str = "phc_raG2H9V246hkNZk6K89DZGG98qQyPrKKlicifGlpOXA";
 const API_CLI_BUNDLE: &str = "lib/insights-api-cli.mjs";
 
 fn write_api_cli_bundle_include() {
@@ -31,7 +31,7 @@ pub fn main() {
 
     let profile = env::var("PROFILE").expect("Profile variable is set by cargo");
     if profile == "debug" {
-        println!("cargo:rustc-env=POSTFN_API_TOKEN={DEBUG_POSTFN_API_TOKEN}");
+        println!("cargo:rustc-env=INSIGHTS_API_TOKEN={DEBUG_INSIGHTS_API_TOKEN}");
     } else {
         eprintln!("Not setting debug insights api token");
     }

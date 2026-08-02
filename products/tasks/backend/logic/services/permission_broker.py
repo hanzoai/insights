@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 logger = structlog.get_logger(__name__)
 
-POSTFN_PERMISSION_REQUEST_METHOD = "_insights/permission_request"
+INSIGHTS_PERMISSION_REQUEST_METHOD = "_insights/permission_request"
 # Must comfortably outlive the run so a replayed relay event can't double-answer.
 AUTO_RESPONSE_DEDUPE_SECONDS = 24 * 60 * 60
 
@@ -40,7 +40,7 @@ def _permission_request_payload(event_data: dict[str, Any]) -> dict[str, Any] | 
         return event_data
 
     notification = event_data.get("notification")
-    if not isinstance(notification, dict) or notification.get("method") != POSTFN_PERMISSION_REQUEST_METHOD:
+    if not isinstance(notification, dict) or notification.get("method") != INSIGHTS_PERMISSION_REQUEST_METHOD:
         return None
 
     params = notification.get("params")

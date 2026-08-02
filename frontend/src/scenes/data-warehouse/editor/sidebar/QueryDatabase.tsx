@@ -38,7 +38,7 @@ import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
 import { newInternalTab } from 'lib/utils/newInternalTab'
-import { POSTFN_WAREHOUSE } from 'scenes/data-warehouse/editor/connectionSelectorLogic'
+import { INSIGHTS_WAREHOUSE } from 'scenes/data-warehouse/editor/connectionSelectorLogic'
 import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { sqlEditorLogic } from 'scenes/data-warehouse/editor/sqlEditorLogic'
 import { urls } from 'scenes/urls'
@@ -286,7 +286,7 @@ export const QueryDatabase = ({
 
         const table = item.record?.tableName || item.name
         const previewQuery = `SELECT * FROM ${escapePropertyAsInsightsQLIdentifier(table)} LIMIT 100`
-        const nextConnectionId = connectionId && connectionId !== POSTFN_WAREHOUSE ? connectionId : undefined
+        const nextConnectionId = connectionId && connectionId !== INSIGHTS_WAREHOUSE ? connectionId : undefined
 
         if (isEmbeddedMode) {
             setActiveTab(OutputTab.Results)
@@ -577,7 +577,7 @@ export const QueryDatabase = ({
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     const nextConnectionId =
-                                        connectionId && connectionId !== POSTFN_WAREHOUSE ? connectionId : undefined
+                                        connectionId && connectionId !== INSIGHTS_WAREHOUSE ? connectionId : undefined
                                     router.actions.push(
                                         urls.sqlEditor({
                                             query: buildSelectAllQuery(item.name, null),

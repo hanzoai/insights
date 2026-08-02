@@ -13,7 +13,7 @@ describe('sampleDataStateLogic', () => {
     let logic: ReturnType<typeof sampleDataStateLogic.build>
 
     afterEach(() => {
-        delete (window as { POSTFN_EXPORTED_DATA?: unknown }).POSTFN_EXPORTED_DATA
+        delete (window as { INSIGHTS_EXPORTED_DATA?: unknown }).INSIGHTS_EXPORTED_DATA
     })
 
     // The global is read inside the selector, so it must be in place before the selector first
@@ -40,7 +40,7 @@ describe('sampleDataStateLogic', () => {
     // `ingested_event`, so it reads as undefined on shared views. Without the isSharedView gate,
     // every empty tile on a real, data-carrying project falsely renders fake sample data.
     it('hides the placeholder on shared views even when ingested_event is absent', async () => {
-        window.POSTFN_EXPORTED_DATA = { type: ExportType.Embed }
+        window.INSIGHTS_EXPORTED_DATA = { type: ExportType.Embed }
         mount({ ...MOCK_DEFAULT_TEAM, ingested_event: undefined })
         await expectLogic(logic).toMatchValues({ shouldShowSampleData: false })
     })

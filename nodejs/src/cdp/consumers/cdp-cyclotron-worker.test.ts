@@ -10,7 +10,7 @@ import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     createExampleInvocation,
     createHogExecutionGlobals,
@@ -45,9 +45,9 @@ describe('CdpCyclotronWorker', () => {
             hub.postgres,
             team.id,
             createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 template_id: 'template-webhook',
             })
         )
@@ -107,9 +107,9 @@ describe('CdpCyclotronWorker', () => {
                 hub.postgres,
                 team.id,
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'segment-actions-amplitude',
                 })
             )
@@ -118,9 +118,9 @@ describe('CdpCyclotronWorker', () => {
                 hub.postgres,
                 team.id,
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'native-webhook',
                 })
             )
@@ -129,9 +129,9 @@ describe('CdpCyclotronWorker', () => {
                 hub.postgres,
                 team.id,
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'plugin-insights-intercom-plugin',
                 })
             )
@@ -280,9 +280,9 @@ describe('CdpCyclotronWorker', () => {
                 hub.postgres,
                 team.id,
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     enabled: false,
                 })
             )
@@ -311,9 +311,9 @@ describe('CdpCyclotronWorker', () => {
                     hub.postgres,
                     team.id,
                     createInsightsFunction({
-                        ...FN_EXAMPLES.simple_fetch,
-                        ...FN_INPUTS_EXAMPLES.simple_fetch,
-                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                        ...INSIGHTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'segment-actions-mixpanel',
                     })
                 )
@@ -346,9 +346,9 @@ describe('CdpCyclotronWorker', () => {
                     hub.postgres,
                     team.id,
                     createInsightsFunction({
-                        ...FN_EXAMPLES.simple_fetch,
-                        ...FN_INPUTS_EXAMPLES.simple_fetch,
-                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                        ...INSIGHTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'plugin-insights-intercom-plugin',
                     })
                 )
@@ -375,9 +375,9 @@ describe('CdpCyclotronWorker', () => {
                     hub.postgres,
                     team.id,
                     createInsightsFunction({
-                        ...FN_EXAMPLES.simple_fetch,
-                        ...FN_INPUTS_EXAMPLES.simple_fetch,
-                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                        ...INSIGHTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'native-webhook',
                     })
                 )
@@ -404,9 +404,9 @@ describe('CdpCyclotronWorker', () => {
                     hub.postgres,
                     team.id,
                     createInsightsFunction({
-                        ...FN_EXAMPLES.simple_fetch,
-                        ...FN_INPUTS_EXAMPLES.simple_fetch,
-                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                        ...INSIGHTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                        ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     })
                 )
 
@@ -468,7 +468,7 @@ describe('CdpCyclotronWorker', () => {
                     hub.postgres,
                     team.id,
                     createInsightsFunction({
-                        ...FN_FILTERS_EXAMPLES.no_filters,
+                        ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                         script: evilFunctionCode,
                         bytecode: await compileHog(evilFunctionCode),
                     })

@@ -22,7 +22,7 @@ if (existsSync(dotEnv)) {
 // advertises production, UI app resources aren't registered) - surface the
 // misconfig loudly, especially for setups still holding config in the
 // removed `.dev.vars` file.
-const requiredVars = ['POSTFN_API_BASE_URL', 'MCP_APPS_BASE_URL']
+const requiredVars = ['INSIGHTS_API_BASE_URL', 'MCP_APPS_BASE_URL']
 const missingVars = requiredVars.filter((name) => !process.env[name])
 if (missingVars.length > 0) {
     console.warn(

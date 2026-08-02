@@ -58,7 +58,7 @@ export function WebScriptsScene(): JSX.Element {
         {
             key: 'history',
             label: 'History',
-            content: <ActivityLog scope={[ActivityScope.FN_FUNCTION, ActivityScope.BATCH_EXPORT]} />,
+            content: <ActivityLog scope={[ActivityScope.INSIGHTS_FUNCTION, ActivityScope.BATCH_EXPORT]} />,
         },
     ]
 

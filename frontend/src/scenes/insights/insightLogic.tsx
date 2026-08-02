@@ -912,7 +912,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
             null as 'liked' | 'disliked' | null,
             {
                 persist: true,
-                prefix: `${window.POSTFN_APP_CONTEXT?.current_team?.id}_`,
+                prefix: `${window.INSIGHTS_APP_CONTEXT?.current_team?.id}_`,
             },
             {
                 setInsightFeedback: (_, { feedback }) => feedback,

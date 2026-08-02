@@ -269,7 +269,7 @@ class TestExternalAccountAPI(APIBaseTest):
                 self.url,
                 data={"external_id": "acme-1", "tags": ["vip"]},
                 format="json",
-                HTTP_X_POSTFN_FN_FLOW_ID=workflow_id,
+                HTTP_X_INSIGHTS_FN_FLOW_ID=workflow_id,
                 **self._auth_headers(),
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -397,7 +397,7 @@ class TestExternalAccountAPI(APIBaseTest):
 
     def test_post_with_workflow_header_attributes_activity_to_workflow(self):
         workflow_id = str(uuid4())
-        response = self._post({"external_id": "new-1"}, HTTP_X_POSTFN_FN_FLOW_ID=workflow_id)
+        response = self._post({"external_id": "new-1"}, HTTP_X_INSIGHTS_FN_FLOW_ID=workflow_id)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         log = ActivityLog.objects.get(team_id=self.team.id, scope="Account", activity="created")
         self.assertIsNone(log.user)
@@ -431,7 +431,7 @@ class TestExternalAccountAPI(APIBaseTest):
         self._create_warehouse_backed_property()
         # selected columns are sorted: mrr, org_id
         with patch(_SYNC_EXECUTE, return_value=_SyncResponse([(100.0, "new-1")])):
-            response = self._post({"external_id": "new-1"}, HTTP_X_POSTFN_FN_FLOW_ID=str(uuid4()))
+            response = self._post({"external_id": "new-1"}, HTTP_X_INSIGHTS_FN_FLOW_ID=str(uuid4()))
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.json()["custom_properties"]["MRR"], 100.0)
@@ -439,7 +439,7 @@ class TestExternalAccountAPI(APIBaseTest):
     def test_post_succeeds_when_property_sync_fails(self):
         self._create_warehouse_backed_property()
         with patch(_SYNC_EXECUTE, side_effect=Exception("datastore down")):
-            response = self._post({"external_id": "new-1"}, HTTP_X_POSTFN_FN_FLOW_ID=str(uuid4()))
+            response = self._post({"external_id": "new-1"}, HTTP_X_INSIGHTS_FN_FLOW_ID=str(uuid4()))
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIsNone(response.json()["custom_properties"]["MRR"])
@@ -455,7 +455,7 @@ class TestExternalAccountAPI(APIBaseTest):
     def test_post_existing_account_does_not_sync(self):
         self._create_warehouse_backed_property()
         with patch(_SYNC_EXECUTE) as execute:
-            response = self._post({"external_id": "acme-1"}, HTTP_X_POSTFN_FN_FLOW_ID=str(uuid4()))
+            response = self._post({"external_id": "acme-1"}, HTTP_X_INSIGHTS_FN_FLOW_ID=str(uuid4()))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         execute.assert_not_called()

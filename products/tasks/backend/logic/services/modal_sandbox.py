@@ -38,7 +38,7 @@ from insights.settings import CLOUD_DEPLOYMENT
 from products.tasks.backend.constants import (
     ALLOWED_DIRECTORY_RESUME_SNAPSHOT_MOUNT_PATHS,
     DEV_STACK_IMAGE_NAME,
-    POSTFN_EXEC_PERMISSION_REGEX,
+    INSIGHTS_EXEC_PERMISSION_REGEX,
     SANDBOX_AGENT_LAUNCH_UNSET_ENV_VARS,
     SNAPSHOT_KIND_DIRECTORY,
     SNAPSHOT_KIND_FILESYSTEM,
@@ -1304,7 +1304,7 @@ class ModalSandbox(SandboxBase):
             logger.warning(f"Installed agent-server in sandbox {self.id} predates --autoPublish; starting review-first")
             auto_publish = False
 
-        exec_permission_regex: str | None = POSTFN_EXEC_PERMISSION_REGEX
+        exec_permission_regex: str | None = INSIGHTS_EXEC_PERMISSION_REGEX
         if not self.agent_server_supports_exec_permission_regex():
             logger.warning(
                 f"Installed agent-server in sandbox {self.id} predates --insightsExecPermissionRegex; "

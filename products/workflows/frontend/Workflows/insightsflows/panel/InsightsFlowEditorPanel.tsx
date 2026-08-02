@@ -8,7 +8,7 @@ import { Badge, Button, Tab, Tabs, Tooltip } from '@hanzo/elements'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 
 import { workflowLogic } from '../../workflowLogic'
-import { FN_FLOW_EDITOR_MODES, InsightsFlowEditorMode, hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { INSIGHTS_FLOW_EDITOR_MODES, InsightsFlowEditorMode, hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { useInsightsFlowStep } from '../steps/InsightsFlowSteps'
 import { InsightsFlowEditorPanelBuild } from './InsightsFlowEditorPanelBuild'
 import { InsightsFlowEditorPanelBuildDetail } from './InsightsFlowEditorPanelBuildDetail'
@@ -25,7 +25,7 @@ export function InsightsFlowEditorPanel(): JSX.Element | null {
 
     const variablesCount = workflow?.variables?.length || 0
 
-    const tabs: Tab<InsightsFlowEditorMode>[] = FN_FLOW_EDITOR_MODES.map((mode) => ({
+    const tabs: Tab<InsightsFlowEditorMode>[] = INSIGHTS_FLOW_EDITOR_MODES.map((mode) => ({
         label: (
             <>
                 {capitalizeFirstLetter(mode)}

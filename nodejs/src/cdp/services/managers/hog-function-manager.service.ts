@@ -9,7 +9,7 @@ import { Team } from '../../../types'
 import { InsightsFunctionType, InsightsFunctionTypeType } from '../../types'
 import { EncryptedFields } from '../../utils/encryption-utils'
 
-const FN_FUNCTION_FIELDS = [
+const INSIGHTS_FUNCTION_FIELDS = [
     'id',
     'team_id',
     'name',
@@ -167,7 +167,7 @@ export class InsightsFunctionManagerService {
         const items: InsightsFunctionType[] = (
             await this.postgres.query(
                 PostgresUse.COMMON_READ,
-                `SELECT ${FN_FUNCTION_FIELDS.join(', ')}
+                `SELECT ${INSIGHTS_FUNCTION_FIELDS.join(', ')}
                 FROM insights_hogfunction
                 WHERE id = $1 AND deleted = FALSE`,
                 [id],
@@ -211,7 +211,7 @@ export class InsightsFunctionManagerService {
 
         const response = await this.postgres.query<InsightsFunctionType>(
             PostgresUse.COMMON_READ,
-            `SELECT ${FN_FUNCTION_FIELDS.join(', ')} FROM insights_hogfunction WHERE id = ANY($1) AND deleted = FALSE`,
+            `SELECT ${INSIGHTS_FUNCTION_FIELDS.join(', ')} FROM insights_hogfunction WHERE id = ANY($1) AND deleted = FALSE`,
             [ids],
             'fetchInsightsFunctions'
         )

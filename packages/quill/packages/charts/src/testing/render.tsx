@@ -5,7 +5,7 @@ import type { TooltipContext } from '../core/types'
 import { DefaultTooltip } from '../overlays/DefaultTooltip'
 import { getHogChart, type HogChart } from './accessor'
 import { ensureJsdom } from './jsdom'
-import { FN_CHARTS_TOOLTIP_SELECTOR } from './tooltip'
+import { INSIGHTS_CHARTS_TOOLTIP_SELECTOR } from './tooltip'
 
 export interface RenderHogChartOptions {
     /** Skip the tooltip-prop override so the chart renders its own tooltip. Context capture
@@ -25,7 +25,7 @@ export function renderHogChart<Meta = unknown>(
 ): RenderResult & { chart: HogChart<Meta> } {
     ensureJsdom()
     cleanup()
-    document.querySelectorAll(FN_CHARTS_TOOLTIP_SELECTOR).forEach((el) => el.remove())
+    document.querySelectorAll(INSIGHTS_CHARTS_TOOLTIP_SELECTOR).forEach((el) => el.remove())
 
     const props = ui.props as { tooltip?: (ctx: TooltipContext<Meta>) => ReactNode; labels?: string[] }
 

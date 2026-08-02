@@ -200,7 +200,7 @@ func printJSON(v any) {
 // across worktrees, so stopping phrocs never stops them. In a sandbox the
 // infra is managed externally, so the hint would be wrong there.
 func printDockerTeardownHint() {
-	if os.Getenv("POSTFN_SANDBOX") == "1" {
+	if os.Getenv("INSIGHTS_SANDBOX") == "1" {
 		return
 	}
 	fmt.Println("Docker services keep running after phrocs stops (the compose stack is shared across worktrees).")

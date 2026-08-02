@@ -48,7 +48,7 @@ const NEXT_COMMAND_DEFAULT: &str = "insights-cli --help";
 
 pub fn login(host_override: Option<String>) -> Result<()> {
     if !io::stdout().is_terminal() {
-        bail!("Failed to login. If you are running on a CI, skip this step and use POSTFN_CLI_HOST, POSTFN_CLI_PROJECT_ID, POSTFN_CLI_API_KEY env variables when running commands")
+        bail!("Failed to login. If you are running on a CI, skip this step and use INSIGHTS_CLI_HOST, INSIGHTS_CLI_PROJECT_ID, INSIGHTS_CLI_API_KEY env variables when running commands")
     }
     login_with_use_cases(host_override, DEFAULT_LOGIN_USE_CASES.to_vec())
 }

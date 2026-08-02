@@ -96,7 +96,7 @@ func StripComposeLogsTail(shell string) string {
 		return shell
 	}
 	last := strings.TrimSpace(segments[len(segments)-1])
-	// The logs tail may sit inside an if/else (e.g. the POSTFN_SANDBOX guard),
+	// The logs tail may sit inside an if/else (e.g. the INSIGHTS_SANDBOX guard),
 	// leaving "; fi" attached to the final segment. Preserve the closer so the
 	// stripped shell still parses.
 	suffix := ""

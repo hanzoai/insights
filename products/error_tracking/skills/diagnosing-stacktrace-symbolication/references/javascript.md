@@ -141,9 +141,9 @@ a redirect error pointing back at `insights-cli symbol-sets extract`.
 Insights build plugins call `insights-cli sourcemap process`. For direct CLI checks, use environment variables:
 
 ```bash
-POSTFN_CLI_HOST="$POSTFN_HOST" \
-POSTFN_CLI_PROJECT_ID="$POSTFN_PROJECT_ID" \
-POSTFN_CLI_API_KEY="$POSTFN_PERSONAL_API_KEY" \
+INSIGHTS_CLI_HOST="$INSIGHTS_HOST" \
+INSIGHTS_CLI_PROJECT_ID="$INSIGHTS_PROJECT_ID" \
+INSIGHTS_CLI_API_KEY="$INSIGHTS_PERSONAL_API_KEY" \
 RUST_LOG=insights_cli=debug \
 insights-cli sourcemap process --directory dist --release-name my-app --release-version 0.0.0
 ```

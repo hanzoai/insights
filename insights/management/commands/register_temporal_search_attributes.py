@@ -10,7 +10,7 @@ import temporalio.api.operatorservice.v1 as ops
 from temporalio.common import SearchAttributeKey
 
 from insights.temporal.common.client import async_connect
-from insights.temporal.common.search_attributes import POSTFN_SEARCH_ATTRIBUTES
+from insights.temporal.common.search_attributes import INSIGHTS_SEARCH_ATTRIBUTES
 
 logger = structlog.get_logger(__name__)
 
@@ -64,7 +64,7 @@ class Command(BaseCommand):
 
             # Find which ones need registering
             to_register = {}
-            for key in POSTFN_SEARCH_ATTRIBUTES:
+            for key in INSIGHTS_SEARCH_ATTRIBUTES:
                 if key.name in existing:
                     logger.info("Already registered", attribute=key.name)
                 else:

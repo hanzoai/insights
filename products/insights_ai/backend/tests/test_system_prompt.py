@@ -1,6 +1,6 @@
 from insights.test.base import APIBaseTest
 
-from products.insights_ai.backend.services.system_prompt.prompt import POSTFN_AI_SYSTEM_PROMPT
+from products.insights_ai.backend.services.system_prompt.prompt import INSIGHTS_AI_SYSTEM_PROMPT
 from products.insights_ai.backend.services.system_prompt.service import ClaudeCodeSystemPrompt, PromptService
 
 
@@ -14,7 +14,7 @@ class TestInsightsAISystemPrompt(APIBaseTest):
         assert self._build() == {
             "type": "preset",
             "preset": "claude_code",
-            "append": POSTFN_AI_SYSTEM_PROMPT,
+            "append": INSIGHTS_AI_SYSTEM_PROMPT,
         }
 
     def test_includes_core_sections(self):

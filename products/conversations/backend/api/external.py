@@ -147,7 +147,7 @@ def _validate_ticket_id(ticket_id: str | uuid.UUID) -> Response | None:
 
 
 # Header a InsightsFlow workflow step forwards so activity entries can attribute the change to it.
-FN_FLOW_ID_HEADER = "X-Insights-Script-Flow-Id"
+INSIGHTS_FLOW_ID_HEADER = "X-Insights-Script-Flow-Id"
 
 
 def _workflow_trigger_from_request(request: Request) -> Trigger | None:
@@ -160,7 +160,7 @@ def _workflow_trigger_from_request(request: Request) -> Trigger | None:
     is team-token authenticated, so the worst case is a token holder pointing attribution at
     another workflow id within its own team — no cross-team or privilege impact.
     """
-    hog_flow_id = request.headers.get(FN_FLOW_ID_HEADER)
+    hog_flow_id = request.headers.get(INSIGHTS_FLOW_ID_HEADER)
     if not hog_flow_id:
         return None
     try:

@@ -121,7 +121,7 @@ export const LOGIC_NODES_TO_SHOW: CreateActionType[] = [
     },
 ]
 
-export const POSTFN_NODES_TO_SHOW: CreateActionType[] = [
+export const INSIGHTS_NODES_TO_SHOW: CreateActionType[] = [
     {
         type: 'function',
         name: 'Set variable',
@@ -152,7 +152,7 @@ const TEMPLATE_IDS_AT_TOP_LEVEL: string[] = [
     ...ACTION_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...DELAY_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...LOGIC_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
-    ...POSTFN_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
+    ...INSIGHTS_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...getRegisteredActionNodeCategories().flatMap((cat) =>
         cat.nodes.map((action) => (action.config as any).template_id)
     ),
@@ -337,7 +337,7 @@ export function InsightsFlowEditorPanelBuild(): JSX.Element {
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
                 Insights actions <Divider className="flex-1" />
             </span>
-            {POSTFN_NODES_TO_SHOW.map((action, index) => (
+            {INSIGHTS_NODES_TO_SHOW.map((action, index) => (
                 <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
             ))}
 

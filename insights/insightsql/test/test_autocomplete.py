@@ -49,7 +49,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         self, query: str, start: int, end: int, database: Optional[Database] = None
     ) -> InsightsQLAutocompleteResponse:
         autocomplete = InsightsQLAutocomplete(
-            kind="InsightsQLAutocomplete", query=query, language=HogLanguage.FN_QL, startPosition=start, endPosition=end
+            kind="InsightsQLAutocomplete", query=query, language=HogLanguage.INSIGHTS_QL, startPosition=start, endPosition=end
         )
         return get_insightsql_autocomplete(query=autocomplete, team=self.team, database_arg=database)
 
@@ -57,7 +57,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.FN_QL_EXPR,
+            language=HogLanguage.INSIGHTS_QL_EXPR,
             sourceQuery=InsightsQLQuery(query="select * from events"),
             startPosition=start,
             endPosition=end,
@@ -70,7 +70,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.FN_TEMPLATE,
+            language=HogLanguage.INSIGHTS_TEMPLATE,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -81,7 +81,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.FN_JSON,
+            language=HogLanguage.INSIGHTS_JSON,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -585,7 +585,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query="SELECT * FROM e",
-            language=HogLanguage.FN_QL,
+            language=HogLanguage.INSIGHTS_QL,
             sourceQuery=InsightsQLQuery(query=source_query),
             startPosition=15,
             endPosition=15,

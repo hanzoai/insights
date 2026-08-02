@@ -252,12 +252,12 @@ test.describe('Quick create survey from feature flag', () => {
     test('warning shown when surveys are disabled', async ({ page }) => {
         await saveFeatureFlag(page)
 
-        // The team data comes from POSTFN_APP_CONTEXT which is server-rendered into HTML.
+        // The team data comes from INSIGHTS_APP_CONTEXT which is server-rendered into HTML.
         // API mocks don't work because teamLogic uses the preloaded context directly.
         // We need to intercept and modify the context before React hydrates.
         await page.addInitScript(() => {
             let _context: any = undefined
-            Object.defineProperty(window, 'POSTFN_APP_CONTEXT', {
+            Object.defineProperty(window, 'INSIGHTS_APP_CONTEXT', {
                 get() {
                     if (_context?.current_team) {
                         _context.current_team.surveys_opt_in = false

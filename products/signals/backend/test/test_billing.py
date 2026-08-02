@@ -359,7 +359,7 @@ class TestSignalsBilling(BaseTest):
 
     def test_exempt_report_never_appears_in_any_usage_window(self) -> None:
         report = self._report()
-        report.billing_exempt_reason = SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK
+        report.billing_exempt_reason = SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK
         report.save(update_fields=["billing_exempt_reason"])
         self._pr_run(report, created_at=_at(10))
         self._pr_run(report, created_at=datetime(2026, 7, 15, tzinfo=UTC))
@@ -405,10 +405,10 @@ class TestSignalsBilling(BaseTest):
 class TestBillingExemptions(BaseTest):
     def test_mark_report_billing_exempt_sets_reason_before_billable_run(self) -> None:
         report = _make_report(self.team)
-        changed = mark_report_billing_exempt(report, SignalReport.BillingExemptReason.POSTFN_SYSTEM)
+        changed = mark_report_billing_exempt(report, SignalReport.BillingExemptReason.INSIGHTS_SYSTEM)
         report.refresh_from_db()
         self.assertTrue(changed)
-        self.assertEqual(report.billing_exempt_reason, SignalReport.BillingExemptReason.POSTFN_SYSTEM)
+        self.assertEqual(report.billing_exempt_reason, SignalReport.BillingExemptReason.INSIGHTS_SYSTEM)
 
     def test_mark_report_billing_exempt_refuses_once_billable_run_exists(self) -> None:
         # The freeze rule: anything already billable is a refund, never a late exemption —
@@ -416,17 +416,17 @@ class TestBillingExemptions(BaseTest):
         report = _make_report(self.team)
         _make_pr_run(self.team, report, created_at=_at(10))
         with self.assertRaises(BillingExemptionError):
-            mark_report_billing_exempt(report, SignalReport.BillingExemptReason.POSTFN_SYSTEM)
+            mark_report_billing_exempt(report, SignalReport.BillingExemptReason.INSIGHTS_SYSTEM)
         report.refresh_from_db()
         self.assertIsNone(report.billing_exempt_reason)
 
     def test_mark_report_billing_exempt_never_rewrites_existing_reason(self) -> None:
         report = _make_report(self.team)
-        mark_report_billing_exempt(report, SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK)
-        changed = mark_report_billing_exempt(report, SignalReport.BillingExemptReason.POSTFN_SYSTEM)
+        mark_report_billing_exempt(report, SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK)
+        changed = mark_report_billing_exempt(report, SignalReport.BillingExemptReason.INSIGHTS_SYSTEM)
         report.refresh_from_db()
         self.assertFalse(changed)
-        self.assertEqual(report.billing_exempt_reason, SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK)
+        self.assertEqual(report.billing_exempt_reason, SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK)
 
     def _scout_run(self, skill_name: str, emitted_report_ids: list[str]) -> SignalScoutRun:
         Task, TaskRun = _task_model(), _task_run_model()
@@ -453,7 +453,7 @@ class TestBillingExemptions(BaseTest):
         skill = _seed_canonical_scout_skill(self.team, "signals-scout-health-checks")
         self.assertEqual(
             system_billing_exempt_reason(self.team.id, health_check_report.id),
-            SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK,
+            SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK,
         )
         self.assertIsNone(system_billing_exempt_reason(self.team.id, other_scout_report.id))
         self.assertIsNone(system_billing_exempt_reason(self.team.id, pipeline_report.id))

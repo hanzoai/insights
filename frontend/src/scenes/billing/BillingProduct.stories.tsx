@@ -8,7 +8,7 @@ import { makeBillingWithPlatformAddons } from '~/mocks/fixtures/_billing_platfor
 import preflightJson from '~/mocks/fixtures/_preflight.json'
 import { BillingProductV2Type, BillingType, StartupProgramLabel } from '~/types'
 
-import { POSTFN_CODE_BILLING_LIMIT_MAX, POSTFN_CODE_USAGE_PRODUCT_KEY } from './billingLimitConfig'
+import { INSIGHTS_CODE_BILLING_LIMIT_MAX, INSIGHTS_CODE_USAGE_PRODUCT_KEY } from './billingLimitConfig'
 import { BillingProduct } from './BillingProduct'
 
 const meta: Meta = {
@@ -53,21 +53,21 @@ const makeInsightsCodeUsageBilling = ({
         name: 'Insights Desktop',
         headline: 'AI coding agents for your Insights workspace.',
         description: 'AI coding agents for automating Insights work.',
-        usage_key: POSTFN_CODE_USAGE_PRODUCT_KEY,
+        usage_key: INSIGHTS_CODE_USAGE_PRODUCT_KEY,
         icon_key: 'IconTerminal',
         docs_url: 'https://hanzo.ai/docs/insights-code',
         subscribed: true,
-        type: POSTFN_CODE_USAGE_PRODUCT_KEY,
-        current_amount_usd: currentLimitUsd > POSTFN_CODE_BILLING_LIMIT_MAX ? '3750.00' : '25.00',
-        projected_amount_usd: currentLimitUsd > POSTFN_CODE_BILLING_LIMIT_MAX ? '4100.00' : '75.00',
-        projected_amount_usd_with_limit: currentLimitUsd > POSTFN_CODE_BILLING_LIMIT_MAX ? '3750.00' : '75.00',
+        type: INSIGHTS_CODE_USAGE_PRODUCT_KEY,
+        current_amount_usd: currentLimitUsd > INSIGHTS_CODE_BILLING_LIMIT_MAX ? '3750.00' : '25.00',
+        projected_amount_usd: currentLimitUsd > INSIGHTS_CODE_BILLING_LIMIT_MAX ? '4100.00' : '75.00',
+        projected_amount_usd_with_limit: currentLimitUsd > INSIGHTS_CODE_BILLING_LIMIT_MAX ? '3750.00' : '75.00',
         plans: sourceProduct.plans.map((plan) => ({
             ...plan,
             initial_billing_limit: 50,
         })),
     }
     const nextPeriodLimits: Record<string, number | null> =
-        nextPeriodLimitUsd === undefined ? {} : { [POSTFN_CODE_USAGE_PRODUCT_KEY]: nextPeriodLimitUsd }
+        nextPeriodLimitUsd === undefined ? {} : { [INSIGHTS_CODE_USAGE_PRODUCT_KEY]: nextPeriodLimitUsd }
 
     return {
         product,
@@ -76,7 +76,7 @@ const makeInsightsCodeUsageBilling = ({
             startup_program_label: StartupProgramLabel.Startup,
             products: [product],
             custom_limits_usd: {
-                [POSTFN_CODE_USAGE_PRODUCT_KEY]: currentLimitUsd,
+                [INSIGHTS_CODE_USAGE_PRODUCT_KEY]: currentLimitUsd,
             },
             next_period_custom_limits_usd: nextPeriodLimits,
         },

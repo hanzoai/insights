@@ -41,7 +41,7 @@ export const webAnalyticsOnboarding: ProductOnboardingProvider = {
             stepKey: OnboardingStepKey.INSTALL,
             role: ctx.role,
             setupTaskId: SetupTaskId.IngestFirstEvent,
-            dedupKey: INSTALL_DEDUP_KEYS.POSTFN_JS,
+            dedupKey: INSTALL_DEDUP_KEYS.INSIGHTS_JS,
             render: () => <OnboardingInstallStep sdkInstructionMap={WebAnalyticsSDKInstructions} />,
         }
 

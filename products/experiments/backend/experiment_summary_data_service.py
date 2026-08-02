@@ -208,7 +208,7 @@ class ExperimentSummaryDataService:
                     )
                     result = query_runner.run(
                         execution_mode=execution_mode,
-                        analytics_props={"source": EventSource.POSTFN_AI},
+                        analytics_props={"source": EventSource.INSIGHTS_AI},
                     )
                 refresh_time = getattr(result, "last_refresh", None)
 
@@ -261,7 +261,7 @@ class ExperimentSummaryDataService:
                         )
                         exposure_result = exposure_runner.run(
                             execution_mode=execution_mode,
-                            analytics_props={"source": EventSource.POSTFN_AI},
+                            analytics_props={"source": EventSource.INSIGHTS_AI},
                         )
 
                     if is_incomplete_response(exposure_result):

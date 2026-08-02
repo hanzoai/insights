@@ -16,7 +16,7 @@ import {
 } from '@/shared/test-utils'
 import { GENERATED_TOOLS } from '@/tools/generated/product_analytics'
 import queryInsightTool from '@/tools/insights/query'
-import { type Context, POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY } from '@/tools/types'
+import { type Context, INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY } from '@/tools/types'
 
 const insightGetTool = GENERATED_TOOLS['insight-get']!()
 const insightCreateTool = GENERATED_TOOLS['insight-create']!()
@@ -163,7 +163,7 @@ describe('Insights', { concurrent: false }, () => {
                 expect(response.results).toHaveProperty('results')
                 expect(Array.isArray(response.results.columns)).toBe(true)
                 expect(Array.isArray(response.results.results)).toBe(true)
-                expect(typeof response[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+                expect(typeof response[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
             })
 
             it('TrendsQuery with output_format=json returns an array of series', async () => {
@@ -194,7 +194,7 @@ describe('Insights', { concurrent: false }, () => {
 
                 expect(response).toHaveProperty('results')
                 expect(Array.isArray(response.results)).toBe(true)
-                expect(typeof response[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
+                expect(typeof response[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
             })
         })
     })

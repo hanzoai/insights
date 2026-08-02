@@ -41,7 +41,7 @@ import { LogsViewerLogicProps } from '../logs/logsViewerLogic'
 import { renderInsightsFunctionMessage } from '../logs/renderInsightsFunctionMessage'
 import {
     BulkRerunParams,
-    FN_INVOCATIONS_RERUN_MAX_COUNT,
+    INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT,
     HogInvocationRow,
     HogInvocationsFilters,
     HogInvocationsFunctionKind,
@@ -620,9 +620,9 @@ export function HogInvocations({
                 <div className="flex items-center justify-between border rounded p-2 bg-bg-light">
                     <div className="text-sm">
                         {selectedCount} selected
-                        {selectedCount > FN_INVOCATIONS_RERUN_MAX_COUNT ? (
+                        {selectedCount > INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT ? (
                             <span className="text-danger ml-2">
-                                Maximum is {FN_INVOCATIONS_RERUN_MAX_COUNT} per request.
+                                Maximum is {INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT} per request.
                             </span>
                         ) : null}
                     </div>
@@ -637,8 +637,8 @@ export function HogInvocations({
                                 rerunUnsupportedReason ??
                                 (rerunableSelectedIds.length === 0
                                     ? 'Selected runs are all still in flight'
-                                    : selectedCount > FN_INVOCATIONS_RERUN_MAX_COUNT
-                                      ? `Selected ${selectedCount} > limit ${FN_INVOCATIONS_RERUN_MAX_COUNT}`
+                                    : selectedCount > INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT
+                                      ? `Selected ${selectedCount} > limit ${INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT}`
                                       : undefined)
                             }
                             onClick={() => {
@@ -980,11 +980,11 @@ function RerunModal({
                         placeholder="Leave empty for all"
                     />
                 </Row>
-                <Row label="Max invocations to re-run" help={`Server caps at ${FN_INVOCATIONS_RERUN_MAX_COUNT}.`}>
+                <Row label="Max invocations to re-run" help={`Server caps at ${INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT}.`}>
                     <Input
                         type="number"
                         min={1}
-                        max={FN_INVOCATIONS_RERUN_MAX_COUNT}
+                        max={INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT}
                         value={maxCount}
                         onChange={(v) => setMaxCount(typeof v === 'number' ? v : undefined)}
                         placeholder="Unlimited (up to server cap)"

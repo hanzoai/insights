@@ -24,7 +24,7 @@ BEDROCK_REGION = (
     or os.environ.get("AWS_REGION")
     or os.environ.get("AWS_DEFAULT_REGION")
 )
-TEST_POSTFN_API_KEY = "phx_fake_personal_api_key"
+TEST_INSIGHTS_API_KEY = "phx_fake_personal_api_key"
 
 # Cloudflare Workers AI runs serverless and is slow + high-variance (cold starts on a large model
 # can push a single completion past 3 minutes). Bound each CF call and disable SDK-level retries so
@@ -221,7 +221,7 @@ def gateway_url_all_providers():
 @pytest.fixture
 def openai_client(gateway_url):
     return OpenAI(
-        api_key=TEST_POSTFN_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=f"{gateway_url}/v1",
     )
 
@@ -230,7 +230,7 @@ def openai_client(gateway_url):
 def openai_client_all_providers(gateway_url_all_providers):
     """OpenAI client with all providers configured (for models endpoint tests)."""
     return OpenAI(
-        api_key=TEST_POSTFN_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=f"{gateway_url_all_providers}/v1",
     )
 
@@ -238,7 +238,7 @@ def openai_client_all_providers(gateway_url_all_providers):
 @pytest.fixture
 def anthropic_client(gateway_url):
     return Anthropic(
-        api_key=TEST_POSTFN_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=gateway_url,
     )
 
@@ -252,7 +252,7 @@ def bedrock_gateway_url():
 @pytest.fixture
 def bedrock_anthropic_client(bedrock_gateway_url):
     return Anthropic(
-        api_key=TEST_POSTFN_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=bedrock_gateway_url,
         default_headers={"X-Insights-Provider": "bedrock"},
     )
@@ -267,7 +267,7 @@ def cloudflare_gateway_url():
 @pytest.fixture
 def cloudflare_anthropic_client(cloudflare_gateway_url):
     return Anthropic(
-        api_key=TEST_POSTFN_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=cloudflare_gateway_url,
         default_headers={"X-Insights-Provider": "cloudflare"},
         timeout=CLOUDFLARE_REQUEST_TIMEOUT,
@@ -278,7 +278,7 @@ def cloudflare_anthropic_client(cloudflare_gateway_url):
 @pytest.fixture
 def cloudflare_openai_client(cloudflare_gateway_url):
     return OpenAI(
-        api_key=TEST_POSTFN_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=f"{cloudflare_gateway_url}/v1",
         timeout=CLOUDFLARE_REQUEST_TIMEOUT,
         max_retries=CLOUDFLARE_MAX_RETRIES,

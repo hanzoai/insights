@@ -12,7 +12,7 @@ use crate::{
     utils::files::FileSelection,
 };
 
-pub const SOURCEMAP_UPLOAD_CONCURRENCY_ENV: &str = "POSTFN_CLI_SOURCEMAP_UPLOAD_CONCURRENCY";
+pub const SOURCEMAP_UPLOAD_CONCURRENCY_ENV: &str = "INSIGHTS_CLI_SOURCEMAP_UPLOAD_CONCURRENCY";
 
 #[derive(clap::Args, Clone, Debug)]
 pub struct UploadConcurrencyArgs {
