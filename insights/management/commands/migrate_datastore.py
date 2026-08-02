@@ -7,9 +7,9 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from cachetools import cached
-from infi.datastore_orm import Database
-from infi.datastore_orm.migrations import MigrationHistory
-from infi.datastore_orm.utils import import_submodules
+from datastore_orm import Database
+from datastore_orm.migrations import MigrationHistory
+from datastore_orm.utils import import_submodules
 
 from insights.datastore.client.connection import default_client
 from insights.settings import DATASTORE_DATABASE, DATASTORE_HTTP_URL, DATASTORE_PASSWORD, DATASTORE_USER
@@ -121,7 +121,7 @@ class Command(BaseCommand):
         return database._get_applied_migrations(MIGRATIONS_PACKAGE_NAME, replicated=True)
 
     def _create_database_if_not_exists(self, database: str, cluster: str):
-        # MULTINODE_DATASTORE: infi.datastore_orm creates the Distributed
+        # MULTINODE_DATASTORE: datastore_orm creates the Distributed
         # migration-tracking table across the migrations cluster before the
         # first migration runs, so the database has to exist on every node up
         # front — otherwise the CREATE TABLE fans out to satellites that have
@@ -133,7 +133,7 @@ class Command(BaseCommand):
                 )
 
     def _create_migration_tracking_tables_if_not_exist(self, database: str, cluster: str):
-        # MULTINODE_DATASTORE only: infi.datastore_orm's auto-create path
+        # MULTINODE_DATASTORE only: datastore_orm's auto-create path
         # issues `CREATE TABLE` without `ON CLUSTER`, so the underlying
         # ReplicatedMergeTree only lands on the migrations host. With a real
         # multi-node `insights_migrations` cluster, the Distributed tracking
@@ -143,7 +143,7 @@ class Command(BaseCommand):
         # and the auto-create branch never runs.
         #
         # Schema (`package_name String, module_name String, applied Date`) and
-        # the ZK path mirror `infi.datastore_orm.migrations.MigrationHistory`
+        # the ZK path mirror `datastore_orm.migrations.MigrationHistory`
         # / `MigrationHistoryReplicated`. If `infi` ever changes those, this
         # pre-create will silently diverge — keep the two in sync.
         if not settings.MULTINODE_DATASTORE:

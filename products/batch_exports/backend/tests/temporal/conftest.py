@@ -12,7 +12,7 @@ import psycopg
 import pytest_asyncio
 import temporalio.worker
 from asgiref.sync import sync_to_async
-from infi.datastore_orm import Database
+from datastore_orm import Database
 from psycopg import sql
 from temporalio.testing import ActivityEnvironment
 
