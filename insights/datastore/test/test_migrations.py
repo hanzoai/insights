@@ -8,7 +8,7 @@ from pathlib import Path
 
 from unittest import TestCase, mock
 
-from infi.datastore_orm.utils import import_submodules
+from datastore_orm.utils import import_submodules
 
 from insights.datastore.client.connection import DATA_NODE_ROLES, NodeRole
 
