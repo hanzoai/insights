@@ -38,7 +38,7 @@ import { validateVariants } from './variantsPanelValidation'
 const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 // Scope the draft key per project so a draft started in one project can't prefill or be submitted in another within the same browser session.
-export const DRAFT_STORAGE_KEY = `experiment-draft-${window.POSTFN_APP_CONTEXT?.current_team?.id ?? 'unknown'}`
+export const DRAFT_STORAGE_KEY = `experiment-draft-${window.INSIGHTS_APP_CONTEXT?.current_team?.id ?? 'unknown'}`
 
 type ExperimentDraft = {
     experiment: Experiment

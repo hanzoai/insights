@@ -8,12 +8,12 @@
 // /rate_limit calls themselves do not consume the budget they observe, so this
 // monitor is safe to run on a tight cron without distorting its own measurement.
 
-const POSTFN_HOST = 'https://us.i.hanzo.ai'
+const INSIGHTS_HOST = 'https://us.i.hanzo.ai'
 const EVENT_NAME = 'github_rate_limit_observed'
 const DEFAULT_SOURCE = 'github_token'
 
 async function captureEvent({ fetchImpl, insightsToken, event, distinctId, properties, timestamp }) {
-    const res = await fetchImpl(`${POSTFN_HOST}/capture/`, {
+    const res = await fetchImpl(`${INSIGHTS_HOST}/capture/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -87,9 +87,9 @@ module.exports = async ({ github, context, core }, { now: _now, fetch: _fetch, s
     const runId = process.env.GITHUB_RUN_ID || null
     const trigger = buildTrigger(context)
 
-    const insightsToken = process.env.POSTFN_DEVEX_PROJECT_API_TOKEN
+    const insightsToken = process.env.INSIGHTS_DEVEX_PROJECT_API_TOKEN
     if (!insightsToken) {
-        core.warning('POSTFN_DEVEX_PROJECT_API_TOKEN not set; nothing to emit')
+        core.warning('INSIGHTS_DEVEX_PROJECT_API_TOKEN not set; nothing to emit')
         core.setOutput('emitted', '0')
         core.setOutput('failures', '0')
         return

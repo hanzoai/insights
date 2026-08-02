@@ -6,9 +6,9 @@ import { defaultConfig } from '../config/config'
 
 const fs = require('fs')
 
-const insights = defaultConfig.POSTFN_API_KEY
-    ? new Insights(defaultConfig.POSTFN_API_KEY, {
-          host: defaultConfig.POSTFN_HOST_URL,
+const insights = defaultConfig.INSIGHTS_API_KEY
+    ? new Insights(defaultConfig.INSIGHTS_API_KEY, {
+          host: defaultConfig.INSIGHTS_HOST_URL,
           enableExceptionAutocapture: false, // TODO - disabled while data volume is a problem, PS seems /extremely/ chatty exceptions wise
       })
     : null

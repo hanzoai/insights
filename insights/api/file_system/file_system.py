@@ -17,7 +17,7 @@ from rest_framework.response import Response
 
 from insights.api.file_system.access_levels import FileSystemAccessLevelSerializerMixin
 from insights.api.file_system.deletion import (
-    FN_FUNCTION_TYPES,
+    INSIGHTS_FUNCTION_TYPES,
     delete_file_system_object,
     is_file_system_type_registered,
     undo_delete as undo_delete_object,
@@ -322,7 +322,7 @@ class FileSystemViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 elif field == "type":
                     if value.endswith("/"):
                         q = Q(type__startswith=value)
-                    elif value in FN_FUNCTION_TYPES:
+                    elif value in INSIGHTS_FUNCTION_TYPES:
                         q = Q(type="insights_function/" + value)
                     else:
                         q = Q(type=value)

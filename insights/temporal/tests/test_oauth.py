@@ -9,7 +9,7 @@ from insights.temporal.oauth import (
     INTERNAL_SCOPES,
     MCP_READ_SCOPES,
     MCP_WRITE_SCOPES,
-    POSTFN_AI_APP_CLIENT_ID_DEV,
+    INSIGHTS_AI_APP_CLIENT_ID_DEV,
     SCOUT_INTERNAL_SCOPES,
     SCOUT_USER_WRITE_SCOPES,
     create_oauth_access_token_for_user,
@@ -155,7 +155,7 @@ class TestCreateOAuthAccessTokenForUser(TestCase):
 
     @override_settings(CLOUD_DEPLOYMENT="DEV")
     def test_insights_ai_application_uses_dev_app(self) -> None:
-        app = self._create_oauth_app(POSTFN_AI_APP_CLIENT_ID_DEV, "Insights AI Dev App")
+        app = self._create_oauth_app(INSIGHTS_AI_APP_CLIENT_ID_DEV, "Insights AI Dev App")
         user, team = self._create_user_and_team()
 
         token = create_oauth_access_token_for_user(user, team.id, application="insights_ai")

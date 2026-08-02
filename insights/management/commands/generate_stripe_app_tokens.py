@@ -25,7 +25,7 @@ from insights.models.oauth import OAuthAccessToken, OAuthApplication, OAuthRefre
 from insights.models.utils import generate_random_oauth_access_token, generate_random_oauth_refresh_token
 
 STRIPE_APP_NAME = "Insights Stripe App"
-ENV_KEY = "STRIPE_POSTFN_OAUTH_CLIENT_ID"
+ENV_KEY = "STRIPE_INSIGHTS_OAUTH_CLIENT_ID"
 
 
 def _read_env_value(env_path: str, key: str) -> str | None:
@@ -150,8 +150,8 @@ class Command(BaseCommand):
     def _resolve_client_id(self) -> str | None:
         """Resolve the OAuth client ID from the Django setting or directly from .env."""
         # The Django setting is populated if the env var was in the shell environment at startup
-        if settings.STRIPE_POSTFN_OAUTH_CLIENT_ID:
-            return settings.STRIPE_POSTFN_OAUTH_CLIENT_ID
+        if settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID:
+            return settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID
 
         # Fall back to reading .env directly — manage.py doesn't load .env into the
         # process environment, so the setting may be empty even though .env has the value

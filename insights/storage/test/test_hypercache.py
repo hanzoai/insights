@@ -112,7 +112,7 @@ class TestHyperCacheGetFromCache(HyperCacheTestBase):
 
     @parameterized.expand(
         [
-            ("value_error", ValueError("Invalid endpoint: https://${POSTFN_DOMAIN}")),
+            ("value_error", ValueError("Invalid endpoint: https://${INSIGHTS_DOMAIN}")),
             ("object_storage_error", object_storage.ObjectStorageError("read failed")),
             ("boto_core_error", BotoCoreError()),
             ("client_error", ClientError({"Error": {"Code": "AccessDenied"}}, "GetObject")),

@@ -29,7 +29,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--api-key",
             type=str,
-            help="Personal API key for Insights cloud (or set POSTFN_PERSONAL_API_KEY env var)",
+            help="Personal API key for Insights cloud (or set INSIGHTS_PERSONAL_API_KEY env var)",
         )
         parser.add_argument(
             "--host",
@@ -66,10 +66,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Get API key from options or environment
-        api_key = options.get("api_key") or os.environ.get("POSTFN_PERSONAL_API_KEY")
+        api_key = options.get("api_key") or os.environ.get("INSIGHTS_PERSONAL_API_KEY")
         if not api_key:
             raise CommandError(
-                "Personal API key required. Provide --api-key or set POSTFN_PERSONAL_API_KEY environment variable.\n"
+                "Personal API key required. Provide --api-key or set INSIGHTS_PERSONAL_API_KEY environment variable.\n"
                 "Get your API key from: https://us.hanzo.ai/settings/user-api-keys"
             )
 

@@ -29,31 +29,31 @@ name: Monitor GitHub Rate Limit
 on:
     workflow_call:
         secrets:
-            POSTFN_DEVEX_PROJECT_API_TOKEN:
+            INSIGHTS_DEVEX_PROJECT_API_TOKEN:
                 required: false
-            GH_APP_POSTFN_DEVEX_GENERAL_APP_ID:
+            GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID:
                 required: false
-            GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY:
+            GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY:
                 required: false
-            GH_APP_POSTFN_TESTS_APP_ID:
+            GH_APP_INSIGHTS_TESTS_APP_ID:
                 required: false
-            GH_APP_POSTFN_TESTS_PRIVATE_KEY:
+            GH_APP_INSIGHTS_TESTS_PRIVATE_KEY:
                 required: false
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID:
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID:
                 required: false
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY:
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY:
                 required: false
             GH_APP_TELEMETRY_APP_ID:
                 required: false
             GH_APP_TELEMETRY_PRIVATE_KEY:
                 required: false
-            GH_APP_POSTFN_SETUP_ACTIONS_APP_ID:
+            GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID:
                 required: false
-            GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY:
+            GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY:
                 required: false
-            GH_APP_POSTFN_PRODUCT_TESTS_APP_ID:
+            GH_APP_INSIGHTS_PRODUCT_TESTS_APP_ID:
                 required: false
-            GH_APP_POSTFN_PRODUCT_TESTS_PRIVATE_KEY:
+            GH_APP_INSIGHTS_PRODUCT_TESTS_PRIVATE_KEY:
                 required: false
     push:
         branches: [master]
@@ -81,7 +81,7 @@ jobs:
             - name: Poll GITHUB_TOKEN bucket and emit to Insights
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
               with:
                   script: |
                       const script = require('./.github/scripts/monitor-github-rate-limit.js')
@@ -99,14 +99,14 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_DEVEX_GENERAL_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_DEVEX_GENERAL_PRIVATE_KEY }}
 
             - name: Poll insights-devex-general bucket and emit to Insights
               if: steps.devex-token.outputs.token != ''
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
               with:
                   github-token: ${{ steps.devex-token.outputs.token }}
                   script: |
@@ -122,14 +122,14 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_TESTS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_TESTS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
 
             - name: Poll insights-tests bucket and emit to Insights
               if: steps.tests-token.outputs.token != ''
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
               with:
                   github-token: ${{ steps.tests-token.outputs.token }}
                   script: |
@@ -141,14 +141,14 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
 
             - name: Poll insights-paths-filter bucket and emit to Insights
               if: steps.paths-filter-token.outputs.token != ''
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
               with:
                   github-token: ${{ steps.paths-filter-token.outputs.token }}
                   script: |
@@ -167,7 +167,7 @@ jobs:
               if: steps.telemetry-token.outputs.token != ''
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
               with:
                   github-token: ${{ steps.telemetry-token.outputs.token }}
                   script: |
@@ -181,14 +181,14 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY }}
 
             - name: Poll insights-setup-actions bucket and emit to Insights
               if: steps.setup-actions-token.outputs.token != ''
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
               with:
                   github-token: ${{ steps.setup-actions-token.outputs.token }}
                   script: |
@@ -202,14 +202,14 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PRODUCT_TESTS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PRODUCT_TESTS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PRODUCT_TESTS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PRODUCT_TESTS_PRIVATE_KEY }}
 
             - name: Poll insights-product-tests bucket and emit to Insights
               if: steps.product-tests-token.outputs.token != ''
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               env:
-                  POSTFN_DEVEX_PROJECT_API_TOKEN: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  INSIGHTS_DEVEX_PROJECT_API_TOKEN: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
               with:
                   github-token: ${{ steps.product-tests-token.outputs.token }}
                   script: |

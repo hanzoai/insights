@@ -7,8 +7,8 @@ from insights.temporal.ai.slack_app.activities.classifiers import (
     classify_untagged_followup_activity,
 )
 from insights.temporal.ai.slack_app.activities.messaging import (
-    POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE,
-    POSTFN_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
+    INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE,
+    INSIGHTS_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE,
     block_insights_code_task_if_no_personal_github_activity,
     mark_slack_app_message_processing_activity,
     mark_slack_app_message_queued_activity,
@@ -45,8 +45,8 @@ from insights.temporal.ai.slack_app.activities.user_resolution import (
 
 __all__ = [
     "CLASSIFIER_THREAD_HISTORY_MESSAGES",
-    "POSTFN_CODE_SLACK_MENTION_PICKER_GUIDANCE",
-    "POSTFN_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE",
+    "INSIGHTS_CODE_SLACK_MENTION_PICKER_GUIDANCE",
+    "INSIGHTS_CODE_SLACK_RULES_ADD_PICKER_GUIDANCE",
     "block_insights_code_task_if_no_personal_github_activity",
     "cascade_insights_code_repository_activity",
     "classify_message_is_agent_directed",

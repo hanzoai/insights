@@ -49,7 +49,7 @@ async function fetchInsightsKey() {
     // Check if .env.local already exists with a valid key
     if (fs.existsSync(envPath) && !process.env.FORCE_FETCH_KEY) {
         const envContent = fs.readFileSync(envPath, 'utf-8')
-        const keyMatch = envContent.match(/NEXT_PUBLIC_POSTFN_KEY=(.+) # (.+)/)
+        const keyMatch = envContent.match(/NEXT_PUBLIC_INSIGHTS_KEY=(.+) # (.+)/)
         if (keyMatch && keyMatch[1] && keyMatch[1].trim() && keyMatch[2].trim() === teamCreatedAt.toISOString()) {
             console.info(
                 `✓ Insights API key already exists in .env.local for team created at ${teamCreatedAt.toISOString()}`
@@ -62,7 +62,7 @@ async function fetchInsightsKey() {
     // Write to .env.local file
     fs.writeFileSync(
         path.join(__dirname, '..', '.env.local'),
-        `NEXT_PUBLIC_POSTFN_KEY=${teamApiToken} # ${teamCreatedAt.toISOString()}\n`
+        `NEXT_PUBLIC_INSIGHTS_KEY=${teamApiToken} # ${teamCreatedAt.toISOString()}\n`
     )
     console.info(`✓ Insights API key fetched and written to .env.local`)
     console.info(`  Team ID: ${teamId}`)

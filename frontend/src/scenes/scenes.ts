@@ -71,7 +71,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         projectBased: true,
         name: 'Web scripts',
         description: 'Web scripts allow you to add custom tags and functionality to your website using Insights.',
-        activityScope: ActivityScope.FN_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         iconType: 'data_pipeline',
     },
     [Scene.BatchExport]: {
@@ -143,7 +143,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.DataPipelinesNew]: {
         projectBased: true,
         name: 'New data pipeline',
-        activityScope: ActivityScope.FN_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
     },
     [Scene.DeadLetterQueue]: { instanceLevel: true },
     [Scene.QueryPerformance]: { instanceLevel: true, name: 'Query performance' },
@@ -152,7 +152,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'Destinations',
         description:
             'Destinations allow you to send your data to external systems either in real time or in scheduled batches.',
-        activityScope: ActivityScope.FN_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         iconType: 'data_pipeline',
     },
     [Scene.DebugHog]: { projectBased: true, name: 'Script Repl' },
@@ -265,7 +265,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'Heatmap recording',
         iconType: 'heatmap',
     },
-    [Scene.InsightsFunction]: { projectBased: true, name: 'Script function', activityScope: ActivityScope.FN_FUNCTION },
+    [Scene.InsightsFunction]: { projectBased: true, name: 'Script function', activityScope: ActivityScope.INSIGHTS_FUNCTION },
     [Scene.Insight]: {
         projectBased: true,
         name: 'Insights',
@@ -554,7 +554,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'Transformations',
         description:
             'Transformations let you modify, filter, and enrich event data to improve data quality, privacy, and consistency.',
-        activityScope: ActivityScope.FN_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         iconType: 'data_pipeline',
     },
     [Scene.EventFiltering]: {

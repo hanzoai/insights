@@ -10,7 +10,7 @@ name: Weekly flaky test report
 # Requires (no-ops with a warning until set, so it never spams failures):
 #   - vars.ENG_ANALYTICS_PROJECT_ID — the Insights project with the GitHub data
 #     warehouse source connected.
-#   - secrets.ENG_ANALYTICS_POSTFN_API_KEY — a personal API key scoped to
+#   - secrets.ENG_ANALYTICS_INSIGHTS_API_KEY — a personal API key scoped to
 #     engineering_analytics:read + query:read for that project (the script also
 #     reads the product's ci_failures view for rescue counts and job links).
 #   - secrets.SLACK_DEVEX_BOT_TOKEN — the existing DevEx Slack bot.
@@ -59,10 +59,10 @@ jobs:
               run: python3 -m pip install --quiet pyyaml
 
             - name: Build and post weekly flaky report
-              # POSTFN_HOST and SLACK_CHANNEL (#flakey-tests) ride the script's defaults.
+              # INSIGHTS_HOST and SLACK_CHANNEL (#flakey-tests) ride the script's defaults.
               env:
-                  POSTFN_PROJECT_ID: ${{ vars.ENG_ANALYTICS_PROJECT_ID }}
-                  POSTFN_API_KEY: ${{ secrets.ENG_ANALYTICS_POSTFN_API_KEY }}
+                  INSIGHTS_PROJECT_ID: ${{ vars.ENG_ANALYTICS_PROJECT_ID }}
+                  INSIGHTS_API_KEY: ${{ secrets.ENG_ANALYTICS_INSIGHTS_API_KEY }}
                   # Optional: pin a specific GitHub source if the project has more than one.
                   ENG_ANALYTICS_SOURCE_ID: ${{ vars.ENG_ANALYTICS_SOURCE_ID }}
                   # Optional: override the source-prefixed runs table name.

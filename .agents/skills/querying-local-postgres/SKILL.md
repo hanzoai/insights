@@ -93,7 +93,7 @@ Equivalent: `postgresql://insights:insights@localhost:5432/insights`
 
 ---
 
-**Configuration source of truth (app):** `insights/settings/data_stores.py` (Django `DATABASES`, optional replica `POSTFN_POSTGRES_READ_HOST`, direct `POSTFN_POSTGRES_DIRECT_HOST`, `PERSONS_DB_WRITER_URL`, product DB routing from `products/db_routing.yaml`).
+**Configuration source of truth (app):** `insights/settings/data_stores.py` (Django `DATABASES`, optional replica `INSIGHTS_POSTGRES_READ_HOST`, direct `INSIGHTS_POSTGRES_DIRECT_HOST`, `PERSONS_DB_WRITER_URL`, product DB routing from `products/db_routing.yaml`).
 
 **When not using the hardcoded URL:** Connecting **from the host** with the same credentials is documented in [Developing locally](../../../docs/published/handbook/engineering/developing-locally.md) (`fe_sendauth` troubleshooting). Ensure containers are running.
 
@@ -157,7 +157,7 @@ npx dotenv -e .env -- bash -c "PGOPTIONS='-c default_transaction_read_only=on' p
 
 - Confirm a row exists for a team, project, user, or feature-flag linkage; check soft-delete / `deleted` fields where applicable.
 - Compare counts and joins to what the app assumes (e.g. membership, project access).
-- Validate replica vs primary read differences only if the user is connected to the right host (replica: `POSTFN_POSTGRES_READ_HOST`).
+- Validate replica vs primary read differences only if the user is connected to the right host (replica: `INSIGHTS_POSTGRES_READ_HOST`).
 - Use `EXPLAIN ANALYZE` on `SELECT` for slow Django queries **replicated as SQL** — mind loading production-sized data.
 
 ## Cross-reference

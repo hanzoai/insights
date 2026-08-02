@@ -4,7 +4,7 @@ from parameterized import parameterized
 from temporalio.client import ScheduleListActionStartWorkflow
 from temporalio.common import SearchAttributePair, TypedSearchAttributes
 
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_TYPE_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_TYPE_KEY
 
 from products.data_modeling.backend.management.commands.backfill_dag_schedule_type import _backfill_schedule_type
 from products.data_modeling.backend.schedule import DATA_MODELING_EXECUTE_DAG_WORKFLOW
@@ -14,7 +14,7 @@ class TestBackfillScheduleType:
     def _listing(self, schedule_id: str, workflow: str, schedule_type: str | None = None):
         action = mock.Mock(spec=ScheduleListActionStartWorkflow, workflow=workflow)
         attrs = TypedSearchAttributes(
-            [SearchAttributePair(POSTFN_SCHEDULE_TYPE_KEY, schedule_type)] if schedule_type else []
+            [SearchAttributePair(INSIGHTS_SCHEDULE_TYPE_KEY, schedule_type)] if schedule_type else []
         )
         return mock.Mock(id=schedule_id, schedule=mock.Mock(action=action), typed_search_attributes=attrs)
 

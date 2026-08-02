@@ -138,7 +138,7 @@ class TestGeneratePolicyYaml(TestCase):
 
     def test_env_policy_allows_insights_vars(self):
         policy = yaml.safe_load(generate_policy_yaml([]))
-        self.assertIn("POSTFN_*", policy["env_policy"]["allow"])
+        self.assertIn("INSIGHTS_*", policy["env_policy"]["allow"])
 
     def test_env_policy_allows_gateway_selection_vars(self):
         # AI_GATEWAY_URL picks the Go gateway and AI_GATEWAY_PRODUCTS scopes it. If
@@ -356,7 +356,7 @@ class TestEnvWrapper(SimpleTestCase):
                 b"SAFE_BASE=kept\x00NODE_OPTIONS=--require=/tmp/payload.js\x00GITHUB_TOKEN=ghs_snapshot\x00"
             )
             github_env_file.write_bytes(b"GITHUB_TOKEN=ghs_fresh\x00GH_TOKEN=ghs_fresh\x00IGNORED=unsafe\x00")
-            oauth_env_file.write_bytes(b"POSTFN_PERSONAL_API_KEY=oauth_fresh\x00IGNORED=unsafe\x00")
+            oauth_env_file.write_bytes(b"INSIGHTS_PERSONAL_API_KEY=oauth_fresh\x00IGNORED=unsafe\x00")
             wrapper_file.write_text(generate_env_wrapper(str(env_file), str(github_env_file), str(oauth_env_file)))
 
             result = subprocess.run(
@@ -366,7 +366,7 @@ class TestEnvWrapper(SimpleTestCase):
                     "bash",
                     "-c",
                     'printf "%s|%s|%s|%s|%s" "$SAFE_BASE" "$GH_TOKEN" "$GITHUB_TOKEN" '
-                    '"$POSTFN_PERSONAL_API_KEY" "${NODE_OPTIONS:-}"',
+                    '"$INSIGHTS_PERSONAL_API_KEY" "${NODE_OPTIONS:-}"',
                 ],
                 check=True,
                 capture_output=True,
@@ -394,7 +394,7 @@ class TestBashEnvScript(SimpleTestCase):
                 b"PATH=/snapshot\x00NODE_OPTIONS=--require=/tmp/payload.js\x00GITHUB_TOKEN=ghu_snapshot\x00"
             )
             github_env_file.write_bytes(b"GH_TOKEN=ghu_fresh\x00GITHUB_TOKEN=ghu_fresh\x00")
-            oauth_env_file.write_bytes(b"POSTFN_PERSONAL_API_KEY=oauth_fresh\x00")
+            oauth_env_file.write_bytes(b"INSIGHTS_PERSONAL_API_KEY=oauth_fresh\x00")
             script_file.write_text(generate_bash_env_script(str(env_file), str(github_env_file), str(oauth_env_file)))
 
             subprocess.run(
@@ -404,7 +404,7 @@ class TestBashEnvScript(SimpleTestCase):
                     "PATH": os.environ["PATH"],
                     "SAFE_BASE": "kept",
                     "GH_TOKEN": "ghu_process",
-                    "POSTFN_PERSONAL_API_KEY": "oauth_process",
+                    "INSIGHTS_PERSONAL_API_KEY": "oauth_process",
                     "NODE_OPTIONS": "--require=/tmp/current.js",
                 },
             )
@@ -417,9 +417,9 @@ class TestBashEnvScript(SimpleTestCase):
             self.assertEqual(entries[b"SAFE_BASE"], b"kept")
             self.assertNotIn(b"NODE_OPTIONS", entries)
             self.assertNotIn(b"GITHUB_TOKEN", entries)
-            self.assertNotIn(b"POSTFN_PERSONAL_API_KEY", entries)
+            self.assertNotIn(b"INSIGHTS_PERSONAL_API_KEY", entries)
             self.assertEqual(github_env_file.read_bytes(), b"GH_TOKEN=ghu_fresh\x00GITHUB_TOKEN=ghu_fresh\x00")
-            self.assertEqual(oauth_env_file.read_bytes(), b"POSTFN_PERSONAL_API_KEY=oauth_fresh\x00")
+            self.assertEqual(oauth_env_file.read_bytes(), b"INSIGHTS_PERSONAL_API_KEY=oauth_fresh\x00")
             for path in (env_file, github_env_file, oauth_env_file):
                 self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 
@@ -447,7 +447,7 @@ class TestBashEnvScript(SimpleTestCase):
                     "PATH": os.environ["PATH"],
                     "SAFE_BASE": "kept",
                     "GITHUB_TOKEN": "ghs_current",
-                    "POSTFN_PERSONAL_API_KEY": "oauth_current",
+                    "INSIGHTS_PERSONAL_API_KEY": "oauth_current",
                 },
             )
 
@@ -455,7 +455,7 @@ class TestBashEnvScript(SimpleTestCase):
                 github_env_file.read_bytes(),
                 b"GITHUB_TOKEN=ghs_current\x00GH_TOKEN=ghs_current\x00",
             )
-            self.assertEqual(oauth_env_file.read_bytes(), b"POSTFN_PERSONAL_API_KEY=oauth_current\x00")
+            self.assertEqual(oauth_env_file.read_bytes(), b"INSIGHTS_PERSONAL_API_KEY=oauth_current\x00")
             for path in (env_file, github_env_file, oauth_env_file):
                 self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 
@@ -646,10 +646,10 @@ class TestModalSandboxAgentShWrapping(TestCase):
             model="gpt-5.3-codex",
             reasoning_effort="high",
         )
-        self.assertIn("POSTFN_CODE_RUNTIME_ADAPTER=codex", cmd)
-        self.assertIn("POSTFN_CODE_PROVIDER=openai", cmd)
-        self.assertIn("POSTFN_CODE_MODEL=gpt-5.3-codex", cmd)
-        self.assertIn("POSTFN_CODE_REASONING_EFFORT=high", cmd)
+        self.assertIn("INSIGHTS_CODE_RUNTIME_ADAPTER=codex", cmd)
+        self.assertIn("INSIGHTS_CODE_PROVIDER=openai", cmd)
+        self.assertIn("INSIGHTS_CODE_MODEL=gpt-5.3-codex", cmd)
+        self.assertIn("INSIGHTS_CODE_REASONING_EFFORT=high", cmd)
 
     def test_write_file_uses_filesystem_api_before_rename(self):
         from products.tasks.backend.logic.services.modal_sandbox import ModalSandbox

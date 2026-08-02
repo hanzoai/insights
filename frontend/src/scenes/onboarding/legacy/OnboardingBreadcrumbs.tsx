@@ -41,7 +41,7 @@ export function OnboardingBreadcrumbs(): JSX.Element | null {
         // a generic "Install" label rather than being titled after whichever product
         // happens to be the dedup survivor (which would be misleading when it
         // actually installs the SDK for several products at once).
-        if (step.stepKey === OnboardingStepKey.INSTALL && step.dedupKey === INSTALL_DEDUP_KEYS.POSTFN_JS) {
+        if (step.stepKey === OnboardingStepKey.INSTALL && step.dedupKey === INSTALL_DEDUP_KEYS.INSIGHTS_JS) {
             return 'Install'
         }
         const base = stepKeyToTitle(step.stepKey) ?? step.stepKey

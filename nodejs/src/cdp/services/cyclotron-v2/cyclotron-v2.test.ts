@@ -53,7 +53,7 @@ function createMockResults(ok = true): {
 // This is the Postgres-rung guard for the invalid-date RangeError class.
 function createRealResults(): { service: HogInvocationResultsService; produce: jest.Mock } {
     const produce = jest.fn().mockResolvedValue(undefined)
-    const service = new HogInvocationResultsService({ produce } as any, { FN_INVOCATION_RESULTS_ENABLED: true })
+    const service = new HogInvocationResultsService({ produce } as any, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
     return { service, produce }
 }
 

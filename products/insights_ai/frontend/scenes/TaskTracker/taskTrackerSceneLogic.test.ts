@@ -20,7 +20,7 @@ const buildTask = (overrides: Partial<Task> = {}): Task => ({
     slug: 'task-1',
     title: 'Some task',
     description: 'do the thing',
-    origin_product: OriginProduct.POSTFN_AI,
+    origin_product: OriginProduct.INSIGHTS_AI,
     runtime: RuntimeEnumApi.Acp,
     repository: null,
     github_integration: null,
@@ -87,7 +87,7 @@ describe('taskTrackerSceneLogic', () => {
 
         expect(createBody).toMatchObject({
             description: 'do the thing',
-            origin_product: OriginProduct.POSTFN_AI,
+            origin_product: OriginProduct.INSIGHTS_AI,
             repository: null,
             github_integration: null,
         })

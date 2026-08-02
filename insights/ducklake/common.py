@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from products.warehouse_sources.backend.models.external_data_schema import ExternalDataSchema
 
 
-DUCKLAKE_CATALOG_RESET_ENV_VAR = "POSTFN_ALLOW_DUCKLAKE_CATALOG_RESET"
+DUCKLAKE_CATALOG_RESET_ENV_VAR = "INSIGHTS_ALLOW_DUCKLAKE_CATALOG_RESET"
 
 # The duckgres schema prefix the data-modeling shadow materialization writes models into.
 DATA_MODELING_DUCKGRES_SHADOW_SCHEMA_PREFIX = "shadow"

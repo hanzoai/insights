@@ -58,7 +58,7 @@ mod tests {
     use super::{router, RouterConfig};
     use crate::v1::analytics::constants::CAPTURE_V1_PATH;
     use crate::v1::constants::{
-        POSTFN_ATTEMPT, POSTFN_REQUEST_ID, POSTFN_REQUEST_TIMESTAMP, POSTFN_SDK_INFO,
+        INSIGHTS_ATTEMPT, INSIGHTS_REQUEST_ID, INSIGHTS_REQUEST_TIMESTAMP, INSIGHTS_SDK_INFO,
     };
     use crate::v1::test_utils::{batch_payload, valid_event, TestStateBuilder};
 
@@ -81,10 +81,10 @@ mod tests {
             .header("Authorization", "Bearer phc_test_token")
             .header("Content-Type", "application/json")
             .header("X-Forwarded-For", "127.0.0.1")
-            .header(POSTFN_SDK_INFO, "insights-rs/1.0.0")
-            .header(POSTFN_ATTEMPT, "1")
-            .header(POSTFN_REQUEST_ID, Uuid::new_v4().to_string())
-            .header(POSTFN_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
+            .header(INSIGHTS_SDK_INFO, "insights-rs/1.0.0")
+            .header(INSIGHTS_ATTEMPT, "1")
+            .header(INSIGHTS_REQUEST_ID, Uuid::new_v4().to_string())
+            .header(INSIGHTS_REQUEST_TIMESTAMP, "2026-03-19T14:30:00Z")
             .header("User-Agent", "test-agent/1.0")
     }
 

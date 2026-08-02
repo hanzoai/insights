@@ -224,7 +224,7 @@ export const maxChangelogLogic = kea<maxChangelogLogicType>([
                 if (!featureFlags) {
                     return []
                 }
-                const payload = getFeatureFlagPayload(FEATURE_FLAGS.POSTFN_AI_CHANGELOG)
+                const payload = getFeatureFlagPayload(FEATURE_FLAGS.INSIGHTS_AI_CHANGELOG)
                 return parseChangelogPayload(payload)
             },
         ],

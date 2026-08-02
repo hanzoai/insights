@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import { createHogExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { cloneInvocation, createInvocation } from './invocation-utils'
 
@@ -21,9 +21,9 @@ describe('Invocation utils', () => {
                 inputs: { foo: 'bar' },
             },
             createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.elements_href_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.elements_href_filter,
             })
         )
 

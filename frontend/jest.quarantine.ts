@@ -37,7 +37,7 @@ const PRODUCT_PREFIX = 'product:'
 const REPO_ROOT = path.resolve(__dirname, '..')
 // Overridable so the adapter's own runtime test can point a spawned jest worker
 // at an isolated fixture file instead of the committed repo-root one.
-const QUARANTINE_PATH = process.env.POSTFN_TEST_QUARANTINE_PATH || path.join(REPO_ROOT, '.test_quarantine.json')
+const QUARANTINE_PATH = process.env.INSIGHTS_TEST_QUARANTINE_PATH || path.join(REPO_ROOT, '.test_quarantine.json')
 
 interface RawEntry {
     id: string

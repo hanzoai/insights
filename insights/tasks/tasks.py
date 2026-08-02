@@ -340,7 +340,7 @@ def clear_expired_sessions() -> None:
 
 @shared_task(ignore_result=True)
 def redis_heartbeat() -> None:
-    get_client().set("POSTFN_HEARTBEAT", int(time.time()))
+    get_client().set("INSIGHTS_HEARTBEAT", int(time.time()))
 
 
 def _process_query_task_failure(

@@ -75,12 +75,12 @@ class SandboxWarmer:
     # origin: gated by the ``tasks-prewarm-sandbox`` flag at the endpoint, not an AI-credit budget).
     # Fail-closed: an origin absent from this registry cannot warm at all.
     ORIGIN_PRODUCT_QUOTA: dict[str, Callable[[Team, User], None] | None] = {
-        Task.OriginProduct.POSTFN_AI: _ai_credits_checker,
+        Task.OriginProduct.INSIGHTS_AI: _ai_credits_checker,
         Task.OriginProduct.USER_CREATED: None,
     }
 
     ORIGIN_PRODUCT_CAPS: dict[str, WarmPoolCaps] = {
-        Task.OriginProduct.POSTFN_AI: WarmPoolCaps(per_user=2, per_org=10),
+        Task.OriginProduct.INSIGHTS_AI: WarmPoolCaps(per_user=2, per_org=10),
         Task.OriginProduct.USER_CREATED: WarmPoolCaps(per_user=2, per_org=50),
     }
     _DEFAULT_CAPS: WarmPoolCaps = WarmPoolCaps(per_user=2, per_org=10)

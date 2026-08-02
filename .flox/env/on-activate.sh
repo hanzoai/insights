@@ -206,7 +206,7 @@ warn_step() {
 # ── Interactive mode detection ────────────────────────────────────
 # Skip all interactive prompts in non-interactive terminals or when running under Insights Desktop (automated agent).
 _interactive=false
-if [[ -t 0 ]] && [[ -z "${POSTFN_CODE:-}" ]]; then
+if [[ -t 0 ]] && [[ -z "${INSIGHTS_CODE:-}" ]]; then
   _interactive=true
 fi
 
@@ -307,7 +307,7 @@ _PHROCS_SKIP=0
 [[ -n "$_PHROCS_BAKED" && -n "$_PHROCS_CURRENT" && "$_PHROCS_BAKED" == "$_PHROCS_CURRENT" ]] && _PHROCS_SKIP=1
 
 # Sandbox the automatic installs below by default on macOS (opt out with
-# POSTFN_DEV_SANDBOX=0). .env.local isn't loaded at flox-activate time, so check
+# INSIGHTS_DEV_SANDBOX=0). .env.local isn't loaded at flox-activate time, so check
 # it directly — but only when the live env is unset, so shell env keeps precedence.
 # The build scripts that run during install (uv sdist hooks, allowlisted pnpm
 # builds, cargo build.rs) then execute inside the sandbox, like the runtime path.
@@ -315,9 +315,9 @@ _PHROCS_SKIP=0
 _DEV_SANDBOX_INSTALLS=0
 if [[ "$(uname -s)" == "Darwin" && -x "$FLOX_ENV_PROJECT/bin/dev-sandbox" ]]; then
   _DEV_SANDBOX_INSTALLS=1
-  if [[ "${POSTFN_DEV_SANDBOX:-}" == "0" ]]; then
+  if [[ "${INSIGHTS_DEV_SANDBOX:-}" == "0" ]]; then
     _DEV_SANDBOX_INSTALLS=0
-  elif [[ -z "${POSTFN_DEV_SANDBOX:-}" ]] && grep -qE "^[[:space:]]*POSTFN_DEV_SANDBOX=0[[:space:]]*$" "$FLOX_ENV_PROJECT/.env.local" 2>/dev/null; then
+  elif [[ -z "${INSIGHTS_DEV_SANDBOX:-}" ]] && grep -qE "^[[:space:]]*INSIGHTS_DEV_SANDBOX=0[[:space:]]*$" "$FLOX_ENV_PROJECT/.env.local" 2>/dev/null; then
     _DEV_SANDBOX_INSTALLS=0
   fi
 fi
@@ -395,8 +395,8 @@ else
 fi
 
 # ── Step 3: /etc/hosts ──────────────────────────────────────────────
-POSTFN_HOSTS="127.0.0.1 db redis7 kafka datastore datastore-coordinator objectstorage seaweedfs temporal # insights"
-if grep -qF "$POSTFN_HOSTS" /etc/hosts; then
+INSIGHTS_HOSTS="127.0.0.1 db redis7 kafka datastore datastore-coordinator objectstorage seaweedfs temporal # insights"
+if grep -qF "$INSIGHTS_HOSTS" /etc/hosts; then
   done_step "System hosts"
 else
   echo ""
@@ -405,7 +405,7 @@ else
   echo -e "  ${C_YELLOW}┃${C_RESET} Insights services need hostnames in /etc/hosts."
   echo -e "  ${C_YELLOW}┃${C_RESET} Copy and run this to update them:"
   echo -e "  ${C_YELLOW}┃${C_RESET}"
-  echo -e "  ${C_YELLOW}┃${C_RESET}   ${C_DIM}sudo sed -i.bak '/datastore-coordinator objectstorage/d' /etc/hosts; echo '${POSTFN_HOSTS}' | sudo tee -a /etc/hosts${C_RESET}"
+  echo -e "  ${C_YELLOW}┃${C_RESET}   ${C_DIM}sudo sed -i.bak '/datastore-coordinator objectstorage/d' /etc/hosts; echo '${INSIGHTS_HOSTS}' | sudo tee -a /etc/hosts${C_RESET}"
   echo -e "  ${C_YELLOW}┃${C_RESET}"
   echo ""
   if [[ "$_interactive" == true ]]; then
@@ -419,7 +419,7 @@ if [[ ! -f "$DOTENV_FILE" ]] && [[ -f ".env.example" ]]; then
   cp .env.example "$DOTENV_FILE"
 fi
 if [[ -f "$DOTENV_FILE" ]]; then
-  if [[ "${POSTFN_SKIP_DOTENV:-}" == "1" ]]; then
+  if [[ "${INSIGHTS_SKIP_DOTENV:-}" == "1" ]]; then
     done_step "Environment vars (deferred)"
   else
     set -o allexport
@@ -505,7 +505,7 @@ fi
 # Fire-and-forget after activation. The find fallback (no venv) is age-only.
 (
   if [[ -x "$UV_PROJECT_ENVIRONMENT/bin/python" && -f "$FLOX_ENV_PROJECT/bin/insightscli" ]]; then
-    POSTFN_TELEMETRY_OPT_OUT=1 "$UV_PROJECT_ENVIRONMENT/bin/python" \
+    INSIGHTS_TELEMETRY_OPT_OUT=1 "$UV_PROJECT_ENVIRONMENT/bin/python" \
       -m insightscli doctor:disk --area=flox-logs --yes >/dev/null 2>&1
   else
     find "$FLOX_ENV_PROJECT/.flox/log" -name "*.log" -type f -mtime +7 -delete 2>/dev/null

@@ -4,7 +4,7 @@ import { Button } from '@hanzo/elements'
 
 import { CyclotronJobFiltersType, InsightsFunctionSubTemplateIdType, InsightsFunctionTypeType } from '~/types'
 
-import { FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES } from '../sub-templates/sub-templates'
+import { INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES } from '../sub-templates/sub-templates'
 import { InsightsFunctionList } from './InsightsFunctionsList'
 import { InsightsFunctionTemplateList } from './InsightsFunctionTemplateList'
 
@@ -21,7 +21,7 @@ export type LinkedInsightsFunctionsProps = {
 export const getFiltersFromSubTemplateId = (
     subTemplateId: InsightsFunctionSubTemplateIdType
 ): CyclotronJobFiltersType | undefined => {
-    const commonProperties = FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
+    const commonProperties = INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
     return commonProperties.filters ?? undefined
 }
 

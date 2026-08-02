@@ -14,7 +14,7 @@ from ..engines.types import EvalSummary
 EVAL_RESULTS_JSONL = "eval_results.jsonl"
 """Machine-readable per-experiment summary export, opt-in via ``EXPORT_EVAL_RESULTS``."""
 
-POSTFN_EVALUATIONS_URL = (
+INSIGHTS_EVALUATIONS_URL = (
     "https://us.hanzo.ai/project/2/ai-evals/evaluations/offline/experiments/{experiment_id}?offline_date_from=-1d"
 )
 
@@ -123,7 +123,7 @@ class ProgressReporter:
 
     async def record_insights_evaluations_url(self, experiment_name: str, experiment_id: str) -> None:
         async with self._lock:
-            self._insights_urls[experiment_name] = POSTFN_EVALUATIONS_URL.format(experiment_id=experiment_id)
+            self._insights_urls[experiment_name] = INSIGHTS_EVALUATIONS_URL.format(experiment_id=experiment_id)
 
     def print_final_summary(
         self,

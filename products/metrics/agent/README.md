@@ -11,26 +11,26 @@ Exemplars survive the trip: counters and histograms scraped with OpenMetrics exe
 
 ```sh
 docker run -d --name insights-metrics-agent \
-  -e POSTFN_API_KEY=<your project API key> \
-  -e POSTFN_HOST=https://us.i.hanzo.ai \
+  -e INSIGHTS_API_KEY=<your project API key> \
+  -e INSIGHTS_HOST=https://us.i.hanzo.ai \
   -e SCRAPE_TARGETS=your-app:9090,your-worker:9091 \
   insights/metrics-agent:latest
 ```
 
-EU cloud: set `POSTFN_HOST=https://eu.i.hanzo.ai`.
+EU cloud: set `INSIGHTS_HOST=https://eu.i.hanzo.ai`.
 
 ## Environment variables
 
 | Variable              | Required | Default                    | Meaning                                                                 |
 | --------------------- | -------- | -------------------------- | ----------------------------------------------------------------------- |
-| `POSTFN_API_KEY`     | yes      | —                          | Project API key, sent as `Authorization: Bearer`                        |
-| `POSTFN_HOST`        | no       | `https://us.i.hanzo.ai` | Insights ingestion origin                                                |
+| `INSIGHTS_API_KEY`     | yes      | —                          | Project API key, sent as `Authorization: Bearer`                        |
+| `INSIGHTS_HOST`        | no       | `https://us.i.hanzo.ai` | Insights ingestion origin                                                |
 | `SCRAPE_TARGETS`      | yes\*    | —                          | Comma-separated `host:port` list to scrape                              |
 | `SCRAPE_INTERVAL`     | no       | `15s`                      | Scrape interval                                                         |
 | `SCRAPE_METRICS_PATH` | no       | `/metrics`                 | Metrics path on the targets                                             |
 | `SCRAPE_JOB_NAME`     | no       | `insights-metrics-agent`    | Prometheus job name; becomes `service_name` on every metric in Insights  |
-| `POSTFN_DEBUG`       | no       | unset                      | `1`/`true`: also log exported batches to the container's stdout         |
-| `POSTFN_INGEST_PATH` | no       | `/i/v1/metrics`            | Advanced: override the ingest route (used by tests)                     |
+| `INSIGHTS_DEBUG`       | no       | unset                      | `1`/`true`: also log exported batches to the container's stdout         |
+| `INSIGHTS_INGEST_PATH` | no       | `/i/v1/metrics`            | Advanced: override the ingest route (used by tests)                     |
 | `SHARD_COUNT`         | no       | `1`                        | Size of an agent fleet; above 1 each instance scrapes only its share    |
 | `SHARD_INDEX`         | no       | from hostname ordinal      | This instance's index in `0..SHARD_COUNT-1` (see Scaling out)           |
 | `PERSIST_QUEUE`       | no       | unset                      | `1`/`true`: buffer undelivered batches to disk so restarts lose nothing |
@@ -57,7 +57,7 @@ The Helm chart's `persistence.enabled=true` provisions the volume for you.
 
 Checked in this order:
 
-1. **Full config override**: mount a complete collector config at `/etc/insights/config.yaml`. It is used verbatim (`${env:POSTFN_API_KEY}`-style references still resolve). This is how the Helm chart drives the image.
+1. **Full config override**: mount a complete collector config at `/etc/insights/config.yaml`. It is used verbatim (`${env:INSIGHTS_API_KEY}`-style references still resolve). This is how the Helm chart drives the image.
 2. **Custom scrape configs**: mount a YAML list of Prometheus `scrape_configs` at `/etc/insights/scrape_configs.yaml` to replace the env-generated job while keeping the Insights exporter wiring. Tip: add `scrape_protocols: [OpenMetricsText1.0.0, OpenMetricsText0.0.1, PrometheusText0.0.4]` to each job so exemplars keep flowing.
 3. Otherwise the scrape job is rendered from `SCRAPE_TARGETS`.
 
@@ -103,8 +103,8 @@ End-to-end against the local dev stack (requires `insightscli start` with captur
 ```sh
 docker build -t insights-metrics-agent:dev .
 docker run --rm \
-  -e POSTFN_API_KEY=phc_local \
-  -e POSTFN_HOST=http://host.docker.internal:4320 \
+  -e INSIGHTS_API_KEY=phc_local \
+  -e INSIGHTS_HOST=http://host.docker.internal:4320 \
   -e SCRAPE_TARGETS=host.docker.internal:6738 \
   -e SCRAPE_METRICS_PATH=/_metrics \
   -e SCRAPE_JOB_NAME=agent-e2e \

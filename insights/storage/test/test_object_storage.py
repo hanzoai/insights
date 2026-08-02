@@ -246,7 +246,7 @@ class TestObjectStorageClientFactory(SimpleTestCase):
         [
             ("valid_http", "http://objectstorage:19000", True),
             ("valid_https", "https://s3.amazonaws.com", True),
-            ("unsubstituted_placeholder", "https://${POSTFN_DOMAIN}", False),
+            ("unsubstituted_placeholder", "https://${INSIGHTS_DOMAIN}", False),
             ("placeholder_in_path", "https://example.com/${BUCKET}", False),
             ("missing_scheme", "objectstorage:19000", False),
             ("empty", "", False),
@@ -263,7 +263,7 @@ class TestObjectStorageClientFactory(SimpleTestCase):
         with self.settings(
             OBJECT_STORAGE_ENABLED=True,
             OBJECT_STORAGE_ENDPOINT="http://objectstorage:19000",
-            OBJECT_STORAGE_PUBLIC_ENDPOINT="https://${POSTFN_DOMAIN}",
+            OBJECT_STORAGE_PUBLIC_ENDPOINT="https://${INSIGHTS_DOMAIN}",
         ):
             storage = object_storage_client()
 

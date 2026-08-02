@@ -25,10 +25,10 @@ describe('metricsIngestionLogic', () => {
 
     beforeEach(() => {
         localStorage.clear()
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             resource_access_control: {
-                ...window.POSTFN_APP_CONTEXT?.resource_access_control,
+                ...window.INSIGHTS_APP_CONTEXT?.resource_access_control,
                 [AccessControlResourceType.Metrics]: AccessControlLevel.Viewer,
             },
         } as AppContext
@@ -107,10 +107,10 @@ describe('metricsIngestionLogic', () => {
     })
 
     it('does not check ingestion without metrics viewer access', async () => {
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             resource_access_control: {
-                ...window.POSTFN_APP_CONTEXT?.resource_access_control,
+                ...window.INSIGHTS_APP_CONTEXT?.resource_access_control,
                 [AccessControlResourceType.Metrics]: AccessControlLevel.None,
             },
         } as AppContext

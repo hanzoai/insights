@@ -36,8 +36,8 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             code: dedent`
                               import com.insights.android.InsightsAndroidConfig
                               val config = InsightsAndroidConfig(
-                                  apiKey = POSTFN_PROJECT_TOKEN,
-                                  host = POSTFN_HOST
+                                  apiKey = INSIGHTS_PROJECT_TOKEN,
+                                  host = INSIGHTS_HOST
                               ).apply {
                                   ...
                                   errorTrackingConfig.autoCapture = true

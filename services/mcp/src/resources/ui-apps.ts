@@ -103,7 +103,7 @@ function registerApp(
     { name, uri, description, appDir }: RegisterAppParams,
     baseUrl: string
 ): void {
-    const meta = buildUiAppResourceMeta(baseUrl, context.env.POSTFN_MCP_APPS_ANALYTICS_BASE_URL)
+    const meta = buildUiAppResourceMeta(baseUrl, context.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL)
     const html = buildAppStubHtml(appDir, baseUrl)
 
     server.registerResource(name, uri, { mimeType: RESOURCE_MIME_TYPE, description }, async (uri) => {

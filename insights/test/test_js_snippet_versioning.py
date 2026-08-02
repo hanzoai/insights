@@ -124,19 +124,19 @@ class TestGetJsContent(SimpleTestCase):
         cache.delete(REDIS_POINTER_MAP_KEY)
         _reset_caches()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="")
     def test_returns_disk_content_when_versioning_disabled(self):
         content = get_js_content("1.358.0")
         assert content is not None
         assert len(content) > 0
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_returns_disk_content_when_version_not_resolved(self):
         content = get_js_content(None)
         assert content is not None
         assert len(content) > 0
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_returns_redis_content_when_cached(self):
         cache.set(f"{REDIS_JS_KEY_PREFIX}:1.358.0", "cached-js-content", 3600)
         try:
@@ -145,7 +145,7 @@ class TestGetJsContent(SimpleTestCase):
         finally:
             cache.delete(f"{REDIS_JS_KEY_PREFIX}:1.358.0")
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_fetches_from_s3_and_caches_in_redis(self, mock_read):
         mock_read.return_value = "s3-js-content"
@@ -157,7 +157,7 @@ class TestGetJsContent(SimpleTestCase):
         finally:
             cache.delete(f"{REDIS_JS_KEY_PREFIX}:1.358.0")
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_falls_back_to_disk_when_s3_misses(self, mock_read):
         mock_read.return_value = None
@@ -165,13 +165,13 @@ class TestGetJsContent(SimpleTestCase):
         assert content is not None
         assert len(content) > 0
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_returns_disk_for_unknown_exact_version(self):
         content = get_js_content("99.99.99")
         assert content is not None
         assert len(content) > 0
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_falls_back_to_disk_on_s3_exception(self, mock_read):
         from insights.storage.object_storage import ObjectStorageError
@@ -181,7 +181,7 @@ class TestGetJsContent(SimpleTestCase):
         assert content is not None
         assert len(content) > 0
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_rejects_invalid_resolved_version(self):
         content = get_js_content("../../../etc/passwd")
         assert content is not None
@@ -189,20 +189,20 @@ class TestGetJsContent(SimpleTestCase):
 
 
 class TestValidateArtifacts(SimpleTestCase):
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_head")
     def test_returns_true_when_array_js_exists(self, mock_head):
         mock_head.return_value = True
         assert validate_version_artifacts("1.358.0") is True
         mock_head.assert_called_once_with("static/1.358.0/array.js")
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_head")
     def test_returns_false_when_array_js_missing(self, mock_head):
         mock_head.return_value = False
         assert validate_version_artifacts("99.99.99") is False
 
-    @override_settings(POSTFN_JS_S3_BUCKET="")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="")
     def test_returns_false_when_bucket_not_configured(self):
         assert validate_version_artifacts("1.358.0") is False
 
@@ -220,42 +220,42 @@ class TestResolveVersion(SimpleTestCase):
         cache.delete(REDIS_POINTER_MAP_KEY)
         _reset_caches()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_exact_known_version_returned_as_is(self):
         assert resolve_version("1.359.0") == "1.359.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_exact_unknown_version_returns_none(self):
         assert resolve_version("99.99.99") is None
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_major_pin_resolved_via_pointers(self):
         assert resolve_version("1") == "1.359.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_minor_pin_resolved_via_pointers(self):
         assert resolve_version("1.358") == "1.358.3"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_none_defaults_to_major_pin(self):
         assert resolve_version(None) == "1.359.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="")
     def test_returns_none_when_versioning_disabled(self):
         assert resolve_version(None) is None
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_yanked_exact_version_falls_back_to_minor_pointer(self):
         # 1.358.0 is not in manifest.versions (simulating a yank),
         # but the minor pointer 1.358 -> 1.358.3 still exists
         assert resolve_version("1.358.0") == "1.358.3"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_missing_minor_pointer_falls_back_to_major(self):
         # 1.500.0 is unknown and there's no 1.500 pointer, but 1 -> 1.359.0
         assert resolve_version("1.500.0") == "1.359.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_missing_minor_series_falls_back_to_major(self):
         # 1.500 has no pointer, but 1 -> 1.359.0
         assert resolve_version("1.500") == "1.359.0"
@@ -269,7 +269,7 @@ class TestGetManifestResilience(SimpleTestCase):
         cache.delete(REDIS_POINTER_MAP_KEY)
         _reset_caches()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read", return_value=None)
     def test_negative_caches_missing_manifest(self, _mock_s3):
         # No manifest in Redis or S3 — first call should try both, second should not
@@ -281,7 +281,7 @@ class TestGetManifestResilience(SimpleTestCase):
             # Only one Redis call despite two resolve_version calls
             assert mock_cache.get.call_count == 1
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read", return_value=None)
     def test_negative_cache_expires(self, _mock_s3):
         with patch("insights.models.js_snippet_versioning.cache") as mock_cache:
@@ -295,7 +295,7 @@ class TestGetManifestResilience(SimpleTestCase):
             assert resolve_version("1") is None
             assert mock_cache.get.call_count == 2
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read", return_value=None)
     def test_redis_connection_error_returns_none(self, _mock_s3):
         with patch("insights.models.js_snippet_versioning.cache") as mock_cache:
@@ -303,7 +303,7 @@ class TestGetManifestResilience(SimpleTestCase):
             mock_cache.set = lambda *a, **kw: None
             assert resolve_version("1") is None
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read", return_value=None)
     def test_redis_connection_error_is_negative_cached(self, _mock_s3):
         with patch("insights.models.js_snippet_versioning.cache") as mock_cache:
@@ -314,7 +314,7 @@ class TestGetManifestResilience(SimpleTestCase):
             # Only one Redis attempt despite two calls
             assert mock_cache.get.call_count == 1
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     def test_real_manifest_replaces_negative_cache(self):
         # Start with missing manifest
         assert resolve_version("1") is None
@@ -332,7 +332,7 @@ class TestGetManifestResilience(SimpleTestCase):
         # Should now resolve
         assert resolve_version("1") == "1.358.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_recovers_manifest_from_s3_on_redis_miss(self, mock_s3_read):
         manifest = _make_manifest(
@@ -345,7 +345,7 @@ class TestGetManifestResilience(SimpleTestCase):
         assert resolve_version("1") == "1.358.0"
         mock_s3_read.assert_called_once_with(sv.S3_MANIFEST_KEY, missing_ok=True)
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_s3_recovery_backfills_redis(self, mock_s3_read):
         manifest = _make_manifest(
@@ -361,7 +361,7 @@ class TestGetManifestResilience(SimpleTestCase):
         assert raw is not None
         assert json.loads(raw)["pointers"]["1"] == "1.358.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_s3_recovery_works_when_redis_completely_down(self, mock_s3_read):
         manifest = _make_manifest(
@@ -381,7 +381,7 @@ class TestGetManifestResilience(SimpleTestCase):
             assert resolve_version("1") == "1.358.0"
             assert mock_s3_read.call_count == 1
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_s3_recovery_is_throttled(self, mock_s3_read):
         mock_s3_read.return_value = None  # S3 also empty
@@ -400,7 +400,7 @@ class TestSyncTask(SimpleTestCase):
         cache.delete(REDIS_POINTER_MAP_KEY)
         _reset_caches()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_write")
     @patch("insights.models.js_snippet_versioning.validate_version_artifacts")
     @patch("insights.models.js_snippet_versioning.s3_read")
@@ -423,7 +423,7 @@ class TestSyncTask(SimpleTestCase):
         assert manifest["pointers"]["1.358"] == "1.358.0"
         assert manifest["pointers"]["1.359"] == "1.359.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.validate_version_artifacts")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_rejects_update_when_no_viable_version(self, mock_read, mock_validate):
@@ -435,7 +435,7 @@ class TestSyncTask(SimpleTestCase):
 
         assert cache.get(REDIS_POINTER_MAP_KEY) is None
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_write")
     @patch("insights.models.js_snippet_versioning.validate_version_artifacts")
     @patch("insights.models.js_snippet_versioning.s3_read")
@@ -458,7 +458,7 @@ class TestSyncTask(SimpleTestCase):
         manifest = json.loads(raw)
         assert manifest["pointers"]["1"] == "1.9.0"
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_raises_when_versions_json_is_empty(self, mock_read):
         from insights.models.js_snippet_versioning import ManifestSyncError
@@ -467,7 +467,7 @@ class TestSyncTask(SimpleTestCase):
         with self.assertRaises(ManifestSyncError):
             sync_manifest_from_s3()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_read")
     def test_raises_when_all_versions_yanked(self, mock_read):
         from insights.models.js_snippet_versioning import ManifestSyncError
@@ -477,7 +477,7 @@ class TestSyncTask(SimpleTestCase):
         with self.assertRaises(ManifestSyncError):
             sync_manifest_from_s3()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="")
     def test_noop_when_versioning_disabled(self):
         sync_js_snippet_manifest()
         assert cache.get(REDIS_POINTER_MAP_KEY) is None
@@ -505,7 +505,7 @@ class TestSyncManifestPurge(SimpleTestCase):
         cache.delete(REDIS_POINTER_MAP_KEY)
         _reset_caches()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_write")
     @patch("insights.models.remote_config.RemoteConfig.purge_cdn_by_tag")
     @patch("insights.models.js_snippet_versioning.validate_version_artifacts")
@@ -534,7 +534,7 @@ class TestSyncManifestPurge(SimpleTestCase):
         assert "insights-js-1.359" in purged_tags
         assert "insights-js-1.358" not in purged_tags
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_write")
     @patch("insights.models.remote_config.RemoteConfig.purge_cdn_by_tag")
     @patch("insights.models.js_snippet_versioning.validate_version_artifacts")
@@ -558,7 +558,7 @@ class TestSyncManifestPurge(SimpleTestCase):
 
         mock_purge.assert_not_called()
 
-    @override_settings(POSTFN_JS_S3_BUCKET="test-bucket")
+    @override_settings(INSIGHTS_JS_S3_BUCKET="test-bucket")
     @patch("insights.models.js_snippet_versioning.s3_write")
     @patch("insights.models.remote_config.RemoteConfig.purge_cdn_by_tag")
     @patch("insights.models.js_snippet_versioning.validate_version_artifacts")

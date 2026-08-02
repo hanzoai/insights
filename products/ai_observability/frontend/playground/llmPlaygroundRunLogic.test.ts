@@ -13,10 +13,10 @@ import { llmPlaygroundPromptsLogic } from './llmPlaygroundPromptsLogic'
 import { appendToolCallChunk, describeError, llmPlaygroundRunLogic, mergeUsage } from './llmPlaygroundRunLogic'
 
 function setPlaygroundAccessLevel(level: AccessControlLevel): void {
-    window.POSTFN_APP_CONTEXT = {
-        ...window.POSTFN_APP_CONTEXT,
+    window.INSIGHTS_APP_CONTEXT = {
+        ...window.INSIGHTS_APP_CONTEXT,
         resource_access_control: { llm_playground: level },
-    } as typeof window.POSTFN_APP_CONTEXT
+    } as typeof window.INSIGHTS_APP_CONTEXT
 }
 
 describe('llmPlaygroundRunLogic', () => {

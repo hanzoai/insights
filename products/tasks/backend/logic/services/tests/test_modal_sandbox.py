@@ -456,16 +456,16 @@ class TestModalSandboxAgentServer:
 
     @pytest.mark.parametrize("method_name", ["execute", "execute_stream"])
     def test_execution_redacts_event_ingest_token_from_error_context(self, mock_sandbox: Any, method_name: str):
-        mock_sandbox._sandbox.exec.side_effect = RuntimeError("failed POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=secret-token")
+        mock_sandbox._sandbox.exec.side_effect = RuntimeError("failed INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=secret-token")
 
         with (
             patch("products.tasks.backend.logic.services.modal_sandbox.capture_exception") as capture_exception,
             pytest.raises(SandboxExecutionError) as exc,
         ):
-            getattr(mock_sandbox, method_name)("env POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=secret-token agent-server")
+            getattr(mock_sandbox, method_name)("env INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=secret-token agent-server")
 
-        assert exc.value.context["command"] == "env POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=<redacted> agent-server"
-        assert exc.value.context["error"] == "failed POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=<redacted>"
+        assert exc.value.context["command"] == "env INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=<redacted> agent-server"
+        assert exc.value.context["error"] == "failed INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=<redacted>"
         assert "secret-token" not in exc.value.context["command"]
         assert "secret-token" not in exc.value.context["error"]
         capture_exception.assert_not_called()
@@ -491,7 +491,7 @@ class TestModalSandboxAgentServer:
         assert f"--repositoryPath {shlex.quote('/tmp/workspace/repos/insights/insights')}" in command
         assert f"--taskId {shlex.quote('task-123')}" in command
         assert f"--runId {shlex.quote('run-456')}" in command
-        assert f"POSTFN_SANDBOX_ID={shlex.quote(mock_sandbox.id)}" in command
+        assert f"INSIGHTS_SANDBOX_ID={shlex.quote(mock_sandbox.id)}" in command
         assert "--sandboxId" not in command
         assert f"--mode {shlex.quote('background')}" in command
         assert "--createPr true" in command
@@ -608,23 +608,23 @@ class TestModalSandboxAgentServer:
         )
 
         command = _agent_server_launch_command(mock_sandbox.execute)
-        assert "POSTFN_AGENT_RUNTIME=pi" in command
-        assert "POSTFN_CODE_RUNTIME_ADAPTER=codex" in command
-        assert "POSTFN_CODE_PROVIDER=openai" in command
-        assert "POSTFN_CODE_MODEL=gpt-5.3-codex" in command
-        assert "POSTFN_CODE_REASONING_EFFORT=high" in command
-        assert "POSTFN_CODE_CONTEXT_WINDOW=1m" in command
-        assert "POSTFN_CODE_FAST_MODE=true" in command
-        assert "POSTFN_CODE_INITIAL_PERMISSION_MODE=plan" in command
-        assert "POSTFN_TASK_RUN_EVENT_INGEST_TOKEN=ingest-token" in command
+        assert "INSIGHTS_AGENT_RUNTIME=pi" in command
+        assert "INSIGHTS_CODE_RUNTIME_ADAPTER=codex" in command
+        assert "INSIGHTS_CODE_PROVIDER=openai" in command
+        assert "INSIGHTS_CODE_MODEL=gpt-5.3-codex" in command
+        assert "INSIGHTS_CODE_REASONING_EFFORT=high" in command
+        assert "INSIGHTS_CODE_CONTEXT_WINDOW=1m" in command
+        assert "INSIGHTS_CODE_FAST_MODE=true" in command
+        assert "INSIGHTS_CODE_INITIAL_PERMISSION_MODE=plan" in command
+        assert "INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN=ingest-token" in command
         # Modal sandboxes reach the proxy by its real URL, no Docker-host rewrite.
-        assert "POSTFN_TASK_RUN_EVENT_INGEST_URL=https://agent-proxy.example.com" in command
-        assert "POSTFN_RTK=1" in command
+        assert "INSIGHTS_TASK_RUN_EVENT_INGEST_URL=https://agent-proxy.example.com" in command
+        assert "INSIGHTS_RTK=1" in command
 
     @pytest.mark.parametrize(
         "fast_mode, expected_env",
         [
-            (False, "POSTFN_CODE_FAST_MODE=false"),
+            (False, "INSIGHTS_CODE_FAST_MODE=false"),
             (None, None),
         ],
     )
@@ -645,13 +645,13 @@ class TestModalSandboxAgentServer:
         if expected_env is not None:
             assert expected_env in command
         else:
-            assert "POSTFN_CODE_FAST_MODE" not in command
+            assert "INSIGHTS_CODE_FAST_MODE" not in command
 
     @pytest.mark.parametrize(
         "rtk_enabled, expected_env",
         [
-            (True, "POSTFN_RTK=1"),
-            (False, "POSTFN_RTK=0"),
+            (True, "INSIGHTS_RTK=1"),
+            (False, "INSIGHTS_RTK=0"),
         ],
     )
     def test_start_agent_server_rtk_env(self, mock_sandbox: Any, rtk_enabled, expected_env):
@@ -692,9 +692,9 @@ class TestModalSandboxAgentServer:
 
         command = _agent_server_launch_command(mock_sandbox.execute)
         if expected_env_present:
-            assert "POSTFN_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN=true" in command
+            assert "INSIGHTS_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN=true" in command
         else:
-            assert "POSTFN_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN" not in command
+            assert "INSIGHTS_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN" not in command
 
     def test_start_agent_server_raises_when_not_running(self, mock_sandbox: Any):
         mock_sandbox._sandbox.poll.return_value = 0
@@ -1438,7 +1438,7 @@ class TestLaunchDevStackBootstrap:
         # `start-dockerd`, and PATH is a settable sandbox env var pointed at it. The
         # launcher must strip the environment (no injected credentials) and pin PATH to
         # system dirs via an absolute /usr/bin/env, so the helper can never resolve or
-        # run the workspace binary with the run's POSTFN_PERSONAL_API_KEY / GITHUB_TOKEN.
+        # run the workspace binary with the run's INSIGHTS_PERSONAL_API_KEY / GITHUB_TOKEN.
         sandbox = self._sandbox(snapshot_restored=True, snapshot_kind=SNAPSHOT_KIND_DIRECTORY)
         result = ExecutionResult(stdout="", stderr="", exit_code=0, error=None)
 

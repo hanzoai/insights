@@ -10,7 +10,7 @@ from temporalio.common import RetryPolicy, SearchAttributePair, TypedSearchAttri
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker
 
-from insights.temporal.common.search_attributes import POSTFN_SESSION_RECORDING_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SESSION_RECORDING_ID_KEY, INSIGHTS_TEAM_ID_KEY
 from insights.temporal.session_replay.rasterize_recording.activities.stuck_counter import BumpStuckCounterInput
 from insights.temporal.session_replay.rasterize_recording.types import (
     BuildRasterizationResult,
@@ -37,8 +37,8 @@ async def _register_search_attributes(env: WorkflowEnvironment) -> None:
 def _search_attributes(team_id: int = 7, session_id: str = "sess-123") -> TypedSearchAttributes:
     return TypedSearchAttributes(
         search_attributes=[
-            SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=team_id),
-            SearchAttributePair(key=POSTFN_SESSION_RECORDING_ID_KEY, value=session_id),
+            SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=team_id),
+            SearchAttributePair(key=INSIGHTS_SESSION_RECORDING_ID_KEY, value=session_id),
         ]
     )
 

@@ -1,6 +1,6 @@
 import {
     APP_METRICS_OUTPUT,
-    FN_INVOCATION_RESULTS_OUTPUT,
+    INSIGHTS_INVOCATION_RESULTS_OUTPUT,
     LOG_ENTRIES_OUTPUT,
     MESSAGE_ASSETS_OUTPUT,
 } from '~/common/outputs'
@@ -27,16 +27,16 @@ import {
 export function createCdpOutputsRegistry() {
     return new IngestionOutputsBuilder()
         .register(APP_METRICS_OUTPUT, {
-            topicKey: 'FN_FUNCTION_MONITORING_APP_METRICS_TOPIC',
-            producerKey: 'FN_FUNCTION_MONITORING_APP_METRICS_PRODUCER',
+            topicKey: 'INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC',
+            producerKey: 'INSIGHTS_FUNCTION_MONITORING_APP_METRICS_PRODUCER',
         })
         .register(LOG_ENTRIES_OUTPUT, {
-            topicKey: 'FN_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC',
-            producerKey: 'FN_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER',
+            topicKey: 'INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC',
+            producerKey: 'INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER',
         })
-        .register(FN_INVOCATION_RESULTS_OUTPUT, {
-            topicKey: 'FN_INVOCATION_RESULTS_TOPIC',
-            producerKey: 'FN_INVOCATION_RESULTS_PRODUCER',
+        .register(INSIGHTS_INVOCATION_RESULTS_OUTPUT, {
+            topicKey: 'INSIGHTS_INVOCATION_RESULTS_TOPIC',
+            producerKey: 'INSIGHTS_INVOCATION_RESULTS_PRODUCER',
         })
         .register(MESSAGE_ASSETS_OUTPUT, {
             topicKey: 'MESSAGE_ASSETS_TOPIC',

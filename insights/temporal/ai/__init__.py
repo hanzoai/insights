@@ -34,7 +34,7 @@ from .sync_vectors import (
 # the worker they hand off to once a repo is picked. The subset is kept exported so
 # start_temporal_worker can register it on that queue without pulling in unrelated AI
 # workflows.
-POSTFN_CODE_SLACK_WORKFLOWS = [
+INSIGHTS_CODE_SLACK_WORKFLOWS = [
     InsightsCodeSlackMentionWorkflow,
     SlackAppMentionWorkflow,
     InsightsCodeSlackMentionCommandWorkflow,
@@ -42,7 +42,7 @@ POSTFN_CODE_SLACK_WORKFLOWS = [
     InsightsSlackInboxOnboardingWorkflow,
 ]
 
-POSTFN_CODE_SLACK_ACTIVITIES = [
+INSIGHTS_CODE_SLACK_ACTIVITIES = [
     *SLACK_APP_ACTIVITIES,
     process_insights_code_terminate_task_activity,
 ]

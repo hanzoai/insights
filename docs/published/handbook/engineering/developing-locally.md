@@ -372,7 +372,7 @@ This command automatically turns any feature flag ending in `_EXPERIMENT` as a m
 
 Backend side flags are automatically configured in DEBUG mode using the
 dev API key created by `manage.py setup_local_api_key`.
-If you need to override the key, set the `POSTFN_PERSONAL_API_KEY` env var.
+If you need to override the key, set the `INSIGHTS_PERSONAL_API_KEY` env var.
 
 ## Extra: Debugging with VS Code
 

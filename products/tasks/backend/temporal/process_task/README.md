@@ -89,7 +89,7 @@ detector (`[TMPRL1101]`). Two mechanisms bound this:
 
 `backend/services/sandbox.py` — Protocol-based abstraction. `get_sandbox_class()` returns `DockerSandbox` when `SANDBOX_PROVIDER=docker` (requires `DEBUG=True`), otherwise `ModalSandbox`.
 
-- **DockerSandbox** (`backend/services/docker_sandbox.py`) — Local dev. Internal port 47821 (host port is dynamically assigned), no auth token needed. Automatically rewrites `POSTFN_API_URL` so the container can reach the host: `localhost`/`127.0.0.1` → `host.docker.internal`, port `8010` (Caddy) → `8000` (Django direct, since Caddy returns empty responses from inside Docker). `SANDBOX_API_URL` should not be set when using Docker — the auto-transform handles it. Builds images from `backend/sandbox/images/Dockerfile.sandbox-base`.
+- **DockerSandbox** (`backend/services/docker_sandbox.py`) — Local dev. Internal port 47821 (host port is dynamically assigned), no auth token needed. Automatically rewrites `INSIGHTS_API_URL` so the container can reach the host: `localhost`/`127.0.0.1` → `host.docker.internal`, port `8010` (Caddy) → `8000` (Django direct, since Caddy returns empty responses from inside Docker). `SANDBOX_API_URL` should not be set when using Docker — the auto-transform handles it. Builds images from `backend/sandbox/images/Dockerfile.sandbox-base`.
 - **ModalSandbox** (`backend/services/modal_sandbox.py`) — Production. Port 8080, gVisor isolation, Modal connect tokens for authenticated access. Images from `ghcr.io/insights/insights-sandbox-base`.
 
 ### Agent server and runner
@@ -101,9 +101,9 @@ Environment variables consumed inside the sandbox:
 | Variable                   | Purpose                                              |
 | -------------------------- | ---------------------------------------------------- |
 | `GITHUB_TOKEN`             | GitHub installation access token for repo operations |
-| `POSTFN_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
-| `POSTFN_API_URL`          | Insights instance URL                                 |
-| `POSTFN_PROJECT_ID`       | Team ID for API scoping                              |
+| `INSIGHTS_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
+| `INSIGHTS_API_URL`          | Insights instance URL                                 |
+| `INSIGHTS_PROJECT_ID`       | Team ID for API scoping                              |
 | `JWT_PUBLIC_KEY`           | Public key for verifying sandbox connection tokens   |
 
 ## End-to-end flow
@@ -167,7 +167,7 @@ Per-team configuration for sandbox execution: network access level (trusted/full
 
 Docker is the recommended sandbox provider for local development. To use it, set `SANDBOX_PROVIDER=docker` and `DEBUG=1` in your `.env`.
 
-**Do not set `SANDBOX_API_URL`** when using Docker. The `DockerSandbox` automatically rewrites `POSTFN_API_URL` inside the container:
+**Do not set `SANDBOX_API_URL`** when using Docker. The `DockerSandbox` automatically rewrites `INSIGHTS_API_URL` inside the container:
 
 - `localhost` / `127.0.0.1` → `host.docker.internal` (Docker's host gateway)
 - Port `8010` (Caddy) → `8000` (Django directly) — Caddy returns empty responses when called from inside Docker

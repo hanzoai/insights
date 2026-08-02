@@ -82,7 +82,7 @@ jobs:
                   # Unset = direct path, so setting them is the cutover.
                   AI_GATEWAY_URL: ${{ secrets.STAMPFN_AI_GATEWAY_URL }}
                   AI_GATEWAY_API_KEY: ${{ secrets.STAMPFN_AI_GATEWAY_API_KEY }}
-                  POSTFN_API_KEY: ${{ secrets.POSTFN_API_TOKEN }}
+                  INSIGHTS_API_KEY: ${{ secrets.INSIGHTS_API_TOKEN }}
                   GH_TOKEN: ${{ steps.app-token.outputs.token }}
               run: |
                   uv run tools/pr-approval-agent/review_pr.py \

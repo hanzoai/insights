@@ -200,7 +200,7 @@ export const seatBillingLogic = kea<seatBillingLogicType>([
         },
     })),
     afterMount(({ actions, values }) => {
-        if (!values.featureFlags[FEATURE_FLAGS.POSTFN_CODE_BILLING]) {
+        if (!values.featureFlags[FEATURE_FLAGS.INSIGHTS_CODE_BILLING]) {
             return
         }
         actions.ensureAllMembersLoaded()

@@ -42,14 +42,14 @@ const setupMsw = (): void => {
         },
     })
     ;(window as any).__mockServiceWorker = worker
-    ;(window as any).POSTFN_APP_CONTEXT = getStorybookAppContext()
+    ;(window as any).INSIGHTS_APP_CONTEXT = getStorybookAppContext()
 }
 setupMsw()
 
 const setupInsightsJs = (): void => {
     // Make sure we don't hit production insights. We want to control requests to,
     // e.g. `/decide/` for feature flags
-    window.JS_POSTFN_HOST = apiHostOrigin()
+    window.JS_INSIGHTS_HOST = apiHostOrigin()
 
     loadInsightsJS()
 }

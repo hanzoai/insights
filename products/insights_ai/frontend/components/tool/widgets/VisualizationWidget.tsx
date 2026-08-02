@@ -27,7 +27,7 @@ import { InsightShortId } from '~/types'
 import { MessageTemplate } from '../../../messages/MessageTemplate'
 import { visualizationTypeToQuery } from '../../../utils/visualizationQuery'
 
-const QUERY_CONTEXT_POSTFN_AI: QueryContext = { limitContext: 'insights_ai' } as const
+const QUERY_CONTEXT_INSIGHTS_AI: QueryContext = { limitContext: 'insights_ai' } as const
 
 export interface VisualizationWidgetProps {
     content: VisualizationArtifactContent
@@ -102,7 +102,7 @@ export const VisualizationWidget = React.memo(function VisualizationWidget({
         <div className="flex flex-col w-full">
             {!isCollapsed && (
                 <div className={clsx('flex flex-col overflow-auto', isFunnelsQuery(rawQuery) ? 'h-[580px]' : 'h-96')}>
-                    <Query query={query} readOnly embedded context={QUERY_CONTEXT_POSTFN_AI} />
+                    <Query query={query} readOnly embedded context={QUERY_CONTEXT_INSIGHTS_AI} />
                 </div>
             )}
             <div className={clsx('flex items-center justify-between', !isCollapsed && 'mt-2')}>

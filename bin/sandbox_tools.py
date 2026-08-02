@@ -136,9 +136,9 @@ def write_user_dockerfile(tools: list[Tool], *, out: Path = USER_DOCKERFILE) -> 
         if not snippet:
             continue
         parts.append(f"# Tool: {t.name}\n")
-        parts.append("RUN <<'__POSTFN_SANDBOX_EOF__'\nset -e\n")
+        parts.append("RUN <<'__INSIGHTS_SANDBOX_EOF__'\nset -e\n")
         parts.append(snippet + "\n")
-        parts.append("__POSTFN_SANDBOX_EOF__\n\n")
+        parts.append("__INSIGHTS_SANDBOX_EOF__\n\n")
     parts.append("USER root\n")
 
     out.parent.mkdir(parents=True, exist_ok=True)

@@ -9,7 +9,7 @@ import { dayjs } from 'lib/dayjs'
 import { Tab, Tabs, TabsProps } from 'lib/elements/Tabs'
 import { isKeyOf } from 'lib/utils/guards'
 
-import { CORE_FILTER_DEFINITIONS_BY_GROUP, POSTFN_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
+import { CORE_FILTER_DEFINITIONS_BY_GROUP, INSIGHTS_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
 import { EventType, RecordingEventType, SurveyEventProperties } from '~/types'
 
 import { AutocaptureImageTab, hasAutocaptureImage } from '../AutocapturePreviewImage/AutocapturePreviewImage'
@@ -82,8 +82,8 @@ export const EventPropertyTabs = ({
                       : 'properties'
     )
 
-    const promotedKeys = isKeyOf(event.event, POSTFN_EVENT_PROMOTED_PROPERTIES)
-        ? POSTFN_EVENT_PROMOTED_PROPERTIES[event.event]
+    const promotedKeys = isKeyOf(event.event, INSIGHTS_EVENT_PROMOTED_PROPERTIES)
+        ? INSIGHTS_EVENT_PROMOTED_PROPERTIES[event.event]
         : []
 
     let properties: Record<string, any> = {}

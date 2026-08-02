@@ -18,7 +18,7 @@ import { projectNoticeLogic } from './projectNoticeLogic'
 
 const DISMISS_KEY = 'project-notice-dismissed.missing_reverse_proxy'
 
-window.POSTFN_APP_CONTEXT = {
+window.INSIGHTS_APP_CONTEXT = {
     current_team: { id: MOCK_TEAM_ID },
     current_project: { id: MOCK_TEAM_ID },
 } as unknown as AppContext
@@ -80,9 +80,9 @@ describe('projectNoticeLogic', () => {
         let originalAppContext: AppContext | undefined
 
         beforeEach(() => {
-            originalAppContext = window.POSTFN_APP_CONTEXT
+            originalAppContext = window.INSIGHTS_APP_CONTEXT
             // Simulate a missing/expired session — userLogic boots to a null user.
-            window.POSTFN_APP_CONTEXT = {
+            window.INSIGHTS_APP_CONTEXT = {
                 ...originalAppContext,
                 current_user: null,
             } as unknown as AppContext
@@ -103,7 +103,7 @@ describe('projectNoticeLogic', () => {
         afterEach(() => {
             getItemSpy.mockRestore()
             getDateSpy.mockRestore()
-            window.POSTFN_APP_CONTEXT = originalAppContext
+            window.INSIGHTS_APP_CONTEXT = originalAppContext
         })
 
         it('does not load proxy records when the user is unauthenticated', async () => {

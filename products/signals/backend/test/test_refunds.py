@@ -177,7 +177,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
             _make_refund(report)
         if case == "billing_exempt":
             SignalReport.objects.filter(id=report.id).update(
-                billing_exempt_reason=SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK
+                billing_exempt_reason=SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK
             )
 
         response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
@@ -189,7 +189,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
     def test_refund_on_exempt_report_is_rejected(self, _flag):
         report = self._report_with_pr(pr_created_at=datetime(2026, 6, 10, tzinfo=UTC))
         SignalReport.objects.filter(id=report.id).update(
-            billing_exempt_reason=SignalReport.BillingExemptReason.POSTFN_HEALTH_CHECK
+            billing_exempt_reason=SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK
         )
         response = self._refund(report)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -697,7 +697,7 @@ class TestExemptSignalReportBillingCommand(BaseTest):
         report = _make_report(self.team)
         call_command("exempt_signal_report_billing", str(self.team.id), str(report.id), "insights_system")
         report.refresh_from_db()
-        assert report.billing_exempt_reason == SignalReport.BillingExemptReason.POSTFN_SYSTEM
+        assert report.billing_exempt_reason == SignalReport.BillingExemptReason.INSIGHTS_SYSTEM
 
     def test_refuses_once_billable_pr_run_exists(self):
         report = _make_report(self.team)

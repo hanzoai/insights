@@ -45,14 +45,14 @@ export async function startCfProxyHarness(env: IntegrationEnv): Promise<Integrat
             port,
             // `vars` are baked in at boot — workerd reads them via
             // `cloudflare:workers`'s `env` export. `MCP_HONO_URL` collapses
-            // both per-region targets onto the local Hono. `POSTFN_API_BASE_URL`
+            // both per-region targets onto the local Hono. `INSIGHTS_API_BASE_URL`
             // points the worker's token-probe path at the same backend Hono
             // talks to.
             vars: {
                 MCP_HONO_URL: hono.baseUrl.toString().replace(/\/$/, ''),
-                POSTFN_API_BASE_URL: env.apiBaseUrl,
-                POSTFN_ANALYTICS_API_KEY: '',
-                POSTFN_ANALYTICS_HOST: '',
+                INSIGHTS_API_BASE_URL: env.apiBaseUrl,
+                INSIGHTS_ANALYTICS_API_KEY: '',
+                INSIGHTS_ANALYTICS_HOST: '',
             },
             experimental: {
                 disableExperimentalWarning: true,

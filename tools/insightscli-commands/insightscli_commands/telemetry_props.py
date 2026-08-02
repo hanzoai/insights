@@ -21,7 +21,7 @@ from insightscli.hooks import register_telemetry_properties
 from insightscli.manifest import REPO_ROOT
 from insightscli.telemetry import _load_config, _save_config, is_ci
 
-_POSTFN_DEV_CACHE_TTL_SECONDS = 30 * 86400  # 30 days
+_INSIGHTS_DEV_CACHE_TTL_SECONDS = 30 * 86400  # 30 days
 
 
 # Created by hogland's guest overlay (script-env-materialise) on every hogbox
@@ -38,7 +38,7 @@ _DEVBOX_ENV_MARKERS = ("CODER", "CODER_WORKSPACE_NAME")
 # marker must win over theirs. Harnesses without an ambient marker (e.g.
 # non-sandboxed codex) can self-declare via HOGLI_AGENT instead.
 _AGENT_ENV_MARKERS = (
-    ("POSTFN_CODE_VERSION", "insights-code"),
+    ("INSIGHTS_CODE_VERSION", "insights-code"),
     ("CLAUDECODE", "claude-code"),
     ("CODEX_SANDBOX", "codex"),
 )
@@ -177,7 +177,7 @@ def _is_insights_dev() -> bool:
     cached = config.get("is_insights_org_member")
     checked_at = config.get("org_check_timestamp", 0.0)
 
-    if cached is not None and (time.time() - checked_at) < _POSTFN_DEV_CACHE_TTL_SECONDS:
+    if cached is not None and (time.time() - checked_at) < _INSIGHTS_DEV_CACHE_TTL_SECONDS:
         return cached
 
     is_member = _check_github_org_membership()

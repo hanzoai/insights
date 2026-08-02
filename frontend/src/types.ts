@@ -127,7 +127,7 @@ export enum AvailableFeature {
     REPLAY_FILTER_PERSON_PROPERTIES = 'replay_filter_person_properties',
     REPLAY_FILTER_EVENTS = 'replay_filter_events',
     REPLAY_DOM_EXPLORER = 'replay_dom_explorer',
-    WORKS_WITH_POSTFN_JS = 'works_with_insights_js',
+    WORKS_WITH_INSIGHTS_JS = 'works_with_insights_js',
     REPLAY_AUTOMATIC_PLAYLISTS = 'replay_automatic_playlists',
     MOBILE_REPLAY = 'mobile_replay',
     GROUP_ANALYTICS = 'group_analytics',
@@ -5494,7 +5494,7 @@ export type IntegrationKind = (typeof INTEGRATION_KINDS)[number]
 
 // Canonical bot scopes Insights requests during the Slack OAuth install flow. Single source of
 // truth for both the frontend (app-manifest snippet + IntegrationView scope-mismatch banner)
-// and the backend (`POSTFN_SLACK_SCOPE` in insights/models/integration.py, via insights/schema.py).
+// and the backend (`INSIGHTS_SLACK_SCOPE` in insights/models/integration.py, via insights/schema.py).
 // Widening this list will surface the "Required scopes are missing" banner for any workspace
 // authorized before the change.
 //
@@ -5992,8 +5992,8 @@ export enum ActivityScope {
     INSIGHT = 'Insight',
     PLUGIN = 'Plugin',
     PLUGIN_CONFIG = 'PluginConfig',
-    FN_FUNCTION = 'InsightsFunction',
-    FN_FLOW = 'InsightsFlow',
+    INSIGHTS_FUNCTION = 'InsightsFunction',
+    INSIGHTS_FLOW = 'InsightsFlow',
     DATA_MANAGEMENT = 'DataManagement',
     EVENT_DEFINITION = 'EventDefinition',
     PROPERTY_DEFINITION = 'PropertyDefinition',

@@ -272,9 +272,9 @@ from insights.ai.openai import OpenAI
 from insights.ai.prompts import Prompts
 
 insights = Insights(
-    os.environ["POSTFN_API_KEY"],
+    os.environ["INSIGHTS_API_KEY"],
     host="https://us.hanzo.ai",  # Replace with your Insights host (e.g. https://eu.hanzo.ai for EU Cloud, or your self-hosted URL)
-    personal_api_key=os.environ["POSTFN_PERSONAL_API_KEY"],
+    personal_api_key=os.environ["INSIGHTS_PERSONAL_API_KEY"],
 )
 
 distinct_id = "<your-user-id>"
@@ -323,9 +323,9 @@ export function PromptExperimentJSSnippet({ flagKey }: PromptSnippetProps): JSX.
 import { OpenAI } from '@hanzo/ai/openai'
 import { Prompts } from '@hanzo/ai/prompts'
 
-const insights = new Insights(process.env.POSTFN_API_KEY!, {
+const insights = new Insights(process.env.INSIGHTS_API_KEY!, {
     host: 'https://us.hanzo.ai', // Replace with your Insights host (e.g. https://eu.hanzo.ai for EU Cloud, or your self-hosted URL)
-    personalApiKey: process.env.POSTFN_PERSONAL_API_KEY,
+    personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY,
 })
 
 const distinctId = '<your-user-id>'
@@ -385,7 +385,7 @@ What to do
 1. Detect the language and framework from existing project files. Use the Insights SDK
    that matches (insights-python, insights-node, etc.). Check the existing package manifest
    before installing a new SDK.
-2. Make sure POSTFN_API_KEY, POSTFN_PERSONAL_API_KEY, and the LLM provider's API key
+2. Make sure INSIGHTS_API_KEY, INSIGHTS_PERSONAL_API_KEY, and the LLM provider's API key
    (e.g. OPENAI_API_KEY) are loaded from env. Add to .env / env example if missing,
    following the project's existing env conventions.
 3. Find where the project makes LLM calls (route handler, service module, agent loop,

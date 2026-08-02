@@ -41,8 +41,8 @@ export function getUserAgent(opts: GetUserAgentOptions = {}): string {
     return parts.join(' ')
 }
 
-export const POSTFN_US_BASE_URL = 'https://us.hanzo.ai'
-export const POSTFN_EU_BASE_URL = 'https://eu.hanzo.ai'
+export const INSIGHTS_US_BASE_URL = 'https://us.hanzo.ai'
+export const INSIGHTS_EU_BASE_URL = 'https://eu.hanzo.ai'
 
 export const toCloudRegion = (value: string | undefined | null): CloudRegion => {
     const normalized = value?.toLowerCase()
@@ -53,21 +53,21 @@ export const toCloudRegion = (value: string | undefined | null): CloudRegion => 
 }
 
 export const getBaseUrlForRegion = (region: CloudRegion): string => {
-    return region === 'eu' ? POSTFN_EU_BASE_URL : POSTFN_US_BASE_URL
+    return region === 'eu' ? INSIGHTS_EU_BASE_URL : INSIGHTS_US_BASE_URL
 }
 
 export const MCP_DOCS_URL = 'https://hanzo.ai/docs/model-context-protocol'
 
 export const OAUTH_PROXY_URL = 'https://oauth.hanzo.ai'
 
-export const getCustomApiBaseUrl = (): string | undefined => env.POSTFN_API_BASE_URL
+export const getCustomApiBaseUrl = (): string | undefined => env.INSIGHTS_API_BASE_URL
 
 /**
- * Public-facing base URL for rendered links. Set when `POSTFN_API_BASE_URL` points
+ * Public-facing base URL for rendered links. Set when `INSIGHTS_API_BASE_URL` points
  * at a non-clickable hostname (e.g. cluster-internal Hono routing). Falls back to
- * `POSTFN_API_BASE_URL` when unset.
+ * `INSIGHTS_API_BASE_URL` when unset.
  */
-export const getPublicBaseUrl = (): string | undefined => env.POSTFN_PUBLIC_URL || env.POSTFN_API_BASE_URL
+export const getPublicBaseUrl = (): string | undefined => env.INSIGHTS_PUBLIC_URL || env.INSIGHTS_API_BASE_URL
 
 const CLOUD_HOSTS = new Set(['us.hanzo.ai', 'eu.hanzo.ai'])
 

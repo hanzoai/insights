@@ -7,8 +7,8 @@ import { GENERATED_TOOL_MAP } from '@/tools/generated'
 import { TOOL_MAP } from '@/tools/index'
 import type { Context, ToolBase, ZodObjectAny } from '@/tools/types'
 
-export const API_BASE_URL = process.env.TEST_POSTFN_API_BASE_URL || 'http://localhost:8010'
-export const API_TOKEN = process.env.TEST_POSTFN_PERSONAL_API_KEY
+export const API_BASE_URL = process.env.TEST_INSIGHTS_API_BASE_URL || 'http://localhost:8010'
+export const API_TOKEN = process.env.TEST_INSIGHTS_PERSONAL_API_KEY
 export const TEST_ORG_ID = process.env.TEST_ORG_ID
 export const TEST_PROJECT_ID = process.env.TEST_PROJECT_ID
 
@@ -23,7 +23,7 @@ export interface CreatedResources {
 
 export function validateEnvironmentVariables(): void {
     if (!API_TOKEN) {
-        throw new Error('TEST_POSTFN_PERSONAL_API_KEY environment variable is required')
+        throw new Error('TEST_INSIGHTS_PERSONAL_API_KEY environment variable is required')
     }
 
     if (!TEST_ORG_ID) {

@@ -154,7 +154,7 @@ PUBLIC_SANDBOX_REPOS: frozenset[str] = frozenset({"insights/hedgebox", "insights
 # TODO: Remove `insights/.github` when we switch repo discovery to repo-less agent (now it works as a lightweight dummy)
 
 SENSITIVE_AGENT_RUNTIME_ENV_NAMES: frozenset[str] = frozenset(
-    {"POSTFN_TASK_RUN_EVENT_INGEST_TOKEN", "POSTFN_TASK_RUN_SESSION_TOKEN"}
+    {"INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN", "INSIGHTS_TASK_RUN_SESSION_TOKEN"}
 )
 SENSITIVE_AGENT_RUNTIME_ENV_PATTERN = re.compile(
     r"(?P<name>" + "|".join(re.escape(name) for name in SENSITIVE_AGENT_RUNTIME_ENV_NAMES) + r")="
@@ -195,24 +195,24 @@ def build_agent_runtime_env_prefix(
     rtk_enabled: bool = True,
 ) -> str:
     env_vars = {
-        "POSTFN_CODE_INTERACTION_ORIGIN": interaction_origin,
-        "POSTFN_AGENT_RUNTIME": agent_runtime,
-        "POSTFN_SANDBOX_ID": sandbox_id,
-        "POSTFN_CODE_RUNTIME_ADAPTER": runtime_adapter,
-        "POSTFN_CODE_PROVIDER": provider,
-        "POSTFN_CODE_MODEL": model,
-        "POSTFN_CODE_REASONING_EFFORT": reasoning_effort,
-        "POSTFN_CODE_CONTEXT_WINDOW": context_window,
+        "INSIGHTS_CODE_INTERACTION_ORIGIN": interaction_origin,
+        "INSIGHTS_AGENT_RUNTIME": agent_runtime,
+        "INSIGHTS_SANDBOX_ID": sandbox_id,
+        "INSIGHTS_CODE_RUNTIME_ADAPTER": runtime_adapter,
+        "INSIGHTS_CODE_PROVIDER": provider,
+        "INSIGHTS_CODE_MODEL": model,
+        "INSIGHTS_CODE_REASONING_EFFORT": reasoning_effort,
+        "INSIGHTS_CODE_CONTEXT_WINDOW": context_window,
         # Explicit false pins fast mode off even if a stale env value survives in a resumed sandbox.
-        "POSTFN_CODE_FAST_MODE": None if fast_mode is None else ("true" if fast_mode else "false"),
-        "POSTFN_CODE_INITIAL_PERMISSION_MODE": initial_permission_mode,
-        "POSTFN_TASK_RUN_EVENT_INGEST_TOKEN": event_ingest_token,
-        "POSTFN_TASK_RUN_SESSION_TOKEN": task_run_session_token,
-        "POSTFN_TASK_RUN_EVENT_INGEST_URL": event_ingest_url,
-        "POSTFN_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN": "true" if event_ingest_keep_stream_open else None,
+        "INSIGHTS_CODE_FAST_MODE": None if fast_mode is None else ("true" if fast_mode else "false"),
+        "INSIGHTS_CODE_INITIAL_PERMISSION_MODE": initial_permission_mode,
+        "INSIGHTS_TASK_RUN_EVENT_INGEST_TOKEN": event_ingest_token,
+        "INSIGHTS_TASK_RUN_SESSION_TOKEN": task_run_session_token,
+        "INSIGHTS_TASK_RUN_EVENT_INGEST_URL": event_ingest_url,
+        "INSIGHTS_TASK_RUN_EVENT_INGEST_KEEP_STREAM_OPEN": "true" if event_ingest_keep_stream_open else None,
         # Set explicitly in both states: "0" opts the run out, "1" pins auto-detection on
         # even if a stale env value survives in a resumed sandbox.
-        "POSTFN_RTK": "1" if rtk_enabled else "0",
+        "INSIGHTS_RTK": "1" if rtk_enabled else "0",
     }
     assignments = " ".join(
         f"{name}={shlex.quote(value)}" for name, value in env_vars.items() if value is not None and value != ""
@@ -313,7 +313,7 @@ class SandboxBase(ABC):
             # untrusted workspace at /tmp/workspace, and PATH is a settable sandbox env var,
             # so without scrubbing the helper's `start-dockerd`/`docker` lookups could resolve
             # an attacker binary from the workspace — and would run it with the injected
-            # POSTFN_PERSONAL_API_KEY / GITHUB_TOKEN. `env -i` drops those credentials and the
+            # INSIGHTS_PERSONAL_API_KEY / GITHUB_TOKEN. `env -i` drops those credentials and the
             # user PATH; the fixed PATH resolves only real system binaries (start-dockerd lives
             # in /usr/local/bin). HOME=/root covers tooling that needs it (dockerd runs as root).
             result = self.execute(
@@ -354,7 +354,7 @@ class SandboxBase(ABC):
 
     def agent_server_supports_pi_runtime(self) -> bool:
         result = self.execute(
-            "grep -q POSTFN_AGENT_RUNTIME /scripts/node_modules/.bin/agent-server",
+            "grep -q INSIGHTS_AGENT_RUNTIME /scripts/node_modules/.bin/agent-server",
             timeout_seconds=10,
         )
         return result.exit_code == 0
@@ -585,7 +585,7 @@ def _get_modal_docker_sandbox_class() -> SandboxClass:
     """Modal sandbox with a separate app name for local development.
 
     Uses a dedicated Modal app (insights-sandbox-modal-docker-*) so that
-    local image builds with LOCAL_POSTFN_CODE_MONOREPO_ROOT don't
+    local image builds with LOCAL_INSIGHTS_CODE_MONOREPO_ROOT don't
     pollute the production app's image cache.
     """
     # Allow TEST too: the guard runs at module import, and pytest loads settings with

@@ -15,7 +15,7 @@ from llm_gateway.dependencies import (
     get_request_json,
     resolve_plan_and_quota,
 )
-from llm_gateway.products.config import POSTFN_CODE_US_APP_ID
+from llm_gateway.products.config import INSIGHTS_CODE_US_APP_ID
 from llm_gateway.rate_limiting.throttles import ThrottleContext, ThrottleResult
 from llm_gateway.services.plan_resolver import PlanInfo
 from llm_gateway.services.quota_resolver import QuotaResourceStatus
@@ -329,7 +329,7 @@ class TestFreeTierModelGateWiring:
         # the gate must see form-encoded models, not just JSON ones
         from llm_gateway.config import get_settings
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         try:
             request = _make_form_request(
@@ -356,7 +356,7 @@ class TestFreeTierModelGateWiring:
         # pins that enforce_throttles actually consults the gate on the request path
         from llm_gateway.config import get_settings
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         try:
             request = _make_request({"model": "claude-fable-5", "messages": []}, path="/array/v1/messages")
@@ -389,7 +389,7 @@ class TestServerCredentialRequirementWiring:
             auth_method="oauth_access_token",
             distinct_id="test-distinct-id-7",
             scopes=scopes,
-            application_id=POSTFN_CODE_US_APP_ID,
+            application_id=INSIGHTS_CODE_US_APP_ID,
         )
 
     @pytest.mark.asyncio
@@ -397,7 +397,7 @@ class TestServerCredentialRequirementWiring:
         # pins that enforce_product_access actually applies the server-credential check on the path
         from llm_gateway.config import get_settings
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         try:
             request = _make_request({"model": "claude-sonnet-5", "messages": []}, path="/signals/v1/messages")
@@ -414,7 +414,7 @@ class TestServerCredentialRequirementWiring:
         # real server-minted token (carrying the marker) would be wrongly rejected here.
         from llm_gateway.config import get_settings
 
-        monkeypatch.setenv("LLM_GATEWAY_POSTFN_CODE_MODEL_GATE_ENABLED", "true")
+        monkeypatch.setenv("LLM_GATEWAY_INSIGHTS_CODE_MODEL_GATE_ENABLED", "true")
         get_settings.cache_clear()
         try:
             request = _make_request({"model": "claude-sonnet-5", "messages": []}, path="/signals/v1/messages")

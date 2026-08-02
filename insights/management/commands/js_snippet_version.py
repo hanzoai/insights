@@ -55,8 +55,8 @@ class Command(BaseCommand):
         subparsers.add_parser("sync", help="Re-sync versions.json from S3 to Redis")
 
     def handle(self, *args, **options):
-        if not settings.POSTFN_JS_S3_BUCKET:
-            raise CommandError("POSTFN_JS_S3_BUCKET is not configured")
+        if not settings.INSIGHTS_JS_S3_BUCKET:
+            raise CommandError("INSIGHTS_JS_S3_BUCKET is not configured")
 
         action = options["action"]
         if action == "publish":
@@ -116,7 +116,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Validating artifacts for v{version}...")
         if not validate_version_artifacts(version):
             raise CommandError(
-                f"Artifacts for v{version} not found in S3 bucket {settings.POSTFN_JS_S3_BUCKET}. "
+                f"Artifacts for v{version} not found in S3 bucket {settings.INSIGHTS_JS_S3_BUCKET}. "
                 f"Ensure {array_js_path(version)} exists before publishing."
             )
         self.stdout.write(self.style.SUCCESS("Artifacts validated"))

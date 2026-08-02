@@ -38,7 +38,7 @@ from insights.schema import (
 
 from insights.insightsql import ast
 from insights.insightsql.constants import (
-    MAX_SELECT_POSTFN_AI_LIMIT,
+    MAX_SELECT_INSIGHTS_AI_LIMIT,
     MAX_SELECT_RETURNED_ROWS,
     InsightsQLDialect,
     InsightsQLGlobalSettings,
@@ -2593,10 +2593,10 @@ class TestPrinter(BaseTest):
         )
 
     def test_select_limit_with_insights_ai_context(self):
-        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, limit_context=LimitContext.POSTFN_AI)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, limit_context=LimitContext.INSIGHTS_AI)
         self.assertEqual(
             self._select("select 1 limit 1000", context=context),
-            f"SELECT 1 LIMIT {MAX_SELECT_POSTFN_AI_LIMIT}",
+            f"SELECT 1 LIMIT {MAX_SELECT_INSIGHTS_AI_LIMIT}",
         )
 
     def test_select_offset(self):

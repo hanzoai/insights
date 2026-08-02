@@ -62,8 +62,8 @@ concurrently.
 Override these only for a dedicated worker with measured headroom:
 
 ```bash
-POSTFN_SENTIMENT_ONNX_INTRA_OP_NUM_THREADS=2
-POSTFN_SENTIMENT_ONNX_INTER_OP_NUM_THREADS=1
+INSIGHTS_SENTIMENT_ONNX_INTRA_OP_NUM_THREADS=2
+INSIGHTS_SENTIMENT_ONNX_INTER_OP_NUM_THREADS=1
 ```
 
 ## Running tests

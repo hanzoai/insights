@@ -34,19 +34,19 @@
 
 ### Patch changes
 
-- [f3a3420b95](https://github.com/Insights/insights/commit/f3a3420b951b9a38d75cbc811f44745585e2cba5) `insights-cli api` failures are now diagnosable and attributable. Launch failures report the specific cause (bundle not embedded in the build, no home directory, install-directory write failure with the underlying IO error kind, Node.js missing) both in the error message and in error telemetry, instead of one generic bundle-not-found error. When the proxied Node process fails, the CLI now exits through its normal path — flushing telemetry and honoring `--no-fail` — instead of terminating immediately, and the bundled API CLI flushes its own analytics before exiting non-zero so failed calls are no longer silently dropped. The `api` command also emits the standard command-run usage event and attaches the project id from `POSTFN_CLI_PROJECT_ID`/`POSTFN_CLI_ENV_ID` to telemetry when stored credentials are not used. — Thanks @cvolzer3!
+- [f3a3420b95](https://github.com/Insights/insights/commit/f3a3420b951b9a38d75cbc811f44745585e2cba5) `insights-cli api` failures are now diagnosable and attributable. Launch failures report the specific cause (bundle not embedded in the build, no home directory, install-directory write failure with the underlying IO error kind, Node.js missing) both in the error message and in error telemetry, instead of one generic bundle-not-found error. When the proxied Node process fails, the CLI now exits through its normal path — flushing telemetry and honoring `--no-fail` — instead of terminating immediately, and the bundled API CLI flushes its own analytics before exiting non-zero so failed calls are no longer silently dropped. The `api` command also emits the standard command-run usage event and attaches the project id from `INSIGHTS_CLI_PROJECT_ID`/`INSIGHTS_CLI_ENV_ID` to telemetry when stored credentials are not used. — Thanks @cvolzer3!
 
 ## 0.8.4 — 2026-07-16
 
 ### Patch changes
 
-- [f45778f281](https://github.com/Insights/insights/commit/f45778f28141b42559f59dca347aa64e8671c8bd) The dotenv credentials file can now also be pointed at with the `POSTFN_CLI_DOTENV_FILE` environment variable, equivalent to passing `--dotenv-file` — for callers that control the environment but not the command line (e.g. an Xcode build phase invoking the iOS SDK's upload-symbols.sh). — Thanks @ablaszkiewicz!
+- [f45778f281](https://github.com/Insights/insights/commit/f45778f28141b42559f59dca347aa64e8671c8bd) The dotenv credentials file can now also be pointed at with the `INSIGHTS_CLI_DOTENV_FILE` environment variable, equivalent to passing `--dotenv-file` — for callers that control the environment but not the command line (e.g. an Xcode build phase invoking the iOS SDK's upload-symbols.sh). — Thanks @ablaszkiewicz!
 
 ## 0.8.3 — 2026-07-15
 
 ### Patch changes
 
-- [97457ef9b4](https://github.com/Insights/insights/commit/97457ef9b493debd3975f12b8b6d1c4baaee2d93) Sourcemap upload concurrency can now be configured with `--concurrency` or `POSTFN_CLI_SOURCEMAP_UPLOAD_CONCURRENCY`, while keeping the existing default of 10 uploads at a time. — Thanks @DebadityaHait!
+- [97457ef9b4](https://github.com/Insights/insights/commit/97457ef9b493debd3975f12b8b6d1c4baaee2d93) Sourcemap upload concurrency can now be configured with `--concurrency` or `INSIGHTS_CLI_SOURCEMAP_UPLOAD_CONCURRENCY`, while keeping the existing default of 10 uploads at a time. — Thanks @DebadityaHait!
 
 ## 0.8.2 — 2026-07-13
 
@@ -176,7 +176,7 @@ _Never published: the release pipeline's Windows build failed after the version 
 
 ## 0.7.16
 
-- feat: add `--dry-run` flag (and `POSTFN_CLI_DRY_RUN` env var) to skip artifact uploads (sourcemap, dSYM, Hermes, ProGuard) without contacting Insights or requiring credentials — for CI gates that bundle to catch regressions but must not upload.
+- feat: add `--dry-run` flag (and `INSIGHTS_CLI_DRY_RUN` env var) to skip artifact uploads (sourcemap, dSYM, Hermes, ProGuard) without contacting Insights or requiring credentials — for CI gates that bundle to catch regressions but must not upload.
 
 ## 0.7.15
 
@@ -184,7 +184,7 @@ _Never published: the release pipeline's Windows build failed after the version 
 
 ## 0.7.14
 
-- feat: add `--env-file <PATH>` to load `POSTFN_CLI_HOST`, `POSTFN_CLI_API_KEY`, and `POSTFN_CLI_PROJECT_ID` (and their legacy aliases) from a dotenv-style file when not set in the process environment. Credentials are resolved atomically from a single source (process env first, then the file), so `POSTFN_CLI_HOST` from the file cannot redirect a key supplied by the process env.
+- feat: add `--env-file <PATH>` to load `INSIGHTS_CLI_HOST`, `INSIGHTS_CLI_API_KEY`, and `INSIGHTS_CLI_PROJECT_ID` (and their legacy aliases) from a dotenv-style file when not set in the process environment. Credentials are resolved atomically from a single source (process env first, then the file), so `INSIGHTS_CLI_HOST` from the file cannot redirect a key supplied by the process env.
 
 ## 0.7.13
 
@@ -267,7 +267,7 @@ _Never published: the release pipeline's Windows build failed after the version 
 
 ## 0.5.29
 
-- chore: introduce env variable `POSTFN_CLI_API_KEY` and `POSTFN_CLI_PROJECT_ID` (backwards compatible)
+- chore: introduce env variable `INSIGHTS_CLI_API_KEY` and `INSIGHTS_CLI_PROJECT_ID` (backwards compatible)
 
 ## 0.5.28
 

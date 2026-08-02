@@ -18,7 +18,7 @@ from insights.settings.utils import get_from_env
 # Configurable via env so on-callers can bump it without a deploy if a batch
 # rerun legitimately needs to drain more rows. The Node side reads the same
 # env var from its CDP config — keep both in sync if you tweak the default.
-FN_INVOCATION_RERUN_MAX_COUNT = get_from_env("FN_INVOCATION_RERUN_MAX_COUNT", default=10000, type_cast=int)
+INSIGHTS_INVOCATION_RERUN_MAX_COUNT = get_from_env("INSIGHTS_INVOCATION_RERUN_MAX_COUNT", default=10000, type_cast=int)
 
 # Matches the Datastore TTL on `hog_invocation_results` (30 days). A rerun
 # window any longer would point at partitions that have already been dropped.
@@ -49,19 +49,19 @@ class HogInvocationRerunFilterSerializer(serializers.Serializer):
     max_count = serializers.IntegerField(
         required=False,
         min_value=1,
-        max_value=FN_INVOCATION_RERUN_MAX_COUNT,
+        max_value=INSIGHTS_INVOCATION_RERUN_MAX_COUNT,
         help_text=(
             f"Maximum number of invocations to rerun in this request. "
-            f"Server-side cap is {FN_INVOCATION_RERUN_MAX_COUNT}."
+            f"Server-side cap is {INSIGHTS_INVOCATION_RERUN_MAX_COUNT}."
         ),
     )
     invocation_ids = serializers.ListField(
         child=serializers.CharField(),
         required=False,
-        max_length=FN_INVOCATION_RERUN_MAX_COUNT,
+        max_length=INSIGHTS_INVOCATION_RERUN_MAX_COUNT,
         help_text=(
             "Optional restriction to specific invocation IDs within the window. "
-            f"Capped at {FN_INVOCATION_RERUN_MAX_COUNT} per request. Always combined with "
+            f"Capped at {INSIGHTS_INVOCATION_RERUN_MAX_COUNT} per request. Always combined with "
             "`window_start`/`window_end` so the Datastore query can be partition-pruned."
         ),
     )

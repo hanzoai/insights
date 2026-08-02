@@ -57,9 +57,9 @@ export type RedisConnectionsConfig = Pick<
     | 'REDIS_POOL_MAX_SIZE'
     | 'INGESTION_REDIS_HOST'
     | 'INGESTION_REDIS_PORT'
-    | 'POSTFN_REDIS_HOST'
-    | 'POSTFN_REDIS_PORT'
-    | 'POSTFN_REDIS_PASSWORD'
+    | 'INSIGHTS_REDIS_HOST'
+    | 'INSIGHTS_REDIS_PORT'
+    | 'INSIGHTS_REDIS_PASSWORD'
 >
 
 /** Kafka consumer loop tuning config */
