@@ -395,7 +395,21 @@ def skip_content(path: str) -> bool:
     return path.endswith(SKIP_CONTENT_SUFFIX) or os.path.basename(path) in SKIP_CONTENT_NAMES
 
 
-IMPORT_RE = re.compile(r"(?:from|import)\s+products\.([a-z_]+)")
+# A product is held by any file we keep that still imports it. The tree has two
+# module systems and they spell an import differently, so the closure has to
+# read both or half the dependency graph is invisible to it.
+PY_IMPORT = re.compile(r"(?:from|import)\s+products\.([a-z_]+)")
+# TypeScript resolves `products/x/...` from the tsconfig root and
+# `../../products/x/...` relatively, and a bundler follows `import()` and
+# `require()` as readily as a static import. Anchored on the keyword rather
+# than on the path alone, because a quoted path in a config names a product
+# precisely because it is NOT built: jest's testPathIgnorePatterns and
+# oxlint's ignore list would otherwise read as dependencies.
+TS_IMPORT = re.compile(r"""(?:from|import|require)\s*\(?\s*['"](?:\.\./)*products/([a-z_]+)/""")
+IMPORT_SOURCES: tuple[tuple[tuple[str, ...], re.Pattern[str]], ...] = (
+    ((".py",), PY_IMPORT),
+    ((".ts", ".tsx", ".js", ".jsx", ".mts", ".cts"), TS_IMPORT),
+)
 
 
 def drop_closure(root: str, files: list[str]) -> tuple[set[str], dict[str, int]]:
@@ -403,20 +417,21 @@ def drop_closure(root: str, files: list[str]) -> tuple[set[str], dict[str, int]]
 
     Upstream keeps weaving products back into the core app, so a drop list
     written once goes stale silently and the first symptom is a
-    ModuleNotFoundError at Django startup. Deleting a product that kept code
-    imports is a refactor, not a delete, so this refuses to do it and says
-    which product held on and how hard.
+    ModuleNotFoundError at Django startup, or a bundler resolving nothing.
+    Deleting a product that kept code imports is a refactor, not a delete, so
+    this refuses to do it and says which product held on and how hard.
     """
     wanted = {d.split("/", 1)[1] for d, _ in DROP_DIRS if d.startswith("products/")}
     imports: list[tuple[str, set[str]]] = []
     for f in files:
-        if not f.endswith(".py"):
+        pattern = next((p for exts, p in IMPORT_SOURCES if f.endswith(exts)), None)
+        if pattern is None:
             continue
         try:
             src = open(os.path.join(root, f), encoding="utf-8", errors="ignore").read()
         except OSError:
             continue
-        found = {mm.group(1) for mm in IMPORT_RE.finditer(src)} & wanted
+        found = {mm.group(1) for mm in pattern.finditer(src)} & wanted
         if found:
             imports.append((f, found))
 
