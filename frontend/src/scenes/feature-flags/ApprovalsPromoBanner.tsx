@@ -18,9 +18,13 @@ const DISMISS_KEY = 'feature-flags-approvals-promo'
 export function ApprovalsPromoBanner(): JSX.Element | null {
     const { hasAvailableFeature } = useValues(userLogic)
     const { isAdminOrOwner } = useValues(organizationLogic)
-    const bannerLogic = bannerLogic({ dismissKey: DISMISS_KEY })
-    const { isDismissed } = useValues(bannerLogic)
-    const { dismiss } = useActions(bannerLogic)
+    // `logic`, not `bannerLogic`: a local of that name shadows the import above and
+    // initialises itself from itself, so this line threw "Cannot access
+    // 'bannerLogic' before initialization" and took the whole feature flags scene
+    // down with it -- before the availability check below, so for everyone.
+    const logic = bannerLogic({ dismissKey: DISMISS_KEY })
+    const { isDismissed } = useValues(logic)
+    const { dismiss } = useActions(logic)
 
     const shouldShow = isAdminOrOwner && hasAvailableFeature(AvailableFeature.APPROVALS)
 
