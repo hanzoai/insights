@@ -2,6 +2,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconEllipsis } from '@hanzo/icons'
 
+import { CAPABILITIES } from 'lib/capabilities'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { Button } from 'lib/elements/Button'
 import { Modal } from 'lib/elements/Modal'
 import { Skeleton } from 'lib/elements/Skeleton'
@@ -114,6 +116,10 @@ export function ManageSubscriptions({
                             ))}
                         </div>
                     </div>
+                ) : !CAPABILITIES.subscriptions.available ? (
+                    // Without this the empty state reads "there are none yet" and offers to add
+                    // one — an invitation to a 404. Say the feature is absent instead.
+                    <Unavailable capability="subscriptions" />
                 ) : (
                     <div className="flex flex-col p-4 items-center text-center">
                         <h3>There are no subscriptions for this insight</h3>
@@ -129,7 +135,7 @@ export function ManageSubscriptions({
 
             <Modal.Footer>
                 <div className="flex-1">
-                    {subscriptions.length ? (
+                    {subscriptions.length && CAPABILITIES.subscriptions.available ? (
                         <Button type="secondary" onClick={() => onSelect('new')}>
                             Add subscription
                         </Button>
