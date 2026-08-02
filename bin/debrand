@@ -366,8 +366,12 @@ RATCHET: list[tuple[str, re.Pattern[str], str]] = [
         # pre-existing hit, `router.register(r"person", ...)`, which is
         # grandfathered — proof the rule bites on something real.
         re.compile(
+            # \b on the verb, or a helper called _build_url() reads as a route
+            # declaration and every vendor URL it tests becomes a violation.
+            # Measured: without it, a Pylon source test asserting on
+            # "https://api.usepylon.com/teams" trips the rule.
             r"""(?xi)
-            (?: (?:register|path|re_path|url) \s* \( \s* r? ["'] [^"']* \b (?:persons?|teams?) \b )
+            (?: \b (?:register|path|re_path|url) \s* \( \s* r? ["'] [^"']* \b (?:persons?|teams?) \b )
             | (?: ["'`] /v1/ [\w/{}:.\-]* \b (?:persons?|teams?) \b )
             """
         ),
