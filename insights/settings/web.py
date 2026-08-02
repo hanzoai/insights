@@ -248,11 +248,22 @@ WSGI_APPLICATION = "insights.wsgi.application"
 
 AUTHENTICATION_BACKENDS: list[str] = [
     "axes.backends.AxesStandaloneBackend",
-    "social_core.backends.github.GithubOAuth2",
-    "social_core.backends.gitlab.GitLabOAuth2",
+    # Hanzo IAM (hanzo.id) is the single federated login. Upstream's per-vendor
+    # OAuth backends are not wired: this deployment has one identity provider,
+    # and a second one would be a second place to revoke an account from.
+    "social_core.backends.open_id_connect.OpenIdConnectAuth",
     "django.contrib.auth.backends.ModelBackend",
     "insights.auth.WebauthnBackend",
 ]
+
+# Hanzo IAM OIDC SSO (social-auth). All five come from the deployment; the
+# secret is delivered from KMS at hanzo//insights-secrets.
+SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: str | None = os.getenv("SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
+SOCIAL_AUTH_OIDC_KEY: str | None = os.getenv("SOCIAL_AUTH_OIDC_KEY")
+SOCIAL_AUTH_OIDC_SECRET: str | None = os.getenv("SOCIAL_AUTH_OIDC_SECRET")
+SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
+SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
+SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
 
 AUTH_USER_MODEL = "insights.User"
 
@@ -275,13 +286,14 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.social_details",
     "social_core.pipeline.social_auth.social_uid",
     "social_core.pipeline.social_auth.auth_allowed",
-    "ee.api.authentication.social_auth_allowed",
     "social_core.pipeline.social_auth.social_user",
     "social_core.pipeline.social_auth.associate_by_email",
     "insights.api.signup.social_create_user",
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
+    # Hanzo IAM: map the OIDC org claim -> Organization + Team + Membership.
+    "insights.api.iam_org_pipeline.iam_org_assign",
     "insights.api.authentication.social_login_notification",
 )
 
