@@ -5,7 +5,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("insights", "1178_datadeletionrequest_person_properties"),
-        ("workflows", "0007_migrate_hog_flow_models"),
+        ("workflows", "0007_migrate_insights_flow_models"),
     ]
 
     operations = [

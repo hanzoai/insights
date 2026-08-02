@@ -403,7 +403,7 @@ class TestExternalAccountAPI(APIBaseTest):
         self.assertIsNone(log.user)
         detail = log.detail
         assert detail is not None
-        self.assertEqual(detail["trigger"]["job_type"], "hog_flow")
+        self.assertEqual(detail["trigger"]["job_type"], "insights_flow")
         self.assertEqual(detail["trigger"]["job_id"], workflow_id)
 
     def test_post_does_not_see_other_teams_account(self):

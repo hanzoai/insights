@@ -11,7 +11,7 @@ from insights.models.organization import OrganizationMembership
 from insights.models.user import User
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 
@@ -23,11 +23,11 @@ class TestMessageSuppressionAccessControl(APIBaseTest):
 
     The endpoints act on team-wide data (every suppressed recipient, their SMTP diagnostics,
     every add/remove) but carry no per-workflow object. `AccessControlPermission` alone falls
-    back to "does the user have access to any single hog_flow object?" — which would let a
+    back to "does the user have access to any single insights_flow object?" — which would let a
     member granted access to one workflow read or mutate the entire team's list.
-    `check_access_level_for_resource` closes that gap by requiring project-wide hog_flow access.
+    `check_access_level_for_resource` closes that gap by requiring project-wide insights_flow access.
 
-    Test lives under products/workflows because the RBAC gate is a hog_flow concern; the viewset
+    Test lives under products/workflows because the RBAC gate is a insights_flow concern; the viewset
     itself lives in products/messaging (tach forbids messaging from importing ee/workflows).
     """
 
@@ -50,7 +50,7 @@ class TestMessageSuppressionAccessControl(APIBaseTest):
         # access the user has.
         AccessControl.objects.create(
             team=self.team,
-            resource="hog_flow",
+            resource="insights_flow",
             resource_id=None,
             access_level="none",
             organization_member=None,
@@ -69,7 +69,7 @@ class TestMessageSuppressionAccessControl(APIBaseTest):
         membership = OrganizationMembership.objects.get(user=user, organization=self.organization)
         AccessControl.objects.create(
             team=self.team,
-            resource="hog_flow",
+            resource="insights_flow",
             resource_id=resource_id,
             access_level=access_level,
             organization_member=membership,

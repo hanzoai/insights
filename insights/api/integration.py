@@ -104,7 +104,7 @@ from insights.utils import is_relative_url
 from products.batch_exports.backend.models.batch_export import get_batch_exports_using_integration
 from products.cdp.backend.services.integration_usage import get_enabled_insights_functions_using_integration
 from products.tasks.backend.facade.api import count_in_progress_runs_for_github_integration
-from products.workflows.backend.services.integration_usage import get_active_hog_flows_using_integration
+from products.workflows.backend.services.integration_usage import get_active_insights_flows_using_integration
 
 logger = structlog.get_logger(__name__)
 
@@ -1048,7 +1048,7 @@ class IntegrationViewSet(
         return super().get_throttles()
 
     def perform_destroy(self, instance) -> None:
-        flows_using_integration = get_active_hog_flows_using_integration(
+        flows_using_integration = get_active_insights_flows_using_integration(
             team_id=instance.team_id, integration_id=instance.id
         )
         functions_using_integration = get_enabled_insights_functions_using_integration(

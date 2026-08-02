@@ -10,7 +10,7 @@ from products.dashboards.backend.models.dashboard import Dashboard
 from products.dashboards.backend.models.dashboard_tile import DashboardTile
 from products.product_analytics.backend.models.insight import Insight
 
-from ee.models.dashboard_privilege import DashboardPrivilege
+from insights.models.ee_models import DashboardPrivilege
 
 
 class WithPermissionsBase:
@@ -57,7 +57,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
             assert permissions.team(self.team).effective_membership_level is None
 
     def test_team_effective_membership_level_with_explicit_membership_returns_current_level(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Make the team private using new access control system
         AccessControl.objects.create(
@@ -78,7 +78,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
         assert self.team.id in self.permissions().team_ids_visible_for_user
 
     def test_team_ids_visible_for_user_no_explicit_permissions(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Make the team private using new access control system
         AccessControl.objects.create(
@@ -93,7 +93,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
         assert self.team.id not in self.permissions().team_ids_visible_for_user
 
     def test_team_ids_visible_for_user_explicit_permission(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Make the team private using new access control system
         AccessControl.objects.create(
@@ -106,7 +106,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
         )
 
         # ExplicitTeamMembership deprecated - now using AccessControl for granular permissions
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         AccessControl.objects.create(
             team=self.team,
@@ -136,7 +136,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_new_access_control_private_team_admin(self):
         """Test that organization admins have access to a private team with the new access control system"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Set up team with new access control system
         # Team is not private (no AccessControl objects), so organization level is used
@@ -161,7 +161,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_new_access_control_private_team_member_no_access(self):
         """Test that regular members don't have access to a private team with the new access control system"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Set up team with new access control system
         # Team is not private (no AccessControl objects), so organization level is used
@@ -186,7 +186,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_new_access_control_private_team_with_member_access(self):
         """Test that users with specific member access have access to a private team with the new access control system"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Set up team with new access control system
         # Team is not private (no AccessControl objects), so organization level is used
@@ -220,8 +220,8 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_new_access_control_private_team_with_role_access(self):
         """Test that users with role-based access have access to a private team with the new access control system"""
-        from ee.models.rbac.access_control import AccessControl
-        from ee.models.rbac.role import Role, RoleMembership
+        from insights.models.ee_models import AccessControl
+        from insights.models.ee_models import Role, RoleMembership
 
         # Set up team with new access control system
         # Team is not private (no AccessControl objects), so organization level is used
@@ -265,7 +265,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_higher_project_membership_than_org_membership(self):
         """Test that users with admin project access will have its effective membership level at admin"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Set up user as a member
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
@@ -284,8 +284,8 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_with_higher_role_based_access(self):
         """Test that users with admin role-based access have its effective membership level at admin"""
-        from ee.models.rbac.access_control import AccessControl
-        from ee.models.rbac.role import Role, RoleMembership
+        from insights.models.ee_models import AccessControl
+        from insights.models.ee_models import Role, RoleMembership
 
         # Set up user as a member
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
@@ -317,8 +317,8 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
     def test_team_effective_membership_level_role_based_access_inert_without_role_based_access_feature(self):
         """Role-backed project AccessControl rows must NOT take effect when the org lacks
         ROLE_BASED_ACCESS — mirrors the UI gate on the project access settings page."""
-        from ee.models.rbac.access_control import AccessControl
-        from ee.models.rbac.role import Role, RoleMembership
+        from insights.models.ee_models import AccessControl
+        from insights.models.ee_models import Role, RoleMembership
 
         # Drop ROLE_BASED_ACCESS, keep ACCESS_CONTROL
         self.organization.available_product_features = [
@@ -354,7 +354,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_lower_project_membership_than_org_membership(self):
         """Test that users with admin org access maintain their admin level even with lower member project access"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Set up user as admin
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -373,7 +373,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_default_access_level_admin(self):
         """Test that org members get admin level when the project default access level is set to admin"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
@@ -392,7 +392,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_default_access_level_member(self):
         """Test that org members get member level when the project default access level is set to member"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
@@ -411,7 +411,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
 
     def test_team_effective_membership_level_direct_access_overrides_default(self):
         """Test that direct user access overrides the project default access level"""
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
@@ -446,8 +446,8 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
         The role admin access should take precedence and return ADMIN level.
         Currently this fails because direct member access returns early without checking roles.
         """
-        from ee.models.rbac.access_control import AccessControl
-        from ee.models.rbac.role import Role, RoleMembership
+        from insights.models.ee_models import AccessControl
+        from insights.models.ee_models import Role, RoleMembership
 
         # Set up user as organization member (not admin)
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
@@ -526,7 +526,7 @@ class TestUserDashboardPermissions(BaseTest, WithPermissionsBase):
         )
 
     def test_dashboard_can_restrict(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         # Explicitly set project default access to member level so the user
         # doesn't get the implicit admin default
@@ -559,7 +559,7 @@ class TestUserDashboardPermissions(BaseTest, WithPermissionsBase):
         assert self.dashboard_permissions().effective_privilege_level == Dashboard.PrivilegeLevel.CAN_EDIT
 
     def test_dashboard_effective_privilege_level_when_collaborators_can_edit(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.dashboard.restriction_level = Dashboard.RestrictionLevel.ONLY_COLLABORATORS_CAN_EDIT
         self.dashboard.save()
@@ -604,7 +604,7 @@ class TestUserDashboardPermissions(BaseTest, WithPermissionsBase):
         assert self.dashboard_permissions().can_edit
 
     def test_dashboard_can_edit_not_collaborator(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.dashboard.restriction_level = Dashboard.RestrictionLevel.ONLY_COLLABORATORS_CAN_EDIT
         self.dashboard.save()
@@ -695,7 +695,7 @@ class TestUserInsightPermissions(BaseTest, WithPermissionsBase):
         )
 
     def test_effective_privilege_level_all_limited(self):
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         Dashboard.objects.all().update(restriction_level=Dashboard.RestrictionLevel.ONLY_COLLABORATORS_CAN_EDIT)
 

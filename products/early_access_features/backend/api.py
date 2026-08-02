@@ -34,7 +34,7 @@ from products.feature_flags.backend.facade.api import create_flag, update_flag
 from products.feature_flags.backend.facade.filters import set_feature_enrollment
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 from .models import EarlyAccessFeature
 

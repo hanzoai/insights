@@ -16,10 +16,10 @@ class TestInsightsFlowRevisionModel(BaseTest):
         flow = InsightsFlow.objects.create(team=self.team, name="Flow")
 
         with team_scope(other_team.id):
-            revision = InsightsFlowRevision.objects.create(team=other_team, hog_flow=flow, version=1, content={})
+            revision = InsightsFlowRevision.objects.create(team=other_team, insights_flow=flow, version=1, content={})
 
         assert revision.team_id == self.team.id
         with team_scope(self.team.id):
-            assert InsightsFlowRevision.objects.filter(hog_flow=flow).count() == 1
+            assert InsightsFlowRevision.objects.filter(insights_flow=flow).count() == 1
         with team_scope(other_team.id):
             assert InsightsFlowRevision.objects.count() == 0

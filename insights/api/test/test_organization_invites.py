@@ -23,8 +23,8 @@ from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.team.team import Team
 from insights.models.utils import generate_random_token_personal, hash_key_value
 
-from ee.models import Role, RoleMembership
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import Role, RoleMembership
+from insights.models.ee_models import AccessControl
 
 NAME_SEEDS = ["John", "Jane", "Alice", "Bob", ""]
 

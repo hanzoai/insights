@@ -250,12 +250,12 @@ class TestMessageTemplatesAPI(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("list_with_read_scope", ["hog_flow:read"], "get", None, status.HTTP_200_OK),
-            ("retrieve_with_read_scope", ["hog_flow:read"], "get", "detail", status.HTTP_200_OK),
-            ("create_with_write_scope", ["hog_flow:write"], "post", None, status.HTTP_201_CREATED),
-            ("update_with_write_scope", ["hog_flow:write"], "patch", "detail", status.HTTP_200_OK),
-            ("create_with_read_scope_forbidden", ["hog_flow:read"], "post", None, status.HTTP_403_FORBIDDEN),
-            ("update_with_read_scope_forbidden", ["hog_flow:read"], "patch", "detail", status.HTTP_403_FORBIDDEN),
+            ("list_with_read_scope", ["insights_flow:read"], "get", None, status.HTTP_200_OK),
+            ("retrieve_with_read_scope", ["insights_flow:read"], "get", "detail", status.HTTP_200_OK),
+            ("create_with_write_scope", ["insights_flow:write"], "post", None, status.HTTP_201_CREATED),
+            ("update_with_write_scope", ["insights_flow:write"], "patch", "detail", status.HTTP_200_OK),
+            ("create_with_read_scope_forbidden", ["insights_flow:read"], "post", None, status.HTTP_403_FORBIDDEN),
+            ("update_with_read_scope_forbidden", ["insights_flow:read"], "patch", "detail", status.HTTP_403_FORBIDDEN),
             ("list_with_unrelated_scope_forbidden", ["insight:read"], "get", None, status.HTTP_403_FORBIDDEN),
         ]
     )
@@ -298,7 +298,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         assert self.message_template.content["email"] == {"subject": "New", "html": "<p>New</p>"}
 
     def test_personal_api_key_cannot_access_other_teams_template(self):
-        api_key = self.create_personal_api_key_with_scopes(["hog_flow:read"])
+        api_key = self.create_personal_api_key_with_scopes(["insights_flow:read"])
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
@@ -419,7 +419,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
     def test_design_patch_requires_write_scope(self):
         self.message_template.content = {"email": {"subject": "Hi", "design": self._design_with_text()}}
         self.message_template.save()
-        api_key = self.create_personal_api_key_with_scopes(["hog_flow:read"])
+        api_key = self.create_personal_api_key_with_scopes(["insights_flow:read"])
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
@@ -433,12 +433,12 @@ class TestMessageTemplatesAPI(APIBaseTest):
 
     @patch("products.messaging.backend.api.message_templates.render_design_html")
     def test_design_patch_allows_write_scoped_personal_api_key(self, mock_render):
-        # Regression: the design action must declare hog_flow:write so MCP / personal API key callers
+        # Regression: the design action must declare insights_flow:write so MCP / personal API key callers
         # aren't rejected as "action does not support personal API key access".
         mock_render.return_value = "<html>ok</html>"
         self.message_template.content = {"email": {"subject": "Hi", "design": self._design_with_text()}}
         self.message_template.save()
-        api_key = self.create_personal_api_key_with_scopes(["hog_flow:write"])
+        api_key = self.create_personal_api_key_with_scopes(["insights_flow:write"])
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 

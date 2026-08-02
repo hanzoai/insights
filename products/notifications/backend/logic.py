@@ -110,7 +110,7 @@ def publish_resource_edited(
     Go handler passes unknown fields through and filters delivery by resolved_user_ids.
 
     `resource_type` is the value the frontend matches on (e.g. "InsightsFlow"); `ac_resource_type` is the
-    access-control scope used to drop recipients without viewer access (e.g. "hog_flow").
+    access-control scope used to drop recipients without viewer access (e.g. "insights_flow").
     """
     organization_id = team.organization_id
 

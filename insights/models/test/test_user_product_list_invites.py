@@ -7,7 +7,7 @@ from insights.models.file_system.user_product_list import DEFAULT_PRODUCT_PATHS,
 from insights.models.organization import OrganizationMembership
 from insights.models.organization_invite import OrganizationInvite
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestUserProductListDefaults(BaseTest):
