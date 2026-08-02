@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from insights.api.shared import UserBasicSerializer
 
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
 
 logger = structlog.get_logger(__name__)
 

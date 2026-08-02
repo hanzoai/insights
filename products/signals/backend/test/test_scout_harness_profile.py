@@ -82,7 +82,7 @@ from products.signals.backend.scout_harness.tools.profile import (
 from products.skills.backend.models.skills import LLMSkill
 from products.surveys.backend.models import Survey
 from products.warehouse_sources.backend.facade.models import ExternalDataJob, ExternalDataSchema, ExternalDataSource
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 class TestProjectContext(BaseTest):
