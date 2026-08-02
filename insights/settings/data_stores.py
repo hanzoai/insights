@@ -453,47 +453,62 @@ READONLY_DATASTORE_PASSWORD: str | None = os.getenv("READONLY_DATASTORE_PASSWORD
 # needing to have a deploy.
 TOKENS_HISTORICAL_DATA = os.getenv("TOKENS_HISTORICAL_DATA", "").split(",")
 
-# The last case happens when someone upgrades Heroku but doesn't have Redis installed yet. Collectstatic gets called before we can provision Redis.
+# Hanzo KV is the ONE key/value + cache + celery-broker backend. It speaks the
+# Redis (RESP) wire protocol, so the kv:// URL is normalized to redis:// for the
+# RESP drivers (redis-py / django_redis / celery). Config surface is KV_URL —
+# never REDIS_URL. REDIS_URL below is the derived RESP connection URL, not an env.
+def _kv_to_resp(url: str) -> str:
+    """Map Hanzo KV's kv:// scheme to the redis:// RESP wire the driver speaks."""
+    return "redis://" + url[len("kv://") :] if url.startswith("kv://") else url
+
+
 if TEST or DEBUG or IS_COLLECT_STATIC:
     if PYTEST_XDIST_WORKER_NUM is not None:
-        REDIS_URL = os.getenv("REDIS_URL", f"redis://redis7/{PYTEST_XDIST_WORKER_NUM}")
+        KV_URL = os.getenv("KV_URL", f"kv://localhost/{PYTEST_XDIST_WORKER_NUM}")
     else:
-        REDIS_URL = os.getenv("REDIS_URL", "redis://redis7/")
+        KV_URL = os.getenv("KV_URL", "kv://localhost/")
 else:
-    REDIS_URL = os.getenv("REDIS_URL", "")
+    KV_URL = os.getenv("KV_URL", "")
 
-if not REDIS_URL and get_from_env("POSTFN_REDIS_HOST", ""):
-    REDIS_URL = "redis://:{}@{}:{}/".format(
-        os.getenv("POSTFN_REDIS_PASSWORD", ""),
-        os.getenv("POSTFN_REDIS_HOST", ""),
-        os.getenv("POSTFN_REDIS_PORT", "6379"),
+if not KV_URL and get_from_env("INSIGHTS_KV_HOST", ""):
+    KV_URL = "kv://:{}@{}:{}/".format(
+        os.getenv("INSIGHTS_KV_PASSWORD", ""),
+        os.getenv("INSIGHTS_KV_HOST", ""),
+        os.getenv("INSIGHTS_KV_PORT", "6379"),
     )
+
+# RESP connection URL consumed by redis-py / django_redis / celery (Hanzo KV backend).
+REDIS_URL = _kv_to_resp(KV_URL)
 
 SESSION_RECORDING_REDIS_URL = REDIS_URL
 
-if get_from_env("POSTFN_SESSION_RECORDING_REDIS_HOST", ""):
-    SESSION_RECORDING_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("POSTFN_SESSION_RECORDING_REDIS_HOST", ""),
-        os.getenv("POSTFN_SESSION_RECORDING_REDIS_PORT", "6379"),
+if get_from_env("INSIGHTS_SESSION_RECORDING_KV_HOST", ""):
+    SESSION_RECORDING_REDIS_URL = _kv_to_resp(
+        "kv://{}:{}/".format(
+            os.getenv("INSIGHTS_SESSION_RECORDING_KV_HOST", ""),
+            os.getenv("INSIGHTS_SESSION_RECORDING_KV_PORT", "6379"),
+        )
     )
 
 REPLAY_VISION_REDIS_URL = REDIS_URL
 
-if get_from_env("POSTFN_REPLAY_VISION_REDIS_HOST", ""):
-    REPLAY_VISION_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("POSTFN_REPLAY_VISION_REDIS_HOST", ""),
-        os.getenv("POSTFN_REPLAY_VISION_REDIS_PORT", "6379"),
+if get_from_env("INSIGHTS_REPLAY_VISION_KV_HOST", ""):
+    REPLAY_VISION_REDIS_URL = _kv_to_resp(
+        "kv://{}:{}/".format(
+            os.getenv("INSIGHTS_REPLAY_VISION_KV_HOST", ""),
+            os.getenv("INSIGHTS_REPLAY_VISION_KV_PORT", "6379"),
+        )
     )
 
-# The LLM gateway caches per-team quota state in its own Redis (llm_gateway/services/quota_resolver.py).
-# The central-Redis default only suits single-Redis setups; cloud must point this at the gateway's instance.
-LLM_GATEWAY_REDIS_URL = os.getenv("LLM_GATEWAY_REDIS_URL", REDIS_URL)
+# The LLM gateway caches per-team quota state in its own KV instance
+# (llm_gateway/services/quota_resolver.py). The central default only suits
+# single-instance setups; cloud must point this at the gateway's own.
+LLM_GATEWAY_REDIS_URL = _kv_to_resp(os.getenv("LLM_GATEWAY_KV_URL", KV_URL))
 
 if not REDIS_URL:
     raise ImproperlyConfigured(
-        "Env var REDIS_URL or POSTFN_REDIS_HOST is absolutely required to run this software.\n"
-        "If upgrading from Insights 1.0.10 or earlier, see here: "
-        "https://hanzo.ai/docs/deployment/upgrading-insights#upgrading-from-before-1011"
+        "Env var KV_URL (or INSIGHTS_KV_HOST) is absolutely required to run this software.\n"
+        "Hanzo KV backs the cache, celery broker and rate-limits; there is no Redis."
     )
 
 # Socket timeouts for the central Redis clients (insights/redis.py). The connect timeout is kept

@@ -14,7 +14,7 @@ import django.db.models.functions.comparison
 import django.utils.timezone
 import insights.helpers.encrypted_fields
 import insights.models.event_ingestion_restriction_config
-import insights.models.exported_asset
+import products.exports.backend.models.exported_asset
 import insights.models.organization_domain
 import insights.models.organization_invite
 import insights.models.sharing_configuration

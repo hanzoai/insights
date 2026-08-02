@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""Assert the Hanzo look survives a rebase onto upstream.
+
+Convergence resets every design token to upstream's value, and the palette is
+not something a diff review reliably catches -- a tree with the wrong colours
+compiles, passes tests, and looks wrong only once someone opens it. So the
+look is a checked invariant, the way the rename is.
+
+    bin/theme            report what holds and what does not
+    bin/theme --check    exit 1 on the first violation
+
+Each rule below is a regression that actually shipped, not a style opinion.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+
+DECL = re.compile(r"^(\s*)(--[a-z0-9-]+)\s*:\s*(.+?);(\s*//.*)?$")
+BASE = "frontend/src/styles/base.scss"
+WORKSPACE = "pnpm-workspace.yaml"
+
+# The ladder. Every surface layers up from a true-black ground, and the eye
+# reads the steps, not the token names -- so these are asserted as values.
+# A step that collides with its neighbour has no edge and reads as a hole.
+LADDER = {
+    "--color-bg-primary": "#000",           # ground
+    "--color-bg-surface-tertiary": "#000",  # chrome sits AT the ground
+    "--color-bg-surface-secondary": "var(--color-neutral-cool-850)",  # #212121
+    "--color-bg-surface-primary": "#262626",  # the raised content panel
+    "--color-bg-table": "#2e2e2e",            # rows sit on the panel
+}
+
+# The scales are monochrome: hue and saturation zero, lightness untouched.
+MONO_PREFIXES = ("--color-neutral-cool-", "--color-insights-3000-")
+
+# Our icons are a published fork; only this package renders className="Icon",
+# and that class is the only thing that gives an icon a size.
+ICONS = "npm:@hanzo/insights-icons@"
+
+# Sticky surfaces paint as the canvas they sit on. These two are the exceptions
+# and match the shipped tree; --check fails if either file stops existing, so
+# the exemption cannot outlive the thing it exempts.
+STICKY_OK = {
+    "frontend/src/layout/navigation-3000/sidepanel/components/SidePanelPaneHeader.tsx",
+    "frontend/src/lib/elements/LemonTabs/LemonTabs.tsx",
+}
+
+
+def root() -> str:
+    return subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True
+    ).stdout.strip()
+
+
+def scan(path: str) -> dict[tuple[str, str], str]:
+    """(top-level selector, token) -> value. A token is declared once per theme
+    block, so the block is half its identity: the same name in :root and in
+    [theme='dark'] are the light and dark values, and keying on the name alone
+    silently collapses them."""
+    out: dict[tuple[str, str], str] = {}
+    depth, block = 0, None
+    for line in open(path, encoding="utf-8"):
+        line = line.rstrip("\n")
+        if depth == 0:
+            m = re.match(r"^([^\s/][^{]*?)\s*\{", line)
+            if m:
+                block = m.group(1).strip()
+        m = DECL.match(line)
+        if m and depth >= 1:
+            out.setdefault((block, m.group(2)), m.group(3).strip())
+        depth += line.count("{") - line.count("}")
+        if depth <= 0:
+            depth, block = 0, None
+    return out
+
+
+def grey(value: str) -> bool:
+    m = re.match(r"^rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*\)$", value)
+    return bool(m) and m.group(1) == m.group(2) == m.group(3)
+
+
+def check(r: str) -> list[str]:
+    bad: list[str] = []
+    tokens = scan(os.path.join(r, BASE))
+    dark = {k[1]: v for k, v in tokens.items() if k[0] == "[theme='dark']"}
+    light = {k[1]: v for k, v in tokens.items() if k[0] != "[theme='dark']"}
+
+    for token, want in LADDER.items():
+        got = dark.get(token)
+        if got != want:
+            bad.append(f"ladder: {token} is {got or 'undeclared'}, want {want}")
+
+    for token, value in light.items():
+        if token.startswith(MONO_PREFIXES) and value.startswith("hsl"):
+            m = re.match(r"^hsla?\(\s*([\d.]+)deg\s+([\d.]+)%", value)
+            if m and (float(m.group(1)) or float(m.group(2))):
+                bad.append(f"monochrome: {token} carries a hue -- {value}")
+
+    # Product accents are sidebar wayfinding. Greying them is the one change
+    # to this file that has been made before and rejected.
+    accents = {t: v for t, v in light.items() if t.startswith("--color-product-")}
+    if len(accents) < 34:
+        bad.append(f"accents: {len(accents)} product colours, expected at least 34")
+    for token, value in accents.items():
+        if grey(value):
+            bad.append(f"accents: {token} was greyed -- {value}")
+
+    # A hex is 3, 4, 6, or 8 digits. Anything else is not a colour, and the
+    # browser drops the declaration rather than reporting it.
+    for (block, token), value in tokens.items():
+        for h in re.findall(r"#[0-9a-fA-F]+", value):
+            if len(h) - 1 not in (3, 4, 6, 8):
+                bad.append(f"hex: {token} in {block} is {h}, which no browser parses")
+
+    workspace = open(os.path.join(r, WORKSPACE), encoding="utf-8").read()
+    m = re.search(r"^\s*'@hanzo/icons':\s*(.+?)\s*$", workspace, re.M)
+    if not m:
+        bad.append("icons: @hanzo/icons has no catalog entry")
+    elif not m.group(1).startswith(ICONS):
+        bad.append(f"icons: @hanzo/icons is {m.group(1)}, want {ICONS}<version>")
+
+    for path in sorted(STICKY_OK):
+        if not os.path.exists(os.path.join(r, path)):
+            bad.append(f"sticky: exemption names {path}, which no longer exists")
+    # The bare utility is the bug; bg-[var(--scene-layout-background,...)] is the
+    # fix and mentions --color-bg-primary as its fallback, so match the class as
+    # a whole token and let the longer name through.
+    ground = re.compile(r"(?<![-\w])bg-primary(?![-\w])")
+    listing = subprocess.run(
+        ["git", "ls-files", "--", "*.tsx"], cwd=r, capture_output=True, text=True
+    ).stdout.split()
+    for path in listing:
+        if path in STICKY_OK:
+            continue
+        try:
+            body = open(os.path.join(r, path), encoding="utf-8").read()
+        except OSError:
+            continue
+        for line in body.splitlines():
+            stripped = line.lstrip()
+            if stripped.startswith(("//", "*", "/*")):
+                continue  # prose about the rule is not a use of it
+            if "sticky" in line and ground.search(line):
+                bad.append(f"sticky: {path} paints a sticky surface on the ground")
+                break
+
+    return bad
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--check", action="store_true", help="exit 1 on violation")
+    a = ap.parse_args()
+    r = root()
+    bad = check(r)
+    for line in bad:
+        print(f"  {line}")
+    if not bad:
+        print("  the look holds: ladder, monochrome scales, accents, icons, sticky surfaces")
+    return 1 if (bad and a.check) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
