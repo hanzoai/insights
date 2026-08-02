@@ -35,7 +35,6 @@ the write path into it; this module only reads it, and deliberately declares
 neither.
 """
 
-from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 from insights.models.person.sql import PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE, PERSONS_WRITABLE_TABLE
 from insights.settings.data_stores import DATASTORE_DATABASE
 
@@ -66,38 +65,92 @@ EVENT_SIGNAL_SQL = f"signal = '{EVENT_SIGNAL}'"
 # `(team_id, toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid))`,
 # so renaming it is a rebuild of the events table, not an edit.
 #
-# So the two words meet HERE, and only here. Everything above this line is named
-# for what it means to us — org, project — and is written into the name the
-# fork reads. The fork's word is spelled exactly twice, immediately below.
-ORG_PROJECT_TABLE = "org_team"
-ORG_PROJECT_COLUMN = "team"
+# THERE IS NO ROUTING TABLE, and deleting it is the point of this section.
+#
+# There was one — `insights.org_team`, a Replacing table read `FINAL` by every
+# projection and written by a management command. It was a SECOND COPY of
+# something the app already knows: `Organization.slug` IS the value the envelope
+# carries as `org`, and an org's project is its first team. A second copy of a
+# fact is a second opinion about it, and this one disagreed — `admin` and
+# `maxpower` were both mapped to project 1, so a separate funded org's events
+# were routed into Hanzo's own project. Deriving the copy instead of authoring it
+# made the copy right; it did not stop it being a copy.
+#
+# So the views are COMPILED from the app's own records. `routing()` reads them,
+# `PROJECT_SQL` writes them into the projection and `ROUTED_SQL` gates it, and
+# `manage.py route_orgs` re-derives the views when the answer changes — a drop
+# and a create, which for a view is metadata-only and instant. The result is a
+# function of the records alone, so re-deriving is idempotent and cannot be
+# PARTIALLY right the way a row-at-a-time correction can.
+#
+# AN ORG WITH NO PROJECT IS NOT PROJECTED — it is not defaulted into one. That is
+# the second half of the same defect: routing everything unmatched into project 1
+# put ~95% of the plane, and a funded org's events, into a customer's project;
+# routing it into project 0 instead only moved the problem, because three
+# distinct tenants ($public, admin, maxpower) then shared one bucket and nothing
+# in `sharded_events` could tell them apart. Now the view considers only the orgs
+# that own a project. Nothing is lost — every row is on `event.fact` either way —
+# and an org becomes projectable the moment the app provisions its project.
+#
+# Routing stays a DELIBERATE act, run and not scheduled, because an org nobody
+# has routed is invisible, and invisible is the safe way to be wrong.
 
-# Traffic that belongs to no provisioned tenant: the anonymous `$public` org,
-# and any org that has not been routed yet.
-#
-# Project ids are handed out by `insights_team_id_seq`, which starts at 1, so 0
-# is a project that cannot exist and therefore one nobody can read. That is the
-# point: an org is only ever readable once it is deliberately routed, so a
-# tenant that appears on the plane tomorrow cannot land in another tenant's
-# project by default. Defaulting this to a real project is what commingled ~95%
-# of traffic — every anonymous pageview, plus every org nobody had mapped —
-# into project 1, which belongs to an actual customer.
-#
-# Nothing is lost: the rows are in the warehouse under project 0, and routing
-# them to a real project later is the same one write as any other org.
-UNATTRIBUTED_PROJECT = 0
+# The project id the projection can never produce. `multiIf` must have a final
+# branch; ROUTED_SQL makes it unreachable, because the view considers only orgs
+# this expression has a branch for. It is 0 because `insights_team_id_seq` starts
+# at 1 — so if the gate and the projection ever disagreed, the rows would land
+# where nobody can read them rather than in somebody else's project. Of the two
+# ways to be wrong, this file always takes the invisible one.
+UNROUTABLE_PROJECT = 0
 
-# THE ROUTING IS DERIVED, NEVER AUTHORED. There is no list of orgs in this file
-# and there must not be one: the app already knows which project an org owns —
-# `Organization.slug` is the same value the envelope carries as `org` — so a
-# second copy written by hand can only ever be a chance to disagree with it, and
-# it did. `admin` and `maxpower` were both mapped to project 1 here, so a
-# separate funded org's data was routed into Hanzo's own project.
-#
-# `manage.py route_orgs` publishes that mapping from the app's own org records
-# and is the ONLY writer of this table. Routing is still a deliberate act — the
-# command is run, not scheduled — because an org that nobody has routed is
-# invisible, which is the safe way to be wrong.
+# An org owns ONE project, because the envelope names an org and not a project.
+# The fork already answers "which one" this way everywhere a user lands somewhere
+# by default (`organization.teams.order_by("id").first()`, `insights/models/user.py`),
+# so this reads the org's FIRST project rather than inventing a second rule for
+# the same question.
+FIRST_PROJECT = "id"
+
+
+def provisioned() -> dict[str, int]:
+    """Which project each org's events land in, per the app's own records.
+
+    Empty is a legitimate answer and not an error: a deployment that has
+    provisioned no project routes nothing, and the plane keeps every row
+    regardless. `bin/migrate` runs the datastore migrations ALONGSIDE the
+    Postgres ones, so on a fresh install this is asked before the table it reads
+    exists — the same answer by a different road.
+    """
+    from django.db import Error
+
+    from insights.models.organization import Organization
+
+    try:
+        orgs = list(Organization.objects.prefetch_related("teams"))
+    except Error:
+        return {}
+    return {org.slug: project.id for org in orgs if (project := org.teams.order_by(FIRST_PROJECT).first()) is not None}
+
+
+def quoted(orgs) -> str:
+    return ", ".join(f"'{org}'" for org in orgs)
+
+
+def ROUTED_SQL(routing: dict[str, int], source: str = "") -> str:
+    """The orgs this projection serves. Everything else is not projected.
+
+    `source` qualifies the column for the one view that aliases its FROM, so the
+    predicate is about the row we READ. An empty routing yields a constantly
+    false predicate rather than an empty `IN ()`, which is a syntax error: a
+    warehouse that routes nothing projects nothing, and says so in one token.
+    """
+    return f"{source}org IN ({quoted(routing)})" if routing else "0"
+
+
+def PROJECT_SQL(routing: dict[str, int]) -> str:
+    """The org's project — a closed `multiIf` over the orgs that own one."""
+    branches = "".join(f"org = '{org}', toInt64({project}), " for org, project in sorted(routing.items()))
+    return f"multiIf({branches}toInt64({UNROUTABLE_PROJECT}))"
+
 
 EMPTY_JSON = "'{}'"
 
@@ -248,33 +301,14 @@ IDENTIFIED_SQL = "person_id != ''"
 # browser — two keys for one human until an alias joins them (USER_ALIAS below).
 USER_SQL = f"reinterpretAsUUID(MD5(if({IDENTIFIED_SQL}, person_id, {DISTINCT_SQL})))"
 
-# Both arrays come from the identical subquery, so they are ordered alike and
-# element i of one names element i of the other. An empty table yields empty
-# arrays and `transform` returns the default, so the lookup cannot throw — an
-# unrouted warehouse attributes nothing rather than failing to project.
-#
-# The SELECT names the PHYSICAL column, unaliased. Our vocabulary is carried by
-# the names in this file; aliasing it to `project` in the emitted text would
-# only make the SQL describe a column the warehouse does not have, and would
-# rewrite every view that embeds this expression to say so.
-ORG_PROJECT_SQL = (
-    f"SELECT org, {ORG_PROJECT_COLUMN} FROM `{DATASTORE_DATABASE}`.`{ORG_PROJECT_TABLE}` FINAL ORDER BY org"
-)
-PROJECT_SQL = (
-    "transform(org"
-    f", (SELECT groupArray(org) FROM ({ORG_PROJECT_SQL}))"
-    f", (SELECT groupArray({ORG_PROJECT_COLUMN}) FROM ({ORG_PROJECT_SQL}))"
-    f", toInt64({UNATTRIBUTED_PROJECT}))"
-)
 
-
-def EVENT_COLUMNS(historical: bool) -> list[tuple[str, str]]:
+def EVENT_COLUMNS(routing: dict[str, int], historical: bool) -> list[tuple[str, str]]:
     return [
         ("uuid", UUID_SQL),
         ("event", EVENT_NAME_SQL),
         ("properties", PROPERTIES_SQL),
         ("timestamp", "toDateTime64(time, 6, 'UTC')"),
-        ("team_id", PROJECT_SQL),
+        ("team_id", PROJECT_SQL(routing)),
         ("distinct_id", DISTINCT_SQL),
         ("elements_chain", "''"),
         ("created_at", "toDateTime64(ingested_at, 6, 'UTC')"),
@@ -286,40 +320,16 @@ def EVENT_COLUMNS(historical: bool) -> list[tuple[str, str]]:
     ]
 
 
-def EVENT_SELECT_SQL(historical: bool) -> str:
-    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in EVENT_COLUMNS(historical))
-    return f"SELECT\n    {projection}\n{EVENT_FROM_SQL}\nWHERE {EVENT_SIGNAL_SQL}"
+def EVENT_SELECT_SQL(routing: dict[str, int], historical: bool) -> str:
+    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in EVENT_COLUMNS(routing, historical))
+    return f"SELECT\n    {projection}\n{EVENT_FROM_SQL}\nWHERE {EVENT_SIGNAL_SQL} AND {ROUTED_SQL(routing)}"
 
 
-def ORG_PROJECT_TABLE_SQL() -> str:
-    return f"""
-CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`{ORG_PROJECT_TABLE}` (
-    org String,
-    {ORG_PROJECT_COLUMN} Int64,
-    version UInt32 DEFAULT toUnixTimestamp(now())
-) ENGINE = {ReplacingMergeTree(ORG_PROJECT_TABLE, ver="version", replication_scheme=ReplicationScheme.REPLICATED)}
-ORDER BY org
-"""
-
-
-def ORG_PROJECT_ROWS_SQL(rows: list[tuple[str, int]]) -> str:
-    """Route each `(org, project)` — the newest row per org is the live one.
-
-    Takes the rows rather than defaulting to a list, because there is no
-    correct list to default to: the answer lives in the app's org records and
-    is read from them by `route_orgs`, the one caller.
-    """
-    if not rows:
-        raise ValueError("ORG_PROJECT_ROWS_SQL needs at least one org to route")
-    values = ", ".join(f"('{org}', {project})" for org, project in rows)
-    return f"INSERT INTO `{DATASTORE_DATABASE}`.`{ORG_PROJECT_TABLE}` (org, {ORG_PROJECT_COLUMN}) VALUES {values}"
-
-
-def EVENT_MV_SQL() -> str:
+def EVENT_MV_SQL(routing: dict[str, int]) -> str:
     return f"""
 CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{EVENT_MV}`
 TO `{DATASTORE_DATABASE}`.`{WRITABLE_EVENTS_DATA_TABLE()}`
-AS {EVENT_SELECT_SQL(historical=False)}
+AS {EVENT_SELECT_SQL(routing, historical=False)}
 """
 
 
@@ -327,12 +337,12 @@ def DROP_EVENT_MV_SQL() -> str:
     return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{EVENT_MV}`"
 
 
-def EVENT_BACKFILL_SQL() -> str:
+def EVENT_BACKFILL_SQL(routing: dict[str, int]) -> str:
     # INSERT ... SELECT binds by position, so the column list is explicit.
-    names = ", ".join(name for name, _ in EVENT_COLUMNS(historical=True))
+    names = ", ".join(name for name, _ in EVENT_COLUMNS(routing, historical=True))
     return f"""
 INSERT INTO `{DATASTORE_DATABASE}`.`{WRITABLE_EVENTS_DATA_TABLE()}` ({names})
-{EVENT_SELECT_SQL(historical=True)}
+{EVENT_SELECT_SQL(routing, historical=True)}
 """
 
 
@@ -446,14 +456,14 @@ LAST_SEEN_VERSION = f"toInt64({precedence(str(BAND_IDENTIFIED), INGESTED_MS, fir
 OVERRIDE_VERSION = precedence(str(BAND_OVERRIDE), NOW_MS, first=False)
 
 
-def USER_COLUMNS() -> list[tuple[str, str]]:
+def USER_COLUMNS(routing: dict[str, int]) -> list[tuple[str, str]]:
     return [
         ("id", USER_SQL),
         # When the PLANE first saw this user, on the server's clock — the same
         # clock that decides which row survives, so the surviving row's
         # `created_at` is the one its version was earned with.
         ("created_at", "toDateTime64(ingested_at, 3, 'UTC')"),
-        ("team_id", PROJECT_SQL),
+        ("team_id", PROJECT_SQL(routing)),
         # The plane carries no user profile — `event_mv` writes events as
         # `propertyless` for exactly this reason — so the row claims none.
         # Traits belong to IAM, and inventing them here would put a second,
@@ -473,9 +483,9 @@ def USER_COLUMNS() -> list[tuple[str, str]]:
     ]
 
 
-def USER_ALIAS_COLUMNS() -> list[tuple[str, str]]:
+def USER_ALIAS_COLUMNS(routing: dict[str, int]) -> list[tuple[str, str]]:
     return [
-        ("team_id", PROJECT_SQL),
+        ("team_id", PROJECT_SQL(routing)),
         # The id the visitor carried BEFORE signing in — the one every earlier
         # event of theirs was written under.
         ("distinct_id", "anonymous_id"),
@@ -505,32 +515,33 @@ USER_ALIAS_WHERE = (
 )
 
 
-def USER_SELECT_SQL() -> str:
-    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_COLUMNS())
-    return f"SELECT\n    {projection}\n{EVENT_FROM_SQL}\nWHERE {EVENT_SIGNAL_SQL}"
+def USER_SELECT_SQL(routing: dict[str, int]) -> str:
+    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_COLUMNS(routing))
+    return f"SELECT\n    {projection}\n{EVENT_FROM_SQL}\nWHERE {EVENT_SIGNAL_SQL} AND {ROUTED_SQL(routing)}"
 
 
-def USER_ALIAS_SELECT_SQL() -> str:
-    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_ALIAS_COLUMNS())
+def USER_ALIAS_SELECT_SQL(routing: dict[str, int]) -> str:
+    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_ALIAS_COLUMNS(routing))
     return (
         f"SELECT\n    {projection}\n{EVENT_FROM_SQL} AS {EVENT_SOURCE}"
-        f"\nWHERE {EVENT_SOURCE}.{EVENT_SIGNAL_SQL} AND {USER_ALIAS_WHERE}"
+        f"\nWHERE {EVENT_SOURCE}.{EVENT_SIGNAL_SQL} AND {ROUTED_SQL(routing, EVENT_SOURCE + '.')}"
+        f" AND {USER_ALIAS_WHERE}"
     )
 
 
-def USER_MV_SQL() -> str:
+def USER_MV_SQL(routing: dict[str, int]) -> str:
     return f"""
 CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{USER_MV}`
 TO `{DATASTORE_DATABASE}`.`{USER_TABLE}`
-AS {USER_SELECT_SQL()}
+AS {USER_SELECT_SQL(routing)}
 """
 
 
-def USER_ALIAS_MV_SQL() -> str:
+def USER_ALIAS_MV_SQL(routing: dict[str, int]) -> str:
     return f"""
 CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{USER_ALIAS_MV}`
 TO `{DATASTORE_DATABASE}`.`{USER_ALIAS_TABLE}`
-AS {USER_ALIAS_SELECT_SQL()}
+AS {USER_ALIAS_SELECT_SQL(routing)}
 """
 
 
@@ -542,20 +553,20 @@ def DROP_USER_ALIAS_MV_SQL() -> str:
     return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{USER_ALIAS_MV}`"
 
 
-def USER_BACKFILL_SQL() -> str:
+def USER_BACKFILL_SQL(routing: dict[str, int]) -> str:
     # INSERT ... SELECT binds by position, so the column list is explicit.
-    names = ", ".join(name for name, _ in USER_COLUMNS())
+    names = ", ".join(name for name, _ in USER_COLUMNS(routing))
     return f"""
 INSERT INTO `{DATASTORE_DATABASE}`.`{USER_TABLE}` ({names})
-{USER_SELECT_SQL()}
+{USER_SELECT_SQL(routing)}
 """
 
 
-def USER_ALIAS_BACKFILL_SQL() -> str:
-    names = ", ".join(name for name, _ in USER_ALIAS_COLUMNS())
+def USER_ALIAS_BACKFILL_SQL(routing: dict[str, int]) -> str:
+    names = ", ".join(name for name, _ in USER_ALIAS_COLUMNS(routing))
     return f"""
 INSERT INTO `{DATASTORE_DATABASE}`.`{USER_ALIAS_TABLE}` ({names})
-{USER_ALIAS_SELECT_SQL()}
+{USER_ALIAS_SELECT_SQL(routing)}
 """
 
 
