@@ -9,8 +9,8 @@ from insights.constants import AvailableFeature
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.team.team import Team
 
-from ee.models.rbac.access_control import AccessControl
-from ee.models.rbac.role import Role, RoleMembership
+from insights.models.ee_models import AccessControl
+from insights.models.ee_models import Role, RoleMembership
 
 
 class TestUserTeamsAccessControl(BaseTest):

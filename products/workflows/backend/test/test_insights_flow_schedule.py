@@ -9,9 +9,9 @@ from django.utils import timezone
 from parameterized import parameterized
 from rest_framework import status
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
-from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule
 
 BATCH_TRIGGER = {
     "type": "batch",
@@ -39,15 +39,15 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
                 }
             ],
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", payload)
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", payload)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         return response.json()
 
     def _schedules_url(self, workflow_id):
-        return f"/api/projects/{self.team.id}/hog_flows/{workflow_id}/schedules/"
+        return f"/api/projects/{self.team.id}/insights_flows/{workflow_id}/schedules/"
 
     def _schedule_detail_url(self, workflow_id, schedule_id):
-        return f"/api/projects/{self.team.id}/hog_flows/{workflow_id}/schedules/{schedule_id}/"
+        return f"/api/projects/{self.team.id}/insights_flows/{workflow_id}/schedules/{schedule_id}/"
 
     def test_create_schedule(self):
         workflow = self._create_batch_workflow()
@@ -150,7 +150,7 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
         workflow = self._create_batch_workflow()
         self.client.post(self._schedules_url(workflow["id"]), SCHEDULE_DATA)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{workflow['id']}/")
+        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{workflow['id']}/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert "schedules" in data
@@ -161,7 +161,7 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
     def test_workflow_get_includes_empty_schedules_when_none(self):
         workflow = self._create_batch_workflow()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/hog_flows/{workflow['id']}/")
+        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{workflow['id']}/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["schedules"] == []
 
@@ -184,7 +184,7 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
         self.client.post(self._schedules_url(workflow["id"]), SCHEDULE_DATA)
         self.client.post(self._schedules_url(workflow["id"]), {**SCHEDULE_DATA, "rrule": "FREQ=DAILY;INTERVAL=1"})
 
-        schedules = InsightsFlowSchedule.objects.filter(hog_flow_id=workflow["id"])
+        schedules = InsightsFlowSchedule.objects.filter(insights_flow_id=workflow["id"])
         assert schedules.count() == 2
 
     def test_rejects_invalid_rrule(self):
@@ -240,13 +240,13 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
 
 @override_settings(INTERNAL_API_SECRET="test-secret")
 @unittest.mock.patch(
-    "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
+    "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
 )
 class TestProcessDueSchedules(APIBaseTest):
-    INTERNAL_URL = "/api/internal/hog_flows/process_due_schedules"
+    INTERNAL_URL = "/api/internal/insights_flows/process_due_schedules"
 
     def _create_workflow_with_schedule(self, next_run_at=None, rrule="FREQ=HOURLY;INTERVAL=1", starts_at=None):
-        hog_flow = InsightsFlow.objects.create(
+        insights_flow = InsightsFlow.objects.create(
             team=self.team,
             name="Test Workflow",
             status="active",
@@ -256,14 +256,14 @@ class TestProcessDueSchedules(APIBaseTest):
         )
         schedule = InsightsFlowSchedule.objects.create(
             team=self.team,
-            hog_flow=hog_flow,
+            insights_flow=insights_flow,
             rrule=rrule,
             starts_at=starts_at or datetime(2026, 1, 1, 9, 0, 0, tzinfo=UTC),
             timezone="UTC",
             status="active",
             next_run_at=next_run_at,
         )
-        return hog_flow, schedule
+        return insights_flow, schedule
 
     def _post(self):
         return self.client.post(
@@ -271,7 +271,7 @@ class TestProcessDueSchedules(APIBaseTest):
         )
 
     def test_due_schedule_is_processed_and_next_run_at_advanced(self, mock_dispatch):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self._post()
@@ -286,25 +286,25 @@ class TestProcessDueSchedules(APIBaseTest):
         assert schedule.next_run_at > datetime(2020, 1, 1, tzinfo=UTC)
 
     def test_due_schedule_creates_batch_job(self, mock_dispatch):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self._post()
         assert response.status_code == 200
         assert len(response.json()["processed"]) == 1
 
-        batch_job = InsightsFlowBatchJob.objects.filter(hog_flow=hog_flow).first()
+        batch_job = InsightsFlowBatchJob.objects.filter(insights_flow=insights_flow).first()
         assert batch_job is not None
         assert batch_job.status == "queued"
         assert batch_job.variables == {"greeting": "Hello"}
         mock_dispatch.assert_called_once()
 
     def test_inactive_workflow_clears_next_run_at(self, mock_dispatch):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
-        hog_flow.status = "draft"
-        hog_flow.save()
+        insights_flow.status = "draft"
+        insights_flow.save()
 
         response = self._post()
         assert response.status_code == 200
@@ -356,7 +356,7 @@ class TestProcessDueSchedules(APIBaseTest):
         assert len(response.json()["failed"]) == 0
 
     def test_schedule_with_variable_overrides_resolves_correctly(self, mock_dispatch):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         schedule.variables = {"greeting": "Overridden", "extra": "value"}
@@ -366,7 +366,7 @@ class TestProcessDueSchedules(APIBaseTest):
         assert response.status_code == 200
         assert len(response.json()["processed"]) == 1
 
-        batch_job = InsightsFlowBatchJob.objects.filter(hog_flow=hog_flow).first()
+        batch_job = InsightsFlowBatchJob.objects.filter(insights_flow=insights_flow).first()
         assert batch_job is not None
         assert batch_job.variables["greeting"] == "Overridden"
         assert batch_job.variables["extra"] == "value"
@@ -385,11 +385,11 @@ class TestProcessDueSchedules(APIBaseTest):
         assert len(response.json()["failed"]) == 1
 
     def test_non_batch_trigger_not_reinitialized(self, mock_dispatch):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
-        hog_flow.trigger = {"type": "event", "filters": {}}
-        hog_flow.save()
+        insights_flow.trigger = {"type": "event", "filters": {}}
+        insights_flow.save()
 
         # Step 1 clears next_run_at for non-batch workflows
         response = self._post()
@@ -409,12 +409,12 @@ class TestProcessDueSchedules(APIBaseTest):
 
 
 @override_settings(INTERNAL_API_SECRET="test-secret")
-@unittest.mock.patch("products.workflows.backend.api.hog_flow.create_hog_flow_scheduled_invocation")
+@unittest.mock.patch("products.workflows.backend.api.insights_flow.create_insights_flow_scheduled_invocation")
 class TestProcessDueScheduleTriggers(APIBaseTest):
-    INTERNAL_URL = "/api/internal/hog_flows/process_due_schedules"
+    INTERNAL_URL = "/api/internal/insights_flows/process_due_schedules"
 
     def _create_workflow_with_schedule(self, next_run_at=None, rrule="FREQ=HOURLY;INTERVAL=1"):
-        hog_flow = InsightsFlow.objects.create(
+        insights_flow = InsightsFlow.objects.create(
             team=self.team,
             name="Test Schedule Workflow",
             status="active",
@@ -424,14 +424,14 @@ class TestProcessDueScheduleTriggers(APIBaseTest):
         )
         schedule = InsightsFlowSchedule.objects.create(
             team=self.team,
-            hog_flow=hog_flow,
+            insights_flow=insights_flow,
             rrule=rrule,
             starts_at=datetime(2026, 1, 1, 9, 0, 0, tzinfo=UTC),
             timezone="UTC",
             status="active",
             next_run_at=next_run_at,
         )
-        return hog_flow, schedule
+        return insights_flow, schedule
 
     def _post(self):
         return self.client.post(
@@ -439,7 +439,7 @@ class TestProcessDueScheduleTriggers(APIBaseTest):
         )
 
     def test_due_schedule_trigger_dispatches_scheduled_invocation(self, mock_invocation):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self._post()
@@ -449,7 +449,7 @@ class TestProcessDueScheduleTriggers(APIBaseTest):
         mock_invocation.assert_called_once()
         call_kwargs = mock_invocation.call_args.kwargs
         assert call_kwargs["team_id"] == self.team.id
-        assert call_kwargs["hog_flow_id"] == str(hog_flow.id)
+        assert call_kwargs["insights_flow_id"] == str(insights_flow.id)
         assert call_kwargs["variables"] == {"greeting": "Hello"}
 
     def test_schedule_trigger_advances_next_run_at(self, mock_invocation):
@@ -464,7 +464,7 @@ class TestProcessDueScheduleTriggers(APIBaseTest):
         assert schedule.next_run_at > datetime(2020, 1, 1, tzinfo=UTC)
 
     def test_schedule_trigger_uses_variable_overrides(self, mock_invocation):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         schedule.variables = {"greeting": "Hi there", "extra": "value"}
@@ -479,11 +479,11 @@ class TestProcessDueScheduleTriggers(APIBaseTest):
         assert variables["extra"] == "value"
 
     def test_inactive_schedule_trigger_workflow_clears_next_run_at(self, mock_invocation):
-        hog_flow, schedule = self._create_workflow_with_schedule(
+        insights_flow, schedule = self._create_workflow_with_schedule(
             next_run_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
-        hog_flow.status = "draft"
-        hog_flow.save()
+        insights_flow.status = "draft"
+        insights_flow.save()
 
         response = self._post()
         assert response.status_code == 200

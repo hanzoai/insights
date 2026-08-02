@@ -3034,28 +3034,28 @@ class TestInsightsFunctionUsageReports(DatastoreDestroyTablesMixin, TestCase, Da
         # Create workflow metrics for org 1 team 1
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="email",
             count=10,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="push",
             count=5,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="sms",
             count=3,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="fetch",
             count=8,
@@ -3064,28 +3064,28 @@ class TestInsightsFunctionUsageReports(DatastoreDestroyTablesMixin, TestCase, Da
         # Create workflow metrics for org 1 team 2
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="email",
             count=15,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="push",
             count=7,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="sms",
             count=2,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="hog_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="fetch",
             count=12,

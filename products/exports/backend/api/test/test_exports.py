@@ -41,7 +41,7 @@ from products.exports.backend.tasks.image_exporter import export_image
 from products.product_analytics.backend.api.insight import InsightSerializer
 from products.product_analytics.backend.models.insight import Insight
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 TEST_ROOT_BUCKET = "test_exports"
 

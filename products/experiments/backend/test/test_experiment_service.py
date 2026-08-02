@@ -56,7 +56,7 @@ from products.feature_flags.backend.facade.api import set_flag_active, update_fl
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
 from products.warehouse_sources.backend.facade.models import DataWarehouseCredential, DataWarehouseTable
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 # Note that we use allow_unknown_events here since allowing it was the behavior before validating it

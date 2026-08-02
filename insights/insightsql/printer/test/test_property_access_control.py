@@ -220,7 +220,7 @@ class TestRestrictPropertiesInInsightsQL(BaseTest):
         assert "event" in sql
 
     def test_role_override_allows_access(self):
-        from ee.models.rbac.role import Role, RoleMembership
+        from insights.models.ee_models import Role, RoleMembership
 
         role = Role.objects.create(name="Analyst", organization=self.organization)
         RoleMembership.objects.create(role=role, user=self.user, organization_member=self.organization_membership)

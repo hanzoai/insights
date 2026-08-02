@@ -8,18 +8,18 @@ import jwt
 import requests
 from parameterized import parameterized
 
-from insights.plugins.plugin_server_api import reschedule_hog_flow_parked_jobs
+from insights.plugins.plugin_server_api import reschedule_insights_flow_parked_jobs
 
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 from products.workflows.backend.services.timing_reschedule import (
     get_all_timing_action_ids,
     get_timing_reschedule_action_ids,
     parse_delay_duration_seconds,
     use_workflows_timing_reschedule,
 )
-from products.workflows.backend.tasks.hog_flows import reschedule_hog_flow_timing
+from products.workflows.backend.tasks.insights_flows import reschedule_insights_flow_timing
 
-RESCHEDULE_CLIENT_PATH = "products.workflows.backend.tasks.hog_flows.reschedule_hog_flow_parked_jobs"
+RESCHEDULE_CLIENT_PATH = "products.workflows.backend.tasks.insights_flows.reschedule_insights_flow_parked_jobs"
 
 
 def _delay(action_id: str = "delay_1", duration: str = "7d") -> dict:
@@ -187,7 +187,7 @@ class TestTimingRescheduleFlag(SimpleTestCase):
 class TestRescheduleParkedJobsClient(BaseTest):
     @patch("insights.plugins.plugin_server_api.internal_requests.post")
     def test_call_carries_a_scoped_jwt_and_timeout(self, mock_post):
-        reschedule_hog_flow_parked_jobs(team_id=self.team.id, hog_flow_id="flow-uuid", action_ids=["delay_1"])
+        reschedule_insights_flow_parked_jobs(team_id=self.team.id, insights_flow_id="flow-uuid", action_ids=["delay_1"])
 
         kwargs = mock_post.call_args.kwargs
         # A hung plugin server must not pin the calling Celery worker indefinitely
@@ -202,13 +202,13 @@ class TestRescheduleParkedJobsClient(BaseTest):
             algorithms=["HS256"],
         )
         assert claims["team_id"] == self.team.id
-        assert claims["hog_flow_id"] == "flow-uuid"
+        assert claims["insights_flow_id"] == "flow-uuid"
 
     @patch("insights.plugins.plugin_server_api.internal_requests.post")
     def test_call_fails_closed_when_key_unprovisioned(self, mock_post):
         with self.settings(WORKFLOWS_RESCHEDULE_JWT_SECRETS=[]):
             with self.assertRaises(RuntimeError):
-                reschedule_hog_flow_parked_jobs(team_id=self.team.id, hog_flow_id="flow-uuid", action_ids=["delay_1"])
+                reschedule_insights_flow_parked_jobs(team_id=self.team.id, insights_flow_id="flow-uuid", action_ids=["delay_1"])
         mock_post.assert_not_called()
 
 
@@ -230,12 +230,12 @@ class TestRescheduleInsightsFlowTimingTask(BaseTest):
         flow = self._create_flow()
         mock_client.return_value = self._response({"swept": 3, "remaining": 0, "done": True})
 
-        with patch.object(reschedule_hog_flow_timing, "apply_async") as mock_apply:
-            reschedule_hog_flow_timing(team_id=self.team.id, hog_flow_id=str(flow.id), action_ids=["delay_1"])
+        with patch.object(reschedule_insights_flow_timing, "apply_async") as mock_apply:
+            reschedule_insights_flow_timing(team_id=self.team.id, insights_flow_id=str(flow.id), action_ids=["delay_1"])
 
         mock_client.assert_called_once_with(
             team_id=self.team.id,
-            hog_flow_id=str(flow.id),
+            insights_flow_id=str(flow.id),
             action_ids=["delay_1"],
             sweep_floor=None,
             sweep_until=None,
@@ -255,15 +255,15 @@ class TestRescheduleInsightsFlowTimingTask(BaseTest):
             }
         )
 
-        with patch.object(reschedule_hog_flow_timing, "apply_async") as mock_apply:
-            reschedule_hog_flow_timing(
-                team_id=self.team.id, hog_flow_id=str(flow.id), action_ids=["delay_1"], slice_count=2
+        with patch.object(reschedule_insights_flow_timing, "apply_async") as mock_apply:
+            reschedule_insights_flow_timing(
+                team_id=self.team.id, insights_flow_id=str(flow.id), action_ids=["delay_1"], slice_count=2
             )
 
         mock_apply.assert_called_once_with(
             kwargs={
                 "team_id": self.team.id,
-                "hog_flow_id": str(flow.id),
+                "insights_flow_id": str(flow.id),
                 "action_ids": ["delay_1"],
                 "sweep_floor": "2026-07-15T00:10:00Z",
                 "sweep_until": "2026-07-15T00:40:00Z",
@@ -278,14 +278,14 @@ class TestRescheduleInsightsFlowTimingTask(BaseTest):
         mock_client.return_value = self._response({}, status_code=503)
 
         with self.assertRaises(requests.HTTPError):
-            reschedule_hog_flow_timing(team_id=self.team.id, hog_flow_id=str(flow.id), action_ids=["delay_1"])
+            reschedule_insights_flow_timing(team_id=self.team.id, insights_flow_id=str(flow.id), action_ids=["delay_1"])
 
     @parameterized.expand([("disabled", "draft"), ("archived", "archived")])
     @patch(RESCHEDULE_CLIENT_PATH)
     def test_skips_inactive_flows(self, _name, status, mock_client):
         flow = self._create_flow(status=status)
 
-        reschedule_hog_flow_timing(team_id=self.team.id, hog_flow_id=str(flow.id), action_ids=["delay_1"])
+        reschedule_insights_flow_timing(team_id=self.team.id, insights_flow_id=str(flow.id), action_ids=["delay_1"])
 
         mock_client.assert_not_called()
 
@@ -293,8 +293,8 @@ class TestRescheduleInsightsFlowTimingTask(BaseTest):
     def test_stops_at_slice_limit(self, mock_client):
         flow = self._create_flow()
 
-        reschedule_hog_flow_timing(
-            team_id=self.team.id, hog_flow_id=str(flow.id), action_ids=["delay_1"], slice_count=501
+        reschedule_insights_flow_timing(
+            team_id=self.team.id, insights_flow_id=str(flow.id), action_ids=["delay_1"], slice_count=501
         )
 
         mock_client.assert_not_called()

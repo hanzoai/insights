@@ -24,8 +24,8 @@ from products.early_access_features.backend.models import EarlyAccessFeature
 from products.feature_flags.backend.encrypted_flag_payloads import REDACTED_PAYLOAD_VALUE, flag_payload_codec
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
-from ee.models.rbac.access_control import AccessControl
-from ee.models.rbac.role import Role
+from insights.models.ee_models import AccessControl
+from insights.models.ee_models import Role
 
 if TYPE_CHECKING:
     from products.surveys.backend.models import Survey as SurveyModel

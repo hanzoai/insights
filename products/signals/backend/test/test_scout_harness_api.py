@@ -1164,7 +1164,7 @@ class TestAgentHarnessProjectProfileAPI(APIBaseTest):
             "recent_experiments",
             "recent_alerts",
             "recent_insights_functions",
-            "recent_hog_flows",
+            "recent_insights_flows",
             "recent_notebooks",
             "recent_cohorts",
             "recent_actions",

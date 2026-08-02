@@ -25,8 +25,8 @@ from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
 from ee.models.explicit_team_membership import ExplicitTeamMembership
 from ee.models.feature_flag_role_access import FeatureFlagRoleAccess
-from ee.models.rbac.access_control import AccessControl
-from ee.models.rbac.role import Role, RoleMembership
+from insights.models.ee_models import AccessControl
+from insights.models.ee_models import Role, RoleMembership
 
 
 class TestOrganizationAPI(APIBaseTest):

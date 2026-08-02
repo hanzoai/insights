@@ -19,7 +19,7 @@ from products.error_tracking.backend.models import (
     ErrorTrackingSymbolSet,
 )
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 
 class TestErrorTrackingFacadeAPI(BaseTest):

@@ -28,7 +28,7 @@ from products.slack_app.backend.slack_link_unfurl import (
     parse_insights_resource_link,
 )
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestParseInsightsResourceLink:

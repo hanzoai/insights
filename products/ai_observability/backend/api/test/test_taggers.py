@@ -11,7 +11,7 @@ from insights.models import Organization, OrganizationMembership, Project, Team,
 from products.ai_observability.backend.models.provider_keys import LLMProvider
 from products.ai_observability.backend.models.taggers import Tagger, TaggerType
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 def _setup_team():

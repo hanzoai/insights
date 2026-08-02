@@ -9,7 +9,7 @@ from products.warehouse_sources.backend.facade.models import (
     WarehouseColumnAnnotation,
 )
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestWarehouseColumnAnnotation(APIBaseTest):

@@ -18,7 +18,7 @@ class InsightsFlowReference:
     status: str
 
 
-def get_hog_flows_referencing_template_input_keys(
+def get_insights_flows_referencing_template_input_keys(
     team_id: int, template_id: str, input_key: str, *, only_value_key: str | None = None
 ) -> dict[str, list[InsightsFlowReference]]:
     """Map each key present in ``input_key``'s dict (across the team's workflows) to the workflows

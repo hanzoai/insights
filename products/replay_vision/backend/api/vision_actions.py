@@ -317,7 +317,7 @@ class VisionActionSerializer(serializers.ModelSerializer):
         allow_null=True,
         help_text="Timestamp of the most recent run, or null if it has never run.",
     )
-    hog_flow_id = serializers.UUIDField(
+    insights_flow_id = serializers.UUIDField(
         read_only=True,
         allow_null=True,
         help_text="ID of the delivery flow provisioned for this action. Null until delivery is wired up.",
@@ -345,7 +345,7 @@ class VisionActionSerializer(serializers.ModelSerializer):
             "delivery_config",
             "next_run_at",
             "last_run_at",
-            "hog_flow_id",
+            "insights_flow_id",
             "created_at",
             "created_by",
             "updated_at",
@@ -354,7 +354,7 @@ class VisionActionSerializer(serializers.ModelSerializer):
             "id",
             "next_run_at",
             "last_run_at",
-            "hog_flow_id",
+            "insights_flow_id",
             "created_at",
             "created_by",
             "updated_at",

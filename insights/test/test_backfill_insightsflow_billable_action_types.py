@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from insights.models import User
 
-from products.workflows.backend.models.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow import InsightsFlow
 
 
 class BackfillInsightsFlowBillableActionTypesTest(TestCase):

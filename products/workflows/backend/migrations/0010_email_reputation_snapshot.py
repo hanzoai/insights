@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ("evaluated_at", models.DateTimeField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
-                    "hog_flow",
+                    "insights_flow",
                     models.ForeignKey(
                         blank=True,
                         null=True,
@@ -75,26 +75,26 @@ class Migration(migrations.Migration):
                         name="insights_ema_team_id_a35f59_idx",
                     ),
                     models.Index(
-                        condition=models.Q(("emails_sent__gt", 0), ("hog_flow__isnull", True)),
+                        condition=models.Q(("emails_sent__gt", 0), ("insights_flow__isnull", True)),
                         fields=["evaluated_at"],
                         name="eml_rep_snapshot_plan_idx",
                     ),
                 ],
                 "constraints": [
                     models.UniqueConstraint(
-                        condition=models.Q(("hog_flow__isnull", False)),
-                        fields=("team", "hog_flow", "evaluated_at"),
+                        condition=models.Q(("insights_flow__isnull", False)),
+                        fields=("team", "insights_flow", "evaluated_at"),
                         name="unique_workflow_reputation_snapshot",
                     ),
                     models.UniqueConstraint(
-                        condition=models.Q(("hog_flow__isnull", True)),
+                        condition=models.Q(("insights_flow__isnull", True)),
                         fields=("team", "evaluated_at"),
                         name="unique_team_reputation_snapshot",
                     ),
                     models.CheckConstraint(
                         condition=models.Q(
-                            models.Q(("hog_flow__isnull", True), ("scope", "team")),
-                            models.Q(("hog_flow__isnull", False), ("scope", "workflow")),
+                            models.Q(("insights_flow__isnull", True), ("scope", "team")),
+                            models.Q(("insights_flow__isnull", False), ("scope", "workflow")),
                             _connector="OR",
                         ),
                         name="email_rep_snapshot_scope_matches_target",

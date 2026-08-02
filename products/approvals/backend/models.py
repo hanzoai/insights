@@ -202,7 +202,7 @@ class ApprovalPolicy(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
             return
 
         try:
-            from ee.models.rbac.role import Role
+            from insights.models.ee_models import Role
         except ImportError:
             pass
         else:
@@ -225,7 +225,7 @@ class ApprovalPolicy(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
         approver_roles = self.approver_config.get("roles")
         if approver_roles:
             try:
-                from ee.models.rbac.role import RoleMembership
+                from insights.models.ee_models import RoleMembership
 
                 role_user_ids = RoleMembership.objects.filter(
                     role_id__in=approver_roles,

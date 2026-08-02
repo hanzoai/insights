@@ -20,7 +20,7 @@ from products.dashboards.backend.models.dashboard_widget import DashboardWidget
 from products.product_analytics.backend.models.insight import Insight
 from products.surveys.backend.models import Survey
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestResourceTransferPreview(APIBaseTest):

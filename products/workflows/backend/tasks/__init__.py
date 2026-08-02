@@ -1,3 +1,3 @@
-from . import hog_flows
+from . import insights_flows
 
-__all__ = ["hog_flows"]
+__all__ = ["insights_flows"]
