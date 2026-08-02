@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "hog_flow",
+                    "insights_flow",
                     models.ForeignKey(
                         blank=True,
                         help_text="Delivery flow provisioned by the API; the action emits an event this flow delivers.",

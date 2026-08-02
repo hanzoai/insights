@@ -361,7 +361,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):  # type: ignore
             org_available_product_feature_keys = [feature["key"] for feature in org_available_product_features]
             if AvailableFeature.ACCESS_CONTROL in org_available_product_feature_keys:
                 try:
-                    from ee.models.rbac.access_control import AccessControl
+                    from insights.models.ee_models import AccessControl
                 except ImportError:
                     pass
                 else:
@@ -392,7 +392,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):  # type: ignore
                     )
                     if role_based_access_supported:
                         try:
-                            from ee.models.rbac.role import RoleMembership
+                            from insights.models.ee_models import RoleMembership
 
                             user_roles = RoleMembership.objects.filter(
                                 user=self, organization_member__in=[membership.id for membership in org_memberships]
@@ -545,7 +545,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):  # type: ignore
         # Auto-assign default role if configured
         if organization.default_role_id:
             try:
-                from ee.models import RoleMembership
+                from insights.models.ee_models import RoleMembership
 
                 RoleMembership.objects.create(
                     role_id=organization.default_role_id, user=self, organization_member=membership

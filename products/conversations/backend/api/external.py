@@ -160,14 +160,14 @@ def _workflow_trigger_from_request(request: Request) -> Trigger | None:
     is team-token authenticated, so the worst case is a token holder pointing attribution at
     another workflow id within its own team — no cross-team or privilege impact.
     """
-    hog_flow_id = request.headers.get(FN_FLOW_ID_HEADER)
-    if not hog_flow_id:
+    insights_flow_id = request.headers.get(FN_FLOW_ID_HEADER)
+    if not insights_flow_id:
         return None
     try:
-        uuid.UUID(hog_flow_id)
+        uuid.UUID(insights_flow_id)
     except (ValueError, TypeError):
         return None
-    return Trigger(job_type="hog_flow", job_id=hog_flow_id, payload={})
+    return Trigger(job_type="insights_flow", job_id=insights_flow_id, payload={})
 
 
 class ExternalTicketView(APIView):

@@ -21,7 +21,7 @@ from products.warehouse_sources.backend.temporal.data_imports.pipelines.core.cdp
 from products.warehouse_sources.backend.temporal.data_imports.sources.postgres.source import PostgresSource
 from products.warehouse_sources.backend.temporal.data_imports.util import InsightsInternalDatabaseError
 from products.warehouse_sources.backend.types import ExternalDataSourceType
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 def _patch_async_producer_scope(mock_producer):
@@ -195,7 +195,7 @@ async def test_should_produce_table_with_leading_underscore_source_prefix(team):
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_should_produce_table_with_matching_hog_flow(team):
+async def test_should_produce_table_with_matching_insights_flow(team):
     source = await sync_to_async(ExternalDataSource.objects.create)(
         team=team, source_type=ExternalDataSourceType.POSTGRES
     )
@@ -218,7 +218,7 @@ async def test_should_produce_table_with_matching_hog_flow(team):
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_should_not_produce_table_with_draft_hog_flow(team):
+async def test_should_not_produce_table_with_draft_insights_flow(team):
     source = await sync_to_async(ExternalDataSource.objects.create)(
         team=team, source_type=ExternalDataSourceType.POSTGRES
     )
@@ -241,7 +241,7 @@ async def test_should_not_produce_table_with_draft_hog_flow(team):
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_should_not_produce_table_with_non_matching_hog_flow_table(team):
+async def test_should_not_produce_table_with_non_matching_insights_flow_table(team):
     source = await sync_to_async(ExternalDataSource.objects.create)(
         team=team, source_type=ExternalDataSourceType.POSTGRES
     )

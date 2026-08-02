@@ -24,7 +24,7 @@ from products.engineering_analytics.backend.tests._github_fixtures import (
     repo_id,
 )
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestListGithubSourcesAccessControl(BaseTest):

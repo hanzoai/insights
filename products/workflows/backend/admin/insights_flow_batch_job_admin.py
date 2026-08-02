@@ -2,25 +2,25 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
 
 
 @admin.register(InsightsFlowBatchJob)
 class InsightsFlowBatchJobAdmin(admin.ModelAdmin):
-    list_display = ("id", "status", "hog_flow_link", "team_link", "created_at")
+    list_display = ("id", "status", "insights_flow_link", "team_link", "created_at")
     list_filter = (
         ("status", admin.ChoicesFieldListFilter),
         ("updated_at", admin.DateFieldListFilter),
     )
-    list_select_related = ("team", "hog_flow")
-    search_fields = ("hog_flow__name", "team__name", "team__organization__name")
+    list_select_related = ("team", "insights_flow")
+    search_fields = ("insights_flow__name", "team__name", "team__organization__name")
     ordering = ("-created_at",)
     readonly_fields = (
         "id",
         "team",
         "team_link",
-        "hog_flow",
-        "hog_flow_link",
+        "insights_flow",
+        "insights_flow_link",
         "created_by",
         "created_at",
         "updated_at",
@@ -30,7 +30,7 @@ class InsightsFlowBatchJobAdmin(admin.ModelAdmin):
     fields = (
         "status",
         "team_link",
-        "hog_flow_link",
+        "insights_flow_link",
         "created_by",
         "created_at",
         "updated_at",
@@ -47,9 +47,9 @@ class InsightsFlowBatchJobAdmin(admin.ModelAdmin):
         )
 
     @admin.display(description="Script flow")
-    def hog_flow_link(self, batch_job: InsightsFlowBatchJob):
+    def insights_flow_link(self, batch_job: InsightsFlowBatchJob):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:workflows_hogflow_change", args=[batch_job.hog_flow.pk]),
-            batch_job.hog_flow.name or batch_job.hog_flow.pk,
+            reverse("admin:workflows_hogflow_change", args=[batch_job.insights_flow.pk]),
+            batch_job.insights_flow.name or batch_job.insights_flow.pk,
         )

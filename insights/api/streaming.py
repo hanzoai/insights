@@ -5,7 +5,9 @@ import threading
 from collections import deque
 from collections.abc import AsyncGenerator, AsyncIterable, AsyncIterator, Generator, Iterable, Iterator
 from http import HTTPStatus
+from typing import TypeVar
 
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse, StreamingHttpResponse
@@ -16,6 +18,8 @@ from prometheus_client import Counter, Gauge, Histogram
 # str chunks (Django encodes str via the response charset). Broad on purpose — SSE
 # views yield str, proxies yield bytes, and the empty-stream stub passes a list.
 StreamContent = Iterable[bytes | str] | AsyncIterable[bytes | str]
+
+T = TypeVar("T")
 
 # Disable proxy buffering/caching so SSE chunks reach the client immediately
 # (nginx/Envoy in front of web-django otherwise buffer the stream).
@@ -366,3 +370,35 @@ def sse_streaming_response(
         # not strand the reservation until GC gets to it.
         reservation.release()
         raise
+
+
+class SyncIterableToAsync(AsyncIterator[T]):
+    """Adapt a blocking iterable to an async one for the ASGI server.
+
+    Under ASGI the event loop must not be blocked, so each `next()` is handed to
+    a worker thread. `thread_sensitive=False` because the wrapped iterables are
+    network streams, not ORM cursors bound to the request's DB connection.
+    """
+
+    def __init__(self, iterable: Iterable[T]) -> None:
+        self._iterable = iterable
+        self._next_async = sync_to_async(self._next, thread_sensitive=False)
+        self._iter_async = sync_to_async(iter, thread_sensitive=False)
+        self._iterator: Iterator[T] | None = None
+
+    def __aiter__(self) -> AsyncIterator[T]:
+        return self
+
+    async def __anext__(self) -> T:
+        if self._iterator is None:
+            self._iterator = await self._iter_async(self._iterable)
+        return await self._next_async(self._iterator)
+
+    @staticmethod
+    def _next(iterator: Iterator[T]) -> T:
+        # asyncio needs StopAsyncIteration; a bare StopIteration would escape as
+        # a RuntimeError out of the thread executor.
+        try:
+            return next(iterator)
+        except StopIteration:
+            raise StopAsyncIteration

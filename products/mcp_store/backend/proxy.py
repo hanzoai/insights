@@ -10,11 +10,11 @@ from django.utils import timezone
 import httpx
 import structlog
 
-from insights.api.streaming import sse_streaming_response
+from insights.api.streaming import SyncIterableToAsync, sse_streaming_response
 from insights.security.url_validation import is_url_allowed
 from insights.settings import SERVER_GATEWAY_INTERFACE
 
-from ee.hogai.utils.asgi import SyncIterableToAsync
+
 
 from .models import MCPAuditEvent, MCPGatewayServer, MCPServerInstallation, MCPServerInstallationTool
 from .oauth import TokenRefreshError, is_token_expiring, refresh_installation_token

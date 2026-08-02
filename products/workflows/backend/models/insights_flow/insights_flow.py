@@ -9,7 +9,7 @@ import structlog
 from insights.helpers.encrypted_fields import EncryptedJSONStringField
 from insights.models.team.team import Team
 from insights.models.utils import UUIDTModel
-from insights.plugins.plugin_server_api import reload_hog_flows_on_workers
+from insights.plugins.plugin_server_api import reload_insights_flows_on_workers
 
 from products.actions.backend.models.action import Action
 
@@ -137,31 +137,31 @@ class InsightsFlow(UUIDTModel):
 
 
 @receiver(post_save, sender=InsightsFlow)
-def hog_flow_saved(sender, instance: InsightsFlow, created, update_fields=None, **kwargs):
+def insights_flow_saved(sender, instance: InsightsFlow, created, update_fields=None, **kwargs):
     # Draft columns don't affect live execution, so workers don't need a config reload for them.
     if update_fields and set(update_fields) <= {"draft", "draft_updated_at"}:
         return
-    reload_hog_flows_on_workers(team_id=instance.team_id, hog_flow_ids=[str(instance.id)])
+    reload_insights_flows_on_workers(team_id=instance.team_id, insights_flow_ids=[str(instance.id)])
 
 
 @receiver(post_delete, sender=InsightsFlow)
-def hog_flow_deleted(sender, instance: InsightsFlow, **kwargs):
+def insights_flow_deleted(sender, instance: InsightsFlow, **kwargs):
     team_id = instance.team_id
-    hog_flow_id = str(instance.id)
+    insights_flow_id = str(instance.id)
     # post_delete fires inside the delete transaction, so publish only after commit; otherwise a
     # worker could re-read the still-live row and cache it as active for another TTL.
-    transaction.on_commit(lambda: reload_hog_flows_on_workers(team_id=team_id, hog_flow_ids=[hog_flow_id]))
+    transaction.on_commit(lambda: reload_insights_flows_on_workers(team_id=team_id, insights_flow_ids=[insights_flow_id]))
 
 
 @receiver(post_save, sender=Action)
-def action_saved_for_hog_flows(sender, instance: Action, created, **kwargs):
-    from products.workflows.backend.tasks.hog_flows import refresh_affected_hog_flows  # noqa: PLC0415
+def action_saved_for_insights_flows(sender, instance: Action, created, **kwargs):
+    from products.workflows.backend.tasks.insights_flows import refresh_affected_insights_flows  # noqa: PLC0415
 
-    refresh_affected_hog_flows.delay(action_id=instance.id)
+    refresh_affected_insights_flows.delay(action_id=instance.id)
 
 
 @receiver(post_save, sender=Team)
-def team_saved_for_hog_flows(sender, instance: Team, created, **kwargs):
-    from products.workflows.backend.tasks.hog_flows import refresh_affected_hog_flows  # noqa: PLC0415
+def team_saved_for_insights_flows(sender, instance: Team, created, **kwargs):
+    from products.workflows.backend.tasks.insights_flows import refresh_affected_insights_flows  # noqa: PLC0415
 
-    refresh_affected_hog_flows.delay(team_id=instance.id)
+    refresh_affected_insights_flows.delay(team_id=instance.id)

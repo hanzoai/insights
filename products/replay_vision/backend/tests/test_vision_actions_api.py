@@ -117,8 +117,8 @@ class TestVisionActionViewSet(_VisionActionAPITestCase):
         self.assertEqual(data["mode"], "group_summary")
         self.assertIsNotNone(data["next_run_at"])
         self.assertIsNone(data["last_run_at"])
-        # Delivery is an internal_destination InsightsFunction (no InsightsFlow), so hog_flow_id stays null.
-        self.assertIsNone(data["hog_flow_id"])
+        # Delivery is an internal_destination InsightsFunction (no InsightsFlow), so insights_flow_id stays null.
+        self.assertIsNone(data["insights_flow_id"])
         self.assertEqual(data["created_by"]["id"], self.user.id)
 
         action = VisionAction.all_teams.get(id=data["id"])

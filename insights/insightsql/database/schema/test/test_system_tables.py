@@ -54,9 +54,9 @@ from products.warehouse_sources.backend.facade.models import (
     ExternalDataSchema,
     ExternalDataSource,
 )
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 if TYPE_CHECKING:
     from products.customer_analytics.backend.models.account import Account
@@ -379,7 +379,7 @@ def _create_error_tracking_symbol_set(team: Team, label: str) -> ErrorTrackingSy
     )
 
 
-def _create_hog_flow(team: Team, label: str) -> InsightsFlow:
+def _create_insights_flow(team: Team, label: str) -> InsightsFlow:
     return InsightsFlow.objects.create(team=team, name=f"flow_{label}")
 
 
@@ -708,7 +708,7 @@ SYSTEM_TABLE_FACTORIES = [
     ("file_system", _create_file_system),
     ("groups", _create_group),
     ("group_type_mappings", _create_group_type_mapping),
-    ("hog_flows", _create_hog_flow),
+    ("insights_flows", _create_insights_flow),
     ("insights_functions", _create_insights_function),
     ("insights", _create_insight),
     ("insight_variables", _create_insight_variable),

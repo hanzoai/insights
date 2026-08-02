@@ -27,7 +27,7 @@ from products.conversations.backend.models import Ticket, TicketAssignment
 from products.conversations.backend.models.constants import OrganizationIdSource
 from products.customer_analytics.backend.facade import contracts as ca_contracts
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 
 class TestConversationEvents(BaseTest):

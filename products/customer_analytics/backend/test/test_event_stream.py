@@ -16,7 +16,7 @@ from products.customer_analytics.backend.logic.event_stream_destination import _
 from products.customer_analytics.backend.models import EventStream, EventStreamMember, TeamCustomerAnalyticsConfig
 from products.customer_analytics.backend.test.factories import create_account
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestEventStreamViewSet(APIBaseTest):
