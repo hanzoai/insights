@@ -1,14 +1,15 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { IconDocument, IconFolder, IconPlus } from '@hanzo/icons'
 import { Dialog } from '@hanzo/elements'
+import { IconDocument, IconFolder, IconPlus } from '@hanzo/icons'
 
 import api from 'lib/api'
-import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'
+import { CAPABILITIES } from 'lib/capabilities'
+import { Spinner } from 'lib/elements/Spinner'
 import { toast } from 'lib/elements/Toast'
 import { TreeDataItem } from 'lib/elements/Tree/Tree'
-import { Spinner } from 'lib/elements/Spinner'
+import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter, humanList, identifierToHuman, pluralize } from 'lib/utils'
 import { getCurrentTeamIdOrNone } from 'lib/utils/getAppContext'
@@ -847,6 +848,11 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
         groupItems: [
             (s) => [s.groupTypes, s.groupsAccessStatus, s.aggregationLabel, s.shortcutData, s.featureFlags],
             (groupTypes, groupsAccessStatus, aggregationLabel, shortcutData, featureFlags): FileSystemImport[] => {
+                // No groups endpoint answers, so there is nothing for this item to open onto.
+                if (!CAPABILITIES.groups.available) {
+                    return []
+                }
+
                 const showGroupsIntroductionPage = [
                     GroupsAccessStatus.HasAccess,
                     GroupsAccessStatus.HasGroupTypes,
