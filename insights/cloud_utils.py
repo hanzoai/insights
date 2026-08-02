@@ -1,19 +1,11 @@
 import os
-from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
 from django.conf import settings
-from django.db.utils import ProgrammingError
-from django.utils import timezone
-
-from insights.exceptions_capture import capture_exception
-
-if TYPE_CHECKING:
-    from ee.models.license import License
 
 is_cloud_cached: Optional[bool] = None
 is_instance_licensed_cached: Optional[bool] = None
-instance_license_cached: Optional["License"] = None
+instance_license_cached: Optional[Any] = None
 
 
 # Keep this in sync with isCloud() in nodejs/src/utils/env-utils.ts.
@@ -30,48 +22,13 @@ def is_ci() -> bool:
     return os.environ.get("GITHUB_ACTIONS") is not None
 
 
-def get_cached_instance_license() -> Optional["License"]:
-    """Returns the first valid license and caches the value for the lifetime of the instance, as it is not expected to change.
-    If there is no valid license, it returns None.
+def get_cached_instance_license() -> Optional[Any]:
+    """The instance's enterprise license, or None when there isn't one.
+
+    Always None: licenses were issued against the enterprise edition, and the model that read them
+    is not carried here. Callers already treat None as "unlicensed", which is what this instance is.
     """
-    global instance_license_cached
-    global is_instance_licensed_cached
-
-    try:
-        from ee.models.license import License
-    except ProgrammingError:
-        # TRICKY - The license table may not exist if a migration is running
-        pass
-    except Exception as e:
-        capture_exception(e)
-        return None
-
-    if isinstance(instance_license_cached, License):
-        return instance_license_cached
-
-    if is_instance_licensed_cached is False:
-        # This is an unlicensed instance
-        return None
-
-    # TRICKY - The license table may not exist if a migration is running
-    license = License.objects.first_valid()
-
-    # No license found locally, create one for dev mode
-    if not license and is_dev_mode():
-        dev_uuid = "69004a5f-a7da-499a-a63a-338f996b6f7a"
-        license = License.objects.create(
-            key=f"{dev_uuid}::{settings.LICENSE_SECRET_KEY}",
-            plan="enterprise",
-            valid_until=timezone.now() + timedelta(weeks=52),
-        )
-
-    if license:
-        instance_license_cached = license
-        is_instance_licensed_cached = True
-    else:
-        is_instance_licensed_cached = False
-
-    return instance_license_cached
+    return None
 
 
 # NOTE: This is purely for testing purposes

@@ -31,7 +31,7 @@ from products.tasks.backend.logic.stream.redis_stream import (
 from products.tasks.backend.models import TaskRun
 from products.tasks.backend.push_dispatcher import notify_task_run_turn_completed
 
-from ee.hogai.sandbox import is_turn_complete
+from products.insights_ai.backend.wire_types import is_turn_complete
 
 logger = structlog.get_logger(__name__)
 

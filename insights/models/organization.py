@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime, timedelta
 from functools import cache as functools_cache
 from typing import TYPE_CHECKING, Any, Literal, Optional, TypedDict, Union
@@ -26,8 +25,6 @@ from insights.models.utils import LowercaseSlugField, UUIDTModel, create_with_sl
 
 if TYPE_CHECKING:
     from insights.models import Team, User
-
-    from ee.billing.quota_limiting import QuotaResource
 
 
 logger = structlog.get_logger(__name__)
@@ -76,20 +73,12 @@ class ProductFeature(TypedDict):
 
 @functools_cache
 def _enterprise_only_feature_keys() -> frozenset[str]:
-    """Enterprise-plan-only feature keys, computed once per process.
+    """Feature keys that only an enterprise plan carried.
 
-    Sourced from `License.ENTERPRISE_FEATURES - SCALE_FEATURES`. Returns an empty
-    set when the ee package isn't importable.
+    Empty: the plan catalog lived on the enterprise License model, so no feature is classified as
+    enterprise-only and `get_plan_tier` never reports "enterprise".
     """
-    keys: set[str] = set()
-    try:
-        from ee.models.license import License
-
-        scale_features = {str(f) for f in License.SCALE_FEATURES}
-        keys |= {str(f) for f in License.ENTERPRISE_FEATURES} - scale_features
-    except ImportError:
-        pass
-    return frozenset(keys)
+    return frozenset()
 
 
 class OrganizationManager(models.Manager):
@@ -328,18 +317,8 @@ class Organization(ModelActivityMixin, UUIDTModel):
         Obtains details on the billing plan for the organization.
         Returns a tuple with (billing_plan_key, billing_realm)
         """
-        try:
-            from ee.models.license import License
-        except ImportError:
-            License = None  # type: ignore
-        # Demo gets all features
-        if settings.DEMO or "generate_demo_data" in sys.argv[1:2]:
-            return (License.ENTERPRISE_PLAN, "demo")
-        # Otherwise, try to find a valid license on this instance
-        if License is not None:
-            license = License.objects.first_valid()
-            if license:
-                return (license.plan, "ee")
+        # Plans were issued against the enterprise License model, which this fork does not carry,
+        # so an instance has no plan and no realm.
         return (None, None)
 
     def update_available_product_features(self) -> list[ProductFeature]:
@@ -348,30 +327,9 @@ class Organization(ModelActivityMixin, UUIDTModel):
             # Since billing V2 we just use the field which is updated when the billing service is called
             return self.available_product_features or []
 
-        try:
-            from ee.models.license import License
-        except ImportError:
-            self.available_product_features = []
-            return []
-
+        # Self-hosted feature entitlements came from a license key read by the enterprise edition.
+        # Without one there is nothing to sync, so the field stays as the billing service left it.
         self.available_product_features = []
-
-        # Self hosted legacy license so we just sync the license features
-        # Demo gets all features
-        if settings.DEMO or "generate_demo_data" in sys.argv[1:2]:
-            features = License.PLANS.get(License.ENTERPRISE_PLAN, [])
-            self.available_product_features = [
-                {"key": feature, "name": " ".join(feature.split(" ")).capitalize()} for feature in features
-            ]
-        else:
-            # Otherwise, try to find a valid license on this instance
-            license = License.objects.first_valid()
-            if license:
-                features = License.PLANS.get(License.ENTERPRISE_PLAN, [])
-                self.available_product_features = [
-                    {"key": feature, "name": " ".join(feature.split(" ")).capitalize()} for feature in features
-                ]
-
         return self.available_product_features
 
     def get_available_feature(self, feature: Union[AvailableFeature, str]) -> ProductFeature | None:
@@ -401,145 +359,6 @@ class Organization(ModelActivityMixin, UUIDTModel):
         if available_keys & _enterprise_only_feature_keys():
             return "enterprise"
         return "paid"
-
-    def limit_product_until_end_of_billing_cycle(self, resource: "QuotaResource") -> None:
-        """
-        Limit a resource for all teams of this organization until the end of the current billing cycle.
-        Updates the organization's usage data with the quota_limited_until timestamp.
-        """
-        from ee.billing.quota_limiting import (
-            QuotaLimitingCaches,
-            QuotaResource,
-            add_limited_team_tokens,
-            dispatch_recordings_remote_config_sync,
-            update_organization_usage_fields,
-        )
-
-        billing_period = self.current_billing_period
-
-        if billing_period:
-            _start, end = billing_period
-            billing_period_end_timestamp = int(end.timestamp())
-
-            team_rows = [
-                (team_id, api_token) for team_id, api_token in self.teams.values_list("id", "api_token") if api_token
-            ]
-            team_tokens: dict[str, int] = {api_token: billing_period_end_timestamp for _, api_token in team_rows}
-            add_limited_team_tokens(resource, team_tokens, QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY)
-
-            update_organization_usage_fields(
-                self,
-                resource,
-                {"quota_limited_until": billing_period_end_timestamp, "quota_limiting_suspended_until": None},
-            )
-
-            if resource == QuotaResource.RECORDINGS:
-                dispatch_recordings_remote_config_sync(team_id for team_id, _ in team_rows)
-        else:
-            raise RuntimeError("Cannot limit without having a billing period")
-
-    def unlimit_product(self, resource: "QuotaResource") -> None:
-        """
-        Remove limiting for a resource for all teams of this organization.
-        Removes teams from the limiting cache and clears quota_limited_until from usage data.
-        """
-        from ee.billing.quota_limiting import (
-            QuotaLimitingCaches,
-            QuotaResource,
-            dispatch_recordings_remote_config_sync,
-            remove_limited_team_tokens,
-            update_organization_usage_fields,
-        )
-
-        team_rows = [
-            (team_id, api_token) for team_id, api_token in self.teams.values_list("id", "api_token") if api_token
-        ]
-        remove_limited_team_tokens(
-            resource, [api_token for _, api_token in team_rows], QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY
-        )
-
-        if self.usage and resource.value in self.usage:
-            update_organization_usage_fields(
-                self, resource, {"quota_limited_until": None, "quota_limiting_suspended_until": None}
-            )
-
-        if resource == QuotaResource.RECORDINGS:
-            dispatch_recordings_remote_config_sync(team_id for team_id, _ in team_rows)
-
-    def get_limited_products(self) -> dict[str, dict[str, Any]]:
-        """
-        Returns information about which products are currently limited for this organization.
-
-        Uses Redis pipelining to efficiently check all team tokens for all resources in a single batch.
-        Returns both Redis state (source of truth) and usage field data (which may be out of sync).
-
-        Returns a dict mapping resource names to their limiting status:
-        {
-            "events": {
-                "is_limited_in_redis": True,
-                "redis_quota_limited_until": 1234567890,
-                "limited_teams": ["team_token_1", "team_token_2"],
-                "usage_quota_limited_until": 1234567890,
-                "usage_quota_limiting_suspended_until": None
-            },
-            "recordings": {
-                "is_limited_in_redis": False,
-                "redis_quota_limited_until": None,
-                "limited_teams": [],
-                "usage_quota_limited_until": None,
-                "usage_quota_limiting_suspended_until": None
-            },
-            ...
-        }
-        """
-        from ee.billing.quota_limiting import QuotaLimitingCaches, QuotaResource, get_client
-
-        team_tokens = [t for t in self.teams.values_list("api_token", flat=True) if t]
-
-        result: dict[str, dict[str, Any]] = {}
-        for resource in QuotaResource:
-            usage_quota_limited_until = None
-            usage_quota_limiting_suspended_until = None
-
-            if self.usage and resource.value in self.usage:
-                resource_usage = self.usage[resource.value]
-                usage_quota_limited_until = resource_usage.get("quota_limited_until")
-                usage_quota_limiting_suspended_until = resource_usage.get("quota_limiting_suspended_until")
-
-            result[resource.value] = {
-                "is_limited_in_redis": False,
-                "redis_quota_limited_until": None,
-                "limited_teams": [],
-                "usage_quota_limited_until": usage_quota_limited_until,
-                "usage_quota_limiting_suspended_until": usage_quota_limiting_suspended_until,
-            }
-
-        if not team_tokens:
-            return result
-
-        redis_client = get_client()
-        now = timezone.now().timestamp()
-
-        pipe = redis_client.pipeline()
-        checks: list[tuple[QuotaResource, str]] = []
-
-        for resource in QuotaResource:
-            cache_key = f"{QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY.value}{resource.value}"
-            for token in team_tokens:
-                pipe.zscore(cache_key, token)
-                checks.append((resource, token))
-
-        scores = pipe.execute()
-
-        for (resource, token), score in zip(checks, scores):
-            if score is not None and score >= now:
-                result[resource.value]["is_limited_in_redis"] = True
-                result[resource.value]["limited_teams"].append(token)
-                current_max = result[resource.value]["redis_quota_limited_until"]
-                if current_max is None or score > current_max:
-                    result[resource.value]["redis_quota_limited_until"] = int(score)
-
-        return result
 
     @property
     def current_billing_period(self) -> tuple[datetime, datetime] | None:

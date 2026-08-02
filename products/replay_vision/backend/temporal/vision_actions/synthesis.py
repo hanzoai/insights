@@ -36,8 +36,7 @@ from products.replay_vision.backend.temporal.vision_actions.types import (
     SynthesizeGroupSummaryResult,
 )
 
-from ee.billing.quota_limiting import is_team_over_ai_credit_budget
-from ee.hogai.utils.untrusted import as_untrusted_data
+from insights.security.untrusted import as_untrusted_data
 
 logger = structlog.get_logger(__name__)
 
@@ -291,10 +290,6 @@ def _synthesize(inputs: SynthesizeGroupSummaryInputs) -> SynthesizeGroupSummaryR
         # Don't run billable AI synthesis for an action whose creator was deleted.
         logger.warning("vision_action.synthesis.no_creator", vision_action_id=str(action.id))
         return SynthesizeGroupSummaryResult(status=SynthesisStatus.ABORTED_NO_USER)
-
-    if is_team_over_ai_credit_budget(team.api_token):
-        logger.info("vision_action.synthesis.over_credit_budget", vision_action_id=str(action.id))
-        return SynthesizeGroupSummaryResult(status=SynthesisStatus.SKIPPED_OVER_BUDGET)
 
     batch = _fetch_observations(team, action, run)
     if not batch.lines:

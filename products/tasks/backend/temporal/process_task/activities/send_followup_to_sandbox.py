@@ -54,7 +54,7 @@ from products.tasks.backend.temporal.process_task.utils import (
     sandbox_identity_scope,
 )
 
-from ee.hogai.sandbox import STOP_REASON_END_TURN, TURN_COMPLETE_METHOD
+from products.insights_ai.backend.wire_types import STOP_REASON_END_TURN, TURN_COMPLETE_METHOD
 
 logger = structlog.get_logger(__name__)
 
