@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Optional, TypedDict, Union
 
@@ -313,8 +314,10 @@ class Organization(ModelActivityMixin, UUIDTModel):
 
     def update_available_product_features(self) -> list[ProductFeature]:
         """Updates field `available_product_features`. Does not `save()`."""
-        # A copy, so an org that edits its own list cannot edit every org's.
-        self.available_product_features = list(PRODUCT_FEATURES)
+        # Deep, because a shallow copy shares the entries: `list(...)` gives each organization its
+        # own list of the very same dicts, so editing one organization's entry edits every
+        # organization's and the constant itself.
+        self.available_product_features = copy.deepcopy(PRODUCT_FEATURES)
         return self.available_product_features
 
     def get_available_feature(self, feature: Union[AvailableFeature, str]) -> ProductFeature | None:
