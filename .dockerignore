@@ -12,6 +12,12 @@
 !common/plugin_transpiler/*.*
 !common/plugin_transpiler/src
 !common/tailwind
+# Upstream installs its parser from PyPI, so upstream's .dockerignore has no
+# line for it and the import dropped ours. We build ours from source —
+# pyproject points insightsql-parser at this directory and the insights-build
+# stage COPYs it — and this file's first rule is `*`, so without a re-include
+# the COPY resolves to nothing and the build stops there.
+!common/insightsql_parser
 !packages/quill
 !dags
 !docs/onboarding

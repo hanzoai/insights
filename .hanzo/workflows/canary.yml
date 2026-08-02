@@ -1,0 +1,69 @@
+# insights — build a branch, and stop there.
+#
+#   git.hanzo.ai push (converge/**) → act_runner → docker build
+#   → ghcr.io/hanzoai/insights:canary-<sha>
+#
+# deploy.yml is the ONE path to production and it ends by pinning
+# hanzoai/universe, so anything it builds ships within minutes. That is correct
+# for main and useless for a branch nobody has proven yet: the convergence has
+# never been through a real image build, and finding that out by shipping it is
+# the wrong order.
+#
+# So this is deploy.yml with the last step removed, and the removal is
+# structural rather than conditional — there is no `if:` here that a future edit
+# could flip. Two further properties make an accidental ship impossible even if
+# someone wires this into a pin by hand:
+#
+#   * The tag is `canary-<sha>`, not semver. pin.sh refuses a non-semver
+#     version, so the pin cannot be written.
+#   * deploy.yml derives the next patch from published tags it first filters
+#     with ^[0-9]+\.[0-9]+\.[0-9]+$, so a canary tag is invisible to it and
+#     cannot skew or collide with the release sequence.
+#
+# The tag carries the commit because that is the only question worth asking of a
+# canary — which tree is this. A semver would be a lie here: these images are
+# not releases and are never ordered against one.
+name: canary
+
+on:
+  push:
+    # Scoped to the convergence namespace, so this can never fire on main, and
+    # deploy.yml (branches: [main]) can never fire on a convergence branch.
+    # Neither workflow needs to know about the other.
+    branches: ['converge/**']
+  workflow_dispatch:
+
+# NOT insights-release. That group serializes production releases because the
+# immutability guard there is check-then-act; a canary has no such guard to
+# protect and holding the release lock for 30-60 minutes would stall a real
+# release behind an experiment.
+concurrency:
+  group: insights-canary-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+
+      # No "is this tag free" probe. The tag is derived from the commit, so a
+      # rebuild of the same ref replaces an image built from identical source —
+      # and nothing pins a canary, so the "two digests behind one name" hazard
+      # deploy.yml guards against has nothing to bite here.
+      - name: Build + push
+        run: |
+          set -euo pipefail
+          VERSION="canary-$(echo "${GITHUB_SHA}" | cut -c1-11)"
+          IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
+          docker build -f Dockerfile \
+            --build-arg COMMIT_HASH="${GITHUB_SHA}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --label "org.opencontainers.image.version=${VERSION}" \
+            --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
+            -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "built $IMAGE (revision ${GITHUB_SHA}) — NOT pinned, NOT shipped"
