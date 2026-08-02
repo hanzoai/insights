@@ -4,6 +4,7 @@ import { loaders } from 'kea-loaders'
 import { beforeUnload, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { dayjs } from 'lib/dayjs'
 import { toast } from 'lib/elements/Toast/Toast'
 import { isEmail, isURL } from 'lib/utils'
@@ -36,6 +37,14 @@ export const subscriptionLogic = kea<subscriptionLogicType>([
         subscription: {
             __default: undefined as unknown as SubscriptionType,
             loadSubscription: async () => {
+                // Same guard as the list loader next door, for the same reason: this one is reached
+                // by URL (`/subscriptions/:id`), so the entry-point check upstream cannot cover it,
+                // and a request to the absent endpoint raises a toast naming a feature the UI has
+                // already stopped offering.
+                if (!CAPABILITIES.subscriptions.available) {
+                    return { ...NEW_SUBSCRIPTION }
+                }
+
                 if (props.id && props.id !== 'new') {
                     return await api.subscriptions.get(props.id)
                 }
