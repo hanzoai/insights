@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""Self-test for bin/debrand.
+
+Every check here guards a defect that has already happened once. The codemod
+decides what the fork contains, so when it is wrong it is wrong across
+thousands of files at a time, and each of these failed silently: a tree that
+still built, still booted, or still read like a valid licence.
+
+Standalone on purpose. The repo's pytest boots Django, and a convergence in
+progress is exactly when that is broken and this is most needed.
+
+    bin/debrand-selftest
+"""
+
+from __future__ import annotations
+
+import contextlib
+import io
+import os
+import subprocess
+import sys
+import tempfile
+from importlib.machinery import SourceFileLoader
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+debrand = SourceFileLoader("debrand", os.path.join(ROOT, "bin", "debrand")).load_module()
+
+failures: list[str] = []
+
+
+def check(name: str, got: object, want: object) -> None:
+    if got == want:
+        print(f"  \033[32mok\033[0m   {name}")
+        return
+    failures.append(name)
+    print(f"  \033[31mFAIL\033[0m {name}\n         got  {got!r}\n         want {want!r}")
+
+
+def quiet(fn, *args: object) -> object:
+    """Run a detector whose job is to print a complaint, without printing it.
+
+    The negative cases below assert that a checker fires. Letting it write its
+    real FAIL line into this script's output makes a passing run read as a
+    failing one.
+    """
+    with contextlib.redirect_stdout(io.StringIO()):
+        return fn(*args)
+
+
+def closure(files: dict[str, str], products: list[str]) -> set[str]:
+    """Run drop_closure over a synthetic tree, dropping `products`."""
+    with tempfile.TemporaryDirectory() as tmp:
+        for rel, body in files.items():
+            path = os.path.join(tmp, rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(body)
+        saved = debrand.DROP_DIRS
+        debrand.DROP_DIRS = [(f"products/{p}", "test") for p in products]
+        try:
+            dropped, _ = debrand.drop_closure(tmp, list(files))
+        finally:
+            debrand.DROP_DIRS = saved
+    return dropped
+
+
+# A product whose Python half nothing imports but whose TypeScript half the core
+# does was dropped anyway, because the closure only read Python. Django booted
+# and the bundle resolved nothing — 21 files, including lib/api.ts, which 760
+# files import.
+check(
+    "a product imported from TypeScript is held",
+    closure({"frontend/src/lib/api.ts": "import type { X } from 'products/widgets/frontend/generated/api'\n"}, ["widgets"]),
+    set(),
+)
+check(
+    "a lazy scene import holds it too",
+    closure({"frontend/src/productScenes.tsx": "export default { W: () => import('../../products/widgets/frontend/Scene') }\n"}, ["widgets"]),
+    set(),
+)
+check(
+    "a type-only import still holds it",
+    closure({"frontend/src/x.ts": "import type { A } from 'products/widgets/frontend/types'\n"}, ["widgets"]),
+    set(),
+)
+# The mirror image, and the more expensive mistake: a config names a product
+# precisely because it is NOT built. Matching those would hold `desktop`, which
+# is 4,797 files and most of what the drop is for.
+check(
+    "an ignore-list entry does not hold it",
+    closure({"frontend/jest.config.ts": "export default { testPathIgnorePatterns: ['/products/widgets/'] }\n"}, ["widgets"]),
+    {"widgets"},
+)
+check(
+    "prose naming a product does not hold it",
+    closure({"insights/api/x.py": "# see products/widgets/backend/logic.py for the pattern\n"}, ["widgets"]),
+    {"widgets"},
+)
+check(
+    "Python imports are still read",
+    closure({"insights/api/x.py": "from products.widgets.backend import thing\n"}, ["widgets"]),
+    set(),
+)
+check(
+    "a doomed product citing another does not save it",
+    closure({"products/widgets/backend/a.py": "from products.gadgets.backend import b\n"}, ["widgets", "gadgets"]),
+    {"widgets", "gadgets"},
+)
+
+# Renaming a name in paths but not in content leaves every reference dangling:
+# imports, and migration dependencies naming a renamed migration file. Assert
+# the detector, not the tree — the tree only shows today's instances.
+saved_rules = debrand.PATH_RULES
+try:
+    debrand.PATH_RULES = [("widget_box", "gadget_box")]
+    check("an asymmetric path rule is refused", quiet(debrand.path_rules_have_content_counterparts), 1)
+    debrand.PATH_RULES = [("hogql", "insightsql")]
+    check("a symmetric path rule passes", quiet(debrand.path_rules_have_content_counterparts), 0)
+finally:
+    debrand.PATH_RULES = saved_rules
+
+# A licence is the one text in the tree that is not ours to rewrite: MIT grants
+# the code on condition the notice travels with it. Renaming the company inside
+# one still reads as a valid licence, so nothing downstream would notice.
+with tempfile.TemporaryDirectory() as tmp:
+    subprocess.run(["git", "init", "-q", tmp], check=True)
+    notice = "MIT License\n\nCopyright (c) 2020-2026 PostHog Inc.\n"
+    for rel, body in {
+        "LICENSE": notice,
+        "sub/LICENSE-MIT": notice,
+        "NOTICE.md": notice,
+        "mod.py": "import posthog\n",
+    }.items():
+        path = os.path.join(tmp, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(body)
+    subprocess.run(["git", "add", "-A"], cwd=tmp, check=True, capture_output=True)
+    quiet(debrand.apply, tmp, False)
+
+    def read(rel: str) -> str:
+        with open(os.path.join(tmp, rel), encoding="utf-8") as fh:
+            return fh.read()
+
+    check("LICENSE is left byte-identical", read("LICENSE"), notice)
+    check("a variant licence name is too", read("sub/LICENSE-MIT"), notice)
+    check("so is NOTICE", read("NOTICE.md"), notice)
+    check("a control file is still rewritten", read("mod.py"), "import insights\n")
+    check("a laundered licence is caught", quiet(debrand.licences_unlaundered, tmp), 0)
+    with open(os.path.join(tmp, "LICENSE"), "w", encoding="utf-8") as fh:
+        fh.write("Copyright (c) 2026 Insights Inc.\n")
+    check("...and reported when it exists", quiet(debrand.licences_unlaundered, tmp), 1)
+
+# Applying the rules to an already-converged tree has to be a no-op, or every
+# rerun produces a diff and convergence never terminates.
+sample = "from insights.insightsql import datastore  # @hanzo/elements, InsightsFunction\n"
+check("content rewriting is idempotent", debrand.rewrite_text(debrand.rewrite_text(sample)), debrand.rewrite_text(sample))
+check("path rewriting is idempotent", debrand.rewrite_path(debrand.rewrite_path("posthog/hogql/clickhouse.py")), debrand.rewrite_path("posthog/hogql/clickhouse.py"))
+
+print()
+if failures:
+    print(f"\033[31m{len(failures)} check(s) failed\033[0m: {', '.join(failures)}")
+    sys.exit(1)
+print("\033[32mall checks passed\033[0m")
