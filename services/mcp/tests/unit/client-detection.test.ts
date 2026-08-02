@@ -7,7 +7,7 @@ import {
     CODING_AGENT_CLIENT_NAME_FRAGMENTS,
     DEFAULT_CLIENT_CAPABILITIES,
     MCPClientProfile,
-    POSTFN_CODE_CONSUMER,
+    INSIGHTS_CODE_CONSUMER,
     TOOLS_MODE_CLIENT_NAME_FRAGMENTS,
     TOOLS_MODE_USER_AGENT_FRAGMENTS,
     isClaudeUiHostClient,
@@ -166,7 +166,7 @@ describe('resolveEffectiveClientName', () => {
 
 describe('isInsightsCodeConsumer', () => {
     it('matches the exact Insights Desktop consumer value', () => {
-        expect(isInsightsCodeConsumer(POSTFN_CODE_CONSUMER)).toBe(true)
+        expect(isInsightsCodeConsumer(INSIGHTS_CODE_CONSUMER)).toBe(true)
         expect(isInsightsCodeConsumer('insights-code')).toBe(true)
     })
 
@@ -360,7 +360,7 @@ describe('MCPClientProfile', () => {
 
     describe('isInsightsCodeConsumer()', () => {
         it('returns true for the exact consumer value', () => {
-            expect(new MCPClientProfile({ consumer: POSTFN_CODE_CONSUMER }).isInsightsCodeConsumer()).toBe(true)
+            expect(new MCPClientProfile({ consumer: INSIGHTS_CODE_CONSUMER }).isInsightsCodeConsumer()).toBe(true)
         })
 
         it.each([['slack'], ['insights'], ['Insights-Code'], ['insights_ai'], ['']])(
@@ -513,14 +513,14 @@ describe('MCPClientProfile', () => {
         const profile = new MCPClientProfile({
             clientName: 'claude-code',
             clientVersion: '1.2.3',
-            consumer: POSTFN_CODE_CONSUMER,
+            consumer: INSIGHTS_CODE_CONSUMER,
             oauthClientName: 'Lovable',
             vendorClient: 'ClaudeCode',
             userAgent: 'Claude-User',
         })
         expect(profile.clientName).toBe('claude-code')
         expect(profile.clientVersion).toBe('1.2.3')
-        expect(profile.consumer).toBe(POSTFN_CODE_CONSUMER)
+        expect(profile.consumer).toBe(INSIGHTS_CODE_CONSUMER)
         expect(profile.oauthClientName).toBe('Lovable')
         expect(profile.vendorClient).toBe('ClaudeCode')
         expect(profile.userAgent).toBe('Claude-User')

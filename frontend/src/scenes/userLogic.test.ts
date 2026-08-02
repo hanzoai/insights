@@ -16,8 +16,8 @@ describe('userLogic', () => {
 
     beforeEach(() => {
         // Set current_user before initKeaTests so userLogic bootstraps with theme_mode: 'light'
-        window.POSTFN_APP_CONTEXT = {
-            ...window.POSTFN_APP_CONTEXT,
+        window.INSIGHTS_APP_CONTEXT = {
+            ...window.INSIGHTS_APP_CONTEXT,
             current_user: userWithLightTheme,
         } as any
         initKeaTests()

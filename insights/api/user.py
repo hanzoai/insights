@@ -1878,3 +1878,13 @@ def redirect_to_site(request):
         return JsonResponse({"toolbarParams": state})
     else:
         return redirect("{}#__insights={}".format(app_url, state))
+
+
+# redirect_to_website is deliberately absent. It registered the signed-in user
+# against a Strapi forum on a third-party domain this deployment does not own,
+# posting their email address and real name to it, and minted a JWT for that
+# forum with a hardcoded fallback secret. There is no forum behind this install,
+# so the endpoint had nothing to redirect to and nothing to authorize -- only
+# the outbound disclosure. The strapi_id column stays on the user model because
+# the live database has it; dropping a populated column is a separate, operator-
+# owned migration.

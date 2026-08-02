@@ -20,10 +20,10 @@ from insights.temporal.common.logger import get_logger
 
 from ee.billing.salesforce_enrichment.constants import (
     ORG_MAPPINGS_CACHE_MISSING_ERROR_TYPE,
-    POSTFN_FETCH_MAPPINGS_PAGE_SIZE,
-    POSTFN_ORG_ID_FIELD,
-    POSTFN_USAGE_ENRICHMENT_BATCH_SIZE,
-    POSTFN_USAGE_FIELD_MAPPINGS,
+    INSIGHTS_FETCH_MAPPINGS_PAGE_SIZE,
+    INSIGHTS_ORG_ID_FIELD,
+    INSIGHTS_USAGE_ENRICHMENT_BATCH_SIZE,
+    INSIGHTS_USAGE_FIELD_MAPPINGS,
     SALESFORCE_UPDATE_BATCH_SIZE,
 )
 from ee.billing.salesforce_enrichment.redis_cache import (
@@ -37,7 +37,7 @@ from ee.billing.salesforce_enrichment.usage_signals import UsageSignals, aggrega
 
 LOGGER = get_logger(__name__)
 
-# Fields from POSTFN_USAGE_FIELD_MAPPINGS that are handled specially (not simple attribute->field copy)
+# Fields from INSIGHTS_USAGE_FIELD_MAPPINGS that are handled specially (not simple attribute->field copy)
 _SPECIAL_FIELDS = frozenset({"products_activated_7d", "products_activated_30d"})
 
 
@@ -56,7 +56,7 @@ class UsageEnrichmentState:
 class UsageEnrichmentInputs:
     """Inputs for the usage enrichment workflow."""
 
-    batch_size: int = POSTFN_USAGE_ENRICHMENT_BATCH_SIZE
+    batch_size: int = INSIGHTS_USAGE_ENRICHMENT_BATCH_SIZE
     max_orgs: int | None = None  # Optional limit for testing
     specific_org_id: str | None = None  # Debug mode: enrich single org
     state: UsageEnrichmentState | None = None  # Continue-As-New state
@@ -77,7 +77,7 @@ def prepare_salesforce_update_record(salesforce_account_id: str, signals: UsageS
     record: dict[str, Any] = {"Id": salesforce_account_id}
 
     # Add all mapped fields, excluding None values and special fields
-    for attr, sf_field in POSTFN_USAGE_FIELD_MAPPINGS.items():
+    for attr, sf_field in INSIGHTS_USAGE_FIELD_MAPPINGS.items():
         if attr in _SPECIAL_FIELDS:
             continue
         value = getattr(signals, attr, None)
@@ -85,8 +85,8 @@ def prepare_salesforce_update_record(salesforce_account_id: str, signals: UsageS
             record[sf_field] = value
 
     # Products activated (comma-separated, sorted for consistency)
-    record[POSTFN_USAGE_FIELD_MAPPINGS["products_activated_7d"]] = ",".join(sorted(signals.products_activated_7d))
-    record[POSTFN_USAGE_FIELD_MAPPINGS["products_activated_30d"]] = ",".join(sorted(signals.products_activated_30d))
+    record[INSIGHTS_USAGE_FIELD_MAPPINGS["products_activated_7d"]] = ",".join(sorted(signals.products_activated_7d))
+    record[INSIGHTS_USAGE_FIELD_MAPPINGS["products_activated_30d"]] = ",".join(sorted(signals.products_activated_30d))
 
     return record
 
@@ -112,16 +112,16 @@ async def cache_org_mappings_activity(force_rebuild: bool = False) -> dict[str, 
         logger.info("cache_miss_querying_salesforce", action="org_mappings")
 
     sf = get_salesforce_client()
-    # POSTFN_ORG_ID_FIELD is a trusted constant defined in constants.py, not user input.
+    # INSIGHTS_ORG_ID_FIELD is a trusted constant defined in constants.py, not user input.
     # ORDER BY keeps list order deterministic across rebuilds, so a workflow resuming
     # at a saved page offset after a mid-run cache rebuild doesn't skip or repeat orgs.
-    query = f"SELECT Id, {POSTFN_ORG_ID_FIELD} FROM Account WHERE {POSTFN_ORG_ID_FIELD} != null ORDER BY Id"
+    query = f"SELECT Id, {INSIGHTS_ORG_ID_FIELD} FROM Account WHERE {INSIGHTS_ORG_ID_FIELD} != null ORDER BY Id"
 
     result = await asyncio.to_thread(sf.query_all, query)
     mappings = [
-        {"salesforce_account_id": r["Id"], "insights_org_id": r[POSTFN_ORG_ID_FIELD]}
+        {"salesforce_account_id": r["Id"], "insights_org_id": r[INSIGHTS_ORG_ID_FIELD]}
         for r in result.get("records", [])
-        if r.get(POSTFN_ORG_ID_FIELD)
+        if r.get(INSIGHTS_ORG_ID_FIELD)
     ]
 
     await store_org_mappings_in_redis(mappings)
@@ -304,7 +304,7 @@ class SalesforceUsageEnrichmentWorkflow(InsightsWorkflow):
         """
         logger = LOGGER.bind()
         state = inputs.state or UsageEnrichmentState()
-        page_size = POSTFN_FETCH_MAPPINGS_PAGE_SIZE
+        page_size = INSIGHTS_FETCH_MAPPINGS_PAGE_SIZE
 
         # Apply max_orgs limit
         if inputs.max_orgs is not None:
@@ -343,7 +343,7 @@ class SalesforceUsageEnrichmentWorkflow(InsightsWorkflow):
         if len(state.errors) < 10:
             state.errors.extend(page_result.errors[: 10 - len(state.errors)])
 
-        if page_result.page_size < POSTFN_FETCH_MAPPINGS_PAGE_SIZE:
+        if page_result.page_size < INSIGHTS_FETCH_MAPPINGS_PAGE_SIZE:
             return self._build_result(state)
 
         # More pages to process — continue as new execution

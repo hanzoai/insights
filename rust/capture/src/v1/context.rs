@@ -131,35 +131,35 @@ impl RequestContext {
             None => None,
         };
 
-        let request_id_raw = header_str(headers, POSTFN_REQUEST_ID)?;
+        let request_id_raw = header_str(headers, INSIGHTS_REQUEST_ID)?;
         let request_id = Uuid::parse_str(request_id_raw).map_err(|_| {
             Error::InvalidHeaderValue(format!(
-                "{POSTFN_REQUEST_ID} is not a valid UUID: {request_id_raw}"
+                "{INSIGHTS_REQUEST_ID} is not a valid UUID: {request_id_raw}"
             ))
         })?;
 
-        let attempt_raw = header_str(headers, POSTFN_ATTEMPT)?;
+        let attempt_raw = header_str(headers, INSIGHTS_ATTEMPT)?;
         let attempt: u32 = attempt_raw
             .parse::<u32>()
             .ok()
             .filter(|&n| n >= 1)
             .ok_or_else(|| {
                 Error::InvalidHeaderValue(format!(
-                    "{POSTFN_ATTEMPT} must be a positive integer: {attempt_raw}"
+                    "{INSIGHTS_ATTEMPT} must be a positive integer: {attempt_raw}"
                 ))
             })?;
 
-        let client_ts_raw = header_str(headers, POSTFN_REQUEST_TIMESTAMP)?;
+        let client_ts_raw = header_str(headers, INSIGHTS_REQUEST_TIMESTAMP)?;
         let client_timestamp: DateTime<Utc> = DateTime::parse_from_rfc3339(client_ts_raw)
             .map(|dt| dt.with_timezone(&Utc))
             .map_err(|_| {
                 Error::InvalidHeaderValue(format!(
-                    "{POSTFN_REQUEST_TIMESTAMP} is not valid RFC 3339: {client_ts_raw}"
+                    "{INSIGHTS_REQUEST_TIMESTAMP} is not valid RFC 3339: {client_ts_raw}"
                 ))
             })?;
 
         let user_agent = header_str(headers, "user-agent")?.to_string();
-        let sdk_info = header_str(headers, POSTFN_SDK_INFO)?.to_string();
+        let sdk_info = header_str(headers, INSIGHTS_SDK_INFO)?.to_string();
 
         let gateway_signature = super::gateway_provenance::parse_signature(headers);
 
@@ -227,16 +227,16 @@ mod tests {
             HeaderValue::from_static("Bearer phc_test_token_123"),
         );
         h.insert(
-            POSTFN_SDK_INFO,
+            INSIGHTS_SDK_INFO,
             HeaderValue::from_static("insights-rs/1.0.0"),
         );
-        h.insert(POSTFN_ATTEMPT, HeaderValue::from_static("1"));
+        h.insert(INSIGHTS_ATTEMPT, HeaderValue::from_static("1"));
         h.insert(
-            POSTFN_REQUEST_ID,
+            INSIGHTS_REQUEST_ID,
             HeaderValue::from_str(&Uuid::new_v4().to_string()).unwrap(),
         );
         h.insert(
-            POSTFN_REQUEST_TIMESTAMP,
+            INSIGHTS_REQUEST_TIMESTAMP,
             HeaderValue::from_static("2025-01-15T10:30:00Z"),
         );
         h.insert("content-type", HeaderValue::from_static("application/json"));
@@ -389,7 +389,7 @@ mod tests {
     #[test]
     fn invalid_uuid_request_id() {
         let mut headers = valid_headers();
-        headers.insert(POSTFN_REQUEST_ID, HeaderValue::from_static("not-a-uuid"));
+        headers.insert(INSIGHTS_REQUEST_ID, HeaderValue::from_static("not-a-uuid"));
         let err = test_context(&headers).unwrap_err();
         assert!(matches!(err, Error::InvalidHeaderValue(_)));
     }
@@ -397,7 +397,7 @@ mod tests {
     #[test]
     fn non_numeric_attempt() {
         let mut headers = valid_headers();
-        headers.insert(POSTFN_ATTEMPT, HeaderValue::from_static("abc"));
+        headers.insert(INSIGHTS_ATTEMPT, HeaderValue::from_static("abc"));
         let err = test_context(&headers).unwrap_err();
         assert!(matches!(err, Error::InvalidHeaderValue(_)));
     }
@@ -405,7 +405,7 @@ mod tests {
     #[test]
     fn zero_attempt_returns_error() {
         let mut headers = valid_headers();
-        headers.insert(POSTFN_ATTEMPT, HeaderValue::from_static("0"));
+        headers.insert(INSIGHTS_ATTEMPT, HeaderValue::from_static("0"));
         let err = test_context(&headers).unwrap_err();
         assert!(matches!(err, Error::InvalidHeaderValue(_)));
     }
@@ -421,7 +421,7 @@ mod tests {
     fn sdk_lib_and_version_splits_at_last_slash() {
         let mut headers = valid_headers();
         headers.insert(
-            POSTFN_SDK_INFO,
+            INSIGHTS_SDK_INFO,
             HeaderValue::from_static("insights/sub-sdk/2.3.4"),
         );
         let ctx = test_context(&headers).unwrap();
@@ -435,7 +435,7 @@ mod tests {
     fn sdk_lib_and_version_trims_whitespace() {
         let mut headers = valid_headers();
         headers.insert(
-            POSTFN_SDK_INFO,
+            INSIGHTS_SDK_INFO,
             HeaderValue::from_static("  insights-rs / 1.2.3  "),
         );
         let ctx = test_context(&headers).unwrap();
@@ -446,7 +446,7 @@ mod tests {
     fn sdk_lib_and_version_rejects_oversized_value() {
         let mut headers = valid_headers();
         let long = format!("insights-rs/{}", "9".repeat(MAX_SDK_INFO_LEN));
-        headers.insert(POSTFN_SDK_INFO, HeaderValue::from_str(&long).unwrap());
+        headers.insert(INSIGHTS_SDK_INFO, HeaderValue::from_str(&long).unwrap());
         let ctx = test_context(&headers).unwrap();
         assert_eq!(ctx.sdk_lib_and_version(), None);
     }
@@ -455,7 +455,7 @@ mod tests {
     fn sdk_lib_and_version_rejects_malformed_values() {
         for bad in &["no-slash", "/1.0.0", "insights-rs/", "/", "", "   /   "] {
             let mut headers = valid_headers();
-            headers.insert(POSTFN_SDK_INFO, HeaderValue::from_str(bad).unwrap());
+            headers.insert(INSIGHTS_SDK_INFO, HeaderValue::from_str(bad).unwrap());
             let ctx = test_context(&headers).unwrap();
             assert_eq!(
                 ctx.sdk_lib_and_version(),
@@ -469,7 +469,7 @@ mod tests {
     fn invalid_rfc3339_timestamp() {
         let mut headers = valid_headers();
         headers.insert(
-            POSTFN_REQUEST_TIMESTAMP,
+            INSIGHTS_REQUEST_TIMESTAMP,
             HeaderValue::from_static("not-a-timestamp"),
         );
         let err = test_context(&headers).unwrap_err();

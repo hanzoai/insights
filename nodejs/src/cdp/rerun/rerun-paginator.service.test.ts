@@ -210,9 +210,9 @@ describe('RerunPaginatorService integration', () => {
         const deps = createCdpConsumerDeps(hub, kafkaProducer)
         const outputs = createCdpOutputsRegistry().build(deps.cdpProducerRegistry, {
             ...hub,
-            FN_INVOCATION_RESULTS_TOPIC: KAFKA_FN_INVOCATION_RESULTS,
+            INSIGHTS_INVOCATION_RESULTS_TOPIC: KAFKA_FN_INVOCATION_RESULTS,
         } as any)
-        seedingService = new HogInvocationResultsService(outputs, { FN_INVOCATION_RESULTS_ENABLED: true })
+        seedingService = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
 
         insightsFunction = await _insertInsightsFunction(hub.postgres, team.id, {
             type: 'destination',

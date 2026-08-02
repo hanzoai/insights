@@ -280,13 +280,13 @@ def test_build_environment_variables_disables_telemetry_when_restricted(
             "https://us.i.hanzo.ai/i/v1/logs",
             "phc_telemetry",
             "https://us.i.hanzo.ai/i/v1/traces",
-            {"POSTFN_AGENT_OTEL_LOGS_URL", "POSTFN_AGENT_OTEL_LOGS_TOKEN", "POSTFN_AGENT_OTEL_TRACES_URL"},
+            {"INSIGHTS_AGENT_OTEL_LOGS_URL", "INSIGHTS_AGENT_OTEL_LOGS_TOKEN", "INSIGHTS_AGENT_OTEL_TRACES_URL"},
         ),
         (
             "https://us.i.hanzo.ai/i/v1/logs",
             "phc_telemetry",
             None,
-            {"POSTFN_AGENT_OTEL_LOGS_URL", "POSTFN_AGENT_OTEL_LOGS_TOKEN"},
+            {"INSIGHTS_AGENT_OTEL_LOGS_URL", "INSIGHTS_AGENT_OTEL_LOGS_TOKEN"},
         ),
         ("https://us.i.hanzo.ai/i/v1/logs", None, None, set()),
         (None, "phc_telemetry", None, set()),
@@ -306,7 +306,7 @@ def test_build_environment_variables_injects_otel_env_only_when_fully_configured
     ):
         env = _build_environment_variables(ctx, MagicMock(), "", "access-token")
 
-    assert {key for key in env if key.startswith("POSTFN_AGENT_OTEL_")} == expected_keys
+    assert {key for key in env if key.startswith("INSIGHTS_AGENT_OTEL_")} == expected_keys
 
 
 @patch(f"{_PROVISION}.get_git_identity_env_vars", return_value={})
@@ -322,4 +322,4 @@ def test_build_environment_variables_omits_otel_env_when_flag_disabled(_api, _jw
     ):
         env = _build_environment_variables(ctx, MagicMock(), "", "access-token")
 
-    assert not any(key.startswith("POSTFN_AGENT_OTEL_") for key in env)
+    assert not any(key.startswith("INSIGHTS_AGENT_OTEL_") for key in env)

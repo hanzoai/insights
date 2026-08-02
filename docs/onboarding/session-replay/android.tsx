@@ -64,16 +64,16 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     class SampleApp : Application() {
 
                                         companion object {
-                                            const val POSTFN_TOKEN = "<ph_project_token>"
-                                            const val POSTFN_HOST = "<ph_client_api_host>"
+                                            const val INSIGHTS_TOKEN = "<ph_project_token>"
+                                            const val INSIGHTS_HOST = "<ph_client_api_host>"
                                         }
 
                                         override fun onCreate() {
                                             super.onCreate()
 
                                             val config = InsightsAndroidConfig(
-                                                apiKey = POSTFN_TOKEN,
-                                                host = POSTFN_HOST
+                                                apiKey = INSIGHTS_TOKEN,
+                                                host = INSIGHTS_HOST
                                             )
 
                                             // Enable session recording. Requires enabling in your project settings as well.

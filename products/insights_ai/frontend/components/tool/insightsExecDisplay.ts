@@ -6,15 +6,15 @@
  */
 
 /** Matches the Insights single-exec MCP tool (`mcp__insights__exec`, plus plugin/regional variants). */
-export const POSTFN_EXEC_TOOL_RE = /^mcp__(?:plugin_)?insights(?:_[^_]+)*__exec$/
+export const INSIGHTS_EXEC_TOOL_RE = /^mcp__(?:plugin_)?insights(?:_[^_]+)*__exec$/
 
 export function isInsightsExecTool(toolName: string): boolean {
-    return POSTFN_EXEC_TOOL_RE.test(toolName)
+    return INSIGHTS_EXEC_TOOL_RE.test(toolName)
 }
 
 /** The verbs the single-exec tool accepts. `call` runs a sub-tool; the rest are read-only. */
 export type InsightsExecVerb = 'tools' | 'search' | 'info' | 'schema' | 'call'
-const POSTFN_EXEC_VERBS = new Set<InsightsExecVerb>(['tools', 'search', 'info', 'schema', 'call'])
+const INSIGHTS_EXEC_VERBS = new Set<InsightsExecVerb>(['tools', 'search', 'info', 'schema', 'call'])
 
 /**
  * Splits the leading whitespace-delimited token off a command and returns it plus the trimmed
@@ -38,7 +38,7 @@ export function splitFirstToken(input: string): { head: string; rest: string } {
  */
 export function parseExecCommand(command: string): { verb: InsightsExecVerb | null; rest: string } {
     const { head, rest } = splitFirstToken(command)
-    return POSTFN_EXEC_VERBS.has(head as InsightsExecVerb)
+    return INSIGHTS_EXEC_VERBS.has(head as InsightsExecVerb)
         ? { verb: head as InsightsExecVerb, rest }
         : { verb: null, rest }
 }

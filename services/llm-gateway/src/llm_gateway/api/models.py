@@ -94,7 +94,7 @@ async def _caller_confirmed_free_tier(request: Request) -> bool:
         if user.team_id is None:
             # no team to bill: enforcement reads this caller as unbilled too
             return True
-        quota_status = await resolve_quota_status(request, user.team_id, CreditBucket.POSTFN_CODE_CREDITS.value)
+        quota_status = await resolve_quota_status(request, user.team_id, CreditBucket.INSIGHTS_CODE_CREDITS.value)
         return not quota_status.code_usage_billing_active
     except Exception:
         logger.warning("models_free_tier_resolution_failed", exc_info=True)

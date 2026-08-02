@@ -54,10 +54,10 @@ def _make_fake_session(*, status: int, body: bytes):
 @pytest.fixture(autouse=True)
 def _reset_proxy_module_state(monkeypatch):
     """Every test starts from a clean cache / circuit-breaker state and a
-    POSTFN_SITE_URL set so _introspect_token doesn't short-circuit."""
+    INSIGHTS_SITE_URL set so _introspect_token doesn't short-circuit."""
     streamlit_auth_proxy._introspection_cache.clear()
     streamlit_auth_proxy._introspection_circuit.reset()
-    monkeypatch.setattr(streamlit_auth_proxy, "POSTFN_SITE_URL", "https://app.insights.test")
+    monkeypatch.setattr(streamlit_auth_proxy, "INSIGHTS_SITE_URL", "https://app.insights.test")
     yield
     streamlit_auth_proxy._introspection_cache.clear()
     streamlit_auth_proxy._introspection_circuit.reset()
@@ -68,43 +68,43 @@ def _reset_proxy_module_state(monkeypatch):
 
 class TestCreateAppConfigValidation:
     def test_raises_when_team_id_missing(self, monkeypatch):
-        monkeypatch.delenv("POSTFN_TEAM_ID", raising=False)
-        monkeypatch.setenv("POSTFN_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
+        monkeypatch.delenv("INSIGHTS_TEAM_ID", raising=False)
+        monkeypatch.setenv("INSIGHTS_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
 
-        with pytest.raises(RuntimeError, match="POSTFN_TEAM_ID"):
+        with pytest.raises(RuntimeError, match="INSIGHTS_TEAM_ID"):
             streamlit_auth_proxy.create_app()
 
     def test_raises_when_team_id_is_zero(self, monkeypatch):
-        monkeypatch.setenv("POSTFN_TEAM_ID", "0")
-        monkeypatch.setenv("POSTFN_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
+        monkeypatch.setenv("INSIGHTS_TEAM_ID", "0")
+        monkeypatch.setenv("INSIGHTS_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
 
-        with pytest.raises(RuntimeError, match="POSTFN_TEAM_ID"):
+        with pytest.raises(RuntimeError, match="INSIGHTS_TEAM_ID"):
             streamlit_auth_proxy.create_app()
 
     def test_raises_when_team_id_is_non_numeric(self, monkeypatch):
-        monkeypatch.setenv("POSTFN_TEAM_ID", "not-a-number")
-        monkeypatch.setenv("POSTFN_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
+        monkeypatch.setenv("INSIGHTS_TEAM_ID", "not-a-number")
+        monkeypatch.setenv("INSIGHTS_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
 
-        with pytest.raises(RuntimeError, match="POSTFN_TEAM_ID"):
+        with pytest.raises(RuntimeError, match="INSIGHTS_TEAM_ID"):
             streamlit_auth_proxy.create_app()
 
     def test_raises_when_client_id_missing(self, monkeypatch):
-        monkeypatch.setenv("POSTFN_TEAM_ID", "42")
-        monkeypatch.delenv("POSTFN_STREAMLIT_CLIENT_ID", raising=False)
+        monkeypatch.setenv("INSIGHTS_TEAM_ID", "42")
+        monkeypatch.delenv("INSIGHTS_STREAMLIT_CLIENT_ID", raising=False)
 
-        with pytest.raises(RuntimeError, match="POSTFN_STREAMLIT_CLIENT_ID"):
+        with pytest.raises(RuntimeError, match="INSIGHTS_STREAMLIT_CLIENT_ID"):
             streamlit_auth_proxy.create_app()
 
     def test_raises_when_client_id_is_empty_string(self, monkeypatch):
-        monkeypatch.setenv("POSTFN_TEAM_ID", "42")
-        monkeypatch.setenv("POSTFN_STREAMLIT_CLIENT_ID", "")
+        monkeypatch.setenv("INSIGHTS_TEAM_ID", "42")
+        monkeypatch.setenv("INSIGHTS_STREAMLIT_CLIENT_ID", "")
 
-        with pytest.raises(RuntimeError, match="POSTFN_STREAMLIT_CLIENT_ID"):
+        with pytest.raises(RuntimeError, match="INSIGHTS_STREAMLIT_CLIENT_ID"):
             streamlit_auth_proxy.create_app()
 
     def test_succeeds_with_valid_env(self, monkeypatch):
-        monkeypatch.setenv("POSTFN_TEAM_ID", "42")
-        monkeypatch.setenv("POSTFN_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
+        monkeypatch.setenv("INSIGHTS_TEAM_ID", "42")
+        monkeypatch.setenv("INSIGHTS_STREAMLIT_CLIENT_ID", "insights-streamlit-apps-first-party")
 
         app = streamlit_auth_proxy.create_app()
 
@@ -298,11 +298,11 @@ class TestTokenInjectionHostScoping:
     token cross-origin."""
 
     MODAL_TOKEN = "modal-secret"
-    POSTFN_TOKEN = "insights-secret"
+    INSIGHTS_TOKEN = "insights-secret"
 
     def _inject(self, body: str) -> str:
         return streamlit_auth_proxy._inject_token_into_html(
-            body.encode("utf-8"), self.MODAL_TOKEN, self.POSTFN_TOKEN
+            body.encode("utf-8"), self.MODAL_TOKEN, self.INSIGHTS_TOKEN
         ).decode("utf-8")
 
     def test_appends_token_to_same_origin_relative_url(self):

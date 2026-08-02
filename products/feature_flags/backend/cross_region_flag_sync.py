@@ -54,7 +54,7 @@ def sync_cross_region_flags() -> None:
     if get_instance_region() != "EU":
         return
 
-    token = settings.POSTFN_FLAGS_PROJECT_SECRET_TOKEN
+    token = settings.INSIGHTS_FLAGS_PROJECT_SECRET_TOKEN
     if not token:
         logger.debug("cross_region_flags_sync_no_token")
         return

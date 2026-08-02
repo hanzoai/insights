@@ -18,14 +18,14 @@ from insights.utils import get_instance_region
 ARRAY_APP_CLIENT_ID_US = "HCWoE0aRFMYxIxFNTTwkOORn5LBjOt2GVDzwSw5W"
 ARRAY_APP_CLIENT_ID_EU = "AIvijgMS0dxKEmr5z6odvRd8Pkh5vts3nPTzgzU9"
 ARRAY_APP_CLIENT_ID_DEV = "DC5uRLVbGI02YQ82grxgnK6Qn12SXWpCqdPb60oZ"
-POSTFN_AI_APP_CLIENT_ID_US = "N6UgOECSl98ag1xajxPphGApQXYEVvJIwzCXotKu"
-POSTFN_AI_APP_CLIENT_ID_EU = "0Lizwa3mFSlBuEEQ8V8FMJlskUXpDuSmoEdhzxyi"
-POSTFN_AI_APP_CLIENT_ID_DEV = "DD2ZLG6a2YEUtpPANSzSiIBPuUryYmbndLnKKUy1"
+INSIGHTS_AI_APP_CLIENT_ID_US = "N6UgOECSl98ag1xajxPphGApQXYEVvJIwzCXotKu"
+INSIGHTS_AI_APP_CLIENT_ID_EU = "0Lizwa3mFSlBuEEQ8V8FMJlskUXpDuSmoEdhzxyi"
+INSIGHTS_AI_APP_CLIENT_ID_DEV = "DD2ZLG6a2YEUtpPANSzSiIBPuUryYmbndLnKKUy1"
 
 # The LLM gateway authorizes by application id, so these must stay equal to
-# POSTFN_CODE_DEV_APP_ID / POSTFN_AI_DEV_APP_ID in llm_gateway/products/config.py.
+# INSIGHTS_CODE_DEV_APP_ID / INSIGHTS_AI_DEV_APP_ID in llm_gateway/products/config.py.
 ARRAY_APP_ID_DEV = "019ebb47-c750-0000-e1ea-723a6ff112d3"
-POSTFN_AI_APP_ID_DEV = "019edb1a-cce4-0000-1f6d-682061862da9"
+INSIGHTS_AI_APP_ID_DEV = "019edb1a-cce4-0000-1f6d-682061862da9"
 
 # Every OAuth application sandbox agent tokens are minted under. Tokens for these apps
 # are only ever created server-side (never via the consent flow or personal API keys),
@@ -35,9 +35,9 @@ SANDBOX_OAUTH_APP_CLIENT_IDS = frozenset(
         ARRAY_APP_CLIENT_ID_US,
         ARRAY_APP_CLIENT_ID_EU,
         ARRAY_APP_CLIENT_ID_DEV,
-        POSTFN_AI_APP_CLIENT_ID_US,
-        POSTFN_AI_APP_CLIENT_ID_EU,
-        POSTFN_AI_APP_CLIENT_ID_DEV,
+        INSIGHTS_AI_APP_CLIENT_ID_US,
+        INSIGHTS_AI_APP_CLIENT_ID_EU,
+        INSIGHTS_AI_APP_CLIENT_ID_DEV,
     }
 )
 
@@ -201,9 +201,9 @@ def get_insights_ai_app() -> OAuthApplication:
     region = get_instance_region()
     client_id = _get_client_id_for_region(
         region=region,
-        us=POSTFN_AI_APP_CLIENT_ID_US,
-        eu=POSTFN_AI_APP_CLIENT_ID_EU,
-        dev=POSTFN_AI_APP_CLIENT_ID_DEV,
+        us=INSIGHTS_AI_APP_CLIENT_ID_US,
+        eu=INSIGHTS_AI_APP_CLIENT_ID_EU,
+        dev=INSIGHTS_AI_APP_CLIENT_ID_DEV,
     )
 
     return _get_oauth_app_for_client_id(client_id, "Insights AI", region)

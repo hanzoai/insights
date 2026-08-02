@@ -2,7 +2,7 @@ import dataclasses
 
 from insights.test.base import BaseTest
 
-from insights.cdp.templates import FN_FUNCTION_TEMPLATES
+from insights.cdp.templates import INSIGHTS_FUNCTION_TEMPLATES
 from insights.cdp.templates.insights_function_template import sync_template_to_db
 from insights.cdp.validation import InputsSchemaItemSerializer, compile_hog
 
@@ -15,7 +15,7 @@ class TestTemplatesGeneral(BaseTest):
         super().setUp()
 
     def test_templates_are_valid(self):
-        for template in FN_FUNCTION_TEMPLATES:
+        for template in INSIGHTS_FUNCTION_TEMPLATES:
             if template.inputs_schema:
                 serializer = InputsSchemaItemSerializer(data=template.inputs_schema, many=True)
                 assert serializer.is_valid()
@@ -25,7 +25,7 @@ class TestTemplatesGeneral(BaseTest):
                 assert bytecode[0] == "_H"
 
     def test_sync_template_to_db(self):
-        template_data = dataclasses.asdict(FN_FUNCTION_TEMPLATES[0])
+        template_data = dataclasses.asdict(INSIGHTS_FUNCTION_TEMPLATES[0])
         template = sync_template_to_db(template_data)
         assert template.template_id == template_data["id"]
         assert template.name == template_data["name"]
@@ -37,7 +37,7 @@ class TestTemplatesGeneral(BaseTest):
         assert template.filters == template_data["filters"]
 
     def test_sync_existing_template(self):
-        template_data = FN_FUNCTION_TEMPLATES[0]
+        template_data = INSIGHTS_FUNCTION_TEMPLATES[0]
         template_id = template_data.id
         template = sync_template_to_db(template_data)
         assert InsightsFunctionTemplate.objects.filter(template_id=template_id).count() == 1

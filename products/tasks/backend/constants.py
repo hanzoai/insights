@@ -130,14 +130,14 @@ InitialPermissionMode = ClaudePermissionMode | CodexPermissionMode
 # full-auto runs answer everything). Three alternatives: destructive verbs as `-`-bounded segments,
 # the exact names of `annotations.destructive: true` tools the verb regex misses, and the exact
 # persist/publish tool names from the apply-back product families. Must stay in sync with
-# `POSTFN_DESTRUCTIVE_SUBTOOL_RE`, `POSTFN_DESTRUCTIVE_SUB_TOOLS`, and `PERSIST_PROMPT_SUB_TOOLS`
+# `INSIGHTS_DESTRUCTIVE_SUBTOOL_RE`, `INSIGHTS_DESTRUCTIVE_SUB_TOOLS`, and `PERSIST_PROMPT_SUB_TOOLS`
 # in `products/insights_ai/frontend/policy/toolPolicy.ts`.
-POSTFN_EXEC_DESTRUCTIVE_VERB_REGEX = r"(^|-)(partial-update|update|patch|delete|destroy)(-|$)"
+INSIGHTS_EXEC_DESTRUCTIVE_VERB_REGEX = r"(^|-)(partial-update|update|patch|delete|destroy)(-|$)"
 
 # Enabled tools annotated `destructive: true` in `products/*/mcp/*.yaml` whose names carry no
 # destructive verb segment (publish, ship, merge, archive, …). Kept complete against those
 # annotations by `test_exec_permission_regex_covers_destructive_annotated_tools`.
-POSTFN_EXEC_DESTRUCTIVE_SUB_TOOLS: tuple[str, ...] = (
+INSIGHTS_EXEC_DESTRUCTIVE_SUB_TOOLS: tuple[str, ...] = (
     # confirmed_action tools register only `<name>-execute` (and `-prepare`); the bare name is
     # never a runtime tool, so the destructive `-execute` variant is what must be gated.
     "change-requests-approve-execute",
@@ -169,7 +169,7 @@ POSTFN_EXEC_DESTRUCTIVE_SUB_TOOLS: tuple[str, ...] = (
 # Non-destructive tools that persist new content (create/copy/add) or publish to end users
 # (launch/stop), from the apply-back product families — the client prompts for these only on
 # foreground streams.
-POSTFN_EXEC_PERSIST_SUB_TOOLS: tuple[str, ...] = (
+INSIGHTS_EXEC_PERSIST_SUB_TOOLS: tuple[str, ...] = (
     "dashboard-create",
     "dashboard-create-text-tile",
     "dashboard-tile-copy",
@@ -185,10 +185,10 @@ POSTFN_EXEC_PERSIST_SUB_TOOLS: tuple[str, ...] = (
     "workflows-create-email-template",
 )
 
-POSTFN_EXEC_PERMISSION_REGEX = (
-    POSTFN_EXEC_DESTRUCTIVE_VERB_REGEX
+INSIGHTS_EXEC_PERMISSION_REGEX = (
+    INSIGHTS_EXEC_DESTRUCTIVE_VERB_REGEX
     + "|^("
-    + "|".join(POSTFN_EXEC_DESTRUCTIVE_SUB_TOOLS + POSTFN_EXEC_PERSIST_SUB_TOOLS)
+    + "|".join(INSIGHTS_EXEC_DESTRUCTIVE_SUB_TOOLS + INSIGHTS_EXEC_PERSIST_SUB_TOOLS)
     + ")$"
 )
 
@@ -389,20 +389,20 @@ DEFAULT_TRUSTED_DOMAINS = [
 
 RESERVED_SANDBOX_ENVIRONMENT_VARIABLE_KEYS: frozenset[str] = frozenset(
     {
-        "POSTFN_PERSONAL_API_KEY",
-        "POSTFN_WIZARD_API_KEY",
-        "POSTFN_API_URL",
-        "POSTFN_PROJECT_ID",
+        "INSIGHTS_PERSONAL_API_KEY",
+        "INSIGHTS_WIZARD_API_KEY",
+        "INSIGHTS_API_URL",
+        "INSIGHTS_PROJECT_ID",
         "JWT_PUBLIC_KEY",
         "GITHUB_TOKEN",
         "GH_TOKEN",
         "LLM_GATEWAY_URL",
         "AI_GATEWAY_URL",
         "AI_GATEWAY_PRODUCTS",
-        "POSTFN_RESUME_RUN_ID",
-        "POSTFN_AGENT_OTEL_LOGS_URL",
-        "POSTFN_AGENT_OTEL_LOGS_TOKEN",
-        "POSTFN_AGENT_OTEL_TRACES_URL",
+        "INSIGHTS_RESUME_RUN_ID",
+        "INSIGHTS_AGENT_OTEL_LOGS_URL",
+        "INSIGHTS_AGENT_OTEL_LOGS_TOKEN",
+        "INSIGHTS_AGENT_OTEL_TRACES_URL",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC",
         "DISABLE_TELEMETRY",
         "DISABLE_ERROR_REPORTING",

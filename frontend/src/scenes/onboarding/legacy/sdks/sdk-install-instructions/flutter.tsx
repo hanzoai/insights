@@ -172,7 +172,7 @@ function FlutterAndroidSetupSnippet({ requiresManualInstall }: FlutterSetupProps
             <CodeSnippet language={Language.XML}>
                 {'<application>\n\t<activity>\n\t\t[...]\n\t</activity>\n\t<meta-data android:name="com.insights.insights.PROJECT_TOKEN" android:value="' +
                     currentTeam?.api_token +
-                    '" />\n\t<meta-data android:name="com.insights.insights.POSTFN_HOST" android:value="' +
+                    '" />\n\t<meta-data android:name="com.insights.insights.INSIGHTS_HOST" android:value="' +
                     url +
                     '" />\n\t<meta-data android:name="com.insights.insights.TRACK_APPLICATION_LIFECYCLE_EVENTS" android:value="true" />\n\t<meta-data android:name="com.insights.insights.DEBUG" android:value="true" />\n</application>'}
             </CodeSnippet>
@@ -212,7 +212,7 @@ function FlutterIOSSetupSnippet({ requiresManualInstall }: FlutterSetupProps): J
             <CodeSnippet language={Language.XML}>
                 {'<dict>\n\t[...]\n\t<key>com.insights.insights.PROJECT_TOKEN</key>\n\t<string>' +
                     currentTeam?.api_token +
-                    '</string>\n\t<key>com.insights.insights.POSTFN_HOST</key>\n\t<string>' +
+                    '</string>\n\t<key>com.insights.insights.INSIGHTS_HOST</key>\n\t<string>' +
                     url +
                     '</string>\n\t<key>com.insights.insights.CAPTURE_APPLICATION_LIFECYCLE_EVENTS</key>\n\t<true/>\n\t<key>com.insights.insights.DEBUG</key>\n\t<true/>\n</dict>'}
             </CodeSnippet>

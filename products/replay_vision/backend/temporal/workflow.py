@@ -13,7 +13,7 @@ from temporalio.exceptions import (
 
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.errors import MAX_ERROR_MESSAGE_CHARS, truncate_for_temporal_payload, unwrap_temporal_cause
-from insights.temporal.common.search_attributes import POSTFN_SESSION_RECORDING_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SESSION_RECORDING_ID_KEY, INSIGHTS_TEAM_ID_KEY
 from insights.temporal.session_replay.rasterize_recording.types import RasterizeRecordingInputs
 
 with wf.unsafe.imports_passed_through():
@@ -402,8 +402,8 @@ class ApplyScannerWorkflow(InsightsWorkflow):
                 execution_timeout=dt.timedelta(minutes=40),
                 search_attributes=TypedSearchAttributes(
                     search_attributes=[
-                        SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=inputs.team_id),
-                        SearchAttributePair(key=POSTFN_SESSION_RECORDING_ID_KEY, value=inputs.session_id),
+                        SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=inputs.team_id),
+                        SearchAttributePair(key=INSIGHTS_SESSION_RECORDING_ID_KEY, value=inputs.session_id),
                     ]
                 ),
             )

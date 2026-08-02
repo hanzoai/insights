@@ -25,7 +25,7 @@ from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 
 from ee.billing.salesforce_enrichment.constants import (
-    POSTFN_ORG_ID_FIELD,
+    INSIGHTS_ORG_ID_FIELD,
     STRIPE_ENRICHMENT_FIELD_MAPPINGS,
     STRIPE_ENRICHMENT_PAGE_SIZE,
 )
@@ -213,14 +213,14 @@ async def enrich_stripe_page_activity(inputs: EnrichStripePageInputs) -> EnrichS
         org_to_account_id: dict[str, str] = {}
 
         for lookup_chunk in batched(all_org_ids, _SFDC_LOOKUP_CHUNK_SIZE, strict=False):
-            # POSTFN_ORG_ID_FIELD is a trusted constant; simple_salesforce quotes the IN values.
+            # INSIGHTS_ORG_ID_FIELD is a trusted constant; simple_salesforce quotes the IN values.
             query = format_soql(
-                f"SELECT Id, {POSTFN_ORG_ID_FIELD} FROM Account WHERE {POSTFN_ORG_ID_FIELD} IN {{}}",
+                f"SELECT Id, {INSIGHTS_ORG_ID_FIELD} FROM Account WHERE {INSIGHTS_ORG_ID_FIELD} IN {{}}",
                 list(lookup_chunk),
             )
             result = await asyncio.to_thread(sf.query_all, query)
             for row in result.get("records", []):
-                insights_org_id = row.get(POSTFN_ORG_ID_FIELD)
+                insights_org_id = row.get(INSIGHTS_ORG_ID_FIELD)
                 if insights_org_id:
                     org_to_account_id[str(insights_org_id)] = row["Id"]
 

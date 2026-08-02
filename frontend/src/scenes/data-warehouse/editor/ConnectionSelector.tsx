@@ -12,7 +12,7 @@ import {
     ADD_DIRECT_CONNECTION_PREFIX,
     CONFIGURE_SOURCES,
     type ConnectionSelectOption,
-    POSTFN_WAREHOUSE,
+    INSIGHTS_WAREHOUSE,
     connectionSelectorLogic,
     getConnectionSelectorValue,
 } from './connectionSelectorLogic'
@@ -59,7 +59,7 @@ export function ConnectionSelector({ tabId }: ConnectionSelectorProps): JSX.Elem
             truncateText={{ maxWidthClass: 'max-w-full' }}
             value={connectionSelectorValue}
             onChange={(nextValue) => {
-                if (!nextValue || nextValue === POSTFN_WAREHOUSE) {
+                if (!nextValue || nextValue === INSIGHTS_WAREHOUSE) {
                     setSourceQuery({
                         ...sourceQueryWithoutLegacyConnectionId,
                         source: {

@@ -16,10 +16,10 @@ _TELEMETRY_ENV_VARS = (
     # Every CI marker the gate checks must be cleared, otherwise the suite
     # running on GitHub Actions (GITHUB_ACTIONS=1) would see telemetry disabled.
     *telemetry._CI_ENV_VARS,
-    "POSTFN_TELEMETRY_OPT_OUT",
+    "INSIGHTS_TELEMETRY_OPT_OUT",
     "DO_NOT_TRACK",
-    "POSTFN_TELEMETRY_HOST",
-    "POSTFN_TELEMETRY_API_KEY",
+    "INSIGHTS_TELEMETRY_HOST",
+    "INSIGHTS_TELEMETRY_API_KEY",
 )
 
 
@@ -39,13 +39,13 @@ def test_is_enabled_by_default():
 @pytest.mark.parametrize(
     "env_vars, config",
     [
-        ({"POSTFN_TELEMETRY_OPT_OUT": "1"}, {}),
+        ({"INSIGHTS_TELEMETRY_OPT_OUT": "1"}, {}),
         ({"DO_NOT_TRACK": "1"}, {}),
         ({"CI": "true"}, {}),
         ({"GITHUB_ACTIONS": "true"}, {}),
         ({"BUILDKITE": "true"}, {}),
         ({"GITLAB_CI": "true"}, {}),
-        ({"POSTFN_TELEMETRY_OPT_OUT": "1"}, {"enabled": True}),
+        ({"INSIGHTS_TELEMETRY_OPT_OUT": "1"}, {"enabled": True}),
     ],
 )
 def test_is_disabled(monkeypatch: pytest.MonkeyPatch, telemetry_config: Path, env_vars, config):
@@ -99,8 +99,8 @@ class TestTrack:
         telemetry_config.write_text(
             json.dumps({"enabled": True, "anonymous_id": "test-id", "first_run_notice_shown": True})
         )
-        monkeypatch.setenv("POSTFN_TELEMETRY_HOST", "http://localhost")
-        monkeypatch.setenv("POSTFN_TELEMETRY_API_KEY", "test-key")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_HOST", "http://localhost")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "test-key")
         with patch("insightscli.telemetry.requests.post") as mock_post:
             mock_post.return_value.status_code = 200
             telemetry.track("command_completed", {"command": "test"})
@@ -204,8 +204,8 @@ class TestInvokeTelemetry:
         telemetry_config.write_text(
             json.dumps({"enabled": True, "anonymous_id": "test-id", "first_run_notice_shown": True})
         )
-        monkeypatch.setenv("POSTFN_TELEMETRY_HOST", "http://localhost")
-        monkeypatch.setenv("POSTFN_TELEMETRY_API_KEY", "test-key")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_HOST", "http://localhost")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "test-key")
         # The suite itself may run under `insightscli test`, which marks its whole
         # process tree nested; pin the import-time capture for a stable assert.
         monkeypatch.setattr("insightscli.cli._IS_NESTED", False)
@@ -239,8 +239,8 @@ class TestInvokeTelemetry:
         """A brand-new install (no config file) must arm itself and emit events
         in the same invocation -- the notice block must run before the gate."""
         assert not telemetry_config.exists()
-        monkeypatch.setenv("POSTFN_TELEMETRY_HOST", "http://localhost")
-        monkeypatch.setenv("POSTFN_TELEMETRY_API_KEY", "test-key")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_HOST", "http://localhost")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "test-key")
         monkeypatch.setattr("insightscli.cli._IS_NESTED", False)
         with patch.object(telemetry._client, "_send_batch") as mock_send:
             result = CliRunner().invoke(cli, ["quickstart"])
@@ -256,8 +256,8 @@ class TestInvokeTelemetry:
         telemetry_config.write_text(
             json.dumps({"enabled": True, "anonymous_id": "test-id", "first_run_notice_shown": True})
         )
-        monkeypatch.setenv("POSTFN_TELEMETRY_HOST", "http://localhost")
-        monkeypatch.setenv("POSTFN_TELEMETRY_API_KEY", "test-key")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_HOST", "http://localhost")
+        monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "test-key")
         with patch.object(telemetry._client, "_send_batch") as mock_send:
             result = CliRunner().invoke(cli, [command])
             assert result.exit_code == 0

@@ -40,7 +40,7 @@ import { getDashboardItemId } from './insightsUtils'
 import { webAnalyticsLogic } from './webAnalyticsLogic'
 import type { DateFilterState } from './webAnalyticsLogic'
 
-const teamId = window.POSTFN_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 // Distinct prefix from webAnalyticsFilterLogic so bot-tab filters don't collide with the regular tab.
 const persistConfig = { persist: true, prefix: `${teamId}__bot_` }
 

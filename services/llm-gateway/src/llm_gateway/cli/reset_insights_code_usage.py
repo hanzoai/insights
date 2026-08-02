@@ -11,7 +11,7 @@ import structlog
 from redis.asyncio import Redis
 
 from llm_gateway.config import get_settings
-from llm_gateway.services.plan_resolver import POSTFN_CODE_PRODUCT
+from llm_gateway.services.plan_resolver import INSIGHTS_CODE_PRODUCT
 
 logger = structlog.get_logger(__name__)
 
@@ -28,7 +28,7 @@ _REDIS_GLOB_METACHARS = re.compile(r"([\\*?\[\]])")
 # redis_limiter). Update both ends if the key shape changes.
 def _patterns_for(user_id: str | None) -> tuple[str, ...]:
     if user_id is None:
-        return tuple(f"ratelimit:cost:user:{scope}:{POSTFN_CODE_PRODUCT}:*" for scope in SCOPES)
+        return tuple(f"ratelimit:cost:user:{scope}:{INSIGHTS_CODE_PRODUCT}:*" for scope in SCOPES)
     # Escape glob metachars so a user_id like "10*" cannot expand the SCAN
     # match and delete unrelated users' counters.
     safe_id = _REDIS_GLOB_METACHARS.sub(r"\\\1", user_id)
@@ -36,7 +36,7 @@ def _patterns_for(user_id: str | None) -> tuple[str, ...]:
     # variants. The trailing ':' prevents user "100" from matching user "1000".
     patterns: list[str] = []
     for scope in SCOPES:
-        base = f"ratelimit:cost:user:{scope}:{POSTFN_CODE_PRODUCT}:{safe_id}"
+        base = f"ratelimit:cost:user:{scope}:{INSIGHTS_CODE_PRODUCT}:{safe_id}"
         patterns.append(base)
         patterns.append(f"{base}:*")
     return tuple(patterns)

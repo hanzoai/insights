@@ -79,7 +79,7 @@ const InsightsConnect = ({ constants, mode }: InsightsConnectProps): JSX.Element
                 />
                 <Button
                     type="primary"
-                    href={`${constants.POSTFN_DASHBOARD_URL}/settings/project-integrations`}
+                    href={`${constants.INSIGHTS_DASHBOARD_URL}/settings/project-integrations`}
                     target="_blank"
                 >
                     Manage in Insights
@@ -100,7 +100,7 @@ const InsightsConnect = ({ constants, mode }: InsightsConnectProps): JSX.Element
                 title="Not connected to Insights"
                 description="Connect this Stripe account from your Insights dashboard to see product analytics data here."
             />
-            <Button type="primary" href={constants.POSTFN_NEW_SOURCE_URL} target="_blank">
+            <Button type="primary" href={constants.INSIGHTS_NEW_SOURCE_URL} target="_blank">
                 Connect in Insights
             </Button>
             <Button onPress={checkCredentials}>Refresh connection status</Button>

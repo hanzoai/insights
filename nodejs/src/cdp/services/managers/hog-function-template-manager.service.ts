@@ -4,7 +4,7 @@ import { logger } from '~/common/utils/logger'
 
 import { DBInsightsFunctionTemplate } from '../../types'
 
-const FN_FUNCTION_TEMPLATE_FIELDS = ['id', 'template_id', 'sha', 'name', 'inputs_schema', 'bytecode', 'type', 'free']
+const INSIGHTS_FUNCTION_TEMPLATE_FIELDS = ['id', 'template_id', 'sha', 'name', 'inputs_schema', 'bytecode', 'type', 'free']
 
 export class InsightsFunctionTemplateManagerService {
     private lazyLoader: LazyLoader<DBInsightsFunctionTemplate>
@@ -45,7 +45,7 @@ export class InsightsFunctionTemplateManagerService {
 
         const response = await this.postgres.query<DBInsightsFunctionTemplate>(
             PostgresUse.COMMON_READ,
-            `SELECT ${FN_FUNCTION_TEMPLATE_FIELDS.join(
+            `SELECT ${INSIGHTS_FUNCTION_TEMPLATE_FIELDS.join(
                 ', '
             )} FROM insights_hogfunctiontemplate WHERE template_id = ANY($1)`,
             [ids],

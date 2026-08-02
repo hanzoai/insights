@@ -26,8 +26,8 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
             {`class SampleApp : Application() {
 
     companion object {
-        const val POSTFN_PROJECT_TOKEN = "${currentTeam?.api_token}"
-        const val POSTFN_HOST = "${apiHostOrigin()}"
+        const val INSIGHTS_PROJECT_TOKEN = "${currentTeam?.api_token}"
+        const val INSIGHTS_HOST = "${apiHostOrigin()}"
     }
 
     override fun onCreate() {
@@ -35,8 +35,8 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
 
         // Create a Insights Config with the given project token and host
         val config = InsightsAndroidConfig(
-            apiKey = POSTFN_PROJECT_TOKEN,
-            host = POSTFN_HOST
+            apiKey = INSIGHTS_PROJECT_TOKEN,
+            host = INSIGHTS_HOST
         )
         ${
             includeReplay

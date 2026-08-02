@@ -115,7 +115,7 @@ export class RerunPaginatorService {
         // Re-enqueue targets keyed by function kind — see RerunJobQueues.
         private jobQueues: RerunJobQueues,
         private monitoringService: InsightsFunctionMonitoringService,
-        // Mirror of the Django serializer cap (FN_INVOCATION_RERUN_MAX_COUNT env var).
+        // Mirror of the Django serializer cap (INSIGHTS_INVOCATION_RERUN_MAX_COUNT env var).
         private maxCount: number
     ) {}
 

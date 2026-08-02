@@ -7,12 +7,12 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		MCP_APPS_BASE_URL: "https://mcp.hanzo.ai";
-		POSTFN_API_BASE_URL: string;
-		POSTFN_PUBLIC_URL: string;
-		POSTFN_MCP_APPS_ANALYTICS_BASE_URL: string;
-		POSTFN_UI_APPS_TOKEN: string;
-		POSTFN_ANALYTICS_API_KEY: string;
-		POSTFN_ANALYTICS_HOST: string;
+		INSIGHTS_API_BASE_URL: string;
+		INSIGHTS_PUBLIC_URL: string;
+		INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: string;
+		INSIGHTS_UI_APPS_TOKEN: string;
+		INSIGHTS_ANALYTICS_API_KEY: string;
+		INSIGHTS_ANALYTICS_HOST: string;
 		ASSETS: Fetcher;
 	}
 }

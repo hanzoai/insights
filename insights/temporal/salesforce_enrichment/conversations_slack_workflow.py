@@ -23,7 +23,7 @@ from ee.billing.salesforce_enrichment.constants import (
     CONVERSATIONS_SLACK_ENRICHMENT_BATCH_SIZE,
     CONVERSATIONS_SLACK_FIELD_MAPPINGS,
     ORG_MAPPINGS_CACHE_MISSING_ERROR_TYPE,
-    POSTFN_FETCH_MAPPINGS_PAGE_SIZE,
+    INSIGHTS_FETCH_MAPPINGS_PAGE_SIZE,
 )
 from ee.billing.salesforce_enrichment.conversations_signals import (
     ConversationsSlackSignals,
@@ -255,7 +255,7 @@ class SalesforceConversationsSlackEnrichmentWorkflow(InsightsWorkflow):
     async def _run_production_mode(self, inputs: ConversationsSlackEnrichmentInputs) -> dict[str, Any]:
         logger = LOGGER.bind()
         state = inputs.state or ConversationsSlackEnrichmentState()
-        page_size = POSTFN_FETCH_MAPPINGS_PAGE_SIZE
+        page_size = INSIGHTS_FETCH_MAPPINGS_PAGE_SIZE
 
         if inputs.max_orgs is not None:
             remaining = inputs.max_orgs - state.total_processed
@@ -290,7 +290,7 @@ class SalesforceConversationsSlackEnrichmentWorkflow(InsightsWorkflow):
         if len(state.errors) < 10:
             state.errors.extend(page_result.errors[: 10 - len(state.errors)])
 
-        if page_result.page_size < POSTFN_FETCH_MAPPINGS_PAGE_SIZE:
+        if page_result.page_size < INSIGHTS_FETCH_MAPPINGS_PAGE_SIZE:
             return self._build_result(state)
 
         state.page_offset += page_result.page_size

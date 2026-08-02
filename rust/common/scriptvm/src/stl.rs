@@ -35,7 +35,7 @@ pub type NativeFunction =
 // instead of reconstructing (and, for the script STL, re-parsing its bytecode) on every context.
 static STL_NATIVE_FNS: Lazy<HashMap<String, NativeFunction>> =
     Lazy::new(|| stl().into_iter().collect());
-static FN_STL_MODULES: Lazy<HashMap<String, Module>> =
+static INSIGHTS_STL_MODULES: Lazy<HashMap<String, Module>> =
     Lazy::new(|| HashMap::from([("stl".to_string(), hog_stl())]));
 
 pub fn stl_map() -> HashMap<String, NativeFunction> {
@@ -43,7 +43,7 @@ pub fn stl_map() -> HashMap<String, NativeFunction> {
 }
 
 pub fn hog_stl_map() -> HashMap<String, Module> {
-    FN_STL_MODULES.clone()
+    INSIGHTS_STL_MODULES.clone()
 }
 
 // NOTE - if you make changes to this, be sure to re-run `bin/dump_scriptvmrs_stl`

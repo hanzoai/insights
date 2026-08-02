@@ -3,7 +3,7 @@
 The proper delete path (`delete_saved_query`) does four things: remove the DAG node
 (`delete_node_from_dag`), soft-delete the query's joins, `revert_materialization()` (soft-delete the
 backing table + null table_id + drop model paths + clear schedule/tier), and `soft_delete()` (rename
-to POSTFN_DELETED). A query soft-deleted another way — a manual `deleted=True` in a shell, bypassing
+to INSIGHTS_DELETED). A query soft-deleted another way — a manual `deleted=True` in a shell, bypassing
 the model method — sets only that flag, leaving the table live (leaks into the "self-managed sources"
 sidebar), the DAG node in place (a ghost node with no resolvable saved query), and the model paths /
 joins dangling.
@@ -76,7 +76,7 @@ def find_half_deleted_matviews(team_id: int | None = None) -> QuerySet[DataWareh
     """Saved queries soft-deleted by a path that bypassed the model method, with cleanup pending.
 
     The signature is `deleted=True` but `deleted_name IS NULL`: a proper `soft_delete()` always
-    records `deleted_name` and renames to POSTFN_DELETED, a raw `deleted=True` does neither. That
+    records `deleted_name` and renames to INSIGHTS_DELETED, a raw `deleted=True` does neither. That
     filter is also what distinguishes these from properly-deleted queries that merely kept a ghost
     node — a separate, far larger population this must not touch. Managed-viewset rows are excluded
     because their viewset owns their lifecycle.

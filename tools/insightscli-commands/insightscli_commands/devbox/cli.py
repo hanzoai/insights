@@ -104,7 +104,7 @@ from .config import (
 )
 
 _LEGACY_KEYCHAIN_SERVICE = "insights-claude-oauth-token"
-_POSTFN_COMMIT_SIGNING_HANDBOOK_URL = "https://hanzo.ai/handbook/engineering/security#commit-signing"
+_INSIGHTS_COMMIT_SIGNING_HANDBOOK_URL = "https://hanzo.ai/handbook/engineering/security#commit-signing"
 
 # Reaching a devbox requires a Tailscale ACL grant. Engineers get it from
 # group:engineering in the cloud-infra tailnet policy; without it the Coder
@@ -579,14 +579,14 @@ def maybe_configure_git_signing(
         click.echo()
         click.echo(click.style("Git commit signing (skipped)", bold=True))
         click.echo("  `git config --global user.signingkey` is empty.")
-        click.echo(f"  Set up commit signing per the handbook: {_POSTFN_COMMIT_SIGNING_HANDBOOK_URL}")
+        click.echo(f"  Set up commit signing per the handbook: {_INSIGHTS_COMMIT_SIGNING_HANDBOOK_URL}")
         click.echo("  Then re-run `insightscli devbox:setup --configure-git-signing`.")
         return
 
     if public_key.startswith("ssh-rsa "):
         click.echo()
         click.echo(click.style("RSA signing keys are not allowed.", fg="red"))
-        click.echo(f"  Use ECDSA or Ed25519 per the handbook: {_POSTFN_COMMIT_SIGNING_HANDBOOK_URL}")
+        click.echo(f"  Use ECDSA or Ed25519 per the handbook: {_INSIGHTS_COMMIT_SIGNING_HANDBOOK_URL}")
         return
 
     upsert_user_secret(GIT_SIGNING_KEY_SECRET, public_key, env_name=GIT_SIGNING_KEY_SECRET)
@@ -599,7 +599,7 @@ def maybe_configure_git_signing(
         click.echo(f"  IdentityAgent for Coder hosts (from your ssh config): {agent_socket}")
     else:
         click.echo("  No IdentityAgent detected for Coder hosts -- SSH agent forwarding will use")
-        click.echo(f"  whatever `$SSH_AUTH_SOCK` points to. Configure per: {_POSTFN_COMMIT_SIGNING_HANDBOOK_URL}")
+        click.echo(f"  whatever `$SSH_AUTH_SOCK` points to. Configure per: {_INSIGHTS_COMMIT_SIGNING_HANDBOOK_URL}")
     click.echo()
     click.echo(click.style("If you haven't already:", bold=True))
     click.echo("  1. Open https://github.com/settings/ssh/new")

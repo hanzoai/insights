@@ -15,7 +15,7 @@ class JobOwners(str, Enum):
     TEAM_LOGS = "team-logs"
     TEAM_AI_OBSERVABILITY = "team-ai-observability"
     TEAM_MANAGED_WAREHOUSE = "team-managed-warehouse"
-    TEAM_POSTFN_AI = "team-insights-ai"
+    TEAM_INSIGHTS_AI = "team-insights-ai"
     TEAM_QUERY_PERFORMANCE = "team-query-performance"
     TEAM_SECURITY = "team-security"
     TEAM_WAREHOUSE_SOURCES = "team-warehouse-sources"

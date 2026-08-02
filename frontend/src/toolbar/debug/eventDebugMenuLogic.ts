@@ -4,7 +4,7 @@ import type { Insights } from 'insights-js/dist/module'
 import { uuid } from 'lib/utils/dom'
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'
 
-import { CLOUD_INTERNAL_POSTFN_PROPERTY_KEYS } from '~/taxonomy/taxonomy'
+import { CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS } from '~/taxonomy/taxonomy'
 import { CORE_FILTER_DEFINITIONS_BY_GROUP, PROPERTY_KEYS } from '~/taxonomy/taxonomy'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 import { EventType } from '~/types'
@@ -340,7 +340,7 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
                     ? Object.fromEntries(
                           Object.entries(allProperties).filter(([key]) => {
                               const isInsightsProperty = key.startsWith('$') && PROPERTY_KEYS.includes(key)
-                              const isNonDollarInsightsProperty = CLOUD_INTERNAL_POSTFN_PROPERTY_KEYS.includes(key)
+                              const isNonDollarInsightsProperty = CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS.includes(key)
                               return !isInsightsProperty && !isNonDollarInsightsProperty
                           })
                       )

@@ -1,6 +1,6 @@
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 
-import { CORE_FILTER_DEFINITIONS_BY_GROUP, POSTFN_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
+import { CORE_FILTER_DEFINITIONS_BY_GROUP, INSIGHTS_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
 
 /**
  * MCP analytics helpers shared by the legacy taxonomic filter (`taxonomicFilterLogic.tsx`)
@@ -33,7 +33,7 @@ export function includesMCPAnalyticsEvents(eventNames: string[]): boolean {
 /** The properties funnels and paths between tool calls pivot on, shown first — the
  *  event's promoted properties, so picker ordering and event-inspector promotion
  *  can't drift apart. The rest of the known schema follows in taxonomy order. */
-const PRIORITY_MCP_PROPERTIES: string[] = POSTFN_EVENT_PROMOTED_PROPERTIES[MCP_TOOL_CALL_EVENT]
+const PRIORITY_MCP_PROPERTIES: string[] = INSIGHTS_EVENT_PROMOTED_PROPERTIES[MCP_TOOL_CALL_EVENT]
 
 // Derived once from the (already static, module-load-resolved) taxonomy — no need to cache
 // beyond the top-level const, since CORE_FILTER_DEFINITIONS_BY_GROUP never changes at runtime.

@@ -4,7 +4,7 @@ import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/cdp/schema
 import { findActionByType } from '~/cdp/services/insightsflows/hogflow-utils'
 import { logger } from '~/common/utils/logger'
 
-import { FN_FILTERS_EXAMPLES } from '../examples'
+import { INSIGHTS_FILTERS_EXAMPLES } from '../examples'
 
 /**
  * Helps us build like this
@@ -131,7 +131,7 @@ export class FixtureInsightsFlowBuilder {
                     type: 'trigger',
                     config: trigger ?? {
                         type: 'event',
-                        filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                        filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                     },
                 },
                 exit: {

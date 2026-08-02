@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::fingerprinting::{FingerprintRecordPart, FingerprintVersion};
 use crate::frames::{Frame, RawFrame};
 use crate::langs::native::DebugImage;
-use crate::metric_consts::POSTFN_SDK_EXCEPTION_RESOLVED;
+use crate::metric_consts::INSIGHTS_SDK_EXCEPTION_RESOLVED;
 
 pub mod batch;
 pub mod event;
@@ -258,7 +258,7 @@ impl Stacktrace {
             }
         }
 
-        metrics::counter!(POSTFN_SDK_EXCEPTION_RESOLVED)
+        metrics::counter!(INSIGHTS_SDK_EXCEPTION_RESOLVED)
             .increment(resolved_frames.iter().filter(|f| f.suspicious).count() as u64);
 
         Some(Stacktrace::Resolved {

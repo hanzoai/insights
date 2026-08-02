@@ -21,7 +21,7 @@ function createMockContext(): { context: Context; request: ReturnType<typeof vi.
             getOrgID: vi.fn(),
             getRegion: vi.fn().mockResolvedValue('us'),
         },
-        env: { POSTFN_BASE_URL: 'https://us.hanzo.ai' },
+        env: { INSIGHTS_BASE_URL: 'https://us.hanzo.ai' },
         sessionManager: {},
         cache: {},
         getDistinctId: async () => 'test',

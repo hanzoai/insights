@@ -53,7 +53,7 @@ export const productAnalyticsOnboarding: ProductOnboardingProvider = {
                     stepKey: OnboardingStepKey.INSTALL,
                     role: ctx.role,
                     setupTaskId: SetupTaskId.IngestFirstEvent,
-                    dedupKey: INSTALL_DEDUP_KEYS.POSTFN_JS,
+                    dedupKey: INSTALL_DEDUP_KEYS.INSIGHTS_JS,
                     render: () => (
                         <OnboardingInstallStep
                             sdkInstructionMap={ProductAnalyticsSDKInstructions}
@@ -126,7 +126,7 @@ export const productAnalyticsOnboarding: ProductOnboardingProvider = {
                 // primary install step, picking Product Analytics + Session Replay (or
                 // any other insights-js product) would render two install steps because
                 // the survivor here would carry no dedupKey for the secondary to match.
-                dedupKey: INSTALL_DEDUP_KEYS.POSTFN_JS,
+                dedupKey: INSTALL_DEDUP_KEYS.INSIGHTS_JS,
                 render: () => (
                     <OnboardingInstallStep
                         sdkInstructionMap={ProductAnalyticsSDKInstructions}

@@ -53,8 +53,8 @@ jobs:
               id: app-token
               if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
             - uses: ./.github/actions/paths-filter
               id: filter
               with:
@@ -102,16 +102,16 @@ jobs:
         # The weekly schedule runs on master, so it lands in the prod repo via the master role.
         env:
             ECR_IMAGE: ${{ github.ref == 'refs/heads/master' && 'insights-recording-rasterizer' || 'insights-recording-rasterizer-prs' }}
-            ECR_ROLE: ${{ github.ref == 'refs/heads/master' && vars.AWS_ECR_POSTFN_MASTER_PUBLISH_IAM_ROLE || vars.AWS_ECR_POSTFN_PRS_PUBLISH_IAM_ROLE }}
+            ECR_ROLE: ${{ github.ref == 'refs/heads/master' && vars.AWS_ECR_INSIGHTS_MASTER_PUBLISH_IAM_ROLE || vars.AWS_ECR_INSIGHTS_PRS_PUBLISH_IAM_ROLE }}
 
         steps:
             - name: Assert master publish role is configured
               if: github.ref == 'refs/heads/master'
               env:
-                  MASTER_ROLE: ${{ vars.AWS_ECR_POSTFN_MASTER_PUBLISH_IAM_ROLE }}
+                  MASTER_ROLE: ${{ vars.AWS_ECR_INSIGHTS_MASTER_PUBLISH_IAM_ROLE }}
               run: |
                   if [[ -z "$MASTER_ROLE" ]]; then
-                    echo "::error::AWS_ECR_POSTFN_MASTER_PUBLISH_IAM_ROLE is not set — refusing to fall back to the PRS role on master."
+                    echo "::error::AWS_ECR_INSIGHTS_MASTER_PUBLISH_IAM_ROLE is not set — refusing to fall back to the PRS role on master."
                     exit 1
                   fi
 
@@ -178,7 +178,7 @@ jobs:
               if: failure()
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_API_TOKEN }}
                   event: 'recording-rasterizer-image-build'
                   properties: '{"status": "failure", "commit_hash": "${{ github.sha }}"}'
             - name: Report failure to DevEx Insights
@@ -186,7 +186,7 @@ jobs:
               continue-on-error: true
               uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  insights-token: ${{ secrets.POSTFN_DEVEX_PROJECT_API_TOKEN }}
+                  insights-token: ${{ secrets.INSIGHTS_DEVEX_PROJECT_API_TOKEN }}
                   event: 'recording-rasterizer-image-build'
                   properties: '{"status": "failure", "commit_hash": "${{ github.sha }}"}'
 

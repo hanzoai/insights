@@ -497,7 +497,7 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
 // from the CDN will not learn about new regions automatically, so users on a new
 // region keep seeing the confirm modal (safe) but any legacy tokens on that region
 // would be silently rejected until the toolbar is rebuilt and deployed.
-const TRUSTED_POSTFN_CLOUD_HOSTNAMES = new Set([
+const TRUSTED_INSIGHTS_CLOUD_HOSTNAMES = new Set([
     'us.hanzo.ai',
     'eu.hanzo.ai',
     'app.hanzo.ai', // legacy canonical — kept for customers who pinned to it
@@ -506,7 +506,7 @@ const TRUSTED_POSTFN_CLOUD_HOSTNAMES = new Set([
 export function isInsightsCloudHost(uiHost: string): boolean {
     try {
         const { protocol, hostname } = new URL(uiHost)
-        return protocol === 'https:' && TRUSTED_POSTFN_CLOUD_HOSTNAMES.has(hostname)
+        return protocol === 'https:' && TRUSTED_INSIGHTS_CLOUD_HOSTNAMES.has(hostname)
     } catch {
         return false
     }

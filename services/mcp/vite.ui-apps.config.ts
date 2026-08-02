@@ -5,13 +5,13 @@ import { defineConfig } from 'vite'
 import { discoverApps } from './scripts/utils'
 
 // Insights configuration - injected at build time
-// Set POSTFN_UI_APPS_TOKEN to enable analytics in UI apps
-const POSTFN_UI_APPS_TOKEN = process.env.POSTFN_UI_APPS_TOKEN || ''
+// Set INSIGHTS_UI_APPS_TOKEN to enable analytics in UI apps
+const INSIGHTS_UI_APPS_TOKEN = process.env.INSIGHTS_UI_APPS_TOKEN || ''
 
 // Analytics base URL for MCP Apps - where events are sent
 // For local development, set to http://localhost:8010
-const POSTFN_MCP_APPS_ANALYTICS_BASE_URL =
-    process.env.POSTFN_MCP_APPS_ANALYTICS_BASE_URL || 'https://us.i.hanzo.ai'
+const INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL =
+    process.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL || 'https://us.i.hanzo.ai'
 
 // Apps directory - each .tsx file is an app
 const APPS_DIR = resolve(__dirname, 'src/ui-apps/apps')
@@ -33,8 +33,8 @@ const ALL_APPS = discoverApps()
  * generates stub HTML that loads the built JS+CSS from static assets.
  *
  * Environment variables:
- * - POSTFN_UI_APPS_TOKEN: Insights API token for analytics (optional)
- * - POSTFN_MCP_APPS_ANALYTICS_BASE_URL: Insights base URL for analytics
+ * - INSIGHTS_UI_APPS_TOKEN: Insights API token for analytics (optional)
+ * - INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: Insights base URL for analytics
  */
 export default defineConfig({
     plugins: [react()],
@@ -71,8 +71,8 @@ export default defineConfig({
     },
     define: {
         // Inject Insights configuration at build time
-        __POSTFN_UI_APPS_TOKEN__: JSON.stringify(POSTFN_UI_APPS_TOKEN),
-        __POSTFN_MCP_APPS_ANALYTICS_BASE_URL__: JSON.stringify(POSTFN_MCP_APPS_ANALYTICS_BASE_URL),
+        __INSIGHTS_UI_APPS_TOKEN__: JSON.stringify(INSIGHTS_UI_APPS_TOKEN),
+        __INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL__: JSON.stringify(INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL),
     },
     build: {
         outDir: 'public/ui-apps',

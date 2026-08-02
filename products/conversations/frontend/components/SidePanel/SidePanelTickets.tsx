@@ -8,7 +8,7 @@ import { TicketsList } from './TicketsList'
 
 export function SidePanelTickets(): JSX.Element {
     const { view, newTicketDraftRevision } = useValues(sidepanelTicketsLogic)
-    const hasIdentityMode = !!window.JS_POSTFN_IDENTITY_DISTINCT_ID
+    const hasIdentityMode = !!window.JS_INSIGHTS_IDENTITY_DISTINCT_ID
 
     return (
         <div>

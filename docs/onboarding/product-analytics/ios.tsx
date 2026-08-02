@@ -74,10 +74,10 @@ export const getIOSSteps = (
 
                                     class AppDelegate: NSObject, UIApplicationDelegate {
                                         func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-                                            let POSTFN_PROJECT_TOKEN = "<ph_project_token>"
-                                            let POSTFN_HOST = "<ph_client_api_host>"
+                                            let INSIGHTS_PROJECT_TOKEN = "<ph_project_token>"
+                                            let INSIGHTS_HOST = "<ph_client_api_host>"
 
-                                            let config = InsightsConfig(projectToken: POSTFN_PROJECT_TOKEN, host: POSTFN_HOST)
+                                            let config = InsightsConfig(projectToken: INSIGHTS_PROJECT_TOKEN, host: INSIGHTS_HOST)
                                             InsightsSDK.shared.setup(config)
 
                                             return true

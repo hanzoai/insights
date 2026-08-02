@@ -21,7 +21,7 @@ JsonObject = dict[str, object]
 DecisionAction = Literal["observe", "skip deterministic", "skip non-test"]
 
 DEFAULT_ALLOWED_WORKFLOWS = ("Backend CI", "Dagster CI", "E2E CI Playwright")
-DEFAULT_POSTFN_HOST = "https://us.i.hanzo.ai"
+DEFAULT_INSIGHTS_HOST = "https://us.i.hanzo.ai"
 DECISION_EVENT = "ci_flake_overseer_decision"
 OUTCOME_EVENT = "ci_flake_overseer_rerun_outcome"
 
@@ -510,8 +510,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--allowed-workflows", default=os.environ.get("CI_FLAKE_OVERSEER_WORKFLOWS"))
     parser.add_argument("--summary-path", default=os.environ.get("GITHUB_STEP_SUMMARY"))
     # Reuses the DevEx project token already wired into other CI workflows; telemetry no-ops when absent.
-    parser.add_argument("--insights-api-key", default=os.environ.get("POSTFN_DEVEX_PROJECT_API_TOKEN", ""))
-    parser.add_argument("--insights-host", default=os.environ.get("POSTFN_DEVEX_PROJECT_HOST") or DEFAULT_POSTFN_HOST)
+    parser.add_argument("--insights-api-key", default=os.environ.get("INSIGHTS_DEVEX_PROJECT_API_TOKEN", ""))
+    parser.add_argument("--insights-host", default=os.environ.get("INSIGHTS_DEVEX_PROJECT_HOST") or DEFAULT_INSIGHTS_HOST)
     parser.add_argument("--insights-timeout-seconds", type=int, default=10)
     return parser.parse_args(argv)
 

@@ -33,8 +33,8 @@ from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 
 DEFAULT_TIMEOUT_MS = 120_000
-DEFAULT_POSTFN_HOST = "https://us.i.hanzo.ai"
-DEFAULT_POSTFN_DOMAINS = ("hanzo.ai", "i.hanzo.ai")
+DEFAULT_INSIGHTS_HOST = "https://us.i.hanzo.ai"
+DEFAULT_INSIGHTS_DOMAINS = ("hanzo.ai", "i.hanzo.ai")
 
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -46,7 +46,7 @@ RESULTS_DIR = Path(__file__).parent / "results"
 
 # Detects Insights presence and configuration on a page. Returns a dict shaped
 # like {loaded, load_method, init_config, runtime_state, ...}.
-POSTFN_DETECT_JS = r"""
+INSIGHTS_DETECT_JS = r"""
 () => {
     const scripts = [...document.querySelectorAll('script')];
     const insightsScripts = scripts.filter(s => {
@@ -532,7 +532,7 @@ async def run_check_loading(
                 try:
                     await page.goto(url, wait_until="load", timeout=timeout_ms)
                     await asyncio.sleep(5.0)
-                    detection = await page.evaluate(POSTFN_DETECT_JS)
+                    detection = await page.evaluate(INSIGHTS_DETECT_JS)
                     detection["url"] = url
                     detection["error"] = None
                     pages[url] = detection
@@ -676,9 +676,9 @@ def resolve_insights_domains(host: str) -> tuple[str, ...]:
     extras: tuple[str, ...] = ()
     if host:
         netloc = (urlparse(host).hostname or host).lower()
-        if netloc and not any(netloc == d or netloc.endswith("." + d) for d in DEFAULT_POSTFN_DOMAINS):
+        if netloc and not any(netloc == d or netloc.endswith("." + d) for d in DEFAULT_INSIGHTS_DOMAINS):
             extras = (netloc,)
-    return DEFAULT_POSTFN_DOMAINS + extras
+    return DEFAULT_INSIGHTS_DOMAINS + extras
 
 
 # ---- CLI -----------------------------------------------------------------------
@@ -725,8 +725,8 @@ Examples:
         s.add_argument(
             "--insights-host",
             type=str,
-            default=DEFAULT_POSTFN_HOST,
-            help=f"Insights ingestion host (default: {DEFAULT_POSTFN_HOST}).",
+            default=DEFAULT_INSIGHTS_HOST,
+            help=f"Insights ingestion host (default: {DEFAULT_INSIGHTS_HOST}).",
         )
         s.add_argument(
             "--cloud",

@@ -15,10 +15,10 @@ import { userLogic } from 'scenes/userLogic'
 import { wizardSessionsLatestRetrieve } from 'products/wizard/frontend/generated/api'
 import type { WizardSessionDTOApi } from 'products/wizard/frontend/generated/api.schemas'
 
-import { POSTFN_INTEGRATION_WORKFLOW_ID, SELF_DRIVING_WORKFLOW_ID } from './workflows'
+import { INSIGHTS_INTEGRATION_WORKFLOW_ID, SELF_DRIVING_WORKFLOW_ID } from './workflows'
 
 /** Always watched: the SDK install is what the app-wide FAB and nav button exist for. */
-const WORKFLOW_ID = POSTFN_INTEGRATION_WORKFLOW_ID
+const WORKFLOW_ID = INSIGHTS_INTEGRATION_WORKFLOW_ID
 
 // Cheap REST repoll cadence used to surface a wizard run that was kicked off
 // from outside the install step (e.g. user copied the command then navigated

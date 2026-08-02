@@ -168,7 +168,7 @@ const handleRequest = async (
         resourceUrl.search = ''
 
         // Determine authorization server for OAuth.
-        // POSTFN_API_BASE_URL takes precedence for self-hosted, otherwise routes to oauth.hanzo.ai.
+        // INSIGHTS_API_BASE_URL takes precedence for self-hosted, otherwise routes to oauth.hanzo.ai.
         const authorizationServer = getAuthorizationServerUrl()
 
         return new Response(

@@ -18,7 +18,7 @@ class TestBuildWizardCommand(SimpleTestCase):
     def test_uses_headless_flag_and_does_not_pass_the_token_on_the_command_line(self) -> None:
         # --headless-DONOTUSE-EXPERIMENTAL is the published-build non-interactive mode (--ci is
         # dev/test-only and rejected by published builds), and the token must come from
-        # POSTFN_WIZARD_API_KEY in the env, never the command line. A regression to --ci or an
+        # INSIGHTS_WIZARD_API_KEY in the env, never the command line. A regression to --ci or an
         # inline --api-key would break cloud runs / leak the token.
         command = _build_wizard_command("/tmp/workspace/repos/acme/app", 123)
 
@@ -35,13 +35,13 @@ class TestBuildWizardCommand(SimpleTestCase):
 
     @parameterized.expand([(True,), (False,)])
     def test_base_url_pins_local_instance_only_in_debug(self, debug: bool) -> None:
-        # Local dev pins --base-url to the sandbox-reachable POSTFN_API_URL so the wizard hits the
+        # Local dev pins --base-url to the sandbox-reachable INSIGHTS_API_URL so the wizard hits the
         # local instance instead of failing cloud region detection on a locally-minted token. Prod
         # must keep inferring the region from the token, so the flag must not leak when DEBUG is off.
         with override_settings(DEBUG=debug):
             command = _build_wizard_command("/tmp/workspace/repos/a/b", 1)
 
-        assert ('--base-url "$POSTFN_API_URL"' in command) is debug
+        assert ('--base-url "$INSIGHTS_API_URL"' in command) is debug
 
     @parameterized.expand([("EU", "eu"), ("US", "us"), (None, "us")])
     def test_region_maps_from_instance_region(self, instance_region: str | None, expected: str) -> None:

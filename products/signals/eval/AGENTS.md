@@ -48,8 +48,8 @@ Set in `.env` at the repo root (loaded automatically):
 | `LLM_GATEWAY_URL`              | Internal LLM gateway base URL (all LLM calls: matching, specificity, summarization, actionability, safety) |
 | `LLM_GATEWAY_PERSONAL_API_KEY` | Bearer token for the LLM gateway (Insights personal API key)                                                |
 | `SIGNALS_EVAL_TEAM_ID`         | Team id used for LLM cost attribution headers (defaults to `1`)                                            |
-| `POSTFN_PROJECT_API_KEY`      | Capturing eval results (skip with `--no-capture`)                                                          |
-| `POSTFN_HOST`                 | Insights instance (defaults to `http://localhost:8010`)                                                     |
+| `INSIGHTS_PROJECT_API_KEY`      | Capturing eval results (skip with `--no-capture`)                                                          |
+| `INSIGHTS_HOST`                 | Insights instance (defaults to `http://localhost:8010`)                                                     |
 
 ### CLI options
 

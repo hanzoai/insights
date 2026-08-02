@@ -23,7 +23,7 @@ import { createHub } from '~/common/utils/db/hub'
 import { parseJSON } from '~/common/utils/json-parse'
 import { promisifyCallback } from '~/common/utils/utils'
 import { compileHog } from '../templates/compiler'
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import { createExampleInvocation, createHogExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { EXTEND_OBJECT_KEY, isConnectionLevelError } from './script-executor.service'
 import { SELF_LOOP_DEPTH_PROPERTY, selfLoopGuardCounter } from './self-loop-guard'
@@ -128,9 +128,9 @@ describe('Script Executor', () => {
         beforeEach(() => {
             insightsFunction = createInsightsFunction({
                 name: 'Test script function',
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
         })
 
@@ -258,8 +258,8 @@ describe('Script Executor', () => {
 
         it('collects and redacts secret values from the logs', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.input_printer,
-                ...FN_INPUTS_EXAMPLES.secret_inputs,
+                ...INSIGHTS_EXAMPLES.input_printer,
+                ...INSIGHTS_INPUTS_EXAMPLES.secret_inputs,
             })
             const invocation = createExampleInvocation(fn)
             const result = await executor.execute(invocation)
@@ -354,9 +354,9 @@ describe('Script Executor', () => {
     describe('filtering', () => {
         it('builds the correct globals object when filtering', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const inputGlobals = createHogExecutionGlobals({ groups: {} })
@@ -373,9 +373,9 @@ describe('Script Executor', () => {
 
         it('can filters incoming messages correctly', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
             })
 
             const resultsShouldntMatch = await executor.buildInsightsFunctionInvocations(
@@ -403,9 +403,9 @@ describe('Script Executor', () => {
 
         it('can use elements_chain_texts', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.elements_text_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.elements_text_filter,
             })
 
             const elementsChain = (buttonText: string) =>
@@ -452,9 +452,9 @@ describe('Script Executor', () => {
 
         it('can use elements_chain_href', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.elements_href_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.elements_href_filter,
             })
 
             const elementsChain = (link: string) =>
@@ -501,9 +501,9 @@ describe('Script Executor', () => {
 
         it('can use elements_chain_tags and _ids', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.elements_tag_and_id_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.elements_tag_and_id_filter,
             })
 
             const elementsChain = (id: string) =>
@@ -553,13 +553,13 @@ describe('Script Executor', () => {
         let fn: InsightsFunctionType
         beforeEach(() => {
             fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 mappings: [
                     {
                         // Filters for pageview or autocapture
-                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                        ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         inputs: {
                             url: {
                                 order: 0,
@@ -584,12 +584,12 @@ describe('Script Executor', () => {
                     },
                     {
                         // No filters so should match all events
-                        ...FN_FILTERS_EXAMPLES.no_filters,
+                        ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                     },
 
                     {
                         // Broken filters so shouldn't match
-                        ...FN_FILTERS_EXAMPLES.broken_filters,
+                        ...INSIGHTS_FILTERS_EXAMPLES.broken_filters,
                     },
                 ],
             })
@@ -665,11 +665,11 @@ describe('Script Executor', () => {
             const mappingFn = createInsightsFunction({
                 script,
                 bytecode: await compileHog(script),
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 inputs_schema: [],
                 mappings: [
                     {
-                        ...FN_FILTERS_EXAMPLES.no_filters,
+                        ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                         inputs: {
                             gclid: {
                                 order: 0,
@@ -705,9 +705,9 @@ describe('Script Executor', () => {
             jest.spyOn(Date, 'now').mockRestore()
 
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.malicious_function,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.malicious_function,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const result = await executor.execute(createExampleInvocation(fn))
@@ -749,9 +749,9 @@ describe('Script Executor', () => {
     describe('result handling', () => {
         it('does not set execResult when VM returns a falsy result', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const hogExecModule = require('../utils/script-exec')
@@ -776,8 +776,8 @@ describe('Script Executor', () => {
         it('sets execResult when VM returns an object synchronously', async () => {
             // This tests a simple return statement without any async functions
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_return_object,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_return_object,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const res = await executor.execute(createExampleInvocation(fn))
@@ -793,9 +793,9 @@ describe('Script Executor', () => {
     describe('insightsCaptue', () => {
         it('captures events', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.insights_capture,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.insights_capture,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const result = await executor.execute(createExampleInvocation(fn))
@@ -816,9 +816,9 @@ describe('Script Executor', () => {
 
         it('falls back to person.id for distinct_id when event.distinct_id is empty (batch invocations)', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.insights_capture,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.insights_capture,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const globals = createHogExecutionGlobals({
@@ -840,9 +840,9 @@ describe('Script Executor', () => {
 
         it('allows events that have already used their insightsCapture a maximum of 10 times', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.insights_capture,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.insights_capture,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const globals = createHogExecutionGlobals({
@@ -871,9 +871,9 @@ describe('Script Executor', () => {
 
         it('ignores events that have already used their insightsCapture 10 times', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.insights_capture,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.insights_capture,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const globals = createHogExecutionGlobals({
@@ -914,9 +914,9 @@ describe('Script Executor', () => {
         const createTicketInvocation = () =>
             createExampleInvocation(
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 }),
                 { inputs: {} }
             )
@@ -1015,9 +1015,9 @@ describe('Script Executor', () => {
         const createAccountInvocation = () =>
             createExampleInvocation(
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 }),
                 { inputs: {} }
             )
@@ -1188,9 +1188,9 @@ describe('Script Executor', () => {
         it('regular fetch call does not pass through internal flag', async () => {
             const invocation = createExampleInvocation(
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 })
             )
 
@@ -1227,9 +1227,9 @@ describe('Script Executor', () => {
 
             insightsFunction = createInsightsFunction({
                 name: 'Test script function',
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
         })
 

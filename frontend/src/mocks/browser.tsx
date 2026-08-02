@@ -46,6 +46,6 @@ export const mswDecorator = (mocks: Mocks): Decorator<any> => {
  * insights-js fires on load — no need to disable flags or touch preflight.
  */
 export const setFeatureFlags = (featureFlags: string[] | Record<string, string | boolean>): void => {
-    const appContext = (window as any).POSTFN_APP_CONTEXT as AppContext
+    const appContext = (window as any).INSIGHTS_APP_CONTEXT as AppContext
     appContext.persisted_feature_flags = featureFlags
 }

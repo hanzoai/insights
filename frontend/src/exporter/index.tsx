@@ -12,7 +12,7 @@ import { loadInsightsJS } from '~/loadInsightsJS'
 
 import { ErrorBoundary } from '../layout/ErrorBoundary'
 
-const exportedData: ExportedData = window.POSTFN_EXPORTED_DATA
+const exportedData: ExportedData = window.INSIGHTS_EXPORTED_DATA
 
 // Disable tracking for shared dashboards / insights / embeds — those iframes can be embedded on
 // our customers' sites, and tracking there would log their visitors to app.hanzo.ai.
@@ -23,7 +23,7 @@ const exportedData: ExportedData = window.POSTFN_EXPORTED_DATA
 // tracking on a customer dashboard share by appending the parameter.
 const isInterview = exportedData?.type === ExportType.Interview && !!exportedData?.interview
 if (!isInterview) {
-    window.JS_POSTFN_API_KEY = undefined
+    window.JS_INSIGHTS_API_KEY = undefined
 }
 
 // The interview URL embeds the SharingConfiguration access token (/interview/<token>/) and the

@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-CACHE_DIR = Path(os.environ.get("POSTFN_SENTIMENT_MODEL_CACHE", "/tmp/insights-sentiment-onnx-cache"))
+CACHE_DIR = Path(os.environ.get("INSIGHTS_SENTIMENT_MODEL_CACHE", "/tmp/insights-sentiment-onnx-cache"))
 REQUIRED_FILES = ("model.onnx", "tokenizer.json", "config.json")
 
 MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment-latest"

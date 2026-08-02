@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from products.tasks.backend.constants import POSTFN_EXEC_PERMISSION_REGEX
+from products.tasks.backend.constants import INSIGHTS_EXEC_PERMISSION_REGEX
 
 PRODUCTS_DIR = Path(__file__).resolve().parents[3]
 
@@ -31,11 +31,11 @@ def _enabled_destructive_tools() -> list[str]:
 def test_exec_permission_regex_covers_destructive_annotated_tools():
     # A destructive-annotated tool the regex misses is never relayed for approval and executes
     # silently in `auto` mode — the exact gap this regex exists to close. When this fails, add the
-    # tool name to `POSTFN_EXEC_DESTRUCTIVE_SUB_TOOLS` in `constants.py` AND to
-    # `POSTFN_DESTRUCTIVE_SUB_TOOLS` in `products/insights_ai/frontend/policy/toolPolicy.ts`.
+    # tool name to `INSIGHTS_EXEC_DESTRUCTIVE_SUB_TOOLS` in `constants.py` AND to
+    # `INSIGHTS_DESTRUCTIVE_SUB_TOOLS` in `products/insights_ai/frontend/policy/toolPolicy.ts`.
     destructive = _enabled_destructive_tools()
     assert len(destructive) > 0, f"no destructive-annotated MCP tools found under {PRODUCTS_DIR} — glob broken?"
 
-    pattern = re.compile(POSTFN_EXEC_PERMISSION_REGEX, re.IGNORECASE)
+    pattern = re.compile(INSIGHTS_EXEC_PERMISSION_REGEX, re.IGNORECASE)
     ungated = sorted(name for name in destructive if not pattern.search(name))
-    assert not ungated, f"destructive-annotated MCP tools not covered by POSTFN_EXEC_PERMISSION_REGEX: {ungated}"
+    assert not ungated, f"destructive-annotated MCP tools not covered by INSIGHTS_EXEC_PERMISSION_REGEX: {ungated}"
