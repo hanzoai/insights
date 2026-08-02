@@ -11,7 +11,7 @@ from insights.datastore.preaggregation.web_stats_frustration_preaggregated_sql i
 
 # Both new web-analytics precompute tables ship together as a single
 # foundation drop and are applied atomically. Each table follows the same
-# 3-op AUX/DATA convention used by `0259_web_stats_preaggregated.py` and the
+# 3-op AUX/DATA convention used by `0266_web_stats_preaggregated.py` and the
 # other web-analytics precompute migrations:
 #
 #   1. Sharded data table on AUX — keeps the small precompute storage off
