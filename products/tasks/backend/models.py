@@ -270,7 +270,7 @@ class Task(FileSystemSyncMixin, DeletedMetaFields, models.Model):
         db_table = "insights_task"
         managed = True
         indexes = [
-            models.Index(fields=["signal_report"], name="insights_task_signal_report_idx"),
+            models.Index(fields=["signal_report"], name="task_signal_report_idx"),
             models.Index(fields=["archived"], name="insights_task_archived_idx"),
             models.Index(fields=["team", "-created_at", "-id"], name="insights_task_team_created_idx"),
             models.Index(fields=["team", "created_by", "-created_at", "-id"], name="insights_task_team_creator_idx"),

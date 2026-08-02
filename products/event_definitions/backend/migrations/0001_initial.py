@@ -374,7 +374,7 @@ class Migration(migrations.Migration):
                 django.db.models.functions.comparison.Coalesce(models.F("project_id"), models.F("team_id")),
                 models.F("type"),
                 models.F("is_numerical"),
-                name="insights_pro_project_3583d2_idx",
+                name="pro_project_3583d2_idx",
             ),
         ),
         migrations.AddIndex(
