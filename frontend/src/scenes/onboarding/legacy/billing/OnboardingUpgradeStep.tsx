@@ -5,7 +5,7 @@ import { IconArrowRight } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
 
 import { SupermanHog } from 'lib/components/mascots'
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -81,7 +81,7 @@ export const OnboardingUpgradeStep: OnboardingStepComponentType<OnboardingUpgrad
 OnboardingUpgradeStep.stepKey = OnboardingStepKey.PLANS
 
 const SubscribedCelebration = (): JSX.Element => {
-    const { trigger, HogfettiComponent } = useHogfetti({ count: 100, duration: 3000 })
+    const { trigger, ConfettiComponent } = useConfetti({ count: 100, duration: 3000 })
 
     useEffect(() => {
         const run = async (): Promise<void> => {
@@ -97,7 +97,7 @@ const SubscribedCelebration = (): JSX.Element => {
 
     return (
         <div className="relative flex flex-col items-center text-center">
-            <HogfettiComponent />
+            <ConfettiComponent />
 
             {/* Superman Script floating animation */}
             <div className="w-40 h-40 animate-float">
@@ -125,7 +125,7 @@ const PlatformPackagesUpsell = ({
     onSkip: () => void
     onContinue: () => void
 }): JSX.Element => {
-    const { trigger, HogfettiComponent } = useHogfetti({ count: 100, duration: 3000 })
+    const { trigger, ConfettiComponent } = useConfetti({ count: 100, duration: 3000 })
     const onPackage = !!activePackageName
 
     useEffect(() => {
@@ -170,7 +170,7 @@ const PlatformPackagesUpsell = ({
 
     return (
         <div className="relative flex flex-col items-center">
-            <HogfettiComponent />
+            <ConfettiComponent />
 
             {/* Superman Script floating animation */}
             <div className="w-24 h-24 animate-float">

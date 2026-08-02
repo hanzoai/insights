@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { IconArrowRight, IconAtSign, IconSparkles } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { IconLink, IconSlack } from 'lib/elements/icons'
@@ -156,7 +156,7 @@ export function WebAnalyticsRecapScene(): JSX.Element {
         goToWebAnalytics,
     } = useActions(webAnalyticsRecapLogic)
     const { openSidePanel } = useActions(sidePanelStateLogic)
-    const { trigger: triggerHogfetti, HogfettiComponent } = useHogfetti({ count: 60, power: 6, duration: 2500 })
+    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti({ count: 60, power: 6, duration: 2500 })
 
     const endRef = useRef<HTMLDivElement>(null)
     const celebratedRef = useRef(false)
@@ -167,9 +167,9 @@ export function WebAnalyticsRecapScene(): JSX.Element {
     useEffect(() => {
         if (recap && !celebratedRef.current) {
             celebratedRef.current = true
-            triggerHogfetti()
+            triggerConfetti()
         }
-    }, [recap, triggerHogfetti])
+    }, [recap, triggerConfetti])
 
     useEffect(() => {
         const node = endRef.current
@@ -226,7 +226,7 @@ export function WebAnalyticsRecapScene(): JSX.Element {
             // eslint-disable-next-line react/forbid-dom-props
             style={{ '--recap-accent': persona.color } as React.CSSProperties}
         >
-            <HogfettiComponent />
+            <ConfettiComponent />
 
             {/* Cohesive full-bleed backdrop pinned behind the snapping sections */}
             <div aria-hidden className="sticky top-0 z-0 h-0">

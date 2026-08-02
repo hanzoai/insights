@@ -105,7 +105,7 @@ function copyPublicAssets(): void {
     }
 
     // Copy mascot-mode assets to dist
-    const mascotModeSrc = resolve('.', 'node_modules', '@insights', 'mascot-mode', 'assets')
+    const mascotModeSrc = resolve('.', 'node_modules', '@hanzo', 'mascot-mode', 'assets')
     const mascotModeDest = resolve('.', 'dist', 'mascot-mode')
     if (existsSync(mascotModeSrc)) {
         copyDirectory(mascotModeSrc, mascotModeDest)
