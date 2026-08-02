@@ -305,7 +305,13 @@ jobs:
         run: |
           set -euo pipefail
           corepack enable
-          pnpm install --frozen-lockfile --filter @hanzo/playwright...
+          # --no-frozen-lockfile, same as the image build one job up, and for a
+          # reason that predates this workflow: patchedDependencies is declared
+          # under `pnpm` in package.json, which pnpm 10 no longer reads, so a
+          # frozen install cannot match the lockfile and dies with
+          # ERR_PNPM_LOCKFILE_CONFIG_MISMATCH. Frozen would be the better default
+          # and should come back when that config moves to pnpm-workspace.yaml.
+          CI=1 pnpm install --no-frozen-lockfile --filter @hanzo/playwright...
           cd playwright
           ./node_modules/.bin/playwright install --with-deps chromium
           ./node_modules/.bin/playwright test -c live/live.config.ts

@@ -1,0 +1,2 @@
+# A signed-in session. Never commit it.
+.auth/

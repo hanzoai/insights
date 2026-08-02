@@ -16,13 +16,19 @@ export default defineConfig({
     testDir: '.',
     timeout: 90 * 1000,
     expect: { timeout: 30 * 1000 },
-    fullyParallel: true,
+    fullyParallel: false,
     forbidOnly: !!process.env.CI,
     // A deployed target is shared and can be slow under load; a flake here should
     // not read as a broken release. Retries are for the network, not for masking
     // a failure -- a test that only passes on retry still shows up in the report.
     retries: process.env.CI ? 2 : 0,
-    workers: 4,
+    // ONE worker. This drives a real deployment serving real users, not a test rig.
+    // In parallel the suite was the load: scenes that render in ~2s serially missed
+    // a 60s deadline at four workers and again at two, and the failures moved
+    // between scenes each run -- the signature of contention, not of a broken
+    // scene. A post-deploy check that stresses the thing it is checking reports on
+    // the stress. Serial costs a couple of minutes and answers the actual question.
+    workers: 1,
     reporter: process.env.CI ? [['list'], ['junit', { outputFile: 'live-results.xml' }]] : [['list']],
     use: {
         baseURL: process.env.LIVE_URL || 'https://insights.hanzo.ai',
@@ -31,5 +37,12 @@ export default defineConfig({
         screenshot: 'only-on-failure',
         testIdAttribute: 'data-attr',
     },
-    projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+    projects: [
+        { name: 'setup', testMatch: /auth\.setup\.ts/ },
+        {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'], storageState: 'live/.auth/session.json' },
+            dependencies: ['setup'],
+        },
+    ],
 })
