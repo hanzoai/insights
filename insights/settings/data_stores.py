@@ -302,6 +302,17 @@ DATASTORE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", DATASTORE_
 DATASTORE_USER: str = os.getenv("DATASTORE_USER", "default")
 DATASTORE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", "")
 DATASTORE_DATABASE: str = DATASTORE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", "default")
+
+# Fail closed on a shared-datastore misconfiguration. The `insights` database is
+# co-resident with o11y and analytics on the shared Hanzo Datastore, so falling
+# back to "default" or "system" would point migrations and queries at another
+# tenant's data — a DDL statement there is not recoverable by retrying with the
+# right value. An unset database is a deploy bug, so it stops the process.
+if not TEST and not IS_COLLECT_STATIC and DATASTORE_DATABASE in ("", "default", "system"):
+    raise ImproperlyConfigured(
+        f"DATASTORE_DATABASE must name an explicit Insights database "
+        f"(got {DATASTORE_DATABASE!r}); refusing to run against a shared/system database."
+    )
 DATASTORE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", "insights")
 DATASTORE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", "insights_migrations")
 DATASTORE_SATELLITE_CLUSTERS: list[str] = [
@@ -453,47 +464,67 @@ READONLY_DATASTORE_PASSWORD: str | None = os.getenv("READONLY_DATASTORE_PASSWORD
 # needing to have a deploy.
 TOKENS_HISTORICAL_DATA = os.getenv("TOKENS_HISTORICAL_DATA", "").split(",")
 
-# The last case happens when someone upgrades Heroku but doesn't have Redis installed yet. Collectstatic gets called before we can provision Redis.
+# Hanzo KV is the ONE key/value + cache + celery-broker backend. It speaks the
+# Redis (RESP) wire protocol, so the kv:// URL is normalized to redis:// for the
+# RESP drivers (redis-py / django_redis / celery). Config surface is KV_URL —
+# never REDIS_URL. The REDIS_* names below are derived RESP connection URLs, not
+# env vars: reading REDIS_URL from the environment would be a second way to
+# configure one thing, and the loser would be silent.
+def _kv_to_resp(url: str) -> str:
+    """Map Hanzo KV's kv:// scheme to the redis:// RESP wire the driver speaks."""
+    return "redis://" + url[len("kv://") :] if url.startswith("kv://") else url
+
+
+# The last case happens on a fresh deploy that has not provisioned KV yet:
+# collectstatic runs before there is anything to connect to.
 if TEST or DEBUG or IS_COLLECT_STATIC:
     if PYTEST_XDIST_WORKER_NUM is not None:
-        REDIS_URL = os.getenv("REDIS_URL", f"redis://redis7/{PYTEST_XDIST_WORKER_NUM}")
+        KV_URL = os.getenv("KV_URL", f"kv://localhost/{PYTEST_XDIST_WORKER_NUM}")
     else:
-        REDIS_URL = os.getenv("REDIS_URL", "redis://redis7/")
+        KV_URL = os.getenv("KV_URL", "kv://localhost/")
 else:
-    REDIS_URL = os.getenv("REDIS_URL", "")
+    KV_URL = os.getenv("KV_URL", "")
 
-if not REDIS_URL and get_from_env("INSIGHTS_REDIS_HOST", ""):
-    REDIS_URL = "redis://:{}@{}:{}/".format(
-        os.getenv("INSIGHTS_REDIS_PASSWORD", ""),
-        os.getenv("INSIGHTS_REDIS_HOST", ""),
-        os.getenv("INSIGHTS_REDIS_PORT", "6379"),
+if not KV_URL and get_from_env("INSIGHTS_KV_HOST", ""):
+    KV_URL = "kv://:{}@{}:{}/".format(
+        os.getenv("INSIGHTS_KV_PASSWORD", ""),
+        os.getenv("INSIGHTS_KV_HOST", ""),
+        os.getenv("INSIGHTS_KV_PORT", "6379"),
     )
+
+# RESP connection URL consumed by redis-py / django_redis / celery (Hanzo KV backend).
+REDIS_URL = _kv_to_resp(KV_URL)
 
 SESSION_RECORDING_REDIS_URL = REDIS_URL
 
-if get_from_env("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""):
-    SESSION_RECORDING_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""),
-        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_PORT", "6379"),
+if get_from_env("INSIGHTS_SESSION_RECORDING_KV_HOST", ""):
+    SESSION_RECORDING_REDIS_URL = _kv_to_resp(
+        "kv://{}:{}/".format(
+            os.getenv("INSIGHTS_SESSION_RECORDING_KV_HOST", ""),
+            os.getenv("INSIGHTS_SESSION_RECORDING_KV_PORT", "6379"),
+        )
     )
 
 REPLAY_VISION_REDIS_URL = REDIS_URL
 
-if get_from_env("INSIGHTS_REPLAY_VISION_REDIS_HOST", ""):
-    REPLAY_VISION_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("INSIGHTS_REPLAY_VISION_REDIS_HOST", ""),
-        os.getenv("INSIGHTS_REPLAY_VISION_REDIS_PORT", "6379"),
+if get_from_env("INSIGHTS_REPLAY_VISION_KV_HOST", ""):
+    REPLAY_VISION_REDIS_URL = _kv_to_resp(
+        "kv://{}:{}/".format(
+            os.getenv("INSIGHTS_REPLAY_VISION_KV_HOST", ""),
+            os.getenv("INSIGHTS_REPLAY_VISION_KV_PORT", "6379"),
+        )
     )
 
-# The LLM gateway caches per-team quota state in its own Redis (llm_gateway/services/quota_resolver.py).
-# The central-Redis default only suits single-Redis setups; cloud must point this at the gateway's instance.
+# The LLM gateway caches per-team quota state in its own store (llm_gateway/services/quota_resolver.py).
+# The central default only suits single-instance setups; cloud must point this at the gateway's own.
+# Kept under its upstream name like the other optional secondary pools below: only the primary
+# connection and the INSIGHTS_-prefixed family are ours to name.
 LLM_GATEWAY_REDIS_URL = os.getenv("LLM_GATEWAY_REDIS_URL", REDIS_URL)
 
 if not REDIS_URL:
     raise ImproperlyConfigured(
-        "Env var REDIS_URL or INSIGHTS_REDIS_HOST is absolutely required to run this software.\n"
-        "If upgrading from Insights 1.0.10 or earlier, see here: "
-        "https://hanzo.ai/docs/deployment/upgrading-insights#upgrading-from-before-1011"
+        "Env var KV_URL (or INSIGHTS_KV_HOST) is absolutely required to run this software.\n"
+        "Hanzo KV backs the cache, celery broker and rate-limits; there is no Redis."
     )
 
 # Socket timeouts for the central Redis clients (insights/redis.py). The connect timeout is kept
