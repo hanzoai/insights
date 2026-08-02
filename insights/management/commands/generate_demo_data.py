@@ -13,7 +13,6 @@ from django.core import exceptions
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import OperationalError
 
-from insights.api.person import PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES
 from insights.health import get_pending_postgres_migrations
 from insights.management.commands.sync_feature_flags_from_api import sync_feature_flags_from_api
 from insights.models import User
@@ -21,7 +20,6 @@ from insights.models.file_system.user_product_list import UserProductList
 from insights.models.team.setup_tasks import SetupTaskId
 from insights.models.team.team import Team
 from insights.products import Products
-from insights.taxonomy.taxonomy import PERSON_PROPERTIES_ADAPTED_FROM_EVENT
 
 from products.demo.backend.facade.api import (
     HedgeboxMatrix,

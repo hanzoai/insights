@@ -20,7 +20,12 @@ with workflow.unsafe.imports_passed_through():
     from django.core.management.base import BaseCommand, CommandError
 
 from insights.datastore.query_tagging import tag_queries
-from insights.temporal.ai import AI_ACTIVITIES, AI_WORKFLOWS, INSIGHTS_CODE_SLACK_ACTIVITIES, INSIGHTS_CODE_SLACK_WORKFLOWS
+from insights.temporal.ai import (
+    AI_ACTIVITIES,
+    AI_WORKFLOWS,
+    INSIGHTS_CODE_SLACK_ACTIVITIES,
+    INSIGHTS_CODE_SLACK_WORKFLOWS,
+)
 from insights.temporal.ai_observability import (
     ACTIVITIES as LLM_ANALYTICS_ACTIVITIES,
     EVAL_ACTIVITIES as LLM_ANALYTICS_EVAL_ACTIVITIES,
@@ -104,14 +109,6 @@ from insights.temporal.proxy_service import (
     ACTIVITIES as PROXY_SERVICE_ACTIVITIES,
     WORKFLOWS as PROXY_SERVICE_WORKFLOWS,
 )
-from insights.temporal.quota_limiting import (
-    ACTIVITIES as QUOTA_LIMITING_ACTIVITIES,
-    WORKFLOWS as QUOTA_LIMITING_WORKFLOWS,
-)
-from insights.temporal.salesforce_enrichment import (
-    ACTIVITIES as SALESFORCE_ENRICHMENT_ACTIVITIES,
-    WORKFLOWS as SALESFORCE_ENRICHMENT_WORKFLOWS,
-)
 from insights.temporal.session_replay.count_playlist_items import (
     COUNT_PLAYLIST_ITEMS_ACTIVITIES,
     COUNT_PLAYLIST_ITEMS_WORKFLOWS,
@@ -132,15 +129,6 @@ from insights.temporal.session_replay.rasterize_recording import (
 from insights.temporal.session_replay.replay_count_metrics import (
     REPLAY_COUNT_METRICS_ACTIVITIES,
     REPLAY_COUNT_METRICS_WORKFLOWS,
-)
-from insights.temporal.session_replay.session_summary import SESSION_SUMMARY_ACTIVITIES, SESSION_SUMMARY_WORKFLOWS
-from insights.temporal.session_replay.session_summary_group import (
-    SESSION_SUMMARY_GROUP_ACTIVITIES,
-    SESSION_SUMMARY_GROUP_WORKFLOWS,
-)
-from insights.temporal.session_replay.summarization_sweep import (
-    SUMMARIZATION_SWEEP_ACTIVITIES,
-    SUMMARIZATION_SWEEP_WORKFLOWS,
 )
 from insights.temporal.session_replay.surfacing_score_export_sweep import (
     SURFACING_SCORE_EXPORT_SWEEP_ACTIVITIES,
@@ -205,10 +193,6 @@ from products.experiments.backend.temporal import (
     EXPERIMENT_CANARY_ACTIVITIES,
     EXPERIMENT_CANARY_WORKFLOWS,
     WORKFLOWS as EXPERIMENTS_RECALCULATION_WORKFLOWS,
-)
-from products.exports.backend.temporal.subscriptions import (
-    ACTIVITIES as SUBSCRIPTION_ACTIVITIES,
-    WORKFLOWS as SUBSCRIPTION_WORKFLOWS,
 )
 from products.logs.backend.facade.temporal import (
     ACTIVITIES as LOGS_ALERTING_ACTIVITIES,
@@ -311,7 +295,6 @@ _task_queue_specs = [
         PROXY_SERVICE_WORKFLOWS
         + DELETE_PERSONS_WORKFLOWS
         + DELETE_TEAMS_WORKFLOWS
-        + SALESFORCE_ENRICHMENT_WORKFLOWS
         + PRODUCT_ANALYTICS_WORKFLOWS
         + LLM_ANALYTICS_WORKFLOWS
         + DLQ_REPLAY_WORKFLOWS
@@ -331,8 +314,6 @@ _task_queue_specs = [
         PROXY_SERVICE_ACTIVITIES
         + DELETE_PERSONS_ACTIVITIES
         + DELETE_TEAMS_ACTIVITIES
-        + QUOTA_LIMITING_ACTIVITIES
-        + SALESFORCE_ENRICHMENT_ACTIVITIES
         + PRODUCT_ANALYTICS_ACTIVITIES
         + LLM_ANALYTICS_ACTIVITIES
         + DLQ_REPLAY_ACTIVITIES
@@ -375,8 +356,8 @@ _task_queue_specs = [
     ),
     (
         settings.ANALYTICS_PLATFORM_TASK_QUEUE,
-        EXPORT_WORKFLOWS + SUBSCRIPTION_WORKFLOWS + ALERT_WORKFLOWS + PULSE_WORKFLOWS,
-        EXPORT_ACTIVITIES + SUBSCRIPTION_ACTIVITIES + ALERT_ACTIVITIES + PULSE_ACTIVITIES,
+        EXPORT_WORKFLOWS + ALERT_WORKFLOWS + PULSE_WORKFLOWS,
+        EXPORT_ACTIVITIES + ALERT_ACTIVITIES + PULSE_ACTIVITIES,
     ),
     (
         settings.TASKS_TASK_QUEUE,
@@ -400,8 +381,8 @@ _task_queue_specs = [
     ),
     (
         settings.BILLING_TASK_QUEUE,
-        QUOTA_LIMITING_WORKFLOWS + SALESFORCE_ENRICHMENT_WORKFLOWS + USAGE_REPORTS_WORKFLOWS,
-        QUOTA_LIMITING_ACTIVITIES + SALESFORCE_ENRICHMENT_ACTIVITIES + USAGE_REPORTS_ACTIVITIES,
+        USAGE_REPORTS_WORKFLOWS,
+        USAGE_REPORTS_ACTIVITIES,
     ),
     (
         settings.VIDEO_EXPORT_TASK_QUEUE,
@@ -424,9 +405,6 @@ _task_queue_specs = [
         + ENFORCE_MAX_REPLAY_RETENTION_WORKFLOWS
         + RASTERIZE_RECORDING_WORKFLOWS
         + REPLAY_COUNT_METRICS_WORKFLOWS
-        + SESSION_SUMMARY_WORKFLOWS
-        + SESSION_SUMMARY_GROUP_WORKFLOWS
-        + SUMMARIZATION_SWEEP_WORKFLOWS
         + SURFACING_SCORE_EXPORT_SWEEP_WORKFLOWS
         + SURFACING_SCORING_SWEEP_WORKFLOWS,
         GEMINI_CLEANUP_SWEEP_ACTIVITIES
@@ -435,9 +413,6 @@ _task_queue_specs = [
         + ENFORCE_MAX_REPLAY_RETENTION_ACTIVITIES
         + RASTERIZE_RECORDING_ACTIVITIES
         + REPLAY_COUNT_METRICS_ACTIVITIES
-        + SESSION_SUMMARY_ACTIVITIES
-        + SESSION_SUMMARY_GROUP_ACTIVITIES
-        + SUMMARIZATION_SWEEP_ACTIVITIES
         + SURFACING_SCORE_EXPORT_SWEEP_ACTIVITIES
         + SURFACING_SCORING_SWEEP_ACTIVITIES,
     ),

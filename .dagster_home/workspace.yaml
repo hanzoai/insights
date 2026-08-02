@@ -16,5 +16,4 @@ load_from:
     - python_module: insights.dags.locations.growth
     - python_module: insights.dags.locations.shared
     - python_module: insights.dags.locations.ingestion
-    - python_module: insights.dags.locations.insights_ai
     - python_module: insights.dags.locations.web_analytics

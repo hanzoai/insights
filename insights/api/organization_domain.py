@@ -1,13 +1,9 @@
 import re
 from typing import Any, cast
 
-from django.db.models import Q, QuerySet
-
-import django_filters
 import hanzo_insights
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions, request, response, serializers
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 
@@ -17,13 +13,10 @@ from insights.api.utils import action
 from insights.cloud_utils import is_cloud
 from insights.constants import AvailableFeature
 from insights.event_usage import groups
-from insights.models import OrganizationDomain, User
+from insights.models import OrganizationDomain
 from insights.models.identity_provider_config import IdentityProviderConfig
-from insights.models.organization import Organization, OrganizationMembership
+from insights.models.organization import Organization
 from insights.permissions import OrganizationAdminWritePermissions, TimeSensitiveActionPermission
-
-from ee.api.scim.utils import get_scim_base_url, mask_email, mask_string
-from ee.models.scim_request_log import SCIMRequestLog
 
 DOMAIN_REGEX = r"^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$"
 
@@ -143,64 +136,9 @@ class OrganizationDomainSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
     def get_scim_base_url(self, obj: OrganizationDomain) -> str | None:
-        if not obj.has_scim:
-            return None
-        return get_scim_base_url(obj, self.context.get("request"))
-
-
-class SCIMRequestLogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SCIMRequestLog
-        fields = (
-            "id",
-            "request_method",
-            "request_path",
-            "request_headers",
-            "request_body",
-            "response_status",
-            "response_body",
-            "identity_provider",
-            "duration_ms",
-            "created_at",
-        )
-        read_only_fields = fields
-
-
-class SCIMRequestLogPagination(PageNumberPagination):
-    page_size = 20
-    page_size_query_param = "page_size"
-    max_page_size = 100
-
-
-def _looks_like_email(value: str) -> bool:
-    return "@" in value and "." in value.rpartition("@")[2]
-
-
-def _search_scim_logs(queryset: QuerySet, _name: str, value: str) -> QuerySet:
-    q = Q(request_path__icontains=value) | Q(request_body__icontains=value)
-    if _looks_like_email(value):
-        masked = mask_email(value)
-        q = q | Q(request_body__icontains=masked)
-    else:
-        masked = mask_string(value)
-        if masked != value:
-            q = q | Q(request_body__icontains=masked)
-    return queryset.filter(q)
-
-
-class SCIMRequestLogFilter(django_filters.FilterSet):
-    status_min = django_filters.NumberFilter(field_name="response_status", lookup_expr="gte")
-    status_max = django_filters.NumberFilter(field_name="response_status", lookup_expr="lte")
-    search = django_filters.CharFilter(method="filter_search")
-    after = django_filters.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
-    before = django_filters.IsoDateTimeFilter(field_name="created_at", lookup_expr="lte")
-
-    class Meta:
-        model = SCIMRequestLog
-        fields: list[str] = []
-
-    def filter_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
-        return _search_scim_logs(queryset, name, value)
+        # SCIM provisioning is an enterprise feature this fork does not carry, so no
+        # domain has a provisioning endpoint to point a directory at.
+        return None
 
 
 @extend_schema(extensions={"x-product": "core"})
@@ -273,20 +211,3 @@ class OrganizationDomainViewset(TeamAndOrgViewSetMixin, ModelViewSet):
 
         instance.delete()
         return response.Response(status=204)
-
-    @action(methods=["GET"], detail=True, url_path="scim/logs")
-    def scim_logs(self, request: Request, **kwargs) -> response.Response:
-        membership = OrganizationMembership.objects.filter(
-            user=cast("User", request.user), organization=self.organization
-        ).first()
-        if not membership or membership.level < OrganizationMembership.Level.ADMIN:
-            raise exceptions.PermissionDenied("Only organization admins can view SCIM logs.")
-
-        domain: OrganizationDomain = self.get_object()
-        queryset = SCIMRequestLog.objects.filter(organization_domain=domain)
-        queryset = SCIMRequestLogFilter(request.query_params, queryset=queryset).qs
-
-        paginator = SCIMRequestLogPagination()
-        page = paginator.paginate_queryset(queryset, request)
-        serializer = SCIMRequestLogSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)

@@ -77,6 +77,7 @@ from products.experiments.backend.models.experiment import (
     experiment_has_legacy_metrics,
 )
 from products.experiments.backend.models.team_experiments_config import TeamExperimentsConfig
+from products.experiments.backend.presentation.serializers import ExperimentToSavedMetricSerializer
 from products.experiments.backend.result_serialization import strip_step_sessions
 from products.experiments.backend.warehouse_access_control import enforce_warehouse_metric_access
 from products.feature_flags.backend.api.feature_flag import parse_created_by_ids
@@ -105,8 +106,6 @@ from products.notifications.backend.facade.api import (
     create_notification,
 )
 from products.tasks.backend.facade import api as tasks_facade
-
-from products.experiments.backend.presentation.serializers import ExperimentToSavedMetricSerializer
 
 logger = structlog.get_logger(__name__)
 

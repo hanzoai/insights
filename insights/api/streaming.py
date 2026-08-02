@@ -7,11 +7,11 @@ from collections.abc import AsyncGenerator, AsyncIterable, AsyncIterator, Callab
 from http import HTTPStatus
 from typing import TypeVar
 
-from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse, StreamingHttpResponse
 
+from asgiref.sync import sync_to_async
 from prometheus_client import Counter, Gauge, Histogram
 
 # What StreamingHttpResponse actually accepts: sync or async iterables of bytes or

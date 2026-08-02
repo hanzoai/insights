@@ -62,7 +62,6 @@ from products.customer_analytics.backend.presentation.views.serializers import (
     EventStreamTestMessageSerializer,
     SupportTicketSerializer,
 )
-
 from products.notebooks.backend.markdown_conversion import build_markdown_notebook_content
 
 # Object-level access levels for the resource ViewSets, matching what

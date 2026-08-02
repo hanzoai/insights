@@ -46,10 +46,10 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.services.query import process_query_model
 from insights.api.streaming import sse_streaming_response
 from insights.api.utils import action, is_async_query, is_insight_actors_options_query, is_insight_actors_query
+from insights.constants import AvailableFeature
 from insights.datastore.client.execute_async import cancel_query, get_query_status
 from insights.datastore.client.limit import ConcurrencyLimitExceeded
 from insights.datastore.query_tagging import get_query_tag_value, get_query_tags, tag_queries
-from insights.constants import AvailableFeature
 from insights.errors import ExposedCHQueryError, InternalCHQueryError
 from insights.event_usage import EventSource, get_request_analytics_properties, report_user_or_team_action
 from insights.exceptions_capture import capture_exception
@@ -495,15 +495,9 @@ class QueryViewSet(QueryCoalescingMixin, TeamAndOrgViewSetMixin, PydanticModelMi
 
     def _try_format_for_llm(self, query: BaseModel, result: dict) -> str | None:
         """Try to format query results as LLM-friendly text. Returns None on failure."""
-        if not settings.EE_AVAILABLE:
-            return None
-        try:
-            from ee.hogai.context.insight.format import format_query_results_for_llm
-
-            return format_query_results_for_llm(query, result, self.team)
-        except Exception:
-            logger.warning("mcp_llm_format_failed", exc_info=True)
-            return None
+        # The renderer that turned query results into model-readable text was part of the
+        # assistant this fork does not carry, so there is no LLM-shaped rendering to return.
+        return None
 
 
 MAX_QUERY_TIMEOUT = 600

@@ -45,6 +45,7 @@ from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.visitor import clone_expr
 
 from insights import rate_limit, redis
+from insights.cloud_utils import TEST_clear_instance_license_cache
 from insights.datastore.adhoc_events_deletion import (
     ADHOC_EVENTS_DELETION_TABLE_SQL,
     DROP_ADHOC_EVENTS_DELETION_TABLE_SQL,
@@ -77,7 +78,6 @@ from insights.datastore.query_log_archive import (
     WRITABLE_QUERY_LOG_ARCHIVE_OPS_TABLE_SQL,
     WRITABLE_QUERY_LOG_ARCHIVE_TABLE,
 )
-from insights.cloud_utils import TEST_clear_instance_license_cache
 from insights.helpers.two_factor_session import code_based_verification_token_generator
 from insights.insightsql_queries.ai.ai_table_resolver import AI_EVENT_NAMES as _AI_EVENT_TYPES
 from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator

@@ -10,8 +10,6 @@ from insights.rbac.user_access_control import UserAccessControl
 from insights.sync import database_sync_to_async
 
 from products.pulse.backend.config import MAX_ITEMS
-from products.pulse.backend.generation.persist import persist_brief_output
-from products.pulse.backend.generation.synthesize import synthesize_brief
 from products.pulse.backend.models import ProductBrief
 from products.pulse.backend.sources.base import SourceItem, SourceItemKind
 from products.pulse.backend.sources.registry import get_sources
@@ -138,27 +136,13 @@ async def gather_brief_inputs_activity(inputs: GenerateBriefWorkflowInputs) -> l
 
 @temporalio.activity.defn
 async def synthesize_brief_activity(inputs: SynthesizeActivityInputs) -> str:
-    brief = await database_sync_to_async(_get_brief, thread_sensitive=False)(inputs.team_id, inputs.brief_id)
-    if brief.created_by is None:
-        raise ApplicationError("brief has no creating user for LLM attribution", non_retryable=True)
-    last_run = await database_sync_to_async(_last_ready_run, thread_sensitive=False)(
-        inputs.team_id, str(brief.config_id) if brief.config_id else None
-    )
-    resolved = resolve_period(brief.period, dt.datetime.now(dt.UTC), last_run)
-    items = [SourceItem(**item) for item in inputs.items]
-    out = await synthesize_brief(
-        team=brief.team,
-        user=brief.created_by,
-        config=brief.config,
-        items=items,
-        start_date=resolved.start_date,
-        end_date=resolved.end_date,
-        lookback_days=resolved.lookback_days,
-    )
-    brief = await database_sync_to_async(persist_brief_output, thread_sensitive=False)(
-        brief=brief, out=out, items=items
-    )
-    return brief.status
+    """Turn the gathered source items into a written brief.
+
+    Writing the brief needs a model, and the client this ran on is enterprise-licensed
+    and not carried here, so the run fails instead of persisting an empty brief. The
+    workflow's failure path marks the brief FAILED, which is what the Pulse scene reads.
+    """
+    raise ApplicationError("Pulse brief synthesis is not available in this deployment", non_retryable=True)
 
 
 @temporalio.activity.defn
