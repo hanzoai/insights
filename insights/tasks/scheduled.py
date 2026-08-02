@@ -31,6 +31,7 @@ from insights.tasks.integrations import refresh_integrations
 from insights.tasks.llm_analytics_usage_report import send_llm_analytics_usage_reports
 from insights.tasks.remote_config import sync_all_remote_configs
 from insights.tasks.surveys import sync_all_surveys_cache
+from insights.tasks.sync_definitions import sync_definitions
 from insights.tasks.tasks import (
     calculate_cohort,
     calculate_decide_usage,
@@ -318,6 +319,18 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
 
     # Sync all Organization.available_product_features every hour, only for billing v1 orgs
     sender.add_periodic_task(crontab(minute="30", hour="*"), sync_all_organization_available_product_features.s())
+
+    # Derive the event and property taxonomy from the warehouse. Nothing writes
+    # these tables at ingest any more, so this is what keeps Data Management and
+    # every property picker populated. Convergent, so a missed run costs freshness
+    # rather than correctness.
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(hour="*", minute="40"),
+        sync_definitions.s(),
+        name="derive event and property definitions from the warehouse",
+        expires_seconds=60 * 60,
+    )
 
     sender.add_periodic_task(crontab(minute="*/15"), check_async_migration_health.s())
 
