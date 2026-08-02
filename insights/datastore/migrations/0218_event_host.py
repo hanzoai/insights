@@ -24,7 +24,11 @@ projection.
 
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_MV_SQL
+from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_MV_SQL, provisioned
+
+# ONE reading of the app's records, so every view this migration creates routes
+# the same way. See the routing note in `plane.py`.
+ROUTING = provisioned()
 
 operations = [
     run_sql_with_exceptions(
@@ -32,7 +36,7 @@ operations = [
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        EVENT_MV_SQL(),
+        EVENT_MV_SQL(ROUTING),
         node_roles=[NodeRole.DATA],
     ),
 ]
