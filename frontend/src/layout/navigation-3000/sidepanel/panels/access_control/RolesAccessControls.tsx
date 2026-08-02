@@ -18,7 +18,9 @@ import {
     ProfilePicture,
 } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
 import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -122,6 +124,13 @@ export function RolesAccessControls(): JSX.Element {
             },
         },
     ]
+
+    // The roles endpoint is absent in this build, so the table can only ever be empty and
+    // "Add a role" can only ever fail. Say so once, here, rather than showing an empty grid
+    // above a button that does not work.
+    if (!CAPABILITIES.roles.available) {
+        return <Unavailable capability="roles" />
+    }
 
     return (
         <div>
