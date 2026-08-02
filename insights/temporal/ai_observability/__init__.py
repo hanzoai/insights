@@ -18,18 +18,6 @@ from insights.temporal.ai_observability.eval_reports.workflow import (
     GenerateAndDeliverEvalReportWorkflow,
     ScheduleAllEvalReportsWorkflow,
 )
-from insights.temporal.ai_observability.evaluation_clustering import (
-    AIObservabilityEvaluationClusteringCoordinatorWorkflow,
-    AIObservabilityEvaluationClusteringWorkflow,
-    AIObservabilityEvaluationSamplerCoordinatorWorkflow,
-    AIObservabilityEvaluationSamplerWorkflow,
-    compute_evaluation_cluster_aggregates_activity,
-    emit_evaluation_cluster_events_activity,
-    fetch_evaluation_metadata_activity,
-    generate_evaluation_cluster_labels_activity,
-    perform_evaluation_clustering_compute_activity,
-    sample_and_embed_for_job_activity,
-)
 from insights.temporal.ai_observability.evaluation_hog import execute_hog_eval_activity
 from insights.temporal.ai_observability.evaluation_llm_judge import execute_llm_judge_activity
 from insights.temporal.ai_observability.evaluation_sentiment import execute_sentiment_eval_activity
@@ -74,13 +62,6 @@ from insights.temporal.ai_observability.trace_clustering import (
     generate_cluster_labels_activity,
     perform_clustering_compute_activity,
 )
-from insights.temporal.ai_observability.trace_summarization import (
-    BatchTraceSummarizationCoordinatorWorkflow,
-    BatchTraceSummarizationWorkflow,
-    fetch_and_format_activity,
-    sample_items_in_window_activity,
-    summarize_and_save_activity,
-)
 
 from products.signals.backend.temporal.emit_eval_signal import emit_eval_signal_activity
 
@@ -120,8 +101,6 @@ TAGGER_ACTIVITIES = [
 ]
 
 WORKFLOWS = [
-    BatchTraceSummarizationWorkflow,
-    BatchTraceSummarizationCoordinatorWorkflow,
     DailyTraceClusteringWorkflow,
     TraceClusteringCoordinatorWorkflow,
     # Evaluation reports
@@ -129,11 +108,6 @@ WORKFLOWS = [
     CheckCountTriggeredReportsWorkflow,
     GenerateAndDeliverEvalReportWorkflow,
     EmitEvalReportSignalWorkflow,
-    # Evaluation clustering (Stage A sampler + Stage B clustering)
-    AIObservabilityEvaluationSamplerCoordinatorWorkflow,
-    AIObservabilityEvaluationSamplerWorkflow,
-    AIObservabilityEvaluationClusteringCoordinatorWorkflow,
-    AIObservabilityEvaluationClusteringWorkflow,
     # Keep eval workflow registered here temporarily so orphaned workflows on general-purpose queue can complete
     RunEvaluationWorkflow,
 ]
@@ -141,10 +115,6 @@ WORKFLOWS = [
 ACTIVITIES = [
     # Team discovery
     get_team_ids_for_ai_observability,
-    # Summarization activities
-    sample_items_in_window_activity,
-    fetch_and_format_activity,
-    summarize_and_save_activity,
     # Shared activities
     fetch_all_clustering_filters_activity,
     fetch_all_clustering_jobs_activity,
@@ -164,13 +134,6 @@ ACTIVITIES = [
     deliver_report_activity,
     update_next_delivery_date_activity,
     emit_eval_report_signal_activity,
-    # Evaluation clustering activities
-    sample_and_embed_for_job_activity,
-    perform_evaluation_clustering_compute_activity,
-    fetch_evaluation_metadata_activity,
-    generate_evaluation_cluster_labels_activity,
-    compute_evaluation_cluster_aggregates_activity,
-    emit_evaluation_cluster_events_activity,
     # Keep eval activities registered here temporarily so orphaned workflows on general-purpose queue can complete
     fetch_evaluation_activity,
     disable_evaluation_activity,

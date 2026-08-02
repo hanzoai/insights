@@ -36,11 +36,11 @@ from insights.schema import (
     FunnelsQuery,
     GenericCachedQueryResponse,
     GroupsQuery,
+    InsightActorsQuery,
+    InsightActorsQueryOptions,
     InsightsQLQuery,
     InsightsQLQueryModifiers,
     InsightsQLVariable,
-    InsightActorsQuery,
-    InsightActorsQueryOptions,
     LifecycleQuery,
     MarketingAnalyticsAggregatedQuery,
     MarketingAnalyticsTableQuery,
@@ -101,6 +101,7 @@ from insights.insightsql.warehouse_warnings import accumulator_scope
 
 from insights import settings
 from insights.caching.utils import ThresholdMode, cache_target_age, is_stale, last_refresh_from_cached_result
+from insights.constants import AvailableFeature
 from insights.datastore.client.connection import Workload
 from insights.datastore.client.execute_async import QueryNotFoundError, enqueue_process_query_task, get_query_status
 from insights.datastore.client.limit import (
@@ -111,7 +112,6 @@ from insights.datastore.client.limit import (
     get_org_app_concurrency_limit,
 )
 from insights.datastore.query_tagging import get_query_tag_value, is_api_key_access_method, tag_queries
-from insights.constants import AvailableFeature
 from insights.errors import QueryErrorCategory, classify_query_error, datastore_error_type
 from insights.event_usage import AnalyticsProps, groups, report_user_or_team_action
 from insights.exceptions_capture import capture_exception
@@ -151,7 +151,9 @@ from insights.slo.types import SloArea, SloOperation, SloOutcome
 from insights.synthetic_user import SyntheticUser
 from insights.utils import generate_cache_key, get_from_dict_or_attr, to_json
 
-from products.web_analytics.backend.insightsql_queries.first_pageview_flag import resolve_first_pageview_filters_modifier
+from products.web_analytics.backend.insightsql_queries.first_pageview_flag import (
+    resolve_first_pageview_filters_modifier,
+)
 
 QUERY_EXECUTION_TOTAL = Counter(
     "insights_query_execution_total",
@@ -743,7 +745,9 @@ def get_query_runner(
         )
 
     if kind == "WebPageURLSearchQuery":
-        from products.web_analytics.backend.insightsql_queries.page_url_search_query_runner import PageUrlSearchQueryRunner
+        from products.web_analytics.backend.insightsql_queries.page_url_search_query_runner import (
+            PageUrlSearchQueryRunner,
+        )
 
         return PageUrlSearchQueryRunner(
             query=query,
@@ -2434,7 +2438,11 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
 
     def apply_variable_overrides(self, variable_overrides: list[InsightsQLVariable]):
         """Irreversibly update self.query with provided variable overrides."""
-        if not hasattr(self.query, "variables") or not self.query.kind == "InsightsQLQuery" or len(variable_overrides) == 0:
+        if (
+            not hasattr(self.query, "variables")
+            or not self.query.kind == "InsightsQLQuery"
+            or len(variable_overrides) == 0
+        ):
             return
 
         assert isinstance(self.query, InsightsQLQuery)

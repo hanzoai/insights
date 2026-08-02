@@ -584,7 +584,9 @@ class OrganizationViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         # Members only — admins can enable Insights AI themselves, so there's nobody to ask.
         membership = OrganizationMembership.objects.filter(user=user, organization=organization).first()
         if membership is None or membership.level >= OrganizationMembership.Level.ADMIN:
-            raise exceptions.PermissionDenied("Only members can request access; admins can enable Insights AI directly.")
+            raise exceptions.PermissionDenied(
+                "Only members can request access; admins can enable Insights AI directly."
+            )
 
         send_insights_ai_access_request.delay(
             organization_id=str(organization.id),

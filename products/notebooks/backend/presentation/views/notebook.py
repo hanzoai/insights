@@ -34,7 +34,7 @@ from insights.api.forbid_destroy_model import ForbidDestroyModel
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.sharing_publish_gate import blocked_access_in_notebook_edit, is_publicly_shared
-from insights.api.streaming import sse_streaming_response
+from insights.api.streaming import SyncIterableToAsync, async_to_sync, sse_streaming_response
 from insights.api.utils import action
 from insights.auth import SessionAuthentication
 from insights.constants import AvailableFeature
@@ -95,8 +95,6 @@ from products.notebooks.backend.temporal.client import start_sql_v2_run_workflow
 from products.notebooks.backend.temporal.sql_v2 import SQLV2RunInput
 from products.tasks.backend.facade.exceptions import SandboxProvisionError
 from products.tasks.backend.facade.sandbox import SandboxStatus
-
-from insights.api.streaming import SyncIterableToAsync, async_to_sync
 
 logger = structlog.get_logger(__name__)
 

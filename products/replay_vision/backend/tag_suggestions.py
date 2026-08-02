@@ -25,12 +25,11 @@ from insights.models.team import Team
 from insights.models.user import User
 from insights.queries.property_values import get_event_property_values_from_aggregated_table
 from insights.rbac.user_access_control import UserAccessControl
+from insights.security.untrusted import neutralize_markup
 
 from products.replay_vision.backend.models.replay_observation import ObservationStatus, ReplayObservation
 from products.replay_vision.backend.models.replay_scanner import ReplayScanner, ScannerType
 from products.replay_vision.backend.tags import slugify_tag
-
-from insights.security.untrusted import neutralize_markup
 
 logger = structlog.get_logger(__name__)
 

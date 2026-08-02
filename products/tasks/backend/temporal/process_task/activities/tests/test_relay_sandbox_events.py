@@ -12,6 +12,7 @@ import httpx_sse
 from parameterized import parameterized
 from temporalio.exceptions import ApplicationError
 
+from products.insights_ai.backend.wire_types import TURN_COMPLETE_METHOD
 from products.tasks.backend.models import Task, TaskRun
 from products.tasks.backend.temporal.process_task import workflow as process_task_workflow_module
 from products.tasks.backend.temporal.process_task.activities.get_task_processing_context import TaskProcessingContext
@@ -34,8 +35,6 @@ from products.tasks.backend.temporal.process_task.workflow import (
     RELAY_SANDBOX_EVENTS_START_TO_CLOSE_TIMEOUT,
     ProcessTaskWorkflow,
 )
-
-from products.insights_ai.backend.wire_types import TURN_COMPLETE_METHOD
 
 relay_sandbox_events_module = importlib.import_module(
     "products.tasks.backend.temporal.process_task.activities.relay_sandbox_events"

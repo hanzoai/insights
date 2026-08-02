@@ -20,9 +20,9 @@ from structlog import get_logger
 
 from insights.insightsql.constants import LimitContext
 
+from insights.cloud_utils import is_cloud
 from insights.datastore.client.limit import ConcurrencyLimitExceeded, limit_concurrency
 from insights.datastore.query_tagging import Feature, Product, get_query_tags, tag_queries
-from insights.cloud_utils import is_cloud
 from insights.errors import CH_TRANSIENT_ERRORS
 from insights.exceptions import DatastoreAtCapacity
 from insights.exceptions_capture import capture_exception

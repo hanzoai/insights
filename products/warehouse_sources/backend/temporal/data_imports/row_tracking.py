@@ -10,7 +10,6 @@ from structlog.types import FilteringBoundLogger
 from insights.exceptions_capture import capture_exception
 from insights.redis import get_async_client
 
-
 if TYPE_CHECKING:
     from products.warehouse_sources.backend.models.external_data_source import ExternalDataSource
 

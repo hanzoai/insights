@@ -1,21 +1,18 @@
-from typing import Any, cast
+from typing import Any
 
 import hanzo_insights
 from drf_spectacular.utils import extend_schema
-from rest_framework import exceptions, request, response, serializers, status
+from rest_framework import request, response, serializers, status
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.api.utils import action
 from insights.constants import AvailableFeature
 from insights.event_usage import groups
 from insights.models.identity_provider_config import IdentityProviderConfig
 from insights.models.organization import Organization
 from insights.permissions import OrganizationAdminWritePermissions, TimeSensitiveActionPermission
 from insights.security.url_validation import is_url_allowed
-
-from ee.api.scim.utils import disable_scim_for_config, enable_scim_for_config, regenerate_scim_token_for_config
 
 
 def _capture_idp_config_event(
@@ -155,45 +152,19 @@ class IdentityProviderConfigSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: dict[str, Any]) -> IdentityProviderConfig:
         validated_data["organization"] = self.context["view"].organization
-        scim_enabled = validated_data.pop("scim_enabled", None)
+        validated_data.pop("scim_enabled", None)
         validated_data.pop("scim_bearer_token", None)
 
-        instance: IdentityProviderConfig = super().create(validated_data)
-
-        if scim_enabled:
-            self._scim_plain_token = enable_scim_for_config(instance)
-
-        return instance
+        return super().create(validated_data)
 
     def update(self, instance: IdentityProviderConfig, validated_data: dict[str, Any]) -> IdentityProviderConfig:
-        scim_enabled = validated_data.pop("scim_enabled", None)
+        validated_data.pop("scim_enabled", None)
         validated_data.pop("scim_bearer_token", None)
 
-        scim_plain_token: str | None = None
-
-        # Generate a new token when enabling SCIM, clear it when disabling.
-        if scim_enabled is not None:
-            if scim_enabled:
-                if not instance.scim_enabled:
-                    scim_plain_token = enable_scim_for_config(instance)
-            else:
-                if instance.scim_enabled:
-                    disable_scim_for_config(instance)
-
-        instance = super().update(instance, validated_data)
-        self._scim_plain_token = scim_plain_token
-
-        return instance
+        return super().update(instance, validated_data)
 
     def get_scim_bearer_token(self, obj: IdentityProviderConfig) -> str | None:
         return self._scim_plain_token
-
-
-class SCIMTokenResponseSerializer(serializers.Serializer):
-    scim_enabled = serializers.BooleanField(help_text="Whether SCIM is enabled for this config.")
-    scim_bearer_token = serializers.CharField(
-        help_text="Newly generated plaintext SCIM bearer token. Only returned once."
-    )
 
 
 @extend_schema(extensions={"x-product": "core"})
@@ -214,20 +185,3 @@ class IdentityProviderConfigViewSet(TeamAndOrgViewSetMixin, ModelViewSet):
         res = super().update(request, *args, **kwargs)
         _capture_idp_config_event(request, self.get_object(), "updated", {"fields": sorted(request.data.keys())})
         return res
-
-    @extend_schema(request=None, responses=SCIMTokenResponseSerializer)
-    @action(methods=["POST"], detail=True, url_path="scim/token")
-    def scim_token(self, request: Request, **kwargs: Any) -> response.Response:
-        """Regenerate the SCIM bearer token for this IdP config."""
-        config = cast(IdentityProviderConfig, self.get_object())
-
-        if not config.organization.is_feature_available(AvailableFeature.SCIM):
-            raise exceptions.PermissionDenied("SCIM is not available for this organization")
-
-        if not config.scim_enabled:
-            return response.Response(
-                {"detail": "SCIM is not enabled for this config"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        plain_token = regenerate_scim_token_for_config(config)
-        return response.Response({"scim_enabled": True, "scim_bearer_token": plain_token})
