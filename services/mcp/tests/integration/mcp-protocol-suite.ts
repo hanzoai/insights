@@ -226,7 +226,7 @@ export function defineMcpProtocolTests(
         it('isolates state between concurrent sessions on different tokens', async ({ skip }) => {
             const harness = await getHarness()
             if (!harness.token2) {
-                skip('Set TEST_POSTFN_PERSONAL_API_KEY_2 to run the concurrent-sessions isolation test.')
+                skip('Set TEST_INSIGHTS_PERSONAL_API_KEY_2 to run the concurrent-sessions isolation test.')
                 return
             }
 

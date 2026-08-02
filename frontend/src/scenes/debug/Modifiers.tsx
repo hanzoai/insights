@@ -8,7 +8,7 @@ import { InsightsQLQueryModifiers, NodeKind } from '~/queries/schema/schema-gene
 
 import { sourcesDataLogic } from 'products/data_warehouse/frontend/shared/logics/sourcesDataLogic'
 
-const POSTFN_WAREHOUSE = '__insights_warehouse__'
+const INSIGHTS_WAREHOUSE = '__insights_warehouse__'
 
 interface QueryWithModifiers {
     connectionId?: string
@@ -56,7 +56,7 @@ function ConnectionIdModifier<Q extends QueryWithModifiers>({
         return null
     }
 
-    const selectedValue = query.connectionId ?? POSTFN_WAREHOUSE
+    const selectedValue = query.connectionId ?? INSIGHTS_WAREHOUSE
     const hasSelectedConnection =
         !!query.connectionId && directSources.some((source) => source.id === query.connectionId)
 
@@ -68,7 +68,7 @@ function ConnectionIdModifier<Q extends QueryWithModifiers>({
                 disabledReason={dataWarehouseSourcesLoading ? 'Loading connections...' : undefined}
                 fullWidth
                 options={[
-                    { value: POSTFN_WAREHOUSE, label: 'Insights (Datastore)' },
+                    { value: INSIGHTS_WAREHOUSE, label: 'Insights (Datastore)' },
                     ...directSources.map((source) => ({
                         value: source.id,
                         label: `${source.prefix ?? source.id} (${source.source_type})`,
@@ -80,7 +80,7 @@ function ConnectionIdModifier<Q extends QueryWithModifiers>({
                 onChange={(value) =>
                     setQuery({
                         ...query,
-                        connectionId: value === POSTFN_WAREHOUSE ? undefined : value,
+                        connectionId: value === INSIGHTS_WAREHOUSE ? undefined : value,
                     })
                 }
                 value={selectedValue}

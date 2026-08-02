@@ -171,7 +171,7 @@ def has_authority_bypass_chars(url: str) -> bool:
 def _dev_bypass_enabled() -> bool:
     """Dev mode short-circuits is_url_allowed.
 
-    Set the FORCE_URL_VALIDATION setting (POSTFN_FORCE_URL_VALIDATION env var) to
+    Set the FORCE_URL_VALIDATION setting (INSIGHTS_FORCE_URL_VALIDATION env var) to
     exercise the production code path locally (e.g. to reproduce or verify SSRF-related
     fixes) without flipping global DEBUG.
     """

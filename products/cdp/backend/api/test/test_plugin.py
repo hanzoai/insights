@@ -13,7 +13,7 @@ from rest_framework import status
 
 from insights.cdp.templates.helpers import mock_transpile
 from insights.cdp.templates.insights_function_template import sync_template_to_db
-from insights.constants import FROZEN_POSTFN_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.team.team import Team
 from insights.models.user import User
@@ -610,7 +610,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         with self.is_cloud(False):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
-                {"url": f"https://github.com/insights-plugin/version-equals/commit/{FROZEN_POSTFN_VERSION}"},
+                {"url": f"https://github.com/insights-plugin/version-equals/commit/{FROZEN_INSIGHTS_VERSION}"},
             )
             self.assertEqual(response.status_code, 201)
 
@@ -619,13 +619,13 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/insights-plugin/version-equals/commit/{FROZEN_POSTFN_VERSION.next_minor()}"
+                    "url": f"https://github.com/insights-plugin/version-equals/commit/{FROZEN_INSIGHTS_VERSION.next_minor()}"
                 },
             )
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
                 cast(dict[str, str], response.json())["detail"],
-                f'Currently running Insights version {FROZEN_POSTFN_VERSION} does not match this plugin\'s semantic version requirement "{FROZEN_POSTFN_VERSION.next_minor()}".',
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement "{FROZEN_INSIGHTS_VERSION.next_minor()}".',
             )
 
     def test_create_plugin_version_range_gt_current(self, mock_get, mock_reload):
@@ -641,25 +641,25 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/insights-plugin/version-greater-than/commit/{FROZEN_POSTFN_VERSION.next_major()}"
+                    "url": f"https://github.com/insights-plugin/version-greater-than/commit/{FROZEN_INSIGHTS_VERSION.next_major()}"
                 },
             )
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
                 cast(dict[str, str], response.json())["detail"],
-                f'Currently running Insights version {FROZEN_POSTFN_VERSION} does not match this plugin\'s semantic version requirement ">= {FROZEN_POSTFN_VERSION.next_major()}".',
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement ">= {FROZEN_INSIGHTS_VERSION.next_major()}".',
             )
 
     def test_create_plugin_version_range_lt_current(self, mock_get, mock_reload):
         with self.is_cloud(False):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
-                {"url": f"https://github.com/insights-plugin/version-less-than/commit/{FROZEN_POSTFN_VERSION}"},
+                {"url": f"https://github.com/insights-plugin/version-less-than/commit/{FROZEN_INSIGHTS_VERSION}"},
             )
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
                 cast(dict[str, str], response.json())["detail"],
-                f'Currently running Insights version {FROZEN_POSTFN_VERSION} does not match this plugin\'s semantic version requirement "< {FROZEN_POSTFN_VERSION}".',
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement "< {FROZEN_INSIGHTS_VERSION}".',
             )
 
     def test_create_plugin_version_range_lt_next_major(self, mock_get, mock_reload):
@@ -667,7 +667,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/insights-plugin/version-less-than/commit/{FROZEN_POSTFN_VERSION.next_major()}"
+                    "url": f"https://github.com/insights-plugin/version-less-than/commit/{FROZEN_INSIGHTS_VERSION.next_major()}"
                 },
             )
             self.assertEqual(response.status_code, 201)
@@ -689,7 +689,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/insights-plugin/version-greater-than/commit/{FROZEN_POSTFN_VERSION.next_major()}"
+                    "url": f"https://github.com/insights-plugin/version-greater-than/commit/{FROZEN_INSIGHTS_VERSION.next_major()}"
                 },
             )
             self.assertEqual(response.status_code, 201)

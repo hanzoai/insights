@@ -2704,10 +2704,10 @@ class MascotActorSkinOption(StrEnum):
 
 class HogLanguage(StrEnum):
     HOG = "script"
-    FN_JSON = "hogJson"
-    FN_QL = "hogQL"
-    FN_QL_EXPR = "hogQLExpr"
-    FN_TEMPLATE = "hogTemplate"
+    INSIGHTS_JSON = "hogJson"
+    INSIGHTS_QL = "hogQL"
+    INSIGHTS_QL_EXPR = "hogQLExpr"
+    INSIGHTS_TEMPLATE = "hogTemplate"
     LIQUID = "liquid"
 
 
@@ -3160,10 +3160,10 @@ class NodeKind(StrEnum):
     EVENTS_QUERY = "EventsQuery"
     SESSIONS_QUERY = "SessionsQuery"
     PERSONS_NODE = "PersonsNode"
-    FN_QUERY = "HogQuery"
-    FN_QL_QUERY = "InsightsQLQuery"
-    FN_QL_METADATA = "InsightsQLMetadata"
-    FN_QL_AUTOCOMPLETE = "InsightsQLAutocomplete"
+    INSIGHTS_QUERY = "HogQuery"
+    INSIGHTS_QL_QUERY = "InsightsQLQuery"
+    INSIGHTS_QL_METADATA = "InsightsQLMetadata"
+    INSIGHTS_QL_AUTOCOMPLETE = "InsightsQLAutocomplete"
     ACTORS_QUERY = "ActorsQuery"
     GROUPS_QUERY = "GroupsQuery"
     FUNNELS_ACTORS_QUERY = "FunnelsActorsQuery"
@@ -3571,7 +3571,7 @@ class QueryIndexUsage(StrEnum):
 
 
 class LimitContext(Enum):
-    POSTFN_AI = "insights_ai"
+    INSIGHTS_AI = "insights_ai"
     NONE_TYPE_NONE = None
 
 

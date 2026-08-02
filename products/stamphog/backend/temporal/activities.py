@@ -148,7 +148,7 @@ def _reviewer_environment(run: ReviewRun) -> dict[str, str]:
     gateway's stamphog product route (``https://<gateway>/stamphog/v1``): that route allowlists the
     sandbox OAuth app the token is minted under, so a token presented anywhere else is refused.
 
-    POSTFN_API_KEY/POSTFN_HOST let the engine emit its stamphog_review_completed event and LLM
+    INSIGHTS_API_KEY/INSIGHTS_HOST let the engine emit its stamphog_review_completed event and LLM
     traces from inside the sandbox. The capture key is a public project write token — the same class of
     token every frontend snippet ships — so its blast radius is event spam, not data access; it's still
     added to _llm_env_secrets so persisted output stays tidy. STAMPFN_EXTRA_PROPERTIES stamps the
@@ -162,7 +162,7 @@ def _reviewer_environment(run: ReviewRun) -> dict[str, str]:
         "AI_GATEWAY_URL": gateway_url,
         "AI_GATEWAY_API_KEY": _mint_reviewer_gateway_token(run),
     }
-    for key in ("POSTFN_API_KEY", "POSTFN_HOST"):
+    for key in ("INSIGHTS_API_KEY", "INSIGHTS_HOST"):
         value = os.environ.get(key)
         if value:
             env[key] = value
@@ -191,7 +191,7 @@ def _sandbox_egress_allowlist() -> list[str]:
     The docker backend (local dev) ignores the allowlist.
     """
     domains = ["github.com", "pypi.org", "files.pythonhosted.org"]
-    for url_env in ("AI_GATEWAY_URL", "POSTFN_HOST"):
+    for url_env in ("AI_GATEWAY_URL", "INSIGHTS_HOST"):
         host = urlparse(os.environ.get(url_env, "")).hostname
         if host:
             domains.append(host)
@@ -919,11 +919,11 @@ def _llm_env_secrets() -> list[str]:
     These reach the sandbox via ``_reviewer_environment``; a confused or compromised
     reviewer could echo them into stdout or the verdict. Redacting them server-side,
     independent of model behavior, is what keeps a leaked key out of the PR and the DB.
-    POSTFN_API_KEY is a public write token (spam-only blast radius) — scrubbed for tidiness.
+    INSIGHTS_API_KEY is a public write token (spam-only blast radius) — scrubbed for tidiness.
     """
     return [
         value
-        for key in ("AI_GATEWAY_API_KEY", "ANTHROPIC_API_KEY", "AI_GATEWAY_URL", "POSTFN_API_KEY")
+        for key in ("AI_GATEWAY_API_KEY", "ANTHROPIC_API_KEY", "AI_GATEWAY_URL", "INSIGHTS_API_KEY")
         if (value := os.environ.get(key))
     ]
 

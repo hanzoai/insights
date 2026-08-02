@@ -13,11 +13,11 @@ import { dataTableSavedFiltersLogic } from './dataTableSavedFiltersLogic'
 jest.mock('uuid')
 
 const switchAppContextTeamId = (newId: number): void => {
-    const appContext = window.POSTFN_APP_CONTEXT
+    const appContext = window.INSIGHTS_APP_CONTEXT
     if (!appContext?.current_team) {
         throw new Error('test harness has no current_team to mutate')
     }
-    window.POSTFN_APP_CONTEXT = {
+    window.INSIGHTS_APP_CONTEXT = {
         ...appContext,
         current_team: { ...appContext.current_team, id: newId },
     }
@@ -60,13 +60,13 @@ describe('dataTableSavedFiltersLogic', () => {
     let logic: ReturnType<typeof dataTableSavedFiltersLogic.build>
     let mockSetQuery: jest.Mock
     let mockRouterPush: jest.SpyInstance
-    let originalAppContext: typeof window.POSTFN_APP_CONTEXT
+    let originalAppContext: typeof window.INSIGHTS_APP_CONTEXT
 
     beforeEach(() => {
         initKeaTests()
         // Snapshot app context so per-test mutations (e.g. switchAppContextTeamId)
         // don't make test ordering load-bearing for later tests in this file.
-        originalAppContext = window.POSTFN_APP_CONTEXT
+        originalAppContext = window.INSIGHTS_APP_CONTEXT
         localStorage.clear()
         mockSetQuery = jest.fn()
         ;(uuidv4 as jest.Mock).mockImplementation(() => 'test-uuid')
@@ -77,7 +77,7 @@ describe('dataTableSavedFiltersLogic', () => {
     afterEach(() => {
         logic?.unmount()
         mockRouterPush?.mockRestore()
-        window.POSTFN_APP_CONTEXT = originalAppContext
+        window.INSIGHTS_APP_CONTEXT = originalAppContext
     })
 
     describe('with unique key', () => {

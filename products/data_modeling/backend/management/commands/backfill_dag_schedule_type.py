@@ -6,7 +6,7 @@ from temporalio.client import ScheduleListActionStartWorkflow, ScheduleUpdate, S
 from temporalio.common import SearchAttributePair
 
 from insights.temporal.common.client import async_connect
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_TYPE_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_TYPE_KEY
 
 from products.data_modeling.backend.schedule import DATA_MODELING_EXECUTE_DAG_WORKFLOW
 
@@ -45,7 +45,7 @@ class Command(BaseCommand):
 
 async def _updater(input: ScheduleUpdateInput) -> ScheduleUpdate:
     merged = input.description.typed_search_attributes.updated(
-        SearchAttributePair(key=POSTFN_SCHEDULE_TYPE_KEY, value=DATA_MODELING_EXECUTE_DAG_WORKFLOW)
+        SearchAttributePair(key=INSIGHTS_SCHEDULE_TYPE_KEY, value=DATA_MODELING_EXECUTE_DAG_WORKFLOW)
     )
     return ScheduleUpdate(schedule=input.description.schedule, search_attributes=merged)
 
@@ -65,7 +65,7 @@ async def _backfill_schedule_type(dry_run: bool) -> tuple[int, int, int, int]:
         ):
             continue
         found += 1
-        if listing.typed_search_attributes.get(POSTFN_SCHEDULE_TYPE_KEY) == DATA_MODELING_EXECUTE_DAG_WORKFLOW:
+        if listing.typed_search_attributes.get(INSIGHTS_SCHEDULE_TYPE_KEY) == DATA_MODELING_EXECUTE_DAG_WORKFLOW:
             already_stamped += 1
             continue
         if dry_run:

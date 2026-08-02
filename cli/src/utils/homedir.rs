@@ -2,9 +2,9 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Error};
 
-// IF `POSTFN_HOME` is set, use that, otherwise use $HOME/.insights
+// IF `INSIGHTS_HOME` is set, use that, otherwise use $HOME/.insights
 pub fn insights_home_dir_if_available() -> Option<PathBuf> {
-    if let Some(home) = std::env::var_os("POSTFN_HOME") {
+    if let Some(home) = std::env::var_os("INSIGHTS_HOME") {
         return Some(PathBuf::from(home));
     }
 

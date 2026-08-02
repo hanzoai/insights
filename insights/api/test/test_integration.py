@@ -3876,7 +3876,7 @@ class TestStripeIntegrationOAuthTokens:
 
     @patch("insights.models.integration.settings")
     def test_destroy_oauth_tokens_deletes_tokens(self, mock_settings):
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = self.oauth_app.client_id
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = self.oauth_app.client_id
         integration, access_token, refresh_token = self._create_integration_with_tokens()
         stripe_int = StripeIntegration(integration)
 
@@ -3887,7 +3887,7 @@ class TestStripeIntegrationOAuthTokens:
 
     @patch("insights.models.integration.settings")
     def test_destroy_oauth_tokens_only_affects_same_team(self, mock_settings):
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = self.oauth_app.client_id
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = self.oauth_app.client_id
         integration, _, _ = self._create_integration_with_tokens()
 
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
@@ -3915,7 +3915,7 @@ class TestStripeIntegrationOAuthTokens:
 
     @patch("insights.models.integration.settings")
     def test_destroy_oauth_tokens_noop_when_no_oauth_app(self, mock_settings):
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = None
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = None
         integration, access_token, refresh_token = self._create_integration_with_tokens()
         stripe_int = StripeIntegration(integration)
 
@@ -3927,7 +3927,7 @@ class TestStripeIntegrationOAuthTokens:
     @patch("stripe.StripeClient")
     @patch("insights.models.integration.settings")
     def test_write_insights_secrets_uses_account_scope(self, mock_settings, MockStripeClient):
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = self.oauth_app.client_id
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = self.oauth_app.client_id
         mock_settings.STRIPE_APP_SECRET_KEY = "sk_test"
         mock_client = MagicMock()
         MockStripeClient.return_value = mock_client
@@ -3957,7 +3957,7 @@ class TestStripeIntegrationOAuthTokens:
     @patch("insights.models.integration.settings")
     def test_clear_insights_secrets_uses_account_scope(self, mock_settings, MockStripeClient):
         mock_settings.STRIPE_APP_SECRET_KEY = "sk_test"
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = None
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = None
         mock_client = MagicMock()
         MockStripeClient.return_value = mock_client
 
@@ -3987,7 +3987,7 @@ class TestStripeIntegrationOAuthTokens:
     @patch("stripe.StripeClient")
     @patch("insights.models.integration.settings")
     def test_stripe_client_uses_live_secret(self, _name, method_name, mock_settings, MockStripeClient):
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = self.oauth_app.client_id
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = self.oauth_app.client_id
         mock_settings.STRIPE_APP_SECRET_KEY = "sk_live"
         MockStripeClient.return_value = MagicMock()
 
@@ -4011,7 +4011,7 @@ class TestStripeIntegrationOAuthTokens:
     @patch("stripe.StripeClient")
     @patch("insights.models.integration.settings")
     def test_write_insights_secrets_skips_when_keys_missing(self, mock_settings, MockStripeClient, mock_capture):
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = self.oauth_app.client_id
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = self.oauth_app.client_id
         mock_settings.STRIPE_APP_CLIENT_ID = None
         mock_settings.STRIPE_APP_SECRET_KEY = None
         MockStripeClient.return_value = MagicMock()
@@ -4038,7 +4038,7 @@ class TestStripeIntegrationOAuthTokens:
     def test_clear_insights_secrets_skips_and_revokes_tokens_when_keys_missing(
         self, mock_settings, MockStripeClient, mock_capture
     ):
-        mock_settings.STRIPE_POSTFN_OAUTH_CLIENT_ID = self.oauth_app.client_id
+        mock_settings.STRIPE_INSIGHTS_OAUTH_CLIENT_ID = self.oauth_app.client_id
         mock_settings.STRIPE_APP_CLIENT_ID = None
         mock_settings.STRIPE_APP_SECRET_KEY = None
         MockStripeClient.return_value = MagicMock()
@@ -5259,9 +5259,9 @@ class TestInsightsConnectAuthorize:
         assert "Unsupported connection scopes" in response.json()["detail"]
 
     @override_settings(
-        POSTFN_CONNECT_BASE_URL_EU="https://eu.hanzo.ai",
-        POSTFN_CONNECT_OAUTH_CLIENT_ID_EU="eu-client-id",
-        POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU="eu-secret",
+        INSIGHTS_CONNECT_BASE_URL_EU="https://eu.hanzo.ai",
+        INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU="eu-client-id",
+        INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU="eu-secret",
     )
     def test_valid_request_redirects_to_target_region(self, client: HttpClient):
         client.force_login(self.user)
@@ -5271,9 +5271,9 @@ class TestInsightsConnectAuthorize:
         assert client.cookies.get("ph_oauth_state") is not None
 
     @override_settings(
-        POSTFN_CONNECT_BASE_URL_EU="https://eu.hanzo.ai",
-        POSTFN_CONNECT_OAUTH_CLIENT_ID_EU="eu-client-id",
-        POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU="eu-secret",
+        INSIGHTS_CONNECT_BASE_URL_EU="https://eu.hanzo.ai",
+        INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU="eu-client-id",
+        INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU="eu-secret",
     )
     def test_read_only_preset_requests_only_read_scopes(self, client: HttpClient):
         from urllib.parse import parse_qs, urlparse
@@ -5293,9 +5293,9 @@ class TestInsightsConnectionListScoping:
     def setup_environment(self, db, settings):
         # A `insights` connection's display_name resolves its target region's OAuth config, so configure
         # EU here (mirrors the authorize tests) or listing it 500s.
-        settings.POSTFN_CONNECT_BASE_URL_EU = "https://eu.hanzo.ai"
-        settings.POSTFN_CONNECT_OAUTH_CLIENT_ID_EU = "eu-client-id"
-        settings.POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU = "eu-secret"
+        settings.INSIGHTS_CONNECT_BASE_URL_EU = "https://eu.hanzo.ai"
+        settings.INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU = "eu-client-id"
+        settings.INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU = "eu-secret"
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
         self.owner = User.objects.create_and_join(

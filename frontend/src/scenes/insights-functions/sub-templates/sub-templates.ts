@@ -61,7 +61,7 @@ function mcpFailedToolCallEvent(errorType?: string): CyclotronJobFilterEvents {
     return { id: '$mcp_tool_call', type: 'events', properties }
 }
 
-export const FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES: Record<
+export const INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES: Record<
     InsightsFunctionSubTemplateIdType,
     Pick<InsightsFunctionSubTemplateType, 'sub_template_id' | 'type' | 'context_id'> &
         Omit<Partial<InsightsFunctionSubTemplateType>, 'sub_template_id' | 'type' | 'context_id'>
@@ -254,7 +254,7 @@ function buildHealthAlertSubTemplates(
     subTemplateId: 'health-check-firing' | 'health-check-resolved',
     copy: HealthAlertTemplateCopy
 ): InsightsFunctionSubTemplateType[] {
-    const common = FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
+    const common = INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
     return [
         {
             ...common,
@@ -459,7 +459,7 @@ function mcpNotificationVariants({
     markdownMessage,
     slackButton,
 }: MCPNotificationVariantsOptions): InsightsFunctionSubTemplateType[] {
-    const commonProperties = FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
+    const commonProperties = INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
 
     return [
         {
@@ -513,7 +513,7 @@ function mcpNotificationVariants({
     ]
 }
 
-export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType, InsightsFunctionSubTemplateType[]> = {
+export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType, InsightsFunctionSubTemplateType[]> = {
     'mcp-tool-error': mcpNotificationVariants({
         subTemplateId: 'mcp-tool-error',
         nameSuffix: 'when an MCP tool call fails',
@@ -526,13 +526,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     }),
     'survey-response': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on survey response',
             description: 'Send a webhook when a survey is completed or dismissed',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
             template_id: 'template-discord',
             name: 'Post to Discord on survey response',
             description: 'Posts a message to Discord when a survey is completed or dismissed',
@@ -543,7 +543,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on survey response',
             description: 'Posts a message to Microsoft Teams when a survey is completed or dismissed',
@@ -554,7 +554,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['survey-response'],
             template_id: 'template-slack',
             name: 'Post to Slack on survey response',
             description: 'Posts a message to Slack when a survey is completed or dismissed',
@@ -593,13 +593,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'early-access-feature-enrollment': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on feature enrollment',
             description: 'Send a webhook when a user enrolls or un-enrolls in an early access feature',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
             template_id: 'template-discord',
             name: 'Post to Discord on feature enrollment',
             description: 'Posts a message to Discord when a user enrolls or un-enrolls in an early access feature',
@@ -610,7 +610,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on feature enrollment',
             description:
@@ -622,7 +622,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['early-access-feature-enrollment'],
             template_id: 'template-slack',
             name: 'Post to Slack on feature enrollment',
             description: 'Posts a message to Slack when a user enrolls or un-enrolls in an early access feature',
@@ -656,7 +656,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'activity-log': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on team activity',
             description: 'Send a webhook when a team activity occurs',
@@ -667,7 +667,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-discord',
             name: 'Post to Discord on team activity',
             description: 'Posts a message to Discord when a team activity occurs',
@@ -678,7 +678,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on team activity',
             description: 'Posts a message to Microsoft Teams when a team activity occurs',
@@ -689,7 +689,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-slack',
             name: 'Post to Slack on team activity',
             description: 'Posts a message to Slack when a team activity occurs',
@@ -713,7 +713,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'feature-flag-change': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
             template_id: 'template-webhook',
             name: 'Notify webhook for feature flag changes',
             description: 'Send a webhook when a feature flag is changed',
@@ -724,7 +724,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
             template_id: 'template-discord',
             name: 'Notify Discord for feature flag changes',
             description: 'Posts a message to Discord when a feature flag is changed',
@@ -735,7 +735,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
             template_id: 'template-microsoft-teams',
             name: 'Notify Microsoft Teams for feature flag changes',
             description: 'Posts a message to Microsoft Teams when a feature flag is changed',
@@ -746,7 +746,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['feature-flag-change'],
             template_id: 'template-slack',
             name: 'Notify Slack for feature flag changes',
             description: 'Posts a message to Slack when a feature flag is changed',
@@ -780,13 +780,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'discussion-mention': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on discussion mention',
             description: 'Send a webhook when someone mentions you in a discussion',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
             template_id: 'template-discord',
             name: 'Post to Discord on discussion mention',
             description: 'Posts a message to Discord when someone mentions you in a discussion',
@@ -797,7 +797,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on discussion mention',
             description: 'Posts a message to Microsoft Teams when someone mentions you in a discussion',
@@ -808,7 +808,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['discussion-mention'],
             template_id: 'template-slack',
             name: 'Post to Slack on discussion mention',
             description: 'Posts a notification to a Slack channel when someone is mentioned in a discussion',
@@ -845,13 +845,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'error-tracking-issue-created': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on issue created',
             description: 'Send a webhook when an issue is created',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
             template_id: 'template-discord',
             name: 'Post to Discord on issue created',
             description: 'Posts a message to Discord when an issue is created',
@@ -862,7 +862,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on issue created',
             description: 'Posts a message to Microsoft Teams when an issue is created',
@@ -873,7 +873,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
             template_id: 'template-slack',
             name: 'Post to Slack on issue created',
             description: 'Posts a message to Slack when an issue is created',
@@ -913,7 +913,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
             template_id: 'template-linear',
             name: 'Linear issue on issue created',
             description: 'Create an issue in Linear when an issue is created.',
@@ -933,7 +933,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
             template_id: 'template-github',
             name: 'GitHub issue on issue created',
             description: 'Create an issue in GitHub when an issue is created.',
@@ -953,7 +953,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-created'],
             template_id: 'template-gitlab',
             name: 'GitLab issue on issue created',
             description: 'Create an issue in GitLab when an issue is created.',
@@ -975,13 +975,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'error-tracking-issue-reopened': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on issue reopened',
             description: 'Send a webhook when an issue is reopened',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
             template_id: 'template-discord',
             name: 'Post to Discord on issue reopened',
             description: 'Posts a message to Discord when an issue is reopened',
@@ -992,7 +992,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on issue reopened',
             description: 'Posts a message to Microsoft Teams when an issue is reopened',
@@ -1003,7 +1003,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-reopened'],
             template_id: 'template-slack',
             name: 'Post to Slack on issue reopened',
             description: 'Posts a message to Slack when an issue is reopened',
@@ -1045,13 +1045,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'error-tracking-issue-spiking': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on issue spiking',
             description: 'Send a webhook when an issue is spiking',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
             template_id: 'template-discord',
             name: 'Post to Discord on issue spiking',
             description: 'Posts a message to Discord when an issue is spiking',
@@ -1071,7 +1071,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on issue spiking',
             description: 'Posts a message to Microsoft Teams when an issue is spiking',
@@ -1082,7 +1082,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['error-tracking-issue-spiking'],
             template_id: 'template-slack',
             name: 'Post to Slack on issue spiking',
             description: 'Posts a message to Slack when an issue is spiking',
@@ -1129,13 +1129,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'experiment-significant': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['experiment-significant'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['experiment-significant'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on experiment significance',
             description: 'Send a webhook when an experiment metric reaches significance',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['experiment-significant'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['experiment-significant'],
             template_id: 'template-slack',
             name: 'Post to Slack on experiment significance',
             description: 'Post to a Slack channel when an experiment metric reaches significance',
@@ -1180,13 +1180,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     [INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]: [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on insight alert firing',
             description: 'Send a webhook when this insight alert fires',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
             template_id: 'template-slack',
             name: 'Post to Slack on insight alert firing',
             description: 'Post to a Slack channel when this insight alert fires',
@@ -1273,7 +1273,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
             template_id: 'template-discord',
             name: 'Post to Discord on insight alert firing',
             description: 'Post to a Discord channel when this insight alert fires',
@@ -1284,7 +1284,7 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
             },
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID],
             template_id: 'template-microsoft-teams',
             name: 'Post to Microsoft Teams on insight alert firing',
             description: 'Post to a Microsoft Teams channel when this insight alert fires',
@@ -1297,13 +1297,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'logs-alert-firing': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-firing'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-firing'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on log alert firing',
             description: 'Send a webhook when a log alert fires',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-firing'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-firing'],
             template_id: 'template-slack',
             name: 'Post to Slack on log alert firing',
             description: 'Post to a Slack channel when a log alert fires',
@@ -1349,13 +1349,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'logs-alert-resolved': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-resolved'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-resolved'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on log alert resolved',
             description: 'Send a webhook when a log alert resolves',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-resolved'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-resolved'],
             template_id: 'template-slack',
             name: 'Post to Slack on log alert resolved',
             description: 'Post to a Slack channel when a log alert resolves',
@@ -1401,13 +1401,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     ],
     'logs-alert-auto-disabled': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-auto-disabled'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-auto-disabled'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on log alert auto-disabled',
             description: 'Send a webhook when a log alert is auto-disabled due to repeated failures',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-auto-disabled'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-auto-disabled'],
             template_id: 'template-slack',
             name: 'Post to Slack on log alert auto-disabled',
             description: 'Post to Slack when a log alert is auto-disabled due to repeated failures',
@@ -1478,13 +1478,13 @@ export const FN_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType
     }),
     'logs-alert-errored': [
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-errored'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-errored'],
             template_id: 'template-webhook',
             name: 'HTTP Webhook on log alert evaluation error',
             description: 'Send a webhook when a log alert fails to evaluate',
         },
         {
-            ...FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-errored'],
+            ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['logs-alert-errored'],
             template_id: 'template-slack',
             name: 'Post to Slack on log alert evaluation error',
             description: 'Post to Slack when a log alert fails to evaluate',
@@ -1534,7 +1534,7 @@ export const getSubTemplate = (
     template: InsightsFunctionTemplateType,
     subTemplateId: InsightsFunctionSubTemplateIdType
 ): InsightsFunctionSubTemplateType | null => {
-    return FN_FUNCTION_SUB_TEMPLATES[subTemplateId].find((x) => x.template_id === template.id) || null
+    return INSIGHTS_FUNCTION_SUB_TEMPLATES[subTemplateId].find((x) => x.template_id === template.id) || null
 }
 
 export const eventToInsightsFunctionContextId = (event: string | undefined): InsightsFunctionConfigurationContextId => {

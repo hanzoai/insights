@@ -187,27 +187,27 @@ SANDBOX_AGENT_OTEL_LOGS_TOKEN=<project API key of the telemetry project>
 SANDBOX_AGENT_OTEL_TRACES_URL=http://localhost:8000/i/v1/traces  # optional, enables APM spans
 ```
 
-In cloud, emission is additionally gated per run by the `tasks-agent-run-otel-telemetry` feature flag (org-targeted, stamped into run state at dispatch; it also gates the scout run-log mirror). `DEBUG` bypasses the flag, so locally these settings are the only switch. They're injected into the sandbox as `POSTFN_AGENT_OTEL_LOGS_URL`/`_TOKEN`/`POSTFN_AGENT_OTEL_TRACES_URL` (deliberately not standard `OTEL_*` names, so OTel SDKs in user code don't auto-export into the telemetry project).
+In cloud, emission is additionally gated per run by the `tasks-agent-run-otel-telemetry` feature flag (org-targeted, stamped into run state at dispatch; it also gates the scout run-log mirror). `DEBUG` bypasses the flag, so locally these settings are the only switch. They're injected into the sandbox as `INSIGHTS_AGENT_OTEL_LOGS_URL`/`_TOKEN`/`INSIGHTS_AGENT_OTEL_TRACES_URL` (deliberately not standard `OTEL_*` names, so OTel SDKs in user code don't auto-export into the telemetry project).
 The agent-server exports run/turn/tool lifecycle metadata (never message content or tool arguments), tagged with `run_id`/`task_id`/`team_id`/`user_id`/`distinct_id` resource attributes and `service.name=insights-code-agent`.
 Telemetry stays off when either of the first two vars is unset.
 For local Docker sandboxes the localhost URLs are rewritten to `host.docker.internal` automatically; local ingestion requires the `capture-logs` service to be running.
 
 ### MCP server `.env`
 
-`MODAL_DOCKER` (and the local Docker provider) both depend on the MCP server running at `localhost:8787`. The server reads its config from `services/mcp/.env` — without it, things like `POSTFN_API_BASE_URL`, the UI-apps token, and analytics keys are missing and the server will either refuse to start or return broken responses to the sandbox.
+`MODAL_DOCKER` (and the local Docker provider) both depend on the MCP server running at `localhost:8787`. The server reads its config from `services/mcp/.env` — without it, things like `INSIGHTS_API_BASE_URL`, the UI-apps token, and analytics keys are missing and the server will either refuse to start or return broken responses to the sandbox.
 
 ```bash
 cd services/mcp && cp .env.example .env
 ```
 
-Then fill in the secrets. `POSTFN_UI_APPS_TOKEN` and `POSTFN_ANALYTICS_API_KEY` are public Insights `phc_*` project keys — for local dev you can paste the same key you use for analytics, or leave them as the placeholder (analytics calls will no-op). Restart the `mcp` phrocs process after changing `.env`.
+Then fill in the secrets. `INSIGHTS_UI_APPS_TOKEN` and `INSIGHTS_ANALYTICS_API_KEY` are public Insights `phc_*` project keys — for local dev you can paste the same key you use for analytics, or leave them as the placeholder (analytics calls will no-op). Restart the `mcp` phrocs process after changing `.env`.
 
 ### Local agent packages
 
 ```bash
 # In your .env:
 SANDBOX_PROVIDER=MODAL_DOCKER
-LOCAL_POSTFN_CODE_MONOREPO_ROOT=/path/to/insights-code
+LOCAL_INSIGHTS_CODE_MONOREPO_ROOT=/path/to/insights-code
 ```
 
 Then build the agent package and restart the temporal worker:
@@ -221,7 +221,7 @@ cd /path/to/insights-code/packages/agent && pnpm build
 | Provider          | `.env` value                    | When to use                                                                                                                                                                                                                                                                                                                                           |
 | ----------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `modal` (default) | `SANDBOX_PROVIDER=modal`        | Production. Uses the published `@hanzo/agent` npm package from the GHCR image.                                                                                                                                                                                                                                                                      |
-| `MODAL_DOCKER`    | `SANDBOX_PROVIDER=MODAL_DOCKER` | **Local development with Modal.** Same as `modal` but uses a separate Modal app (`insights-sandbox-modal-docker-*`) so local image builds don't pollute the production app cache. When `LOCAL_POSTFN_CODE_MONOREPO_ROOT` is set, each local package's external runtime dependencies are installed and its compiled output is overlaid onto the image. |
+| `MODAL_DOCKER`    | `SANDBOX_PROVIDER=MODAL_DOCKER` | **Local development with Modal.** Same as `modal` but uses a separate Modal app (`insights-sandbox-modal-docker-*`) so local image builds don't pollute the production app cache. When `LOCAL_INSIGHTS_CODE_MONOREPO_ROOT` is set, each local package's external runtime dependencies are installed and its compiled output is overlaid onto the image. |
 | `docker`          | `SANDBOX_PROVIDER=docker`       | Local-only Docker containers (`DEBUG=True` required). No Modal account needed. This is the recommended option for local development.                                                                                                                                                                                                                  |
 
 ### Sandbox templates
@@ -287,7 +287,7 @@ Mirroring failures are logged and never break the run's log write.
 
 ### How `MODAL_DOCKER` works
 
-When both `SANDBOX_PROVIDER=MODAL_DOCKER` and `LOCAL_POSTFN_CODE_MONOREPO_ROOT` are set:
+When both `SANDBOX_PROVIDER=MODAL_DOCKER` and `LOCAL_INSIGHTS_CODE_MONOREPO_ROOT` are set:
 
 1. The selected sandbox Dockerfile is built in a temporary context
 2. External runtime dependencies from local `packages/agent`, `packages/shared`, and `packages/git` manifests that are missing from the published image are installed at `/scripts`; required system compatibility packages such as musl for Codex are installed with them, while `workspace:*` dependencies continue to resolve through the overlaid packages
@@ -322,4 +322,4 @@ cd /path/to/insights-code/packages/agent && pnpm build
 | Sandbox can't reach Insights API                                      | Don't set `SANDBOX_API_URL` with Docker — auto-transform handles it. If overriding, use port 8000, not 8010 (Caddy returns empty responses from inside Docker)                                                                                                                                                                                                                                                         |
 | `DEBUG` not set                                                      | `SANDBOX_PROVIDER=docker` requires `DEBUG=1`. Re-run `python manage.py setup_background_agents` to write it                                                                                                                                                                                                                                                                                                            |
 | `... sandbox is for local development only` (RuntimeError at import) | The `docker` / `MODAL_DOCKER` providers require `DEBUG=1` (or `TEST=1`, which pytest sets). `DEBUG=1` is normally injected by the flox env (`.flox/env/manifest.toml` `[vars]`) — this fires when you're outside `flox activate` or explicitly unset `DEBUG` (e.g. to escape the cloud-DEBUG guard). Keep `DEBUG` on and use `CLOUD_DEPLOYMENT=E2E` for cloud-mode dev instead. See [dev-env-vars.md](dev-env-vars.md) |
-| `git commit is disabled in Insights Desktop`                          | A PATH shim (`git-guard.sh` at `/opt/insights/bin/git`) blocks `git commit` and `git push` so unsigned commits can't leave the sandbox. Stage changes with `git add`, then use the `git_signed_commit` tool. To bypass during debugging, set `POSTFN_ALLOW_UNSIGNED_GIT=1`                                                                                                                                             |
+| `git commit is disabled in Insights Desktop`                          | A PATH shim (`git-guard.sh` at `/opt/insights/bin/git`) blocks `git commit` and `git push` so unsigned commits can't leave the sandbox. Stage changes with `git add`, then use the `git_signed_commit` tool. To bypass during debugging, set `INSIGHTS_ALLOW_UNSIGNED_GIT=1`                                                                                                                                             |

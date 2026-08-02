@@ -146,7 +146,7 @@ export class ResourceCatalog {
     }
 
     private contextMillLocalUrl(): string | undefined {
-        const localUrlRaw = (this.env as Record<string, string | undefined>)?.POSTFN_MCP_LOCAL_SKILLS_URL
+        const localUrlRaw = (this.env as Record<string, string | undefined>)?.INSIGHTS_MCP_LOCAL_SKILLS_URL
         return localUrlRaw && localUrlRaw.trim() !== '' ? localUrlRaw : undefined
     }
 
@@ -174,7 +174,7 @@ export class ResourceCatalog {
             return
         }
 
-        const analyticsBaseUrl = this.env.POSTFN_MCP_APPS_ANALYTICS_BASE_URL
+        const analyticsBaseUrl = this.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL
 
         for (const app of UI_APPS) {
             const html = buildAppStubHtml(app.appDir, baseUrl)

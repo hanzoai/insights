@@ -15,7 +15,7 @@ export interface InsightsFunctionHclExportOptions extends HclExportOptions {
 /**
  * @see https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/insights_function
  */
-const FN_FUNCTION_FIELD_MAPPINGS: FieldMapping<Partial<InsightsFunctionType>, InsightsFunctionHclExportOptions>[] = [
+const INSIGHTS_FUNCTION_FIELD_MAPPINGS: FieldMapping<Partial<InsightsFunctionType>, InsightsFunctionHclExportOptions>[] = [
     {
         source: 'name',
         target: 'name',
@@ -121,10 +121,10 @@ function validateInsightsFunction(
     return warnings
 }
 
-const FN_FUNCTION_EXPORTER: ResourceExporter<Partial<InsightsFunctionType>, InsightsFunctionHclExportOptions> = {
+const INSIGHTS_FUNCTION_EXPORTER: ResourceExporter<Partial<InsightsFunctionType>, InsightsFunctionHclExportOptions> = {
     resourceType: 'insights_insights_function',
     resourceLabel: 'insights_function',
-    fieldMappings: FN_FUNCTION_FIELD_MAPPINGS,
+    fieldMappings: INSIGHTS_FUNCTION_FIELD_MAPPINGS,
     validate: validateInsightsFunction,
     getResourceName: (h) => h.name || `insights_function_${h.id || 'new'}`,
     getId: (h) => h.id,
@@ -134,7 +134,7 @@ export function generateInsightsFunctionHCL(
     insightsFunction: Partial<InsightsFunctionType>,
     options: InsightsFunctionHclExportOptions = {}
 ): HclExportResult {
-    return generateHCL(insightsFunction, FN_FUNCTION_EXPORTER, options)
+    return generateHCL(insightsFunction, INSIGHTS_FUNCTION_EXPORTER, options)
 }
 
 function stripInputServerFields(input: CyclotronJobInputType | null): StrippedInput | null {

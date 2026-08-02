@@ -17,7 +17,7 @@ import { Button, Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, 
 
 import { Day, useCalendar } from './use-calendar'
 
-export const POSTFN_START_DATE = new Date(2020, 0, 23)
+export const INSIGHTS_START_DATE = new Date(2020, 0, 23)
 export const WEEK_DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 export const MONTH_NAMES = [
     'January',
@@ -149,7 +149,7 @@ export function Calendar({
         onViewChange(addMonths(viewing, 1))
     }
 
-    const floorDate = minDate && minDate.getTime() > POSTFN_START_DATE.getTime() ? minDate : POSTFN_START_DATE
+    const floorDate = minDate && minDate.getTime() > INSIGHTS_START_DATE.getTime() ? minDate : INSIGHTS_START_DATE
     const minYearVal = getYear(floorDate)
     const minMonthAtMinYear = getMonth(floorDate)
     const floorKey = minYearVal * 12 + minMonthAtMinYear

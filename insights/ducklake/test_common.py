@@ -100,7 +100,7 @@ class TestIsVersionMismatch:
 
 
 class TestResetDucklakeCatalog:
-    @patch.dict("os.environ", {"POSTFN_ALLOW_DUCKLAKE_CATALOG_RESET": "1"}, clear=True)
+    @patch.dict("os.environ", {"INSIGHTS_ALLOW_DUCKLAKE_CATALOG_RESET": "1"}, clear=True)
     @patch("insights.ducklake.common.is_dev_mode", return_value=True)
     @patch("insights.ducklake.common.psycopg")
     def test_terminates_connections_before_drop(self, mock_psycopg: MagicMock, _mock_dev: MagicMock):
@@ -131,12 +131,12 @@ class TestResetDucklakeCatalog:
     @patch.dict("os.environ", {}, clear=True)
     @patch("insights.ducklake.common.is_dev_mode", return_value=True)
     def test_requires_explicit_env_opt_in(self, _mock_dev: MagicMock):
-        with pytest.raises(RuntimeError, match="POSTFN_ALLOW_DUCKLAKE_CATALOG_RESET=1"):
+        with pytest.raises(RuntimeError, match="INSIGHTS_ALLOW_DUCKLAKE_CATALOG_RESET=1"):
             reset_ducklake_catalog(TEST_CONFIG)
 
 
 class TestInitializeDucklake:
-    @patch.dict("os.environ", {"POSTFN_ALLOW_DUCKLAKE_CATALOG_RESET": "1"}, clear=True)
+    @patch.dict("os.environ", {"INSIGHTS_ALLOW_DUCKLAKE_CATALOG_RESET": "1"}, clear=True)
     @patch("insights.ducklake.common.is_dev_mode", return_value=True)
     @patch("insights.ducklake.common.reset_ducklake_catalog")
     @patch("insights.ducklake.common.run_smoke_check")
@@ -214,7 +214,7 @@ class TestInitializeDucklake:
             with pytest.raises(duckdb.NotImplementedException, match="COPY FROM"):
                 initialize_ducklake(TEST_CONFIG)
 
-    @patch.dict("os.environ", {"POSTFN_ALLOW_DUCKLAKE_CATALOG_RESET": "1"}, clear=True)
+    @patch.dict("os.environ", {"INSIGHTS_ALLOW_DUCKLAKE_CATALOG_RESET": "1"}, clear=True)
     @patch("insights.ducklake.common.is_dev_mode", return_value=True)
     @patch("insights.ducklake.common.reset_ducklake_catalog")
     @patch("insights.ducklake.common.run_smoke_check")

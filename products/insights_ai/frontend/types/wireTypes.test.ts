@@ -127,7 +127,7 @@ const NOTIFICATION_PARAMS_BY_METHOD: { [M in keyof InsightsNotificationParamsByM
     '_insights/turn_complete': [{ sessionId: 'sess_a1b2c3', stopReason: 'end_turn' }],
 }
 
-const KNOWN_POSTFN_METHODS = Object.keys(NOTIFICATION_PARAMS_BY_METHOD) as (keyof InsightsNotificationParamsByMethod)[]
+const KNOWN_INSIGHTS_METHODS = Object.keys(NOTIFICATION_PARAMS_BY_METHOD) as (keyof InsightsNotificationParamsByMethod)[]
 
 const SESSION_UPDATE_CASES: { kind: string; update: Record<string, unknown> }[] = [
     {
@@ -258,12 +258,12 @@ describe('wireTypes guards', () => {
     })
 
     it.each(
-        KNOWN_POSTFN_METHODS.flatMap((method) =>
+        KNOWN_INSIGHTS_METHODS.flatMap((method) =>
             NOTIFICATION_PARAMS_BY_METHOD[method].map((params) => [method, params] as const)
         )
     )('%s notifications pass exactly the matching method guard', (method, params) => {
         const wireNotification = notificationOf(notification(method, params))
-        for (const known of KNOWN_POSTFN_METHODS) {
+        for (const known of KNOWN_INSIGHTS_METHODS) {
             expect(isInsightsNotification(wireNotification, known)).toBe(known === method)
         }
         expect(isSessionUpdateNotification(wireNotification)).toBe(false)
@@ -349,7 +349,7 @@ describe('wireTypes guards', () => {
 
     it('matches no known method guard for unknown _insights methods', () => {
         const wireNotification = notificationOf(notification('_insights/hologram_sync', { shards: 3 }))
-        for (const known of KNOWN_POSTFN_METHODS) {
+        for (const known of KNOWN_INSIGHTS_METHODS) {
             expect(isInsightsNotification(wireNotification, known)).toBe(false)
         }
         expect(isSessionUpdateNotification(wireNotification)).toBe(false)

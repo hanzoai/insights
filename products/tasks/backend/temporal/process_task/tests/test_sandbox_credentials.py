@@ -90,7 +90,7 @@ class TestReplaceSandboxCredentials:
         )
         assert sandbox.write_file.call_args_list[1].args == (
             OAUTH_ENV_FILE,
-            b"POSTFN_PERSONAL_API_KEY=oauth_new\x00",
+            b"INSIGHTS_PERSONAL_API_KEY=oauth_new\x00",
         )
         assert [call.args[0] for call in sandbox.execute.call_args_list] == [
             f"chmod 600 {GITHUB_ENV_FILE}",

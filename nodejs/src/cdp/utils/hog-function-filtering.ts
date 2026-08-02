@@ -326,7 +326,7 @@ export function convertToInsightsFunctionFilterGlobal(
     return response
 }
 
-const FN_FILTERING_TIMEOUT_MS = 100
+const INSIGHTS_FILTERING_TIMEOUT_MS = 100
 
 function preFilterResult(filters: InsightsFunctionType['filters'], filterGlobals: InsightsFunctionFilterGlobals): boolean {
     const eventMatches = filters?.events?.some((eventFilter) => {
@@ -405,7 +405,7 @@ export async function filterFunctionInstrumented(options: {
             insightsFunctionFilterDuration.observe({ type }, execHogOutcome.durationMs)
         }
 
-        if (execHogOutcome.durationMs > FN_FILTERING_TIMEOUT_MS) {
+        if (execHogOutcome.durationMs > INSIGHTS_FILTERING_TIMEOUT_MS) {
             logger.error('🦔', `[${fnKind}] Filter took longer than expected`, {
                 functionId: fn.id,
                 functionName: fn.name,

@@ -144,7 +144,7 @@ Redis health is inferred from ingestion-side metrics and CloudWatch ElastiCache 
 | Redis instance        | ElastiCache cluster (prod-us)     | Env var                    | Use                                  |
 | --------------------- | --------------------------------- | -------------------------- | ------------------------------------ |
 | Ingestion Redis       | `ingestion-prod-redis`            | `INGESTION_REDIS_HOST`     | Overflow state, pub/sub coordination |
-| Insights/Primary Redis | `insights-solo`                    | `POSTFN_REDIS_HOST`       | Billing/quota, restrictions, general |
+| Insights/Primary Redis | `insights-solo`                    | `INSIGHTS_REDIS_HOST`       | Billing/quota, restrictions, general |
 | Cookieless Redis      | `cookieless-prod-redis`           | `COOKIELESS_REDIS_HOST`    | Cookieless server hash mode          |
 | CDP Redis             | `cdp-delivery-prod-redis`         | `CDP_REDIS_HOST`           | CDP Script function delivery            |
 | Dedup Redis           | `ingestion-duplicates-prod-redis` | `DEDUPLICATION_REDIS_HOST` | Event deduplication                  |

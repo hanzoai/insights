@@ -17,7 +17,7 @@ from typing import Literal
 from typing_extensions import TypedDict
 
 from products.insights_ai.backend.helpers import BaseSandboxService
-from products.insights_ai.backend.services.system_prompt.prompt import POSTFN_AI_SYSTEM_PROMPT
+from products.insights_ai.backend.services.system_prompt.prompt import INSIGHTS_AI_SYSTEM_PROMPT
 
 
 class ClaudeCodeSystemPrompt(TypedDict):
@@ -42,4 +42,4 @@ class PromptService(BaseSandboxService):
         ``clientConnection.newSession({ _meta: { systemPrompt } })``; the sandbox appends ``append``
         after Claude Code's own system prompt rather than replacing it.
         """
-        return {"type": "preset", "preset": "claude_code", "append": POSTFN_AI_SYSTEM_PROMPT}
+        return {"type": "preset", "preset": "claude_code", "append": INSIGHTS_AI_SYSTEM_PROMPT}

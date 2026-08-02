@@ -12,7 +12,7 @@ import { fetch } from '~/common/utils/request'
 import { logger } from '~/common/utils/logger'
 import { Hub } from '../../../types'
 import { createHub } from '~/common/utils/db/hub'
-import { FN_FILTERS_EXAMPLES } from '../../_tests/examples'
+import { INSIGHTS_FILTERS_EXAMPLES } from '../../_tests/examples'
 import { createExampleInsightsFlowInvocation } from '../../_tests/fixtures-insightsflows'
 import { HogExecutorService } from '../script-executor.service'
 import { HogInputsService } from '../script-inputs.service'
@@ -171,7 +171,7 @@ describe('Hogflow Executor', () => {
                             type: 'trigger',
                             config: {
                                 type: 'event',
-                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                             },
                         },
 
@@ -462,7 +462,7 @@ describe('Hogflow Executor', () => {
         describe('action filtering', () => {
             beforeEach(() => {
                 const action = hogFlow.actions.find((action) => action.id === 'function_id_1')!
-                action.filters = FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters
+                action.filters = INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters
             })
 
             it('should only run the action if the provided filters match', async () => {
@@ -596,7 +596,7 @@ describe('Hogflow Executor', () => {
                             type: 'trigger',
                             config: {
                                 type: 'event',
-                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                             },
                         },
                         delay: {
@@ -706,7 +706,7 @@ describe('Hogflow Executor', () => {
                         {
                             type: 'wait_until_condition',
                             config: {
-                                condition: { filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters },
+                                condition: { filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters },
                                 max_wait_duration: '10m',
                             },
                         },
@@ -1191,7 +1191,7 @@ describe('Hogflow Executor', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                                 },
                             },
                             function_id_1: {
@@ -1331,7 +1331,7 @@ describe('Hogflow Executor', () => {
                 hogFlow.exit_condition = 'exit_on_trigger_not_matched'
                 hogFlow.trigger = {
                     type: 'event',
-                    filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                 }
 
                 const invocation1 = createExampleInsightsFlowInvocation(hogFlow, {
@@ -1374,7 +1374,7 @@ describe('Hogflow Executor', () => {
                 hogFlow.exit_condition = 'exit_on_trigger_not_matched_or_conversion'
                 hogFlow.trigger = {
                     type: 'event',
-                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                    filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                 }
                 hogFlow.conversion = {
                     filters: [
@@ -1549,7 +1549,7 @@ describe('Hogflow Executor', () => {
                                     type: 'trigger',
                                     config: {
                                         type: 'event',
-                                        filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                        filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                     },
                                 },
                                 function_id_1: {
@@ -1698,7 +1698,7 @@ describe('Hogflow Executor', () => {
                                 type: 'wait_until_condition',
                                 config: {
                                     condition: {
-                                        filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters, // no match
+                                        filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters, // no match
                                     },
                                     max_wait_duration: '10m',
                                 },
@@ -1728,10 +1728,10 @@ describe('Hogflow Executor', () => {
                                 config: {
                                     conditions: [
                                         {
-                                            filters: FN_FILTERS_EXAMPLES.elements_text_filter.filters,
+                                            filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters,
                                         },
                                         {
-                                            filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters,
+                                            filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters,
                                         },
                                     ],
                                 },
@@ -2020,7 +2020,7 @@ describe('Hogflow Executor', () => {
                             config: {
                                 type: 'event',
                                 // Use the test account filter which filters out @hanzo.ai emails
-                                filters: FN_FILTERS_EXAMPLES.test_account_filter.filters ?? {},
+                                filters: INSIGHTS_FILTERS_EXAMPLES.test_account_filter.filters ?? {},
                             },
                         },
 
@@ -2267,7 +2267,7 @@ describe('Hogflow Executor', () => {
                                     type: 'trigger',
                                     config: {
                                         type: 'event',
-                                        filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                        filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                     },
                                 },
                                 action_1: {
@@ -2425,7 +2425,7 @@ describe('Hogflow Executor', () => {
                             type: 'trigger',
                             config: {
                                 type: 'event',
-                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                             },
                         },
                         action_1: {
@@ -2465,7 +2465,7 @@ describe('Hogflow Executor', () => {
                             type: 'trigger',
                             config: {
                                 type: 'event',
-                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                             },
                         },
                         ...flow.actions,
@@ -2684,7 +2684,7 @@ describe('Hogflow Executor', () => {
                             type: 'trigger',
                             config: {
                                 type: 'event',
-                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                             },
                         },
                         email_1: {
@@ -2778,7 +2778,7 @@ describe('Hogflow Executor', () => {
                             type: 'trigger',
                             config: {
                                 type: 'event',
-                                filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                             },
                         },
                         email_1: {

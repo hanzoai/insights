@@ -69,13 +69,13 @@ await fetch('/api/personal_api_keys/', {
 The returned `phx_...` value is shown only this once. Then export it:
 
 ```bash
-export POSTFN_QUERY_PERF_PAT_US=phx_...
-export POSTFN_QUERY_PERF_PAT_EU=phx_...
+export INSIGHTS_QUERY_PERF_PAT_US=phx_...
+export INSIGHTS_QUERY_PERF_PAT_EU=phx_...
 ```
 
 Prompt the user to do this themselves — never ask them to paste the key into the conversation,
 and never echo it.
-Pass it as a header: `Authorization: Bearer $POSTFN_QUERY_PERF_PAT_US`.
+Pass it as a header: `Authorization: Bearer $INSIGHTS_QUERY_PERF_PAT_US`.
 
 Agent shells are non-interactive and typically don't read `~/.zshrc` —
 if the vars come up empty, prefix commands with `source ~/.zshrc 2>/dev/null;`.
@@ -190,7 +190,7 @@ Headline health, both regions:
 ```bash
 for region in US EU; do
   base=$([ $region = US ] && echo https://us.hanzo.ai || echo https://eu.hanzo.ai)
-  pat_var="POSTFN_QUERY_PERF_PAT_$region"
+  pat_var="INSIGHTS_QUERY_PERF_PAT_$region"
   if [ -z "${!pat_var}" ]; then
     echo "$pat_var not set — source ~/.zshrc or export it (see Authentication)" >&2
     continue
@@ -207,7 +207,7 @@ done
 Slowest byte-capped queries for one team, summarized without the SQL text:
 
 ```bash
-curl -sf -H "Authorization: Bearer $POSTFN_QUERY_PERF_PAT_US" \
+curl -sf -H "Authorization: Bearer $INSIGHTS_QUERY_PERF_PAT_US" \
   "https://us.hanzo.ai/api/debug_ch_queries/slowest_queries/?hours=24&team_id=12345&exception_code=307" \
   > /tmp/slowest.json
 jq '[.[] | {query_id, experiment_id, experiment_metric_name, total_duration_ms,

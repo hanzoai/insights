@@ -25,17 +25,17 @@ _traced_query = None
 try:
     import hanzo_insights
 
-    hanzo_insights.api_key = os.environ.get("POSTFN_API_KEY", "")  # ty: ignore[invalid-assignment]
-    hanzo_insights.host = os.environ.get("POSTFN_HOST", "https://us.i.hanzo.ai")  # ty: ignore[invalid-assignment]
+    hanzo_insights.api_key = os.environ.get("INSIGHTS_API_KEY", "")  # ty: ignore[invalid-assignment]
+    hanzo_insights.host = os.environ.get("INSIGHTS_HOST", "https://us.i.hanzo.ai")  # ty: ignore[invalid-assignment]
 
     if hanzo_insights.api_key:
         from hanzo_insights.ai.claude_agent_sdk import query as _traced_query  # type: ignore[no-redef]
 
-        _POSTFN_AI_AVAILABLE = True
+        _INSIGHTS_AI_AVAILABLE = True
     else:
-        _POSTFN_AI_AVAILABLE = False
+        _INSIGHTS_AI_AVAILABLE = False
 except ImportError:
-    _POSTFN_AI_AVAILABLE = False
+    _INSIGHTS_AI_AVAILABLE = False
 
 MODEL = "claude-sonnet-5"
 
@@ -342,7 +342,7 @@ class Reviewer:
         insights_kwargs: dict = {}
         # props: live insights_properties in traced mode (mutated on verdict), else inert.
         props: dict = {}
-        if active_query is None and _POSTFN_AI_AVAILABLE:
+        if active_query is None and _INSIGHTS_AI_AVAILABLE:
             active_query = _traced_query
             reviewers = sorted({_sanitize_untrusted(r["user"], max_len=50) for r in pr.reviews if r.get("user")})
             safe_labels = [_sanitize_untrusted(label, max_len=100) for label in pr.labels]

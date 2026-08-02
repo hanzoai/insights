@@ -54,10 +54,10 @@ import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        let POSTFN_PROJECT_TOKEN = "${currentTeam?.api_token}"
-        let POSTFN_HOST = "${apiHostOrigin()}"
+        let INSIGHTS_PROJECT_TOKEN = "${currentTeam?.api_token}"
+        let INSIGHTS_HOST = "${apiHostOrigin()}"
 
-        let config = InsightsConfig(projectToken: POSTFN_PROJECT_TOKEN, host: POSTFN_HOST)
+        let config = InsightsConfig(projectToken: INSIGHTS_PROJECT_TOKEN, host: INSIGHTS_HOST)
         ${configSection}
         InsightsSDK.shared.setup(config)
 

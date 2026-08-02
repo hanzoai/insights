@@ -826,7 +826,7 @@ class EvaluationViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbi
 
     @staticmethod
     def _is_mcp_request(request: Request) -> bool:
-        return request.META.get("HTTP_X_POSTFN_CLIENT") == "mcp"
+        return request.META.get("HTTP_X_INSIGHTS_CLIENT") == "mcp"
 
     def _wants_slim_list(self) -> bool:
         return self.action == "list" and self._is_mcp_request(self.request)

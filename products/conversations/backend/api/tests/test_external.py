@@ -530,7 +530,7 @@ class TestExternalTicketAPI(BaseTest):
     def _workflow_headers(self, flow_id="0191d3e0-0000-7000-8000-000000000001", token=None):
         return {
             **self._auth_headers(token),
-            "HTTP_X_POSTFN_FN_FLOW_ID": flow_id,
+            "HTTP_X_INSIGHTS_FN_FLOW_ID": flow_id,
         }
 
     def _latest_ticket_activity(self, activity="updated"):

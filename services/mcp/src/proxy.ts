@@ -24,12 +24,12 @@ async function resolveUser(
         }
     }
 
-    // When POSTFN_API_BASE_URL is set (local dev), both hit the same server —
+    // When INSIGHTS_API_BASE_URL is set (local dev), both hit the same server —
     // region always resolves to "us", which is correct since local Hono is a
-    // single instance. In production, POSTFN_API_BASE_URL is not set on the
+    // single instance. In production, INSIGHTS_API_BASE_URL is not set on the
     // CF worker, so this probes both regions in parallel.
-    const usBase = env.POSTFN_API_BASE_URL || 'https://us.hanzo.ai'
-    const euBase = env.POSTFN_API_BASE_URL || 'https://eu.hanzo.ai'
+    const usBase = env.INSIGHTS_API_BASE_URL || 'https://us.hanzo.ai'
+    const euBase = env.INSIGHTS_API_BASE_URL || 'https://eu.hanzo.ai'
 
     const [usResult, euResult] = await Promise.all([
         new ApiClient({ apiToken: token, baseUrl: usBase }).users().me(),

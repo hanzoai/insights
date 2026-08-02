@@ -707,7 +707,7 @@ def _build_template_context(
     # `get_all_flags` call above.
     context["insights_bootstrap"] = json.dumps(insights_bootstrap)
 
-    context["insights_js_uuid_version"] = settings.POSTFN_JS_UUID_VERSION
+    context["insights_js_uuid_version"] = settings.INSIGHTS_JS_UUID_VERSION
 
     # Only the SPA shell references these; other templates (exporter, layout, ...) load different bundles
     if template_name == "index.html":
@@ -833,7 +833,7 @@ def _build_flag_provider() -> "HyperCacheFlagProvider":
         HyperCacheFlagProvider,
     )
 
-    explicit_team_id = os.environ.get("POSTFN_SELF_TEAM_ID")
+    explicit_team_id = os.environ.get("INSIGHTS_SELF_TEAM_ID")
     if explicit_team_id:
         # Operator override: pin the flag-definitions team explicitly.
         # Truthiness, not `is not None`: an empty env var means "unset" and must
@@ -1233,7 +1233,7 @@ def generate_cache_key(team_pk: int, stringified: str) -> str:
 
 
 def get_celery_heartbeat() -> Union[str, int]:
-    last_heartbeat = get_client().get("POSTFN_HEARTBEAT")
+    last_heartbeat = get_client().get("INSIGHTS_HEARTBEAT")
     worker_heartbeat = int(time.time()) - int(last_heartbeat) if last_heartbeat else -1
 
     if 0 <= worker_heartbeat < 300:

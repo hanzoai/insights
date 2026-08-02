@@ -72,11 +72,11 @@ from version import STAMPFN_VERSION
 try:
     import hanzo_insights
 
-    hanzo_insights.api_key = os.environ.get("POSTFN_API_KEY", "")  # ty: ignore[invalid-assignment]
-    hanzo_insights.host = os.environ.get("POSTFN_HOST", "https://us.i.hanzo.ai")  # ty: ignore[invalid-assignment]
-    _POSTFN_AVAILABLE = bool(hanzo_insights.api_key)
+    hanzo_insights.api_key = os.environ.get("INSIGHTS_API_KEY", "")  # ty: ignore[invalid-assignment]
+    hanzo_insights.host = os.environ.get("INSIGHTS_HOST", "https://us.i.hanzo.ai")  # ty: ignore[invalid-assignment]
+    _INSIGHTS_AVAILABLE = bool(hanzo_insights.api_key)
 except ImportError:
-    _POSTFN_AVAILABLE = False
+    _INSIGHTS_AVAILABLE = False
 
 
 def flush_analytics() -> None:
@@ -85,7 +85,7 @@ def flush_analytics() -> None:
     The capture client batches in a background thread — without an explicit flush,
     events queued near process exit are silently dropped.
     """
-    if _POSTFN_AVAILABLE:
+    if _INSIGHTS_AVAILABLE:
         hanzo_insights.flush()
 
 
@@ -800,7 +800,7 @@ class Pipeline:
 
     def _capture_review_completed(self, gate_verdict: str, llm_verdict: str) -> None:
         """Send a stamphog_review_completed event with all verdict data."""
-        if not _POSTFN_AVAILABLE:
+        if not _INSIGHTS_AVAILABLE:
             return
 
         cl = self.classification

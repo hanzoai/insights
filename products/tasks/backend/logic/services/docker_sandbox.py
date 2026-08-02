@@ -20,7 +20,7 @@ from django.conf import settings
 if TYPE_CHECKING:
     from products.tasks.backend.temporal.process_task.utils import McpServerConfig
 
-from products.tasks.backend.constants import POSTFN_EXEC_PERMISSION_REGEX, SANDBOX_AGENT_LAUNCH_UNSET_ENV_VARS
+from products.tasks.backend.constants import INSIGHTS_EXEC_PERMISSION_REGEX, SANDBOX_AGENT_LAUNCH_UNSET_ENV_VARS
 from products.tasks.backend.exceptions import (
     ProcessTaskError,
     SandboxCleanupError,
@@ -84,10 +84,10 @@ STREAMLIT_AUTH_PROXY_PORT = 8080
 # host.docker.internal at `docker run` time (non-localhost hosts pass through).
 _DOCKER_URL_ENV_KEYS = frozenset(
     {
-        "POSTFN_API_URL",
-        "POSTFN_SITE_URL",
-        "POSTFN_AGENT_OTEL_LOGS_URL",
-        "POSTFN_AGENT_OTEL_TRACES_URL",
+        "INSIGHTS_API_URL",
+        "INSIGHTS_SITE_URL",
+        "INSIGHTS_AGENT_OTEL_LOGS_URL",
+        "INSIGHTS_AGENT_OTEL_TRACES_URL",
         "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT",
         "OTEL_EXPORTER_OTLP_ENDPOINT",
     }
@@ -166,7 +166,7 @@ class DockerSandbox(SandboxBase):
     @staticmethod
     def _get_local_insights_code_root() -> str | None:
         monorepo_root = os.environ.get(
-            "LOCAL_POSTFN_CODE_MONOREPO_ROOT", os.environ.get("LOCAL_TWIG_MONOREPO_ROOT", "")
+            "LOCAL_INSIGHTS_CODE_MONOREPO_ROOT", os.environ.get("LOCAL_TWIG_MONOREPO_ROOT", "")
         )
         if not monorepo_root:
             return None
@@ -187,7 +187,7 @@ class DockerSandbox(SandboxBase):
         if missing:
             missing_paths = ", ".join(missing)
             raise SandboxProvisionError(
-                f"LOCAL_POSTFN_CODE_MONOREPO_ROOT is invalid: {missing_paths}",
+                f"LOCAL_INSIGHTS_CODE_MONOREPO_ROOT is invalid: {missing_paths}",
                 {"monorepo_root": monorepo_root, "missing": missing},
                 cause=RuntimeError(f"Missing paths: {missing_paths}"),
             )
@@ -282,7 +282,7 @@ class DockerSandbox(SandboxBase):
 
     @staticmethod
     def _ensure_image_exists(template: SandboxTemplate) -> str:
-        """Build the sandbox image, using local packages if LOCAL_POSTFN_CODE_MONOREPO_ROOT is set."""
+        """Build the sandbox image, using local packages if LOCAL_INSIGHTS_CODE_MONOREPO_ROOT is set."""
         if template == SandboxTemplate.NOTEBOOK_BASE:
             dockerfile_path = os.path.join(
                 settings.BASE_DIR, "products/tasks/backend/sandbox/images/Dockerfile.sandbox-notebook"
@@ -794,7 +794,7 @@ class DockerSandbox(SandboxBase):
         insights_exec_permission_regex: str | None = None,
     ) -> str:
         # The host proxy URL (e.g. localhost:8003) is unreachable from inside the container;
-        # rewrite it the same way POSTFN_API_URL is for Docker sandboxes.
+        # rewrite it the same way INSIGHTS_API_URL is for Docker sandboxes.
         if event_ingest_url:
             event_ingest_url = DockerSandbox._transform_url_for_docker(event_ingest_url)
         env_prefix = build_agent_runtime_env_prefix(
@@ -949,7 +949,7 @@ class DockerSandbox(SandboxBase):
             logger.warning(f"Installed agent-server in sandbox {self.id} predates --autoPublish; starting review-first")
             auto_publish = False
 
-        exec_permission_regex: str | None = POSTFN_EXEC_PERMISSION_REGEX
+        exec_permission_regex: str | None = INSIGHTS_EXEC_PERMISSION_REGEX
         if not self.agent_server_supports_exec_permission_regex():
             logger.warning(
                 f"Installed agent-server in sandbox {self.id} predates --insightsExecPermissionRegex; "

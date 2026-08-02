@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 
 logger = structlog.get_logger(__name__)
 
-POSTFN_CODE_PRODUCT = "insights_code"
-PLAN_CACHE_PREFIX = f"plan:{POSTFN_CODE_PRODUCT}"
+INSIGHTS_CODE_PRODUCT = "insights_code"
+PLAN_CACHE_PREFIX = f"plan:{INSIGHTS_CODE_PRODUCT}"
 # Duplicated in products/tasks/backend/seat_api.py
 PRO_PLAN_PREFIXES = ("insights-code-200", "insights-code-pro-")
 
@@ -97,7 +97,7 @@ async def resolve_plan_info(
     product: str,
 ) -> PlanInfo:
     """Resolve plan info, returning safe defaults on failure."""
-    if product != POSTFN_CODE_PRODUCT:
+    if product != INSIGHTS_CODE_PRODUCT:
         return PlanInfo(plan_key=None, seat_created_at=None)
 
     plan_resolver: PlanResolver = request.app.state.plan_resolver
@@ -219,7 +219,7 @@ class PlanResolver:
         url = f"{settings.insights_api_base_url.rstrip('/')}/api/seats/me/"
         resp = await self._http.get(
             url,
-            params={"product_key": POSTFN_CODE_PRODUCT, "best": "true"},
+            params={"product_key": INSIGHTS_CODE_PRODUCT, "best": "true"},
             headers={"Authorization": auth_header},
             timeout=2.0,
         )

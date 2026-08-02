@@ -17,7 +17,7 @@ const shouldDefer = (): boolean => {
 
 const shouldTrackFramerate = (loadedInstance: InsightsInterface): boolean => {
     return (
-        !!window.POSTFN_APP_CONTEXT?.preflight?.is_debug ||
+        !!window.INSIGHTS_APP_CONTEXT?.preflight?.is_debug ||
         !!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_REACT_FRAMERATE)
     )
 }
@@ -37,17 +37,17 @@ export interface LoadInsightsJSOptions {
 }
 
 export function loadInsightsJS(options: LoadInsightsJSOptions = {}): void {
-    if (window.JS_POSTFN_API_KEY) {
-        insights.init(window.JS_POSTFN_API_KEY, {
+    if (window.JS_INSIGHTS_API_KEY) {
+        insights.init(window.JS_INSIGHTS_API_KEY, {
             opt_out_useragent_filter: window.location.hostname === 'localhost', // we ARE a bot when running in localhost, so we need to enable this opt-out
-            api_host: window.JS_POSTFN_HOST,
-            ui_host: window.JS_POSTFN_UI_HOST,
+            api_host: window.JS_INSIGHTS_HOST,
+            ui_host: window.JS_INSIGHTS_UI_HOST,
             defaults: SDK_DEFAULTS_DATE,
             persistence: 'localStorage+cookie',
             cookie_persisted_properties: [
                 'prod_interest', // hanzo.ai sets these based on what docs were browsed
             ],
-            bootstrap: window.POSTFN_USER_IDENTITY_WITH_FLAGS ? window.POSTFN_USER_IDENTITY_WITH_FLAGS : {},
+            bootstrap: window.INSIGHTS_USER_IDENTITY_WITH_FLAGS ? window.INSIGHTS_USER_IDENTITY_WITH_FLAGS : {},
             opt_in_site_apps: true,
             disable_surveys: window.IMPERSONATED_SESSION,
             disable_product_tours: true,
@@ -74,7 +74,7 @@ export function loadInsightsJS(options: LoadInsightsJSOptions = {}): void {
                     }
 
                     if (
-                        !!window.POSTFN_APP_CONTEXT?.preflight?.is_debug ||
+                        !!window.INSIGHTS_APP_CONTEXT?.preflight?.is_debug ||
                         !!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_DETACHED_ELEMENTS)
                     ) {
                         startDetachedElementTracking(loadedInstance)
@@ -171,8 +171,8 @@ export function loadInsightsJS(options: LoadInsightsJSOptions = {}): void {
                 //disabling to investigate if this is associated with memory leak in the insights app
                 web_vitals_attribution: false,
             },
-            identity_distinct_id: window.JS_POSTFN_IDENTITY_DISTINCT_ID,
-            identity_hash: window.JS_POSTFN_IDENTITY_HASH,
+            identity_distinct_id: window.JS_INSIGHTS_IDENTITY_DISTINCT_ID,
+            identity_hash: window.JS_INSIGHTS_IDENTITY_HASH,
         })
 
         insights.onFeatureFlags((_flags, _variants, context) => {
@@ -183,8 +183,8 @@ export function loadInsightsJS(options: LoadInsightsJSOptions = {}): void {
             insights.capture('onFeatureFlags error')
 
             // Track that we failed to load feature flags
-            window.POSTFN_GLOBAL_ERRORS ||= {}
-            window.POSTFN_GLOBAL_ERRORS['onFeatureFlagsLoadError'] = true
+            window.INSIGHTS_GLOBAL_ERRORS ||= {}
+            window.INSIGHTS_GLOBAL_ERRORS['onFeatureFlagsLoadError'] = true
         })
     } else {
         insights.init('fake_token', {

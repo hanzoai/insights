@@ -68,7 +68,7 @@ export function pickMinimalPinnedItem(item: unknown, fallbackValue: TaxonomicFil
 
 const OLD_PERSIST_KEY = 'scenes.session-recordings.player.playerSettingsLogic.quickFilterProperties'
 
-const teamId = typeof window !== 'undefined' ? window.POSTFN_APP_CONTEXT?.current_team?.id : undefined
+const teamId = typeof window !== 'undefined' ? window.INSIGHTS_APP_CONTEXT?.current_team?.id : undefined
 const MIGRATION_KEY = `taxonomicFilterPinnedProperties__migrated__${teamId ?? 'default'}`
 const DEFAULTS_SEEDED_KEY = `taxonomicFilterPinnedProperties__defaultsSeeded__${teamId ?? 'default'}`
 

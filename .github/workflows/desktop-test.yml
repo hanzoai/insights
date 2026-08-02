@@ -5,13 +5,13 @@ on:
     # desktop suite; merge_group gating and PR concurrency live there.
     workflow_call:
         secrets:
-            GH_APP_POSTFN_PATHS_FILTER_APP_ID:
+            GH_APP_INSIGHTS_PATHS_FILTER_APP_ID:
                 required: false
-            GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY:
+            GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY:
                 required: false
-            POSTFN_CODE_E2E_GATEWAY_PERSONAL_API_KEY:
+            INSIGHTS_CODE_E2E_GATEWAY_PERSONAL_API_KEY:
                 required: false
-            POSTFN_CODE_E2E_GATEWAY_URL:
+            INSIGHTS_CODE_E2E_GATEWAY_URL:
                 required: false
             TRUNK_API_TOKEN:
                 required: false
@@ -44,8 +44,8 @@ jobs:
               # forks can't read org secrets, so fall back to github.token
               if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
 
             - name: Detect relevant changes
               id: filter
@@ -274,14 +274,14 @@ jobs:
         # Live-model e2e for the @hanzo/agent adapters (claude + codex). Runs only
         # after the unit + integration jobs pass — a red tree never reaches the
         # gateway — and only when a products/desktop/packages/ file changed. Each arm still
-        # self-skips unless the POSTFN_CODE_E2E_GATEWAY_PERSONAL_API_KEY secret is
-        # present (fork PRs never see it) and POSTFN_CODE_E2E_GATEWAY_URL points at
+        # self-skips unless the INSIGHTS_CODE_E2E_GATEWAY_PERSONAL_API_KEY secret is
+        # present (fork PRs never see it) and INSIGHTS_CODE_E2E_GATEWAY_URL points at
         # a runner-reachable gateway. Drives cheap models (claude-haiku-4-5 /
         # gpt-5-mini), so a run is a handful of short turns.
         needs: [changes, unit-test, integration-test]
         # Always run on any products/desktop/packages/ change (or a change to this workflow),
         # once unit-test + integration-test have passed. There is intentionally NO
-        # gate on the gateway config being present: if the POSTFN_CODE_E2E_*
+        # gate on the gateway config being present: if the INSIGHTS_CODE_E2E_*
         # secret/vars are missing, the fail-loud guard
         # (products/desktop/packages/agent/e2e/guard.e2e.test.ts) REDS the run rather than
         # skipping to green. Only fork PRs are skipped, since they never receive the
@@ -349,21 +349,21 @@ jobs:
 
             - name: Run live e2e (both adapters)
               run: pnpm --filter agent run test:e2e
-              # The suite reads these POSTFN_CODE_E2E_* names directly
+              # The suite reads these INSIGHTS_CODE_E2E_* names directly
               # (products/desktop/packages/agent/e2e/config.ts). The personal API key is an org
               # secret; the URL and model/environment overrides are org vars.
               env:
-                  POSTFN_CODE_E2E_GATEWAY_PERSONAL_API_KEY: ${{ secrets.POSTFN_CODE_E2E_GATEWAY_PERSONAL_API_KEY }}
+                  INSIGHTS_CODE_E2E_GATEWAY_PERSONAL_API_KEY: ${{ secrets.INSIGHTS_CODE_E2E_GATEWAY_PERSONAL_API_KEY }}
                   # Accept the URL from either an org var or an org secret — it has ended
                   # up in both places, and vars.* can't see secrets.
-                  POSTFN_CODE_E2E_GATEWAY_URL: ${{ vars.POSTFN_CODE_E2E_GATEWAY_URL || secrets.POSTFN_CODE_E2E_GATEWAY_URL }}
-                  POSTFN_CODE_E2E_CLAUDE_MODEL: ${{ vars.POSTFN_CODE_E2E_CLAUDE_MODEL }}
-                  POSTFN_CODE_E2E_CODEX_MODEL: ${{ vars.POSTFN_CODE_E2E_CODEX_MODEL }}
-                  # Optional: set vars.POSTFN_CODE_E2E_ENVIRONMENT=cloud to exercise the
+                  INSIGHTS_CODE_E2E_GATEWAY_URL: ${{ vars.INSIGHTS_CODE_E2E_GATEWAY_URL || secrets.INSIGHTS_CODE_E2E_GATEWAY_URL }}
+                  INSIGHTS_CODE_E2E_CLAUDE_MODEL: ${{ vars.INSIGHTS_CODE_E2E_CLAUDE_MODEL }}
+                  INSIGHTS_CODE_E2E_CODEX_MODEL: ${{ vars.INSIGHTS_CODE_E2E_CODEX_MODEL }}
+                  # Optional: set vars.INSIGHTS_CODE_E2E_ENVIRONMENT=cloud to exercise the
                   # cloud code path (sandbox/permission-profile gating). Unset = local. The
                   # OS-sandbox enforcement test is macOS-gated, so it doesn't red this linux
                   # runner.
-                  POSTFN_CODE_E2E_ENVIRONMENT: ${{ vars.POSTFN_CODE_E2E_ENVIRONMENT }}
+                  INSIGHTS_CODE_E2E_ENVIRONMENT: ${{ vars.INSIGHTS_CODE_E2E_ENVIRONMENT }}
 
     # Collation job for the required status check; must be registered as the
     # required check instead of the individual jobs.

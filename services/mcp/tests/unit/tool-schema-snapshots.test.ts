@@ -16,12 +16,12 @@ function createMockContext(): Context {
         cache: {} as any,
         env: {
             MCP_APPS_BASE_URL: undefined,
-            POSTFN_ANALYTICS_API_KEY: undefined,
-            POSTFN_ANALYTICS_HOST: undefined,
-            POSTFN_API_BASE_URL: undefined,
-            POSTFN_PUBLIC_URL: undefined,
-            POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-            POSTFN_UI_APPS_TOKEN: undefined,
+            INSIGHTS_ANALYTICS_API_KEY: undefined,
+            INSIGHTS_ANALYTICS_HOST: undefined,
+            INSIGHTS_API_BASE_URL: undefined,
+            INSIGHTS_PUBLIC_URL: undefined,
+            INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+            INSIGHTS_UI_APPS_TOKEN: undefined,
         },
         stateManager: {
             // Staff-only tools require their OAuth-hidden scope explicitly on the key

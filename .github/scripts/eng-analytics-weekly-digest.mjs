@@ -25,9 +25,9 @@
 // $, re-runs) and the WoW delta absorbs the hole. The PR-snapshot rows (merge
 // count, open→merge median) are robust to gaps.
 
-const HOST = (process.env.POSTFN_HOST || 'https://us.hanzo.ai').replace(/\/$/, '')
-const PROJECT_ID = process.env.POSTFN_PROJECT_ID || ''
-const API_KEY = process.env.POSTFN_API_KEY || ''
+const HOST = (process.env.INSIGHTS_HOST || 'https://us.hanzo.ai').replace(/\/$/, '')
+const PROJECT_ID = process.env.INSIGHTS_PROJECT_ID || ''
+const API_KEY = process.env.INSIGHTS_API_KEY || ''
 // Pin the source when the project has more than one connected GitHub source; otherwise
 // the endpoints default to the oldest, which may not be the repo you mean.
 const SOURCE_ID = process.env.ENG_ANALYTICS_SOURCE_ID || ''
@@ -217,7 +217,7 @@ async function postToSlack(blocks) {
 async function main() {
     if (!PROJECT_ID || !API_KEY) {
         // No-op (don't fail the scheduled run) until the project + read key are wired.
-        console.warn('POSTFN_PROJECT_ID / POSTFN_API_KEY not set — skipping digest. Wire them to enable.')
+        console.warn('INSIGHTS_PROJECT_ID / INSIGHTS_API_KEY not set — skipping digest. Wire them to enable.')
         return
     }
     const now = new Date()

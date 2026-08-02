@@ -443,7 +443,7 @@ class TestSavedQuery(APIBaseTest):
         assert saved_query.deleted is True
         assert saved_query.deleted_at is not None
         assert saved_query.deleted_name == query_name
-        assert saved_query.name.startswith("POSTFN_DELETED_")
+        assert saved_query.name.startswith("INSIGHTS_DELETED_")
 
         delete_activity = ActivityLog.objects.get(
             item_id=str(saved_query.id), scope="DataWarehouseSavedQuery", activity="deleted"

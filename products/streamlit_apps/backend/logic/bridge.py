@@ -35,7 +35,7 @@ def execute_bridge_query(query: str, team_id: int, user: User | None, client_que
         query=query,
         team=team,
         user=user,
-        limit_context=LimitContext.POSTFN_AI,
+        limit_context=LimitContext.INSIGHTS_AI,
         settings=InsightsQLGlobalSettings(
             max_execution_time=BRIDGE_MAX_EXECUTION_TIME_SECONDS,
             max_memory_usage=BRIDGE_MAX_MEMORY_USAGE_BYTES,

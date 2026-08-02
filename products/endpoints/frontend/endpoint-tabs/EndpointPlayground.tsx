@@ -69,14 +69,14 @@ function generateTerminalExample(endpoint: EndpointVersionType, selectedVersion:
     // If no payload and no version, omit the -d flag entirely
     if (!hasPayload && !versionParam) {
         return `curl -X POST ${getEndpointUrl(endpoint.endpoint_path)} \\
-  -H "Authorization: Bearer $POSTFN_PERSONAL_API_KEY"`
+  -H "Authorization: Bearer $INSIGHTS_PERSONAL_API_KEY"`
     }
 
     const payloadBody = formatPayloadForCodeExample(payload)
     const dataContent = [payloadBody, versionParam].filter(Boolean).join(',\n')
 
     return `curl -X POST ${getEndpointUrl(endpoint.endpoint_path)} \\
-  -H "Authorization: Bearer $POSTFN_PERSONAL_API_KEY" \\
+  -H "Authorization: Bearer $INSIGHTS_PERSONAL_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
 ${dataContent}
@@ -98,7 +98,7 @@ function generatePythonExample(endpoint: EndpointVersionType, selectedVersion: n
 url = "${getEndpointUrl(endpoint.endpoint_path)}"
 
 headers = {
-    'Authorization': 'Bearer {POSTFN_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 }
 
 response = requests.post(url, headers=headers)
@@ -115,7 +115,7 @@ url = "${getEndpointUrl(endpoint.endpoint_path)}"
 
 headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer {POSTFN_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 }
 
 payload = {
@@ -141,7 +141,7 @@ function generateNodeExample(endpoint: EndpointVersionType, selectedVersion: num
 const url = '${getEndpointUrl(endpoint.endpoint_path)}';
 
 const headers = {
-    'Authorization': 'Bearer {POSTFN_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 };
 
 fetch(url, {
@@ -162,7 +162,7 @@ const url = '${getEndpointUrl(endpoint.endpoint_path)}';
 
 const headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer {POSTFN_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 };
 
 const payload = {

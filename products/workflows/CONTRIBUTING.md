@@ -182,14 +182,14 @@ Guidelines:
 
 ### 2) Register it in the templates index
 
-Templates are exported from a central list. Add an import and include it in `FN_FUNCTION_TEMPLATES_DESTINATIONS`:
+Templates are exported from a central list. Add an import and include it in `INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS`:
 
 - nodejs/src/cdp/templates/index.ts
 
 Reference for how existing workflows templates are added:
 
 - Imports: `insightsGetTicketTemplate`, `insightsUpdateTicketTemplate`, `insightsSetHogflowVariableTemplate`
-- List: `FN_FUNCTION_TEMPLATES_DESTINATIONS`
+- List: `INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS`
 
 ## Backend: adding an async function
 

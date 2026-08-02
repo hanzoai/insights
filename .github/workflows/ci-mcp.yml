@@ -49,8 +49,8 @@ jobs:
               id: app-token
               if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_PATHS_FILTER_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_PATHS_FILTER_PRIVATE_KEY }}
             - uses: ./.github/actions/paths-filter
               id: filter
               if: github.event_name != 'push' # Run all tests on master push
@@ -148,8 +148,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Set up Python
@@ -298,7 +298,7 @@ jobs:
             DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
             PERSONS_DB_WRITER_URL: 'postgres://insights:insights@localhost:5432/insights_persons'
             PERSONFN_ADDR: 'localhost:50052'
-            POSTFN_PERSONS_DB_NAME: 'insights_persons'
+            INSIGHTS_PERSONS_DB_NAME: 'insights_persons'
             REDIS_URL: 'redis://localhost'
             DATASTORE_HOST: 'localhost'
             DATASTORE_SECURE: 'False'
@@ -312,7 +312,7 @@ jobs:
             DISABLE_SECURE_SSL_REDIRECT: 'True'
             DATASTORE_LOGS_CLUSTER_SECURE: 'False'
             CELERY_METRICS_PORT: 8999
-            POSTFN_FEATURE_FLAGS_FORCE_ENABLED: 'logs-alerting,dashboard-widgets,product-business-knowledge'
+            INSIGHTS_FEATURE_FLAGS_FORCE_ENABLED: 'logs-alerting,dashboard-widgets,product-business-knowledge'
             # Required for the feature_flags test_evaluation endpoint, which authenticates
             # historical-flag override requests to the Rust flags service. Any non-empty
             # value is fine for CI — the Rust service in the test stack accepts it.
@@ -352,8 +352,8 @@ jobs:
               continue-on-error: true
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_SETUP_ACTIONS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_SETUP_ACTIONS_PRIVATE_KEY }}
                   skip-token-revoke: true
 
             - name: Set up Python
@@ -638,8 +638,8 @@ jobs:
               # The junit reporter (alongside the default console one) feeds the Trunk upload below.
               run: cd services/mcp && pnpm run test:integration -- --reporter=default --reporter=junit --outputFile.junit=junit-integration.xml
               env:
-                  TEST_POSTFN_API_BASE_URL: http://localhost:8000
-                  TEST_POSTFN_PERSONAL_API_KEY: phx_e2e_demo_api_key
+                  TEST_INSIGHTS_API_BASE_URL: http://localhost:8000
+                  TEST_INSIGHTS_PERSONAL_API_KEY: phx_e2e_demo_api_key
                   TEST_ORG_ID: ${{ env.TEST_ORG_ID }}
                   TEST_PROJECT_ID: ${{ env.TEST_PROJECT_ID }}
 
@@ -705,8 +705,8 @@ jobs:
               id: app-token
               uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
               with:
-                  client-id: ${{ secrets.GH_APP_POSTFN_TESTS_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTFN_TESTS_PRIVATE_KEY }}
+                  client-id: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
 
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

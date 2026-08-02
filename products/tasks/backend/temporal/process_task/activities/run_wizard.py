@@ -65,7 +65,7 @@ def _format_wizard_output(result: ExecutionResult) -> str:
 
 
 def _build_wizard_command(repo_path: str, project_id: int) -> str:
-    # The wizard reads its access token from the POSTFN_WIZARD_API_KEY env var injected into the
+    # The wizard reads its access token from the INSIGHTS_WIZARD_API_KEY env var injected into the
     # sandbox (see provision_sandbox), so the token never appears on the command line.
     # --headless-DONOTUSE-EXPERIMENTAL runs the published wizard non-interactively.
     parts = [
@@ -83,11 +83,11 @@ def _build_wizard_command(repo_path: str, project_id: int) -> str:
     if settings.DEBUG:
         # Local dev: pin the wizard to the same Insights instance the sandbox itself reaches, instead
         # of letting it infer a cloud region from the access token (which fails for a locally-minted
-        # token). POSTFN_API_URL is injected into the sandbox env and already carries the provider's
+        # token). INSIGHTS_API_URL is injected into the sandbox env and already carries the provider's
         # in-container rewrite (e.g. http://host.docker.internal:8000 for the Docker sandbox, since
         # localhost/:8010 are unreachable from inside it), so expand it inside the container rather
         # than baking a host-side URL into the command.
-        parts.append('--base-url "$POSTFN_API_URL"')
+        parts.append('--base-url "$INSIGHTS_API_URL"')
 
     return " ".join(parts)
 

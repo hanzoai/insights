@@ -4,16 +4,16 @@ import { RedisConnectionConfig } from '../utils/db/redis'
 
 /**
  * Build the connection config for the ingestion Redis pool.
- * Fallback chain: INGESTION_REDIS_HOST → POSTFN_REDIS_HOST → REDIS_URL
+ * Fallback chain: INGESTION_REDIS_HOST → INSIGHTS_REDIS_HOST → REDIS_URL
  */
 export function createIngestionRedisConnectionConfig(
     config: Pick<
         CommonConfig,
         | 'INGESTION_REDIS_HOST'
         | 'INGESTION_REDIS_PORT'
-        | 'POSTFN_REDIS_HOST'
-        | 'POSTFN_REDIS_PORT'
-        | 'POSTFN_REDIS_PASSWORD'
+        | 'INSIGHTS_REDIS_HOST'
+        | 'INSIGHTS_REDIS_PORT'
+        | 'INSIGHTS_REDIS_PASSWORD'
         | 'REDIS_URL'
     >
 ): RedisConnectionConfig {
@@ -24,10 +24,10 @@ export function createIngestionRedisConnectionConfig(
             name: 'ingestion-redis',
         }
     }
-    if (config.POSTFN_REDIS_HOST) {
+    if (config.INSIGHTS_REDIS_HOST) {
         return {
-            url: config.POSTFN_REDIS_HOST,
-            options: { port: config.POSTFN_REDIS_PORT, password: config.POSTFN_REDIS_PASSWORD },
+            url: config.INSIGHTS_REDIS_HOST,
+            options: { port: config.INSIGHTS_REDIS_PORT, password: config.INSIGHTS_REDIS_PASSWORD },
             name: 'ingestion-redis',
         }
     }
@@ -36,15 +36,15 @@ export function createIngestionRedisConnectionConfig(
 
 /**
  * Build the connection config for the Insights Redis pool.
- * Fallback chain: POSTFN_REDIS_HOST → REDIS_URL
+ * Fallback chain: INSIGHTS_REDIS_HOST → REDIS_URL
  */
 export function createInsightsRedisConnectionConfig(
-    config: Pick<CommonConfig, 'POSTFN_REDIS_HOST' | 'POSTFN_REDIS_PORT' | 'POSTFN_REDIS_PASSWORD' | 'REDIS_URL'>
+    config: Pick<CommonConfig, 'INSIGHTS_REDIS_HOST' | 'INSIGHTS_REDIS_PORT' | 'INSIGHTS_REDIS_PASSWORD' | 'REDIS_URL'>
 ): RedisConnectionConfig {
-    if (config.POSTFN_REDIS_HOST) {
+    if (config.INSIGHTS_REDIS_HOST) {
         return {
-            url: config.POSTFN_REDIS_HOST,
-            options: { port: config.POSTFN_REDIS_PORT, password: config.POSTFN_REDIS_PASSWORD },
+            url: config.INSIGHTS_REDIS_HOST,
+            options: { port: config.INSIGHTS_REDIS_PORT, password: config.INSIGHTS_REDIS_PASSWORD },
             name: 'insights-redis',
         }
     }
@@ -76,9 +76,9 @@ export function createFeatureFlagCalledDedupRedisConnectionConfig(
             CommonConfig,
             | 'INGESTION_REDIS_HOST'
             | 'INGESTION_REDIS_PORT'
-            | 'POSTFN_REDIS_HOST'
-            | 'POSTFN_REDIS_PORT'
-            | 'POSTFN_REDIS_PASSWORD'
+            | 'INSIGHTS_REDIS_HOST'
+            | 'INSIGHTS_REDIS_PORT'
+            | 'INSIGHTS_REDIS_PASSWORD'
             | 'REDIS_URL'
         >
 ): RedisConnectionConfig {

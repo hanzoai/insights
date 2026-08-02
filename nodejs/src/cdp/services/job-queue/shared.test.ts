@@ -1,4 +1,4 @@
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../../_tests/examples'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../../_tests/examples'
 import { createHogExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
 import { CyclotronJobInvocationResult } from '../../types'
 import { createInvocation } from '../../utils/invocation-utils'
@@ -7,9 +7,9 @@ import { createInvocationSanitizer, sanitizeInvocationForPersistence } from './s
 describe('sanitizeInvocationForPersistence', () => {
     const exampleInsightsFunction = createInsightsFunction({
         name: 'Test script function',
-        ...FN_EXAMPLES.simple_fetch,
-        ...FN_INPUTS_EXAMPLES.simple_fetch,
-        ...FN_FILTERS_EXAMPLES.no_filters,
+        ...INSIGHTS_EXAMPLES.simple_fetch,
+        ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+        ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
     })
 
     const exampleGroups = {
@@ -203,9 +203,9 @@ describe('sanitizeInvocationForPersistence', () => {
 describe('createInvocationSanitizer', () => {
     const exampleInsightsFunction = createInsightsFunction({
         name: 'Test script function',
-        ...FN_EXAMPLES.simple_fetch,
-        ...FN_INPUTS_EXAMPLES.simple_fetch,
-        ...FN_FILTERS_EXAMPLES.no_filters,
+        ...INSIGHTS_EXAMPLES.simple_fetch,
+        ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+        ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
     })
 
     const exampleGroups = {

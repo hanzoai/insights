@@ -27,9 +27,9 @@ from insights.sync import database_sync_to_async
 from insights.temporal.common.client import async_connect
 from insights.temporal.common.schedule import a_create_schedule, a_delete_schedule, a_schedule_exists, a_update_schedule
 from insights.temporal.common.search_attributes import (
-    POSTFN_SCHEDULE_FINGERPRINT_KEY,
-    POSTFN_SCHEDULE_TYPE_KEY,
-    POSTFN_TEAM_ID_KEY,
+    INSIGHTS_SCHEDULE_FINGERPRINT_KEY,
+    INSIGHTS_SCHEDULE_TYPE_KEY,
+    INSIGHTS_TEAM_ID_KEY,
 )
 
 from products.replay_vision.backend.models.replay_scanner import ReplayScanner
@@ -148,9 +148,9 @@ async def a_upsert_scanner_schedule(scanner_id: UUID, team_id: int) -> None:
     schedule = _build_schedule(scanner_id, team_id)
     search_attributes = TypedSearchAttributes(
         search_attributes=[
-            SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=team_id),
-            SearchAttributePair(key=POSTFN_SCHEDULE_TYPE_KEY, value=SCANNER_SCHEDULE_TYPE),
-            SearchAttributePair(key=POSTFN_SCHEDULE_FINGERPRINT_KEY, value=fingerprint),
+            SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=team_id),
+            SearchAttributePair(key=INSIGHTS_SCHEDULE_TYPE_KEY, value=SCANNER_SCHEDULE_TYPE),
+            SearchAttributePair(key=INSIGHTS_SCHEDULE_FINGERPRINT_KEY, value=fingerprint),
         ]
     )
 

@@ -24,7 +24,7 @@ PAYLOAD='{
   },
   "build": {
     "env": {
-      "GATSBY_POSTFN_BRANCH": "'"$PR_BRANCH"'"
+      "GATSBY_INSIGHTS_BRANCH": "'"$PR_BRANCH"'"
     }
   }
 }'

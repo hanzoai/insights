@@ -2513,7 +2513,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
             // behind the rollout flag.
             (s) => [s.featureFlags, s.isSandboxMode],
             (featureFlags: import('lib/logic/featureFlagLogic').FeatureFlagsSet, isSandboxMode: boolean): boolean =>
-                !!featureFlags[FEATURE_FLAGS.POSTFN_AI_QUEUE_MESSAGES_SYSTEM] || isSandboxMode,
+                !!featureFlags[FEATURE_FLAGS.INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM] || isSandboxMode,
         ],
 
         queueIsFull: [

@@ -46,7 +46,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                               [...]
                                             </activity>
                                             <meta-data android:name="com.insights.insights.PROJECT_TOKEN" android:value="<ph_project_token>" />
-                                            <meta-data android:name="com.insights.insights.POSTFN_HOST" android:value="<ph_client_api_host>" />
+                                            <meta-data android:name="com.insights.insights.INSIGHTS_HOST" android:value="<ph_client_api_host>" />
                                             <meta-data android:name="com.insights.insights.TRACK_APPLICATION_LIFECYCLE_EVENTS" android:value="true" />
                                             <meta-data android:name="com.insights.insights.DEBUG" android:value="true" />
                                           </application>
@@ -84,7 +84,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                             [...]
                                             <key>com.insights.insights.PROJECT_TOKEN</key>
                                             <string><ph_project_token></string>
-                                            <key>com.insights.insights.POSTFN_HOST</key>
+                                            <key>com.insights.insights.INSIGHTS_HOST</key>
                                             <string><ph_client_api_host></string>
                                             <key>com.insights.insights.CAPTURE_APPLICATION_LIFECYCLE_EVENTS</key>
                                             <true/>

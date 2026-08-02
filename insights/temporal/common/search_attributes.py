@@ -7,30 +7,30 @@ from temporalio.common import SearchAttributeKey
 # that requires the Namespace Admin role in Temporal Cloud. Be mindful when adding new ones.
 # Deleting custom search attributes has to go through their support. You've been warned.
 
-POSTFN_TEAM_ID_KEY = SearchAttributeKey.for_int("InsightsTeamId")
-POSTFN_ORG_ID_KEY = SearchAttributeKey.for_keyword("InsightsOrgId")
+INSIGHTS_TEAM_ID_KEY = SearchAttributeKey.for_int("InsightsTeamId")
+INSIGHTS_ORG_ID_KEY = SearchAttributeKey.for_keyword("InsightsOrgId")
 # Data modeling
-POSTFN_DAG_ID_KEY = SearchAttributeKey.for_keyword("InsightsDagId")
+INSIGHTS_DAG_ID_KEY = SearchAttributeKey.for_keyword("InsightsDagId")
 # Tags a Temporal schedule so a namespace-wide reconciler can find its own schedules
 # without scanning every schedule in the namespace.
-POSTFN_SCHEDULE_TYPE_KEY = SearchAttributeKey.for_keyword("InsightsScheduleType")
+INSIGHTS_SCHEDULE_TYPE_KEY = SearchAttributeKey.for_keyword("InsightsScheduleType")
 # Hash of the SignalSourceConfig dict that produced the schedule. Reconcilers
 # compare to the freshly-computed hash to detect drift after UI config edits.
-POSTFN_SCHEDULE_FINGERPRINT_KEY = SearchAttributeKey.for_keyword("InsightsScheduleFingerprint")
-POSTFN_SESSION_RECORDING_ID_KEY = SearchAttributeKey.for_keyword("InsightsSessionRecordingId")
+INSIGHTS_SCHEDULE_FINGERPRINT_KEY = SearchAttributeKey.for_keyword("InsightsScheduleFingerprint")
+INSIGHTS_SESSION_RECORDING_ID_KEY = SearchAttributeKey.for_keyword("InsightsSessionRecordingId")
 # Replay Vision scanner UUID, stamped on every apply-scanner workflow so the sweep can count a
 # single scanner's in-flight applies and enforce a hard per-scanner concurrency cap.
-POSTFN_SCANNER_ID_KEY = SearchAttributeKey.for_keyword("InsightsScannerId")
+INSIGHTS_SCANNER_ID_KEY = SearchAttributeKey.for_keyword("InsightsScannerId")
 
 # Registry of all custom search attributes Insights registers in Temporal.
 # This is the single source of truth — the register_temporal_search_attributes
 # management command reads from this list.
-POSTFN_SEARCH_ATTRIBUTES: list[SearchAttributeKey] = [
-    POSTFN_TEAM_ID_KEY,
-    POSTFN_ORG_ID_KEY,
-    POSTFN_DAG_ID_KEY,
-    POSTFN_SCHEDULE_TYPE_KEY,
-    POSTFN_SCHEDULE_FINGERPRINT_KEY,
-    POSTFN_SESSION_RECORDING_ID_KEY,
-    POSTFN_SCANNER_ID_KEY,
+INSIGHTS_SEARCH_ATTRIBUTES: list[SearchAttributeKey] = [
+    INSIGHTS_TEAM_ID_KEY,
+    INSIGHTS_ORG_ID_KEY,
+    INSIGHTS_DAG_ID_KEY,
+    INSIGHTS_SCHEDULE_TYPE_KEY,
+    INSIGHTS_SCHEDULE_FINGERPRINT_KEY,
+    INSIGHTS_SESSION_RECORDING_ID_KEY,
+    INSIGHTS_SCANNER_ID_KEY,
 ]

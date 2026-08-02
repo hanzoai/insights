@@ -235,7 +235,7 @@ test.describe('Signup', () => {
 
         // Inject cloud = true into the context
         await page.evaluate(() => {
-            const context = window['POSTFN_APP_CONTEXT']
+            const context = window['INSIGHTS_APP_CONTEXT']
             if (context && context.preflight) {
                 context.preflight.cloud = true
             }

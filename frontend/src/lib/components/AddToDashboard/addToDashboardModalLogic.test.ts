@@ -106,7 +106,7 @@ describe('addToDashboardModalLogic', () => {
     afterEach(() => {
         logic?.unmount()
         // Tests may set `current_user: null`; clear so the next test gets a fresh `initKeaTests` bootstrap.
-        delete window.POSTFN_APP_CONTEXT
+        delete window.INSIGHTS_APP_CONTEXT
     })
 
     it('addNewDashboard sets redirectAfterCreation to false on newDashboardLogic', async () => {
@@ -197,7 +197,7 @@ describe('addToDashboardModalLogic', () => {
     })
 
     it('when user is not loaded, dashboards with no creator are not grouped as mine', async () => {
-        window.POSTFN_APP_CONTEXT = { current_user: null } as unknown as AppContext
+        window.INSIGHTS_APP_CONTEXT = { current_user: null } as unknown as AppContext
         const insightOnlyOnDash2: QueryBasedInsightModel = {
             ...MOCK_INSIGHT,
             dashboards: [2],

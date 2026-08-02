@@ -33,8 +33,8 @@ from insights.models.instance_setting import set_instance_setting
 from insights.models.integration import (
     CONFIG_LEGACY_OAUTH_CLIENT,
     MISSING_CERT_PATH,
-    POSTFN_CONNECT_DEFAULT_SCOPES,
-    POSTFN_CONNECT_IDENTITY_SCOPES,
+    INSIGHTS_CONNECT_DEFAULT_SCOPES,
+    INSIGHTS_CONNECT_IDENTITY_SCOPES,
     TLS,
     Authority,
     AwsS3Integration,
@@ -79,10 +79,10 @@ def update_db_field_value(field, model_id, value):
 
 
 def test_slack_oauth_scope_includes_canvas_scope_for_local_installs():
-    from insights.models.integration import POSTFN_SLACK_SCOPE
+    from insights.models.integration import INSIGHTS_SLACK_SCOPE
 
-    assert "canvases:write" in set(POSTFN_SLACK_SCOPE.split(","))
-    assert "files:write" in set(POSTFN_SLACK_SCOPE.split(","))
+    assert "canvases:write" in set(INSIGHTS_SLACK_SCOPE.split(","))
+    assert "files:write" in set(INSIGHTS_SLACK_SCOPE.split(","))
 
 
 class TestIntegrationModel(BaseTest):
@@ -1251,15 +1251,15 @@ class TestOauthIntegrationModel(BaseTest):
 
 class TestInsightsConnectIntegration(BaseTest):
     connect_settings = {
-        "POSTFN_CONNECT_BASE_URL_US": "https://us.hanzo.ai",
-        "POSTFN_CONNECT_OAUTH_CLIENT_ID_US": "us-client-id",
-        "POSTFN_CONNECT_OAUTH_CLIENT_SECRET_US": "us-secret",
-        "POSTFN_CONNECT_BASE_URL_EU": "https://eu.hanzo.ai",
-        "POSTFN_CONNECT_OAUTH_CLIENT_ID_EU": "eu-client-id",
-        "POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU": "eu-secret",
-        "POSTFN_CONNECT_BASE_URL_DEV": "http://localhost:8000",
-        "POSTFN_CONNECT_OAUTH_CLIENT_ID_DEV": "dev-client-id",
-        "POSTFN_CONNECT_OAUTH_CLIENT_SECRET_DEV": "dev-secret",
+        "INSIGHTS_CONNECT_BASE_URL_US": "https://us.hanzo.ai",
+        "INSIGHTS_CONNECT_OAUTH_CLIENT_ID_US": "us-client-id",
+        "INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_US": "us-secret",
+        "INSIGHTS_CONNECT_BASE_URL_EU": "https://eu.hanzo.ai",
+        "INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU": "eu-client-id",
+        "INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU": "eu-secret",
+        "INSIGHTS_CONNECT_BASE_URL_DEV": "http://localhost:8000",
+        "INSIGHTS_CONNECT_OAUTH_CLIENT_ID_DEV": "dev-client-id",
+        "INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_DEV": "dev-secret",
     }
 
     @parameterized.expand(
@@ -1302,7 +1302,7 @@ class TestInsightsConnectIntegration(BaseTest):
         with self.settings(**self.connect_settings):
             url = OauthIntegration.authorize_url("insights", token="tok", region="US", scopes=None)
             params = {k: v[0] for k, v in parse_qs(url.partition("?")[2]).items()}
-            expected = " ".join([*POSTFN_CONNECT_DEFAULT_SCOPES, *POSTFN_CONNECT_IDENTITY_SCOPES])
+            expected = " ".join([*INSIGHTS_CONNECT_DEFAULT_SCOPES, *INSIGHTS_CONNECT_IDENTITY_SCOPES])
             assert params["scope"] == expected
 
     def test_authorize_url_unknown_region_raises(self):
@@ -1313,8 +1313,8 @@ class TestInsightsConnectIntegration(BaseTest):
     def test_authorize_url_unconfigured_region_raises(self):
         unconfigured = {
             **self.connect_settings,
-            "POSTFN_CONNECT_OAUTH_CLIENT_ID_EU": "",
-            "POSTFN_CONNECT_OAUTH_CLIENT_SECRET_EU": "",
+            "INSIGHTS_CONNECT_OAUTH_CLIENT_ID_EU": "",
+            "INSIGHTS_CONNECT_OAUTH_CLIENT_SECRET_EU": "",
         }
         with self.settings(**unconfigured):
             with pytest.raises(NotImplementedError):

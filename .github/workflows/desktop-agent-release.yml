@@ -73,7 +73,7 @@ jobs:
             actions: write
         steps:
             # Same-repo dispatch: the agent now lives in this repository, so the
-            # cross-repo GH_APP_POSTFN_WORKFLOW_TRIGGER app is retired and the
+            # cross-repo GH_APP_INSIGHTS_WORKFLOW_TRIGGER app is retired and the
             # ambient token dispatches the rebuild directly.
             - name: Dispatch sandbox image rebuild
               env:

@@ -1,4 +1,4 @@
-import { POSTFN_EU_BASE_URL, POSTFN_US_BASE_URL } from '@/lib/constants'
+import { INSIGHTS_EU_BASE_URL, INSIGHTS_US_BASE_URL } from '@/lib/constants'
 import { getClientMapping, getRegionSelection } from '@/lib/kv'
 import { proxyPostWithClientId, proxyToRegion, tryBothRegions } from '@/lib/proxy'
 import { errorResponse } from '@/lib/validation'
@@ -25,7 +25,7 @@ export async function handleIntrospect(request: Request): Promise<Response> {
     headers.delete('host')
     headers.delete('content-length')
 
-    const usResponse = await fetch(new URL('/oauth/introspect/', POSTFN_US_BASE_URL).toString(), {
+    const usResponse = await fetch(new URL('/oauth/introspect/', INSIGHTS_US_BASE_URL).toString(), {
         method: 'POST',
         headers,
         body,
@@ -45,7 +45,7 @@ export async function handleIntrospect(request: Request): Promise<Response> {
     euHeaders.delete('host')
     euHeaders.delete('content-length')
 
-    const euResponse = await fetch(new URL('/oauth/introspect/', POSTFN_EU_BASE_URL).toString(), {
+    const euResponse = await fetch(new URL('/oauth/introspect/', INSIGHTS_EU_BASE_URL).toString(), {
         method: 'POST',
         headers: euHeaders,
         body,

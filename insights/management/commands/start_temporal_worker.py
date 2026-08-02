@@ -20,7 +20,7 @@ with workflow.unsafe.imports_passed_through():
     from django.core.management.base import BaseCommand, CommandError
 
 from insights.datastore.query_tagging import tag_queries
-from insights.temporal.ai import AI_ACTIVITIES, AI_WORKFLOWS, POSTFN_CODE_SLACK_ACTIVITIES, POSTFN_CODE_SLACK_WORKFLOWS
+from insights.temporal.ai import AI_ACTIVITIES, AI_WORKFLOWS, INSIGHTS_CODE_SLACK_ACTIVITIES, INSIGHTS_CODE_SLACK_WORKFLOWS
 from insights.temporal.ai_observability import (
     ACTIVITIES as LLM_ANALYTICS_ACTIVITIES,
     EVAL_ACTIVITIES as LLM_ANALYTICS_EVAL_ACTIVITIES,
@@ -385,8 +385,8 @@ _task_queue_specs = [
         # cut over and any in-flight runs have drained, drop them from
         # AI_WORKFLOWS / AI_ACTIVITIES and flip the start_workflow callers in
         # products/slack_app to settings.TASKS_TASK_QUEUE.
-        TASKS_WORKFLOWS + POSTFN_CODE_SLACK_WORKFLOWS,
-        TASKS_ACTIVITIES + POSTFN_CODE_SLACK_ACTIVITIES,
+        TASKS_WORKFLOWS + INSIGHTS_CODE_SLACK_WORKFLOWS,
+        TASKS_ACTIVITIES + INSIGHTS_CODE_SLACK_ACTIVITIES,
     ),
     (
         settings.MAX_AI_TASK_QUEUE,

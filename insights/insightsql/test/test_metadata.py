@@ -39,7 +39,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL_EXPR,
+                language=HogLanguage.INSIGHTS_QL_EXPR,
                 query=query,
                 sourceQuery=InsightsQLQuery(query=f"select * from {table}"),
                 response=None,
@@ -51,7 +51,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _select(self, query: str, modifiers: Optional[InsightsQLQueryModifiers] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=HogLanguage.FN_QL, query=query, response=None, modifiers=modifiers
+                kind="InsightsQLMetadata", language=HogLanguage.INSIGHTS_QL, query=query, response=None, modifiers=modifiers
             ),
             team=self.team,
         )
@@ -62,7 +62,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query=query,
                 response=None,
                 variables=variables,
@@ -81,7 +81,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
 
     def _template(self, query: str) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
-            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=HogLanguage.FN_TEMPLATE, query=query, response=None),
+            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=HogLanguage.INSIGHTS_TEMPLATE, query=query, response=None),
             team=self.team,
         )
 
@@ -392,7 +392,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query="SELECT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -422,7 +422,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query="SELECT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -456,7 +456,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query="SELECT * FROM persons LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -496,7 +496,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query="SELECT * FROM insights_user LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -540,7 +540,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query="SELECT * FROM events LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -581,7 +581,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL_EXPR,
+                language=HogLanguage.INSIGHTS_QL_EXPR,
                 query="icu_collate_nl(name, 'nl')",
                 sourceQuery=InsightsQLQuery(query="select * from insights_user"),
                 response=None,
@@ -623,7 +623,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query="SELECT * FROM insights_user LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -648,7 +648,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.FN_QL,
+                language=HogLanguage.INSIGHTS_QL,
                 query="SELECT 1",
                 response=None,
                 connectionId=str(selected_source.id),

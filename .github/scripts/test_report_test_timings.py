@@ -804,11 +804,11 @@ def test_job_trace_key_distinguishes_jobs() -> None:
 @pytest.mark.parametrize(
     "env,expected",
     [
-        ({"POSTFN_DEVEX_PROJECT_API_TOKEN": "phc_a", "POSTFN_CI_TRACES_EXTRA_TOKEN": "phc_b"}, ["phc_a", "phc_b"]),
-        ({"POSTFN_DEVEX_PROJECT_API_TOKEN": "phc_a", "POSTFN_CI_TRACES_EXTRA_TOKEN": "phc_a"}, ["phc_a"]),
-        ({"POSTFN_DEVEX_PROJECT_API_TOKEN": "phc_a"}, ["phc_a"]),
-        ({"POSTFN_CI_TRACES_EXTRA_TOKEN": "phc_b"}, ["phc_b"]),
-        ({"POSTFN_DEVEX_PROJECT_API_TOKEN": "", "POSTFN_CI_TRACES_EXTRA_TOKEN": ""}, []),
+        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "phc_a", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": "phc_b"}, ["phc_a", "phc_b"]),
+        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "phc_a", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": "phc_a"}, ["phc_a"]),
+        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "phc_a"}, ["phc_a"]),
+        ({"INSIGHTS_CI_TRACES_EXTRA_TOKEN": "phc_b"}, ["phc_b"]),
+        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": ""}, []),
         ({}, []),
     ],
 )

@@ -63,20 +63,20 @@ class TestAddTrackingParams:
 
 class TestResolveInsightsDomains:
     def test_empty_host_returns_defaults(self):
-        assert cli.resolve_insights_domains("") == cli.DEFAULT_POSTFN_DOMAINS
+        assert cli.resolve_insights_domains("") == cli.DEFAULT_INSIGHTS_DOMAINS
 
     def test_default_host_does_not_add_extras(self):
         # us.i.hanzo.ai is a subdomain of i.hanzo.ai, so no extra needed.
         domains = cli.resolve_insights_domains("https://us.i.hanzo.ai")
-        assert domains == cli.DEFAULT_POSTFN_DOMAINS
+        assert domains == cli.DEFAULT_INSIGHTS_DOMAINS
 
     def test_custom_host_adds_netloc(self):
         domains = cli.resolve_insights_domains("https://ph.example.com")
-        assert domains == (*cli.DEFAULT_POSTFN_DOMAINS, "ph.example.com")
+        assert domains == (*cli.DEFAULT_INSIGHTS_DOMAINS, "ph.example.com")
 
     def test_eu_cloud_does_not_add_extras(self):
         domains = cli.resolve_insights_domains("https://eu.i.hanzo.ai")
-        assert domains == cli.DEFAULT_POSTFN_DOMAINS
+        assert domains == cli.DEFAULT_INSIGHTS_DOMAINS
 
 
 class TestLoadUrlsFile:
@@ -184,7 +184,7 @@ class TestBuildParser:
 
     def test_insights_host_default(self):
         args = cli.build_parser().parse_args(["check-loading", "--url", "https://example.com"])
-        assert args.insights_host == cli.DEFAULT_POSTFN_HOST
+        assert args.insights_host == cli.DEFAULT_INSIGHTS_HOST
 
     def test_custom_insights_host(self):
         args = cli.build_parser().parse_args(
@@ -201,7 +201,7 @@ class TestBuildParser:
 
 class TestAnalyticsCapture:
     def test_is_insights_matches_default_domains(self):
-        cap = cli.AnalyticsCapture(insights_domains=cli.DEFAULT_POSTFN_DOMAINS)
+        cap = cli.AnalyticsCapture(insights_domains=cli.DEFAULT_INSIGHTS_DOMAINS)
         assert cap._is_insights("https://us.i.hanzo.ai/capture/")
         assert cap._is_insights("https://app.hanzo.ai/decide/")
         assert not cap._is_insights("https://google-analytics.com/collect")
@@ -226,7 +226,7 @@ class TestAnalyticsCapture:
         ],
     )
     def test_is_insights_rejects_lookalike_urls(self, url):
-        cap = cli.AnalyticsCapture(insights_domains=cli.DEFAULT_POSTFN_DOMAINS)
+        cap = cli.AnalyticsCapture(insights_domains=cli.DEFAULT_INSIGHTS_DOMAINS)
         assert not cap._is_insights(url)
 
 

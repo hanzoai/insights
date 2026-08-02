@@ -61,7 +61,7 @@ _SLACK_HEADER_MAX_LEN = 150
 _MAX_REVIEWER_MENTIONS = 5
 
 # Deep link opened by the Insights Desktop app. Override via env for dev (`insights-code-dev`).
-POSTFN_CODE_INBOX_DEEP_LINK_SCHEME = getattr(settings, "POSTFN_CODE_INBOX_DEEP_LINK_SCHEME", "insights-code")
+INSIGHTS_CODE_INBOX_DEEP_LINK_SCHEME = getattr(settings, "INSIGHTS_CODE_INBOX_DEEP_LINK_SCHEME", "insights-code")
 
 # Priority ranking — lower index is higher priority. Index used for threshold comparison.
 _PRIORITY_ORDER: tuple[str, ...] = (

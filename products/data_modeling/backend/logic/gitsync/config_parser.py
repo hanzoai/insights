@@ -69,7 +69,7 @@ from products.warehouse_sources.backend.facade.models import sync_frequency_to_s
 
 logger = structlog.get_logger(__name__)
 
-POSTFN_CONFIG_BASENAMES = ("insights.toml", "insights.yaml", "insights.yml")
+INSIGHTS_CONFIG_BASENAMES = ("insights.toml", "insights.yaml", "insights.yml")
 DAG_CONFIG_BASENAMES = ("dag.toml", "dag.yaml", "dag.yml")
 SUPPORTED_VERSIONS = (1,)
 

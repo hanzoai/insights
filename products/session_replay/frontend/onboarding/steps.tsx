@@ -90,7 +90,7 @@ export const sessionReplayOnboarding: ProductOnboardingProvider = {
             stepKey: OnboardingStepKey.INSTALL,
             role: ctx.role,
             setupTaskId: SetupTaskId.SetupSessionRecordings,
-            dedupKey: INSTALL_DEDUP_KEYS.POSTFN_JS,
+            dedupKey: INSTALL_DEDUP_KEYS.INSIGHTS_JS,
             render: () => <OnboardingInstallStep sdkInstructionMap={SessionReplaySDKInstructions} />,
         }
 

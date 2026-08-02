@@ -21,8 +21,8 @@ import { ExecHelpCatalog } from '@/tools/exec-help'
 import { withInformationalResponse } from '@/tools/tool-utils'
 import { getToolDefinition } from '@/tools/toolDefinitions'
 import {
-    POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY,
-    POSTFN_META_KEY,
+    INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY,
+    INSIGHTS_META_KEY,
     type Context,
     type Tool,
     type ZodObjectAny,
@@ -161,7 +161,7 @@ describe('exec tool', () => {
         })
 
         it('returns JSON for tool with outputFormat json even without --json flag', async () => {
-            const tool = makeMockTool({ _meta: { [POSTFN_META_KEY]: { outputFormat: 'json' } } })
+            const tool = makeMockTool({ _meta: { [INSIGHTS_META_KEY]: { outputFormat: 'json' } } })
             const exec = createExec([tool])
             const result = await exec.handler(mockContext, { command: 'call mock-tool' })
             const parsed = JSON.parse(result as string)
@@ -169,7 +169,7 @@ describe('exec tool', () => {
         })
 
         it('returns JSON when both --json flag and tool meta outputFormat=json are present', async () => {
-            const tool = makeMockTool({ _meta: { [POSTFN_META_KEY]: { outputFormat: 'json' } } })
+            const tool = makeMockTool({ _meta: { [INSIGHTS_META_KEY]: { outputFormat: 'json' } } })
             const exec = createExec([tool])
             const result = await exec.handler(mockContext, { command: 'call --json mock-tool' })
             const parsed = JSON.parse(result as string)
@@ -181,7 +181,7 @@ describe('exec tool', () => {
                 handler: async () => ({
                     results: [{ data: [1, 2, 3], count: 6 }],
                     _insightsUrl: 'http://localhost:8010/insights/new#q=...',
-                    [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6',
+                    [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6',
                 }),
             })
             const exec = createExec([tool])
@@ -210,14 +210,14 @@ describe('exec tool', () => {
             const tool = makeMockTool({
                 handler: async () => ({
                     results: [{ data: [1, 2, 3] }],
-                    [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6',
+                    [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6',
                 }),
             })
             const exec = createExec([tool])
             const result = await exec.handler(mockContext, { command: 'call --json mock-tool' })
             const parsed = JSON.parse(result as string)
             expect(parsed.results).toEqual([{ data: [1, 2, 3] }])
-            expect(parsed[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('Date|count\n2026-05-07|6')
+            expect(parsed[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('Date|count\n2026-05-07|6')
         })
 
         it('keeps agent CLI informational data inside the trust boundary in --json mode', async () => {
@@ -349,7 +349,7 @@ describe('exec tool', () => {
                     handler: async () => ({
                         results: [{ data: [1, 2, 3], count: 6 }],
                         _insightsUrl: 'http://localhost:8010/insights/new#q=...',
-                        [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6',
+                        [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6',
                     }),
                 })
                 const exec = createExec([tool], consumer, options)
@@ -678,7 +678,7 @@ describe('exec tool', () => {
                     const optimized = (params as { output_format?: string }).output_format !== 'json'
                     return {
                         results: [{ count: 6 }],
-                        ...(optimized ? { [POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6' } : {}),
+                        ...(optimized ? { [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: 'Date|count\n2026-05-07|6' } : {}),
                     }
                 },
             })
@@ -701,7 +701,7 @@ describe('exec tool', () => {
             })) as string
             const parsed = JSON.parse(result)
             expect(parsed.results).toEqual([{ count: 6 }])
-            expect(parsed[POSTFN_FORMATTED_RESULTS_OVERRIDE_KEY]).toBeUndefined()
+            expect(parsed[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBeUndefined()
         })
 
         it('folds --json into the dispatched output_format so the handler skips the formatter', async () => {
@@ -936,12 +936,12 @@ describe('exec tool', () => {
                 cache: {} as any,
                 env: {
                     MCP_APPS_BASE_URL: undefined,
-                    POSTFN_ANALYTICS_API_KEY: undefined,
-                    POSTFN_ANALYTICS_HOST: undefined,
-                    POSTFN_API_BASE_URL: undefined,
-                    POSTFN_PUBLIC_URL: undefined,
-                    POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-                    POSTFN_UI_APPS_TOKEN: undefined,
+                    INSIGHTS_ANALYTICS_API_KEY: undefined,
+                    INSIGHTS_ANALYTICS_HOST: undefined,
+                    INSIGHTS_API_BASE_URL: undefined,
+                    INSIGHTS_PUBLIC_URL: undefined,
+                    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+                    INSIGHTS_UI_APPS_TOKEN: undefined,
                 },
                 stateManager: {
                     getApiKey: async () => ({ scopes: ['*'] }),
@@ -1002,12 +1002,12 @@ describe('exec tool', () => {
                 cache: {} as any,
                 env: {
                     MCP_APPS_BASE_URL: undefined,
-                    POSTFN_ANALYTICS_API_KEY: undefined,
-                    POSTFN_ANALYTICS_HOST: undefined,
-                    POSTFN_API_BASE_URL: undefined,
-                    POSTFN_PUBLIC_URL: undefined,
-                    POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-                    POSTFN_UI_APPS_TOKEN: undefined,
+                    INSIGHTS_ANALYTICS_API_KEY: undefined,
+                    INSIGHTS_ANALYTICS_HOST: undefined,
+                    INSIGHTS_API_BASE_URL: undefined,
+                    INSIGHTS_PUBLIC_URL: undefined,
+                    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+                    INSIGHTS_UI_APPS_TOKEN: undefined,
                 },
                 stateManager: {
                     getApiKey: async () => ({ scopes: ['*'] }),
@@ -1261,12 +1261,12 @@ describe('exec tool', () => {
                 cache: {} as any,
                 env: {
                     MCP_APPS_BASE_URL: undefined,
-                    POSTFN_ANALYTICS_API_KEY: undefined,
-                    POSTFN_ANALYTICS_HOST: undefined,
-                    POSTFN_API_BASE_URL: undefined,
-                    POSTFN_PUBLIC_URL: undefined,
-                    POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-                    POSTFN_UI_APPS_TOKEN: undefined,
+                    INSIGHTS_ANALYTICS_API_KEY: undefined,
+                    INSIGHTS_ANALYTICS_HOST: undefined,
+                    INSIGHTS_API_BASE_URL: undefined,
+                    INSIGHTS_PUBLIC_URL: undefined,
+                    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+                    INSIGHTS_UI_APPS_TOKEN: undefined,
                 },
                 stateManager: {
                     getApiKey: async () => ({ scopes: ['*'] }),
