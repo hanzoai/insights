@@ -227,6 +227,30 @@ DROP_GLOBS: list[tuple[str, str]] = [
     (".sqlx/", "sqlx offline query cache; regenerated from the database"),
 ]
 
+# --- attribution --------------------------------------------------------
+#
+# A licence is the one text in the tree that is not ours to rewrite. The MIT
+# grant we hold this code under is conditioned on carrying the original
+# copyright notice forward, so renaming the upstream company inside a licence
+# both breaks that condition and asserts our copyright over their code. It is
+# also invisible: the file still reads like a valid licence.
+#
+# This is structural, not an allowlist entry, because the allowlist is a list
+# someone can add to and this must not be opt-out-able. Paths still rename —
+# a licence that moves with its directory is fine. Only the bytes are frozen.
+
+LICENCE_FILE = re.compile(
+    r"^(licen[cs]e|copying|copyright|notice)"     # the notice itself
+    r"([-_][a-z0-9\-]+)?"                         # an optional variant: LICENSE-MIT
+    r"(\.(md|txt|rst|markdown))?$",               # prose only: license.py is a module
+    re.IGNORECASE,
+)
+
+
+def is_licence(path: str) -> bool:
+    return bool(LICENCE_FILE.match(os.path.basename(path)))
+
+
 # --- allowlist ----------------------------------------------------------
 #
 # Content that legitimately still says the upstream name. Each entry is a
@@ -440,7 +464,7 @@ def apply(root: str, dry: bool) -> tuple[int, int]:
         src = os.path.join(root, rel)
         if not os.path.isfile(src) or os.path.islink(src):
             continue
-        if not skip_content(rel) and rel not in CONTENT_ALLOWLIST:
+        if not skip_content(rel) and not is_licence(rel) and rel not in CONTENT_ALLOWLIST:
             try:
                 raw = open(src, "rb").read()
                 text = raw.decode("utf-8")
@@ -471,6 +495,32 @@ def apply(root: str, dry: bool) -> tuple[int, int]:
     return edited, renamed
 
 
+LAUNDERED = re.compile(r"^.*copyright.*\binsights\b.*$", re.IGNORECASE | re.MULTILINE)
+
+
+def licences_unlaundered(root: str) -> int:
+    """Refuse a licence that attributes someone else's code to our brand.
+
+    This is the exact shape of the bug the refusal above prevents, asserted
+    from the other side: a rename that reaches a copyright line reads as a
+    valid licence afterwards, so nothing else in the tree would notice.
+    """
+    hit = []
+    for rel in tracked_files(root):
+        if not is_licence(rel):
+            continue
+        try:
+            text = open(os.path.join(root, rel), encoding="utf-8").read()
+        except (UnicodeDecodeError, OSError):
+            continue
+        hit += [(rel, m.group(0).strip()) for m in LAUNDERED.finditer(text)]
+    if hit:
+        print(f"FAIL: {len(hit)} licence copyright lines name our brand over someone else's code")
+        for rel, line in hit[:20]:
+            print(f"    {rel}: {line}")
+    return 1 if hit else 0
+
+
 def check(root: str) -> int:
     bad = 0
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
@@ -491,8 +541,13 @@ def check(root: str) -> int:
         b = os.path.basename(p)
         return b in MANIFESTS or b in SKIP_CONTENT_NAMES
 
-    pending = sorted(h for h in hits if h not in CONTENT_ALLOWLIST and is_manifest(h))
-    leaked = [h for h in hits if h not in CONTENT_ALLOWLIST and not is_manifest(h)]
+    exempt = set(CONTENT_ALLOWLIST)
+    attribution = sorted(h for h in hits if is_licence(h))
+    pending = sorted(h for h in hits if h not in exempt and not is_licence(h) and is_manifest(h))
+    leaked = [h for h in hits if h not in exempt and not is_licence(h) and not is_manifest(h)]
+    if attribution:
+        print(f"attribution: {len(attribution)} licence files name the upstream, as MIT requires")
+    bad += licences_unlaundered(root)
     if pending:
         print(f"PENDING: {len(pending)} dependency manifests still name upstream packages.")
         print("    Each needs a decision: take it from upstream, or host it under our name.")
