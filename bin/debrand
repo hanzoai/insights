@@ -275,6 +275,12 @@ CONTENT_ALLOWLIST: dict[str, str] = {
         "This file. The rules are the upstream names, so it necessarily "
         "spells them out."
     ),
+    "bin/debrand-selftest": (
+        "Tests this file. Its fixtures are an upstream copyright notice that "
+        "must survive verbatim and an upstream import that must not, so it "
+        "spells out both; rewriting them would assert the tests pass by "
+        "editing what they compare against."
+    ),
     "LLM.md": (
         "States which upstream commit we last converged from. Naming the "
         "upstream is the point of the sentence."
