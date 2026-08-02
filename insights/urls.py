@@ -5,6 +5,7 @@ from urllib.parse import urlencode, urlparse
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import render
 from django.template import loader
 from django.urls import include, path, re_path
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -525,7 +526,6 @@ urlpatterns = [
     path("toolbar_oauth/callback", user.toolbar_oauth_callback),
     path("toolbar_oauth/check", user.toolbar_oauth_check),
     opt_slash_path("api/user/redirect_to_site", user.redirect_to_site),
-    opt_slash_path("api/user/redirect_to_website", user.redirect_to_website),
     opt_slash_path("api/early_access_features", early_access_features),
     opt_slash_path("api/web_experiments", web_experiments),
     opt_slash_path("api/push_subscriptions", push_subscriptions),
@@ -766,5 +766,36 @@ frontend_unauthenticated_routes = [
 ]
 for route in frontend_unauthenticated_routes:
     urlpatterns.append(re_path(route, home))
+
+
+@ensure_csrf_cookie
+def root(request: HttpRequest) -> HttpResponse:
+    """`/` — the app for a signed-in user, the marketing landing for everyone else.
+
+    Anonymous `/` otherwise falls through to the catch-all below and bounces
+    straight to SSO, so the product has no public face at all: the only thing an
+    unauthenticated visitor can see is a login screen. Signed-in behaviour is
+    unchanged — same catch-all entrypoint, same SPA, same region redirect.
+
+    The CTAs point at surfaces that actually work. Plans deliberately leave for
+    hanzo.ai/pricing rather than this app's own billing pages: `/api/billing` is
+    not served here, so an in-app upgrade funnel would dead-end.
+    """
+    if request.user.is_authenticated:
+        return home_with_region_redirect(request)
+    return render(
+        request,
+        "landing.html",
+        {
+            "login_url": "/login",
+            "plans_url": "https://hanzo.ai/pricing",
+            "docs_url": "https://docs.hanzo.ai",
+            "source_url": "https://github.com/hanzoai/insights",
+        },
+    )
+
+
+# Ahead of the catch-all, so `/` branches before everything falls through to it.
+urlpatterns.append(re_path(r"^$", root))
 
 urlpatterns.append(re_path(r"^.*", home_with_region_redirect))

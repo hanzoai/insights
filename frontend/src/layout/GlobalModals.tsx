@@ -4,7 +4,6 @@ import { Suspense } from 'react'
 import { ItemSelectModal } from 'lib/components/FileSystem/ItemSelectModal/ItemSelectModal'
 import { LinkToModal } from 'lib/components/FileSystem/LinkTo/LinkTo'
 import { MoveToModal } from 'lib/components/FileSystem/MoveTo/MoveTo'
-import { MascotMode } from 'lib/components/MascotMode/MascotMode'
 import { SuperpowersModal } from 'lib/components/Superpowers/Superpowers'
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'
 import { TimeSensitiveAuthenticationModal } from 'lib/components/TimeSensitiveAuthentication/TimeSensitiveAuthentication'
@@ -77,7 +76,6 @@ export function GlobalModals(): JSX.Element {
             ) : null}
             <PreviewingCustomCssModal />
             <TwoFactorSetupModal />
-            <MascotMode />
             <PaymentEntryModal />
             <GlobalCustomUnitModal />
             <MoveToModal />
