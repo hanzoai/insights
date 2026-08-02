@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         AddIndexConcurrently(
             model_name="task",
-            index=models.Index(fields=["signal_report"], name="insights_task_signal_report_idx"),
+            index=models.Index(fields=["signal_report"], name="task_signal_report_idx"),
         ),
     ]

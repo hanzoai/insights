@@ -250,7 +250,7 @@ class Organization(ModelActivityMixin, UUIDTModel):
     )
     allow_publicly_shared_resources = models.BooleanField(default=True)
     default_role = models.ForeignKey(
-        "ee.Role",
+        "insights.Role",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
