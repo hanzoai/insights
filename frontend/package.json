@@ -2,15 +2,15 @@
     "name": "@hanzo/frontend",
     "version": "0.0.0",
     "description": "",
-    "homepage": "https://github.com/insights/insights#readme",
+    "homepage": "https://github.com/hanzoai/insights#readme",
     "bugs": {
-        "url": "https://github.com/insights/insights/issues"
+        "url": "https://github.com/hanzoai/insights/issues"
     },
     "license": "MIT",
     "author": "Insights Inc.",
     "repository": {
         "type": "git",
-        "url": "https://github.com/insights/insights.git"
+        "url": "https://github.com/hanzoai/insights.git"
     },
     "browser": {
         "path": "path-browserify"
@@ -80,7 +80,6 @@
         "@hanzo/icons": "catalog:",
         "@hanzo/products-access-control": "workspace:*",
         "@hanzo/products-actions": "workspace:*",
-        "@hanzo/products-ai-gateway": "workspace:*",
         "@hanzo/products-ai-observability": "workspace:*",
         "@hanzo/products-alerts": "workspace:*",
         "@hanzo/products-annotations": "workspace:*",
@@ -116,7 +115,6 @@
         "@hanzo/products-notebooks": "workspace:*",
         "@hanzo/products-notifications": "workspace:*",
         "@hanzo/products-persons": "workspace:*",
-        "@hanzo/products-platform-features": "workspace:*",
         "@hanzo/products-insights-ai": "workspace:*",
         "@hanzo/products-product-analytics": "workspace:*",
         "@hanzo/products-pulse": "workspace:*",
@@ -134,10 +132,8 @@
         "@hanzo/products-tasks": "workspace:*",
         "@hanzo/products-tracing": "workspace:*",
         "@hanzo/products-user-interviews": "workspace:*",
-        "@hanzo/products-visual-review": "workspace:*",
         "@hanzo/products-warehouse-sources": "workspace:*",
         "@hanzo/products-web-analytics": "workspace:*",
-        "@hanzo/products-wizard": "workspace:*",
         "@hanzo/products-workflows": "workspace:*",
         "@hanzo/quill": "workspace:*",
         "@hanzo/quill-charts": "workspace:*",
