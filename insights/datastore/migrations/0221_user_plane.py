@@ -61,7 +61,12 @@ from insights.models.event.plane import (
     USER_ALIAS_MV_SQL,
     USER_BACKFILL_SQL,
     USER_MV_SQL,
+    provisioned,
 )
+
+# ONE reading of the app's records, so every view this migration creates routes
+# the same way. See the routing note in `plane.py`.
+ROUTING = provisioned()
 
 operations = [
     # Recreate so a changed projection takes effect on re-run.
@@ -70,7 +75,7 @@ operations = [
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        USER_MV_SQL(),
+        USER_MV_SQL(ROUTING),
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
@@ -78,17 +83,17 @@ operations = [
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        USER_ALIAS_MV_SQL(),
+        USER_ALIAS_MV_SQL(ROUTING),
         node_roles=[NodeRole.DATA],
     ),
     # The views are live first, so a backfill only ever overlaps them, and the
     # overlap collapses.
     run_sql_with_exceptions(
-        USER_BACKFILL_SQL(),
+        USER_BACKFILL_SQL(ROUTING),
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        USER_ALIAS_BACKFILL_SQL(),
+        USER_ALIAS_BACKFILL_SQL(ROUTING),
         node_roles=[NodeRole.DATA],
     ),
 ]

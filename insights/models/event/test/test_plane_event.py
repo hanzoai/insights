@@ -17,6 +17,10 @@ from insights.models.event.plane import (
     USER_SELECT_SQL,
 )
 
+# The routing these cases are about. The builders are pure, so a test that asserts
+# a projection's text names its own input rather than reading the app's records.
+ROUTING = {"hanzo": 1}
+
 
 def column(columns, name):
     return dict(columns())[name]
@@ -27,7 +31,7 @@ def test_a_page_is_named_the_way_every_lens_reads_it():
     all key on the literal `$pageview`. A projection that publishes the
     surface's own name publishes rows none of them can find.
     """
-    event = dict(EVENT_COLUMNS(historical=False))["event"]
+    event = dict(EVENT_COLUMNS(ROUTING, historical=False))["event"]
     for kind, reserved in RESERVED_KIND.items():
         assert f"kind = '{kind}', '{reserved}'" in event
 
@@ -76,8 +80,9 @@ def test_the_projection_reads_the_plane_and_names_its_signal():
     publish every log line, span, error and replay clip into the product-event
     stream, and `user_mv` would mint a person for each of them.
     """
-    sql = EVENT_SELECT_SQL(historical=False)
-    assert sql.endswith("FROM event.fact\nWHERE signal = 'act'")
+    sql = EVENT_SELECT_SQL(ROUTING, historical=False)
+    # The WHERE is the signal AND the routing gate: which sort of fact, and whose.
+    assert sql.endswith("FROM event.fact\nWHERE signal = 'act' AND org IN ('hanzo')")
 
 
 def test_every_projection_of_the_plane_names_its_signal():
@@ -85,10 +90,10 @@ def test_every_projection_of_the_plane_names_its_signal():
     predicate is composed from one place precisely so a fourth cannot forget it.
     """
     for sql in (
-        EVENT_SELECT_SQL(historical=False),
-        EVENT_SELECT_SQL(historical=True),
-        USER_SELECT_SQL(),
-        USER_ALIAS_SELECT_SQL(),
+        EVENT_SELECT_SQL(ROUTING, historical=False),
+        EVENT_SELECT_SQL(ROUTING, historical=True),
+        USER_SELECT_SQL(ROUTING),
+        USER_ALIAS_SELECT_SQL(ROUTING),
     ):
         assert "FROM event.fact" in sql, sql
         assert EVENT_SIGNAL_SQL in sql, sql

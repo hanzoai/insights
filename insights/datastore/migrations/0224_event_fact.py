@@ -47,13 +47,18 @@ from insights.models.event.plane import (
     EVENT_MV_SQL,
     USER_ALIAS_MV_SQL,
     USER_MV_SQL,
+    provisioned,
 )
+
+# ONE reading of the app's records, so every view this migration creates routes
+# the same way. See the routing note in `plane.py`.
+ROUTING = provisioned()
 
 operations = [
     run_sql_with_exceptions(DROP_EVENT_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(EVENT_MV_SQL(), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(EVENT_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
     run_sql_with_exceptions(DROP_USER_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(USER_MV_SQL(), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
     run_sql_with_exceptions(DROP_USER_ALIAS_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(USER_ALIAS_MV_SQL(), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_ALIAS_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
 ]
