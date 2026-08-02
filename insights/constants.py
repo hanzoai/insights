@@ -334,7 +334,11 @@ GENERATED_DASHBOARD_PREFIX = "Generated Dashboard"
 
 ENRICHED_DASHBOARD_INSIGHT_IDENTIFIER = "Feature Viewed"
 
-PERMITTED_FORUM_DOMAINS = ["localhost", "hanzo.ai"]
+# Empty on purpose, and load-bearing. This gates the forum-login redirect, and
+# every caller reads it as an allowlist, so an empty list fails closed: no host
+# is permitted and the forum path is unreachable. Adding an entry re-opens a
+# redirect flow whose account-linking half has been removed.
+PERMITTED_FORUM_DOMAINS: list[str] = []
 
 INVITE_DAYS_VALIDITY = 3  # number of days for which team invites are valid
 

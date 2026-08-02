@@ -5,7 +5,6 @@ import { useValues } from 'kea'
 import md5 from 'md5'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-import { MascotModeProfile } from 'lib/components/MascotMode/MascotModeStatic'
 import { inStorybookTestRunner } from 'lib/utils/dom'
 import { fullName } from 'lib/utils/strings'
 import { userLogic } from 'scenes/userLogic'
@@ -47,10 +46,8 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
 
     const combinedNameAndEmail = name && email ? `${name} <${email}>` : name || email
 
-    const mascotProfile = !!user?.mascot_config?.use_as_profile
-
     const gravatarUrl = useMemo(() => {
-        if (mascotProfile || inStorybookTestRunner()) {
+        if (inStorybookTestRunner()) {
             return // There are no guarantees on how long it takes to fetch a Gravatar, so we skip this in snapshots
         }
         // Check if Gravatar exists
@@ -59,7 +56,7 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
             const hash = md5(identifier.trim().toLowerCase())
             return `https://www.gravatar.com/avatar/${hash}?s=96&d=404`
         }
-    }, [email, mascotProfile, name])
+    }, [email, name])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -85,23 +82,19 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
 
     const pictureComponent = (
         <span className={clsx('ProfilePicture ph-no-capture', size, className)} ref={ref}>
-            {mascotProfile && user.mascot_config ? (
-                <MascotModeProfile config={user.mascot_config} size="100%" />
-            ) : (
-                gravatarLoaded !== true && (
-                    <>
-                        {type === 'bot' ? (
-                            <IconRobot className="p-0.5" />
-                        ) : (
-                            <Lettermark
-                                name={combinedNameAndEmail}
-                                index={index}
-                                rounded
-                                color={type === 'system' ? LettermarkColor.Gray : undefined}
-                            />
-                        )}
-                    </>
-                )
+            {gravatarLoaded !== true && (
+                <>
+                    {type === 'bot' ? (
+                        <IconRobot className="p-0.5" />
+                    ) : (
+                        <Lettermark
+                            name={combinedNameAndEmail}
+                            index={index}
+                            rounded
+                            color={type === 'system' ? LettermarkColor.Gray : undefined}
+                        />
+                    )}
+                </>
             )}
             {gravatarUrl && gravatarLoaded !== false ? (
                 <img

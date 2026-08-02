@@ -1,10 +1,7 @@
-import selfDrivingHog from 'public/mascot/self-driving-script.png'
-
 /** The opener: what self-driving is, before we ask anyone to paste a command. */
 export function WelcomeStep(): JSX.Element {
     return (
         <div className="flex flex-col items-center text-center gap-5">
-            <img src={selfDrivingHog} alt="A mascot riding in a self-driving car" className="w-full rounded-lg" />
             <div className="flex flex-col gap-2">
                 <h1 className="text-2xl font-bold m-0">Let's make your product self-driving</h1>
                 <p className="text-muted max-w-md mx-auto m-0">

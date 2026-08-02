@@ -43,6 +43,14 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("@posthog/hogvm", "@hanzo/scriptvm"),
     ("@posthog/icons", "@hanzo/icons"),
     ("@posthog/", "@hanzo/"),
+    # The scope also appears without its slash -- as a path segment in
+    # `path.resolve(dir, '@posthog', 'brand')`, as `@posthog[\\/]` inside a
+    # bundler regex, and in `!frontend/@posthog` in .dockerignore. Without this
+    # rule those fall through to the bare brand rule below and become
+    # `@insights`, a scope we do not publish under, so the alias silently
+    # resolves to nothing. PATH_RULES has always carried the bare form; this is
+    # content catching up.
+    ("@posthog", "@hanzo"),
     # SDKs. The python SDK package is `hanzo_insights`; the browser SDK keeps
     # the product name.
     ("posthoganalytics", "hanzo_insights"),
@@ -113,9 +121,16 @@ PATH_RULES: list[tuple[str, str]] = [
     ("hogql_parser", "insightsql_parser"),
     ("hog-transformations", "script-transformations"),
     ("hog-functions", "insights-functions"),
+    # `hog-function-utils.ts` is imported as `./script-function-utils` once the
+    # content rule rewrites the bare word, so the file has to move with it.
+    ("hog-function-utils", "script-function-utils"),
     ("hog_functions", "insights_functions"),
     ("hog_function", "insights_function"),
     ("HogFunction", "InsightsFunction"),
+    # camelCase too, because CONTENT_RULES rewrites it and the import has to
+    # land on the file: `hogFunctionConfigurationLogic.tsx` is imported as
+    # `./insightsFunctionConfigurationLogic` the moment content is rewritten.
+    ("hogFunction", "insightsFunction"),
     ("hog_flow", "insights_flow"),
     ("HogFlow", "InsightsFlow"),
     ("hogflows", "insightsflows"),
@@ -147,6 +162,13 @@ PATH_RULES: list[tuple[str, str]] = [
 PATH_SCOPED_RULES: list[tuple[str, str]] = [
     ("-hog-", "-mascot-"),
     ("_hog_", "_iql_"),
+    # A whole path component named `hog` is the script language, and CONTENT's
+    # `\bhog\b` rule already rewrites every reference to it: `lib/hog.ts` is
+    # imported as `lib/script`, `debug/hog/` as `debug/script/`. Anchored on the
+    # separators so it can only ever match a whole component -- `hogql` and
+    # `hedgehog` are handled above and must not be touched here.
+    ("/hog/", "/script/"),
+    ("/hog.", "/script."),
 ]
 
 PATH_SUFFIX_RULES: list[tuple[str, str]] = [
@@ -160,6 +182,25 @@ PATH_SUFFIX_RULES: list[tuple[str, str]] = [
 PATH_DIR_RULES: list[tuple[str, str]] = [
     ("nodejs/src/kafka/", "nodejs/src/stream/"),
     ("nodejs/src/session-recording/kafka/", "nodejs/src/session-recording/stream/"),
+]
+
+# Rules a path shares with content, because an import specifier IS a path.
+#
+# `lib/lemon-ui/LemonTabs/LemonTabs.tsx` is rewritten by CONTENT_REGEX wherever
+# it appears in a file, so the file it names has to move the same way or the
+# import resolves to nothing. Keeping the two lists in sync by hand is what
+# broke: the content strip landed, the path strip did not, and the frontend
+# stopped building with every design-system import dangling. `--check` now
+# asserts the agreement instead of trusting it.
+#
+# Deliberately `(?=[A-Z])` and nothing looser, mirroring CONTENT_REGEX exactly.
+# `lemon_squeezy` is Lemon Squeezy, a payments vendor whose warehouse source we
+# import, so a rule matching a bare `lemon` would rename someone else's product.
+# Lowercase `lemonBannerLogic` is likewise left alone, because content leaves it
+# alone -- `LemonBanner/lemonBannerLogic.ts` becomes `Banner/lemonBannerLogic.ts`,
+# which is what the rewritten import asks for.
+PATH_REGEX: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
 ]
 
 # Compose files follow the house convention.
@@ -202,6 +243,12 @@ DROP_DIRS: list[tuple[str, str]] = [
     ("products/business_knowledge", "knowledge base product"),
     ("products/data_catalog", "catalog product"),
     ("products/stamphog", "upstream stamp/rewards toy"),
+    (
+        "products/games",
+        "two mascot easter-egg games (368 hedgehogs, flappy hedgehog). The last "
+        "place upstream's mascot artwork still rendered, and the artwork is the "
+        "whole product -- there is nothing to debrand, only to drop",
+    ),
     ("products/legal_documents", "upstream legal doc workflow"),
     ("products/streamlit_apps", "arbitrary Streamlit hosting"),
     ("products/skills", "agent skill registry"),
@@ -266,6 +313,28 @@ SKIP_CONTENT_SUFFIX = (
 )
 SKIP_CONTENT_NAMES = {"pnpm-lock.yaml", "uv.lock", "Cargo.lock", "package-lock.json", "poetry.lock"}
 
+# A licence is the one text in the tree that a rename must never touch.
+#
+# MIT's single condition is that the copyright notice travels with the code, so
+# rewriting the copyright holder's name inside it does not debrand anything --
+# it asserts our copyright over someone else's work, and it does so invisibly,
+# because the file still reads like a valid licence. `--check` therefore also
+# refuses to let the upstream notice go missing.
+#
+# This is a refusal, not an allowlist entry: allowlisted files are ones we have
+# decided to leave alone for now, whereas no future rule may ever edit these.
+LICENSE_NAMES = {"license", "licence", "copying", "notice"}
+
+
+def is_license(path: str) -> bool:
+    stem = os.path.basename(path).lower().split(".")[0]
+    return stem in LICENSE_NAMES
+
+
+# The notice MIT obliges us to carry, and the file that has to carry it.
+REQUIRED_NOTICE = "PostHog Inc."
+LICENSE_PATH = "LICENSE"
+
 
 def tracked_files(root: str) -> list[str]:
     out = subprocess.run(
@@ -326,6 +395,8 @@ def rewrite_path(p: str) -> str:
         p = os.path.join(os.path.dirname(p), PATH_EXACT_RULES[base])
     for old, new in PATH_RULES:
         p = p.replace(old, new)
+    for pat, rep in PATH_REGEX:
+        p = pat.sub(rep, p)
     for old, new in PATH_SCOPED_RULES:
         p = p.replace(old, new)
     for old, new in PATH_SUFFIX_RULES:
@@ -335,7 +406,11 @@ def rewrite_path(p: str) -> str:
 
 
 def skip_content(path: str) -> bool:
-    return path.endswith(SKIP_CONTENT_SUFFIX) or os.path.basename(path) in SKIP_CONTENT_NAMES
+    return (
+        is_license(path)
+        or path.endswith(SKIP_CONTENT_SUFFIX)
+        or os.path.basename(path) in SKIP_CONTENT_NAMES
+    )
 
 
 IMPORT_RE = re.compile(r"(?:from|import)\s+products\.([a-z_]+)")
@@ -471,8 +546,29 @@ def apply(root: str, dry: bool) -> tuple[int, int]:
     return edited, renamed
 
 
+def check_license(root: str) -> int:
+    """The licence must still carry the notice MIT obliges us to pass on.
+
+    A debranding pass that reaches the licence produces a file that reads as
+    valid while claiming our copyright over upstream's code, so the invariant
+    is asserted positively rather than left to the absence of a rule.
+    """
+    path = os.path.join(root, LICENSE_PATH)
+    if not os.path.exists(path):
+        print(f"FAIL: {LICENSE_PATH} is missing")
+        return 1
+    text = open(path, encoding="utf-8").read()
+    if REQUIRED_NOTICE not in text:
+        print(
+            f"FAIL: {LICENSE_PATH} no longer carries the upstream copyright notice "
+            f"({REQUIRED_NOTICE!r}). MIT requires it to travel with the code."
+        )
+        return 1
+    return 0
+
+
 def check(root: str) -> int:
-    bad = 0
+    bad = check_license(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1
@@ -491,6 +587,9 @@ def check(root: str) -> int:
         b = os.path.basename(p)
         return b in MANIFESTS or b in SKIP_CONTENT_NAMES
 
+    # A licence naming the upstream is the licence working, so it is not a leak.
+    # check_license asserts the opposite direction: that the name is still there.
+    hits = [h for h in hits if not is_license(h)]
     pending = sorted(h for h in hits if h not in CONTENT_ALLOWLIST and is_manifest(h))
     leaked = [h for h in hits if h not in CONTENT_ALLOWLIST and not is_manifest(h)]
     if pending:
