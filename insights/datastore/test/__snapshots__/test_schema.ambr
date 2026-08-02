@@ -394,7 +394,9 @@
       -- The actual log message.
       message String
       
-  ) ENGINE = Kafka(msk_cluster, kafka_topic_list = 'log_entries_test', kafka_group_name = 'group1', kafka_format = 'JSONEachRow')
+  ) ENGINE = Kafka(msk_cluster, kafka_topic_list = 'log_entries_test', kafka_group_name = 'datastore_log_entries', kafka_format = 'JSONEachRow')
+  
+  SETTINGS kafka_skip_broken_messages = 100
   
   '''
 # ---
@@ -1941,7 +1943,9 @@
       -- The actual log message.
       message String
       
-  ) ENGINE = Kafka(msk_cluster, kafka_topic_list = 'log_entries_test', kafka_group_name = 'group1', kafka_format = 'JSONEachRow')
+  ) ENGINE = Kafka(msk_cluster, kafka_topic_list = 'log_entries_test', kafka_group_name = 'datastore_log_entries', kafka_format = 'JSONEachRow')
+  
+  SETTINGS kafka_skip_broken_messages = 100
   
   '''
 # ---
@@ -2263,6 +2267,7 @@
   _timestamp,
   _offset
   FROM insights_test.kafka_log_entries
+  WHERE toDate(timestamp) <= today()
   
   '''
 # ---

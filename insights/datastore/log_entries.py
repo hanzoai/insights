@@ -59,16 +59,40 @@ SETTINGS index_granularity=512
 
 
 def KAFKA_LOG_ENTRIES_TABLE_SQL(on_cluster=True):
-    return LOG_ENTRIES_TABLE_BASE_SQL.format(
+    """The one consumer of the `log_entries` topic.
+
+    The group and the broken-message allowance came from the `_v3` copy of this
+    table, which is what migration 0230 retires: two Kafka tables read the same
+    topic under two group names, so every log was consumed twice and written
+    twice into sharded_log_entries. Naming the group matters beyond tidiness —
+    an unnamed consumer takes the server default `group1`, which every other
+    unnamed consumer on the cluster also takes.
+    """
+    return (
+        LOG_ENTRIES_TABLE_BASE_SQL
+        + """
+SETTINGS kafka_skip_broken_messages = 100
+"""
+    ).format(
         table_name="kafka_" + LOG_ENTRIES_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
-        engine=kafka_engine(topic=KAFKA_LOG_ENTRIES),
+        engine=kafka_engine(topic=KAFKA_LOG_ENTRIES, group=CONSUMER_GROUP_LOG_ENTRIES),
         extra_fields="",
     )
 
 
-LOG_ENTRIES_TABLE_MV_SQL = """
-CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}_mv ON CLUSTER '{cluster}'
+def LOG_ENTRIES_TABLE_MV_SQL(on_cluster=True):
+    """Kafka -> log_entries.
+
+    A function rather than a string because the migration framework cannot run
+    ON CLUSTER (see 0201), and this now has a migration for a caller.
+
+    The date guard also comes from the `_v3` copy. A log line stamped in the
+    future never ages out: the table's TTL is measured from `timestamp`, so a
+    row dated 2087 sits in a partition that will not drop for sixty years.
+    """
+    return """
+CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}_mv {on_cluster_clause}
 TO {database}.{table_name}
 AS SELECT
 team_id,
@@ -81,11 +105,12 @@ message,
 _timestamp,
 _offset
 FROM {database}.kafka_{table_name}
+WHERE toDate(timestamp) <= today()
 """.format(
-    table_name=LOG_ENTRIES_TABLE,
-    cluster=DATASTORE_CLUSTER,
-    database=DATASTORE_DATABASE,
-)
+        table_name=LOG_ENTRIES_TABLE,
+        on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
+        database=DATASTORE_DATABASE,
+    )
 
 
 INSERT_LOG_ENTRY_SQL = """
