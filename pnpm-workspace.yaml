@@ -11,6 +11,11 @@ packages:
     - packages/quill/apps/*
     - packages/quill/packages/*
     - frontend
+    # The design system lives under frontend/ but is its own package, and
+    # products depend on it by name ("@hanzo/elements": "*"). Without this
+    # entry pnpm does not know it is local, resolves that "*" against the npm
+    # registry, and every install fails.
+    - frontend/@hanzo/*
     - playwright
     - nodejs
     - nodejs/src/scripts
@@ -30,6 +35,11 @@ packages:
     - rust/replay-anonymizer-node
 
 blockExoticSubdeps: true
+
+# Our workspace packages are not published, so a plain range like "*" has to
+# resolve locally. pnpm 10 defaults this off, which sends every such range to
+# the registry and 404s on the design system.
+linkWorkspacePackages: true
 trustPolicy: no-downgrade
 
 catalog:
@@ -85,6 +95,10 @@ catalog:
 # dependency automation should not delay these package updates.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+    # Scoped to the exact version we pin, not the whole scope: upstream trusts
+    # its own '@posthog/*' publishes, but we only consume them, so the gate has
+    # to keep protecting every version we did not deliberately choose.
+    - '@posthog/brand@0.9.1'
     - insights-js
     - insights-js-lite
     - insights-node
@@ -112,3 +126,120 @@ minimumReleaseAgeExclude:
     - shiki
     - shadcn
     - '@shikijs/*'
+
+# pnpm 10 reads these here; the `pnpm` field in package.json is ignored,
+# which had left every pin below inert — including the security bumps.
+overrides:
+    axios: '^1.15.0'
+    '@modelcontextprotocol/sdk': '^1.29.0'
+    '@types/react': '18.3.27'
+    '@types/react-dom': '18.3.7'
+    cipher-base: '>=1.0.5'
+    d3-geo: '>=3.1.0'
+    d3-selection: '>=3.0.0'
+    d3-zoom: '>=3.0.0'
+    form-data: '>=4.0.4'
+    node-forge: '>=1.4.0'
+    pbkdf2: '>=3.1.3'
+    react: '18.3.1'
+    react-dom: '18.3.1'
+    sha.js: '>=2.4.12'
+    typescript: '6.0.3'
+    'ultimate-express>uWebSockets.js': '-'
+    # rollup 2.x ended at 2.79.2 (Sept 2024); 2.80.0 appeared 17 months later on
+    # that dead line with no trust evidence, and trustPolicy: no-downgrade refuses
+    # it. Pin the last trusted 2.x on this path rather than relax the policy.
+    'tsup>rollup': '2.79.2'
+    'fast-xml-parser@^4': '>=4.5.4'
+    'fast-xml-parser@^5': '>=5.3.5'
+    'jest-playwright-preset>playwright-core': '1.60.0'
+    '@smithy/node-http-handler': '4.4.9'
+    '@smithy/core': '3.24.6'
+    rolldown: '1.1.4'
+    '@tiptap/core': '3.20.6'
+    '@tiptap/extensions': '3.20.6'
+    '@tiptap/html': '3.20.6'
+    '@tiptap/markdown': '3.20.6'
+    '@tiptap/pm': '3.20.6'
+    '@tiptap/react': '3.20.6'
+    '@tiptap/starter-kit': '3.20.6'
+    '@tiptap/suggestion': '3.20.6'
+    '@tiptap/extension-blockquote': '3.20.6'
+    '@tiptap/extension-bold': '3.20.6'
+    '@tiptap/extension-bubble-menu': '3.20.6'
+    '@tiptap/extension-bullet-list': '3.20.6'
+    '@tiptap/extension-code': '3.20.6'
+    '@tiptap/extension-code-block': '3.20.6'
+    '@tiptap/extension-code-block-lowlight': '3.20.6'
+    '@tiptap/extension-collaboration': '3.20.6'
+    '@tiptap/extension-color': '3.20.6'
+    '@tiptap/extension-document': '3.20.6'
+    '@tiptap/extension-drag-handle': '3.20.6'
+    '@tiptap/extension-drag-handle-react': '3.20.6'
+    '@tiptap/extension-dropcursor': '3.20.6'
+    '@tiptap/extension-floating-menu': '3.20.6'
+    '@tiptap/extension-gapcursor': '3.20.6'
+    '@tiptap/extension-hard-break': '3.20.6'
+    '@tiptap/extension-heading': '3.20.6'
+    '@tiptap/extension-horizontal-rule': '3.20.6'
+    '@tiptap/extension-image': '3.20.6'
+    '@tiptap/extension-italic': '3.20.6'
+    '@tiptap/extension-link': '3.20.6'
+    '@tiptap/extension-list': '3.20.6'
+    '@tiptap/extension-list-item': '3.20.6'
+    '@tiptap/extension-list-keymap': '3.20.6'
+    '@tiptap/extension-node-range': '3.20.6'
+    '@tiptap/extension-ordered-list': '3.20.6'
+    '@tiptap/extension-paragraph': '3.20.6'
+    '@tiptap/extension-placeholder': '3.20.6'
+    '@tiptap/extension-strike': '3.20.6'
+    '@tiptap/extension-table': '3.20.6'
+    '@tiptap/extension-table-of-contents': '3.20.6'
+    '@tiptap/extension-text': '3.20.6'
+    '@tiptap/extension-text-align': '3.20.6'
+    '@tiptap/extension-text-style': '3.20.6'
+    '@tiptap/extension-underline': '3.20.6'
+    '@hanzo/icons': 'npm:@hanzo/insights-icons@0.36.7'
+    '@hanzo/insightsql-parser': 'npm:@posthog/hogql-parser@1.3.75'
+    '@hanzo/mascot-mode': 'npm:@hanzo/insights-mascot-mode@0.0.48'
+    insights-js: 'npm:@hanzo/insights@1.358.1'
+    insights-js-lite: 'npm:@hanzo/insights-lite@4.2.2'
+    '@hanzo/brand': 'npm:@posthog/brand@0.9.1'
+    '@hanzo/react': 'npm:@posthog/react@1.9.0'
+    '@datastore/client': 'npm:@clickhouse/client@^1.12.0'
+    '@hanzo/cli': 'npm:@posthog/cli@^0.8.2'
+    '@hanzo/mcp-analytics': 'npm:@posthog/mcp@0.5.0'
+    '@hanzo/rollup-plugin': 'npm:@posthog/rollup-plugin@^1.4.4'
+    '@hanzo/siphash': 'npm:@posthog/siphash@1.1.1'
+    insights-node: 'npm:posthog-node@5.25.0'
+    insights-react-native: 'npm:posthog-react-native@^4.18.0'
+    insights-react-native-session-replay: 'npm:posthog-react-native-session-replay@^1.6.0'
+
+patchedDependencies:
+    heatmap.js@2.0.5: patches/heatmap.js@2.0.5.patch
+    dayjs@1.11.11: patches/dayjs@1.11.11.patch
+    chartjs-plugin-crosshair@2.0.0: patches/chartjs-plugin-crosshair@2.0.0.patch
+    kea@4.0.0-pre.6: patches/kea@4.0.0-pre.6.patch
+
+onlyBuiltDependencies:
+    - '@modelcontextprotocol/ext-apps'
+    - '@mongodb-js/zstd'
+    - '@parcel/watcher'
+    - chartjs-plugin-stacked100
+    - '@swc/core'
+    - core-js
+    - core-js-pure
+    - cpu-features
+    - esbuild
+    - lmdb
+    - lz4
+    - msgpackr-extract
+    - msw
+    - node-gyp
+    - node-rdkafka
+    - protobufjs
+    - re2
+    - sharp
+    - ssh2
+    - unrs-resolver
+    - workerd
