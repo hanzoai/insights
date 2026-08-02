@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""
+Does every first-party import point at a file that is actually committed?
+
+`git commit -- some/path/` stages the TRACKED files under that path and silently
+skips untracked ones, so a new module and the line that imports it can be split
+across the commit boundary: the caller lands, the callee does not. That shipped
+once -- scheduled.py imported insights.tasks.sync_definitions while the module
+sat untracked -- and the failure is a ModuleNotFoundError at celery startup,
+which is import time for the beat schedule, so it takes the worker down on boot
+rather than failing one task.
+
+Static and dependency-free on purpose: it reads the git index, not the
+filesystem, so it answers "would a fresh clone of this commit run" rather than
+"does it run on the machine that wrote it". That is the question a build needs.
+"""
+
+import ast
+import subprocess
+import sys
+from pathlib import Path
+
+# Packages that live in this repo. An import into anything else is a dependency's
+# problem, not ours.
+FIRST_PARTY = ("insights", "products", "common")
+
+
+def tracked_files() -> set[str]:
+    out = subprocess.run(["git", "ls-files"], capture_output=True, text=True, check=True).stdout
+    return set(out.splitlines())
+
+
+def resolves(module: str, tracked: set[str]) -> bool:
+    # A module is either a file or a package directory with an __init__.
+    #
+    # No falling back to the parent package. The first version of this did, on the
+    # theory that `from a.b import c` might name a symbol rather than a module --
+    # but the dotted path checked here is always ast's `module`/`name`, which is a
+    # module by definition. The fallback only meant that a missing module resolved
+    # against its committed parent, so this check passed on the very commit that
+    # motivated it. A guard that cannot fail is not a guard.
+    path = module.replace(".", "/")
+    if f"{path}.py" in tracked or f"{path}/__init__.py" in tracked:
+        return True
+    # A directory with no __init__.py is still a package (PEP 420), and this tree
+    # is full of them -- insights/insightsql alone is 220 files. Requiring the
+    # __init__ marked every one of them missing.
+    return any(f.startswith(f"{path}/") for f in tracked)
+
+
+def main() -> int:
+    tracked = tracked_files()
+    sources = [f for f in tracked if f.endswith(".py")]
+    broken: list[tuple[str, int, str]] = []
+
+    for source in sources:
+        try:
+            tree = ast.parse(Path(source).read_text(encoding="utf-8"), filename=source)
+        except (SyntaxError, UnicodeDecodeError, FileNotFoundError):
+            # Syntax is another check's job, and a tracked-but-absent file is
+            # exactly what a fresh clone would not have either.
+            continue
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                # level > 0 is a relative import, resolved against the package
+                # directory, which is committed by definition if this file is.
+                if node.level or not node.module:
+                    continue
+                target = node.module
+            elif isinstance(node, ast.Import):
+                target = node.names[0].name
+            else:
+                continue
+
+            if target.split(".")[0] in FIRST_PARTY and not resolves(target, tracked):
+                broken.append((source, node.lineno, target))
+
+    if broken:
+        print("These imports name a module that is not committed:\n")
+        for source, line, target in sorted(broken):
+            print(f"  {source}:{line}  imports  {target}")
+        print(f"\n{len(broken)} unresolved. A fresh clone of this commit would not start.")
+        return 1
+
+    print(f"all first-party imports across {len(sources)} files resolve to committed modules")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

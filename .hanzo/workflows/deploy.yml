@@ -73,6 +73,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Before spending 30-60 minutes on an image: does this commit's own code
+      # reference a module the commit does not contain? `git commit -- some/path/`
+      # stages tracked files under a path and skips untracked ones, which is how
+      # scheduled.py once landed importing a module that was never committed. The
+      # symptom is a ModuleNotFoundError at celery startup, so it takes the worker
+      # down on boot rather than failing one task. Reads the git index, so it
+      # answers for a fresh clone rather than for the machine that wrote it.
+      - name: Every import names a committed module
+        run: ./bin/check-imports-are-committed
+
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
