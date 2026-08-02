@@ -2,6 +2,7 @@ import { BreakPointFunction, actions, afterMount, kea, key, listeners, path, pro
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { getInsightId } from 'scenes/insights/utils'
 
@@ -24,6 +25,14 @@ export const subscriptionsLogic = kea<subscriptionsLogicType>([
         subscriptions: {
             __default: [] as SubscriptionType[],
             loadSubscriptions: async (_?: any, breakpoint?: BreakPointFunction) => {
+                // Guarded here rather than at the mount so that every caller is covered by one
+                // check — the delete listener reloads through this same action. The endpoint is
+                // absent in this build, so asking would only raise a toast for a feature the UI
+                // has already stopped offering.
+                if (!CAPABILITIES.subscriptions.available) {
+                    return []
+                }
+
                 if (!props.dashboardId && !props.insightShortId) {
                     return []
                 }
