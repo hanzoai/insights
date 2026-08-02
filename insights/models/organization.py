@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Optional, TypedDict, Union
 
@@ -25,7 +24,6 @@ from insights.models.utils import LowercaseSlugField, UUIDTModel, create_with_sl
 
 if TYPE_CHECKING:
     from insights.models import Team, User
-
 
 
 logger = structlog.get_logger(__name__)
@@ -66,6 +64,67 @@ class ProductFeature(TypedDict):
     limit: int | None
     note: str | None
     is_plan_default: bool
+
+
+def _feature(key: AvailableFeature, *, limit: int | None = None, unit: str | None = None) -> ProductFeature:
+    """One entry of `PRODUCT_FEATURES`. `limit=None` means unlimited, as it does upstream."""
+    return ProductFeature(
+        key=str(key), name=str(key), description="", unit=unit, limit=limit, note=None, is_plan_default=True
+    )
+
+
+# What this build carries. Every gate in the codebase asks `is_feature_available` /
+# `hasAvailableFeature`, and both read `Organization.available_product_features` — so this list is
+# the single answer to "can this deployment do X", for the backend and the frontend alike.
+#
+# Upstream fills that field from the Billing Service, per the org's plan. There is no Billing
+# Service here (`/api/billing` answers 404) and nothing sells a plan, so the answer cannot come from
+# a subscription. It comes from the build: a key is listed if the code that implements it is present
+# and works, and is absent if the implementation left with the separately-licensed `ee/` tree.
+#
+# So the absences below are load-bearing, not oversights. `saml`, `scim`, `subscriptions`,
+# `role_based_access`, `advanced_permissions` and `access_control` all name endpoints that answer
+# 404 — listing them would light up UI that cannot save. `group_analytics` is the same: no groups
+# viewset was ported. `lib/capabilities.ts` is where the UI says so out loud.
+#
+# `approvals` is absent for a sharper reason, and the reason is not its endpoints — those are
+# registered and answer 401. `ApprovalPolicy.bypass_roles` went with the roles it pointed at, but
+# `PolicyEngine.evaluate` still reads it on its first line, so listing this key would arm a policy
+# that raises the moment it is asked to hold a change.
+#
+# Deliberately absent for a different reason: `api_queries_concurrency` and
+# `organization_app_query_concurrency_limit` raise datastore concurrency ceilings. They are resource
+# controls rather than product surfaces, and belong to whoever sizes the warehouse.
+PRODUCT_FEATURES: list[ProductFeature] = [
+    # Projects and organizations. Without this an org is capped at one non-demo project
+    # (`insights/api/project.py:952`) and cannot be a second org (`insights/api/organization.py:55`).
+    _feature(AvailableFeature.ORGANIZATIONS_PROJECTS),
+    # Product analytics.
+    _feature(AvailableFeature.PATHS_ADVANCED),
+    _feature(AvailableFeature.CORRELATION_ANALYSIS),
+    _feature(AvailableFeature.BEHAVIORAL_COHORT_FILTERING),
+    _feature(AvailableFeature.DATA_COLOR_THEMES),
+    _feature(AvailableFeature.ALERTS),
+    # Session replay. The retention entitlement is the ceiling this deployment will honour, and it
+    # has to be stated: with no entitlement at all, saving a retention period raises rather than
+    # refusing (`insights/api/team.py:991`).
+    _feature(AvailableFeature.SESSION_REPLAY_DATA_RETENTION, limit=60, unit="months"),
+    _feature(AvailableFeature.RECORDINGS_FILE_EXPORT),
+    # Surveys.
+    _feature(AvailableFeature.SURVEYS_STYLING),
+    # Sharing.
+    _feature(AvailableFeature.WHITE_LABELLING),
+    # Governance.
+    _feature(AvailableFeature.AUDIT_LOGS),
+    # Organization security. Each of these only lets an admin *set* the corresponding setting; none
+    # of them turns anything on by itself.
+    _feature(AvailableFeature.TWO_FACTOR_ENFORCEMENT),
+    _feature(AvailableFeature.ORGANIZATION_SECURITY_SETTINGS),
+    _feature(AvailableFeature.ORGANIZATION_INVITE_SETTINGS),
+    # Verified domains, over the OIDC login this deployment already uses.
+    _feature(AvailableFeature.SSO_ENFORCEMENT),
+    _feature(AvailableFeature.AUTOMATIC_PROVISIONING),
+]
 
 
 class OrganizationManager(models.Manager):
@@ -254,9 +313,8 @@ class Organization(ModelActivityMixin, UUIDTModel):
 
     def update_available_product_features(self) -> list[ProductFeature]:
         """Updates field `available_product_features`. Does not `save()`."""
-        if is_cloud() or self.usage:
-            return self.available_product_features or []
-        self.available_product_features = []
+        # A copy, so an org that edits its own list cannot edit every org's.
+        self.available_product_features = list(PRODUCT_FEATURES)
         return self.available_product_features
 
     def get_available_feature(self, feature: Union[AvailableFeature, str]) -> ProductFeature | None:
