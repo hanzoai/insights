@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from insights.insightsql_queries.ai.utils import HEAVY_COLUMN_NAMES
 
-from products.ai_observability.backend.tools.run_hog_eval import RunHogEvalTestArgs, RunHogEvalTestTool
+from products.ai_observability.backend.tools.run_iql_eval import RunHogEvalTestArgs, RunHogEvalTestTool
 
 EVENT_TIMESTAMP = "2026-07-20T12:34:56Z"
 

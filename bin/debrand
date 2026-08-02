@@ -22,6 +22,7 @@ tree when upstream renames something out from under us.
 from __future__ import annotations
 
 import argparse
+import glob
 import json
 import os
 import re
@@ -44,9 +45,13 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("@posthog/hogvm", "@hanzo/scriptvm"),
     ("@posthog/icons", "@hanzo/icons"),
     ("@posthog/", "@hanzo/"),
-    # The scope on its own, so it agrees with the path rule. Without it the bare
-    # form falls through to the brand rule and becomes `@insights`, a scope that
-    # is nobody's, while the directory it names becomes `@hanzo`.
+    # The scope also appears without its slash -- as a path segment in
+    # `path.resolve(dir, '@posthog', 'brand')`, as `@posthog[\\/]` inside a
+    # bundler regex, and in `!frontend/@posthog` in .dockerignore. Without this
+    # rule those fall through to the bare brand rule below and become
+    # `@insights`, a scope we do not publish under, so the alias silently
+    # resolves to nothing. PATH_RULES has always carried the bare form; this is
+    # content catching up.
     ("@posthog", "@hanzo"),
     # SDKs. The python SDK package is `hanzo_insights`; the browser SDK keeps
     # the product name.
@@ -127,9 +132,16 @@ PATH_RULES: list[tuple[str, str]] = [
     ("hogql_parser", "insightsql_parser"),
     ("hog-transformations", "script-transformations"),
     ("hog-functions", "insights-functions"),
+    # `hog-function-utils.ts` is imported as `./script-function-utils` once the
+    # content rule rewrites the bare word, so the file has to move with it.
+    ("hog-function-utils", "script-function-utils"),
     ("hog_functions", "insights_functions"),
     ("hog_function", "insights_function"),
     ("HogFunction", "InsightsFunction"),
+    # camelCase too, because CONTENT_RULES rewrites it and the import has to
+    # land on the file: `hogFunctionConfigurationLogic.tsx` is imported as
+    # `./insightsFunctionConfigurationLogic` the moment content is rewritten.
+    ("hogFunction", "insightsFunction"),
     ("hog_flow", "insights_flow"),
     ("HogFlow", "InsightsFlow"),
     ("hogflows", "insightsflows"),
@@ -160,6 +172,13 @@ PATH_RULES: list[tuple[str, str]] = [
 PATH_SCOPED_RULES: list[tuple[str, str]] = [
     ("-hog-", "-mascot-"),
     ("_hog_", "_iql_"),
+    # A whole path component named `hog` is the script language, and CONTENT's
+    # `\bhog\b` rule already rewrites every reference to it: `lib/hog.ts` is
+    # imported as `lib/script`, `debug/hog/` as `debug/script/`. Anchored on the
+    # separators so it can only ever match a whole component -- `hogql` and
+    # `hedgehog` are handled above and must not be touched here.
+    ("/hog/", "/script/"),
+    ("/hog.", "/script."),
 ]
 
 PATH_SUFFIX_RULES: list[tuple[str, str]] = [
@@ -173,6 +192,25 @@ PATH_SUFFIX_RULES: list[tuple[str, str]] = [
 PATH_DIR_RULES: list[tuple[str, str]] = [
     ("nodejs/src/kafka/", "nodejs/src/stream/"),
     ("nodejs/src/session-recording/kafka/", "nodejs/src/session-recording/stream/"),
+]
+
+# Rules a path shares with content, because an import specifier IS a path.
+#
+# `lib/lemon-ui/LemonTabs/LemonTabs.tsx` is rewritten by CONTENT_REGEX wherever
+# it appears in a file, so the file it names has to move the same way or the
+# import resolves to nothing. Keeping the two lists in sync by hand is what
+# broke: the content strip landed, the path strip did not, and the frontend
+# stopped building with every design-system import dangling. `--check` now
+# asserts the agreement instead of trusting it.
+#
+# Deliberately `(?=[A-Z])` and nothing looser, mirroring CONTENT_REGEX exactly.
+# `lemon_squeezy` is Lemon Squeezy, a payments vendor whose warehouse source we
+# import, so a rule matching a bare `lemon` would rename someone else's product.
+# Lowercase `lemonBannerLogic` is likewise left alone, because content leaves it
+# alone -- `LemonBanner/lemonBannerLogic.ts` becomes `Banner/lemonBannerLogic.ts`,
+# which is what the rewritten import asks for.
+PATH_REGEX: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
 ]
 
 # Compose files follow the house convention.
@@ -215,6 +253,12 @@ DROP_DIRS: list[tuple[str, str]] = [
     ("products/business_knowledge", "knowledge base product"),
     ("products/data_catalog", "catalog product"),
     ("products/stamphog", "upstream stamp/rewards toy"),
+    (
+        "products/games",
+        "two mascot easter-egg games (368 hedgehogs, flappy hedgehog). The last "
+        "place upstream's mascot artwork still rendered, and the artwork is the "
+        "whole product -- there is nothing to debrand, only to drop",
+    ),
     ("products/legal_documents", "upstream legal doc workflow"),
     ("products/streamlit_apps", "arbitrary Streamlit hosting"),
     ("products/skills", "agent skill registry"),
@@ -309,6 +353,19 @@ SKIP_CONTENT_SUFFIX = (
 )
 SKIP_CONTENT_NAMES = {"pnpm-lock.yaml", "uv.lock", "Cargo.lock", "package-lock.json", "poetry.lock"}
 
+# A licence is the one text in the tree that a rename must never touch.
+#
+# MIT's single condition is that the copyright notice travels with the code, so
+# rewriting the copyright holder's name inside it does not debrand anything --
+# it asserts our copyright over someone else's work, and it does so invisibly,
+# because the file still reads like a valid licence. `--check` therefore also
+# refuses to let the upstream notice go missing.
+#
+# This is a refusal, not an allowlist entry: allowlisted files are ones we have
+# The notice MIT obliges us to carry, and the file that has to carry it.
+REQUIRED_NOTICE = "PostHog Inc."
+LICENSE_PATH = "LICENSE"
+
 
 def tracked_files(root: str) -> list[str]:
     out = subprocess.run(
@@ -357,6 +414,132 @@ MANIFESTS = {"pyproject.toml", "Cargo.toml", "package.json", "pnpm-workspace.yam
 SELF_URL = re.compile(r"github\.com/posthog/posthog(?![\w-])", re.IGNORECASE)
 SELF_URL_TO = "github.com/hanzoai/insights"
 
+# --- workspace ----------------------------------------------------------
+#
+# Dropping a product removes a pnpm workspace package, and every manifest that
+# depended on it is left naming a package that is no longer there. `workspace:*`
+# has no registry to fall back on, so pnpm treats an unresolvable one as fatal:
+#
+#     ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In frontend: "@hanzo/products-games@
+#     workspace:*" is in the dependencies but no package named ... is present
+#
+# That is the first line of the Docker build, so a drop that skips the manifest
+# does not fail where the product was removed -- it fails the image.
+
+
+def workspace_globs(root: str) -> tuple[list[str], list[str]]:
+    """The `packages:` list from pnpm-workspace.yaml, as (include, exclude).
+
+    Parsed by hand rather than with PyYAML: this script is the convergence tool
+    and runs wherever an upstream import lands, so it stays dependency-free.
+    The list is a flat sequence of scalars, which is the one YAML shape this
+    needs to understand.
+    """
+    path = os.path.join(root, "pnpm-workspace.yaml")
+    if not os.path.exists(path):
+        return [], []
+    inc: list[str] = []
+    exc: list[str] = []
+    in_packages = False
+    for line in open(path, encoding="utf-8"):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if re.match(r"^\S", line):  # a new top-level key ends the list
+            in_packages = line.startswith("packages:")
+            continue
+        if not in_packages:
+            continue
+        mm = re.match(r"\s*-\s*(.+?)\s*$", line)
+        if not mm:
+            continue
+        pat = mm.group(1).strip().strip("'\"")
+        (exc if pat.startswith("!") else inc).append(pat.lstrip("!"))
+    return inc, exc
+
+
+def workspace_packages(root: str) -> dict[str, str]:
+    """Map every package name in the workspace to its directory."""
+    inc, exc = workspace_globs(root)
+    dirs: set[str] = set()
+    for pat in inc:
+        for d in glob.glob(os.path.join(root, pat)):
+            if os.path.isdir(d):
+                dirs.add(os.path.normpath(d))
+    for pat in exc:
+        for d in glob.glob(os.path.join(root, pat)):
+            dirs.discard(os.path.normpath(d))
+    names: dict[str, str] = {}
+    for d in sorted(dirs):
+        manifest = os.path.join(d, "package.json")
+        if not os.path.exists(manifest):
+            continue
+        try:
+            name = json.load(open(manifest, encoding="utf-8")).get("name")
+        except (OSError, ValueError):
+            continue
+        if name:
+            names[name] = os.path.relpath(d, root)
+    return names
+
+
+DEP_SECTIONS = ("dependencies", "devDependencies", "peerDependencies", "optionalDependencies")
+
+
+def dangling_workspace_deps(root: str) -> list[tuple[str, str, str]]:
+    """Every `workspace:` dep naming a package the workspace does not have."""
+    present = workspace_packages(root)
+    out: list[tuple[str, str, str]] = []
+    for _, rel in sorted(present.items(), key=lambda kv: kv[1]):
+        manifest = os.path.join(root, rel, "package.json")
+        try:
+            data = json.load(open(manifest, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for section in DEP_SECTIONS:
+            for dep, spec in (data.get(section) or {}).items():
+                if isinstance(spec, str) and spec.startswith("workspace:") and dep not in present:
+                    out.append((os.path.join(rel, "package.json"), section, dep))
+    return out
+
+
+def prune_manifests(root: str, dry: bool) -> int:
+    """Drop `workspace:` deps on packages the workspace no longer contains.
+
+    Derived from the tree rather than from DROP_DIRS: a dep is removed only
+    once the package it names is genuinely absent, so this repairs a drop that
+    a previous pass left half-done as readily as one made in this pass, and it
+    needs no second list to keep in step with the first. Each removal is
+    printed, because a package missing for any other reason must be visible
+    rather than quietly deleted from the manifest.
+    """
+    dangling = dangling_workspace_deps(root)
+    if not dangling:
+        return 0
+    by_manifest: dict[str, list[tuple[str, str]]] = {}
+    for rel, section, dep in dangling:
+        by_manifest.setdefault(rel, []).append((section, dep))
+    for rel, items in sorted(by_manifest.items()):
+        for section, dep in items:
+            print(f"{'would drop' if dry else 'dropped'} {dep} from {rel} ({section})")
+        if dry:
+            continue
+        path = os.path.join(root, rel)
+        raw = open(path, encoding="utf-8").read()
+        data = json.loads(raw)
+        for section, dep in items:
+            data.get(section, {}).pop(dep, None)
+        # Rewritten with json.dumps rather than by deleting lines, so the file
+        # stays valid whatever shape the entry had. The indent is read back off
+        # the file so re-serializing touches only the removed entry -- a manifest
+        # reformatted wholesale would bury the change in noise and fight the
+        # repo's own formatter.
+        mm = re.search(r"^(\s+)\"", raw, re.M)
+        indent = len(mm.group(1)) if mm else 4
+        open(path, "w", encoding="utf-8").write(
+            json.dumps(data, indent=indent) + ("\n" if raw.endswith("\n") else "")
+        )
+    return len(dangling)
+
 
 def rewrite_text(s: str, path: str = "") -> str:
     s = SELF_URL.sub(SELF_URL_TO, s)
@@ -387,7 +570,28 @@ def _rewrite_manifest(s: str) -> str:
     return s
 
 
+# A migration's filename IS its identity. Django records `0002_hogflowbatchjob_
+# scheduled_at` in the `django_migrations` table when it runs, and finds it again
+# by that exact string. Rename the file and Django sees the recorded migration
+# gone and an unapplied one in its place, so it re-runs DDL against a schema that
+# already has it -- and every `dependencies` entry naming the old filename becomes
+# an unresolvable graph edge (NodeNotFoundError), which takes down `migrate` and
+# every management command that builds the graph.
+#
+# Measured against production, five names already in `django_migrations` are
+# renamed by the rules above, `workflows.0002_hogflowbatchjob_scheduled_at`
+# among them. So a migration name is refused for the same reason a physical
+# column name is: it is an identity that lives in the database, not a label.
+MIGRATION_RE = re.compile(r"(?:^|/)migrations/\d{4}_[A-Za-z0-9_]+\.py$")
+
+
+def is_migration(p: str) -> bool:
+    return bool(MIGRATION_RE.search(p))
+
+
 def rewrite_path(p: str) -> str:
+    if is_migration(p):
+        return p
     for old, new in PATH_DIR_RULES:
         if p.startswith(old):
             p = new + p[len(old):]
@@ -396,6 +600,8 @@ def rewrite_path(p: str) -> str:
         p = os.path.join(os.path.dirname(p), PATH_EXACT_RULES[base])
     for old, new in PATH_RULES:
         p = p.replace(old, new)
+    for pat, rep in PATH_REGEX:
+        p = pat.sub(rep, p)
     for old, new in PATH_SCOPED_RULES:
         p = p.replace(old, new)
     for old, new in PATH_SUFFIX_RULES:
@@ -405,7 +611,11 @@ def rewrite_path(p: str) -> str:
 
 
 def skip_content(path: str) -> bool:
-    return path.endswith(SKIP_CONTENT_SUFFIX) or os.path.basename(path) in SKIP_CONTENT_NAMES
+    return (
+        is_licence(path)
+        or path.endswith(SKIP_CONTENT_SUFFIX)
+        or os.path.basename(path) in SKIP_CONTENT_NAMES
+    )
 
 
 # A product is held by any file we keep that still imports it. The tree has two
@@ -486,16 +696,6 @@ def prune(root: str, dry: bool) -> int:
         if any(f == d or f.startswith(d + "/") for d in active)
         or any(g in f for g, _ in DROP_GLOBS)
     ]
-    # Read the dropped products' package names before the files go, so the
-    # workspace can be unwired by name rather than by guessing how a directory
-    # becomes a package.
-    orphaned_pkgs = set()
-    for p in sorted(drop_products):
-        mf = os.path.join(root, "products", p, "package.json")
-        try:
-            orphaned_pkgs.add(json.load(open(mf, encoding="utf-8"))["name"])
-        except (OSError, ValueError, KeyError):
-            pass
     # Report what actually went, not what matched: on a converged tree the
     # list still matches and a count of matches would read as work done.
     doomed = [f for f in doomed if os.path.lexists(os.path.join(root, f))]
@@ -523,24 +723,10 @@ def prune(root: str, dry: bool) -> int:
             keep.append(line)
         if removed_apps and not dry:
             open(settings, "w", encoding="utf-8").write("".join(keep))
-
-    # pnpm holds the same kind of hand-written list. A dropped product still
-    # named as `workspace:*` is not a dead entry it can ignore — pnpm refuses
-    # the whole install with ERR_PNPM_WORKSPACE_PKG_NOT_FOUND, so no package in
-    # the repo can be built until the reference goes.
-    removed_deps = 0
-    for mf in [f for f in tracked_files(root) if os.path.basename(f) == "package.json"]:
-        path = os.path.join(root, mf)
-        try:
-            text = open(path, encoding="utf-8").read()
-        except OSError:
-            continue
-        keep = [ln for ln in text.splitlines(keepends=True)
-                if not any(f'"{name}"' in ln for name in orphaned_pkgs)]
-        if len(keep) != len(text.splitlines()):
-            removed_deps += len(text.splitlines()) - len(keep)
-            if not dry:
-                open(path, "w", encoding="utf-8").write("".join(keep))
+    # A dropped product is also a pnpm workspace package, and the manifests
+    # that depended on it are as much a part of the wiring as INSTALLED_APPS.
+    # This runs after the files are gone, because absence is what it reads.
+    removed_deps = prune_manifests(root, dry)
     print(f"{'would drop' if dry else 'dropped'} {len(doomed)} files, "
           f"{removed_apps} INSTALLED_APPS entries, {removed_deps} workspace deps")
     return len(doomed)
@@ -661,8 +847,204 @@ def path_rules_have_content_counterparts() -> int:
     return 1 if bad else 0
 
 
+def check_license(root: str) -> int:
+    """The licence must still carry the notice MIT obliges us to pass on.
+
+    A debranding pass that reaches the licence produces a file that reads as
+    valid while claiming our copyright over upstream's code, so the invariant
+    is asserted positively rather than left to the absence of a rule.
+    """
+    path = os.path.join(root, LICENSE_PATH)
+    if not os.path.exists(path):
+        print(f"FAIL: {LICENSE_PATH} is missing")
+        return 1
+    text = open(path, encoding="utf-8").read()
+    if REQUIRED_NOTICE not in text:
+        print(
+            f"FAIL: {LICENSE_PATH} no longer carries the upstream copyright notice "
+            f"({REQUIRED_NOTICE!r}). MIT requires it to travel with the code."
+        )
+        return 1
+    return 0
+
+
+# --- module references --------------------------------------------------
+#
+# A path rule renames a file; nothing renames the code that imports it. Where a
+# content rule happens to match too the two stay in step, and where it does not
+# the import silently points at a module that is no longer there. That is not a
+# hypothetical: `hog_flow` is in PATH_RULES and in no content rule, so the whole
+# workflows product moved and every `from products.workflows.backend.api.hog_flow`
+# stayed put -- an ImportError at Django startup.
+#
+# The obvious repair, adding the missing content rule, is wrong here. `hog_flow`
+# is also a physical column (`hog_flow_id`), a table (`insights_hogflow`), a
+# search-result type in the API response, an access-control scope and a URL
+# segment the nodejs CDP service calls. Rewriting the token everywhere would
+# rename live database and wire identifiers to match a file move.
+#
+# So the reference is repaired in its own right, and derived from the tree: take
+# the module a reference names, put it through the same path rules the file went
+# through, and if THAT resolves, the file moved and the reference is stale.
+
+# `from .hog_flow import X` is the same staleness wearing a relative spelling,
+# and it is the spelling a package's own __init__ uses -- so the leading dots
+# are part of the match, resolved against the package the file sits in.
+MODULE_REF_RE = re.compile(
+    r"(?P<pre>(?:^|\n)[ \t]*(?P<kw>from|import)[ \t]+)(?P<dots>\.*)(?P<mod>[A-Za-z_][\w.]*)"
+)
+
+
+def package_of(rel: str) -> str:
+    """The package a .py file's relative imports are resolved against."""
+    mod = rel[:-3].replace("/", ".")
+    return mod.rsplit(".", 1)[0] if not rel.endswith("__init__.py") else mod[: -len(".__init__")]
+
+
+def first_party(tracked: set[str]) -> set[str]:
+    return {p.split("/")[0] for p in tracked if p.endswith(".py") and "/" in p}
+
+
+def module_resolves(mod: str, tracked: set[str], root: str) -> bool:
+    base = mod.replace(".", "/")
+    return (
+        f"{base}.py" in tracked
+        or f"{base}/__init__.py" in tracked
+        or os.path.isdir(os.path.join(root, base))
+    )
+
+
+def module_target(mod: str, tracked: set[str], root: str) -> str | None:
+    """Where a stale module reference should point, or None if it is fine.
+
+    Two ways, tried in order and both derived rather than declared: the path
+    rules (the file was renamed in place), then a unique basename match (the
+    file was moved to another package, which no rename rule can express).
+    """
+    if module_resolves(mod, tracked, root):
+        return None
+    moved = rewrite_path(mod.replace(".", "/")).replace("/", ".")
+    if moved != mod and module_resolves(moved, tracked, root):
+        return moved
+    leaf = mod.rsplit(".", 1)[-1]
+    hits = {
+        p[:-3].replace("/", ".")
+        for p in tracked
+        if p.endswith(f"/{leaf}.py")
+    } | {
+        p[: -len("/__init__.py")].replace("/", ".")
+        for p in tracked
+        if p.endswith(f"/{leaf}/__init__.py")
+    }
+    # Only when it is unambiguous. Two candidates means a human has to choose,
+    # and guessing would wire the app to the wrong module without saying so.
+    return hits.pop() if len(hits) == 1 else None
+
+
+def ref_target(mm: re.Match[str], rel: str, tracked: set[str], fp: set[str],
+               root: str) -> str | None:
+    """The replacement text for one import's module part, or None to leave it.
+
+    Relative references keep their dots: only the module part after them moves,
+    and only when the file is still reachable from the same package -- a move to
+    a different package cannot be spelled relatively and is left for --check to
+    report rather than silently rewritten into the wrong shape.
+    """
+    dots, mod = mm.group("dots"), mm.group("mod")
+    if dots and mm.group("kw") != "from":
+        return None
+    if not dots:
+        if mod.split(".")[0] not in fp:
+            return None
+        return module_target(mod, tracked, root)
+    base = package_of(rel)
+    for _ in range(len(dots) - 1):
+        base = base.rsplit(".", 1)[0] if "." in base else base
+    absolute = f"{base}.{mod}"
+    target = module_target(absolute, tracked, root)
+    if not target:
+        return None
+    prefix = f"{base}."
+    return target[len(prefix):] if target.startswith(prefix) else None
+
+
+def stale_module_refs(root: str) -> dict[str, list[str]]:
+    """Stale first-party module references, mapped to the files that carry them."""
+    tracked = set(tracked_files(root))
+    fp = first_party(tracked)
+    out: dict[str, list[str]] = {}
+    for rel in sorted(p for p in tracked if p.endswith(".py")):
+        try:
+            src = open(os.path.join(root, rel), encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        for mm in MODULE_REF_RE.finditer(src):
+            if ref_target(mm, rel, tracked, fp, root):
+                out.setdefault(mm.group("dots") + mm.group("mod"), []).append(rel)
+    return out
+
+
+def rewrite_module_refs(root: str, dry: bool) -> int:
+    tracked = set(tracked_files(root))
+    fp = first_party(tracked)
+    fixed = 0
+    for rel in sorted(p for p in tracked if p.endswith(".py")):
+        path = os.path.join(root, rel)
+        try:
+            src = open(path, encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        moved: dict[str, str] = {}
+
+        def sub(mm: re.Match[str]) -> str:
+            target = ref_target(mm, rel, tracked, fp, root)
+            if not target:
+                return mm.group(0)
+            moved[mm.group("dots") + mm.group("mod")] = mm.group("dots") + target
+            return mm.group("pre") + mm.group("dots") + target
+
+        new = MODULE_REF_RE.sub(sub, src)
+        if new != src:
+            for old, target in sorted(moved.items()):
+                print(f"{'would point' if dry else 'pointed'} {rel}: {old} -> {target}")
+            fixed += len(moved)
+            if not dry:
+                open(path, "w", encoding="utf-8").write(new)
+    return fixed
+
+
+def check_modules(root: str) -> int:
+    stale = stale_module_refs(root)
+    if not stale:
+        return 0
+    sites = sum(len(v) for v in stale.values())
+    print(f"FAIL: {len(stale)} module references name a module that is not on disk ({sites} sites)")
+    for mod, files in sorted(stale.items(), key=lambda kv: -len(kv[1]))[:15]:
+        print(f"    {mod}  ({len(files)} sites, e.g. {files[0]})")
+    return 1
+
+
+def check_workspace(root: str) -> int:
+    """Every `workspace:` dep must name a package the workspace actually has.
+
+    pnpm has no registry fallback for the protocol, so one dangling entry fails
+    the whole install -- and the install is the first step of the image build,
+    far from the drop that caused it. Asserting it here names the manifest.
+    """
+    dangling = dangling_workspace_deps(root)
+    if not dangling:
+        return 0
+    print(f"FAIL: {len(dangling)} workspace deps name packages that are not in the workspace")
+    for rel, section, dep in dangling:
+        print(f"    {rel}: {section}.{dep}")
+    return 1
+
+
 def check(root: str) -> int:
     bad = path_rules_have_content_counterparts()
+    bad += check_license(root)
+    bad += check_workspace(root)
+    bad += check_modules(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1
@@ -722,8 +1104,11 @@ def main() -> int:
     if not a.rename_only:
         prune(root, dry=a.stat)
     edited, renamed = apply(root, dry=a.stat)
+    # After the renames, because it asks the filesystem where a module ended up.
+    pointed = rewrite_module_refs(root, dry=a.stat)
     verb = "would rewrite" if a.stat else "rewrote"
-    print(f"{verb} {edited} files, {'would rename' if a.stat else 'renamed'} {renamed} paths")
+    print(f"{verb} {edited} files, {'would rename' if a.stat else 'renamed'} {renamed} paths, "
+          f"{'would repoint' if a.stat else 'repointed'} {pointed} module references")
     return 0
 
 

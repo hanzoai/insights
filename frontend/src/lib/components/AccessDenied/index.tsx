@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { Link } from 'lib/elements/Link'
 import { cn } from 'lib/utils/css-classes'
 
-import noAccessNopehog from 'public/no-access-nopehog.png'
+import noAccessImage from 'public/no-access.png'
 
 import { supportLogic } from '../Support/supportLogic'
 
@@ -26,7 +26,7 @@ export function AccessDenied({ object, reason, inline = false }: AccessDeniedPro
     return (
         <div className={cn('flex flex-col items-center max-w-2xl p-4 mx-auto text-center', !inline && 'my-24')}>
             <img
-                src={noAccessNopehog}
+                src={noAccessImage}
                 alt="Access denied illustration"
                 className={cn('bg-no-repeat bg-center', inline ? 'w-32 h-32' : 'w-64 h-64')}
             />

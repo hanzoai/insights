@@ -163,7 +163,6 @@ import { SettingSection } from './types'
 import { AllowImpersonation } from './user/AllowImpersonation'
 import { ChangePassword, ChangePasswordTitle } from './user/ChangePassword'
 import { ConnectedApps } from './user/ConnectedApps'
-import { MascotModeSettings } from './user/MascotModeSettings'
 import { LoginSessions } from './user/LoginSessions'
 import { MCPHintsSetting } from './user/MCPHintsSetting'
 import { OptOutCapture } from './user/OptOutCapture'
@@ -2000,13 +1999,6 @@ export const SETTINGS_MAP: SettingSection[] = [
                 component: <WebAnalyticsAchievementsSetting />,
                 flag: 'WEB_ANALYTICS_ACHIEVEMENTS',
                 keywords: ['web analytics', 'achievements', 'gamification', 'badges', 'streak'],
-            },
-            {
-                id: 'mascot-mode',
-                title: 'Mascot mode',
-                description: 'Enable the Insights mascot companion that follows you around the app.',
-                component: <MascotModeSettings />,
-                keywords: ['mascot', 'mascot', 'fun', 'companion', 'script'],
             },
             {
                 id: 'customization-irl',

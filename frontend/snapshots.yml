@@ -1072,9 +1072,9 @@ snapshots:
         hash: v1.k794b7964.e966b36f1d97a1c747e714332c1cd311c2675a42abefc4e00fc26bda9b859c38.p6CtvjX7ivWj1x450WPHCnAtzs0DHKt2AIuw3DglG8g
     components-hogcharts-valuelabels--with-custom-formatter--light:
         hash: v1.k794b7964.d869c77a1f92cc21e388ef914443e75ae79b7cf4db0ba74602427774f0dbe03e.P9OzTg_IDOl7w4M7Ytavv2QeCTK0d7kMruR5dTQIrGg
-    components-hogfetti--hogfetti--dark:
+    components-confetti--confetti--dark:
         hash: v1.k794b7964.0f77c7ad81a3a50d370f2cbae0e3638d4608cfb837b9d0c219773f63729bb57a.DMUUJJl8iQNbBYjKd5rjvr12Nimvy3xf9uoCxQzvM80
-    components-hogfetti--hogfetti--light:
+    components-confetti--confetti--light:
         hash: v1.k794b7964.80f9c47f95582b6d6da53cf7a080dbf7835d01a8dbe160773035ebdabb69000d.uI29XeShHiPghfdriLFGvqeZ2NAdr8FOC3_Y0kUubFM
     components-insightsqleditor--script-ql-editor--dark:
         hash: v1.k794b7964.af3f4ba00327c226f149cdbe34310632259b2c21c7a6befdc64d3f0c137751d3.GtvvdAE7HsFRpUqze7X-Ox9rVKV18vsYkJFmZX4f_kc

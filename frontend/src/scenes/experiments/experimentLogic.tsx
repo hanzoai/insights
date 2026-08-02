@@ -552,7 +552,7 @@ export interface experimentLogicValues {
     }[]
     hasMinimumExposureForResults: boolean
     hasPrimaryMetricSet: boolean
-    hogfettiTrigger: (() => void) | null
+    confettiTrigger: (() => void) | null
     isCreatingExperimentDashboard: boolean
     isExperimentDraft: boolean
     isExperimentLaunched: boolean
@@ -1112,7 +1112,7 @@ export interface experimentLogicActions {
         series: AnyEntityNode[] | undefined
         uuid: string
     }
-    setHogfettiTrigger: (trigger: (() => void) | null) => {
+    setConfettiTrigger: (trigger: (() => void) | null) => {
         trigger: (() => void) | null
     }
     setIsCreatingExperimentDashboard: (isCreating: boolean) => {
@@ -1570,7 +1570,7 @@ export const experimentLogic = kea<experimentLogicType>([
         setValidExistingFeatureFlag: (featureFlag: FeatureFlagType | null) => ({ featureFlag }),
         setFeatureFlagValidationError: (error: string) => ({ error }),
         validateFeatureFlag: (featureFlagKey: string) => ({ featureFlagKey }),
-        setHogfettiTrigger: (trigger: (() => void) | null) => ({ trigger }),
+        setConfettiTrigger: (trigger: (() => void) | null) => ({ trigger }),
         // METRICS
         setMetric: ({
             uuid,
@@ -2178,10 +2178,10 @@ export const experimentLogic = kea<experimentLogicType>([
                 setUnfreezeExposureLoading: (_, { loading }) => loading,
             },
         ],
-        hogfettiTrigger: [
+        confettiTrigger: [
             null as (() => void) | null,
             {
-                setHogfettiTrigger: (_, { trigger }) => trigger,
+                setConfettiTrigger: (_, { trigger }) => trigger,
             },
         ],
         autoRefresh: [
@@ -2447,7 +2447,7 @@ export const experimentLogic = kea<experimentLogicType>([
             toast.success('Experiment ended successfully')
 
             if (values.experiment.conclusion === ExperimentConclusion.Won) {
-                const trigger = values.hogfettiTrigger
+                const trigger = values.confettiTrigger
                 if (trigger) {
                     ;[0, 400, 800].forEach((delay) => setTimeout(trigger, delay))
                 }
@@ -2780,9 +2780,9 @@ export const experimentLogic = kea<experimentLogicType>([
                         : 'Experiment ended. The selected variant has been rolled out to the experiment population.'
                 )
 
-                // Trigger Hogfetti celebration with cascading delays
+                // Trigger Confetti celebration with cascading delays
                 if (values.experiment.conclusion === ExperimentConclusion.Won) {
-                    const trigger = values.hogfettiTrigger
+                    const trigger = values.confettiTrigger
                     if (trigger) {
                         ;[0, 400, 800].forEach((delay) => setTimeout(trigger, delay))
                     }

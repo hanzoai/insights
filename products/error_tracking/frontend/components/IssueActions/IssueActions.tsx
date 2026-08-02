@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { Dialog } from '@hanzo/elements'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import {
     Button,
     Select,
@@ -37,7 +37,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
     const { filterGroup } = useValues(issueFiltersLogic)
     const { setFilterGroup } = useActions(issueFiltersLogic)
     const { setSelectedIssueIds } = useActions(bulkSelectLogic)
-    const { trigger: triggerHogfetti, HogfettiComponent } = useHogfetti()
+    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti()
 
     const hasAtLeastTwoIssues = selectedIds.length >= 2
 
@@ -109,7 +109,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
 
     return (
         <div className="flex gap-x-2 justify-between">
-            <HogfettiComponent />
+            <ConfettiComponent />
             <div className="flex gap-x-2">
                 <Button variant="outline" onClick={openInNewTabs}>
                     Open all
@@ -131,7 +131,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
                         switch (value) {
                             case 'resolved':
                                 resolveIssues(selectedIds)
-                                ;[0, 400, 800].forEach((delay) => setTimeout(triggerHogfetti, delay))
+                                ;[0, 400, 800].forEach((delay) => setTimeout(triggerConfetti, delay))
                                 break
                             case 'suppressed':
                                 suppressIssues(selectedIds)
