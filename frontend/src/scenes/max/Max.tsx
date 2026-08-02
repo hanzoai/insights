@@ -13,6 +13,8 @@ import {
 } from '@hanzo/icons'
 import { Banner, Link, Tooltip } from '@hanzo/elements'
 
+import { CAPABILITIES } from 'lib/capabilities'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Button } from 'lib/elements/Button'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -44,8 +46,21 @@ import { maxLogic } from './maxLogic'
 import { MaxThreadLogicProps, maxThreadLogic } from './maxThreadLogic'
 
 export const scene: SceneExport = {
-    component: Max,
+    component: MaxScene,
     logic: maxLogic,
+}
+
+/**
+ * `AI_AVAILABLE` removes every entry point to the assistant, but `/ai` stays routed, so a
+ * bookmark or a pasted link still lands here. Answer it honestly instead of rendering a chat box
+ * whose every request 404s. The check sits in this wrapper rather than in `Max` so that no hook
+ * runs before it and `Max` itself is left exactly as upstream wrote it.
+ */
+function MaxScene({ tabId }: { tabId?: string }): JSX.Element {
+    if (!CAPABILITIES.ai.available) {
+        return <Unavailable capability="ai" />
+    }
+    return <Max tabId={tabId} />
 }
 
 export function Max({ tabId }: { tabId?: string }): JSX.Element {
