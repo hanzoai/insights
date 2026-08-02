@@ -147,9 +147,18 @@ with tempfile.TemporaryDirectory() as tmp:
     check("so is NOTICE", read("NOTICE.md"), notice)
     check("a control file is still rewritten", read("mod.py"), "import insights\n")
     check("a laundered licence is caught", quiet(debrand.licences_unlaundered, tmp), 0)
+    check("so is a dropped notice", quiet(debrand.licence_notice_survives, tmp), 0)
     with open(os.path.join(tmp, "LICENSE"), "w", encoding="utf-8") as fh:
         fh.write("Copyright (c) 2026 Insights Inc.\n")
     check("...and reported when it exists", quiet(debrand.licences_unlaundered, tmp), 1)
+    # Renaming the holder is one way to break the MIT condition; deleting the
+    # line is the other, and it leaves nothing behind for the check above to
+    # match. Both shipped: a laundered rust/LICENSE, and a root LICENSE that
+    # named only us.
+    with open(os.path.join(tmp, "LICENSE"), "w", encoding="utf-8") as fh:
+        fh.write("MIT License\n\nCopyright (c) 2026 Hanzo AI\n")
+    check("a notice deleted rather than renamed is caught too", quiet(debrand.licences_unlaundered, tmp), 0)
+    check("...by the invariant that asserts it is there", quiet(debrand.licence_notice_survives, tmp), 1)
 
 # Applying the rules to an already-converged tree has to be a no-op, or every
 # rerun produces a diff and convergence never terminates.
