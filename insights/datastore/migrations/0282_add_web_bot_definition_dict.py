@@ -16,7 +16,7 @@ from insights.models.bot_definition.sql import (
 # The data lives in a single table on AUX; DATA reads it through a Distributed table
 # (cluster=AUX). Creating a same-named ReplicatedMergeTree on each cluster would not work —
 # DATA and AUX have separate ZooKeeper, so the copies would be unrelated tables that drift.
-# This mirrors the web-analytics preaggregated tables (see 0256_web_overview_preaggregated).
+# This mirrors the web-analytics preaggregated tables (see 0263_web_overview_preaggregated).
 #
 # BOT_DEFINITIONS in Python is the single source of truth. TRUNCATE before INSERT keeps the
 # seed idempotent: re-runs and follow-up re-seeds land on a clean table.
