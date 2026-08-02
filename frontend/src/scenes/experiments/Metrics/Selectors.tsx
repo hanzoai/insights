@@ -1,12 +1,12 @@
 import { useValues } from 'kea'
 
+import { Input, Link, Select, SelectOption, SelectSection } from '@hanzo/elements'
 import { IconInfo } from '@hanzo/icons'
-import { Input, Select, SelectOption, SelectSection, Link } from '@hanzo/elements'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils'
 import { TIME_INTERVAL_BOUNDS } from 'scenes/funnels/funnelUtils'
 import { GroupIntroductionFooter } from 'scenes/groups/GroupsIntroduction'
@@ -60,7 +60,7 @@ export function FunnelAggregationSelect({
     ]
     if (needsUpgradeForGroups || canStartUsingGroups) {
         // if (false) {
-        optionSections[0].footer = <GroupIntroductionFooter needsUpgrade={needsUpgradeForGroups} />
+        optionSections[0].footer = <GroupIntroductionFooter />
     } else {
         Array.from(groupTypes.values()).forEach((groupType) => {
             baseValues.push(`$group_${groupType.group_type_index}`)
@@ -128,12 +128,10 @@ export function FunnelConversionWindowFilter({
     onFunnelWindowIntervalChange: (funnelWindowInterval: number | undefined) => void
     onFunnelWindowIntervalUnitChange: (funnelWindowIntervalUnit: FunnelConversionWindowTimeUnit) => void
 }): JSX.Element {
-    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
-        (unit) => ({
-            label: capitalizeFirstLetter(pluralize(funnelWindowInterval ?? 7, unit, `${unit}s`, false)),
-            value: unit as FunnelConversionWindowTimeUnit,
-        })
-    )
+    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map((unit) => ({
+        label: capitalizeFirstLetter(pluralize(funnelWindowInterval ?? 7, unit, `${unit}s`, false)),
+        value: unit as FunnelConversionWindowTimeUnit,
+    }))
     const intervalBounds = TIME_INTERVAL_BOUNDS[funnelWindowIntervalUnit ?? FunnelConversionWindowTimeUnit.Day]
 
     return (
