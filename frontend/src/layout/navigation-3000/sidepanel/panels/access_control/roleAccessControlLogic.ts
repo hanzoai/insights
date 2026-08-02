@@ -6,6 +6,7 @@ import { actionToUrl, router } from 'kea-router'
 import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
+import { CAPABILITIES } from 'lib/capabilities'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -63,6 +64,12 @@ export const roleAccessControlLogic = kea<roleAccessControlLogicType>([
             [] as RoleType[],
             {
                 loadRoles: async () => {
+                    // The access-control side panel connects to this on every resource it opens,
+                    // so an unguarded call here is the most frequent of the role 404s. Same guard
+                    // as `rolesLogic` — the endpoint is absent, not failing.
+                    if (!CAPABILITIES.roles.available) {
+                        return []
+                    }
                     const response = await api.roles.list()
                     return response?.results || []
                 },
