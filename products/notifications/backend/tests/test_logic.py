@@ -89,7 +89,7 @@ class TestCreateNotification(BaseTest):
     def test_resolve_team_excludes_org_members_without_project_access(self):
         from insights.models import OrganizationMembership
 
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL}
@@ -355,7 +355,7 @@ class TestPublishResourceEdited(BaseTest):
                 resource_id="flow-123",
                 updated_at="2026-06-16T00:00:00+00:00",
                 actor_user_id=self.user.id,
-                ac_resource_type="hog_flow",
+                ac_resource_type="insights_flow",
             )
 
         producer.produce.assert_called_once()

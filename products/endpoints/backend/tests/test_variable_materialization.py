@@ -29,7 +29,7 @@ from products.endpoints.backend.materialization_transforms import (
 )
 from products.warehouse_sources.backend.facade.models import DataWarehouseTable
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 pytestmark = [pytest.mark.django_db]
 

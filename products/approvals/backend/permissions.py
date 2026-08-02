@@ -42,7 +42,7 @@ class CanApprove(permissions.BasePermission):
         approver_roles = policy_snapshot.get("roles", [])
         if approver_roles:
             try:
-                from ee.models.rbac.role import RoleMembership
+                from insights.models.ee_models import RoleMembership
             except ImportError:
                 return False
 

@@ -9,7 +9,7 @@ from products.error_tracking.backend.models import ErrorTrackingIssue, ErrorTrac
 from products.error_tracking.backend.notifications import _AssignerExcludingResolver, dispatch_issue_assigned_realtime
 from products.notifications.backend.facade.enums import TargetType
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 
 class TestDispatchIssueAssignedRealtime(BaseTest):

@@ -1118,8 +1118,8 @@ class Team(UUIDTClassicModel):
         from insights.models.organization import OrganizationMembership
         from insights.models.user import User
 
-        from ee.models.rbac.access_control import AccessControl
-        from ee.models.rbac.role import RoleMembership
+        from insights.models.ee_models import AccessControl
+        from insights.models.ee_models import RoleMembership
 
         # Without ACCESS_CONTROL there is no notion of private teams — all org members have access.
         # Mirrors User.teams and UserTeamPermissions.effective_membership_level_for_parent_membership.

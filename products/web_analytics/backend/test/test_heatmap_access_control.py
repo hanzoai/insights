@@ -19,7 +19,7 @@ from products.web_analytics.backend.models import SavedHeatmap
 from products.web_analytics.backend.test.test_heatmaps_api import INSERT_SINGLE_HEATMAP_EVENT
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

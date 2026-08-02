@@ -6,9 +6,9 @@ from insights.exceptions_capture import capture_exception
 from insights.models.team import Team
 
 from ee.models.feature_flag_role_access import FeatureFlagRoleAccess
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 from ee.models.rbac.organization_resource_access import OrganizationResourceAccess
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 logger = structlog.get_logger(__name__)
 

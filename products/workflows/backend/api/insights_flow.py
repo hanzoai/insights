@@ -58,9 +58,9 @@ from insights.event_usage import EventSource, get_event_source, report_user_acti
 from insights.models import Team
 from insights.models.filters import Filter
 from insights.plugins.plugin_server_api import (
-    create_hog_flow_invocation_test,
-    create_hog_flow_scheduled_invocation,
-    get_hog_flow_in_flight_count,
+    create_insights_flow_invocation_test,
+    create_insights_flow_scheduled_invocation,
+    get_insights_flow_in_flight_count,
     rerun_hog_invocations,
 )
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
@@ -79,7 +79,7 @@ from products.notifications.backend.facade.api import publish_resource_edited
 from products.workflows.backend.api.action_redirects import compute_action_redirects
 from products.workflows.backend.api.graph_operations import apply_graph_operations
 from products.workflows.backend.api.graph_validation import validate_graph
-from products.workflows.backend.api.hog_flow_batch_job import InsightsFlowBatchJobSerializer
+from products.workflows.backend.api.insights_flow_batch_job import InsightsFlowBatchJobSerializer
 from products.workflows.backend.api.message_assets import (
     MessageAssetContentRequestSerializer,
     MessageAssetSerializer,
@@ -88,16 +88,16 @@ from products.workflows.backend.api.message_assets import (
     fetch_message_assets,
 )
 from products.workflows.backend.api.publish_impact import build_publish_impact
-from products.workflows.backend.models.hog_flow.hog_flow import (
+from products.workflows.backend.models.insights_flow.insights_flow import (
     BILLABLE_ACTION_TYPES,
     PERSON_DEPENDENT_ACTION_TYPES,
     SUPPORTED_ACTION_TYPES,
     TRIGGER_TYPES,
     InsightsFlow,
 )
-from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
-from products.workflows.backend.models.hog_flow_revision import InsightsFlowRevision
-from products.workflows.backend.models.hog_flow_schedule import SCHEDULED_TRIGGER_TYPES, InsightsFlowSchedule
+from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.insights_flow_revision import InsightsFlowRevision
+from products.workflows.backend.models.insights_flow_schedule import SCHEDULED_TRIGGER_TYPES, InsightsFlowSchedule
 from products.workflows.backend.models.team_workflows_config import TeamWorkflowsConfig
 from products.workflows.backend.providers.ses import SESProvider
 from products.workflows.backend.services.batch_audience import (
@@ -114,7 +114,7 @@ from products.workflows.backend.services.timing_reschedule import (
     use_workflows_timing_reschedule,
 )
 from products.workflows.backend.services.wait_clock_conditions import find_clock_function
-from products.workflows.backend.tasks.hog_flows import reschedule_hog_flow_timing
+from products.workflows.backend.tasks.insights_flows import reschedule_insights_flow_timing
 from products.workflows.backend.utils.batch_trigger_limit import get_hogflow_batch_trigger_limit
 from products.workflows.backend.utils.rrule_utils import compute_next_occurrences, validate_rrule
 
@@ -1369,8 +1369,8 @@ class EmailSendingRatesSerializer(serializers.Serializer):
 
 
 class WorkflowEmailSendingRatesSerializer(EmailSendingRatesSerializer):
-    hog_flow_id = serializers.UUIDField(read_only=True, help_text="The workflow these rates are for.")
-    hog_flow_name = serializers.CharField(
+    insights_flow_id = serializers.UUIDField(read_only=True, help_text="The workflow these rates are for.")
+    insights_flow_name = serializers.CharField(
         read_only=True, allow_blank=True, help_text="Display name of the workflow; empty for unnamed workflows."
     )
 
@@ -1841,14 +1841,14 @@ class InsightsFlowSerializer(InsightsFlowMinimalSerializer):
                 graph_errors = exc.detail.get("graph", []) if isinstance(exc.detail, dict) else [exc.detail]
                 for error in graph_errors:
                     logger.warning(
-                        "hog_flow_graph_structural_error",
+                        "insights_flow_graph_structural_error",
                         error=str(error),
-                        hog_flow_id=str(instance.id) if instance else None,
+                        insights_flow_id=str(instance.id) if instance else None,
                     )
                 warnings = []
             for warning in warnings:
                 logger.info(
-                    "hog_flow_graph_warning", warning=warning, hog_flow_id=str(instance.id) if instance else None
+                    "insights_flow_graph_warning", warning=warning, insights_flow_id=str(instance.id) if instance else None
                 )
 
         conversion = data.get("conversion")
@@ -2215,13 +2215,13 @@ PUBLISH_CONFIRM_TOKEN_MAX_AGE = timedelta(minutes=15)
 _PUBLISH_CONFIRM_SALT = "hogflow-publish"
 
 
-def _publish_confirm_value(hog_flow: InsightsFlow) -> str:
-    draft_updated_at = hog_flow.draft_updated_at.isoformat() if hog_flow.draft_updated_at else ""
-    return f"{hog_flow.id}:{draft_updated_at}"
+def _publish_confirm_value(insights_flow: InsightsFlow) -> str:
+    draft_updated_at = insights_flow.draft_updated_at.isoformat() if insights_flow.draft_updated_at else ""
+    return f"{insights_flow.id}:{draft_updated_at}"
 
 
-def mint_publish_confirm_token(hog_flow: InsightsFlow) -> str:
-    return TimestampSigner(salt=_PUBLISH_CONFIRM_SALT).sign(_publish_confirm_value(hog_flow))
+def mint_publish_confirm_token(insights_flow: InsightsFlow) -> str:
+    return TimestampSigner(salt=_PUBLISH_CONFIRM_SALT).sign(_publish_confirm_value(insights_flow))
 
 
 # Same structural-unskippability pattern for batch dispatch: only the blast-radius preview mints
@@ -2276,7 +2276,7 @@ def mint_audience_confirm_token(
 class InsightsFlowViewSet(
     TeamAndOrgViewSetMixin, AccessControlViewSetMixin, LogEntryMixin, AppMetricsMixin, viewsets.ModelViewSet
 ):
-    scope_object = "hog_flow"
+    scope_object = "insights_flow"
     scope_object_read_actions = [
         "list",
         "retrieve",
@@ -2310,9 +2310,9 @@ class InsightsFlowViewSet(
     pagination_class = InsightsFlowPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = InsightsFlowFilterSet
-    log_source = "hog_flow"
-    app_source = "hog_flow"
-    function_kind = "hog_flow"
+    log_source = "insights_flow"
+    app_source = "insights_flow"
+    function_kind = "insights_flow"
 
     def dangerously_get_required_scopes(self, request, view) -> Optional[list[str]]:
         # Dual-method custom actions need method-aware scopes — the action-name-based read/write
@@ -2323,39 +2323,39 @@ class InsightsFlowViewSet(
             # outbound messages, so it's person-data access on top of the workflow write - same
             # rationale as user_blast_radius. Listing jobs/schedules stays workflow-read.
             if request.method in ("GET", "HEAD", "OPTIONS"):
-                return ["hog_flow:read"]
-            return ["hog_flow:write", "person:read"]
+                return ["insights_flow:read"]
+            return ["insights_flow:write", "person:read"]
         # Sizing an audience runs a person/group count over caller-supplied filters — that's person-data
-        # access, so require person:read on top of workflow read. Without it a hog_flow:read-only token
+        # access, so require person:read on top of workflow read. Without it a insights_flow:read-only token
         # could use this as a person-existence oracle (e.g. "does email X exist?"). The web builder uses
         # session auth, so live sizing while editing is unaffected.
         if self.action == "user_blast_radius":
-            return ["hog_flow:read", "person:read"]
+            return ["insights_flow:read", "person:read"]
         # Invocation inspection returns distinct_id / person_id and the raw triggering payload
         # (invocation_globals: event/person/groups), so it's person-data access — require person:read
-        # on top of workflow read, same as user_blast_radius. A hog_flow:read-only token must not be
+        # on top of workflow read, same as user_blast_radius. A insights_flow:read-only token must not be
         # able to enumerate who a workflow ran for.
         if self.action in ("invocation_results", "invocation_result"):
-            return ["hog_flow:read", "person:read"]
+            return ["insights_flow:read", "person:read"]
         # Assets expose recipient/distinct_id/person_id and the message bytes — require
-        # person:read so a hog_flow:read-only token can't enumerate who got emailed.
+        # person:read so a insights_flow:read-only token can't enumerate who got emailed.
         if self.action in ("assets", "asset_content"):
-            return ["hog_flow:read", "person:read"]
+            return ["insights_flow:read", "person:read"]
         # A test invocation resolves the event's $groups into real group properties server-side, so a
-        # hog_flow:write-only token could branch on group_0.properties and read the returned logs/variables
+        # insights_flow:write-only token could branch on group_0.properties and read the returned logs/variables
         # as a group-property oracle. Require group:read on top. The web builder uses session auth, so
         # running tests while editing is unaffected.
         if self.action == "invocations":
-            return ["hog_flow:write", "group:read"]
+            return ["insights_flow:write", "group:read"]
         # Rerun re-executes stored invocations — it replays up to 30 days of
         # persisted event/person/group data through the current (possibly
-        # reconfigured) workflow. A `hog_flow:write`-only token could use that to
+        # reconfigured) workflow. A `insights_flow:write`-only token could use that to
         # route historical data it can't otherwise read to a destination it
         # controls, so gate rerun on person:read + group:read on top of write —
-        # the same data-read scopes invocation inspection requires. (`hog_flow:read`
+        # the same data-read scopes invocation inspection requires. (`insights_flow:read`
         # would be a no-op since :write already satisfies it.)
         if self.action == "rerun":
-            return ["hog_flow:write", "person:read", "group:read"]
+            return ["insights_flow:write", "person:read", "group:read"]
         return None
 
     def get_serializer_class(self) -> type[BaseSerializer]:
@@ -2437,9 +2437,9 @@ class InsightsFlowViewSet(
         onto cyclotron with `is_retry=1`.
 
         Because rerun replays historical event/person/group data, it requires
-        `person:read` and `group:read` on top of `hog_flow:write`.
+        `person:read` and `group:read` on top of `insights_flow:write`.
         """
-        hog_flow = self.get_object()
+        insights_flow = self.get_object()
 
         serializer = HogInvocationRerunRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -2451,8 +2451,8 @@ class InsightsFlowViewSet(
         # filter-mode rerun before the request even left Django.
         res = rerun_hog_invocations(
             team_id=self.team_id,
-            function_kind="hog_flow",
-            function_id=str(hog_flow.id),
+            function_kind="insights_flow",
+            function_id=str(insights_flow.id),
             payload=serializer.data,
         )
 
@@ -2509,7 +2509,7 @@ class InsightsFlowViewSet(
         self._emit_resource_edited(serializer.instance)
 
         self._report_workflow_action(
-            "hog_flow_created",
+            "insights_flow_created",
             serializer.instance,
             {
                 "edges_count": len(serializer.instance.edges or []),
@@ -2623,14 +2623,14 @@ class InsightsFlowViewSet(
         log_activity_from_viewset(self, serializer.instance, name=serializer.instance.name, previous=before_update)
         self._emit_resource_edited(serializer.instance)
 
-        # Insights capture for hog_flow activated (draft -> active)
+        # Insights capture for insights_flow activated (draft -> active)
         if (
             before_update
             and before_update.status == InsightsFlow.State.DRAFT
             and serializer.instance.status == InsightsFlow.State.ACTIVE
         ):
             self._report_workflow_action(
-                "hog_flow_activated",
+                "insights_flow_activated",
                 serializer.instance,
                 {
                     "edges_count": len(serializer.instance.edges or []),
@@ -2647,7 +2647,7 @@ class InsightsFlowViewSet(
             log_activity_from_viewset(self, instance, activity="deleted", name=instance.name)
             instance.delete()
         instance.id = flow_id
-        self._report_workflow_action("hog_flow_deleted", instance, {"via": "destroy"})
+        self._report_workflow_action("insights_flow_deleted", instance, {"via": "destroy"})
 
     def _refresh_action_redirects(
         self, target: InsightsFlow, old: InsightsFlow, new_actions: Optional[list], enabled: bool
@@ -2695,17 +2695,17 @@ class InsightsFlowViewSet(
         # Must run inside the same transaction as the content write it snapshots. On the first
         # tracked write, also snapshot the outgoing live content so the state before any tracked
         # change is always available to roll back to (there's no backfill).
-        if not InsightsFlowRevision.objects.filter(hog_flow=instance).exists():
+        if not InsightsFlowRevision.objects.filter(insights_flow=instance).exists():
             InsightsFlowRevision.objects.create(
                 team_id=self.team_id,
-                hog_flow=instance,
+                insights_flow=instance,
                 version=before.version,
                 content=snapshot_flow_content(before),
                 created_by=None,
             )
         InsightsFlowRevision.objects.create(
             team_id=self.team_id,
-            hog_flow=instance,
+            insights_flow=instance,
             version=instance.version,
             content=snapshot_flow_content(instance),
             created_by=self.request.user if self.request.user.is_authenticated else None,
@@ -2811,7 +2811,7 @@ class InsightsFlowViewSet(
         log_activity_from_viewset(self, locked, activity="updated", name=locked.name, previous=before_update)
         self._emit_resource_edited(locked)
         self._report_workflow_action(
-            "hog_flow_graph_updated",
+            "insights_flow_graph_updated",
             locked,
             {"operations_count": len(operations), "routed_to_draft": route_to_draft},
         )
@@ -2846,12 +2846,12 @@ class InsightsFlowViewSet(
         if not use_workflows_timing_reschedule(self.team):
             return
         team_id = self.team_id
-        hog_flow_id = str(after.id)
+        insights_flow_id = str(after.id)
         transaction.on_commit(
-            lambda: reschedule_hog_flow_timing.delay(team_id=team_id, hog_flow_id=hog_flow_id, action_ids=action_ids)
+            lambda: reschedule_insights_flow_timing.delay(team_id=team_id, insights_flow_id=insights_flow_id, action_ids=action_ids)
         )
 
-    def _require_audience_confirm_token(self, request: Request, hog_flow: InsightsFlow) -> None:
+    def _require_audience_confirm_token(self, request: Request, insights_flow: InsightsFlow) -> None:
         confirm_token = request.data.get("confirm_token")
         if not confirm_token:
             raise exceptions.ValidationError(
@@ -2879,7 +2879,7 @@ class InsightsFlowViewSet(
         # trigger's filters; request filters are never forwarded), so the token must sign exactly
         # that - a token minted for other filters, or for an audience edited since the preview,
         # forces a re-preview of the real recipient set.
-        filters = (hog_flow.trigger or {}).get("filters") or {}
+        filters = (insights_flow.trigger or {}).get("filters") or {}
         if previewed != _audience_confirm_value(self.team_id, filters):
             raise exceptions.ValidationError(
                 {
@@ -2890,12 +2890,12 @@ class InsightsFlowViewSet(
                 }
             )
 
-    def _get_in_flight_counts(self, hog_flow: InsightsFlow) -> Optional[dict]:
+    def _get_in_flight_counts(self, insights_flow: InsightsFlow) -> Optional[dict]:
         # Best-effort: publish must not fail because the counting service is unreachable — the counts
         # are advisory ("N runs in flight will follow the new config"), not a gate. by_action and
         # position_unknown are None when the plugin server predates the per-action breakdown.
         try:
-            res = get_hog_flow_in_flight_count(team_id=self.team_id, hog_flow_id=str(hog_flow.id))
+            res = get_insights_flow_in_flight_count(team_id=self.team_id, insights_flow_id=str(insights_flow.id))
             if res.status_code == 200:
                 body = res.json()
                 return {
@@ -2905,30 +2905,30 @@ class InsightsFlowViewSet(
                 }
             logger.warning(
                 "Failed to fetch in-flight run count for workflow",
-                hog_flow_id=str(hog_flow.id),
+                insights_flow_id=str(insights_flow.id),
                 status_code=res.status_code,
             )
         except Exception:
             logger.warning(
-                "Failed to fetch in-flight run count for workflow", hog_flow_id=str(hog_flow.id), exc_info=True
+                "Failed to fetch in-flight run count for workflow", insights_flow_id=str(insights_flow.id), exc_info=True
             )
         return None
 
-    def _build_publish_impact(self, hog_flow: InsightsFlow, counts: Optional[dict]) -> dict:
-        draft = hog_flow.draft or {}
+    def _build_publish_impact(self, insights_flow: InsightsFlow, counts: Optional[dict]) -> dict:
+        draft = insights_flow.draft or {}
         schedule_overrides = {
             str(schedule_id): variables or {}
-            for schedule_id, variables in hog_flow.schedules.exclude(
+            for schedule_id, variables in insights_flow.schedules.exclude(
                 status=InsightsFlowSchedule.Status.COMPLETED
             ).values_list("id", "variables")
         }
         return build_publish_impact(
-            live_actions=hog_flow.actions or [],
-            live_edges=hog_flow.edges or [],
-            live_variables=hog_flow.variables or [],
+            live_actions=insights_flow.actions or [],
+            live_edges=insights_flow.edges or [],
+            live_variables=insights_flow.variables or [],
             draft_actions=draft.get("actions") or [],
             draft_variables=draft.get("variables") or [],
-            existing_redirects=hog_flow.action_redirects,
+            existing_redirects=insights_flow.action_redirects,
             by_action_counts=counts.get("by_action") if counts else None,
             position_unknown=counts.get("position_unknown") if counts else None,
             schedule_overrides=schedule_overrides,
@@ -3023,7 +3023,7 @@ class InsightsFlowViewSet(
         self._maybe_reschedule_timing_edits(before_update, locked)
         log_activity_from_viewset(self, locked, activity="published", name=locked.name, previous=before_update)
         self._emit_resource_edited(locked)
-        self._report_workflow_action("hog_flow_draft_published", locked)
+        self._report_workflow_action("insights_flow_draft_published", locked)
 
         return Response(
             {
@@ -3056,7 +3056,7 @@ class InsightsFlowViewSet(
 
         log_activity_from_viewset(self, locked, activity="draft_discarded", name=locked.name, previous=before_update)
         self._emit_resource_edited(locked)
-        self._report_workflow_action("hog_flow_draft_discarded", locked)
+        self._report_workflow_action("insights_flow_draft_discarded", locked)
 
         return Response(self.get_serializer(locked).data)
 
@@ -3070,7 +3070,7 @@ class InsightsFlowViewSet(
         if not use_workflows_revisions(self.team):
             raise exceptions.ValidationError(REVISIONS_DISABLED_MESSAGE)
         instance = self.get_object()
-        queryset = InsightsFlowRevision.objects.filter(hog_flow=instance).order_by("-version").select_related("created_by")
+        queryset = InsightsFlowRevision.objects.filter(insights_flow=instance).order_by("-version").select_related("created_by")
         page = self.paginate_queryset(queryset)
         return self.get_paginated_response(InsightsFlowRevisionBasicSerializer(page, many=True).data)
 
@@ -3084,7 +3084,7 @@ class InsightsFlowViewSet(
             raise exceptions.ValidationError(REVISIONS_DISABLED_MESSAGE)
         instance = self.get_object()
         try:
-            revision = InsightsFlowRevision.objects.get(hog_flow=instance, version=int(version or 0))
+            revision = InsightsFlowRevision.objects.get(insights_flow=instance, version=int(version or 0))
         except InsightsFlowRevision.DoesNotExist:
             raise exceptions.NotFound("No such revision for this workflow.")
         return Response(InsightsFlowRevisionSerializer(revision).data)
@@ -3111,7 +3111,7 @@ class InsightsFlowViewSet(
             # nosemgrep: idor-lookup-without-team (re-fetch of already-authorized instance, locked for update)
             locked = InsightsFlow.objects.select_for_update().get(pk=instance.pk)
             try:
-                revision = InsightsFlowRevision.objects.get(hog_flow_id=locked.pk, version=int(version or 0))
+                revision = InsightsFlowRevision.objects.get(insights_flow_id=locked.pk, version=int(version or 0))
             except InsightsFlowRevision.DoesNotExist:
                 raise exceptions.NotFound("No such revision for this workflow.")
             if locked.draft and not param_serializer.validated_data["overwrite"]:
@@ -3128,7 +3128,7 @@ class InsightsFlowViewSet(
 
         log_activity_from_viewset(self, locked, activity="revision_restored", name=locked.name, previous=before_update)
         self._emit_resource_edited(locked)
-        self._report_workflow_action("hog_flow_revision_restored", locked, {"version": revision.version})
+        self._report_workflow_action("insights_flow_revision_restored", locked, {"version": revision.version})
 
         return Response(self.get_serializer(locked).data)
 
@@ -3136,16 +3136,16 @@ class InsightsFlowViewSet(
     @action(detail=True, methods=["POST"])
     def invocations(self, request: Request, *args, **kwargs):
         try:
-            hog_flow = self.get_object()
+            insights_flow = self.get_object()
         except (Http404, exceptions.NotFound):
             # Only a genuinely missing workflow lands here (e.g. testing from the builder before first
             # save) — fall back to testing the submitted payload. Permission failures never reach this
             # fallback: a resource-level denial 403s upstream before this method runs, and an object-level
             # PermissionDenied from get_object() is deliberately not caught, so it surfaces as a 403.
-            hog_flow = None
+            insights_flow = None
 
         serializer = InsightsFlowInvocationSerializer(
-            data=request.data, context={**self.get_serializer_context(), "instance": hog_flow}
+            data=request.data, context={**self.get_serializer_context(), "instance": insights_flow}
         )
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
@@ -3158,7 +3158,7 @@ class InsightsFlowViewSet(
                 raise exceptions.ValidationError(
                     {"use_draft": "Pass either use_draft or an explicit configuration override, not both."}
                 )
-            if not hog_flow or not hog_flow.draft:
+            if not insights_flow or not insights_flow.draft:
                 raise exceptions.ValidationError(
                     {
                         "use_draft": (
@@ -3169,15 +3169,15 @@ class InsightsFlowViewSet(
                 )
             # The draft's actions are stripped of secrets, and this inline path bypasses the worker's
             # manager (which normally decrypts), so fold the draft's secrets back in before dispatch.
-            draft = dict(hog_flow.draft)
-            draft_secrets = merge_secret_maps(hog_flow.encrypted_inputs, hog_flow.draft_encrypted_inputs)
+            draft = dict(insights_flow.draft)
+            draft_secrets = merge_secret_maps(insights_flow.encrypted_inputs, insights_flow.draft_encrypted_inputs)
             if isinstance(draft.get("actions"), list):
                 draft["actions"] = rehydrate_flow_secrets(draft["actions"], draft_secrets)
             payload["configuration"] = draft
 
-        res = create_hog_flow_invocation_test(
+        res = create_insights_flow_invocation_test(
             team_id=self.team_id,
-            hog_flow_id=str(hog_flow.id) if hog_flow else "new",
+            insights_flow_id=str(insights_flow.id) if insights_flow else "new",
             payload=payload,
         )
 
@@ -3193,7 +3193,7 @@ class InsightsFlowViewSet(
         # "has access to any one workflow" (has_any_specific_access_for_resource). That's too weak for a
         # project-wide person/group count: require resource-level workflow access so an object-level grant on
         # a single workflow can't be used as a project-wide audience oracle.
-        if not self.user_access_control.check_access_level_for_resource("hog_flow", "viewer"):
+        if not self.user_access_control.check_access_level_for_resource("insights_flow", "viewer"):
             raise exceptions.PermissionDenied("You do not have access to workflows.")
 
         param_serializer = BlastRadiusRequestSerializer(data=request.data)
@@ -3236,7 +3236,7 @@ class InsightsFlowViewSet(
         )
 
     @extend_schema(
-        operation_id="hog_flows_invocation_results_retrieve",
+        operation_id="insights_flows_invocation_results_retrieve",
         parameters=[HogInvocationResultsRequestSerializer],
         responses=HogInvocationResultSerializer(many=True),
     )
@@ -3269,7 +3269,7 @@ class InsightsFlowViewSet(
         return Response(HogInvocationResultSerializer(data, many=True).data)
 
     @extend_schema(
-        operation_id="hog_flows_invocation_result_retrieve",
+        operation_id="insights_flows_invocation_result_retrieve",
         parameters=[OpenApiParameter("invocation_id", str, OpenApiParameter.PATH)],
         responses=HogInvocationResultDetailSerializer,
     )
@@ -3294,7 +3294,7 @@ class InsightsFlowViewSet(
         return Response(HogInvocationResultDetailSerializer(data).data)
 
     @extend_schema(
-        operation_id="hog_flows_assets_retrieve",
+        operation_id="insights_flows_assets_retrieve",
         parameters=[MessageAssetsRequestSerializer],
         responses=MessageAssetSerializer(many=True),
     )
@@ -3330,7 +3330,7 @@ class InsightsFlowViewSet(
         return Response(MessageAssetSerializer(enriched, many=True).data)
 
     @extend_schema(
-        operation_id="hog_flows_asset_content_retrieve",
+        operation_id="insights_flows_asset_content_retrieve",
         parameters=[MessageAssetContentRequestSerializer],
         responses={(200, "text/html"): OpenApiTypes.STR},
     )
@@ -3367,7 +3367,7 @@ class InsightsFlowViewSet(
         return response
 
     @extend_schema(
-        operation_id="hog_flows_metrics_global_retrieve",
+        operation_id="insights_flows_metrics_global_retrieve",
         parameters=[WorkflowGlobalStatsRequestSerializer],
         responses=WorkflowStatsRowSerializer(many=True),
     )
@@ -3452,7 +3452,7 @@ class InsightsFlowViewSet(
                 log_activity_from_viewset(self, flow, activity="deleted", name=flow.name)
 
         for flow in deleted_flows:
-            self._report_workflow_action("hog_flow_deleted", flow, {"via": "bulk_delete"})
+            self._report_workflow_action("insights_flow_deleted", flow, {"via": "bulk_delete"})
 
         return Response({"deleted": deleted_count})
 
@@ -3490,7 +3490,7 @@ class InsightsFlowViewSet(
         # The project-wide aggregate pools ALL workflows' email (that's its point), so it can't be
         # filtered per object grant — only members with project-wide workflow read access get it.
         # Members holding just object-level grants still get their (filtered) per-workflow rows.
-        can_read_all_workflows = self.user_access_control.check_access_level_for_resource("hog_flow", "viewer")
+        can_read_all_workflows = self.user_access_control.check_access_level_for_resource("insights_flow", "viewer")
 
         # Cached briefly: the UI reloads per search keystroke, but search filters in Python — the
         # Datastore totals are search-independent. Session-authenticated requests bypass the
@@ -3502,7 +3502,7 @@ class InsightsFlowViewSet(
             after = timezone.now() - timedelta(days=self.REPUTATION_WINDOW_DAYS)
             totals_by_source = fetch_app_metric_totals_by_source(
                 team_id=self.team_id,
-                app_source="hog_flow",
+                app_source="insights_flow",
                 after=after,
                 name=["email_sent", "email_bounced_hard", "email_blocked"],
             )
@@ -3527,7 +3527,7 @@ class InsightsFlowViewSet(
         team_queryset = self.get_queryset()
         # Only names are needed and InsightsFlow rows are wide (full step graphs in edges/actions/draft),
         # so don't hydrate model instances for an uncapped id list. Unnamed flows serialize as "" to
-        # keep hog_flow_name a plain string in the generated types.
+        # keep insights_flow_name a plain string in the generated types.
         names_by_flow_id = {
             str(flow_id): name or ""
             for flow_id, name in team_queryset.filter(id__in=source_ids).values_list("id", "name")
@@ -3537,7 +3537,7 @@ class InsightsFlowViewSet(
             str(batch_job_id): str(flow_id)
             for batch_job_id, flow_id in InsightsFlowBatchJob.objects.filter(
                 team_id=self.team_id, id__in=unmatched_ids
-            ).values_list("id", "hog_flow_id")
+            ).values_list("id", "insights_flow_id")
         }
         missing_flow_ids = set(batch_job_to_flow.values()) - set(names_by_flow_id)
         names_by_flow_id.update(
@@ -3570,8 +3570,8 @@ class InsightsFlowViewSet(
         search = (request.query_params.get("search") or "").strip().lower()
         workflow_rows: list[dict[str, Any]] = [
             {
-                "hog_flow_id": flow_id,
-                "hog_flow_name": names_by_flow_id[flow_id],
+                "insights_flow_id": flow_id,
+                "insights_flow_name": names_by_flow_id[flow_id],
                 **_email_sending_rates(counts["sent"], counts["bounced"], counts["complained"]),
             }
             for flow_id, counts in counts_by_flow.items()
@@ -3610,7 +3610,7 @@ class InsightsFlowViewSet(
         )
 
     @extend_schema(
-        operation_id="hog_flows_email_sending_suspension_retrieve",
+        operation_id="insights_flows_email_sending_suspension_retrieve",
         responses={200: EmailSendingSuspensionStatusSerializer},
     )
     @action(
@@ -3651,7 +3651,7 @@ class InsightsFlowViewSet(
     @action(detail=True, methods=["GET", "POST"], pagination_class=None, filter_backends=[])
     def batch_jobs(self, request: Request, *args, **kwargs):
         try:
-            hog_flow = self.get_object()
+            insights_flow = self.get_object()
         except (Http404, exceptions.NotFound):
             # A PermissionDenied from the object-level access check propagates as a 403; only a genuine
             # missing workflow becomes a friendly 404.
@@ -3661,7 +3661,7 @@ class InsightsFlowViewSet(
             # A batch run sends real messages, so only fire for an enabled workflow. The scheduler applies the
             # same gate (see internal_process_due_schedules) and the UI disables the manual trigger for non-active
             # workflows; enforce it here too so API/MCP callers can't start a run the consumer would only drop.
-            if hog_flow.status != InsightsFlow.State.ACTIVE:
+            if insights_flow.status != InsightsFlow.State.ACTIVE:
                 raise exceptions.ValidationError("Workflow must be active to run a batch. Enable it first.")
 
             # A batch run is an irreversible mass send: interactive agent surfaces must prove they
@@ -3670,21 +3670,21 @@ class InsightsFlowViewSet(
             # and headless callers (raw API keys, Terraform) are professional surfaces where the
             # two-step would be ceremony with no human to read the count - they stay token-free.
             if get_event_source(request) in AGENT_EVENT_SOURCES:
-                self._require_audience_confirm_token(request, hog_flow)
+                self._require_audience_confirm_token(request, insights_flow)
 
             serializer = InsightsFlowBatchJobSerializer(
-                data={**request.data, "hog_flow": hog_flow.id}, context={**self.get_serializer_context()}
+                data={**request.data, "insights_flow": insights_flow.id}, context={**self.get_serializer_context()}
             )
             if not serializer.is_valid():
                 return Response(serializer.errors, status=400)
 
             # The consumer fans out to the trigger's stored filters, so snapshot those on the job -
             # caller-supplied filters are never what actually runs.
-            batch_job = serializer.save(filters=(hog_flow.trigger or {}).get("filters") or {})
-            self._report_workflow_action("hog_flow_batch_job_created", hog_flow, {"batch_job_id": str(batch_job.id)})
+            batch_job = serializer.save(filters=(insights_flow.trigger or {}).get("filters") or {})
+            self._report_workflow_action("insights_flow_batch_job_created", insights_flow, {"batch_job_id": str(batch_job.id)})
             return Response(InsightsFlowBatchJobSerializer(batch_job).data)
         else:
-            batch_jobs = InsightsFlowBatchJob.objects.filter(hog_flow=hog_flow, team=self.team).order_by("-created_at")
+            batch_jobs = InsightsFlowBatchJob.objects.filter(insights_flow=insights_flow, team=self.team).order_by("-created_at")
             serializer = InsightsFlowBatchJobSerializer(batch_jobs, many=True)
             return Response(serializer.data)
 
@@ -3694,7 +3694,7 @@ class InsightsFlowViewSet(
     # generated schema matches the actual response shape.
     @action(detail=True, methods=["GET", "POST"], pagination_class=None, filter_backends=[])
     def schedules(self, request: Request, *args, **kwargs):
-        hog_flow = self.get_object()
+        insights_flow = self.get_object()
 
         if request.method == "POST":
             # A schedule is a recurring batch dispatch - without this, an agent could sidestep the
@@ -3704,21 +3704,21 @@ class InsightsFlowViewSet(
                 # A draft's trigger can still be edited after the audience was sized, so a schedule
                 # staged on a draft could fire on a broadened audience once enabled. Same rule the
                 # MCP tool enforces, applied at the API boundary.
-                if hog_flow.status != InsightsFlow.State.ACTIVE:
+                if insights_flow.status != InsightsFlow.State.ACTIVE:
                     raise exceptions.ValidationError(
                         "Workflow must be active before scheduling - a draft's audience can still be "
                         "edited after previewing. Enable it with workflows-enable, then preview and "
                         "schedule."
                     )
-                self._require_audience_confirm_token(request, hog_flow)
+                self._require_audience_confirm_token(request, insights_flow)
 
             serializer = InsightsFlowScheduleSerializer(data=request.data, context=self.get_serializer_context())
             serializer.is_valid(raise_exception=True)
-            schedule = serializer.save(team=self.team, hog_flow=hog_flow)
-            self._report_workflow_action("hog_flow_schedule_created", hog_flow, {"schedule_id": str(schedule.id)})
+            schedule = serializer.save(team=self.team, insights_flow=insights_flow)
+            self._report_workflow_action("insights_flow_schedule_created", insights_flow, {"schedule_id": str(schedule.id)})
             return Response(serializer.data, status=201)
 
-        schedules = InsightsFlowSchedule.objects.filter(hog_flow=hog_flow, team=self.team).order_by("-created_at")
+        schedules = InsightsFlowSchedule.objects.filter(insights_flow=insights_flow, team=self.team).order_by("-created_at")
         serializer = InsightsFlowScheduleSerializer(schedules, many=True)
         return Response(serializer.data)
 
@@ -3735,16 +3735,16 @@ class InsightsFlowViewSet(
     )
     @action(detail=True, methods=["PATCH", "DELETE"], url_path="schedules/(?P<schedule_id>[^/.]+)")
     def schedule_detail(self, request: Request, schedule_id=None, *args, **kwargs):
-        hog_flow = self.get_object()
+        insights_flow = self.get_object()
         try:
-            schedule = InsightsFlowSchedule.objects.get(id=schedule_id, hog_flow=hog_flow, team=self.team)
+            schedule = InsightsFlowSchedule.objects.get(id=schedule_id, insights_flow=insights_flow, team=self.team)
         except InsightsFlowSchedule.DoesNotExist:
             raise exceptions.NotFound("Schedule not found")
 
         if request.method == "DELETE":
             schedule_id_str = str(schedule.id)
             schedule.delete()
-            self._report_workflow_action("hog_flow_schedule_deleted", hog_flow, {"schedule_id": schedule_id_str})
+            self._report_workflow_action("insights_flow_schedule_deleted", insights_flow, {"schedule_id": schedule_id_str})
             return Response(status=204)
 
         serializer = InsightsFlowScheduleSerializer(
@@ -3752,7 +3752,7 @@ class InsightsFlowViewSet(
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        self._report_workflow_action("hog_flow_schedule_updated", hog_flow, {"schedule_id": str(schedule.id)})
+        self._report_workflow_action("insights_flow_schedule_updated", insights_flow, {"schedule_id": str(schedule.id)})
         return Response(serializer.data)
 
 
@@ -3860,8 +3860,8 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
         """
         from django.db import transaction  # noqa: PLC0415
 
-        from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
-        from products.workflows.backend.models.hog_flow_schedule import InsightsFlowSchedule  # noqa: PLC0415
+        from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
+        from products.workflows.backend.models.insights_flow_schedule import InsightsFlowSchedule  # noqa: PLC0415
         from products.workflows.backend.utils.rrule_utils import compute_next_occurrences  # noqa: PLC0415
 
         def advance_next_run(schedule, after=None):
@@ -3882,10 +3882,10 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                 schedule.save(update_fields=["status", "next_run_at", "updated_at"])
             return occurrences
 
-        def resolve_variables(hog_flow, schedule):
+        def resolve_variables(insights_flow, schedule):
             """Build default variables from InsightsFlow schema, then merge schedule overrides."""
             variables = {}
-            for var in hog_flow.variables or []:
+            for var in insights_flow.variables or []:
                 variables[var.get("key")] = var.get("default")
             variables.update(schedule.variables or {})
             return variables
@@ -3915,7 +3915,7 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                         schedule = (
                             # nosemgrep: idor-lookup-without-team
                             InsightsFlowSchedule.objects.select_for_update(skip_locked=True)
-                            .select_related("hog_flow")
+                            .select_related("insights_flow")
                             .filter(
                                 id=schedule_id, status=InsightsFlowSchedule.Status.ACTIVE, next_run_at__lte=timezone.now()
                             )
@@ -3924,10 +3924,10 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                         if not schedule:
                             continue
 
-                        hog_flow = schedule.hog_flow
-                        trigger_type = (hog_flow.trigger or {}).get("type")
+                        insights_flow = schedule.insights_flow
+                        trigger_type = (insights_flow.trigger or {}).get("type")
 
-                        if hog_flow.status != "active" or trigger_type not in SCHEDULED_TRIGGER_TYPES:
+                        if insights_flow.status != "active" or trigger_type not in SCHEDULED_TRIGGER_TYPES:
                             schedule.next_run_at = None
                             schedule.save(update_fields=["next_run_at", "updated_at"])
                             continue
@@ -3937,15 +3937,15 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                         if trigger_type == "batch":
                             batch_job_params = {
                                 "team_id": schedule.team_id,
-                                "hog_flow": hog_flow,
-                                "variables": resolve_variables(hog_flow, schedule),
-                                "filters": (hog_flow.trigger or {}).get("filters", {}),
+                                "insights_flow": insights_flow,
+                                "variables": resolve_variables(insights_flow, schedule),
+                                "filters": (insights_flow.trigger or {}).get("filters", {}),
                             }
                         else:
                             schedule_invocation_params = {
                                 "team_id": schedule.team_id,
-                                "hog_flow_id": str(hog_flow.id),
-                                "variables": resolve_variables(hog_flow, schedule),
+                                "insights_flow_id": str(insights_flow.id),
+                                "variables": resolve_variables(insights_flow, schedule),
                             }
 
                     # Dispatch outside the transaction so HTTP calls don't hold the row lock.
@@ -3956,7 +3956,7 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                         )
                         processed.append(str(schedule_id))
                     elif schedule_invocation_params:
-                        response = create_hog_flow_scheduled_invocation(**schedule_invocation_params)
+                        response = create_insights_flow_scheduled_invocation(**schedule_invocation_params)
                         response.raise_for_status()
                         processed.append(str(schedule_id))
                 except Exception:
@@ -3969,8 +3969,8 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                 InsightsFlowSchedule.objects.filter(
                     status=InsightsFlowSchedule.Status.ACTIVE,
                     next_run_at__isnull=True,
-                    hog_flow__status="active",
-                    hog_flow__trigger__type__in=SCHEDULED_TRIGGER_TYPES,
+                    insights_flow__status="active",
+                    insights_flow__trigger__type__in=SCHEDULED_TRIGGER_TYPES,
                 ).values_list("id", flat=True)
             )
 
@@ -4016,7 +4016,7 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
 
         Accepts: { status: "completed" | "failed" }
         """
-        from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
+        from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob  # noqa: PLC0415
 
         if request.method != "PUT":
             return Response({"error": "Method not allowed"}, status=405)

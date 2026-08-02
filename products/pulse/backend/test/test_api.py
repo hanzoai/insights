@@ -19,7 +19,7 @@ from products.product_analytics.backend.models.insight import Insight
 from products.pulse.backend.api.brief import ProductBriefViewSet
 from products.pulse.backend.models import BriefConfig, ProductBrief
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 def _temporal_client() -> MagicMock:

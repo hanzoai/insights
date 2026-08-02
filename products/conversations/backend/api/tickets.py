@@ -62,7 +62,7 @@ from products.conversations.backend.models import EmailChannel, Ticket, TicketAs
 from products.conversations.backend.models.constants import Channel, ChannelDetail, Priority, Status
 from products.conversations.backend.person_lookup import _get_persons_by_email
 
-from ee.models.rbac.role import Role
+from insights.models.ee_models import Role
 
 logger = structlog.get_logger(__name__)
 

@@ -57,7 +57,7 @@ from products.cdp.backend.models import InsightsFunction
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 from products.workflows.backend.models import InsightsFlow
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestSlackIntegration:

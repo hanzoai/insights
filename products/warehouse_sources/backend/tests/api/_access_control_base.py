@@ -13,7 +13,7 @@ from insights.models.organization import OrganizationMembership
 from insights.models.user import User
 
 try:
-    from ee.models.rbac.access_control import AccessControl
+    from insights.models.ee_models import AccessControl
 except ImportError:
     pass
 

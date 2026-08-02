@@ -15,9 +15,9 @@ from products.event_definitions.backend.models.event_definition import EventDefi
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
 from products.notebooks.backend.models import Notebook
 from products.product_analytics.backend.models.insight import Insight
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 
 class TestSearch(APIBaseTest):
@@ -179,19 +179,19 @@ class TestSearch(APIBaseTest):
         self.assertEqual(results[0]["type"], "early_access_feature")
         self.assertEqual(results[0]["extra_fields"]["name"], "second feature")
 
-    def test_hog_flows(self):
+    def test_insights_flows(self):
         InsightsFlow.objects.create(name="first workflow", team=self.team)
         InsightsFlow.objects.create(name="second workflow", team=self.team)
         InsightsFlow.objects.create(name="third workflow", team=self.team)
 
-        response = self.client.get("/api/projects/@current/search?q=sec&entities=hog_flow")
+        response = self.client.get("/api/projects/@current/search?q=sec&entities=insights_flow")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["counts"]["hog_flow"], 1)
+        self.assertEqual(response.json()["counts"]["insights_flow"], 1)
 
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["type"], "hog_flow")
+        self.assertEqual(results[0]["type"], "insights_flow")
         self.assertEqual(results[0]["extra_fields"]["name"], "second workflow")
 
     def test_build_search_vector_requires_search_fields(self):

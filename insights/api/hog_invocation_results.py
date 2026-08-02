@@ -17,7 +17,7 @@ from insights.datastore.query_tagging import Feature, tag_queries
 
 FUNCTION_KIND_TO_PRODUCT_KEY: dict[str, ProductKey] = {
     "insights_function": ProductKey.PIPELINE_DESTINATIONS,
-    "hog_flow": ProductKey.WORKFLOWS,
+    "insights_flow": ProductKey.WORKFLOWS,
 }
 
 

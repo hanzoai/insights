@@ -274,7 +274,7 @@ def fetch_message_assets_for_person(
         "person_id = %(person_id)s",
         # Standalone insights_function email destinations aren't surfaced anywhere yet,
         # so this endpoint only returns workflow-step rows.
-        "function_kind = 'hog_flow'",
+        "function_kind = 'insights_flow'",
         # One channel per call. The person view shows email and push in separate tabs, each with
         # columns shaped for its channel, so returning both from one call would misrepresent whichever
         # tab it landed in.

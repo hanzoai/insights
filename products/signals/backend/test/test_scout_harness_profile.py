@@ -64,7 +64,7 @@ from products.signals.backend.scout_harness.profile.builders import (
     _recent_dashboards,
     _recent_experiments,
     _recent_feature_flags,
-    _recent_hog_flows,
+    _recent_insights_flows,
     _recent_insights_functions,
     _recent_notebooks,
     _recent_reviewer_corrections,
@@ -82,7 +82,7 @@ from products.signals.backend.scout_harness.tools.profile import (
 from products.skills.backend.models.skills import LLMSkill
 from products.surveys.backend.models import Survey
 from products.warehouse_sources.backend.facade.models import ExternalDataJob, ExternalDataSchema, ExternalDataSource
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 class TestProjectContext(BaseTest):
@@ -628,14 +628,14 @@ class TestRecentInsightsFlows(BaseTest):
         InsightsFlow.objects.create(team=self.team, name="draft", status="draft")
         InsightsFlow.objects.create(team=self.team, name="active", status="active")
         InsightsFlow.objects.create(team=self.team, name="archived", status="archived")
-        result = _recent_hog_flows(self.team)
+        result = _recent_insights_flows(self.team)
         assert result["total_count"] == 3
         assert result["active_count"] == 2  # everything except archived
 
     def test_team_isolated(self) -> None:
         other = self.organization.teams.create(name="other")
         InsightsFlow.objects.create(team=other, name="x", status="active")
-        result = _recent_hog_flows(self.team)
+        result = _recent_insights_flows(self.team)
         assert result["total_count"] == 0
 
 
@@ -947,7 +947,7 @@ class TestBuildInventory(BaseTest):
             "recent_experiments",
             "recent_alerts",
             "recent_insights_functions",
-            "recent_hog_flows",
+            "recent_insights_flows",
             "recent_notebooks",
             "recent_cohorts",
             "recent_actions",

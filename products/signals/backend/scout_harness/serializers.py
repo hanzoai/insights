@@ -1537,7 +1537,7 @@ class RecentInsightsFunctionsSerializer(serializers.Serializer):
 
 
 class RecentInsightsFlowEntrySerializer(serializers.Serializer):
-    """One row in `inventory.recent_hog_flows.recent`."""
+    """One row in `inventory.recent_insights_flows.recent`."""
 
     id = serializers.CharField(help_text="Script flow UUID.")
     name = serializers.CharField(allow_blank=True, help_text="Script flow name.")
@@ -1546,7 +1546,7 @@ class RecentInsightsFlowEntrySerializer(serializers.Serializer):
 
 
 class RecentInsightsFlowsSerializer(serializers.Serializer):
-    """`inventory.recent_hog_flows` — total + non-archived count, plus the 5 most recently modified."""
+    """`inventory.recent_insights_flows` — total + non-archived count, plus the 5 most recently modified."""
 
     total_count = serializers.IntegerField(help_text="Total script flows on the team.")
     active_count = serializers.IntegerField(help_text="Script flows that are not archived.")
@@ -1721,7 +1721,7 @@ class ProjectProfileInventorySerializer(serializers.Serializer):
             "updated destinations / transformations the team has wired up via the CDP pipelines."
         ),
     )
-    recent_hog_flows = RecentInsightsFlowsSerializer(
+    recent_insights_flows = RecentInsightsFlowsSerializer(
         help_text=(
             "Script flow orientation: total + non-archived count, plus the 5 most recently updated automation flows."
         ),

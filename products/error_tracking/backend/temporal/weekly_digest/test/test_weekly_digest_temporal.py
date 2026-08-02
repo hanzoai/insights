@@ -44,7 +44,7 @@ from products.error_tracking.backend.temporal.weekly_digest.workflow import (
 from products.error_tracking.backend.weekly_digest import build_team_digest_data
 
 from ee.datastore.materialized_columns.columns import materialize
-from ee.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 
 _WEBHOOK_POST = "products.error_tracking.backend.weekly_digest.requests.post"
 _BUILD_TEAM_DIGEST_DATA = "products.error_tracking.backend.weekly_digest.build_team_digest_data"
