@@ -30,7 +30,7 @@ from products.replay_vision.backend.models.replay_observation import Observation
 from products.replay_vision.backend.models.replay_scanner import ReplayScanner, ScannerType
 from products.replay_vision.backend.tags import slugify_tag
 
-from ee.hogai.utils.untrusted import neutralize_markup
+from insights.security.untrusted import neutralize_markup
 
 logger = structlog.get_logger(__name__)
 

@@ -84,10 +84,9 @@ def noop(*args, **kwargs) -> None:
     return None
 
 
-try:
-    from ee.models.license import get_licensed_users_available
-except ImportError:
-    get_licensed_users_available = noop  # ty: ignore[invalid-assignment]
+# Seat counts were enforced against an enterprise license key; with no license there is no seat
+# limit to report.
+get_licensed_users_available = noop
 
 
 def login_required(view):

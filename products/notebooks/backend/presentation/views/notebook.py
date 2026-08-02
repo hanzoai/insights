@@ -96,8 +96,7 @@ from products.notebooks.backend.temporal.sql_v2 import SQLV2RunInput
 from products.tasks.backend.facade.exceptions import SandboxProvisionError
 from products.tasks.backend.facade.sandbox import SandboxStatus
 
-from ee.hogai.utils.aio import async_to_sync
-from ee.hogai.utils.asgi import SyncIterableToAsync
+from insights.api.streaming import SyncIterableToAsync, async_to_sync
 
 logger = structlog.get_logger(__name__)
 

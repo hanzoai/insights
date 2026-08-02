@@ -803,8 +803,7 @@ def discover_affected_mat_columns(properties: list[str], table_column: str) -> l
 
     from insights.datastore.client import sync_execute
     from insights.datastore.client.connection import DatastoreUser
-
-    from ee.datastore.materialized_columns.columns import MaterializedColumnDetails
+    from insights.datastore.materialized_column_types import MaterializedColumnDetails
 
     rows = sync_execute(
         """

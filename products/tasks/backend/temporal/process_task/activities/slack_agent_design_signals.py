@@ -26,7 +26,7 @@ from products.tasks.backend.logic.stream.redis_stream import (
 )
 from products.tasks.backend.models import TaskRun as TaskRunModel
 
-from ee.hogai.sandbox import is_turn_complete
+from products.insights_ai.backend.wire_types import is_turn_complete
 
 # Reuse the ACP event helpers, signal dispatcher, and SSE reconnect tuning from relay_sandbox_events
 # so the two relays derive/emit signals and drive their SSE transport from identical logic.

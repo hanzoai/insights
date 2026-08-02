@@ -1033,43 +1033,11 @@ def update_survey_adaptive_sampling() -> None:
     update_survey_adaptive_sampling()
 
 
-def recompute_materialized_columns_enabled() -> bool:
-    from insights.models.instance_setting import get_instance_setting
-
-    if get_instance_setting("MATERIALIZED_COLUMNS_ENABLED") and get_instance_setting(
-        "COMPUTE_MATERIALIZED_COLUMNS_ENABLED"
-    ):
-        return True
-    return False
-
-
-@shared_task(ignore_result=True)
-def datastore_materialize_columns() -> None:
-    if recompute_materialized_columns_enabled():
-        try:
-            from ee.datastore.materialized_columns.analyze import materialize_properties_task
-        except ImportError:
-            pass
-        else:
-            materialize_properties_task()
-
-
 @shared_task(ignore_result=True, queue=CeleryQueue.USAGE_REPORTS.value)
 def send_org_usage_reports() -> None:
     from insights.tasks.usage_report import send_all_org_usage_reports
 
     send_all_org_usage_reports.delay()
-
-
-@shared_task(ignore_result=True, retries=3)
-def datastore_send_license_usage() -> None:
-    try:
-        if not is_cloud():
-            from ee.tasks.send_license_usage import send_license_usage
-
-            send_license_usage()
-    except ImportError:
-        pass
 
 
 @shared_task(ignore_result=True, queue=CeleryQueue.LONG_RUNNING.value)
