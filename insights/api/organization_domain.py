@@ -15,7 +15,7 @@ from insights.event_usage import groups
 from insights.models import OrganizationDomain
 from insights.models.organization import Organization
 from insights.permissions import OrganizationAdminWritePermissions, TimeSensitiveActionPermission
-
+from insights.utils import get_instance_available_sso_providers
 
 DOMAIN_REGEX = r"^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$"
 
@@ -96,6 +96,29 @@ class OrganizationDomainSerializer(serializers.ModelSerializer):
         if not re.match(DOMAIN_REGEX, domain):
             raise serializers.ValidationError("Please enter a valid domain or subdomain name.")
         return domain
+
+    def validate_sso_enforcement(self, sso_enforcement: str) -> str:
+        # The field is a free-text CharField with no choices and no validator, so any <=28-char
+        # string could be persisted on a verified domain. An enforcement naming a provider this
+        # instance does not build is unenforceable by construction -- there is no outcome in which
+        # SSO actually happens -- and it is read from six UNAUTHENTICATED endpoints, where it used
+        # to raise KeyError and answer 500 on every auth flow at that domain, SSO included.
+        #
+        # The read side now fails soft, which is the right behaviour for state that already exists.
+        # This stops the state being created: refusing at the boundary is what keeps a login gate
+        # from being configured into a shape that cannot gate anything.
+        #
+        # SAML is allowed even though it is absent from the instance-level providers, because it is
+        # configured per domain rather than per instance.
+        if not sso_enforcement:
+            return sso_enforcement
+        allowed = {"saml", *get_instance_available_sso_providers().keys()}
+        if sso_enforcement not in allowed:
+            raise serializers.ValidationError(
+                f"Cannot enforce SSO with '{sso_enforcement}'. This instance offers: {', '.join(sorted(allowed))}.",
+                code="sso_provider_unavailable",
+            )
+        return sso_enforcement
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         instance = cast(OrganizationDomain, self.instance)
