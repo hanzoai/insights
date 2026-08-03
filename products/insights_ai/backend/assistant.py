@@ -25,12 +25,11 @@ logger = structlog.get_logger(__name__)
 # The client refuses anything longer, and says so in those words.
 MAX_CONTENT_LENGTH = 40000
 
-# A reply that has not started after this long is a failure, not a slow thought.
-_TIMEOUT_SECONDS = 120
-
 # Bounds on what one request may carry. A thread grows without limit, so replay
 # the recent past rather than all of it, and cap the attached context: both feed
-# straight into a priced context window.
+# straight into a priced context window. The turn count alone is not a bound —
+# forty turns of forty thousand characters is a very large request — so the
+# characters are what actually caps it.
 _MAX_REPLAYED_TURNS = 40
 _MAX_CONTEXT_CHARS = 8000
 
@@ -75,6 +74,27 @@ def render_context(ui_context) -> str:
     return text
 
 
+def recent_turns(turns: list[dict]) -> list[dict]:
+    """The tail of the thread that fits the replay budget, oldest-first.
+
+    Walks backwards from the newest turn and stops at the character budget, so
+    the size of a request is bounded by the budget rather than by how much the
+    caller has written. The newest turn is always included even if it alone
+    exceeds the budget — a request that dropped the thing just said would be
+    incoherent, and its length is capped separately at MAX_CONTENT_LENGTH.
+    """
+    kept: list[dict] = []
+    spent = 0
+    for turn in reversed(turns[-_MAX_REPLAYED_TURNS:]):
+        cost = len(turn.get("content") or "")
+        if kept and spent + cost > settings.INSIGHTS_AI_MAX_REPLAYED_CHARS:
+            break
+        kept.append(turn)
+        spent += cost
+    kept.reverse()
+    return kept
+
+
 def build_messages(turns: list[dict], *, team, ui_context=None) -> list[dict]:
     """Turns plus standing instructions, in the gateway's wire shape.
 
@@ -91,7 +111,7 @@ def build_messages(turns: list[dict], *, team, ui_context=None) -> list[dict]:
             }
         )
 
-    messages.extend(turns[-_MAX_REPLAYED_TURNS:])
+    messages.extend(recent_turns(turns))
     return messages
 
 
@@ -105,7 +125,7 @@ def stream_reply(messages: list[dict]) -> Iterator[str]:
         base_url=f"{settings.HANZO_API_URL}/v1",
         # Raises IamUnavailable rather than sending an unauthenticated request.
         api_key=iam.service_token(),
-        timeout=_TIMEOUT_SECONDS,
+        timeout=settings.INSIGHTS_AI_REPLY_TIMEOUT_SECONDS,
         max_retries=1,
     )
 
@@ -113,6 +133,8 @@ def stream_reply(messages: list[dict]) -> Iterator[str]:
         model=settings.INSIGHTS_AI_MODEL,
         messages=messages,  # type: ignore[arg-type]
         stream=True,
+        # An unbounded reply is unbounded spend and an unbounded worker hold.
+        max_tokens=settings.INSIGHTS_AI_MAX_OUTPUT_TOKENS,
     )
 
     for chunk in stream:

@@ -100,8 +100,17 @@ class ConversationMessage(UUIDModel):
     replayed thread and a streamed one cannot drift.
     """
 
+    class Source(models.TextChoices):
+        MODEL = "model"
+        CLIENT = "client"
+
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     type = models.CharField(max_length=20)
+    # Who wrote this. An assistant-typed message is not proof the model said it:
+    # the client can append one directly, and replaying those back as the model's
+    # own words would let a caller put words in its mouth and pay to have them
+    # re-read on every later turn. Only MODEL-sourced replies are replayed.
+    source = models.CharField(max_length=10, choices=Source.choices, default=Source.MODEL)
     content = models.TextField(blank=True, default="")
     # Correlates a turn with the client's provisional bubble, so a reconnect
     # replaces that bubble instead of appending a duplicate.
