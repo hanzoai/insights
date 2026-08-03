@@ -58,3 +58,11 @@ WORKOS_RADAR_ENABLED = get_from_env("WORKOS_RADAR_ENABLED", False, type_cast=str
 # Recall.ai (for desktop recordings product)
 RECALL_AI_API_KEY = get_from_env("RECALL_AI_API_KEY", "")
 RECALL_AI_API_URL = get_from_env("RECALL_AI_API_URL", "https://us-west-2.recall.ai")
+
+# Hanzo AI gateway (backs the Insights assistant). No key here: the deployment
+# presents its own IAM identity via `insights.iam`, so there is nothing to rotate
+# in this file and nothing that could be baked into a frontend bundle.
+HANZO_API_URL = get_from_env("HANZO_API_URL", "https://api.hanzo.ai").rstrip("/")
+# A gateway catalogue entry, not a provider model name. Configurable because the
+# catalogue moves; the default is checked against it in the assistant's tests.
+INSIGHTS_AI_MODEL = get_from_env("INSIGHTS_AI_MODEL", "claude-haiku-4.5")
