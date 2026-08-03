@@ -21,7 +21,7 @@ REDIS_LOCK_TOKEN = "insights:decide_analytics:lock"
 CACHE_BUCKET_SIZE = 60 * 2  # duration in seconds
 
 # SDK library names must match the Rust Library::as_str() values in
-# rust/feature-flags/src/handler/types.rs
+# hanzoai/cloud apps/flags (was rust/feature-flags/src/handler/types.rs)
 SDK_LIBRARIES = [
     "insights-js",
     "insights-node",
