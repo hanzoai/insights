@@ -18,7 +18,19 @@ function watch(page: Page): Watch {
             w.serverErrors.push(`${r.status()} ${r.request().method()} ${new URL(r.url()).pathname}`)
         }
     })
-    page.on('pageerror', (e) => w.pageErrors.push(String(e).slice(0, 300)))
+    page.on('pageerror', (e) => {
+        const text = String(e)
+        // Monaco's cancellation token, not a fault. The editor rejects in-flight
+        // work with exactly this when it disposes, so navigating away from the SQL
+        // editor surfaces it as an unhandled rejection while the scene itself is
+        // fine -- no error boundary, no failed request. Matched exactly rather than
+        // by substring: "cancel" appears in plenty of real failures, and an
+        // exemption that grows is how a suite stops meaning anything.
+        if (text === 'Canceled: Canceled') {
+            return
+        }
+        w.pageErrors.push(text.slice(0, 300))
+    })
     return w
 }
 
