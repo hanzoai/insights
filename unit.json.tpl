@@ -41,6 +41,7 @@
         "insights": {
             "type": "python 3.12",
             "processes": $NGINX_UNIT_APP_PROCESSES,
+            "threads": $NGINX_UNIT_APP_THREADS,
             "working_directory": "/code",
             "path": ".",
             "module": "insights.$NGINX_UNIT_PYTHON_PROTOCOL",

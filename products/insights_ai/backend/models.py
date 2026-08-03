@@ -60,3 +60,63 @@ class AgentMemory(UUIDModel):
             timestamp=self.created_at,
             metadata=embedding_metadata,
         )
+
+
+class Conversation(UUIDModel):
+    """One assistant thread, owned by the user who opened it.
+
+    Scoped by BOTH team and user. The team is the tenant boundary the rest of the
+    API enforces; the user is the second half, because a thread is private to its
+    author rather than shared across a project the way a dashboard is. Reading
+    either one off the row means a query can never widen past both.
+    """
+
+    class Status(models.TextChoices):
+        IDLE = "idle"
+        IN_PROGRESS = "in_progress"
+        CANCELING = "canceling"
+
+    class Type(models.TextChoices):
+        ASSISTANT = "assistant"
+
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE, related_name="assistant_conversations")
+    user = models.ForeignKey("insights.User", on_delete=models.CASCADE, related_name="assistant_conversations")
+    title = models.CharField(max_length=200, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.IDLE)
+    type = models.CharField(max_length=20, choices=Type.choices, default=Type.ASSISTANT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        indexes = [models.Index(fields=["team", "user", "-updated_at"])]
+
+
+class ConversationMessage(UUIDModel):
+    """A single turn, stored in the shape the client already reads.
+
+    `type` holds the wire value ("human", "ai", "ai/failure") rather than a private
+    enum that would need translating on the way out. One representation, so a
+    replayed thread and a streamed one cannot drift.
+    """
+
+    class Source(models.TextChoices):
+        MODEL = "model"
+        CLIENT = "client"
+
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
+    type = models.CharField(max_length=20)
+    # Who wrote this. An assistant-typed message is not proof the model said it:
+    # the client can append one directly, and replaying those back as the model's
+    # own words would let a caller put words in its mouth and pay to have them
+    # re-read on every later turn. Only MODEL-sourced replies are replayed.
+    source = models.CharField(max_length=10, choices=Source.choices, default=Source.MODEL)
+    content = models.TextField(blank=True, default="")
+    # Correlates a turn with the client's provisional bubble, so a reconnect
+    # replaces that bubble instead of appending a duplicate.
+    trace_id = models.CharField(max_length=64, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        indexes = [models.Index(fields=["conversation", "created_at"])]
