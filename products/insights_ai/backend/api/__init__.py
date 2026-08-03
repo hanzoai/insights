@@ -1,3 +1,3 @@
-from .mcp_tools import MCPToolsViewSet
+from .conversations import ConversationViewSet
 
-__all__ = ["MCPToolsViewSet"]
+__all__ = ["ConversationViewSet"]

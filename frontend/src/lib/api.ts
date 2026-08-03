@@ -1,5 +1,6 @@
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source'
 import { encodeParams } from 'kea-router'
+
 import insights from '@hanzo/insights'
 
 import { ActivityLogProps } from 'lib/components/ActivityLog/ActivityLog'
@@ -129,12 +130,12 @@ import {
     HeatmapScreenshotType,
     HeatmapStatus,
     HeatmapType,
+    InsightModel,
     InsightsFunctionIconResponse,
     InsightsFunctionStatus,
     InsightsFunctionTemplateType,
     InsightsFunctionType,
     InsightsFunctionTypeType,
-    InsightModel,
     IntegrationType,
     JiraProjectType,
     LLMPrompt,
@@ -1583,14 +1584,6 @@ export class ApiRequest {
     }
 
     // Conversations (AI Assistant)
-    public conversations(teamId?: TeamType['id']): ApiRequest {
-        return this.environmentsDetail(teamId).addPathComponent('conversations')
-    }
-
-    public conversation(id: string, teamId?: TeamType['id']): ApiRequest {
-        return this.environmentsDetail(teamId).addPathComponent('conversations').addPathComponent(id)
-    }
-
     // Conversations (Support product)
     public conversationsTickets(teamId?: TeamType['id']): ApiRequest {
         return this.projectsDetail(teamId).addPathComponent('conversations').addPathComponent('tickets')
@@ -1938,6 +1931,19 @@ function getDistinctId(): string | undefined {
         return undefined
     }
     return insights.get_distinct_id()
+}
+
+/**
+ * The assistant's threads, at `/v1/`.
+ *
+ * Built here rather than through `ApiRequest`, whose `assembleFullUrl` prefixes
+ * `api/` by design — that prefix is where this fork's inherited endpoints live,
+ * and new surfaces are versioned at the root instead. The project id is a path
+ * segment because it names which project is being asked for; the server
+ * authorizes it against the caller rather than trusting it.
+ */
+function assistantConversationsUrl(): string {
+    return `/v1/projects/${ApiConfig.getCurrentTeamId()}/assistant/conversations`
 }
 
 const api = {
@@ -3367,7 +3373,10 @@ const api = {
         async create(data: Partial<InsightsFunctionType>): Promise<InsightsFunctionType> {
             return await new ApiRequest().insightsFunctions().create({ data })
         },
-        async update(id: InsightsFunctionType['id'], data: Partial<InsightsFunctionType>): Promise<InsightsFunctionType> {
+        async update(
+            id: InsightsFunctionType['id'],
+            data: Partial<InsightsFunctionType>
+        ): Promise<InsightsFunctionType> {
             return await new ApiRequest().insightsFunction(id).update({ data })
         },
         async logs(
@@ -3386,7 +3395,11 @@ const api = {
             id: InsightsFunctionType['id'],
             params: Partial<AppMetricsV2RequestParams> = {}
         ): Promise<AppMetricsTotalsV2Response> {
-            return await new ApiRequest().insightsFunction(id).withAction('metrics/totals').withQueryString(params).get()
+            return await new ApiRequest()
+                .insightsFunction(id)
+                .withAction('metrics/totals')
+                .withQueryString(params)
+                .get()
         },
         async listTemplates(params: {
             types: InsightsFunctionTypeType[]
@@ -5157,7 +5170,10 @@ const api = {
         async createInsightsFlow(data: Partial<InsightsFlow>): Promise<InsightsFlow> {
             return await new ApiRequest().insightsFlows().create({ data })
         },
-        async updateInsightsFlow(insightsFlowId: InsightsFlow['id'], data: Partial<InsightsFlow>): Promise<InsightsFlow> {
+        async updateInsightsFlow(
+            insightsFlowId: InsightsFlow['id'],
+            data: Partial<InsightsFlow>
+        ): Promise<InsightsFlow> {
             return await new ApiRequest().insightsFlow(insightsFlowId).update({ data })
         },
         async deleteInsightsFlow(insightsFlowId: InsightsFlow['id']): Promise<void> {
@@ -5202,7 +5218,9 @@ const api = {
         async getInsightsFlowTemplates(): Promise<PaginatedResponse<InsightsFlowTemplate>> {
             return await new ApiRequest().insightsFlowTemplates().get()
         },
-        async getInsightsFlowTemplate(insightsFlowTemplateId: InsightsFlowTemplate['id']): Promise<InsightsFlowTemplate> {
+        async getInsightsFlowTemplate(
+            insightsFlowTemplateId: InsightsFlowTemplate['id']
+        ): Promise<InsightsFlowTemplate> {
             return await new ApiRequest().insightsFlowTemplate(insightsFlowTemplateId).get()
         },
         async createInsightsFlowTemplate(data: Partial<InsightsFlowTemplate>): Promise<InsightsFlowTemplate> {
@@ -5327,31 +5345,39 @@ const api = {
             },
             options?: ApiMethodOptions
         ): Promise<Response> {
-            return api.createResponse(new ApiRequest().conversations().assembleFullUrl(), data, options)
+            return api.createResponse(assistantConversationsUrl(), data, options)
         },
 
         cancel(conversationId: string): Promise<void> {
-            return new ApiRequest().conversation(conversationId).withAction('cancel').update()
+            return api.update(`${assistantConversationsUrl()}/${conversationId}/cancel`, {})
         },
 
         list(): Promise<PaginatedResponse<ConversationDetail>> {
-            return new ApiRequest().conversations().get()
+            return api.get(assistantConversationsUrl())
         },
 
         get(conversationId: string): Promise<ConversationDetail> {
-            return new ApiRequest().conversation(conversationId).get()
+            return api.get(`${assistantConversationsUrl()}/${conversationId}`)
         },
 
         appendMessage(conversationId: string, content: string): Promise<{ id: string }> {
-            return new ApiRequest()
-                .conversation(conversationId)
-                .withAction('append_message')
-                .create({ data: { content } })
+            return api.create(`${assistantConversationsUrl()}/${conversationId}/messages`, { content })
         },
 
+        /**
+         * Queued messages — sending a second message while the first is still being
+         * answered. This build does not serve the queue.
+         *
+         * The only thing keeping these unused is the feature flag: they are reached
+         * exclusively behind `INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM`, which is off. Do
+         * not rely on the 404 handling in `loadQueueData` as a second line — these
+         * paths are not routed, so they fall to the SPA catch-all and answer 200
+         * with an HTML page, which that handler would not catch. Serving the queue
+         * means adding the routes, not flipping the flag.
+         */
         queue: {
             list(conversationId: string): Promise<ConversationQueueResponse> {
-                return new ApiRequest().conversation(conversationId).withAction('queue').get()
+                return api.get(`${assistantConversationsUrl()}/${conversationId}/queue`)
             },
 
             enqueue(
@@ -5364,22 +5390,19 @@ const api = {
                     agent_mode?: AgentMode | null
                 }
             ): Promise<ConversationQueueResponse> {
-                return new ApiRequest().conversation(conversationId).withAction('queue').create({ data })
+                return api.create(`${assistantConversationsUrl()}/${conversationId}/queue`, data)
             },
 
             update(conversationId: string, queueId: string, content: string): Promise<ConversationQueueResponse> {
-                return new ApiRequest()
-                    .conversation(conversationId)
-                    .withAction(`queue/${queueId}`)
-                    .update({ data: { content } })
+                return api.update(`${assistantConversationsUrl()}/${conversationId}/queue/${queueId}`, { content })
             },
 
             delete(conversationId: string, queueId: string): Promise<ConversationQueueResponse> {
-                return new ApiRequest().conversation(conversationId).withAction(`queue/${queueId}`).delete()
+                return api.delete(`${assistantConversationsUrl()}/${conversationId}/queue/${queueId}`)
             },
 
             clear(conversationId: string): Promise<ConversationQueueResponse> {
-                return new ApiRequest().conversation(conversationId).withAction('queue/clear').create({ data: {} })
+                return api.create(`${assistantConversationsUrl()}/${conversationId}/queue/clear`, {})
             },
         },
     },
