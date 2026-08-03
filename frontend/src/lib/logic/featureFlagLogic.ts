@@ -1,6 +1,8 @@
 import { actions, afterMount, kea, path, reducers } from 'kea'
+
 import insights from '@hanzo/insights'
 
+import api from 'lib/api'
 import { FeatureFlagKey } from 'lib/constants'
 import { getAppContext } from 'lib/utils/getAppContext'
 
@@ -11,6 +13,16 @@ import type { featureFlagLogicType } from './featureFlagLogicType'
 export type FeatureFlagsSet = {
     [flag in FeatureFlagKey]?: boolean | string
 }
+
+/** A flag's payload is whatever JSON the definition carries. */
+export type FeatureFlagPayloads = Record<string, any>
+
+/** The verdict, exactly as the evaluator names it. */
+interface FeatureFlagVerdict {
+    featureFlags?: FeatureFlagsSet
+    featureFlagPayloads?: FeatureFlagPayloads
+}
+
 const eventsNotified: Record<string, boolean> = {}
 function notifyFlagIfNeeded(flag: string, flagState: string | boolean | undefined): void {
     if (!eventsNotified[flag]) {
@@ -34,12 +46,18 @@ function getPersistedFeatureFlags(appContext: AppContext | undefined = getAppCon
 }
 
 function spyOnFeatureFlags(featureFlags: FeatureFlagsSet): FeatureFlagsSet {
-    const appContext = getAppContext()
-    const persistedFlags = getPersistedFeatureFlags(appContext)
-    const availableFlags =
-        appContext?.preflight?.cloud || appContext?.preflight?.is_debug || process.env.NODE_ENV === 'test'
-            ? { ...persistedFlags, ...featureFlags }
-            : persistedFlags
+    // An evaluated verdict always wins over the deployment's own defaults.
+    //
+    // There used to be a `preflight.cloud || preflight.is_debug` gate here that
+    // dropped the verdict entirely, which left PERSISTED_FEATURE_FLAGS -- a
+    // comma-separated env var -- as the only lever that could turn a flag on.
+    // `cloud` is an upstream multi-region SaaS concept this deployment does not
+    // have, so it reads FALSE on our own hosted install: the same trap that once
+    // advertised "Move to Insights Cloud" to our own paying users. Whether a
+    // verdict is trustworthy is decided by who delivers it, not by a flag about
+    // somebody else's hosting model, and the deliverer here is this deployment's
+    // own session-authenticated door.
+    const availableFlags = { ...getPersistedFeatureFlags(), ...featureFlags }
 
     if (typeof window.Proxy !== 'undefined') {
         return new Proxy(
@@ -73,14 +91,48 @@ function spyOnFeatureFlags(featureFlags: FeatureFlagsSet): FeatureFlagsSet {
     return flags
 }
 
+/** This user's verdict, from this deployment's own door.
+ *
+ * `/v1/flags/` is answered by Django over the session the browser already has;
+ * it relays what Hanzo cloud's native evaluator decided for the signed-in user.
+ * The browser holds no flag credential and this asks for no identity -- the
+ * server evaluates whoever the session says is asking.
+ *
+ * Deliberately NOT the analytics SDK. The SDK is initialised with a stub token
+ * and opted out of capturing on purpose, and routing flags through it would mean
+ * standing its keyed, cross-origin protocol back up.
+ */
+function fetchVerdict(): Promise<FeatureFlagVerdict> {
+    return api.get<FeatureFlagVerdict>('v1/flags/')
+}
+
+/** Is there a session for the server to evaluate?
+ *
+ * The shared-dashboard and exporter views render this app anonymously, and so
+ * does every test that mounts it without saying otherwise.
+ */
+function hasSession(): boolean {
+    return getAppContext()?.anonymous === false
+}
+
 export function getFeatureFlagPayload(flag: FeatureFlagKey): any {
-    return insights.getFeatureFlagPayload(flag)
+    return featureFlagLogic.findMounted()?.values.featureFlagPayloads?.[flag]
 }
 
 export const featureFlagLogic = kea<featureFlagLogicType>([
     path(['lib', 'logic', 'featureFlagLogic']),
     actions({
-        setFeatureFlags: (flags: string[], variants: Record<string, string | boolean>) => ({ flags, variants }),
+        // `payloads` is optional so that a caller who only cares which flags are
+        // on -- every test that drives this logic -- keeps working unchanged.
+        setFeatureFlags: (
+            flags: string[],
+            variants: Record<string, string | boolean>,
+            payloads: FeatureFlagPayloads = {}
+        ) => ({
+            flags,
+            variants,
+            payloads,
+        }),
     }),
     reducers({
         featureFlags: [
@@ -88,6 +140,13 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
             { persist: true },
             {
                 setFeatureFlags: (_, { variants }) => spyOnFeatureFlags(variants),
+            },
+        ],
+        featureFlagPayloads: [
+            {} as FeatureFlagPayloads,
+            { persist: true },
+            {
+                setFeatureFlags: (_, { payloads }) => payloads,
             },
         ],
         receivedFeatureFlags: [
@@ -98,6 +157,22 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         ],
     }),
     afterMount(({ actions }) => {
-        insights.onFeatureFlags(actions.setFeatureFlags)
+        // ALWAYS delivers, including on failure and including when there is
+        // nothing to ask. The app blocks on `receivedFeatureFlags` for up to
+        // three seconds before it renders, so silence here is a stalled product.
+        // A failed evaluation grants nothing and leaves the deployment's defaults
+        // standing -- fail closed, not fail slow.
+        if (!hasSession()) {
+            // Answered NOW, not on a microtask: a verdict that lands later would
+            // overwrite whatever the caller set in the meantime, and "nothing to
+            // evaluate" is already known here.
+            actions.setFeatureFlags([], {}, {})
+            return
+        }
+        void fetchVerdict()
+            .then((verdict) =>
+                actions.setFeatureFlags([], verdict.featureFlags ?? {}, verdict.featureFlagPayloads ?? {})
+            )
+            .catch(() => actions.setFeatureFlags([], {}, {}))
     }),
 ])
