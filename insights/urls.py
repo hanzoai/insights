@@ -185,12 +185,19 @@ urlpatterns = [
     #
     # `/api/` comes out when the last caller is gone -- frontend, plugin server and
     # any external key holder -- and not before.
-    # `api/` stays FIRST on purpose. Both mounts register the same URL names, and
-    # Django's reverse() resolves a duplicate name to the LAST one registered — so
-    # this order keeps every reverse() answering exactly what it answers today.
-    # The new prefix is purely additive until the callers move.
-    path("api/", include(router.urls)),
+    # `v1/` is listed FIRST so that `api/` wins reverse(), which reads backwards
+    # until you know why. Both mounts register the same URL names.
+    # URLResolver._populate() walks `reversed(self.url_patterns)` and reverse()
+    # returns the first match it finds, so the LAST mount listed is the one
+    # reverse() answers with. Listing `api/` first — which is what "keep today's
+    # behaviour" looks like — silently made every reverse() emit `/v1/`.
+    #
+    # Resolution is unaffected by the order: both prefixes serve every route
+    # either way. Only reverse() output changes, and it must keep saying `/api/`
+    # while callers still live there — the plugin server's IAM team-access gate
+    # keys on `/api/projects/:team_id/` paths.
     path("v1/", include(router.urls)),
+    path("api/", include(router.urls)),
     # The assistant was built at /v1/ from the start, so it has no `api/` twin.
     path("v1/", include("products.insights_ai.backend.api.urls")),
     # Override the tf_urls QRGeneratorView to use the cache-aware version (handles session race conditions)
