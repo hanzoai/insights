@@ -58,3 +58,32 @@ WORKOS_RADAR_ENABLED = get_from_env("WORKOS_RADAR_ENABLED", False, type_cast=str
 # Recall.ai (for desktop recordings product)
 RECALL_AI_API_KEY = get_from_env("RECALL_AI_API_KEY", "")
 RECALL_AI_API_URL = get_from_env("RECALL_AI_API_URL", "https://us-west-2.recall.ai")
+
+# Hanzo AI gateway (backs the Insights assistant). No key here: the deployment
+# presents its own IAM identity via `insights.iam`, so there is nothing to rotate
+# in this file and nothing that could be baked into a frontend bundle.
+HANZO_API_URL = get_from_env("HANZO_API_URL", "https://api.hanzo.ai").rstrip("/")
+# A gateway catalogue entry, not a provider model name. Configurable because the
+# catalogue moves; the default is checked against it in the assistant's tests.
+INSIGHTS_AI_MODEL = get_from_env("INSIGHTS_AI_MODEL", "claude-haiku-4.5")
+
+# A streamed reply is two scarce things at once: money at the gateway, and a
+# request-serving worker held for the duration. Both are bounded here.
+#
+# None of this can be left to the global throttle. InsightsQLQueryThrottle and its
+# siblings return True for any authenticated request that carries no personal API
+# key (rate_limit.py, allow_request), so a browser session — which is how every
+# assistant request arrives — is never throttled by them.
+INSIGHTS_AI_MAX_OUTPUT_TOKENS = get_from_env("INSIGHTS_AI_MAX_OUTPUT_TOKENS", 2048, type_cast=int)
+# Wall clock for one generation. Also the longest a worker can be held.
+INSIGHTS_AI_REPLY_TIMEOUT_SECONDS = get_from_env("INSIGHTS_AI_REPLY_TIMEOUT_SECONDS", 60, type_cast=int)
+# Concurrent replies per process. Unit runs this app with one thread per process
+# unless NGINX_UNIT_APP_THREADS says otherwise, so a stream that is not capped
+# takes the worker that also serves login and the SPA shell.
+INSIGHTS_AI_MAX_CONCURRENT_REPLIES = get_from_env("INSIGHTS_AI_MAX_CONCURRENT_REPLIES", 2, type_cast=int)
+INSIGHTS_AI_RATE_BURST = get_from_env("INSIGHTS_AI_RATE_BURST", "20/minute")
+INSIGHTS_AI_RATE_DAILY = get_from_env("INSIGHTS_AI_RATE_DAILY", "300/day")
+# Turns are replayed into every request, so the thread is what sets the size of a
+# priced call. Cap the thread itself, and the slice of it that is replayed.
+INSIGHTS_AI_MAX_MESSAGES = get_from_env("INSIGHTS_AI_MAX_MESSAGES", 200, type_cast=int)
+INSIGHTS_AI_MAX_REPLAYED_CHARS = get_from_env("INSIGHTS_AI_MAX_REPLAYED_CHARS", 24000, type_cast=int)
