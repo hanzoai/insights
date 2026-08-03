@@ -2,10 +2,9 @@ import './ProfilePicture.scss'
 
 import clsx from 'clsx'
 import { useValues } from 'kea'
-import md5 from 'md5'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React from 'react'
 
-import { fullName, inStorybookTestRunner } from 'lib/utils'
+import { fullName } from 'lib/utils'
 import { userLogic } from 'scenes/userLogic'
 
 import { UserBasicType } from '~/types'
@@ -29,8 +28,6 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
     ref
 ) {
     const { user: currentUser } = useValues(userLogic)
-    const [gravatarLoaded, setGravatarLoaded] = useState<boolean | undefined>()
-    const imgRef = useRef<HTMLImageElement>(null)
 
     let email = user?.email
 
@@ -41,66 +38,20 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
 
     const combinedNameAndEmail = name && email ? `${name} <${email}>` : name || email
 
-    const gravatarUrl = useMemo(() => {
-        if (inStorybookTestRunner()) {
-            return // There are no guarantees on how long it takes to fetch a Gravatar, so we skip this in snapshots
-        }
-        // Check if Gravatar exists
-        const identifier = email || (name?.includes('@') ? name : undefined)
-        if (identifier) {
-            const hash = md5(identifier.trim().toLowerCase())
-            return `https://www.gravatar.com/avatar/${hash}?s=96&d=404`
-        }
-    }, [email, name])
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const img = imgRef.current
-        if (img) {
-            // Check if already loaded before attaching listeners
-            if (img.complete) {
-                if (img.naturalHeight !== 0) {
-                    setGravatarLoaded(true)
-                } else {
-                    setGravatarLoaded(false)
-                }
-            }
-            const onLoad = (): void => setGravatarLoaded(true)
-            const onError = (): void => setGravatarLoaded(false)
-            img.addEventListener('load', onLoad, { signal: controller.signal })
-            img.addEventListener('error', onError, { signal: controller.signal })
-        }
-        return () => {
-            controller.abort()
-        }
-    }, [gravatarUrl])
-
     const pictureComponent = (
-        <span className={clsx('ProfilePicture ph-no-capture', size, className)} ref={ref}>
-            {gravatarLoaded !== true && (
-                <>
-                    {type === 'bot' ? (
-                        <IconRobot className="p-0.5" />
-                    ) : (
-                        <Lettermark
-                            name={combinedNameAndEmail}
-                            index={index}
-                            rounded
-                            color={type === 'system' ? LettermarkColor.Gray : undefined}
-                        />
-                    )}
-                </>
-            )}
-            {gravatarUrl && gravatarLoaded !== false ? (
-                <img
-                    ref={imgRef}
-                    className="absolute top-0 left-0 w-full h-full rounded-full"
-                    src={gravatarUrl}
-                    loading="lazy"
-                    title={title || `This is the Gravatar for ${combinedNameAndEmail}`}
-                    alt=""
+        // `title` used to sit on the Gravatar image. It stays on the avatar so the
+        // prop keeps meaning something for the callers that pass one.
+        <span className={clsx('ProfilePicture ph-no-capture', size, className)} ref={ref} title={title}>
+            {type === 'bot' ? (
+                <IconRobot className="p-0.5" />
+            ) : (
+                <Lettermark
+                    name={combinedNameAndEmail}
+                    index={index}
+                    rounded
+                    color={type === 'system' ? LettermarkColor.Gray : undefined}
                 />
-            ) : null}
+            )}
         </span>
     )
 

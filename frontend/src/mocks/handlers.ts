@@ -160,7 +160,6 @@ export const defaultMocks: Mocks = {
         },
         // We don't want to show the "new version available" banner in tests
         'https://api.github.com/repos/insights/insights-js/tags': () => [200, []],
-        'https://www.gravatar.com/avatar/:gravatar_id': () => [404, ''],
         'https://us.i.hanzo.ai/api/early_access_features': {
             earlyAccessFeatures: [],
         },
