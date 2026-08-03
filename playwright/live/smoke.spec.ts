@@ -64,6 +64,16 @@ async function expectHealthy(page: Page, w: Watch, path: string): Promise<void> 
     // The boundary renders <div class="ErrorBoundary"><h2>An error has occurred</h2>.
     // Its presence means the scene threw, which a mounted-and-blank check misses.
     await expect(page.locator('.ErrorBoundary'), `error boundary caught a throw at ${path}`).toHaveCount(0)
+
+    // A scene can mount perfectly and still be showing "not found". This suite
+    // counted /project/1/data-warehouse as healthy for exactly that reason: it
+    // renders NotFound whenever its feature flag is off, which is always here, and
+    // "did something render" cannot tell that apart from the product working.
+    await expect(
+        page.locator('.NotFoundComponent'),
+        `scene rendered a not-found state at ${path} -- it mounted, but there is nothing there`
+    ).toHaveCount(0)
+
     expect(w.serverErrors, `server errored while loading ${path}`).toEqual([])
     expect(w.pageErrors, `uncaught exception at ${path}`).toEqual([])
 }
@@ -81,7 +91,12 @@ const SCENES: { name: string; path: string }[] = [
     { name: 'event definitions', path: '/project/1/data-management/events' },
     { name: 'properties', path: '/project/1/data-management/properties' },
     { name: 'annotations', path: '/project/1/data-management/annotations' },
-    { name: 'data warehouse', path: '/project/1/data-warehouse' },
+    // data-management/sources, not /project/1/data-warehouse. The latter is not
+    // linked from the nav and renders NotFound unless FEATURE_FLAGS.DATA_WAREHOUSE_SCENE
+    // is on, which it is not here -- so listing it asserted a feature this build
+    // deliberately does not serve, and passed anyway until the not-found check
+    // above existed. This is the surface a signed-in user actually reaches.
+    { name: 'sources', path: '/project/1/data-management/sources' },
     { name: 'sql editor', path: '/project/1/sql' },
     { name: 'feature flags', path: '/project/1/feature_flags' },
     { name: 'experiments', path: '/project/1/experiments' },
