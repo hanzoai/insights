@@ -1,5 +1,5 @@
 import { useValues } from 'kea'
-import { Marker } from 'maplibre-gl'
+import { Suspense, lazy } from 'react'
 
 import { Skeleton } from '@hanzo/elements'
 
@@ -7,10 +7,16 @@ import { NotFound } from 'lib/components/NotFound'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { personLogic } from 'scenes/persons/personLogic'
 
-import { Map } from '../../../lib/components/Map/Map'
 import { NotebookNodeProps, NotebookNodeType } from '../types'
 import { NotebookNodeEmptyState } from './components/NotebookNodeEmptyState'
 import { notebookNodeLogic } from './notebookNodeLogic'
+
+// maplibre-gl is ~800KB and Map calls addProtocol at module scope, so a static
+// import costs every page load. This node is reachable from the app shell
+// (SidePanel -> NotebookPanel -> Notebook -> Editor registers every node type),
+// which put the whole library in the main bundle for one marker. Same lazy shape
+// Trends already uses for WorldMap and RegionMap.
+const PersonMap = lazy(() => import('./PersonMap').then((m) => ({ default: m.PersonMap })))
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeMapAttributes>): JSX.Element | null => {
     const { id, distinctId } = attributes
@@ -39,11 +45,9 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeMapAttributes>)
     }
 
     return (
-        <Map
-            center={personCoordinates}
-            markers={[new Marker({ color: 'var(--color-accent)' }).setLngLat(personCoordinates)]}
-            className="h-full"
-        />
+        <Suspense fallback={<Skeleton className="h-full" />}>
+            <PersonMap coordinates={personCoordinates} />
+        </Suspense>
     )
 }
 
