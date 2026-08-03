@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { AI_AVAILABLE } from 'lib/constants'
+import { CAPABILITIES } from 'lib/capabilities'
 import { toast } from 'lib/elements/Toast/Toast'
 
 import { CoreMemory } from '~/types'
@@ -83,7 +83,10 @@ export const maxSettingsLogic = kea<maxSettingsLogicType>([
     })),
 
     afterMount(({ actions }) => {
-        if (AI_AVAILABLE) {
+        // The assistant ships; its cross-conversation memory does not, and
+        // `core_memory` has no route. Gate the fetch on the memory itself rather
+        // than on the assistant, or this fires a request that can only 404.
+        if (CAPABILITIES.aiMemory.available) {
             actions.loadCoreMemory()
         }
     }),
