@@ -71,7 +71,6 @@ from products.llm_analytics.backend.api import (
     LLMProxyViewSet,
 )
 from products.notebooks.backend.api.notebook import NotebookViewSet
-from products.insights_ai.backend.api import MCPToolsViewSet
 from products.product_tours.backend.api import ProductTourViewSet
 from products.signals.backend.views import SignalViewSet
 from products.user_interviews.backend.api import UserInterviewViewSet
@@ -1223,9 +1222,3 @@ environments_router.register(
     ["team_id"],
 )
 
-environments_router.register(
-    r"mcp_tools",
-    MCPToolsViewSet,
-    "environment_mcp_tools",
-    ["team_id"],
-)
