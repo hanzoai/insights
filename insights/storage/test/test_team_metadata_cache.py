@@ -519,7 +519,7 @@ class TestSampleRateSerializationForRustCompatibility(BaseTest):
     For the cache path, we store None directly for 100% sampling to avoid precision issues
     when Rust deserializes floats. For other values, we store strings with fixed precision.
 
-    See: rust/feature-flags/src/handler/session_recording.rs:18 (SAMPLE_RATE_FULL = "1.00")
+    See: hanzoai/cloud apps/flags (was rust/feature-flags/src/handler/session_recording.rs):18 (SAMPLE_RATE_FULL = "1.00")
     """
 
     @parameterized.expand(
