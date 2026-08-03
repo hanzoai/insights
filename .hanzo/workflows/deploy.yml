@@ -65,6 +65,55 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # A NAME THAT SHADOWS THE IMPORT IT CALLS. Twice now:
+  #
+  #     import { bannerLogic } from '...'
+  #     const bannerLogic = bannerLogic({ dismissKey })
+  #
+  # The local shadows the import for the whole scope, so the initialiser reads the
+  # local in its temporal dead zone and throws during render — which does not break
+  # a line, it takes the scene. ApprovalsPromoBanner killed feature flags,
+  # MembersPlatformAddonAd killed organization members. Both look like the debrand
+  # rename dropping a shorter name onto an existing one, so this is a class.
+  #
+  # tsc names it exactly: TS2448, plus the TS7022 that follows. Nothing checked,
+  # so both shipped. A hand-written AST check was tried first and thrown away — it
+  # produced false positives on property and type positions AND missed the real
+  # bug, because it was reimplementing scope analysis badly. The compiler already
+  # does this correctly.
+  #
+  # Only those two codes. The tree carries ~87 other type errors; gating on all of
+  # them would need a baseline that goes stale, while these two are zero today and
+  # mean exactly one thing. Separate job so it fails in minutes rather than behind
+  # an hour of image build.
+  typecheck:
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - uses: actions/checkout@v4
+      - name: No self-shadowed declarations
+        run: |
+          set -euo pipefail
+          corepack enable
+          # --no-frozen-lockfile for the same reason the image build drops it:
+          # patchedDependencies lives under `pnpm` in package.json, which pnpm 10
+          # no longer reads, so a frozen install cannot match the lockfile.
+          CI=1 pnpm install --no-frozen-lockfile --filter @hanzo/frontend...
+
+          # tsc is meaningless before this: kea's generated *Type.ts files are
+          # gitignored, and without them every logic import is a missing module and
+          # the run drowns in ~9,600 cascading errors. Run through the workspace
+          # script rather than naming a path -- pnpm puts the binary under
+          # node_modules/.pnpm, not where a plain ../node_modules/.bin guess lands.
+          pnpm --filter @hanzo/frontend run typegen:write
+
+          cd frontend
+          ./node_modules/.bin/tsc --noEmit -p . > /tmp/tsc.out 2>&1 || true
+          if grep -E 'error TS(2448|7022)' /tmp/tsc.out; then
+            echo "::error::a declaration initialises itself from the import it shadows — it throws when its scene renders"
+            exit 1
+          fi
+          echo "no self-shadowed declarations (TS2448/TS7022 clean)"
+
   build:
     # The live runner fleet advertises `hanzo-build-linux-amd64`. The old
     # `hanzo-linux-amd64` matched no runner, so every job here queued forever —
