@@ -25,10 +25,14 @@ const platformAddonAdIllustrations: Record<MembersPagePlatformAddonAdKey, typeof
 const dismissKey = 'organization-members-platform-addon-ad-3'
 
 export function MembersPlatformAddonAd(): JSX.Element | null {
-    const bannerLogic = bannerLogic({ dismissKey })
+    // `logic`, not `bannerLogic`: a local of that name shadows the import and
+    // initialises itself from itself, so this threw "Cannot access 'bannerLogic'
+    // before initialization" and took the organization members settings down with
+    // it. Second instance of this shape -- ApprovalsPromoBanner had the same one.
+    const logic = bannerLogic({ dismissKey })
     const { shouldShowPlatformAddonAd, platformAddonAdConfig } = useValues(membersPlatformAddonAdLogic)
-    const { isDismissed } = useValues(bannerLogic)
-    const { dismiss } = useActions(bannerLogic)
+    const { isDismissed } = useValues(logic)
+    const { dismiss } = useActions(logic)
 
     useEffect(() => {
         if (shouldShowPlatformAddonAd && !isDismissed) {
