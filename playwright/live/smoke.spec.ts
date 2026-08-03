@@ -83,7 +83,11 @@ async function expectHealthy(page: Page, w: Watch, path: string): Promise<void> 
 const SCENES: { name: string; path: string }[] = [
     { name: 'dashboards', path: '/project/1/dashboard' },
     { name: 'saved insights', path: '/project/1/insights' },
-    { name: 'web analytics', path: '/project/1/web-analytics' },
+    // /web, not /web-analytics. urls.webAnalytics() returns `/web`
+    // (products/web_analytics/manifest.tsx), so the longer path was always a 404 --
+    // and this suite passed it anyway, because the 404 scene mounts like any other.
+    // It went green on a page that did not exist until the not-found check landed.
+    { name: 'web analytics', path: '/project/1/web' },
     { name: 'session replay', path: '/project/1/replay/recent' },
     { name: 'users', path: '/project/1/persons' },
     { name: 'cohorts', path: '/project/1/cohorts' },
