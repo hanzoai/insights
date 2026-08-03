@@ -21,6 +21,12 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
         # `code` is the field the one caller sends (`api.fn.create` in lib/api.ts). Reading anything
         # else compiles `None`; reading a name that was never bound raised before it got that far.
         code = request.data.get("code")
+        # A caller that omits `code` is making a bad request, and should be told which field.
+        # Left to the compiler, `parse_program(None)` raises `TypeError: argument 1 must be str`,
+        # which lands in the catch-all below: the status is right but the body says "internal
+        # error" and an ERROR with a stack trace is written for what is a client mistake.
+        if not isinstance(code, str):
+            return Response({"error": "`code` is required and must be a string"}, status=status.HTTP_400_BAD_REQUEST)
         in_repl = request.data.get("in_repl", "false") in ("true", "True", True)
         locals = request.data.get("locals", []) or []
         try:
