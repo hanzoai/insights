@@ -173,6 +173,9 @@ urlpatterns = [
     path("api/conversations/", include("products.conversations.backend.api.urls")),
     opt_slash_path("api/support/ensure-zendesk-organization", csrf_exempt(ensure_zendesk_organization)),
     path("api/", include(router.urls)),
+    # The assistant is served at /v1/, not under /api/. New surfaces are versioned
+    # at the root; `api/` is where the fork's inherited endpoints live.
+    path("v1/", include("products.insights_ai.backend.api.urls")),
     # Override the tf_urls QRGeneratorView to use the cache-aware version (handles session race conditions)
     path("account/two_factor/qrcode/", CacheAwareQRGeneratorView.as_view()),
     path("", include(tf_urls)),
