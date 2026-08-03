@@ -130,7 +130,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
     path(['data-warehouse', 'editor', 'sqlEditorLogic']),
     props({} as SqlEditorLogicProps),
     tabAwareScene(),
-    connect(() => ({
+    connect((props: SqlEditorLogicProps) => ({
         values: [
             dataWarehouseViewsLogic,
             ['dataWarehouseSavedQueries', 'dataWarehouseSavedQueryMapById'],
@@ -161,7 +161,12 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
             ['fixErrors', 'fixErrorsSuccess', 'fixErrorsFailure'],
             draftsLogic,
             ['saveAsDraft', 'deleteDraft', 'saveAsDraftSuccess', 'deleteDraftSuccess'],
-            endpointLogic,
+            // Keyed by tabId, so it has to be built with one. Named bare, kea had
+            // no key to build it under and threw "[KEA] Undefined key for logic
+            // endpointLogic" on every visit to the SQL editor. This logic already
+            // carries the tabId -- it is tab-aware and uses props.tabId
+            // throughout -- so the key was available all along.
+            endpointLogic({ tabId: props.tabId }),
             ['setIsUpdateMode', 'setSelectedEndpointName'],
         ],
     })),
