@@ -1,4 +1,3 @@
-import { AI_AVAILABLE } from 'lib/constants'
 import { urls } from 'scenes/urls'
 
 /**
@@ -6,9 +5,12 @@ import { urls } from 'scenes/urls'
  *
  * Everything listed here as unavailable went with upstream's separately-licensed `ee/` tree, which
  * this fork does not ship. Mostly that means the endpoints are absent rather than failing —
- * `/subscriptions/`, `/roles/`, `/session_summaries/`, `/conversations/` and `/groups/` all answer
- * 404 while a working endpoint answers 401/403. So a surface for one of these must not fire a
- * request and must not offer a control that cannot work.
+ * `/subscriptions/`, `/roles/`, `/session_summaries/` and `/groups/` all answer 404 while a working
+ * endpoint answers 401/403. So a surface for one of these must not fire a request and must not
+ * offer a control that cannot work.
+ *
+ * The assistant used to be listed here and no longer is: `products/insights_ai` serves it natively.
+ * Only the part that did not come back — its memory between conversations — is still described.
  *
  * Absent is not the only way to be unavailable, though, so check before assuming it: `approvals`
  * below answers 401 and is unavailable for a different reason entirely.
@@ -26,7 +28,7 @@ import { urls } from 'scenes/urls'
  * nobody is scheduled to keep is worse than a plain gap. When one genuinely ships, flip
  * `available` here and every surface that reads it comes back at once.
  */
-export type CapabilityKey = 'ai' | 'sessionSummaries' | 'subscriptions' | 'roles' | 'approvals' | 'groups'
+export type CapabilityKey = 'aiMemory' | 'sessionSummaries' | 'subscriptions' | 'roles' | 'approvals' | 'groups'
 
 export interface Capability {
     /** Surfaces read this to decide whether to render, and loaders to decide whether to fetch. */
@@ -38,21 +40,15 @@ export interface Capability {
 }
 
 export const CAPABILITIES: Record<CapabilityKey, Capability> = {
-    // Reads the flag the rest of the app already gates on, rather than introducing a second
-    // switch that could disagree with it: `AI_AVAILABLE` hides every entry point, and this adds
-    // the wording for the one place you can still land — the `/ai` scene itself, which stays
-    // routed and so needs to say something rather than offer a chat box that goes nowhere.
-    //
-    // Why it is off, since the answer is not in this repository: api.hanzo.ai does accept a
-    // hanzo.id JWT, but a user's Insights token is audience-bound to `hanzo-insights`, which the
-    // gateway rejects on purpose, and IAM declines to exchange it ("client is not permitted for
-    // token exchange"). Baking in an API key is not a way around it — a key belongs to exactly
-    // one org and this image serves more than one. So this states a fact instead of promising a
-    // date; permitting that one IAM client is what makes it true.
-    ai: {
-        available: AI_AVAILABLE,
-        title: 'Insights AI is not available',
-        body: 'This deployment does not run the assistant. Everything it could look up — insights, recordings, dashboards — is still there to explore directly.',
+    // The assistant itself IS available — `products/insights_ai` serves it, so there is no
+    // `ai` entry here any more. What did not come with it is the memory: the assistant answers
+    // from the current thread only, and nothing carries over to the next one. The settings
+    // section that offers to edit those remembered details is the one surface that would
+    // otherwise promise something no endpoint delivers, so it says this instead.
+    aiMemory: {
+        available: false,
+        title: "Insights AI's memory is not available",
+        body: 'The assistant does not retain anything between conversations, so there is nothing stored to review or edit here. Each conversation starts fresh, and everything you tell it within one is used for that conversation only.',
     },
     sessionSummaries: {
         available: false,
