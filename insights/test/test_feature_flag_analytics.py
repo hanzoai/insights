@@ -588,7 +588,7 @@ class TestSdkBreakdown(BaseTest):
         Verify SDK_LIBRARIES matches Rust Library::as_str() values.
 
         IMPORTANT: These values must match the Rust Library enum in:
-        rust/feature-flags/src/handler/types.rs
+        hanzoai/cloud apps/flags (was rust/feature-flags/src/handler/types.rs)
 
         If this test fails after adding a new SDK to Rust, update SDK_LIBRARIES
         in insights/models/feature_flag/flag_analytics.py to match.
