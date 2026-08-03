@@ -58,6 +58,13 @@ else
 
     export NGINX_UNIT_PYTHON_PROTOCOL=${NGINX_UNIT_PYTHON_PROTOCOL:-wsgi}
     export NGINX_UNIT_APP_PROCESSES=${NGINX_UNIT_APP_PROCESSES:-4}
+    # Unit defaults Python to ONE thread per process, and the deployed CR sets
+    # processes to 1 — which made the whole of Django two concurrent requests
+    # across two replicas. Any slow request then blocks login and the SPA shell,
+    # not just itself; a streamed assistant reply is merely the longest one.
+    # Threads are the right unit here because these handlers wait on the network
+    # and the database, and release the GIL while they do.
+    export NGINX_UNIT_APP_THREADS=${NGINX_UNIT_APP_THREADS:-4}
     export NGINX_UNIT_REQUEST_LIMIT=${NGINX_UNIT_REQUEST_LIMIT:-7500}
     envsubst < /docker-entrypoint.d/unit.json.tpl > /docker-entrypoint.d/unit.json
 

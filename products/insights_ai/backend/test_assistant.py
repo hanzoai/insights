@@ -80,6 +80,36 @@ def test_build_messages_replays_only_the_recent_past():
     assert messages[-1]["content"] == "turn 199"
 
 
+@override_settings(INSIGHTS_AI_MAX_REPLAYED_CHARS=1000)
+def test_replay_is_bounded_by_characters_not_just_turn_count():
+    """Forty turns is not a bound when a turn may be 40 000 characters. The
+    character budget is what actually caps the size of a priced request."""
+    turns = [{"role": "user", "content": "x" * 400} for _ in range(40)]
+
+    kept = assistant.recent_turns(turns)
+
+    assert sum(len(t["content"]) for t in kept) <= 1000
+    assert len(kept) < 40
+
+
+@override_settings(INSIGHTS_AI_MAX_REPLAYED_CHARS=100)
+def test_the_newest_turn_survives_even_if_it_alone_exceeds_the_budget():
+    """Dropping the thing just said would make the request incoherent; its own
+    length is capped separately."""
+    turns = [{"role": "user", "content": "old"}, {"role": "user", "content": "y" * 5000}]
+
+    kept = assistant.recent_turns(turns)
+
+    assert len(kept) == 1
+    assert kept[0]["content"].startswith("y")
+
+
+def test_replay_keeps_chronological_order():
+    turns = [{"role": "user", "content": "first"}, {"role": "assistant", "content": "second"}]
+
+    assert [t["content"] for t in assistant.recent_turns(turns)] == ["first", "second"]
+
+
 @override_settings(INSIGHTS_AI_MODEL="claude-haiku-4.5")
 def test_the_default_model_is_a_gateway_catalogue_id():
     """A provider-native name here would be a 404 at the gateway."""
@@ -125,3 +155,64 @@ def test_a_rendered_message_carries_its_id_and_wire_type():
 def test_a_rendered_message_omits_an_absent_trace_id():
     assert "trace_id" not in render_message(ConversationMessage(type="ai", content="x"))
     assert render_message(ConversationMessage(type="human", content="x", trace_id="t"))["trace_id"] == "t"
+
+
+def test_only_model_authored_replies_are_replayed_as_the_model():
+    """A client-appended assistant note is shown in the transcript but must not be
+    fed back as though the model had said it — otherwise a caller writes the
+    assistant's half of the conversation, and pays to have it re-read every turn."""
+    from products.insights_ai.backend.api.conversations import ASSISTANT, HUMAN, replayable_turns
+
+    messages = [
+        ConversationMessage(type=HUMAN, source=ConversationMessage.Source.CLIENT, content="question"),
+        ConversationMessage(type=ASSISTANT, source=ConversationMessage.Source.MODEL, content="real answer"),
+        ConversationMessage(type=ASSISTANT, source=ConversationMessage.Source.CLIENT, content="injected"),
+        ConversationMessage(type="ai/failure", source=ConversationMessage.Source.MODEL, content="oops"),
+        ConversationMessage(type=ASSISTANT, source=ConversationMessage.Source.MODEL, content=""),
+    ]
+
+    turns = replayable_turns(messages)
+
+    assert turns == [
+        {"role": "user", "content": "question"},
+        {"role": "assistant", "content": "real answer"},
+    ]
+
+
+def test_a_permit_is_returned_once_however_often_it_is_released():
+    from products.insights_ai.backend.api.conversations import _ReplySlots
+
+    slots = _ReplySlots(1)
+    permit = slots.take()
+
+    assert slots.take() is None, "the only permit is taken"
+
+    permit.release()
+    permit.release()  # idempotent: the generator and the response closer both call it
+
+    second = slots.take()
+    assert second is not None, "releasing twice must not have released two permits"
+    second.release()
+
+
+def test_reply_slots_refuse_past_the_limit():
+    from products.insights_ai.backend.api.conversations import _ReplySlots
+
+    slots = _ReplySlots(2)
+    first, second = slots.take(), slots.take()
+
+    assert first is not None and second is not None
+    assert slots.take() is None
+
+    first.release()
+    assert slots.take() is not None
+
+
+def test_throttle_rates_come_from_settings_not_global_defaults():
+    """The fork's own throttles exempt session requests, so this endpoint needs its
+    own — and it must not depend on DEFAULT_THROTTLE_RATES being configured."""
+    from products.insights_ai.backend.api.conversations import AssistantBurstThrottle, AssistantDailyThrottle
+
+    with override_settings(INSIGHTS_AI_RATE_BURST="7/minute", INSIGHTS_AI_RATE_DAILY="11/day"):
+        assert AssistantBurstThrottle().num_requests == 7
+        assert AssistantDailyThrottle().num_requests == 11

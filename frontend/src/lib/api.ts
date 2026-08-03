@@ -5366,9 +5366,14 @@ const api = {
 
         /**
          * Queued messages — sending a second message while the first is still being
-         * answered. This build does not serve the queue: it is reached only behind
-         * `INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM`, which is off, and `loadQueueData`
-         * already treats a 404 as an empty queue.
+         * answered. This build does not serve the queue.
+         *
+         * The only thing keeping these unused is the feature flag: they are reached
+         * exclusively behind `INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM`, which is off. Do
+         * not rely on the 404 handling in `loadQueueData` as a second line — these
+         * paths are not routed, so they fall to the SPA catch-all and answer 200
+         * with an HTML page, which that handler would not catch. Serving the queue
+         * means adding the routes, not flipping the flag.
          */
         queue: {
             list(conversationId: string): Promise<ConversationQueueResponse> {
