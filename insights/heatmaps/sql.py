@@ -7,6 +7,10 @@ from insights.kafka_client.topics import KAFKA_DATASTORE_HEATMAP_EVENTS
 
 HEATMAPS_DATA_TABLE = lambda: "sharded_heatmaps"
 
+# The write side. Named once because two writers target it: the Kafka view below,
+# and the event plane's own projection (`insights/models/event/plane.py`).
+WRITABLE_HEATMAPS_TABLE = "writable_heatmaps"
+
 
 """
 We intend to send specific $heatmap events to build a heatmap instead of building from autocapture like the click map
@@ -127,7 +131,7 @@ AS SELECT
     _partition
 FROM {database}.kafka_heatmaps
 """.format(
-        target_table="writable_heatmaps",
+        target_table=WRITABLE_HEATMAPS_TABLE,
         database=settings.DATASTORE_DATABASE,
     )
 )
@@ -136,7 +140,7 @@ FROM {database}.kafka_heatmaps
 
 # This table is responsible for writing to sharded_heatmaps based on a sharding key.
 WRITABLE_HEATMAPS_TABLE_SQL = lambda: HEATMAPS_TABLE_BASE_SQL.format(
-    table_name="writable_heatmaps",
+    table_name=WRITABLE_HEATMAPS_TABLE,
     engine=Distributed(
         data_table=HEATMAPS_DATA_TABLE(),
         sharding_key="cityHash64(concat(toString(team_id), '-', session_id, '-', toString(toDate(timestamp))))",
@@ -154,7 +158,7 @@ DISTRIBUTED_HEATMAPS_TABLE_SQL = lambda: HEATMAPS_TABLE_BASE_SQL.format(
 
 DROP_HEATMAPS_TABLE_SQL = lambda: (f"DROP TABLE IF EXISTS {HEATMAPS_DATA_TABLE()}")
 
-DROP_WRITABLE_HEATMAPS_TABLE_SQL = lambda: (f"DROP TABLE IF EXISTS writable_heatmaps")
+DROP_WRITABLE_HEATMAPS_TABLE_SQL = lambda: (f"DROP TABLE IF EXISTS {WRITABLE_HEATMAPS_TABLE}")
 
 DROP_HEATMAPS_TABLE_MV_SQL = lambda: (f"DROP TABLE IF EXISTS heatmaps_mv")
 
