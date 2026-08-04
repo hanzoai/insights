@@ -33,6 +33,7 @@ use crate::router::State as AppState;
 use crate::timestamp;
 use crate::token::validate_token;
 use crate::v0_request::{DataType, ProcessedEvent, ProcessedEventMetadata};
+use crate::warnings::WarningType;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PartInfo {
@@ -188,13 +189,20 @@ pub async fn ai_handler(
         .unwrap_or("");
 
     if !auth_header.starts_with("Bearer ") {
-        warn!("AI endpoint missing or invalid Authorization header");
+        state
+            .warnings
+            .refused(WarningType::IngestKeyRequired, None, "ai", Some(1));
         return Err(CaptureError::NoTokenError);
     }
 
     // Extract and validate token
     let token = &auth_header[7..]; // Remove "Bearer " prefix
-    validate_token(token)?;
+    if let Err(reason) = validate_token(token) {
+        state
+            .warnings
+            .refused(WarningType::IngestKeyUnknown, Some(token), "ai", Some(1));
+        return Err(reason.into());
+    }
 
     // Positive token→team allow-list AND the tenant the AI blob store is keyed by.
     // Unknown ⇒ reject (forged/unknown project key). Unavailable ⇒ reject (fail
@@ -203,7 +211,12 @@ pub async fn ai_handler(
     let team_id: Option<TeamId> = match &state.team_resolver {
         Some(resolver) => match resolver.resolve(token).await {
             Ok(id) => Some(id),
-            Err(crate::team::TeamResolveError::Unknown) => return Err(CaptureError::UnknownToken),
+            Err(crate::team::TeamResolveError::Unknown) => {
+                state
+                    .warnings
+                    .refused(WarningType::IngestKeyUnknown, Some(token), "ai", Some(1));
+                return Err(CaptureError::UnknownToken);
+            }
             Err(crate::team::TeamResolveError::Unavailable) => {
                 return Err(CaptureError::ServiceUnavailable(
                     "team resolution unavailable".to_string(),

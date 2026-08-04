@@ -71,6 +71,7 @@ from insights.tasks.team_metadata import (
 from insights.utils import get_crontab, get_instance_region
 
 from products.endpoints.backend.tasks import deactivate_stale_materializations
+from products.insights_ai.backend.tasks import ask_due_questions
 
 TWENTY_FOUR_HOURS = 24 * 60 * 60
 
@@ -509,4 +510,13 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         crontab(hour="5", minute="0"),
         deactivate_stale_materializations.s(),
         name="deactivate stale endpoint materializations",
+    )
+
+    # Ask the standing questions whose cadence has come round. Hourly is the
+    # shortest cadence a question can have, so the tick only needs to be hourly;
+    # the tick itself asks nothing, it just hands each due question to its own task.
+    sender.add_periodic_task(
+        crontab(hour="*", minute="10"),
+        ask_due_questions.s(),
+        name="ask due assistant questions",
     )
