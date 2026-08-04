@@ -186,6 +186,7 @@ async fn setup_ai_router_with_restriction(
         None,
         256, // body_read_chunk_size_kb
         Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
+        Arc::new(capture::warnings::Warnings::default()),
     );
 
     (router, sink_clone)

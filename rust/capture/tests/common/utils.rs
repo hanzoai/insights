@@ -38,6 +38,7 @@ pub static DEFAULT_CONFIG: Lazy<Config> = Lazy::new(|| Config {
     kv_url: "redis://localhost:6379/".to_string(),
     kv_response_timeout_ms: 100,
     kv_connection_timeout_ms: 5000,
+    enforce_token_allowlist: true,
     global_rate_limit_enabled: false,
     global_rate_limit_threshold: 10_000,
     global_rate_limit_window_interval_secs: 60,
