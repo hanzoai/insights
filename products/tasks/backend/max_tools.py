@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from insights.storage import object_storage
 
+from products.insights_ai.backend.max_tool import MaxTool
 
 from .models import Task, TaskRun
 from .temporal.client import execute_task_processing_workflow_async

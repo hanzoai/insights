@@ -13,6 +13,9 @@ from insights.session_recordings.session_recording_api import list_recordings_fr
 from insights.session_recordings.utils import filter_from_params_to_query
 from insights.sync import database_sync_to_async
 
+from products.insights_ai.backend.max_tool import MaxTool
+
+from .experiment_context import ExperimentContext
 
 CREATE_EXPERIMENT_TOOL_DESCRIPTION = dedent("""
     Use this tool to create A/B test experiments that measure the impact of changes.
