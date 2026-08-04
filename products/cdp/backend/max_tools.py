@@ -11,25 +11,26 @@ from insights.insightsql.ai import (
     EVENT_PROPERTY_TAXONOMY_MESSAGE,
     EVENT_TAXONOMY_MESSAGE,
     FILTER_TAXONOMY_MESSAGE,
-    SCRIPT_EXAMPLE_MESSAGE,
-    INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT,
-    INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT,
-    SCRIPT_GRAMMAR_MESSAGE,
     IDENTITY_MESSAGE_SCRIPT,
     INPUT_SCHEMA_TYPES_MESSAGE,
+    INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT,
     PERSON_TAXONOMY_MESSAGE,
+    SCRIPT_EXAMPLE_MESSAGE,
+    SCRIPT_GRAMMAR_MESSAGE,
     TRANSFORMATION_LIMITATIONS_MESSAGE,
 )
 from insights.insightsql.parser import parse_program
 
-from insights.cdp.validation import compile_iql
+from insights.cdp.validation import compile_script
 
 from products.cdp.backend.prompts import (
     INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
     INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
     IQL_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
 )
-
+from products.insights_ai.backend.max_tool import MaxTool
+from products.insights_ai.backend.model import MaxChatOpenAI, PydanticOutputParserException
 
 
 class CreateIQLTransformationFunctionArgs(BaseModel):
@@ -50,7 +51,9 @@ class InsightsFunctionFiltersOutput(BaseModel):
 
 class CreateIQLTransformationFunctionTool(MaxTool):
     name: str = "create_iql_transformation_function"  # Must match a value in AssistantTool enum
-    description: str = "Write or edit the script code to create your desired function and apply it to the current editor"
+    description: str = (
+        "Write or edit the script code to create your desired function and apply it to the current editor"
+    )
     args_schema: type[BaseModel] = CreateIQLTransformationFunctionArgs
     context_prompt_template: str = (
         IQL_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT
@@ -125,7 +128,7 @@ class CreateIQLTransformationFunctionTool(MaxTool):
             )
 
         try:
-            compile_iql(script_code, "transformation")
+            compile_script(script_code, "transformation")
         except Exception:
             # Try to get a more specific error by parsing directly
             try:
@@ -234,7 +237,9 @@ class InsightsFunctionInputsOutput(BaseModel):
 
 class CreateInsightsFunctionInputsTool(MaxTool):
     name: str = "create_insights_function_inputs"
-    description: str = "Generate or modify input variables for script functions based on the current code and requirements"
+    description: str = (
+        "Generate or modify input variables for script functions based on the current code and requirements"
+    )
     args_schema: type[BaseModel] = CreateInsightsFunctionInputsArgs
     context_prompt_template: str = INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT
 

@@ -12,6 +12,7 @@ from insights.exceptions_capture import capture_exception
 from insights.models import FeatureFlag, GroupTypeMapping
 from insights.sync import database_sync_to_async
 
+from products.insights_ai.backend.max_tool import MaxTool
 
 
 class MultivariateVariant(BaseModel):
