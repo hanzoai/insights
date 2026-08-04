@@ -44,6 +44,18 @@ from .sql import WRITABLE_EVENTS_DATA_TABLE
 EVENT_TABLE = "event.fact"
 EVENT_MV = "event_mv"
 
+# WHICH SIGNAL. The rename was also a MERGE: `event.fact` holds every signal the
+# door accepts — act, clip, error, log, span — discriminated by `signal`, so the
+# source name no longer says what a row IS. Product events are `act`, and a view
+# that projects them has to say so: unpinned, an exception message arrives as an
+# event name and a browser that only ever threw becomes a user.
+EVENT_SIGNAL = "act"
+
+
+def EVENT_WHERE(source: str = "") -> str:
+    """The product-event predicate, qualified where the projection binds an alias."""
+    return f"{source + '.' if source else ''}signal = '{EVENT_SIGNAL}'"
+
 # ── routing: which PROJECT an org's events land in ───────────────────────────
 #
 # THE TENANT IS THE ORG. It is what IAM issues, what the envelope carries and
@@ -495,12 +507,15 @@ USER_ALIAS_WHERE = (
 
 def USER_SELECT_SQL() -> str:
     projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_COLUMNS())
-    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}"
+    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}\nWHERE {EVENT_WHERE()}"
 
 
 def USER_ALIAS_SELECT_SQL() -> str:
     projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_ALIAS_COLUMNS())
-    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE} AS {EVENT_SOURCE}\nWHERE {USER_ALIAS_WHERE}"
+    return (
+        f"SELECT\n    {projection}\nFROM {EVENT_TABLE} AS {EVENT_SOURCE}"
+        f"\nWHERE {EVENT_WHERE(EVENT_SOURCE)} AND {USER_ALIAS_WHERE}"
+    )
 
 
 def USER_MV_SQL() -> str:
