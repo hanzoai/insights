@@ -25,8 +25,13 @@ browser already sends. The browser SDK stays opted out and initialised with no
 usable token; nothing here turns analytics capture back on.
 
 FAILS CLOSED. No IAM token, an unreachable gateway, a non-200 or a body that is
-not the verdict shape all raise 502 and grant NOTHING. A flag that cannot be
-proven on is off.
+not the verdict shape all grant NOTHING. A flag that cannot be proven on is off.
+
+That invariant is about what is GRANTED, not about the status code. A 403 from
+cloud -- this identity may not ask -- returns an empty verdict with 200, because
+"none" is the true answer and it grants exactly as little. Everything else is
+502. Collapsing the two made a stable capability state look like an outage on
+every page load, which is how a real outage would have gone unnoticed.
 """
 
 from typing import Any
@@ -95,6 +100,14 @@ def _evaluate(user) -> dict[str, Any]:
             json=payload,
             timeout=_TIMEOUT_SECONDS,
         )
+        # 403 is not a gateway fault: it is cloud saying this identity may not ask.
+        # The honest answer to "which flags are on for a caller who cannot ask" is
+        # NONE, and an empty verdict grants exactly as little as a 502 does — the
+        # fail-closed invariant below is "grant nothing", not "return 502". Keeping
+        # them distinct matters because a 502 on every page load reads as an outage
+        # and buries the real one; this is a capability state, and it is stable.
+        if response.status_code == 403:
+            return dict(_EMPTY)
         response.raise_for_status()
         verdict = response.json()
     except iam.IamUnavailable as e:
