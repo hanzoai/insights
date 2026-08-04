@@ -22,6 +22,7 @@ pub mod token;
 pub mod utils;
 pub mod v0_endpoint;
 pub mod v0_request;
+pub mod warnings;
 
 // Re-export timestamp parsing from common-types for backwards compatibility
 pub use common_types::timestamp;
