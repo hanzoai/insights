@@ -223,6 +223,25 @@ class TestFlagsEndpoint:
         assert "pro" not in str(sent["person_properties"])
 
     @configured
+    def test_a_refusal_to_ask_is_an_empty_verdict_not_a_gateway_error(self):
+        """403 upstream means this identity may not ask, which is a stable state.
+
+        It grants nothing, exactly like a 502, so the fail-closed invariant holds
+        either way. It is reported as an empty verdict because a 502 on every page
+        load reads as an outage and buries the real one -- which is how this shipped:
+        the relay 502'd on every request and the e2e was the only thing that noticed.
+        """
+        with patch("insights.api.flags.iam.authorization", return_value={"Authorization": "Bearer tok"}):
+            with patch("insights.api.flags.requests.post") as post:
+                post.return_value = _response({"detail": "X-Org-Id required"}, code=403)
+
+                response = self._get(user=_User())
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["featureFlags"] == {}
+        assert response.data["featureFlagPayloads"] == {}
+
+    @configured
     def test_a_broken_gateway_grants_nothing(self):
         with patch("insights.api.flags.iam.authorization", return_value={"Authorization": "Bearer tok"}):
             with patch("insights.api.flags.requests.post", side_effect=OSError("connection refused")):
