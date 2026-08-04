@@ -9,7 +9,7 @@ topic has no producer and never had one.
 
 `0217` already established the answer for exactly this shape: one more view over
 the source that IS being written. `heatmap_mv` projects the pointer position off
-`event.event` into `writable_heatmaps`, the same write-side table the Kafka view
+the event plane into `writable_heatmaps`, the same write-side table the Kafka view
 targets, so both writers agree about sharding and nothing downstream changes.
 
 THE POSITION IS NEW ON THE WIRE. `@hanzo/observe` took the element off the click
@@ -30,7 +30,7 @@ with no collapse key, so a second pass would DOUBLE every row rather than replac
 it — and no click in the warehouse carries a position anyway, so it would project
 nothing. See the note at the end of `insights/models/event/plane.py`.
 
-Requires `event.event` to exist — Cloud owns it; see
+Requires the event plane to exist — Cloud owns it; see
 `insights/models/event/plane.py`.
 """
 
