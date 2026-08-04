@@ -11,6 +11,7 @@ use crate::{
     payload::{handle_event_payload, handle_recording_payload, EventQuery},
     prometheus::{report_dropped_events, report_internal_error_metrics},
     router,
+    warnings::WarningType,
 };
 
 #[instrument(
@@ -64,6 +65,9 @@ pub async fn event(
 
         Err(err) => {
             report_internal_error_metrics(err.to_metric_tag(), "parsing");
+            if let Some(warning) = WarningType::for_error(&err) {
+                state.warnings.refused(warning, None, "analytics", None);
+            }
             error!("event: request payload parsing error: {err:#}");
             Err(err)
         }
@@ -78,6 +82,12 @@ pub async fn event(
                     Ok(_) => {}
                     Err(crate::team::TeamResolveError::Unknown) => {
                         report_dropped_events("unknown_token", events.len() as u64);
+                        state.warnings.refused(
+                            WarningType::IngestKeyUnknown,
+                            Some(&context.token),
+                            "analytics",
+                            Some(events.len() as u64),
+                        );
                         return Err(CaptureError::UnknownToken);
                     }
                     Err(crate::team::TeamResolveError::Unavailable) => {}
@@ -145,6 +155,9 @@ pub async fn recording(
         }),
         Err(err) => {
             report_internal_error_metrics(err.to_metric_tag(), "parsing");
+            if let Some(warning) = WarningType::for_error(&err) {
+                state.warnings.refused(warning, None, "recordings", None);
+            }
             error!("recordings: request payload parsing error: {err:#}");
             Err(err)
         }
@@ -160,6 +173,12 @@ pub async fn recording(
                     Ok(_) => {}
                     Err(crate::team::TeamResolveError::Unknown) => {
                         report_dropped_events("unknown_token", count);
+                        state.warnings.refused(
+                            WarningType::IngestKeyUnknown,
+                            Some(&context.token),
+                            "recordings",
+                            Some(count),
+                        );
                         return Err(CaptureError::UnknownToken);
                     }
                     Err(crate::team::TeamResolveError::Unavailable) => {
