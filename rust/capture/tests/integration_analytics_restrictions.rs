@@ -120,6 +120,7 @@ async fn setup_analytics_router_with_restriction(
         None,
         256, // body_read_chunk_size_kb
         None, // team_resolver (gate disabled: this suite does not exercise it)
+        Arc::new(capture::warnings::Warnings::default()),
     );
 
     (router, sink_clone)

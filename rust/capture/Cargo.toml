@@ -16,6 +16,7 @@ base64 = { workspace = true }
 bytes = { workspace = true }
 envconfig = { workspace = true }
 flate2 = { workspace = true }
+governor = { workspace = true }
 health = { path = "../common/health" }
 hyper = { workspace = true }
 hyper-util = { workspace = true }

@@ -430,9 +430,24 @@ where
     // seam. Forged / unknown / revoked project tokens resolve to no team and are
     // rejected before any event is stored (team::KvTeamResolver).
     let team_resolver: Option<Arc<dyn crate::team::TeamResolver>> =
-        Some(Arc::new(crate::team::KvTeamResolver::new(
-            redis_client.clone(),
-        )));
+        if config.enforce_token_allowlist {
+            Some(Arc::new(crate::team::KvTeamResolver::new(
+                redis_client.clone(),
+            )))
+        } else {
+            warn!("token allow-list disabled: keys are shape-checked, not resolved");
+            None
+        };
+
+    // Makes refused traffic visible to an operator. Swept on its own task so the
+    // throttle's key map cannot grow until warnings stop firing altogether.
+    let warnings = Arc::new(crate::warnings::Warnings::default());
+    {
+        let warnings = warnings.clone();
+        tokio::spawn(async move {
+            warnings.clean_state().await;
+        });
+    }
 
     let app = router::router(
         crate::time::SystemTime {},
@@ -458,6 +473,7 @@ where
         config.body_chunk_read_timeout_ms,
         config.body_read_chunk_size_kb,
         team_resolver,
+        warnings,
     );
 
     info!("listening on {:?}", listener.local_addr().unwrap());
