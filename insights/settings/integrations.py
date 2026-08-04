@@ -92,3 +92,21 @@ INSIGHTS_AI_MAX_REPLAYED_CHARS = get_from_env("INSIGHTS_AI_MAX_REPLAYED_CHARS", 
 # rounds bound the requests and the characters bound what one result adds.
 INSIGHTS_AI_MAX_TOOL_ROUNDS = get_from_env("INSIGHTS_AI_MAX_TOOL_ROUNDS", 6, type_cast=int)
 INSIGHTS_AI_MAX_TOOL_RESULT_CHARS = get_from_env("INSIGHTS_AI_MAX_TOOL_RESULT_CHARS", 6000, type_cast=int)
+
+# Standing questions: the assistant asking on a timer, with nobody watching.
+#
+# Every bound above assumes a person is waiting for the answer and will stop
+# asking when it costs too much or takes too long. Nobody is waiting here, so
+# these are the only things standing between a scheduler tick and an unbounded
+# bill at a metered gateway. Both are caps, not targets.
+#
+# Wall clock for one asking. Also how long a run may sit unfinished before it is
+# taken to be dead: a worker that is killed mid-run leaves a row claiming to be
+# in progress, and without an expiry that row would block its question forever.
+INSIGHTS_AI_QUESTION_TIMEOUT_SECONDS = get_from_env("INSIGHTS_AI_QUESTION_TIMEOUT_SECONDS", 120, type_cast=int)
+# Askings per team per rolling day, across all of that team's questions. Counted
+# on the runs themselves, so retries and manual runs are spend like any other.
+INSIGHTS_AI_QUESTION_RUNS_PER_DAY = get_from_env("INSIGHTS_AI_QUESTION_RUNS_PER_DAY", 50, type_cast=int)
+# Questions one team may keep. Each is a standing claim on the schedule, so the
+# per-day cap alone would let one team's questions crowd out its own.
+INSIGHTS_AI_MAX_QUESTIONS = get_from_env("INSIGHTS_AI_MAX_QUESTIONS", 20, type_cast=int)
