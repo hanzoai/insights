@@ -29,4 +29,4 @@ See the [documentation](https://hanzo.ai/docs/insights) for detailed guides and 
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT Expat with an `ee/` enterprise carve-out — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
