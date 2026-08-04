@@ -1,0 +1,11 @@
+insights
+Copyright (c) 2020-2026 Hanzo AI, Inc.
+
+This product includes software from PostHog (https://github.com/PostHog/posthog),
+licensed under the PostHog license (MIT Expat with an "ee/" enterprise carve-out,
+reproduced verbatim in LICENSE):
+
+    Copyright (c) 2020-2026 PostHog Inc.
+
+Hanzo branding (product name, logos, package names, documentation) is Hanzo's own
+and is not part of the upstream work.
