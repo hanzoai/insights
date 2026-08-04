@@ -7,6 +7,16 @@ use thiserror::Error;
 
 use crate::token::InvalidTokenReason;
 
+/// Machine-readable refusal body. Byte-identical in shape to the `/v1/event`
+/// door cloud already serves (`zip.HTTPError`), so a client branches on `code`
+/// once and both doors answer it the same way.
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct ErrorBody {
+    pub status: u16,
+    pub code: &'static str,
+    pub error: String,
+}
+
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum CaptureResponseCode {
     Ok = 1,
@@ -132,10 +142,46 @@ impl CaptureError {
             CaptureError::BodyReadTimeout => "body_read_timeout",
         }
     }
-}
 
-impl IntoResponse for CaptureError {
-    fn into_response(self) -> Response {
+    /// The client-facing code. The credential arms use the vocabulary the
+    /// `/v1/event` door already answers with, so a caller branches once:
+    /// `ingest_key_required` (nothing presented), `ingest_key_unknown`
+    /// (presented, names no project), `unroutable_events` (body names no one
+    /// project to land in). The rest name the payload defect they describe.
+    pub fn code(&self) -> &'static str {
+        match self {
+            CaptureError::NoTokenError => "ingest_key_required",
+            CaptureError::TokenValidationError(_) | CaptureError::UnknownToken => {
+                "ingest_key_unknown"
+            }
+            CaptureError::MultipleTokensError => "unroutable_events",
+
+            CaptureError::RequestDecodingError(_) => "request_decoding_error",
+            CaptureError::RequestParsingError(_) => "request_parsing_error",
+            CaptureError::RequestHydrationError(_) => "request_hydration_error",
+            CaptureError::EmptyBatch => "empty_batch",
+            CaptureError::EmptyPayload => "empty_payload",
+            CaptureError::EmptyPayloadFiltered => "empty_payload_filtered",
+            CaptureError::MissingEventName => "missing_event_name",
+            CaptureError::MissingDistinctId => "missing_distinct_id",
+            CaptureError::InvalidCookielessMode => "invalid_cookieless_mode",
+            CaptureError::InvalidTimestamp => "invalid_timestamp",
+            CaptureError::MissingSnapshotData => "missing_snapshot_data",
+            CaptureError::MissingSessionId => "missing_session_id",
+            CaptureError::MissingWindowId => "missing_window_id",
+            CaptureError::InvalidSessionId => "invalid_session_id",
+            CaptureError::NonRetryableSinkError => "invalid_event",
+            CaptureError::EventTooBig(_) => "payload_too_large",
+            CaptureError::RetryableSinkError | CaptureError::ServiceUnavailable(_) => {
+                "service_unavailable"
+            }
+            CaptureError::BillingLimit => "billing_limit",
+            CaptureError::RateLimited | CaptureError::GlobalRateLimitExceeded(..) => "rate_limited",
+            CaptureError::BodyReadTimeout => "body_read_timeout",
+        }
+    }
+
+    pub fn status_code(&self) -> StatusCode {
         match self {
             CaptureError::RequestDecodingError(_)
             | CaptureError::RequestParsingError(_)
@@ -151,30 +197,41 @@ impl IntoResponse for CaptureError {
             | CaptureError::MissingWindowId
             | CaptureError::InvalidSessionId
             | CaptureError::EmptyPayloadFiltered
-            | CaptureError::MissingSnapshotData => (StatusCode::BAD_REQUEST, self.to_string()),
-
-            CaptureError::EventTooBig(_) => (StatusCode::PAYLOAD_TOO_LARGE, self.to_string()),
-
-            CaptureError::NoTokenError
             | CaptureError::MultipleTokensError
-            | CaptureError::TokenValidationError(_)
-            | CaptureError::UnknownToken => (StatusCode::UNAUTHORIZED, self.to_string()),
+            | CaptureError::MissingSnapshotData => StatusCode::BAD_REQUEST,
+
+            CaptureError::EventTooBig(_) => StatusCode::PAYLOAD_TOO_LARGE,
+
+            // Nothing presented is a 401 (send a key); a key that names no
+            // project is a 403 (this key will never work) — the split lets a
+            // caller tell "I forgot to send one" from "mine is wrong".
+            CaptureError::NoTokenError => StatusCode::UNAUTHORIZED,
+            CaptureError::TokenValidationError(_) | CaptureError::UnknownToken => {
+                StatusCode::FORBIDDEN
+            }
 
             CaptureError::RetryableSinkError | CaptureError::ServiceUnavailable(_) => {
-                (StatusCode::SERVICE_UNAVAILABLE, self.to_string())
+                StatusCode::SERVICE_UNAVAILABLE
             }
 
-            CaptureError::BillingLimit | CaptureError::RateLimited => {
-                (StatusCode::TOO_MANY_REQUESTS, self.to_string())
-            }
+            CaptureError::BillingLimit
+            | CaptureError::RateLimited
+            | CaptureError::GlobalRateLimitExceeded(..) => StatusCode::TOO_MANY_REQUESTS,
 
-            CaptureError::GlobalRateLimitExceeded(_, _, _, _, _, _) => {
-                (StatusCode::TOO_MANY_REQUESTS, self.to_string())
-            }
-
-            CaptureError::BodyReadTimeout => (StatusCode::REQUEST_TIMEOUT, self.to_string()),
+            CaptureError::BodyReadTimeout => StatusCode::REQUEST_TIMEOUT,
         }
-        .into_response()
+    }
+}
+
+impl IntoResponse for CaptureError {
+    fn into_response(self) -> Response {
+        let status = self.status_code();
+        let body = ErrorBody {
+            status: status.as_u16(),
+            code: self.code(),
+            error: self.to_string(),
+        };
+        (status, Json(body)).into_response()
     }
 }
 
@@ -192,6 +249,33 @@ mod tests {
         };
         let response = response.into_response();
         assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[test]
+    fn credential_refusals_carry_the_shared_vocabulary() {
+        // Nothing presented: retry WITH a key.
+        let missing = CaptureError::NoTokenError;
+        assert_eq!(missing.code(), "ingest_key_required");
+        assert_eq!(missing.status_code(), StatusCode::UNAUTHORIZED);
+
+        // Presented but useless: retrying with the same key is pointless.
+        for err in [
+            CaptureError::UnknownToken,
+            CaptureError::TokenValidationError(InvalidTokenReason::Empty),
+        ] {
+            assert_eq!(err.code(), "ingest_key_unknown", "{err}");
+            assert_eq!(err.status_code(), StatusCode::FORBIDDEN, "{err}");
+        }
+
+        // A batch naming two projects lands in neither.
+        assert_eq!(
+            CaptureError::MultipleTokensError.code(),
+            "unroutable_events"
+        );
+        assert_eq!(
+            CaptureError::MultipleTokensError.status_code(),
+            StatusCode::BAD_REQUEST
+        );
     }
 
     #[test]
