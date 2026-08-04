@@ -1,0 +1,13 @@
+{% extends "email/base.html" %} {% load insights_assets %} {% block section %}
+    <p>
+        Your standing question <strong>{{ question_name }}</strong> was asked of {{ project_name }} on {{ asked_at }}.
+    </p>
+    <p class="text-muted">{{ prompt }}</p>
+    <div class="mb mt">{{ answer|linebreaks }}</div>
+    {% if truncated %}
+        <p class="text-muted">This answer was shortened for email. The whole of it is on the run.</p>
+    {% endif %}
+    <div class="mb mt text-center">
+        <a class="button" href="{% absolute_uri questions_url %}">Manage standing questions</a>
+    </div>
+{% endblock %}{% load insights_filters %}
