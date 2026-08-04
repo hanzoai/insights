@@ -16,10 +16,11 @@ use tower_http::trace::TraceLayer;
 
 use crate::ai_s3::BlobStorage;
 use crate::event_restrictions::EventRestrictionService;
-use crate::team::TeamResolver;
 use crate::global_rate_limiter::GlobalRateLimiter;
+use crate::team::TeamResolver;
 use crate::test_endpoint;
 use crate::v0_request::DataType;
+use crate::warnings::Warnings;
 use crate::{ai_endpoint, sinks, time::TimeSource, v0_endpoint};
 use common_redis::Client;
 use limiters::token_dropper::TokenDropper;
@@ -53,6 +54,8 @@ pub struct State {
     /// production (server.rs wires the KV resolver); `None` disables the gate for
     /// unit/integration setups that do not exercise it.
     pub team_resolver: Option<Arc<dyn TeamResolver>>,
+    /// Makes refused traffic visible to an operator.
+    pub warnings: Arc<Warnings>,
 }
 
 #[derive(Clone)]
@@ -120,6 +123,7 @@ pub fn router<
     body_chunk_read_timeout_ms: Option<u64>,
     body_read_chunk_size_kb: usize,
     team_resolver: Option<Arc<dyn TeamResolver>>,
+    warnings: Arc<Warnings>,
 ) -> Router {
     let state = State {
         sink: Arc::new(sink),
@@ -141,6 +145,7 @@ pub fn router<
         body_chunk_read_timeout: body_chunk_read_timeout_ms.map(Duration::from_millis),
         body_read_chunk_size_kb,
         team_resolver,
+        warnings,
     };
 
     // Very permissive CORS policy, as old SDK versions
