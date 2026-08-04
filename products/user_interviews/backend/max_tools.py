@@ -2,9 +2,11 @@ from typing import Any
 
 from django.conf import settings
 
-from openai import OpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
+from products.insights_ai.backend.max_tool import MaxTool
+from products.insights_ai.backend.model import MaxChatOpenAI
 
 from .models import UserInterview
 
@@ -39,20 +41,16 @@ class AnalyzeUserInterviewsTool(MaxTool):
 
         interview_summaries = "\n\n".join(interview_summaries)
 
-        # Use GPT to analyze the summaries
-        analysis_response = OpenAI(base_url=settings.OPENAI_BASE_URL).responses.create(
-            model="gpt-4.1-mini",
-            input=[
-                {
-                    "role": "system",
-                    "content": """
+        analysis_response = self._model.invoke(
+            [
+                SystemMessage(
+                    content="""
 You are an expert product manager analyzing user interviews. Your task is to analyze multiple interview summaries and provide insights based on the requested analysis angle.
 Focus on finding patterns, common themes, and actionable insights.
-""".strip(),
-                },
-                {
-                    "role": "user",
-                    "content": f"""
+""".strip()
+                ),
+                HumanMessage(
+                    content=f"""
 Please analyze these user interview summaries from the following angle:
 {analysis_angle}
 
@@ -61,9 +59,21 @@ Please analyze these user interview summaries from the following angle:
 </interview_summaries>
 
 Provide a structured analysis with clear sections and bullet points where appropriate. Keep it very concise though. Avoid fluff, just give the facts to answer the question.
-""".strip(),
-                },
-            ],
+""".strip()
+                ),
+            ]
         )
 
-        return analysis_response.output_text, None
+        return analysis_response.content, None
+
+    @property
+    def _model(self):
+        return MaxChatOpenAI(
+            model=settings.INSIGHTS_AI_MODEL,
+            temperature=0.3,
+            disable_streaming=True,
+            user=self._user,
+            team=self._team,
+            billable=True,
+            inject_context=False,
+        )
