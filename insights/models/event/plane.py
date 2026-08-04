@@ -1,8 +1,8 @@
 """Projection of the Hanzo event plane onto the Insights event schema.
 
 An event is the fact; a message is the container it travels in. Every product's
-facts land in ONE place on the ONE warehouse — `event.event` on the Hanzo
-Datastore — with an envelope that is identical across `event.event`,
+facts land in ONE place on the ONE warehouse — `event.fact` on the Hanzo
+Datastore — with an envelope that is identical across `event.fact`,
 `event.error`, `event.log` and `event.span`. It is a plain MergeTree family
 table, so a materialized view over it fires on every insert: the unified stream
 reaches Insights with no second capture tier, no queue and no extra process.
@@ -21,8 +21,9 @@ The same envelope also names the USER an event belongs to, so `user_mv` and
 `user_alias_mv` project the users out of it the same way — three views, one
 source, one set of identity expressions. See "the USER plane" below.
 
-Prerequisite: `event.event` must exist. Cloud owns the write path into it; this
-module only reads it, and deliberately does not declare it.
+Prerequisite: `event.fact` must exist. Cloud owns the write path into it; this
+module only reads it, and deliberately does not declare it. EVENT_TABLE below is
+the one name; nothing here spells a plane a second time.
 """
 
 from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
@@ -215,7 +216,7 @@ PROPERTIES_SQL = (
 # is written into the column the fork reads. Nothing above this file says
 # "person".
 #
-# `event.event.person_id` carries the IAM SUBJECT (the `sub` claim — the stable
+# `event.fact.person_id` carries the IAM SUBJECT (the `sub` claim — the stable
 # opaque user id) whenever the writer was signed in, and is empty otherwise;
 # `anonymous_id` is the browser-minted id the same visitor carried BEFORE they
 # signed in. So the plane already holds both halves of a user's history, and the
