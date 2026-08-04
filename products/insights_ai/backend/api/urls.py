@@ -11,11 +11,28 @@ authorizes. A path segment names a resource; it never asserts tenancy.
 from django.urls import re_path
 
 from .conversations import ConversationViewSet
+from .questions import QuestionViewSet
 
 _CONVERSATIONS = r"^projects/(?P<parent_lookup_team_id>[0-9]+)/assistant/conversations"
+_QUESTIONS = r"^projects/(?P<parent_lookup_team_id>[0-9]+)/assistant/questions"
 _UUID = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 
 urlpatterns = [
+    re_path(
+        rf"{_QUESTIONS}/(?P<pk>{_UUID})/runs/?$",
+        QuestionViewSet.as_view({"get": "runs"}),
+        name="assistant-question-runs",
+    ),
+    re_path(
+        rf"{_QUESTIONS}/(?P<pk>{_UUID})/?$",
+        QuestionViewSet.as_view({"get": "retrieve", "patch": "partial_update", "delete": "destroy"}),
+        name="assistant-question",
+    ),
+    re_path(
+        rf"{_QUESTIONS}/?$",
+        QuestionViewSet.as_view({"get": "list", "post": "create"}),
+        name="assistant-questions",
+    ),
     re_path(
         rf"{_CONVERSATIONS}/(?P<pk>{_UUID})/cancel/?$",
         ConversationViewSet.as_view({"patch": "cancel"}),

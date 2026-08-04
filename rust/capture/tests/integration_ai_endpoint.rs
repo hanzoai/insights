@@ -193,6 +193,7 @@ fn setup_ai_test_router() -> Router {
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
         Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
+        Arc::new(capture::warnings::Warnings::default()),
     )
 }
 
@@ -1649,6 +1650,7 @@ fn setup_ai_test_router_with_capturing_sink() -> (Router, CapturingSink) {
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
         Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
+        Arc::new(capture::warnings::Warnings::default()),
     );
 
     (router, sink_clone)
@@ -2557,6 +2559,7 @@ fn setup_ai_test_router_with_token_dropper(token_dropper: TokenDropper) -> (Rout
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
         Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
+        Arc::new(capture::warnings::Warnings::default()),
     );
 
     (router, sink_clone)
@@ -2760,6 +2763,7 @@ fn setup_ai_test_router_with_llm_quota_limited(token: &str) -> (Router, Capturin
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
         Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
+        Arc::new(capture::warnings::Warnings::default()),
     );
 
     (router, sink_clone)
