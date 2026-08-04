@@ -26,12 +26,22 @@ module only reads it, and deliberately does not declare it.
 """
 
 from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
+from insights.heatmaps.sql import WRITABLE_HEATMAPS_TABLE
 from insights.models.person.sql import PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE, PERSONS_WRITABLE_TABLE
 from insights.settings.data_stores import DATASTORE_DATABASE
 
 from .sql import WRITABLE_EVENTS_DATA_TABLE
 
-EVENT_TABLE = "event.event"
+# WHERE CLOUD WRITES. `event.fact` is the live table — Cloud's own sink names it
+# (`factTable = plane + ".fact"`), and it is the one every view here must read.
+#
+# It was `event.event`, and that name is now a table that stopped receiving rows on
+# 2026-08-02 while still holding 9,605 of them — so a view left pointing at it does
+# not fail, it silently projects nothing. The deployed `event_mv` was moved to
+# `event.fact`; `user_mv` and `user_alias_mv` were NOT, which is why the users plane
+# stopped growing on the same date. Naming the source ONCE is what keeps the next
+# rename from splitting them again.
+EVENT_TABLE = "event.fact"
 EVENT_MV = "event_mv"
 
 # ── routing: which PROJECT an org's events land in ───────────────────────────
@@ -587,3 +597,129 @@ SELECT DISTINCT
 FROM `{DATASTORE_DATABASE}`.`{USER_ALIAS_READ_TABLE}`
 WHERE team_id = %(team_id)s AND person_id IN %(ids)s
 """
+
+
+# ── the HEAT MAP plane ──────────────────────────────────────────────────────
+#
+# `event_mv` projects WHAT was clicked. A heat map is the same fact read as a
+# POSITION, and it lands in its own table because it is queried by url and
+# viewport rather than by user and time — `sharded_heatmaps` sorts on
+# (type, team_id, date, current_url, viewport_width).
+#
+# `heatmaps_mv` already feeds that table from `kafka_heatmaps`, which is fed by
+# an ingestion consumer this deployment does not run: Cloud writes the plane
+# directly, so no heatmap message is ever produced and the table stayed empty
+# while clicks accumulated. This is the same shape as the events projection —
+# one more view over the source that is actually being written.
+#
+# The position rides on the click. @hanzo/observe measures it (`$x`, `$y`,
+# `$target_fixed`, `$viewport_width`, `$viewport_height`) and Cloud carries it
+# in `attributes`, so nothing on the ingest path had to learn a second wire.
+#
+# A CLICK WITHOUT A POSITION IS NOT PROJECTED. Every click captured before the
+# SDK measured one would otherwise land at the origin, and a heat map with a
+# hot corner it invented is worse than an empty one — so the position is
+# REQUIRED (HEATMAP_WHERE), not defaulted.
+
+HEATMAP_MV = "heatmap_mv"
+
+# Coordinates are stored on a grid rather than per pixel: a bucket is a region.
+# The read path multiplies the factor back out (`heatmaps/sql.py`), and the row
+# carries the factor it was written with, so a future grid can coexist with this
+# one instead of silently rescaling what is already stored.
+SCALE = 16
+
+# The plane's pointer events, in the `type` vocabulary the heat map reads them
+# under. Keyed on the event name: this is the one place the two spellings meet.
+HEATMAP_TYPE = {"$click": "click"}
+
+# What the SDK measures. Named once so the projection and its guard cannot
+# disagree about which keys carry a position.
+POINTER_X = "attributes['$x']"
+POINTER_Y = "attributes['$y']"
+POINTER_FIXED = "attributes['$target_fixed']"
+VIEWPORT_WIDTH = "attributes['$viewport_width']"
+VIEWPORT_HEIGHT = "attributes['$viewport_height']"
+
+
+def grid(value: str) -> str:
+    """`value` on the stored grid, clamped to the column's range.
+
+    `toFloat64OrZero` is total over any String, so a malformed coordinate reads
+    0 rather than throwing. The clamp is what makes it total in the other
+    direction: `toInt16` WRAPS on overflow, so without it a coordinate past
+    ~524k pixels would land as a negative one somewhere else on the map.
+    """
+    return f"toInt16(greatest(-32768, least(32767, round(toFloat64OrZero({value}) / {SCALE}))))"
+
+
+HEATMAP_TYPE_SQL = "multiIf(" + ", ".join(f"name = '{n}', '{t}'" for n, t in HEATMAP_TYPE.items()) + ", '')"
+
+
+def HEATMAP_COLUMNS() -> list[tuple[str, str]]:
+    return [
+        ("session_id", "session_id"),
+        ("team_id", PROJECT_SQL),
+        ("distinct_id", DISTINCT_SQL),
+        ("timestamp", "toDateTime64(time, 6, 'UTC')"),
+        ("x", grid(POINTER_X)),
+        ("y", grid(POINTER_Y)),
+        ("scale_factor", f"toInt16({SCALE})"),
+        ("viewport_width", grid(VIEWPORT_WIDTH)),
+        ("viewport_height", grid(VIEWPORT_HEIGHT)),
+        # A fixed target was measured against the viewport, not the page. The
+        # reader cannot tell the two apart afterwards, so the row says which.
+        ("pointer_target_fixed", f"{POINTER_FIXED} = 'true'"),
+        ("current_url", "url"),
+        ("type", HEATMAP_TYPE_SQL),
+    ]
+
+
+# A row is projected only when it carries a position that can be drawn.
+#
+# The viewport must survive the grid as at least one bucket, because the read
+# divides by it (`round(x / viewport_width, 2)`, `heatmaps_api.py`) — a viewport
+# under one bucket would scale to 0 and every click on that row would read as an
+# infinity. Requiring the RAW value to reach one full bucket says that in the
+# units the guard is actually about.
+HEATMAP_WHERE = " AND ".join(
+    [
+        "name IN (" + ", ".join(f"'{name}'" for name in HEATMAP_TYPE) + ")",
+        f"{POINTER_X} != ''",
+        f"{POINTER_Y} != ''",
+        f"toFloat64OrZero({VIEWPORT_WIDTH}) >= {SCALE}",
+        f"toFloat64OrZero({VIEWPORT_HEIGHT}) >= {SCALE}",
+    ]
+)
+
+
+def HEATMAP_SELECT_SQL() -> str:
+    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in HEATMAP_COLUMNS())
+    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}\nWHERE {HEATMAP_WHERE}"
+
+
+def HEATMAP_MV_SQL() -> str:
+    return f"""
+CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{HEATMAP_MV}`
+TO `{DATASTORE_DATABASE}`.`{WRITABLE_HEATMAPS_TABLE}`
+AS {HEATMAP_SELECT_SQL()}
+"""
+
+
+def DROP_HEATMAP_MV_SQL() -> str:
+    return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{HEATMAP_MV}`"
+
+
+# THERE IS DELIBERATELY NO BACKFILL HERE, and the reason is not caution.
+#
+# `sharded_heatmaps` is a plain MergeTree: it has no collapse key, so a second
+# pass ADDS every row again rather than replacing it — unlike `person`
+# (Replacing on `(team_id, id)`), where re-running is indistinguishable from
+# running once. A backfill in `operations` would therefore double every click
+# each time the migration is re-applied, and this file's neighbours are
+# re-applied on purpose (0221 drops and recreates its views so a changed
+# projection takes effect).
+#
+# It would also project nothing: no click in the warehouse carries a position,
+# because the SDK did not measure one until now. The backfill is both unsafe
+# and empty, which is a good reason not to write it.
