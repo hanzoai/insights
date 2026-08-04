@@ -517,7 +517,9 @@ class ConversationViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
 
             try:
                 messages = assistant.build_messages(turns, team=team, ui_context=ui_context)
-                for index, delta in enumerate(assistant.stream_reply(messages)):
+                # The same team the mixin authorized for this request, and the only
+                # project the reply's tool calls can read.
+                for index, delta in enumerate(assistant.stream_reply(messages, team=team)):
                     parts.append(delta)
                     yield _sse(EVENT_MESSAGE, {"id": streaming_id, "type": ASSISTANT, "content": "".join(parts)})
                     if time.monotonic() > deadline:

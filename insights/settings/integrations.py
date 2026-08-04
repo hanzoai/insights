@@ -87,3 +87,8 @@ INSIGHTS_AI_RATE_DAILY = get_from_env("INSIGHTS_AI_RATE_DAILY", "300/day")
 # priced call. Cap the thread itself, and the slice of it that is replayed.
 INSIGHTS_AI_MAX_MESSAGES = get_from_env("INSIGHTS_AI_MAX_MESSAGES", 200, type_cast=int)
 INSIGHTS_AI_MAX_REPLAYED_CHARS = get_from_env("INSIGHTS_AI_MAX_REPLAYED_CHARS", 24000, type_cast=int)
+# The assistant reads the project's data through tools. Every round it spends
+# reading is another priced request carrying everything it has read so far, so the
+# rounds bound the requests and the characters bound what one result adds.
+INSIGHTS_AI_MAX_TOOL_ROUNDS = get_from_env("INSIGHTS_AI_MAX_TOOL_ROUNDS", 6, type_cast=int)
+INSIGHTS_AI_MAX_TOOL_RESULT_CHARS = get_from_env("INSIGHTS_AI_MAX_TOOL_RESULT_CHARS", 6000, type_cast=int)
