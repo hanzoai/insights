@@ -25,8 +25,8 @@ from insights.constants import DEFAULT_SURVEY_APPEARANCE
 from insights.exceptions_capture import capture_exception
 from insights.models import Survey, Team
 
+from products.insights_ai.backend.max_tool import MaxTool
 from products.surveys.backend.summarization.fetch import fetch_responses
-
 
 
 def get_team_survey_config(team: Team) -> dict[str, Any]:
