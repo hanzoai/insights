@@ -6,6 +6,8 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
+from products.insights_ai.backend.max_tool import MaxTool
+from products.insights_ai.backend.model import MaxChatOpenAI, PydanticOutputParserException
 
 
 class CreateTemplateArgs(BaseModel):
