@@ -168,7 +168,7 @@ function TemplateItem({
             : template.scope === 'organization'
               ? 'organization'
               : template.scope === 'team'
-                ? 'team'
+                ? 'project'
                 : null
 
     return (

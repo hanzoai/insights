@@ -2239,7 +2239,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Should be denied
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.json()["detail"] == "Backfilling Workflows is not enabled for this team."
+        assert response.json()["detail"] == "Backfilling Workflows is not enabled for this project."
 
         # Verify feature flag was checked correctly
         mock_feature_enabled.assert_called_once()

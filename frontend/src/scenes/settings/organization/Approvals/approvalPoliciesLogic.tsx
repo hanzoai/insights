@@ -50,7 +50,7 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
             try {
                 const teamId = teamLogic.values.currentTeamId
                 if (!teamId) {
-                    throw new Error('No team selected')
+                    throw new Error('No project selected')
                 }
                 await api.create(`api/environments/${teamId}/approval_policies/`, policy)
                 toast.success('Approval policy created')
@@ -63,7 +63,7 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
             try {
                 const teamId = teamLogic.values.currentTeamId
                 if (!teamId) {
-                    throw new Error('No team selected')
+                    throw new Error('No project selected')
                 }
                 await api.update(`api/environments/${teamId}/approval_policies/${id}/`, policy)
                 toast.success('Approval policy updated')
@@ -76,7 +76,7 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
             try {
                 const teamId = teamLogic.values.currentTeamId
                 if (!teamId) {
-                    throw new Error('No team selected')
+                    throw new Error('No project selected')
                 }
                 await api.delete(`api/environments/${teamId}/approval_policies/${id}/`)
                 toast.success('Approval policy deleted')

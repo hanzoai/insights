@@ -91,7 +91,7 @@ class AlertSubscriptionSerializer(serializers.ModelSerializer):
         alert_configuration = data["alert_configuration"]
 
         if not user.teams.filter(pk=alert_configuration.team_id).exists():
-            raise serializers.ValidationError("User does not belong to the same organization as the alert's team.")
+            raise serializers.ValidationError("User does not belong to the same organization as the alert's project.")
 
         return data
 
@@ -262,12 +262,12 @@ class AlertSerializer(serializers.ModelSerializer):
     def validate_subscribed_users(self, value):
         for user in value:
             if not user.teams.filter(pk=self.context["team_id"]).exists():
-                raise ValidationError("User does not belong to the same organization as the alert's team.")
+                raise ValidationError("User does not belong to the same organization as the alert's project.")
         return value
 
     def validate(self, attrs):
         if attrs.get("insight") and attrs["insight"].team.id != self.context["team_id"]:
-            raise ValidationError({"insight": ["This insight does not belong to your team."]})
+            raise ValidationError({"insight": ["This insight does not belong to your project."]})
 
         # only validate alert count when creating a new alert
         if self.context["request"].method != "POST":

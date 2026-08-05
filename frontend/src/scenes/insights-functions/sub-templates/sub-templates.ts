@@ -217,8 +217,8 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
         {
             ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-webhook',
-            name: 'HTTP Webhook on team activity',
-            description: 'Send a webhook when a team activity occurs',
+            name: 'HTTP Webhook on project activity',
+            description: 'Send a webhook when a project activity occurs',
             inputs: {
                 content: {
                     value: '**{person.name}** {event.properties.activity} {event.properties.scope} `{event.properties.item_id}`',
@@ -228,8 +228,8 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
         {
             ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-discord',
-            name: 'Post to Discord on team activity',
-            description: 'Posts a message to Discord when a team activity occurs',
+            name: 'Post to Discord on project activity',
+            description: 'Posts a message to Discord when a project activity occurs',
             inputs: {
                 content: {
                     value: '**{person.name}** {event.properties.activity} {event.properties.scope} `{event.properties.item_id}`',
@@ -239,8 +239,8 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
         {
             ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-microsoft-teams',
-            name: 'Post to Microsoft Teams on team activity',
-            description: 'Posts a message to Microsoft Teams when a team activity occurs',
+            name: 'Post to Microsoft Teams on project activity',
+            description: 'Posts a message to Microsoft Teams when a project activity occurs',
             inputs: {
                 content: {
                     value: '**{person.name}** {event.properties.activity} {event.properties.scope} `{event.properties.item_id}`',
@@ -250,8 +250,8 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
         {
             ...INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES['activity-log'],
             template_id: 'template-slack',
-            name: 'Post to Slack on team activity',
-            description: 'Posts a message to Slack when a team activity occurs',
+            name: 'Post to Slack on project activity',
+            description: 'Posts a message to Slack when a project activity occurs',
             inputs: {
                 blocks: {
                     value: [

@@ -31,7 +31,7 @@ function getErrorMessage(error: any, defaultMessage: string): string {
 
         // Handle team mismatch errors
         if (typeof detail === 'string' && detail.includes('must belong to the same team')) {
-            return 'Property group must belong to the same team as the event'
+            return 'Property group must belong to the same project as the event'
         }
 
         // Return the detail if it's a user-friendly string

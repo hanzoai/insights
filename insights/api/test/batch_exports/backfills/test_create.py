@@ -586,7 +586,7 @@ def test_batch_export_earliest_backfill_rejected_without_feature_flag(
             "2021-01-01T01:00:00+00:00",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
-        assert response.json()["detail"] == "Backfilling from the beginning of time is not enabled for this team."
+        assert response.json()["detail"] == "Backfilling from the beginning of time is not enabled for this project."
 
 
 def test_batch_export_earliest_backfill_allowed_with_feature_flag(

@@ -177,7 +177,7 @@ export function MaterializedColumns(): JSX.Element {
         <SceneContent>
             <SceneTitleSection
                 name={`Materialized Columns - ${currentTeam?.name || 'Loading...'}`}
-                description="Manage materialized column slot assignments for this team."
+                description="Manage materialized column slot assignments for this project."
                 markdown
                 resourceType={{
                     type: 'materialized_columns',

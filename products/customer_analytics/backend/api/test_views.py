@@ -349,7 +349,7 @@ class TestCustomerJourneyViewSet(APIBaseTest):
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         data = response.json()
         self.assertEqual(data["attr"], "insight")
-        self.assertEqual(data["detail"], "The insight does not belong to this team.")
+        self.assertEqual(data["detail"], "The insight does not belong to this project.")
 
     @parameterized.expand(
         [
