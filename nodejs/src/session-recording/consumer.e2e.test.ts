@@ -13,7 +13,7 @@ import { Datastore } from '../../tests/helpers/datastore'
 import { waitForExpect } from '../../tests/helpers/expectations'
 import { resetKafka } from '../../tests/helpers/kafka'
 import { forSnapshot } from '../../tests/helpers/snapshots'
-import { createOrganization, createTeam, getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
+import { getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
 import { defaultConfig, overrideWithEnv } from '../config/config'
 import {
     KAFKA_DATASTORE_SESSION_REPLAY_EVENTS,
@@ -23,7 +23,6 @@ import { KafkaProducerWrapper } from '../kafka/producer'
 import { Hub, Team } from '../types'
 import { closeHub, createHub } from '../utils/db/hub'
 import { PostgresRouter, PostgresUse } from '../utils/db/postgres'
-import { REDIS_KEY_PREFIX, RedisRestrictionType } from '../utils/event-ingestion-restrictions/redis-schema'
 import { parseJSON } from '../utils/json-parse'
 import { SessionRecordingIngester } from './consumer'
 import { MouseInteractions, RRWebEventSource, RRWebEventType } from './rrweb-types'
@@ -44,7 +43,6 @@ const PARTITION_ASSIGNMENT_WAIT_MS = 1000
 
 // Token for a team that has DROP_EVENT restriction applied
 // This team is created in beforeAll and the restriction is set in Redis
-const RESTRICTED_TEAM_TOKEN = 'restricted-team-token-for-e2e-tests'
 
 /**
  * Payload configuration for test cases.
@@ -52,7 +50,7 @@ const RESTRICTED_TEAM_TOKEN = 'restricted-team-token-for-e2e-tests'
 interface PayloadConfig {
     sessionId: string
     distinctId: string
-    token: string
+    org: string
     windowId?: string
     events: Array<{ type: number; data: unknown; timestamp?: number }>
 }
@@ -100,7 +98,7 @@ interface ParsedSessionEvent {
 interface TestCase {
     name: string
     description: string
-    createPayloads: (team: Team, testRunId: string) => PayloadConfig[]
+    createPayloads: (org: string, testRunId: string) => PayloadConfig[]
     expectedOutcome: 'written' | 'dropped'
 }
 
@@ -115,7 +113,7 @@ function createKafkaPayload(config: PayloadConfig): {
     key: Buffer
     headers: Record<string, string>
 } {
-    const { sessionId, distinctId, token, windowId = 'window-1', events } = config
+    const { sessionId, distinctId, org, windowId = 'window-1', events } = config
 
     const baseTimestamp = Date.now()
     const snapshotItems = events.map((event, index) => ({
@@ -146,7 +144,7 @@ function createKafkaPayload(config: PayloadConfig): {
         value: Buffer.from(JSON.stringify(messagePayload)),
         key: Buffer.from(sessionId),
         headers: {
-            token,
+            org,
             distinct_id: distinctId,
             session_id: sessionId,
             event: '$snapshot_items',
@@ -538,11 +536,11 @@ const testCases: TestCase[] = [
     {
         name: 'single session with multiple event types',
         description: 'Basic happy path with Meta, FullSnapshot, and IncrementalSnapshot events',
-        createPayloads: (team, testRunId) => [
+        createPayloads: (org, testRunId) => [
             {
                 sessionId: `session-${testRunId}`,
                 distinctId: `user-${testRunId}`,
-                token: team.api_token,
+                org,
                 events: [
                     { type: RRWebEventType.Meta, data: { href: 'https://example.com', width: 1920, height: 1080 } },
                     {
@@ -559,13 +557,13 @@ const testCases: TestCase[] = [
         expectedOutcome: 'written',
     },
     {
-        name: 'invalid team token',
-        description: 'Messages with invalid tokens should be dropped',
-        createPayloads: (_team, testRunId) => [
+        name: 'unrouted org',
+        description: 'Messages from an org that owns no project should be dropped',
+        createPayloads: (_org, testRunId) => [
             {
-                sessionId: `invalid-token-session-${testRunId}`,
+                sessionId: `unrouted-org-session-${testRunId}`,
                 distinctId: `user-${testRunId}`,
-                token: 'invalid-token-that-does-not-exist',
+                org: 'org-that-does-not-exist',
                 events: [
                     { type: RRWebEventType.Meta, data: { href: 'https://example.com', width: 1024, height: 768 } },
                     { type: RRWebEventType.FullSnapshot, data: { source: 1, snapshot: { html: '<div>Test</div>' } } },
@@ -577,11 +575,11 @@ const testCases: TestCase[] = [
     {
         name: 'multiple sessions in same batch',
         description: 'Multiple independent sessions should all be processed',
-        createPayloads: (team, testRunId) => [
+        createPayloads: (org, testRunId) => [
             {
                 sessionId: `session-a-${testRunId}`,
                 distinctId: `user-a-${testRunId}`,
-                token: team.api_token,
+                org,
                 events: [
                     {
                         type: RRWebEventType.Meta,
@@ -596,7 +594,7 @@ const testCases: TestCase[] = [
             {
                 sessionId: `session-b-${testRunId}`,
                 distinctId: `user-b-${testRunId}`,
-                token: team.api_token,
+                org,
                 events: [
                     {
                         type: RRWebEventType.Meta,
@@ -614,13 +612,13 @@ const testCases: TestCase[] = [
     {
         name: 'multiple windows in same session',
         description: 'Events from different windows in the same session should be recorded together',
-        createPayloads: (team, testRunId) => {
+        createPayloads: (org, testRunId) => {
             const sessionId = `multi-window-${testRunId}`
             return [
                 {
                     sessionId,
                     distinctId: `user-${testRunId}`,
-                    token: team.api_token,
+                    org,
                     windowId: 'window-main',
                     events: [
                         {
@@ -632,7 +630,7 @@ const testCases: TestCase[] = [
                 {
                     sessionId,
                     distinctId: `user-${testRunId}`,
-                    token: team.api_token,
+                    org,
                     windowId: 'window-popup',
                     events: [
                         {
@@ -648,14 +646,14 @@ const testCases: TestCase[] = [
     {
         name: 'session continuity across batches',
         description: 'Events arriving in separate batches for the same session should be combined',
-        createPayloads: (team, testRunId) => {
+        createPayloads: (org, testRunId) => {
             const sessionId = `continuous-session-${testRunId}`
             const baseTimestamp = Date.now()
             return [
                 {
                     sessionId,
                     distinctId: `user-${testRunId}`,
-                    token: team.api_token,
+                    org,
                     events: [
                         {
                             type: RRWebEventType.Meta,
@@ -672,7 +670,7 @@ const testCases: TestCase[] = [
                 {
                     sessionId,
                     distinctId: `user-${testRunId}`,
-                    token: team.api_token,
+                    org,
                     events: [
                         {
                             type: RRWebEventType.IncrementalSnapshot,
@@ -693,13 +691,13 @@ const testCases: TestCase[] = [
     {
         name: 'out of order events',
         description: 'Events with timestamps out of chronological order should still be processed',
-        createPayloads: (team, testRunId) => {
+        createPayloads: (org, testRunId) => {
             const baseTimestamp = Date.now()
             return [
                 {
                     sessionId: `out-of-order-${testRunId}`,
                     distinctId: `user-${testRunId}`,
-                    token: team.api_token,
+                    org,
                     events: [
                         {
                             type: RRWebEventType.Meta,
@@ -725,11 +723,11 @@ const testCases: TestCase[] = [
     {
         name: 'empty events array',
         description: 'Messages with no events should be handled gracefully',
-        createPayloads: (team, testRunId) => [
+        createPayloads: (org, testRunId) => [
             {
                 sessionId: `empty-events-${testRunId}`,
                 distinctId: `user-${testRunId}`,
-                token: team.api_token,
+                org,
                 events: [],
             },
         ],
@@ -738,11 +736,11 @@ const testCases: TestCase[] = [
     {
         name: 'console log events',
         description: 'Console log, warn, and error events should be counted in metadata',
-        createPayloads: (team, testRunId) => [
+        createPayloads: (org, testRunId) => [
             {
                 sessionId: `console-logs-${testRunId}`,
                 distinctId: `user-${testRunId}`,
-                token: team.api_token,
+                org,
                 events: [
                     { type: RRWebEventType.Meta, data: { href: 'https://example.com', width: 1024, height: 768 } },
                     {
@@ -773,11 +771,11 @@ const testCases: TestCase[] = [
     {
         name: 'click and keypress events',
         description: 'Click and keypress events should be counted in metadata',
-        createPayloads: (team, testRunId) => [
+        createPayloads: (org, testRunId) => [
             {
                 sessionId: `clicks-keypresses-${testRunId}`,
                 distinctId: `user-${testRunId}`,
-                token: team.api_token,
+                org,
                 events: [
                     { type: RRWebEventType.Meta, data: { href: 'https://example.com', width: 1024, height: 768 } },
                     // Click events
@@ -807,22 +805,6 @@ const testCases: TestCase[] = [
         ],
         expectedOutcome: 'written',
     },
-    {
-        name: 'token with DROP_EVENT restriction',
-        description: 'Messages from a token with DROP_EVENT restriction should be dropped',
-        createPayloads: (_team, testRunId) => [
-            {
-                sessionId: `restricted-session-${testRunId}`,
-                distinctId: `user-${testRunId}`,
-                token: RESTRICTED_TEAM_TOKEN,
-                events: [
-                    { type: RRWebEventType.Meta, data: { href: 'https://example.com', width: 1024, height: 768 } },
-                    { type: RRWebEventType.FullSnapshot, data: { source: 1, snapshot: { html: '<div>Test</div>' } } },
-                ],
-            },
-        ],
-        expectedOutcome: 'dropped',
-    },
 ]
 
 describe('Session Recording Consumer Integration', () => {
@@ -830,6 +812,7 @@ describe('Session Recording Consumer Integration', () => {
 
     let hub: Hub
     let team: Team
+    let teamOrg: string
     let s3Client: S3Client
     let datastore: Datastore
 
@@ -919,6 +902,14 @@ describe('Session Recording Consumer Integration', () => {
         })
 
         team = await getFirstTeam(hub)
+        teamOrg = (
+            await hub.postgres.query<{ slug: string }>(
+                PostgresUse.COMMON_READ,
+                'SELECT slug FROM insights_organization WHERE id = $1',
+                [team.organization_id],
+                'team-org-slug'
+            )
+        ).rows[0].slug
 
         // Enable console log capture for the primary team so console log tests work
         await hub.postgres.query(
@@ -927,41 +918,9 @@ describe('Session Recording Consumer Integration', () => {
             [team.id],
             'enable-console-log-capture'
         )
-
-        // Create a second team with a known token that will have DROP_EVENT restriction
-        const restrictedOrgId = await createOrganization(hub.postgres)
-        await createTeam(hub.postgres, restrictedOrgId, RESTRICTED_TEAM_TOKEN)
-
-        // Set up DROP_EVENT restriction in Redis for the restricted team
-        // The ingester's restriction manager will read this when it starts
-        const redisClient = await hub.redisPool.acquire()
-        try {
-            const key = `${REDIS_KEY_PREFIX}:${RedisRestrictionType.DROP_EVENT_FROM_INGESTION}`
-            const restriction = [
-                {
-                    version: 2,
-                    token: RESTRICTED_TEAM_TOKEN,
-                    pipelines: ['session_recordings'],
-                },
-            ]
-            await redisClient.set(key, JSON.stringify(restriction))
-        } finally {
-            await hub.redisPool.release(redisClient)
-        }
     })
 
     afterAll(async () => {
-        // Clean up the DROP_EVENT restriction from Redis
-        if (hub?.redisPool) {
-            const redisClient = await hub.redisPool.acquire()
-            try {
-                const key = `${REDIS_KEY_PREFIX}:${RedisRestrictionType.DROP_EVENT_FROM_INGESTION}`
-                await redisClient.del(key)
-            } finally {
-                await hub.redisPool.release(redisClient)
-            }
-        }
-
         if (hub) {
             await closeHub(hub)
         }
@@ -977,7 +936,7 @@ describe('Session Recording Consumer Integration', () => {
     describe('end-to-end message processing', () => {
         it.each(testCases)('$name', async ({ createPayloads, expectedOutcome }) => {
             const testRunId = uuidv4().slice(0, 8)
-            const payloadConfigs = createPayloads(team, testRunId)
+            const payloadConfigs = createPayloads(teamOrg, testRunId)
 
             // Collect expected session IDs for metadata consumption
             const expectedSessionIds =
