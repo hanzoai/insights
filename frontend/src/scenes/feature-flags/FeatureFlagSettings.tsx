@@ -66,7 +66,7 @@ export function FlagChangeConfirmationSettings(): JSX.Element {
                         <Button
                             type="primary"
                             htmlType="submit"
-                            disabledReason={!currentTeam ? 'Loading team...' : undefined}
+                            disabledReason={!currentTeam ? 'Loading project...' : undefined}
                             loading={confirmationMessageLoading}
                         >
                             Save message

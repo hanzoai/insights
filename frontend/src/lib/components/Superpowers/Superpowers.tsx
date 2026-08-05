@@ -68,7 +68,7 @@ function SuperpowersContent(): JSX.Element {
                         <div>
                             <div className="font-medium">Clear all onboarding tasks</div>
                             <div className="text-sm text-secondary">
-                                Reset all quick start task progress for this team
+                                Reset all quick start task progress for this project
                             </div>
                         </div>
                         <Button
