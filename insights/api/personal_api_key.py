@@ -101,11 +101,13 @@ class PersonalAPIKeySerializer(serializers.ModelSerializer):
         teams = Team.objects.filter(pk__in=scoped_teams)
 
         if len(teams) != len(scoped_teams):
-            raise serializers.ValidationError(f"You must be a member of all teams that you are scoping the key to.")
+            raise serializers.ValidationError(f"You must be a member of all projects that you are scoping the key to.")
 
         for team in teams:
             if user_permissions.team(team).effective_membership_level is None:
-                raise serializers.ValidationError(f"You must be a member of all teams that you are scoping the key to.")
+                raise serializers.ValidationError(
+                    f"You must be a member of all projects that you are scoping the key to."
+                )
 
         return scoped_teams
 

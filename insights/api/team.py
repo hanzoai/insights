@@ -730,7 +730,7 @@ class TeamSerializer(serializers.ModelSerializer, UserPermissionsSerializerMixin
         if self.instance and self.instance.id == 2 and get_instance_region() == "US":
             return value
 
-        raise exceptions.PermissionDenied("Proactive tasks can only be enabled for authorized teams.")
+        raise exceptions.PermissionDenied("Proactive tasks can only be enabled for authorized projects.")
 
     def validate(self, attrs: Any) -> Any:
         attrs = validate_team_attrs(attrs, self.context["view"], self.context["request"], self.instance)
@@ -1521,7 +1521,7 @@ def validate_team_attrs(
                 {"primary_dashboard": "Primary dashboard cannot be set on project creation."}
             )
         if attrs["primary_dashboard"] and attrs["primary_dashboard"].team_id != instance.id:
-            raise exceptions.ValidationError({"primary_dashboard": "Dashboard does not belong to this team."})
+            raise exceptions.ValidationError({"primary_dashboard": "Dashboard does not belong to this project."})
 
     if "autocapture_exceptions_errors_to_ignore" in attrs:
         if not isinstance(attrs["autocapture_exceptions_errors_to_ignore"], list):

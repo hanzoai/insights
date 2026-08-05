@@ -161,7 +161,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                 }): Promise<KeyValidationResult> => {
                     const teamId = teamLogic.values.currentTeamId
                     if (!teamId) {
-                        return { state: 'error', error_message: 'No team selected' }
+                        return { state: 'error', error_message: 'No project selected' }
                     }
                     try {
                         const response = await api.create(

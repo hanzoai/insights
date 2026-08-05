@@ -1219,7 +1219,7 @@ class CohortViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.ModelVi
         try:
             person_uuid = Person.objects.db_manager(READ_DB_FOR_PERSONS).get(team_id=self.team_id, uuid=person_id).uuid
         except Person.DoesNotExist:
-            raise NotFound("Person with this UUID does not exist in the cohort's team")
+            raise NotFound("Person with this UUID does not exist in the cohort's project")
 
         # Remove is idempotent - succeeds even if person wasn't in cohort (handles CH/PG sync issues)
         cohort.remove_user_by_uuid(str(person_uuid), team_id=self.team_id)

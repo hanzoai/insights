@@ -33,7 +33,7 @@ export const llmEvaluationExecutionLogic = kea<llmEvaluationExecutionLogicType>(
             {
                 runEvaluation: async ({ evaluationId, targetEventId, timestamp, event, distinctId }) => {
                     if (!values.currentTeamId) {
-                        throw new Error('No team selected')
+                        throw new Error('No project selected')
                     }
 
                     try {

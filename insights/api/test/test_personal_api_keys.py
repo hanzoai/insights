@@ -230,7 +230,7 @@ class TestPersonalAPIKeysAPI(APIBaseTest):
             },
         )
         assert response.status_code == 400, response.json()
-        assert response.json()["detail"] == "You must be a member of all teams that you are scoping the key to."
+        assert response.json()["detail"] == "You must be a member of all projects that you are scoping the key to."
 
     def test_roll_api_key(self):
         original_value = generate_random_token_personal()

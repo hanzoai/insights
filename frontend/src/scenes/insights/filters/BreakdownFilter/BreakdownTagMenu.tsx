@@ -84,7 +84,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                                     hasPathCleaningFilters ? (
                                         <>
                                             <p>
-                                                Apply your team's path cleaning rules to standardize URLs by removing
+                                                Apply your project's path cleaning rules to standardize URLs by removing
                                                 unnecessary parameters and fragments.
                                             </p>
                                             <Button
