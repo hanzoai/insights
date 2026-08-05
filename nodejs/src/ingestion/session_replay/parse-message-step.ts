@@ -167,8 +167,8 @@ export function createParseMessageStep(
             )
         }
 
-        const tokenHeader = message.headers?.find((header: MessageHeader) => header.token)?.token
-        const token = typeof tokenHeader === 'string' ? tokenHeader : tokenHeader?.toString()
+        const orgHeader = message.headers?.find((header: MessageHeader) => header.org)?.org
+        const org = typeof orgHeader === 'string' ? orgHeader : orgHeader?.toString()
 
         const parsedMessage: ParsedMessageData = {
             metadata: {
@@ -181,7 +181,7 @@ export function createParseMessageStep(
             headers: message.headers,
             distinct_id: messageResult.data.distinct_id,
             session_id: $session_id,
-            token: token ?? null,
+            org: org ?? null,
             eventsByWindowId: {
                 [$window_id ?? '']: validEvents,
             },
@@ -197,7 +197,7 @@ export function createParseMessageStep(
         if (topTracker) {
             const parseEndTime = performance.now()
             const parseDurationMs = parseEndTime - parseStartTime
-            const trackingKey = `token:${parsedMessage.token ?? 'unknown'}:session_id:${$session_id}`
+            const trackingKey = `org:${parsedMessage.org ?? 'unknown'}:session_id:${$session_id}`
             topTracker.increment('parse_time_ms_by_session_id', trackingKey, parseDurationMs)
         }
 
