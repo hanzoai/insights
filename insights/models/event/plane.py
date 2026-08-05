@@ -744,99 +744,31 @@ def DROP_HEATMAP_MV_SQL() -> str:
 # and empty, which is a good reason not to write it.
 
 
-# ── the session plane: a recording is the interaction stream, not a movie ────
+# ── the session plane: the recorder writes these rows, this file does not ────
 #
-# `insights.session_replay_events` is the same shape as `heatmaps` above and had
-# the same emptiness for the same reason: a full pipeline (Kafka table, view,
-# sharded Aggregating table, Distributed read) whose topic
-# `datastore_session_replay_events` has NO PRODUCER and never had one. Its only
-# rows are four hand-made probes.
+# `insights.session_replay_events` is written by the session-recording blob
+# pipeline: the browser recorder sends rrweb snapshots to `/v1/replay`, the
+# ingester writes a snappy block to object storage, and lands one row per block
+# carrying `block_urls` — the byte range the player reads back to draw the movie.
 #
-# The answer is 0217's again — one more view over the source that IS written.
-# Nothing new is captured to make this work: @hanzo/observe already annotates
-# every interaction with the semantic hierarchy that makes a session READABLE
-# ("nav / Dashboard / UserCard / button[save]"), stamps a session_id, and sends
-# it down the one front door. A session summary is that stream, grouped.
+# A projection over the interaction stream USED to write these rows too, so the
+# session list had something to show before a recorder existed. It is removed,
+# because two writers cannot share this table:
 #
-# So this is deliberately NOT a DOM-snapshot recorder. There is no second SDK to
-# ship, no blob store to run, no CDN script for a strict CSP to break, and a
-# session costs what its events already cost.
+#   `min_first_timestamp` is a SimpleAggregateFunction(min), so a merged row
+#   takes the EARLIEST timestamp either writer supplied. A page's first
+#   interaction always precedes the recorder's first snapshot. `build_block_list`
+#   (`session_recordings/session_recording_v2_service.py`) then requires
+#   `blocks[0].start_time == start_time` EXACTLY, and returns NO blocks when they
+#   disagree. The blob is in object storage and its URL is in the row, but the
+#   player is handed an empty list — silently, with no error on any surface.
 #
-# WHAT AGGREGATES, AND WHY IT IS SAFE TO RE-RUN. The target is an
-# AggregatingMergeTree keyed on the session, so this view emits ONE PARTIAL ROW
-# PER INSERT BLOCK and the engine merges them. That is also why re-creating the
-# view is safe where a backfill would not be: re-running projects nothing that
-# was not already projected, because the view only ever sees new inserts.
+# So the projection did not merely sit alongside real blocks with empty arrays;
+# it made a real recording unplayable. Listing a session that cannot play is the
+# bug this removal closes, and a summary of a session that was never recorded is
+# not a recording. The interaction stream is untouched in `event.fact` and still
+# answers every product-analytics question asked of it.
 REPLAY_MV = "replay_mv"
-
-# Both signals, because a session's error count is part of its summary and an
-# error carries the same session_id as the clicks around it.
-REPLAY_WHERE = (
-    f"session_id != '' AND signal IN ('{EVENT_SIGNAL}', 'error')"
-)
-
-# The interaction names that count as pointer activity, spelled once.
-REPLAY_MOUSE_NAMES = ("$click", "$change", "$submit")
-
-
-def REPLAY_COLUMNS() -> list[tuple[str, str]]:
-    ts = "toDateTime64(time, 6, 'UTC')"
-    mouse = ", ".join(f"'{n}'" for n in REPLAY_MOUSE_NAMES)
-    return [
-        ("session_id", "session_id"),
-        ("team_id", PROJECT_SQL),
-        ("distinct_id", f"any({DISTINCT_SQL})"),
-        ("min_first_timestamp", f"min({ts})"),
-        ("max_last_timestamp", f"max({ts})"),
-        # Blocks are a snapshot-recorder concept: a block is a chunk of recorded
-        # DOM in object storage. This plane has no blobs, so the arrays are empty
-        # rather than invented — an empty list reads as "no blocks", which is true.
-        ("block_first_timestamps", "CAST([], 'Array(DateTime64(6, \\'UTC\\'))')"),
-        ("block_last_timestamps", "CAST([], 'Array(DateTime64(6, \\'UTC\\'))')"),
-        ("block_urls", "CAST([], 'Array(String)')"),
-        ("first_url", f"argMinState(toNullable(url), {ts})"),
-        ("all_urls", "groupUniqArray(url)"),
-        ("click_count", "toInt64(countIf(name = '$click'))"),
-        ("keypress_count", "toInt64(countIf(name = '$input'))"),
-        ("mouse_activity_count", f"toInt64(countIf(name IN ({mouse})))"),
-        # Activity is the span of THIS block, summed by the engine across blocks.
-        # It therefore counts time the visitor was demonstrably doing something and
-        # skips the gaps between batches — an under-count, never an invented one.
-        ("active_milliseconds", "toInt64(dateDiff('millisecond', min(time), max(time)))"),
-        # Console capture is a separate stream this plane does not carry. Zero is
-        # the honest value: it means "not measured here", and the error count below
-        # is measured, so the two do not pretend to be the same thing.
-        ("console_log_count", "toInt64(0)"),
-        ("console_warn_count", "toInt64(0)"),
-        ("console_error_count", "toInt64(countIf(signal = 'error'))"),
-        # Bytes on the wire belong to a recorder that stores bytes. This one stores
-        # events, and event_count says how many.
-        ("size", "toInt64(0)"),
-        ("message_count", "toInt64(count())"),
-        ("event_count", "toInt64(count())"),
-        ("snapshot_source", f"argMinState(CAST('web', 'LowCardinality(Nullable(String))'), {ts})"),
-        ("snapshot_library", f"argMinState(CAST('@hanzo/observe', 'Nullable(String)'), {ts})"),
-        ("_timestamp", "now()"),
-        ("retention_period_days", "CAST(NULL, 'Nullable(Int64)')"),
-        ("is_deleted", "toUInt8(0)"),
-    ]
-
-
-def REPLAY_SELECT_SQL() -> str:
-    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in REPLAY_COLUMNS())
-    return (
-        f"SELECT\n    {projection}\nFROM {EVENT_TABLE}\n"
-        f"WHERE {REPLAY_WHERE}\nGROUP BY session_id, team_id"
-    )
-
-
-def REPLAY_MV_SQL() -> str:
-    return f"""
-CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{REPLAY_MV}`
-TO `{DATASTORE_DATABASE}`.`{WRITABLE_SESSION_REPLAY_EVENTS_TABLE}`
-AS {REPLAY_SELECT_SQL()}
-"""
-
 
 def DROP_REPLAY_MV_SQL() -> str:
     return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{REPLAY_MV}`"
