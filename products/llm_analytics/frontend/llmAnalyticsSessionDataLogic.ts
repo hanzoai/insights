@@ -255,7 +255,7 @@ export const llmAnalyticsSessionDataLogic = kea<llmAnalyticsSessionDataLogicType
         summarizeTrace: async ({ traceId, forceRefresh }) => {
             const teamId = values.currentTeamId
             if (!teamId) {
-                actions.summarizeTraceFailure(traceId, 'Team ID not available')
+                actions.summarizeTraceFailure(traceId, 'Project ID not available')
                 return
             }
 

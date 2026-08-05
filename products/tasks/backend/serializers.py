@@ -58,7 +58,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate_github_integration(self, value):
         """Validate that the GitHub integration belongs to the same team"""
         if value and value.team_id != self.context["team"].id:
-            raise serializers.ValidationError("Integration must belong to the same team")
+            raise serializers.ValidationError("Integration must belong to the same project")
         return value
 
     def validate_repository(self, value):
@@ -180,7 +180,7 @@ class TaskRunDetailSerializer(serializers.ModelSerializer):
     def validate_task(self, value):
         team = self.context.get("team")
         if team and value.team_id != team.id:
-            raise serializers.ValidationError("Task must belong to the same team")
+            raise serializers.ValidationError("Task must belong to the same project")
         return value
 
     def create(self, validated_data):

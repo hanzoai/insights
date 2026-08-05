@@ -371,7 +371,7 @@ class TestExports(APIBaseTest):
             {
                 "attr": "dashboard",
                 "code": "invalid_input",
-                "detail": "This dashboard does not belong to your team.",
+                "detail": "This dashboard does not belong to your project.",
                 "type": "validation_error",
             },
         )
@@ -405,7 +405,7 @@ class TestExports(APIBaseTest):
             {
                 "attr": "insight",
                 "code": "invalid_input",
-                "detail": "This insight does not belong to your team.",
+                "detail": "This insight does not belong to your project.",
                 "type": "validation_error",
             },
         )

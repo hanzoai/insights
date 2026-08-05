@@ -43,7 +43,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                 if (scope === 'global') {
                     return <Snack>Official</Snack>
                 }
-                return <Snack>Team</Snack>
+                return <Snack>Project</Snack>
             },
         },
         {
@@ -84,7 +84,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                                     }}
                                     fullWidth
                                 >
-                                    Make visible to {scope === 'global' ? 'this team only' : 'everyone'}
+                                    Make visible to {scope === 'global' ? 'this project only' : 'everyone'}
                                 </Button>
 
                                 <Divider />
@@ -110,7 +110,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                                     status="danger"
                                     disabledReason={
                                         scope === 'global'
-                                            ? 'Cannot delete global dashboard templates, make them team only first'
+                                            ? 'Cannot delete global dashboard templates, make them project only first'
                                             : undefined
                                     }
                                 >

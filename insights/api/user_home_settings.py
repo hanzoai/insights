@@ -82,7 +82,7 @@ class UserHomeSettingsViewSet(viewsets.GenericViewSet):
 
         team = instance.current_team
         if not team:
-            raise serializers.ValidationError("Current team is required to manage pinned scene tabs.")
+            raise serializers.ValidationError("Current project is required to manage pinned scene tabs.")
 
         pinned_tabs = self._get_settings(instance, team)
 
@@ -103,7 +103,7 @@ class UserHomeSettingsViewSet(viewsets.GenericViewSet):
     def _get_response(self, instance: User) -> Response:
         team = instance.current_team
         if not team:
-            raise serializers.ValidationError("Current team is required to manage pinned scene tabs.")
+            raise serializers.ValidationError("Current project is required to manage pinned scene tabs.")
 
         pinned_tabs = self._get_settings(instance, team)
 
