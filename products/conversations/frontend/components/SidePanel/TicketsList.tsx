@@ -18,7 +18,7 @@ export function TicketsList(): JSX.Element {
     if (!insights.conversations || !insights.conversations.isAvailable()) {
         return (
             <div className="text-center text-muted-alt py-8">
-                <p>Conversations are not available for this team.</p>
+                <p>Conversations are not available for this project.</p>
             </div>
         )
     }

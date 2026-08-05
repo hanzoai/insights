@@ -68,7 +68,7 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
                 addTag: async ({ tagName }) => {
                     const teamId = values.currentTeam?.id
                     if (!teamId) {
-                        throw new Error('No team selected')
+                        throw new Error('No project selected')
                     }
 
                     try {
@@ -102,7 +102,7 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
                 removeTag: async ({ tagName }) => {
                     const teamId = values.currentTeam?.id
                     if (!teamId) {
-                        throw new Error('No team selected')
+                        throw new Error('No project selected')
                     }
 
                     try {

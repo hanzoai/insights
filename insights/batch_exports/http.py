@@ -651,14 +651,14 @@ class BatchExportSerializer(serializers.ModelSerializer):
                 },
                 send_feature_flag_events=False,
             ):
-                raise PermissionDenied("The Databricks destination is not enabled for this team.")
+                raise PermissionDenied("The Databricks destination is not enabled for this project.")
 
             # validate the Integration is valid (this is mandatory for Databricks batch exports)
             integration: Integration | None = destination_attrs.get("integration")
             if integration is None:
                 raise serializers.ValidationError("Integration is required for Databricks batch exports")
             if integration.team_id != team_id:
-                raise serializers.ValidationError("Integration does not belong to this team.")
+                raise serializers.ValidationError("Integration does not belong to this project.")
             if integration.kind != Integration.IntegrationKind.DATABRICKS:
                 raise serializers.ValidationError("Integration is not a Databricks integration.")
             # try instantiate the integration to check if it's valid
@@ -683,14 +683,14 @@ class BatchExportSerializer(serializers.ModelSerializer):
                 },
                 send_feature_flag_events=False,
             ):
-                raise PermissionDenied("Azure Blob Storage batch exports are not enabled for this team.")
+                raise PermissionDenied("Azure Blob Storage batch exports are not enabled for this project.")
 
             # validate the Integration is valid (this is mandatory for Azure Blob batch exports)
             integration = destination_attrs.get("integration")
             if integration is None:
                 raise serializers.ValidationError("Integration is required for Azure Blob batch exports")
             if integration.team_id != team_id:
-                raise serializers.ValidationError("Integration does not belong to this team.")
+                raise serializers.ValidationError("Integration does not belong to this project.")
             if integration.kind != Integration.IntegrationKind.AZURE_BLOB:
                 raise serializers.ValidationError("Integration is not an Azure Blob integration.")
             # try instantiate the integration to check if it's valid
@@ -750,7 +750,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
                 },
                 send_feature_flag_events=False,
             ):
-                raise PermissionDenied("Backfilling Workflows is not enabled for this team.")
+                raise PermissionDenied("Backfilling Workflows is not enabled for this project.")
 
         return destination_attrs
 
@@ -774,7 +774,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
                 },
                 send_feature_flag_events=False,
             ):
-                raise PermissionDenied("Higher frequency batch exports are not enabled for this team.")
+                raise PermissionDenied("Higher frequency batch exports are not enabled for this project.")
 
         insightsql_query = None
         if insightsql_query := validated_data.pop("insightsql_query", None):
@@ -1162,7 +1162,7 @@ def create_backfill(
             },
             send_feature_flag_events=False,
         ):
-            raise ValidationError("Backfilling from the beginning of time is not enabled for this team.")
+            raise ValidationError("Backfilling from the beginning of time is not enabled for this project.")
 
     temporal = sync_connect()
 

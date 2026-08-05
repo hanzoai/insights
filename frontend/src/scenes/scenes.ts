@@ -46,7 +46,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.MaterializedColumns]: {
         projectBased: true,
         name: 'Materialized columns',
-        description: 'Manage materialized column slot assignments for your team.',
+        description: 'Manage materialized column slot assignments for your project.',
     },
     [Scene.Annotations]: {
         projectBased: true,

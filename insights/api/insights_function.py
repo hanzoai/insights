@@ -629,7 +629,7 @@ class InsightsFunctionViewSet(
             },
             send_feature_flag_events=False,
         ):
-            raise PermissionDenied("Backfilling Workflows is not enabled for this team.")
+            raise PermissionDenied("Backfilling Workflows is not enabled for this project.")
 
         # Prepare batch export data matching the frontend's structure
         batch_export_data = {

@@ -70,7 +70,7 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         destination_team = self._get_team_in_org(data["destination_team_id"])
 
         if source_team.pk == destination_team.pk:
-            raise exceptions.ValidationError("Source and destination teams must be different")
+            raise exceptions.ValidationError("Source and destination projects must be different")
 
         resource = self._get_source_resource(data["resource_kind"], data["resource_id"], source_team)
 
@@ -128,7 +128,7 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         destination_team = self._get_team_in_org(data["destination_team_id"])
 
         if source_team.pk == destination_team.pk:
-            raise exceptions.ValidationError("Source and destination teams must be different")
+            raise exceptions.ValidationError("Source and destination projects must be different")
 
         resource = self._get_source_resource(data["resource_kind"], data["resource_id"], source_team)
 
@@ -253,7 +253,7 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         try:
             return Team.objects.get(id=team_id, organization_id=self.organization_id)
         except Team.DoesNotExist:
-            raise exceptions.ValidationError(f"Team {team_id} not found in this organization")
+            raise exceptions.ValidationError(f"Project {team_id} not found in this organization")
 
     def _get_source_resource(self, resource_kind: str, resource_id: str, source_team: Team) -> Any:
         visitor = ResourceTransferVisitor.get_visitor(resource_kind)
@@ -267,7 +267,7 @@ class ResourceTransferViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         try:
             return model.objects.get(pk=resource_id, team=source_team)
         except ObjectDoesNotExist:
-            raise exceptions.NotFound(f"{resource_kind} with id {resource_id} not found in source team")
+            raise exceptions.NotFound(f"{resource_kind} with id {resource_id} not found in source project")
 
     def _check_access_controls(
         self,

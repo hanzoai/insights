@@ -425,7 +425,7 @@ class ScenePersonalisationSerializer(serializers.ModelSerializer):
         instance = cast(User, self.instance)
 
         if value.team != instance.current_team:
-            raise serializers.ValidationError("Dashboard must belong to the user's current team.")
+            raise serializers.ValidationError("Dashboard must belong to the user's current project.")
 
         return value
 

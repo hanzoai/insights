@@ -77,11 +77,11 @@ class ObjectMediaPreview(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
 
         # Validate team consistency
         if self.uploaded_media and self.uploaded_media.team_id != self.team_id:
-            raise ValidationError("Uploaded media team must match preview team")
+            raise ValidationError("Uploaded media project must match preview project")
         if self.exported_asset and self.exported_asset.team_id != self.team_id:
-            raise ValidationError("Exported asset team must match preview team")
+            raise ValidationError("Exported asset project must match preview project")
         if self.event_definition and self.event_definition.team_id != self.team_id:
-            raise ValidationError("Event definition team must match preview team")
+            raise ValidationError("Event definition project must match preview project")
 
     def save(self, *args, **kwargs):
         self.full_clean()
