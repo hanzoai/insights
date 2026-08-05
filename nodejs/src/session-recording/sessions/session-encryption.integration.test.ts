@@ -125,7 +125,7 @@ describe('session recording encryption integration', () => {
         message: {
             distinct_id: 'distinct_id',
             session_id: sessionId,
-            token: null,
+            org: null,
             eventsByWindowId: {
                 window1: events.map((event, index) => ({
                     ...event,

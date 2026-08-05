@@ -213,20 +213,36 @@ describe('createParseMessageStep', () => {
         }
     })
 
-    it('should extract token from headers', async () => {
+    it('should extract org from headers', async () => {
         const step = createParseMessageStep()
         const payload = createValidSnapshotPayload('session-1')
-        const input = createInput(0, 1, payload, { token: 'my-team-token' })
+        const input = createInput(0, 1, payload, { org: 'my-org' })
 
         const result = await step(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
         if (result.type === PipelineResultType.OK) {
-            expect(result.value.parsedMessage.token).toBe('my-team-token')
+            expect(result.value.parsedMessage.org).toBe('my-org')
         }
     })
 
-    it('should set token to null when not in headers', async () => {
+    it('should ignore a token header entirely', async () => {
+        // The snapshot path carries no credential. A `token` header is not a fallback
+        // for a missing org — it is a value with no meaning here, and reading it would
+        // be the second credential this path was built to not have.
+        const step = createParseMessageStep()
+        const payload = createValidSnapshotPayload('session-1')
+        const input = createInput(0, 1, payload, { token: 'hi_some_project_token' })
+
+        const result = await step(input)
+
+        expect(result.type).toBe(PipelineResultType.OK)
+        if (result.type === PipelineResultType.OK) {
+            expect(result.value.parsedMessage.org).toBeNull()
+        }
+    })
+
+    it('should set org to null when not in headers', async () => {
         const step = createParseMessageStep()
         const payload = createValidSnapshotPayload('session-1')
         const input = createInput(0, 1, payload)
@@ -235,7 +251,7 @@ describe('createParseMessageStep', () => {
 
         expect(result.type).toBe(PipelineResultType.OK)
         if (result.type === PipelineResultType.OK) {
-            expect(result.value.parsedMessage.token).toBeNull()
+            expect(result.value.parsedMessage.org).toBeNull()
         }
     })
 
@@ -275,13 +291,13 @@ describe('createParseMessageStep', () => {
         const topTracker = new TopTracker()
         const step = createParseMessageStep({ topTracker })
         const payload = createValidSnapshotPayload('session-1')
-        const input = createInput(0, 1, payload, { token: 'test-token' })
+        const input = createInput(0, 1, payload, { org: 'test-org' })
 
         const result = await step(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
 
-        const trackingKey = 'token:test-token:session_id:session-1'
+        const trackingKey = 'org:test-org:session_id:session-1'
         const parseTime = topTracker.getCount('parse_time_ms_by_session_id', trackingKey)
         expect(parseTime).toBeGreaterThan(0)
     })
