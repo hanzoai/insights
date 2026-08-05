@@ -179,7 +179,7 @@ function CreateViewModal(): JSX.Element {
                         <SegmentedButton
                             options={[
                                 { value: 'private', label: 'Private (only visible to me)' },
-                                { value: 'shared', label: 'Shared with team' },
+                                { value: 'shared', label: 'Shared with project' },
                             ]}
                             fullWidth
                         />

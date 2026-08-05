@@ -49,7 +49,7 @@ export const getProductEventFilterOptions = (contextId: InsightsFunctionConfigur
         default:
             return [
                 {
-                    label: 'Team activity',
+                    label: 'Project activity',
                     value: '$activity_log_entry_created',
                 },
                 {

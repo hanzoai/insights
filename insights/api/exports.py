@@ -97,10 +97,10 @@ class ExportedAssetSerializer(serializers.ModelSerializer):
             raise ValidationError("Either dashboard, insight or export_context is required for an export.")
 
         if data.get("dashboard") and data["dashboard"].team.id != self.context["team_id"]:
-            raise ValidationError({"dashboard": ["This dashboard does not belong to your team."]})
+            raise ValidationError({"dashboard": ["This dashboard does not belong to your project."]})
 
         if data.get("insight") and data["insight"].team.id != self.context["team_id"]:
-            raise ValidationError({"insight": ["This insight does not belong to your team."]})
+            raise ValidationError({"insight": ["This insight does not belong to your project."]})
 
         # NEW: Check full video export limit for team (only MP4 exports with "video" mode)
         export_format = data.get("export_format")

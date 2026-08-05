@@ -64,10 +64,10 @@ class ErrorTrackingExternalReferenceSerializer(serializers.ModelSerializer):
         team = self.context["get_team"]()
 
         if issue.team_id != team.id:
-            raise serializers.ValidationError("Issue does not belong to this team.")
+            raise serializers.ValidationError("Issue does not belong to this project.")
 
         if integration.team_id != team.id:
-            raise serializers.ValidationError("Integration does not belong to this team.")
+            raise serializers.ValidationError("Integration does not belong to this project.")
 
         return data
 

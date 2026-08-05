@@ -473,7 +473,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         inMenu: false,
     },
     [NodeKind.TeamTaxonomyQuery]: {
-        name: 'Team Taxonomy',
+        name: 'Project Taxonomy',
         icon: IconInsightsQL,
         inMenu: false,
     },

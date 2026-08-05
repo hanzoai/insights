@@ -96,7 +96,7 @@ export const SidePanelActivity = (): JSX.Element => {
     if (!hasAccess) {
         return (
             <>
-                <SidePanelPaneHeader title="Team activity" />
+                <SidePanelPaneHeader title="Project activity" />
                 <div className="flex flex-col items-center justify-center gap-3 p-6 text-center h-full">
                     <IconNotification className="text-5xl text-muted" />
                     <div>
@@ -113,7 +113,7 @@ export const SidePanelActivity = (): JSX.Element => {
 
     return (
         <>
-            <SidePanelPaneHeader title="Team activity" />
+            <SidePanelPaneHeader title="Project activity" />
             <PayGateMini
                 feature={AvailableFeature.AUDIT_LOGS}
                 className="flex flex-col flex-1 overflow-hidden"

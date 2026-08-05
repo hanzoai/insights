@@ -427,7 +427,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
     },
 
     // and.... many more random stuff
-    name: createSimpleValueHandler('team name', { requireValue: false }),
+    name: createSimpleValueHandler('project name', { requireValue: false }),
     test_account_filters_default_checked: createBooleanToggleHandler(
         '"internal & test account filters" for all insights'
     ),

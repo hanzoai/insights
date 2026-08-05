@@ -1098,7 +1098,7 @@ def test_creating_databricks_batch_export_fails_if_feature_flag_is_not_enabled(
     )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN, response.json()
-    assert "The Databricks destination is not enabled for this team." in response.json()["detail"]
+    assert "The Databricks destination is not enabled for this project." in response.json()["detail"]
 
 
 def test_creating_databricks_batch_export_fails_if_integration_is_missing(
@@ -1311,7 +1311,7 @@ def test_creating_azure_blob_batch_export_fails_if_feature_flag_is_not_enabled(
         )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN, response.json()
-    assert "Azure Blob Storage batch exports are not enabled for this team." in response.json()["detail"]
+    assert "Azure Blob Storage batch exports are not enabled for this project." in response.json()["detail"]
 
 
 @pytest.fixture
@@ -1602,4 +1602,4 @@ def test_creating_workflows_batch_export_fails_if_feature_flag_is_not_enabled(
     )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN, response.json()
-    assert "Backfilling Workflows is not enabled for this team." in response.json()["detail"]
+    assert "Backfilling Workflows is not enabled for this project." in response.json()["detail"]

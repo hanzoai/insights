@@ -122,7 +122,7 @@ class SessionRecordingExternalReferenceSerializer(serializers.ModelSerializer):
         data["session_recording"] = session_recording
 
         if integration.team_id != team.id:
-            raise serializers.ValidationError("Integration does not belong to this team.")
+            raise serializers.ValidationError("Integration does not belong to this project.")
 
         return data
 

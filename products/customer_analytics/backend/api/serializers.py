@@ -70,7 +70,7 @@ class CustomerJourneySerializer(serializers.ModelSerializer):
 
     def validate_insight(self, value):
         if value.team_id != self.context["team_id"]:
-            raise serializers.ValidationError("The insight does not belong to this team.")
+            raise serializers.ValidationError("The insight does not belong to this project.")
         return value
 
     def create(self, validated_data):
