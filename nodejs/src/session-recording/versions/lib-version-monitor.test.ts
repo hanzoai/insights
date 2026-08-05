@@ -29,7 +29,7 @@ describe('LibVersionMonitor', () => {
             headers,
             distinct_id: 'distinct_id',
             session_id: 'session1',
-            token: null,
+            org: null,
             eventsByWindowId: { window1: [] },
             eventsRange: { start: DateTime.fromMillis(0), end: DateTime.fromMillis(0) },
             snapshot_source: null,
