@@ -10,6 +10,13 @@ def SESSION_REPLAY_EVENTS_DATA_TABLE():
     return "sharded_session_replay_events"
 
 
+# The write-side Distributed table, named the way heatmaps names its own
+# (`WRITABLE_HEATMAPS_TABLE`), so a second writer can target it without
+# re-spelling the string. Both the Kafka view and the event-plane projection
+# write HERE, which is what keeps them agreeing about sharding.
+WRITABLE_SESSION_REPLAY_EVENTS_TABLE = "writable_session_replay_events"
+
+
 """
 Kafka needs slightly different column setup. It receives individual events, not aggregates.
 We write first_timestamp and last_timestamp as individual records
