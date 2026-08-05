@@ -29,6 +29,9 @@ the one name; nothing here spells a plane a second time.
 from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 from insights.heatmaps.sql import WRITABLE_HEATMAPS_TABLE
 from insights.models.person.sql import PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE, PERSONS_WRITABLE_TABLE
+from insights.session_recordings.sql.session_replay_event_sql import (
+    WRITABLE_SESSION_REPLAY_EVENTS_TABLE,
+)
 from insights.settings.data_stores import DATASTORE_DATABASE
 
 from .sql import WRITABLE_EVENTS_DATA_TABLE
@@ -739,3 +742,101 @@ def DROP_HEATMAP_MV_SQL() -> str:
 # It would also project nothing: no click in the warehouse carries a position,
 # because the SDK did not measure one until now. The backfill is both unsafe
 # and empty, which is a good reason not to write it.
+
+
+# ── the session plane: a recording is the interaction stream, not a movie ────
+#
+# `insights.session_replay_events` is the same shape as `heatmaps` above and had
+# the same emptiness for the same reason: a full pipeline (Kafka table, view,
+# sharded Aggregating table, Distributed read) whose topic
+# `datastore_session_replay_events` has NO PRODUCER and never had one. Its only
+# rows are four hand-made probes.
+#
+# The answer is 0217's again — one more view over the source that IS written.
+# Nothing new is captured to make this work: @hanzo/observe already annotates
+# every interaction with the semantic hierarchy that makes a session READABLE
+# ("nav / Dashboard / UserCard / button[save]"), stamps a session_id, and sends
+# it down the one front door. A session summary is that stream, grouped.
+#
+# So this is deliberately NOT a DOM-snapshot recorder. There is no second SDK to
+# ship, no blob store to run, no CDN script for a strict CSP to break, and a
+# session costs what its events already cost.
+#
+# WHAT AGGREGATES, AND WHY IT IS SAFE TO RE-RUN. The target is an
+# AggregatingMergeTree keyed on the session, so this view emits ONE PARTIAL ROW
+# PER INSERT BLOCK and the engine merges them. That is also why re-creating the
+# view is safe where a backfill would not be: re-running projects nothing that
+# was not already projected, because the view only ever sees new inserts.
+REPLAY_MV = "replay_mv"
+
+# Both signals, because a session's error count is part of its summary and an
+# error carries the same session_id as the clicks around it.
+REPLAY_WHERE = (
+    f"session_id != '' AND signal IN ('{EVENT_SIGNAL}', 'error')"
+)
+
+# The interaction names that count as pointer activity, spelled once.
+REPLAY_MOUSE_NAMES = ("$click", "$change", "$submit")
+
+
+def REPLAY_COLUMNS() -> list[tuple[str, str]]:
+    ts = "toDateTime64(time, 6, 'UTC')"
+    mouse = ", ".join(f"'{n}'" for n in REPLAY_MOUSE_NAMES)
+    return [
+        ("session_id", "session_id"),
+        ("team_id", PROJECT_SQL),
+        ("distinct_id", f"any({DISTINCT_SQL})"),
+        ("min_first_timestamp", f"min({ts})"),
+        ("max_last_timestamp", f"max({ts})"),
+        # Blocks are a snapshot-recorder concept: a block is a chunk of recorded
+        # DOM in object storage. This plane has no blobs, so the arrays are empty
+        # rather than invented — an empty list reads as "no blocks", which is true.
+        ("block_first_timestamps", "CAST([], 'Array(DateTime64(6, \\'UTC\\'))')"),
+        ("block_last_timestamps", "CAST([], 'Array(DateTime64(6, \\'UTC\\'))')"),
+        ("block_urls", "CAST([], 'Array(String)')"),
+        ("first_url", f"argMinState(toNullable(url), {ts})"),
+        ("all_urls", "groupUniqArray(url)"),
+        ("click_count", "toInt64(countIf(name = '$click'))"),
+        ("keypress_count", "toInt64(countIf(name = '$input'))"),
+        ("mouse_activity_count", f"toInt64(countIf(name IN ({mouse})))"),
+        # Activity is the span of THIS block, summed by the engine across blocks.
+        # It therefore counts time the visitor was demonstrably doing something and
+        # skips the gaps between batches — an under-count, never an invented one.
+        ("active_milliseconds", "toInt64(dateDiff('millisecond', min(time), max(time)))"),
+        # Console capture is a separate stream this plane does not carry. Zero is
+        # the honest value: it means "not measured here", and the error count below
+        # is measured, so the two do not pretend to be the same thing.
+        ("console_log_count", "toInt64(0)"),
+        ("console_warn_count", "toInt64(0)"),
+        ("console_error_count", "toInt64(countIf(signal = 'error'))"),
+        # Bytes on the wire belong to a recorder that stores bytes. This one stores
+        # events, and event_count says how many.
+        ("size", "toInt64(0)"),
+        ("message_count", "toInt64(count())"),
+        ("event_count", "toInt64(count())"),
+        ("snapshot_source", f"argMinState(CAST('web', 'LowCardinality(Nullable(String))'), {ts})"),
+        ("snapshot_library", f"argMinState(CAST('@hanzo/observe', 'Nullable(String)'), {ts})"),
+        ("_timestamp", "now()"),
+        ("retention_period_days", "CAST(NULL, 'Nullable(Int64)')"),
+        ("is_deleted", "toUInt8(0)"),
+    ]
+
+
+def REPLAY_SELECT_SQL() -> str:
+    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in REPLAY_COLUMNS())
+    return (
+        f"SELECT\n    {projection}\nFROM {EVENT_TABLE}\n"
+        f"WHERE {REPLAY_WHERE}\nGROUP BY session_id, team_id"
+    )
+
+
+def REPLAY_MV_SQL() -> str:
+    return f"""
+CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{REPLAY_MV}`
+TO `{DATASTORE_DATABASE}`.`{WRITABLE_SESSION_REPLAY_EVENTS_TABLE}`
+AS {REPLAY_SELECT_SQL()}
+"""
+
+
+def DROP_REPLAY_MV_SQL() -> str:
+    return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{REPLAY_MV}`"
