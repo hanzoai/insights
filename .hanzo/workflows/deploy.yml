@@ -107,7 +107,16 @@ jobs:
           pnpm --filter @hanzo/frontend run typegen:write
 
           cd frontend
-          ./node_modules/.bin/tsc --noEmit -p . > /tmp/tsc.out 2>&1 || true
+          # 8GB because tsc OOMs on this tree at node's ~4GB default, and the
+          # `|| true` below cannot tell a crash from a clean run: a compiler that
+          # died at 4034MB wrote no diagnostics, so the grep found nothing and the
+          # gate passed without having checked anything.
+          NODE_OPTIONS=--max-old-space-size=8192 ./node_modules/.bin/tsc --noEmit -p . > /tmp/tsc.out 2>&1 || true
+          # A run that never produced diagnostics did not pass; it failed to run.
+          if grep -q 'JavaScript heap out of memory' /tmp/tsc.out; then
+            echo "::error::the typecheck ran out of memory, so this gate checked nothing — raise the heap rather than trusting the silence"
+            exit 1
+          fi
           if grep -E 'error TS(2448|7022)' /tmp/tsc.out; then
             echo "::error::a declaration initialises itself from the import it shadows — it throws when its scene renders"
             exit 1
