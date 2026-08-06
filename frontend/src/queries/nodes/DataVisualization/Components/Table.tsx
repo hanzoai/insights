@@ -5,7 +5,7 @@ import insights from 'insights-js'
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
 import { IconPin, IconPinFilled } from '@hanzo/icons'
-import { Banner, Table, TableColumn, Tooltip } from '@hanzo/elements'
+import { Banner, Table as TablePrimitive, TableColumn, Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { execHog } from 'lib/script'
@@ -341,7 +341,7 @@ export const Table = (props: TableProps): JSX.Element => {
                     Sorting only reorders the rows already loaded, not the full dataset.
                 </Banner>
             )}
-            <Table
+            <TablePrimitive
                 className="DataVisualizationTable"
                 dataSource={tabularData}
                 columns={tableColumns}

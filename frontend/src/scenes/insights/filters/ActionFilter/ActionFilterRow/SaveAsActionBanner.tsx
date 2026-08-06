@@ -1,5 +1,5 @@
 import { Banner } from '@hanzo/elements'
-import { InsightsCaptureOnViewed } from '@hanzo/react'
+import { PostHogCaptureOnViewed as InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { saveActionFromFilter } from '~/models/saveAsActionDialog'
 

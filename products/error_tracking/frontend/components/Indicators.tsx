@@ -1,8 +1,9 @@
 import clsx from 'clsx'
 import React from 'react'
 
-import { Badge, Tooltip as Tooltip, TooltipProps } from '@hanzo/elements'
+import { Badge } from '@hanzo/elements'
 
+import { Dot, Tooltip, TooltipContent, TooltipTrigger } from 'lib/ui/quill'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 

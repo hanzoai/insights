@@ -25,10 +25,6 @@ const PRELOAD_MIN_CHUNK_BYTES = 50 * 1024
 startDevServer(__dirname)
 copyPublicFolder(path.resolve(__dirname, 'public'), path.resolve(__dirname, 'dist'))
 
-copyPublicFolder(
-    path.resolve(__dirname, 'node_modules', '@hanzo', 'mascot-mode', 'assets'),
-    path.resolve(__dirname, 'dist', 'mascot-mode')
-)
 copySnappyWASMFile(__dirname)
 copyRRWebWorkerFiles(__dirname)
 
