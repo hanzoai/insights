@@ -2105,13 +2105,6 @@ class PropertyGroupsMode(StrEnum):
     OPTIMIZED = "optimized"
 
 
-class SessionTableVersion(StrEnum):
-    AUTO = "auto"
-    V1 = "v1"
-    V2 = "v2"
-    V3 = "v3"
-
-
 class SessionsV2JoinMode(StrEnum):
     STRING = "string"
     UUID = "uuid"
@@ -5461,7 +5454,6 @@ class InsightsQLQueryModifiers(BaseModel):
     personsOnEventsMode: PersonsOnEventsMode | None = None
     propertyGroupsMode: PropertyGroupsMode | None = None
     s3TableUseInvalidColumns: bool | None = None
-    sessionTableVersion: SessionTableVersion | None = None
     sessionsV2JoinMode: SessionsV2JoinMode | None = None
     timings: bool | None = None
     useMaterializedViews: bool | None = None
