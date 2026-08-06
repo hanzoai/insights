@@ -5,10 +5,8 @@ import hanzo_insights
 from insights.cloud_utils import is_cloud
 from insights.schema_enums import (
     BounceRatePageViewMode,
-    CustomChannelRule,
     InCohortVia,
     InlineCohortCalculation,
-    InsightsQLQueryModifiers,
     MaterializationMode,
     PersonsArgMaxVersion,
     PropertyGroupsMode,
