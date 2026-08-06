@@ -348,6 +348,31 @@ CONTENT_ALLOWLIST: dict[str, str] = {
         "The live smoke asserts the upstream name is ABSENT from the served "
         "page; the assertion must spell the name it forbids."
     ),
+    "frontend/src/layout/ErrorBoundary/ErrorBoundary.tsx": (
+        "Aliases the react wrapper package's own export names; the npm API is "
+        "upstream's to name."
+    ),
+    "frontend/src/lib/components/MarkdownNotebook/NotebookComponentShell.tsx": (
+        "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
+    "products/visual_review/frontend/scenes/VisualReviewRunScene.tsx": (
+        "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
+    "frontend/src/scenes/session-recordings/filters/ProductAnalyticsOverLimitBanner.tsx": (
+        "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
+    "frontend/src/scenes/insights/filters/ActionFilter/ActionFilterRow/SaveAsActionBanner.tsx": (
+        "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
+    "frontend/src/scenes/notebooks/Nodes/NotebookNodePlaylist.tsx": (
+        "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
+    "frontend/src/scenes/session-recordings/SessionRecordings.tsx": (
+        "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
+    "frontend/src/scenes/App.tsx": (
+        "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
 }
 
 # Never rewrite bytes in these. Lockfiles pin upstream package identities we

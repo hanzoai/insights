@@ -6,7 +6,6 @@ import insights from 'insights-js'
 import { useEffect, useRef } from 'react'
 
 import { IconFilter, IconList, IconRefresh, IconRewindPlay, IconX } from '@hanzo/icons'
-import { Button } from '@hanzo/elements'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
@@ -16,6 +15,7 @@ import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useWindowSize } from 'lib/hooks/useWindowSize'
+import { Button, Separator, Tooltip, TooltipContent, TooltipTrigger } from 'lib/ui/quill'
 import {
     TabsPrimitive,
     TabsPrimitiveContent,

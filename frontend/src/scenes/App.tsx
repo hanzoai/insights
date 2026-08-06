@@ -4,7 +4,7 @@ import insights from 'insights-js'
 import React, { Suspense, useEffect } from 'react'
 import { Slide, ToastContainer } from 'react-toastify'
 
-import { InsightsProvider } from '@hanzo/react'
+import { PostHogProvider as InsightsProvider } from '@hanzo/react'
 
 import { ProductEmptyStateGate } from 'lib/components/ProductEmptyState/ProductEmptyStateGate'
 import { productSetupPreloadLogic } from 'lib/components/ProductEmptyState/productSetupPreloadLogic'
