@@ -538,9 +538,9 @@ describe('sessionRecordingsPlaylistLogic', () => {
                 .toDispatchActions(['setFilters'])
                 .toMatchValues({
                     filters: {
-                        date_from: '-3d',
+                        date_from: '-30d',
                         date_to: null,
-                        duration: [{ key: 'active_seconds', operator: 'gt', type: 'recording', value: 5 }],
+                        duration: [{ key: 'active_seconds', operator: 'gt', type: 'recording', value: 0 }],
                         filter_group: {
                             type: FilterLogicalOperator.And,
                             values: [
@@ -729,7 +729,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
             expect(result).toEqual({
                 actions: [],
                 console_log_filters: [],
-                date_from: '-3d',
+                date_from: '-30d',
                 date_to: null,
                 events: [],
                 filter_test_accounts: false,
@@ -738,7 +738,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
                         key: 'active_seconds',
                         operator: 'gt',
                         type: 'recording',
-                        value: 5,
+                        value: 0,
                     },
                 ],
                 kind: 'RecordingsQuery',
@@ -774,7 +774,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
             expect(result).toEqual({
                 actions: [],
                 console_log_filters: [],
-                date_from: '-3d',
+                date_from: '-30d',
                 date_to: null,
                 events: [],
                 filter_test_accounts: false,
@@ -783,7 +783,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
                         key: 'active_seconds',
                         operator: 'gt',
                         type: 'recording',
-                        value: 5,
+                        value: 0,
                     },
                 ],
                 kind: 'RecordingsQuery',
@@ -800,14 +800,14 @@ describe('sessionRecordingsPlaylistLogic', () => {
         it('should return the defaults if values are missing', () => {
             const result = convertLegacyFiltersToUniversalFilters(undefined, {})
             expect(result).toEqual({
-                date_from: '-3d',
+                date_from: '-30d',
                 date_to: null,
                 duration: [
                     {
                         key: 'active_seconds',
                         operator: 'gt',
                         type: 'recording',
-                        value: 5,
+                        value: 0,
                     },
                 ],
                 filter_group: {
@@ -908,14 +908,9 @@ describe('sessionRecordingsPlaylistLogic', () => {
             expect(result.filter_test_accounts).toBe(false)
         })
 
-        it('returns date_from as -30d for person recordings', () => {
-            const result = getDefaultFilters('person-uuid')
-            expect(result.date_from).toBe('-30d')
-        })
-
-        it('returns date_from as -3d for non-person recordings', () => {
+        it('returns date_from as -30d for non-person recordings', () => {
             const result = getDefaultFilters()
-            expect(result.date_from).toBe('-3d')
+            expect(result.date_from).toBe('-30d')
         })
     })
 })

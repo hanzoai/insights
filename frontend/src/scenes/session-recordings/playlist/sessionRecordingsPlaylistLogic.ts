@@ -149,10 +149,13 @@ export type MatchingEventsMatchType = NoEventsToMatch | EventNamesMatching | Eve
 export const RECORDINGS_LIMIT = 20
 export const PINNED_RECORDINGS_LIMIT = 100 // NOTE: This is high but avoids the need for pagination for now...
 
+// The default view excludes recordings with no activity at all — there is nothing to watch in them.
+// It must not exclude short recordings: a two second recording is a real, playable recording, and a
+// default that hides every recording a project has is indistinguishable from the product being broken.
 export const defaultRecordingDurationFilter: RecordingDurationFilter = {
     type: PropertyFilterType.Recording,
     key: 'active_seconds',
-    value: 5,
+    value: 0,
     operator: PropertyOperator.GreaterThan,
 }
 
@@ -165,9 +168,20 @@ const getDefaultFilterTestAccounts = (): boolean => {
     return stored === 'true'
 }
 
+// Recordings are kept for `retention_period_days` (30 by default), so a 30 day default window is the
+// one window that never hides a recording the project still has.
+export const DEFAULT_RECORDING_FILTERS_DATE_FROM = '-30d'
+
+// The filters above are persisted per team, so changing a default does not reach anyone who has
+// already opened the page — their browser restores the old value and keeps showing the old result.
+// Bumping this retires the stored copy so a corrected default actually takes effect. Bump it whenever
+// a default changes in a way that must reach existing browsers; it costs a one-time reset of ad-hoc
+// filters (saved playlists live on the server and are untouched).
+export const FILTERS_PERSIST_VERSION = 'v2'
+
 export const DEFAULT_RECORDING_FILTERS: RecordingUniversalFilters = {
     filter_test_accounts: false,
-    date_from: '-3d',
+    date_from: DEFAULT_RECORDING_FILTERS_DATE_FROM,
     date_to: null,
     filter_group: { ...DEFAULT_UNIVERSAL_GROUP_FILTER },
     duration: [defaultRecordingDurationFilter],
@@ -175,12 +189,11 @@ export const DEFAULT_RECORDING_FILTERS: RecordingUniversalFilters = {
     order_direction: 'DESC',
 }
 
-export const getDefaultFilters = (personUUID?: PersonUUID): RecordingUniversalFilters => {
+export const getDefaultFilters = (): RecordingUniversalFilters => {
     const filterTestAccounts = getDefaultFilterTestAccounts()
     return {
         ...DEFAULT_RECORDING_FILTERS,
         filter_test_accounts: filterTestAccounts,
-        date_from: personUUID ? '-30d' : '-3d',
     }
 }
 
@@ -717,8 +730,8 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
             },
         ],
         filters: [
-            props.filters ?? getDefaultFilters(props.personUUID),
-            { persist: true, prefix: `${getCurrentTeamId()}__${key}` },
+            props.filters ?? getDefaultFilters(),
+            { persist: true, prefix: `${getCurrentTeamId()}__${key}__${FILTERS_PERSIST_VERSION}` },
             {
                 setFilters: (state, { filters }) => {
                     try {
@@ -726,7 +739,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                             insights.captureException(new Error('Invalid filters provided'), {
                                 filters,
                             })
-                            return getDefaultFilters(props.personUUID)
+                            return getDefaultFilters()
                         }
 
                         return {
@@ -737,10 +750,10 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                         }
                     } catch (e) {
                         insights.captureException(e)
-                        return getDefaultFilters(props.personUUID)
+                        return getDefaultFilters()
                     }
                 },
-                resetFilters: () => getDefaultFilters(props.personUUID),
+                resetFilters: () => getDefaultFilters(),
             },
         ],
         showFilters: [
@@ -1333,9 +1346,9 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
         ],
 
         totalFiltersCount: [
-            (s) => [s.filters, (_, props) => props.personUUID],
-            (filters, personUUID) => {
-                const defaultFilters = getDefaultFilters(personUUID)
+            (s) => [s.filters],
+            (filters) => {
+                const defaultFilters = getDefaultFilters()
                 const groupFilters = filtersFromUniversalFilterGroups(filters)
 
                 return (
@@ -1471,7 +1484,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
         ] => {
             const params: ReplayURLSearchParamTypes = objectClean({
                 ...router.values.searchParams,
-                filters: objectsEqual(values.filters, getDefaultFilters(props.personUUID)) ? undefined : values.filters,
+                filters: objectsEqual(values.filters, getDefaultFilters()) ? undefined : values.filters,
                 sessionRecordingId: values.selectedRecordingId ?? undefined,
             })
 
