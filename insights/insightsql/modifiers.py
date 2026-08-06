@@ -6,8 +6,8 @@ from pydantic import ValidationError
 from insights.schema import (
     BounceRatePageViewMode,
     CustomChannelRule,
-    InsightsQLQueryModifiers,
     InCohortVia,
+    InsightsQLQueryModifiers,
     MaterializationMode,
     PersonsArgMaxVersion,
     PropertyGroupsMode,

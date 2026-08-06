@@ -19,7 +19,11 @@ from insights.insightsql.database.models import (
     StringDatabaseField,
     Table,
 )
-from insights.insightsql.database.schema.channel_type import DEFAULT_CHANNEL_TYPES, ChannelTypeExprs, create_channel_type_expr
+from insights.insightsql.database.schema.channel_type import (
+    DEFAULT_CHANNEL_TYPES,
+    ChannelTypeExprs,
+    create_channel_type_expr,
+)
 from insights.insightsql.database.schema.util.where_clause_extractor import SessionMinTimestampWhereClauseExtractor
 from insights.insightsql.errors import ResolutionError
 from insights.insightsql.modifiers import create_default_modifiers_for_team
