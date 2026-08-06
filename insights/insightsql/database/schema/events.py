@@ -20,7 +20,7 @@ from insights.insightsql.database.schema.persons_revenue_analytics import (
     PersonsRevenueAnalyticsTable,
     join_with_persons_revenue_analytics_table,
 )
-from insights.insightsql.database.schema.sessions_v1 import SessionsTableV1, join_events_table_to_sessions_table
+from insights.insightsql.database.schema.sessions import SessionsTable, join_events_table_to_sessions_table
 
 
 class EventsPersonSubTable(VirtualTable):
@@ -124,7 +124,7 @@ class EventsTable(Table):
         ),
         "session": LazyJoin(
             from_field=["$session_id"],
-            join_table=SessionsTableV1(),
+            join_table=SessionsTable(),
             join_function=join_events_table_to_sessions_table,
         ),
         "elements_chain_href": StringDatabaseField(name="elements_chain_href", nullable=False),
