@@ -16,15 +16,11 @@ from insights.insightsql.database.schema.persons import join_with_persons_table
 from insights.insightsql.database.schema.persons_pdi import persons_pdi_join
 from insights.insightsql.database.schema.persons_revenue_analytics import join_with_persons_revenue_analytics_table
 from insights.insightsql.database.schema.session_replay_events import (
-    join_replay_table_to_sessions_table_v1,
-    join_replay_table_to_sessions_table_v2,
-    join_replay_table_to_sessions_table_v3,
+    join_replay_table_to_sessions_table,
     join_with_console_logs_log_entries_table,
     join_with_events_table,
 )
-from insights.insightsql.database.schema.sessions_v1 import join_events_table_to_sessions_table
-from insights.insightsql.database.schema.sessions_v2 import join_events_table_to_sessions_table_v2
-from insights.insightsql.database.schema.sessions_v3 import join_events_table_to_sessions_table_v3
+from insights.insightsql.database.schema.sessions import join_events_table_to_sessions_table
 from insights.insightsql.database.schema.system import ticket_assignment_join, ticket_tags_join
 from insights.insightsql.database.warehouse_join_resolvers import (
     resolve_data_warehouse_experiments_join,
@@ -67,12 +63,8 @@ RESOLVERS: dict[str, LazyJoinResolver] = {
     tags.GROUP_N: join_with_group_n_table,
     tags.GROUPS_REVENUE_ANALYTICS: join_with_groups_revenue_analytics_table,
     tags.PERSONS_REVENUE_ANALYTICS: join_with_persons_revenue_analytics_table,
-    tags.EVENTS_TO_SESSIONS_V1: join_events_table_to_sessions_table,
-    tags.EVENTS_TO_SESSIONS_V2: join_events_table_to_sessions_table_v2,
-    tags.EVENTS_TO_SESSIONS_V3: join_events_table_to_sessions_table_v3,
-    tags.REPLAY_TO_SESSIONS_V1: join_replay_table_to_sessions_table_v1,
-    tags.REPLAY_TO_SESSIONS_V2: join_replay_table_to_sessions_table_v2,
-    tags.REPLAY_TO_SESSIONS_V3: join_replay_table_to_sessions_table_v3,
+    tags.EVENTS_TO_SESSIONS: join_events_table_to_sessions_table,
+    tags.REPLAY_TO_SESSIONS: join_replay_table_to_sessions_table,
     tags.REPLAY_TO_EVENTS: join_with_events_table,
     tags.REPLAY_TO_CONSOLE_LOGS: join_with_console_logs_log_entries_table,
     tags.ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES: join_with_error_tracking_issue_fingerprint_overrides_table,

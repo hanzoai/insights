@@ -29,7 +29,6 @@ from insights.schema import (
     PropertyOperator,
     SamplingRate,
     SessionPropertyFilter,
-    SessionTableVersion,
     WebAnalyticsSampling,
     WebOverviewQuery,
     WebOverviewQueryResponse,
@@ -112,7 +111,6 @@ class TestWebOverviewQueryRunner(FirstPageviewAttributionTestMixin, DatastoreTes
         self,
         date_from: str,
         date_to: str,
-        session_table_version: SessionTableVersion = SessionTableVersion.V2,
         compare: bool = True,
         limit_context: Optional[LimitContext] = None,
         filter_test_accounts: Optional[bool] = False,
@@ -122,7 +120,7 @@ class TestWebOverviewQueryRunner(FirstPageviewAttributionTestMixin, DatastoreTes
     ):
         with freeze_time(self.QUERY_TIMESTAMP):
             modifiers = InsightsQLQueryModifiers(
-                sessionTableVersion=session_table_version, bounceRatePageViewMode=bounce_rate_mode
+                bounceRatePageViewMode=bounce_rate_mode
             )
             query = WebOverviewQuery(
                 dateRange=DateRange(date_from=date_from, date_to=date_to),
@@ -151,7 +149,6 @@ class TestWebOverviewQueryRunner(FirstPageviewAttributionTestMixin, DatastoreTes
                     properties=[
                         SessionPropertyFilter(key="$channel_type", value="Paid Search", operator=PropertyOperator.EXACT)
                     ],
-                    modifiers=InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V2),
                 )
                 results = WebOverviewQueryRunner(team=self.team, query=query).calculate().results
                 return next(item.value for item in results if item.key == "visitors")

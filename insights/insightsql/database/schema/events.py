@@ -1,5 +1,5 @@
 from insights.insightsql.database.lazy_join_tags import (
-    EVENTS_TO_SESSIONS_V1,
+    EVENTS_TO_SESSIONS,
     GROUP_N,
     PERSON_DISTINCT_IDS,
     PERSONS_REVENUE_ANALYTICS,
@@ -21,7 +21,7 @@ from insights.insightsql.database.models import (
 from insights.insightsql.database.schema.groups import GroupsTable
 from insights.insightsql.database.schema.person_distinct_ids import PersonDistinctIdsTable
 from insights.insightsql.database.schema.persons_revenue_analytics import PersonsRevenueAnalyticsTable
-from insights.insightsql.database.schema.sessions_v1 import SessionsTableV1
+from insights.insightsql.database.schema.sessions import SessionsTable
 
 from insights.datastore.events_json import DISTRIBUTED_EVENTS_JSON_TABLE
 
@@ -184,8 +184,8 @@ class EventsTable(Table):
         ),
         "session": LazyJoin(
             from_field=["$session_id"],
-            join_table=SessionsTableV1(),
-            resolver=EVENTS_TO_SESSIONS_V1,
+            join_table=SessionsTable(),
+            resolver=EVENTS_TO_SESSIONS,
         ),
         "elements_chain_href": StringDatabaseField(name="elements_chain_href", nullable=False),
         "elements_chain_texts": StringArrayDatabaseField(name="elements_chain_texts", nullable=False),

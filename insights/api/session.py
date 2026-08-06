@@ -4,21 +4,10 @@ from opentelemetry import trace
 from rest_framework import request, response, viewsets
 from rest_framework.exceptions import ValidationError
 
-from insights.schema import SessionTableVersion
-
-from insights.insightsql.database.schema.sessions_v1 import (
-    get_lazy_session_table_properties_v1,
-    get_lazy_session_table_values_v1,
+from insights.insightsql.database.schema.sessions import (
+    get_lazy_session_table_properties,
+    get_lazy_session_table_values,
 )
-from insights.insightsql.database.schema.sessions_v2 import (
-    get_lazy_session_table_properties_v2,
-    get_lazy_session_table_values_v2,
-)
-from insights.insightsql.database.schema.sessions_v3 import (
-    get_lazy_session_table_properties_v3,
-    get_lazy_session_table_values_v3,
-)
-from insights.insightsql.modifiers import create_default_modifiers_for_team
 
 from insights.api.property_value_metrics import PROPERTY_VALUES_DURATION
 from insights.api.routing import TeamAndOrgViewSetMixin
@@ -55,18 +44,7 @@ class SessionViewSet(
             span.set_attribute("property_key", key)
             span.set_attribute("has_search_term", search_term is not None)
 
-            modifiers = create_default_modifiers_for_team(team)
-            version = modifiers.sessionTableVersion
-
-            if version == SessionTableVersion.V3:
-                span.set_attribute("session_table_version", "v3")
-                result = get_lazy_session_table_values_v3(key, search_term=search_term, team=team)
-            elif version == SessionTableVersion.V2 or version == SessionTableVersion.AUTO:
-                span.set_attribute("session_table_version", "v2")
-                result = get_lazy_session_table_values_v2(key, search_term=search_term, team=team)
-            else:
-                span.set_attribute("session_table_version", "v1")
-                result = get_lazy_session_table_values_v1(key, search_term=search_term, team=team)
+            result = get_lazy_session_table_values(key, search_term=search_term, team=team)
 
             span.set_attribute("result_count", len(result))
 
@@ -92,19 +70,7 @@ class SessionViewSet(
 
         # unlike e.g. event properties, there's a very limited number of session properties,
         # so we can just return them all
-        modifiers = create_default_modifiers_for_team(self.team)
-        version = modifiers.sessionTableVersion
-        if version == SessionTableVersion.V3:
-            results = get_lazy_session_table_properties_v3(search)
-        elif version == SessionTableVersion.V2 or version == SessionTableVersion.AUTO:
-            results = get_lazy_session_table_properties_v2(search)
-        else:
-            results = get_lazy_session_table_properties_v1(search)
-
-        if is_numerical is not None:
-            want_numerical = is_numerical.lower() == "true"
-            results = [r for r in results if r.get("is_numerical") == want_numerical]
-
+        results = get_lazy_session_table_properties(search)
         return response.Response(
             {
                 "count": len(results),

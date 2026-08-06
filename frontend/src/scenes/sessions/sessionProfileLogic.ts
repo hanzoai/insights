@@ -385,48 +385,9 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
             null as SessionData | null,
             {
                 loadSessionData: async () => {
-                    // Check the session table version to optimize the query
-                    const { currentTeam } = values
-                    const sessionTableVersion =
-                        currentTeam?.modifiers?.sessionTableVersion ??
-                        currentTeam?.default_modifiers?.sessionTableVersion ??
-                        'auto'
-
-                    // V3 uses session_id directly for a point lookup (converted to session_timestamp = exact)
-                    // V2/AUTO needs timestamp hints due to cityHash64 in the ordering key
-                    const sessionQuery =
-                        sessionTableVersion === 'v3'
-                            ? insightsql`
-                        SELECT
-                            session_id,
-                            distinct_id,
-                            $start_timestamp,
-                            $end_timestamp,
-                            $entry_current_url,
-                            $end_current_url,
-                            $urls,
-                            $num_uniq_urls,
-                            $pageview_count,
-                            $autocapture_count,
-                            $screen_count,
-                            $session_duration,
-                            $channel_type,
-                            $is_bounce,
-                            $entry_hostname,
-                            $entry_pathname,
-                            $entry_utm_source,
-                            $entry_utm_campaign,
-                            $entry_utm_medium,
-                            $entry_referring_domain,
-                            $last_external_click_url
-                        FROM sessions
-                        WHERE session_id = ${props.sessionId}
-                        LIMIT 1
-                    `
-                            : (() => {
-                                  // Extract timestamp from UUIDv7 and use date constants for partition pruning
-                                  const { startDate, endDate } = getTimestampFromUUIDv7(props.sessionId)
-                                  return insightsql`
+                    // Extract timestamp from UUIDv7 and use date constants for partition pruning
+                    const { startDate, endDate } = getTimestampFromUUIDv7(props.sessionId)
+                    const sessionQuery = insightsql`
                         SELECT
                             session_id,
                             distinct_id,
@@ -455,7 +416,6 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                             AND session_id = ${props.sessionId}
                         LIMIT 1
                     `
-                              })()
 
                     const tags = { scene: 'SessionProfile', productKey: 'persons' }
                     const response = await api.queryInsightsQL(sessionQuery, tags)
