@@ -50,7 +50,10 @@ def resolves(module: str, tracked: set[str]) -> bool:
 
 def main() -> int:
     tracked = tracked_files()
-    sources = [f for f in tracked if f.endswith(".py")]
+    # Semgrep rule fixtures are specimens the scanner reads, never modules the app
+    # imports: they name the pattern a rule is meant to CATCH, so an unresolvable
+    # import in one is the fixture doing its job rather than a tree that cannot boot.
+    sources = [f for f in tracked if f.endswith(".py") and not f.startswith(".semgrep/")]
     broken: list[tuple[str, int, str]] = []
 
     for source in sources:
