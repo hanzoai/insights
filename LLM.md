@@ -181,6 +181,63 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
   selected by its image. Reading a pod mid-rollout returns the OLD build and
   makes a shipped fix look absent (or an absent one look shipped).
 
+## Warehouse table names: no version suffixes, and a gate that can see them
+
+A `_v2` is a confession — two tables are the same thing and nobody deleted one.
+The fork brought nine into the `insights` database:
+
+| name | disposition |
+|---|---|
+| `query_log_archive_v2` | **retired** by `0230` — renamed to `retired.query_log_archive` |
+| `kafka_log_entries_v3`, `log_entries_v3_mv` | **retired** by `0230` — the clean pair takes over |
+| the six `raw_sessions_v3*` | **held** — the sessions rewrite is mid-flight |
+
+`bin/tables` is the gate. `--check` reads source and is stdlib-only (no Django,
+no warehouse, no services, runs in `env -i`); `--live` reads `system.tables`.
+Both consult one LEDGER, in `bin/tables` itself, which names every versioned
+table with a disposition and a reason. A name not on that list fails the build;
+a ledger row matching nothing also fails, so the list can only shrink.
+
+**The measured lesson.** The predecessor guard was a Go test doing
+`os.ReadDir(".")` over `cloud/apps/analytics/*.go`. Its own comment named
+`raw_sessions_v3` as the thing it existed to prevent — and it could not see it,
+because the nine live in Python, in migrations, and in the database. Before
+writing a name rule, check what it can REACH; a rule that cannot see the names
+it forbids is indistinguishable from no rule.
+
+**Why a ledger and not a ban.** This repo self-deploys, so a rule that fails on
+a clean checkout blocks every deploy — worse than the rot. The set is closed
+instead of empty. `.hanzo/workflows/names.yml` runs it off the deploy path
+(judgement turns a branch red, never wedges production — same split
+`bin/debrand` draws).
+
+**A DROP is the remedy, not the offence.** The gate reads CREATE positions only.
+`0201` drops eleven versioned tables and `0230` two more; counting those would
+make writing the cleanup down the thing that fails the build.
+
+**`0230` never drops a row.** `query_log_archive_v2` holds 575 rows, so it is
+MOVED — a cross-database `RENAME` between Atomic databases is metadata-only.
+The version distinction becomes a NAMESPACE distinction, which is the rule
+itself: `retired.query_log_archive` needs no number. The two log_entries objects
+dropped are a Kafka table and a view, neither of which stores anything. Note
+`max_table_size_to_drop = 0` (used in `0201`) *disables* the size guard — it is
+not a safety rail.
+
+**The duplicate consumer, found on the way.** `kafka_log_entries` and
+`kafka_log_entries_v3` both read the topic `log_entries` under different groups
+(`group1` and `datastore_log_entries`) into the same `sharded_log_entries` — so
+every log was consumed and written twice, deduplicated only because the
+destination is a ReplacingMergeTree. Retiring the name and the duplicate is one
+act. The survivor keeps the `_v3` group name, so it resumes from already
+committed offsets: no replay, no gap.
+
+**Declared and live disagree, and that is where sprawl hides.** `schema.py`
+declares `log_entries` as a MergeTree; production has it as a Distributed table
+(a migration replaced it), and `query_log_archive_v2` exists in the warehouse
+with no CREATE anywhere in the tree. This is why `--live` exists and why `0230`
+deliberately does NOT move the MV's destination — that drift is real, is not a
+naming problem, and is not fixed here.
+
 ## Auth / tenancy
 
 Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability

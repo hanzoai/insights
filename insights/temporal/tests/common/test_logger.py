@@ -476,7 +476,7 @@ async def test_logger_produces_to_log_queue_from_activity(activity_environment, 
 def log_entries_table():
     """Manage log_entries table for testing."""
     sync_execute(KAFKA_LOG_ENTRIES_TABLE_SQL())
-    sync_execute(LOG_ENTRIES_TABLE_MV_SQL)
+    sync_execute(LOG_ENTRIES_TABLE_MV_SQL())
     sync_execute(TRUNCATE_LOG_ENTRIES_TABLE_SQL)
 
     yield LOG_ENTRIES_TABLE
