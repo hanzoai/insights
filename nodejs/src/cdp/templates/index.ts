@@ -18,6 +18,7 @@ import { template as linearTemplate } from './_destinations/linear/linear.templa
 import { template as linkedinAdsTemplate } from './_destinations/linkedin_ads/linkedin.template'
 import { template as microsoftAdsTemplate } from './_destinations/microsoft_ads/microsoft.template'
 import { template as nativeWebhookTemplate } from './_destinations/native_webhook/webhook.template'
+import { template as openaiAdsTemplate } from './_destinations/openai_ads/openai.template'
 import { template as insightsCaptureTemplate } from './_destinations/insights_capture/insights-capture.template'
 import { template as insightsGroupIdentifyTemplate } from './_destinations/insights_capture/insights-group-identify.template'
 import { template as insightsUpdatePersonPropertiesTemplate } from './_destinations/insights_capture/insights-update-person-properties.template'
@@ -70,6 +71,7 @@ export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[
     googleAdsTemplate,
     linkedinAdsTemplate,
     microsoftAdsTemplate,
+    openaiAdsTemplate,
     redditAdsTemplate,
     twilioTemplate,
     whatsappTemplate,

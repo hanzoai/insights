@@ -14,20 +14,26 @@ import {
     IconWebhooks,
 } from '@hanzo/icons'
 import {
+    Banner,
     Button,
+    Checkbox,
     Collapse,
     Divider,
     Dropdown,
     Input,
+    InputSelect,
     Label,
+    SegmentedButton,
     Select,
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
+import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { IconAdsClick } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
 import { Radio } from 'lib/elements/Radio'
@@ -37,9 +43,13 @@ import { createFuse } from 'lib/utils/fuseSearch'
 import { humanFriendlyNumber } from 'lib/utils/numbers'
 import { COHORTS_ONLY_SUPPORT_IN_PICKER_PROPS } from 'scenes/feature-flags/cohortPickerProps'
 import { TestAccountFilter } from 'scenes/insights/filters/TestAccountFilter/TestAccountFilter'
+import { teamLogic } from 'scenes/teamLogic'
 
+import { tagsModel } from '~/models/tagsModel'
 import { PropertyFilterType } from '~/types'
 
+import { accountsColumnConfigLogic } from 'products/customer_analytics/frontend/components/Accounts/accountsColumnConfigLogic'
+import { ACCOUNT_CUSTOM_PROPERTY_OPERATOR_ALLOWLIST } from 'products/customer_analytics/frontend/components/Accounts/accountsCustomPropertyFilters'
 // Side-effect imports: register product-specific trigger types
 import 'products/workflows/frontend/Workflows/insightsflows/registry/triggers'
 
@@ -506,7 +516,9 @@ function StepTriggerConfigurationManual(): JSX.Element {
 
 function StepTriggerAffectedUsers({ actionId, filters }: { actionId: string; filters: any }): JSX.Element | null {
     const { workflow } = useValues(workflowLogic)
-    const dedupeKey = getAudienceDedupeKey(workflow)
+    const isAccountAudience = filters?.audience_type === 'accounts'
+    // Account audiences carry no person, so email dedup never applies to them.
+    const dedupeKey = isAccountAudience ? undefined : getAudienceDedupeKey(workflow)
     const logic = batchTriggerLogic({ id: actionId, filters, dedupeKey })
     const { blastRadiusLoading, blastRadius, blastRadiusError } = useValues(logic)
 
@@ -543,12 +555,14 @@ function StepTriggerAffectedUsers({ actionId, filters }: { actionId: string; fil
         return (
             <div className="text-muted">
                 <div className={exceeded ? 'text-danger font-semibold' : 'text-muted'}>
-                    approximately {humanFriendlyNumber(affected)} of {humanFriendlyNumber(total)} persons.
+                    approximately {humanFriendlyNumber(affected)} of {humanFriendlyNumber(total)}{' '}
+                    {isAccountAudience ? 'accounts' : 'persons'}.
                 </div>
                 {exceeded && limit != null && (
                     <div className="text-danger text-xs">
-                        Batch size exceeds the limit of {humanFriendlyNumber(limit)} users. Add filters to narrow your
-                        audience. This limit will be loosened in the future.
+                        Batch size exceeds the limit of {humanFriendlyNumber(limit)}{' '}
+                        {isAccountAudience ? 'accounts' : 'users'}. Add filters to narrow your audience. This limit will
+                        be loosened in the future.
                     </div>
                 )}
             </div>
@@ -568,6 +582,90 @@ function BatchScheduleSection(): JSX.Element {
     )
 }
 
+type BatchTriggerFilters = Extract<InsightsFlowAction['config'], { type: 'batch' }>['filters']
+
+function StepTriggerBatchAccountFilters({
+    actionId,
+    filters,
+}: {
+    actionId: string
+    filters: BatchTriggerFilters
+}): JSX.Element {
+    const { partialSetWorkflowActionConfig } = useActions(workflowLogic)
+    const { tags: tagsAvailable } = useValues(tagsModel)
+    const { customPropertyTaxonomicOptions } = useValues(accountsColumnConfigLogic)
+
+    const setFilters = (update: Partial<BatchTriggerFilters>): void => {
+        partialSetWorkflowActionConfig(actionId, { filters: { ...filters, ...update } })
+    }
+
+    const assignedToUserIds = filters.assigned_to_user_ids ?? []
+
+    return (
+        <div className="flex flex-col gap-2">
+            <Banner type="info" className="w-full">
+                Account audiences run one workflow per account, without a person. Steps that read person properties
+                won't fill in. Use the "Get account" step to read account data.
+            </Banner>
+            <div className="flex flex-wrap gap-2 items-center">
+                <InputSelect
+                    mode="multiple"
+                    allowCustomValues
+                    size="small"
+                    className="min-w-48"
+                    value={filters.tag_names ?? []}
+                    options={(tagsAvailable || []).map((tag: string) => ({ key: tag, label: tag }))}
+                    onChange={(tag_names) => setFilters({ tag_names })}
+                    placeholder="Filter by tags"
+                    data-attr="workflows-batch-account-tags-filter"
+                />
+                <Dropdown
+                    closeOnClickInside={false}
+                    overlay={
+                        <div className="p-2 min-w-64 flex flex-col gap-2">
+                            <Checkbox
+                                checked={!!filters.all_roles_unassigned}
+                                onChange={(all_roles_unassigned) => setFilters({ all_roles_unassigned })}
+                                label="Unassigned only"
+                                data-attr="workflows-batch-account-unassigned-filter"
+                            />
+                            <Divider className="my-0" />
+                            <MemberSelectMultiple
+                                idKey="id"
+                                value={assignedToUserIds}
+                                onChange={(users) => setFilters({ assigned_to_user_ids: users.map((user) => user.id) })}
+                            />
+                        </div>
+                    }
+                >
+                    <Button type="secondary" size="small" data-attr="workflows-batch-account-assigned-filter">
+                        {filters.all_roles_unassigned
+                            ? 'Unassigned'
+                            : assignedToUserIds.length === 0
+                              ? 'Assigned to anyone'
+                              : `Assigned to ${assignedToUserIds.length} ${assignedToUserIds.length === 1 ? 'person' : 'people'}`}
+                    </Button>
+                </Dropdown>
+            </div>
+            {customPropertyTaxonomicOptions.length > 0 && (
+                <PropertyFilters
+                    pageKey={`workflows-batch-trigger-account-filters-${actionId}`}
+                    propertyFilters={filters.properties}
+                    addText="Add condition"
+                    sendAllKeyUpdates
+                    onChange={(properties) => setFilters({ properties })}
+                    taxonomicGroupTypes={[TaxonomicFilterGroupType.AccountCustomProperties]}
+                    taxonomicFilterOptionsFromProp={{
+                        [TaxonomicFilterGroupType.AccountCustomProperties]: customPropertyTaxonomicOptions,
+                    }}
+                    hasRowOperator={false}
+                    operatorAllowlist={ACCOUNT_CUSTOM_PROPERTY_OPERATOR_ALLOWLIST}
+                />
+            )}
+        </div>
+    )
+}
+
 function StepTriggerConfigurationBatch({
     action,
     config,
@@ -576,45 +674,73 @@ function StepTriggerConfigurationBatch({
     config: Extract<InsightsFlowAction['config'], { type: 'batch' }>
 }): JSX.Element {
     const { partialSetWorkflowActionConfig } = useActions(workflowLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
+    const { currentTeam } = useValues(teamLogic)
+
+    const accountAudienceAvailable =
+        !!featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS_CSP] &&
+        currentTeam?.customer_analytics_config?.account_group_type_index != null
+    const isAccountAudience = config.filters.audience_type === 'accounts'
 
     return (
         <div className="flex flex-col gap-2 my-2 w-full">
+            {(accountAudienceAvailable || isAccountAudience) && (
+                <SegmentedButton
+                    size="small"
+                    value={isAccountAudience ? 'accounts' : 'persons'}
+                    onChange={(audience_type) =>
+                        // Person and account filters are mutually invalid, so switching resets them.
+                        partialSetWorkflowActionConfig(action.id, {
+                            filters: { audience_type, properties: [] },
+                        })
+                    }
+                    options={[
+                        { value: 'persons' as const, label: 'People' },
+                        { value: 'accounts' as const, label: 'Accounts' },
+                    ]}
+                    data-attr="workflows-batch-audience-type"
+                />
+            )}
             <div>
                 <span className="font-semibold">This batch will include</span>{' '}
                 <StepTriggerAffectedUsers actionId={action.id} filters={config.filters} />
             </div>
-            <div>
-                <PropertyFilters
-                    pageKey={`workflows-batch-trigger-property-filters-${action.id}`}
-                    propertyFilters={config.filters.properties}
-                    addText="Add condition"
-                    orFiltering
-                    sendAllKeyUpdates
-                    allowRelativeDateOptions
-                    {...COHORTS_ONLY_SUPPORT_IN_PICKER_PROPS}
-                    hideBehavioralCohorts
-                    logicalRowDivider
-                    onChange={(properties) =>
-                        partialSetWorkflowActionConfig(action.id, {
-                            filters: {
-                                properties,
-                            },
-                        })
-                    }
-                    taxonomicGroupTypes={[
-                        TaxonomicFilterGroupType.PersonProperties,
-                        TaxonomicFilterGroupType.Cohorts,
-                        TaxonomicFilterGroupType.Metadata,
-                    ]}
-                    taxonomicFilterOptionsFromProp={{
-                        [TaxonomicFilterGroupType.Metadata]: [
-                            { name: 'distinct_id', propertyFilterType: PropertyFilterType.Person },
-                        ],
-                    }}
-                    hasRowOperator={false}
-                    operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
-                />
-            </div>
+            {isAccountAudience ? (
+                <StepTriggerBatchAccountFilters actionId={action.id} filters={config.filters} />
+            ) : (
+                <div>
+                    <PropertyFilters
+                        pageKey={`workflows-batch-trigger-property-filters-${action.id}`}
+                        propertyFilters={config.filters.properties}
+                        addText="Add condition"
+                        orFiltering
+                        sendAllKeyUpdates
+                        allowRelativeDateOptions
+                        {...COHORTS_ONLY_SUPPORT_IN_PICKER_PROPS}
+                        hideBehavioralCohorts
+                        logicalRowDivider
+                        onChange={(properties) =>
+                            partialSetWorkflowActionConfig(action.id, {
+                                filters: {
+                                    properties,
+                                },
+                            })
+                        }
+                        taxonomicGroupTypes={[
+                            TaxonomicFilterGroupType.PersonProperties,
+                            TaxonomicFilterGroupType.Cohorts,
+                            TaxonomicFilterGroupType.Metadata,
+                        ]}
+                        taxonomicFilterOptionsFromProp={{
+                            [TaxonomicFilterGroupType.Metadata]: [
+                                { name: 'distinct_id', propertyFilterType: PropertyFilterType.Person },
+                            ],
+                        }}
+                        hasRowOperator={false}
+                        operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
+                    />
+                </div>
+            )}
 
             <BatchScheduleSection />
         </div>

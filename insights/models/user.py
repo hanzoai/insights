@@ -84,6 +84,7 @@ ROLE_CHOICES = (
     ("leadership", "Leadership"),
     ("marketing", "Marketing"),
     ("sales", "Sales / Success"),
+    ("student", "Student"),
     ("other", "Other"),
 )
 

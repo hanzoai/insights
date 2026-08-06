@@ -27,7 +27,7 @@ const names = [
 
 type Story = StoryObj<InputSelectProps<string>>
 const meta: Meta<InputSelectProps<string>> = {
-    title: 'Lemon UI/Lemon Input Select',
+    title: 'Elements/Input Select',
     component: InputSelect as any,
     args: {
         options: names.map((x, i) => ({

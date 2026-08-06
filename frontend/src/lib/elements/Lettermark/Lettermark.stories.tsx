@@ -6,7 +6,7 @@ import { Lettermark, LettermarkColor, LettermarkProps, NUM_LETTERMARK_STYLES } f
 
 type Story = StoryObj<LettermarkProps>
 const meta: Meta<LettermarkProps> = {
-    title: 'Lemon UI/Lettermark',
+    title: 'Elements/Lettermark',
     component: Lettermark as any,
     parameters: {
         docs: {

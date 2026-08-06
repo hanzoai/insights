@@ -10,7 +10,7 @@ import { Button, ButtonProps } from 'lib/elements/Button'
 import { Modal, ModalProps } from 'lib/elements/Modal'
 import { uuid } from 'lib/utils/dom'
 
-import { DialogFormPropsType, lemonDialogLogic } from './lemonDialogLogic'
+import { DialogFormPropsType, dialogLogic } from './dialogLogic'
 
 // A rejected await-submit keeps the dialog open so the user can retry. Capture only genuinely
 // unexpected failures — not 4xx validation errors the user is expected to cause (e.g. a reserved
@@ -190,7 +190,7 @@ export const FormDialog = ({
     ...props
 }: FormDialogProps): JSX.Element => {
     const logicProps = { errors, dialogKey, showErrorsOnTouch }
-    const logic = lemonDialogLogic(logicProps)
+    const logic = dialogLogic(logicProps)
     const { form, isFormValid, formValidationErrors } = useValues(logic)
     const { setFormValues } = useActions(logic)
     const [isLoading, setIsLoading] = useState(false)
@@ -226,7 +226,7 @@ export const FormDialog = ({
 
     return (
         <Form
-            logic={lemonDialogLogic}
+            logic={dialogLogic}
             props={logicProps}
             formKey="form"
             onKeyDown={
@@ -292,6 +292,6 @@ Dialog.open = (props: DialogProps) => {
 Dialog.openForm = (props: FormDialogProps) => {
     const { root, onDestroy } = createAndInsertRoot()
     // Each dialog gets a unique key so nested dialogs don't share the same
-    // lemonDialogLogic instance and corrupt each other's form state.
+    // dialogLogic instance and corrupt each other's form state.
     root.render(<FormDialog {...props} dialogKey={uuid()} onAfterClose={onDestroy} />)
 }

@@ -320,9 +320,9 @@ export function Playlist({
                             <TableLoader loading={sessionRecordingsResponseLoading} />
                         </div>
                         {selectedRecordingOutsideFilters && (
-                            <Banner type="info" className="m-2 text-xs">
-                                The selected recording doesn't match the current filters. It's shown because it was
-                                opened from a direct link.
+                            <Banner type="warning" className="m-2">
+                                The recording you have open doesn't match the current filters. It stays in the list
+                                until you close it.
                             </Banner>
                         )}
                         <div className="overflow-y-auto flex-1 min-h-0" onScroll={handleScroll} ref={contentRef}>

@@ -4,7 +4,7 @@ import { ColorGlyph, ColorGlyphProps } from './ColorGlyph'
 
 type Story = StoryObj<ColorGlyphProps>
 const meta: Meta<ColorGlyphProps> = {
-    title: 'Lemon UI/Lemon Color/Lemon Color Glyph',
+    title: 'Elements/Color/Color Glyph',
     component: ColorGlyph,
     tags: ['autodocs'],
 }

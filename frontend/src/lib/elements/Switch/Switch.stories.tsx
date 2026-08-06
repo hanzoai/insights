@@ -5,16 +5,16 @@ import { AccessControlAction } from 'lib/components/AccessControlAction'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
-import { SwitchProps, Switch as RawLemonSwitch } from './Switch'
+import { SwitchProps, Switch as RawSwitch } from './Switch'
 
 const Switch = ({ checked, ...props }: Partial<SwitchProps>): JSX.Element => {
     const [isChecked, setIsChecked] = useState(checked || false)
-    return <RawLemonSwitch {...props} checked={isChecked} onChange={setIsChecked} />
+    return <RawSwitch {...props} checked={isChecked} onChange={setIsChecked} />
 }
 
 type Story = StoryObj<SwitchProps>
 const meta: Meta<SwitchProps> = {
-    title: 'Lemon UI/Lemon Switch',
+    title: 'Elements/Switch',
     component: Switch,
     args: {
         label: 'Switch this!',
@@ -72,12 +72,12 @@ export const Indeterminate: Story = {
         const [value, setValue] = useState<boolean | 'indeterminate'>('indeterminate')
         return (
             <div className="deprecated-space-y-2">
-                <RawLemonSwitch label="Interactive (click resolves to checked)" checked={value} onChange={setValue} />
+                <RawSwitch label="Interactive (click resolves to checked)" checked={value} onChange={setValue} />
                 <Switch label="Unchecked" checked={false} />
-                <RawLemonSwitch label="Indeterminate" checked="indeterminate" onChange={() => {}} />
+                <RawSwitch label="Indeterminate" checked="indeterminate" onChange={() => {}} />
                 <Switch label="Checked" checked />
-                <RawLemonSwitch label="Indeterminate bordered" checked="indeterminate" onChange={() => {}} bordered />
-                <RawLemonSwitch label="Indeterminate small" size="small" checked="indeterminate" onChange={() => {}} />
+                <RawSwitch label="Indeterminate bordered" checked="indeterminate" onChange={() => {}} bordered />
+                <RawSwitch label="Indeterminate small" size="small" checked="indeterminate" onChange={() => {}} />
             </div>
         )
     },

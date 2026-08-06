@@ -23,13 +23,13 @@ describe('Calendar', () => {
         )
 
         // find just one month
-        const lemonCalendarMonths = getAllByDataAttr(container, 'lemon-calendar-month')
-        expect(lemonCalendarMonths.length).toBe(1)
-        const [calendar] = lemonCalendarMonths
+        const calendarMonths = getAllByDataAttr(container, 'lemon-calendar-month')
+        expect(calendarMonths.length).toBe(1)
+        const [calendar] = calendarMonths
 
         // make sure there are 5 weeks in the February 2020 calendar
-        const lemonCalendarWeeks = getAllByDataAttr(container, 'lemon-calendar-week')
-        expect(lemonCalendarWeeks.length).toBe(5)
+        const calendarWeeks = getAllByDataAttr(container, 'lemon-calendar-week')
+        expect(calendarWeeks.length).toBe(5)
 
         // find February 2020
         expect(await within(calendar).findByText('February 2020')).toBeTruthy()
@@ -73,9 +73,9 @@ describe('Calendar', () => {
         )
 
         // find just one month
-        const lemonCalendars = getAllByDataAttr(container, 'lemon-calendar-month')
-        expect(lemonCalendars.length).toBe(2)
-        const [cal1, cal2] = lemonCalendars
+        const calendars = getAllByDataAttr(container, 'lemon-calendar-month')
+        expect(calendars.length).toBe(2)
+        const [cal1, cal2] = calendars
 
         // find February 2020
         expect(await within(cal1).findByText('February 2020')).toBeTruthy()
@@ -110,8 +110,8 @@ describe('Calendar', () => {
 
     test('renders many months', async () => {
         const { container } = render(<Calendar months={10} />)
-        const lemonCalendarMonths = getAllByDataAttr(container, 'lemon-calendar-month')
-        expect(lemonCalendarMonths.length).toBe(10)
+        const calendarMonths = getAllByDataAttr(container, 'lemon-calendar-month')
+        expect(calendarMonths.length).toBe(10)
     })
 
     test('renders the current month by default', async () => {

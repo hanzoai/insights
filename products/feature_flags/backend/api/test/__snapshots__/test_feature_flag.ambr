@@ -510,6 +510,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
@@ -962,6 +963,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
@@ -1361,6 +1363,7 @@
          "insights_experiment"."end_date",
          "insights_experiment"."created_at",
          "insights_experiment"."updated_at",
+         "insights_experiment"."version",
          "insights_experiment"."archived",
          "insights_experiment"."feature_flag_auto_archived",
          "insights_experiment"."deleted",
@@ -1474,6 +1477,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
@@ -1521,7 +1525,8 @@
   WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
           AND "ee_accesscontrol"."role_id" IS NULL
           AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
+         OR ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+             AND "insights_organizationmembership"."user_id" = 99999
              AND "ee_accesscontrol"."role_id" IS NULL
              AND "ee_accesscontrol"."team_id" = 99999))
   '''
@@ -1550,6 +1555,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
@@ -1603,7 +1609,7 @@
     (SELECT 1 AS "a"
      FROM "insights_team" U0
      WHERE (U0."project_id" = ("insights_team"."project_id")
-            AND ((U0."session_recording_linked_flag" -> 'id'))::integer = ("insights_featureflag"."id"))
+            AND U0."session_recording_linked_flag" @> (JSONB_BUILD_OBJECT(('id')::text, "insights_featureflag"."id")))
      LIMIT 1) AS "is_used_in_replay_settings_annotation",
          "insights_user"."id",
          "insights_user"."password",
@@ -1711,6 +1717,7 @@
          "insights_experiment"."end_date",
          "insights_experiment"."created_at",
          "insights_experiment"."updated_at",
+         "insights_experiment"."version",
          "insights_experiment"."archived",
          "insights_experiment"."feature_flag_auto_archived",
          "insights_experiment"."deleted",

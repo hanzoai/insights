@@ -3,7 +3,6 @@ import { Fragment } from 'react'
 import { Tag, Link } from '@hanzo/elements'
 import type { TagType } from '@hanzo/elements'
 
-import { TZLabel } from 'lib/components/TZLabel'
 import { Markdown } from 'lib/elements/Markdown'
 
 import type {
@@ -214,9 +213,6 @@ export function HealthCheckSignalCard({ signal }: SignalCardProps): JSX.Element 
                     <Link to={extra.link} className="text-xs font-medium">
                         Open in Insights
                     </Link>
-                    <span className="text-xs text-tertiary">
-                        <TZLabel time={signal.timestamp} />
-                    </span>
                 </div>
             </div>
         </SignalCardShell>

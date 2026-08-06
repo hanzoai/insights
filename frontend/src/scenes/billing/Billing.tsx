@@ -281,7 +281,7 @@ export function Billing(): JSX.Element {
                                 <Button
                                     icon={<IconDocument />}
                                     size="small"
-                                    to="https://hanzo.ai/docs/insights-code"
+                                    to="https://hanzo.ai/docs/insights-desktop"
                                     tooltip="Read the docs"
                                 />
                             </div>

@@ -8,7 +8,7 @@ import { Row, RowProps } from './Row'
 
 type Story = StoryObj<RowProps>
 const meta: Meta<RowProps> = {
-    title: 'Lemon UI/Lemon Row',
+    title: 'Elements/Row',
     component: Row as any,
     tags: ['autodocs'],
 }

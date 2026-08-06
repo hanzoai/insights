@@ -9,7 +9,7 @@ import { Dialog, DialogProps, FormDialog, FormDialogProps } from './Dialog'
 
 type Story = StoryObj<DialogProps>
 const meta: Meta<DialogProps> = {
-    title: 'Lemon UI/Lemon Dialog',
+    title: 'Elements/Dialog',
     component: Dialog,
     args: {
         title: 'Do you want to do the thing?',

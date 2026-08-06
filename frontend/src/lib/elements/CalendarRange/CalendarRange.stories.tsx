@@ -9,7 +9,7 @@ import { formatDateRange } from 'lib/utils/datetime'
 
 type Story = StoryObj<CalendarRangeProps>
 const meta: Meta<CalendarRangeProps> = {
-    title: 'Lemon UI/Lemon Calendar/Lemon Calendar Range',
+    title: 'Elements/Calendar/Calendar Range',
     component: CalendarRange,
     parameters: {
         mockDate: '2023-01-26',

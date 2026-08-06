@@ -14,7 +14,7 @@ import { TableColumns } from './types'
 
 type Story = StoryObj<TableProps<any>>
 const meta: Meta<TableProps<any>> = {
-    title: 'Lemon UI/Lemon Table',
+    title: 'Elements/Table',
     component: Table as any,
     tags: ['autodocs'],
 }

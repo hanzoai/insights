@@ -34,7 +34,9 @@ impl Person {
                 WHERE
                     insights_persondistinctid.distinct_id = $1
                     AND insights_persondistinctid.team_id = $2
+                    AND insights_persondistinctid.is_deleted = false
                     AND pp.team_id = $2
+                    AND pp.is_deleted = false
                 LIMIT 1
             "#,
             distinct_id,
@@ -59,7 +61,9 @@ impl Person {
                 WHERE
                     insights_persondistinctid.distinct_id = $1
                     AND insights_persondistinctid.team_id = $2
+                    AND insights_persondistinctid.is_deleted = false
                     AND pp.team_id = $2
+                    AND pp.is_deleted = false
                 LIMIT 1
             "#,
             distinct_id,

@@ -1,0 +1,2 @@
+insightsql_parser
+insightsql_parser-stubs

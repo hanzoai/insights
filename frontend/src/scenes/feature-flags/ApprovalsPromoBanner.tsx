@@ -7,7 +7,7 @@ import { Banner } from '@hanzo/elements'
 
 import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
 import { pngHoggie } from 'lib/brand/hoggies'
-import { lemonBannerLogic } from 'lib/elements/Banner/lemonBannerLogic'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
 import { Button } from 'lib/elements/Button'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { urls } from 'scenes/urls'
@@ -23,7 +23,7 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
     const { hasAvailableFeature } = useValues(userLogic)
     const { isAdminOrOwner } = useValues(organizationLogic)
     const { activePolicies, activePoliciesLoading } = useValues(approvalsGateLogic)
-    const bannerLogic = lemonBannerLogic({ dismissKey: DISMISS_KEY })
+    const bannerLogic = bannerLogic({ dismissKey: DISMISS_KEY })
     const { isDismissed } = useValues(bannerLogic)
     const { dismiss } = useActions(bannerLogic)
 

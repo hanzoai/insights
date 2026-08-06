@@ -6,7 +6,7 @@ import { SegmentedSelect, SegmentedSelectProps } from './SegmentedSelect'
 
 type Story = StoryObj<SegmentedSelectProps<string>>
 const meta: Meta<SegmentedSelectProps<string>> = {
-    title: 'Lemon UI/Lemon Segmented Select',
+    title: 'Elements/Segmented Select',
     component: SegmentedSelect,
     argTypes: {
         options: {

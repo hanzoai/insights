@@ -3,7 +3,7 @@ import { Meta, StoryObj } from '@storybook/react'
 import { Progress, ProgressProps } from './Progress'
 
 const meta: Meta<ProgressProps> = {
-    title: 'Lemon UI/Lemon Progress',
+    title: 'Elements/Progress',
     component: Progress,
     args: {
         percent: 30,

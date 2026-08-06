@@ -1,0 +1,36 @@
+
+> @hanzo/scriptvm@1.0.67 build /home/z/work/hanzo/insights/common/scriptvm/typescript
+> pnpm clean && pnpm build:parcel && pnpm build:cli
+
+
+> @hanzo/scriptvm@1.0.67 clean /home/z/work/hanzo/insights/common/scriptvm/typescript
+> rm -rf dist .parcel-cache
+
+
+> @hanzo/scriptvm@1.0.67 build:parcel /home/z/work/hanzo/insights/common/scriptvm/typescript
+> parcel build --no-cache
+
+Building...
+Browserslist: browsers data (caniuse-lite) is 20 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 20 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 20 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 20 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Bundling...
+Packaging & Optimizing...
+✨ Built in 2.03s
+
+dist/index.js       153.1 kB    49ms
+dist/module.js     154.29 kB    52ms
+dist/index.d.ts      6.78 kB    21ms
+
+> @hanzo/scriptvm@1.0.67 build:cli /home/z/work/hanzo/insights/common/scriptvm/typescript
+> mkdir -p ./dist && cp ./src/cli.js ./dist/cli.js
+

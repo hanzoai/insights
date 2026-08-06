@@ -3,11 +3,12 @@ import { useActions, useValues } from 'kea'
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
 import { Modal } from 'lib/elements/Modal'
+import { SegmentedButton } from 'lib/elements/SegmentedButton'
 import { Select } from 'lib/elements/Select'
 import { TextArea } from 'lib/elements/TextArea'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 
-import { CertificationTargetType, certificationsLogic } from '../certificationsLogic'
+import { CertificationTargetType, ProposedStatus, certificationsLogic } from '../certificationsLogic'
 
 const VIEW_TABLE_TYPES = new Set(['view', 'materialized_view', 'managed_view'])
 
@@ -51,13 +52,14 @@ export function NewCertificationModal(): JSX.Element {
         : null
 
     const submitDisabledReason = !newCertificationForm.targetName ? 'Choose a table or view' : undefined
+    const proposingDeprecation = newCertificationForm.proposedStatus === 'deprecated'
 
     return (
         <Modal
             isOpen={newCertificationModalOpen}
             onClose={closeNewCertificationModal}
             width={560}
-            title="Propose a certification"
+            title="Propose a trust mark"
         >
             <Modal.Content>
                 <div className="flex flex-col gap-4">
@@ -78,11 +80,29 @@ export function NewCertificationModal(): JSX.Element {
                         />
                     </Field.Pure>
 
+                    <Field.Pure label="Proposal">
+                        <SegmentedButton
+                            value={newCertificationForm.proposedStatus}
+                            onChange={(proposedStatus: ProposedStatus) => setNewCertificationForm({ proposedStatus })}
+                            options={[
+                                { value: 'certified', label: 'Certify - trust this source' },
+                                { value: 'deprecated', label: 'Deprecate - avoid this source' },
+                            ]}
+                            fullWidth
+                            size="small"
+                            data-attr="data-catalog-certification-proposed-status"
+                        />
+                    </Field.Pure>
+
                     <Field.Pure label="Notes">
                         <TextArea
                             value={newCertificationForm.notes}
                             onChange={(notes) => setNewCertificationForm({ notes })}
-                            placeholder="Why should the team trust this source?"
+                            placeholder={
+                                proposingDeprecation
+                                    ? 'Why should the team avoid this source?'
+                                    : 'Why should the team trust this source?'
+                            }
                             minRows={2}
                         />
                     </Field.Pure>
@@ -100,7 +120,7 @@ export function NewCertificationModal(): JSX.Element {
                     disabledReason={submitDisabledReason}
                     data-attr="data-catalog-create-certification-submit"
                 >
-                    Propose certification
+                    {proposingDeprecation ? 'Propose deprecation' : 'Propose certification'}
                 </Button>
             </Modal.Footer>
         </Modal>

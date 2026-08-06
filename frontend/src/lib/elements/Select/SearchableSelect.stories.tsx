@@ -6,7 +6,7 @@ import { capitalizeFirstLetter } from 'lib/utils/strings'
 
 type Story = StoryObj<SearchableSelectProps<any>>
 const meta: Meta<SearchableSelectProps<any>> = {
-    title: 'Lemon UI/Lemon Searchable Select',
+    title: 'Elements/Searchable Select',
     component: SearchableSelect,
     args: {
         options: [

@@ -76,8 +76,8 @@ export function InsightsQLEditor({
                 onPressCmdEnter={
                     disableCmdEnter
                         ? undefined
-                        : (value) => {
-                              onChange(value)
+                        : () => {
+                              onChange(bufferedValue)
                           }
                 }
             />
