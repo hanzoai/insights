@@ -6,7 +6,7 @@ from insights.insightsql.database.lazy_join_tags import (
     PERSON_DISTINCT_IDS,
     REPLAY_TO_CONSOLE_LOGS,
     REPLAY_TO_EVENTS,
-    REPLAY_TO_SESSIONS_V1,
+    REPLAY_TO_SESSIONS,
 )
 from insights.insightsql.database.models import (
     DatabaseField,
@@ -24,16 +24,15 @@ from insights.insightsql.database.models import (
 from insights.insightsql.database.schema.events import EventsTable
 from insights.insightsql.database.schema.log_entries import ReplayConsoleLogsLogEntriesTable
 from insights.insightsql.database.schema.person_distinct_ids import PersonDistinctIdsTable
-from insights.insightsql.database.schema.sessions_v1 import SessionsTableV1, select_from_sessions_table_v1
-from insights.insightsql.database.schema.sessions_v2 import (
-    select_from_sessions_table_v2,
+from insights.insightsql.database.schema.sessions import (
+    SessionsTable,
+    select_from_sessions_table,
     session_id_to_session_id_v7_as_uint128_expr,
 )
-from insights.insightsql.database.schema.sessions_v3 import select_from_sessions_table_v3, session_id_to_uint128_as_uuid_expr
 from insights.insightsql.errors import ResolutionError
 
 
-def join_replay_table_to_sessions_table_v1(
+def join_replay_table_to_sessions_table(
     join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: SelectQuery
 ) -> JoinExpr:
     from insights.insightsql import ast
@@ -41,29 +40,7 @@ def join_replay_table_to_sessions_table_v1(
     if not join_to_add.fields_accessed:
         raise ResolutionError("No fields requested from replay")
 
-    join_expr = ast.JoinExpr(table=select_from_sessions_table_v1(join_to_add.fields_accessed, node, context))
-    join_expr.join_type = "LEFT JOIN"
-    join_expr.alias = join_to_add.to_table
-    join_expr.constraint = ast.JoinConstraint(
-        expr=ast.CompareOperation(
-            op=ast.CompareOperationOp.Eq,
-            left=ast.Field(chain=[join_to_add.from_table, "session_id"]),
-            right=ast.Field(chain=[join_to_add.to_table, "session_id"]),
-        ),
-        constraint_type="ON",
-    )
-    return join_expr
-
-
-def join_replay_table_to_sessions_table_v2(
-    join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: SelectQuery
-) -> JoinExpr:
-    from insights.insightsql import ast
-
-    if not join_to_add.fields_accessed:
-        raise ResolutionError("No fields requested from replay")
-
-    join_expr = ast.JoinExpr(table=select_from_sessions_table_v2(join_to_add.fields_accessed, node, context))
+    join_expr = ast.JoinExpr(table=select_from_sessions_table(join_to_add.fields_accessed, node, context))
     join_expr.join_type = "LEFT JOIN"
     join_expr.alias = join_to_add.to_table
     join_expr.constraint = ast.JoinConstraint(
@@ -76,27 +53,6 @@ def join_replay_table_to_sessions_table_v2(
     )
     return join_expr
 
-
-def join_replay_table_to_sessions_table_v3(
-    join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: SelectQuery
-) -> JoinExpr:
-    from insights.insightsql import ast
-
-    if not join_to_add.fields_accessed:
-        raise ResolutionError("No fields requested from replay")
-
-    join_expr = ast.JoinExpr(table=select_from_sessions_table_v3(join_to_add.fields_accessed, node, context))
-    join_expr.join_type = "LEFT JOIN"
-    join_expr.alias = join_to_add.to_table
-    join_expr.constraint = ast.JoinConstraint(
-        expr=ast.CompareOperation(
-            op=ast.CompareOperationOp.Eq,
-            left=session_id_to_uint128_as_uuid_expr(ast.Field(chain=[join_to_add.from_table, "session_id"])),
-            right=ast.Field(chain=[join_to_add.to_table, "session_id_v7"]),
-        ),
-        constraint_type="ON",
-    )
-    return join_expr
 
 
 def join_with_events_table(
@@ -295,8 +251,8 @@ SESSION_REPLAY_EVENTS_COMMON_FIELDS: dict[str, FieldOrTable] = {
     "person_id": FieldTraverser(chain=["pdi", "person_id"]),
     "session": LazyJoin(
         from_field=["session_id"],
-        join_table=SessionsTableV1(),
-        resolver=REPLAY_TO_SESSIONS_V1,
+        join_table=SessionsTable(),
+        resolver=REPLAY_TO_SESSIONS,
     ),
 }
 

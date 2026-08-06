@@ -2606,7 +2606,7 @@ class Resolver(CloningVisitor):
     # The set of "sessions-cluster" tables is whatever the current database resolves
     # for these names — adding a new sessions version means wiring it up in
     # database.py, and this helper picks it up automatically.
-    _SESSIONS_TABLE_NAMES = ("sessions", "raw_sessions", "raw_sessions_v3")
+    _SESSIONS_TABLE_NAMES = ("sessions", "raw_sessions")
 
     def _sessions_table_classes(self) -> tuple[type, ...]:
         database = self.context.database

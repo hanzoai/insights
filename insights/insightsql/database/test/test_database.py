@@ -3370,7 +3370,6 @@ class TestDatabase(BaseTest, QueryMatchingTest):
             "raw_error_tracking_issue_fingerprint_overrides",
             "raw_error_tracking_fingerprint_issue_state",
             "raw_sessions",
-            "raw_sessions_v3",
             "raw_query_log",
             "raw_document_embeddings",
             "document_embeddings_text_embedding_3_small_1536",

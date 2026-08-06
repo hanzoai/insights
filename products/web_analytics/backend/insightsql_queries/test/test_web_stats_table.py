@@ -30,7 +30,6 @@ from insights.schema import (
     InsightsQLQueryModifiers,
     PropertyOperator,
     SessionPropertyFilter,
-    SessionTableVersion,
     WebAnalyticsOrderByDirection,
     WebAnalyticsOrderByFields,
     WebAnalyticsSampling,
@@ -235,14 +234,13 @@ class TestWebStatsTableQueryRunner(
         compare_filter=None,
         action: Optional[Action] = None,
         custom_event: Optional[str] = None,
-        session_table_version: SessionTableVersion = SessionTableVersion.V2,
         filter_test_accounts: Optional[bool] = False,
         bounce_rate_mode: Optional[BounceRatePageViewMode] = BounceRatePageViewMode.COUNT_PAGEVIEWS,
         orderBy=None,
     ):
         with freeze_time(self.QUERY_TIMESTAMP):
             modifiers = InsightsQLQueryModifiers(
-                sessionTableVersion=session_table_version, bounceRatePageViewMode=bounce_rate_mode
+                bounceRatePageViewMode=bounce_rate_mode
             )
             query = WebStatsTableQuery(
                 dateRange=DateRange(date_from=date_from, date_to=date_to),

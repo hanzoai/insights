@@ -5,7 +5,6 @@ from insights.schema import (
     ActionConversionGoal,
     DateRange,
     InsightsQLQueryModifiers,
-    SessionTableVersion,
     WebStatsBreakdown,
     WebStatsTableQuery,
 )
@@ -84,7 +83,6 @@ class TestWebStatsTablePreAggregatedConversions(WebAnalyticsPreAggregatedTestBas
 
         with freeze_time("2024-01-02T00:00:00Z"):
             modifiers = InsightsQLQueryModifiers(
-                sessionTableVersion=SessionTableVersion.V2,
                 useWebAnalyticsPreAggregatedTables=True,
             )
             query = WebStatsTableQuery(
@@ -174,7 +172,6 @@ class TestWebStatsTablePreAggregatedConversions(WebAnalyticsPreAggregatedTestBas
 
             with freeze_time("2024-01-02T00:00:00Z"):
                 modifiers = InsightsQLQueryModifiers(
-                    sessionTableVersion=SessionTableVersion.V2,
                     useWebAnalyticsPreAggregatedTables=True,
                 )
                 query = WebStatsTableQuery(

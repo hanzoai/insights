@@ -3,7 +3,7 @@ from django.conf import settings
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
 from insights.datastore.cluster import ON_CLUSTER_CLAUSE
-from insights.models.raw_sessions.sessions_v2 import (
+from insights.models.raw_sessions.sessions import (
     RAW_SESSION_TABLE_UPDATE_SQL,
     RAW_SESSIONS_CREATE_OR_REPLACE_VIEW_SQL,
     SHARDED_RAW_SESSIONS_DATA_TABLE,

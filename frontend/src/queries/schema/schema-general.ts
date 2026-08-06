@@ -31,9 +31,9 @@ import {
     FunnelMathType,
     FunnelsFilterType,
     GroupMathType,
-    InsightsQLMathType,
     InsightShortId,
     InsightType,
+    InsightsQLMathType,
     IntegrationType,
     IntervalType,
     LifecycleFilterType,
@@ -488,7 +488,6 @@ export interface InsightsQLQueryModifiers {
     personsJoinMode?: 'inner' | 'left'
     bounceRatePageViewMode?: 'count_pageviews' | 'uniq_urls' | 'uniq_page_screen_autocaptures'
     bounceRateDurationSeconds?: number
-    sessionTableVersion?: 'auto' | 'v1' | 'v2' | 'v3'
     sessionsV2JoinMode?: 'string' | 'uuid'
     materializedColumnsOptimizationMode?: 'disabled' | 'optimized'
     propertyGroupsMode?: 'enabled' | 'disabled' | 'optimized'

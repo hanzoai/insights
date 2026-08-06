@@ -7,7 +7,7 @@ from django.test import SimpleTestCase
 
 from parameterized import parameterized
 
-from insights.schema import InsightsQLQueryModifiers, PersonsOnEventsMode, SessionTableVersion
+from insights.schema import InsightsQLQueryModifiers, PersonsOnEventsMode
 
 from insights.insightsql import ast
 from insights.insightsql.context import InsightsQLContext
@@ -147,7 +147,6 @@ class TestBuiltDatabaseSerializable(BaseTest):
     @parameterized.expand(
         [
             ("default", InsightsQLQueryModifiers()),
-            ("sessions_v3", InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V3)),
             (
                 "poe_overrides_joined",
                 InsightsQLQueryModifiers(personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_JOINED),
@@ -191,9 +190,7 @@ class TestLazyJoinManifest(SimpleTestCase):
             "data_warehouse_experiments",
             "error_tracking_fingerprint_issue_state",
             "error_tracking_issue_fingerprint_overrides",
-            "events_to_sessions_v1",
-            "events_to_sessions_v2",
-            "events_to_sessions_v3",
+            "events_to_sessions",
             "foreign_key",
             "group_n",
             "groups_revenue_analytics",
@@ -204,9 +201,7 @@ class TestLazyJoinManifest(SimpleTestCase):
             "persons_revenue_analytics",
             "replay_to_console_logs",
             "replay_to_events",
-            "replay_to_sessions_v1",
-            "replay_to_sessions_v2",
-            "replay_to_sessions_v3",
+            "replay_to_sessions",
             "ticket_assignment",
             "ticket_tags",
         ]

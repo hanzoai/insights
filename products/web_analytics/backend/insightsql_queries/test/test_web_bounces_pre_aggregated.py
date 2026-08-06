@@ -1,7 +1,7 @@
 from freezegun import freeze_time
 from insights.test.base import _create_event, _create_person, flush_persons_and_events
 
-from insights.schema import DateRange, InsightsQLQueryModifiers, SessionTableVersion, WebOverviewQuery
+from insights.schema import DateRange, InsightsQLQueryModifiers, WebOverviewQuery
 
 from insights.datastore.client.execute import sync_execute
 from insights.models.utils import uuid7
@@ -261,8 +261,7 @@ class TestWebBouncesPreAggregated(WebAnalyticsPreAggregatedTestBase):
             compareFilter=None,
         )
         modifiers = InsightsQLQueryModifiers(
-            useWebAnalyticsPreAggregatedTables=False, sessionTableVersion=SessionTableVersion.V2
-        )
+            useWebAnalyticsPreAggregatedTables=False, )
         runner = WebOverviewQueryRunner(query=query, team=self.team, modifiers=modifiers)
         weboverview_response = runner.calculate()
         weboverview_results = {item.key: item.value for item in weboverview_response.results}
