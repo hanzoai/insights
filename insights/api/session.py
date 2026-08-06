@@ -4,15 +4,9 @@ from opentelemetry import trace
 from rest_framework import request, response, viewsets
 from rest_framework.exceptions import ValidationError
 
-from insights.schema import SessionTableVersion
-
-from insights.insightsql.database.schema.sessions_v1 import (
-    get_lazy_session_table_properties_v1,
-    get_lazy_session_table_values_v1,
-)
-from insights.insightsql.database.schema.sessions_v2 import (
-    get_lazy_session_table_properties_v2,
-    get_lazy_session_table_values_v2,
+from insights.insightsql.database.schema.sessions import (
+    get_lazy_session_table_properties,
+    get_lazy_session_table_values,
 )
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 
@@ -48,15 +42,7 @@ class SessionViewSet(
             span.set_attribute("has_search_term", search_term is not None)
 
             modifiers = create_default_modifiers_for_team(team)
-            if (
-                modifiers.sessionTableVersion == SessionTableVersion.V2
-                or modifiers.sessionTableVersion == SessionTableVersion.AUTO
-            ):
-                span.set_attribute("session_table_version", "v2")
-                result = get_lazy_session_table_values_v2(key, search_term=search_term, team=team)
-            else:
-                span.set_attribute("session_table_version", "v1")
-                result = get_lazy_session_table_values_v1(key, search_term=search_term, team=team)
+            result = get_lazy_session_table_values(key, search_term=search_term, team=team)
 
             span.set_attribute("result_count", len(result))
 
@@ -75,14 +61,7 @@ class SessionViewSet(
 
         # unlike e.g. event properties, there's a very limited number of session properties,
         # so we can just return them all
-        modifiers = create_default_modifiers_for_team(self.team)
-        if (
-            modifiers.sessionTableVersion == SessionTableVersion.V2
-            or modifiers.sessionTableVersion == SessionTableVersion.AUTO
-        ):
-            results = get_lazy_session_table_properties_v2(search)
-        else:
-            results = get_lazy_session_table_properties_v1(search)
+        results = get_lazy_session_table_properties(search)
         return response.Response(
             {
                 "count": len(results),
