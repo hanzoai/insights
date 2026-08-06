@@ -703,7 +703,6 @@ class DatastorePrinter(InsightsQLPrinter):
                         if table_name in (
                             "events",
                             "raw_sessions",
-                            "raw_sessions_v3",
                             "session_replay_events",
                             "raw_session_replay_events",
                         ):
@@ -753,7 +752,6 @@ class DatastorePrinter(InsightsQLPrinter):
 
         hack_sessions_timestamp = (
             "fromUnixTimestamp(intDiv(toUInt64(bitShiftRight(raw_sessions.session_id_v7, 80)), 1000))",
-            "raw_sessions_v3.session_timestamp",
         )
         if left in hack_sessions_timestamp or right in hack_sessions_timestamp:
             not_nullable = True

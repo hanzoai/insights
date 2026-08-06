@@ -21,7 +21,7 @@ from insights.models.person.sql import (
     PERSONS_TABLE_SQL,
 )
 from insights.models.person_overrides.sql import PERSON_OVERRIDES_CREATE_TABLE_SQL
-from insights.models.raw_sessions.sessions_v2 import DISTRIBUTED_RAW_SESSIONS_TABLE_SQL
+from insights.models.raw_sessions.sessions import DISTRIBUTED_RAW_SESSIONS_TABLE_SQL
 from insights.models.sessions.sql import DISTRIBUTED_SESSIONS_TABLE_SQL
 from insights.session_recordings.sql.session_replay_embeddings_sql import DISTRIBUTED_SESSION_REPLAY_EMBEDDINGS_TABLE_SQL
 from insights.session_recordings.sql.session_replay_event_sql import DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL
