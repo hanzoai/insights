@@ -10,7 +10,6 @@ from insights.schema import (
     SessionAttributionExplorerQuery,
     SessionAttributionGroupBy,
     SessionPropertyFilter,
-    SessionTableVersion,
 )
 
 from insights.insightsql.constants import LimitContext
@@ -79,12 +78,11 @@ class TestSessionAttributionQueryRunner(DatastoreTestMixin, APIBaseTest):
         self,
         date_from: Optional[str] = None,
         date_to: Optional[str] = None,
-        session_table_version: SessionTableVersion = SessionTableVersion.V2,
         group_by: Optional[list[SessionAttributionGroupBy]] = None,
         limit_context: Optional[LimitContext] = None,
         properties: Optional[list[SessionPropertyFilter]] = None,
     ):
-        modifiers = InsightsQLQueryModifiers(sessionTableVersion=session_table_version)
+        modifiers = InsightsQLQueryModifiers()
         query = SessionAttributionExplorerQuery(
             filters=Filters(dateRange=DateRange(date_from=date_from, date_to=date_to), properties=properties or []),
             groupBy=group_by or [],

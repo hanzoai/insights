@@ -25,12 +25,10 @@ from insights.insightsql.database.lazy_join_tags import (
     DATA_WAREHOUSE_EXPERIMENTS,
     ERROR_TRACKING_FINGERPRINT_ISSUE_STATE,
     ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES,
-    EVENTS_TO_SESSIONS_V2,
-    EVENTS_TO_SESSIONS_V3,
+    EVENTS_TO_SESSIONS,
     PERSON_DISTINCT_ID_OVERRIDES,
     PERSONS,
-    REPLAY_TO_SESSIONS_V2,
-    REPLAY_TO_SESSIONS_V3,
+    REPLAY_TO_SESSIONS,
 )
 from insights.insightsql.database.models import (
     BooleanDatabaseField,
@@ -119,11 +117,15 @@ from insights.insightsql.database.schema.preaggregation_results import Preaggreg
 from insights.insightsql.database.schema.precalculated_events import PrecalculatedEventsTable
 from insights.insightsql.database.schema.precalculated_person_properties import PrecalculatedPersonPropertiesTable
 from insights.insightsql.database.schema.query_log_archive import QueryLogArchiveTable, RawQueryLogArchiveTable
-from insights.insightsql.database.schema.session_replay_events import RawSessionReplayEventsTable, SessionReplayEventsTable
+from insights.insightsql.database.schema.session_replay_events import (
+    RawSessionReplayEventsTable,
+    SessionReplayEventsTable,
+)
 from insights.insightsql.database.schema.session_replay_features import SessionReplayFeaturesTable
-from insights.insightsql.database.schema.sessions_v1 import RawSessionsTableV1, SessionsTableV1
-from insights.insightsql.database.schema.sessions_v2 import RawSessionsTableV2, SessionsTableV2
-from insights.insightsql.database.schema.sessions_v3 import RawSessionsTableV3, SessionsTableV3
+from insights.insightsql.database.schema.sessions import (
+    RawSessionsTable,
+    SessionsTable,
+)
 from insights.insightsql.database.schema.spans import TraceAttributesTable, TraceSpansTable
 from insights.insightsql.database.schema.static_cohort_people import StaticCohortPeople
 from insights.insightsql.database.schema.system import SystemTables
@@ -146,7 +148,7 @@ from insights.insightsql.timings import InsightsQLTimings
 
 from insights.exceptions_capture import capture_exception
 from insights.ph_client import feature_enabled_or_false
-from insights.schema_enums import DatabaseSerializedFieldType, PersonsOnEventsMode, SessionTableVersion
+from insights.schema_enums import DatabaseSerializedFieldType, PersonsOnEventsMode
 from insights.scopes import APIScopeObject
 from insights.synthetic_user import SyntheticUser
 from insights.week_start_day import WeekStartDay
@@ -273,7 +275,7 @@ ROOT_TABLES__DO_NOT_ADD_ANY_MORE: dict[str, TableNode] = {
     "app_metrics": TableNode(name="app_metrics", table=AppMetrics2Table()),
     "console_logs_log_entries": TableNode(name="console_logs_log_entries", table=ReplayConsoleLogsLogEntriesTable()),
     "batch_export_log_entries": TableNode(name="batch_export_log_entries", table=BatchExportLogEntriesTable()),
-    "sessions": TableNode(name="sessions", table=SessionsTableV1()),
+    "sessions": TableNode(name="sessions", table=SessionsTable()),
     "heatmaps": TableNode(name="heatmaps", table=HeatmapsTable()),
     "exchange_rate": TableNode(name="exchange_rate", table=ExchangeRateTable()),
     "document_embeddings": TableNode(name="document_embeddings", table=DocumentEmbeddingsTable()),
@@ -312,8 +314,7 @@ ROOT_TABLES__DO_NOT_ADD_ANY_MORE: dict[str, TableNode] = {
         name="raw_error_tracking_fingerprint_issue_state",
         table=RawErrorTrackingFingerprintIssueStateTable(),
     ),
-    "raw_sessions": TableNode(name="raw_sessions", table=RawSessionsTableV1()),
-    "raw_sessions_v3": TableNode(name="raw_sessions_v3", table=RawSessionsTableV3()),
+    "raw_sessions": TableNode(name="raw_sessions", table=RawSessionsTable()),
     "raw_query_log": TableNode(name="raw_query_log", table=RawQueryLogArchiveTable()),
     "raw_document_embeddings": TableNode(name="raw_document_embeddings", table=RawDocumentEmbeddingsTable()),
 }
@@ -1574,31 +1575,31 @@ class Database(BaseModel):
 
                 _use_error_tracking_issue_id_from_error_tracking_issue_overrides(database)
 
+        # ONE session model. `raw_sessions` is the projection the events plane
+        # writes; `sessions` is the aggregate read over it. There is no version
+        # switch, because there is nothing to switch between.
         with timings.measure("session_table", emit_span=True):
-            if not database._is_direct_query() and (
-                modifiers.sessionTableVersion == SessionTableVersion.V2
-                or modifiers.sessionTableVersion == SessionTableVersion.AUTO
-            ):
-                raw_sessions: Union[RawSessionsTableV2, RawSessionsTableV3] = RawSessionsTableV2()
+            if not database._is_direct_query():
+                raw_sessions = RawSessionsTable()
                 database.tables.add_child(
                     TableNode(name="raw_sessions", table=raw_sessions), table_conflict_mode="override"
                 )
 
-                sessions: Union[SessionsTableV2, SessionsTableV3] = SessionsTableV2()
+                sessions = SessionsTable()
                 database.tables.add_child(TableNode(name="sessions", table=sessions), table_conflict_mode="override")
 
                 events_table = database.get_table("events")
                 events_table.fields["session"] = LazyJoin(
                     from_field=["$session_id"],
                     join_table=sessions,
-                    resolver=EVENTS_TO_SESSIONS_V2,
+                    resolver=EVENTS_TO_SESSIONS,
                 )
 
                 replay_events = database.get_table("session_replay_events")
                 replay_events.fields["session"] = LazyJoin(
                     from_field=["session_id"],
                     join_table=sessions,
-                    resolver=REPLAY_TO_SESSIONS_V2,
+                    resolver=REPLAY_TO_SESSIONS,
                 )
                 cast(LazyJoin, replay_events.fields["events"]).join_table = events_table
 
@@ -1606,33 +1607,7 @@ class Database(BaseModel):
                 raw_replay_events.fields["session"] = LazyJoin(
                     from_field=["session_id"],
                     join_table=sessions,
-                    resolver=REPLAY_TO_SESSIONS_V2,
-                )
-                cast(LazyJoin, raw_replay_events.fields["events"]).join_table = events_table
-            elif not database._is_direct_query() and modifiers.sessionTableVersion == SessionTableVersion.V3:
-                sessions = SessionsTableV3()
-                database.tables.add_child(TableNode(name="sessions", table=sessions), table_conflict_mode="override")
-
-                events_table = database.get_table("events")
-                events_table.fields["session"] = LazyJoin(
-                    from_field=["$session_id"],
-                    join_table=sessions,
-                    resolver=EVENTS_TO_SESSIONS_V3,
-                )
-
-                replay_events = database.get_table("session_replay_events")
-                replay_events.fields["session"] = LazyJoin(
-                    from_field=["session_id"],
-                    join_table=sessions,
-                    resolver=REPLAY_TO_SESSIONS_V3,
-                )
-                cast(LazyJoin, replay_events.fields["events"]).join_table = events_table
-
-                raw_replay_events = database.get_table("raw_session_replay_events")
-                raw_replay_events.fields["session"] = LazyJoin(
-                    from_field=["session_id"],
-                    join_table=sessions,
-                    resolver=REPLAY_TO_SESSIONS_V3,
+                    resolver=REPLAY_TO_SESSIONS,
                 )
                 cast(LazyJoin, raw_replay_events.fields["events"]).join_table = events_table
 

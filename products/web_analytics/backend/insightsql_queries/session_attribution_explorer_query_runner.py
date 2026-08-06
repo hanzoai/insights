@@ -4,7 +4,6 @@ from insights.schema import (
     SessionAttributionExplorerQuery,
     SessionAttributionExplorerQueryResponse,
     SessionAttributionGroupBy,
-    SessionTableVersion,
 )
 
 from insights.insightsql import ast
@@ -14,23 +13,7 @@ from insights.insightsql.parser import parse_select
 from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
 
-AD_IDS_PREFIXES_SESSIONS_V1 = [
-    "gclid",
-    "gad_source",
-    "gclsrc",
-    "dclid",
-    "gbraid",
-    "wbraid",
-    "fbclid",
-    "msclkid",
-    "twclid",
-    "li_fat_id",
-    "mc_cid",
-    "igshid",
-    "ttclid",
-]
-
-AD_IDS_PREFIXES_SESSIONS_V2 = [
+AD_IDS_PREFIXES_SESSIONS = [
     "gclid",
     "gad_source",
     "gclsrc",
@@ -67,10 +50,7 @@ class SessionAttributionExplorerQueryRunner(AnalyticsQueryRunner[SessionAttribut
     # placeholders are valid in InsightsQL insights too, so it will "just work"!
     def to_query(self) -> ast.SelectQuery:
         with self.timings.measure("session_attribution_query_runner"):
-            if self.query.modifiers and self.query.modifiers.sessionTableVersion == SessionTableVersion.V1:
-                relevant_ad_ids = AD_IDS_PREFIXES_SESSIONS_V1
-            else:
-                relevant_ad_ids = AD_IDS_PREFIXES_SESSIONS_V2
+            relevant_ad_ids = AD_IDS_PREFIXES_SESSIONS
 
             group_by = []
 

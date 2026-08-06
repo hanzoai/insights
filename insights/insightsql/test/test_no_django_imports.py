@@ -10,7 +10,6 @@ import subprocess
 DJANGO_FREE_MODULES = [
     "insights.uuidt",
     "insights.exchange_rate_constants",
-    "insights.raw_sessions_v3_ad_ids",
     "insights.datastore.events_json",
     "insights.property_columns",
     "insights.week_start_day",

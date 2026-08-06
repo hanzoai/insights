@@ -12,7 +12,6 @@ from insights.test.base import (
 from insights.schema import (
     DateRange,
     InsightsQLQueryModifiers,
-    SessionTableVersion,
     WebAnalyticsOrderByDirection,
     WebAnalyticsOrderByFields,
     WebAnalyticsPreComputeStrategy,
@@ -65,13 +64,12 @@ class TestExternalClicksTableQueryRunner(DatastoreTestMixin, APIBaseTest):
         date_to,
         limit=None,
         properties=None,
-        session_table_version: SessionTableVersion = SessionTableVersion.V2,
         filter_test_accounts: Optional[bool] = False,
         strip_query_params: Optional[bool] = False,
         do_path_cleaning: Optional[bool] = False,
         order_by: Optional[list[Union[WebAnalyticsOrderByFields, WebAnalyticsOrderByDirection]]] = None,
     ):
-        modifiers = InsightsQLQueryModifiers(sessionTableVersion=session_table_version)
+        modifiers = InsightsQLQueryModifiers()
         query = WebExternalClicksTableQuery(
             dateRange=DateRange(date_from=date_from, date_to=date_to),
             properties=properties or [],

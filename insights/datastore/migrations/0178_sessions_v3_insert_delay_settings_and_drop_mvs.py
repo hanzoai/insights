@@ -1,18 +1,3 @@
-from insights.datastore.client.connection import NodeRole
-from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.raw_sessions.sessions_v3 import (
-    ALTER_SHARDED_RAW_SESSIONS_TABLE_SETTINGS_V3,
-    DROP_RAW_SESSION_MATERIALIZED_VIEW_RECORDINGS_SQL_V3,
-    DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL_V3,
-)
-
-operations = [
-    run_sql_with_exceptions(
-        ALTER_SHARDED_RAW_SESSIONS_TABLE_SETTINGS_V3(),
-        node_roles=[NodeRole.DATA],
-        sharded=True,
-        is_alter_on_replicated_table=True,
-    ),
-    run_sql_with_exceptions(DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL_V3(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(DROP_RAW_SESSION_MATERIALIZED_VIEW_RECORDINGS_SQL_V3(), node_roles=[NodeRole.DATA]),
-]
+# Applied on the live datastore under this name. The v3 sessions plane it touched was
+# retired with the one sessions model, so a fresh bootstrap creates nothing here.
+operations = []  # type: ignore  # noqa

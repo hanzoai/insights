@@ -233,7 +233,6 @@ from insights.schema_enums import (
     Scale as Scale,
     SessionAttributionGroupBy as SessionAttributionGroupBy,
     SessionsV2JoinMode as SessionsV2JoinMode,
-    SessionTableVersion as SessionTableVersion,
     SlackIntegrationScope as SlackIntegrationScope,
     SlackIntegrationScopeInReview as SlackIntegrationScopeInReview,
     SlashCommandName as SlashCommandName,
@@ -5135,7 +5134,6 @@ class InsightsQLQueryModifiers(BaseModel):
             " references one (e.g. `$entry_current_url`)."
         ),
     )
-    sessionTableVersion: SessionTableVersion | None = None
     sessionsV2JoinMode: SessionsV2JoinMode | None = None
     timings: bool | None = None
     typeAwareCastSimplification: bool | None = Field(

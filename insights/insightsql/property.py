@@ -45,7 +45,7 @@ from insights.insightsql import ast
 from insights.insightsql.base import AST
 from insights.insightsql.constants import EXCEPTION_STRING_ARRAY_PROPERTIES
 from insights.insightsql.database.models import BooleanDatabaseField
-from insights.insightsql.database.schema.sessions_v3 import LAZY_SESSIONS_FIELDS
+from insights.insightsql.database.schema.sessions import LAZY_SESSIONS_FIELDS
 from insights.insightsql.errors import NotImplementedError, QueryError
 from insights.insightsql.functions import find_insightsql_aggregation
 from insights.insightsql.parser import CacheOrigin, parse_expr

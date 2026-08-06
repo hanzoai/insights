@@ -1695,9 +1695,6 @@ export interface eventUsageLogicActions {
         dashboardId: number | null
         insight: Partial<QueryBasedInsightModel<Node<Record<string, any>>>> | null
     }
-    reportSessionTableVersionUpdated: (version: string) => {
-        version: string
-    }
     reportSubscribedDuringOnboarding: (productKey: string) => {
         productKey: string
     }
@@ -2250,7 +2247,6 @@ export const eventUsageLogic = kea<eventUsageLogicType>([
         reportPoEModeUpdated: (mode: string) => ({ mode }),
         reportPersonsJoinModeUpdated: (mode: string) => ({ mode }),
         reportBounceRatePageViewModeUpdated: (mode: string) => ({ mode }),
-        reportSessionTableVersionUpdated: (version: string) => ({ version }),
         reportCustomChannelTypeRulesUpdated: (numRules: number) => ({ numRules }),
         reportPropertySelectOpened: true,
         reportCreatedDashboardFromModal: true,
@@ -3269,9 +3265,6 @@ export const eventUsageLogic = kea<eventUsageLogicType>([
         },
         reportBounceRatePageViewModeUpdated: async ({ mode }) => {
             insights.capture('bounce rate page view mode updated', { mode })
-        },
-        reportSessionTableVersionUpdated: async ({ version }) => {
-            insights.capture('session table version updated', { version })
         },
         reportCustomChannelTypeRulesUpdated: async ({ numRules }) => {
             insights.capture('custom channel type rules updated', { numRules })

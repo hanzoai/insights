@@ -15,7 +15,6 @@ from insights.schema import (
     DateRange,
     EventPropertyFilter,
     InsightsQLQueryModifiers,
-    SessionTableVersion,
     WebGoalsQuery,
 )
 
@@ -132,11 +131,10 @@ class TestWebGoalsQueryRunner(DatastoreTestMixin, APIBaseTest):
         path_cleaning_filters=None,
         properties=None,
         compare=True,
-        session_table_version: SessionTableVersion = SessionTableVersion.V2,
         filter_test_accounts: Optional[bool] = False,
     ):
         with freeze_time(self.QUERY_TIMESTAMP):
-            modifiers = InsightsQLQueryModifiers(sessionTableVersion=session_table_version)
+            modifiers = InsightsQLQueryModifiers()
             query = WebGoalsQuery(
                 dateRange=DateRange(date_from=date_from, date_to=date_to),
                 properties=properties or [],

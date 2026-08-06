@@ -1,5 +1,5 @@
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.raw_sessions.sessions_v2 import (
+from insights.models.raw_sessions.sessions import (
     DISTRIBUTED_RAW_SESSIONS_TABLE_SQL,
     RAW_SESSIONS_CREATE_OR_REPLACE_VIEW_SQL,
     RAW_SESSIONS_TABLE_MV_SQL,
