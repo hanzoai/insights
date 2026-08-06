@@ -6,7 +6,7 @@ import { router } from 'kea-router'
 import React from 'react'
 
 import { IconExternal, IconList } from '@hanzo/icons'
-import { Button, Divider, Link } from '@hanzo/elements'
+import { Divider, Link } from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'

@@ -146,7 +146,7 @@ describe('mcpGatewaySettingsLogic', () => {
         'handles %s returns without losing the selected Settings tab',
         async (parameter, toastType, message) => {
             await mountSettings(true)
-            const toast = jest.spyOn(toast, toastType)
+            const toastSpy = jest.spyOn(toast, toastType)
             const initialRequestCounts = [
                 mockConfigList.mock.calls.length,
                 mockServersList.mock.calls.length,
@@ -158,7 +158,7 @@ describe('mcpGatewaySettingsLogic', () => {
             router.actions.push(`${urls.settings('mcp-servers')}?tab=audit&keep=value&${parameter}=true#panel=open`)
             await expectLogic(gatewayLogic!).toFinishAllListeners()
 
-            expect(toast).toHaveBeenCalledWith(message)
+            expect(toastSpy).toHaveBeenCalledWith(message)
             expect(settingsLogic?.values.activeTab).toBe('audit')
             expect(router.values.searchParams).toEqual({ tab: 'audit', keep: 'value' })
             expect(router.values.hashParams).toEqual({ panel: 'open' })
@@ -174,12 +174,12 @@ describe('mcpGatewaySettingsLogic', () => {
 
     it('handles an OAuth callback that is already present when the Settings logic mounts', async () => {
         router.actions.push(`${urls.settings('mcp-servers')}?tab=audit&keep=value&oauth_complete=true#panel=open`)
-        const toast = jest.spyOn(toast, 'success')
+        const toastSpy = jest.spyOn(toast, 'success')
 
         await mountSettings(true, 2)
 
-        expect(toast).toHaveBeenCalledWith('Server connected')
-        expect(toast).toHaveBeenCalledTimes(1)
+        expect(toastSpy).toHaveBeenCalledWith('Server connected')
+        expect(toastSpy).toHaveBeenCalledTimes(1)
         expect(settingsLogic?.values.activeTab).toBe('audit')
         expect(router.values.searchParams).toEqual({ tab: 'audit', keep: 'value' })
         expect(router.values.hashParams).toEqual({ panel: 'open' })

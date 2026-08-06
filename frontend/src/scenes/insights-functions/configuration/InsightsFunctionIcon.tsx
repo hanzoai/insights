@@ -170,7 +170,7 @@ export function InsightsFunctionIcon({
                     {!loaded && <Skeleton className="absolute w-full h-full" />}
                 </>
             ) : (
-                <span>🦔</span>
+                <span>◆</span>
             )}
         </span>
     )

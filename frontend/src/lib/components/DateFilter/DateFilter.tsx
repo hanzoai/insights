@@ -27,7 +27,6 @@ import { ResolvedDateRangeResponse } from '~/queries/schema/schema-general'
 import { DateMappingOption, PropertyOperator } from '~/types'
 
 import { PropertyFilterDatePicker } from '../PropertyFilters/components/PropertyFilterDatePicker'
-import type { DateFilterExclusions } from './DateFilterExclusionsControl'
 import { dateFilterLogic } from './dateFilterLogic'
 import { FixedRangeWithTimePicker } from './FixedRangeWithTimePicker'
 import { JumpToTimestampPicker } from './JumpToTimestampPicker'

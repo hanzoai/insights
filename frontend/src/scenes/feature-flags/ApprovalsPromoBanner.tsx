@@ -23,9 +23,9 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
     const { hasAvailableFeature } = useValues(userLogic)
     const { isAdminOrOwner } = useValues(organizationLogic)
     const { activePolicies, activePoliciesLoading } = useValues(approvalsGateLogic)
-    const bannerLogic = bannerLogic({ dismissKey: DISMISS_KEY })
-    const { isDismissed } = useValues(bannerLogic)
-    const { dismiss } = useActions(bannerLogic)
+    const promoBanner = bannerLogic({ dismissKey: DISMISS_KEY })
+    const { isDismissed } = useValues(promoBanner)
+    const { dismiss } = useActions(promoBanner)
 
     const hasActivePolicies = activePolicies.length > 0
     const shouldShow =

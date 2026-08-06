@@ -82,14 +82,14 @@ export const UnsubscribeSurveyModal = ({
         <div className="flex flex-col gap-4">
             <div className="text-center">
                 <h3 className="text-lg mb-2">How about now? Was that enough mascots?</h3>
-                <p className="text-secondary mb-4">Look at all these adorable mascots dancing just for you! 🦔✨</p>
+                <p className="text-secondary mb-4">Look at all these adorable mascots dancing just for you! ◆✨</p>
                 <div className="flex justify-center items-center">
                     <HeartHog width="100" height="100" />
                 </div>
             </div>
             <div className="flex gap-2 justify-center">
                 <Link onClick={triggerMoreMascots} disabled={billingLoading}>
-                    Still not enough! More mascots! 🦔
+                    Still not enough! More mascots! ◆
                 </Link>
             </div>
             <Divider />

@@ -2,7 +2,6 @@ import { useActions, useValues } from 'kea'
 
 import { Button } from '@hanzo/elements'
 
-import { Button, SelectTriggerIcon } from 'lib/ui/quill'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 

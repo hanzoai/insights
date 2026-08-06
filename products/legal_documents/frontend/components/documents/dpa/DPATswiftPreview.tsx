@@ -1,6 +1,6 @@
 import { SignatureBlock } from '../../base/SignatureBlock'
 
-const TSWIFT_IMG = 'https://res.cloudinary.com/dmukukwp6/image/upload/hanzo.ai/src/images/dpa/t-swift.png'
+const TSWIFT_IMG = 'https://example.com/image.png'
 
 export function DPATswiftPreview(): JSX.Element {
     return (

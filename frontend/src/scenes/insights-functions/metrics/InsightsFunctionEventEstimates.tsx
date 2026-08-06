@@ -47,7 +47,7 @@ export function InsightsFunctionEventEstimates(): JSX.Element | null {
         ],
     }
 
-    const canvasUrl = urls.canvas() + '#🦔=' + base64Encode(JSON.stringify(canvasContent))
+    const canvasUrl = urls.canvas() + '#◆=' + base64Encode(JSON.stringify(canvasContent))
 
     return (
         <div className="relative p-3 rounded border deprecated-space-y-2 bg-surface-primary">
