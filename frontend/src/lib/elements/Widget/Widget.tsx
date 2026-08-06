@@ -16,7 +16,7 @@ export interface WidgetProps {
 
 export function Widget({ title, onClose, actions, children, className }: WidgetProps): JSX.Element {
     return (
-        <Widget className={className}>
+        <Container className={className}>
             <Header>
                 <span className="flex-1 text-primary-alt px-2 truncate">{title}</span>
                 {actions}
@@ -24,11 +24,11 @@ export function Widget({ title, onClose, actions, children, className }: WidgetP
                 {onClose && <Button status="danger" onClick={onClose} size="small" icon={<IconX />} />}
             </Header>
             <Content>{children}</Content>
-        </Widget>
+        </Container>
     )
 }
 
-const Widget = ({ children, className }: { children: React.ReactNode; className?: string }): JSX.Element => {
+const Container = ({ children, className }: { children: React.ReactNode; className?: string }): JSX.Element => {
     return <div className={clsx('Widget', className)}>{children}</div>
 }
 

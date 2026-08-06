@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { IconDocument, IconGear, IconHeadset, IconOpenSidebar } from '@hanzo/icons'
 import { Badge, Button, Link } from '@hanzo/elements'
-import { InsightsCaptureOnViewed } from '@hanzo/react'
+import { PostHogCaptureOnViewed as InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { WarningHog } from 'lib/components/mascots'

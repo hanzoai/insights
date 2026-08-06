@@ -4,7 +4,7 @@ import React from 'react'
 import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { Button, Checkbox, Skeleton, Link } from '@hanzo/elements'
-import { InsightsCaptureOnViewed } from '@hanzo/react'
+import { PostHogCaptureOnViewed as InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'

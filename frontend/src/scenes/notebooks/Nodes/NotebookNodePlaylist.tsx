@@ -1,7 +1,7 @@
 import { BuiltLogic, useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { InsightsErrorBoundary } from '@hanzo/react'
+import { PostHogErrorBoundary as InsightsErrorBoundary } from '@hanzo/react'
 
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

@@ -184,7 +184,7 @@ const INSIGHTS_EVAL_GLOBALS_BY_TARGET = {
     // No compatibility globals: those exist for Script source saved before `target` and
     // `evaluation_events` landed, and no session-target source predates them. This mirrors
     // build_session_hog_globals, which builds the shared globals and nothing else.
-    session: FN_EVAL_COMMON_GLOBALS_BY_TARGET.session,
+    session: INSIGHTS_EVAL_COMMON_GLOBALS_BY_TARGET.session,
 }
 
 function HogTestResultsPanel(): JSX.Element | null {

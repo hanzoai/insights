@@ -1,7 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { Select, type SelectProps } from '@hanzo/elements'
+import { type SelectProps } from '@hanzo/elements'
 
+import { Dot, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'lib/ui/quill'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 

@@ -1,5 +1,5 @@
 import insights from 'insights-js'
-import { toast, type ToastOptions } from 'react-toastify'
+import { toast as baseToast, type ToastOptions } from 'react-toastify'
 
 import { IconCheckCircle, IconInfo, IconWarning, IconX } from '@hanzo/icons'
 
@@ -67,7 +67,7 @@ export function ToastContent({ type, message, button, id }: ToastContentProps): 
                 <Button
                     onClick={() => {
                         void button.action()
-                        toast.dismiss(id)
+                        baseToast.dismiss(id)
                     }}
                     type="secondary"
                     size="small"
@@ -262,6 +262,6 @@ export const toast = {
         if (id) {
             cancelledIds.add(id)
         }
-        toast.dismiss(id)
+        baseToast.dismiss(id)
     },
 }

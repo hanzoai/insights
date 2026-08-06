@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { Banner, Link } from '@hanzo/elements'
-import { InsightsCaptureOnViewed } from '@hanzo/react'
+import { PostHogCaptureOnViewed as InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { urls } from 'scenes/urls'
