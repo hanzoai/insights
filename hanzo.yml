@@ -1,0 +1,29 @@
+# hanzoai/insights — the product analytics platform (Django + pnpm front end +
+# Rust services).
+#
+# Gate only, no `images:`. ghcr.io/hanzoai/insights is cut by
+# .hanzo/workflows/deploy.yml, which derives the next patch from what the
+# registry already publishes and refuses to re-push a live tag. Declaring
+# `images:` here would put a second producer behind that name and break exactly
+# the immutability that lane exists to enforce.
+#
+# The gate is the repo's own `lint` — oxlint over the JS/TS tree, then stylelint
+# over frontend/ and products/ — run against a lockfile-pinned install. That
+# combination fails on the defects a push actually introduces: an undefined
+# reference, an unused import that means a rename was left half-done, a stylesheet
+# that no longer parses.
+#
+# --ignore-scripts because this gate reads source. The scripts here build the
+# WASM and native artifacts (emsdk, ninja, node-gyp) that the IMAGE needs; the
+# linters need none of them, and pulling an Emscripten toolchain to run oxlint
+# is how a gate becomes slow enough that people start skipping it.
+#
+# Not the pytest or jest suites: those need Postgres, ClickHouse and Kafka
+# (see ci-backend.yml standing them up as services). That is an integration
+# lane. A gate that is red for a missing database says nothing about the commit.
+test:
+  - name: lint
+    run: |
+      set -e
+      pnpm install --frozen-lockfile --ignore-scripts
+      pnpm run lint
