@@ -108,11 +108,11 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
             {
                 loadSessionData: async () => {
                     const sessionQuery = (() => {
-                                // Extract timestamp from UUIDv7 and use simple date constants
-                                // This allows Datastore to push predicates down for partition pruning
-                                const { startDate } = getTimestampFromUUIDv7(props.sessionId)
-                                const endDate = new Date(startDate.getTime() + 60 * 60 * 1000) // +1 hour
-                                return insightsql`
+                        // Extract timestamp from UUIDv7 and use simple date constants
+                        // This allows Datastore to push predicates down for partition pruning
+                        const { startDate } = getTimestampFromUUIDv7(props.sessionId)
+                        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000) // +1 hour
+                        return insightsql`
                       SELECT
                           session_id,
                           distinct_id,
