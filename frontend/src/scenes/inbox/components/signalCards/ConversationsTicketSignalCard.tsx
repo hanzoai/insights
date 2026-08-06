@@ -4,7 +4,6 @@ import { Link } from '@hanzo/elements'
 import { IconMicrosoftTeams, IconSlack } from 'lib/elements/icons'
 import { Markdown } from 'lib/elements/Markdown'
 import { Tag, type TagType } from 'lib/elements/Tag'
-import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 import { urls } from 'scenes/urls'
 
 import type { ConversationsTicketSignalExtraApi } from 'products/signals/frontend/generated/api.schemas'
@@ -110,7 +109,6 @@ export function ConversationsTicketSignalCard({ signal }: SignalCardProps): JSX.
                         </span>
                     </span>
                 </Tag>
-                <span>{humanFriendlyDetailedTime(extra.created_at)}</span>
             </div>
             <div className="flex items-center mt-2">
                 <span className="flex-1" />

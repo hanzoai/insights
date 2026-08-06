@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconChevronLeft } from '@hanzo/icons'
-import { Checkbox, Input, TextArea, Link } from '@hanzo/elements'
+import { Input, TextArea, Link } from '@hanzo/elements'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { UsageLimitPaywall } from 'lib/components/PayGateMini/UsageLimitPaywall'
 import { TZLabel } from 'lib/components/TZLabel'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -53,6 +53,7 @@ import {
     monthlyWeekdayOptions,
     targetTypeOptions,
     timeOptions,
+    weekdayInputOptions,
     weekdayOptions,
     WEEKDAYS,
     AI_PROMPT_MAX_LENGTH,
@@ -474,7 +475,7 @@ function EditSubscriptionForm({
                             </Field>
                             <Field name="enabled" className="pb-2">
                                 {({ value, onChange }) => (
-                                    <Checkbox
+                                    <Switch
                                         checked={value !== false}
                                         onChange={onChange}
                                         data-attr="subscription-enabled"
@@ -567,7 +568,7 @@ function EditSubscriptionForm({
                                             mode="multiple"
                                             allowCustomValues
                                             data-attr="subscribed-emails"
-                                            options={usersLemonSelectOptions(meFirstMembers.map((x) => x.user))}
+                                            options={usersSelectOptions(meFirstMembers.map((x) => x.user))}
                                             loading={membersLoading}
                                             placeholder="Enter an email address"
                                         />
@@ -643,108 +644,115 @@ function EditSubscriptionForm({
                         ) : null}
 
                         <div>
-                            <div className="flex items-baseline justify-between w-full">
-                                <Label className="mb-2">Recurrence</Label>
-                                <div className="text-xs text-secondary text-right">{currentTimezone}</div>
-                            </div>
-                            <div className="flex gap-2 items-center rounded border p-2 flex-wrap">
-                                <span>Send every</span>
-                                <Field name="interval">
-                                    <Select options={intervalOptions} />
-                                </Field>
-                                <Field name="frequency">
-                                    <Select options={availableFrequencyOptions} />
-                                </Field>
+                            <Label className="mb-2">Recurrence</Label>
+                            <div className="rounded border p-2">
+                                <div className="flex gap-2 items-center flex-wrap">
+                                    <span>Send every</span>
+                                    <Field name="interval">
+                                        <Select options={intervalOptions} />
+                                    </Field>
+                                    <Field name="frequency" renderError={() => null}>
+                                        <Select options={availableFrequencyOptions} />
+                                    </Field>
 
-                                {subscription.frequency === 'weekly' && (
-                                    <>
-                                        <span>on</span>
-                                        <Field name="byweekday">
-                                            {({ value, onChange }) => (
-                                                <Select
-                                                    options={weekdayOptions}
-                                                    value={value ? value[0] : null}
-                                                    onChange={(val) => onChange([val])}
-                                                />
-                                            )}
-                                        </Field>
-                                    </>
-                                )}
-
-                                {subscription.frequency === 'monthly' && (
-                                    <>
-                                        <span>on the</span>
-                                        <Field name="bysetpos">
-                                            {({ value, onChange }) => (
-                                                <Select
-                                                    options={bysetposOptions}
-                                                    value={value ? String(value) : null}
-                                                    onChange={(val) => {
-                                                        onChange(typeof val === 'string' ? parseInt(val, 10) : null)
-                                                    }}
-                                                />
-                                            )}
-                                        </Field>
-                                        <Field name="byweekday">
-                                            {({ value, onChange }) => {
-                                                const isWeekday =
-                                                    value?.length === 5 && value.every((d: string) => WEEKDAYS.has(d))
-                                                const displayValue = value
-                                                    ? isWeekday
-                                                        ? 'weekday'
-                                                        : value.length === 1
-                                                          ? value[0]
-                                                          : 'day'
-                                                    : null
-
-                                                return (
-                                                    <Select
-                                                        dropdownMatchSelectWidth={false}
-                                                        options={monthlyWeekdayOptions}
-                                                        value={displayValue}
-                                                        onChange={(val) =>
-                                                            onChange(
-                                                                val === 'day'
-                                                                    ? Object.values(weekdayOptions).map((v) => v.value)
-                                                                    : val === 'weekday'
-                                                                      ? [...WEEKDAYS]
-                                                                      : [val]
-                                                            )
-                                                        }
-                                                    />
-                                                )
-                                            }}
-                                        </Field>
-                                    </>
-                                )}
-                                <span>by</span>
-                                <Field name="start_date">
-                                    {({ value, onChange }) => (
-                                        <Select
-                                            options={timeOptions}
-                                            value={dayjs(value).hour().toString()}
-                                            onChange={(val) => {
-                                                onChange(
-                                                    dayjs()
-                                                        .hour(typeof val === 'string' ? parseInt(val, 10) : 0)
-                                                        .minute(0)
-                                                        .second(0)
-                                                        .toISOString()
-                                                )
-                                            }}
-                                        />
+                                    {(subscription.frequency === 'daily' || subscription.frequency === 'weekly') && (
+                                        <>
+                                            <Field name="byweekday">
+                                                {({ value, onChange }) => {
+                                                    const selectedDays = value ?? []
+                                                    return (
+                                                        <InputSelect
+                                                            mode="multiple"
+                                                            bulkActions="select-and-clear-all"
+                                                            options={weekdayInputOptions}
+                                                            value={selectedDays}
+                                                            onChange={onChange}
+                                                        />
+                                                    )
+                                                }}
+                                            </Field>
+                                        </>
                                     )}
-                                </Field>
+                                    {subscription.frequency === 'monthly' && (
+                                        <>
+                                            <span>on the</span>
+                                            <Field name="bysetpos">
+                                                {({ value, onChange }) => (
+                                                    <Select
+                                                        options={bysetposOptions}
+                                                        value={value ? String(value) : null}
+                                                        onChange={(val) => {
+                                                            onChange(val === null ? null : Number(val))
+                                                        }}
+                                                    />
+                                                )}
+                                            </Field>
+                                            <Field name="byweekday">
+                                                {({ value, onChange }) => {
+                                                    const isWeekday =
+                                                        value?.length === 5 &&
+                                                        value.every((d: string) => WEEKDAYS.has(d))
+                                                    let displayValue = null
+                                                    if (isWeekday) {
+                                                        displayValue = 'weekday'
+                                                    } else if (value?.length === 1) {
+                                                        displayValue = value[0]
+                                                    } else if (value) {
+                                                        displayValue = 'day'
+                                                    }
+
+                                                    return (
+                                                        <Select
+                                                            dropdownMatchSelectWidth={false}
+                                                            options={monthlyWeekdayOptions}
+                                                            value={displayValue}
+                                                            onChange={(val) => {
+                                                                if (val === 'day') {
+                                                                    onChange(weekdayOptions.map(({ value }) => value))
+                                                                    return
+                                                                }
+                                                                if (val === 'weekday') {
+                                                                    onChange([...WEEKDAYS])
+                                                                    return
+                                                                }
+                                                                onChange([val])
+                                                            }}
+                                                        />
+                                                    )
+                                                }}
+                                            </Field>
+                                        </>
+                                    )}
+                                    <span>at</span>
+                                    <Field name="start_date">
+                                        {({ value, onChange }) => (
+                                            <Select
+                                                options={timeOptions}
+                                                value={dayjs(value).hour().toString()}
+                                                onChange={(val) => {
+                                                    onChange(
+                                                        dayjs()
+                                                            .hour(Number(val ?? 0))
+                                                            .minute(0)
+                                                            .second(0)
+                                                            .toISOString()
+                                                    )
+                                                }}
+                                            />
+                                        )}
+                                    </Field>
+                                </div>
                             </div>
                             {nextDeliveryDate && (
-                                <div className="text-xs text-secondary mt-1">
+                                <div className="text-sm text-secondary mt-1">
                                     Next delivery:{' '}
                                     <TZLabel
                                         time={dayjs(nextDeliveryDate)}
                                         formatDate="ddd, MMM D"
-                                        formatTime="HH:mm"
+                                        formatTime="h:mm A"
                                         timestampStyle="absolute"
-                                    />
+                                    />{' '}
+                                    {currentTimezone}
                                 </div>
                             )}
                         </div>
@@ -834,7 +842,7 @@ function EditSubscriptionForm({
                                             <TZLabel
                                                 time={dayjs(nextDeliveryDate)}
                                                 formatDate="ddd, MMM D"
-                                                formatTime="HH:mm"
+                                                formatTime="h:mm A"
                                                 timestampStyle="absolute"
                                             />
                                             )

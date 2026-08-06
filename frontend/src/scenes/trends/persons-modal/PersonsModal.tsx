@@ -126,7 +126,7 @@ export function PersonsModal({
     const totalActorsCount = missingActorsCount + actors.length
     type ActorsQuery = NonNullable<typeof query>
 
-    const asLemonSelectValue = (value: unknown): string | number | boolean | null =>
+    const asSelectValue = (value: unknown): string | number | boolean | null =>
         typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? value : null
 
     const getTitle = useCallback(() => {
@@ -265,7 +265,7 @@ export function PersonsModal({
                                           <Select
                                               fullWidth
                                               className="mb-2"
-                                              value={asLemonSelectValue(query[key as keyof ActorsQuery])}
+                                              value={asSelectValue(query[key as keyof ActorsQuery])}
                                               onChange={(v) => updateActorsQuery({ [key]: v })}
                                               options={options}
                                           />

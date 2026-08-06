@@ -377,6 +377,7 @@ export const NotebooksKernelStopCreateBody = /* @__PURE__ */ zod.object({
 export const notebooksSqlV2RunCreateBodyNodeTypeDefault = `insightsql`
 export const notebooksSqlV2RunCreateBodyOutputNameDefault = ``
 export const notebooksSqlV2RunCreateBodyRefsKindDefault = `insightsql`
+export const notebooksSqlV2RunCreateBodySendRawQueryDefault = false
 
 export const NotebooksSqlV2RunCreateBody = /* @__PURE__ */ zod.object({
     node_id: zod.string().describe('ProseMirror node id of the SQLV2 node being run.'),
@@ -413,5 +414,17 @@ export const NotebooksSqlV2RunCreateBody = /* @__PURE__ */ zod.object({
         .optional()
         .describe(
             "Available upstream nodes, keyed by dataframe name. A SQL node inlines referenced insightsql refs as CTEs — unless it references a local ref, which reroutes the run to the sandbox's DuckDB; a python node materializes the insightsql refs its code reads as pandas frames."
+        ),
+    connection_id: zod
+        .uuid()
+        .nullish()
+        .describe(
+            "SQL nodes only: id of a direct-query-capable external data source to run against instead of Insights's Datastore. Omit to query Insights."
+        ),
+    send_raw_query: zod
+        .boolean()
+        .default(notebooksSqlV2RunCreateBodySendRawQueryDefault)
+        .describe(
+            'Send the code to the selected connection verbatim instead of compiling it from InsightsQL first. Ignored without connection_id, and incompatible with references to other cells.'
         ),
 })

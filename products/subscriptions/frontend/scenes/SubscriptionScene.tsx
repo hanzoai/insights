@@ -1,9 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { Button, Tag } from '@hanzo/elements'
+import { Button } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
+import { Switch } from 'lib/elements/Switch'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -46,17 +47,13 @@ function SubscriptionDetailActions({ sub }: { sub: SubscriptionApi }): JSX.Eleme
 
     return (
         <div className="flex flex-wrap items-center gap-2">
-            <Tag type={enabled ? 'success' : 'danger'} data-attr="subscription-status-tag">
-                {enabled ? 'Enabled' : 'Disabled'}
-            </Tag>
-            <Button
-                type="secondary"
-                onClick={() => setEnabled({ enabled: !enabled })}
+            <Switch
+                checked={enabled}
+                onChange={(newEnabled) => setEnabled({ enabled: newEnabled })}
                 loading={subscriptionLoading}
+                label={enabled ? 'Enabled' : 'Disabled'}
                 data-attr="subscription-toggle-enabled"
-            >
-                {enabled ? 'Disable subscription' : 'Enable subscription'}
-            </Button>
+            />
             {editHref ? (
                 <Button type="secondary" onClick={() => push(editHref)}>
                     Edit subscription
@@ -113,7 +110,7 @@ export function SubscriptionScene(): JSX.Element {
                         actions={subscription ? <SubscriptionDetailActions sub={subscription} /> : undefined}
                     />
                     {subscription ? (
-                        // Mute the body when the subscription is paused — the Tag in the
+                        // Mute the body when the subscription is disabled — the switch in the
                         // header is the explicit signal; this is the at-a-glance reinforcement.
                         <div className={isSubscriptionEnabled(subscription) ? '' : 'opacity-60'}>
                             <SubscriptionSummary sub={subscription} />

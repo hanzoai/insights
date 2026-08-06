@@ -7,7 +7,7 @@ import {
     InsightsFunctionType,
 } from '~/cdp/types'
 
-import { HogExecutorExecuteAsyncOptions, HogExecutorService } from '../script-executor.service'
+import { HogExecutorAsyncService, HogExecutorExecuteAsyncOptions } from '../script-executor-async.service'
 import { InsightsFunctionTemplateManagerService } from '../managers/script-function-template-manager.service'
 
 type FunctionActionType = 'function' | 'function_email' | 'function_sms'
@@ -18,7 +18,7 @@ export class InsightsFlowFunctionsService {
     constructor(
         private siteUrl: string,
         private insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService,
-        private insightsFunctionExecutor: HogExecutorService
+        private insightsFunctionExecutor: HogExecutorAsyncService
     ) {}
 
     async buildInsightsFunction(hogFlow: InsightsFlow, configuration: Action['config']): Promise<InsightsFunctionType> {
@@ -110,7 +110,10 @@ export class InsightsFlowFunctionsService {
             ...invocation,
             insightsFunction,
             state: invocation.state.currentAction?.insightsFunctionState ?? {
-                globals: await this.insightsFunctionExecutor.buildInputsWithGlobals(insightsFunction, globalsWithSource),
+                globals: await this.insightsFunctionExecutor.hogExecutor.buildInputsWithGlobals(
+                    insightsFunction,
+                    globalsWithSource
+                ),
                 timings: [],
                 attempts: 0,
                 actionId: invocation.state.currentAction?.id,

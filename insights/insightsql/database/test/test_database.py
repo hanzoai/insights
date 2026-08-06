@@ -64,8 +64,9 @@ from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.query import execute_insightsql_query
 from insights.insightsql.test.utils import pretty_print_in_tests
 
+from insights.constants import AvailableFeature
 from insights.models.group_type_mapping import invalidate_group_types_cache
-from insights.models.organization import Organization
+from insights.models.organization import Organization, OrganizationMembership
 from insights.models.team.team import Team
 from insights.test.test_utils import create_group_type_mapping_without_created_at
 
@@ -3681,3 +3682,34 @@ class TestDatabase(BaseTest, QueryMatchingTest):
         user_access_control, _denied = captured["result"]
         # A real user gets per-user access control computed rather than the anonymous all-deny path.
         assert user_access_control is not None
+
+    @parameterized.expand(
+        [
+            # Admin/owner cases matter most: they short-circuit RBAC, so an entitlement check placed
+            # only in the per-resource loop would let them keep querying a table the org can't buy.
+            ("cloud_unentitled_admin", True, False, OrganizationMembership.Level.ADMIN, False),
+            ("cloud_unentitled_owner", True, False, OrganizationMembership.Level.OWNER, False),
+            ("cloud_unentitled_member", True, False, OrganizationMembership.Level.MEMBER, False),
+            ("cloud_entitled_admin", True, True, OrganizationMembership.Level.ADMIN, True),
+            ("self_hosted_unentitled_admin", False, False, OrganizationMembership.Level.ADMIN, True),
+        ]
+    )
+    def test_entitlement_gated_system_table_visibility(
+        self,
+        _name: str,
+        cloud: bool,
+        entitled: bool,
+        level: "OrganizationMembership.Level",
+        expected_visible: bool,
+    ):
+        self.organization.available_product_features = (
+            [{"key": AvailableFeature.AUDIT_LOGS, "name": AvailableFeature.AUDIT_LOGS}] if entitled else []
+        )
+        self.organization.save()
+        self.organization_membership.level = level
+        self.organization_membership.save()
+
+        with self.is_cloud(cloud):
+            database = Database.create_for(team=self.team, user=self.user)
+
+        assert ("system.activity_logs" in database.get_system_table_names()) is expected_visible

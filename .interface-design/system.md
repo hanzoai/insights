@@ -232,7 +232,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 Three-tier architecture:
 
 1. **Primitives** (`frontend/src/lib/ui/`) — Low-level React primitives (Button, Combobox, DropdownMenu, etc.)
-2. **Lemon UI** (`frontend/src/lib/elements/`) — 50+ published components (Button, Input, Modal, Table, etc.)
-3. **Composed components** (`frontend/src/lib/components/`) — Feature-specific composed components built on Lemon UI
+2. **Elements** (`frontend/src/lib/elements/`) — 50+ published components (Button, Input, Modal, Table, etc.)
+3. **Composed components** (`frontend/src/lib/components/`) — Feature-specific composed components built on Elements
 
-Always prefer Lemon UI components over custom implementations.
+Always prefer Elements components over custom implementations.

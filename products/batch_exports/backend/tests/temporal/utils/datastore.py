@@ -7,7 +7,7 @@ from insights.models.app_metrics2.sql import APP_METRICS2_DATA_TABLE_SQL, APP_ME
 from insights.temporal.common.asyncpa import InvalidMessageFormat
 from insights.temporal.common.datastore import DatastoreClient, DatastoreError
 
-from products.batch_exports.backend.temporal.spmc import slice_record_batch
+from products.batch_exports.backend.temporal.pipeline.producer import slice_record_batch
 
 
 @retry(

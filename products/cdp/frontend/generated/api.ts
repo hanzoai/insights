@@ -13,15 +13,21 @@ import type {
     AppMetricsTotalsResponseApi,
     InsightsFunctionApi,
     InsightsFunctionInvocationApi,
+    InsightsFunctionPublishRequestApi,
+    InsightsFunctionPublishResponseApi,
+    InsightsFunctionRevisionApi,
+    InsightsFunctionRevisionRestoreRequestApi,
     InsightsFunctionTemplateApi,
     InsightsFunctionTemplatesListParams,
     InsightsFunctionsListParams,
     InsightsFunctionsLogsRetrieveParams,
     InsightsFunctionsMetricsRetrieveParams,
     InsightsFunctionsMetricsTotalsRetrieveParams,
+    InsightsFunctionsRevisionsListParams,
     HogInvocationRerunRequestApi,
     HogInvocationRerunResponseApi,
     PaginatedInsightsFunctionMinimalListApi,
+    PaginatedInsightsFunctionRevisionBasicListApi,
     PaginatedInsightsFunctionTemplateListApi,
     PaginatedPluginLogEntryListApi,
     PatchedInsightsFunctionApi,
@@ -198,6 +204,21 @@ export const insightsFunctionsDestroy = async (projectId: string, id: string, op
     })
 }
 
+export const getInsightsFunctionsDiscardDraftCreateUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/insights_functions/${id}/discard_draft/`
+}
+
+export const insightsFunctionsDiscardDraftCreate = async (
+    projectId: string,
+    id: string,
+    options?: RequestInit
+): Promise<InsightsFunctionApi> => {
+    return apiMutator<InsightsFunctionApi>(getInsightsFunctionsDiscardDraftCreateUrl(projectId, id), {
+        ...options,
+        method: 'POST',
+    })
+}
+
 export const getInsightsFunctionsEnableBackfillsCreateUrl = (projectId: string, id: string) => {
     return `/api/projects/${projectId}/insights_functions/${id}/enable_backfills/`
 }
@@ -223,7 +244,7 @@ export const getInsightsFunctionsInvocationsCreateUrl = (projectId: string, id: 
 export const insightsFunctionsInvocationsCreate = async (
     projectId: string,
     id: string,
-    insightsFunctionInvocationApi: NonReadonly<InsightsFunctionInvocationApi>,
+    insightsFunctionInvocationApi?: NonReadonly<InsightsFunctionInvocationApi>,
     options?: RequestInit
 ): Promise<InsightsFunctionInvocationApi> => {
     return apiMutator<InsightsFunctionInvocationApi>(getInsightsFunctionsInvocationsCreateUrl(projectId, id), {
@@ -330,6 +351,24 @@ export const insightsFunctionsMetricsTotalsRetrieve = async (
     })
 }
 
+export const getInsightsFunctionsPublishCreateUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/insights_functions/${id}/publish/`
+}
+
+export const insightsFunctionsPublishCreate = async (
+    projectId: string,
+    id: string,
+    insightsFunctionPublishRequestApi?: InsightsFunctionPublishRequestApi,
+    options?: RequestInit
+): Promise<InsightsFunctionPublishResponseApi> => {
+    return apiMutator<InsightsFunctionPublishResponseApi>(getInsightsFunctionsPublishCreateUrl(projectId, id), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(insightsFunctionPublishRequestApi),
+    })
+}
+
 export const getInsightsFunctionsRerunCreateUrl = (projectId: string, id: string) => {
     return `/api/projects/${projectId}/insights_functions/${id}/rerun/`
 }
@@ -365,6 +404,76 @@ export const insightsFunctionsRerunCreate = async (
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
         body: JSON.stringify(hogInvocationRerunRequestApi),
+    })
+}
+
+export const getInsightsFunctionsRevisionsListUrl = (
+    projectId: string,
+    id: string,
+    params?: InsightsFunctionsRevisionsListParams
+) => {
+    const normalizedParams = new URLSearchParams()
+
+    Object.entries(params || {}).forEach(([key, value]) => {
+        if (value !== undefined) {
+            normalizedParams.append(key, value === null ? 'null' : String(value))
+        }
+    })
+
+    const stringifiedParams = normalizedParams.toString()
+
+    return stringifiedParams.length > 0
+        ? `/api/projects/${projectId}/insights_functions/${id}/revisions/?${stringifiedParams}`
+        : `/api/projects/${projectId}/insights_functions/${id}/revisions/`
+}
+
+export const insightsFunctionsRevisionsList = async (
+    projectId: string,
+    id: string,
+    params?: InsightsFunctionsRevisionsListParams,
+    options?: RequestInit
+): Promise<PaginatedInsightsFunctionRevisionBasicListApi> => {
+    return apiMutator<PaginatedInsightsFunctionRevisionBasicListApi>(
+        getInsightsFunctionsRevisionsListUrl(projectId, id, params),
+        {
+            ...options,
+            method: 'GET',
+        }
+    )
+}
+
+export const getInsightsFunctionsRevisionsRetrieveUrl = (projectId: string, id: string, version: number) => {
+    return `/api/projects/${projectId}/insights_functions/${id}/revisions/${version}/`
+}
+
+export const insightsFunctionsRevisionsRetrieve = async (
+    projectId: string,
+    id: string,
+    version: number,
+    options?: RequestInit
+): Promise<InsightsFunctionRevisionApi> => {
+    return apiMutator<InsightsFunctionRevisionApi>(getInsightsFunctionsRevisionsRetrieveUrl(projectId, id, version), {
+        ...options,
+        method: 'GET',
+    })
+}
+
+export const getInsightsFunctionsRevisionsRestoreCreateUrl = (projectId: string, id: string, version: number) => {
+    return `/api/projects/${projectId}/insights_functions/${id}/revisions/${version}/restore/`
+}
+
+export const insightsFunctionsRevisionsRestoreCreate = async (
+    projectId: string,
+    id: string,
+    version: number,
+    insightsFunctionRevisionRestoreRequestApi?: InsightsFunctionRevisionRestoreRequestApi,
+    options?: RequestInit
+): Promise<InsightsFunctionApi> => {
+    return apiMutator<InsightsFunctionApi>(getInsightsFunctionsRevisionsRestoreCreateUrl(projectId, id, version), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(insightsFunctionRevisionRestoreRequestApi),
     })
 }
 

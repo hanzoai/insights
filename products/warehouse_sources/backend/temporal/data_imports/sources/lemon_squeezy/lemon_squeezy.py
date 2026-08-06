@@ -40,7 +40,7 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_sque
 
 
 @dataclasses.dataclass
-class SqueezyResumeConfig:
+class LemonSqueezyResumeConfig:
     next_url: str
 
 
@@ -83,7 +83,7 @@ def _flatten_json_api_item(item: dict[str, Any]) -> dict[str, Any]:
     return {"id": item.get("id"), **attributes}
 
 
-class SqueezyPaginator(JSONResponsePaginator):
+class LemonSqueezyPaginator(JSONResponsePaginator):
     """Follows the JSON:API `links.next` URL, stopping early on incremental syncs.
 
     Lemon Squeezy list endpoints return rows newest-first (`created_at` descending, no sort
@@ -133,7 +133,7 @@ def lemon_squeezy_source(
     endpoint: str,
     team_id: int,
     job_id: str,
-    resumable_source_manager: ResumableSourceManager[SqueezyResumeConfig],
+    resumable_source_manager: ResumableSourceManager[LemonSqueezyResumeConfig],
     webhook_source_manager: Optional[WebhookSourceManager] = None,
     should_use_incremental_field: bool = False,
     db_incremental_field_last_value: Optional[Any] = None,
@@ -146,7 +146,7 @@ def lemon_squeezy_source(
             "base_url": BASE_URL,
             "headers": dict(JSON_API_HEADERS),
             "auth": {"type": "bearer", "token": api_key},
-            "paginator": SqueezyPaginator(watermark),
+            "paginator": LemonSqueezyPaginator(watermark),
             # capture=False: list responses carry customer PII, redeemable `license_keys.key`
             # values, and signed file/checkout URLs the name-based scrubbers can't recognise, so
             # keep the raw bodies out of HTTP sample capture even when an operator enables it.
@@ -187,7 +187,7 @@ def lemon_squeezy_source(
         # Persist only while a next page remains; the hook fires AFTER a page is yielded so a
         # crash re-yields the last page (merge dedupes on primary key) rather than skipping it.
         if state and state.get("next_url"):
-            resumable_source_manager.save_state(SqueezyResumeConfig(next_url=str(state["next_url"])))
+            resumable_source_manager.save_state(LemonSqueezyResumeConfig(next_url=str(state["next_url"])))
 
     resource = rest_api_resource(
         rest_config,
@@ -258,7 +258,7 @@ def _webhook_table_transformer(table: pa.Table) -> pa.Table:
     return table_from_py_list([row for _, row in latest_by_id.values()])
 
 
-class SqueezyUntrustedURLError(Exception):
+class LemonSqueezyUntrustedURLError(Exception):
     pass
 
 
@@ -277,7 +277,7 @@ def _assert_lemon_squeezy_origin(url: str) -> None:
     """
     split = urlsplit(url)
     if not (split.scheme == "https" and split.netloc == _API_NETLOC and split.path.startswith("/v1/")):
-        raise SqueezyUntrustedURLError(f"Refusing to follow a Lemon Squeezy URL outside {BASE_URL}/v1/")
+        raise LemonSqueezyUntrustedURLError(f"Refusing to follow a Lemon Squeezy URL outside {BASE_URL}/v1/")
 
 
 def _make_session(api_key: str) -> Session:

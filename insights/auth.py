@@ -31,6 +31,7 @@ from zxcvbn import zxcvbn
 from insights.datastore.query_tagging import AccessMethod, tag_authentication
 from insights.constants import AvailableFeature
 from insights.helpers.two_factor_session import enforce_two_factor
+from insights.helpers.verified_domain_enforcement import enforce_verified_domain
 from insights.internal_api_secret import usable_internal_api_secrets
 from insights.jwt import InsightsJwtAudience, decode_jwt, get_oidc_verification_keys
 from insights.models.activity_logging.utils import activity_storage
@@ -176,6 +177,7 @@ class SessionAuthentication(authentication.SessionAuthentication):
 
             user, auth = auth_result
             enforce_two_factor(request, user)
+            enforce_verified_domain(request, user)
 
             return (user, auth)
 

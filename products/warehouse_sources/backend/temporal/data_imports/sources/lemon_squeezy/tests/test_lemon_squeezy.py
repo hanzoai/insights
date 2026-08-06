@@ -10,9 +10,9 @@ from requests import Response
 from products.warehouse_sources.backend.temporal.data_imports.pipelines.core.arrow_utils import table_from_py_list
 from products.warehouse_sources.backend.temporal.data_imports.sources.common.http import TrackedHTTPAdapter
 from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.lemon_squeezy import (
-    SqueezyPaginator,
-    SqueezyResumeConfig,
-    SqueezyUntrustedURLError,
+    LemonSqueezyPaginator,
+    LemonSqueezyResumeConfig,
+    LemonSqueezyUntrustedURLError,
     _assert_lemon_squeezy_origin,
     _flatten_json_api_item,
     _make_session,
@@ -55,7 +55,7 @@ def _response(items: list[dict[str, Any]], next_link: str | None) -> Response:
     return resp
 
 
-def _make_manager(resume_state: SqueezyResumeConfig | None = None) -> mock.MagicMock:
+def _make_manager(resume_state: LemonSqueezyResumeConfig | None = None) -> mock.MagicMock:
     manager = mock.MagicMock()
     manager.can_resume.return_value = resume_state is not None
     manager.load_state.return_value = resume_state
@@ -174,7 +174,7 @@ class TestPagination:
         assert requests_seen[1]["params"] == {}
         # State is saved only while a next page exists.
         manager.save_state.assert_called_once()
-        assert manager.save_state.call_args.args[0] == SqueezyResumeConfig(
+        assert manager.save_state.call_args.args[0] == LemonSqueezyResumeConfig(
             next_url="https://api.lemonsqueezy.com/v1/orders?page%5Bnumber%5D=2"
         )
 
@@ -193,7 +193,7 @@ class TestPagination:
         requests_seen = _wire(session, [_response([_json_api_item("9", "2024-05-01T00:00:00Z")], None)])
 
         resume_url = "https://api.lemonsqueezy.com/v1/orders?page%5Bnumber%5D=5"
-        rows = _rows(_source("orders", _make_manager(SqueezyResumeConfig(next_url=resume_url))))
+        rows = _rows(_source("orders", _make_manager(LemonSqueezyResumeConfig(next_url=resume_url))))
 
         assert [row["id"] for row in rows] == ["9"]
         assert requests_seen[0]["url"] == resume_url
@@ -253,7 +253,7 @@ class TestPagination:
 
     def test_paginator_keeps_paging_when_created_at_unparseable(self):
         # An upstream format change must degrade to a full walk, not silently stop the sync.
-        paginator = SqueezyPaginator(watermark=datetime(2024, 5, 1, tzinfo=UTC))
+        paginator = LemonSqueezyPaginator(watermark=datetime(2024, 5, 1, tzinfo=UTC))
         response = _response([_json_api_item("1", "not-a-date")], "https://api.lemonsqueezy.com/v1/orders?page=2")
 
         paginator.update_state(response, response.json()["data"])
@@ -535,7 +535,7 @@ class TestCredentialLeakHardening:
         ],
     )
     def test_iterate_list_refuses_off_origin_next_url(self, url):
-        with pytest.raises(SqueezyUntrustedURLError):
+        with pytest.raises(LemonSqueezyUntrustedURLError):
             _assert_lemon_squeezy_origin(url)
 
     def test_iterate_list_allows_api_origin(self):

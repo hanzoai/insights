@@ -2,12 +2,24 @@ import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconEye, IconHide, IconPencil, IconPlus, IconSearch, IconTrash, IconWarning } from '@hanzo/icons'
+import {
+    IconArrowLeft,
+    IconEye,
+    IconFolder,
+    IconHide,
+    IconPencil,
+    IconPlus,
+    IconSearch,
+    IconTrash,
+    IconWarning,
+} from '@hanzo/icons'
 import {
     Banner,
     Button,
     Dialog,
     Input,
+    Menu,
+    Modal,
     Switch,
     Tab,
     Table,
@@ -24,11 +36,10 @@ import { TableColumns } from 'lib/elements/Table'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
-import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { removeProjectIdIfPresent } from 'lib/utils/kea-router'
 import { fullName } from 'lib/utils/strings'
 import { SceneExport } from 'scenes/sceneTypes'
-import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -36,6 +47,7 @@ import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { ProductKey } from '~/queries/schema/schema-general'
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
+import type { EvaluationDirectoryApi } from '../generated/api.schemas'
 import { LLMProviderKey } from '../settings/llmProviderKeysLogic'
 import {
     getUnhealthyProviderKey,
@@ -155,7 +167,7 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
     const metricsLogic = evaluationMetricsLogic()
     const {
         evaluations,
-        filteredEvaluations,
+        displayedEvaluations,
         evaluationsLoading,
         evaluationsFilter,
         showDisabledEvaluations,
@@ -163,23 +175,44 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
         providerKeys,
         unhealthyProviderKeysUsedByEvaluations,
         canEnableEvaluation,
+        evaluationDirectories,
+        evaluationDirectoriesLoading,
+        selectedDirectory,
+        selectedDirectoryId,
+        directoryEditor,
+        submitDirectoryLoading,
+        deletingDirectoryId,
+        movingEvaluationId,
     } = useValues(evaluationsLogic)
-    const { setEvaluationsFilter, setShowDisabledEvaluations, toggleEvaluationEnabled, loadEvaluations, setDates } =
-        useActions(evaluationsLogic)
+    const {
+        setEvaluationsFilter,
+        setShowDisabledEvaluations,
+        toggleEvaluationEnabled,
+        setDates,
+        openCreateDirectory,
+        openRenameDirectory,
+        closeDirectoryEditor,
+        setDirectoryEditorName,
+        submitDirectory,
+        deleteDirectory,
+        moveEvaluation,
+        selectDirectory,
+        deleteEvaluation,
+    } = useActions(evaluationsLogic)
     const { evaluationsWithMetrics } = useValues(metricsLogic)
-    const { currentTeamId } = useValues(teamLogic)
     const { push } = useActions(router)
     const { searchParams } = useValues(router)
     const evaluationUrl = (id: string): string => combineUrl(urls.aiObservabilityEvaluation(id), searchParams).url
     const settingsUrl = urls.settings('project-ai-observability', 'ai-observability-byok')
-
-    const filteredEvaluationsWithMetrics = evaluationsWithMetrics.filter((evaluation: EvaluationConfig) =>
-        filteredEvaluations.some((filtered) => filtered.id === evaluation.id)
+    const moveEvaluationDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.LlmAnalytics,
+        AccessControlLevel.Editor
     )
 
-    if (!evaluationsLoading && evaluations.length === 0) {
-        return <EvaluationTemplatesEmptyState />
-    }
+    const filteredEvaluationsWithMetrics = evaluationsWithMetrics.filter((evaluation: EvaluationConfig) =>
+        displayedEvaluations.some((filtered) => filtered.id === evaluation.id)
+    )
+    const directoryById = new Map(evaluationDirectories.map((directory) => [directory.id, directory]))
 
     const columns: TableColumns<EvaluationConfig> = [
         {
@@ -196,6 +229,17 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
             sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
+            title: 'Directory',
+            key: 'directory',
+            render: (_, evaluation) =>
+                evaluation.directory_id ? directoryById.get(evaluation.directory_id)?.name : 'Top level',
+            sorter: (a, b) => {
+                const directoryName = (evaluation: EvaluationConfig): string =>
+                    evaluation.directory_id ? directoryById.get(evaluation.directory_id)?.name || '' : ''
+                return directoryName(a).localeCompare(directoryName(b))
+            },
+        },
+        {
             title: 'Status',
             key: 'status',
             render: (_, evaluation) => {
@@ -205,7 +249,13 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
                 if (evaluation.status === 'error') {
                     return (
                         <Tooltip title={`${statusReasonLabel(evaluation.status_reason)}. Open to fix.`}>
-                            <Tag type="danger" icon={<IconWarning />} data-attr="evaluation-status-error">
+                            <Tag
+                                type="danger"
+                                icon={<IconWarning />}
+                                forceClickable
+                                onClick={() => push(evaluationUrl(evaluation.id))}
+                                data-attr="evaluation-status-error"
+                            >
                                 Error
                             </Tag>
                         </Tooltip>
@@ -217,9 +267,15 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
                         <Tooltip
                             title={`Paused because API key ${providerKeyIssue.name} ${providerKeyStateIssueDescription(
                                 providerKeyIssue.state
-                            )}.`}
+                            )}. Open settings to fix.`}
                         >
-                            <Tag type="warning" icon={<IconWarning />} data-attr="evaluation-status-key-issue">
+                            <Tag
+                                type="warning"
+                                icon={<IconWarning />}
+                                forceClickable
+                                onClick={() => push(settingsUrl)}
+                                data-attr="evaluation-status-key-issue"
+                            >
                                 Key issue
                             </Tag>
                         </Tooltip>
@@ -358,6 +414,37 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
             key: 'actions',
             render: (_, evaluation) => (
                 <div className="flex gap-1">
+                    <Menu
+                        items={[
+                            {
+                                icon: <IconFolder />,
+                                label: 'Top level',
+                                onClick: () => moveEvaluation(evaluation.id, null),
+                                disabledReason:
+                                    !evaluation.directory_id || movingEvaluationId === evaluation.id
+                                        ? 'Evaluation is already here'
+                                        : undefined,
+                            },
+                            ...evaluationDirectories.map((directory) => ({
+                                icon: <IconFolder />,
+                                label: directory.name,
+                                onClick: () => moveEvaluation(evaluation.id, directory.id),
+                                disabledReason:
+                                    evaluation.directory_id === directory.id || movingEvaluationId === evaluation.id
+                                        ? 'Evaluation is already here'
+                                        : undefined,
+                            })),
+                        ]}
+                    >
+                        <Button
+                            size="small"
+                            type="secondary"
+                            icon={<IconFolder />}
+                            tooltip="Move evaluation"
+                            loading={movingEvaluationId === evaluation.id}
+                            disabledReason={moveEvaluationDisabledReason}
+                        />
+                    </Menu>
                     <AccessControlAction
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
@@ -387,13 +474,7 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
                                         type: 'primary',
                                         status: 'danger',
                                         'data-attr': 'confirm-delete-evaluation',
-                                        onClick: () => {
-                                            deleteWithUndo({
-                                                endpoint: `environments/${currentTeamId}/evaluations`,
-                                                object: evaluation,
-                                                callback: () => loadEvaluations(),
-                                            })
-                                        },
+                                        onClick: () => deleteEvaluation(evaluation.id),
                                     },
                                     secondaryButton: {
                                         children: 'Cancel',
@@ -408,9 +489,90 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
         },
     ]
 
+    const directoryColumns: TableColumns<EvaluationDirectoryApi> = [
+        {
+            title: 'Name',
+            key: 'name',
+            render: (_, directory) => (
+                <Button
+                    type="tertiary"
+                    icon={<IconFolder />}
+                    onClick={() => selectDirectory(directory.id)}
+                    data-attr="evaluation-directory-link"
+                >
+                    {directory.name}
+                </Button>
+            ),
+            sorter: (a, b) => a.name.localeCompare(b.name),
+        },
+        {
+            title: 'Evaluations',
+            key: 'evaluation_count',
+            render: (_, directory) => directory.evaluation_count,
+            sorter: (a, b) => a.evaluation_count - b.evaluation_count,
+        },
+        {
+            title: 'Actions',
+            key: 'actions',
+            align: 'right',
+            width: 0,
+            render: (_, directory) => (
+                <div className="flex justify-end gap-1">
+                    <AccessControlAction
+                        resourceType={AccessControlResourceType.LlmAnalytics}
+                        minAccessLevel={AccessControlLevel.Editor}
+                    >
+                        <Button
+                            size="small"
+                            type="secondary"
+                            icon={<IconPencil />}
+                            tooltip="Rename directory"
+                            onClick={() => openRenameDirectory(directory)}
+                        />
+                    </AccessControlAction>
+                    <AccessControlAction
+                        resourceType={AccessControlResourceType.LlmAnalytics}
+                        minAccessLevel={AccessControlLevel.Editor}
+                    >
+                        <Button
+                            size="small"
+                            type="secondary"
+                            status="danger"
+                            icon={<IconTrash />}
+                            tooltip="Delete directory"
+                            loading={deletingDirectoryId === directory.id}
+                            onClick={() => {
+                                Dialog.open({
+                                    title: `Delete ${directory.name}?`,
+                                    description: `${directory.evaluation_count} evaluation${
+                                        directory.evaluation_count === 1 ? '' : 's'
+                                    } will move to the top level.`,
+                                    primaryButton: {
+                                        children: 'Delete directory',
+                                        status: 'danger',
+                                        onClick: () => deleteDirectory(directory.id),
+                                    },
+                                    secondaryButton: {
+                                        children: 'Cancel',
+                                    },
+                                })
+                            }}
+                        />
+                    </AccessControlAction>
+                </div>
+            ),
+        },
+    ]
+
+    const showEmptyState =
+        !evaluationsLoading &&
+        !evaluationDirectoriesLoading &&
+        evaluations.length === 0 &&
+        evaluationDirectories.length === 0
+
     return (
         <div className="space-y-4">
-            {unhealthyProviderKeysUsedByEvaluations.length > 0 && (
+            {!showEmptyState && unhealthyProviderKeysUsedByEvaluations.length > 0 && (
                 <Banner type="warning">
                     <div className="space-y-2">
                         <p>Some evaluations are using API keys that need attention.</p>
@@ -428,66 +590,146 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
                 </Banner>
             )}
 
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-xl font-semibold">Online evals</h2>
+            <div className={showEmptyState ? 'hidden' : 'flex justify-between items-start gap-3'}>
+                <div className="min-w-0 flex-1">
+                    {selectedDirectory ? (
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="tertiary"
+                                size="small"
+                                icon={<IconArrowLeft />}
+                                onClick={() => selectDirectory(null)}
+                            >
+                                Online evals
+                            </Button>
+                            <span className="text-muted">/</span>
+                            <h2 className="text-xl font-semibold m-0">{selectedDirectory.name}</h2>
+                        </div>
+                    ) : (
+                        <h2 className="text-xl font-semibold">Online evals</h2>
+                    )}
                     <p className="text-muted">
                         Configure evaluation prompts and triggers to automatically assess your AI generations. Each
                         evaluation run is billed as an AI observability event.
                     </p>
                 </div>
-                <AccessControlAction
-                    resourceType={AccessControlResourceType.LlmAnalytics}
-                    minAccessLevel={AccessControlLevel.Editor}
-                >
-                    <Button
-                        type="primary"
-                        icon={<IconPlus />}
-                        to={combineUrl(urls.aiObservabilityEvaluationTemplates(), searchParams).url}
-                        data-attr="create-evaluation-button"
-                        tooltip="Create evaluation"
+                <div className="flex shrink-0 items-center gap-2">
+                    {!selectedDirectoryId && (
+                        <AccessControlAction
+                            resourceType={AccessControlResourceType.LlmAnalytics}
+                            minAccessLevel={AccessControlLevel.Editor}
+                        >
+                            <Button
+                                type="secondary"
+                                icon={<IconFolder />}
+                                onClick={() => openCreateDirectory()}
+                                data-attr="create-evaluation-directory-button"
+                            >
+                                New directory
+                            </Button>
+                        </AccessControlAction>
+                    )}
+                    <AccessControlAction
+                        resourceType={AccessControlResourceType.LlmAnalytics}
+                        minAccessLevel={AccessControlLevel.Editor}
                     >
-                        Create evaluation
-                    </Button>
-                </AccessControlAction>
+                        <Button
+                            type="primary"
+                            icon={<IconPlus />}
+                            to={combineUrl(urls.aiObservabilityEvaluationTemplates(), searchParams).url}
+                            data-attr="create-evaluation-button"
+                            tooltip="Create evaluation"
+                        >
+                            Create evaluation
+                        </Button>
+                    </AccessControlAction>
+                </div>
             </div>
 
-            <DateFilter dateFrom={dateFilter.dateFrom} dateTo={dateFilter.dateTo} onChange={setDates} />
+            {showEmptyState ? (
+                <EvaluationTemplatesEmptyState />
+            ) : (
+                <>
+                    <DateFilter dateFrom={dateFilter.dateFrom} dateTo={dateFilter.dateTo} onChange={setDates} />
 
-            <EvaluationMetrics />
+                    <EvaluationMetrics />
 
-            <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        <Input
+                            type="search"
+                            placeholder="Search online evals..."
+                            value={evaluationsFilter}
+                            data-attr="evaluations-search-input"
+                            onChange={setEvaluationsFilter}
+                            prefix={<IconSearch />}
+                            className="max-w-sm"
+                        />
+                        <Button
+                            type="secondary"
+                            active={!showDisabledEvaluations}
+                            icon={showDisabledEvaluations ? <IconEye /> : <IconHide />}
+                            onClick={() => setShowDisabledEvaluations(!showDisabledEvaluations)}
+                            data-attr="toggle-show-disabled-evaluations"
+                            tooltip={showDisabledEvaluations ? 'Hide disabled evals' : 'Show disabled evals'}
+                        >
+                            {showDisabledEvaluations ? 'Hide disabled' : 'Show disabled'}
+                        </Button>
+                    </div>
+
+                    {!evaluationsFilter && !selectedDirectoryId && (
+                        <Table
+                            columns={directoryColumns}
+                            dataSource={evaluationDirectories}
+                            loading={evaluationDirectoriesLoading}
+                            rowKey="id"
+                            nouns={['directory', 'directories']}
+                        />
+                    )}
+
+                    <Table
+                        columns={columns}
+                        dataSource={filteredEvaluationsWithMetrics}
+                        loading={evaluationsLoading || evaluationDirectoriesLoading}
+                        rowKey="id"
+                        pagination={{
+                            pageSize: 50,
+                        }}
+                        nouns={['evaluation', 'evaluations']}
+                    />
+                </>
+            )}
+
+            <Modal
+                isOpen={!!directoryEditor}
+                onClose={closeDirectoryEditor}
+                title={directoryEditor?.mode === 'rename' ? 'Rename directory' : 'New directory'}
+                width={480}
+                footer={
+                    <>
+                        <Button type="secondary" onClick={closeDirectoryEditor} disabled={submitDirectoryLoading}>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="primary"
+                            onClick={() => submitDirectory()}
+                            loading={submitDirectoryLoading}
+                            disabledReason={!directoryEditor?.name.trim() ? 'Directory name is required' : undefined}
+                            data-attr="save-evaluation-directory"
+                        >
+                            {directoryEditor?.mode === 'rename' ? 'Save directory' : 'Create directory'}
+                        </Button>
+                    </>
+                }
+            >
                 <Input
-                    type="search"
-                    placeholder="Search online evals..."
-                    value={evaluationsFilter}
-                    data-attr="evaluations-search-input"
-                    onChange={setEvaluationsFilter}
-                    prefix={<IconSearch />}
-                    className="max-w-sm"
+                    value={directoryEditor?.name || ''}
+                    onChange={(value) => setDirectoryEditorName(String(value || ''))}
+                    placeholder="Directory name"
+                    autoFocus
+                    fullWidth
+                    data-attr="evaluation-directory-name-input"
                 />
-                <Button
-                    type="secondary"
-                    active={!showDisabledEvaluations}
-                    icon={showDisabledEvaluations ? <IconEye /> : <IconHide />}
-                    onClick={() => setShowDisabledEvaluations(!showDisabledEvaluations)}
-                    data-attr="toggle-show-disabled-evaluations"
-                    tooltip={showDisabledEvaluations ? 'Hide disabled evals' : 'Show disabled evals'}
-                >
-                    {showDisabledEvaluations ? 'Hide disabled' : 'Show disabled'}
-                </Button>
-            </div>
-
-            <Table
-                columns={columns}
-                dataSource={filteredEvaluationsWithMetrics}
-                loading={evaluationsLoading}
-                rowKey="id"
-                pagination={{
-                    pageSize: 50,
-                }}
-                nouns={['evaluation', 'evaluations']}
-            />
+            </Modal>
         </div>
     )
 }

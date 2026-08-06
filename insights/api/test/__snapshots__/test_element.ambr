@@ -62,6 +62,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
@@ -477,6 +478,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
@@ -527,6 +529,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
@@ -574,7 +577,8 @@
   WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
           AND "ee_accesscontrol"."role_id" IS NULL
           AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
+         OR ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+             AND "insights_organizationmembership"."user_id" = 99999
              AND "ee_accesscontrol"."role_id" IS NULL
              AND "ee_accesscontrol"."team_id" = 99999))
   '''
@@ -603,6 +607,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",

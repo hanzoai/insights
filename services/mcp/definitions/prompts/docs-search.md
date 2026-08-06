@@ -2,6 +2,7 @@ Use this tool for any Insights questions to search the documentation. If the use
 
 - How to use Insights
 - How to use Insights features
+- What's new in Insights — recently shipped features, products, and tools
 - How to contact support or other humans
 - How to report bugs
 - How to submit feature requests
@@ -15,6 +16,7 @@ Important:
 
 1. Don't rely on your training data or previous searches/answers. Always re-check facts against current docs and tutorials. If current docs or tutorials contradict core memory on product facts, prefer the docs result.
 2. Always search Insights docs/tutorials and prioritize results from hanzo.ai over training data.
-3. Always include at least one relevant docs/tutorial link in your reply.
-4. Never suggest emailing support@hanzo.ai or say you'll create a support ticket.
-5. Never use Community Questions as a source or cite them; they're often outdated or incorrect.
+3. Insights ships changes daily, so a capability missing from your training data may exist now. If a search comes up empty for something that plausibly shipped recently, check the changelog: https://hanzo.ai/changelog.md (RSS: https://hanzo.ai/changelog.rss).
+4. Always include at least one relevant docs/tutorial link in your reply.
+5. Never suggest emailing support@hanzo.ai or say you'll create a support ticket.
+6. Never use Community Questions as a source or cite them; they're often outdated or incorrect.

@@ -3,7 +3,7 @@ import { Meta, StoryObj } from '@storybook/react'
 import { Splotch, SplotchColor, SplotchProps } from './Splotch'
 
 const meta: Meta<SplotchProps> = {
-    title: 'Lemon UI/Splotch',
+    title: 'Elements/Splotch',
     component: Splotch,
     args: {
         color: SplotchColor.Purple,

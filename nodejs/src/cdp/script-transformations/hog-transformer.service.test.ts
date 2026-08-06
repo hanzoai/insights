@@ -16,8 +16,8 @@ import { Hub } from '../../types'
 import { createInsightsFunction, insertInsightsFunction } from '../_tests/fixtures'
 import { insightsPluginGeoip } from '../legacy-plugins/_transformations/insights-plugin-geoip/template'
 import { propertyFilterPlugin } from '../legacy-plugins/_transformations/property-filter-plugin/template'
-import { HogWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionTemplate } from '../types'
+import type { HogTransformerServiceConfig } from './script-transformer.service'
 import { HogTransformerService, createHogTransformerService } from './script-transformer.service'
 import { resetHogvmNodeModuleCacheForTests } from './rust-vm'
 
@@ -69,6 +69,26 @@ describe('HogTransformer', () => {
         await closeHub(hub)
 
         jest.spyOn(hogTransformer['pluginExecutor'], 'execute')
+    })
+
+    it('constructs the synchronous executor from only transformation config', async () => {
+        const config: HogTransformerServiceConfig = {
+            SITE_URL: hub.SITE_URL,
+            CDP_FN_RUST_VM_EXECUTION_ENABLED: false,
+            MMDB_FILE_LOCATION: hub.MMDB_FILE_LOCATION,
+            // Deliberately not the default, so the assertion below proves the value is plumbed
+            // through rather than hardcoded in the factory.
+            TRANSFORMATIONS_FN_TIMEOUT_MS: 123,
+        }
+        const transformer = createHogTransformerService(config, {
+            ...hub,
+            monitoringOutputs: createTestMonitoringOutputs(mockProducer),
+        })
+
+        expect(transformer['hogExecutor']['hogInputsService']['recipientTokensService']).toBeUndefined()
+        expect(transformer['hogExecutor']['config'].executionTimeoutMs).toBe(123)
+
+        await transformer.stop()
     })
 
     describe('transformEvent', () => {
@@ -1564,356 +1584,18 @@ describe('HogTransformer', () => {
         })
     })
 
-    describe('HogWatcher integration', () => {
-        beforeEach(() => {
-            hogTransformer['config'].hogWatcherSampleRate = 1
-        })
-
-        it('should skip HogWatcher operations when sample rate is 0', async () => {
-            hogTransformer['config'].hogWatcherSampleRate = 0
-
-            const testTemplate: InsightsFunctionTemplate = {
-                free: true,
-                status: 'beta',
-                type: 'transformation',
-                id: 'template-test',
-                name: 'Test Template',
-                description: 'A simple test template',
-                category: ['Custom'],
-                code_language: 'script',
-                code: `
-                    let returnEvent := event
-                    returnEvent.properties.test_property := true
-                    return returnEvent
-                `,
-                inputs_schema: [],
-            }
-
-            const insightsFunction = createInsightsFunction({
-                type: 'transformation',
-                name: testTemplate.name,
-                team_id: teamId,
-                enabled: true,
-                bytecode: await compileHog(testTemplate.code),
-                id: '11111111-1111-4111-a111-111111111111',
-            })
-
-            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
-
-            const observeResultsSpy = jest.spyOn(hogTransformer['hogWatcher'], 'observeResults')
-
-            const event = createPluginEvent({ event: 'test-event' }, teamId)
-            await hogTransformer.transformEventAndProduceMessages(event)
-
-            expect(observeResultsSpy).not.toHaveBeenCalled()
-            expect(hogTransformer['invocationResults'].length).toBe(1)
-
-            observeResultsSpy.mockRestore()
-        })
-
-        it('should add watcher promise when sample rate is 1', async () => {
-            hogTransformer['config'].hogWatcherSampleRate = 1
-
-            const testTemplate: InsightsFunctionTemplate = {
-                free: true,
-                status: 'beta',
-                type: 'transformation',
-                id: 'template-test',
-                name: 'Test Template',
-                description: 'A simple test template',
-                category: ['Custom'],
-                code_language: 'script',
-                code: `
-                    let returnEvent := event
-                    returnEvent.properties.test_property := true
-                    return returnEvent
-                `,
-                inputs_schema: [],
-            }
-
-            const insightsFunctionId = '11111111-1111-4111-a111-111111111111'
-            const insightsFunction = createInsightsFunction({
-                type: 'transformation',
-                name: testTemplate.name,
-                team_id: teamId,
-                enabled: true,
-                bytecode: await compileHog(testTemplate.code),
-                id: insightsFunctionId,
-            })
-
-            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
-
-            // Add the state to the cache to prevent the error from being thrown
-            // This simulates what would happen in production where states would be loaded
-            hogTransformer['cachedStates'][insightsFunctionId] = HogWatcherState.healthy
-
-            const observeResultsSpy = jest
-                .spyOn(hogTransformer['hogWatcher'], 'observeResults')
-                .mockImplementation(() => Promise.resolve())
-
-            const event = createPluginEvent({ event: 'test-event' }, teamId)
-            await hogTransformer.transformEventAndProduceMessages(event)
-            expect(hogTransformer['invocationResults'].length).toBe(1)
-            await hogTransformer.processInvocationResults()
-            expect(hogTransformer['invocationResults'].length).toBe(0)
-
-            expect(observeResultsSpy).toHaveBeenCalled()
-
-            observeResultsSpy.mockRestore()
-        })
-
-        it('should save and clear script function states', async () => {
-            const functionIds = ['11111111-1111-4111-a111-111111111111', '22222222-2222-4222-a222-222222222222']
-            const mockStates = {
-                [functionIds[0]]: { state: HogWatcherState.disabled, tokens: 0, rating: 0 },
-                [functionIds[1]]: { state: HogWatcherState.disabled, tokens: 0, rating: 0 },
-            }
-
-            // Mock getStates
-            jest.spyOn(hogTransformer['hogWatcher'], 'getPersistedStates').mockResolvedValue(
-                Promise.resolve(mockStates)
-            )
-
-            // Save states
-            await hogTransformer.fetchAndCacheInsightsFunctionStates(functionIds)
-
-            // Verify states were cached
-            expect(hogTransformer['cachedStates'][functionIds[0]]).toBe(HogWatcherState.disabled)
-            expect(hogTransformer['cachedStates'][functionIds[1]]).toBe(HogWatcherState.disabled)
-
-            // Clear specific state
-            hogTransformer.clearInsightsFunctionStates([functionIds[0]])
-            expect(hogTransformer['cachedStates'][functionIds[0]]).toBeUndefined()
-            expect(hogTransformer['cachedStates'][functionIds[1]]).toBe(HogWatcherState.disabled)
-
-            // Clear all states
-            hogTransformer.clearInsightsFunctionStates()
-            expect(hogTransformer['cachedStates']).toEqual({})
-        })
-
-        it('should throw error when state is missing from cache', () => {
-            const insightsFunctionId = '11111111-1111-4111-a111-111111111111'
-
-            // Create a test script function
-            createInsightsFunction({
-                type: 'transformation',
-                name: 'Test Function',
-                team_id: teamId,
-                enabled: true,
-                id: insightsFunctionId,
-            })
-
-            // Make sure state is not in cache
-            hogTransformer.clearInsightsFunctionStates()
-
-            // Verify state is not in cache initially
-            expect(hogTransformer['cachedStates'][insightsFunctionId] || null).toBeNull()
-
-            // Create the expected error message
-            const expectedErrorMessage = `Critical error: Missing InsightsFunction state in cache for function ${insightsFunctionId} - this should never happen`
-
-            // Define a function that will throw the error
-            const throwingFunction = () => {
-                if (!hogTransformer['cachedStates'][insightsFunctionId]) {
-                    throw new Error(expectedErrorMessage)
-                }
-                return 'This should not be returned'
-            }
-
-            // Verify that the function throws the expected error
-            expect(throwingFunction).toThrow(expectedErrorMessage)
-        })
-
-        it('should skip transformation execution but continue when hogwatcher is enabled and function is disabled', async () => {
-            // Set sample rate to 100% to ensure hogwatcher logic runs
-            hogTransformer['config'].hogWatcherSampleRate = 1
-
-            // Create test transformation function
-            const testTemplate: InsightsFunctionTemplate = {
-                free: true,
-                status: 'beta',
-                type: 'transformation',
-                id: 'template-test',
-                name: 'Disabled Test Template',
-                description: 'A test template that should be skipped due to disabled state',
-                category: ['Custom'],
-                code_language: 'script',
-                code: `
-                    let returnEvent := event
-                    returnEvent.properties.should_not_be_set := true
-                    return returnEvent
-                `,
-                inputs_schema: [],
-            }
-
-            const insightsFunctionId = '33333333-3333-4333-a333-333333333333'
-            const insightsFunction = createInsightsFunction({
-                type: 'transformation',
-                name: testTemplate.name,
-                team_id: teamId,
-                enabled: true,
-                bytecode: await compileHog(testTemplate.code),
-                id: insightsFunctionId,
-            })
-
-            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
-
-            // Mock the cached state to indicate the function is disabled
-            hogTransformer['cachedStates'][insightsFunctionId] = HogWatcherState.disabled
-
-            // Create a spy to verify the executeInsightsFunction method is not called
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
-
-            const event = createPluginEvent({ event: 'test-event' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
-
-            // Verify the executeInsightsFunction method was not called for this function
-            expect(executeInsightsFunctionSpy).not.toHaveBeenCalled()
-
-            // Verify the transformation result doesn't have the property that would be set
-            expect(result.event?.properties?.should_not_be_set).toBeUndefined()
-
-            // Verify there are no transformation records in the properties
-            expect(result.event?.properties?.$transformations_succeeded).toBeUndefined()
-            expect(result.event?.properties?.$transformations_failed).toBeUndefined()
-
-            // Reset spies
-            executeInsightsFunctionSpy.mockRestore()
-        })
-
-        it('should execute transformation when hogwatcher is enabled but function is in healthy state', async () => {
-            // Set sample rate to 100% to ensure hogwatcher logic runs
-            hogTransformer['config'].hogWatcherSampleRate = 1
-
-            // Create test transformation function
-            const testTemplate: InsightsFunctionTemplate = {
-                free: true,
-                status: 'beta',
-                type: 'transformation',
-                id: 'template-test',
-                name: 'Healthy Test Template',
-                description: 'A test template that should execute because state is healthy',
-                category: ['Custom'],
-                code_language: 'script',
-                code: `
-                    let returnEvent := event
-                    returnEvent.properties.should_be_set := true
-                    return returnEvent
-                `,
-                inputs_schema: [],
-            }
-
-            const insightsFunctionId = '55555555-5555-5555-a555-555555555555'
-            const insightsFunction = createInsightsFunction({
-                type: 'transformation',
-                name: testTemplate.name,
-                team_id: teamId,
-                enabled: true,
-                bytecode: await compileHog(testTemplate.code),
-                id: insightsFunctionId,
-            })
-
-            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
-
-            // Mock the cached state to indicate the function is healthy
-            hogTransformer['cachedStates'][insightsFunctionId] = HogWatcherState.healthy
-
-            // Create a spy to verify the executeInsightsFunction method is called
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
-
-            const event = createPluginEvent({ event: 'test-event' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
-
-            // Verify the executeInsightsFunction method was called for this function
-            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(1)
-
-            // Verify the transformation result has the property that should be set
-            expect(result.event?.properties?.should_be_set).toBe(true)
-
-            // Verify the transformation is recorded as successful
-            expect(result.event?.properties?.$transformations_succeeded).toContain(
-                `${insightsFunction.name} (${insightsFunction.id})`
-            )
-
-            // Reset spies
-            executeInsightsFunctionSpy.mockRestore()
-        })
-
-        it('should apply transformation when hogwatcher is disabled even if function state is disabled', async () => {
-            // Set sample rate to 0% to ensure hogwatcher logic is skipped
-            hogTransformer['config'].hogWatcherSampleRate = 0
-
-            // Create test transformation function
-            const testTemplate: InsightsFunctionTemplate = {
-                free: true,
-                status: 'beta',
-                type: 'transformation',
-                id: 'template-test',
-                name: 'Test Template',
-                description: 'A test template that should execute despite disabled state because hogwatcher is off',
-                category: ['Custom'],
-                code_language: 'script',
-                code: `
-                    let returnEvent := event
-                    returnEvent.properties.should_be_set := true
-                    return returnEvent
-                `,
-                inputs_schema: [],
-            }
-
-            const insightsFunctionId = '44444444-4444-4444-a444-444444444444'
-            const insightsFunction = createInsightsFunction({
-                type: 'transformation',
-                name: testTemplate.name,
-                team_id: teamId,
-                enabled: true,
-                bytecode: await compileHog(testTemplate.code),
-                id: insightsFunctionId,
-            })
-
-            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
-
-            // Mock the cached state to indicate the function is disabled
-            hogTransformer['cachedStates'][insightsFunctionId] = HogWatcherState.disabled
-
-            // Create a spy to verify the executeInsightsFunction method is called
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
-
-            const event = createPluginEvent({ event: 'test-event' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
-
-            // Verify the executeInsightsFunction method was called for this function
-            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(1)
-
-            // Verify the transformation result has the property that should be set
-            expect(result.event?.properties?.should_be_set).toBe(true)
-
-            // Verify the transformation is recorded as successful
-            expect(result.event?.properties?.$transformations_succeeded).toContain(
-                `${insightsFunction.name} (${insightsFunction.id})`
-            )
-
-            // Reset spies
-            executeInsightsFunctionSpy.mockRestore()
-        })
-
-        it('should throw when trying to capture events in transformations', async () => {
-            // Create a transformation function that captures an event
-            const captureTemplate: InsightsFunctionTemplate = {
-                free: true,
-                status: 'beta',
-                type: 'transformation',
-                id: 'template-capture',
-                name: 'Capture Template',
-                description: 'A template that captures an event',
-                category: ['Custom'],
-                code_language: 'script',
-                code: `
+    it('should throw when trying to capture events in transformations', async () => {
+        // Create a transformation function that captures an event
+        const captureTemplate: InsightsFunctionTemplate = {
+            free: true,
+            status: 'beta',
+            type: 'transformation',
+            id: 'template-capture',
+            name: 'Capture Template',
+            description: 'A template that captures an event',
+            category: ['Custom'],
+            code_language: 'script',
+            code: `
                     let returnEvent := event
                     returnEvent.properties.captured := true
 
@@ -1931,26 +1613,25 @@ describe('HogTransformer', () => {
 
                     return returnEvent
                 `,
-                inputs_schema: [],
-            }
+            inputs_schema: [],
+        }
 
-            const insightsFunction = createInsightsFunction({
-                type: 'transformation',
-                name: captureTemplate.name,
-                team_id: teamId,
-                enabled: true,
-                bytecode: await compileHog(captureTemplate.code),
-                id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',
-            })
-
-            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
-
-            const event = createPluginEvent({ event: 'original-event', distinct_id: 'original_user' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
-
-            expect(result.invocationResults[0].error).toContain('insightsCapture is not supported in transformations')
+        const insightsFunction = createInsightsFunction({
+            type: 'transformation',
+            name: captureTemplate.name,
+            team_id: teamId,
+            enabled: true,
+            bytecode: await compileHog(captureTemplate.code),
+            id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',
         })
+
+        await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+        hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+
+        const event = createPluginEvent({ event: 'original-event', distinct_id: 'original_user' }, teamId)
+        const result = await hogTransformer.transformEventAndProduceMessages(event)
+
+        expect(result.invocationResults[0].error).toContain('insightsCapture is not supported in transformations')
     })
 
     describe('rust vm primary execution', () => {

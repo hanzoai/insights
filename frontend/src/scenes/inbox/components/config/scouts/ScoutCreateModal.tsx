@@ -2,7 +2,15 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useId } from 'react'
 
-import { Button, Input, Modal, Select, Switch, TextArea } from '@hanzo/elements'
+import {
+    Button,
+    Input,
+    InputSelect,
+    Modal,
+    Select,
+    Switch,
+    TextArea,
+} from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 import { teamLogic } from 'scenes/teamLogic'
@@ -21,6 +29,7 @@ import {
     SCOUT_DAILY_AT_SCHEDULE_MODE,
     SIGNALS_SCOUT_SKILL_PREFIX,
 } from '../../../utils/scoutRunsWindow'
+import { MAX_SCOUT_TAGS, normalizeScoutTags } from '../../../utils/scoutTags'
 import { ScoutSlackDestination } from './ScoutSlackDestination'
 
 export interface ScoutCreateModalProps {
@@ -49,12 +58,16 @@ export function ScoutCreateModal({ isOpen, onClose, initialValues, onCreated }: 
         onClose()
     }
 
+    const tagsValidationError = scoutCreateFormValidationErrors.config?.tags?.find(
+        (error): error is string => typeof error === 'string'
+    )
     const firstError = [
         scoutCreateFormValidationErrors.name,
         scoutCreateFormValidationErrors.description,
         scoutCreateFormValidationErrors.body,
         scoutCreateFormValidationErrors.dailyTime,
         scoutCreateFormValidationErrors.config?.run_interval_minutes,
+        tagsValidationError,
     ].find((error): error is string => typeof error === 'string')
 
     return (
@@ -126,6 +139,30 @@ export function ScoutCreateModal({ isOpen, onClose, initialValues, onCreated }: 
                         />
                     </Field>
 
+                    <Field
+                        name="config.tags"
+                        label="Tags"
+                        help={`Add up to ${MAX_SCOUT_TAGS} tags to group scouts in the fleet.`}
+                    >
+                        {({ value, onChange }) => (
+                            <div className="flex flex-col gap-2">
+                                <InputSelect
+                                    mode="multiple"
+                                    allowCustomValues
+                                    limit={MAX_SCOUT_TAGS}
+                                    value={value}
+                                    onChange={(tags) => onChange(normalizeScoutTags(tags))}
+                                    placeholder="Add tag"
+                                    fullWidth
+                                    status={tagsValidationError ? 'danger' : 'default'}
+                                    disabledReason={isScoutCreateFormSubmitting ? 'Creating the scout' : undefined}
+                                    data-attr="scout-create-tags"
+                                />
+                                {tagsValidationError ? <Field.Error error={tagsValidationError} /> : null}
+                            </div>
+                        )}
+                    </Field>
+
                     <Field name="body" label="Instructions" help="This markdown prompt is executed on every run.">
                         <TextArea
                             minRows={8}
@@ -178,14 +215,14 @@ export function ScoutCreateModal({ isOpen, onClose, initialValues, onCreated }: 
                                 <Switch
                                     checked={value}
                                     onChange={onChange}
-                                    label="Write findings to the inbox"
+                                    label="Write signals to the inbox"
                                     bordered
                                     fullWidth
                                 />
                             )}
                         </Field>
                         <span className="text-xs text-muted">
-                            Turn off inbox findings to run the scout in dry-run mode.
+                            Turn off inbox signals to run the scout in dry-run mode.
                         </span>
                         <Field name="config.output_destinations">
                             {({ value, onChange }) => (

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/../products/desktop"
+
+pnpm install --frozen-lockfile
+
+exec pnpm exec turbo dev --filter=@hanzo/code --filter=@hanzo/agent --filter=@hanzo/git --filter=@hanzo/platform --filter=@hanzo/enricher

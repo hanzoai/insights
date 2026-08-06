@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconApps, IconPlus } from '@hanzo/icons'
+import { IconApps, IconChevronDown, IconPlus } from '@hanzo/icons'
 import { Button, Input, Select, SelectOptions, Link } from '@hanzo/elements'
 
-import { BulkUpdateTagsButton } from 'lib/components/BulkActions/BulkUpdateTagsButton'
+import { BulkUpdateTagsModal } from 'lib/components/BulkActions/BulkUpdateTagsModal'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TagSelect } from 'lib/components/TagSelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -12,6 +12,7 @@ import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { EVENT_DEFINITIONS_PER_PAGE } from 'lib/constants'
 import { Banner } from 'lib/elements/Banner'
+import { Menu } from 'lib/elements/Menu'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { cn } from 'lib/utils/css-classes'
 import { DefinitionHeader, getEventDefinitionIcon } from 'scenes/data-management/events/DefinitionHeader'
@@ -42,10 +43,12 @@ const eventTypeOptions: SelectOptions<EventDefinitionType> = [
 ]
 
 export function EventDefinitionsTable(): JSX.Element {
-    const { eventDefinitions, eventDefinitionsLoading, filters, showVerifiedFilter } =
+    const { eventDefinitions, eventDefinitionsLoading, filters, showVerifiedFilter, bulkVerifiedResultLoading } =
         useValues(eventDefinitionsTableLogic)
-    const { loadEventDefinitions, setFilters, applyBulkTagUpdates } = useActions(eventDefinitionsTableLogic)
+    const { loadEventDefinitions, setFilters, applyBulkTagUpdates, bulkUpdateVerified } =
+        useActions(eventDefinitionsTableLogic)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [isBulkTagsModalOpen, setIsBulkTagsModalOpen] = useState(false)
 
     const columns: TableColumns<EventDefinition> = [
         {
@@ -261,14 +264,66 @@ export function EventDefinitionsTable(): JSX.Element {
                     headerAriaLabel: 'Select all events on this page',
                     noun: ['event', 'events'],
                     renderActions: (ctx) => (
-                        <BulkUpdateTagsButton
-                            resource="event_definitions"
-                            selectedIds={ctx.selectedKeys}
-                            onSuccess={(result) => {
-                                applyBulkTagUpdates(result.updated)
-                                ctx.clearSelection()
-                            }}
-                        />
+                        <>
+                            <Menu
+                                placement="bottom-end"
+                                items={[
+                                    {
+                                        items: [
+                                            {
+                                                label: 'Update tags',
+                                                onClick: () => setIsBulkTagsModalOpen(true),
+                                                'data-attr': 'event-definitions-bulk-edit-update-tags',
+                                            },
+                                        ],
+                                    },
+                                    showVerifiedFilter && {
+                                        items: [
+                                            {
+                                                label: 'Verify',
+                                                onClick: () =>
+                                                    bulkUpdateVerified({
+                                                        ids: [...ctx.selectedKeys],
+                                                        verified: true,
+                                                        onSuccess: ctx.clearSelection,
+                                                    }),
+                                                'data-attr': 'event-definitions-bulk-edit-verify',
+                                            },
+                                            {
+                                                label: 'Unverify',
+                                                onClick: () =>
+                                                    bulkUpdateVerified({
+                                                        ids: [...ctx.selectedKeys],
+                                                        verified: false,
+                                                        onSuccess: ctx.clearSelection,
+                                                    }),
+                                                'data-attr': 'event-definitions-bulk-edit-unverify',
+                                            },
+                                        ],
+                                    },
+                                ]}
+                            >
+                                <Button
+                                    type="secondary"
+                                    size="small"
+                                    sideIcon={<IconChevronDown />}
+                                    disabledReason={bulkVerifiedResultLoading ? 'Updating…' : undefined}
+                                    data-attr="event-definitions-bulk-edit"
+                                >
+                                    Bulk edit
+                                </Button>
+                            </Menu>
+                            <BulkUpdateTagsModal
+                                resource="event_definitions"
+                                selectedIds={ctx.selectedKeys}
+                                isOpen={isBulkTagsModalOpen}
+                                onClose={() => setIsBulkTagsModalOpen(false)}
+                                onSuccess={(result) => {
+                                    applyBulkTagUpdates(result.updated)
+                                    ctx.clearSelection()
+                                }}
+                            />
+                        </>
                     ),
                 }}
                 dataSource={eventDefinitions.results}

@@ -5,10 +5,10 @@ from insights.schema import ReleaseStatus, SourceFieldInputConfig, SourceFieldIn
 
 from products.warehouse_sources.backend.temporal.data_imports.sources.common.resumable import ResumableSourceManager
 from products.warehouse_sources.backend.temporal.data_imports.sources.generated_configs.lemonsqueezy import (
-    SqueezySourceConfig,
+    LemonSqueezySourceConfig,
 )
 from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.lemon_squeezy import (
-    SqueezyResumeConfig,
+    LemonSqueezyResumeConfig,
 )
 from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.settings import (
     ENDPOINTS,
@@ -17,7 +17,7 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_sque
     SCHEMA_TO_WEBHOOK_EVENTS,
     WEBHOOK_SCHEMA_NAMES,
 )
-from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.source import SqueezySource
+from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.source import LemonSqueezySource
 from products.warehouse_sources.backend.types import ExternalDataSourceType
 
 API_CLIENT_PATCH = "products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.source.api_client"
@@ -25,9 +25,9 @@ API_CLIENT_PATCH = "products.warehouse_sources.backend.temporal.data_imports.sou
 
 class TestLemonSqueezySource:
     def setup_method(self):
-        self.source = SqueezySource()
+        self.source = LemonSqueezySource()
         self.team_id = 123
-        self.config = SqueezySourceConfig(api_key="test-api-key")
+        self.config = LemonSqueezySourceConfig(api_key="test-api-key")
 
     def test_source_type(self):
         assert self.source.source_type == ExternalDataSourceType.LEMONSQUEEZY
@@ -35,7 +35,7 @@ class TestLemonSqueezySource:
     def test_get_source_config(self):
         config = self.source.get_source_config
 
-        assert config.name.value == "Squeezy"
+        assert config.name.value == "LemonSqueezy"
         assert config.label == "Lemon Squeezy"
         assert config.releaseStatus == ReleaseStatus.ALPHA
         # The source must ship visible: unreleasedSource hides it from every user.
@@ -118,7 +118,7 @@ class TestLemonSqueezySource:
         manager = self.source.get_resumable_source_manager(mock.MagicMock())
 
         assert isinstance(manager, ResumableSourceManager)
-        assert manager._data_class is SqueezyResumeConfig
+        assert manager._data_class is LemonSqueezyResumeConfig
 
     @mock.patch(f"{API_CLIENT_PATCH}.lemon_squeezy_source")
     def test_source_for_pipeline_plumbs_arguments(self, mock_source):
