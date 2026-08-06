@@ -104,7 +104,7 @@ class TestWebOverviewQueryRunner(DatastoreTestMixin, APIBaseTest):
     ):
         with freeze_time(self.QUERY_TIMESTAMP):
             modifiers = InsightsQLQueryModifiers(
-                sessionTableVersion=session_table_version, bounceRatePageViewMode=bounce_rate_mode
+                bounceRatePageViewMode=bounce_rate_mode
             )
             query = WebOverviewQuery(
                 dateRange=DateRange(date_from=date_from, date_to=date_to),
