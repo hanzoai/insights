@@ -23,7 +23,6 @@ from insights.schema import (
     InsightsQLQueryModifiers,
     IntervalType,
     SessionPropertyFilter,
-    SessionTableVersion,
     WebOverviewQuery,
     WebOverviewQueryResponse,
 )
@@ -96,7 +95,6 @@ class TestWebOverviewQueryRunner(DatastoreTestMixin, APIBaseTest):
         self,
         date_from: str,
         date_to: str,
-        session_table_version: SessionTableVersion = SessionTableVersion.V2,
         compare: bool = True,
         limit_context: Optional[LimitContext] = None,
         filter_test_accounts: Optional[bool] = False,
