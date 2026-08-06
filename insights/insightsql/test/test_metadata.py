@@ -13,7 +13,6 @@ from insights.schema import (
     InsightsQLMetadataResponse,
     InsightsQLQuery,
     InsightsQLQueryModifiers,
-    SessionTableVersion,
 )
 
 from insights.insightsql.direct_connection import INVALID_CONNECTION_ID_ERROR
@@ -1062,11 +1061,11 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             """
         SELECT events.session.id FROM events
         """,
-            modifiers=InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V3),
+            modifiers=InsightsQLQueryModifiers(),
         )
         self.assertEqual(metadata.isValid, True)
         self.assertEqual(sorted(metadata.table_names or []), sorted(["events"]))
-        self.assertEqual(sorted(metadata.ch_table_names or []), sorted(["events", "raw_sessions_v3"]))
+        self.assertEqual(sorted(metadata.ch_table_names or []), sorted(["events", "raw_sessions"]))
 
     def test_views_type_resolution(self):
         _source = ExternalDataSource.objects.create(

@@ -160,7 +160,7 @@ from insights.models.precalculated_person_properties.sql import (
     PRECALCULATED_PERSON_PROPERTIES_WRITABLE_TABLE_SQL,
 )
 from insights.models.project import Project
-from insights.models.raw_sessions.sessions_v2 import (
+from insights.models.raw_sessions.sessions import (
     DISTRIBUTED_RAW_SESSIONS_TABLE_SQL,
     DROP_RAW_SESSION_DISTRIBUTED_TABLE_SQL,
     DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL,
@@ -171,20 +171,6 @@ from insights.models.raw_sessions.sessions_v2 import (
     RAW_SESSIONS_TABLE_MV_SQL,
     RAW_SESSIONS_TABLE_SQL,
     WRITABLE_RAW_SESSIONS_TABLE_SQL,
-)
-from insights.models.raw_sessions.sessions_v3 import (
-    DISTRIBUTED_RAW_SESSIONS_TABLE_SQL_V3,
-    DROP_RAW_SESSION_DISTRIBUTED_TABLE_SQL_V3,
-    DROP_RAW_SESSION_MATERIALIZED_VIEW_RECORDINGS_SQL_V3,
-    DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL_V3,
-    DROP_RAW_SESSION_SHARDED_TABLE_SQL_V3,
-    DROP_RAW_SESSION_VIEW_SQL_V3,
-    DROP_RAW_SESSION_WRITABLE_TABLE_SQL_V3,
-    RAW_SESSIONS_CREATE_OR_REPLACE_VIEW_SQL_V3,
-    RAW_SESSIONS_TABLE_MV_RECORDINGS_SQL_V3,
-    RAW_SESSIONS_TABLE_MV_SQL_V3,
-    SHARDED_RAW_SESSIONS_TABLE_SQL_V3,
-    WRITABLE_RAW_SESSIONS_TABLE_SQL_V3,
 )
 from insights.models.sessions.sql import (
     DISTRIBUTED_SESSIONS_TABLE_SQL,
@@ -1808,10 +1794,7 @@ def reset_datastore_database() -> None:
     run_datastore_statement_in_parallel(
         [
             DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL(),
-            DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL_V3(),
-            DROP_RAW_SESSION_MATERIALIZED_VIEW_RECORDINGS_SQL_V3(),
             DROP_RAW_SESSION_VIEW_SQL(),
-            DROP_RAW_SESSION_VIEW_SQL_V3(),
             DROP_SESSION_MATERIALIZED_VIEW_SQL(),
             DROP_SESSION_VIEW_SQL(),
             DROP_CHANNEL_DEFINITION_DICTIONARY_SQL,
@@ -1829,11 +1812,8 @@ def reset_datastore_database() -> None:
             DROP_PERSON_TABLE_SQL,
             DROP_PROPERTY_DEFINITIONS_TABLE_SQL(),
             DROP_RAW_SESSION_SHARDED_TABLE_SQL(),
-            DROP_RAW_SESSION_SHARDED_TABLE_SQL_V3(),
             DROP_RAW_SESSION_DISTRIBUTED_TABLE_SQL(),
-            DROP_RAW_SESSION_DISTRIBUTED_TABLE_SQL_V3(),
             DROP_RAW_SESSION_WRITABLE_TABLE_SQL(),
-            DROP_RAW_SESSION_WRITABLE_TABLE_SQL_V3(),
             DROP_SESSION_REPLAY_EVENTS_TABLE_SQL(),
             DROP_KAFKA_SESSION_REPLAY_EVENTS_TABLE_SQL(),
             DROP_SESSION_TABLE_SQL(),
@@ -1877,9 +1857,7 @@ def reset_datastore_database() -> None:
             PERSONS_TABLE_SQL(),
             PROPERTY_DEFINITIONS_TABLE_SQL(),
             RAW_SESSIONS_TABLE_SQL(),
-            SHARDED_RAW_SESSIONS_TABLE_SQL_V3(),
             WRITABLE_RAW_SESSIONS_TABLE_SQL(),
-            WRITABLE_RAW_SESSIONS_TABLE_SQL_V3(),
             SESSIONS_TABLE_SQL(),
             SESSION_REPLAY_EVENTS_TABLE_SQL(),
             CREATE_CUSTOM_METRICS_COUNTER_EVENTS_TABLE,
@@ -1902,7 +1880,6 @@ def reset_datastore_database() -> None:
             *datastore_events_distributed_table_sqls(),
             DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE_SQL(),
             DISTRIBUTED_RAW_SESSIONS_TABLE_SQL(),
-            DISTRIBUTED_RAW_SESSIONS_TABLE_SQL_V3(),
             DISTRIBUTED_SESSIONS_TABLE_SQL(),
             DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL(),
             KAFKA_SESSION_REPLAY_EVENTS_TABLE_SQL(),
@@ -1928,10 +1905,7 @@ def reset_datastore_database() -> None:
             CHANNEL_DEFINITION_DATA_SQL(),
             EXCHANGE_RATE_DATA_BACKFILL_SQL(),
             RAW_SESSIONS_TABLE_MV_SQL(),
-            RAW_SESSIONS_TABLE_MV_SQL_V3(),
-            RAW_SESSIONS_TABLE_MV_RECORDINGS_SQL_V3(),
             RAW_SESSIONS_CREATE_OR_REPLACE_VIEW_SQL(),
-            RAW_SESSIONS_CREATE_OR_REPLACE_VIEW_SQL_V3(),
             SESSIONS_TABLE_MV_SQL(),
             SESSIONS_VIEW_SQL(),
             ADHOC_EVENTS_DELETION_TABLE_SQL(),

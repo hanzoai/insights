@@ -5,13 +5,14 @@ import hanzo_insights
 from insights.cloud_utils import is_cloud
 from insights.schema_enums import (
     BounceRatePageViewMode,
+    CustomChannelRule,
     InCohortVia,
     InlineCohortCalculation,
+    InsightsQLQueryModifiers,
     MaterializationMode,
     PersonsArgMaxVersion,
     PropertyGroupsMode,
     SessionsV2JoinMode,
-    SessionTableVersion,
 )
 
 # This module loads at django.setup() via Team; insights.schema (the pydantic models) is
@@ -106,9 +107,6 @@ def set_default_modifier_values(modifiers: "InsightsQLQueryModifiers", team: "Te
 
     if modifiers.bounceRatePageViewMode is None:
         modifiers.bounceRatePageViewMode = BounceRatePageViewMode.COUNT_PAGEVIEWS
-
-    if modifiers.sessionTableVersion is None:
-        modifiers.sessionTableVersion = SessionTableVersion.AUTO
 
     if modifiers.sessionsV2JoinMode is None:
         modifiers.sessionsV2JoinMode = SessionsV2JoinMode.UUID

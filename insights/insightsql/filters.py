@@ -14,9 +14,7 @@ from insights.insightsql.database.schema.ai_events import AiEventsTable
 from insights.insightsql.database.schema.events import EventsTable
 from insights.insightsql.database.schema.groups import GroupsTable
 from insights.insightsql.database.schema.logs import LogAttributesTable, LogsTable
-from insights.insightsql.database.schema.sessions_v1 import SessionsTableV1
-from insights.insightsql.database.schema.sessions_v2 import SessionsTableV2
-from insights.insightsql.database.schema.sessions_v3 import SessionsTableV3
+from insights.insightsql.database.schema.sessions import SessionsTable
 from insights.insightsql.database.schema.spans import TraceSpansTable
 from insights.insightsql.errors import QueryError
 from insights.insightsql.property import property_to_expr
@@ -189,7 +187,7 @@ class ReplaceFilters(CloningVisitor):
                     resolved = self._resolve_table(last_join.table.chain)
                     if isinstance(resolved, (EventsTable, AiEventsTable)):
                         found_events = True
-                    if isinstance(resolved, SessionsTableV1 | SessionsTableV2 | SessionsTableV3):
+                    if isinstance(resolved, SessionsTable):
                         found_sessions = True
                     if isinstance(resolved, (LogsTable, LogAttributesTable)):
                         found_logs = True

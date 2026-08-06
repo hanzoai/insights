@@ -17,10 +17,13 @@ from insights.insightsql.database.models import (
     StringDatabaseField,
     Table,
 )
-from insights.insightsql.database.schema.channel_type import DEFAULT_CHANNEL_TYPES, ChannelTypeExprs, create_channel_type_expr
-from insights.insightsql.database.schema.sessions_v1 import DEFAULT_BOUNCE_RATE_DURATION_SECONDS, null_if_empty
+from insights.insightsql.database.schema.channel_type import (
+    DEFAULT_CHANNEL_TYPES,
+    ChannelTypeExprs,
+    create_channel_type_expr,
+)
 from insights.insightsql.database.schema.util.where_clause_extractor import (
-    SessionMinTimestampWhereClauseExtractorV2,
+    SessionMinTimestampWhereClauseExtractor,
     build_session_id_literal_pushdown_predicate,
     build_session_id_v7_pushdown_predicate,
     build_session_property_pre_aggregation_predicate,
@@ -146,7 +149,14 @@ LAZY_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
 }
 
 
-class RawSessionsTableV2(Table):
+DEFAULT_BOUNCE_RATE_DURATION_SECONDS = 10
+
+
+def null_if_empty(expr: ast.Expr) -> ast.Call:
+    return ast.Call(name="nullIf", args=[expr, ast.Constant(value="")])
+
+
+class RawSessionsTable(Table):
     fields: dict[str, FieldOrTable] = RAW_SESSIONS_FIELDS
 
     def to_printed_datastore(self, context):
@@ -192,7 +202,7 @@ class RawSessionsTableV2(Table):
         ]
 
 
-def select_from_sessions_table_v2(
+def select_from_sessions_table(
     requested_fields: dict[str, list[str | int]],
     node: ast.SelectQuery,
     context: InsightsQLContext,
@@ -438,7 +448,7 @@ def select_from_sessions_table_v2(
             if name != "session_id_v7":
                 group_by_fields.append(ast.Field(chain=cast(list[str | int], [table_name]) + chain))
 
-    where = SessionMinTimestampWhereClauseExtractorV2(context).get_inner_where(node)
+    where = SessionMinTimestampWhereClauseExtractor(context).get_inner_where(node)
     if extra_where is not None:
         where = ast.And(exprs=[where, extra_where]) if where is not None else extra_where
 
@@ -450,7 +460,7 @@ def select_from_sessions_table_v2(
     )
 
 
-def _single_sessions_occurrence_type(node: ast.SelectQuery, lazy_table: "SessionsTableV2") -> Optional[ast.Type]:
+def _single_sessions_occurrence_type(node: ast.SelectQuery, lazy_table: "SessionsTable") -> Optional[ast.Type]:
     """The resolved type of the query's only ``sessions`` occurrence, or None.
 
     Returns None when the sessions table appears more than once in the FROM/JOIN
@@ -474,7 +484,7 @@ def _single_sessions_occurrence_type(node: ast.SelectQuery, lazy_table: "Session
 
 
 def build_direct_session_id_in_pushdown(
-    node: ast.SelectQuery, context: InsightsQLContext, lazy_table: "SessionsTableV2"
+    node: ast.SelectQuery, context: InsightsQLContext, lazy_table: "SessionsTable"
 ) -> Optional[ast.Expr]:
     """Push a top-level ``session_id IN (SELECT …)`` filter below the per-session GROUP BY.
 
@@ -498,7 +508,7 @@ def build_direct_session_id_in_pushdown(
     fires when the filtered column provably belongs to this sessions occurrence —
     the query's single one; joined tables' own ``session_id`` columns and sessions
     self-joins are left untouched (locked by the parity and hijack tests in
-    test_session_v2_where_clause_extractor.py). Fails open (returns None, outer
+    test_session_where_clause_extractor.py). Fails open (returns None, outer
     term untouched) on any shape it doesn't recognize — NOT IN, literal lists,
     OR-nested terms, multi-column subqueries — preserving exact original semantics
     there.
@@ -606,7 +616,7 @@ def build_direct_session_id_in_pushdown(
     return None
 
 
-class SessionsTableV2(LazyTable):
+class SessionsTable(LazyTable):
     description: str = (
         "Aggregated user sessions (one row per session), with entry/exit URLs, attribution, and duration. "
         "Join from events via `events.$session_id = sessions.session_id`."
@@ -620,7 +630,7 @@ class SessionsTableV2(LazyTable):
         node: ast.SelectQuery,
     ):
         extra_where = build_direct_session_id_in_pushdown(node, context, self)
-        return select_from_sessions_table_v2(table_to_add.fields_accessed, node, context, extra_where=extra_where)
+        return select_from_sessions_table(table_to_add.fields_accessed, node, context, extra_where=extra_where)
 
     def to_printed_datastore(self, context):
         return "sessions"
@@ -646,7 +656,7 @@ def session_id_to_session_id_v7_as_uint128_expr(session_id: ast.Expr) -> ast.Exp
     )
 
 
-def join_events_table_to_sessions_table_v2(
+def join_events_table_to_sessions_table(
     join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: ast.SelectQuery
 ) -> ast.JoinExpr:
     from insights.insightsql import ast
@@ -679,14 +689,14 @@ def join_events_table_to_sessions_table_v2(
             join_to_add,
             context,
             requested_fields=join_to_add.fields_accessed,
-            select_from_fn=select_from_sessions_table_v2,
+            select_from_fn=select_from_sessions_table,
             session_id_v7_field=ast.Field(chain=["raw_sessions", "session_id_v7"]),
         )
         if pre_agg_where is not None:
             extra_where = ast.And(exprs=[extra_where, pre_agg_where]) if extra_where is not None else pre_agg_where
 
     join_expr = ast.JoinExpr(
-        table=select_from_sessions_table_v2(join_to_add.fields_accessed, node, context, extra_where=extra_where)
+        table=select_from_sessions_table(join_to_add.fields_accessed, node, context, extra_where=extra_where)
     )
     join_expr.join_type = "LEFT JOIN"
     join_expr.alias = join_to_add.to_table
@@ -713,7 +723,7 @@ def join_events_table_to_sessions_table_v2(
     return join_expr
 
 
-def get_lazy_session_table_properties_v2(search: Optional[str]):
+def get_lazy_session_table_properties(search: Optional[str]):
     # some fields shouldn't appear as properties
     hidden_fields = {
         "max_inserted_at",
@@ -808,9 +818,9 @@ SESSION_PROPERTY_TO_RAW_SESSIONS_EXPR_MAP = {
 }
 
 
-def get_lazy_session_table_values_v2(key: str, search_term: Optional[str], team: "Team"):
+def get_lazy_session_table_values(key: str, search_term: Optional[str], team: "Team"):
     # lazy import keeps the raw-sessions SQL module (Django ORM) off this module's import path
-    from insights.models.raw_sessions.sessions_v2 import (  # noqa: PLC0415
+    from insights.models.raw_sessions.sessions import (  # noqa: PLC0415
         RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL,
         RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_WITH_FILTER,
     )

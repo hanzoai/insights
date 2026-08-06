@@ -33,7 +33,6 @@ from insights.schema import (
     PersonsArgMaxVersion,
     PersonsOnEventsMode,
     PropertyGroupsMode,
-    SessionTableVersion,
 )
 
 from insights.insightsql import ast
@@ -4792,18 +4791,9 @@ class TestPrinter(BaseTest):
 
             assert clean_varying_query_parts(printed, replace_all_numbers=False) == self._schema_snapshot()
 
-    @parameterized.expand(
-        [
-            (SessionTableVersion.V1, "IN", "globalIn"),
-            (SessionTableVersion.V1, "NOT IN", "globalNotIn"),
-            (SessionTableVersion.V2, "IN", "globalIn"),
-            (SessionTableVersion.V2, "NOT IN", "globalNotIn"),
-            (SessionTableVersion.V3, "IN", "globalIn"),
-            (SessionTableVersion.V3, "NOT IN", "globalNotIn"),
-        ]
-    )
-    def test_sessions_filter_by_event_subquery_uses_global_in(self, version, op, expected):
-        modifiers = InsightsQLQueryModifiers(sessionTableVersion=version)
+    @parameterized.expand([("IN", "globalIn"), ("NOT IN", "globalNotIn")])
+    def test_sessions_filter_by_event_subquery_uses_global_in(self, op, expected):
+        modifiers = InsightsQLQueryModifiers()
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
         printed = self._select(
             f"""
@@ -4817,7 +4807,7 @@ class TestPrinter(BaseTest):
 
     @parameterized.expand([("IN", "globalIn"), ("NOT IN", "globalNotIn")])
     def test_sessions_filter_by_event_subquery_uses_global_in_with_alias(self, op, expected):
-        modifiers = InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V3)
+        modifiers = InsightsQLQueryModifiers()
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
         printed = self._select(
             f"""
@@ -4831,7 +4821,7 @@ class TestPrinter(BaseTest):
 
     @parameterized.expand([("IN", "globalIn"), ("NOT IN", "globalNotIn")])
     def test_events_filter_by_sessions_subquery_uses_global_in(self, op, expected):
-        modifiers = InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V3)
+        modifiers = InsightsQLQueryModifiers()
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
         printed = self._select(
             f"""
