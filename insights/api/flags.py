@@ -59,11 +59,10 @@ from insights import iam
 logger = structlog.get_logger(__name__)
 
 # Evaluation is an in-process SQLite read plus a pure function on the other side,
-# so this bounds the network and nothing else. It is deliberately shorter than
-# the IAM mint timeout: the frontend shows the app after 3s whether or not flags
-# arrived, and a verdict that lands after that only makes the page change under
-# the user.
-_TIMEOUT_SECONDS = 5
+# so this bounds the network and nothing else. The frontend shows the app after
+# 3s whether or not flags arrived, so the verdict must land or fail inside that
+# budget — a slower answer only makes the page change under the user.
+_TIMEOUT_SECONDS = 2
 
 # The verdict, exactly as the evaluator names it. `featureFlags` maps key ->
 # true | variant-string; `featureFlagPayloads` maps key -> arbitrary JSON.
