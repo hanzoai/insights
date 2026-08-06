@@ -13,7 +13,7 @@ import { BatchExportBackfill } from '~/types'
 import { BatchExportBackfillModal } from './BatchExportBackfillModal'
 import { BatchExportBackfillsLogicProps, batchExportBackfillsLogic } from './batchExportBackfillsLogic'
 import { BatchExportLoadingSkeleton } from './BatchExportLoadingSkeleton'
-import { statusToLemonTagType, statusToProgressStrokeColor } from './utils'
+import { statusToTagType, statusToProgressStrokeColor } from './utils'
 
 export function BatchExportBackfills({ id, context }: BatchExportBackfillsLogicProps): JSX.Element {
     const logic = batchExportBackfillsLogic({ id, context })
@@ -85,7 +85,7 @@ function BatchExportLatestBackfills({ id, context }: BatchExportBackfillsLogicPr
                         render: (_, backfill) => {
                             const status = backfill.status
                             return (
-                                <Tag type={statusToLemonTagType(status)} size="medium">
+                                <Tag type={statusToTagType(status)} size="medium">
                                     {status}
                                 </Tag>
                             )

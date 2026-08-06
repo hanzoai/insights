@@ -21,8 +21,8 @@ import {
 import { dateRangeSelectionLabel, type DataAttributeProps, type DateRangeSelection } from './DateRangePresetsPanel'
 import { QuillDateFilter } from './QuillDateFilter'
 
-// The experimental chip-based date filter, twice: under the lemon skin (lemon-skin.scss rebinds
-// quill under `data-lemon-skin` — same code, lemon look) and quill-native. The panel is rendered
+// The experimental chip-based date filter, twice: under the lemon skin (elements-skin.scss rebinds
+// quill under `data-elements-skin` — same code, lemon look) and quill-native. The panel is rendered
 // inline (not behind the popover) so snapshots capture the actual filter UI.
 
 const meta: Meta = {
@@ -47,13 +47,13 @@ function shortExclusionsLabel(parts: string[]): string {
     return parts.length > 1 ? `excl. ${parts[0]} +${parts.length - 1}` : `excl. ${parts[0]}`
 }
 
-function DateFilterConcept({ lemonSkin }: { lemonSkin?: boolean }): JSX.Element {
+function DateFilterConcept({ elementsSkin }: { elementsSkin?: boolean }): JSX.Element {
     const [selection, setSelection] = useState<DateRangeSelection>({ kind: 'rolling', count: 30, unit: 'days' })
     const [exclusions, setExclusions] = useState<DateFilterExclusions>({ days: [], incomplete: false })
     const [exactTime, setExactTime] = useState(false)
     const exclusionParts = dateFilterExclusionParts(exclusions)
-    const skinProps = lemonSkin ? { 'data-lemon-skin': true, 'data-quill': true } : { 'data-quill': true }
-    const portalProps = lemonSkin ? ({ 'data-lemon-skin': 'true' } as DataAttributeProps) : undefined
+    const skinProps = elementsSkin ? { 'data-elements-skin': true, 'data-quill': true } : { 'data-quill': true }
+    const portalProps = elementsSkin ? ({ 'data-elements-skin': 'true' } as DataAttributeProps) : undefined
     return (
         <div className="flex flex-col items-start gap-3" {...skinProps}>
             <QuillButton variant="outline">
@@ -112,7 +112,7 @@ function ConceptGrid(): JSX.Element {
     return (
         <div className="flex flex-wrap items-start gap-8">
             <ConceptColumn title="Date filter · lemon skin">
-                <DateFilterConcept lemonSkin />
+                <DateFilterConcept elementsSkin />
             </ConceptColumn>
             <ConceptColumn title="Date filter · quill">
                 <DateFilterConcept />

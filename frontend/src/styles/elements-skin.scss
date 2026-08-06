@@ -1,0 +1,433 @@
+/*
+ * PROTOTYPE — Lemon skin for quill: restyles quill primitives to UI's visual
+ * language so quill components drop into Lemon scenes with no visible change.
+ * Opt in per surface with `data-quill data-elements-skin` on a wrapper. Quill's own
+ * rules live in `@layer components`, so these unlayered overrides win the cascade.
+ * Portaled content (menus, flyouts, dropdowns) escapes the wrapper — pass
+ * `data-elements-skin` to the quill *Content component so it lands on the portal.
+ */
+
+/* quill-bridge.scss rebinds several Lemon var names to quill tokens inside
+   [data-quill], so these aliases restore the Lemon values under skin-local names. */
+[data-elements-skin] {
+    --elements-skin-accent: hsl(
+        var(--color-brand-primary-hue),
+        var(--color-brand-primary-saturation),
+        var(--color-brand-primary-lightness)
+    );
+    --elements-skin-accent-hover: hsl(
+        var(--color-brand-primary-hue),
+        var(--color-brand-primary-saturation),
+        calc(var(--color-brand-primary-lightness) + 10%)
+    );
+    --elements-skin-border: var(--color-insights-3000-200);
+    --elements-skin-border-hover: var(--color-insights-3000-400);
+    --elements-skin-surface: var(--color-white);
+    --elements-skin-bg-page: var(--color-insights-3000-50);
+    --elements-skin-text-secondary: var(--color-neutral-750);
+    --elements-skin-radius: 0.375rem;
+    --elements-skin-radius-lg: 0.625rem;
+}
+
+[theme='dark'] [data-elements-skin] {
+    --elements-skin-border: var(--color-neutral-cool-800);
+    --elements-skin-border-hover: var(--color-neutral-cool-600);
+    --elements-skin-surface: var(--color-neutral-cool-850);
+    --elements-skin-bg-page: var(--color-neutral-cool-950);
+    --elements-skin-text-secondary: var(--color-neutral-350);
+}
+
+/* Core quill tokens → Lemon values: recolors primitive CSS and bespoke Tailwind in one
+   place. tokens.scoped.css sets values directly on every [data-quill] element, so the
+   extra selectors are needed to out-specificity it. */
+[data-elements-skin],
+[data-elements-skin][data-quill],
+[data-elements-skin] [data-quill] {
+    --foreground: var(--text-3000);
+    --muted-foreground: var(--elements-skin-text-secondary);
+    --border: var(--elements-skin-border);
+    --input: var(--elements-skin-border);
+    --card: var(--color-bg-surface-popover);
+    --background: var(--elements-skin-surface);
+    --primary: var(--elements-skin-accent);
+    --primary-foreground: var(--elements-skin-surface);
+    --fill-hover: var(--color-bg-fill-button-tertiary-hover);
+    --fill-selected: var(--color-bg-fill-button-tertiary-active);
+    --fill-expanded: var(--color-bg-fill-button-tertiary-active);
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.625rem;
+
+    /* Quill's base 12px text → Lemon's 14px, wherever quill CSS reads the var */
+    --text-xs: 0.875rem;
+    --shadow-md: var(--shadow-elevation-3000);
+}
+
+/* ═══ Button → Button ═════════════════════════════════════════════ */
+
+/* The attribute matches an ancestor (wrapped surfaces, portaled content) or the
+   element itself, so an opted-in inline button is skinned without a wrapper. */
+
+[data-elements-skin] .quill-button,
+.quill-button[data-elements-skin] {
+    font-family: var(--font-button);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+    color: var(--text-3000);
+    border-radius: var(--elements-skin-radius);
+}
+
+/* primary → Lemon primary. Button draws its 3D frame on a pseudo-element inset
+   -1px with `0 3px 0 -1px`; on the button itself 0 spread gives the same net edge. */
+
+[data-elements-skin] .quill-button--variant-primary,
+.quill-button--variant-primary[data-elements-skin] {
+    color: var(--text-3000-light);
+    background-color: var(--primary-3000-button-bg);
+    border: 1px solid var(--primary-3000-button-border);
+    box-shadow: 0 0.1875rem 0 0 var(--primary-3000-frame-bg);
+    translate: none;
+}
+
+[data-elements-skin] .quill-button--variant-primary:not(:disabled, [aria-disabled='true']):hover,
+.quill-button--variant-primary[data-elements-skin]:not(:disabled, [aria-disabled='true']):hover {
+    background-color: var(--primary-3000-button-bg);
+    border-color: var(--primary-3000-button-border-hover);
+}
+
+[data-elements-skin] .quill-button--variant-primary:not(:disabled, [aria-disabled='true']):active,
+.quill-button--variant-primary[data-elements-skin]:not(:disabled, [aria-disabled='true']):active {
+    box-shadow: none;
+    translate: 0 0.1875rem;
+}
+
+/* outline → Lemon secondary */
+
+[data-elements-skin] .quill-button--variant-outline,
+.quill-button--variant-outline[data-elements-skin] {
+    background-color: transparent;
+    border: 1px solid var(--secondary-3000-button-border);
+    box-shadow: 0 0.1875rem 0 0 var(--secondary-3000-frame-bg);
+}
+
+[data-elements-skin] .quill-button--variant-outline:not(:disabled, [aria-disabled='true']):hover,
+.quill-button--variant-outline[data-elements-skin]:not(:disabled, [aria-disabled='true']):hover {
+    color: var(--text-3000);
+    background-color: transparent;
+    border-color: var(--secondary-3000-button-border-hover);
+}
+
+[data-elements-skin] .quill-button--variant-outline:not(:disabled, [aria-disabled='true']):active,
+.quill-button--variant-outline[data-elements-skin]:not(:disabled, [aria-disabled='true']):active {
+    box-shadow: none;
+    translate: 0 0.1875rem;
+}
+
+/* default (ghost) → Lemon tertiary */
+
+[data-elements-skin] .quill-button--variant-default,
+.quill-button--variant-default[data-elements-skin] {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+[data-elements-skin] .quill-button--variant-default:not(:disabled, [aria-disabled='true']):hover,
+.quill-button--variant-default[data-elements-skin]:not(:disabled, [aria-disabled='true']):hover {
+    color: var(--text-3000);
+    background-color: var(--color-bg-fill-button-tertiary-hover);
+}
+
+[data-elements-skin] .quill-button--variant-default:not(:disabled, [aria-disabled='true']):active,
+.quill-button--variant-default[data-elements-skin]:not(:disabled, [aria-disabled='true']):active {
+    background-color: var(--color-bg-fill-button-tertiary-active);
+}
+
+/* link / link-muted → Link (accent text, no underline) */
+
+[data-elements-skin] .quill-button--variant-link,
+[data-elements-skin] .quill-button--variant-link-muted,
+.quill-button--variant-link[data-elements-skin],
+.quill-button--variant-link-muted[data-elements-skin] {
+    height: auto;
+    padding: 0;
+    color: var(--elements-skin-accent);
+    text-decoration-line: none;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+[data-elements-skin] .quill-button--variant-link-muted,
+.quill-button--variant-link-muted[data-elements-skin] {
+    color: var(--text-3000);
+}
+
+[data-elements-skin]
+    :is(.quill-button--variant-link, .quill-button--variant-link-muted):not(:disabled, [aria-disabled='true']):hover,
+:is(.quill-button--variant-link, .quill-button--variant-link-muted)[data-elements-skin]:not(
+    :disabled,
+    [aria-disabled='true']
+):hover {
+    color: var(--elements-skin-accent-hover);
+    text-decoration-line: none;
+    background: none;
+}
+
+/* Sizes → Lemon's scale by closest geometry: xs→xxsmall, sm→xsmall,
+   default→small, lg→medium */
+
+[data-elements-skin] .quill-button--size-default,
+.quill-button--size-default[data-elements-skin] {
+    gap: 0.5rem;
+    height: 2.0625rem;
+    padding-inline: 0.5rem;
+    font-size: 0.875rem;
+}
+
+[data-elements-skin] .quill-button--size-default svg:not([class*='size-']),
+.quill-button--size-default[data-elements-skin] svg:not([class*='size-']) {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+[data-elements-skin] .quill-button--size-xs,
+.quill-button--size-xs[data-elements-skin] {
+    gap: 0.1875rem;
+    height: 1.25rem;
+    padding-inline: 0.25rem;
+    font-size: 0.6875rem;
+    border-radius: var(--elements-skin-radius);
+}
+
+[data-elements-skin] .quill-button--size-sm,
+.quill-button--size-sm[data-elements-skin] {
+    gap: 0.25rem;
+    height: 1.625rem;
+    padding-inline: 0.375rem;
+    font-size: 0.75rem;
+}
+
+[data-elements-skin] .quill-button--size-sm svg:not([class*='size-']),
+.quill-button--size-sm[data-elements-skin] svg:not([class*='size-']) {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+
+/* ═══ InputGroup (input with addons) — recolor only, keep 2rem metrics ═ */
+
+[data-elements-skin] .quill-input-group {
+    /* Undo the global --text-xs bump inside the stepper: at 14px a 3-digit count truncates.
+       The text-xs utility reads the var (and is !important), so re-scope the var. */
+    --text-xs: 0.75rem;
+
+    font-family: var(--font-sans);
+    background-color: var(--color-bg-fill-input);
+    border-color: var(--elements-skin-border);
+    border-radius: var(--elements-skin-radius);
+}
+
+[data-elements-skin] .quill-input-group:has([data-slot='input-group-control']:focus-visible) {
+    border-color: var(--elements-skin-border-hover);
+    box-shadow: none;
+}
+
+/* Buttons inside the group keep quill's compact metrics — the Lemon button remap
+   (2.0625rem, full radius) overflows the 2rem group on hover. */
+[data-elements-skin] .quill-input-group .quill-button {
+    border-radius: calc(var(--elements-skin-radius) - 2px);
+}
+
+[data-elements-skin] .quill-input-group .quill-input-group__button--size-icon-xs {
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+}
+
+/* ═══ Switch → Switch ═════════════════════════════════════════════ */
+
+[data-elements-skin] .quill-switch {
+    border: none;
+    outline: 1px solid var(--elements-skin-border);
+}
+
+[data-elements-skin] .quill-switch[data-unchecked] {
+    background-color: var(--color-bg-fill-switch);
+}
+
+[data-elements-skin] .quill-switch[data-checked] {
+    background-color: var(--elements-skin-accent);
+}
+
+[data-elements-skin] .quill-switch__thumb {
+    /* Lemon hardcodes a white handle in the off state */
+    background-color: #fff;
+}
+
+[data-elements-skin] .quill-switch[data-checked] .quill-switch__thumb {
+    background-color: var(--elements-skin-surface);
+    transform: translateX(100%);
+}
+
+/* ═══ Separator → Divider ═════════════════════════════════════════ */
+
+[data-elements-skin] .quill-separator {
+    background-color: var(--elements-skin-border);
+}
+
+/* ═══ Label → Label ═══════════════════════════════════════════════ */
+
+[data-elements-skin] .quill-label {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+}
+
+/* ═══ Popover / menu / select surfaces → Popover box ═════════════ */
+
+[data-elements-skin] :is(.quill-popover__content, .quill-select__content),
+:is(.quill-popover__content, .quill-select__content)[data-elements-skin] {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    background-color: var(--color-bg-surface-popover);
+    border: 1px solid var(--secondary-3000-button-border);
+    border-radius: var(--elements-skin-radius-lg);
+    box-shadow: var(--shadow-elevation-3000);
+}
+
+/* SelectTrigger sizes itself via data-size, not Button's size prop: sm → xsmall */
+[data-elements-skin] .quill-select__trigger[data-size='sm'] {
+    gap: 0.25rem;
+    height: 1.625rem;
+    padding-inline: 0.375rem;
+    font-size: 0.75rem;
+}
+
+/* Select rows sized like the small Buttons Menu renders */
+
+[data-elements-skin] .quill-select__item {
+    height: auto;
+    min-height: 2.0625rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: var(--elements-skin-radius);
+}
+
+[data-elements-skin] .quill-select__item:focus {
+    background-color: var(--color-bg-fill-button-tertiary-hover);
+}
+
+[data-elements-skin] .quill-select__item:not(:hover)[aria-selected='true'] {
+    background-color: var(--color-bg-fill-button-tertiary-active);
+}
+
+/* ═══ ToggleGroup → Lemon day chips ════════════════════════════════════ */
+
+/* Items carry quill's toggle classes, whose grey pressed styling leaks through —
+   give each a pressable face with an accent bottom edge, sinking when pressed. */
+
+[data-elements-skin] .quill-toggle-group__item {
+    font-size: 0.75rem;
+    color: var(--text-3000);
+    background-color: var(--elements-skin-surface);
+    border: 1px solid var(--elements-skin-border);
+    border-radius: var(--elements-skin-radius);
+    box-shadow: 0 0.1875rem 0 0 var(--elements-skin-accent);
+    translate: none;
+}
+
+[data-elements-skin] .quill-toggle-group__item:not(:disabled, [aria-disabled='true']):hover {
+    color: var(--text-3000);
+    background-color: var(--elements-skin-surface);
+    border-color: var(--elements-skin-border-hover);
+}
+
+/* Selected → pressed: sink onto the accent edge and tint the face */
+
+[data-elements-skin] .quill-toggle-group__item:is([aria-pressed='true'], [data-pressed], [data-state='on']) {
+    color: var(--elements-skin-accent);
+    background-color: color-mix(in oklab, var(--elements-skin-accent) 12%, var(--elements-skin-surface));
+    border-color: var(--elements-skin-accent);
+    box-shadow: none;
+    translate: 0 0.1875rem;
+}
+
+/* ═══ DateTimePicker actions footer → small Lemon buttons ══════════════ */
+
+/* Cancel/Apply are quill size=sm; bump them to small Lemon metrics. */
+
+[data-elements-skin]
+    .quill-button:is([data-attr='date-time-picker-cancel'], [data-attr='date-time-picker-apply-date-range']) {
+    height: 2.0625rem;
+    padding-inline: 0.75rem;
+    font-size: 0.8125rem;
+}
+
+/* ═══ Chip-based date filter surface → Lemon popover chrome ═════════════ */
+
+/* Surface: Lemon popover chrome instead of quill's card ring. */
+[data-elements-skin] [data-attr='quill-date-filter'] {
+    background: var(--elements-skin-surface);
+    border: 1px solid var(--elements-skin-border);
+    border-radius: var(--elements-skin-radius);
+    box-shadow: var(--shadow-elevation-3000);
+}
+
+/* Chips → Tag metrics: flat neutral border, tag-scale type — 16 of Lemon's
+   raised secondary buttons in one grid read as noise. */
+[data-elements-skin] .quill-button:is([data-attr^='date-presets-chip-']) {
+    height: 1.5rem;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1rem;
+    color: var(--text-3000);
+    background: var(--elements-skin-surface);
+    border: 1px solid var(--elements-skin-border);
+    border-radius: 0.25rem;
+    box-shadow: none;
+    translate: none;
+}
+
+[data-elements-skin] .quill-button:is([data-attr^='date-presets-chip-']):not([aria-selected='true']):hover {
+    background: var(--elements-skin-surface);
+    border-color: var(--elements-skin-border-hover);
+    box-shadow: none;
+    translate: none;
+}
+
+/* Selected chip → Tag highlight: accent text + border, no fill. */
+[data-elements-skin] .quill-button:is([data-attr^='date-presets-chip-'])[aria-selected='true'] {
+    color: var(--elements-skin-accent);
+    background: var(--elements-skin-surface);
+    border-color: var(--elements-skin-accent);
+}
+
+/* Footer rows (Custom range… / Exclude) → Lemon menu-row metrics.
+   `height`, not `min-height`: the size-sm variant sets an explicit height that would win. */
+[data-elements-skin] .quill-button:is([data-attr='date-presets-custom-range'], [data-attr='date-filter-exclusions']) {
+    height: 2.0625rem;
+    padding-inline: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+/* Picker footer band → flat Lemon surface. bg-muted/30 is an !important utility the
+   skin can't outrank, so neutralize the token it mixes from instead. */
+[data-elements-skin] div:has(> [data-attr='date-time-picker-cancel']) {
+    --muted-3000: transparent;
+
+    background: var(--elements-skin-surface);
+    border-top: 1px solid var(--elements-skin-border);
+}
+
+/* Footer switch-row labels → same metrics as the footer button rows (the generic
+   Label→Label mapping above is 600/14px, too heavy for a menu row). */
+[data-elements-skin] label:is([for='date-filter-exact-time'], [for='date-filter-include-time']) {
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
