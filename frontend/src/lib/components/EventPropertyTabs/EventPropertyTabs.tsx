@@ -45,7 +45,7 @@ type EventPropertyTabKey =
 export const EventPropertyTabs = ({
     event,
     tabContentComponentFn,
-    ...lemonTabsProps
+    ...tabsProps
 }: {
     event: ErrorPropertyTabEvent
     tabContentComponentFn: (props: TabContentComponentFnProps) => JSX.Element
@@ -252,7 +252,7 @@ export const EventPropertyTabs = ({
     ]
     return (
         <Tabs
-            {...lemonTabsProps}
+            {...tabsProps}
             activeKey={activeTab}
             onChange={(newKey: EventPropertyTabKey) => setActiveTab(newKey)}
             tabs={tabs}

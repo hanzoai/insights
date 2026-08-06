@@ -126,7 +126,7 @@ export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     ref
 ): JSX.Element {
     const { referenceRef, itemsRef } = useKeyboardNavigation<HTMLElement, HTMLButtonElement>(
-        items.flatMap((item) => (item && isLemonMenuSection(item) ? item.items : item)).length,
+        items.flatMap((item) => (item && isMenuSection(item) ? item.items : item)).length,
         activeItemIndex,
         { enabled: focusBasedKeyboardNavigation }
     )
@@ -186,7 +186,7 @@ export function MenuOverlay({
 }: MenuOverlayProps): JSX.Element {
     const sectionsOrItems = useMemo(() => normalizeItems(items), [items])
 
-    return sectionsOrItems.length > 0 && isLemonMenuSection(sectionsOrItems[0]) ? (
+    return sectionsOrItems.length > 0 && isMenuSection(sectionsOrItems[0]) ? (
         <MenuSectionList
             sections={sectionsOrItems as MenuSection[]}
             buttonSize={buttonSize}
@@ -364,7 +364,7 @@ function normalizeItems(sectionsAndItems: MenuItems): MenuItem[] | MenuSection[]
         if (!sectionOrItem) {
             continue // Ignore falsy items
         }
-        if (isLemonMenuSection(sectionOrItem)) {
+        if (isMenuSection(sectionOrItem)) {
             if (implicitSection.items.length > 0) {
                 sections.push(implicitSection)
                 implicitSection = { items: [] }
@@ -384,6 +384,6 @@ function normalizeItems(sectionsAndItems: MenuItems): MenuItem[] | MenuSection[]
     return sections
 }
 
-export function isLemonMenuSection(candidate: MenuSection | MenuItem): candidate is MenuSection {
+export function isMenuSection(candidate: MenuSection | MenuItem): candidate is MenuSection {
     return candidate && 'items' in candidate && !('label' in candidate)
 }

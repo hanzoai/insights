@@ -6,7 +6,7 @@ import { ColorList, ColorListProps } from './ColorList'
 
 type Story = StoryObj<ColorListProps>
 const meta: Meta<ColorListProps> = {
-    title: 'Lemon UI/Lemon Color/Lemon Color List',
+    title: 'Elements/Color/Color List',
     component: ColorList,
     tags: ['autodocs'],
 }

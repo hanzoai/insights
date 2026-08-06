@@ -6,7 +6,7 @@ import { Popover, PopoverProps } from './Popover'
 
 type Story = StoryObj<PopoverProps>
 const meta: Meta<PopoverProps> = {
-    title: 'Lemon UI/Popover',
+    title: 'Elements/Popover',
     component: Popover as any,
     tags: ['autodocs', 'test-skip'], // FIXME: This story needs a play test for the popup to show up in snapshots
 }

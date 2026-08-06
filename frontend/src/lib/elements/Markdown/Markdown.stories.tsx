@@ -5,7 +5,7 @@ import { MarkdownWithMermaid } from './MarkdownWithMermaid'
 
 type Story = StoryObj<MarkdownProps>
 const meta: Meta<MarkdownProps> = {
-    title: 'Lemon UI/Lemon Markdown',
+    title: 'Elements/Markdown',
     component: MarkdownComponent,
     tags: ['autodocs'],
 }

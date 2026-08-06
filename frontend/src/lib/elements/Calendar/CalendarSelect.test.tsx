@@ -35,7 +35,7 @@ const createClickHelpers = (
     },
 })
 
-const renderLemonCalendarSelect = (
+const renderCalendarSelect = (
     selectedDate: dayjs.Dayjs | null = null,
     props: Partial<CalendarSelectProps> = {}
 ): {
@@ -81,7 +81,7 @@ describe('CalendarSelect', () => {
     })
 
     test('select various dates', async () => {
-        const { container, onClose, onChange, clickOnDate } = renderLemonCalendarSelect(dayjs('2022-02-10'))
+        const { container, onClose, onChange, clickOnDate } = renderCalendarSelect(dayjs('2022-02-10'))
 
         // find just one month
         const calendar = getByDataAttr(container, 'lemon-calendar')
@@ -103,7 +103,7 @@ describe('CalendarSelect', () => {
     })
 
     test('select various times', async () => {
-        const { onChange, clickOnDate, clickOnTime } = renderLemonCalendarSelect(null, {
+        const { onChange, clickOnDate, clickOnTime } = renderCalendarSelect(null, {
             granularity: 'minute',
         })
 
@@ -129,7 +129,7 @@ describe('CalendarSelect', () => {
     })
 
     test('only allow upcoming selection', async () => {
-        const { onChange, clickOnDate, clickOnTime } = renderLemonCalendarSelect(null, {
+        const { onChange, clickOnDate, clickOnTime } = renderCalendarSelect(null, {
             granularity: 'minute',
             selectionPeriod: 'upcoming',
         })
@@ -162,7 +162,7 @@ describe('CalendarSelect', () => {
 
     test('upcoming selection uses selectionPeriodTimezone for the boundary', async () => {
         // 17:22 UTC is 12:22 in New York, so a same-day 2pm slot is still upcoming there.
-        const { onChange, clickOnDate, clickOnTime } = renderLemonCalendarSelect(null, {
+        const { onChange, clickOnDate, clickOnTime } = renderCalendarSelect(null, {
             granularity: 'minute',
             selectionPeriod: 'upcoming',
             selectionPeriodTimezone: 'America/New_York',
@@ -178,7 +178,7 @@ describe('CalendarSelect', () => {
     test('upcoming selection resolves the day boundary in selectionPeriodTimezone', async () => {
         // 04:00 UTC on Jan 11 is still 23:00 on Jan 10 in New York, so "today" is Jan 10 there, not Jan 11 UTC.
         jest.setSystemTime(new Date('2023-01-11 04:00:00'))
-        const { onChange, clickOnDate } = renderLemonCalendarSelect(null, {
+        const { onChange, clickOnDate } = renderCalendarSelect(null, {
             granularity: 'minute',
             selectionPeriod: 'upcoming',
             selectionPeriodTimezone: 'America/New_York',
@@ -192,7 +192,7 @@ describe('CalendarSelect', () => {
     test('past selection resolves the day boundary in selectionPeriodTimezone', async () => {
         // 20:00 UTC on Jan 10 is already 05:00 on Jan 11 in Tokyo, so "today" is Jan 11 there, not Jan 10 UTC.
         jest.setSystemTime(new Date('2023-01-10 20:00:00'))
-        const { onChange, clickOnDate } = renderLemonCalendarSelect(null, {
+        const { onChange, clickOnDate } = renderCalendarSelect(null, {
             granularity: 'minute',
             selectionPeriod: 'past',
             selectionPeriodTimezone: 'Asia/Tokyo',
@@ -208,7 +208,7 @@ describe('CalendarSelect', () => {
     })
 
     test('only allow past selection', async () => {
-        const { onChange, clickOnDate, clickOnTime } = renderLemonCalendarSelect(null, {
+        const { onChange, clickOnDate, clickOnTime } = renderCalendarSelect(null, {
             granularity: 'minute',
             selectionPeriod: 'past',
         })
@@ -240,7 +240,7 @@ describe('CalendarSelect', () => {
     })
 
     test('select times with use24HourFormat', async () => {
-        const { onChange, clickOnDate, clickOnTime } = renderLemonCalendarSelect(null, {
+        const { onChange, clickOnDate, clickOnTime } = renderCalendarSelect(null, {
             granularity: 'minute',
             use24HourFormat: true,
         })

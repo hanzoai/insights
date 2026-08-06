@@ -15,7 +15,7 @@ import {
     createCdpCoreServices,
 } from '../cdp-services'
 import type { CdpConfig } from '../config'
-import { HogExecutorService } from '../services/script-executor.service'
+import { HogExecutorAsyncService } from '../services/script-executor-async.service'
 import { HogInputsService } from '../services/script-inputs.service'
 import { InsightsFlowExecutorService } from '../services/insightsflows/hogflow-executor.service'
 import { InsightsFlowFunctionsService } from '../services/insightsflows/hogflow-functions.service'
@@ -56,7 +56,7 @@ export abstract class CdpConsumerBase<TConfig extends CdpConsumerBaseConfig = Cd
     valkeyShadow: CdpValkeyShadowPools | null
     isStopping = false
 
-    hogExecutor: HogExecutorService
+    hogExecutorAsync: HogExecutorAsyncService
     hogInputsService: HogInputsService
     hogFlowExecutor: InsightsFlowExecutorService
     hogMasker: HogMaskerService
@@ -94,7 +94,7 @@ export abstract class CdpConsumerBase<TConfig extends CdpConsumerBaseConfig = Cd
         this.hogFlowManager = services.hogFlowManager
         this.hogWatcher = services.hogWatcher
         this.hogWatcherMirror = services.hogWatcherMirror
-        this.hogExecutor = services.hogExecutor
+        this.hogExecutorAsync = services.hogExecutorAsync
         this.hogInputsService = services.hogInputsService
         this.insightsFunctionTemplateManager = services.insightsFunctionTemplateManager
         this.hogFlowFunctionsService = services.hogFlowFunctionsService

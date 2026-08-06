@@ -9,7 +9,7 @@ import { Divider, DividerProps } from './Divider'
 
 type Story = StoryObj<DividerProps>
 const meta: Meta<DividerProps> = {
-    title: 'Lemon UI/Lemon Divider',
+    title: 'Elements/Divider',
     component: Divider,
     tags: ['autodocs'],
 }

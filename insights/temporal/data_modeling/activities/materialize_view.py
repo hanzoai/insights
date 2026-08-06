@@ -29,6 +29,7 @@ from insights.sync import database_sync_to_async_pool
 from insights.temporal.common.datastore import get_client as get_datastore_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
+from insights.temporal.data_modeling.activities.utils import bind_data_modeling_log_context
 
 from products.data_modeling.backend.facade.modeling import bounded_resolver_factory_for_view
 from products.data_modeling.backend.facade.models import DataModelingJob, DataWarehouseSavedQuery, Node, NodeType
@@ -394,7 +395,9 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger,
         arrow_prepared_insightsql_query, context=context, dialect="datastore", stack=[], settings=settings
     )
 
-    await logger.adebug(f"Running datastore query: {arrow_printed}")
+    # The query goes in a field rather than the message: only the message is copied into the
+    # log_entries row users can read, and the compiled query is the saved query's own SQL.
+    await logger.adebug("Running datastore query", query=arrow_printed)
 
     async with (
         _datastore_query_semaphore,
@@ -487,6 +490,7 @@ async def materialize_view_activity(inputs: MaterializeViewInputs) -> Materializ
     tag_queries(team_id=inputs.team_id, product=Product.WAREHOUSE, feature=Feature.DATA_MODELING)
 
     objects = await _get_matview_input_objects(inputs)
+    bind_data_modeling_log_context(inputs.team_id, objects.saved_query.id)
     await logger.ainfo(f"Starting materialization for node {objects.node.name}")
 
     table_uri = _build_model_table_uri(objects.team.pk, objects.saved_query.id.hex, objects.saved_query.normalized_name)
@@ -513,7 +517,7 @@ async def materialize_view_activity(inputs: MaterializeViewInputs) -> Materializ
         pa_schema: pa.Schema | None = None
 
         # write each batch as its own delta commit, imitating the data_imports pipeline
-        # (DeltaTableHelper.write_to_deltalake): the first batch overwrites — creating the
+        # (DeltaWriter.write): the first batch overwrites — creating the
         # table from the exact arrow schema, which pins column case like `personId` — and
         # later batches append with schema_mode="merge". this keeps peak memory at ~one
         # batch (insightsql_table yields ~100MB combined batches) and, because each write is a

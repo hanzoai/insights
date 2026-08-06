@@ -4,7 +4,7 @@ import { ColorButton, ColorButtonProps } from './ColorButton'
 
 type Story = StoryObj<ColorButtonProps>
 const meta: Meta<ColorButtonProps> = {
-    title: 'Lemon UI/Lemon Color/Lemon Color Button',
+    title: 'Elements/Color/Color Button',
     component: ColorButton,
     tags: ['autodocs'],
 }

@@ -44,6 +44,25 @@ import { RawPostgresPersonRepository } from './raw-postgres-person-repository'
 const DEFAULT_PERSON_PROPERTIES_TRIM_TARGET_BYTES = 512 * 1024
 const DEFAULT_PERSON_PROPERTIES_DB_CONSTRAINT_LIMIT_BYTES = 655360
 
+// Person write paths return these explicit columns instead of *: the persons
+// schema carries personinsights-only columns (is_deleted) that must not leak into
+// ingestion's InternalPerson objects.
+const PERSON_COLUMN_NAMES = [
+    'id',
+    'uuid',
+    'created_at',
+    'team_id',
+    'properties',
+    'properties_last_updated_at',
+    'properties_last_operation',
+    'is_user_id',
+    'version',
+    'is_identified',
+    'last_seen_at',
+]
+export const PERSON_COLUMNS = PERSON_COLUMN_NAMES.join(', ')
+const PERSON_COLUMNS_PREFIXED = PERSON_COLUMN_NAMES.map((column) => `p.${column}`).join(', ')
+
 function queryTag(base: string, callerTag?: string): string {
     return callerTag ? `${base}:${callerTag}` : base
 }
@@ -251,7 +270,9 @@ export class PostgresPersonRepository
             WHERE
                 insights_person.team_id = $1
                 AND insights_persondistinctid.team_id = $1
-                AND insights_persondistinctid.distinct_id = $2`
+                AND insights_persondistinctid.distinct_id = $2
+                AND insights_persondistinctid.is_deleted = false
+                AND insights_person.is_deleted = false`
         if (options.forUpdate) {
             // Locks the teamId and distinctId tied to this personId + this person's info
             queryString = queryString.concat(` FOR UPDATE`)
@@ -316,7 +337,10 @@ export class PostgresPersonRepository
             )
             JOIN UNNEST($1::integer[], $2::text[]) AS batch(team_id, distinct_id)
                 ON insights_persondistinctid.team_id = batch.team_id
-                AND insights_persondistinctid.distinct_id = batch.distinct_id`
+                AND insights_persondistinctid.distinct_id = batch.distinct_id
+            WHERE
+                insights_persondistinctid.is_deleted = false
+                AND insights_person.is_deleted = false`
 
         const { rows } = await this.postgres.query<RawPerson & { distinct_id: string }>(
             useReadReplica ? PostgresUse.PERSONS_READ : PostgresUse.PERSONS_WRITE,
@@ -367,6 +391,8 @@ export class PostgresPersonRepository
                 insights_person.team_id = $1
                 AND insights_persondistinctid.team_id = $1
                 AND insights_persondistinctid.distinct_id = ANY($2::text[])
+                AND insights_persondistinctid.is_deleted = false
+                AND insights_person.is_deleted = false
             ORDER BY insights_person.id
             FOR UPDATE`
 
@@ -422,7 +448,8 @@ export class PostgresPersonRepository
                 insights_person.is_identified,
                 insights_person.last_seen_at
             FROM insights_person
-            WHERE (insights_person.team_id, insights_person.uuid) IN (SELECT * FROM UNNEST($1::integer[], $2::uuid[]))`
+            WHERE (insights_person.team_id, insights_person.uuid) IN (SELECT * FROM UNNEST($1::integer[], $2::uuid[]))
+                AND insights_person.is_deleted = false`
 
         const { rows } = await this.postgres.query<RawPerson>(
             useReadReplica ? PostgresUse.PERSONS_READ : PostgresUse.PERSONS_WRITE,
@@ -454,7 +481,7 @@ export class PostgresPersonRepository
             JOIN LATERAL (
                 SELECT distinct_id, id AS pdi_id
                 FROM insights_persondistinctid
-                WHERE team_id = $1 AND person_id = p.id
+                WHERE team_id = $1 AND person_id = p.id AND is_deleted = false
                 ORDER BY id ASC
                 LIMIT $3::bigint
             ) pdi ON true`
@@ -581,7 +608,7 @@ export class PostgresPersonRepository
                 `WITH inserted_person AS (
                         INSERT INTO insights_person (${columns.join(', ')})
                         VALUES (${valuePlaceholders})
-                        RETURNING *
+                        RETURNING ${PERSON_COLUMNS}
                     )` +
                 distinctIdsCTE +
                 ` SELECT * FROM inserted_person;`
@@ -883,7 +910,7 @@ export class PostgresPersonRepository
             tx ?? PostgresUse.PERSONS_WRITE,
             `SELECT person_id, count(*) AS count
                 FROM insights_persondistinctid
-                WHERE team_id = $1 AND person_id = ANY($2::bigint[])
+                WHERE team_id = $1 AND person_id = ANY($2::bigint[]) AND is_deleted = false
                 GROUP BY person_id`,
             [teamId, personIds],
             'countDistinctIdsForPersons'
@@ -968,14 +995,14 @@ export class PostgresPersonRepository
             ? `
                 SELECT distinct_id
                 FROM insights_persondistinctid
-                WHERE person_id = $1 AND team_id = $2
+                WHERE person_id = $1 AND team_id = $2 AND is_deleted = false
                 ORDER BY id
                 LIMIT $3
             `
             : `
                 SELECT distinct_id
                 FROM insights_persondistinctid
-                WHERE person_id = $1 AND team_id = $2
+                WHERE person_id = $1 AND team_id = $2 AND is_deleted = false
                 ORDER BY id
             `
 
@@ -1151,14 +1178,14 @@ export class PostgresPersonRepository
         ).map(
             (field, index) => `"${sanitizeSqlIdentifier(field)}" = $${index + 1}`
         )} WHERE id = $${idParamIndex} AND team_id = $${teamIdParamIndex}
-        RETURNING *, COALESCE(pg_column_size(properties)::bigint, 0::bigint) as properties_size_bytes
+        RETURNING ${PERSON_COLUMNS}, COALESCE(pg_column_size(properties)::bigint, 0::bigint) as properties_size_bytes
         /* operation='updatePersonWithPropertiesSize',purpose='${tag || 'update'}' */`
 
         // Potentially overriding values badly if there was an update to the person after computing updateValues above
         const queryString = `UPDATE insights_person SET version = ${versionString}, ${Object.keys(update).map(
             (field, index) => `"${sanitizeSqlIdentifier(field)}" = $${index + 1}`
         )} WHERE id = $${idParamIndex} AND team_id = $${teamIdParamIndex}
-        RETURNING *
+        RETURNING ${PERSON_COLUMNS}
         /* operation='updatePerson',purpose='${tag || 'update'}' */`
 
         const shouldCalculatePropertiesSize =
@@ -1238,7 +1265,7 @@ export class PostgresPersonRepository
                     last_seen_at = $5,
                     version = COALESCE(version, 0)::numeric + 1
                 WHERE team_id = $6 AND uuid = $7 AND version = $8
-                RETURNING *
+                RETURNING ${PERSON_COLUMNS}
                 `,
                 [
                     JSON.stringify(finalProperties),
@@ -1364,7 +1391,7 @@ export class PostgresPersonRepository
                     $8::text[]
                 ) AS batch(batch_uuid, batch_team_id, new_properties, new_properties_last_updated_at, new_properties_last_operation, new_is_identified, new_created_at, new_last_seen_at)
                 WHERE p.uuid = batch.batch_uuid AND p.team_id = batch.batch_team_id
-                RETURNING p.*
+                RETURNING ${PERSON_COLUMNS_PREFIXED}
                 `,
                 [
                     uuids,

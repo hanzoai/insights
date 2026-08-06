@@ -17,8 +17,8 @@ import {
 } from '../legacy-plugins/types'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult } from '../types'
 import { CDP_TEST_ID, createAddLogFunction, destinationE2eLagMsSummary, isLegacyPluginInsightsFunction } from '../utils'
+import { cdpTrackedFetch } from '../utils/cdp-fetch'
 import { createInvocationResult } from '../utils/invocation-utils'
-import { cdpTrackedFetch } from './script-executor.service'
 
 const pluginExecutionDuration = new Histogram({
     name: 'cdp_plugin_execution_duration_ms',

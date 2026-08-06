@@ -19,12 +19,12 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                             [Node.js](https://github.com/Insights/insights-js/tree/main/examples/example-ai-instructor)
                             and
                             [Python](https://github.com/Insights/insights-python/tree/master/examples/example-ai-instructor)
-                            examples on GitHub. If you're using the Insights SDK wrapper instead of OpenTelemetry, see
-                            the [Node.js
+                            examples on GitHub. If you use the Insights SDK wrapper instead of OpenTelemetry: see the
+                            [Node.js
                             wrapper](https://github.com/Insights/insights-js/tree/e08ff1be/examples/example-ai-instructor)
                             and [Python
                             wrapper](https://github.com/Insights/insights-python/tree/7223c52/examples/example-ai-instructor)
-                            examples.
+                            examples instead.
                         </Markdown>
                     </CalloutBox>
 

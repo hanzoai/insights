@@ -94,8 +94,11 @@ cd nodejs && pnpm run generate:personinsights-proto
 
 Then update:
 
-- `nodejs/src/ingestion/personinsights/client.ts` — add a wrapper method matching the pattern of existing methods
-- `nodejs/src/ingestion/personinsights/client.test.ts` — add a default stub to `SERVICE_DEFAULTS` for the new RPC
+- `nodejs/src/common/personinsights/groups.ts` or `persons.ts` — add a wrapper method to the
+  matching operations class (`PersonHogGroupOperations` / `PersonHogPersonOperations`),
+  following the pattern of existing methods. `client.ts` only constructs and exposes
+  these operation objects; it holds no RPC wrappers itself.
+- `nodejs/src/common/personinsights/client.test.ts` — add a default stub to `SERVICE_DEFAULTS` for the new RPC
 
 ### Rust
 

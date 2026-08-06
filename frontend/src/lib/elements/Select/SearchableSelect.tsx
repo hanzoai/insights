@@ -13,7 +13,7 @@ import {
     SelectPropsClearable,
     SelectPropsNonClearable,
     SelectSection,
-    isLemonSelectSection,
+    isSelectSection,
 } from './Select'
 
 export interface SearchableSelectPropsBase<T> extends SelectPropsBase<T> {
@@ -46,7 +46,7 @@ function flattenOptions<T>(options: SelectOptions<T>): SelectOption<T>[] {
     }
 
     options.forEach((item) => {
-        if (isLemonSelectSection(item)) {
+        if (isSelectSection(item)) {
             item.options.forEach(addOption)
         } else {
             addOption(item)
@@ -60,7 +60,7 @@ function filterStructure<T>(
     item: SelectOption<T> | SelectSection<T>,
     matchedOptions: Set<SelectOption<T>>
 ): typeof item | null {
-    if (isLemonSelectSection(item)) {
+    if (isSelectSection(item)) {
         const filteredOptions = item.options
             .map((option) => filterStructure(option, matchedOptions))
             .filter(Boolean) as SelectOption<T>[]

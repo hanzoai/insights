@@ -266,7 +266,7 @@ describe('createInvocationSanitizer', () => {
             metrics: [],
             capturedInsightsEvents: [],
             warehouseWebhookPayloads: [],
-            emailAssets: [],
+            messageAssets: [],
         }
 
         const [sanitized] = sanitizer.sanitizeResults([result])

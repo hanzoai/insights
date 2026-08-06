@@ -4,7 +4,7 @@ import { Checkbox, CheckboxProps } from './Checkbox'
 
 type Story = StoryObj<CheckboxProps>
 const meta: Meta<CheckboxProps> = {
-    title: 'Lemon UI/Lemon Checkbox',
+    title: 'Elements/Checkbox',
     component: Checkbox,
     tags: ['autodocs'],
 }

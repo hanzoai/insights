@@ -5,7 +5,7 @@ import { Widget, WidgetProps } from './Widget'
 
 type Story = StoryObj<WidgetProps>
 const meta: Meta<WidgetProps> = {
-    title: 'Lemon UI/Lemon Widget',
+    title: 'Elements/Widget',
     component: Widget,
     tags: ['autodocs'],
     render: (props) => {

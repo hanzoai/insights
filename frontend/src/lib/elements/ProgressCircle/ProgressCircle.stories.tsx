@@ -9,7 +9,7 @@ import { ProgressCircle, ProgressCircleProps } from './ProgressCircle'
 
 type Story = StoryObj<ProgressCircleProps>
 const meta: Meta<ProgressCircleProps> = {
-    title: 'Lemon UI/Lemon Progress Circle',
+    title: 'Elements/Progress Circle',
     component: ProgressCircle,
     parameters: {
         docs: {
@@ -18,7 +18,7 @@ const meta: Meta<ProgressCircleProps> = {
 
 [Related Figma area](https://www.figma.com/file/Y9G24U4r04nEjIDGIEGuKI/Insights-Design-System-One?node-id=3139%3A1388)
 
-Lemon Labels provide common styling and options for labeling form elements. They can be used directly but most commonly should be used via the \`Field\` component.
+Labels provide common styling and options for labeling form elements. They can be used directly but most commonly should be used via the \`Field\` component.
 
 `,
             },

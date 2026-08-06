@@ -508,6 +508,16 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         icon: IconInsightsQL,
         inMenu: false,
     },
+    [NodeKind.MarketingAnalyticsAttributionQuery]: {
+        name: 'Marketing Analytics Attribution',
+        icon: IconInsightsQL,
+        inMenu: false,
+    },
+    [NodeKind.MarketingAnalyticsAttributionPathsQuery]: {
+        name: 'Marketing Analytics Attribution Paths',
+        icon: IconInsightsQL,
+        inMenu: false,
+    },
     [NodeKind.NonIntegratedConversionsTableQuery]: {
         name: 'Non-Integrated Conversions Table',
         icon: IconInsightsQL,

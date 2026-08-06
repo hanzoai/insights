@@ -8,7 +8,7 @@ import { IconInfo, IconSparkles, IconWarning, IconX } from '@hanzo/icons'
 import { Button, SideAction } from 'lib/elements/Button'
 import { ButtonPropsBase } from 'lib/elements/Button'
 
-import { lemonBannerLogic } from './lemonBannerLogic'
+import { bannerLogic } from './bannerLogic'
 
 export type BannerAction = SideAction & Pick<ButtonPropsBase, 'children'>
 
@@ -42,7 +42,7 @@ export function Banner({
     square = false,
     icon,
 }: BannerProps): JSX.Element | null {
-    const logic = lemonBannerLogic({ dismissKey })
+    const logic = bannerLogic({ dismissKey })
     const { isDismissed } = useValues(logic)
     const { dismiss } = useActions(logic)
     const showCloseButton = dismissKey || onClose

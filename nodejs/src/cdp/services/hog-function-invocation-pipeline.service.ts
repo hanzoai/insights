@@ -15,8 +15,9 @@ import {
     InsightsFunctionTypeType,
     MinimalAppMetric,
 } from '../types'
-import { mirrorCall } from '../utils/mirror-call'
-import { HogExecutorService } from './script-executor.service'
+import { buildInsightsFunctionInvocations } from '../utils/invocation-utils'
+import { mirrorCompare } from '../utils/mirror-call'
+import { HogInputsService } from './script-inputs.service'
 import { InsightsFunctionManagerService } from './managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
 import { HogMaskerService } from './monitoring/script-masker.service'
@@ -31,7 +32,7 @@ export interface InsightsFunctionInvocationPipelineConfig {
 
 export interface InsightsFunctionInvocationPipelineDeps {
     insightsFunctionManager: InsightsFunctionManagerService
-    hogExecutor: HogExecutorService
+    hogInputsService: HogInputsService
     hogWatcher: HogWatcherService
     hogWatcherMirror: HogWatcherService | null
     hogMasker: HogMaskerService
@@ -89,7 +90,8 @@ export class InsightsFunctionInvocationPipeline {
                 invocationGlobals.map(async (globals) => {
                     const teamInsightsFunctions = insightsFunctionsByTeam[globals.project.id]
 
-                    const { invocations, metrics, logs } = await this.deps.hogExecutor.buildInsightsFunctionInvocations(
+                    const { invocations, metrics, logs } = await buildInsightsFunctionInvocations(
+                        this.deps.hogInputsService,
                         teamInsightsFunctions,
                         globals
                     )
@@ -103,27 +105,29 @@ export class InsightsFunctionInvocationPipeline {
         ).flat()
 
         const insightsFunctionIds = possibleInvocations.map((x) => x.insightsFunction.id)
-        const [states] = await Promise.all([
-            instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
-                return await this.deps.hogWatcher.getEffectiveStates(insightsFunctionIds)
-            }),
-            mirrorCall('script-watcher.getEffectiveStates', () =>
-                this.deps.hogWatcherMirror?.getEffectiveStates(insightsFunctionIds)
-            ),
-        ])
+        const states = await mirrorCompare(
+            'script-watcher.getEffectiveStates',
+            () =>
+                instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
+                    return await this.deps.hogWatcher.getEffectiveStates(insightsFunctionIds)
+                }),
+            () => this.deps.hogWatcherMirror?.getEffectiveStates(insightsFunctionIds)
+        )
 
         const rateLimitInputs: KeyedRateLimitRequest[] = possibleInvocations.map((x) => ({
             id: x.insightsFunction.id,
             cost: 1,
         }))
-        const [rateLimits] = await Promise.all([
-            instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitGrouped', async () => {
-                return await this.hogRateLimiter.rateLimitGrouped(rateLimitInputs)
-            }),
-            mirrorCall('script-rate-limiter.rateLimitGrouped', () =>
-                this.hogRateLimiterMirror?.rateLimitGrouped(rateLimitInputs)
-            ),
-        ])
+        const rateLimits = await mirrorCompare(
+            'script-rate-limiter.rateLimitGrouped',
+            () =>
+                instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitGrouped', async () => {
+                    return await this.hogRateLimiter.rateLimitGrouped(rateLimitInputs)
+                }),
+            () => this.hogRateLimiterMirror?.rateLimitGrouped(rateLimitInputs),
+            (primary, mirror) =>
+                primary.every(([, result], index) => result.isRateLimited === mirror[index]?.[1].isRateLimited)
+        )
 
         const validInvocations: CyclotronJobInvocationInsightsFunction[] = []
 

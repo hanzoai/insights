@@ -5,7 +5,7 @@ import { Snack, SnackProps } from './Snack'
 
 type Story = StoryObj<SnackProps>
 const meta: Meta<SnackProps> = {
-    title: 'Lemon UI/Lemon Snack',
+    title: 'Elements/Snack',
     component: Snack as any,
     args: {
         children: 'Tasty snacks',

@@ -6,14 +6,14 @@ import { Button } from 'lib/elements/Button'
 import { Modal, ModalProps } from './Modal'
 
 const meta: Meta<ModalProps> = {
-    title: 'Lemon UI/Lemon Modal',
+    title: 'Elements/Modal',
     component: Modal,
     tags: ['autodocs'],
 }
 type Story = StoryObj<ModalProps>
 export default meta
 
-export const _LemonModal: Story = {
+export const _Modal: Story = {
     render: (props) => {
         const [isOpen, setIsOpen] = useState(false)
         return (

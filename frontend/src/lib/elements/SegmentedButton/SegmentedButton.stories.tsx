@@ -7,7 +7,7 @@ import { SegmentedButton, SegmentedButtonOption, SegmentedButtonProps } from './
 
 type Story = StoryObj<SegmentedButtonProps<string>>
 const meta: Meta<SegmentedButtonProps<string>> = {
-    title: 'Lemon UI/Lemon Segmented Button',
+    title: 'Elements/Segmented Button',
     component: SegmentedButton as any,
     argTypes: {
         options: {

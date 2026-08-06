@@ -31,7 +31,7 @@ export interface personsManagementSceneLogicValues {
     groupsAccessStatus: GroupsAccessStatus // groupsModel
     crmFeatureFlag: boolean | string | undefined
     groupTabs: PersonsManagementTab[]
-    lemonTabs: Tab<string>[]
+    tabs: Tab<string>[]
     tabs: PersonsManagementTab[]
 }
 
@@ -45,7 +45,7 @@ export interface personsManagementSceneLogicMeta {
             groupsAccessStatus: GroupsAccessStatus,
             aggregationLabel: (groupTypeIndex: number | null | undefined, deferToUserWording?: boolean) => Noun
         ) => PersonsManagementTab[]
-        lemonTabs: (tabs: PersonsManagementTab[]) => Tab<string>[]
+        tabs: (tabs: PersonsManagementTab[]) => Tab<string>[]
     }
 }
 
@@ -131,7 +131,7 @@ export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>(
             },
         ],
 
-        lemonTabs: [
+        tabs: [
             (s) => [s.tabs],
             (tabs: PersonsManagementTab[]): Tab<string>[] =>
                 tabs.map((tab) => ({

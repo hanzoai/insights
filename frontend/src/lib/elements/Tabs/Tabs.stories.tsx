@@ -6,7 +6,7 @@ import { Tab, Tabs as TabsComponent, TabsProps } from './Tabs'
 
 type Story = StoryObj<TabsProps<string>>
 const meta: Meta<TabsProps<string>> = {
-    title: 'Lemon UI/Lemon Tabs',
+    title: 'Elements/Tabs',
     component: TabsComponent as any,
     argTypes: {
         tabs: {

@@ -96,7 +96,7 @@ export function ConnectionSelector({ tabId }: ConnectionSelectorProps): JSX.Elem
                 syncUrlWithQuery()
             }}
             options={connectionSelectOptions.map((group) => ({
-                options: group.options.map(toLemonSelectOption),
+                options: group.options.map(toSelectOption),
             }))}
         />
     )
@@ -104,10 +104,10 @@ export function ConnectionSelector({ tabId }: ConnectionSelectorProps): JSX.Elem
 
 // A connection option is either a leaf (selectable `value`) or a node with nested `options` that
 // Select renders as a submenu (e.g. "Add direct connection" → Postgres / MySQL / Snowflake).
-function toLemonSelectOption(option: ConnectionSelectOption): SelectOption<string> {
+function toSelectOption(option: ConnectionSelectOption): SelectOption<string> {
     const icon = option.iconSrc ? sourceIcon(option.iconSrc) : undefined
     if (option.options) {
-        return { label: option.label, icon, options: option.options.map(toLemonSelectOption) }
+        return { label: option.label, icon, options: option.options.map(toSelectOption) }
     }
     return {
         value: option.value as string,

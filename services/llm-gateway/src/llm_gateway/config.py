@@ -36,6 +36,10 @@ DEFAULT_PRODUCT_COST_LIMITS: dict[str, "ProductCostLimit"] = {
     "signals": ProductCostLimit(limit_usd=25000.0, window_seconds=86400),
     "insights_ai": ProductCostLimit(limit_usd=5000.0, window_seconds=86400),
     "changelog_bot": ProductCostLimit(limit_usd=500.0, window_seconds=86400),
+    # Path-cleaning suggestions: haiku-only, a few short calls per team per week. The product is
+    # unbilled and reachable with any feature-gated llm_gateway:read key, so a tight cap bounds
+    # abuse of the shared budget rather than real usage.
+    "web_analytics": ProductCostLimit(limit_usd=100.0, window_seconds=86400),
 }
 
 DEFAULT_USER_COST_LIMITS: dict[str, "UserCostLimit"] = {
@@ -187,6 +191,10 @@ class Settings(BaseSettings):
     # so the EU deployment lands EU events on EU Insights (team_id=1) for regional billing.
     insights_secondary_project_token: str | None = None
     insights_secondary_host: str | None = None
+
+    # Set false on local dev stacks whose ingestion-ai forwarder rejects AI-lane batches
+    # (401 on /batch/, events silently dropped) — capture falls back to the standard lane.
+    insights_ai_lane_capture: bool = True
 
     metrics_enabled: bool = True
 

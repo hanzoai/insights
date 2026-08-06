@@ -5,7 +5,7 @@ import { Radio, RadioOption, RadioProps } from './Radio'
 
 type Story = StoryObj<RadioProps<string>>
 const meta: Meta<RadioProps<string>> = {
-    title: 'Lemon UI/Lemon Radio',
+    title: 'Elements/Radio',
     component: Radio as any,
     argTypes: {
         options: {

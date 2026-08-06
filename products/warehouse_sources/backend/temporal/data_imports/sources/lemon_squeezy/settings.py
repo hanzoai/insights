@@ -16,7 +16,7 @@ JSON_API_HEADERS = {
 
 
 @dataclass
-class SqueezyEndpointConfig:
+class LemonSqueezyEndpointConfig:
     path: str
     # JSON:API resource type carried in `data[].type` — also the routing key for webhook
     # deliveries of this resource.
@@ -31,46 +31,46 @@ class SqueezyEndpointConfig:
     partition_key: str = "created_at"
 
 
-LEMON_SQUEEZY_ENDPOINTS: dict[str, SqueezyEndpointConfig] = {
-    "stores": SqueezyEndpointConfig(path="/v1/stores", json_api_type="stores"),
-    "customers": SqueezyEndpointConfig(path="/v1/customers", json_api_type="customers"),
-    "products": SqueezyEndpointConfig(path="/v1/products", json_api_type="products"),
-    "variants": SqueezyEndpointConfig(path="/v1/variants", json_api_type="variants"),
-    "prices": SqueezyEndpointConfig(path="/v1/prices", json_api_type="prices"),
-    "files": SqueezyEndpointConfig(path="/v1/files", json_api_type="files"),
-    "orders": SqueezyEndpointConfig(
+LEMON_SQUEEZY_ENDPOINTS: dict[str, LemonSqueezyEndpointConfig] = {
+    "stores": LemonSqueezyEndpointConfig(path="/v1/stores", json_api_type="stores"),
+    "customers": LemonSqueezyEndpointConfig(path="/v1/customers", json_api_type="customers"),
+    "products": LemonSqueezyEndpointConfig(path="/v1/products", json_api_type="products"),
+    "variants": LemonSqueezyEndpointConfig(path="/v1/variants", json_api_type="variants"),
+    "prices": LemonSqueezyEndpointConfig(path="/v1/prices", json_api_type="prices"),
+    "files": LemonSqueezyEndpointConfig(path="/v1/files", json_api_type="files"),
+    "orders": LemonSqueezyEndpointConfig(
         path="/v1/orders",
         json_api_type="orders",
         incremental_fields=[incremental_field("created_at")],
     ),
-    "order_items": SqueezyEndpointConfig(
+    "order_items": LemonSqueezyEndpointConfig(
         path="/v1/order-items",
         json_api_type="order-items",
         incremental_fields=[incremental_field("created_at")],
     ),
-    "subscriptions": SqueezyEndpointConfig(path="/v1/subscriptions", json_api_type="subscriptions"),
-    "subscription_invoices": SqueezyEndpointConfig(
+    "subscriptions": LemonSqueezyEndpointConfig(path="/v1/subscriptions", json_api_type="subscriptions"),
+    "subscription_invoices": LemonSqueezyEndpointConfig(
         path="/v1/subscription-invoices",
         json_api_type="subscription-invoices",
         incremental_fields=[incremental_field("created_at")],
     ),
-    "subscription_items": SqueezyEndpointConfig(path="/v1/subscription-items", json_api_type="subscription-items"),
-    "usage_records": SqueezyEndpointConfig(
+    "subscription_items": LemonSqueezyEndpointConfig(path="/v1/subscription-items", json_api_type="subscription-items"),
+    "usage_records": LemonSqueezyEndpointConfig(
         path="/v1/usage-records",
         json_api_type="usage-records",
         incremental_fields=[incremental_field("created_at")],
     ),
-    "discounts": SqueezyEndpointConfig(path="/v1/discounts", json_api_type="discounts"),
-    "discount_redemptions": SqueezyEndpointConfig(
+    "discounts": LemonSqueezyEndpointConfig(path="/v1/discounts", json_api_type="discounts"),
+    "discount_redemptions": LemonSqueezyEndpointConfig(
         path="/v1/discount-redemptions",
         json_api_type="discount-redemptions",
         incremental_fields=[incremental_field("created_at")],
     ),
-    "license_keys": SqueezyEndpointConfig(path="/v1/license-keys", json_api_type="license-keys"),
-    "license_key_instances": SqueezyEndpointConfig(
+    "license_keys": LemonSqueezyEndpointConfig(path="/v1/license-keys", json_api_type="license-keys"),
+    "license_key_instances": LemonSqueezyEndpointConfig(
         path="/v1/license-key-instances", json_api_type="license-key-instances"
     ),
-    "checkouts": SqueezyEndpointConfig(path="/v1/checkouts", json_api_type="checkouts"),
+    "checkouts": LemonSqueezyEndpointConfig(path="/v1/checkouts", json_api_type="checkouts"),
 }
 
 ENDPOINTS = tuple(LEMON_SQUEEZY_ENDPOINTS.keys())

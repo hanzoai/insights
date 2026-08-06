@@ -5,7 +5,7 @@ import { usePagination } from './usePagination'
 
 type Story = StoryObj<PaginationControlProps<any>>
 const meta: Meta<PaginationControlProps<any>> = {
-    title: 'Lemon UI/Pagination Control',
+    title: 'Elements/Pagination Control',
     component: PaginationControl as any,
     tags: ['autodocs'],
     render: (props) => {

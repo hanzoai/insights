@@ -14,7 +14,7 @@ import {
     MenuItemNode,
     MenuProps,
     MenuSection,
-    isLemonMenuSection,
+    isMenuSection,
 } from '../Menu/Menu'
 import { PopoverProps } from '../Popover'
 import { TooltipProps } from '../Tooltip'
@@ -147,7 +147,7 @@ export function Select<T extends string | number | boolean | null>({
             className={menu?.className}
             maxContentWidth={dropdownMaxContentWidth}
             activeItemIndex={items
-                .flatMap((i) => (isLemonMenuSection(i) ? i.items.filter(Boolean) : i))
+                .flatMap((i) => (isMenuSection(i) ? i.items.filter(Boolean) : i))
                 .findIndex((i) => (i as MenuItem).active)}
             closeParentPopoverOnClickInside={menu?.closeParentPopoverOnClickInside}
             onVisibilityChange={menu?.onVisibilityChange}
@@ -236,7 +236,7 @@ function convertToMenuSingle<T>(
     onSelect: NonNullable<SelectPropsBase<T>['onSelect']>,
     acc: SelectOptionLeaf<T>[]
 ): MenuItem | MenuSection | null {
-    if (isLemonSelectSection(option)) {
+    if (isSelectSection(option)) {
         const { options: childOptions, ...section } = option
         const items = option.options.map((o) => convertToMenuSingle(o, activeValue, onSelect, acc)).filter(Boolean)
         if (!items.length) {
@@ -247,7 +247,7 @@ function convertToMenuSingle<T>(
             ...section,
             items,
         } as MenuSection
-    } else if (isLemonSelectOptionNode(option)) {
+    } else if (isSelectOptionNode(option)) {
         const { options: childOptions, ...node } = option
         const items = childOptions.map((o) => convertToMenuSingle(o, activeValue, onSelect, acc)).filter(Boolean)
         if (option.hidden) {
@@ -286,13 +286,13 @@ function convertToMenuSingle<T>(
     } as MenuItemLeaf
 }
 
-export function isLemonSelectSection<T>(
+export function isSelectSection<T>(
     candidate: SelectSection<T> | SelectOption<T>
 ): candidate is SelectSection<T> {
     return candidate && 'options' in candidate && !('label' in candidate)
 }
 
-export function isLemonSelectOptionNode<T>(
+export function isSelectOptionNode<T>(
     candidate: SelectSection<T> | SelectOption<T>
 ): candidate is SelectOptionNode<T> {
     return candidate && 'options' in candidate && 'label' in candidate

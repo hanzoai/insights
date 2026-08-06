@@ -6,7 +6,7 @@ import { Collapse as CollapseComponent, type CollapseProps } from './Collapse'
 
 type Story = StoryObj<CollapseProps<string>>
 const meta: Meta<CollapseProps<string>> = {
-    title: 'Lemon UI/Lemon Collapse',
+    title: 'Elements/Collapse',
     component: CollapseComponent,
     args: {
         panels: [

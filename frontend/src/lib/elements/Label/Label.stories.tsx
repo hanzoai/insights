@@ -7,7 +7,7 @@ import { Label, LabelProps } from './Label'
 
 type Story = StoryObj<LabelProps>
 const meta: Meta<LabelProps> = {
-    title: 'Lemon UI/Lemon Label',
+    title: 'Elements/Label',
     component: Label,
     parameters: {
         docs: {
@@ -16,7 +16,7 @@ const meta: Meta<LabelProps> = {
 
 [Related Figma area](https://www.figma.com/file/Y9G24U4r04nEjIDGIEGuKI/Insights-Design-System-One?node-id=3139%3A1388)
 
-Lemon Labels provide common styling and options for labeling form elements. They can be used directly but most commonly should be used via the \`Field\` component.
+Labels provide common styling and options for labeling form elements. They can be used directly but most commonly should be used via the \`Field\` component.
 
 `,
             },

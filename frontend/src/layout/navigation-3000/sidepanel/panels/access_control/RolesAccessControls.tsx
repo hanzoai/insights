@@ -22,7 +22,7 @@ import { CAPABILITIES } from 'lib/capabilities'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { Field } from 'lib/elements/Field'
 import { TableLink } from 'lib/elements/Table/TableLink'
@@ -191,7 +191,7 @@ function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
                             onChange={(newValues: string[]) => setMembersToAdd(newValues)}
                             mode="multiple"
                             disabled={!canEditRoles}
-                            options={usersLemonSelectOptions(
+                            options={usersSelectOptions(
                                 membersNotInRole.map((member) => member.user),
                                 'uuid'
                             )}

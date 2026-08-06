@@ -17,7 +17,7 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
                         <Markdown>
                             See the complete [Python
                             example](https://github.com/Insights/insights-python/tree/master/examples/example-ai-pydantic-ai)
-                            on GitHub. If you're using the Insights SDK wrapper instead of OpenTelemetry, see the [Python
+                            on GitHub. If you use the Insights SDK wrapper instead of OpenTelemetry, see the [Python
                             wrapper
                             example](https://github.com/Insights/insights-python/tree/7223c52/examples/example-ai-pydantic-ai).
                         </Markdown>
