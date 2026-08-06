@@ -5,7 +5,7 @@ from insights.models.raw_sessions.migrations import (
     DISTRIBUTED_RAW_SESSIONS_ADD_IRCLID_KX_COLUMNS_SQL,
     WRITABLE_RAW_SESSIONS_ADD_IRCLID_KX_COLUMNS_SQL,
 )
-from insights.models.raw_sessions.sessions_v2 import (
+from insights.models.raw_sessions.sessions import (
     DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL,
     RAW_SESSIONS_CREATE_OR_REPLACE_VIEW_SQL,
     RAW_SESSIONS_TABLE_MV_SQL,

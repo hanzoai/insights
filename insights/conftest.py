@@ -86,8 +86,7 @@ def reset_datastore_tables():
         TRUNCATE_PERSON_STATIC_COHORT_TABLE_SQL,
         TRUNCATE_PERSON_TABLE_SQL,
     )
-    from insights.models.raw_sessions.sessions_v2 import TRUNCATE_RAW_SESSIONS_TABLE_SQL
-    from insights.models.raw_sessions.sessions_v3 import TRUNCATE_RAW_SESSIONS_TABLE_SQL_V3
+    from insights.models.raw_sessions.sessions import TRUNCATE_RAW_SESSIONS_TABLE_SQL
     from insights.models.sessions.sql import TRUNCATE_SESSIONS_TABLE_SQL
 
     from products.error_tracking.backend.embedding import TRUNCATE_DOCUMENT_EMBEDDINGS_TABLE_SQL
@@ -113,7 +112,6 @@ def reset_datastore_tables():
         TRUNCATE_CHANNEL_DEFINITION_TABLE_SQL,
         TRUNCATE_EXCHANGE_RATE_TABLE_SQL(),
         TRUNCATE_SESSIONS_TABLE_SQL(),
-        TRUNCATE_RAW_SESSIONS_TABLE_SQL_V3(),
         TRUNCATE_RAW_SESSIONS_TABLE_SQL(),
         TRUNCATE_HEATMAPS_TABLE_SQL(),
         TRUNCATE_PG_EMBEDDINGS_TABLE_SQL(),

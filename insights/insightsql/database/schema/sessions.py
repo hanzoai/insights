@@ -20,13 +20,12 @@ from insights.insightsql.database.models import (
     Table,
 )
 from insights.insightsql.database.schema.channel_type import DEFAULT_CHANNEL_TYPES, ChannelTypeExprs, create_channel_type_expr
-from insights.insightsql.database.schema.sessions_v1 import DEFAULT_BOUNCE_RATE_DURATION_SECONDS, null_if_empty
-from insights.insightsql.database.schema.util.where_clause_extractor import SessionMinTimestampWhereClauseExtractorV2
+from insights.insightsql.database.schema.util.where_clause_extractor import SessionMinTimestampWhereClauseExtractor
 from insights.insightsql.errors import ResolutionError
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 
 from insights.models.property_definition import PropertyType
-from insights.models.raw_sessions.sessions_v2 import (
+from insights.models.raw_sessions.sessions import (
     RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL,
     RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_WITH_FILTER,
 )
@@ -138,7 +137,14 @@ LAZY_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
 }
 
 
-class RawSessionsTableV2(Table):
+DEFAULT_BOUNCE_RATE_DURATION_SECONDS = 10
+
+
+def null_if_empty(expr: ast.Expr) -> ast.Call:
+    return ast.Call(name="nullIf", args=[expr, ast.Constant(value="")])
+
+
+class RawSessionsTable(Table):
     fields: dict[str, FieldOrTable] = RAW_SESSIONS_FIELDS
 
     def to_printed_datastore(self, context):
@@ -184,7 +190,7 @@ class RawSessionsTableV2(Table):
         ]
 
 
-def select_from_sessions_table_v2(
+def select_from_sessions_table(
     requested_fields: dict[str, list[str | int]], node: ast.SelectQuery, context: InsightsQLContext
 ):
     from insights.insightsql import ast
@@ -426,7 +432,7 @@ def select_from_sessions_table_v2(
             )
             group_by_fields.append(ast.Field(chain=cast(list[str | int], [table_name]) + chain))
 
-    where = SessionMinTimestampWhereClauseExtractorV2(context).get_inner_where(node)
+    where = SessionMinTimestampWhereClauseExtractor(context).get_inner_where(node)
 
     return ast.SelectQuery(
         select=select_fields,
@@ -436,7 +442,7 @@ def select_from_sessions_table_v2(
     )
 
 
-class SessionsTableV2(LazyTable):
+class SessionsTable(LazyTable):
     fields: dict[str, FieldOrTable] = LAZY_SESSIONS_FIELDS
 
     def lazy_select(
@@ -445,7 +451,7 @@ class SessionsTableV2(LazyTable):
         context,
         node: ast.SelectQuery,
     ):
-        return select_from_sessions_table_v2(table_to_add.fields_accessed, node, context)
+        return select_from_sessions_table(table_to_add.fields_accessed, node, context)
 
     def to_printed_datastore(self, context):
         return "sessions"
@@ -471,7 +477,7 @@ def session_id_to_session_id_v7_as_uint128_expr(session_id: ast.Expr) -> ast.Exp
     )
 
 
-def join_events_table_to_sessions_table_v2(
+def join_events_table_to_sessions_table(
     join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: ast.SelectQuery
 ) -> ast.JoinExpr:
     from insights.insightsql import ast
@@ -479,7 +485,7 @@ def join_events_table_to_sessions_table_v2(
     if not join_to_add.fields_accessed:
         raise ResolutionError("No fields requested from events")
 
-    join_expr = ast.JoinExpr(table=select_from_sessions_table_v2(join_to_add.fields_accessed, node, context))
+    join_expr = ast.JoinExpr(table=select_from_sessions_table(join_to_add.fields_accessed, node, context))
     join_expr.join_type = "LEFT JOIN"
     join_expr.alias = join_to_add.to_table
     if context.modifiers.sessionsV2JoinMode == SessionsV2JoinMode.UUID:
@@ -505,7 +511,7 @@ def join_events_table_to_sessions_table_v2(
     return join_expr
 
 
-def get_lazy_session_table_properties_v2(search: Optional[str]):
+def get_lazy_session_table_properties(search: Optional[str]):
     # some fields shouldn't appear as properties
     hidden_fields = {
         "max_inserted_at",
@@ -597,7 +603,7 @@ SESSION_PROPERTY_TO_RAW_SESSIONS_EXPR_MAP = {
 }
 
 
-def get_lazy_session_table_values_v2(key: str, search_term: Optional[str], team: "Team"):
+def get_lazy_session_table_values(key: str, search_term: Optional[str], team: "Team"):
     # the sessions table does not have a properties json object like the events and person tables
 
     if key == "$channel_type":
