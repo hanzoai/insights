@@ -252,8 +252,8 @@ class WhereClauseExtractor(CloningVisitor):
 
 class SessionMinTimestampWhereClauseExtractor(WhereClauseExtractor):
     capture_timestamp_comparisons = True
-    timestamp_field: ast.Expr
-    time_buffer: ast.Expr
+    timestamp_field = uuid_uint128_expr_to_timestamp_expr_v2(ast.Field(chain=["raw_sessions", "session_id_v7"]))
+    time_buffer = ast.Call(name="toIntervalDay", args=[ast.Constant(value=SESSION_BUFFER_DAYS)])
 
     def __init__(self, context: InsightsQLContext):
         super().__init__(context)
@@ -356,26 +356,7 @@ class SessionMinTimestampWhereClauseExtractor(WhereClauseExtractor):
         return None
 
 
-class SessionMinTimestampWhereClauseExtractorV1(SessionMinTimestampWhereClauseExtractor):
-    timestamp_field = ast.Field(chain=["raw_sessions", "min_timestamp"])
-    time_buffer = ast.Call(name="toIntervalDay", args=[ast.Constant(value=SESSION_BUFFER_DAYS)])
 
-
-class SessionMinTimestampWhereClauseExtractorV2(SessionMinTimestampWhereClauseExtractor):
-    timestamp_field = uuid_uint128_expr_to_timestamp_expr_v2(ast.Field(chain=["raw_sessions", "session_id_v7"]))
-    time_buffer = ast.Call(name="toIntervalDay", args=[ast.Constant(value=SESSION_BUFFER_DAYS)])
-
-
-class SessionMinTimestampWhereClauseExtractorV3(SessionMinTimestampWhereClauseExtractor):
-    timestamp_field = ast.Field(chain=["raw_sessions_v3", "session_timestamp"])
-    time_buffer = ast.Call(name="toIntervalDay", args=[ast.Constant(value=SESSION_BUFFER_DAYS)])
-
-    def session_id_str_to_timestamp_expr(self, session_id_str_expr: ast.Expr) -> Optional[ast.Expr]:
-        # this is a roundabout way of doing it, but we want to match the logic in the datastore table definition
-        timestamp_expr = uuid_uint128_expr_to_timestamp_expr_v3(
-            ast.Call(name="_toUInt128", args=[ast.Call(name="toUUID", args=[session_id_str_expr])])
-        )
-        return timestamp_expr
 
 
 def has_tombstone(expr: ast.Expr, tombstone_string: str) -> bool:
@@ -412,9 +393,7 @@ class RewriteTimestampFieldVisitor(CloningVisitor):
     def visit_field(self, node: ast.Field) -> ast.Expr:
         from insights.insightsql.database.schema.events import EventsTable
         from insights.insightsql.database.schema.session_replay_events import RawSessionReplayEventsTable
-        from insights.insightsql.database.schema.sessions_v1 import SessionsTableV1
-        from insights.insightsql.database.schema.sessions_v2 import SessionsTableV2
-        from insights.insightsql.database.schema.sessions_v3 import SessionsTableV3
+        from insights.insightsql.database.schema.sessions import SessionsTable
 
         if node.type and isinstance(node.type, ast.FieldType):
             resolved_field = node.type.resolve_database_field(self.context)
@@ -433,15 +412,7 @@ class RewriteTimestampFieldVisitor(CloningVisitor):
                 if (
                     (isinstance(table, EventsTable) and resolved_field.name == "timestamp")
                     or (
-                        isinstance(table, SessionsTableV1)
-                        and resolved_field.name in ("$start_timestamp", "$end_timestamp")
-                    )
-                    or (
-                        isinstance(table, SessionsTableV2)
-                        and resolved_field.name in ("$start_timestamp", "$end_timestamp")
-                    )
-                    or (
-                        isinstance(table, SessionsTableV3)
+                        isinstance(table, SessionsTable)
                         and resolved_field.name in ("$start_timestamp", "$end_timestamp")
                     )
                     or (isinstance(table, RawSessionReplayEventsTable) and resolved_field.name == "min_first_timestamp")
@@ -466,7 +437,6 @@ def is_session_id_string_expr(node: ast.Expr, context: InsightsQLContext) -> boo
     if isinstance(node, ast.Field):
         from insights.insightsql.database.schema.events import EventsTable
         from insights.insightsql.database.schema.session_replay_events import RawSessionReplayEventsTable
-        from insights.insightsql.database.schema.sessions_v3 import SessionsTableV3
 
         if node.type and isinstance(node.type, ast.FieldType):
             resolved_field = node.type.resolve_database_field(context)
@@ -485,7 +455,7 @@ def is_session_id_string_expr(node: ast.Expr, context: InsightsQLContext) -> boo
             if resolved_field and isinstance(resolved_field, DatabaseField):
                 if (
                     (isinstance(table, EventsTable) and resolved_field.name == "$session_id")
-                    or (isinstance(table, SessionsTableV3) and resolved_field.name in ("session_id"))
+                    or (isinstance(table, SessionsTable) and resolved_field.name in ("session_id"))
                     or (isinstance(table, RawSessionReplayEventsTable) and resolved_field.name == "min_first_timestamp")
                 ):
                     return True

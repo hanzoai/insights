@@ -84,7 +84,7 @@ EMPTY_JSON = "'{}'"
 # lens the fork ships names that same fact the way ITS schema says it
 # (`$pageview`). Passing `name` straight through therefore publishes rows no
 # lens can find: web analytics, `sessions_mv.pageview_count` and
-# `raw_sessions_v3_mv.page_screen_uniq` all key on the literal `$pageview`, so
+# `raw_sessions_mv.page_screen_uniq` all key on the literal `$pageview`, so
 # without this back-map every session on insights.hanzo.ai reads ZERO pageviews
 # while the rows sit in the warehouse — measured on 2026-08-01, where 06:00
 # through 15:00 UTC held 168 sessions and 0 counted pageviews.

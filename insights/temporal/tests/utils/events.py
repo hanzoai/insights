@@ -10,7 +10,7 @@ import itertools
 import aiohttp.client_exceptions
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
-from insights.models.raw_sessions.sessions_v2 import RAW_SESSION_TABLE_BACKFILL_SELECT_SQL
+from insights.models.raw_sessions.sessions import RAW_SESSION_TABLE_BACKFILL_SELECT_SQL
 from insights.temporal.common.datastore import DatastoreClient, DatastoreError
 from insights.temporal.tests.utils.datetimes import date_range
 

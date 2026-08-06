@@ -13,7 +13,6 @@ load_from:
     #    - python_module: insights.dags.locations.billing
 
     # These dags are loaded in local dev
-    - python_module: insights.dags.locations.analytics_platform
     - python_module: insights.dags.locations.experiments
     - python_module: insights.dags.locations.growth
     - python_module: insights.dags.locations.ingestion

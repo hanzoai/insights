@@ -10,7 +10,6 @@ from insights.schema import (
     InsightsQLMetadataResponse,
     InsightsQLQuery,
     InsightsQLQueryModifiers,
-    SessionTableVersion,
 )
 
 from insights.insightsql.metadata import get_insightsql_metadata
@@ -528,7 +527,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             """
         SELECT events.session.id FROM events
         """,
-            modifiers=InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V3),
+            modifiers=InsightsQLQueryModifiers(),
         )
         self.assertEqual(metadata.isValid, True)
         self.assertEqual(sorted(metadata.table_names or []), sorted(["events"]))
