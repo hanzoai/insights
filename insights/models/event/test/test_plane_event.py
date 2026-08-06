@@ -9,10 +9,17 @@ from insights.models.event.plane import (
     EVENT_COLUMNS,
     EVENT_NAME_SQL,
     EVENT_SELECT_SQL,
+    EVENT_SIGNAL_SQL,
     ORIGINAL_NAME_SQL,
     PROPERTY_COLUMN,
     RESERVED_KIND,
+    USER_ALIAS_SELECT_SQL,
+    USER_SELECT_SQL,
 )
+
+# The routing these cases are about. The builders are pure, so a test that asserts
+# a projection's text names its own input rather than reading the app's records.
+ROUTING = {"hanzo": 1}
 
 
 def column(columns, name):
@@ -24,7 +31,7 @@ def test_a_page_is_named_the_way_every_lens_reads_it():
     all key on the literal `$pageview`. A projection that publishes the
     surface's own name publishes rows none of them can find.
     """
-    event = dict(EVENT_COLUMNS(historical=False))["event"]
+    event = dict(EVENT_COLUMNS(ROUTING, historical=False))["event"]
     for kind, reserved in RESERVED_KIND.items():
         assert f"kind = '{kind}', '{reserved}'" in event
 
@@ -64,8 +71,29 @@ def test_nothing_is_preserved_when_nothing_was_renamed():
     assert "NOT (name IN (" in ORIGINAL_NAME_SQL
 
 
-def test_the_projection_reads_the_plane():
-    """The one source. A view pointed at the retired `hanzo.events` compiles,
-    runs, and delivers nothing — which is how this feed went dry.
+def test_the_projection_reads_the_plane_and_names_its_signal():
+    """The one source, and the one predicate.
+
+    A view pointed at the retired `hanzo.events` compiles, runs, and delivers
+    nothing — which is how this feed went dry. The plane is now ONE table, so
+    naming it is no longer enough: without `signal = 'act'` this view would
+    publish every log line, span, error and replay clip into the product-event
+    stream, and `user_mv` would mint a person for each of them.
     """
-    assert EVENT_SELECT_SQL(historical=False).endswith("FROM event.event")
+    sql = EVENT_SELECT_SQL(ROUTING, historical=False)
+    # The WHERE is the signal AND the routing gate: which sort of fact, and whose.
+    assert sql.endswith("FROM event.fact\nWHERE signal = 'act' AND org IN ('hanzo')")
+
+
+def test_every_projection_of_the_plane_names_its_signal():
+    """All three views read the same table, so all three must scope it. The
+    predicate is composed from one place precisely so a fourth cannot forget it.
+    """
+    for sql in (
+        EVENT_SELECT_SQL(ROUTING, historical=False),
+        EVENT_SELECT_SQL(ROUTING, historical=True),
+        USER_SELECT_SQL(ROUTING),
+        USER_ALIAS_SELECT_SQL(ROUTING),
+    ):
+        assert "FROM event.fact" in sql, sql
+        assert EVENT_SIGNAL_SQL in sql, sql

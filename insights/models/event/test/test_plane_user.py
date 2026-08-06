@@ -28,10 +28,15 @@ from insights.models.event.plane import (
     USER_TOMBSTONE_SQL,
     precedence,
 )
+from insights.settings.data_stores import DATASTORE_DATABASE
+
+# The routing these cases are about. The builders are pure, so a test that asserts
+# a projection's text names its own input rather than reading the app's records.
+ROUTING = {"hanzo": 1}
 
 
 def column(columns, name):
-    return dict(columns())[name]
+    return dict(columns(ROUTING))[name]
 
 
 def test_a_user_row_exists_for_every_user_an_event_names():
@@ -41,7 +46,7 @@ def test_a_user_row_exists_for_every_user_an_event_names():
     the exact shape of the bug this plane was written to fix, just moved one
     table over.
     """
-    events = dict(EVENT_COLUMNS(historical=False))
+    events = dict(EVENT_COLUMNS(ROUTING, historical=False))
     assert column(USER_COLUMNS, "id") == events["person_id"] == USER_SQL
 
 
@@ -135,7 +140,7 @@ def test_the_alias_predicate_reads_the_source_row_not_the_projection():
     Unqualified, `person_id != ''` compares the projected UUID to a string and
     the whole view fails with CANNOT_PARSE_UUID.
     """
-    sql = USER_ALIAS_SELECT_SQL()
+    sql = USER_ALIAS_SELECT_SQL(ROUTING)
     where = sql.split("WHERE", 1)[1]
     assert "e.person_id != ''" in where
     assert " person_id != ''" not in where
@@ -143,7 +148,7 @@ def test_the_alias_predicate_reads_the_source_row_not_the_projection():
 
 def test_the_alias_never_points_a_user_at_themselves():
     """An alias is only a fact when there are two DIFFERENT ids to join."""
-    where = USER_ALIAS_SELECT_SQL().split("WHERE", 1)[1]
+    where = USER_ALIAS_SELECT_SQL(ROUTING).split("WHERE", 1)[1]
     assert "e.anonymous_id != ''" in where
     assert "e.anonymous_id != e.person_id" in where
 
@@ -175,12 +180,12 @@ def test_the_backfill_writes_exactly_what_the_view_writes():
         (USER_BACKFILL_SQL, USER_SELECT_SQL, USER_COLUMNS),
         (USER_ALIAS_BACKFILL_SQL, USER_ALIAS_SELECT_SQL, USER_ALIAS_COLUMNS),
     ):
-        names = ", ".join(name for name, _ in columns())
-        assert f"({names})" in backfill()
-        assert select() in backfill()
+        names = ", ".join(name for name, _ in columns(ROUTING))
+        assert f"({names})" in backfill(ROUTING)
+        assert select(ROUTING) in backfill(ROUTING)
 
 
 def test_the_views_target_the_write_side_tables():
     """Never the local tables — the same write path the fork's own views use."""
-    assert "`insights`.`writable_person`" in USER_MV_SQL()
-    assert "`insights`.`writable_person_distinct_id_overrides`" in USER_ALIAS_MV_SQL()
+    assert f"`{DATASTORE_DATABASE}`.`writable_person`" in USER_MV_SQL(ROUTING)
+    assert f"`{DATASTORE_DATABASE}`.`writable_person_distinct_id_overrides`" in USER_ALIAS_MV_SQL(ROUTING)
