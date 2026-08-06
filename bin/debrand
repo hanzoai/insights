@@ -87,6 +87,7 @@ CONTENT_RULES: list[tuple[str, str]] = [
     # path that no longer exists.
     ("hog_flow", "insights_flow"),
     ("hogflows", "insightsflows"),
+    ("hogflow", "insightsflow"),
     ("HogFlow", "InsightsFlow"),
     ("hogvm", "scriptvm"),
     ("HogVM", "ScriptVM"),
@@ -343,12 +344,9 @@ CONTENT_ALLOWLIST: dict[str, str] = {
         "datastore migrations table under their original package names. "
         "Renaming these strings would orphan every applied migration."
     ),
-    "rust/common/symbol_data/tests/static/sourcemap_with_nulls.jsdata": (
-        "Gzipped fixture. The old name is inside the compressed bytes; "
-        "rewriting it would corrupt the archive the test decompresses."
-    ),
-    "rust/cymbal/tests/static/sourcemap_with_nulls.jsdata": (
-        "Gzipped fixture, same reason as the symbol_data copy."
+    "playwright/live/smoke.spec.ts": (
+        "The live smoke asserts the upstream name is ABSENT from the served "
+        "page; the assertion must spell the name it forbids."
     ),
 }
 
