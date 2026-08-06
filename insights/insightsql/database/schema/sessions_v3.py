@@ -1,8 +1,6 @@
 import re
 from typing import TYPE_CHECKING, Optional, cast
 
-from insights.schema import CustomChannelRule
-
 from insights.insightsql import ast
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.models import (
@@ -26,15 +24,12 @@ from insights.insightsql.database.schema.util.where_clause_extractor import Sess
 from insights.insightsql.errors import ResolutionError
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 
-from insights.models.property_definition import PropertyType
-from insights.models.raw_sessions.sessions_v3 import (
-    RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_V3,
-    RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_WITH_FILTER_V3,
-    SESSION_V3_LOWER_TIER_AD_IDS,
-)
 from insights.queries.insight import insight_sync_execute
+from insights.raw_sessions_v3_ad_ids import SESSION_V3_LOWER_TIER_AD_IDS
 
 if TYPE_CHECKING:
+    from insights.schema import CustomChannelRule
+
     from insights.models.team import Team
 
 
@@ -83,33 +78,65 @@ RAW_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
     "screen_uniq": DatabaseField(name="screen_uniq", nullable=False),
     "page_screen_uniq_up_to": DatabaseField(name="page_screen_uniq_up_to", nullable=False),
     "has_autocapture": BooleanDatabaseField(name="has_autocapture", nullable=False),
+    "hosts": StringArrayDatabaseField(name="hosts", nullable=False),
+    "emails": StringArrayDatabaseField(name="emails", nullable=False),
     "has_replay_events": BooleanDatabaseField(name="has_replay_events", nullable=False),
 }
 
 LAZY_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
     # IDs
     "team_id": IntegerDatabaseField(name="team_id"),
-    "session_id_v7": StringDatabaseField(name="session_id_v7"),
-    "id": StringDatabaseField(name="id"),
+    "session_id_v7": StringDatabaseField(
+        name="session_id_v7", description="Preferred session identifier (UUIDv7); join target for `events.$session_id`."
+    ),
+    "id": StringDatabaseField(name="id", description="Session identifier; matches `events.$session_id`."),
     # TODO remove this, it's a duplicate of the correct session_id field below to get some trends working on a deadline
-    "session_id": StringDatabaseField(name="session_id"),
-    "session_timestamp": DateTimeDatabaseField(name="session_timestamp", nullable=False),
+    "session_id": StringDatabaseField(
+        name="session_id", description="Session identifier; matches `events.$session_id`."
+    ),
+    "session_timestamp": DateTimeDatabaseField(
+        name="session_timestamp",
+        nullable=False,
+        description="Timestamp embedded in the session id; prefer `$start_timestamp` for most queries.",
+    ),
     "distinct_id": StringDatabaseField(name="distinct_id"),
     # timestamp
-    "$start_timestamp": DateTimeDatabaseField(name="$start_timestamp"),
-    "$end_timestamp": DateTimeDatabaseField(name="$end_timestamp"),
+    "$start_timestamp": DateTimeDatabaseField(
+        name="$start_timestamp", description="Timestamp of the first event in the session."
+    ),
+    "$end_timestamp": DateTimeDatabaseField(
+        name="$end_timestamp", description="Timestamp of the last event in the session."
+    ),
     "max_inserted_at": DateTimeDatabaseField(name="max_inserted_at"),
     # URLs
-    "$urls": StringArrayDatabaseField(name="$urls"),
-    "$num_uniq_urls": IntegerDatabaseField(name="$num_uniq_urls"),
-    "$entry_current_url": StringDatabaseField(name="$entry_current_url"),
-    "$entry_pathname": StringDatabaseField(name="$entry_pathname"),
-    "$entry_hostname": StringDatabaseField(name="$entry_host"),
-    "$end_current_url": StringDatabaseField(name="$end_current_url"),
-    "$end_pathname": StringDatabaseField(name="$end_pathname"),
-    "$end_hostname": StringDatabaseField(name="$end_hostname"),
-    "$entry_referring_domain": StringDatabaseField(name="$entry_referring_domain"),
-    "$last_external_click_url": StringDatabaseField(name="$last_external_click_url"),
+    "$urls": StringArrayDatabaseField(name="$urls", description="Distinct URLs visited during the session."),
+    "$num_uniq_urls": IntegerDatabaseField(
+        name="$num_uniq_urls", description="Number of distinct URLs visited during the session."
+    ),
+    "$entry_current_url": StringDatabaseField(
+        name="$entry_current_url", description="Full URL of the first page viewed in the session."
+    ),
+    "$entry_pathname": StringDatabaseField(
+        name="$entry_pathname", description="Path of the first page viewed in the session (URL without host or query)."
+    ),
+    "$entry_hostname": StringDatabaseField(
+        name="$entry_host", description="Host of the first page viewed in the session."
+    ),
+    "$end_current_url": StringDatabaseField(
+        name="$end_current_url", description="Full URL of the last page viewed in the session."
+    ),
+    "$end_pathname": StringDatabaseField(
+        name="$end_pathname", description="Path of the last page viewed in the session (URL without host or query)."
+    ),
+    "$end_hostname": StringDatabaseField(
+        name="$end_hostname", description="Host of the last page viewed in the session."
+    ),
+    "$entry_referring_domain": StringDatabaseField(
+        name="$entry_referring_domain", description="Referring domain that brought the user into the session."
+    ),
+    "$last_external_click_url": StringDatabaseField(
+        name="$last_external_click_url", description="URL of the last outbound (external) link clicked in the session."
+    ),
     # some aliases for people upgrading from v1 to v2/v3
     "$exit_current_url": StringDatabaseField(name="$exit_current_url"),
     "$exit_pathname": StringDatabaseField(name="$exit_pathname"),
@@ -133,13 +160,27 @@ LAZY_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
     "$has_autocapture": BooleanDatabaseField(name="$has_autocapture"),
     "$entry_channel_type_properties": DatabaseField(name="$entry_channel_type_properties"),
     # computed fields
-    "$channel_type": StringDatabaseField(name="$channel_type"),
-    "$session_duration": IntegerDatabaseField(name="$session_duration"),
+    "$channel_type": StringDatabaseField(
+        name="$channel_type",
+        description="Derived acquisition channel (e.g. Organic Search, Paid Social) for the session.",
+    ),
+    "$session_duration": IntegerDatabaseField(
+        name="$session_duration", description="Session duration in seconds ($end_timestamp - $start_timestamp)."
+    ),
     "duration": IntegerDatabaseField(
         name="duration"
     ),  # alias of $session_duration, deprecated but included for backwards compatibility
-    "$is_bounce": BooleanDatabaseField(name="$is_bounce"),
-    "$has_replay_events": BooleanDatabaseField(name="$has_replay_events", nullable=False),
+    "$is_bounce": BooleanDatabaseField(
+        name="$is_bounce",
+        description="True if the session was a bounce (single page view, short duration, no interaction).",
+    ),
+    "$hosts": StringArrayDatabaseField(name="$hosts", description="Distinct hosts visited during the session."),
+    "$emails": StringArrayDatabaseField(name="$emails", description="Distinct emails associated with the session."),
+    "$has_replay_events": BooleanDatabaseField(
+        name="$has_replay_events",
+        nullable=False,
+        description="True if the session has session replay recording events.",
+    ),
 }
 
 
@@ -153,6 +194,10 @@ def get_binary_fields(table: Table) -> set[str]:
 
 
 class RawSessionsTableV3(Table):
+    description: str = (
+        "Raw v3 sessions aggregate-state table backing `sessions` (v3). Columns hold AggregateFunction states "
+        "that must be merged; query the streamlined sessions table instead unless you need the raw states."
+    )
     fields: dict[str, FieldOrTable] = RAW_SESSIONS_FIELDS
 
     def to_printed_datastore(self, context):
@@ -187,6 +232,17 @@ def select_from_sessions_table_v3(
     def arg_max_merge_field(field_name: str) -> ast.Call:
         return ast.Call(name="argMaxMerge", args=[ast.Field(chain=[table_name, field_name])])
 
+    def collect_array_field(field_name: str) -> ast.Call:
+        return ast.Call(
+            name="arrayDistinct",
+            args=[
+                ast.Call(
+                    name="arrayFlatten",
+                    args=[ast.Call(name="groupArray", args=[ast.Field(chain=[table_name, field_name])])],
+                )
+            ],
+        )
+
     aggregate_fields: dict[str, ast.Expr] = {
         "session_id": ast.Call(
             name="toString",
@@ -215,15 +271,9 @@ def select_from_sessions_table_v3(
         "$start_timestamp": ast.Call(name="min", args=[ast.Field(chain=[table_name, "min_timestamp"])]),
         "$end_timestamp": ast.Call(name="max", args=[ast.Field(chain=[table_name, "max_timestamp"])]),
         "max_inserted_at": ast.Call(name="max", args=[ast.Field(chain=[table_name, "max_inserted_at"])]),
-        "$urls": ast.Call(
-            name="arrayDistinct",
-            args=[
-                ast.Call(
-                    name="arrayFlatten",
-                    args=[ast.Call(name="groupArray", args=[ast.Field(chain=[table_name, "urls"])])],
-                )
-            ],
-        ),
+        "$urls": collect_array_field("urls"),
+        "$hosts": collect_array_field("hosts"),
+        "$emails": collect_array_field("emails"),
         "$entry_current_url": (arg_min_merge_field("entry_url")),
         "$end_current_url": (arg_max_merge_field("end_url")),
         "$last_external_click_url": arg_max_merge_field("last_external_click_url"),
@@ -391,6 +441,10 @@ def select_from_sessions_table_v3(
 
 
 class SessionsTableV3(LazyTable):
+    description: str = (
+        "Aggregated user sessions (one row per session), with entry/exit URLs, attribution, device/geo info, "
+        "and duration. Join from events via `events.$session_id = sessions.session_id`."
+    )
     fields: dict[str, FieldOrTable] = LAZY_SESSIONS_FIELDS
 
     def lazy_select(
@@ -476,6 +530,9 @@ def get_lazy_session_table_properties_v3(search: Optional[str]):
         "$exit_pathname",
     }
 
+    # lazy import keeps the event-definitions ORM off this module's import path
+    from products.event_definitions.backend.models.property_definition import PropertyType  # noqa: PLC0415
+
     # some fields should have a specific property type which isn't derivable from the type of database field
     property_type_overrides = {
         "$session_duration": PropertyType.Duration,
@@ -517,7 +574,7 @@ def get_lazy_session_table_properties_v3(search: Optional[str]):
     return results
 
 
-# NOTE: Keep the AD IDs in sync with `insights.insightsql_queries.web_analytics.session_attribution_explorer_query_runner.py`
+# NOTE: Keep the AD IDs in sync with `products.web_analytics.backend.insightsql_queries.session_attribution_explorer_query_runner.py`
 SESSION_PROPERTY_TO_RAW_SESSIONS_EXPR_MAP = {
     "$entry_referring_domain": "finalizeAggregation(entry_referring_domain)",
     "$entry_utm_source": "finalizeAggregation(entry_utm_source)",
@@ -544,6 +601,12 @@ for session_ad_id in SESSION_V3_LOWER_TIER_AD_IDS:
 
 
 def get_lazy_session_table_values_v3(key: str, search_term: Optional[str], team: "Team"):
+    # lazy import keeps the raw-sessions SQL module (Django ORM) off this module's import path
+    from insights.models.raw_sessions.sessions_v3 import (  # noqa: PLC0415
+        RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_V3,
+        RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_WITH_FILTER_V3,
+    )
+
     # the sessions table does not have a properties json object like the events and person tables
 
     if key == "$channel_type":

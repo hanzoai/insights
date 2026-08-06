@@ -1,16 +1,14 @@
 import uuid
-import itertools
 from abc import ABC
 from functools import cached_property
 from typing import Any, Optional, Union
 
-from rest_framework.exceptions import ValidationError
-
 from insights.schema import (
     ActionsNode,
     BreakdownType,
-    DataWarehouseNode,
     EventsNode,
+    FunnelAggregateByInsightsQL,
+    FunnelsDataWarehouseNode,
     FunnelTimeToConvertResults,
     FunnelVizType,
     GroupNode,
@@ -24,13 +22,15 @@ from insights.insightsql.parser import parse_expr, parse_select
 from insights.datastore.materialized_columns import ColumnName
 from insights.insightsql_queries.insights.funnels.funnel_event_query import FunnelEventQuery
 from insights.insightsql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
-from insights.insightsql_queries.insights.funnels.utils import funnel_window_interval_unit_to_sql
+from insights.insightsql_queries.insights.funnels.utils import funnel_window_interval_unit_to_sql, get_breakdown_cohort_name
+from insights.insightsql_queries.insights.utils.breakdowns import ALL_USERS_COHORT_ID
 from insights.insightsql_queries.insights.utils.entities import is_equal, is_superset
-from insights.models.action.action import Action
-from insights.models.cohort.cohort import Cohort
 from insights.models.property.property import PropertyName
-from insights.queries.breakdown_props import ALL_USERS_COHORT_ID, get_breakdown_cohort_name
 from insights.queries.util import correct_result_for_sampling
+from insights.types import FunnelEntityNode
+
+from products.actions.backend.models.action import Action
+from products.cohorts.backend.models.cohort import Cohort
 
 JOIN_ALGOS = "auto"
 
@@ -55,77 +55,6 @@ class FunnelBase(ABC):
             self._extra_event_fields = ["uuid"]
             self._extra_event_properties = ["$session_id", "$window_id"]
 
-        # validate funnel steps range
-        max_series_index = len(self.context.query.series) - 1
-        if self.context.funnelsFilter.funnelFromStep is not None:
-            if not (0 <= self.context.funnelsFilter.funnelFromStep <= max_series_index - 1):
-                raise ValidationError(
-                    f"funnelFromStep is out of bounds. It must be between 0 and {max_series_index - 1}."
-                )
-
-        if self.context.funnelsFilter.funnelToStep is not None:
-            if not (1 <= self.context.funnelsFilter.funnelToStep <= max_series_index):
-                raise ValidationError(f"funnelToStep is out of bounds. It must be between 1 and {max_series_index}.")
-
-            if (
-                self.context.funnelsFilter.funnelFromStep is not None
-                and self.context.funnelsFilter.funnelFromStep >= self.context.funnelsFilter.funnelToStep
-            ):
-                raise ValidationError(
-                    "Funnel step range is invalid. funnelToStep should be greater than funnelFromStep."
-                )
-
-        # validate exclusions
-        if self.context.funnelsFilter.exclusions is not None:
-            for exclusion in self.context.funnelsFilter.exclusions:
-                if exclusion.funnelFromStep >= exclusion.funnelToStep:
-                    raise ValidationError(
-                        "Exclusion event range is invalid. End of range should be greater than start."
-                    )
-
-                if exclusion.funnelFromStep >= len(self.context.query.series) - 1:
-                    raise ValidationError(
-                        "Exclusion event range is invalid. Start of range is greater than number of steps."
-                    )
-
-                if exclusion.funnelToStep > len(self.context.query.series) - 1:
-                    raise ValidationError(
-                        "Exclusion event range is invalid. End of range is greater than number of steps."
-                    )
-
-                for entity in self.context.query.series[exclusion.funnelFromStep : exclusion.funnelToStep + 1]:
-                    if is_equal(entity, exclusion) or is_superset(entity, exclusion):
-                        raise ValidationError("Exclusion steps cannot contain an event that's part of funnel steps.")
-
-        has_optional_steps = any(getattr(node, "optionalInFunnel", False) for node in self.context.query.series)
-
-        if has_optional_steps:
-            # validate that optional steps are only allowed in Ordered Steps funnels
-            allows_optional_steps = (
-                self.context.funnelsFilter.funnelVizType in (FunnelVizType.STEPS, None)
-                and self.context.funnelsFilter.funnelOrderType != StepOrderValue.UNORDERED
-            )
-            if not allows_optional_steps:
-                raise ValidationError(
-                    'Optional funnel steps are only supported in funnels with step order Sequential or Strict and the graph type "Conversion Steps".'
-                )
-
-            # validate that the first step is not optional
-            if self.context.query.series and getattr(self.context.query.series[0], "optionalInFunnel", False):
-                raise ValidationError("The first step of a funnel cannot be optional.")
-
-            # Validate that an optional step never follows a required step that is exactly the same right after it
-            # In that case, the optional step will show up as never converting.
-            # Not trying to be overly clever here - putting filters in different order or using SQL queries that are slightly different could
-            # get around this, but want to stop the naive case from spawning support issues.
-            for i, j in itertools.pairwise(self.context.query.series):
-                if (
-                    (is_equal(i, j) or is_superset(j, i))
-                    and getattr(i, "optionalInFunnel", True)
-                    and not getattr(j, "optionalInFunnel", False)
-                ):
-                    raise ValidationError("An optional step cannot be the same as the following required step.")
-
     def get_query(self) -> ast.SelectQuery:
         raise NotImplementedError()
 
@@ -141,12 +70,33 @@ class FunnelBase(ABC):
 
         if isinstance(breakdown, list):
             cohorts = Cohort.objects.filter(
-                team__project_id=team.project_id, pk__in=[b for b in breakdown if b != "all"]
+                team__project_id=team.project_id, pk__in=[b for b in breakdown if b not in ("all", None)]
             )
         else:
+            if breakdown is None:
+                return []
             cohorts = Cohort.objects.filter(team__project_id=team.project_id, pk=breakdown)
 
         return list(cohorts)
+
+    @cached_property
+    def _not_in_cohort_name(self) -> str | None:
+        if len(self.breakdown_cohorts) == 1:
+            return self.breakdown_cohorts[0].name
+        return None
+
+    @cached_property
+    def should_add_not_in_cohort_group(self) -> bool:
+        breakdown, breakdownType = self.context.breakdown, self.context.breakdownType
+        if breakdownType != BreakdownType.COHORT:
+            return False
+        if isinstance(breakdown, list) and "all" in breakdown:
+            return False
+        return len(self.breakdown_cohorts) == 1
+
+    def _extract_total_median_conversion_time(self, results, columns) -> Optional[float]:
+        """Funnel-level median of total conversion time. Only the Steps viz computes one; others return None."""
+        return None
 
     def _format_results(
         self, results
@@ -196,7 +146,11 @@ class FunnelBase(ABC):
                 serialized_result.update(
                     {
                         "breakdown": (
-                            get_breakdown_cohort_name(breakdown_value, self.context.team)
+                            get_breakdown_cohort_name(
+                                breakdown_value,
+                                self.context.team,
+                                not_in_cohort_name=self._not_in_cohort_name,
+                            )
                             if self.context.breakdownFilter.breakdown_type == "cohort"
                             else breakdown_value
                         ),
@@ -210,7 +164,7 @@ class FunnelBase(ABC):
 
     def _serialize_step(
         self,
-        step: ActionsNode | EventsNode | DataWarehouseNode | GroupNode,
+        step: FunnelEntityNode,
         count: int,
         index: int,
         people: Optional[list[uuid.UUID]] = None,
@@ -220,7 +174,7 @@ class FunnelBase(ABC):
             step_type = "events"
         elif isinstance(step, ActionsNode):
             step_type = "actions"
-        elif isinstance(step, DataWarehouseNode):
+        elif isinstance(step, FunnelsDataWarehouseNode):
             step_type = "data_warehouse"
         elif isinstance(step, GroupNode):
             step_type = "group"
@@ -242,8 +196,8 @@ class FunnelBase(ABC):
         if isinstance(step, EventsNode):
             name = step.event
             action_id = step.event
-        elif isinstance(step, DataWarehouseNode):
-            name = f"{step.table_name}.{step.distinct_id_field}"
+        elif isinstance(step, FunnelsDataWarehouseNode):
+            name = step.table_name
             action_id = None
         elif isinstance(step, GroupNode):
             action_ids = [int(node.id) for node in step.nodes if isinstance(node, ActionsNode)]
@@ -258,8 +212,6 @@ class FunnelBase(ABC):
                     events.append(node.event if node.event is not None else "All events")
                 elif isinstance(node, ActionsNode):
                     events.append(actions_by_id.get(int(node.id), "Unnamed action"))
-                elif isinstance(node, DataWarehouseNode):
-                    events.append(node.table_name)
             name = ", ".join(events)
             action_id = name
         else:
@@ -280,6 +232,9 @@ class FunnelBase(ABC):
     @property
     def extra_event_fields_and_properties(self):
         return self._extra_event_fields + self._extra_event_properties
+
+    def _is_session_aggregation(self) -> bool:
+        return self.context.funnelsFilter.funnelAggregateByInsightsQL == FunnelAggregateByInsightsQL.PROPERTIES__SESSION_ID.value
 
     @property
     def _absolute_actors_step(self) -> Optional[int]:
@@ -321,7 +276,7 @@ class FunnelBase(ABC):
         )
 
         # TODO: cohort breakdowns are not supported for data warehouse / mixed funnels at the moment
-        if breakdown and breakdownType == BreakdownType.COHORT:
+        if breakdown and breakdownType == BreakdownType.COHORT and not self.should_add_not_in_cohort_group:
             assert funnel_events_query.select_from is not None
             funnel_events_query.select_from.next_join = self._get_cohort_breakdown_join()
 

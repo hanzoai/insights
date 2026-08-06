@@ -2,7 +2,7 @@
 
 ## Overview
 
-Python-based acceptance tests for the LLM Analytics capture pipeline, testing against an existing Insights instance.
+Python-based acceptance tests for the AI observability capture pipeline, testing against an existing Insights instance.
 
 ## Test Execution
 

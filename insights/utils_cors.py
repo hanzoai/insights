@@ -16,6 +16,11 @@ CORS_ALLOWED_TRACING_HEADERS = (
     "Baggage",
     "x-highlight-request",
     "x-datadome-clientid",
+    "x-datadog-origin",
+    "x-datadog-trace-id",
+    "x-datadog-parent-id",
+    "x-datadog-sampling-priority",
+    "x-datadog-tags",
     "x-insights-token",
     "x-conversations-token",
     "x-b3-sampled",
@@ -27,9 +32,9 @@ CORS_ALLOWED_TRACING_HEADERS = (
 
 # Temporary list of known good origins for monitoring
 KNOWN_ORIGINS = {
-    "insights.hanzo.ai",
-    "insights.hanzo.ai",
-    "insights.hanzo.ai",
+    "app.hanzo.ai",
+    "us.hanzo.ai",
+    "eu.hanzo.ai",
     "localhost:8000",
     "localhost:8010",
     "app.dev.insights.dev",

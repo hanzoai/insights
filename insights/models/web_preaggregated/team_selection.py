@@ -1,6 +1,7 @@
+from insights.datastore.client.connection import DatastoreUser, get_datastore_creds
 from insights.datastore.cluster import ON_CLUSTER_CLAUSE
 from insights.datastore.table_engines import ReplacingMergeTree
-from insights.settings.data_stores import DATASTORE_DATABASE, DATASTORE_PASSWORD, DATASTORE_USER
+from insights.settings.data_stores import DATASTORE_DATABASE
 
 WEB_PRE_AGGREGATED_TEAM_SELECTION_TABLE_NAME = "web_pre_aggregated_teams"
 WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_NAME = "web_pre_aggregated_teams_dict"
@@ -117,6 +118,11 @@ WHERE version > 0
 """.replace("\n", " ").strip()
 
 
+_dict_reader_creds = get_datastore_creds(DatastoreUser.DICT_READER)
+DATASTORE_DICT_READER_USER = _dict_reader_creds.user
+DATASTORE_DICT_READER_PASSWORD = _dict_reader_creds.password
+
+
 def WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_SQL(on_cluster=True):
     return """
 CREATE DICTIONARY IF NOT EXISTS {dictionary_name} {on_cluster_clause} (
@@ -129,8 +135,8 @@ LAYOUT(HASHED())""".format(
         dictionary_name=f"`{WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_NAME}`",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
         query=WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_QUERY(),
-        datastore_user=DATASTORE_USER,
-        datastore_password=DATASTORE_PASSWORD,
+        datastore_user=DATASTORE_DICT_READER_USER,
+        datastore_password=DATASTORE_DICT_READER_PASSWORD,
     )
 
 

@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 # Datastore query timeout in seconds
-# From https://github.com/Hanzo Insights/insights-cloud-infra/blob/main/ansible/config/datastore-users.xml#L11
+# From https://github.com/Insights/insights-cloud-infra/blob/master/ansible/config/datastore-users.xml#L11
 # Keep in sync with the above! And note that this doesn't hold for async queries (which are flagged as of Feb 2023)
 DATASTORE_MAX_EXECUTION_TIME = timedelta(seconds=180)
 

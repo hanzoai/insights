@@ -7,7 +7,7 @@ import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEdit
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { capitalizeFirstLetter, pluralize } from 'lib/utils'
+import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
 import { TIME_INTERVAL_BOUNDS } from 'scenes/funnels/funnelUtils'
 import { GroupIntroductionFooter } from 'scenes/groups/GroupsIntroduction'
 import { FUNNEL_STEP_COUNT_LIMIT } from 'scenes/insights/EditorFilters/FunnelsQuerySteps'
@@ -187,7 +187,7 @@ export function FunnelAttributionSelect({
             <div className="flex">
                 <span>Attribution type</span>
                 <Tooltip
-                    closeDelayMs={200}
+                    docLink="https://hanzo.ai/docs/product-analytics/funnels#attribution-types"
                     title={
                         <div className="deprecated-space-y-2">
                             <div>
@@ -208,12 +208,6 @@ export function FunnelAttributionSelect({
                                 </li>
                                 <li>Specific step: only the property value seen at the selected step is chosen.</li>
                             </ul>
-                            <div>
-                                Read more in the{' '}
-                                <Link to="https://hanzo.ai/docs/product-analytics/funnels#attribution-types">
-                                    documentation.
-                                </Link>
-                            </div>
                         </div>
                     }
                 >

@@ -9,8 +9,8 @@ const RE2 = require('re2')
 const args = process.argv.slice(2).filter((arg) => arg !== '' && !arg.startsWith('-'))
 const filename = args[0]
 
-if (!filename.endsWith('.iqle')) {
-    throw new Error("filename must end with '.iqle'")
+if (!filename.endsWith('.hoge')) {
+    throw new Error("filename must end with '.hoge'")
 }
 
 const code = JSON.parse(fs.readFileSync(filename, 'utf8'))

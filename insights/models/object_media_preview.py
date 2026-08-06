@@ -21,7 +21,7 @@ class ObjectMediaPreview(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
         related_name="object_previews",
     )
     exported_asset = models.ForeignKey(
-        "ExportedAsset",
+        "exports.ExportedAsset",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -32,7 +32,7 @@ class ObjectMediaPreview(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     # Previews for other objects could be added here later (e.g. property_definition, feature_flag)
     # When adding, update the constraint below to ensure exactly one is set
     event_definition = models.ForeignKey(
-        "EventDefinition",
+        "event_definitions.EventDefinition",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -48,14 +48,14 @@ class ObjectMediaPreview(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
         ]
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(uploaded_media__isnull=False, exported_asset__isnull=True)
                     | models.Q(uploaded_media__isnull=True, exported_asset__isnull=False)
                 ),
                 name="exactly_one_media",
             ),
             models.CheckConstraint(
-                check=models.Q(event_definition__isnull=False),
+                condition=models.Q(event_definition__isnull=False),
                 name="exactly_one_object",
             ),
         ]

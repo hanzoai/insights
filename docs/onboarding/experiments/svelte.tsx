@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getSvelteSteps as getSvelteStepsPA } from '../product-analytics/svelte'
 import { StepDefinition } from '../steps'
@@ -8,9 +8,7 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
     const ExperimentImplementation = snippets?.ExperimentImplementationSnippet
 
     // Get installation steps from product-analytics only
-    const installationSteps = getSvelteStepsPA(ctx).filter(
-        (step: StepDefinition) => step.title !== 'Send events'
-    )
+    const installationSteps = getSvelteStepsPA(ctx).filter((step: StepDefinition) => step.title !== 'Send events')
 
     // Add experiments-specific steps
     const experimentSteps: StepDefinition[] = [

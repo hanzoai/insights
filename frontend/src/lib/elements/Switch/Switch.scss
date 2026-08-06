@@ -1,7 +1,7 @@
 .Switch {
-    --switch-handle-size: 13px;
-    --switch-height: calc(var(--switch-handle-size) + 2px);
-    --switch-width: calc(2 * var(--switch-handle-size) + 2px);
+    --lemon-switch-handle-size: 13px;
+    --lemon-switch-height: calc(var(--lemon-switch-handle-size) + 2px);
+    --lemon-switch-width: calc(2 * var(--lemon-switch-handle-size) + 2px);
 
     display: flex;
     gap: 0.5rem;
@@ -21,7 +21,7 @@
     }
 
     &.Switch--xxsmall {
-        --switch-handle-size: 6px;
+        --lemon-switch-handle-size: 6px;
 
         label {
             font-size: 0.75rem;
@@ -29,7 +29,7 @@
     }
 
     &.Switch--xsmall {
-        --switch-handle-size: 7px;
+        --lemon-switch-handle-size: 7px;
 
         label {
             font-size: 0.75rem;
@@ -37,7 +37,7 @@
     }
 
     &.Switch--small {
-        --switch-handle-size: 9px;
+        --lemon-switch-handle-size: 9px;
 
         label {
             font-size: 0.75rem;
@@ -94,18 +94,18 @@
 }
 
 .Switch__button {
-    --switch-handle-gutter: calc((var(--switch-height) - var(--switch-handle-size)) / 2);
+    --lemon-switch-handle-gutter: calc((var(--lemon-switch-height) - var(--lemon-switch-handle-size)) / 2);
 
     position: relative;
     display: inline-block;
     flex-shrink: 0;
-    width: var(--switch-width);
-    height: var(--switch-height);
-    padding: var(--switch-handle-gutter);
+    width: var(--lemon-switch-width);
+    height: var(--lemon-switch-height);
+    padding: var(--lemon-switch-handle-gutter);
     cursor: pointer;
     background-color: var(--color-bg-fill-switch);
     border: none;
-    border-radius: var(--switch-height);
+    border-radius: var(--lemon-switch-height);
     outline: 1px solid var(--color-border-primary);
     transition: background-color 100ms ease;
 
@@ -119,20 +119,23 @@
 }
 
 .Switch__handle {
-    --switch-handle-height: var(--switch-handle-size);
-    --switch-handle-width: var(--switch-handle-size);
-    --switch-active-translate: translateX(
-        calc(var(--switch-width) - var(--switch-handle-width) - 2 * var(--switch-handle-gutter))
+    --lemon-switch-handle-height: var(--lemon-switch-handle-size);
+    --lemon-switch-handle-width: var(--lemon-switch-handle-size);
+    --lemon-switch-active-translate: translateX(
+        calc(var(--lemon-switch-width) - var(--lemon-switch-handle-width) - 2 * var(--lemon-switch-handle-gutter))
+    );
+    --lemon-switch-indeterminate-translate: translateX(
+        calc((var(--lemon-switch-width) - var(--lemon-switch-handle-width) - 2 * var(--lemon-switch-handle-gutter)) / 2)
     );
 
     position: relative;
-    width: var(--switch-handle-width);
-    height: var(--switch-handle-height);
+    width: var(--lemon-switch-handle-width);
+    height: var(--lemon-switch-handle-height);
     pointer-events: none;
     cursor: inherit;
     background-color: #fff;
     border: none;
-    border-radius: var(--switch-handle-size);
+    border-radius: var(--lemon-switch-handle-size);
     transition:
         background-color 100ms ease,
         transform 100ms ease,
@@ -142,21 +145,43 @@
     .Switch--checked & {
         background-color: var(--color-bg-surface-primary);
         border-color: var(--color-accent);
-        transform: var(--switch-active-translate);
+        transform: var(--lemon-switch-active-translate);
+    }
+
+    // Indeterminate: the handle parks mid-track on the neutral track, carrying a gray dash
+    .Switch--indeterminate & {
+        transform: var(--lemon-switch-indeterminate-translate);
+    }
+
+    // The spinner replaces the dash while loading
+    .Switch--indeterminate:not(.Switch--loading) &::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 55%;
+        height: 2px;
+        content: '';
+        background-color: var(--color-text-secondary);
+        border-radius: 1px;
+        transform: translate(-50%, -50%);
     }
 
     .Switch--active & {
-        --switch-handle-width: calc(var(--switch-handle-size) * 1.2);
+        --lemon-switch-handle-width: calc(var(--lemon-switch-handle-size) * 1.2);
 
         transform: none;
     }
 
     .Switch--active.Switch--checked & {
-        transform: var(--switch-active-translate);
+        transform: var(--lemon-switch-active-translate);
+    }
+
+    .Switch--active.Switch--indeterminate & {
+        transform: var(--lemon-switch-indeterminate-translate);
     }
 }
 
 .Switch__spinner-icon {
-    width: calc(var(--switch-handle-size) + 2px);
-    height: calc(var(--switch-handle-size) + 2px);
+    width: calc(var(--lemon-switch-handle-size) + 2px);
+    height: calc(var(--lemon-switch-handle-size) + 2px);
 }

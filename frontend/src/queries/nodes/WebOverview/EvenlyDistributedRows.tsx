@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-// see https://github.com/hanzoai/insights/pull/20359/files#r1490894232 for a visual example of what this is trying to
+// see https://github.com/Insights/insights/pull/20359/files#r1490894232 for a visual example of what this is trying to
 // solve
 // if 5 items are to be evenly distributed across a container that has space for 4, just naively using flex will result
 // in a 4-1 split, whereas this component will distribute them 3-2

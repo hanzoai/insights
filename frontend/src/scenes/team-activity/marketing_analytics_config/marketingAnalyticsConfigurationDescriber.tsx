@@ -1,5 +1,5 @@
 import { ActivityChange, ChangeMapping } from 'lib/components/ActivityLog/humanizeActivity'
-import { objectsEqual } from 'lib/utils'
+import { objectsEqual } from 'lib/utils/objects'
 
 import { MarketingAnalyticsConfig, SourceMap } from '~/queries/schema/schema-general'
 
@@ -86,8 +86,8 @@ const marketingAnalyticsSourceMapDescriber = (change?: ActivityChange): JSX.Elem
             if (beforeKeys.includes(key)) {
                 const beforeCols = sourceMapBefore[key] || {}
                 const afterCols = sourceMapAfter[key] || {}
-                const beforeColKeys = Object.keys(beforeCols)
-                const afterColKeys = Object.keys(afterCols)
+                const beforeColKeys = Object.keys(beforeCols) as Array<keyof typeof beforeCols>
+                const afterColKeys = Object.keys(afterCols) as Array<keyof typeof afterCols>
 
                 // Added columns
                 for (const col of afterColKeys) {

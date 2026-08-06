@@ -1,19 +1,21 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import { IconTrash } from '@hanzo/icons'
 
 import { useDelayedOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
-import { Button } from '../Button'
-import { Divider } from '../Divider'
 import { IconLink } from '../icons'
+import { Button } from '../Button'
+import { More } from '../Button/More'
+import { Divider } from '../Divider'
 import { Table, TableProps } from './Table'
 import { TableLink } from './TableLink'
+import { TableColumns } from './types'
 
-type Story = StoryObj<typeof Table>
-const meta: Meta<typeof Table> = {
-    title: 'Elements/Table',
-    component: Table,
+type Story = StoryObj<TableProps<any>>
+const meta: Meta<TableProps<any>> = {
+    title: 'Lemon UI/Lemon Table',
+    component: Table as any,
     tags: ['autodocs'],
 }
 export default meta
@@ -28,8 +30,68 @@ interface MockFunnelSeries {
     stepResults: [[number, number], [number, number]]
 }
 
-// @ts-expect-error
-const GroupedTemplate: StoryFn<typeof Table> = (props: TableProps<MockFunnelSeries>) => {
+const MANY_PEOPLE: MockPerson[] = [
+    { name: 'Werner C.', occupation: 'Engineer' },
+    { name: 'Ursula Z.', occupation: 'Retired' },
+    { name: 'Ludwig A.', occupation: 'Painter' },
+    { name: 'Arnold S.', occupation: 'Body-builder' },
+    { name: 'Franz B.', occupation: 'Teacher' },
+    { name: 'Marie K.', occupation: 'Scientist' },
+    { name: 'Hans G.', occupation: 'Architect' },
+    { name: 'Greta T.', occupation: 'Activist' },
+    { name: 'Otto V.', occupation: 'Musician' },
+    { name: 'Helga P.', occupation: 'Doctor' },
+    { name: 'Klaus M.', occupation: 'Chef' },
+    { name: 'Ingrid S.', occupation: 'Writer' },
+]
+
+const WIDE_COLUMNS: TableColumns<MockPerson> = [
+    {
+        title: 'Name',
+        dataIndex: 'name',
+        width: 150,
+        sorter: (a, b) => a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]),
+    },
+    {
+        title: 'Occupation',
+        dataIndex: 'occupation',
+        width: 150,
+        tooltip: 'What they are primarily working on.',
+        sorter: (a, b) => a.occupation.localeCompare(b.occupation),
+    },
+    {
+        title: 'Age',
+        key: 'age',
+        width: 120,
+        render: (_, person) => `${person.name.length * 12} years`,
+    },
+    {
+        title: 'Zodiac sign',
+        key: 'zodiac',
+        width: 120,
+        render: () => 'Gemini',
+    },
+    {
+        title: 'Favorite color',
+        key: 'color',
+        width: 120,
+        render: (_, person) => (person.occupation === 'Engineer' ? 'Blue' : 'Red'),
+    },
+    {
+        title: 'Hometown',
+        key: 'hometown',
+        width: 120,
+        render: (_, person) => (person.occupation === 'Engineer' ? 'Berlin' : 'Munich'),
+    },
+    {
+        title: 'Years of experience',
+        key: 'experience',
+        width: 150,
+        render: (_, person) => `${person.name.length + 5} years`,
+    },
+]
+
+const renderGrouped = (props: TableProps<MockFunnelSeries>): JSX.Element => {
     return (
         <Table
             {...props}
@@ -98,8 +160,7 @@ const GroupedTemplate: StoryFn<typeof Table> = (props: TableProps<MockFunnelSeri
     )
 }
 
-// @ts-expect-error
-const BasicTemplate: StoryFn<typeof Table> = (props: TableProps<MockPerson>) => {
+const renderBasic = (props: TableProps<MockPerson>): JSX.Element => {
     return (
         <Table
             {...props}
@@ -144,7 +205,7 @@ const BasicTemplate: StoryFn<typeof Table> = (props: TableProps<MockPerson>) => 
     )
 }
 
-const EmptyTemplate: StoryFn<typeof Table> = (props: TableProps<Record<string, any>>) => {
+const renderEmpty = (props: TableProps<Record<string, any>>): JSX.Element => {
     return (
         <Table
             {...props}
@@ -157,356 +218,351 @@ const EmptyTemplate: StoryFn<typeof Table> = (props: TableProps<Record<string, a
     )
 }
 
-export const Basic: Story = BasicTemplate.bind({})
-Basic.args = {}
+export const Basic: Story = { render: renderBasic as any, args: {} }
 
-export const Grouped: Story = GroupedTemplate.bind({})
-Grouped.args = {}
+export const Grouped: Story = { render: renderGrouped as any, args: {} }
 
-export const Empty: Story = EmptyTemplate.bind({})
-Empty.args = {}
+export const Empty: Story = { render: renderEmpty as any, args: {} }
 
-export const PaginatedAutomatically: Story = BasicTemplate.bind({})
-PaginatedAutomatically.args = { nouns: ['person', 'people'], pagination: { pageSize: 3 } }
+export const PaginatedAutomatically: Story = {
+    render: renderBasic as any,
+    args: { nouns: ['person', 'people'], pagination: { pageSize: 3 } },
+}
 
-export const WithExpandableRows: Story = BasicTemplate.bind({})
-WithExpandableRows.args = {
-    expandable: {
-        rowExpandable: (record) => record.occupation !== 'Retired',
-        expandedRowRender: function RenderCow() {
-            return <img src="https://c.tenor.com/WAFH6TX2VIYAAAAC/polish-cow.gif" alt="Dancing cow" />
+export const WithExpandableRows: Story = {
+    render: renderBasic as any,
+    args: {
+        expandable: {
+            rowExpandable: (record) => record.occupation !== 'Retired',
+            expandedRowRender: function RenderCow() {
+                return <img src="https://c.tenor.com/WAFH6TX2VIYAAAAC/polish-cow.gif" alt="Dancing cow" />
+            },
         },
     },
 }
 
-export const Small: Story = BasicTemplate.bind({})
-Small.args = { size: 'small' }
+export const Small: Story = { render: renderBasic as any, args: { size: 'small' } }
 
-export const Embedded: Story = BasicTemplate.bind({})
-Embedded.args = { embedded: true }
+export const Embedded: Story = { render: renderBasic as any, args: { embedded: true } }
 
-export const Stealth: Story = BasicTemplate.bind({})
-Stealth.args = { stealth: true }
+export const Stealth: Story = { render: renderBasic as any, args: { stealth: true } }
 
-export const Loading: Story = BasicTemplate.bind({})
-Loading.args = { loading: true }
-Loading.parameters = {
-    testOptions: {
-        waitForLoadersToDisappear: false,
-        waitForSelector: '.TableLoader',
+export const Loading: Story = {
+    render: renderBasic as any,
+    args: { loading: true },
+    parameters: {
+        testOptions: {
+            waitForLoadersToDisappear: false,
+            waitForSelector: '.TableLoader',
+        },
     },
 }
 
-export const EmptyLoading: Story = EmptyTemplate.bind({})
-EmptyLoading.args = { loading: true }
-EmptyLoading.parameters = {
-    testOptions: {
-        waitForLoadersToDisappear: false,
-        waitForSelector: '.TableLoader',
+export const EmptyLoading: Story = {
+    render: renderEmpty as any,
+    args: { loading: true },
+    parameters: {
+        testOptions: {
+            waitForLoadersToDisappear: false,
+            waitForSelector: '.TableLoader',
+        },
     },
 }
 
-export const EmptyLoadingWithManySkeletonRows: Story = EmptyTemplate.bind({})
-EmptyLoadingWithManySkeletonRows.args = { loading: true, loadingSkeletonRows: 10 }
-EmptyLoadingWithManySkeletonRows.parameters = {
-    testOptions: {
-        waitForLoadersToDisappear: false,
-        waitForSelector: '.TableLoader',
+export const EmptyLoadingWithManySkeletonRows: Story = {
+    render: renderEmpty as any,
+    args: { loading: true, loadingSkeletonRows: 10 },
+    parameters: {
+        testOptions: {
+            waitForLoadersToDisappear: false,
+            waitForSelector: '.TableLoader',
+        },
     },
 }
 
-export const WithoutHeader: Story = BasicTemplate.bind({})
-WithoutHeader.args = { showHeader: false }
+export const WithoutHeader: Story = { render: renderBasic as any, args: { showHeader: false } }
 
-export const WithoutUppercasingInHeader: Story = BasicTemplate.bind({})
-WithoutUppercasingInHeader.args = { uppercaseHeader: false }
+export const WithoutUppercasingInHeader: Story = { render: renderBasic as any, args: { uppercaseHeader: false } }
 
-export const WithFooter: Story = BasicTemplate.bind({})
-WithFooter.args = {
-    footer: (
-        <>
-            <div className="flex items-center m-2">
-                <Button center fullWidth>
-                    Load more rows
-                </Button>
-            </div>
-        </>
-    ),
+export const WithFooter: Story = {
+    render: renderBasic as any,
+    args: {
+        footer: (
+            <>
+                <div className="flex items-center m-2">
+                    <Button center fullWidth>
+                        Load more rows
+                    </Button>
+                </div>
+            </>
+        ),
+    },
 }
 
-export const WithColorCodedRows: Story = BasicTemplate.bind({})
-WithColorCodedRows.args = {
-    rowRibbonColor: ({ occupation }) =>
-        occupation === 'Engineer'
-            ? 'var(--success)'
-            : occupation === 'Retired'
-              ? 'var(--warning)'
-              : occupation === 'Body-builder'
-                ? 'var(--danger)'
-                : null,
+export const WithColorCodedRows: Story = {
+    render: renderBasic as any,
+    args: {
+        rowRibbonColor: ({ occupation }) =>
+            occupation === 'Engineer'
+                ? 'var(--success)'
+                : occupation === 'Retired'
+                  ? 'var(--warning)'
+                  : occupation === 'Body-builder'
+                    ? 'var(--danger)'
+                    : null,
+    },
 }
 
-export const WithHighlightedRows: Story = BasicTemplate.bind({})
-WithHighlightedRows.args = {
-    rowStatus: ({ occupation }) => (['Retired', 'Body-builder'].includes(occupation) ? 'highlighted' : null),
+export const WithHighlightedRows: Story = {
+    render: renderBasic as any,
+    args: {
+        rowStatus: ({ occupation }) => (['Retired', 'Body-builder'].includes(occupation) ? 'highlighted' : null),
+    },
 }
 
-export const WithMandatorySorting: Story = BasicTemplate.bind({})
-WithMandatorySorting.args = { defaultSorting: { columnKey: 'name', order: 1 }, noSortingCancellation: true }
+export const WithMandatorySorting: Story = {
+    render: renderBasic as any,
+    args: { defaultSorting: { columnKey: 'name', order: 1 }, noSortingCancellation: true },
+}
 
-export const WithStickyFirstColumn = (): JSX.Element => {
-    useDelayedOnMountEffect(() => {
-        const scrollableInner = document.querySelector(
-            '#story--elements-table--with-sticky-first-column .scrollable__inner'
+export const WithStickyFirstColumn: Story = {
+    render: () => {
+        useDelayedOnMountEffect(() => {
+            const scrollableInner = document.querySelector(
+                '#story--elements-lemon-table--with-sticky-first-column .scrollable__inner'
+            )
+            if (scrollableInner) {
+                scrollableInner.scrollLeft = 20
+            }
+        })
+
+        return (
+            <Table
+                className="max-w-100"
+                firstColumnSticky
+                columns={WIDE_COLUMNS.slice(0, 5)}
+                dataSource={MANY_PEOPLE.slice(0, 5)}
+            />
         )
-        if (scrollableInner) {
-            scrollableInner.scrollLeft = 20
-        }
-    })
+    },
+}
 
+export const WithLink: Story = {
+    render: () => {
+        return (
+            <Table
+                columns={[
+                    {
+                        title: 'Name',
+                        dataIndex: 'name',
+                        sorter: (a, b) => a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]),
+                        render: (_, item) => (
+                            <TableLink
+                                title={item.name}
+                                to="/test"
+                                description={`${item.name} is a ${item.occupation.toLowerCase()} who is ${
+                                    item.name.length * 12
+                                } years old.`}
+                            />
+                        ),
+                    },
+                    ...WIDE_COLUMNS.slice(1, 5),
+                ]}
+                dataSource={MANY_PEOPLE.slice(0, 5)}
+            />
+        )
+    },
+}
+
+export const WithCellActions: Story = {
+    render: () => {
+        return (
+            <Table
+                columns={[
+                    {
+                        title: 'Name',
+                        dataIndex: 'name',
+                        cellActions: (value) => (
+                            <>
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    icon={<IconLink />}
+                                    onClick={() => alert(`Viewing profile for ${value}`)}
+                                >
+                                    View profile
+                                </Button>
+                                <Button fullWidth size="small" onClick={() => alert(`Copying ${value}`)}>
+                                    Copy name
+                                </Button>
+                            </>
+                        ),
+                    },
+                    {
+                        title: 'Occupation',
+                        dataIndex: 'occupation',
+                        cellActions: (value, record) => (
+                            <>
+                                <Button fullWidth size="small" onClick={() => alert(`Filtering to ${value}`)}>
+                                    Filter to {value}
+                                </Button>
+                                <Divider />
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    status="danger"
+                                    icon={<IconTrash />}
+                                    onClick={() => alert(`Removing ${record.name}`)}
+                                >
+                                    Remove person
+                                </Button>
+                            </>
+                        ),
+                    },
+                    {
+                        title: 'Age',
+                        key: 'age',
+                        render: (_, person) => `${person.name.length * 12} years`,
+                    },
+                ]}
+                dataSource={MANY_PEOPLE.slice(0, 5)}
+            />
+        )
+    },
+}
+
+export const WithRowActions: Story = {
+    render: () => {
+        return (
+            <Table
+                columns={[
+                    {
+                        title: 'Name',
+                        dataIndex: 'name',
+                    },
+                    {
+                        title: 'Occupation',
+                        dataIndex: 'occupation',
+                    },
+                    {
+                        title: 'Age',
+                        key: 'age',
+                        render: (_, person) => `${person.name.length * 12} years`,
+                    },
+                ]}
+                rowActions={(record) => (
+                    <More
+                        overlay={
+                            <>
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    icon={<IconLink />}
+                                    onClick={() => alert(`Viewing ${record.name}'s profile`)}
+                                >
+                                    View profile
+                                </Button>
+                                <Button fullWidth size="small" onClick={() => alert(`Editing ${record.name}`)}>
+                                    Edit
+                                </Button>
+                                <Divider />
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    status="danger"
+                                    icon={<IconTrash />}
+                                    onClick={() => alert(`Deleting ${record.name}`)}
+                                >
+                                    Delete
+                                </Button>
+                            </>
+                        }
+                    />
+                )}
+                dataSource={MANY_PEOPLE.slice(0, 5)}
+            />
+        )
+    },
+}
+
+export const WithHorizontalOverflow: Story = {
+    render: () => {
+        return (
+            <div className="max-w-120">
+                <Table columns={WIDE_COLUMNS} dataSource={MANY_PEOPLE.slice(0, 5)} />
+            </div>
+        )
+    },
+}
+
+export const WithVerticalOverflow: Story = {
+    render: () => {
+        return (
+            <div className="w-fit max-w-full flex flex-col" style={{ height: 240 }}>
+                <Table columns={WIDE_COLUMNS.slice(0, 2)} dataSource={MANY_PEOPLE} allowContentScroll />
+            </div>
+        )
+    },
+}
+
+export const WithHorizontalAndVerticalOverflow: Story = {
+    render: () => {
+        return (
+            <div className="flex flex-col" style={{ maxWidth: 480, height: 320 }}>
+                <Table columns={WIDE_COLUMNS} dataSource={MANY_PEOPLE} allowContentScroll />
+            </div>
+        )
+    },
+}
+
+const BULK_SELECTION_COLUMNS: TableColumns<MockPerson> = [
+    { title: 'Name', dataIndex: 'name' },
+    { title: 'Occupation', dataIndex: 'occupation' },
+]
+
+const BULK_SELECTION_PEOPLE = MANY_PEOPLE.slice(0, 5)
+
+function BulkSelectionTable({ initialSelected }: { initialSelected: string[] }): JSX.Element {
     return (
         <Table
-            className="max-w-100"
-            firstColumnSticky
-            columns={[
-                {
-                    title: 'Name',
-                    dataIndex: 'name',
-                    sorter: (a, b) => a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]),
-                },
-                {
-                    title: 'Occupation',
-                    dataIndex: 'occupation',
-                    tooltip: 'What they are primarily working on.',
-                    sorter: (a, b) => a.occupation.localeCompare(b.occupation),
-                },
-                {
-                    title: 'Age',
-                    key: 'age',
-                    render: (_, person) => `${person.name.length * 12} years`,
-                },
-                {
-                    title: 'Zodiac sign',
-                    key: 'zodiac',
-                    render: () => 'Gemini',
-                },
-                {
-                    title: 'Favorite color',
-                    key: 'color',
-                    render: (_, person) => (person.occupation === 'Engineer' ? 'Blue' : 'Red'),
-                },
-            ]}
-            dataSource={
-                [
-                    {
-                        name: 'Werner C.',
-                        occupation: 'Engineer',
-                    },
-                    {
-                        name: 'Ursula Z.',
-                        occupation: 'Retired',
-                    },
-                    {
-                        name: 'Ludwig A.',
-                        occupation: 'Painter',
-                    },
-                    {
-                        name: 'Arnold S.',
-                        occupation: 'Body-builder',
-                    },
-                    {
-                        name: 'Franz B.',
-                        occupation: 'Teacher',
-                    },
-                ] as MockPerson[]
-            }
+            columns={BULK_SELECTION_COLUMNS}
+            dataSource={BULK_SELECTION_PEOPLE}
+            rowKey="name"
+            bulkSelection={{
+                getKey: (person: MockPerson): string => person.name,
+                initialSelectedKeys: initialSelected,
+                noun: ['person', 'people'],
+                rowAriaLabel: (person: MockPerson) => `Select ${person.name}`,
+                headerAriaLabel: 'Select all people on this page',
+                renderActions: (ctx) => (
+                    <>
+                        <Button
+                            type="secondary"
+                            size="small"
+                            onClick={() => alert(`Editing ${ctx.selectedCount} person(s)`)}
+                        >
+                            Edit selected
+                        </Button>
+                        <Button
+                            type="primary"
+                            status="danger"
+                            size="small"
+                            icon={<IconTrash />}
+                            onClick={() => alert(`Deleting ${ctx.selectedKeys.join(', ')}`)}
+                        >
+                            Delete selected
+                        </Button>
+                    </>
+                ),
+            }}
         />
     )
 }
 
-export const WithLink = (): JSX.Element => {
-    return (
-        <Table
-            columns={[
-                {
-                    title: 'Name',
-                    dataIndex: 'name',
-                    sorter: (a, b) => a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]),
-                    render: (_, item) => (
-                        <TableLink
-                            title={item.name}
-                            to="/test"
-                            description={`${item.name} is a ${item.occupation.toLowerCase()} who is ${
-                                item.name.length * 12
-                            } years old.`}
-                        />
-                    ),
-                },
-                {
-                    title: 'Occupation',
-                    dataIndex: 'occupation',
-                    tooltip: 'What they are primarily working on.',
-                    sorter: (a, b) => a.occupation.localeCompare(b.occupation),
-                },
-                {
-                    title: 'Age',
-                    key: 'age',
-                    render: (_, person) => `${person.name.length * 12} years`,
-                },
-                {
-                    title: 'Zodiac sign',
-                    key: 'zodiac',
-                    render: () => 'Gemini',
-                },
-                {
-                    title: 'Favorite color',
-                    key: 'color',
-                    render: (_, person) => (person.occupation === 'Engineer' ? 'Blue' : 'Red'),
-                },
-            ]}
-            dataSource={
-                [
-                    {
-                        name: 'Werner C.',
-                        occupation: 'Engineer',
-                    },
-                    {
-                        name: 'Ursula Z.',
-                        occupation: 'Retired',
-                    },
-                    {
-                        name: 'Ludwig A.',
-                        occupation: 'Painter',
-                    },
-                    {
-                        name: 'Arnold S.',
-                        occupation: 'Body-builder',
-                    },
-                    {
-                        name: 'Franz B.',
-                        occupation: 'Teacher',
-                    },
-                ] as MockPerson[]
-            }
-        />
-    )
+export const WithBulkSelectionNothingSelected: Story = {
+    render: () => <BulkSelectionTable initialSelected={[]} />,
 }
 
-export const WithCellActions = (): JSX.Element => {
-    return (
-        <Table
-            columns={[
-                {
-                    title: 'Name',
-                    dataIndex: 'name',
-                    cellActions: (value) => (
-                        <>
-                            <Button
-                                fullWidth
-                                size="small"
-                                icon={<IconLink />}
-                                onClick={() => alert(`Viewing profile for ${value}`)}
-                            >
-                                View profile
-                            </Button>
-                            <Button fullWidth size="small" onClick={() => alert(`Copying ${value}`)}>
-                                Copy name
-                            </Button>
-                        </>
-                    ),
-                },
-                {
-                    title: 'Occupation',
-                    dataIndex: 'occupation',
-                    cellActions: (value, record) => (
-                        <>
-                            <Button fullWidth size="small" onClick={() => alert(`Filtering to ${value}`)}>
-                                Filter to {value}
-                            </Button>
-                            <Divider />
-                            <Button
-                                fullWidth
-                                size="small"
-                                status="danger"
-                                icon={<IconTrash />}
-                                onClick={() => alert(`Removing ${record.name}`)}
-                            >
-                                Remove person
-                            </Button>
-                        </>
-                    ),
-                },
-                {
-                    title: 'Age',
-                    key: 'age',
-                    render: (_, person) => `${person.name.length * 12} years`,
-                },
-            ]}
-            dataSource={
-                [
-                    { name: 'Werner C.', occupation: 'Engineer' },
-                    { name: 'Ursula Z.', occupation: 'Retired' },
-                    { name: 'Ludwig A.', occupation: 'Painter' },
-                    { name: 'Arnold S.', occupation: 'Body-builder' },
-                    { name: 'Franz B.', occupation: 'Teacher' },
-                ] as MockPerson[]
-            }
-        />
-    )
-}
-
-export const WithRowActions = (): JSX.Element => {
-    return (
-        <Table
-            columns={[
-                {
-                    title: 'Name',
-                    dataIndex: 'name',
-                },
-                {
-                    title: 'Occupation',
-                    dataIndex: 'occupation',
-                },
-                {
-                    title: 'Age',
-                    key: 'age',
-                    render: (_, person) => `${person.name.length * 12} years`,
-                },
-            ]}
-            rowActions={(record) => (
-                <>
-                    <Button
-                        fullWidth
-                        size="small"
-                        icon={<IconLink />}
-                        onClick={() => alert(`Viewing ${record.name}'s profile`)}
-                    >
-                        View profile
-                    </Button>
-                    <Button fullWidth size="small" onClick={() => alert(`Editing ${record.name}`)}>
-                        Edit
-                    </Button>
-                    <Divider />
-                    <Button
-                        fullWidth
-                        size="small"
-                        status="danger"
-                        icon={<IconTrash />}
-                        onClick={() => alert(`Deleting ${record.name}`)}
-                    >
-                        Delete
-                    </Button>
-                </>
-            )}
-            dataSource={
-                [
-                    { name: 'Werner C.', occupation: 'Engineer' },
-                    { name: 'Ursula Z.', occupation: 'Retired' },
-                    { name: 'Ludwig A.', occupation: 'Painter' },
-                    { name: 'Arnold S.', occupation: 'Body-builder' },
-                    { name: 'Franz B.', occupation: 'Teacher' },
-                ] as MockPerson[]
-            }
-        />
-    )
+export const WithBulkSelectionTwoSelected: Story = {
+    render: () => <BulkSelectionTable initialSelected={['Werner C.', 'Ursula Z.']} />,
 }

@@ -2,16 +2,16 @@ import { Meta, StoryObj } from '@storybook/react'
 
 import { IconFlag, IconInfo } from '@hanzo/icons'
 
-import { Tag as TagComponent, TagType } from './Tag'
+import { Tag as TagComponent, TagProps, TagType } from './Tag'
 
-const meta: Meta<typeof TagComponent> = {
-    title: 'Elements/Tag',
-    component: TagComponent,
+const meta: Meta<TagProps> = {
+    title: 'Lemon UI/Lemon Tag',
+    component: TagComponent as any,
     tags: ['autodocs'],
 }
 
 export default meta
-type Story = StoryObj<typeof TagComponent>
+type Story = StoryObj<TagProps>
 
 const SIZES: ('small' | 'medium')[] = ['small', 'medium']
 

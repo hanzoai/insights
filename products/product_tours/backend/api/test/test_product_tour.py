@@ -6,12 +6,15 @@ from django.utils import timezone
 from parameterized import parameterized
 from rest_framework import status
 
-from insights.models.feature_flag import FeatureFlag
-from insights.models.surveys.survey import Survey
+from insights.constants import AvailableFeature
 from insights.models.team.team import Team
 
-from products.product_tours.backend.constants import ProductTourEventName
+from products.approvals.backend.models import ApprovalPolicy, ChangeRequest, ChangeRequestState
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
+from products.product_tours.backend.api.product_tour import get_product_tours_response
+from products.product_tours.backend.constants import ProductTourEventName, ProductTourPersonProperties
 from products.product_tours.backend.models import ProductTour
+from products.surveys.backend.models import Survey
 
 
 class TestProductTour(APIBaseTest):
@@ -239,6 +242,169 @@ class TestProductTour(APIBaseTest):
         mock_report.assert_called_once()
         call_args = mock_report.call_args
         assert call_args[0][2]["creation_context"] == "toolbar"
+
+    @parameterized.expand(
+        [
+            (
+                "exact match wins over partial matches",
+                ["Ad Sales", "Email Sales", "Sales", "Sales Funnel", "Weekly Sales", "Unrelated"],
+                "Sales",
+                "Sales",
+                ["Unrelated"],
+            ),
+            (
+                "typo / transposition still matches via trigram",
+                ["Onboarding tour", "Unrelated"],
+                "onbarding",
+                "Onboarding tour",
+                ["Unrelated"],
+            ),
+            (
+                "prefix-as-you-type",
+                ["Marketing tour", "Engineering tour"],
+                "Marke",
+                "Marketing tour",
+                ["Engineering tour"],
+            ),
+            (
+                "case-insensitive: lower",
+                ["NPS Tour", "Engineering tour"],
+                "nps",
+                "NPS Tour",
+                ["Engineering tour"],
+            ),
+            (
+                "case-insensitive: upper",
+                ["NPS Tour", "Engineering tour"],
+                "NPS",
+                "NPS Tour",
+                ["Engineering tour"],
+            ),
+        ]
+    )
+    def test_list_filter_by_search_relevance(self, _name, tour_names, search, expected_first, excluded):
+        for name in tour_names:
+            ProductTour.objects.create(team=self.team, name=name, content={"steps": []})
+
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        assert response.status_code == status.HTTP_200_OK
+        result_names = [r["name"] for r in response.json()["results"]]
+
+        assert result_names, f"expected at least one match for {search!r}, got nothing"
+        assert result_names[0] == expected_first, f"expected {expected_first!r} first, got {result_names}"
+        for name in excluded:
+            assert name not in result_names, f"expected {name!r} excluded, got {result_names}"
+
+    def test_list_filter_by_search_matches_description_with_lower_rank_than_name(self):
+        name_match = ProductTour.objects.create(team=self.team, name="revenue", content={"steps": []})
+        description_match = ProductTour.objects.create(
+            team=self.team,
+            name="Q4 review",
+            description="Quarterly revenue tour",
+            content={"steps": []},
+        )
+        ProductTour.objects.create(team=self.team, name="Unrelated", content={"steps": []})
+
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/?search=revenue")
+        assert response.status_code == status.HTTP_200_OK
+        result_ids = [r["id"] for r in response.json()["results"]]
+
+        assert result_ids[:2] == [str(name_match.id), str(description_match.id)]
+        assert all(r["name"] != "Unrelated" for r in response.json()["results"])
+
+    @parameterized.expand(
+        [
+            ("whitespace-only", "   "),
+            ("empty", ""),
+        ]
+    )
+    def test_list_filter_by_search_blank_returns_all(self, _name, search):
+        a = ProductTour.objects.create(team=self.team, name="Alpha", content={"steps": []})
+        b = ProductTour.objects.create(team=self.team, name="Beta", content={"steps": []})
+
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        assert response.status_code == status.HTTP_200_OK
+        result_ids = {r["id"] for r in response.json()["results"]}
+
+        assert {str(a.id), str(b.id)}.issubset(result_ids)
+
+    @parameterized.expand(
+        [
+            ("plain symbols", "&|!"),
+            ("sql-injection-shaped", "'; DROP TABLE--"),
+        ]
+    )
+    def test_list_filter_by_search_pathological_input_does_not_500(self, _name, search):
+        ProductTour.objects.create(team=self.team, name="Tour overview", content={"steps": []})
+
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_list_filter_by_search_nul_bytes_do_not_500(self):
+        ProductTour.objects.create(team=self.team, name="Alpha", content={"steps": []})
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": "\x00\x00\x00"})
+        assert response.status_code == status.HTTP_200_OK
+
+    @parameterized.expand(
+        [
+            ("at cap (200)", 200, status.HTTP_200_OK),
+            ("just over cap (201)", 201, status.HTTP_400_BAD_REQUEST),
+            ("very long (10k)", 10_000, status.HTTP_400_BAD_REQUEST),
+        ]
+    )
+    def test_list_filter_by_search_enforces_length_cap(self, _name, length, expected_status):
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": "a" * length})
+        assert response.status_code == expected_status
+
+        if expected_status == status.HTTP_400_BAD_REQUEST:
+            body = response.json()
+            assert body["attr"] == "search", f"expected error scoped to 'search', got {body}"
+            assert "200 characters" in body["detail"], f"expected error detail to mention the cap, got {body['detail']}"
+
+    @parameterized.expand(
+        [
+            ("email in name", "alerts+ops@example.com", "alerts+ops@example.com"),
+            ("uuid in name", "run 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed", "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"),
+            ("dotted identifier", "com.acme.billing tour", "com.acme.billing"),
+        ]
+    )
+    def test_list_filter_by_search_matches_literal_substring_below_trigram_threshold(self, _name, tour_name, search):
+        matching = ProductTour.objects.create(team=self.team, name=tour_name, content={"steps": []})
+        ProductTour.objects.create(team=self.team, name="Totally unrelated", content={"steps": []})
+
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+
+        match_type_by_id = {r["id"]: r["search_match_type"] for r in results}
+        assert match_type_by_id.get(str(matching.id)) == "exact", (
+            "a literal substring must match and be labelled exact even when it scores below the trigram thresholds"
+        )
+        assert all(r["name"] != "Totally unrelated" for r in results)
+
+    def test_list_filter_by_search_hides_similar_matches_when_exact_matches_exist(self):
+        for name in ("onboarding tour", "tour for onboarding", "onbarding flow", "Engineering tour"):
+            ProductTour.objects.create(team=self.team, name=name, content={"steps": []})
+
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/?search=onboarding")
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+
+        match_type_by_name = {r["name"]: r["search_match_type"] for r in results}
+        assert match_type_by_name == {
+            "onboarding tour": "exact",
+            "tour for onboarding": "exact",
+        }, "similar matches must be hidden when exact matches exist"
+
+    def test_list_filter_by_search_match_type_absent_without_search(self):
+        ProductTour.objects.create(team=self.team, name="Alpha", content={"steps": []})
+
+        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/")
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+
+        assert results
+        assert all("search_match_type" not in r for r in results)
 
 
 class TestProductTourAnalyticsMetadata(APIBaseTest):
@@ -626,6 +792,138 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
         else:
             assert len(properties) == 0, f"Expected no exclusion properties, got {properties}"
 
+    def test_full_filters_shape_round_trips_through_gated_flag_writes(self):
+        user_filters = {
+            "groups": [
+                {"properties": [{"key": "plan", "value": "pro", "operator": "exact", "type": "person"}]},
+            ]
+        }
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/product_tours/",
+            data={
+                "name": "Round trip",
+                "content": {
+                    "steps": [],
+                    "displayFrequency": "until_interacted",
+                    "conditions": {"seenTourWaitPeriod": {"days": 7, "types": ["tour"]}},
+                },
+                "auto_launch": True,
+                "start_date": timezone.now().isoformat(),
+                "targeting_flag_filters": user_filters,
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
+        tour = ProductTour.objects.get(id=response.json()["id"])
+        assert tour.internal_targeting_flag is not None
+        flag = tour.internal_targeting_flag
+
+        tour_key = str(tour.id)
+        base_properties = [
+            {
+                "key": f"$product_tour_completed/{tour_key}",
+                "type": "person",
+                "value": "is_not_set",
+                "operator": "is_not_set",
+            },
+            {
+                "key": f"$product_tour_dismissed/{tour_key}",
+                "type": "person",
+                "value": "is_not_set",
+                "operator": "is_not_set",
+            },
+        ]
+        wait_key = f"{ProductTourPersonProperties.TOUR_LAST_SEEN_DATE}/tour"
+        wait_options = [
+            {"key": wait_key, "value": "is_not_set", "operator": "is_not_set", "type": "person"},
+            {"key": wait_key, "value": "7d", "operator": "is_date_before", "type": "person"},
+        ]
+        user_property = {"key": "plan", "value": "pro", "operator": "exact", "type": "person"}
+        # aggregation_group_type_index keys are FeatureFlagSerializer normalization,
+        # the only mutation the gated write path is expected to make
+        expected_filters = {
+            "aggregation_group_type_index": None,
+            "groups": [
+                {
+                    "variant": "",
+                    "rollout_percentage": 100,
+                    "properties": [*base_properties, wait_option, user_property],
+                    "aggregation_group_type_index": None,
+                }
+                for wait_option in wait_options
+            ],
+        }
+
+        flag.refresh_from_db()
+        assert flag.filters == expected_filters
+        assert flag.active
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            data={"targeting_flag_filters": user_filters},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        flag.refresh_from_db()
+        assert flag.filters == expected_filters
+
+    @patch("products.approvals.backend.decorators._is_approvals_enabled", return_value=True)
+    def test_update_under_disable_policy_leaves_pending_change_request(self, _mock_approvals_enabled):
+        # Turning auto_launch off deactivates the internal targeting flag through the feature flag
+        # facade's approval gate. That gated write must run outside a transaction: if update() were
+        # atomic, the ApprovalRequired it raises would roll back the pending ChangeRequest the gate
+        # just created, leaving the 409 pointing at a request that no longer exists. Lock in that the
+        # ChangeRequest survives and the flag is left untouched.
+        self.organization.available_product_features = [
+            {"key": AvailableFeature.APPROVALS, "name": AvailableFeature.APPROVALS}
+        ]
+        self.organization.save()
+
+        # Create an auto-launching tour with no policy in place, so its internal targeting flag is active.
+        create_response = self.client.post(
+            f"/api/projects/{self.team.id}/product_tours/",
+            data={
+                "name": "Approval gated tour",
+                "content": {
+                    "steps": [],
+                    "displayFrequency": "until_interacted",
+                    "conditions": {"seenTourWaitPeriod": {"days": 7, "types": ["tour"]}},
+                },
+                "auto_launch": True,
+                "start_date": timezone.now().isoformat(),
+            },
+            format="json",
+        )
+        assert create_response.status_code == status.HTTP_201_CREATED, create_response.json()
+        tour = ProductTour.objects.get(id=create_response.json()["id"])
+        flag = tour.internal_targeting_flag
+        assert flag is not None
+        assert flag.active
+
+        ApprovalPolicy.objects.create(
+            organization=self.organization,
+            team=self.team,
+            action_key="feature_flag.disable",
+            conditions={},
+            approver_config={"quorum": 1, "users": [self.user.id]},
+            created_by=self.user,
+        )
+
+        patch_response = self.client.patch(
+            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            data={"auto_launch": False},
+            format="json",
+        )
+
+        # The gated disable needs approval: it comes back as a 409 referencing the pending
+        # ChangeRequest, the flag is left active, and — because update() is not atomic — that
+        # ChangeRequest survives for an approver to act on rather than being rolled back.
+        assert patch_response.status_code == status.HTTP_409_CONFLICT, patch_response.content
+        assert patch_response.json()["change_request_id"]
+        flag.refresh_from_db()
+        assert flag.active
+        assert ChangeRequest.objects.filter(state=ChangeRequestState.PENDING).count() == 1
+
 
 class TestProductTourStepNormalization(APIBaseTest):
     @parameterized.expand(
@@ -964,3 +1262,214 @@ class TestProductTourLaunchValidation(APIBaseTest):
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "linkedFlagVariant can only be used when a linked_flag_id is specified" in str(response.json())
+
+
+class TestProductTourAPISerializerTourType(APIBaseTest):
+    @parameterized.expand(
+        [
+            # (content, expected_tour_type)
+            ({"steps": [{"id": "s1", "type": "modal"}]}, "tour"),  # no content type → default
+            ({}, "tour"),  # empty content
+            ({"type": "tour", "steps": []}, "tour"),  # explicit tour type
+            ({"type": "announcement", "steps": [{"id": "s1", "type": "modal"}]}, "announcement"),
+            ({"type": "announcement", "steps": [{"id": "s1", "type": "banner"}]}, "banner"),
+            ({"type": "announcement", "steps": []}, "announcement"),  # announcement with no steps
+        ]
+    )
+    def test_tour_type_in_sdk_response(self, content, expected_tour_type):
+        ProductTour.objects.create(
+            team=self.team,
+            name=f"Tour {expected_tour_type}",
+            content=content,
+            created_by=self.user,
+            start_date=timezone.now(),
+        )
+        tours = get_product_tours_response(self.team)["product_tours"]
+        assert len(tours) == 1
+        assert tours[0]["tour_type"] == expected_tour_type
+
+
+class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
+    def _create_tour_with_wait_period(self, types: list[str], days: int = 7) -> dict:
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/product_tours/",
+            data={
+                "name": "Wait period tour",
+                "content": {
+                    "steps": [],
+                    "conditions": {"seenTourWaitPeriod": {"days": days, "types": types}},
+                },
+                "auto_launch": True,
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        return response.json()
+
+    def _get_flag_groups(self, tour_id: str) -> list[dict]:
+        tour = ProductTour.objects.get(id=tour_id)
+        assert tour.internal_targeting_flag is not None
+        tour.internal_targeting_flag.refresh_from_db()
+        return tour.internal_targeting_flag.filters.get("groups", [])
+
+    def _all_properties_across_groups(self, groups: list[dict]) -> list[dict]:
+        return [p for g in groups for p in g.get("properties", [])]
+
+    def test_single_type_creates_two_groups(self):
+        data = self._create_tour_with_wait_period(["tour"], days=7)
+        groups = self._get_flag_groups(data["id"])
+
+        assert len(groups) == 2
+        keys = {p["key"] for g in groups for p in g.get("properties", []) if "last_seen" in p["key"]}
+        assert keys == {f"{ProductTourPersonProperties.TOUR_LAST_SEEN_DATE}/tour"}
+
+        operators = {p["operator"] for g in groups for p in g.get("properties", []) if "last_seen" in p["key"]}
+        assert operators == {"is_not_set", "is_date_before"}
+
+    @parameterized.expand(
+        [
+            (["tour"], 2),
+            (["tour", "announcement"], 4),
+            (["tour", "announcement", "banner"], 8),
+        ]
+    )
+    def test_group_count_is_2_to_the_n_types(self, types, expected_groups):
+        data = self._create_tour_with_wait_period(types, days=5)
+        groups = self._get_flag_groups(data["id"])
+        assert len(groups) == expected_groups
+
+    def test_wait_period_days_in_flag_properties(self):
+        data = self._create_tour_with_wait_period(["tour"], days=14)
+        all_props = self._all_properties_across_groups(self._get_flag_groups(data["id"]))
+
+        date_before_props = [p for p in all_props if p.get("operator") == "is_date_before"]
+        assert len(date_before_props) == 1
+        assert date_before_props[0]["value"] == "14d"
+
+    def test_no_wait_period_creates_single_group(self):
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/product_tours/",
+            data={
+                "name": "No wait period",
+                "content": {"steps": []},
+                "auto_launch": True,
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        groups = self._get_flag_groups(response.json()["id"])
+        assert len(groups) == 1
+
+    def test_wait_period_combined_with_user_targeting(self):
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/product_tours/",
+            data={
+                "name": "Wait + targeting",
+                "content": {
+                    "steps": [],
+                    "conditions": {"seenTourWaitPeriod": {"days": 7, "types": ["tour"]}},
+                },
+                "auto_launch": True,
+                "targeting_flag_filters": {
+                    "groups": [
+                        {
+                            "properties": [
+                                {"key": "email", "value": "test@example.com", "operator": "exact", "type": "person"}
+                            ]
+                        },
+                    ]
+                },
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        groups = self._get_flag_groups(response.json()["id"])
+
+        # 1 user group × 2 wait period combos = 2 groups
+        assert len(groups) == 2
+        for g in groups:
+            prop_keys = [p["key"] for p in g["properties"]]
+            assert "email" in prop_keys
+
+    def test_adding_wait_period_on_update_refreshes_flag(self):
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/product_tours/",
+            data={
+                "name": "Add wait later",
+                "content": {"steps": []},
+                "auto_launch": True,
+            },
+            format="json",
+        )
+        tour_id = response.json()["id"]
+        assert len(self._get_flag_groups(tour_id)) == 1
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            data={
+                "content": {
+                    "steps": [],
+                    "conditions": {"seenTourWaitPeriod": {"days": 3, "types": ["tour", "announcement"]}},
+                },
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        groups = self._get_flag_groups(tour_id)
+        assert len(groups) == 4
+
+    def test_removing_wait_period_on_update_collapses_groups(self):
+        data = self._create_tour_with_wait_period(["tour", "announcement"], days=7)
+        tour_id = data["id"]
+        assert len(self._get_flag_groups(tour_id)) == 4
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            data={"content": {"steps": [], "conditions": {}}},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        groups = self._get_flag_groups(tour_id)
+        assert len(groups) == 1
+
+    def test_wait_period_preserves_user_targeting_on_refresh(self):
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/product_tours/",
+            data={
+                "name": "Preserve targeting",
+                "content": {
+                    "steps": [],
+                    "displayFrequency": "show_once",
+                    "conditions": {"seenTourWaitPeriod": {"days": 7, "types": ["tour"]}},
+                },
+                "auto_launch": True,
+                "targeting_flag_filters": {
+                    "groups": [
+                        {"properties": [{"key": "plan", "value": "pro", "operator": "exact", "type": "person"}]},
+                    ]
+                },
+            },
+            format="json",
+        )
+        tour_id = response.json()["id"]
+        # 1 user group × 2 wait combos = 2 groups
+        assert len(self._get_flag_groups(tour_id)) == 2
+
+        # Change displayFrequency without re-providing targeting_flag_filters
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            data={
+                "content": {
+                    "steps": [],
+                    "displayFrequency": "until_interacted",
+                    "conditions": {"seenTourWaitPeriod": {"days": 7, "types": ["tour"]}},
+                },
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        groups = self._get_flag_groups(tour_id)
+        assert len(groups) == 2
+        for g in groups:
+            prop_keys = [p["key"] for p in g["properties"]]
+            assert "plan" in prop_keys

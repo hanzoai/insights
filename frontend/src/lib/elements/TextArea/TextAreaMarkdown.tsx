@@ -1,5 +1,5 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import React, { useCallback, useRef, useState } from 'react'
 
 import { IconImage, IconMarkdownFilled } from '@hanzo/icons'
@@ -10,12 +10,12 @@ import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { Button } from 'lib/elements/Button'
 import { FileInput } from 'lib/elements/FileInput'
 import { Tabs } from 'lib/elements/Tabs'
-import { TextArea, TextAreaProps } from 'lib/elements/TextArea/TextArea'
 import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
+import { TextArea, TextAreaProps } from 'lib/elements/TextArea/TextArea'
 import { toast } from 'lib/elements/Toast'
 import { Spinner } from 'lib/elements/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import { preflightLogic } from 'lib/logic/preflightLogic'
 
 export const TextAreaMarkdown = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     function TextAreaMarkdown({ value, onChange, className, ...editAreaProps }, ref): JSX.Element {
@@ -113,7 +113,7 @@ export const TextAreaMarkdown = React.forwardRef<HTMLTextAreaElement, TextAreaPr
                                         />,
                                         <EmojiPickerPopover
                                             key="emoj-picker"
-                                            data-attr="text-area-markdown-emoji-popover"
+                                            data-attr="lemon-text-area-markdown-emoji-popover"
                                             onSelect={(emoji: string) => {
                                                 const textArea = textAreaRef.current
                                                 if (textArea) {

@@ -4,11 +4,12 @@ import { IconGraph, IconLineGraph, IconTrending } from '@hanzo/icons'
 import { SegmentedButtonOption } from '@hanzo/elements'
 
 import { getColorVar } from 'lib/colors'
-import { Tooltip } from 'lib/elements/Tooltip/Tooltip'
 import { IconAreaChart, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
-import { humanFriendlyDuration, humanFriendlyLargeNumber, humanFriendlyNumber, percentage } from 'lib/utils'
-import { isNotNil } from 'lib/utils'
-import { DEFAULT_CURRENCY, getCurrencySymbol } from 'lib/utils/geography/currency'
+import { Tooltip } from 'lib/elements/Tooltip/Tooltip'
+import { DEFAULT_CURRENCY, getCurrencySymbol } from 'lib/utils/currency'
+import { humanFriendlyDuration } from 'lib/utils/durations'
+import { isNotNil } from 'lib/utils/guards'
+import { humanFriendlyLargeNumber, humanFriendlyNumber, percentage } from 'lib/utils/numbers'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { InfinityValue, MarketingAnalyticsItem, WebAnalyticsItemKind } from '~/queries/schema/schema-general'
@@ -211,7 +212,6 @@ const MarketingAnalyticsCellInternal = ({
     if (item.value == null && item.previous != null) {
         const formattedPrevious = formatMarketingItem(item.previous, item.kind, {
             currency: baseCurrency,
-            hideCurrency: true,
         })
         return (
             <Tooltip title={getNoDataTooltip(item)} delayMs={300} className="cursor-default">
@@ -251,7 +251,7 @@ const MarketingAnalyticsCellInternal = ({
         ? `${item.key}: ${formatMarketingItem(item.value, item.kind, { precise: true, currency: baseCurrency })}`
         : createComparisonTooltip(item, baseCurrency)
 
-    const formattedValue = formatMarketingItem(item.value, item.kind, { currency: baseCurrency, hideCurrency: true })
+    const formattedValue = formatMarketingItem(item.value, item.kind, { currency: baseCurrency })
     const changePercFormatted = formatChangePercentage(item.changeFromPreviousPct)
 
     const bgColor = getChangeBackgroundColor(item.changeFromPreviousPct, item.isIncreaseBad)

@@ -1,9 +1,16 @@
+import pathlib
+
 import pytest
 
 from psycopg.errors import SerializationFailure
 
+from insights.models.integration import MISSING_CERT_PATH, PostgreSQLIntegration
+
 from products.batch_exports.backend.temporal.destinations.postgres_batch_export import (
+    NON_RETRYABLE_ERROR_TYPES,
+    PostgresInsertInputs,
     PostgreSQLClient,
+    PostgreSQLMissingRequiredInputsError,
     PostgreSQLTransactionError,
     remove_invalid_json,
     run_in_retryable_transaction,
@@ -34,6 +41,30 @@ def test_remove_invalid_json(input_data, expected_data):
     assert remove_invalid_json(input_data) == expected_data
 
 
+@pytest.mark.parametrize("missing_field", ["user", "password", "host", "port"])
+def test_from_inputs_raises_value_error_when_connection_inputs_missing(missing_field):
+    # The activity relies on `from_inputs` raising ValueError to convert missing inputs into a
+    # non-retryable error, so it fails fast rather than retrying to an SLA breach.
+    inputs = PostgresInsertInputs(
+        team_id=1,
+        data_interval_start=None,
+        data_interval_end="2023-04-25T14:30:00+00:00",
+        database="insights",
+        table_name="events",
+        host="localhost",
+        port=5432,
+        user="insights",
+        password="insights",
+    )
+    setattr(inputs, missing_field, None)
+    with pytest.raises(ValueError):
+        PostgreSQLClient.from_inputs(inputs, database=inputs.database)
+
+
+def test_missing_required_inputs_error_is_non_retryable():
+    assert PostgreSQLMissingRequiredInputsError.__name__ in NON_RETRYABLE_ERROR_TYPES
+
+
 async def test_run_in_retryable_transaction_raises_non_retryable_error_after_max_retries(
     postgres_config, setup_postgres_test_db
 ):
@@ -54,7 +85,7 @@ async def test_run_in_retryable_transaction_raises_non_retryable_error_after_max
         database=postgres_config["database"],
         host=postgres_config["host"],
         port=postgres_config["port"],
-        has_self_signed_cert=False,
+        ssl_mode="prefer",
     )
 
     async with postgres_client.connect() as pg_client:
@@ -86,7 +117,7 @@ async def test_run_in_retryable_transaction_retries_successfully_on_serializatio
         database=postgres_config["database"],
         host=postgres_config["host"],
         port=postgres_config["port"],
-        has_self_signed_cert=False,
+        ssl_mode="prefer",
     )
 
     async with postgres_client.connect() as pg_client:
@@ -114,7 +145,7 @@ async def test_run_in_retryable_transaction_raises_error_if_fn_raises_non_serial
         database=postgres_config["database"],
         host=postgres_config["host"],
         port=postgres_config["port"],
-        has_self_signed_cert=False,
+        ssl_mode="prefer",
     )
 
     async with postgres_client.connect() as pg_client:
@@ -122,3 +153,50 @@ async def test_run_in_retryable_transaction_raises_error_if_fn_raises_non_serial
             await run_in_retryable_transaction(pg_client.connection, raise_error)
 
     assert attempt_count == 1
+
+
+@pytest.mark.parametrize("contents", ["system", "cert contents", MISSING_CERT_PATH])
+async def test_ensure_ssl_root_cert_file(postgres_config, setup_postgres_test_db, contents):
+    """Assert `_ensure_ssl_root_cert_file` manages `ssl_root_cert`."""
+
+    postgres_client = PostgreSQLClient(
+        user=postgres_config["user"],
+        password=postgres_config["password"],
+        database=postgres_config["database"],
+        host=postgres_config["host"],
+        port=postgres_config["port"],
+        ssl_mode="prefer",
+        ssl_root_cert=contents,
+    )
+
+    check_file_deleted = None
+
+    async with postgres_client._ensure_ssl_root_cert_file() as ssl_root_cert:
+        if contents in ("system", MISSING_CERT_PATH):
+            assert ssl_root_cert == contents
+            assert not pathlib.Path(ssl_root_cert).is_file()
+        else:
+            check_file_deleted = pathlib.Path(ssl_root_cert)
+            assert check_file_deleted.is_file()
+            with open(check_file_deleted) as f:
+                read_contents = f.read()
+
+            assert read_contents == contents
+
+    if check_file_deleted is not None:
+        assert check_file_deleted.exists() is False
+
+
+@pytest.mark.parametrize("integration", [True], indirect=True)
+async def test_client_from_integration(postgres_config, setup_postgres_test_db, integration):
+    """Assert client can be initialized from integration."""
+    pq_integration = PostgreSQLIntegration(integration)
+    postgres_client = PostgreSQLClient.from_inputs(pq_integration, database=postgres_config["database"])
+
+    # Do a basic query to check we can connect
+    async with postgres_client.connect() as client:
+        async with client.connection.transaction():
+            async with client.connection.cursor() as cursor:
+                await cursor.execute("SELECT 1")
+                results = await cursor.fetchall()
+                assert results == [(1,)]

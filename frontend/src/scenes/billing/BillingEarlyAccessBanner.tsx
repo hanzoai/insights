@@ -1,11 +1,14 @@
 import { useActions } from 'kea'
 
+import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
 import { Link } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { BuilderMascot3 } from 'lib/components/mascots'
 import { Banner } from 'lib/elements/Banner'
 import { Tag } from 'lib/elements/Tag/Tag'
+
+const MascotConstruction2 = pngHoggie(construction2Png)
 
 export function BillingEarlyAccessBanner(): JSX.Element {
     const { openSupportForm } = useActions(supportLogic)
@@ -17,7 +20,7 @@ export function BillingEarlyAccessBanner(): JSX.Element {
                     <Tag type="completion" className="absolute top-2.5 left-0 transform -rotate-12">
                         EARLY ACCESS
                     </Tag>
-                    <BuilderMascot3 className="w-20 h-20 mt-6" />
+                    <MascotConstruction2 className="w-20 h-20 mt-6" />
                 </div>
                 <div className="text-primary">
                     <p>

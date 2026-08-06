@@ -4,15 +4,17 @@ import { IconCheckCircle, IconInfo } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 
+import { useSliderPositioning } from '../hooks'
 import { Link } from '../Link'
 import { Tooltip } from '../Tooltip'
-import { useSliderPositioning } from '../hooks'
 
 /** A tab that represents one of the options, but doesn't have any content. Render tab-dependent UI yourself. */
-export interface AbstractTab<T extends string | number> {
+export interface AbstractLemonTab<T extends string | number> {
     key: T
     label: string | JSX.Element
     tooltip?: string | JSX.Element
+    /** When set, the tab is shown but greyed out and not selectable; the reason is its tooltip. */
+    disabledReason?: string
     /** URL of the tab if it can be linked to (which is usually a good practice). */
     link?: string
     tooltipDocLink?: string
@@ -22,11 +24,11 @@ export interface AbstractTab<T extends string | number> {
 }
 
 /** A tab with content. In this case the Tabs component automatically renders content of the active tab. */
-export interface ConcreteTab<T extends string | number> extends AbstractTab<T> {
+export interface ConcreteLemonTab<T extends string | number> extends AbstractLemonTab<T> {
     content: JSX.Element
 }
 
-export type Tab<T extends string | number> = AbstractTab<T> | ConcreteTab<T>
+export type Tab<T extends string | number> = AbstractLemonTab<T> | ConcreteLemonTab<T>
 
 export interface TabsProps<T extends string | number> {
     activeKey: T
@@ -41,11 +43,12 @@ export interface TabsProps<T extends string | number> {
     sceneInset?: boolean
     /** Pass in JSX to be sticky to the right of the tabs. */
     rightSlot?: React.ReactNode
+    rightSlotClassName?: string
 }
 
 interface TabsCSSProperties extends React.CSSProperties {
-    '--tabs-slider-width': `${number}px`
-    '--tabs-slider-offset': `${number}px`
+    '--lemon-tabs-slider-width': `${number}px`
+    '--lemon-tabs-slider-offset': `${number}px`
 }
 
 export function Tabs<T extends string | number>({
@@ -58,6 +61,7 @@ export function Tabs<T extends string | number>({
     'data-attr': dataAttr,
     sceneInset = false,
     rightSlot,
+    rightSlotClassName,
 }: TabsProps<T>): JSX.Element {
     const { containerRef, selectionRef, sliderWidth, sliderOffset, transitioning } = useSliderPositioning<
         HTMLUListElement,
@@ -80,8 +84,8 @@ export function Tabs<T extends string | number>({
             // eslint-disable-next-line react/forbid-dom-props
             style={
                 {
-                    '--tabs-slider-width': `${sliderWidth}px`,
-                    '--tabs-slider-offset': `${sliderOffset}px`,
+                    '--lemon-tabs-slider-width': `${sliderWidth}px`,
+                    '--lemon-tabs-slider-offset': `${sliderOffset}px`,
                 } as TabsCSSProperties
             }
             data-attr={dataAttr}
@@ -94,6 +98,7 @@ export function Tabs<T extends string | number>({
                     })}
                 >
                     {realTabs.map((tab) => {
+                        const disabled = !!tab.disabledReason
                         const content = (
                             <div className="relative flex items-center gap-1" data-attr={tab['data-attr']}>
                                 {tab.label}
@@ -109,19 +114,24 @@ export function Tabs<T extends string | number>({
                         return (
                             <Tooltip
                                 key={tab.key}
-                                title={tab.tooltip}
+                                title={tab.disabledReason || tab.tooltip}
                                 placement="top"
                                 offset={0}
                                 docLink={tab.tooltipDocLink}
                             >
                                 <li
-                                    className={cn('Tabs__tab', tab.key === activeKey && 'Tabs__tab--active')}
-                                    onClick={onChange ? () => onChange(tab.key) : undefined}
+                                    className={cn(
+                                        'Tabs__tab',
+                                        tab.key === activeKey && 'Tabs__tab--active',
+                                        disabled && 'Tabs__tab--disabled'
+                                    )}
+                                    onClick={onChange && !disabled ? () => onChange(tab.key) : undefined}
                                     role="tab"
                                     aria-selected={tab.key === activeKey}
-                                    tabIndex={0}
+                                    aria-disabled={disabled || undefined}
+                                    tabIndex={disabled ? -1 : 0}
                                     onKeyDown={
-                                        onChange
+                                        onChange && !disabled
                                             ? (e) => {
                                                   if (e.key === 'Enter') {
                                                       onChange(tab.key)
@@ -144,7 +154,18 @@ export function Tabs<T extends string | number>({
                     })}
                 </div>
                 {rightSlot && (
-                    <div className="mb-[1px] flex gap-x-2 shrink-0 items-center justify-end sticky right-0 bg-primary pr-4">
+                    <div
+                        className={cn(
+                            // Sticky mask: paint it with the canvas it sits on, not the app
+                            // ground. Both surfaces this lands on resolve to the raised
+                            // surface -- the scene canvas via --scene-layout-background, and
+                            // Modal, whose content is --color-bg-surface-primary. bg-primary
+                            // painted the ground, which in dark mode is a black bar over the
+                            // tabs scrolling under it.
+                            'mb-[1px] flex gap-x-2 shrink-0 items-center justify-end sticky right-0 bg-[var(--scene-layout-background,var(--color-bg-primary))] pr-4',
+                            rightSlotClassName
+                        )}
+                    >
                         {rightSlot}
                     </div>
                 )}

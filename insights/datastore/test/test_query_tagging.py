@@ -1,19 +1,36 @@
+import json
 import uuid
 import asyncio
+from types import SimpleNamespace
 
 import pytest
+from insights.test.base import BaseTest, DatastoreTestMixin
 
+from parameterized import parameterized
 from pydantic import ValidationError
 
+from insights.insightsql.query import execute_insightsql_query
+
+from insights.datastore.client import sync_execute
 from insights.datastore.query_tagging import (
+    _PROJECT_ROOT_PREFIX,
+    _SOURCE_SKIP_PREFIXES,
+    AccessMethod,
+    DagsterTags,
+    Feature,
+    InsightsQLFeatures,
     Product,
     QueryTags,
     TemporalTags,
+    add_fallback_query_tags,
     clear_tag,
     create_base_tags,
+    get_caller_source,
     get_query_tag_value,
     get_query_tags,
+    is_api_key_access_method,
     reset_query_tags,
+    tag_contains_user_insightsql,
     tag_queries,
     tags_context,
     update_tags,
@@ -85,6 +102,13 @@ def test_failure_on_incorrect_type():
     assert get_query_tags() == create_base_tags()
 
 
+def test_session_id_accepts_non_uuid_strings():
+    reset_query_tags()
+    tag_queries(session_id="not-a-uuid-but-valid-string")
+    tags = get_query_tags()
+    assert tags.session_id == "not-a-uuid-but-valid-string"
+
+
 def test_clear_tag():
     reset_query_tags()
     clear_tag("team_id")
@@ -116,6 +140,40 @@ def test_tags_context():
 
     # Verify tags are restored
     assert get_query_tags() == create_base_tags(team_id=123)
+
+
+def test_tags_context_snapshot_isolation():
+    # Shallow-copy invariant: mutations through public helpers must not corrupt the
+    # saved snapshot that tags_context restores. Regression guard for the switch from
+    # deep to shallow model_copy in update_tags/tag_queries.
+    #
+    # A nested tag object set *before* taking the snapshot inside tags_context exercises
+    # the shallow-copy hazard: if the copy is truly shallow and with_temporal were to
+    # mutate the nested object in place (rather than replace the attribute), the snapshot
+    # would be corrupted. Setting a sentinel value before the snapshot lets us assert
+    # the nested object is untouched after all the in-context mutations.
+    reset_query_tags()
+    tag_queries(team_id=1)
+
+    with tags_context(user_id=42):
+        # Set a nested tag before taking the snapshot, then snapshot.
+        get_query_tags().with_temporal(TemporalTags(workflow_type="wt-before"))
+        snapshot = get_query_tags()
+        # Drive every public mutation helper after the snapshot is taken.
+        tag_queries(team_id=2)
+        update_tags(create_base_tags(cohort_id=99))
+        clear_tag("user_id")
+        qt = get_query_tags()
+        qt.with_temporal(TemporalTags(workflow_type="wt"))
+        qt.with_dagster(DagsterTags(run_id="run-1"))
+
+    # The snapshot taken inside tags_context must be untouched by all mutations above,
+    # including the nested temporal object that was set before the snapshot was taken.
+    expected = create_base_tags(team_id=1, user_id=42)
+    expected.with_temporal(TemporalTags(workflow_type="wt-before"))
+    assert snapshot == expected
+    assert snapshot.temporal is not None
+    assert snapshot.temporal.workflow_type == "wt-before"
 
 
 @pytest.mark.asyncio
@@ -260,3 +318,492 @@ async def test_async_tasks_have_isolated_tags_with_clear_tag():
     # Task B cleared team_id, should still have user_id
     assert results["task_b"]["team_id"] is None
     assert results["task_b"]["user_id"] == 50
+
+
+def test_get_caller_source_returns_this_file():
+    source_file, source_line = get_caller_source()
+    assert source_file == "insights/datastore/test/test_query_tagging.py"
+    assert source_line is not None
+
+
+def test_get_caller_source_skips_infrastructure():
+    for prefix in _SOURCE_SKIP_PREFIXES:
+        assert prefix.startswith(_PROJECT_ROOT_PREFIX)
+
+
+def test_tag_contains_user_insightsql_sets_flag():
+    reset_query_tags()
+    assert get_query_tag_value("contains_user_insightsql") is None
+    tag_contains_user_insightsql()
+    assert get_query_tag_value("contains_user_insightsql") is True
+
+
+def test_tag_contains_user_insightsql_is_idempotent():
+    reset_query_tags()
+    tag_contains_user_insightsql()
+    tag_contains_user_insightsql()
+    assert get_query_tag_value("contains_user_insightsql") is True
+
+
+def test_tag_contains_user_insightsql_short_circuits_after_first_call():
+    # Repeated calls (recursive property_to_expr, breakdown loops, @property accessors)
+    # must skip the model_copy() inside tag_queries after the first call.
+    reset_query_tags()
+    tag_contains_user_insightsql()
+    first_tags = get_query_tags()
+    tag_contains_user_insightsql()
+    tag_contains_user_insightsql()
+    # Same object — no fresh copy was set by the no-op calls
+    assert get_query_tags() is first_tags
+
+
+def test_contains_user_insightsql_excluded_from_json_when_none():
+    qt = QueryTags(git_commit="test", container_hostname="test", service_name="test")
+    assert "contains_user_insightsql" not in qt.to_json()
+
+
+def test_contains_user_insightsql_included_in_json_when_set():
+    qt = QueryTags(
+        contains_user_insightsql=True,
+        git_commit="test",
+        container_hostname="test",
+        service_name="test",
+    )
+    assert '"contains_user_insightsql":true' in qt.to_json()
+
+
+def test_source_file_excluded_from_json_when_none():
+    qt = QueryTags(git_commit="test", container_hostname="test", service_name="test")
+    data = qt.to_json()
+    assert "source_file" not in data
+    assert "source_line" not in data
+
+
+def test_source_file_included_in_json_when_set():
+    qt = QueryTags(
+        source_file="insights/api/query.py",
+        source_line=42,
+        git_commit="test",
+        container_hostname="test",
+        service_name="test",
+    )
+    data = qt.to_json()
+    assert '"source_file":"insights/api/query.py"' in data
+    assert '"source_line":42' in data
+
+
+class TestQueryTaggingSourceInQueryLog(BaseTest, DatastoreTestMixin):
+    def _get_log_comment(self, marker: str) -> dict:
+        sync_execute("SYSTEM FLUSH LOGS")
+        rows = sync_execute(
+            "SELECT log_comment FROM system.query_log "
+            "WHERE query LIKE %(marker)s AND type = 'QueryFinish' "
+            "ORDER BY event_time DESC LIMIT 1",
+            {"marker": f"%{marker}%"},
+        )
+        assert rows, f"No query log entry found containing marker {marker}"
+        return json.loads(rows[0][0])
+
+    def test_sync_execute_populates_source_tags(self):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test")
+        sync_execute(f"SELECT '{marker}'")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["source_file"] == "insights/datastore/test/test_query_tagging.py"
+        assert comment["source_line"] > 0
+
+    def test_execute_insightsql_query_populates_source_tags(self):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test")
+        execute_insightsql_query(f"SELECT '{marker}'", team=self.team, query_type="InsightsQLQuery")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["source_file"] == "insights/datastore/test/test_query_tagging.py"
+        assert comment["source_line"] > 0
+
+    @parameterized.expand([("approved", True), ("not_approved", False)])
+    def test_sync_execute_preserves_ai_data_processing_approved_tag(self, _name, approved):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, ai_data_processing_approved=approved)
+        sync_execute(f"SELECT '{marker}'")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["ai_data_processing_approved"] is approved
+
+    def test_sync_execute_omits_ai_data_processing_approved_when_not_tagged(self):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk)
+        sync_execute(f"SELECT '{marker}'")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+
+        assert "ai_data_processing_approved" not in comment
+
+    def test_sync_execute_falls_back_to_mcp_product_when_source_is_mcp(self):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, source="mcp", feature="query")
+        sync_execute(f"SELECT '{marker}'")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["product"] == Product.MCP.value
+
+    def test_sync_execute_does_not_override_existing_product_when_source_is_mcp(self):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(
+            kind="request",
+            id="test",
+            team_id=self.team.pk,
+            source="mcp",
+            product=Product.LOGS,
+            feature="query",
+        )
+        sync_execute(f"SELECT '{marker}'")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["product"] == Product.LOGS.value
+
+    @parameterized.expand([("api", "api"), ("web", "web"), ("insights_code", "insights_code")])
+    def test_sync_execute_does_not_set_mcp_product_when_source_is_not_mcp(self, _name, source):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, source=source, feature="query")
+        sync_execute(f"SELECT '{marker}'")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+
+        assert comment.get("product") != Product.MCP.value
+
+    def test_execute_insightsql_query_populates_insightsql_features_tag(self):
+        # End-to-end: a InsightsQLQuery against `events` filtered by `$exception` should
+        # land in query_log with both the AST-derived insightsql_features tag and the
+        # error_tracking product attribution that derives from it.
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, feature="query")
+        execute_insightsql_query(
+            f"SELECT count() FROM events WHERE distinct_id = '{marker}' AND event = '$exception'",  # noqa: S608
+            team=self.team,
+            query_type="InsightsQLQuery",
+        )
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["insightsql_features"] == {"tables": ["events"], "events": ["$exception"]}
+        assert comment["product"] == Product.ERROR_TRACKING.value
+
+    def test_execute_insightsql_query_attributes_plain_events_query_to_product_analytics(self):
+        # Plain `events` query (no narrowing event filter) should fall back to
+        # product_analytics via the table-level rule.
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, feature="query")
+        execute_insightsql_query(
+            f"SELECT count() FROM events WHERE distinct_id = '{marker}'",  # noqa: S608
+            team=self.team,
+            query_type="InsightsQLQuery",
+        )
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["insightsql_features"] == {"tables": ["events"], "events": []}
+        assert comment["product"] == Product.PRODUCT_ANALYTICS.value
+
+    def test_insightsql_query_runner_marks_contains_user_insightsql(self):
+        from insights.schema import InsightsQLQuery
+
+        from insights.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
+
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, feature="query")
+
+        runner = InsightsQLQueryRunner(query=InsightsQLQuery(query=f"SELECT '{marker}'"), team=self.team)  # noqa: S608
+        runner._calculate()
+
+        comment = self._get_log_comment(marker)
+        assert comment.get("contains_user_insightsql") is True
+
+    def test_platform_query_does_not_mark_contains_user_insightsql(self):
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, feature="query", product=Product.INTERNAL)
+        sync_execute(f"SELECT '{marker}'")  # noqa: S608
+
+        comment = self._get_log_comment(marker)
+        assert "contains_user_insightsql" not in comment
+
+    def test_execute_insightsql_query_with_mcp_source_still_attributes_via_features(self):
+        # Pulling MCP traffic apart by what it actually does is the whole point
+        # of this fallback — confirm a $exception query from MCP attributes to
+        # error_tracking, not the catch-all MCP product.
+        marker = str(uuid.uuid4())
+        reset_query_tags()
+        tag_queries(kind="request", id="test", team_id=self.team.pk, source="mcp", feature="query")
+        execute_insightsql_query(
+            f"SELECT count() FROM events WHERE distinct_id = '{marker}' AND event = '$exception'",  # noqa: S608
+            team=self.team,
+            query_type="InsightsQLQuery",
+        )
+
+        comment = self._get_log_comment(marker)
+
+        assert comment["product"] == Product.ERROR_TRACKING.value
+
+
+class TestAddFallbackQueryTags(BaseTest):
+    def test_does_not_override_set_product(self):
+        tags = QueryTags(product=Product.LOGS, feature=Feature.QUERY, scene="Cohort", query_type="TrendsQuery")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.LOGS
+        assert tags.feature == Feature.QUERY
+
+    def test_does_not_override_set_feature(self):
+        tags = QueryTags(feature=Feature.DASHBOARD, scene="Cohort")
+        add_fallback_query_tags(tags)
+        assert tags.feature == Feature.DASHBOARD
+        # product was unset, scene fills it in
+        assert tags.product == Product.COHORTS
+
+    def test_scene_fills_product_and_feature(self):
+        tags = QueryTags(scene="SQLEditor")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.WAREHOUSE
+        assert tags.feature == Feature.QUERY
+
+    def test_kind_fills_product_only(self):
+        # Not every query kind is customer-facing (e.g. VectorSearchQuery is internal Max AI).
+        # Better to leave feature unset and let UntaggedQueryError surface where it matters.
+        tags = QueryTags(query_type="TrendsQuery")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.PRODUCT_ANALYTICS
+        assert tags.feature is None
+
+    def test_mcp_source_fills_product_only(self):
+        tags = QueryTags(source="mcp")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.MCP
+        assert tags.feature is None
+
+    def test_scene_takes_precedence_over_kind(self):
+        # Scene maps to warehouse but kind would have mapped to product_analytics —
+        # scene wins because it's checked first.
+        tags = QueryTags(scene="SQLEditor", query_type="TrendsQuery")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.WAREHOUSE
+
+    def test_kind_takes_precedence_over_mcp_source(self):
+        tags = QueryTags(query_type="LogsQuery", source="mcp")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.LOGS
+
+    def test_empty_tags_left_untouched(self):
+        tags = QueryTags()
+        add_fallback_query_tags(tags)
+        assert tags.product is None
+        assert tags.feature is None
+
+    def test_unmapped_scene_falls_through(self):
+        tags = QueryTags(scene="Unknown", query_type="TrendsQuery")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.PRODUCT_ANALYTICS
+
+    @parameterized.expand([("Dashboard",), ("Dashboards",), ("Notebook",), ("Notebooks",), ("DebugQuery",), ("Max",)])
+    def test_container_scene_defers_to_kind(self, scene):
+        # Container scenes explicitly map to None — kind decides the product.
+        tags = QueryTags(scene=scene, query_type="TrendsQuery")
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.PRODUCT_ANALYTICS
+
+    def test_unmapped_scene_and_kind_leaves_tags_untouched(self):
+        tags = QueryTags(scene="Unknown", query_type="UnknownKind")
+        add_fallback_query_tags(tags)
+        assert tags.product is None
+        assert tags.feature is None
+
+    @parameterized.expand(
+        [
+            ("ai_generation", ["$ai_generation"], Product.LLM_ANALYTICS),
+            ("ai_span", ["$ai_span"], Product.LLM_ANALYTICS),
+            ("ai_trace", ["$ai_trace"], Product.LLM_ANALYTICS),
+            ("ai_embedding", ["$ai_embedding"], Product.LLM_ANALYTICS),
+            ("ai_metric", ["$ai_metric"], Product.LLM_ANALYTICS),
+            ("ai_feedback", ["$ai_feedback"], Product.LLM_ANALYTICS),
+            ("exception", ["$exception"], Product.ERROR_TRACKING),
+            ("web_vitals", ["$web_vitals"], Product.WEB_ANALYTICS),
+            ("feature_flag_called", ["$feature_flag_called"], Product.FEATURE_FLAGS),
+        ]
+    )
+    def test_insightsql_features_event_fills_product(self, _name, events, expected_product):
+        tags = QueryTags(
+            query_type="InsightsQLQuery",
+            insightsql_features=InsightsQLFeatures(tables=["events"], events=events),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == expected_product
+
+    @parameterized.expand(
+        [
+            ("session_replay", ["session_replay_events"], Product.REPLAY),
+            ("logs_table", ["logs"], Product.LOGS),
+            ("events_table", ["events"], Product.PRODUCT_ANALYTICS),
+        ]
+    )
+    def test_insightsql_features_table_fills_product_when_no_event_match(self, _name, tables, expected_product):
+        tags = QueryTags(
+            query_type="InsightsQLQuery",
+            insightsql_features=InsightsQLFeatures(tables=tables, events=[]),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == expected_product
+
+    def test_insightsql_features_event_takes_precedence_over_table(self):
+        # Querying the events table for $exception should attribute to error
+        # tracking, not product analytics — events are more specific.
+        tags = QueryTags(
+            query_type="InsightsQLQuery",
+            insightsql_features=InsightsQLFeatures(tables=["events"], events=["$exception"]),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.ERROR_TRACKING
+
+    def test_insightsql_features_only_apply_to_insightsqlquery_kind(self):
+        # A TrendsQuery would already be product_analytics via kind fallback;
+        # we shouldn't let the AST features override that. More importantly,
+        # the AST contents of e.g. an LLM-analytics insight (which uses
+        # TrendsQuery on $ai_generation) shouldn't get re-attributed.
+        tags = QueryTags(
+            query_type="TrendsQuery",
+            insightsql_features=InsightsQLFeatures(tables=["events"], events=["$exception"]),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.PRODUCT_ANALYTICS
+
+    def test_insightsql_features_does_not_override_set_product(self):
+        tags = QueryTags(
+            product=Product.MCP,
+            query_type="InsightsQLQuery",
+            insightsql_features=InsightsQLFeatures(tables=["events"], events=["$exception"]),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.MCP
+
+    def test_insightsql_features_take_precedence_over_mcp_source(self):
+        # The whole point of the insightsql_features fallback is to pull MCP traffic
+        # apart by what it actually does — so even when source=mcp, a recognised
+        # event filter must win over the catch-all MCP attribution.
+        tags = QueryTags(
+            query_type="InsightsQLQuery",
+            source="mcp",
+            insightsql_features=InsightsQLFeatures(tables=["events"], events=["$exception"]),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.ERROR_TRACKING
+
+    def test_insightsql_features_table_only_take_precedence_over_mcp_source(self):
+        # Same precedence holds for the table-only path.
+        tags = QueryTags(
+            query_type="InsightsQLQuery",
+            source="mcp",
+            insightsql_features=InsightsQLFeatures(tables=["session_replay_events"], events=[]),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.REPLAY
+
+    def test_insightsql_features_unmapped_features_fall_through_to_mcp(self):
+        # No interesting events, no recognised tables — let the MCP source
+        # fallback fire instead.
+        tags = QueryTags(
+            query_type="InsightsQLQuery",
+            source="mcp",
+            insightsql_features=InsightsQLFeatures(tables=[], events=[]),
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.MCP
+
+    # --- query-structure fallback: wrapper / drill-down queries inherit the wrapped product ---
+
+    @parameterized.expand(
+        [("RetentionQuery",), ("TrendsQuery",), ("FunnelsQuery",), ("StickinessQuery",), ("LifecycleQuery",)]
+    )
+    def test_query_structure_resolves_actors_drilldowns(self, inner_kind):
+        # "Open as new insight" from an actors modal posts a DataTableNode wrapping an
+        # ActorsQuery → InsightActorsQuery → <insight>. Every outer kind maps to None, so the
+        # product is inherited from the wrapped insight via the query-structure walk.
+        query = {
+            "kind": "DataTableNode",
+            "source": {"kind": "ActorsQuery", "source": {"kind": "InsightActorsQuery", "source": {"kind": inner_kind}}},
+        }
+        tags = QueryTags(query_type="ActorsQuery", query=query)
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.PRODUCT_ANALYTICS
+
+    def test_query_structure_resolves_marketing_analytics_snakecase_query_type(self):
+        # Marketing analytics runners pass a non-NodeKind query_type label ("marketing_analytics_table_query"),
+        # so the query_type fallback can't map it — but tags.query carries the canonical kind.
+        tags = QueryTags(
+            query_type="marketing_analytics_table_query",
+            query={"kind": "MarketingAnalyticsTableQuery"},
+        )
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.MARKETING_ANALYTICS
+
+    def test_query_structure_does_not_override_set_product(self):
+        query = {"kind": "ActorsQuery", "source": {"kind": "InsightActorsQuery", "source": {"kind": "RetentionQuery"}}}
+        tags = QueryTags(product=Product.MCP, query_type="ActorsQuery", query=query)
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.MCP
+
+    def test_query_type_kind_takes_precedence_over_query_structure(self):
+        # query_type maps directly (LogsQuery → logs); the structure walk must not override it.
+        tags = QueryTags(query_type="LogsQuery", query={"kind": "TrendsQuery"})
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.LOGS
+
+    def test_query_structure_leaves_product_none_when_no_inner_kind_maps(self):
+        # A bare ActorsQuery (raw persons drill-down) has no wrapped insight to inherit from.
+        tags = QueryTags(query_type="ActorsQuery", query={"kind": "ActorsQuery", "source": None})
+        add_fallback_query_tags(tags)
+        assert tags.product is None
+
+    def test_query_structure_accepts_pydantic_like_objects(self):
+        # tags.query is usually the raw posted dict, but the walk also reads `.kind` / `.source` attributes.
+        query = SimpleNamespace(
+            kind="ActorsQuery",
+            source=SimpleNamespace(
+                kind="InsightActorsQuery", source=SimpleNamespace(kind="RetentionQuery", source=None)
+            ),
+        )
+        tags = QueryTags(query_type="ActorsQuery", query=query)
+        add_fallback_query_tags(tags)
+        assert tags.product == Product.PRODUCT_ANALYTICS
+
+
+@pytest.mark.parametrize(
+    "access_method,expected",
+    [
+        # Programmatic key auth routes Datastore queries to the offline cluster as the API user
+        # (see sync_execute); user-facing auth stays online.
+        (AccessMethod.PERSONAL_API_KEY, True),
+        (AccessMethod.PROJECT_SECRET_API_KEY, True),
+        (AccessMethod.TEAM_SECRET_TOKEN, True),
+        (AccessMethod.OAUTH, False),
+        (AccessMethod.SHARING_TOKEN, False),
+        (AccessMethod.ID_JAG, False),
+        (None, False),
+        ("", False),
+    ],
+)
+def test_is_api_key_access_method(access_method, expected):
+    assert is_api_key_access_method(access_method) is expected

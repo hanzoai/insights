@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -45,7 +45,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize the Insights client with your project API key:</Markdown>
+                    <Markdown>Initialize the Insights client with your project token:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -55,7 +55,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 import { Insights } from 'insights-node'
 
                                 const client = new Insights(
-                                    '<ph_project_api_key>',
+                                    '<ph_project_token>',
                                     {
                                         host: '<ph_client_api_host>'
                                     }

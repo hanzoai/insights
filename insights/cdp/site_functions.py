@@ -4,8 +4,9 @@ from insights.insightsql.compiler.javascript import JavaScriptCompiler
 
 from insights.cdp.filters import insights_function_filters_to_expr
 from insights.cdp.validation import transpile_template_code
-from insights.models.insights_functions.insights_function import InsightsFunction
-from insights.models.plugin import transpile
+
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
+from products.cdp.backend.models.plugin import transpile
 
 
 def get_transpiled_function(insights_function: InsightsFunction) -> str:
@@ -39,7 +40,7 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
     # Add all constant inputs directly
     response += "let inputs = {\n" + (",\n".join(inputs_object)) + "};\n"
 
-    # Transpiled Custom code needs a "__getGlobal" function in scope
+    # Transpiled Script code needs a "__getGlobal" function in scope
     response += "let __getGlobal = (key) => key === 'inputs' ? inputs : globals[key];\n"
 
     if inputs_switch:
@@ -52,7 +53,7 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
 
     response += "return inputs;}\n"
 
-    response += f"const source = {transpile(insights_function.iql, 'site')}();"
+    response += f"const source = {transpile(insights_function.script, 'site')}();"
 
     # Convert the global filters to code
     filters_expr = insights_function_filters_to_expr(insights_function.filters or {}, insights_function.team, {})

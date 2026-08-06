@@ -2,11 +2,11 @@ import { Meta, StoryObj } from '@storybook/react'
 
 import { DataColorToken } from 'lib/colors'
 
-import { ColorList } from './ColorList'
+import { ColorList, ColorListProps } from './ColorList'
 
-type Story = StoryObj<typeof ColorList>
-const meta: Meta<typeof ColorList> = {
-    title: 'Elements/Color/Color List',
+type Story = StoryObj<ColorListProps>
+const meta: Meta<ColorListProps> = {
+    title: 'Lemon UI/Lemon Color/Lemon Color List',
     component: ColorList,
     tags: ['autodocs'],
 }

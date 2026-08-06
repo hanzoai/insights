@@ -1,6 +1,6 @@
-import { PluginEvent, ProcessedPluginEvent, StorageExtension } from '@hanzo/plugin-scaffold'
+import { FetchOptions, FetchResponse } from '~/common/utils/request'
+import { PluginEvent, ProcessedPluginEvent, StorageExtension } from '~/plugin-scaffold'
 
-import { FetchOptions, FetchResponse } from '../../utils/request'
 import { InsightsFunctionTemplate } from '../types'
 
 export type LegacyPluginLogger = {

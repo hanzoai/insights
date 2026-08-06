@@ -16,7 +16,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send data to GCS. This creates a file per event.",
     icon_url="/static/services/google-cloud-storage.png",
     category=["Custom"],
-    code_language="fn",
+    code_language="script",
     code="""
 let res := fetch(f'https://storage.googleapis.com/upload/storage/v1/b/{encodeURLComponent(inputs.bucketName)}/o?uploadType=media&name={encodeURLComponent(inputs.filename)}', {
   'method': 'POST',
@@ -70,18 +70,18 @@ if (res.status >= 200 and res.status < 300) {
 
 
 class TemplateGoogleCloudStorageMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-gcs-plugin"
+    plugin_url = "https://github.com/Insights/insights-gcs-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         exportEventsToIgnore = [x.strip() for x in obj.config.get("exportEventsToIgnore", "").split(",") if x]
         bucketName = obj.config.get("bucketName", "")
 
-        from insights.models.plugin import PluginAttachment
+        from products.cdp.backend.models.plugin import PluginAttachment
 
         attachment: PluginAttachment | None = PluginAttachment.objects.filter(
             plugin_config=obj, key="googleCloudKeyJson"

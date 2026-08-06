@@ -7,10 +7,14 @@
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "@hanzo/insights": "catalog:"
+        "insights-js": "catalog:"
+    },
+    "devDependencies": {
+        "@storybook/react": "catalog:",
+        "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "*",
+        "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

@@ -294,7 +294,7 @@
 # name: test_full_queries[missing timestamp condition].3
   <QueryIndexUsage.NO: 'no'>
 # ---
-# name: test_full_queries[production query often failing cause ClickHouse not using index]
+# name: test_full_queries[production query often failing cause Datastore not using index]
   '''
   
   [
@@ -453,16 +453,16 @@
   
   '''
 # ---
-# name: test_full_queries[production query often failing cause ClickHouse not using index].1
+# name: test_full_queries[production query often failing cause Datastore not using index].1
   2
 # ---
-# name: test_full_queries[production query often failing cause ClickHouse not using index].2
+# name: test_full_queries[production query often failing cause Datastore not using index].2
   list([
     ReadIndexUsage(table='insights.sharded_events', use=<QueryIndexUsage.NO: 'no'>),
     ReadIndexUsage(table='insights.person_distinct_id_overrides', use=<QueryIndexUsage.YES: 'yes'>),
   ])
 # ---
-# name: test_full_queries[production query often failing cause ClickHouse not using index].3
+# name: test_full_queries[production query often failing cause Datastore not using index].3
   <QueryIndexUsage.PARTIAL: 'partial'>
 # ---
 # name: test_full_queries[session query not using indices]

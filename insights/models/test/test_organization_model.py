@@ -10,10 +10,12 @@ from django.utils import timezone
 from parameterized import parameterized
 
 from insights.constants import AvailableFeature
-from insights.models import Organization, OrganizationInvite, Plugin
+from insights.models import Organization, OrganizationInvite
 from insights.models.organization import PRODUCT_FEATURES, OrganizationMembership
 from insights.plugins.test.mock import mocked_plugin_requests_get
 from insights.plugins.test.plugin_archives import HELLO_WORLD_PLUGIN_GITHUB_ZIP
+
+from products.cdp.backend.models.plugin import Plugin
 
 
 class TestOrganization(BaseTest):
@@ -34,10 +36,10 @@ class TestOrganization(BaseTest):
         self.assertEqual(self.organization.invites.count(), 2)
         self.assertEqual(self.organization.active_invites.count(), 1)
 
-    @mock.patch("requests.get", side_effect=mocked_plugin_requests_get)
+    @mock.patch("insights.plugins.utils.requests.get", side_effect=mocked_plugin_requests_get)
     def test_plugins_are_preinstalled_on_self_hosted(self, mock_get):
         with self.is_cloud(False):
-            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Hanzo Insights/helloworldplugin/"]):
+            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Insights/helloworldplugin/"]):
                 new_org, _, _ = Organization.objects.bootstrap(
                     self.user,
                     plugins_access_level=Organization.PluginsAccessLevel.INSTALL,
@@ -50,14 +52,14 @@ class TestOrganization(BaseTest):
         )
         self.assertEqual(mock_get.call_count, 2)
         mock_get.assert_any_call(
-            f"https://github.com/Hanzo Insights/helloworldplugin/archive/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}.zip",
+            f"https://github.com/Insights/helloworldplugin/archive/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}.zip",
             headers={},
         )
 
-    @mock.patch("requests.get", side_effect=mocked_plugin_requests_get)
+    @mock.patch("insights.plugins.utils.requests.get", side_effect=mocked_plugin_requests_get)
     def test_plugins_are_not_preinstalled_on_cloud(self, mock_get):
         with self.is_cloud(True):
-            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Hanzo Insights/helloworldplugin/"]):
+            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Insights/helloworldplugin/"]):
                 new_org, _, _ = Organization.objects.bootstrap(
                     self.user,
                     plugins_access_level=Organization.PluginsAccessLevel.INSTALL,
@@ -97,6 +99,22 @@ class TestOrganization(BaseTest):
                 self.user, name="Explicit Org", default_anonymize_ips=False
             )
             self.assertFalse(explicit_org.default_anonymize_ips)
+
+    @parameterized.expand(
+        [
+            ("eu_defaults_to_opted_out", "EU", None, False),
+            ("us_defaults_to_opted_in", "US", None, True),
+            ("unset_deployment_defaults_to_opted_in", None, None, True),
+            ("explicit_value_overrides_eu_default", "EU", True, True),
+        ]
+    )
+    def test_default_is_ai_training_opted_in_based_on_deployment(
+        self, _name, cloud_deployment, explicit_value, expected
+    ):
+        with self.settings(CLOUD_DEPLOYMENT=cloud_deployment):
+            extra_kwargs = {} if explicit_value is None else {"is_ai_training_opted_in": explicit_value}
+            org, _, _ = Organization.objects.bootstrap(self.user, name=_name, **extra_kwargs)
+            self.assertEqual(org.is_ai_training_opted_in, expected)
 
     def test_update_available_product_features_states_what_the_build_carries(self):
         # The answer comes from the build, not from a subscription, so it does not vary with
@@ -146,6 +164,24 @@ class TestOrganization(BaseTest):
 
         assert another.available_product_features[0]["limit"] is None
         assert PRODUCT_FEATURES[0]["limit"] is None
+
+    @parameterized.expand(
+        [
+            ("no_features", None, "free"),
+            ("empty_features", [], "free"),
+            ("unknown_feature_treated_as_paid", [{"key": "made_up_feature"}], "paid"),
+            ("scale_feature_present", [{"key": "recordings_file_export"}], "paid"),
+            ("multiple_scale_features", [{"key": "zapier"}, {"key": "group_analytics"}], "paid"),
+            # No feature is classified as enterprise-only (`_enterprise_only_feature_keys` is
+            # empty), so a key that once named an enterprise plan reads as any other paid feature.
+            ("formerly_enterprise_key_is_paid", [{"key": "saml"}], "paid"),
+            ("malformed_entries_ignored", [None, {}, {"key": None}], "free"),
+        ]
+    )
+    def test_get_plan_tier(self, _name, available_product_features, expected_tier):
+        self.organization.available_product_features = available_product_features
+        self.organization.save()
+        self.assertEqual(self.organization.get_plan_tier(), expected_tier)
 
     def test_session_age_caching(self):
         # Test caching when session_cookie_age is set

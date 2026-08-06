@@ -19,37 +19,46 @@ public:
   enum {
     ALL = 1, AND = 2, ANTI = 3, ANY = 4, ARRAY = 5, AS = 6, ASCENDING = 7, 
     ASOF = 8, BETWEEN = 9, BOTH = 10, BY = 11, CASE = 12, CAST = 13, CATCH = 14, 
-    COHORT = 15, COLLATE = 16, CROSS = 17, CUBE = 18, CURRENT = 19, DATE = 20, 
-    DAY = 21, DESC = 22, DESCENDING = 23, DISTINCT = 24, ELSE = 25, END = 26, 
-    EXCEPT = 27, EXTRACT = 28, FINAL = 29, FINALLY = 30, FIRST = 31, FN = 32, 
-    FOLLOWING = 33, FOR = 34, FROM = 35, FULL = 36, FUN = 37, GROUP = 38, 
-    HAVING = 39, HOUR = 40, ID = 41, IF = 42, ILIKE = 43, IN = 44, INF = 45, 
-    INNER = 46, INTERSECT = 47, INTERVAL = 48, IS = 49, JOIN = 50, KEY = 51, 
-    LAST = 52, LEADING = 53, LEFT = 54, LET = 55, LIKE = 56, LIMIT = 57, 
-    MINUTE = 58, MONTH = 59, NAN_SQL = 60, NOT = 61, NULL_SQL = 62, NULLS = 63, 
-    OFFSET = 64, ON = 65, OR = 66, ORDER = 67, OUTER = 68, OVER = 69, PARTITION = 70, 
-    PRECEDING = 71, PREWHERE = 72, QUARTER = 73, RANGE = 74, RECURSIVE = 75, 
-    RETURN = 76, RIGHT = 77, ROLLUP = 78, ROW = 79, ROWS = 80, SAMPLE = 81, 
-    SECOND = 82, SELECT = 83, SEMI = 84, SETTINGS = 85, SUBSTRING = 86, 
-    THEN = 87, THROW = 88, TIES = 89, TIMESTAMP = 90, TO = 91, TOP = 92, 
-    TOTALS = 93, TRAILING = 94, TRIM = 95, TRUNCATE = 96, TRY = 97, UNBOUNDED = 98, 
-    UNION = 99, USING = 100, WEEK = 101, WHEN = 102, WHERE = 103, WHILE = 104, 
-    WINDOW = 105, WITH = 106, YEAR = 107, ESCAPE_CHAR_COMMON = 108, IDENTIFIER = 109, 
-    FLOATING_LITERAL = 110, OCTAL_LITERAL = 111, DECIMAL_LITERAL = 112, 
-    HEXADECIMAL_LITERAL = 113, STRING_LITERAL = 114, ARROW = 115, ASTERISK = 116, 
-    BACKQUOTE = 117, BACKSLASH = 118, DOUBLECOLON = 119, COLON = 120, COMMA = 121, 
-    CONCAT = 122, DASH = 123, DOLLAR = 124, DOT = 125, EQ_DOUBLE = 126, 
-    EQ_SINGLE = 127, GT_EQ = 128, GT = 129, HASH = 130, IREGEX_SINGLE = 131, 
-    IREGEX_DOUBLE = 132, LBRACE = 133, LBRACKET = 134, LPAREN = 135, LT_EQ = 136, 
-    LT = 137, LT_SLASH = 138, NOT_EQ = 139, NOT_IREGEX = 140, NOT_REGEX = 141, 
-    NULL_PROPERTY = 142, NULLISH = 143, PERCENT = 144, PLUS = 145, QUERY = 146, 
-    QUOTE_DOUBLE = 147, QUOTE_SINGLE_TEMPLATE = 148, QUOTE_SINGLE_TEMPLATE_FULL = 149, 
-    QUOTE_SINGLE = 150, REGEX_SINGLE = 151, REGEX_DOUBLE = 152, RBRACE = 153, 
-    RBRACKET = 154, RPAREN = 155, SEMICOLON = 156, SLASH = 157, SLASH_GT = 158, 
-    UNDERSCORE = 159, MULTI_LINE_COMMENT = 160, SINGLE_LINE_COMMENT = 161, 
-    WHITESPACE = 162, STRING_TEXT = 163, STRING_ESCAPE_TRIGGER = 164, FULL_STRING_TEXT = 165, 
-    FULL_STRING_ESCAPE_TRIGGER = 166, TAG_WS = 167, TAGC_WS = 168, INSIGHTSQLX_TEXT_TEXT = 169, 
-    INSIGHTSQLX_TEXT_WS = 170
+    COHORT = 15, COLLATE = 16, COLUMNS = 17, CROSS = 18, CUBE = 19, CURRENT = 20, 
+    DATE = 21, DAY = 22, DESC = 23, DESCENDING = 24, DISTINCT = 25, ELSE = 26, 
+    END = 27, EXCEPT = 28, EXCLUDE = 29, EXTRACT = 30, FINAL = 31, FILL = 32, 
+    FILTER = 33, FINALLY = 34, FIRST = 35, FN = 36, FOLLOWING = 37, FOR = 38, 
+    FROM = 39, FULL = 40, FUN = 41, GROUP = 42, GROUPING = 43, HAVING = 44, 
+    HOUR = 45, ID = 46, IF = 47, ILIKE = 48, IGNORE = 49, INCLUDE = 50, 
+    IN = 51, INF = 52, INNER = 53, INTERSECT = 54, INTERPOLATE = 55, INTERVAL = 56, 
+    IS = 57, JOIN = 58, KEY = 59, LAMBDA = 60, LAST = 61, LEADING = 62, 
+    LEFT = 63, LET = 64, LIKE = 65, LIMIT = 66, MATERIALIZED = 67, MINUTE = 68, 
+    MONTH = 69, NAME = 70, NATURAL = 71, NAN_SQL = 72, NOT = 73, NULL_SQL = 74, 
+    NULLS = 75, OFFSET = 76, ON = 77, OR = 78, ORDER = 79, OUTER = 80, OVER = 81, 
+    PARTITION = 82, PIVOT = 83, POSITIONAL = 84, PRECEDING = 85, PREWHERE = 86, 
+    QUALIFY = 87, QUARTER = 88, RANGE = 89, RECURSIVE = 90, REPLACE = 91, 
+    RETURN = 92, RIGHT = 93, ROLLUP = 94, ROW = 95, ROWS = 96, SAMPLE = 97, 
+    SECOND = 98, SELECT = 99, SEMI = 100, SETS = 101, SETTINGS = 102, STEP = 103, 
+    SUBSTRING = 104, THEN = 105, THROW = 106, TIES = 107, TIMESTAMP = 108, 
+    TIME = 109, LOCAL = 110, ZONE = 111, TO = 112, TOP = 113, TOTALS = 114, 
+    TRAILING = 115, TRIM = 116, TRUNCATE = 117, TRY = 118, TRY_CAST = 119, 
+    UNBOUNDED = 120, UNION = 121, UNPIVOT = 122, USING = 123, VALUES = 124, 
+    WEEK = 125, WHEN = 126, WHERE = 127, WHILE = 128, WINDOW = 129, WITH = 130, 
+    WITHIN = 131, YEAR = 132, ESCAPE_CHAR_COMMON = 133, IDENTIFIER = 134, 
+    QUOTED_IDENTIFIER = 135, FLOATING_LITERAL = 136, BINARY_LITERAL = 137, 
+    OCTAL_LITERAL = 138, DECIMAL_LITERAL = 139, HEXADECIMAL_LITERAL = 140, 
+    OCTAL_PREFIX_LITERAL = 141, MALFORMED_BINARY_LITERAL = 142, STRING_LITERAL = 143, 
+    ARROW = 144, ASTERISK = 145, BACKQUOTE = 146, BACKSLASH = 147, DOUBLECOLON = 148, 
+    COLONEQUALS = 149, COLON = 150, COMMA = 151, CONCAT = 152, DASH = 153, 
+    DOLLAR = 154, DOT = 155, EQ_DOUBLE = 156, EQ_SINGLE = 157, GT_EQ = 158, 
+    GT = 159, HASH = 160, IREGEX_SINGLE = 161, IREGEX_DOUBLE = 162, LBRACE = 163, 
+    LBRACKET = 164, LPAREN = 165, NULL_SAFE_EQ = 166, LT_EQ = 167, LT = 168, 
+    LT_SLASH = 169, NOT_EQ = 170, NOT_IREGEX = 171, NOT_REGEX = 172, NULL_PROPERTY = 173, 
+    NULLISH = 174, PERCENT = 175, PLUS = 176, QUERY = 177, QUOTE_DOUBLE = 178, 
+    QUOTE_SINGLE_TEMPLATE = 179, QUOTE_SINGLE_TEMPLATE_FULL = 180, QUOTE_SINGLE = 181, 
+    REGEX_SINGLE = 182, REGEX_DOUBLE = 183, RBRACE = 184, RBRACKET = 185, 
+    RPAREN = 186, SEMICOLON = 187, SLASH = 188, SLASH_GT = 189, UNDERSCORE = 190, 
+    MULTI_LINE_COMMENT = 191, SINGLE_LINE_COMMENT = 192, HASH_COMMENT = 193, 
+    WHITESPACE = 194, UNEXPECTED_CHARACTER = 195, STRING_TEXT = 196, STRING_ESCAPE_TRIGGER = 197, 
+    FULL_STRING_TEXT = 198, FULL_STRING_ESCAPE_TRIGGER = 199, TAG_MULTI_LINE_COMMENT = 200, 
+    TAG_SINGLE_LINE_COMMENT = 201, TAG_WS = 202, TAGC_MULTI_LINE_COMMENT = 203, 
+    TAGC_SINGLE_LINE_COMMENT = 204, TAGC_WS = 205, INSIGHTSQLX_TEXT_TEXT = 206, 
+    INSIGHTSQLX_TEXT_WS = 207
   };
 
   enum {
@@ -63,11 +72,17 @@ public:
 
 
 
+  /* ctype classifiers are UB outside [0,255]+EOF; LA() returns raw UTF-32 code
+     points, so guard to ASCII before delegating (C-locale semantics). */
+  static bool isAsciiAlpha(int ch) { return ch >= 0 && ch < 128 && std::isalpha(ch); }
+  static bool isAsciiAlnum(int ch) { return ch >= 0 && ch < 128 && std::isalnum(ch); }
+  static bool isAsciiSpace(int ch) { return ch >= 0 && ch < 128 && std::isspace(ch); }
+
   /** Skip over whitespace and end-of-line comments (`// …`, `-- …`, `# …`). */
   void skipWsAndComments(std::size_t& i) {
       for (;;) {
           int ch = _input->LA(i);
-          if (std::isspace(ch)) {                       // regular whitespace
+          if (isAsciiSpace(ch)) {                       // regular whitespace
               ++i;
               continue;
           }
@@ -85,7 +100,7 @@ public:
           /* consume to EOL or EOF */
           while (true) {
               ch = _input->LA(i);
-              if (ch == 0 || ch == '\n' || ch == '\r')
+              if (ch <= 0 || ch == '\n' || ch == '\r')
                   break;
               ++i;
           }
@@ -97,14 +112,14 @@ public:
   bool isOpeningTag() {
       /* first char after '<' */
       int la1 = _input->LA(1);
-      if (!std::isalpha(la1) && la1 != '_')
+      if (!isAsciiAlpha(la1) && la1 != '_')
           return false;
 
       /* skip the tag name ([a-zA-Z0-9_-]*) */
       std::size_t i = 2;
       while (true) {
           int ch = _input->LA(i);
-          if (std::isalnum(ch) || ch == '_' || ch == '-')
+          if (isAsciiAlnum(ch) || ch == '_' || ch == '-')
               ++i;
           else
               break;
@@ -117,11 +132,11 @@ public:
           return true;
 
       /*  If the next char is whitespace, look further  */
-      if (std::isspace(ch)) {
+      if (isAsciiSpace(ch)) {
           skipWsAndComments(++i); // step past first space
           ch = _input->LA(i);
           /* tag iff next non-ws/non-comment char is alnum/underscore */
-          return std::isalnum(ch) || ch == '_' || ch == '>' || ch == '/';
+          return isAsciiAlnum(ch) || ch == '_' || ch == '>' || ch == '/';
       }
 
       /* anything else (operator chars, ')', '+', …) → not a tag */

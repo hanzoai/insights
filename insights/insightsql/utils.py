@@ -9,7 +9,7 @@ from insights.insightsql.ast import AST, AST_CLASSES, Constant, Expr, InsightsQL
 def like_matches(pattern: str, text: str) -> bool:
     """
     Python implementation of Datastore LIKE pattern matching (case-sensitive).
-    See https://github.com/hanzoai/datastore/blob/main/src/Functions/MatchImpl.h
+    See https://github.com/Datastore/Datastore/blob/master/src/Functions/MatchImpl.h
 
     LIKE is case-sensitive matching where:
     - % matches any sequence of characters (including empty)
@@ -70,15 +70,16 @@ def is_simple_value(value: Any) -> bool:
     return False
 
 
-def deserialize_hx_tag(iql_tag: dict) -> InsightsQLXTag:
-    tag_kind = iql_tag.get("__hx_tag", None)
+def deserialize_hx_tag(hog_tag: dict) -> InsightsQLXTag:
+    tag_kind = hog_tag.get("__hx_tag", None)
     if tag_kind is None:
         raise ValueError("Missing '__hx_tag' key in InsightsQLXTag")
 
     attributes = []
-    for k, v in iql_tag.items():
+    for k, v in hog_tag.items():
         if k == "__hx_tag":
             continue
+        value: Any
         if isinstance(v, list):
             value = [
                 deserialize_hx_ast(item)
@@ -93,18 +94,18 @@ def deserialize_hx_tag(iql_tag: dict) -> InsightsQLXTag:
     return InsightsQLXTag(kind=tag_kind, attributes=attributes)
 
 
-def deserialize_hx_ast(iql_ast: dict) -> AST:
+def deserialize_hx_ast(hog_ast: dict) -> AST:
     """
     Deserialize a HX AST and tag dicts into real Python AST classes.
       - Dicts with `__hx_ast` -> AST node
       - Dicts with `__hx_tag` -> InsightsQLXTag
       - Lists that may contain tags, primitive values, or more lists
     """
-    tag_kind = iql_ast.get("__hx_tag")
+    tag_kind = hog_ast.get("__hx_tag")
     if tag_kind is not None:
-        return deserialize_hx_tag(iql_ast)
+        return deserialize_hx_tag(hog_ast)
 
-    kind = iql_ast.get("__hx_ast")
+    kind = hog_ast.get("__hx_ast")
     if kind is None or kind not in AST_CLASSES:
         raise ValueError(f"Invalid or missing '__hx_ast' kind: {kind}")
 
@@ -112,7 +113,7 @@ def deserialize_hx_ast(iql_ast: dict) -> AST:
     cls_fields = {f.name: f.type for f in fields(cls)}
     init_args: dict[str, Any] = {}
 
-    def _deserialize(value: Any, field_type: type) -> Any:
+    def _deserialize(value: Any, field_type: Any) -> Any:
         if isinstance(value, dict) and "__hx_tag" in value:
             return deserialize_hx_tag(value)
 
@@ -133,7 +134,7 @@ def deserialize_hx_ast(iql_ast: dict) -> AST:
 
         raise ValueError(f"Unexpected value of type '{type(value).__name__}' for field expecting '{field_type}'")
 
-    for key, value in iql_ast.items():
+    for key, value in hog_ast.items():
         if key == "__hx_ast":
             continue
         if key not in cls_fields:
@@ -141,7 +142,7 @@ def deserialize_hx_ast(iql_ast: dict) -> AST:
 
         init_args[key] = _deserialize(value, cls_fields[key])
 
-    return cls(**init_args)  # type: ignore
+    return cls(**init_args)
 
 
 def map_virtual_properties(e: ast.Expr):

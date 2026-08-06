@@ -6,7 +6,6 @@ from unittest.mock import patch
 from django.core import exceptions
 
 from insights.cdp.templates.helpers import mock_transpile
-from insights.models import Plugin, PluginSourceFile
 from insights.plugins.test.plugin_archives import (
     HELLO_WORLD_PLUGIN_FRONTEND_TSX,
     HELLO_WORLD_PLUGIN_GITHUB_INDEX_JS,
@@ -23,6 +22,8 @@ from insights.plugins.test.plugin_archives import (
     HELLO_WORLD_PLUGIN_RAW_WITHOUT_PLUGIN_JS,
     HELLO_WORLD_PLUGIN_SITE_TS,
 )
+
+from products.cdp.backend.models.plugin import Plugin, PluginSourceFile
 
 
 class TestPlugin(BaseTest):
@@ -183,7 +184,7 @@ class TestPluginSourceFile(BaseTest, QueryMatchingTest):
         self.assertEqual(frontend_tsx_file.source, HELLO_WORLD_PLUGIN_FRONTEND_TSX)
         self.assertFalse(self.team.inject_web_apps)
 
-    @patch("insights.models.plugin.transpile", side_effect=mock_transpile)
+    @patch("products.cdp.backend.models.plugin.transpile", side_effect=mock_transpile)
     @snapshot_postgres_queries
     def test_sync_from_plugin_archive_from_zip_without_index_ts_but_site_ts_works(self, mock_transpile_fn):
         self.assertFalse(self.team.inject_web_apps)
@@ -225,7 +226,7 @@ class TestPluginSourceFile(BaseTest, QueryMatchingTest):
             f"Could not find main file index.js or index.ts in plugin Contoso",
         )
 
-    @patch("insights.models.plugin.transpile", side_effect=mock_transpile)
+    @patch("products.cdp.backend.models.plugin.transpile", side_effect=mock_transpile)
     @snapshot_postgres_queries
     def test_sync_from_plugin_archive_twice_from_zip_with_index_ts_replaced_by_frontend_tsx_works(
         self, mock_transpile_fn
@@ -273,7 +274,7 @@ class TestPluginSourceFile(BaseTest, QueryMatchingTest):
             organization=self.organization,
             name="Contoso",
             archive=base64.b64decode(HELLO_WORLD_PLUGIN_RAW_SUBDIR),
-            url="https://www.github.com/Hanzo Insights/helloworldplugin/tree/main/app",
+            url="https://www.github.com/Insights/helloworldplugin/tree/main/app",
         )
 
         (

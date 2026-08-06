@@ -1,10 +1,12 @@
-import { useValues } from 'kea'
+import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconCopy, IconPencil } from '@hanzo/icons'
+import { IconChevronLeft, IconChevronRight, IconCopy, IconPencil, IconTrash } from '@hanzo/icons'
 import {
     Banner,
     Button,
+    Dialog,
+    Input,
     Table,
     TableColumn,
     TableColumns,
@@ -12,18 +14,21 @@ import {
     Tooltip,
 } from '@hanzo/elements'
 
-import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { TableLink } from 'lib/elements/Table/TableLink'
+import { More } from 'lib/elements/Button/More'
 import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { pluralize } from 'lib/utils/strings'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
+import { tagsModel } from '~/models/tagsModel'
 import { NodeKind } from '~/queries/schema/schema-general'
 
 import { isLegacySharedMetric } from '../utils'
+import { InlineTagEditor } from './InlineTagEditor'
 import { SharedMetric } from './sharedMetricLogic'
-import { sharedMetricsLogic } from './sharedMetricsLogic'
+import { PAGE_SIZE, sharedMetricsLogic } from './sharedMetricsLogic'
 
 export const scene: SceneExport = {
     component: SharedMetrics,
@@ -31,7 +36,13 @@ export const scene: SceneExport = {
 }
 
 export function SharedMetrics(): JSX.Element {
-    const { sharedMetrics, sharedMetricsLoading } = useValues(sharedMetricsLogic)
+    const { sharedMetrics, sharedMetricsLoading, searchTerm, savingTagsMetricId, count, page } =
+        useValues(sharedMetricsLogic)
+    const { setSearchTerm, setPage, updateSharedMetricTags, deleteSharedMetric } = useActions(sharedMetricsLogic)
+    const { tags: allTags } = useValues(tagsModel)
+
+    const startCount = count === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+    const endCount = page * PAGE_SIZE < count ? page * PAGE_SIZE : count
 
     const columns: TableColumns<SharedMetric> = [
         {
@@ -59,7 +70,6 @@ export function SharedMetrics(): JSX.Element {
                     />
                 )
             },
-            sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
             key: 'description',
@@ -69,8 +79,15 @@ export function SharedMetrics(): JSX.Element {
         {
             title: 'Tags',
             dataIndex: 'tags' as keyof SharedMetric,
-            render: function Render(tags: SharedMetric['tags']) {
-                return tags ? <ObjectTags tags={tags} staticOnly /> : null
+            render: function Render(_: any, metric: SharedMetric) {
+                return (
+                    <InlineTagEditor
+                        metric={metric}
+                        allTags={allTags}
+                        onSave={(newTags) => updateSharedMetricTags(metric.id, newTags)}
+                        saving={savingTagsMetricId === metric.id}
+                    />
+                )
             },
         } as TableColumn<SharedMetric, keyof SharedMetric | undefined>,
         {
@@ -87,29 +104,66 @@ export function SharedMetrics(): JSX.Element {
         createdAtColumn<SharedMetric>() as TableColumn<SharedMetric, keyof SharedMetric | undefined>,
         {
             key: 'actions',
-            title: 'Actions',
+            title: '',
+            width: 0,
             render: (_, sharedMetric) => {
                 return (
-                    <div className="flex gap-1">
-                        <Button
-                            className="max-w-72"
-                            type="secondary"
-                            size="xsmall"
-                            icon={<IconPencil />}
-                            onClick={() => {
-                                router.actions.push(urls.experimentsSharedMetric(sharedMetric.id))
-                            }}
-                        />
-                        <Button
-                            className="max-w-72"
-                            type="secondary"
-                            size="xsmall"
-                            icon={<IconCopy />}
-                            onClick={() => {
-                                router.actions.push(urls.experimentsSharedMetric(sharedMetric.id, 'duplicate'))
-                            }}
-                        />
-                    </div>
+                    <More
+                        size="xsmall"
+                        overlay={
+                            <>
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    icon={<IconPencil />}
+                                    onClick={() => {
+                                        router.actions.push(urls.experimentsSharedMetric(sharedMetric.id))
+                                    }}
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    icon={<IconCopy />}
+                                    onClick={() => {
+                                        router.actions.push(urls.experimentsSharedMetric(sharedMetric.id, 'duplicate'))
+                                    }}
+                                >
+                                    Duplicate
+                                </Button>
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    icon={<IconTrash />}
+                                    status="danger"
+                                    onClick={() => {
+                                        Dialog.open({
+                                            title: 'Delete this metric?',
+                                            content: (
+                                                <div className="text-sm text-secondary">
+                                                    This action cannot be undone.
+                                                </div>
+                                            ),
+                                            primaryButton: {
+                                                children: 'Delete',
+                                                type: 'primary',
+                                                onClick: () => deleteSharedMetric(sharedMetric.id),
+                                                size: 'small',
+                                            },
+                                            secondaryButton: {
+                                                children: 'Cancel',
+                                                type: 'tertiary',
+                                                size: 'small',
+                                            },
+                                        })
+                                    }}
+                                >
+                                    Delete
+                                </Button>
+                            </>
+                        }
+                    />
                 )
             },
         },
@@ -122,17 +176,52 @@ export function SharedMetrics(): JSX.Element {
                 ideal for tracking key metrics like conversion rates or revenue across different experiments without
                 having to set them up each time.
             </Banner>
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-2">
+                    <Input
+                        type="search"
+                        placeholder="Search shared metrics..."
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                    />
+                    {count ? (
+                        <span className="text-secondary whitespace-nowrap">
+                            {`${startCount}${endCount > startCount ? '-' + endCount : ''} of ${pluralize(
+                                count,
+                                'metric'
+                            )}`}
+                        </span>
+                    ) : null}
+                </div>
                 <Button size="small" type="primary" to={urls.experimentsSharedMetric('new')}>
                     New shared metric
                 </Button>
             </div>
             <Table
                 columns={columns}
-                dataSource={sharedMetrics || []}
+                dataSource={sharedMetrics}
                 loading={sharedMetricsLoading}
                 emptyState={<div>You haven't created any shared metrics yet.</div>}
             />
+            {count > PAGE_SIZE ? (
+                <div className="flex items-center justify-end gap-1">
+                    <span className="text-secondary whitespace-nowrap">
+                        {`${startCount}${endCount > startCount ? '-' + endCount : ''} of ${pluralize(count, 'metric')}`}
+                    </span>
+                    <Button
+                        icon={<IconChevronLeft />}
+                        size="small"
+                        disabledReason={page <= 1 ? 'No previous page' : undefined}
+                        onClick={() => setPage(page - 1)}
+                    />
+                    <Button
+                        icon={<IconChevronRight />}
+                        size="small"
+                        disabledReason={endCount >= count ? 'No next page' : undefined}
+                        onClick={() => setPage(page + 1)}
+                    />
+                </div>
+            ) : null}
         </div>
     )
 }

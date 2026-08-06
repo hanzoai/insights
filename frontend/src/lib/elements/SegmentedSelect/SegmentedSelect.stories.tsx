@@ -1,12 +1,12 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import { IconBook, IconCalculator, IconCalendar, IconGear } from '@hanzo/icons'
 
 import { SegmentedSelect, SegmentedSelectProps } from './SegmentedSelect'
 
-type Story = StoryObj<typeof SegmentedSelect>
-const meta: Meta<typeof SegmentedSelect> = {
-    title: 'Elements/Segmented Select',
+type Story = StoryObj<SegmentedSelectProps<string>>
+const meta: Meta<SegmentedSelectProps<string>> = {
+    title: 'Lemon UI/Lemon Segmented Select',
     component: SegmentedSelect,
     argTypes: {
         options: {
@@ -30,22 +30,24 @@ const meta: Meta<typeof SegmentedSelect> = {
         ],
     },
     tags: ['autodocs'],
+    render: (props) => {
+        return <SegmentedSelect {...props} value={props.options[1]?.value} />
+    },
 }
 export default meta
 
-const Template: StoryFn<typeof SegmentedSelect> = (props: Omit<SegmentedSelectProps<any>, 'value'>) => {
-    return <SegmentedSelect {...props} value={props.options[1]?.value} />
+export const Default: Story = {
+    args: {},
 }
 
-export const Default: Story = Template.bind({})
-Default.args = {}
-
-export const FullWidth: Story = Template.bind({})
-FullWidth.args = {
-    fullWidth: true,
+export const FullWidth: Story = {
+    args: {
+        fullWidth: true,
+    },
 }
 
-export const Small: Story = Template.bind({})
-Small.args = {
-    size: 'small',
+export const Small: Story = {
+    args: {
+        size: 'small',
+    },
 }

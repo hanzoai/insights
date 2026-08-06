@@ -4,7 +4,7 @@ import { CalendarSelectInput } from '@hanzo/elements'
 
 import { PropertyValueProps } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { dayjs } from 'lib/dayjs'
-import { isOperatorDate } from 'lib/utils'
+import { isOperatorDate } from 'lib/utils/operators'
 
 import { PropertyFilterValue, PropertyOperator } from '~/types'
 

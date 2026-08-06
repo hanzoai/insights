@@ -1,4 +1,8 @@
+import datetime as dt
+
 import structlog
+
+from django.core.cache import cache
 
 from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
@@ -8,6 +12,8 @@ from insights.datastore.client.connection import Workload
 from insights.models import Team
 
 logger = structlog.get_logger(__name__)
+
+HAS_LOGS_CACHE_TTL = int(dt.timedelta(days=7).total_seconds())
 
 
 class HasLogsQueryRunner:
@@ -36,3 +42,14 @@ class HasLogsQueryRunner:
             return False
 
         return len(response.results) > 0
+
+
+def team_has_logs(team: Team) -> bool:
+    cache_key = f"team:{team.id}:has_logs"
+    if cache.get(cache_key) is True:
+        return True
+
+    has_logs = HasLogsQueryRunner(team).run()
+    if has_logs:
+        cache.set(cache_key, True, HAS_LOGS_CACHE_TTL)
+    return has_logs

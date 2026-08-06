@@ -3,8 +3,7 @@ import { useValues } from 'kea'
 import { IconDatabase, IconPlug, IconServer } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
 
-import type { DataHealthIssue } from '~/layout/navigation-3000/sidepanel/panels/sidePanelHealthLogic'
-
+import type { DataHealthIssue } from './pipelineHealthLogic'
 import { pipelineStatusSceneLogic } from './pipelineStatusSceneLogic'
 
 const TYPE_CONFIG: { type: DataHealthIssue['type']; label: string; icon: JSX.Element }[] = [

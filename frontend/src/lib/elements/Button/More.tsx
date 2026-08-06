@@ -1,8 +1,8 @@
-import { ButtonWithDropdown } from '.'
 import { forwardRef } from 'react'
 
 import { IconEllipsis } from '@hanzo/icons'
 
+import { ButtonWithDropdown } from '.'
 import { PopoverProps } from '../Popover/Popover'
 import { ButtonDropdown, ButtonProps } from './Button'
 

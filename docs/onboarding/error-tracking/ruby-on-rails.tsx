@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getRubyOnRailsSteps as getRubyOnRailsStepsPA } from '../product-analytics/ruby-on-rails'
 import { StepDefinition } from '../steps'
@@ -138,7 +138,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

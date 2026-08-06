@@ -42,7 +42,8 @@ class AccessControl(UUIDTModel):
 
 class DashboardPrivilege(UUIDTModel):
     dashboard = models.ForeignKey(
-        "insights.Dashboard", on_delete=models.CASCADE,
+        # Dashboard lives in the dashboards app, not the main one.
+        "dashboards.Dashboard", on_delete=models.CASCADE,
         related_name="privileges", related_query_name="privilege",
     )
     user = models.ForeignKey(

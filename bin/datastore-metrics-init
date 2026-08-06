@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# temporary script to init metrics datastore schema before we've got migrations setup properly
+bin/wait-for-docker
+
+cat bin/datastore-metrics.sql | docker-compose exec -T datastore datastore-client

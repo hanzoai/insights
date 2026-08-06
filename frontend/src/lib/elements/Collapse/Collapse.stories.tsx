@@ -1,12 +1,12 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import { IconInfo } from '@hanzo/icons'
 
-import { Collapse as CollapseComponent } from './Collapse'
+import { Collapse as CollapseComponent, type CollapseProps } from './Collapse'
 
-type Story = StoryObj<typeof CollapseComponent>
-const meta: Meta<typeof CollapseComponent> = {
-    title: 'Elements/Collapse',
+type Story = StoryObj<CollapseProps<string>>
+const meta: Meta<CollapseProps<string>> = {
+    title: 'Lemon UI/Lemon Collapse',
     component: CollapseComponent,
     args: {
         panels: [
@@ -26,44 +26,45 @@ const meta: Meta<typeof CollapseComponent> = {
 }
 export default meta
 
-const Template: StoryFn<typeof CollapseComponent> = (props) => {
-    return <CollapseComponent {...props} />
+export const Single: Story = {
+    args: { defaultActiveKey: '1' },
 }
 
-export const Single: Story = Template.bind({})
-Single.args = { defaultActiveKey: '1' }
+export const Multiple: Story = {
+    args: { defaultActiveKeys: ['1', '2'], multiple: true },
+}
 
-export const Multiple: Story = Template.bind({})
-Multiple.args = { defaultActiveKeys: ['1', '2'], multiple: true }
+export const Small: Story = {
+    args: { size: 'small', multiple: true },
+}
 
-export const Small: Story = Template.bind({})
-Small.args = { size: 'small', multiple: true }
+export const Large: Story = {
+    args: { size: 'large', multiple: true },
+}
 
-export const Large: Story = Template.bind({})
-Large.args = { size: 'large', multiple: true }
-
-export const CustomizedHeaders: Story = Template.bind({})
-CustomizedHeaders.args = {
-    panels: [
-        {
-            key: '1',
-            header: {
-                sideAction: {
-                    onClick: () => alert('You clicked me!'),
-                    icon: <IconInfo />,
+export const CustomizedHeaders: Story = {
+    args: {
+        panels: [
+            {
+                key: '1',
+                header: {
+                    sideAction: {
+                        onClick: () => alert('You clicked me!'),
+                        icon: <IconInfo />,
+                    },
+                    children: (
+                        <span className="text-sm">
+                            I am <span className="italic">customized...</span>
+                        </span>
+                    ),
                 },
-                children: (
-                    <span className="text-sm">
-                        I am <span className="italic">customized...</span>
-                    </span>
-                ),
+                content: <span>Panel 1 content</span>,
             },
-            content: <span>Panel 1 content</span>,
-        },
-        {
-            key: '2',
-            header: 'I am not :(',
-            content: <span>Panel 2 content</span>,
-        },
-    ],
+            {
+                key: '2',
+                header: 'I am not :(',
+                content: <span>Panel 2 content</span>,
+            },
+        ],
+    },
 }

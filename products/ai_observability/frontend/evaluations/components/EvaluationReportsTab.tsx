@@ -1,0 +1,160 @@
+import { useActions, useValues } from 'kea'
+
+import { IconInfo } from '@hanzo/icons'
+import { Button, Table, Tag, Tooltip } from '@hanzo/elements'
+
+import { TZLabel } from 'lib/components/TZLabel'
+
+import { evaluationReportLogic } from '../evaluationReportLogic'
+import type { EvaluationReportRun } from '../types'
+import { EvaluationReportViewer, summarizeEvaluationReportResults } from './EvaluationReportViewer'
+
+interface EvaluationReportsTabProps {
+    evaluationId: string
+    /** Called when the user clicks the "Set up scheduled reports" CTA in the empty state. */
+    onConfigureClick?: () => void
+}
+
+const STATUS_STYLES: Record<
+    EvaluationReportRun['delivery_status'],
+    { label: string; type: 'success' | 'warning' | 'danger' | 'muted' }
+> = {
+    delivered: { label: 'Delivered', type: 'success' },
+    generated: { label: 'Generated', type: 'success' },
+    pending: { label: 'Pending', type: 'muted' },
+    partial_failure: { label: 'Partial failure', type: 'warning' },
+    failed: { label: 'Failed', type: 'danger' },
+}
+
+export function EvaluationReportsTab({ evaluationId, onConfigureClick }: EvaluationReportsTabProps): JSX.Element {
+    const logic = evaluationReportLogic({ evaluationId })
+    const { reportRuns, reportRunsLoading, reportsLoading, activeReport, generateResultLoading } = useValues(logic)
+    const { generateReport, loadReportRuns } = useActions(logic)
+
+    // No schedule configured at all → CTA pointing to the Configuration tab.
+    // Avoids hiding the Reports tab entirely so it stays discoverable.
+    if (!reportsLoading && !activeReport) {
+        return (
+            <div className="max-w-6xl">
+                <div className="bg-bg-light border rounded p-8 text-center space-y-3">
+                    <h3 className="text-lg font-semibold m-0">No scheduled reports yet</h3>
+                    <p className="text-muted text-sm m-0">
+                        Scheduled reports deliver AI-generated analysis of this evaluation's results to email or Slack
+                        on a recurring basis.
+                    </p>
+                    {onConfigureClick && (
+                        <Button type="primary" onClick={onConfigureClick}>
+                            Set up scheduled reports
+                        </Button>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="max-w-6xl">
+            <div className="flex items-center justify-between mb-4">
+                <p className="text-muted text-sm m-0">
+                    History of AI-generated reports for this evaluation. Click a row to expand the full report. Schedule
+                    and delivery targets are configured in the Configuration tab.
+                </p>
+                {activeReport && (
+                    <div className="flex items-center gap-2">
+                        <Button
+                            type="secondary"
+                            size="small"
+                            onClick={() => loadReportRuns(activeReport.id)}
+                            loading={reportRunsLoading}
+                        >
+                            Refresh
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => generateReport(activeReport.id)}
+                            loading={generateResultLoading}
+                        >
+                            Generate now
+                        </Button>
+                    </div>
+                )}
+            </div>
+
+            <Table
+                dataSource={reportRuns}
+                loading={reportRunsLoading}
+                rowKey="id"
+                columns={[
+                    {
+                        title: 'Generated',
+                        key: 'created_at',
+                        render: (_, run: EvaluationReportRun) => <TZLabel time={run.created_at} />,
+                    },
+                    {
+                        title: 'Title',
+                        key: 'title',
+                        render: (_, run: EvaluationReportRun) => (
+                            <span className="font-medium truncate block max-w-md" title={run.content?.title}>
+                                {run.content?.title || '–'}
+                            </span>
+                        ),
+                    },
+                    {
+                        title: 'Results',
+                        key: 'results',
+                        render: (_, run: EvaluationReportRun) => {
+                            if (run.content?.generation_status === 'metrics_unavailable') {
+                                return 'Metrics unavailable'
+                            }
+                            const metrics = run.content?.metrics ?? run.metadata
+                            return metrics ? summarizeEvaluationReportResults(metrics) : '–'
+                        },
+                    },
+                    {
+                        title: 'Runs',
+                        key: 'total_runs',
+                        render: (_, run: EvaluationReportRun) =>
+                            run.content?.metrics?.total_runs ?? run.metadata?.total_runs ?? '–',
+                    },
+                    {
+                        title: 'Status',
+                        key: 'delivery_status',
+                        render: (_, run: EvaluationReportRun) => {
+                            const info = STATUS_STYLES[run.delivery_status] || {
+                                label: run.delivery_status,
+                                type: 'default' as const,
+                            }
+                            return (
+                                <Tag type={info.type} size="small">
+                                    {info.label}
+                                </Tag>
+                            )
+                        },
+                    },
+                    {
+                        key: 'info',
+                        width: 0,
+                        render: (_, run: EvaluationReportRun) => (
+                            <Tooltip
+                                title={`Period: ${new Date(run.period_start).toLocaleString()} – ${new Date(run.period_end).toLocaleString()}`}
+                            >
+                                <IconInfo className="text-muted text-base" />
+                            </Tooltip>
+                        ),
+                    },
+                ]}
+                expandable={{
+                    noIndent: true,
+                    expandedRowRender: (run: EvaluationReportRun) => (
+                        <div className="p-4 bg-bg-light">
+                            <EvaluationReportViewer reportRun={run} compact />
+                        </div>
+                    ),
+                }}
+                emptyState="No reports generated yet"
+                size="small"
+            />
+        </div>
+    )
+}

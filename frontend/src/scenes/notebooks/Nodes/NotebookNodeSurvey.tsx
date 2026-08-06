@@ -5,14 +5,14 @@ import { Divider } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { IconSurveys } from 'lib/elements/icons'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { SurveyStatusTag } from 'scenes/surveys/components/SurveyStatusTag'
 import { SurveyDisplaySummary } from 'scenes/surveys/Survey'
 import { SurveyAppearancePreview } from 'scenes/surveys/SurveyAppearancePreview'
-import { SurveyResult } from 'scenes/surveys/SurveyView'
-import { SurveyStatusTag } from 'scenes/surveys/components/SurveyStatusTag'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
+import { SurveyResult } from 'scenes/surveys/SurveyView'
 import { urls } from 'scenes/urls'
 
 import { FeatureFlagBasicType } from '~/types'
@@ -20,7 +20,6 @@ import { FeatureFlagBasicType } from '~/types'
 import { NotebookNodeProps, NotebookNodeType } from '../types'
 import { buildFlagContent } from './NotebookNodeFlag'
 import { notebookNodeLogic } from './notebookNodeLogic'
-import { OPTIONAL_PROJECT_NON_CAPTURE_GROUP, UUID_REGEX_MATCH_GROUPS } from './utils'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeSurveyAttributes>): JSX.Element => {
     const { id } = attributes
@@ -121,12 +120,6 @@ export const NotebookNodeSurvey = createInsightsWidgetNode<NotebookNodeSurveyAtt
     resizeable: false,
     attributes: {
         id: {},
-    },
-    pasteOptions: {
-        find: OPTIONAL_PROJECT_NON_CAPTURE_GROUP + urls.survey(UUID_REGEX_MATCH_GROUPS),
-        getAttributes: async (match) => {
-            return { id: match[1] }
-        },
     },
 })
 

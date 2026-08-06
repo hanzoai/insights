@@ -1,4 +1,4 @@
-import { buildIntegerMatcher, buildStringMatcher, getDefaultConfig, overrideWithEnv } from '../src/config/config'
+import { buildIntegerMatcher, buildStringMatcher, getDefaultConfig, overrideWithEnv } from '~/common/config/config'
 
 describe('config', () => {
     test('overrideWithEnv 1', () => {
@@ -6,14 +6,14 @@ describe('config', () => {
         const env = {
             INSTRUMENT_THREAD_PERFORMANCE: 'false',
             TASK_TIMEOUT: '3008',
-            KV_URL: '0.0.0.0',
+            REDIS_URL: '0.0.0.0',
             BASE_DIR: undefined,
         }
         const config = overrideWithEnv(getDefaultConfig(), env)
 
         expect(config.INSTRUMENT_THREAD_PERFORMANCE).toEqual(false)
         expect(config.TASK_TIMEOUT).toEqual(3008)
-        expect(config.KV_URL).toEqual('0.0.0.0')
+        expect(config.REDIS_URL).toEqual('0.0.0.0')
         expect(config.BASE_DIR).toEqual(defaultConfig.BASE_DIR)
     })
 

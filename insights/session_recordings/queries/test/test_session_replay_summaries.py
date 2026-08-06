@@ -10,14 +10,7 @@ from dateutil.parser import isoparse
 from insights.datastore.client import sync_execute
 from insights.models import Team
 from insights.models.event.util import format_datastore_timestamp
-from insights.queries.app_metrics.serializers import AppMetricsRequestSerializer
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
-
-
-def make_filter(serializer_klass=AppMetricsRequestSerializer, **kwargs) -> AppMetricsRequestSerializer:
-    filter = serializer_klass(data=kwargs)
-    filter.is_valid(raise_exception=True)
-    return filter
 
 
 class SessionReplaySummaryQuery:

@@ -16,16 +16,23 @@ import { SavedInsightsFilters } from 'scenes/saved-insights/SavedInsightsFilters
 
 import { QueryBasedInsightModel } from '~/types'
 
-import { InsightIcon } from './SavedInsights'
 import { addSavedInsightsModalLogic } from './addSavedInsightsModalLogic'
+import { InsightIcon } from './SavedInsights'
 
 interface SavedInsightsTableProps {
     isSelected?: (insight: QueryBasedInsightModel) => boolean
     onToggle?: (insight: QueryBasedInsightModel) => void
     isToggling?: (insight: QueryBasedInsightModel) => boolean
+    /** Optional filter to exclude insights from the table */
+    filterFn?: (insight: QueryBasedInsightModel) => boolean
 }
 
-export function SavedInsightsTable({ isSelected, onToggle, isToggling }: SavedInsightsTableProps): JSX.Element {
+export function SavedInsightsTable({
+    isSelected,
+    onToggle,
+    isToggling,
+    filterFn,
+}: SavedInsightsTableProps): JSX.Element {
     const {
         modalPage,
         insights,
@@ -145,7 +152,7 @@ export function SavedInsightsTable({ isSelected, onToggle, isToggling }: SavedIn
             ) : (
                 <div className="overflow-x-hidden">
                     <Table
-                        dataSource={insights.results}
+                        dataSource={filterFn ? insights.results.filter(filterFn) : insights.results}
                         columns={columns}
                         loading={insightsLoading}
                         pagination={{

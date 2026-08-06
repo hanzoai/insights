@@ -2,7 +2,7 @@ import { ButtonProps, Select } from '@hanzo/elements'
 
 import { FilterLogicalOperator } from '~/types'
 
-interface AndOrFilterSelectProps {
+export interface AndOrFilterSelectProps {
     onChange: (type: FilterLogicalOperator) => void
     value: FilterLogicalOperator
     topLevelFilter?: boolean
@@ -23,7 +23,7 @@ export function AndOrFilterSelect({
 }: AndOrFilterSelectProps): JSX.Element {
     return (
         <div className="flex items-center font-medium">
-            <span className="ml-2">{prefix}</span>
+            <span className="ml-2 @max-[410px]/editor-panel:ml-0">{prefix}</span>
             <Select
                 className="mx-2"
                 size={size}

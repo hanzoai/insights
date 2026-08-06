@@ -1,4 +1,4 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import { useRef } from 'react'
 
 import { IconArchive, IconShieldPeople } from '@hanzo/icons'
@@ -6,10 +6,10 @@ import { Link } from '@hanzo/elements'
 
 import { Tree, TreeProps } from './Tree'
 
-type Story = StoryObj<typeof Tree>
-const meta: Meta<typeof Tree> = {
-    title: 'Elements/Tree',
-    component: Tree,
+type Story = StoryObj<TreeProps>
+const meta: Meta<TreeProps> = {
+    title: 'Lemon UI/Lemon Tree',
+    component: Tree as any,
     args: {
         defaultNodeIcon: <IconArchive />,
         onFolderClick: (item) => {
@@ -197,40 +197,40 @@ const meta: Meta<typeof Tree> = {
         ],
     },
     tags: ['autodocs'],
+    render: (props: TreeProps) => {
+        const ref = useRef<HTMLDivElement>(null)
+        return (
+            <div className="deprecated-space-y-4">
+                <Link to="https://hanzo.ai">Insights</Link>
+                <div className="deprecated-space-y-1">
+                    <p>
+                        Keyboard navigation: when focused inside the tree, try [up] [right] [down] [left] [enter] [home]
+                        [end]
+                    </p>
+                    <p>
+                        Type-ahead search: when focused inside the tree, try typing the first few letters of a item and
+                        it will focus it
+                    </p>
+                </div>
+
+                <div className="w-full h-full grid grid-cols-[250px_1fr]">
+                    <Tree {...props} contentRef={ref} />
+                    <main
+                        className="p-4 focus-visible:ring-2 ring-accent ring-offset-1"
+                        ref={ref}
+                        role="main"
+                        tabIndex={-1}
+                    >
+                        <h1>Your scene here</h1>
+                        <Link to="https://hanzo.ai">some content link</Link>
+                    </main>
+                </div>
+            </div>
+        )
+    },
 }
 export default meta
 
-const BasicTemplate: StoryFn<typeof Tree> = (props: TreeProps) => {
-    const ref = useRef<HTMLDivElement>(null)
-    return (
-        <div className="deprecated-space-y-4">
-            <Link to="https://hanzo.ai">Insights</Link>
-            <div className="deprecated-space-y-1">
-                <p>
-                    Keyboard navigation: when focused inside the tree, try [up] [right] [down] [left] [enter] [home]
-                    [end]
-                </p>
-                <p>
-                    Type-ahead search: when focused inside the tree, try typing the first few letters of a item and it
-                    will focus it
-                </p>
-            </div>
-
-            <div className="w-full h-full grid grid-cols-[250px_1fr]">
-                <Tree {...props} contentRef={ref} />
-                <main
-                    className="p-4 focus-visible:ring-2 ring-accent ring-offset-1"
-                    ref={ref}
-                    role="main"
-                    tabIndex={-1}
-                >
-                    <h1>Your scene here</h1>
-                    <Link to="https://hanzo.ai">some content link</Link>
-                </main>
-            </div>
-        </div>
-    )
+export const Default: Story = {
+    args: {},
 }
-
-export const Default: Story = BasicTemplate.bind({})
-Default.args = {}

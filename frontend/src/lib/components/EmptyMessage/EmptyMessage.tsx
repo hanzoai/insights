@@ -8,6 +8,7 @@ export interface EmptyMessageProps {
     buttonText?: string
     buttonTo?: string
     buttonOnClick?: () => void
+    buttonDataAttr?: string
     size?: 'small' | 'medium' | 'large'
 }
 
@@ -17,6 +18,7 @@ export function EmptyMessage({
     buttonText,
     buttonTo,
     buttonOnClick,
+    buttonDataAttr,
     size = 'medium',
 }: EmptyMessageProps): JSX.Element {
     return (
@@ -26,7 +28,13 @@ export function EmptyMessage({
 
                 <p className="text-secondary description">{description}</p>
                 {buttonText && (
-                    <Button type="secondary" to={buttonTo} onClick={buttonOnClick} size={size}>
+                    <Button
+                        type="secondary"
+                        to={buttonTo}
+                        onClick={buttonOnClick}
+                        size={size}
+                        data-attr={buttonDataAttr}
+                    >
                         {buttonText}
                     </Button>
                 )}

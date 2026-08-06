@@ -7,8 +7,9 @@ import { IconPerson, IconVideoCamera } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { humanFriendlyLargeNumber, humanFriendlyNumber, pluralize } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
+import { humanFriendlyLargeNumber, humanFriendlyNumber } from 'lib/utils/numbers'
+import { pluralize } from 'lib/utils/strings'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { LiveUserCountLogicProps, liveUserCountLogic } from './liveUserCountLogic'

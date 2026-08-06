@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getNodeJSSteps as getNodeJSStepsPA } from '../product-analytics/nodejs'
 import { StepDefinition } from '../steps'
@@ -17,7 +17,7 @@ export const getHonoSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                     {dedent`
                         Hono uses [\`app.onError\`](https://hono.dev/docs/api/exception#handling-httpexception) to handle uncaught exceptions. You can take advantage of this for error tracking. 
                         
-                        Remember to **export** your [project API key](https://insights.hanzo.ai/settings/project#variables) as an environment variable.
+                        Remember to **export** your [project token](https://app.hanzo.ai/settings/project#variables) as an environment variable.
                     `}
                 </Markdown>
                 <CodeBlock
@@ -27,7 +27,7 @@ export const getHonoSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                             file: 'index.ts',
                             code: dedent`
                               import { Insights } from 'insights-node'
-                              const insights = new Insights(process.env.INSIGHTS_PUBLIC_KEY, { host: 'https://us.i.hanzo.ai' })
+                              const insights = new Insights(process.env.INSIGHTS_TOKEN, { host: 'https://us.i.hanzo.ai' })
                               app.onError(async (err, c) => {
                                 insights.captureException(err, 'user_distinct_id_with_err_rethrow', {
                                   path: c.req.path,
@@ -57,17 +57,13 @@ export const getHonoSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        exceptionHandlingStep,
-        verifyStep,
-    ]
+    return [...installSteps, exceptionHandlingStep, verifyStep]
 }
 
 export const HonoInstallation = createInstallation(getHonoSteps)

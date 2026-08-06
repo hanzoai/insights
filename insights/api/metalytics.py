@@ -4,11 +4,12 @@ from rest_framework import request, response, serializers, viewsets
 from rest_framework.serializers import BaseSerializer
 
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.kafka_client.client import KafkaProducer
+from insights.kafka_client.routing import get_producer
 from insights.kafka_client.topics import KAFKA_APP_METRICS2
 from insights.models.event.util import format_datastore_timestamp
-from insights.models.plugin import PluginConfig
 from insights.utils import cast_timestamp_or_now
+
+from products.cdp.backend.models.plugin import PluginConfig
 
 
 class MetalyticsCreateRequestSerializer(serializers.Serializer):
@@ -37,6 +38,6 @@ class MetalyticsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
             "timestamp": format_datastore_timestamp(cast_timestamp_or_now(None)),
         }
 
-        KafkaProducer().produce(topic=KAFKA_APP_METRICS2, data=payload)
+        get_producer(topic=KAFKA_APP_METRICS2).produce(topic=KAFKA_APP_METRICS2, data=payload)
 
         return response.Response({})

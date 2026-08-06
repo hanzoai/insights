@@ -1,20 +1,27 @@
-// react-toastify's `toast` is aliased because this file exports its own: the
-// debrand renamed lemonToast onto that name, so every unaliased call below bound
-// to the object being defined and called itself.
-import { ToastOptions, ToastContentProps as ToastifyRenderProps, toast as toastify } from 'react-toastify'
+import insights from 'insights-js'
+import { toast, type ToastOptions } from 'react-toastify'
 
 import { IconCheckCircle, IconInfo, IconWarning, IconX } from '@hanzo/icons'
-import insights from '@hanzo/insights'
 
+import { getIncidentStatus, STATUS_PAGE_BASE } from 'lib/components/HelpMenu/incidentStatus'
 import { isChristmas } from 'lib/holidays'
-import { hashCodeForString } from 'lib/utils'
+import { hashCodeForString } from 'lib/utils/strings'
 
-import { Button } from '../Button'
-import { Spinner } from '../Spinner'
 import { IconErrorOutline, IconGift } from '../icons'
+import { Button } from '../Button'
+import { Link } from '../Link'
+import { Spinner } from '../Spinner'
 
 export function ToastCloseButton({ closeToast }: { closeToast?: () => void }): JSX.Element {
-    return <Button type="tertiary" size="small" icon={<IconX />} onClick={closeToast} data-attr="toast-close-button" />
+    return (
+        <Button
+            type="tertiary"
+            size="small"
+            icon={<IconX />}
+            onClick={closeToast}
+            data-attr="toast-close-button"
+        />
+    )
 }
 
 interface ToastButton {
@@ -24,7 +31,7 @@ interface ToastButton {
     className?: string
 }
 
-interface ToastOptionsWithButton extends ToastOptions {
+interface ToastOptionsWithButton<T = string> extends ToastOptions<T> {
     button?: ToastButton
     hideButton?: boolean
 }
@@ -33,6 +40,15 @@ export const GET_HELP_BUTTON: ToastButton = {
     label: 'Get help',
     action: () => {
         window.open('https://hanzo.ai/support?utm_medium=in-product&utm_campaign=error-toast', '_blank')
+    },
+}
+
+// Fallback for when submitting a support ticket in-app fails: let the user reach us
+// directly by email instead of being sent back to the form that just failed.
+export const EMAIL_SUPPORT_BUTTON: ToastButton = {
+    label: 'Email us directly',
+    action: () => {
+        window.location.href = 'mailto:supportreply@hanzo.ai?subject=Insights support request'
     },
 }
 
@@ -51,7 +67,7 @@ export function ToastContent({ type, message, button, id }: ToastContentProps): 
                 <Button
                     onClick={() => {
                         void button.action()
-                        toastify.dismiss(id)
+                        toast.dismiss(id)
                     }}
                     type="secondary"
                     size="small"
@@ -65,7 +81,11 @@ export function ToastContent({ type, message, button, id }: ToastContentProps): 
     )
 }
 
-function ensureToastId(toastOptions: ToastOptions, type: string, message?: string | JSX.Element): ToastOptions {
+function ensureToastId<T>(
+    toastOptions: ToastOptions<T>,
+    type: string,
+    message?: string | JSX.Element
+): ToastOptions<T> {
     if (toastOptions.toastId) {
         return toastOptions
     }
@@ -73,39 +93,99 @@ function ensureToastId(toastOptions: ToastOptions, type: string, message?: strin
     // will skip showing a duplicate toast if one with the same type and message is already visible.
     const toastId =
         typeof message === 'string'
-            ? `${type}-${hashCodeForString(message)}`
-            : `${Math.round(Math.random() * 10000000)}`
+            ? `lemon-${type}-${hashCodeForString(message)}`
+            : `lemon-${Math.round(Math.random() * 10000000)}`
     return { ...toastOptions, toastId }
 }
 
+function withIncidentNote(message: string | JSX.Element): string | JSX.Element {
+    const status = getIncidentStatus()
+    if (status === 'operational') {
+        return message
+    }
+
+    return (
+        <>
+            <span className="block">{message}</span>
+            <Link className="block text-xs mt-1 opacity-75" to={STATUS_PAGE_BASE} target="_blank">
+                There is an ongoing incident that may be related.
+            </Link>
+        </>
+    )
+}
+
+interface ToastError {
+    message: string
+}
+
+// IDs dismissed before the deferred microtask has fired. Prevents a toast from
+// appearing if dismiss() is called synchronously after creation in the same tick.
+const cancelledIds = new Set<number | string>()
+
 export const toast = {
-    info(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}): void {
-        toastOptions = ensureToastId(toastOptions, 'info', message)
-        toastify.info(<ToastContent type="info" message={message} button={button} id={toastOptions.toastId} />, {
-            icon: <IconInfo />,
-            ...toastOptions,
+    info(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}) {
+        const options = ensureToastId(toastOptions, 'info', message)
+        const id = options.toastId!
+        // Defer so React can flush the re-render with the updated theme on ToastContainer
+        queueMicrotask(() => {
+            if (cancelledIds.delete(id)) {
+                return
+            }
+            toast.info(<ToastContent type="info" message={message} button={button} id={id} />, {
+                icon: <IconInfo />,
+                ...options,
+            })
         })
+        return id
     },
-    success(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}): void {
-        toastOptions = ensureToastId(toastOptions, 'success', message)
-        toastify.success(<ToastContent type="success" message={message} button={button} id={toastOptions.toastId} />, {
-            icon: isChristmas() ? <IconGift className="text-green-600" /> : <IconCheckCircle />,
-            ...toastOptions,
+    loading(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}) {
+        const options = ensureToastId(toastOptions, 'loading', message)
+        const id = options.toastId!
+        queueMicrotask(() => {
+            if (cancelledIds.delete(id)) {
+                return
+            }
+            toast.loading(<ToastContent type="info" message={message} button={button} id={id} />, {
+                icon: <Spinner />,
+                ...options,
+            })
         })
+        return id
     },
-    warning(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}): void {
+    success(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}) {
+        const options = ensureToastId(toastOptions, 'success', message)
+        const id = options.toastId!
+        queueMicrotask(() => {
+            if (cancelledIds.delete(id)) {
+                return
+            }
+            toast.success(<ToastContent type="success" message={message} button={button} id={id} />, {
+                icon: isChristmas() ? <IconGift className="text-green-600" /> : <IconCheckCircle />,
+                ...options,
+            })
+        })
+        return id
+    },
+    warning(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}) {
         insights.capture('toast warning', {
             message: String(message),
             button: button?.label,
             toastId: toastOptions.toastId,
         })
-        toastOptions = ensureToastId(toastOptions, 'warning', message)
-        toastify.warning(<ToastContent type="warning" message={message} button={button} id={toastOptions.toastId} />, {
-            icon: <IconWarning />,
-            ...toastOptions,
+        const options = ensureToastId(toastOptions, 'warning', message)
+        const id = options.toastId!
+        queueMicrotask(() => {
+            if (cancelledIds.delete(id)) {
+                return
+            }
+            toast.warning(<ToastContent type="warning" message={message} button={button} id={id} />, {
+                icon: <IconWarning />,
+                ...options,
+            })
         })
+        return id
     },
-    error(message: string | JSX.Element, { button, hideButton, ...toastOptions }: ToastOptionsWithButton = {}): void {
+    error(message: string | JSX.Element, { button, hideButton, ...toastOptions }: ToastOptionsWithButton = {}) {
         // when used inside the insights toolbar, `insights.capture` isn't loaded
         // check if the function is available before calling it.
         if (insights.capture) {
@@ -116,20 +196,27 @@ export const toast = {
             })
         }
 
-        toastOptions = ensureToastId(toastOptions, 'error', message)
-        toastify.error(
-            <ToastContent
-                type="error"
-                message={message}
-                // Show button if explicitly provided, or show GET_HELP_BUTTON unless hideButton is true
-                button={button !== undefined ? button : hideButton ? undefined : GET_HELP_BUTTON}
-                id={toastOptions.toastId}
-            />,
-            {
-                icon: <IconErrorOutline />,
-                ...toastOptions,
+        const options = ensureToastId(toastOptions, 'error', message)
+        const id = options.toastId!
+        queueMicrotask(() => {
+            if (cancelledIds.delete(id)) {
+                return
             }
-        )
+            toast.error(
+                <ToastContent
+                    type="error"
+                    message={withIncidentNote(message)}
+                    // Show button if explicitly provided, or show GET_HELP_BUTTON unless hideButton is true
+                    button={button !== undefined ? button : hideButton ? undefined : GET_HELP_BUTTON}
+                    id={id}
+                />,
+                {
+                    icon: <IconErrorOutline />,
+                    ...options,
+                }
+            )
+        })
+        return id
     },
     promise(
         promise: Promise<any>,
@@ -138,9 +225,9 @@ export const toast = {
     ): Promise<any> {
         // Promise toasts always get random IDs (unless explicitly provided) because
         // different operations often share identical pending text like "Saving..."
-        toastOptions = ensureToastId(toastOptions, 'promise')
+        const options = ensureToastId(toastOptions, 'promise')
         // see https://fkhadra.github.io/react-toastify/promise
-        return toastify.promise(
+        return toast.promise<string | undefined, ToastError>(
             promise,
             {
                 pending: {
@@ -148,22 +235,33 @@ export const toast = {
                     icon: <Spinner />,
                 },
                 success: {
-                    render: (({ data }: ToastifyRenderProps<string>) => {
+                    render: ({ data }) => {
                         return <ToastContent type="success" message={data || messages.success} button={button} />
-                    }) as (props: ToastifyRenderProps<unknown>) => React.ReactNode,
+                    },
                     icon: isChristmas() ? <IconGift className="text-green-600" /> : <IconCheckCircle />,
                 },
                 error: {
-                    render: (({ data }: ToastifyRenderProps<Error>) => {
-                        return <ToastContent type="error" message={data?.message || messages.error} button={button} />
-                    }) as (props: ToastifyRenderProps<unknown>) => React.ReactNode,
+                    render: ({ data }) => {
+                        return (
+                            <ToastContent
+                                type="error"
+                                message={withIncidentNote(data?.message || messages.error)}
+                                button={button}
+                            />
+                        )
+                    },
                     icon: <IconErrorOutline />,
                 },
             },
-            toastOptions
+            options
         )
     },
     dismiss(id?: number | string): void {
-        toastify.dismiss(id)
+        // If a toast was created in this tick but hasn't been registered yet (due to
+        // queueMicrotask deferral), mark the ID as cancelled so the microtask skips it.
+        if (id) {
+            cancelledIds.add(id)
+        }
+        toast.dismiss(id)
     },
 }

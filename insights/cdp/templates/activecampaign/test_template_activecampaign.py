@@ -8,7 +8,7 @@ def create_inputs(**kwargs):
         "apiKey": "API_KEY",
         "email": "max@hanzo.ai",
         "firstName": "max",
-        "attributes": {"1": "Insights", "2": "insights.com"},
+        "attributes": {"1": "Insights", "2": "hanzo.ai"},
     }
     inputs.update(kwargs)
 
@@ -38,7 +38,7 @@ class TestTemplateActiveCampaign(BaseInsightsFunctionTemplateTest):
                     "contact": {
                         "email": "max@hanzo.ai",
                         "firstName": "max",
-                        "fieldValues": [{"field": "1", "value": "Insights"}, {"field": "2", "value": "insights.com"}],
+                        "fieldValues": [{"field": "1", "value": "Insights"}, {"field": "2", "value": "hanzo.ai"}],
                     }
                 },
             },

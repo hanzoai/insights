@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useMemo } from 'react'
 
 import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
-import { Button, Divider, SegmentedButton, Select, Tag } from '@hanzo/elements'
+import { Button, Divider, InputSelect, SegmentedButton, Tag } from '@hanzo/elements'
 
 import { ActionPopoverInfo } from 'lib/components/DefinitionPopover/ActionPopoverInfo'
 import { CohortPopoverInfo } from 'lib/components/DefinitionPopover/CohortPopoverInfo'
@@ -13,20 +13,20 @@ import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import {
     DataWarehousePopoverField,
+    DefinitionPopoverRenderer,
     SimpleOption,
     TaxonomicDefinitionTypes,
     TaxonomicFilterGroup,
     TaxonomicFilterGroupType,
 } from 'lib/components/TaxonomicFilter/types'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { TextArea } from 'lib/elements/TextArea/TextArea'
 import { Popover } from 'lib/elements/Popover'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconOpenInNew } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
-import { DataWarehouseTableForInsight } from 'scenes/data-warehouse/types'
+import { isKeyOf } from 'lib/utils/guards'
 
-import { getFilterLabel, isCoreFilter } from '~/taxonomy/helpers'
-import { CORE_FILTER_DEFINITIONS_BY_GROUP } from '~/taxonomy/taxonomy'
+import { getCoreFilterDefinition, getFilterLabel, isCoreFilter } from '~/taxonomy/helpers'
 import {
     ActionType,
     CohortType,
@@ -35,9 +35,11 @@ import {
     PropertyDefinitionVerificationStatus,
 } from '~/types'
 
+import { DataWarehouseTableForInsight } from 'products/data_warehouse/frontend/types'
+
 import { InsightsQLDropdown } from '../InsightsQLDropdown/InsightsQLDropdown'
-import { TZLabel } from '../TZLabel'
 import { taxonomicFilterLogic } from '../TaxonomicFilter/taxonomicFilterLogic'
+import { TZLabel } from '../TZLabel'
 
 export function PropertyStatusControl({
     verified,
@@ -163,9 +165,9 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
         return <></>
     }
 
-    const description: string | JSX.Element | undefined | null =
+    const description =
         (definition && 'description' in definition && definition?.description) ||
-        (definition?.name && CORE_FILTER_DEFINITIONS_BY_GROUP[group.type]?.[definition.name]?.description)
+        (definition?.name ? getCoreFilterDefinition(definition.name, group.type)?.description : undefined)
 
     const sharedComponents = (
         <>
@@ -300,7 +302,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                 <>
                     {sharedComponents}
                     <DefinitionPopover.Grid cols={2}>
-                        <DefinitionPopover.Card title="Users" value={_definition.count ?? 0} />
+                        <DefinitionPopover.Card title="Persons" value={_definition.count ?? 0} />
                         <DefinitionPopover.Card
                             title="Last calculated"
                             value={_definition.last_calculation && <TZLabel time={_definition.last_calculation} />}
@@ -314,7 +316,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                 <>
                     {sharedComponents}
                     <DefinitionPopover.Grid cols={2}>
-                        <DefinitionPopover.Card title="Users" value={_definition.count ?? 0} />
+                        <DefinitionPopover.Card title="Persons" value={_definition.count ?? 0} />
                         <DefinitionPopover.Card
                             title="Last calculated"
                             value={_definition.last_calculation && <TZLabel time={_definition.last_calculation} />}
@@ -328,7 +330,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
             <>
                 {sharedComponents}
                 <DefinitionPopover.Grid cols={2}>
-                    <DefinitionPopover.Card title="Users" value={_definition.count ?? 0} />
+                    <DefinitionPopover.Card title="Persons" value={_definition.count ?? 0} />
                     <DefinitionPopover.Card
                         title="Last calculated"
                         value={_definition.last_calculation && <TZLabel time={_definition.last_calculation} />}
@@ -465,7 +467,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
     }
     if (isDataWarehouse && dataWarehousePopoverFields.length > 0) {
         const _definition = definition as DataWarehouseTableForInsight
-        const columnOptions = Object.values(_definition.fields).map((column) => ({
+        const columnOptions = Object.values(_definition.fields ?? {}).map((column) => ({
             label: column.name + ' (' + column.type + ')',
             value: column.name,
             type: column.type,
@@ -491,13 +493,13 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                 label,
                                 description,
                                 allowInsightsQL,
-                                insightsQLOnly,
+                                hogQLOnly,
                                 tableName,
                                 optional,
                                 type,
                             }: DataWarehousePopoverField) => {
-                                const fieldValue = key in localDefinition ? localDefinition[key] : undefined
-                                const isInsightsQL = isUsingInsightsQLExpression(fieldValue)
+                                const fieldValue = isKeyOf(key, localDefinition) ? localDefinition[key] : undefined
+                                const isInsightsQL = isUsingInsightsQLExpression(fieldValue ?? undefined)
 
                                 return (
                                     <Fragment key={key}>
@@ -517,23 +519,38 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                                 </Tooltip>
                                             )}
                                         </label>
-                                        {!insightsQLOnly && (
-                                            <Select
+                                        {!hogQLOnly && (
+                                            <InputSelect
+                                                mode="single"
                                                 fullWidth
-                                                allowClear={!!optional}
-                                                value={isInsightsQL ? '' : fieldValue}
+                                                placeholder="Select a column"
+                                                value={isInsightsQL ? [''] : fieldValue != null ? [fieldValue] : null}
                                                 options={[
-                                                    ...columnOptions.filter((col) => !type || col.type === type),
-                                                    ...(allowInsightsQL ? [insightsqlOption] : []),
+                                                    ...columnOptions
+                                                        .filter((col) => !type || col.type === type)
+                                                        .map((col) => ({
+                                                            key: col.value,
+                                                            label: col.label,
+                                                            value: col.value,
+                                                        })),
+                                                    ...(allowInsightsQL
+                                                        ? [
+                                                              {
+                                                                  key: insightsqlOption.value,
+                                                                  label: insightsqlOption.label,
+                                                                  value: insightsqlOption.value,
+                                                              },
+                                                          ]
+                                                        : []),
                                                 ]}
-                                                onChange={(value: string | null) =>
-                                                    setLocalDefinition({ [key]: value })
+                                                onChange={(value) =>
+                                                    setLocalDefinition({ [key]: value.length > 0 ? value[0] : null })
                                                 }
                                             />
                                         )}
-                                        {((allowInsightsQL && isInsightsQL) || insightsQLOnly) && (
+                                        {((allowInsightsQL && isInsightsQL) || hogQLOnly) && (
                                             <InsightsQLDropdown
-                                                insightsQLValue={fieldValue || ''}
+                                                hogQLValue={fieldValue || ''}
                                                 tableName={tableName || _definition.name}
                                                 onInsightsQLValueChange={(value) => setLocalDefinition({ [key]: value })}
                                             />
@@ -546,12 +563,12 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                     <div className="flex justify-end">
                         <Button
                             onClick={() => {
-                                selectItem(group, itemValue ?? null, localDefinition, undefined)
+                                selectItem(group, itemValue ?? null, localDefinition)
                             }}
                             disabledReason={
                                 dataWarehousePopoverFields.every(
                                     ({ key, optional }: DataWarehousePopoverField) =>
-                                        optional || (key in localDefinition && localDefinition[key])
+                                        optional || (isKeyOf(key, localDefinition) && localDefinition[key])
                                 )
                                     ? null
                                     : 'All required field mappings must be specified'
@@ -646,7 +663,7 @@ function DefinitionEdit(): JSX.Element {
                 )}
                 <Divider className="DefinitionPopover mt-0" />
                 <div className="flex items-center justify-between gap-2 click-outside-block">
-                    {!hideView && isViewable && type !== TaxonomicFilterGroupType.Events ? (
+                    {!hideView && isViewable && viewFullDetailUrl && type !== TaxonomicFilterGroupType.Events ? (
                         <Button
                             sideIcon={<IconOpenInNew style={{ marginLeft: 4, fontSize: '1rem' }} />}
                             disabledReason={definitionLoading ? 'Loading…' : undefined}
@@ -691,6 +708,7 @@ interface ControlledDefinitionPopoverContentsProps {
     item: TaxonomicDefinitionTypes
     group: TaxonomicFilterGroup
     highlightedItemElement: HTMLDivElement | null
+    definitionPopoverRenderer?: DefinitionPopoverRenderer
 }
 
 export function ControlledDefinitionPopover({
@@ -698,6 +716,7 @@ export function ControlledDefinitionPopover({
     item,
     group,
     highlightedItemElement,
+    definitionPopoverRenderer,
 }: ControlledDefinitionPopoverContentsProps): JSX.Element | null {
     const { state, singularType, definition } = useValues(definitionPopoverLogic)
     const { setDefinition } = useActions(definitionPopoverLogic)
@@ -705,24 +724,34 @@ export function ControlledDefinitionPopover({
     const icon = group.getIcon?.(definition || item)
 
     // Supports all types specified in selectedItemHasPopover
-    const value = group.getValue?.(item)
+    // Pinned items store minimal data ({ name }) so the source group's getValue may not
+    // work (e.g. EventMetadata uses option.id). Fall back to item.name for pinned items.
+    const value = group.getValue?.(item) ?? ('name' in item ? item.name : null)
 
     // Hydrate popover card with the newest item. Compare by value identity (not reference)
     // to avoid cascading re-renders when taxonomicGroups re-evaluates and creates new item
     // objects with the same logical identity.
     useEffect(() => {
         setDefinition(item)
-    }, [value, setDefinition, item])
+    }, [value, setDefinition]) // eslint-disable-line react-hooks/exhaustive-deps
 
     if (!value || !item) {
         return null
     }
 
+    const isDataWarehouseFunnelWidePopover =
+        group.type === TaxonomicFilterGroupType.DataWarehouse && !!definitionPopoverRenderer
+
+    const defaultView = <DefinitionView group={group} />
+    const customView = definitionPopoverRenderer?.({ item, group, defaultView }) ?? defaultView
+
     return (
         <Popover
             visible={visible}
             referenceElement={highlightedItemElement}
-            className="click-outside-block hotkey-block"
+            className={cn('click-outside-block hotkey-block', {
+                'definition-popover--data-warehouse-funnel-wide': isDataWarehouseFunnelWidePopover,
+            })}
             overlay={
                 <DefinitionPopover.Wrapper>
                     <DefinitionPopover.Header
@@ -739,7 +768,7 @@ export function ControlledDefinitionPopover({
                         editHeaderTitle={`Edit ${singularType}`}
                         icon={icon}
                     />
-                    {state === DefinitionPopoverState.Edit ? <DefinitionEdit /> : <DefinitionView group={group} />}
+                    {state === DefinitionPopoverState.Edit ? <DefinitionEdit /> : customView}
                 </DefinitionPopover.Wrapper>
             }
             placement="right"

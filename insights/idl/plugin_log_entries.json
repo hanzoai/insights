@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "file://insights/idl/plugin_log_entries.json",
     "title": "plugin_log_entries",
-    "description": "Plugin log entries that are destined for ClickHouse",
+    "description": "Plugin log entries that are destined for Datastore",
     "type": "object",
     "properties": {
         "id": {

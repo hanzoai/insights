@@ -54,7 +54,7 @@ pub struct Job {
     // Job metadata
     pub id: Uuid,
     pub team_id: i32,
-    pub function_id: Option<Uuid>, // Some jobs might not come from IQL, and it doesn't /kill/ use to support that
+    pub function_id: Option<Uuid>, // Some jobs might not come from script, and it doesn't /kill/ use to support that
     pub created: DateTime<Utc>,
 
     // Queue bookkeeping
@@ -78,7 +78,7 @@ pub struct Job {
     pub parent_run_id: Option<String>, // Optional batch job ID for tracking batch workflows
     pub vm_state: Option<Bytes>,       // The state of the VM this job is running on (if it exists)
     pub metadata: Option<Bytes>, // Additional fields a worker can tack onto a job, for e.g. tracking some state across retries (or number of retries in general by a given class of worker)
-    pub parameters: Option<Bytes>, // The actual parameters of the job (function args for a IQL function, http request for a fetch function)
+    pub parameters: Option<Bytes>, // The actual parameters of the job (function args for a script function, http request for a fetch function)
     pub blob: Option<Bytes>, // An additional, binary, parameter field (for things like fetch request body)
 }
 

@@ -1,4 +1,4 @@
-import { hexToRGB } from 'lib/utils'
+import { hexToRGB } from 'lib/utils/colors'
 
 type ReferenceColor = { name: string; group: string }
 
@@ -45,7 +45,7 @@ const referenceColors: Record<string, ReferenceColor> = {
     '#FFD700': { name: 'Gold', group: 'Yellow' },
     '#FFFF00': { name: 'Yellow', group: 'Yellow' },
     '#FFFFE0': { name: 'LightYellow', group: 'Yellow' },
-    '#FFFACD': { name: 'LemonChiffon', group: 'Yellow' },
+    '#FFFACD': { name: 'Chiffon', group: 'Yellow' },
     '#FAFAD2': { name: 'LightGoldenRodYellow', group: 'Yellow' },
     '#FFEFD5': { name: 'PapayaWhip', group: 'Yellow' },
     '#FFE4B5': { name: 'Moccasin', group: 'Yellow' },

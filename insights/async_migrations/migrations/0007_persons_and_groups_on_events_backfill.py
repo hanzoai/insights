@@ -1,5 +1,4 @@
 from datetime import datetime
-from functools import cached_property
 from typing import Union
 
 from django.conf import settings
@@ -137,11 +136,11 @@ class Migration(AsyncMigrationDefinition):
 
         return len(rows_to_backfill_check) > 0
 
-    @cached_property
-    def operations(self):
+    @property
+    def operations(self) -> list[AsyncMigrationOperation]:
         return [
             AsyncMigrationOperation(
-                # See https://github.com/hanzoai/insights/issues/10616 for details on choice of codec
+                # See https://github.com/Insights/insights/issues/10616 for details on choice of codec
                 fn=lambda query_id: self._update_properties_column_compression_codec(query_id, "ZSTD(3)"),
                 rollback_fn=lambda query_id: self._update_properties_column_compression_codec(query_id, "LZ4"),
             ),
@@ -450,9 +449,7 @@ class Migration(AsyncMigrationDefinition):
                 {where_clause}
             """,
             where_clause_params,
-            # dictGet is non-deterministic; replicated storage refuses it in
-            # ALTER UPDATE unless explicitly allowed (BAD_ARGUMENTS code 36).
-            settings={"max_execution_time": 0, "allow_nondeterministic_mutations": 1},
+            settings={"max_execution_time": 0},
             per_shard=True,
             query_id=query_id,
         )

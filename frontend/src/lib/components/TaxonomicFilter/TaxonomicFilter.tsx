@@ -2,25 +2,27 @@ import './TaxonomicFilter.scss'
 
 import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { forwardRef, useEffect, useId, useRef, useState } from 'react'
 
-import { IconKeyboard } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
 
 import {
+    CategoryDropdownVariant,
+    resolveCategoryDropdownVariant,
     TaxonomicFilterGroupType,
     TaxonomicFilterLogicProps,
     TaxonomicFilterProps,
 } from 'lib/components/TaxonomicFilter/types'
-import { Input, InputPropsText } from 'lib/elements/Input/Input'
-import { Tooltip, TooltipProps } from 'lib/elements/Tooltip'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { Icon123 } from 'lib/elements/icons'
+import { Input, InputPropsText } from 'lib/elements/Input/Input'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { urls } from 'scenes/urls'
 
+import { CategoryDropdown } from './CategoryDropdown'
 import { InfiniteSelectResults } from './InfiniteSelectResults'
 import { defaultDataWarehousePopoverFields, taxonomicFilterLogic } from './taxonomicFilterLogic'
-
-let uniqueMemoizedIndex = 0
 
 export function TaxonomicFilter({
     taxonomicFilterLogicKey: taxonomicFilterLogicKeyInput,
@@ -34,6 +36,7 @@ export function TaxonomicFilter({
     metadataSource,
     eventNames,
     schemaColumns,
+    schemaColumnsLoading,
     height,
     width,
     excludedProperties,
@@ -45,18 +48,31 @@ export function TaxonomicFilter({
     showNumericalPropsOnly,
     dataWarehousePopoverFields = defaultDataWarehousePopoverFields,
     maxContextOptions,
-    useVerticalLayout,
     allowNonCapturedEvents = false,
-    insightsQLGlobals,
+    hogQLGlobals,
+    hogQLExpressionShowBreakdownLabelHint,
+    definitionPopoverRenderer,
+    minSearchQueryLength,
+    suggestedFiltersLabel,
+    hideSearchInput,
+    searchQuery: controlledSearchQuery,
+    enableKeywordShortcuts,
+    excludedOperators,
+    selectingKeyOnly,
+    collapseUrlsToContainsRow,
 }: TaxonomicFilterProps): JSX.Element {
-    // Generate a unique key for each unique TaxonomicFilter that's rendered
-    const taxonomicFilterLogicKey = useMemo(
-        () => taxonomicFilterLogicKeyInput || `taxonomic-filter-${uniqueMemoizedIndex++}`,
-        [taxonomicFilterLogicKeyInput]
-    )
+    const generatedKey = useId()
+    const taxonomicFilterLogicKey = taxonomicFilterLogicKeyInput || `taxonomic-filter-${generatedKey}`
 
     const searchInputRef = useRef<HTMLInputElement | null>(null)
     const focusInput = (): void => searchInputRef.current?.focus()
+
+    const { featureFlags } = useValues(featureFlagLogic)
+    const categoryDropdownVariant = resolveCategoryDropdownVariant(
+        featureFlags[FEATURE_FLAGS.TAXONOMIC_FILTER_CATEGORY_DROPDOWN]
+    )
+    const resolvedSuggestedFiltersLabel =
+        suggestedFiltersLabel ?? (categoryDropdownVariant === 'control' ? 'Suggestions' : 'All')
 
     const taxonomicFilterLogicProps: TaxonomicFilterLogicProps = {
         taxonomicFilterLogicKey,
@@ -68,6 +84,7 @@ export function TaxonomicFilter({
         optionsFromProp,
         eventNames,
         schemaColumns,
+        schemaColumnsLoading,
         popoverEnabled,
         selectFirstItem,
         excludedProperties,
@@ -77,16 +94,29 @@ export function TaxonomicFilter({
         hideBehavioralCohorts,
         showNumericalPropsOnly,
         dataWarehousePopoverFields,
-        useVerticalLayout,
         autoSelectItem: true,
         allowNonCapturedEvents,
         maxContextOptions,
-        insightsQLGlobals,
+        hogQLGlobals,
+        hogQLExpressionShowBreakdownLabelHint,
+        minSearchQueryLength,
+        suggestedFiltersLabel: resolvedSuggestedFiltersLabel,
+        enableKeywordShortcuts,
+        excludedOperators,
+        selectingKeyOnly,
+        collapseUrlsToContainsRow,
     }
 
     const logic = taxonomicFilterLogic(taxonomicFilterLogicProps)
     const { activeTab } = useValues(logic)
+    const { setSearchQuery } = useActions(logic)
     const [refReady, setRefReady] = useState(false)
+
+    useEffect(() => {
+        if (controlledSearchQuery !== undefined) {
+            setSearchQuery(controlledSearchQuery)
+        }
+    }, [controlledSearchQuery, setSearchQuery])
 
     useEffect(() => {
         if (groupType !== TaxonomicFilterGroupType.InsightsQLExpression) {
@@ -99,7 +129,7 @@ export function TaxonomicFilter({
         if (taxonomicFilterRef.current) {
             setRefReady(true)
         }
-    }, [taxonomicFilterRef.current])
+    }, [])
 
     const style = {
         ...(width ? { width } : {}),
@@ -119,9 +149,16 @@ export function TaxonomicFilter({
                 // eslint-disable-next-line react/forbid-dom-props
                 style={style}
             >
-                {activeTab !== TaxonomicFilterGroupType.InsightsQLExpression || taxonomicGroupTypes.length > 1 ? (
+                {!hideSearchInput &&
+                (activeTab !== TaxonomicFilterGroupType.InsightsQLExpression || taxonomicGroupTypes.length > 1) ? (
                     <div className="relative">
-                        <TaxonomicFilterSearchInput searchInputRef={searchInputRef} onClose={onClose} />
+                        <TaxonomicFilterSearchInput
+                            searchInputRef={searchInputRef}
+                            onClose={onClose}
+                            categoryDropdownVariant={categoryDropdownVariant}
+                            eventName={eventNames?.[0]}
+                            focusInput={focusInput}
+                        />
                     </div>
                 ) : null}
                 {refReady && (
@@ -129,7 +166,8 @@ export function TaxonomicFilter({
                         focusInput={focusInput}
                         taxonomicFilterLogicProps={taxonomicFilterLogicProps}
                         popupAnchorElement={taxonomicFilterRef.current}
-                        useVerticalLayout={useVerticalLayout}
+                        definitionPopoverRenderer={definitionPopoverRenderer}
+                        categoryDropdownVariant={categoryDropdownVariant}
                     />
                 )}
             </div>
@@ -142,15 +180,33 @@ export const TaxonomicFilterSearchInput = forwardRef<
     {
         searchInputRef: React.Ref<HTMLInputElement> | null
         onClose: TaxonomicFilterProps['onClose']
-    } & Pick<InputPropsText, 'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange' | 'autoFocus'> &
-        Pick<TooltipProps, 'docLink'>
+        categoryDropdownVariant?: CategoryDropdownVariant
+        eventName?: string
+        focusInput?: () => void
+    } & Pick<
+        InputPropsText,
+        'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange' | 'autoFocus' | 'placeholder'
+    >
 >(function UniversalSearchInput(
-    { searchInputRef, onClose, onChange, docLink, autoFocus = true, ...props },
+    {
+        searchInputRef,
+        onClose,
+        onChange,
+        autoFocus = true,
+        placeholder,
+        categoryDropdownVariant = 'control',
+        eventName,
+        focusInput,
+        prefix,
+        ...props
+    },
     ref
 ): JSX.Element {
     const { searchQuery, searchPlaceholder, showNumericalPropsOnly } = useValues(taxonomicFilterLogic)
     const {
         setSearchQuery: setTaxonomicSearchQuery,
+        markUserInteraction,
+        recordPaste,
         moveUp,
         moveDown,
         tabLeft,
@@ -159,9 +215,18 @@ export const TaxonomicFilterSearchInput = forwardRef<
     } = useActions(taxonomicFilterLogic)
 
     const _onChange = (query: string): void => {
+        // Only the input's onChange path counts as user interaction. The controlled-prop
+        // useEffect above also calls setSearchQuery directly, but that's programmatic and
+        // shouldn't unmute the `taxonomic filter closed` capture — keep this dispatch separate.
+        markUserInteraction()
         setTaxonomicSearchQuery(query)
         onChange?.(query)
     }
+
+    const categoriesAreInDropdown = categoryDropdownVariant !== 'control'
+    const categoryDropdown = categoriesAreInDropdown ? (
+        <CategoryDropdown variant={categoryDropdownVariant} eventName={eventName} onAfterChange={focusInput} />
+    ) : null
 
     return (
         <Input
@@ -170,12 +235,21 @@ export const TaxonomicFilterSearchInput = forwardRef<
             data-attr="taxonomic-filter-searchfield"
             type="search"
             fullWidth
-            placeholder={`Search ${searchPlaceholder}`}
+            placeholder={placeholder ?? `Search ${searchPlaceholder}`}
             value={searchQuery}
+            prefix={prefix}
+            onPaste={(e) => {
+                const pasted = e.clipboardData?.getData('text') ?? ''
+                if (pasted.length > 0) {
+                    recordPaste(pasted.length)
+                }
+            }}
             suffix={
                 <>
+                    {categoryDropdown}
                     {showNumericalPropsOnly && (
                         <Tooltip
+                            interactive
                             title={
                                 <span>
                                     This filter only shows numerical properties. If you're not seeing your property
@@ -192,15 +266,6 @@ export const TaxonomicFilterSearchInput = forwardRef<
                             </span>
                         </Tooltip>
                     )}
-                    <Tooltip
-                        title={
-                            'Fuzzy text search, or filter by specific properties and values.' +
-                            (docLink ? ' Check the documentation for more information.' : '')
-                        }
-                        docLink={docLink}
-                    >
-                        <IconKeyboard style={{ fontSize: '1.2rem' }} className="text-secondary" />
-                    </Tooltip>
                 </>
             }
             onKeyDown={(e) => {
@@ -213,6 +278,10 @@ export const TaxonomicFilterSearchInput = forwardRef<
                         moveDown()
                         break
                     case 'Tab':
+                        if (categoriesAreInDropdown) {
+                            shouldPreventDefault = false
+                            break
+                        }
                         e.shiftKey ? tabLeft() : tabRight()
                         break
                     case 'Enter':

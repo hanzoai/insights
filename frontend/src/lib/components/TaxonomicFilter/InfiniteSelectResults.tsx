@@ -1,27 +1,48 @@
 import { BindLogic, useActions, useValues } from 'kea'
+import { useRef } from 'react'
 
-import { IconCheck, IconSort } from '@hanzo/icons'
-import { Button, Menu, Tag } from '@hanzo/elements'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { InfiniteList } from 'lib/components/TaxonomicFilter/InfiniteList'
 import { infiniteListLogic } from 'lib/components/TaxonomicFilter/infiniteListLogic'
-import { taxonomicFilterPreferencesLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterPreferencesLogic'
-import { TaxonomicFilterGroupType, TaxonomicFilterLogicProps } from 'lib/components/TaxonomicFilter/types'
+import {
+    CategoryDropdownVariant,
+    DefinitionPopoverRenderer,
+    TaxonomicFilterGroupType,
+    TaxonomicFilterLogicProps,
+} from 'lib/components/TaxonomicFilter/types'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
-import { IconBlank } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
+import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
+import { userLogic } from 'scenes/userLogic'
+
+import { AvailableFeature } from '~/types'
 
 import { TaxonomicFilterEmptyState, taxonomicFilterGroupTypesWithEmptyStates } from './TaxonomicFilterEmptyState'
 import { taxonomicFilterLogic } from './taxonomicFilterLogic'
-
-// Number of taxonomic groups after which we switch to vertical layout by default
-const VERTICAL_LAYOUT_THRESHOLD = 4
 
 export interface InfiniteSelectResultsProps {
     focusInput: () => void
     taxonomicFilterLogicProps: TaxonomicFilterLogicProps
     popupAnchorElement: HTMLDivElement | null
-    useVerticalLayout?: boolean
+    definitionPopoverRenderer?: DefinitionPopoverRenderer
+    categoryDropdownVariant?: CategoryDropdownVariant
+}
+
+export function getCategoryPillDisabledReason(
+    canInteract: boolean,
+    groupType: TaxonomicFilterGroupType,
+    hasPathsAdvanced: boolean
+): string | null {
+    if (canInteract) {
+        return null
+    }
+    // Wildcard groups (paths) are gated behind Advanced paths — explain the paygate rather than a generic "No results".
+    // Paid users with no wildcards defined still see "No results" since they can add them.
+    if (groupType === TaxonomicFilterGroupType.Wildcards && !hasPathsAdvanced) {
+        return 'Wildcard groups are only available on paid plans'
+    }
+    return 'No results'
 }
 
 // CategoryPillContent uses useValues(infiniteListLogic) without props, relying on BindLogic context
@@ -36,7 +57,16 @@ function CategoryPillContent({
     onClick: () => void
 }): JSX.Element {
     const { taxonomicGroups } = useValues(taxonomicFilterLogic)
-    const { totalResultCount, totalListCount, isLoading, hasRemoteDataSource, hasMore } = useValues(infiniteListLogic)
+    const { hasAvailableFeature } = useValues(userLogic)
+    const {
+        totalResultCount,
+        totalListCount,
+        isLoading,
+        isLocalDataLoading,
+        hasRemoteDataSource,
+        hasMore,
+        needsMoreSearchCharacters,
+    } = useValues(infiniteListLogic)
 
     const group = taxonomicGroups.find((g) => g.type === groupType)
 
@@ -45,35 +75,52 @@ function CategoryPillContent({
         totalListCount > 0 ||
         taxonomicFilterGroupTypesWithEmptyStates.includes(groupType) ||
         groupType === TaxonomicFilterGroupType.SuggestedFilters
-    const showLoading = isLoading && hasRemoteDataSource
+    const showLoading = (isLoading && hasRemoteDataSource) || isLocalDataLoading
 
-    return (
+    const hasPathsAdvanced = hasAvailableFeature(AvailableFeature.PATHS_ADVANCED)
+    const disabledReason = getCategoryPillDisabledReason(canInteract, groupType, hasPathsAdvanced)
+    // Wildcard groups are gated behind Advanced paths. Tag's `disabledReason` only renders as a slow
+    // native `title`, so surface the upgrade hint via a proper Tooltip (below) instead. Other groups keep the
+    // existing `disabledReason` ("No results") behavior.
+    const isGatedWildcards = !canInteract && groupType === TaxonomicFilterGroupType.Wildcards && !hasPathsAdvanced
+
+    const tag = (
         <Tag
             type={isActive ? 'primary' : canInteract ? 'option' : 'muted'}
             data-attr={`taxonomic-tab-${groupType}`}
             onClick={canInteract ? onClick : undefined}
-            disabledReason={!canInteract ? 'No results' : null}
+            disabledReason={disabledReason}
             className="font-normal"
+            // For the gated case the reason is shown via the Tooltip below, so suppress Tag's native `title`
+            // to avoid a duplicate tooltip while keeping its disabled semantics (aria-disabled, cursor, styling).
+            // aria-label keeps the reason screen-reader-accessible since the suppressed title no longer can.
+            {...(isGatedWildcards ? { title: '', 'aria-label': disabledReason ?? undefined } : {})}
         >
             {group?.categoryLabel ? (
                 group.categoryLabel(totalResultCount)
             ) : (
                 <>
                     {group?.name}
-                    {': '}
-                    {showLoading ? (
-                        <Spinner className="text-sm inline-block ml-1" textColored speed="0.8s" />
-                    ) : (
-                        totalResultCount
+                    {!needsMoreSearchCharacters && (
+                        <>
+                            {': '}
+                            {showLoading ? (
+                                <Spinner className="text-sm inline-block ml-1" textColored speed="0.8s" />
+                            ) : (
+                                totalResultCount
+                            )}
+                            {/* This is a workaround. We need to make the logic fetch more results when querying from datastore*/}
+                            <span aria-label={hasMore ? `${totalResultCount} or more` : `${totalResultCount}`}>
+                                {hasMore ? '+' : ''}
+                            </span>
+                        </>
                     )}
-                    {/* This is a workaround. We need to make the logic fetch more results when querying from datastore*/}
-                    <span aria-label={hasMore ? `${totalResultCount} or more` : `${totalResultCount}`}>
-                        {hasMore ? '+' : ''}
-                    </span>
                 </>
             )}
         </Tag>
     )
+
+    return isGatedWildcards && disabledReason ? <Tooltip title={disabledReason}>{tag}</Tooltip> : tag
 }
 
 // CategoryPill wraps CategoryPillContent with BindLogic to ensure infiniteListLogic is properly mounted
@@ -98,75 +145,9 @@ function CategoryPill({
 
 function TaxonomicGroupTitle({ openTab }: { openTab: TaxonomicFilterGroupType }): JSX.Element {
     const { taxonomicGroups } = useValues(taxonomicFilterLogic)
-
-    const { eventOrdering } = useValues(taxonomicFilterPreferencesLogic)
-    const { setEventOrdering } = useActions(taxonomicFilterPreferencesLogic)
-
     return (
         <div className="flex flex-row justify-between items-center w-full relative pb-2">
-            {openTab === TaxonomicFilterGroupType.Events ? (
-                <>
-                    <span>{taxonomicGroups.find((g) => g.type === openTab)?.name || openTab}</span>
-                    <Menu
-                        items={[
-                            {
-                                label: (
-                                    <div className="flex flex-row gap-2">
-                                        {eventOrdering === 'name' ? <IconCheck /> : <IconBlank />}
-                                        <span>Name</span>
-                                    </div>
-                                ),
-                                tooltip: 'Sort events alphabetically',
-                                onClick: () => {
-                                    setEventOrdering('name')
-                                },
-                                'data-attr': 'taxonomic-event-sorting-by-name',
-                            },
-                            {
-                                label: (
-                                    <div className="flex flex-row gap-2">
-                                        {eventOrdering === '-last_seen_at' ? <IconCheck /> : <IconBlank />}
-                                        <span>Recently seen</span>
-                                    </div>
-                                ),
-                                tooltip: 'Show the most recent events first',
-                                onClick: () => {
-                                    setEventOrdering('-last_seen_at')
-                                },
-                                'data-attr': 'taxonomic-event-sorting-by-recency',
-                            },
-                            {
-                                label: (
-                                    <div className="flex flex-row gap-2">
-                                        {!eventOrdering ? <IconCheck /> : <IconBlank />}
-                                        <span>Both</span>
-                                    </div>
-                                ),
-                                tooltip:
-                                    'Sorts events by the day they were last seen, and then by name. The default option.',
-                                onClick: () => {
-                                    setEventOrdering(null)
-                                },
-                                'data-attr': 'taxonomic-event-sorting-by-both',
-                            },
-                        ]}
-                    >
-                        <Button
-                            icon={<IconSort />}
-                            size="small"
-                            tooltip={`Sorting by ${
-                                eventOrdering === '-last_seen_at'
-                                    ? 'recently seen'
-                                    : eventOrdering === 'name'
-                                      ? 'name'
-                                      : 'recently seen and then name'
-                            }`}
-                        />
-                    </Menu>
-                </>
-            ) : (
-                <>{taxonomicGroups.find((g) => g.type === openTab)?.name || openTab}</>
-            )}
+            {taxonomicGroups.find((g) => g.type === openTab)?.name || openTab}
         </div>
     )
 }
@@ -175,28 +156,32 @@ export function InfiniteSelectResults({
     focusInput,
     taxonomicFilterLogicProps,
     popupAnchorElement,
-    useVerticalLayout: useVerticalLayoutProp,
+    definitionPopoverRenderer,
+    categoryDropdownVariant = 'control',
 }: InfiniteSelectResultsProps): JSX.Element {
     const { activeTab, taxonomicGroups, taxonomicGroupTypes, activeTaxonomicGroup, value } =
         useValues(taxonomicFilterLogic)
+    const wrapperRef = useRef<HTMLDivElement | null>(null)
 
     const openTab = activeTab || taxonomicGroups[0].type
     const infiniteListLogicProps = { ...taxonomicFilterLogicProps, listGroupType: openTab }
     const logic = infiniteListLogic(infiniteListLogicProps)
 
     const { setActiveTab, selectItem } = useActions(taxonomicFilterLogic)
+    const { reportTaxonomicFilterCategorySelected } = useActions(eventUsageLogic)
 
-    const { totalListCount, items } = useValues(logic)
+    const { totalListCount, isLocalDataLoading } = useValues(logic)
 
     const RenderComponent = activeTaxonomicGroup?.render
 
     const hasMultipleGroups = taxonomicGroupTypes.length > 1
+    const showCategoryColumn = hasMultipleGroups && categoryDropdownVariant === 'control'
 
     const listComponent = RenderComponent ? (
         <RenderComponent
             {...(activeTaxonomicGroup?.componentProps ?? {})}
             value={value}
-            onChange={(newValue, item) => selectItem(activeTaxonomicGroup, newValue, item, items.originalQuery)}
+            onChange={(newValue, item) => selectItem(activeTaxonomicGroup, newValue, item)}
             infiniteListLogicProps={infiniteListLogicProps}
         />
     ) : (
@@ -206,33 +191,30 @@ export function InfiniteSelectResults({
                     <TaxonomicGroupTitle openTab={openTab} />
                 </div>
             )}
-            <InfiniteList popupAnchorElement={popupAnchorElement} />
+            <InfiniteList
+                popupAnchorElement={popupAnchorElement ?? wrapperRef.current}
+                definitionPopoverRenderer={definitionPopoverRenderer}
+            />
         </>
     )
 
-    const showEmptyState = totalListCount === 0 && taxonomicFilterGroupTypesWithEmptyStates.includes(openTab)
-
-    const useVerticalLayout =
-        useVerticalLayoutProp !== undefined
-            ? useVerticalLayoutProp
-            : taxonomicGroupTypes.length > VERTICAL_LAYOUT_THRESHOLD
+    const showDataWarehouseLoadingState =
+        (openTab === TaxonomicFilterGroupType.DataWarehouse ||
+            openTab === TaxonomicFilterGroupType.DataWarehouseSourceTables ||
+            openTab === TaxonomicFilterGroupType.DataWarehouseProperties) &&
+        totalListCount === 0 &&
+        isLocalDataLoading
+    const showEmptyState =
+        !showDataWarehouseLoadingState &&
+        totalListCount === 0 &&
+        taxonomicFilterGroupTypesWithEmptyStates.includes(openTab)
 
     return (
-        <div className={cn('flex h-full', useVerticalLayout ? 'flex-row' : 'flex-col')}>
-            {hasMultipleGroups && (
-                <div
-                    className={cn(
-                        useVerticalLayout ? 'border-r pr-2 mr-2 flex-shrink-0' : 'border-b',
-                        'border-primary'
-                    )}
-                >
+        <div ref={wrapperRef} className="flex flex-row h-full">
+            {showCategoryColumn && (
+                <div className="border-r pr-2 mr-2 flex-shrink-0 border-primary">
                     <div className="taxonomic-group-title">Categories</div>
-                    <div
-                        className={cn(
-                            'taxonomic-pills flex',
-                            useVerticalLayout ? 'flex-col gap-1' : 'gap-0.5 flex-wrap'
-                        )}
-                    >
+                    <div className="taxonomic-pills flex flex-col gap-1">
                         {taxonomicGroupTypes.map((groupType) => {
                             return (
                                 <CategoryPill
@@ -243,6 +225,10 @@ export function InfiniteSelectResults({
                                     onClick={() => {
                                         setActiveTab(groupType)
                                         focusInput()
+                                        reportTaxonomicFilterCategorySelected(
+                                            groupType,
+                                            taxonomicFilterLogicProps.eventNames?.[0]
+                                        )
                                     }}
                                 />
                             )
@@ -259,9 +245,15 @@ export function InfiniteSelectResults({
                                 logic={infiniteListLogic}
                                 props={{ ...taxonomicFilterLogicProps, listGroupType: groupType }}
                             >
-                                {showEmptyState && <TaxonomicFilterEmptyState groupType={groupType} />}
-                                {!showEmptyState && listComponent}
-                                {!showEmptyState &&
+                                {(showDataWarehouseLoadingState || showEmptyState) && (
+                                    <TaxonomicFilterEmptyState
+                                        groupType={groupType}
+                                        isLoading={showDataWarehouseLoadingState}
+                                    />
+                                )}
+                                {!showDataWarehouseLoadingState && !showEmptyState && listComponent}
+                                {!showDataWarehouseLoadingState &&
+                                    !showEmptyState &&
                                     (() => {
                                         const currentGroup = taxonomicGroups.find((g) => g.type === groupType)
                                         return (

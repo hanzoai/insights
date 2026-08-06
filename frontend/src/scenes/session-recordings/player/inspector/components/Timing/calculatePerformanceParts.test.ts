@@ -1,4 +1,4 @@
-import { InitiatorType } from '@hanzo/insights'
+import { InitiatorType } from 'insights-js'
 
 import { mapRRWebNetworkRequest } from 'scenes/session-recordings/apm/performance-event-utils'
 import { calculatePerformanceParts } from 'scenes/session-recordings/apm/waterfall/TimingBar'

@@ -1,0 +1,179 @@
+import { PostgresRouter } from '~/common/utils/db/postgres'
+
+import { TeamService } from './team-service'
+
+describe('TeamService', () => {
+    let teamService: TeamService
+    let fetchSpy: jest.SpyInstance
+
+    beforeEach(() => {
+        jest.useFakeTimers()
+        const mockPostgres = {} as jest.Mocked<PostgresRouter>
+        teamService = new TeamService(mockPostgres)
+
+        fetchSpy = jest.spyOn(teamService as any, 'fetchOrgProjectsWithRecordings').mockResolvedValue({
+            orgMap: {
+                'valid-org': { teamId: 1, consoleLogIngestionEnabled: true, aiTrainingOptedIn: true },
+                'valid-org-2': { teamId: 2, consoleLogIngestionEnabled: false, aiTrainingOptedIn: false },
+            },
+            retentionMap: { 1: '30d', 2: '1y' },
+        })
+    })
+
+    afterEach(() => {
+        jest.useRealTimers()
+    })
+
+    describe('getTeamByOrg', () => {
+        it('should return the project for a routed org', async () => {
+            const team = await teamService.getTeamByOrg('valid-org')
+            expect(team).toEqual({
+                teamId: 1,
+                consoleLogIngestionEnabled: true,
+                aiTrainingOptedIn: true,
+            })
+        })
+
+        it('should return null for an org that owns no project', async () => {
+            const team = await teamService.getTeamByOrg('invalid-org')
+            expect(team).toBeNull()
+        })
+
+        it('should return null if teamId is missing', async () => {
+            fetchSpy.mockResolvedValue({
+                orgMap: {
+                    org: { teamId: null as any, consoleLogIngestionEnabled: true, aiTrainingOptedIn: true },
+                },
+                retentionMap: { 1: '30d', 2: '1y' },
+            })
+            const team = await teamService.getTeamByOrg('org')
+            expect(team).toBeNull()
+        })
+
+        it('should cache results and not fetch again within refresh period', async () => {
+            await teamService.getTeamByOrg('valid-org')
+            await teamService.getTeamByOrg('valid-org-2')
+
+            // Advance time but not enough to trigger refresh
+            jest.advanceTimersByTime(4 * 60 * 1000) // 4 minutes (refresh is 5 minutes)
+
+            await teamService.getTeamByOrg('valid-org')
+            await teamService.getTeamByOrg('valid-org-2')
+
+            expect(fetchSpy).toHaveBeenCalledTimes(1)
+        })
+
+        it('should refresh after max age', async () => {
+            await teamService.getTeamByOrg('valid-org')
+            expect(fetchSpy).toHaveBeenCalledTimes(1)
+
+            // Move time forward past the refresh interval
+            jest.advanceTimersByTime(5 * 60 * 1000 + 1)
+
+            // This should trigger a refresh
+            await teamService.getTeamByOrg('valid-org')
+            expect(fetchSpy).toHaveBeenCalledTimes(2)
+        })
+
+        it('should handle refresh errors and return cached data', async () => {
+            // First call succeeds
+            await teamService.getTeamByOrg('valid-org')
+            expect(fetchSpy).toHaveBeenCalledTimes(1)
+
+            // Make next refresh fail
+            fetchSpy.mockRejectedValueOnce(new Error('Refresh failed'))
+
+            // Advance time to trigger refresh
+            jest.advanceTimersByTime(5 * 60 * 1000 + 1)
+
+            // Should still return cached data
+            const team = await teamService.getTeamByOrg('valid-org')
+            expect(team).toEqual({
+                teamId: 1,
+                consoleLogIngestionEnabled: true,
+                aiTrainingOptedIn: true,
+            })
+        })
+
+        it('should eventually update cache after successful refresh', async () => {
+            // Initial fetch
+            const team1 = await teamService.getTeamByOrg('valid-org')
+            expect(team1?.consoleLogIngestionEnabled).toBe(true)
+
+            // Update mock data and capture the promise
+            const mockFetchPromise = Promise.resolve({
+                orgMap: {
+                    'valid-org': { teamId: 1, consoleLogIngestionEnabled: false, aiTrainingOptedIn: true },
+                },
+                retentionMap: { 1: '30d', 2: '1y' },
+            })
+            fetchSpy.mockReturnValue(mockFetchPromise)
+
+            // Advance time to trigger refresh
+            jest.advanceTimersByTime(5 * 60 * 1000 + 1)
+
+            // Wait for the new value to appear using a spinlock, don't advance time though
+            while ((await teamService.getTeamByOrg('valid-org'))?.consoleLogIngestionEnabled !== false) {
+                await Promise.resolve() // Allow other promises to resolve
+            }
+
+            const team2 = await teamService.getTeamByOrg('valid-org')
+            expect(team2?.consoleLogIngestionEnabled).toBe(false)
+        })
+
+        it('should eventually return null when team is removed after refresh', async () => {
+            // Initial fetch
+            const team1 = await teamService.getTeamByOrg('valid-org')
+            expect(team1?.teamId).toBe(1)
+
+            // Update mock data to remove the team
+            const mockFetchPromise = Promise.resolve({
+                orgMap: {
+                    'valid-org-2': { teamId: 2, consoleLogIngestionEnabled: false, aiTrainingOptedIn: false }, // Remove valid-org
+                },
+                retentionMap: { 2: '1y' },
+            })
+            fetchSpy.mockReturnValue(mockFetchPromise)
+
+            // Advance time to trigger refresh
+            jest.advanceTimersByTime(5 * 60 * 1000 + 1)
+
+            // Wait for the team to be removed using a spinlock, don't advance time though
+            while ((await teamService.getTeamByOrg('valid-org')) !== null) {
+                await Promise.resolve() // Allow other promises to resolve
+            }
+
+            const team2 = await teamService.getTeamByOrg('valid-org')
+            expect(team2).toBeNull()
+        })
+    })
+
+    describe('getRetentionPeriodByTeamId', () => {
+        it('should return retention period for known team', async () => {
+            const retention = await teamService.getRetentionPeriodByTeamId(1)
+            expect(retention).toBe('30d')
+        })
+
+        it('should return different retention periods per team', async () => {
+            const retention1 = await teamService.getRetentionPeriodByTeamId(1)
+            const retention2 = await teamService.getRetentionPeriodByTeamId(2)
+            expect(retention1).toBe('30d')
+            expect(retention2).toBe('1y')
+        })
+
+        it('should return null for unknown team', async () => {
+            const retention = await teamService.getRetentionPeriodByTeamId(999)
+            expect(retention).toBeNull()
+        })
+
+        it('should throw when the stored retention value is not a valid period', async () => {
+            fetchSpy.mockResolvedValue({
+                orgMap: {},
+                retentionMap: { 7: 'forever' },
+            })
+            await expect(teamService.getRetentionPeriodByTeamId(7)).rejects.toThrow(
+                "Invalid session_recording_retention_period 'forever' for team 7"
+            )
+        })
+    })
+})

@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Creates an issue in a GitHub repository',
     icon_url: '/static/services/github.png',
     category: ['Error tracking'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `let owner := inputs.github_installation.account.name
 let repo := inputs.repository
 
@@ -21,7 +21,10 @@ if (not repo) {
     throw Error('Repository is required')
 }
 
-let insights_issue_url := f'{project.url}/error_tracking/{inputs.insights_issue_id}'
+let insights_issue_url := inputs.insights_issue_url
+if (empty(insights_issue_url)) {
+    insights_issue_url := f'{project.url}/error_tracking/{inputs.insights_issue_id}'
+}
 let payload := {
     'method': 'POST',
     'headers': {
@@ -86,6 +89,16 @@ if (res.status < 200 or res.status >= 300) {
             hidden: true,
             required: true,
             default: '{event.properties.$exception_issue_id}',
+        },
+        {
+            key: 'insights_issue_url',
+            type: 'string',
+            label: 'Insights issue URL',
+            description:
+                'Link back to the Insights issue. When empty, a link is built from the Insights issue ID instead.',
+            secret: false,
+            hidden: true,
+            required: false,
         },
     ],
 }

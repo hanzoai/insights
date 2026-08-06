@@ -2,16 +2,16 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconCalendar } from '@hanzo/icons'
-import { Button, Popover } from '@hanzo/elements'
+import { Select } from '@hanzo/elements'
 
-import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
+import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
+import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { FEATURE_FLAGS } from 'lib/constants'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { DashboardEventSource } from 'lib/utils/eventUsageLogic'
+import { getProjectEventExistence } from 'lib/utils/getAppContext'
+import { DashboardEditBarAdvancedFilters } from 'scenes/dashboard/DashboardEditBarAdvancedFilters'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import { TaxonomicBreakdownFilter } from 'scenes/insights/filters/BreakdownFilter/TaxonomicBreakdownFilter'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -20,24 +20,48 @@ import { Scene } from 'scenes/sceneTypes'
 import { groupsModel } from '~/models/groupsModel'
 import { VariablesForDashboard } from '~/queries/nodes/DataVisualization/Components/Variables/Variables'
 import { BreakdownFilter, NodeKind } from '~/queries/schema/schema-general'
-import { DashboardMode, InsightLogicProps } from '~/types'
+import { DashboardMode, InsightLogicProps, IntervalType } from '~/types'
 
-export function DashboardEditBar(): JSX.Element {
-    const {
-        dashboard,
-        dashboardMode,
-        hasVariables,
-        effectiveEditBarFilters,
-        showEditBarApplyPopover,
-        loadingPreview,
-        cancellingPreview,
-        hasUrlFilters,
-    } = useValues(dashboardLogic)
-    const { setDates, setProperties, setBreakdownFilter, setDashboardMode, applyFilters } = useActions(dashboardLogic)
+interface DashboardEditBarProps {
+    showDateFilter?: boolean
+    className?: string
+}
+
+export function DashboardIntervalFilter(): JSX.Element {
+    const { dashboardMode, effectiveEditBarFilters } = useValues(dashboardLogic)
+    const { setInterval, setDashboardMode } = useActions(dashboardLogic)
+
+    return (
+        <span className="flex items-center gap-2">
+            <span className="hidden md:inline">grouped by</span>
+            <Select<IntervalType | null>
+                size="small"
+                value={effectiveEditBarFilters.interval ?? null}
+                dropdownMatchSelectWidth={false}
+                onChange={(interval) => {
+                    if (dashboardMode !== DashboardMode.Edit) {
+                        setDashboardMode(DashboardMode.Edit, DashboardEventSource.DashboardFilters)
+                    }
+                    setInterval(interval)
+                }}
+                options={[
+                    { value: null, label: "each insight's interval" },
+                    { value: 'hour', label: 'hour' },
+                    { value: 'day', label: 'day' },
+                    { value: 'week', label: 'week' },
+                    { value: 'month', label: 'month' },
+                ]}
+            />
+        </span>
+    )
+}
+
+export function DashboardEditBar({ showDateFilter = true, className }: DashboardEditBarProps): JSX.Element {
+    const { dashboard, dashboardMode, hasVariables, effectiveEditBarFilters } = useValues(dashboardLogic)
+    const { setDates, setProperties, setBreakdownFilter, setDashboardMode } = useActions(dashboardLogic)
     const { groupsTaxonomicTypes } = useValues(groupsModel)
 
-    const { featureFlags } = useValues(featureFlagLogic)
-    const canAccessExplicitDateToggle = !!featureFlags[FEATURE_FLAGS.PRODUCT_ANALYTICS_DATE_PICKER_EXPLICIT_DATE_TOGGLE]
+    const { hasPageview, hasScreen } = getProjectEventExistence()
 
     const insightProps: InsightLogicProps = {
         dashboardItemId: 'new',
@@ -53,42 +77,20 @@ export function DashboardEditBar(): JSX.Element {
     }
 
     return (
-        // Only show preview button for large dashboards where we don't automatically preview filter changes */
-        <Popover
-            visible={showEditBarApplyPopover}
-            overlay={
-                <div className="flex items-center gap-2 m-1">
-                    <Button
-                        onClick={() =>
-                            setDashboardMode(
-                                hasUrlFilters ? dashboardMode : null,
-                                DashboardEventSource.DashboardHeaderDiscardChanges
-                            )
-                        }
-                        loading={cancellingPreview}
-                        type="secondary"
-                        size="small"
-                    >
-                        Cancel
-                    </Button>
-                    <Button onClick={applyFilters} loading={loadingPreview} type="primary" size="small">
-                        Apply filters and preview
-                    </Button>
-                </div>
-            }
-            placement="bottom"
-            showArrow
-        >
-            <div
-                className={clsx(
-                    'flex gap-2 items-end flex-wrap border md:[&>*]:grow-0 [&>*]:grow',
+        <div
+            className={
+                className ??
+                clsx(
+                    'flex gap-2 items-end flex-wrap border',
                     dashboardMode === DashboardMode.Edit
                         ? '-m-1.5 p-1.5 border-primary border-dashed rounded-lg'
                         : 'border-transparent'
-                )}
-            >
-                <div className={clsx('content-end', { 'h-[61px]': hasVariables })}>
-                    <AppShortcut
+                )
+            }
+        >
+            {showDateFilter && (
+                <div className={clsx('content-end min-w-0', { 'h-[61px]': hasVariables })}>
+                    <Shortcut
                         name="DashboardDateFilter"
                         keybind={[keyBinds.dateFilter]}
                         intent="Date filter"
@@ -97,7 +99,7 @@ export function DashboardEditBar(): JSX.Element {
                     >
                         <DateFilter
                             showCustom
-                            showExplicitDateToggle={canAccessExplicitDateToggle}
+                            showExplicitDateToggle
                             allowTimePrecision
                             allowFixedRangeWithTime
                             dateFrom={effectiveEditBarFilters.date_from}
@@ -105,7 +107,7 @@ export function DashboardEditBar(): JSX.Element {
                             explicitDate={effectiveEditBarFilters.explicitDate}
                             onChange={(from_date, to_date, explicitDate) => {
                                 if (dashboardMode !== DashboardMode.Edit) {
-                                    setDashboardMode(DashboardMode.Edit, null)
+                                    setDashboardMode(DashboardMode.Edit, DashboardEventSource.DashboardFilters)
                                 }
                                 setDates(from_date, to_date, explicitDate)
                             }}
@@ -116,63 +118,70 @@ export function DashboardEditBar(): JSX.Element {
                                 </>
                             )}
                         />
-                    </AppShortcut>
+                    </Shortcut>
                 </div>
+            )}
+            {showDateFilter && (
                 <div className={clsx('content-end', { 'h-[61px]': hasVariables })}>
-                    <PropertyFilters
-                        onChange={(properties) => {
-                            if (dashboardMode !== DashboardMode.Edit) {
-                                setDashboardMode(DashboardMode.Edit, null)
-                            }
-                            setProperties(properties)
-                        }}
-                        pageKey={'dashboard_' + dashboard?.id}
-                        propertyFilters={effectiveEditBarFilters.properties}
-                        taxonomicGroupTypes={[
-                            TaxonomicFilterGroupType.EventProperties,
-                            TaxonomicFilterGroupType.PersonProperties,
-                            TaxonomicFilterGroupType.EventFeatureFlags,
-                            TaxonomicFilterGroupType.EventMetadata,
-                            ...groupsTaxonomicTypes,
-                            TaxonomicFilterGroupType.Cohorts,
-                            TaxonomicFilterGroupType.Elements,
-                            TaxonomicFilterGroupType.SessionProperties,
-                            TaxonomicFilterGroupType.InsightsQLExpression,
-                            TaxonomicFilterGroupType.DataWarehousePersonProperties,
-                        ]}
-                    />
+                    <DashboardIntervalFilter />
                 </div>
-                <div className={clsx('content-end', { 'h-[61px]': hasVariables })}>
-                    <BindLogic logic={insightLogic} props={insightProps}>
-                        <TaxonomicBreakdownFilter
-                            insightProps={insightProps}
-                            breakdownFilter={effectiveEditBarFilters.breakdown_filter}
-                            isTrends={false}
-                            showLabel={false}
-                            updateBreakdownFilter={(breakdown_filter) => {
-                                if (dashboardMode !== DashboardMode.Edit) {
-                                    setDashboardMode(DashboardMode.Edit, null)
-                                }
-                                let saved_breakdown_filter: BreakdownFilter | null = breakdown_filter
-                                // taxonomicBreakdownFilterLogic can generate an empty breakdown_filter object
-                                if (
-                                    breakdown_filter &&
-                                    !breakdown_filter.breakdown_type &&
-                                    !breakdown_filter.breakdowns
-                                ) {
-                                    saved_breakdown_filter = null
-                                }
-                                setBreakdownFilter(saved_breakdown_filter)
-                            }}
-                            updateDisplay={() => {}}
-                            disablePropertyInfo
-                            size="small"
-                        />
-                    </BindLogic>
-                </div>
-
-                <VariablesForDashboard />
+            )}
+            <div className={clsx('content-end', { 'h-[61px]': hasVariables })}>
+                <PropertyFilters
+                    onChange={(properties) => {
+                        if (dashboardMode !== DashboardMode.Edit) {
+                            setDashboardMode(DashboardMode.Edit, DashboardEventSource.DashboardFilters)
+                        }
+                        setProperties(properties)
+                    }}
+                    pageKey={'dashboard_' + dashboard?.id}
+                    propertyFilters={effectiveEditBarFilters.properties}
+                    taxonomicGroupTypes={[
+                        TaxonomicFilterGroupType.EventProperties,
+                        TaxonomicFilterGroupType.PersonProperties,
+                        TaxonomicFilterGroupType.EventFeatureFlags,
+                        TaxonomicFilterGroupType.EventMetadata,
+                        ...(hasPageview ? [TaxonomicFilterGroupType.PageviewUrls] : []),
+                        ...(hasScreen ? [TaxonomicFilterGroupType.Screens] : []),
+                        TaxonomicFilterGroupType.EmailAddresses,
+                        ...groupsTaxonomicTypes,
+                        TaxonomicFilterGroupType.Cohorts,
+                        TaxonomicFilterGroupType.Elements,
+                        TaxonomicFilterGroupType.SessionProperties,
+                        TaxonomicFilterGroupType.InsightsQLExpression,
+                        TaxonomicFilterGroupType.DataWarehousePersonProperties,
+                    ]}
+                />
             </div>
-        </Popover>
+            {/* Single flex item so the "…" button always wraps together with the breakdown button */}
+            <div className={clsx('content-end flex items-end gap-2', { 'h-[61px]': hasVariables })}>
+                <BindLogic logic={insightLogic} props={insightProps}>
+                    <TaxonomicBreakdownFilter
+                        insightProps={insightProps}
+                        breakdownFilter={effectiveEditBarFilters.breakdown_filter}
+                        isTrends={false}
+                        isFunnels={false}
+                        showLabel={false}
+                        updateBreakdownFilter={(breakdown_filter) => {
+                            if (dashboardMode !== DashboardMode.Edit) {
+                                setDashboardMode(DashboardMode.Edit, DashboardEventSource.DashboardFilters)
+                            }
+                            let saved_breakdown_filter: BreakdownFilter | null = breakdown_filter
+                            // taxonomicBreakdownFilterLogic can generate an empty breakdown_filter object
+                            if (breakdown_filter && !breakdown_filter.breakdown_type && !breakdown_filter.breakdowns) {
+                                saved_breakdown_filter = null
+                            }
+                            setBreakdownFilter(saved_breakdown_filter)
+                        }}
+                        updateDisplay={() => {}}
+                        disablePropertyInfo
+                        size="small"
+                    />
+                </BindLogic>
+                <DashboardEditBarAdvancedFilters />
+            </div>
+
+            <VariablesForDashboard />
+        </div>
     )
 }

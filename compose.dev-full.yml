@@ -48,10 +48,10 @@ services:
         volumes:
             - ./insights/idl:/idl
             - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./docker/datastore/config.xml:/etc/clickhouse-server/config.xml
-            - ./docker/datastore/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
-            - ./docker/datastore/users-dev.xml:/etc/clickhouse-server/users.xml
-            - ./docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/default.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
             - ./insights/user_scripts:/var/lib/datastore/user_scripts
         depends_on:
             - kafka

@@ -1,13 +1,13 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
 import { Button } from '../Button'
-import { Tab, Tabs as TabsComponent } from './Tabs'
+import { Tab, Tabs as TabsComponent, TabsProps } from './Tabs'
 
-type Story = StoryObj<typeof TabsComponent>
-const meta: Meta<typeof TabsComponent> = {
-    title: 'Elements/Tabs',
-    component: TabsComponent,
+type Story = StoryObj<TabsProps<string>>
+const meta: Meta<TabsProps<string>> = {
+    title: 'Lemon UI/Lemon Tabs',
+    component: TabsComponent as any,
     argTypes: {
         tabs: {
             control: {
@@ -42,26 +42,28 @@ const meta: Meta<typeof TabsComponent> = {
             },
         ] as Tab<'calendar' | 'calculator' | 'banana' | 'settings'>[],
     },
+    render: (props) => {
+        const [activeKey, setActiveKey] = useState((props.tabs[0] as Tab<string | number>).key)
+
+        return <TabsComponent {...props} activeKey={activeKey} onChange={(newValue) => setActiveKey(newValue)} />
+    },
 }
 export default meta
 
-const Template: StoryFn<typeof TabsComponent> = (props) => {
-    const [activeKey, setActiveKey] = useState((props.tabs[0] as Tab<string | number>).key)
-
-    return <TabsComponent {...props} activeKey={activeKey} onChange={(newValue) => setActiveKey(newValue)} />
+export const Default: Story = {
+    args: {},
 }
 
-export const Default: Story = Template.bind({})
-Default.args = {}
+export const Small: Story = {
+    args: { size: 'small' },
+}
 
-export const Small: Story = Template.bind({})
-Small.args = { size: 'small' }
-
-export const RightSlot: Story = Template.bind({})
-RightSlot.args = {
-    rightSlot: (
-        <Button type="secondary" size="small">
-            Right slot
-        </Button>
-    ),
+export const RightSlot: Story = {
+    args: {
+        rightSlot: (
+            <Button type="secondary" size="small">
+                Right slot
+            </Button>
+        ),
+    },
 }

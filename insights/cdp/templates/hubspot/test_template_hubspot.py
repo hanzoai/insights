@@ -7,7 +7,8 @@ from insights.cdp.templates.hubspot.template_hubspot import (
     template as template_hubspot,
     template_event as template_hubspot_event,
 )
-from insights.models import PluginConfig
+
+from products.cdp.backend.models.plugin import PluginConfig
 
 from common.scriptvm.python.utils import UncaughtScriptVMException
 
@@ -438,5 +439,5 @@ class TestTemplateMigration(BaseTest):
         assert fn["inputs_schema"][0]["key"] == "access_token"
         assert fn["inputs_schema"][0]["type"] == "string"
         assert fn["inputs_schema"][0]["secret"]
-        assert "inputs.oauth.access_token" not in fn["fn"]
-        assert "inputs.access_token" in fn["fn"]
+        assert "inputs.oauth.access_token" not in fn["script"]
+        assert "inputs.access_token" in fn["script"]

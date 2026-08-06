@@ -1,17 +1,21 @@
 import uuid
+from importlib import import_module
 
 from insights.test.base import APIBaseTest
 from unittest.mock import MagicMock, patch
 
+from django.conf import settings
+from django.contrib.auth import SESSION_KEY
 from django.utils import timezone
 
 from parameterized import parameterized
 from rest_framework import status
 
-from insights.api.webauthn import WEBAUTHN_REGISTRATION_CHALLENGE_KEY
+from insights.api.webauthn import WEBAUTHN_REGISTRATION_CHALLENGE_KEY, WebAuthnLoginViewSet
 from insights.models import User
 from insights.models.organization_domain import OrganizationDomain
 from insights.models.webauthn_credential import WebauthnCredential
+from insights.session.models import Session
 
 
 class TestWebAuthnRegistration(APIBaseTest):
@@ -233,6 +237,48 @@ class TestWebAuthnLogin(APIBaseTest):
         self.assertEqual(me_response.status_code, status.HTTP_200_OK)
         self.assertEqual(me_response.json()["email"], self.user.email)
 
+    @patch("insights.api.authentication.is_email_available", return_value=True)
+    @patch("insights.api.authentication.EmailVerifier.create_token_and_send_email_verification")
+    @patch("insights.auth.verify_passkey_authentication_response")
+    def test_login_blocks_explicitly_unverified_email_accounts(
+        self, mock_verify, mock_send_email_verification, mock_is_email_available
+    ):
+        from webauthn.helpers import bytes_to_base64url
+
+        from insights.api.webauthn import user_uuid_to_handle
+
+        self.user.is_email_verified = False
+        self.user.save()
+
+        self.client.post("/api/webauthn/login/begin/")
+        mock_verify.return_value = MagicMock(new_sign_count=1)
+
+        user_handle = user_uuid_to_handle(self.user.uuid)
+
+        response = self.client.post(
+            "/api/webauthn/login/complete/",
+            {
+                "id": bytes_to_base64url(self.credential.credential_id),
+                "rawId": bytes_to_base64url(self.credential.credential_id),
+                "type": "public-key",
+                "response": {
+                    "authenticatorData": "data",
+                    "clientDataJSON": "data",
+                    "signature": "sig",
+                    "userHandle": bytes_to_base64url(user_handle),
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("awaiting verification", response.json()["error"].lower())
+
+        me_response = self.client.get("/api/users/@me/")
+        self.assertEqual(me_response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        mock_is_email_available.assert_called_once()
+        mock_send_email_verification.assert_called_once_with(self.user, None)
+
     @patch("insights.auth.verify_passkey_authentication_response")
     def test_login_with_unverified_credential_fails(self, mock_verify):
         from webauthn.helpers import bytes_to_base64url
@@ -263,6 +309,224 @@ class TestWebAuthnLogin(APIBaseTest):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("authentication failed", response.json()["error"].lower())
+
+    @patch("insights.auth.verify_passkey_authentication_response")
+    def test_login_rejects_spoofed_user_handle(self, mock_verify):
+        """Spoofed userHandle pointing to a different user must be rejected."""
+        from webauthn.helpers import bytes_to_base64url
+
+        from insights.api.webauthn import user_uuid_to_handle
+
+        other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password123")
+
+        self.client.post("/api/webauthn/login/begin/")
+        mock_verify.return_value = MagicMock(new_sign_count=1)
+
+        # Credential belongs to self.user, but userHandle points to other_user
+        spoofed_handle = user_uuid_to_handle(other_user.uuid)
+
+        response = self.client.post(
+            "/api/webauthn/login/complete/",
+            {
+                "id": bytes_to_base64url(self.credential.credential_id),
+                "rawId": bytes_to_base64url(self.credential.credential_id),
+                "type": "public-key",
+                "response": {
+                    "authenticatorData": "data",
+                    "clientDataJSON": "data",
+                    "signature": "sig",
+                    "userHandle": bytes_to_base64url(spoofed_handle),
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("authentication failed", response.json()["error"].lower())
+
+        # Verify the user is NOT logged in
+        me_response = self.client.get("/api/users/@me/")
+        self.assertEqual(me_response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @patch("insights.auth.verify_passkey_authentication_response")
+    def test_login_rejects_nonexistent_user_handle(self, mock_verify):
+        """userHandle pointing to a nonexistent user must be rejected."""
+        from webauthn.helpers import bytes_to_base64url
+
+        from insights.api.webauthn import user_uuid_to_handle
+
+        self.client.post("/api/webauthn/login/begin/")
+        mock_verify.return_value = MagicMock(new_sign_count=1)
+
+        # userHandle points to a UUID that doesn't exist
+        fake_handle = user_uuid_to_handle(uuid.uuid4())
+
+        response = self.client.post(
+            "/api/webauthn/login/complete/",
+            {
+                "id": bytes_to_base64url(self.credential.credential_id),
+                "rawId": bytes_to_base64url(self.credential.credential_id),
+                "type": "public-key",
+                "response": {
+                    "authenticatorData": "data",
+                    "clientDataJSON": "data",
+                    "signature": "sig",
+                    "userHandle": bytes_to_base64url(fake_handle),
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("authentication failed", response.json()["error"].lower())
+
+    @patch("insights.auth.verify_passkey_authentication_response")
+    def test_login_enforces_sso_against_authenticated_user(self, mock_verify):
+        """SSO enforcement must be checked against the cryptographically verified user,
+        not the unverified userHandle."""
+        from webauthn.helpers import bytes_to_base64url
+
+        from insights.api.webauthn import user_uuid_to_handle
+
+        email_domain = self.user.email.split("@", 1)[1]
+
+        self.organization.available_product_features = [
+            {"key": "sso_enforcement", "name": "sso_enforcement"},
+            {"key": "saml", "name": "saml"},
+        ]
+        self.organization.save()
+
+        OrganizationDomain.objects.create(
+            domain=email_domain,
+            organization=self.organization,
+            verified_at=timezone.now(),
+            sso_enforcement="saml",
+        )
+
+        self.client.post("/api/webauthn/login/begin/")
+        mock_verify.return_value = MagicMock(new_sign_count=1)
+
+        user_handle = user_uuid_to_handle(self.user.uuid)
+
+        response = self.client.post(
+            "/api/webauthn/login/complete/",
+            {
+                "id": bytes_to_base64url(self.credential.credential_id),
+                "rawId": bytes_to_base64url(self.credential.credential_id),
+                "type": "public-key",
+                "response": {
+                    "authenticatorData": "data",
+                    "clientDataJSON": "data",
+                    "signature": "sig",
+                    "userHandle": bytes_to_base64url(user_handle),
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("SSO", response.json()["error"])
+
+        # Verify the user is NOT logged in
+        me_response = self.client.get("/api/users/@me/")
+        self.assertEqual(me_response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @patch("insights.auth.verify_passkey_authentication_response")
+    def test_spoofed_user_handle_cannot_bypass_sso_enforcement(self, mock_verify):
+        """An attacker with a valid passkey cannot bypass SSO enforcement by spoofing
+        the userHandle to point to a user without SSO enforcement."""
+        from webauthn.helpers import bytes_to_base64url
+
+        from insights.api.webauthn import user_uuid_to_handle
+
+        # Create a second user in a different org without SSO enforcement
+        from insights.models.organization import Organization
+
+        other_org = Organization.objects.create(name="No SSO Org")
+        non_sso_user = User.objects.create_and_join(other_org, "nosso@other.com", "password123")
+
+        # Enforce SSO for the credential owner's domain
+        email_domain = self.user.email.split("@", 1)[1]
+        self.organization.available_product_features = [
+            {"key": "sso_enforcement", "name": "sso_enforcement"},
+            {"key": "saml", "name": "saml"},
+        ]
+        self.organization.save()
+
+        OrganizationDomain.objects.create(
+            domain=email_domain,
+            organization=self.organization,
+            verified_at=timezone.now(),
+            sso_enforcement="saml",
+        )
+
+        self.client.post("/api/webauthn/login/begin/")
+        mock_verify.return_value = MagicMock(new_sign_count=1)
+
+        # Attacker spoofs userHandle to point to the non-SSO user
+        spoofed_handle = user_uuid_to_handle(non_sso_user.uuid)
+
+        response = self.client.post(
+            "/api/webauthn/login/complete/",
+            {
+                "id": bytes_to_base64url(self.credential.credential_id),
+                "rawId": bytes_to_base64url(self.credential.credential_id),
+                "type": "public-key",
+                "response": {
+                    "authenticatorData": "data",
+                    "clientDataJSON": "data",
+                    "signature": "sig",
+                    "userHandle": bytes_to_base64url(spoofed_handle),
+                },
+            },
+            format="json",
+        )
+        # The mismatch check should reject this before even reaching SSO checks
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("authentication failed", response.json()["error"].lower())
+
+        # Verify the user is NOT logged in
+        me_response = self.client.get("/api/users/@me/")
+        self.assertEqual(me_response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @patch("insights.auth.verify_passkey_authentication_response")
+    def test_spoofed_user_handle_records_failure_against_verified_user(self, mock_verify):
+        """A spoofed userHandle mismatch must record an axes failure against the
+        credential owner (verified user), so repeated attempts trigger rate limiting."""
+        from webauthn.helpers import bytes_to_base64url
+
+        from insights.api.webauthn import user_uuid_to_handle
+
+        other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password123")
+        spoofed_handle = user_uuid_to_handle(other_user.uuid)
+
+        mock_verify.return_value = MagicMock(new_sign_count=1)
+
+        with patch.object(
+            WebAuthnLoginViewSet,
+            "_handle_authentication_failure",
+            wraps=WebAuthnLoginViewSet()._handle_authentication_failure,
+        ) as mock_handle_failure:
+            self.client.post("/api/webauthn/login/begin/")
+            self.client.post(
+                "/api/webauthn/login/complete/",
+                {
+                    "id": bytes_to_base64url(self.credential.credential_id),
+                    "rawId": bytes_to_base64url(self.credential.credential_id),
+                    "type": "public-key",
+                    "response": {
+                        "authenticatorData": "data",
+                        "clientDataJSON": "data",
+                        "signature": "sig",
+                        "userHandle": bytes_to_base64url(spoofed_handle),
+                    },
+                },
+                format="json",
+            )
+
+            mock_handle_failure.assert_called_once()
+            # The failure must be recorded against the verified user (credential owner),
+            # not the spoofed user from userHandle
+            call_args = mock_handle_failure.call_args
+            recorded_user = call_args[0][1]
+            self.assertEqual(recorded_user.pk, self.user.pk)
 
 
 class TestWebAuthnCredentialManagement(APIBaseTest):
@@ -392,6 +656,36 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
         self.assertTrue(verify_complete_response.json()["verified"])
 
         mock_send_email.delay.assert_called_once_with(self.user.id)
+
+    @patch("insights.api.webauthn.send_passkey_added_email")
+    @patch("insights.api.webauthn.verify_passkey_authentication_response")
+    def test_verify_complete_first_passkey_revokes_other_sessions(self, mock_verify, _mock_send_email):
+        # Only the FIRST verified passkey (a new login factor) revokes other sessions.
+        WebauthnCredential.objects.filter(user=self.user).delete()
+        engine = import_module(settings.SESSION_ENGINE)
+        other = engine.SessionStore()
+        other[SESSION_KEY] = str(self.user.pk)
+        other.create()
+
+        unverified = WebauthnCredential.objects.create(
+            user=self.user,
+            credential_id=b"first-passkey-id",
+            label="First",
+            public_key=b"public-key",
+            algorithm=-7,
+            counter=0,
+            transports=["internal"],
+            verified=False,
+        )
+        self.client.post(f"/api/webauthn/credentials/{unverified.pk}/verify/")
+        mock_verify.return_value = MagicMock(new_sign_count=1)
+
+        response = self.client.post(f"/api/webauthn/credentials/{unverified.pk}/verify_complete/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertFalse(Session.objects.filter(session_key=other.session_key).exists())
+        # The current session is kept — only OTHER sessions are revoked.
+        self.assertTrue(Session.objects.filter(session_key=self.client.session.session_key).exists())
 
     @parameterized.expand(
         [

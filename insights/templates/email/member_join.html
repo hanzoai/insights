@@ -1,12 +1,12 @@
 {% extends "email/base.html" %} {% load insights_assets %} {% load insights_filters %}
-{% block heading %}{{ invitee.first_name }} accepted their Insights invitation{% endblock %}
+{% block heading %}{{ invitee_first_name }}{% if invitee_last_name %} {{ invitee_last_name }}{% endif %} accepted their Insights invitation{% endblock %}
 {% block section %}
 <!-- prettier-ignore -->
 <p>
-    {{ invitee.first_name }} (<a href="mailto:{{ invitee.email }}">{{ invitee.email }}</a>) just joined you at {{ organization.name }}.
+    {{ invitee_first_name }}{% if invitee_last_name %} {{ invitee_last_name }}{% endif %} (<a href="mailto:{{ invitee.email }}">{{ invitee.email }}</a>) just joined you at {{ organization_name }}.
 </p>
 <div class="mb mt text-center">
-    <a class="button" href="{% absolute_uri %}">View Insights</a>
+    <a class="button" href="{% absolute_uri %}">View Insights insights</a>
 </div>
 <div class="mt">
     <p>

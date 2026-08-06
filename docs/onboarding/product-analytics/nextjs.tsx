@@ -1,6 +1,7 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
+import { SDK_DEFAULTS_DATE } from './_snippets/sdkDefaults'
 
 export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, CalloutBox, Tab, dedent } = ctx
@@ -46,8 +47,8 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
             content: (
                 <>
                     <Markdown>
-                        Add your Insights API key and host to your `.env.local` file and to your hosting provider (e.g.
-                        Vercel, Netlify). These values need to start with `NEXT_PUBLIC_` to be accessible on the
+                        Add your Insights project token and host to your `.env.local` file and to your hosting provider
+                        (e.g. Vercel, Netlify). These values need to start with `NEXT_PUBLIC_` to be accessible on the
                         client-side.
                     </Markdown>
                     <CodeBlock
@@ -56,7 +57,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 language: 'bash',
                                 file: '.env.local',
                                 code: dedent`
-                                    NEXT_PUBLIC_INSIGHTS_KEY=<ph_project_api_key>
+                                    NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN=<ph_project_token>
                                     NEXT_PUBLIC_INSIGHTS_HOST=<ph_client_api_host>
                                 `,
                             },
@@ -90,11 +91,11 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             language: 'typescript',
                                             file: 'instrumentation-client.ts',
                                             code: dedent`
-                                                import insights from '@hanzo/insights'
+                                                import insights from 'insights-js'
 
-                                                insights.init(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
+                                                insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
                                                     api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
-                                                    defaults: '2026-01-30'
+                                                    defaults: '${SDK_DEFAULTS_DATE}'
                                                 })
                                             `,
                                         },
@@ -118,14 +119,14 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { usePathname, useSearchParams } from "next/navigation"
                                                 import { useEffect } from "react"
 
-                                                import insights from '@hanzo/insights'
-                                                import { InsightsProvider as PHProvider } from '@hanzo/insights/react'
+                                                import insights from 'insights-js'
+                                                import { InsightsProvider as PHProvider } from '@hanzo/react'
 
                                                 export function InsightsProvider({ children }: { children: React.ReactNode }) {
                                                   useEffect(() => {
-                                                    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_KEY as string, {
+                                                    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN as string, {
                                                       api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
-                                                      defaults: '2026-01-30'
+                                                      defaults: '${SDK_DEFAULTS_DATE}'
                                                     })
                                                   }, [])
 
@@ -180,16 +181,16 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             code: dedent`
                                                 import { useEffect } from 'react'
                                                 import { Router } from 'next/router'
-                                                import insights from '@hanzo/insights'
-                                                import { InsightsProvider } from '@hanzo/insights/react'
+                                                import insights from 'insights-js'
+                                                import { InsightsProvider } from '@hanzo/react'
                                                 import type { AppProps } from 'next/app'
 
                                                 export default function App({ Component, pageProps }: AppProps) {
 
                                                   useEffect(() => {
-                                                    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_KEY as string, {
+                                                    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN as string, {
                                                       api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
-                                                      defaults: '2026-01-30',
+                                                      defaults: '${SDK_DEFAULTS_DATE}',
                                                       loaded: (insights) => {
                                                         if (process.env.NODE_ENV === 'development') insights.debug()
                                                       }
@@ -244,7 +245,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             code: dedent`
                                                 'use client'
 
-                                                import insights from '@hanzo/insights'
+                                                import insights from 'insights-js'
 
                                                 export default function CheckoutPage() {
                                                     function handlePurchase() {
@@ -268,7 +269,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             code: dedent`
                                                 'use client'
 
-                                                import { useInsights } from '@hanzo/insights/react'
+                                                import { useInsights } from '@hanzo/react'
 
                                                 export default function CheckoutPage() {
                                                     const insights = useInsights()
@@ -353,7 +354,7 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { Insights } from 'insights-node'
 
                                                 export async function POST(request: Request) {
-                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
+                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
                                                         host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                                     })
 
@@ -380,7 +381,7 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { Insights } from 'insights-node'
 
                                                 export async function myServerAction() {
-                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
+                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
                                                         host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                                     })
 
@@ -411,7 +412,7 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                     req: NextApiRequest,
                                                     res: NextApiResponse
                                                 ) {
-                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
+                                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
                                                         host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                                     })
 

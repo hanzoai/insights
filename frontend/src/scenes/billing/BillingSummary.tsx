@@ -2,10 +2,10 @@ import { useValues } from 'kea'
 
 import { dayjs } from 'lib/dayjs'
 import { Label } from 'lib/elements/Label/Label'
-import { humanFriendlyCurrency } from 'lib/utils'
+import { humanFriendlyCurrency } from 'lib/utils/numbers'
 
-import { BillingPortalButton } from './BillingPortalButton'
 import { billingLogic } from './billingLogic'
+import { StripePortalButton } from './StripePortalButton'
 
 export const BillingSummary = (): JSX.Element => {
     const { billing } = useValues(billingLogic)
@@ -117,7 +117,7 @@ export const BillingSummary = (): JSX.Element => {
                         </div>
                     )}
                 </div>
-                <BillingPortalButton />
+                <StripePortalButton />
             </div>
         </div>
     )

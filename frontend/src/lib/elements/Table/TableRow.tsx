@@ -6,7 +6,7 @@ import { IconCollapse, IconExpand } from '@hanzo/icons'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
 
-import { getStickyColumnInfo } from './columnUtils'
+import { getStickyColumnInfo } from './columnLayoutUtils'
 import { ExpandableConfig, TableColumn, TableColumnGroup, TableCellRepresentation } from './types'
 
 export interface TableRowProps<T extends Record<string, any>> {
@@ -166,14 +166,7 @@ function TableRowRaw<T extends Record<string, any>>({
                             )
                         })
                 )}
-                {rowActions && (
-                    <td className="w-0">
-                        {(() => {
-                            const actionsOverlay = rowActions(record, recordIndex)
-                            return actionsOverlay ? <More overlay={actionsOverlay} /> : null
-                        })()}
-                    </td>
-                )}
+                {rowActions && <td className="w-0">{rowActions(record, recordIndex)}</td>}
             </tr>
 
             {expandable && !!rowExpandable && isRowExpanded && (

@@ -7,15 +7,19 @@ from parameterized import parameterized
 
 from insights.schema import PersonsOnEventsMode
 
-from insights.models import Dashboard, DashboardTile, Organization, Team, User
+from insights.models import Organization, Team, User
 from insights.models.instance_setting import override_instance_config
 from insights.models.project import Project
 from insights.models.team import get_team_in_cache, util
 from insights.models.team.team import SessionRecordingRetentionPeriod
 
+from products.cohorts.backend.models.cohort import INTERNAL_TEST_USERS_COHORT_NAME, Cohort, CohortKind
+from products.dashboards.backend.models.dashboard import Dashboard
+from products.dashboards.backend.models.dashboard_tile import DashboardTile
+
 from .base import BaseTest
 
-util.can_enable_actor_on_events = True
+util.can_enable_actor_on_events = True  # ty: ignore[invalid-assignment]
 
 
 class TestModelCache(TestCase):
@@ -73,47 +77,97 @@ class TestTeam(BaseTest):
 
     def test_create_team_with_test_account_filters(self):
         team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
+
+        # An internal/test users cohort should be created
+        test_users_cohort = Cohort.objects.get(team=team, name=INTERNAL_TEST_USERS_COHORT_NAME)
+
+        self.assertEqual(test_users_cohort.kind, CohortKind.INTERNAL_TEST_USERS)
+
+        # Cohort should have $internal_or_test_user filter AND email domain filter (hanzo.ai is not generic)
         self.assertEqual(
-            team.test_account_filters,
-            [
-                {
-                    "key": "email",
-                    "value": "@hanzo.ai",
-                    "operator": "not_icontains",
-                    "type": "person",
-                },
-                {
-                    "key": "$host",
-                    "operator": "not_regex",
-                    "value": "^(localhost|127\\.0\\.0\\.1)($|:)",
-                    "type": "event",
-                },
-            ],
+            test_users_cohort.filters,
+            {
+                "properties": {
+                    "type": "OR",
+                    "values": [
+                        {
+                            "type": "AND",
+                            "values": [
+                                {
+                                    "key": "$internal_or_test_user",
+                                    "type": "person",
+                                    "value": [True],
+                                    "operator": "exact",
+                                }
+                            ],
+                        },
+                        {
+                            "type": "AND",
+                            "values": [
+                                {
+                                    "key": "email",
+                                    "type": "person",
+                                    "value": "@hanzo.ai",
+                                    "operator": "icontains",
+                                }
+                            ],
+                        },
+                    ],
+                }
+            },
         )
 
-        # test generic emails
+        # test_account_filters should reference the cohort with not_in
+        self.assertEqual(
+            team.test_account_filters,
+            [{"key": "id", "type": "cohort", "value": test_users_cohort.pk, "operator": "not_in"}],
+        )
+
+    def test_create_team_with_generic_email_skips_domain_filter(self):
         user = User.objects.create(email="test@gmail.com")
         organization = Organization.objects.create()
         organization.members.set([user])
-        team = Team.objects.create_with_data(initiating_user=self.user, organization=organization)
+        team = Team.objects.create_with_data(initiating_user=user, organization=organization)
+
+        # Cohort should only have $internal_or_test_user filter (no email domain for gmail.com)
+        test_users_cohort = Cohort.objects.get(team=team, name=INTERNAL_TEST_USERS_COHORT_NAME)
+        self.assertEqual(test_users_cohort.kind, CohortKind.INTERNAL_TEST_USERS)
+        self.assertEqual(
+            test_users_cohort.filters,
+            {
+                "properties": {
+                    "type": "OR",
+                    "values": [
+                        {
+                            "type": "AND",
+                            "values": [
+                                {
+                                    "key": "$internal_or_test_user",
+                                    "type": "person",
+                                    "value": [True],
+                                    "operator": "exact",
+                                }
+                            ],
+                        },
+                    ],
+                }
+            },
+        )
+
+        # test_account_filters should still reference the cohort
         self.assertEqual(
             team.test_account_filters,
-            [
-                {
-                    "key": "$host",
-                    "operator": "not_regex",
-                    "value": "^(localhost|127\\.0\\.0\\.1)($|:)",
-                    "type": "event",
-                }
-            ],
+            [{"key": "id", "type": "cohort", "value": test_users_cohort.pk, "operator": "not_in"}],
         )
 
     def test_create_team_sets_primary_dashboard(self):
         team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
         self.assertIsInstance(team.primary_dashboard, Dashboard)
+        assert team.primary_dashboard is not None
+        self.assertEqual(team.primary_dashboard.name, "Your starter dashboard")
 
-        # Ensure insights are created and linked
-        self.assertEqual(DashboardTile.objects.filter(dashboard=team.primary_dashboard).count(), 6)
+        # Ensure insights are created and linked (8 insight tiles + 5 text tiles + 3 button tiles)
+        self.assertEqual(DashboardTile.objects.filter(dashboard=team.primary_dashboard).count(), 16)
 
     @mock.patch("hanzo_insights.feature_enabled", return_value=True)
     def test_team_on_cloud_uses_feature_flag_to_determine_person_on_events(self, mock_feature_enabled):
@@ -128,14 +182,17 @@ class TestTeam(BaseTest):
                     "persons-on-events-v2-reads-enabled",
                     str(team.uuid),
                     groups={"organization": str(self.organization.id)},
+                    person_properties=None,
                     group_properties={
                         "organization": {
                             "id": str(self.organization.id),
-                            "created_at": self.organization.created_at,
+                            "created_at": self.organization.created_at.isoformat(),
                         }
                     },
                     only_evaluate_locally=True,
                     send_feature_flag_events=False,
+                    disable_geoip=None,
+                    device_id=None,
                 )
 
     @mock.patch("hanzo_insights.feature_enabled", return_value=False)
@@ -211,11 +268,74 @@ class TestTeam(BaseTest):
         [
             ("self_hosted", False, "session_recording_retention_period", SessionRecordingRetentionPeriod.FIVE_YEARS),
             ("cloud", True, "session_recording_retention_period", SessionRecordingRetentionPeriod.THIRTY_DAYS),
-            ("self_hosted", False, "session_recording_encryption", False),
-            ("cloud", True, "session_recording_encryption", False),
         ]
     )
     def test_create_team_session_recording_defaults(self, _label, is_cloud, field, expected):
         with self.is_cloud(is_cloud):
             team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
             assert getattr(team, field) == expected
+
+    @parameterized.expand(
+        [
+            ("Active users (last 30 days)",),
+            ("Daily active users (DAUs)",),
+            ("Weekly active users (WAUs)",),
+        ]
+    )
+    def test_default_dashboard_dau_wau_tiles_use_group_node(self, tile_name):
+        team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
+        tile = DashboardTile.objects.get(
+            dashboard=team.primary_dashboard,
+            insight__name=tile_name,
+        )
+        assert tile.insight is not None
+        assert tile.insight.query is not None
+        series = tile.insight.query["source"]["series"]
+        assert len(series) == 1
+        assert series[0]["kind"] == "GroupNode"
+        assert series[0]["operator"] == "OR"
+        assert series[0]["math"] == "dau"
+        assert {n["event"] for n in series[0]["nodes"]} == {"$pageview", "$screen"}
+
+    @parameterized.expand(
+        [
+            ("Sessions (last 7 days)", "TrendsQuery"),
+            ("Pageviews (last 7 days)", "TrendsQuery"),
+            ("Top referrers", "TrendsQuery"),
+            ("Retention", "RetentionQuery"),
+        ]
+    )
+    def test_default_dashboard_pageview_only_tiles(self, tile_name, expected_kind):
+        team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
+        tile = DashboardTile.objects.get(
+            dashboard=team.primary_dashboard,
+            insight__name=tile_name,
+        )
+        assert tile.insight is not None
+        assert tile.insight.query is not None
+        source = tile.insight.query["source"]
+        assert source["kind"] == expected_kind
+        assert "GroupNode" not in str(source)
+        assert "$pageview" in str(source)
+
+    def test_default_dashboard_funnel_tile_steps_through_pageview_to_autocapture(self):
+        team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
+        tile = DashboardTile.objects.get(
+            dashboard=team.primary_dashboard,
+            insight__name="Visit to interaction funnel",
+        )
+        assert tile.insight is not None
+        assert tile.insight.query is not None
+        source = tile.insight.query["source"]
+        assert source["kind"] == "FunnelsQuery"
+        assert [step["event"] for step in source["series"]] == ["$pageview", "$autocapture"]
+
+    def test_default_dashboard_button_tiles_link_to_related_products(self):
+        team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
+        button_tiles = DashboardTile.objects.filter(
+            dashboard=team.primary_dashboard,
+            button_tile__isnull=False,
+        ).select_related("button_tile")
+        assert button_tiles.count() == 3
+        urls = {tile.button_tile.url for tile in button_tiles if tile.button_tile is not None}
+        assert urls == {"/replay/home", "/web", "/activity/explore"}

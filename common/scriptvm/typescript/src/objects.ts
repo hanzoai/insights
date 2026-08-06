@@ -1,31 +1,31 @@
-import { IQLCallable, IQLClosure, IQLDate, IQLDateTime, IQLError, IQLUpValue } from './types'
+import { HogCallable, HogClosure, HogDate, HogDateTime, HogError, HogUpValue } from './types'
 
-export function isIQLDate(obj: any): obj is IQLDate {
-    return obj && typeof obj === 'object' && '__iqlDate__' in obj && 'year' in obj && 'month' in obj && 'day' in obj
+export function isHogDate(obj: any): obj is HogDate {
+    return obj && typeof obj === 'object' && '__hogDate__' in obj && 'year' in obj && 'month' in obj && 'day' in obj
 }
 
-export function isIQLDateTime(obj: any): obj is IQLDateTime {
-    return obj && typeof obj === 'object' && '__iqlDateTime__' in obj && 'dt' in obj && 'zone' in obj
+export function isHogDateTime(obj: any): obj is HogDateTime {
+    return obj && typeof obj === 'object' && '__hogDateTime__' in obj && 'dt' in obj && 'zone' in obj
 }
 
-export function isIQLError(obj: any): obj is IQLError {
-    return obj && typeof obj === 'object' && '__iqlError__' in obj && 'type' in obj && 'message' in obj
+export function isHogError(obj: any): obj is HogError {
+    return obj && typeof obj === 'object' && '__hogError__' in obj && 'type' in obj && 'message' in obj
 }
 
-export function newIQLError(type: string, message: string, payload?: Record<string, any>): IQLError {
+export function newHogError(type: string, message: string, payload?: Record<string, any>): HogError {
     return {
-        __iqlError__: true,
+        __hogError__: true,
         type: type || 'Error',
         message: message || 'An error occurred',
         payload,
     }
 }
 
-export function isIQLCallable(obj: any): obj is IQLCallable {
+export function isHogCallable(obj: any): obj is HogCallable {
     return (
         obj &&
         typeof obj === 'object' &&
-        '__iqlCallable__' in obj &&
+        '__hogCallable__' in obj &&
         'argCount' in obj &&
         'ip' in obj &&
         // 'chunk' in obj &&  // TODO: enable after this has been live for some hours
@@ -33,20 +33,20 @@ export function isIQLCallable(obj: any): obj is IQLCallable {
     )
 }
 
-export function isIQLClosure(obj: any): obj is IQLClosure {
-    return obj && typeof obj === 'object' && '__iqlClosure__' in obj && 'callable' in obj && 'upvalues' in obj
+export function isHogClosure(obj: any): obj is HogClosure {
+    return obj && typeof obj === 'object' && '__hogClosure__' in obj && 'callable' in obj && 'upvalues' in obj
 }
 
-export function newIQLClosure(callable: IQLCallable, upvalues?: number[]): IQLClosure {
+export function newHogClosure(callable: HogCallable, upvalues?: number[]): HogClosure {
     return {
-        __iqlClosure__: true,
+        __hogClosure__: true,
         callable,
         upvalues: upvalues ?? [],
     }
 }
 
-export function newIQLCallable(
-    type: IQLCallable['__iqlCallable__'],
+export function newHogCallable(
+    type: HogCallable['__hogCallable__'],
     {
         name,
         chunk,
@@ -60,28 +60,28 @@ export function newIQLCallable(
         upvalueCount: number
         ip: number
     }
-): IQLCallable {
+): HogCallable {
     return {
-        __iqlCallable__: type,
+        __hogCallable__: type,
         name,
         chunk: chunk,
         argCount,
         upvalueCount,
         ip,
-    } satisfies IQLCallable
+    } satisfies HogCallable
 }
 
-export function isIQLUpValue(obj: any): obj is IQLUpValue {
+export function isHogUpValue(obj: any): obj is HogUpValue {
     return (
         obj &&
         typeof obj === 'object' &&
-        '__iqlUpValue__' in obj &&
+        '__hogUpValue__' in obj &&
         'location' in obj &&
         'closed' in obj &&
         'value' in obj
     )
 }
 
-export function isIQLAST(obj: any): boolean {
+export function isHogAST(obj: any): boolean {
     return obj && ((typeof obj === 'object' && '__hx_ast' in obj) || (obj instanceof Map && obj.get('__hx_ast')))
 }

@@ -17,6 +17,7 @@ from django.utils import timezone
 import structlog
 
 from insights.exceptions_capture import capture_exception
+from insights.models.activity_logging.utils import ACTIVITY_LOG_CLIENT_MAX_LENGTH, activity_storage
 from insights.models.utils import ActivityDetailEncoder, UUIDTModel
 
 if TYPE_CHECKING:
@@ -53,19 +54,24 @@ ActivityScope = Literal[
     "Project",
     "ErrorTrackingIssue",
     "DataWarehouseSavedQuery",
+    "LegalDocument",
     "Organization",
     "OrganizationDomain",
+    "IdentityProviderConfig",
     "OrganizationMembership",
     "Role",
     "UserGroup",
     "BatchExport",
     "BatchImport",
+    "ExportedAsset",
     "Integration",
     "Annotation",
     "Tag",
     "TaggedItem",
     "Subscription",
     "PersonalAPIKey",
+    "ProjectSecretAPIKey",
+    "OAuthApplication",
     "User",
     "Action",
     "AlertConfiguration",
@@ -73,15 +79,40 @@ ActivityScope = Literal[
     "AlertSubscription",
     "ExternalDataSource",
     "ExternalDataSchema",
+    "Evaluation",
+    "LLMPrompt",
+    "LLMPromptLabel",
     "LLMTrace",
+    "AIGatewayCredit",
     "WebAnalyticsFilterPreset",
     "CustomerProfileConfig",
     "Log",
+    "LogsAlertConfiguration",
+    "LogsExclusionRule",
+    "LogsRetentionRule",
+    "DashboardWidget",
     "ProductTour",
+    "Ticket",
+    "InstanceSetting",
+    "SignalReport",
+    "SignalScoutConfig",
+    "StreamlitApp",
+    "Metric",
+    "TableCertification",
+    "Billing",
+    "Loop",
 ]
 ChangeAction = Literal[
-    "changed", "created", "deleted", "merged", "split", "exported", "revoked", "logged_in", "logged_out"
+    "changed", "created", "deleted", "merged", "split", "exported", "revoked", "logged_in", "logged_out", "copied"
 ]
+
+# Internal-only scope key. Used by `field_exclusions` and `changes_between` to address
+# through-tables and other internal models that are never exposed as a top-level
+# `scope` in stored activity logs. Keeping these out of `ActivityScope` prevents them
+# from leaking into the generated `ActivityLogListScope` API enum, where filtering by
+# them would always return zero results.
+InternalActivityScope = Literal["ExperimentToSavedMetric",]
+AuditableScope = Union[ActivityScope, InternalActivityScope]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -126,7 +157,7 @@ class ActivityLog(UUIDTModel):
         constraints = [
             models.CheckConstraint(
                 name="must_have_team_or_organization_id",
-                check=models.Q(team_id__isnull=False) | models.Q(organization_id__isnull=False),
+                condition=models.Q(team_id__isnull=False) | models.Q(organization_id__isnull=False),
             ),
         ]
         indexes = [
@@ -172,6 +203,19 @@ class ActivityLog(UUIDTModel):
                 name="idx_alog_team_scp_act_crtd",
                 condition=models.Q(was_impersonated=False) & models.Q(is_system=False),
             ),
+            # Advanced activity logs default list ordering. The org- and team-scoped list
+            # endpoints order by -created_at with no scope filter, so the scope-led indexes
+            # above can't serve the sort, and the org indexes above are partial on a detail
+            # predicate the list query never carries. These full indexes let the LIMITed
+            # ordered scan walk created_at directly instead of sorting the whole partition.
+            models.Index(
+                fields=["organization_id", "-created_at"],
+                name="idx_alog_org_created_at",
+            ),
+            models.Index(
+                fields=["team_id", "-created_at"],
+                name="idx_alog_team_created_at",
+            ),
         ]
 
     team_id = models.PositiveIntegerField(null=True)
@@ -180,6 +224,10 @@ class ActivityLog(UUIDTModel):
     was_impersonated = models.BooleanField(null=True)
     # If truthy, user can be unset and this indicates a 'system' user made activity asynchronously
     is_system = models.BooleanField(null=True)
+    # Value of the x-insights-client request header captured when the activity was logged
+    client = models.CharField(max_length=ACTIVITY_LOG_CLIENT_MAX_LENGTH, null=True, blank=True)
+    # Client IP captured at request time. Null for non-HTTP activity (system, Celery).
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
 
     activity = models.fields.CharField(max_length=79, null=False)
     # if scoped to a model this activity log holds the id of the model being logged
@@ -210,7 +258,7 @@ common_field_exclusions = [
 ]
 
 
-field_with_masked_contents: dict[ActivityScope, list[str]] = {
+field_with_masked_contents: dict[AuditableScope, list[str]] = {
     "InsightsFunction": [
         "encrypted_inputs",
     ],
@@ -227,20 +275,39 @@ field_with_masked_contents: dict[ActivityScope, list[str]] = {
     "ExternalDataSource": [
         "job_inputs",
     ],
+    "InsightsFlow": [
+        # Full content snapshot including action inputs (auth headers, API keys) — record that a
+        # draft was staged/published/discarded, never its contents.
+        "draft",
+        # Encrypted secret function inputs (Fernet ciphertext) — a diff would be noise at best and
+        # leak-adjacent at worst; record that they changed, never the values.
+        "encrypted_inputs",
+        "draft_encrypted_inputs",
+        # The action graph can carry secret function inputs (auth headers, API keys). New writes strip
+        # them into encrypted_inputs, but a legacy row's first write would diff its still-plaintext
+        # `before` against the stripped `after`, leaking the secret. Record that actions changed, never
+        # the contents — the per-version content audit lives in the revisions feature instead.
+        "actions",
+    ],
     "OrganizationDomain": [
-        "scim_bearer_token",
+        "_scim_bearer_token",
         "verification_challenge",
+        "_saml_x509_cert",
+    ],
+    "IdentityProviderConfig": [
+        "scim_bearer_token",
         "saml_x509_cert",
     ],
     "User": [
         "email",
         "password",
+        # No longer used but kept for backwards-compatibility with existing activity log entries
         "temporary_token",
         "pending_email",
     ],
 }
 
-field_name_overrides: dict[ActivityScope, dict[str, str]] = {
+field_name_overrides: dict[AuditableScope, dict[str, str]] = {
     "InsightsFunction": {
         "execution_order": "priority",
     },
@@ -248,11 +315,13 @@ field_name_overrides: dict[ActivityScope, dict[str, str]] = {
         "name": "organization name",
         "enforce_2fa": "two-factor authentication requirement",
         "members_can_invite": "member invitation permissions",
+        "members_can_create_projects": "member project creation permissions",
         "members_can_use_personal_api_keys": "personal API key permissions",
         "allow_publicly_shared_resources": "public sharing permissions",
         "is_member_join_email_enabled": "member join email notifications",
         "session_cookie_age": "session cookie age",
         "default_experiment_stats_method": "default experiment stats method",
+        "is_ai_data_processing_approved": "third-party AI services",
     },
     "BatchExport": {
         "paused": "enabled",
@@ -263,14 +332,28 @@ field_name_overrides: dict[ActivityScope, dict[str, str]] = {
     "ExternalDataSchema": {
         "should_sync": "enabled",
     },
+    "SignalScoutConfig": {
+        "run_interval_minutes": "run interval (minutes)",
+        "emit": "emit findings",
+        "pause_reason": "pause reason",
+        "auto_pause_exempt": "never pause for inactivity",
+    },
+    "OAuthApplication": {
+        "_provisioning_config": "provisioning config",
+    },
     "OrganizationDomain": {
         "jit_provisioning_enabled": "just-in-time provisioning",
         "sso_enforcement": "SSO enforcement",
+        "_saml_entity_id": "SAML entity ID",
+        "_saml_acs_url": "SAML ACS URL",
+        "_saml_x509_cert": "SAML X.509 certificate",
+        "_scim_enabled": "SCIM provisioning",
+        "verified_at": "domain verification",
+    },
+    "IdentityProviderConfig": {
         "saml_entity_id": "SAML entity ID",
         "saml_acs_url": "SAML ACS URL",
         "saml_x509_cert": "SAML X.509 certificate",
-        "scim_enabled": "SCIM provisioning",
-        "verified_at": "domain verification",
     },
 }
 
@@ -284,6 +367,19 @@ signal_exclusions: dict[ActivityScope, list[str]] = {
         "last_error_at",
     ],
     "Dashboard": ["last_accessed_at"],
+    "LogsAlertConfiguration": [
+        "next_check_at",
+        "last_notified_at",
+        "last_checked_at",
+        "consecutive_failures",
+        "state",
+    ],
+    "Loop": [
+        "last_run_at",
+        "last_run_status",
+        "last_error",
+        "consecutive_failures",
+    ],
     "PersonalAPIKey": [
         "last_used_at",
     ],
@@ -297,6 +393,17 @@ signal_exclusions: dict[ActivityScope, list[str]] = {
     ],
     "OrganizationDomain": [
         "last_verification_retry",
+    ],
+    "Subscription": [
+        "next_delivery_date",
+    ],
+    # `last_run_at` is written by the scout coordinator on every tick (~every 15 min per scout),
+    # and the failure streak by the runner on every run outcome. When those are the only
+    # change, suppress the activity signal entirely so run bookkeeping never spams the audit
+    # log. A breaker trip is NOT suppressed: it moves `status`, which logs like any pause.
+    "SignalScoutConfig": [
+        "last_run_at",
+        "consecutive_failure_count",
     ],
 }
 
@@ -315,12 +422,90 @@ activity_visibility_restrictions: list[dict[str, Any]] = [
         "exclude_when": {},
         "allow_staff": True,
     },
+    {
+        "scope": "User",
+        "activities": ["scim_provisioned", "scim_replaced", "scim_updated", "scim_deprovisioned"],
+        "exclude_when": {},
+        "allow_staff": True,
+    },
+    {
+        # Staff-only email sending suspension flips: the acting staff user must not leak into the
+        # org activity log. The customer is told via email and in-app notification instead.
+        "scope": "Team",
+        "activities": ["email_sending_suspended", "email_sending_unsuspended"],
+        "exclude_when": {},
+        "allow_staff": True,
+    },
+    {
+        "scope": "Role",
+        "activities": ["scim_provisioned", "scim_replaced", "scim_updated", "scim_deprovisioned"],
+        "exclude_when": {},
+        "allow_staff": True,
+    },
+    {
+        # Instance-setting changes are staff-only operations and must not leak into the
+        # org-scoped activity log endpoints, which are visible to organization admins.
+        "scope": "InstanceSetting",
+        "activities": ["updated"],
+        "exclude_when": {},
+        "allow_staff": True,
+    },
+    {
+        # Admin AI-gateway top-ups are staff-only; keep the staff email, credit reason,
+        # and wallet balance out of the org-scoped activity log endpoints.
+        "scope": "AIGatewayCredit",
+        "activities": ["credit_added"],
+        "exclude_when": {},
+        "allow_staff": True,
+    },
 ]
 
-field_exclusions: dict[ActivityScope, list[str]] = {
+field_exclusions: dict[AuditableScope, list[str]] = {
+    "InsightsFlow": [
+        # System-maintained skip-forward map for deleted steps, refreshed as a side effect of graph
+        # writes — bookkeeping, not a user edit, so keep it out of change diffs.
+        "action_redirects",
+    ],
+    "Metric": [
+        # Derived/throttled fields, not user-meaningful change diffs.
+        "last_run_at",
+        "source_insight_query_hash",
+        "referenced_table_names",
+    ],
+    "Loop": [
+        # FK relations are not JSON-serializable for the change detail (same reason
+        # FeatureFlag/Subscription exclude theirs).
+        "team",
+        "sandbox_environment",
+        # Reverse FKs (LoopTrigger, LoopFire): reading them goes through those models' own
+        # fail-closed TeamScopedManagers with no ambient team scope at signal-handling time.
+        "triggers",
+        "fires",
+        # Run bookkeeping, not user-meaningful config.
+        "last_run_at",
+        "last_run_status",
+        "last_error",
+        "consecutive_failures",
+    ],
     "OrganizationDomain": [
         "organization",
         "scim_provisioned_users",
+        # Internal link to the IdP config mirror; the mirrored fields themselves are already logged
+        "identity_provider_config",
+    ],
+    "IdentityProviderConfig": [
+        "organization",
+        # Reverse relation from `OrganizationDomain.identity_provider_config`; not a plain field diff.
+        "domains",
+    ],
+    "Subscription": [
+        # Scheduler-derived field; keep it out of user-facing change diffs even when another
+        # field changes in the same save (signal_exclusions only governs whether the signal fires).
+        "next_delivery_date",
+        # FK to a connected Slack integration. The generic field-diff captures the related object,
+        # which isn't JSON-serializable for the change detail (same reason FeatureFlag/Experiment
+        # exclude their FK relations) — without this, editing a subscription's integration 500s the save.
+        "integration",
     ],
     "Cohort": [
         "version",
@@ -343,9 +528,11 @@ field_exclusions: dict[ActivityScope, list[str]] = {
         "featureflagoverride",
         "usage_dashboard",
         "analytics_dashboards",
+        "flag_evaluation_contexts",
     ],
     "Experiment": [
         "feature_flag",
+        "feature_flag_auto_archived",
         "exposure_cohort",
         "holdout",
         "saved_metrics",
@@ -354,6 +541,16 @@ field_exclusions: dict[ActivityScope, list[str]] = {
     "ExperimentSavedMetric": [
         "experiments",
         "experimenttosavedmetric_set",
+    ],
+    "ExperimentToSavedMetric": [
+        "experiment",
+        "saved_metric",
+    ],
+    "ProjectSecretAPIKey": [
+        "secure_value",
+        # Gateway is team-scoped; resolving it for a diff would hit the fail-closed
+        # manager. Binding changes are audited by the gateway management API instead.
+        "gateway",
     ],
     "Person": [
         "distinct_ids",
@@ -385,7 +582,6 @@ field_exclusions: dict[ActivityScope, list[str]] = {
         "short_id",
         "insightviewed",
         "dashboardtile",
-        "caching_states",
     ],
     "EventDefinition": [
         "eventdefinition_ptr_id",
@@ -426,7 +622,6 @@ field_exclusions: dict[ActivityScope, list[str]] = {
         "external_tables",
         "last_run_at",
         "latest_error",
-        "sync_frequency_interval",
         "deleted_name",
     ],
     "Endpoint": [
@@ -452,7 +647,6 @@ field_exclusions: dict[ActivityScope, list[str]] = {
         "setup_section_2_completed",
         "plugins_access_level",
         "is_hipaa",
-        "is_ai_data_processing_approved",
         "never_drop_data",
     ],
     "BatchExport": [
@@ -486,9 +680,16 @@ field_exclusions: dict[ActivityScope, list[str]] = {
         # ForeignKey fields
         "current_organization",
         "current_team",
+        # The onboarding delegation FK is excluded here because the generic field-diffing
+        # path tries to serialize the related invite during the signal, which races the
+        # same transaction that created the invite. Forensic visibility for delegation
+        # state transitions is handled via explicit structlog entries from
+        # `set_delegated_state` / `clear_delegation_state` / the pre_delete receiver.
+        "onboarding_delegated_to_invite",
         # With _id suffix for direct attribute access
         "current_organization_id",
         "current_team_id",
+        "onboarding_delegated_to_invite_id",
         # System/internal fields
         "distinct_id",
         "partial_notification_settings",
@@ -544,29 +745,71 @@ field_exclusions: dict[ActivityScope, list[str]] = {
         "connection_id",
         "destination_id",
         "are_tables_created",
+        # Reverse relation to a fail-closed model: reading through it in `changes_between` raises
+        # TeamScopeError when a source is saved outside request scope, and it isn't source-config intent.
+        "custom_oauth2_integrations",
     ],
     "ExternalDataSchema": [
         "status",
         "sync_type_config",
         "latest_error",
         "last_synced_at",
+        # Pipeline-assigned, not user intent. Diffing it resolves the FK through
+        # DataWarehouseTable.objects, whose manager adds two joins and a prefetch on every
+        # schema save (even ones that don't touch this field) — the extra queries have
+        # deadlocked with concurrent DDL in production.
+        "table",
+    ],
+    "Evaluation": [
+        # Reverse relations — auto-managed by FK creates, not user intent.
+        "reports",
+    ],
+    "SignalScoutConfig": [
+        # Run bookkeeping, not user intent — keep it out of change detection even when it
+        # rides along with a real change (belt-and-suspenders with signal_exclusions above).
+        "last_run_at",
+        "consecutive_failure_count",
+        # Companion bookkeeping that rides along with every logged `status` change; the
+        # activity log entry itself already carries who and when.
+        "status_changed_at",
+        "status_changed_by",
+        # Reverse relations auto-managed by FK creates, not user-initiated config changes.
+        "runs",
+    ],
+    "OAuthApplication": [
+        # Secrets — never diff these, even masked.
+        "client_secret",
+        "hash_client_secret",
+        # Reverse token relations can hold tens of thousands of rows; reading
+        # through them in `changes_between` would scan the token tables.
+        "oauthaccesstoken",
+        "oauthidtoken",
+        "oauthrefreshtoken",
+        "oauthgrant",
+        # Bookkeeping timestamps and FKs, not scope-ceiling intent.
+        "created",
+        "updated",
+        "cimd_metadata_last_fetched",
+        "dcr_client_id_issued_at",
+        "organization",
+        "user",
     ],
 }
 
 
 def describe_change(m: Any) -> Union[str, dict]:
     # Use lazy imports to avoid circular dependencies
-    from insights.models.dashboard import Dashboard
-    from insights.models.dashboard_tile import DashboardTile
+    from products.dashboards.backend.models.dashboard import Dashboard
+    from products.dashboards.backend.models.dashboard_tile import DashboardTile
 
     if isinstance(m, Dashboard):
         return {"id": m.id, "name": m.name}
     if isinstance(m, DashboardTile):
-        description = {"dashboard": {"id": m.dashboard.id, "name": m.dashboard.name}}
-        if m.insight:
-            description["insight"] = {"id": m.insight.id}
-        if m.text:
-            description["text"] = {"id": m.text.id}
+        description: dict[str, Any] = {"dashboard": {"id": m.dashboard.id, "name": m.dashboard.name}}
+        description["insight"] = {"id": m.insight_id} if m.insight_id else None
+        description["text"] = {"id": m.text_id} if m.text_id else None
+        description["button_tile"] = {"id": m.button_tile_id} if m.button_tile_id else None
+        description["widget"] = {"id": str(m.widget_id)} if m.widget_id else None
         return description
     else:
         return str(m)
@@ -620,7 +863,7 @@ def safely_get_field_value(instance: models.Model | None, field: str):
 
 
 def changes_between(
-    model_type: ActivityScope,
+    model_type: AuditableScope,
     previous: Optional[models.Model],
     current: Optional[models.Model],
 ) -> list[Change]:
@@ -688,7 +931,7 @@ def changes_between(
 
 
 def dict_changes_between(
-    model_type: ActivityScope,
+    model_type: AuditableScope,
     previous: dict[Any, Any],
     new: dict[Any, Any],
     use_field_exclusions: bool = False,
@@ -768,9 +1011,15 @@ def log_activity(
     activity: str,
     detail: Detail,
     was_impersonated: bool,
+    client: Optional[str] = None,
+    ip_address: Optional[str] = None,
     force_save: bool = False,
     instance_only: bool = False,
 ) -> ActivityLog | None:
+    if client is None:
+        client = activity_storage.get_client()
+    if ip_address is None:
+        ip_address = activity_storage.get_ip_address()
     if was_impersonated and user is None:
         logger.warn(
             "activity_log.failed_to_write_to_activity_log",
@@ -803,6 +1052,8 @@ def log_activity(
                 scope=scope,
                 activity=activity,
                 detail=detail,
+                client=client,
+                ip_address=ip_address,
             )
 
         def _do_log_activity():
@@ -817,6 +1068,8 @@ def log_activity(
                 scope=log.scope,
                 activity=log.activity,
                 detail=log.detail,
+                client=log.client,
+                ip_address=log.ip_address,
             )
 
         if instance_only:
@@ -856,6 +1109,8 @@ class LogActivityEntry(TypedDict, total=False):
     activity: Required[str]
     detail: Required[Detail]
     was_impersonated: Required[bool]
+    client: Optional[str]
+    ip_address: Optional[str]
     force_save: bool
 
 

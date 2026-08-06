@@ -3,10 +3,16 @@ from typing import TYPE_CHECKING, cast
 from urllib.parse import urlparse
 
 from django.conf import settings
+from django.contrib.auth.signals import user_logged_out
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Q
+from django.dispatch import receiver
+from django.utils import timezone
 
+import structlog
 from oauth2_provider.models import (
     AbstractAccessToken,
     AbstractApplication,
@@ -14,11 +20,18 @@ from oauth2_provider.models import (
     AbstractIDToken,
     AbstractRefreshToken,
 )
+from oauth2_provider.settings import oauth2_settings
+from oauth2_provider.validators import AllowedURIValidator
 
-from insights.models.utils import UUIDT
+from insights.models.activity_logging.model_activity import ModelActivityMixin
+from insights.models.utils import UUIDT, generate_random_token, hash_key_value, mask_key_value
 
 if TYPE_CHECKING:
     from insights.models import Organization, User
+
+    # This model loads at django.setup() in every process; the pydantic schema is
+    # runtime-imported in the accessors that materialize it.
+    from insights.models.oauth_provisioning import ProvisioningConfig
 
 
 class OAuthApplicationAccessLevel(enum.Enum):
@@ -32,11 +45,27 @@ class OAuthApplicationAuthBrand(enum.Enum):
     TWIG = "twig"
 
 
+class TokenEndpointAuthMethod(enum.Enum):
+    """How a client authenticates at the token endpoint, per RFC 7591 section 2.
+
+    ``NONE`` is a public client: it holds no credential and relies on PKCE (RFC 7636).
+    ``CLIENT_SECRET_POST`` holds a shared secret; RFC 6749 section 2.3.1 also defines a
+    ``client_secret_basic`` variant, which is not registered separately here because both
+    transports are accepted from any secret-holding client. ``PRIVATE_KEY_JWT`` is
+    asymmetric: the client signs an assertion (RFC 7523) that is verified against a public
+    key it publishes at its ``jwks_uri``, so no shared secret ever has to be transmitted.
+    """
+
+    NONE = "none"
+    CLIENT_SECRET_POST = "client_secret_post"
+    PRIVATE_KEY_JWT = "private_key_jwt"
+
+
 def is_loopback_host(hostname: str | None) -> bool:
-    """Check if hostname is a loopback address (localhost or 127.0.0.0/8)."""
+    """Check if hostname is a loopback address (localhost, 127.0.0.0/8, or ::1)."""
     if not hostname:
         return False
-    if hostname == "localhost":
+    if hostname in ("localhost", "::1", "[::1]"):
         return True
     # Check for IPv4 loopback range 127.0.0.0/8
     if hostname.startswith("127.") and hostname.count(".") == 3:
@@ -46,111 +75,28 @@ def is_loopback_host(hostname: str | None) -> bool:
     return False
 
 
-class OAuthApplication(AbstractApplication):
-    class Meta(AbstractApplication.Meta):
-        verbose_name = "OAuth Application"
-        verbose_name_plural = "OAuth Applications"
-        swappable = "OAUTH2_PROVIDER_APPLICATION_MODEL"
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(skip_authorization=False),
-                name="enforce_skip_authorization_false",
-            ),
-            # Note: We do not support HS256 since we don't want to store the client secret in plaintext
-            models.CheckConstraint(check=models.Q(algorithm="RS256"), name="enforce_rs256_algorithm"),
-            models.CheckConstraint(
-                check=models.Q(authorization_grant_type=AbstractApplication.GRANT_AUTHORIZATION_CODE),
-                name="enforce_supported_grant_types",
-            ),
-        ]
-
-    # Dangerous URI schemes that could be used for attacks (XSS, data exfiltration, etc.)
-    DEFAULT_BLOCKED_SCHEMES = frozenset(["javascript", "data", "file", "blob", "vbscript"])
-
-    @staticmethod
-    def get_blocked_schemes() -> set[str]:
-        """Get the set of blocked redirect URI schemes from settings."""
-        return set(
-            cast(
-                list[str],
-                settings.OAUTH2_PROVIDER.get(
-                    "BLOCKED_REDIRECT_URI_SCHEMES", list(OAuthApplication.DEFAULT_BLOCKED_SCHEMES)
-                ),
-            )
-        )
-
-    def clean(self):
-        super().clean()
-
-        for uri in self.redirect_uris.split(" "):
-            if not uri:
-                continue
-
-            parsed_uri = urlparse(uri)
-
-            if parsed_uri.fragment:
-                raise ValidationError({"redirect_uris": f"Redirect URI {uri} cannot contain fragments"})
-
-            # Custom URL schemes for native apps (RFC 8252 Section 7.1)
-            # These look like: myapp://callback, twig://oauth
-            is_custom_scheme = parsed_uri.scheme not in ["http", "https", ""]
-
-            if is_custom_scheme:
-                # Block dangerous schemes that could be used for attacks (XSS, data exfiltration, etc.)
-                # Since we use DCR with pre-registration, clients can use any scheme not in this blocklist
-                if parsed_uri.scheme in self.get_blocked_schemes():
-                    raise ValidationError(
-                        {
-                            "redirect_uris": f"Redirect URI scheme '{parsed_uri.scheme}' is not allowed for security reasons"
-                        }
-                    )
-            else:
-                # Standard HTTP(S) validation
-                if not parsed_uri.netloc:
-                    raise ValidationError({"redirect_uris": f"Redirect URI {uri} must contain a host"})
-
-                is_loopback = is_loopback_host(parsed_uri.hostname)
-
-                # http is only allowed for loopback addresses (localhost, 127.x.x.x)
-                allowed_schemes = ["http", "https"] if is_loopback else ["https"]
-
-                if parsed_uri.scheme not in allowed_schemes:
-                    raise ValidationError(
-                        {
-                            "redirect_uris": f"Redirect URI {uri} must start with one of the following schemes: {', '.join(allowed_schemes)}"
-                        }
-                    )
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-    def get_allowed_schemes(self) -> list[str]:
-        """Extract unique schemes from the application's registered redirect URIs, filtering out blocked schemes."""
-        blocked_schemes = self.get_blocked_schemes()
-        schemes: set[str] = set()
-        for uri in self.redirect_uris.split(" "):
-            if not uri:
-                continue
-            parsed_uri = urlparse(uri)
-            if parsed_uri.scheme and parsed_uri.scheme not in blocked_schemes:
-                schemes.add(parsed_uri.scheme)
-        return list(schemes) if schemes else ["https"]
-
+class OAuthApplication(ModelActivityMixin, AbstractApplication):  # type: ignore[django-manager-missing]
     id: models.UUIDField = models.UUIDField(primary_key=True, default=UUIDT, editable=False)
+
     # NOTE: By default an application should be linked to the organization that created it.
     # It can be null if the organization that created it is deleted, or it was created outside of an organization (e.g. using dynamic client registration)
     # Only admins of the organization should have permission to edit the application.
-    organization: "Organization | None" = models.ForeignKey(  # type: ignore[assignment]
+    organization: "Organization | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
         "insights.Organization", on_delete=models.SET_NULL, null=True, blank=True, related_name="oauth_applications"
     )
 
     # NOTE: The user that created the application. It should not be used to check for access to the application, since the user might have left the organization.
-    user: "User | None" = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)  # type: ignore[assignment]
+    user: "User | None" = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+
+    logo_uri: models.URLField = models.URLField(
+        max_length=2048, null=True, blank=True, help_text="URL to the client's logo image"
+    )
 
     # DCR (Dynamic Client Registration) fields - RFC 7591
     is_dcr_client: models.BooleanField = models.BooleanField(
-        default=False, help_text="True if this client was registered via Dynamic Client Registration"
+        default=False,
+        verbose_name="Is DCR client",
+        help_text="True if this client was registered via Dynamic Client Registration",
     )
     dcr_client_id_issued_at: models.DateTimeField = models.DateTimeField(
         null=True, blank=True, help_text="When the client_id was issued (for DCR clients)"
@@ -174,16 +120,400 @@ class OAuthApplication(AbstractApplication):
         help_text="Branding to use on authentication pages",
     )
 
+    # Server-stored scope ceiling for tokens issued for this app.
+    # CharField max_length matches PersonalAPIKey.scopes (`max_length=100`)
+    # so the same `obj:action` strings fit identically across both
+    # PAT and OAuth surfaces.
+    scopes: ArrayField = ArrayField(
+        models.CharField(max_length=100),
+        default=list,
+        db_default=[],
+        blank=True,
+        null=False,
+        help_text=(
+            "Required scope ceiling — strings tokens issued for this app may carry, all required and "
+            "locked on the consent screen. Empty list means a broad/deferred request (the user picks freely)."
+        ),
+    )
+
+    optional_scopes: ArrayField = ArrayField(
+        models.CharField(max_length=100),
+        default=list,
+        db_default=[],
+        blank=True,
+        null=False,
+        help_text=(
+            "Additive declinable scopes layered on top of the required `scopes` base — the user may "
+            "decline these at consent. Requires a non-empty `scopes` (an app with optional extras must "
+            "have a required base)."
+        ),
+    )
+
+    @property
+    def ceiling_scopes(self) -> list[str]:
+        """The full grantable set: `scopes` plus `optional_scopes`, deduplicated."""
+        return list(dict.fromkeys([*self.scopes, *self.optional_scopes]))
+
+    @property
+    def required_scopes(self) -> list[str]:
+        # Everything in the explicit ceiling is required and locked at consent; optional_scopes
+        # are additive declinable extras. An empty `scopes` is a broad/deferred request
+        # (MCP / `*` / empty) so nothing is required and the user picks freely. Self-registered
+        # (DCR / CIMD) ceilings are already filtered to grantable scopes and shown as locked rows
+        # the user can decline by cancelling, so they carry the same required floor as any other app.
+        return list(self.scopes)
+
+    # Generation marker for app-wide session revocation. A refresh presenting a token issued
+    # before this timestamp is rejected at mint time, so a refresh racing revoke_application_sessions
+    # can't slip new tokens past the one-shot bulk revoke.
+    sessions_revoked_at: models.DateTimeField = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            "When an admin last force-revoked every session for this app. Tokens issued before this "
+            "are rejected on refresh, forcing re-authorization."
+        ),
+    )
+
+    # CIMD (Client ID Metadata Document) fields — draft-ietf-oauth-client-id-metadata-document-00
+    is_cimd_client: models.BooleanField = models.BooleanField(
+        default=False,
+        verbose_name="Is CIMD client",
+        help_text="True if this client was registered via Client ID Metadata Document (CIMD)",
+    )
+    cimd_metadata_url: models.URLField = models.URLField(
+        max_length=2048,
+        null=True,
+        blank=True,
+        unique=True,
+        help_text="The URL used as client_id for CIMD clients. Must match the client_id in the metadata document.",
+    )
+    cimd_metadata_last_fetched: models.DateTimeField = models.DateTimeField(
+        null=True, blank=True, help_text="When the CIMD metadata was last successfully fetched"
+    )
+
+    # Client authentication - RFC 7591 section 2 client metadata
+    jwks_uri: models.URLField = models.URLField(
+        max_length=2048,
+        null=True,
+        blank=True,
+        help_text=(
+            "HTTPS URL serving the client's public keys as a JWK Set. Setting this on a "
+            "confidential client switches it to private_key_jwt authentication (RFC 7523): it "
+            "signs an assertion we verify against these keys instead of holding a shared secret."
+        ),
+    )
+
+    # Provisioning fields - only relevant for partners that provision accounts/resources
+    # via the agentic provisioning API. Null/blank for regular OAuth clients.
+    is_provisioning_partner: models.BooleanField = models.BooleanField(
+        default=False,
+        db_default=False,
+        help_text=(
+            "Whether this app may act as an agentic provisioning partner. How it authenticates "
+            "follows from client_type, so there is no separate provisioning auth method."
+        ),
+    )
+    # Mangled so the `provisioning` property below can own the readable name. Every capability
+    # and quota lives in here; see insights/models/oauth_provisioning.py for the shape. Empty
+    # object means "a partner that may do nothing yet", which is the intended starting point.
+    _provisioning_config: models.JSONField = models.JSONField(
+        default=dict,
+        db_default={},
+        blank=True,
+        db_column="provisioning_config",
+        help_text=(
+            "Provisioning capabilities and per-endpoint rate limits. Every capability is off unless explicitly granted."
+        ),
+    )
+
+    @property
+    def provisioning(self) -> "ProvisioningConfig":
+        """The parsed provisioning config. Absent keys read as their default, so a partner is
+        never accidentally granted a capability the stored blob never mentioned."""
+        from insights.models.oauth_provisioning import ProvisioningConfig  # noqa: PLC0415
+
+        return ProvisioningConfig.model_validate(self._provisioning_config or {})
+
+    @provisioning.setter
+    def provisioning(self, value: "ProvisioningConfig | dict") -> None:
+        from insights.models.oauth_provisioning import ProvisioningConfig  # noqa: PLC0415
+
+        config = value if isinstance(value, ProvisioningConfig) else ProvisioningConfig.model_validate(value)
+        self._provisioning_config = config.model_dump(mode="json")
+
+    def update_provisioning(self, **changes: object) -> "ProvisioningConfig":
+        """Apply a partial change to the config and persist it.
+
+        The blob is one column, so a read-modify-write is the only way to set a single key
+        without clobbering its neighbours. That makes concurrent writers a lost-update
+        problem - an admin granting a capability while a CIMD refresh re-tiers a rate limit
+        would otherwise have one silently overwrite the other - so the row is locked and
+        re-read inside the transaction rather than trusting the copy in memory.
+        """
+        with transaction.atomic():
+            current = OAuthApplication.objects.select_for_update().get(pk=self.pk)
+            self._provisioning_config = current._provisioning_config
+            self.provisioning = self.provisioning.model_copy(update=changes)
+            self.save(update_fields=["_provisioning_config"])
+        return self.provisioning
+
+    def update_provisioning_rate_limits(self, **changes: object) -> "ProvisioningConfig":
+        """Apply a partial change to the nested rate limits and persist it.
+
+        Nested under the same lock as any other partial change, so the read of the current
+        limits can't be stale by the time it is written back.
+        """
+        with transaction.atomic():
+            current = OAuthApplication.objects.select_for_update().get(pk=self.pk)
+            self._provisioning_config = current._provisioning_config
+            return self.update_provisioning(rate_limits=self.provisioning.rate_limits.model_copy(update=changes))
+
+    @property
+    def carries_provisioning_config(self) -> bool:
+        """Whether this app has ever been configured for provisioning, whatever
+        ``is_provisioning_partner`` says now.
+
+        Partner quotas key on this rather than the flag, so an admin who disables a partner
+        without revoking its outstanding tokens doesn't also exempt those tokens from the
+        rate limits.
+
+        "Grants or records something" rather than "the column is non-empty": the backfill writes
+        a config to every row, ordinary OAuth apps included, so a non-empty blob says nothing
+        about whether an app was ever a partner. A config equal to the all-default one carries no
+        grant, no deactivation and no quota, which is exactly the app that owes no partner quota.
+        """
+        from insights.models.oauth_provisioning import ProvisioningConfig  # noqa: PLC0415
+
+        return self.is_provisioning_partner or self.provisioning != ProvisioningConfig()
+
+    # Client authentication is registration state on purpose. A client_id is public, so
+    # inferring the method from what a request happens to present would let anyone act as a
+    # confidential client by presenting nothing at all.
+
+    @property
+    def effective_client_id(self) -> str:
+        """The identifier this client uses for itself on the wire.
+
+        For a CIMD client that is its metadata URL, which is what the client sends and what it
+        names itself by in a signed assertion; the ``client_id`` column holds an opaque value
+        generated at registration. For every other client the two are the same.
+
+        Gated on ``is_cimd_client`` so a stray ``cimd_metadata_url`` on a non-CIMD app cannot
+        change which identifier an assertion's ``iss``/``sub`` are checked against.
+        """
+        if self.is_cimd_client and self.cimd_metadata_url:
+            return self.cimd_metadata_url
+        return self.client_id
+
+    @property
+    def requires_client_authentication(self) -> bool:
+        """Whether this client must prove itself, i.e. is confidential (RFC 6749 section 3.2.1)."""
+        return self.client_type == AbstractApplication.CLIENT_CONFIDENTIAL
+
+    @property
+    def token_endpoint_auth_method(self) -> TokenEndpointAuthMethod:
+        """Which RFC 7591 method this client authenticates with.
+
+        Derived rather than stored: the client type says whether it authenticates at all, and a
+        jwks_uri says it does so with an asymmetric key. Both are registration state, so this is
+        never influenced by what a request presents.
+        """
+        if not self.requires_client_authentication:
+            return TokenEndpointAuthMethod.NONE
+        if self.jwks_uri:
+            return TokenEndpointAuthMethod.PRIVATE_KEY_JWT
+        return TokenEndpointAuthMethod.CLIENT_SECRET_POST
+
+    @property
+    def uses_client_secret_auth(self) -> bool:
+        return self.token_endpoint_auth_method is TokenEndpointAuthMethod.CLIENT_SECRET_POST
+
+    @property
+    def uses_private_key_jwt_auth(self) -> bool:
+        return self.token_endpoint_auth_method is TokenEndpointAuthMethod.PRIVATE_KEY_JWT
+
+    class Meta(AbstractApplication.Meta):
+        verbose_name = "OAuth Application"
+        verbose_name_plural = "OAuth Applications"
+        swappable = "OAUTH2_PROVIDER_APPLICATION_MODEL"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(skip_authorization=False),
+                name="enforce_skip_authorization_false",
+            ),
+            # Note: We do not support HS256 since we don't want to store the client secret in plaintext
+            models.CheckConstraint(condition=models.Q(algorithm="RS256"), name="enforce_rs256_algorithm"),
+            models.CheckConstraint(
+                condition=models.Q(authorization_grant_type=AbstractApplication.GRANT_AUTHORIZATION_CODE),
+                name="enforce_supported_grant_types",
+            ),
+        ]
+
+    # Dangerous URI schemes that could be used for attacks (XSS, data exfiltration, etc.)
+    DEFAULT_BLOCKED_SCHEMES = frozenset(["javascript", "data", "file", "blob", "vbscript"])
+
+    @staticmethod
+    def get_blocked_schemes() -> set[str]:
+        """Get the set of blocked redirect URI schemes from settings."""
+        return set(
+            cast(
+                list[str],
+                settings.OAUTH2_PROVIDER.get(
+                    "BLOCKED_REDIRECT_URI_SCHEMES", list(OAuthApplication.DEFAULT_BLOCKED_SCHEMES)
+                ),
+            )
+        )
+
+    def clean(self):
+        # Full override of AbstractApplication.clean(). We run django-oauth-toolkit's redirect_uri
+        # validator ourselves with a carve-out for authority-less native-app schemes (com.example.app:/oauth),
+        # and re-implement its remaining model checks in _validate_application_config — rather than
+        # calling super().clean(), which would re-run the redirect validation and reject those native schemes.
+        self._validate_redirect_uris()
+        self._validate_optional_scopes()
+        self._validate_client_authentication()
+        self._validate_application_config()
+
+    def _validate_client_authentication(self):
+        if self.jwks_uri and not self.jwks_uri.startswith("https://"):
+            raise ValidationError("jwks_uri must be an https URL")
+
+        # A public client cannot authenticate, so a key set would never be consulted
+        # Rejecting the combination keeps token_endpoint_auth_method unambiguous.
+        if self.jwks_uri and not self.requires_client_authentication:
+            raise ValidationError("jwks_uri is only meaningful for a confidential client")
+
+    def _validate_redirect_uris(self):
+        validator = AllowedURIValidator(
+            {scheme.lower() for scheme in self.get_allowed_schemes()},
+            name="redirect uri",
+            allow_path=True,
+            allow_query=True,
+            allow_hostname_wildcard=oauth2_settings.ALLOW_URI_WILDCARDS,
+        )
+        for uri in self.redirect_uris.split():
+            parsed_uri = urlparse(uri)
+
+            # RFC 8252 Section 7.1 private-use scheme redirects (e.g. com.example.app:/oauth)
+            # are authority-less by design; django-oauth-toolkit validator rejects them solely for lacking a host.
+            # Everything else goes through validator unchanged.
+            if parsed_uri.scheme not in ("http", "https", "") and parsed_uri.hostname is None:
+                if parsed_uri.scheme in self.get_blocked_schemes():
+                    raise ValidationError(
+                        {
+                            "redirect_uris": f"Redirect URI scheme '{parsed_uri.scheme}' is not allowed for security reasons"
+                        }
+                    )
+                if parsed_uri.fragment:
+                    raise ValidationError({"redirect_uris": f"Redirect URI {uri} cannot contain fragments"})
+                continue
+
+            # django-oauth-toolkit validates scheme, fragment, and URL shape
+            validator(uri)
+
+            # django-oauth-toolkit permits any allowlisted scheme; we additionally require https except on loopback.
+            if parsed_uri.scheme == "http" and not is_loopback_host(parsed_uri.hostname):
+                raise ValidationError(
+                    {
+                        "redirect_uris": f"Redirect URI {uri} must use https (http is only allowed for loopback addresses)"
+                    }
+                )
+
+    def _validate_optional_scopes(self):
+        if not self.optional_scopes:
+            return
+        if not self.scopes:
+            raise ValidationError(
+                {"optional_scopes": "Declaring optional scopes requires a non-empty required set in `scopes`."}
+            )
+        for field, values in (("scopes", self.scopes), ("optional_scopes", self.optional_scopes)):
+            non_resource = [scope for scope in values if ":" not in scope]
+            if non_resource:
+                # `*` or identity scopes in a required set either brick /authorize
+                # (explicit ceilings reject `*`) or 400 every consent the client
+                # didn't request them on, with no UI recourse.
+                raise ValidationError(
+                    {
+                        field: f"With optional scopes declared, every entry must be a resource scope "
+                        f"(object:action); invalid: {', '.join(non_resource)}"
+                    }
+                )
+
+    def _validate_application_config(self):
+        # Mirror of AbstractApplication.clean()'s non-redirect checks (grant type, allowed origins,
+        # signing algorithm). Re-implemented here because clean() does not call super().clean()
+        code_grant_types = (
+            AbstractApplication.GRANT_AUTHORIZATION_CODE,
+            AbstractApplication.GRANT_IMPLICIT,
+            AbstractApplication.GRANT_OPENID_HYBRID,
+        )
+        if not self.redirect_uris.split() and self.authorization_grant_type in code_grant_types:
+            raise ValidationError(f"redirect_uris cannot be empty with grant_type {self.authorization_grant_type}")
+
+        allowed_origins = self.allowed_origins.split()
+        if allowed_origins:
+            origin_validator = AllowedURIValidator(
+                oauth2_settings.ALLOWED_SCHEMES,
+                name="allowed origin",
+                allow_hostname_wildcard=oauth2_settings.ALLOW_URI_WILDCARDS,
+            )
+            for origin in allowed_origins:
+                origin_validator(origin)
+
+        if self.algorithm == AbstractApplication.RS256_ALGORITHM and not oauth2_settings.OIDC_RSA_PRIVATE_KEY:
+            raise ValidationError("You must set OIDC_RSA_PRIVATE_KEY to use RSA algorithm")
+
+        if self.algorithm == AbstractApplication.HS256_ALGORITHM and (
+            self.authorization_grant_type
+            in (AbstractApplication.GRANT_IMPLICIT, AbstractApplication.GRANT_OPENID_HYBRID)
+            or self.client_type == AbstractApplication.CLIENT_PUBLIC
+        ):
+            raise ValidationError("You cannot use HS256 with public grants or clients")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def get_allowed_schemes(self) -> list[str]:
+        """Extract unique schemes from the application's registered redirect URIs, filtering out blocked schemes."""
+        blocked_schemes = self.get_blocked_schemes()
+        schemes: set[str] = set()
+        for uri in self.redirect_uris.split(" "):
+            if not uri:
+                continue
+            parsed_uri = urlparse(uri)
+            if parsed_uri.scheme and parsed_uri.scheme not in blocked_schemes:
+                schemes.add(parsed_uri.scheme)
+        return list(schemes) if schemes else ["https"]
+
 
 class OAuthAccessToken(AbstractAccessToken):
     class Meta(AbstractAccessToken.Meta):
         verbose_name = "OAuth Access Token"
         verbose_name_plural = "OAuth Access Tokens"
         swappable = "OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL"
+        indexes = [
+            # The gateway credential cache scans for tokens holding a given scope via a
+            # whitespace-bounded regex on the space-separated `scope` text. A trigram GIN
+            # index lets that parameterized `~*` use an index scan; partial on
+            # application_id IS NOT NULL (which every such scan already filters on) keeps
+            # it to app tokens. See insights/storage/gateway_credential_cache.py.
+            GinIndex(
+                fields=["scope"],
+                name="oauthaccesstoken_scope_trgm",
+                opclasses=["gin_trgm_ops"],
+                condition=Q(application__isnull=False),
+            ),
+            # B-tree on the plaintext `token` so equality lookups by token value resolve
+            # via an index scan instead of a sequential scan. These lookups account for a
+            # large share of the server's CPU time; the index removes that hot-path scan.
+            models.Index(fields=["token"], name="oauthaccesstoken_token_idx"),
+        ]
 
     id: models.UUIDField = models.UUIDField(primary_key=True, default=UUIDT, editable=False)
 
-    user: "User | None" = models.ForeignKey(  # type: ignore[assignment]
+    user: "User | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
         "insights.User",
         on_delete=models.CASCADE,
         blank=True,
@@ -194,6 +524,27 @@ class OAuthAccessToken(AbstractAccessToken):
     scoped_teams: ArrayField = ArrayField(models.IntegerField(), null=True, blank=True)
     scoped_organizations: ArrayField = ArrayField(models.CharField(max_length=100), null=True, blank=True)
 
+    # When set, this token was minted by a staff user impersonating `user`. Used to revoke
+    # tokens at impersonation end. SET_NULL so the customer's tokens survive admin deactivation.
+    impersonated_by: "User | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        "insights.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        db_index=True,
+    )
+
+    # Optional user-facing label set at mint time. Carried across refreshes so
+    # it persists for the life of the connection, not just one rotated token.
+    label: models.CharField = models.CharField(
+        max_length=40,
+        blank=True,
+        default="",
+        db_default="",
+        help_text="Optional user-facing label so a user can identify a token (per-device, per-IP, or by purpose).",
+    )
+
 
 class OAuthIDToken(AbstractIDToken):
     class Meta(AbstractIDToken.Meta):
@@ -203,7 +554,7 @@ class OAuthIDToken(AbstractIDToken):
 
     id: models.UUIDField = models.UUIDField(primary_key=True, default=UUIDT, editable=False)
 
-    user: "User | None" = models.ForeignKey(  # type: ignore[assignment]
+    user: "User | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
         "insights.User",
         on_delete=models.CASCADE,
         blank=True,
@@ -220,7 +571,7 @@ class OAuthRefreshToken(AbstractRefreshToken):
 
     id: models.UUIDField = models.UUIDField(primary_key=True, default=UUIDT, editable=False)
 
-    user: "User" = models.ForeignKey(  # type: ignore[assignment]
+    user: "User" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
         "insights.User",
         on_delete=models.CASCADE,
         related_name="oauth_refresh_tokens",
@@ -228,6 +579,16 @@ class OAuthRefreshToken(AbstractRefreshToken):
 
     scoped_teams: ArrayField = ArrayField(models.IntegerField(), null=True, blank=True)
     scoped_organizations: ArrayField = ArrayField(models.CharField(max_length=100), null=True, blank=True)
+
+    # See OAuthAccessToken.impersonated_by — propagated through token rotation.
+    impersonated_by: "User | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        "insights.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        db_index=True,
+    )
 
 
 class OAuthGrant(AbstractGrant):
@@ -239,14 +600,14 @@ class OAuthGrant(AbstractGrant):
         # Note: We do not support plaintext code challenge methods since they are not secure
         constraints = [
             models.CheckConstraint(
-                check=models.Q(code_challenge_method=AbstractGrant.CODE_CHALLENGE_S256),
+                condition=models.Q(code_challenge_method=AbstractGrant.CODE_CHALLENGE_S256),
                 name="enforce_supported_code_challenge_method",
             )
         ]
 
     id: models.UUIDField = models.UUIDField(primary_key=True, default=UUIDT, editable=False)
 
-    user: "User" = models.ForeignKey(  # type: ignore[assignment]
+    user: "User" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
         "insights.User",
         on_delete=models.CASCADE,
         related_name="oauth_grants",
@@ -254,6 +615,16 @@ class OAuthGrant(AbstractGrant):
 
     scoped_teams: ArrayField = ArrayField(models.IntegerField(), null=True, blank=True)
     scoped_organizations: ArrayField = ArrayField(models.CharField(max_length=100), null=True, blank=True)
+
+    # See OAuthAccessToken.impersonated_by — propagated from grant to access token at code exchange.
+    impersonated_by: "User | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        "insights.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        db_index=True,
+    )
 
 
 def find_oauth_access_token(token: str) -> OAuthAccessToken | None:
@@ -314,3 +685,170 @@ def revoke_oauth_session(
 
         # Delete all grants for this user+application
         OAuthGrant.objects.filter(user=user, application=application).delete()
+
+
+def revoke_application_sessions(application: "OAuthApplication") -> None:
+    """Force-invalidate every outstanding token and grant for an application, across all users.
+
+    Lets a scope-ceiling narrowing take effect immediately by forcing every connection to
+    re-authorize under the new ceiling, instead of waiting for each token to hit its next
+    refresh (where `get_original_scopes` caps it).
+
+    Revokes refresh tokens before deleting access tokens, all in one transaction, so a
+    concurrent refresh can't mint a fresh access token in the gap and a mid-way failure
+    can't leave refresh tokens live after their access tokens are already gone.
+
+    Stamps `sessions_revoked_at` so a refresh that validated its (now-revoked) token before
+    this transaction committed is rejected when it tries to mint — DOT validates the refresh
+    token in autocommit, before its own transaction takes the row lock, so the bulk update
+    here would otherwise miss the tokens that racing refresh is about to create.
+
+    Grants are deleted before the token sweep: a racing code exchange locks its grant row at
+    mint (`_reject_code_exchange_racing_revoke`), so deleting grants first makes this
+    transaction block on that lock and re-snapshot the token sweep after the mint commits.
+    Sweeping tokens first would let the racing mint's tokens escape the sweep."""
+    now = timezone.now()
+    with transaction.atomic():
+        OAuthApplication.objects.filter(pk=application.pk).update(sessions_revoked_at=now)
+        OAuthGrant.objects.filter(application=application).delete()
+        OAuthRefreshToken.objects.filter(application=application, revoked__isnull=True).update(revoked=now)
+        OAuthAccessToken.objects.filter(application=application).delete()
+
+
+def generate_random_token_cimd_verification() -> str:
+    return "phvt_" + generate_random_token()
+
+
+class CIMDVerificationToken(models.Model):
+    """Token that links a CIMD partner app to a Insights organization.
+
+    A partner embeds the plaintext token in their CIMD metadata document under
+    `insights_verification_token`. On fetch, we hash and look up the token; if it
+    matches, we link the resulting OAuthApplication to this organization and
+    apply the verified-partner rate-limit tier.
+    """
+
+    id: models.UUIDField = models.UUIDField(primary_key=True, default=UUIDT, editable=False)
+    organization: "Organization" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        "insights.Organization", on_delete=models.CASCADE, related_name="cimd_verification_tokens"
+    )
+    label: models.CharField = models.CharField(max_length=40)
+    mask_value: models.CharField = models.CharField(max_length=11, editable=False, null=True)
+    secure_value: models.CharField = models.CharField(unique=True, max_length=300, editable=False)
+    created_by: "User | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        "insights.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    created_at: models.DateTimeField = models.DateTimeField(default=timezone.now)
+    last_used_at: models.DateTimeField = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "CIMD Verification Token"
+        verbose_name_plural = "CIMD Verification Tokens"
+
+
+def find_cimd_verification_token(token: str) -> "CIMDVerificationToken | None":
+    if not token or not token.startswith("phvt_"):
+        return None
+    secure_value = hash_key_value(token)
+    try:
+        return CIMDVerificationToken.objects.select_related("organization").get(secure_value=secure_value)
+    except CIMDVerificationToken.DoesNotExist:
+        return None
+
+
+def create_cimd_verification_token(
+    *, organization: "Organization", label: str, created_by: "User | None" = None
+) -> tuple[CIMDVerificationToken, str]:
+    """Create a new token, returning (instance, plaintext). Plaintext is only
+    available at creation time — we only persist its hash."""
+    plaintext = generate_random_token_cimd_verification()
+    token = CIMDVerificationToken.objects.create(
+        organization=organization,
+        label=label,
+        created_by=created_by,
+        secure_value=hash_key_value(plaintext),
+        mask_value=mask_key_value(plaintext),
+    )
+    return token, plaintext
+
+
+class CIMDBlocklistEntry(models.Model):
+    """Persistent blocklist for CIMD partner URLs.
+
+    Source of truth for is_cimd_url_blocked - the Redis check is a read-through
+    cache. Persisting in Postgres means the blocklist survives Redis flushes /
+    LRU eviction and a deleted CIMD app can stay blocked across restarts.
+    """
+
+    id: models.UUIDField = models.UUIDField(primary_key=True, default=UUIDT, editable=False)
+    cimd_url: models.URLField = models.URLField(max_length=2048, unique=True)
+    reason: models.CharField = models.CharField(max_length=200, blank=True, default="")
+    created_at: models.DateTimeField = models.DateTimeField(default=timezone.now)
+    created_by: "User | None" = models.ForeignKey(  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        "insights.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        verbose_name = "CIMD Blocklist Entry"
+        verbose_name_plural = "CIMD Blocklist Entries"
+
+
+logger = structlog.get_logger(__name__)
+
+
+@receiver(user_logged_out)
+def _revoke_impersonation_oauth_tokens(sender, request, user, **kwargs):
+    """Revoke OAuth tokens minted during an impersonation session when it ends.
+
+    Fires on every logout, but only acts on impersonation logouts — when the loginas
+    session flag is still set and we can recover the original (staff) user. Tokens
+    are matched by `(user=<impersonated>, impersonated_by=<staff>)`, so only tokens
+    this admin minted during this kind of impersonation are revoked; the customer's
+    own pre-existing tokens (impersonated_by IS NULL) are untouched.
+
+    Lives in the model module so the receiver is registered as soon as Django
+    imports `OAuthAccessToken` — no explicit `apps.py` wiring required.
+    """
+    if request is None or user is None:
+        return
+
+    from insights.helpers.impersonation import get_original_user_from_session, is_impersonated_session
+
+    if not is_impersonated_session(request):
+        return
+
+    impersonator = get_original_user_from_session(request)
+    if impersonator is None:
+        return
+
+    now = timezone.now()
+    access_deleted, _ = OAuthAccessToken.objects.filter(user=user, impersonated_by=impersonator).delete()
+    refresh_revoked = OAuthRefreshToken.objects.filter(
+        user=user, impersonated_by=impersonator, revoked__isnull=True
+    ).update(revoked=now)
+    grants_deleted, _ = OAuthGrant.objects.filter(user=user, impersonated_by=impersonator).delete()
+
+    if access_deleted or refresh_revoked or grants_deleted:
+        logger.info(
+            "impersonation_oauth_tokens_revoked",
+            impersonated_user_id=user.pk,
+            impersonator_user_id=impersonator.pk,
+            access_tokens_deleted=access_deleted,
+            refresh_tokens_revoked=refresh_revoked,
+            grants_deleted=grants_deleted,
+        )
+
+
+@receiver(models.signals.post_delete, sender=OAuthApplication)
+def _block_cimd_url_on_application_delete(sender, instance: OAuthApplication, **kwargs):
+    # Auto-blocklist a CIMD URL when its app is deleted, so a metadata refresh
+    # can't immediately recreate the same partner. Admin can explicitly
+    # unblock via unblock_cimd_url if they want to allow re-registration.
+    if not (instance.is_cimd_client and instance.cimd_metadata_url):
+        return
+    from insights.api.oauth.cimd import block_cimd_url
+
+    block_cimd_url(
+        instance.cimd_metadata_url,
+        reason=f"Auto-blocked on deletion of OAuthApplication {instance.pk}",
+    )

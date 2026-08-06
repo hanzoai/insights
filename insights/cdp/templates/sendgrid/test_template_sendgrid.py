@@ -5,7 +5,8 @@ from insights.cdp.templates.sendgrid.template_sendgrid import (
     TemplateSendGridMigrator,
     template as template_sendgrid,
 )
-from insights.models import PluginConfig
+
+from products.cdp.backend.models.plugin import PluginConfig
 
 
 class TestTemplateSendgrid(BaseInsightsFunctionTemplateTest):

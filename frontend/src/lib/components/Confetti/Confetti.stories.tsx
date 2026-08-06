@@ -20,11 +20,11 @@ export function Confetti(): JSX.Element {
         <>
             <ConfettiComponent />
             <Button type="secondary" onClick={handleClick}>
-                Trigger Confetti
+                Trigger confetti
             </Button>
-            <Banner type="warning" className="mt-4">
-                The rendering in Storybook is not the same as in the app so it may appear laggy here but it should be
-                working as expected in the app.
+            <Banner type="info" className="mt-4">
+                The celebration draws nothing today. Its particles were upstream mascot illustrations, which this
+                product does not ship.
             </Banner>
         </>
     )

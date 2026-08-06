@@ -1,4 +1,5 @@
-import { ScriptExecutorServiceHub } from './services/script-executor.service'
+import { TeamManager } from '~/common/utils/team-manager'
+
 import {
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
@@ -9,7 +10,8 @@ import {
 export type AsyncFunctionContext = {
     invocation: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>['invocation']
     globals: InsightsFunctionInvocationGlobalsWithInputs
-    hub: ScriptExecutorServiceHub
+    teamManager: TeamManager
+    siteUrl: string
 }
 
 export type AsyncFunctionHandler = {

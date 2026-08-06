@@ -1,15 +1,17 @@
 import { memo } from 'react'
-import { useMDXComponents } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+
+import { useMDXComponents } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 export const MultivariateFlagSnippet = memo(({ language = 'javascript' }: { language?: string }): JSX.Element => {
     const { CodeBlock, dedent } = useMDXComponents()
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            if (insights.getFeatureFlag('flag-key') == 'variant-key') { // replace 'variant-key' with the key of your variant
+            const matchedFlag = insights.getFeatureFlagResult('flag-key')
+            if (matchedFlag?.variant == 'variant-key') { // replace 'variant-key' with the key of your variant
                 // Do something differently for this user
-                // Optional: fetch the payload
-                const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
+                // Optional: read the payload from the same result
+                const matchedFlagPayload = matchedFlag?.payload
             }
         `,
         react: dedent`

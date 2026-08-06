@@ -1,7 +1,16 @@
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
 
-import { EXPERIMENT_TARGET_SELECTOR } from 'lib/actionUtils'
+import { EXPERIMENT_TARGET_SELECTOR } from 'lib/utils/actions'
+
+jest.mock('lib/elements/Toast/Toast', () => ({
+    toast: { success: jest.fn(), error: jest.fn() },
+}))
+
+// The failure-path tests intentionally exercise toolbarLogger, which logs to the console by design
+jest.mock('~/toolbar/toolbarLogger', () => ({
+    toolbarLogger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+}))
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
@@ -10,6 +19,12 @@ import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 
 import { experimentsLogic } from './experimentsLogic'
 import { experimentsTabLogic } from './experimentsTabLogic'
+
+// The toolbar logger mirrors intentional error/auth paths to the console (its job on
+// customer pages); tests exercise those paths on purpose, so stub the boundary.
+jest.mock('~/toolbar/toolbarLogger', () => ({
+    toolbarLogger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+}))
 
 const web_experiments = [
     {
@@ -48,12 +63,17 @@ const web_experiments = [
     },
 ]
 
-global.fetch = jest.fn(() =>
-    Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ results: web_experiments }),
-    } as any as Response)
-)
+// The toolbar calls `global.fetch` directly (not the app api client / MSW). Reassign the mock per
+// test in beforeEach — the MSW jest harness installs its own `global.fetch` in a global beforeAll,
+// which runs after this module loads and would otherwise clobber a top-level assignment.
+const installFetchMock = (): void => {
+    global.fetch = jest.fn(() =>
+        Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ results: web_experiments }),
+        } as any as Response)
+    )
+}
 describe('experimentsTabLogic', () => {
     let theExperimentsTabLogic: ReturnType<typeof experimentsTabLogic.build>
     let theExperimentsLogic: ReturnType<typeof experimentsLogic.build>
@@ -61,6 +81,10 @@ describe('experimentsTabLogic', () => {
     let theToolbarConfigLogic: ReturnType<typeof toolbarConfigLogic.build>
 
     beforeEach(() => {
+        installFetchMock()
+        const { toast } = jest.requireMock('lib/elements/Toast/Toast')
+        ;(toast.success as jest.Mock).mockClear()
+        ;(toast.error as jest.Mock).mockClear()
         useMocks({
             get: {
                 '/api/projects/:team/web_experiments/': () => web_experiments,
@@ -80,17 +104,17 @@ describe('experimentsTabLogic', () => {
         })
         initKeaTests()
 
+        theToolbarConfigLogic = toolbarConfigLogic.build({ apiURL: 'http://localhost', accessToken: 'test-token' })
+        theToolbarConfigLogic.mount()
+
+        theToolbarLogic = toolbarLogic()
+        theToolbarLogic.mount()
+
         theExperimentsLogic = experimentsLogic()
         theExperimentsLogic.mount()
 
         theExperimentsTabLogic = experimentsTabLogic()
         theExperimentsTabLogic.mount()
-
-        theToolbarLogic = toolbarLogic()
-        theToolbarLogic.mount()
-
-        theToolbarConfigLogic = toolbarConfigLogic.build({ apiURL: 'http://localhost' })
-        theToolbarConfigLogic.mount()
     })
 
     describe('core assumptions', () => {
@@ -157,7 +181,7 @@ describe('experimentsTabLogic', () => {
                                 transforms: [],
                                 rollout_percentage: 50,
                             },
-                            'variant #1': {
+                            'test-0': {
                                 transforms: [{}],
                                 rollout_percentage: 50,
                                 is_new: true,
@@ -173,7 +197,7 @@ describe('experimentsTabLogic', () => {
         it('can remove an existing variant', async () => {
             await expectLogic(theExperimentsTabLogic, () => {
                 theExperimentsTabLogic.actions.selectExperiment(1)
-                theExperimentsTabLogic.actions.removeVariant('variant #1')
+                theExperimentsTabLogic.actions.removeVariant('test-0')
             })
                 .toMatchValues({
                     experimentForm: {
@@ -262,6 +286,71 @@ describe('experimentsTabLogic', () => {
                 .toMatchValues({
                     elementSelector: 'h1,h2,h3,h4,h5,h6',
                 })
+        })
+    })
+
+    describe('form submission error handling', () => {
+        const savedFetch = global.fetch
+
+        afterEach(() => {
+            global.fetch = savedFetch
+        })
+
+        it('shows error toast when API returns error with detail', async () => {
+            const { toast } = jest.requireMock('lib/elements/Toast/Toast')
+
+            global.fetch = jest.fn(() =>
+                Promise.resolve({
+                    ok: false,
+                    status: 400,
+                    json: () => Promise.resolve({ detail: 'Invalid experiment config' }),
+                } as any as Response)
+            )
+
+            theExperimentsTabLogic.actions.newExperiment()
+            theExperimentsTabLogic.actions.setExperimentFormValue('name', 'Bad Experiment')
+
+            await expectLogic(theExperimentsTabLogic, () => {
+                theExperimentsTabLogic.actions.submitExperimentForm()
+            }).delay(0)
+
+            expect(toast.error).toHaveBeenCalledWith('Invalid experiment config')
+        })
+
+        it('shows generic error when API returns error and json parsing fails', async () => {
+            const { toast } = jest.requireMock('lib/elements/Toast/Toast')
+
+            global.fetch = jest.fn(() =>
+                Promise.resolve({
+                    ok: false,
+                    status: 500,
+                    json: () => Promise.reject(new Error('parse error')),
+                } as any as Response)
+            )
+
+            theExperimentsTabLogic.actions.newExperiment()
+            theExperimentsTabLogic.actions.setExperimentFormValue('name', 'Server Error Experiment')
+
+            await expectLogic(theExperimentsTabLogic, () => {
+                theExperimentsTabLogic.actions.submitExperimentForm()
+            }).delay(0)
+
+            expect(toast.error).toHaveBeenCalledWith('Failed to save experiment')
+        })
+
+        it('handles network error gracefully', async () => {
+            const { toast } = jest.requireMock('lib/elements/Toast/Toast')
+
+            global.fetch = jest.fn(() => Promise.reject(new Error('Network error')))
+
+            theExperimentsTabLogic.actions.newExperiment()
+            theExperimentsTabLogic.actions.setExperimentFormValue('name', 'Network Error Experiment')
+
+            await expectLogic(theExperimentsTabLogic, () => {
+                theExperimentsTabLogic.actions.submitExperimentForm()
+            }).delay(0)
+
+            expect(toast.error).toHaveBeenCalledWith('Failed to save experiment')
         })
     })
 

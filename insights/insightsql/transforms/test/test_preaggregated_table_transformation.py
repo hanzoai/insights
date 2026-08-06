@@ -9,6 +9,7 @@ from insights.schema import BaseMathType, DateRange, EventsNode, InsightsQLQuery
 
 from insights.insightsql.ast import SelectQuery
 from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database
 from insights.insightsql.database.schema.web_analytics_preaggregated import WebPreAggregatedStatsTable
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
@@ -20,11 +21,12 @@ from insights.insightsql.transforms.preaggregated_table_transformation import (
 
 from insights.datastore.client import sync_execute
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
-from insights.insightsql_queries.web_analytics.pre_aggregated.properties import (
+from insights.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
+
+from products.web_analytics.backend.insightsql_queries.pre_aggregated.properties import (
     EVENT_PROPERTY_TO_FIELD,
     SESSION_PROPERTY_TO_FIELD,
 )
-from insights.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
 
 
 class TestPreaggregatedTableTransformation(BaseTest, QueryMatchingTest):
@@ -68,7 +70,14 @@ class TestPreaggregatedTableTransformation(BaseTest, QueryMatchingTest):
 
     def _parse_and_transform(self, query: str):
         node = parse_select(query)
-        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
+        # Database.create_for validates the team's timezone, which a couple of tests set to an
+        # invalid value to assert the transform disables itself. In those cases leave the context
+        # without a database — the transform's timezone guard returns early before looking at it.
+        try:
+            database = Database.create_for(team=self.team)
+        except ValueError:
+            database = None
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team, database=database)
         transformed = do_preaggregated_table_transforms(node, context)
         return str(transformed)
 
@@ -243,6 +252,20 @@ class TestPreaggregatedTableTransformation(BaseTest, QueryMatchingTest):
         expected = self._normalize(original_query)
         assert query == expected
 
+    def test_qualified_insights_events_transforms(self):
+        original_query = "select count() from insights.events where event = '$pageview'"
+        query = self._parse_and_transform(original_query)
+        # The qualified form should resolve to EventsTable and get transformed
+        assert PREAGGREGATED_TABLE_NAME in query
+
+    def test_transform_requires_database(self):
+        # Without a database on the context we cannot safely resolve table identity,
+        # so the transform must no-op rather than guess via string comparison.
+        node = parse_select("select count() from events where event = '$pageview'")
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
+        transformed = do_preaggregated_table_transforms(node, context)
+        assert PREAGGREGATED_TABLE_NAME not in str(transformed)
+
     def test_alias_intact(self):
         original_query = "select count() as c, uniq(person_id) as p, uniq($session_id) as s, properties.utm_medium as m from events where event = '$pageview' group by m"
         query = self._parse_and_transform(original_query)
@@ -302,7 +325,7 @@ class TestPreaggregatedTableTransformation(BaseTest, QueryMatchingTest):
 
         # The assertions here are pretty odd, as debug printing of insightsql queries with CTEs does not work.
         node = parse_select(original_query)
-        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team, database=Database.create_for(team=self.team))
         transformed = do_preaggregated_table_transforms(node, context)
         assert isinstance(transformed, SelectQuery)
 

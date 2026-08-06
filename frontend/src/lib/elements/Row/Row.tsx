@@ -6,8 +6,10 @@ import React from 'react'
 import { Spinner } from '../Spinner/Spinner'
 import { Tooltip } from '../Tooltip'
 
-export interface RowPropsBase<T extends keyof JSX.IntrinsicElements>
-    extends Omit<React.HTMLProps<JSX.IntrinsicElements[T]>, 'ref' | 'size'> {
+export interface RowPropsBase<T extends keyof JSX.IntrinsicElements> extends Omit<
+    React.HTMLProps<JSX.IntrinsicElements[T]>,
+    'ref' | 'size'
+> {
     icon?: React.ReactElement | null
     /** HTML tag to render the row with. */
     tag?: T

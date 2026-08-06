@@ -3,9 +3,9 @@ import './SegmentedDropdown.scss'
 import clsx from 'clsx'
 import React, { useMemo } from 'react'
 
+import { useSliderPositioning } from '../hooks'
 import { Button, ButtonProps } from '../Button'
 import { Menu } from '../Menu/Menu'
-import { useSliderPositioning } from '../hooks'
 import { SegmentedButtonOption } from './SegmentedButton'
 
 export interface SegmentedDropdownProps<T extends React.Key> {
@@ -14,61 +14,55 @@ export interface SegmentedDropdownProps<T extends React.Key> {
     options: SegmentedButtonOption<T>[]
     /** Number of options to show as buttons (remaining options go in dropdown). If not provided, all options shown as buttons. */
     splitIndex?: number
+    /** Multiple split points to create separate dropdown groups. Each number marks the start of a new dropdown group. Overrides splitIndex if provided. */
+    splitIndices?: number[]
     size?: ButtonProps['size']
     className?: string
     fullWidth?: boolean
 }
 
 interface SegmentedDropdownCSSProperties extends React.CSSProperties {
-    '--segmented-button-slider-width': `${number}px`
-    '--segmented-button-slider-offset': `${number}px`
+    '--lemon-segmented-button-slider-width': `${number}px`
+    '--lemon-segmented-button-slider-offset': `${number}px`
 }
 
-/** Hybrid component showing initial options as segmented buttons and remaining options as a dropdown. */
+/** Hybrid component showing initial options as segmented buttons and remaining options as dropdown(s). */
 export function SegmentedDropdown<T extends React.Key>({
     value,
     onChange,
     options,
     splitIndex,
+    splitIndices,
     size,
     fullWidth,
     className,
 }: SegmentedDropdownProps<T>): JSX.Element {
-    const effectiveSplitIndex = splitIndex ?? options.length
-    const buttonOptions = options.slice(0, effectiveSplitIndex)
-    const dropdownOptions = options.slice(effectiveSplitIndex)
-    const shouldShowDropdown = dropdownOptions.length > 0
+    const effectiveSplitIndices = splitIndices ?? (splitIndex !== undefined ? [splitIndex] : [options.length])
+    const firstSplit = effectiveSplitIndices[0] ?? options.length
+    const buttonOptions = options.slice(0, firstSplit)
 
-    // Check if selected value is in dropdown
-    const isDropdownValueSelected = dropdownOptions.some((opt) => opt.value === value)
+    const dropdownGroups = useMemo(() => {
+        const groups: SegmentedButtonOption<T>[][] = []
+        for (let i = 0; i < effectiveSplitIndices.length; i++) {
+            const start = effectiveSplitIndices[i]
+            const end = effectiveSplitIndices[i + 1] ?? options.length
+            const group = options.slice(start, end)
+            if (group.length > 0) {
+                groups.push(group)
+            }
+        }
+        return groups
+    }, [options, effectiveSplitIndices])
 
-    // Find the selected option for dropdown display
-    const selectedDropdownOption = dropdownOptions.find((opt) => opt.value === value)
+    const isAnyDropdownValueSelected = dropdownGroups.some((group) => group.some((opt) => opt.value === value))
 
     const { containerRef, selectionRef, sliderWidth, sliderOffset, transitioning } = useSliderPositioning<
         HTMLDivElement,
         HTMLLIElement
     >(value, 200)
 
-    // Convert dropdown options to menu items
-    const menuItems = useMemo(
-        () =>
-            dropdownOptions.map((option) => ({
-                label: option.label ?? '',
-                icon: option.icon,
-                active: option.value === value,
-                onClick: (e: React.MouseEvent) => {
-                    onChange?.(option.value, e)
-                },
-                disabledReason: option.disabledReason,
-                tooltip: option.tooltip,
-                'data-attr': option['data-attr'],
-            })),
-        [dropdownOptions, value, onChange]
-    )
-
     const isFirstSelected = value === buttonOptions[0]?.value
-    const isLastButtonSelected = value === buttonOptions[buttonOptions.length - 1]?.value && !isDropdownValueSelected
+    const isLastButtonSelected = value === buttonOptions[buttonOptions.length - 1]?.value && !isAnyDropdownValueSelected
 
     return (
         <div
@@ -81,8 +75,8 @@ export function SegmentedDropdown<T extends React.Key>({
             // eslint-disable-next-line react/forbid-dom-props
             style={
                 {
-                    '--segmented-button-slider-width': `${sliderWidth}px`,
-                    '--segmented-button-slider-offset': `${sliderOffset}px`,
+                    '--lemon-segmented-button-slider-width': `${sliderWidth}px`,
+                    '--lemon-segmented-button-slider-offset': `${sliderOffset}px`,
                 } as SegmentedDropdownCSSProperties
             }
             ref={containerRef}
@@ -93,7 +87,7 @@ export function SegmentedDropdown<T extends React.Key>({
                         'SegmentedDropdown__slider',
                         isFirstSelected
                             ? 'SegmentedDropdown__slider--first'
-                            : isLastButtonSelected || isDropdownValueSelected
+                            : isLastButtonSelected || isAnyDropdownValueSelected
                               ? 'SegmentedDropdown__slider--last'
                               : null
                     )}
@@ -129,28 +123,45 @@ export function SegmentedDropdown<T extends React.Key>({
                         </Button>
                     </li>
                 ))}
-                {shouldShowDropdown && (
-                    <li
-                        className={clsx(
-                            'SegmentedDropdown__option',
-                            'SegmentedDropdown__option--dropdown',
-                            isDropdownValueSelected && 'SegmentedDropdown__option--selected'
-                        )}
-                        ref={isDropdownValueSelected ? selectionRef : undefined}
-                    >
-                        <Menu items={menuItems}>
-                            <Button
-                                type={isDropdownValueSelected ? 'primary' : 'secondary'}
-                                size={size}
-                                fullWidth
-                                icon={selectedDropdownOption?.icon}
-                                center
-                            >
-                                {selectedDropdownOption?.label ?? dropdownOptions[0]?.label}
-                            </Button>
-                        </Menu>
-                    </li>
-                )}
+                {dropdownGroups.map((group, groupIndex) => {
+                    const isGroupValueSelected = group.some((opt) => opt.value === value)
+                    const selectedOption = group.find((opt) => opt.value === value)
+                    const menuItems = group.map((option) => ({
+                        label: option.label ?? '',
+                        icon: option.icon,
+                        active: option.value === value,
+                        onClick: (e: React.MouseEvent) => {
+                            onChange?.(option.value, e)
+                        },
+                        disabledReason: option.disabledReason,
+                        tooltip: option.tooltip,
+                        'data-attr': option['data-attr'],
+                    }))
+
+                    return (
+                        <li
+                            key={`dropdown-${groupIndex}`}
+                            className={clsx(
+                                'SegmentedDropdown__option',
+                                'SegmentedDropdown__option--dropdown',
+                                isGroupValueSelected && 'SegmentedDropdown__option--selected'
+                            )}
+                            ref={isGroupValueSelected ? selectionRef : undefined}
+                        >
+                            <Menu items={menuItems}>
+                                <Button
+                                    type={isGroupValueSelected ? 'primary' : 'secondary'}
+                                    size={size}
+                                    fullWidth
+                                    icon={selectedOption?.icon}
+                                    center
+                                >
+                                    {selectedOption?.label ?? group[0]?.label}
+                                </Button>
+                            </Menu>
+                        </li>
+                    )
+                })}
             </ul>
         </div>
     )

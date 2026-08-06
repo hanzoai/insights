@@ -1,5 +1,7 @@
 import { expectLogic } from 'kea-test-utils'
 
+import { toast } from '@hanzo/elements'
+
 import api from 'lib/api'
 
 import { initKeaTests } from '~/test/init'
@@ -21,7 +23,7 @@ jest.mock('lib/api', () => ({
 
 const mockApi = api.insightsFunctions as jest.Mocked<typeof api.insightsFunctions>
 
-const HOG_TEMPLATE: InsightsFunctionTemplateType = {
+const INSIGHTS_TEMPLATE: InsightsFunctionTemplateType = {
     free: false,
     status: 'beta',
     id: 'template-webhook',
@@ -29,7 +31,7 @@ const HOG_TEMPLATE: InsightsFunctionTemplateType = {
     name: 'HTTP Webhook',
     description: 'Sends a webhook templated by the incoming event data',
     code: "let res := fetch(inputs.url, {\n  'headers': inputs.headers,\n  'body': inputs.body,\n  'method': inputs.method\n});\n\nif (inputs.debug) {\n  print('Response', res.status, res.body);\n}",
-    code_language: 'fn',
+    code_language: 'script',
     inputs_schema: [
         {
             key: 'url',
@@ -102,9 +104,9 @@ const HOG_TEMPLATE: InsightsFunctionTemplateType = {
 }
 
 const INSIGHTS_FUNCTION: InsightsFunctionType = {
-    ...HOG_TEMPLATE,
-    iql: HOG_TEMPLATE.code,
-    description: typeof HOG_TEMPLATE.description === 'string' ? HOG_TEMPLATE.description : '',
+    ...INSIGHTS_TEMPLATE,
+    script: INSIGHTS_TEMPLATE.code,
+    description: typeof INSIGHTS_TEMPLATE.description === 'string' ? INSIGHTS_TEMPLATE.description : '',
     created_at: '2021-09-29T14:00:00Z',
     created_by: {} as any,
     id: '123-456-789',
@@ -120,7 +122,7 @@ describe('insightsFunctionConfigurationLogic', () => {
         beforeEach(() => {
             initKeaTests()
 
-            mockApi.getTemplate.mockReturnValue(Promise.resolve(HOG_TEMPLATE))
+            mockApi.getTemplate.mockReturnValue(Promise.resolve(INSIGHTS_TEMPLATE))
             mockApi.create.mockReturnValue(Promise.resolve(INSIGHTS_FUNCTION))
             mockApi.update.mockReturnValue(Promise.resolve(INSIGHTS_FUNCTION))
 
@@ -133,15 +135,15 @@ describe('insightsFunctionConfigurationLogic', () => {
             logic.mount()
             await expectLogic(logic).toDispatchActions(['loadTemplate', 'loadTemplateSuccess'])
 
-            expect(logic.values.template).toEqual(HOG_TEMPLATE)
+            expect(logic.values.template).toEqual(INSIGHTS_TEMPLATE)
             expect(logic.values.configuration).toEqual({
-                name: HOG_TEMPLATE.name,
-                type: HOG_TEMPLATE.type,
-                description: HOG_TEMPLATE.description,
-                inputs_schema: HOG_TEMPLATE.inputs_schema,
+                name: INSIGHTS_TEMPLATE.name,
+                type: INSIGHTS_TEMPLATE.type,
+                description: INSIGHTS_TEMPLATE.description,
+                inputs_schema: INSIGHTS_TEMPLATE.inputs_schema,
                 filters: null,
-                iql: HOG_TEMPLATE.code,
-                icon_url: HOG_TEMPLATE.icon_url,
+                script: INSIGHTS_TEMPLATE.code,
+                icon_url: INSIGHTS_TEMPLATE.icon_url,
                 inputs: {
                     method: { value: 'POST' },
                     body: {
@@ -181,6 +183,56 @@ describe('insightsFunctionConfigurationLogic', () => {
             await expectLogic(logic, () => {
                 logic.actions.submitConfiguration()
             }).toDispatchActions(['upsertInsightsFunction', 'submitConfigurationSuccess'])
+        })
+    })
+
+    describe('log transformation', () => {
+        const LOG_TEMPLATE: InsightsFunctionTemplateType = {
+            free: true,
+            status: 'stable',
+            id: 'template-log-transformation-default',
+            type: 'transformation_log',
+            name: 'Custom log transformation',
+            description: 'Start from scratch.',
+            code: 'return record',
+            code_language: 'script',
+            inputs_schema: [],
+            filters: null,
+            masking: null,
+            icon_url: '/static/mascot/builder-script-01.png',
+        }
+
+        beforeEach(() => {
+            initKeaTests()
+            mockApi.getTemplate.mockReturnValue(Promise.resolve(LOG_TEMPLATE))
+            logic = insightsFunctionConfigurationLogic({ templateId: 'test' })
+            logic.mount()
+        })
+
+        it('seeds the inline tester with a sample record, not an event', async () => {
+            await expectLogic(logic).toDispatchActions(['loadTemplate', 'loadTemplateSuccess'])
+            const globals = logic.values.exampleInvocationGlobals
+            expect(globals.record).toBeTruthy()
+            expect(globals.record?.body).toContain('GET /api/users')
+            expect(globals.event).toBeUndefined()
+        })
+
+        it('surfaces validation errors on `type` as a toast, since no form field renders them', async () => {
+            // The feature-flag gate and the enabled-function cap both reject with attr `type`;
+            // without the toast the Save button fails with no visible feedback at all.
+            const toastSpy = jest.spyOn(toast, 'error').mockImplementation(() => 'id')
+            const detail = 'Log transformations are not enabled for this team.'
+            mockApi.create.mockRejectedValue({
+                status: 400,
+                data: { type: 'validation_error', code: 'invalid_input', attr: 'type', detail },
+            })
+            await expectLogic(logic).toDispatchActions(['loadTemplate', 'loadTemplateSuccess'])
+
+            await expectLogic(logic, () => {
+                logic.actions.submitConfiguration()
+            }).toDispatchActions(['upsertInsightsFunctionFailure'])
+
+            expect(toastSpy).toHaveBeenCalledWith(detail)
         })
     })
 })

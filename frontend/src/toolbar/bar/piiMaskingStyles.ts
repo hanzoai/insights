@@ -1,4 +1,4 @@
-import { Insights } from '~/lib/insights-browser'
+import { Insights } from 'insights-js'
 
 const SHIMMER_EFFECT_CSS = `
     @keyframes shimmer {

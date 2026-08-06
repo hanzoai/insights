@@ -1,0 +1,19 @@
+{% extends "email/base.html" %} {% load insights_assets %} {% load insights_filters %}
+{% block heading %}{{ requester_name }} requested access to Insights AI{% endblock %}
+{% block section %}
+<!-- prettier-ignore -->
+<p>
+    <strong>{{ requester_name }}</strong> (<a href="mailto:{{ requester_email }}">{{ requester_email }}</a>) wants to
+    use Insights AI in <strong>{{ organization_name }}</strong>. Enabling Insights AI requires admin access, so they're
+    asking you to turn it on.
+</p>
+<div class="mb mt text-center">
+    <a class="button primary" href="{{ insights_ai_url }}">Enable Insights AI</a>
+</div>
+<div class="mt">
+    <p>
+        If the button above doesn't work, paste this link into your browser:<br />
+        <a href="{{ insights_ai_url }}">{{ insights_ai_url }}</a>
+    </p>
+</div>
+{% endblock %}

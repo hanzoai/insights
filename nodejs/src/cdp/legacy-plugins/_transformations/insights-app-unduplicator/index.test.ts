@@ -1,5 +1,4 @@
-import { createPageview, resetMeta } from '@hanzo/plugin-scaffold/test/utils'
-
+import { createPageview, resetMeta } from '../../test-utils'
 import { LegacyTransformationPluginMeta } from '../../types'
 import { processEvent } from './index'
 

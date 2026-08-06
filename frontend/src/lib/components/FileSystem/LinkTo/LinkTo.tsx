@@ -8,7 +8,7 @@ import { linkToLogic } from 'lib/components/FileSystem/LinkTo/linkToLogic'
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
 import { Modal } from 'lib/elements/Modal'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 
 import { splitPath } from '~/layout/panel-layout/ProjectTree/utils'
 

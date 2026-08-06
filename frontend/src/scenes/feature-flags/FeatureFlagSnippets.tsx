@@ -1,6 +1,7 @@
 import { useValues } from 'kea'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
+import { Link } from 'lib/elements/Link'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -326,8 +327,7 @@ export function PythonSnippet({
     encryptedPayload,
     samplePropertyName,
 }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'insights.'
-    const flagFunction = payload ? 'get_feature_flag_payload' : multivariant ? 'get_feature_flag' : 'feature_enabled'
+    const snapshotMethod = payload ? 'get_flag_payload' : multivariant ? 'get_flag' : 'is_enabled'
 
     const propertyName = samplePropertyName || 'is_authorized'
 
@@ -349,25 +349,23 @@ remote_config_payload = insights.get_remote_config_payload('${flagKey}')`}
             ? `
     # add group properties used in the flag to ensure the flag
     # is evaluated locally, vs. going to our servers
-    group_properties={ ${groupType.group_type}: {'${propertyName}': 'value', 'name': 'xyz'}}`
+    group_properties={ '${groupType.group_type}': {'${propertyName}': 'value', 'name': 'xyz'}}`
             : `
     # add person properties used in the flag to ensure the flag
     # is evaluated locally, vs. going to our servers
     person_properties={'${propertyName}': 'value'}`
         : ''
 
-    const flagSnippet = groupType
-        ? `${clientSuffix}${flagFunction}(
-    '${flagKey}',
+    const evaluateSnippet = groupType
+        ? `insights.evaluate_flags(
     'user distinct id',
     groups={ '${groupType.group_type}': '<${groupType.name_singular || 'group'} ID>' },${localEvalAddition}
 )`
         : localEvalAddition
-          ? `${clientSuffix}${flagFunction}(
-    '${flagKey}',
+          ? `insights.evaluate_flags(
     'user distinct id',${localEvalAddition}
 )`
-          : `${clientSuffix}${flagFunction}('${flagKey}', 'user distinct id')`
+          : `insights.evaluate_flags('user distinct id')`
     const variableName = payload ? 'matched_flag_payload' : multivariant ? 'enabled_variant' : 'is_my_flag_enabled'
 
     const conditional = multivariant ? `${variableName} == 'example-variant'` : `${variableName}`
@@ -380,10 +378,14 @@ if ${conditional}:
     # Do something differently for this ${groupType ? groupType.name_singular || 'group' : 'user'}
 `
 
+    const reminderPrefix = localEvaluation ? '# ' + LOCAL_EVAL_REMINDER : ''
+
     return (
         <>
             <CodeSnippet language={Language.Python} wrap>
-                {`${localEvaluation ? '# ' + LOCAL_EVAL_REMINDER : ''}${variableName} = ${flagSnippet}${followUpCode}`}
+                {`${reminderPrefix}flags = ${evaluateSnippet}
+
+${variableName} = flags.${snapshotMethod}('${flagKey}')${followUpCode}`}
             </CodeSnippet>
         </>
     )
@@ -509,13 +511,40 @@ if ("example-variant".equals(flagValue)) {
     )
 }
 
-export function AndroidSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
+export function AndroidSnippet({
+    flagKey,
+    multivariant,
+    payload,
+    remoteConfiguration,
+    encryptedPayload,
+}: FeatureFlagSnippet): JSX.Element {
     const clientSuffix = 'Insights.'
+
+    if (remoteConfiguration) {
+        const warning = `// ${REMOTE_CONFIG_REMINDER}` + (encryptedPayload ? `\n// ${ENCRYPTED_PAYLOAD_REMINDER}` : '')
+
+        return (
+            <>
+                <CodeSnippet language={Language.Kotlin} wrap>
+                    {`${warning ? warning + '\n' : ''}val result = ${clientSuffix}getFeatureFlagResult("${flagKey}")
+result.payload?.let { payload ->
+    // Handle remote configuration payload
+    println("Remote config: $payload")
+}`}
+                </CodeSnippet>
+                <div className="mt-2">
+                    <Link to="https://hanzo.ai/tutorials/android-remote-config" target="_blank">
+                        View complete Android remote config tutorial
+                    </Link>
+                </div>
+            </>
+        )
+    }
 
     if (payload) {
         return (
             <CodeSnippet language={Language.Kotlin} wrap>
-                {`${clientSuffix}getFeatureFlagPayload("${flagKey}")`}
+                {`${clientSuffix}getFeatureFlagResult("${flagKey}")?.payload`}
             </CodeSnippet>
         )
     }
@@ -533,13 +562,40 @@ export function AndroidSnippet({ flagKey, multivariant, payload }: FeatureFlagSn
     )
 }
 
-export function FlutterSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
+export function FlutterSnippet({
+    flagKey,
+    multivariant,
+    payload,
+    remoteConfiguration,
+    encryptedPayload,
+}: FeatureFlagSnippet): JSX.Element {
     const clientSuffix = 'await Insights().'
+
+    if (remoteConfiguration) {
+        const warning = `// ${REMOTE_CONFIG_REMINDER}` + (encryptedPayload ? `\n// ${ENCRYPTED_PAYLOAD_REMINDER}` : '')
+
+        return (
+            <>
+                <CodeSnippet language={Language.Dart} wrap>
+                    {`${warning ? warning + '\n' : ''}final result = ${clientSuffix}getFeatureFlagResult('${flagKey}');
+if (result.payload != null) {
+  // Handle remote configuration payload
+  print('Remote config: \${result.payload}');
+}`}
+                </CodeSnippet>
+                <div className="mt-2">
+                    <Link to="https://hanzo.ai/tutorials/flutter-remote-config" target="_blank">
+                        View complete Flutter remote config tutorial
+                    </Link>
+                </div>
+            </>
+        )
+    }
 
     if (payload) {
         return (
             <CodeSnippet language={Language.Dart} wrap>
-                {`${clientSuffix}getFeatureFlagPayload('${flagKey}');`}
+                {`(${clientSuffix}getFeatureFlagResult('${flagKey}'))?.payload;`}
             </CodeSnippet>
         )
     }
@@ -558,13 +614,40 @@ export function FlutterSnippet({ flagKey, multivariant, payload }: FeatureFlagSn
     )
 }
 
-export function iOSSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
+export function iOSSnippet({
+    flagKey,
+    multivariant,
+    payload,
+    remoteConfiguration,
+    encryptedPayload,
+}: FeatureFlagSnippet): JSX.Element {
     const clientSuffix = 'InsightsSDK.shared.'
+
+    if (remoteConfiguration) {
+        const warning = `// ${REMOTE_CONFIG_REMINDER}` + (encryptedPayload ? `\n// ${ENCRYPTED_PAYLOAD_REMINDER}` : '')
+
+        return (
+            <>
+                <CodeSnippet language={Language.Swift} wrap>
+                    {`${warning ? warning + '\n' : ''}let result = ${clientSuffix}getFeatureFlagResult("${flagKey}")
+if let payload = result.payload {
+    // Handle remote configuration payload
+    print("Remote config: \\(payload)")
+}`}
+                </CodeSnippet>
+                <div className="mt-2">
+                    <Link to="https://hanzo.ai/tutorials/ios-remote-config" target="_blank">
+                        View complete iOS remote config tutorial
+                    </Link>
+                </div>
+            </>
+        )
+    }
 
     if (payload) {
         return (
             <CodeSnippet language={Language.Swift} wrap>
-                {`${clientSuffix}getFeatureFlagPayload("${flagKey}")`}
+                {`${clientSuffix}getFeatureFlagResult("${flagKey}")?.payload`}
             </CodeSnippet>
         )
     }
@@ -581,13 +664,47 @@ export function iOSSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippe
     )
 }
 
-export function ReactNativeSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
+export function ReactNativeSnippet({
+    flagKey,
+    multivariant,
+    payload,
+    remoteConfiguration,
+    encryptedPayload,
+}: FeatureFlagSnippet): JSX.Element {
     const clientSuffix = 'insights.'
+
+    if (remoteConfiguration) {
+        const warning = `// ${REMOTE_CONFIG_REMINDER}` + (encryptedPayload ? `\n// ${ENCRYPTED_PAYLOAD_REMINDER}` : '')
+
+        return (
+            <>
+                <CodeSnippet language={Language.JSX} wrap>
+                    {`${warning ? warning + '\n' : ''}import { useFeatureFlagResult } from 'insights-react-native'
+
+const MyComponent = () => {
+    const result = useFeatureFlagResult('${flagKey}')
+    
+    if (result.payload) {
+        // Handle remote configuration payload
+        console.log('Remote config:', result.payload)
+    }
+    
+    return <YourComponent />
+}`}
+                </CodeSnippet>
+                <div className="mt-2">
+                    <Link to="https://hanzo.ai/tutorials/react-native-remote-config" target="_blank">
+                        View complete React Native remote config tutorial
+                    </Link>
+                </div>
+            </>
+        )
+    }
 
     if (payload) {
         return (
             <CodeSnippet language={Language.JSX} wrap>
-                {`${clientSuffix}getFeatureFlagPayload('${flagKey}')`}
+                {`${clientSuffix}getFeatureFlagResult('${flagKey}')?.payload`}
             </CodeSnippet>
         )
     }
@@ -631,7 +748,7 @@ export function ReactSnippet({ flagKey, multivariant, payload }: FeatureFlagSnip
     return (
         <CodeSnippet language={Language.JSX} wrap>
             {`
-import { ${flagFunction} } from '@hanzo/insights/react'
+import { ${flagFunction} } from '@hanzo/react'
 
 function App() {
     const ${variable} = ${flagFunction}('${flagKey}')
@@ -689,11 +806,12 @@ export function JSSnippet({
     instantlyAvailableProperties,
     samplePropertyName,
 }: FeatureFlagSnippet): JSX.Element {
+    const clientSuffix = 'insights.'
     if (payload) {
         return (
             <>
                 <CodeSnippet language={Language.JavaScript} wrap>
-                    {`insights.getFeatureFlagPayload('${flagKey ?? ''}')`}
+                    {`${clientSuffix}getFeatureFlagResult('${flagKey ?? ''}')?.payload`}
                 </CodeSnippet>
             </>
         )
@@ -712,7 +830,6 @@ insights.${
 
 `
 
-    const clientSuffix = 'insights.'
     const flagFunction = multivariant ? 'getFeatureFlag' : 'isFeatureEnabled'
 
     const variantSuffix = multivariant ? ` == 'example-variant'` : ''

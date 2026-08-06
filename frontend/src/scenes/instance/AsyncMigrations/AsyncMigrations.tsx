@@ -5,6 +5,7 @@ import { IconDatabase, IconRefresh } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
+import { IconPlayCircle, IconReplay } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
 import { Progress } from 'lib/elements/Progress'
@@ -14,8 +15,7 @@ import { Tabs } from 'lib/elements/Tabs'
 import { Tag, TagType } from 'lib/elements/Tag/Tag'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconPlayCircle, IconReplay } from 'lib/elements/icons'
-import { humanFriendlyDetailedTime } from 'lib/utils'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 import { AsyncMigrationParametersModal } from 'scenes/instance/AsyncMigrations/AsyncMigrationParametersModal'
 import { SceneExport } from 'scenes/sceneTypes'
 import { userLogic } from 'scenes/userLogic'
@@ -25,7 +25,6 @@ import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 
 import { AsyncMigrationDetails } from './AsyncMigrationDetails'
-import { SettingUpdateField } from './SettingUpdateField'
 import {
     AsyncMigration,
     AsyncMigrationStatus,
@@ -33,6 +32,7 @@ import {
     asyncMigrationsLogic,
     migrationStatusNumberToMessage,
 } from './asyncMigrationsLogic'
+import { SettingUpdateField } from './SettingUpdateField'
 
 export const scene: SceneExport = {
     component: AsyncMigrations,
@@ -78,7 +78,7 @@ export function AsyncMigrations(): JSX.Element {
         title: 'Migration',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             const link =
-                'https://github.com/hanzoai/insights/blob/main/insights/async_migrations/migrations/' +
+                'https://github.com/Insights/insights/blob/master/insights/async_migrations/migrations/' +
                 asyncMigration.name +
                 '.py'
             return <TableLink to={link} title={asyncMigration.name} description={asyncMigration.description} />
@@ -220,21 +220,26 @@ export function AsyncMigrations(): JSX.Element {
         },
     }
 
-    const columns = {}
-    columns[AsyncMigrationsTab.FutureMigrations] = [nameColumn, statusColumn, minVersionColumn, maxVersionColumn]
-    columns[AsyncMigrationsTab.Management] = [
-        nameColumn,
-        progressColumn,
-        statusColumn,
-        lastOpColumn,
-        queryIdColumn,
-        startedAtColumn,
-        finishedAtColumn,
-        ActionsColumn,
-    ]
-    const migrations = {}
-    migrations[AsyncMigrationsTab.FutureMigrations] = futureMigrations
-    migrations[AsyncMigrationsTab.Management] = actionableMigrations
+    const columns = {
+        [AsyncMigrationsTab.FutureMigrations]: [nameColumn, statusColumn, minVersionColumn, maxVersionColumn],
+        [AsyncMigrationsTab.Management]: [
+            nameColumn,
+            progressColumn,
+            statusColumn,
+            lastOpColumn,
+            queryIdColumn,
+            startedAtColumn,
+            finishedAtColumn,
+            ActionsColumn,
+        ],
+        [AsyncMigrationsTab.Settings]: [],
+    }
+
+    const migrations = {
+        [AsyncMigrationsTab.FutureMigrations]: futureMigrations,
+        [AsyncMigrationsTab.Management]: actionableMigrations,
+        [AsyncMigrationsTab.Settings]: [],
+    }
 
     const rowExpansion = {
         expandedRowRender: function renderExpand(asyncMigration: AsyncMigration) {

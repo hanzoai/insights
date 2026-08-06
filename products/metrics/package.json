@@ -1,0 +1,26 @@
+{
+    "name": "@hanzo/products-metrics",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short",
+        "backend:contract-check": "echo 'Contract files unchanged'"
+    },
+    "dependencies": {
+        "@hanzo/quill-charts": "workspace:*",
+        "kea": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "insights-js": "catalog:"
+    },
+    "devDependencies": {
+        "kea-test-utils": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/brand": "catalog:",
+        "@hanzo/icons": "catalog:",
+        "@hanzo/products-error-tracking": "workspace:*",
+        "@types/react": "*",
+        "clsx": "*",
+        "react": "*",
+        "react-window": "*"
+    }
+}

@@ -4,7 +4,7 @@ import { cloneElement, useEffect, useState } from 'react'
 import { ColorGlyph, Input, Label, Popover } from '@hanzo/elements'
 
 import { DataColorToken } from 'lib/colors'
-import { dataThemeLogic } from 'scenes/dataThemeLogic'
+import { dataThemeLogic } from 'lib/logic/dataThemeLogic'
 
 import { ColorButton } from './ColorButton'
 import { ColorList } from './ColorList'
@@ -21,9 +21,11 @@ type ColorPickerColorProps = ColorPickerBaseProps & {
     colors: string[]
     selectedColor?: string | null
     onSelectColor: (color: string) => void
+    onClearColor?: () => void
     colorTokens?: never
     selectedColorToken?: never
     onSelectColorToken?: never
+    onClearColorToken?: never
     themeId?: never
 }
 
@@ -31,13 +33,15 @@ type ColorPickerTokenProps = ColorPickerBaseProps & {
     colorTokens?: DataColorToken[]
     selectedColorToken?: DataColorToken | null
     onSelectColorToken: (colorToken: DataColorToken) => void
+    onClearColorToken?: () => void
     themeId?: number | null
     colors?: never
     selectedColor?: never
     onSelectColor?: never
+    onClearColor?: never
 }
 
-type ColorPickerProps = ColorPickerColorProps | ColorPickerTokenProps
+export type ColorPickerProps = ColorPickerColorProps | ColorPickerTokenProps
 
 type ColorPickerOverlayProps = Omit<ColorPickerProps, 'hideDropdown'>
 
@@ -49,6 +53,8 @@ export const ColorPickerOverlay = ({
     selectedColorToken,
     onSelectColor,
     onSelectColorToken,
+    onClearColor,
+    onClearColorToken,
     showCustomColor = false,
     preventPopoverClose = false,
     customColorValue,
@@ -82,13 +88,19 @@ export const ColorPickerOverlay = ({
         >
             <Label className="mt-1 mb-0.5">Preset colors</Label>
             {colors ? (
-                <ColorList colors={colors} selectedColor={selectedColor} onSelectColor={onSelectColor} />
+                <ColorList
+                    colors={colors}
+                    selectedColor={selectedColor}
+                    onSelectColor={onSelectColor}
+                    onClearColor={onClearColor}
+                />
             ) : (
                 <ColorList
                     themeId={themeId}
                     colorTokens={colorTokens || getAvailableColorTokens(themeId) || []}
                     selectedColorToken={selectedColorToken}
                     onSelectColorToken={onSelectColorToken}
+                    onClearColorToken={onClearColorToken}
                 />
             )}
             {showCustomColor && (

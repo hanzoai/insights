@@ -1,18 +1,18 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Button } from 'lib/elements/Button'
 import { Radio, RadioOption } from 'lib/elements/Radio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
-import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 type BounceRatePageViewMode = NonNullable<InsightsQLQueryModifiers['bounceRatePageViewMode']>
 
-const bounceRatePageViewModeOptions: RadioOption<BounceRatePageViewMode>[] = [
+const BOUNCE_RATE_PAGE_VIEW_MODE_OPTIONS: RadioOption<BounceRatePageViewMode>[] = [
     {
         value: 'count_pageviews',
         label: (
@@ -54,7 +54,15 @@ export function BounceRatePageViewModeSetting(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
     const { currentTeam } = useValues(teamLogic)
     const { reportBounceRatePageViewModeUpdated } = useActions(eventUsageLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
+    const bounceRatePageViewModeOptions = BOUNCE_RATE_PAGE_VIEW_MODE_OPTIONS.map((o) => ({
+        ...o,
+        disabledReason: restrictedReason ?? undefined,
+    }))
     const savedBounceRatePageViewMode =
         currentTeam?.modifiers?.bounceRatePageViewMode ??
         currentTeam?.default_modifiers?.bounceRatePageViewMode ??
@@ -69,31 +77,21 @@ export function BounceRatePageViewModeSetting(): JSX.Element {
 
     return (
         <>
-            <AccessControlAction
-                resourceType={AccessControlResourceType.WebAnalytics}
-                minAccessLevel={AccessControlLevel.Editor}
-            >
-                <Radio
-                    value={bounceRatePageViewMode}
-                    onChange={setBounceRatePageViewMode}
-                    options={bounceRatePageViewModeOptions}
-                />
-            </AccessControlAction>
+            <Radio
+                value={bounceRatePageViewMode}
+                onChange={setBounceRatePageViewMode}
+                options={bounceRatePageViewModeOptions}
+            />
             <div className="mt-4">
-                <AccessControlAction
-                    resourceType={AccessControlResourceType.WebAnalytics}
-                    minAccessLevel={AccessControlLevel.Editor}
+                <Button
+                    type="primary"
+                    onClick={() => handleChange(bounceRatePageViewMode)}
+                    disabledReason={
+                        bounceRatePageViewMode === savedBounceRatePageViewMode ? 'No changes to save' : restrictedReason
+                    }
                 >
-                    <Button
-                        type="primary"
-                        onClick={() => handleChange(bounceRatePageViewMode)}
-                        disabledReason={
-                            bounceRatePageViewMode === savedBounceRatePageViewMode ? 'No changes to save' : undefined
-                        }
-                    >
-                        Save
-                    </Button>
-                </AccessControlAction>
+                    Save
+                </Button>
             </div>
         </>
     )

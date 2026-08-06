@@ -1,22 +1,25 @@
 import pytest
 from insights.test.base import BaseTest
+from unittest import mock
 
 from parameterized import parameterized
 
 from insights.insightsql.errors import QueryError
 
-from products.data_modeling.backend.models import Edge, Node
-from products.data_modeling.backend.models.node import NodeType
-from products.data_modeling.backend.services.saved_query_dag_sync import (
+from products.data_modeling.backend.logic.saved_query_dag_sync import (
     HasDependentsError,
+    ManagedDAGError,
     delete_node_from_dag,
-    get_conflict_dag_id,
     get_dag_id,
     get_dependent_saved_queries,
     sync_saved_query_to_dag,
     update_node_type,
 )
-from products.data_warehouse.backend.models import DataWarehouseSavedQuery
+from products.data_modeling.backend.models import Edge, Node
+from products.data_modeling.backend.models.dag import DAG, DEFAULT_DAG_NAME
+from products.data_modeling.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
+from products.data_modeling.backend.models.modeling import ResolutionCycleError
+from products.data_modeling.backend.models.node import NodeType
 
 
 @pytest.mark.django_db
@@ -25,14 +28,60 @@ class TestGetDagId(BaseTest):
         self.assertEqual(get_dag_id(123), "insights_123")
         self.assertEqual(get_dag_id(1), "insights_1")
 
-    def test_get_conflict_dag_id_has_correct_prefix(self):
-        conflict_id = get_conflict_dag_id(123)
-        self.assertTrue(conflict_id.startswith("conflict_"))
-        self.assertTrue(conflict_id.endswith("_insights_123"))
-
 
 @pytest.mark.django_db
 class TestSyncSavedQueryToDag(BaseTest):
+    def test_sync_creates_dag_model(self):
+        saved_query = DataWarehouseSavedQuery.objects.create(
+            name="test_view",
+            team=self.team,
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
+        )
+
+        sync_saved_query_to_dag(saved_query)
+
+        dag = DAG.objects.get(team=self.team, name=DEFAULT_DAG_NAME)
+        self.assertEqual(dag.name, DEFAULT_DAG_NAME)
+
+    def test_sync_rejects_managed_dag_for_user_initiated_call(self):
+        managed_dag = DAG.get_or_create_revenue_analytics(self.team)
+        saved_query = DataWarehouseSavedQuery.objects.create(
+            name="sneaky_view",
+            team=self.team,
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
+        )
+
+        with self.assertRaises(ManagedDAGError):
+            sync_saved_query_to_dag(saved_query, dag=managed_dag)
+
+        self.assertFalse(Node.objects.filter(team=self.team, dag=managed_dag).exists())
+
+    def test_sync_allows_managed_dag_for_internal_call(self):
+        managed_dag = DAG.get_or_create_revenue_analytics(self.team)
+        saved_query = DataWarehouseSavedQuery.objects.create(
+            name="managed_view",
+            team=self.team,
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
+        )
+
+        node = sync_saved_query_to_dag(saved_query, dag=managed_dag, allow_managed=True)
+
+        assert node is not None
+        self.assertEqual(node.dag_id, managed_dag.id)
+
+    def test_sync_reuses_existing_dag_model(self):
+        existing_dag = DAG.objects.create(team=self.team, name=DEFAULT_DAG_NAME)
+
+        saved_query = DataWarehouseSavedQuery.objects.create(
+            name="test_view",
+            team=self.team,
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
+        )
+        sync_saved_query_to_dag(saved_query)
+
+        self.assertEqual(DAG.objects.filter(team=self.team, name=DEFAULT_DAG_NAME).count(), 1)
+        self.assertEqual(DAG.objects.get(team=self.team, name=DEFAULT_DAG_NAME).id, existing_dag.id)
+
     def test_sync_creates_node_for_saved_query(self):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
@@ -41,13 +90,16 @@ class TestSyncSavedQueryToDag(BaseTest):
         )
 
         node = sync_saved_query_to_dag(saved_query)
-        # use explicit assert for mypy's dumb ass
         assert node is not None
         self.assertEqual(node.name, "test_view")
         self.assertEqual(node.team, self.team)
-        self.assertEqual(node.dag_id_text, get_dag_id(self.team.id))
+        assert node.dag is not None
+        self.assertEqual(node.dag.name, DEFAULT_DAG_NAME)
         self.assertEqual(node.type, NodeType.VIEW)
         self.assertEqual(node.saved_query, saved_query)
+
+        dag = DAG.objects.get(team=self.team, name=DEFAULT_DAG_NAME)
+        self.assertEqual(node.dag_id, dag.id)
 
     def test_sync_creates_table_node_for_insights_source(self):
         saved_query = DataWarehouseSavedQuery.objects.create(
@@ -60,7 +112,7 @@ class TestSyncSavedQueryToDag(BaseTest):
 
         events_node = Node.objects.filter(
             team=self.team,
-            dag_id_text=get_dag_id(self.team.id),
+            dag__name=DEFAULT_DAG_NAME,
             name="events",
         ).first()
 
@@ -68,9 +120,14 @@ class TestSyncSavedQueryToDag(BaseTest):
         self.assertEqual(events_node.type, NodeType.TABLE)
         self.assertEqual(events_node.properties.get("origin"), "insights")
 
+        dag = DAG.objects.get(team=self.team, name=DEFAULT_DAG_NAME)
+        self.assertEqual(events_node.dag_id, dag.id)
+
         # edge from events -> test_view
         edge = Edge.objects.filter(source=events_node, target=node).first()
         self.assertIsNotNone(edge)
+        assert edge is not None
+        self.assertEqual(edge.dag_id, dag.id)
 
     def test_sync_creates_edges_for_multiple_dependencies(self):
         saved_query = DataWarehouseSavedQuery.objects.create(
@@ -153,36 +210,29 @@ class TestSyncSavedQueryToDag(BaseTest):
         edge = Edge.objects.filter(source=upstream_node, target=downstream_node).first()
         self.assertIsNotNone(edge)
 
-    def test_sync_creates_conflict_edge_on_cycle(self):
+    def test_sync_raises_on_cycle(self):
         query_a = DataWarehouseSavedQuery.objects.create(
             name="view_a",
             team=self.team,
             query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
-        # no deps
-        node_a = sync_saved_query_to_dag(query_a)
+        sync_saved_query_to_dag(query_a)
 
         query_b = DataWarehouseSavedQuery.objects.create(
             name="view_b",
             team=self.team,
             query={"query": "SELECT * FROM view_a", "kind": "InsightsQLQuery"},
         )
-        # depends on a
         sync_saved_query_to_dag(query_b)
 
-        # update a to depend on b (cycle)
+        # update a to depend on b (cycle) — should fail
         query_a.query = {"query": "SELECT * FROM view_b", "kind": "InsightsQLQuery"}
         query_a.save()
-        sync_saved_query_to_dag(query_a)
+        with self.assertRaises(ResolutionCycleError):
+            sync_saved_query_to_dag(query_a)
 
-        conflict_edges = Edge.objects.filter(dag_id_text__startswith="conflict_", target=node_a)
-        self.assertEqual(conflict_edges.count(), 1)
-
-        conflict_edge = conflict_edges.first()
-        assert conflict_edge is not None
-        self.assertEqual(conflict_edge.properties.get("error_type"), "cycle")
-        self.assertIn("original_dag_id", conflict_edge.properties)
-        self.assertEqual(conflict_edge.properties["original_dag_id"], get_dag_id(self.team.id))
+        # node for query_a should be cleaned up
+        self.assertFalse(Node.objects.filter(saved_query=query_a).exists())
 
     def test_sync_raises_for_empty_or_null_query(self):
         empty_query, _ = DataWarehouseSavedQuery.objects.get_or_create(
@@ -388,85 +438,34 @@ class TestUpdateNodeType(BaseTest):
 
 
 @pytest.mark.django_db
-class TestSkipValidation(BaseTest):
-    def test_skip_validation_bypasses_cycle_detection(self):
-        query_a = DataWarehouseSavedQuery.objects.create(
-            name="view_a",
-            team=self.team,
-            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
-        )
-        node_a = Node.objects.create(
-            team=self.team,
-            dag_id_text=get_dag_id(self.team.id),
-            name="view_a",
-            saved_query=query_a,
-            type=NodeType.VIEW,
-        )
-        query_b = DataWarehouseSavedQuery.objects.create(
-            name="view_b",
-            team=self.team,
-            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
-        )
-        node_b = Node.objects.create(
-            team=self.team,
-            dag_id_text=get_dag_id(self.team.id),
-            name="view_b",
-            saved_query=query_b,
-            type=NodeType.VIEW,
-        )
-        # a -> b
-        Edge.objects.create(
-            team=self.team,
-            dag_id_text=get_dag_id(self.team.id),
-            source=node_a,
-            target=node_b,
+class TestGraphMutationTriggers(BaseTest):
+    def _saved_query(self, name: str = "trigger_view") -> DataWarehouseSavedQuery:
+        return DataWarehouseSavedQuery.objects.create(
+            name=name, team=self.team, query={"query": "SELECT 1", "kind": "InsightsQLQuery"}
         )
 
-        # shouldn't raise
-        conflict_edge = Edge(
-            team=self.team,
-            dag_id_text=get_conflict_dag_id(self.team.id),
-            source=node_b,
-            target=node_a,
-            properties={"error_type": "cycle"},
-        )
-        conflict_edge.save(skip_validation=True)
+    def test_each_graph_mutation_queues_a_reconcile(self):
+        # the tiered scheduler converges from the graph, so every mutation path must invoke
+        # the trigger hook — dropping one silently freezes that DAG's schedules
+        saved_query = self._saved_query()
+        module = "products.data_modeling.backend.logic.saved_query_dag_sync"
 
-        self.assertTrue(Edge.objects.filter(id=conflict_edge.id).exists())
+        with mock.patch(f"{module}.maybe_reconcile_dag") as reconcile:
+            sync_saved_query_to_dag(saved_query)
+        reconcile.assert_called_once()
 
-    def test_skip_validation_bypasses_dag_mismatch_check(self):
-        query = DataWarehouseSavedQuery.objects.create(
-            name="view",
-            team=self.team,
-            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
-        )
-        node_a = Node.objects.create(
-            team=self.team,
-            dag_id_text="dag_1",
-            name="node_a",
-            saved_query=query,
-            type=NodeType.VIEW,
-        )
+        with mock.patch(f"{module}.maybe_reconcile_dag") as reconcile:
+            update_node_type(saved_query, NodeType.MAT_VIEW)
+        reconcile.assert_called_once()
 
-        query_b = DataWarehouseSavedQuery.objects.create(
-            name="view_b",
-            team=self.team,
-            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
-        )
-        node_b = Node.objects.create(
-            team=self.team,
-            dag_id_text="dag_2",
-            name="node_b",
-            saved_query=query_b,
-            type=NodeType.VIEW,
-        )
+        with mock.patch(f"{module}.maybe_reconcile_dag") as reconcile:
+            delete_node_from_dag(saved_query)
+        reconcile.assert_called_once()
 
-        # shouldn't raise
-        conflict_edge = Edge(
-            team=self.team,
-            dag_id_text=get_conflict_dag_id(self.team.id),
-            source=node_a,
-            target=node_b,
-        )
-        conflict_edge.save(skip_validation=True)
-        self.assertTrue(Edge.objects.filter(id=conflict_edge.id).exists())
+    def test_sync_can_defer_reconcile_for_batch_callers(self):
+        saved_query = self._saved_query("batched_view")
+        module = "products.data_modeling.backend.logic.saved_query_dag_sync"
+
+        with mock.patch(f"{module}.maybe_reconcile_dag") as reconcile:
+            sync_saved_query_to_dag(saved_query, reconcile=False)
+        reconcile.assert_not_called()

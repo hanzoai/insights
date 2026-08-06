@@ -77,7 +77,7 @@ class InsightsQLFunctionMeta:
     tz_aware: bool = False
     """Whether the function is timezone-aware. This means the project timezone will be appended as the last arg."""
     case_sensitive: bool = True
-    """Not all Datastore functions are case-insensitive. See https://clickhouse.com/docs/en/sql-reference/syntax#keywords."""
+    """Not all Datastore functions are case-insensitive. See https://datastore.com/docs/en/sql-reference/syntax#keywords."""
     signatures: Optional[list[tuple[tuple[AnyConstantType, ...], AnyConstantType]]] = None
     """Signatures allow for specifying the types of the arguments and the return type of the function."""
     suffix_args: Optional[list[ast.Constant]] = None
@@ -86,6 +86,8 @@ class InsightsQLFunctionMeta:
     using_positional_arguments: bool = False
     parametric_first_arg: bool = False
     """Some Datastore functions take a constant string function name as the first argument. Check that it's one of our allowed function names."""
+    requires_within_group: bool = False
+    """Whether the aggregation requires WITHIN GROUP syntax."""
 
 
 def compare_types(

@@ -1,13 +1,18 @@
+import { createMockJobQueue } from '../../../tests/helpers/mocks/job-queue.mock'
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { closeHub, createHub } from '~/common/utils/db/hub'
+
+import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
-import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, createKafkaMessage } from '../_tests/fixtures'
+import { insertInsightsFlow as _insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { CdpDataWarehouseEvent } from '../schema'
-import { CyclotronJobQueue } from '../services/job-queue/job-queue'
-import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
+import { HogWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { CdpDatawarehouseEventsConsumer } from './cdp-data-warehouse-events.consumer'
 
@@ -18,11 +23,17 @@ describe('CdpDatawarehouseEventsConsumer', () => {
     let hub: Hub
     let team: Team
     let team2: Team
-    let mockQueueInvocations: jest.Mock
+    let mockQueueInvocations: jest.MockedFunction<any>
 
-    const createDataWarehouseEvent = (teamId: number, properties: Record<string, any> = {}): CdpDataWarehouseEvent => {
+    const createDataWarehouseEvent = (
+        teamId: number,
+        properties: Record<string, any> = {},
+        tableName?: string
+    ): CdpDataWarehouseEvent => {
         return {
             team_id: teamId,
+            table_name: tableName,
+            event_id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
             properties: {
                 column1: 'value1',
                 column2: 123,
@@ -42,20 +53,29 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         return item
     }
 
+    const insertInsightsFlow = async (hogFlow: InsightsFlow): Promise<InsightsFlow> => {
+        return await _insertInsightsFlow(hub.postgres, hogFlow)
+    }
+
     beforeEach(async () => {
         await resetTestDatabase()
         hub = await createHub()
-        team = await getFirstTeam(hub) // This team has data_pipelines feature by default (legacy addon)
+        team = await getFirstTeam(hub.postgres) // This team has data_pipelines feature by default (legacy addon)
 
         // Create second organization without data_pipelines for testing quota limiting
         const otherOrganizationId = await createOrganization(hub.postgres)
         const team2Id = await createTeam(hub.postgres, otherOrganizationId)
-        team2 = (await getTeam(hub, team2Id))! // This team does NOT have data_pipelines
+        team2 = (await getTeam(hub.postgres, team2Id))! // This team does NOT have data_pipelines
 
         // Set up default quota limiting mock - not limited by default
         jest.spyOn(hub.quotaLimiting, 'isTeamQuotaLimited').mockResolvedValue(false)
 
-        processor = new CdpDatawarehouseEventsConsumer(hub)
+        const mockJobQueue = createMockJobQueue()
+
+        processor = new CdpDatawarehouseEventsConsumer(hub, createCdpConsumerDeps(hub), {
+            hogQueue: mockJobQueue,
+            hogflowQueue: mockJobQueue,
+        })
 
         // NOTE: We don't want to actually connect to Kafka for these tests as it is slow and we are testing the core logic only
         processor['kafkaConsumer'] = {
@@ -64,13 +84,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             isHealthy: jest.fn(() => ({ status: 'healthy' })),
         } as any
 
-        processor['cyclotronJobQueue'] = {
-            queueInvocations: jest.fn(),
-            startAsProducer: jest.fn(() => Promise.resolve()),
-            stop: jest.fn(),
-        } as unknown as jest.Mocked<CyclotronJobQueue>
-
-        mockQueueInvocations = jest.mocked(processor['cyclotronJobQueue']['queueInvocations'])
+        mockQueueInvocations = mockJobQueue.queueInvocations
 
         await processor.start()
     })
@@ -89,9 +103,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         it('should parse valid data warehouse events', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' })
@@ -106,11 +120,12 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                 column2: 123,
                 test_prop: 'test_value',
             })
-            expect(invocations[0].event.uuid).toBe('data-warehouse-table-uuid-do-not-use')
-            expect(invocations[0].event.event).toBe('data-warehouse-table-event-do-not-use')
+            // Deterministic per-row id from the producer, surfaced as event.uuid for stable billing dedup.
+            expect(invocations[0].event.uuid).toBe('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee')
+            expect(invocations[0].event.event).toBe('$warehouse_source_row')
         })
 
-        it('should not parse events for teams without custom functions or flows', async () => {
+        it('should not parse events for teams without script functions or flows', async () => {
             const event = createDataWarehouseEvent(team.id)
             const messages = [createKafkaMessage(event)]
 
@@ -122,9 +137,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         it('should not parse events for teams that do not exist', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(99999)
@@ -147,9 +162,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         it('should filter by team correctly', async () => {
             await insertInsightsFunction({
                 team_id: team.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const events = [
@@ -164,9 +179,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
             await insertInsightsFunction({
                 team_id: team2.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const invocations2 = await processor._parseKafkaBatch(events)
@@ -177,22 +192,22 @@ describe('CdpDatawarehouseEventsConsumer', () => {
     describe('filterInsightsFunction', () => {
         it('should filter for data-warehouse-table source', async () => {
             const fnWithDataWarehouseFilter = await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters,
-                filters: { ...FN_FILTERS_EXAMPLES.no_filters.filters, source: 'events' },
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
+                filters: { ...INSIGHTS_FILTERS_EXAMPLES.no_filters.filters, source: 'events' },
             })
 
             await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const event = createDataWarehouseEvent(team.id)
@@ -213,9 +228,9 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
         beforeEach(async () => {
             fnFetchNoFilters = await insertInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' })
@@ -244,8 +259,8 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             expect(mockQueueInvocations).not.toHaveBeenCalled()
         })
 
-        it('should filter out disabled custom functions', async () => {
-            await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.disabled)
+        it('should filter out disabled script functions', async () => {
+            await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.disabled)
 
             const { invocations } = await processor.processBatch([globals])
 
@@ -268,7 +283,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
 
         it('should handle degraded state by setting queue priority', async () => {
-            await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.degraded)
+            await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.degraded)
 
             const { invocations } = await processor.processBatch([globals])
 
@@ -284,7 +299,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')).toMatchObject(
                 [
                     {
-                        key: expect.any(String),
+                        key: null,
                         topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'insights_function',
@@ -298,7 +313,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                     },
                     // Billing is per-event, not per-destination
                     {
-                        key: expect.any(String),
+                        key: null,
                         topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'insights_function',
@@ -315,12 +330,25 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             )
         })
 
+        it('should queue a running lifecycle row for each invocation so the runs UI shows in-flight work', async () => {
+            const queueLifecycleRowSpy = jest.spyOn(
+                processor['invocationResultsService']['invocationResultsRowsService'],
+                'queueLifecycleRow'
+            )
+
+            const { invocations } = await processor.processBatch([globals])
+
+            expect(invocations).toHaveLength(1)
+            expect(queueLifecycleRowSpy).toHaveBeenCalledTimes(1)
+            expect(queueLifecycleRowSpy).toHaveBeenCalledWith(invocations[0], 'running')
+        })
+
         it('should bill once per event when multiple destinations match', async () => {
             // Add a second function that also matches
             const fnSecondDestination = await insertInsightsFunction({
-                ...FN_EXAMPLES.input_printer,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.input_printer,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const { invocations } = await processor.processBatch([globals])
@@ -345,6 +373,61 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
     })
 
+    describe('script flow invocations', () => {
+        const buildDataWarehouseInsightsFlow = (teamId: number, tableName: string): InsightsFlow =>
+            new FixtureInsightsFlowBuilder()
+                .withTeamId(teamId)
+                .withSimpleWorkflow({
+                    trigger: {
+                        type: 'data-warehouse-table',
+                        table_name: tableName,
+                        // Always-true bytecode (return true)
+                        filters: { properties: [], bytecode: ['_h', 29] } as any,
+                    },
+                })
+                .build()
+
+        it('should build a script flow invocation when the row table matches the trigger', async () => {
+            const hogFlow = await insertInsightsFlow(buildDataWarehouseInsightsFlow(team.id, 'postgres.table_1'))
+
+            const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' }, 'postgres.table_1')
+            const globals = await processor._parseKafkaBatch([createKafkaMessage(event)])
+            expect(globals).toHaveLength(1)
+
+            const { invocations } = await processor.processBatch(globals)
+
+            const hogFlowInvocations = invocations.filter((i: any) => i.hogFlow)
+            expect(hogFlowInvocations).toHaveLength(1)
+            expect(hogFlowInvocations[0].functionId).toBe(hogFlow.id)
+        })
+
+        it('should not build a script flow invocation when the row table does not match', async () => {
+            await insertInsightsFlow(buildDataWarehouseInsightsFlow(team.id, 'postgres.table_1'))
+
+            const event = createDataWarehouseEvent(team.id, {}, 'postgres.other_table')
+            const globals = await processor._parseKafkaBatch([createKafkaMessage(event)])
+
+            const { invocations } = await processor.processBatch(globals)
+
+            const hogFlowInvocations = invocations.filter((i: any) => i.hogFlow)
+            expect(hogFlowInvocations).toHaveLength(0)
+        })
+
+        it('should parse rows for workflow-only teams (no script functions)', async () => {
+            await insertInsightsFlow(buildDataWarehouseInsightsFlow(team.id, 'postgres.table_1'))
+
+            const event = createDataWarehouseEvent(team.id, {}, 'postgres.table_1')
+            const globals = await processor._parseKafkaBatch([createKafkaMessage(event)])
+
+            // Team has a workflow but no script functions - the row must not be dropped.
+            // The source table is exposed via event.properties.$source_table so the pipeline's
+            // eligibilityFn can match warehouse-table triggers without a top-level globals field.
+            expect(globals).toHaveLength(1)
+            expect(globals[0].event?.event).toBe('$warehouse_source_row')
+            expect(globals[0].event?.properties?.$source_table).toBe('postgres.table_1')
+        })
+    })
+
     describe('quota limiting', () => {
         let fnFetchNoFilters: InsightsFunctionType
         let fnDataWarehouseFunction: InsightsFunctionType
@@ -354,16 +437,16 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             // Create functions for team2 (no data_pipelines feature)
             fnFetchNoFilters = await insertInsightsFunction({
                 team_id: team2.id,
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             fnDataWarehouseFunction = await insertInsightsFunction({
                 team_id: team2.id,
-                ...FN_EXAMPLES.input_printer,
-                ...FN_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...FN_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...INSIGHTS_EXAMPLES.input_printer,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             // Globals for team2 (without data_pipelines)

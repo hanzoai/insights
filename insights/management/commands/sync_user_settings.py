@@ -22,6 +22,7 @@ class Command(BaseCommand):
         "partial_notification_settings",
         "anonymize_data",
         "toolbar_mode",
+        "mascot_config",
     ]
 
     def add_arguments(self, parser):
@@ -33,8 +34,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--host",
             type=str,
-            default="https://insights.hanzo.ai",
-            help="Insights host to sync from (default: https://insights.hanzo.ai)",
+            default="https://us.hanzo.ai",
+            help="Insights host to sync from (default: https://us.hanzo.ai)",
         )
         parser.add_argument(
             "--local-email",
@@ -69,7 +70,7 @@ class Command(BaseCommand):
         if not api_key:
             raise CommandError(
                 "Personal API key required. Provide --api-key or set INSIGHTS_PERSONAL_API_KEY environment variable.\n"
-                "Get your API key from: https://insights.hanzo.ai/settings/user-api-keys"
+                "Get your API key from: https://us.hanzo.ai/settings/user-api-keys"
             )
 
         host = options["host"].rstrip("/")

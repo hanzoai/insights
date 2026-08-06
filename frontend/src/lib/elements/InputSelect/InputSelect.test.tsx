@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -17,6 +18,45 @@ describe('InputSelect', () => {
         const dropdownButtons = await screen.findAllByRole('button')
         return dropdownButtons.find((button) => button.textContent?.includes(text))
     }
+
+    it('disables the input and explains why when disabledReason is set', async () => {
+        render(
+            <InputSelect
+                mode="multiple"
+                options={[]}
+                value={[]}
+                onChange={jest.fn()}
+                placeholder="Select values"
+                disabledReason="You don't have access to edit this field"
+            />
+        )
+
+        const input = screen.getByPlaceholderText('Select values')
+        expect(input).toBeDisabled()
+
+        await userEvent.hover(input.closest('.Input') as HTMLElement)
+
+        expect(await screen.findByText("You don't have access to edit this field")).toBeInTheDocument()
+    })
+
+    it('does not allow removing selected values when disabledReason is set', () => {
+        const onChange = jest.fn()
+
+        const { container } = render(
+            <InputSelect
+                mode="multiple"
+                options={[{ key: 'option-a', label: 'Option A' }]}
+                value={['option-a']}
+                onChange={onChange}
+                disabledReason="You don't have access to edit this field"
+            />
+        )
+
+        // The selected value still shows, but its remove (x) button must not render
+        expect(screen.getByText('Option A')).toBeInTheDocument()
+        expect(container.querySelector('.Snack__close')).toBeNull()
+        expect(onChange).not.toHaveBeenCalled()
+    })
 
     it('works with string values (backwards compatibility)', () => {
         const onChange = jest.fn()
@@ -246,6 +286,31 @@ describe('InputSelect', () => {
         expect(onChange).toHaveBeenCalledWith([])
     })
 
+    it('single-select mode: focusing with a selected option still shows every option', async () => {
+        // Regression: for option-backed single selects the option key is an opaque id (e.g. a UUID).
+        // Focusing must not seed the input with that key, which would filter the dropdown down to the
+        // selected option alone and hide every other choice (the OAuth organization picker symptom).
+        const onChange = jest.fn()
+
+        const { container } = render(
+            <InputSelect<string>
+                mode="single"
+                options={[
+                    { key: '019cd764-55e6-0000-67dc-7f9cb756d36e', label: 'Testbench' },
+                    { key: '4dc8564d-bd82-1065-2f40-97f7c50f67cf', label: 'Insights Inc.' },
+                ]}
+                value={['019cd764-55e6-0000-67dc-7f9cb756d36e']}
+                onChange={onChange}
+            />
+        )
+
+        await openDropdown(container)
+
+        // Both the selected org and the other org must be selectable from the open dropdown.
+        expect(await findDropdownButtonByText('Testbench')).toBeInTheDocument()
+        expect(await findDropdownButtonByText('Insights Inc.')).toBeInTheDocument()
+    })
+
     it('custom values: typing prefix of existing option shows both entries, completing shows only one', async () => {
         const onChange = jest.fn()
 
@@ -285,6 +350,40 @@ describe('InputSelect', () => {
 
         expect(testButtons.length).toBeGreaterThanOrEqual(1)
         expect(addTestButtons.length).toBe(0)
+    })
+
+    it('multiple-select mode: selecting an option freezes the displayed results until user types again', async () => {
+        const onChange = jest.fn()
+
+        const { container } = render(
+            <InputSelect<string>
+                mode="multiple"
+                options={[
+                    { key: 'apple', label: 'Apple' },
+                    { key: 'apricot', label: 'Apricot' },
+                    { key: 'zucchini', label: 'Zucchini' },
+                ]}
+                value={[]}
+                onChange={onChange}
+            />
+        )
+
+        const input = await openDropdown(container)
+
+        // Type to filter — "app" should match Apple and Apricot but not Zucchini
+        await userEvent.type(input, 'app')
+
+        const appleButton = await findDropdownButtonByText('Apple')
+        expect(appleButton).toBeInTheDocument()
+        expect(screen.queryByText('Zucchini')).not.toBeInTheDocument()
+
+        // Select "Apple" — input clears but results should stay frozen
+        await userEvent.click(appleButton!)
+
+        expect(input.value).toBe('')
+
+        // Zucchini should still not appear — the frozen filtered results persist
+        expect(screen.queryByText('Zucchini')).not.toBeInTheDocument()
     })
 
     it('multiple-select mode: clicking option matching search text does not toggle it off', async () => {

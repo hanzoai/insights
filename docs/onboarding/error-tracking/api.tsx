@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -19,7 +19,7 @@ export const getAPISteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     
                             If a platform you use is not supported by error tracking, we recommend that you reach out to us or contribute to our open-source SDKs before attempting to manually send exceptions.
                     
-                            If you'd rather roll your own exception capturing (or if you're using a platform we don't have an SDK for), you can use the [capture API](/docs/api/capture.md) or \`capture\` method to capture an \`$exception\` event with the following properties:
+                            If you'd rather roll your own exception capturing (or if you're using a platform we don't have an SDK for), you can use the [capture API](https://hanzo.ai/docs/api/capture) or \`capture\` method to capture an \`$exception\` event with the following properties:
                         `}
                     </Markdown>
                     <div className="Markdown">
@@ -36,7 +36,10 @@ export const getAPISteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                         <code>$exception_list</code>
                                     </td>
                                     <td>
-                                        A list of exception objects with detailed information about each error. Each exception can include a type, value, mechanism, module, and a stacktrace with frames and type. You can find the expected schema as types for both exception and stack frames in our Rust repo
+                                        A list of exception objects with detailed information about each error. Each
+                                        exception can include a type, value, mechanism, module, and a stacktrace with
+                                        frames and type. You can find the expected schema as types for both exception
+                                        and stack frames in our Rust repo
                                     </td>
                                 </tr>
                                 <tr>
@@ -44,7 +47,8 @@ export const getAPISteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                         <code>$exception_fingerprint</code>
                                     </td>
                                     <td>
-                                        (Optional) The identifier used to group issues. If not set, a unique hash based on the exception pattern will be generated during ingestion
+                                        (Optional) The identifier used to group issues. If not set, a unique hash based
+                                        on the exception pattern will be generated during ingestion
                                     </td>
                                 </tr>
                             </tbody>
@@ -72,7 +76,7 @@ export const getAPISteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                   curl -X POST "https://us.i.hanzo.ai/i/v0/e/" \\
                                        -H "Content-Type: application/json" \\
                                        -d '{
-                                          "api_key": "<ph_project_api_key>",
+                                          "token": "<ph_project_token>",
                                           "event": "$exception",
                                           "properties": {
                                               "distinct_id": "distinct_id_of_your_user",

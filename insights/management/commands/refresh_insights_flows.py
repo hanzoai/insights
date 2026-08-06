@@ -6,8 +6,8 @@ from django.test import RequestFactory
 
 import structlog
 
-from insights.api.insights_flow import InsightsFlowSerializer
-from insights.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.api.insights_flow import InsightsFlowSerializer
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 logger = structlog.get_logger(__name__)
 
@@ -35,7 +35,7 @@ class Command(BaseCommand):
             "--team-id", type=int, help="Team ID to refresh InsightsFlows for (if not provided, processes all teams)"
         )
         parser.add_argument(
-            "--fn-flow-id",
+            "--script-flow-id",
             type=str,
             help="Specific InsightsFlow ID to refresh (if provided, only this flow is processed)",
         )

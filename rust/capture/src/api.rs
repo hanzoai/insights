@@ -1,7 +1,6 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -92,8 +91,8 @@ pub enum CaptureError {
     #[error("rate limited")]
     RateLimited,
 
-    #[error("{0}: {1} events submitted between {2} and {3} exceeds limit of {4} events per {5}s")]
-    GlobalRateLimitExceeded(String, u64, DateTime<Utc>, DateTime<Utc>, u64, u64),
+    #[error("rate limit exceeded: events per minute")]
+    GlobalRateLimitExceeded(),
 
     #[error("payload empty after filtering invalid event types")]
     EmptyPayloadFiltered,
@@ -103,6 +102,9 @@ pub enum CaptureError {
 
     #[error("client stopped sending data")]
     BodyReadTimeout,
+
+    #[error("internal server error: {0}")]
+    InternalError(String),
 }
 
 impl From<serde_json::Error> for CaptureError {
@@ -136,10 +138,11 @@ impl CaptureError {
             CaptureError::NonRetryableSinkError => "non_retry_sink",
             CaptureError::BillingLimit => "billing_limit",
             CaptureError::RateLimited => "rate_limited",
-            CaptureError::GlobalRateLimitExceeded(_, _, _, _, _, _) => "global_rate_limit",
+            CaptureError::GlobalRateLimitExceeded() => "global_rate_limit",
             CaptureError::EmptyPayloadFiltered => "empty_filtered_payload",
             CaptureError::ServiceUnavailable(_) => "service_unavailable",
             CaptureError::BodyReadTimeout => "body_read_timeout",
+            CaptureError::InternalError(_) => "internal_error",
         }
     }
 
@@ -178,6 +181,7 @@ impl CaptureError {
             CaptureError::BillingLimit => "billing_limit",
             CaptureError::RateLimited | CaptureError::GlobalRateLimitExceeded(..) => "rate_limited",
             CaptureError::BodyReadTimeout => "body_read_timeout",
+            CaptureError::InternalError(_) => "internal_error",
         }
     }
 
@@ -219,6 +223,8 @@ impl CaptureError {
             | CaptureError::GlobalRateLimitExceeded(..) => StatusCode::TOO_MANY_REQUESTS,
 
             CaptureError::BodyReadTimeout => StatusCode::REQUEST_TIMEOUT,
+
+            CaptureError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
@@ -226,10 +232,15 @@ impl CaptureError {
 impl IntoResponse for CaptureError {
     fn into_response(self) -> Response {
         let status = self.status_code();
+        // Internal detail stays in logs; the wire carries only the class.
+        let error = match &self {
+            CaptureError::InternalError(_) => "internal server error".to_string(),
+            _ => self.to_string(),
+        };
         let body = ErrorBody {
             status: status.as_u16(),
             code: self.code(),
-            error: self.to_string(),
+            error,
         };
         (status, Json(body)).into_response()
     }
@@ -287,5 +298,12 @@ mod tests {
         };
         let response = response.into_response();
         assert_eq!(response.status(), StatusCode::NO_CONTENT);
+    }
+
+    #[test]
+    fn test_internal_error_into_response() {
+        let error = CaptureError::InternalError("some detail".to_string());
+        let response = error.into_response();
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
     }
 }

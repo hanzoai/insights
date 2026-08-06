@@ -2,10 +2,10 @@ import { Meta } from '@storybook/react'
 
 import { Button } from '@hanzo/elements'
 
-import { Spinner, SpinnerOverlay } from './Spinner'
+import { Spinner, SpinnerOverlay, SpinnerProps } from './Spinner'
 
-const meta: Meta<typeof Spinner> = {
-    title: 'Elements/Spinner',
+const meta: Meta<SpinnerProps> = {
+    title: 'Lemon UI/Spinner',
     component: Spinner,
     parameters: {
         testOptions: {

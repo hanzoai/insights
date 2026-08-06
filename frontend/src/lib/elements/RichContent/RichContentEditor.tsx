@@ -6,7 +6,7 @@ import { Placeholder } from '@tiptap/extensions'
 import { EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useRef, useState } from 'react'
 
 import { IconEye, IconImage, IconPencil } from '@hanzo/icons'
@@ -15,6 +15,7 @@ import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
 import { useRichContentEditor } from 'lib/components/RichContentEditor'
 import { CommandEnterExtension } from 'lib/components/RichContentEditor/CommandEnterExtension'
+import { EmojiSuggestionExtension } from 'lib/components/RichContentEditor/EmojiSuggestionExtension'
 import { MentionsExtension } from 'lib/components/RichContentEditor/MentionsExtension'
 import { RichContentNodeMention } from 'lib/components/RichContentEditor/RichContentNodeMention'
 import { RichContentEditorType, RichContentNodeType, TTEditor } from 'lib/components/RichContentEditor/types'
@@ -25,8 +26,8 @@ import { FileInput } from 'lib/elements/FileInput'
 import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 import { toast } from 'lib/elements/Toast'
 import { Spinner } from 'lib/elements/Spinner'
+import { preflightLogic } from 'lib/logic/preflightLogic'
 import { cn } from 'lib/utils/css-classes'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 export type RichContentEditorProps = {
     logicKey?: string
@@ -51,6 +52,7 @@ const DEFAULT_INITIAL_CONTENT: JSONContent = {
 
 export const DEFAULT_EXTENSIONS = [
     MentionsExtension,
+    EmojiSuggestionExtension,
     RichContentNodeMention,
     ExtensionDocument,
     StarterKit.configure({
@@ -193,7 +195,7 @@ export function RichContentEditor({
                     {!isPreviewShown && (
                         <EmojiPickerPopover
                             key="emoj-picker"
-                            data-attr="rich-text-editor-emoji-popover"
+                            data-attr="lemon-rich-text-editor-emoji-popover"
                             onSelect={(emoji: string) => {
                                 if (ttEditor) {
                                     ttEditor.commands.insertContent(emoji)

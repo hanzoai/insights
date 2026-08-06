@@ -1,33 +1,36 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import { Card, CardProps } from './Card'
 
-type Story = StoryObj<typeof Card>
-const meta: Meta<typeof Card> = {
-    title: 'Elements/Card',
-    component: Card,
+type Story = StoryObj<CardProps>
+const meta: Meta<CardProps> = {
+    title: 'Lemon UI/Lemon Card',
+    component: Card as any,
     tags: ['autodocs'],
+    render: (props) => {
+        return (
+            <div>
+                <Card {...props}>
+                    <span>Tis a lemon card</span>
+                </Card>
+            </div>
+        )
+    },
 }
 export default meta
 
-const Template: StoryFn<typeof Card> = (props: CardProps) => {
-    return (
-        <div>
-            <Card {...props}>
-                <span>Tis a card</span>
-            </Card>
-        </div>
-    )
+export const Default: Story = {
+    args: {},
 }
 
-export const Default: Story = Template.bind({})
-Default.args = {}
+export const Focused: Story = {
+    args: { focused: true },
+}
 
-export const Focused: Story = Template.bind({})
-Focused.args = { focused: true }
+export const HoverEffect: Story = {
+    args: { hoverEffect: true },
+}
 
-export const HoverEffect: Story = Template.bind({})
-HoverEffect.args = { hoverEffect: true }
-
-export const Closeable: Story = Template.bind({})
-Closeable.args = { closeable: true }
+export const Closeable: Story = {
+    args: { closeable: true },
+}

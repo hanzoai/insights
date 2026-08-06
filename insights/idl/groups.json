@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "file://insights/idl/groups.json",
     "title": "groups",
-    "description": "Groups schema that is destined for ClickHouse",
+    "description": "Groups schema that is destined for Datastore",
     "type": "object",
     "properties": {
         "group_type_index": {

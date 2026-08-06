@@ -7,12 +7,13 @@ from pydantic import BaseModel, Field
 
 from insights.schema import MaxExperimentMetricResult
 
-from insights.insightsql_queries.experiments.utils import get_experiment_stats_method
-from insights.models import Experiment, FeatureFlag
 from insights.session_recordings.session_recording_api import list_recordings_from_query
 from insights.session_recordings.utils import filter_from_params_to_query
 from insights.sync import database_sync_to_async
 
+from products.experiments.backend.insightsql_queries.utils import get_experiment_stats_method
+from products.experiments.backend.models.experiment import Experiment
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
 from products.insights_ai.backend.max_tool import MaxTool
 
 from .experiment_context import ExperimentContext
@@ -320,7 +321,7 @@ class ExperimentSummaryTool(MaxTool):
         """Fetch experiment data from query runners and format it."""
         from products.experiments.backend.experiment_summary_data_service import ExperimentSummaryDataService
 
-        data_service = ExperimentSummaryDataService(self._team)
+        data_service = ExperimentSummaryDataService(self._team, self._user)
 
         try:
             summary_context, _last_refresh, pending = await data_service.fetch_experiment_data(experiment_id)

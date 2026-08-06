@@ -1,13 +1,13 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import { dayjs } from 'lib/dayjs'
 
 import { Calendar, CalendarProps } from './Calendar'
 
-type Story = StoryObj<typeof Calendar>
-const meta: Meta<typeof Calendar> = {
-    title: 'Elements/Calendar/Calendar',
-    component: Calendar,
+type Story = StoryObj<CalendarProps>
+const meta: Meta<CalendarProps> = {
+    title: 'Lemon UI/Lemon Calendar/Lemon Calendar',
+    component: Calendar as any,
     args: {
         onDateClick: (date: dayjs.Dayjs) => {
             // eslint-disable-next-line no-console
@@ -21,76 +21,45 @@ const meta: Meta<typeof Calendar> = {
 }
 export default meta
 
-const BasicTemplate: StoryFn<typeof Calendar> = (props: CalendarProps) => {
-    return <Calendar {...props} />
-}
+export const Default: Story = { args: {} }
 
-export const Default: Story = BasicTemplate.bind({})
-Default.args = {}
+export const MultipleMonths: Story = { args: { months: 3 } }
 
-export const MultipleMonths: Story = BasicTemplate.bind({})
-MultipleMonths.args = {
-    months: 3,
-}
-
-export const CustomStyles: Story = BasicTemplate.bind({})
-CustomStyles.args = {
-    getButtonProps: ({ date, props }) => {
-        return {
-            ...props,
-            active: date.day() % 2 === 0,
-            type: date.date() % 10 === 0 ? 'primary' : undefined,
-        }
+export const RangeSelection: Story = {
+    args: {
+        getDateState: ({ date }) => ({
+            isStart: date.date() === 10,
+            isEnd: date.date() === 20,
+            isBetween: date.date() > 10 && date.date() < 20,
+        }),
     },
 }
 
-export const MondayFirst: Story = BasicTemplate.bind({})
-MondayFirst.args = {
-    weekStartDay: 1,
+export const SingleSelection: Story = {
+    args: {
+        getDateState: ({ date }) => ({
+            selected: date.date() === 15,
+            disabledReason: date.date() > 20 ? 'Cannot select dates after the 20th' : undefined,
+        }),
+    },
 }
 
-export const TuesdayFirst: Story = BasicTemplate.bind({})
-TuesdayFirst.args = {
-    weekStartDay: 2,
-}
+export const MondayFirst: Story = { args: { weekStartDay: 1 } }
 
-export const WednesdayFirst: Story = BasicTemplate.bind({})
-WednesdayFirst.args = {
-    weekStartDay: 3,
-}
+export const TuesdayFirst: Story = { args: { weekStartDay: 2 } }
 
-export const ThursdayFirst: Story = BasicTemplate.bind({})
-ThursdayFirst.args = {
-    weekStartDay: 4,
-}
+export const WednesdayFirst: Story = { args: { weekStartDay: 3 } }
 
-export const FridayFirst: Story = BasicTemplate.bind({})
-FridayFirst.args = {
-    weekStartDay: 5,
-}
+export const ThursdayFirst: Story = { args: { weekStartDay: 4 } }
 
-export const SaturdayFirst: Story = BasicTemplate.bind({})
-SaturdayFirst.args = {
-    weekStartDay: 6,
-}
+export const FridayFirst: Story = { args: { weekStartDay: 5 } }
 
-export const SundayFirst: Story = BasicTemplate.bind({})
-SundayFirst.args = {
-    weekStartDay: 0,
-}
+export const SaturdayFirst: Story = { args: { weekStartDay: 6 } }
 
-export const Hour: Story = BasicTemplate.bind({})
-Hour.args = {
-    granularity: 'hour',
-}
+export const SundayFirst: Story = { args: { weekStartDay: 0 } }
 
-export const Minute: Story = BasicTemplate.bind({})
-Minute.args = {
-    granularity: 'minute',
-}
+export const Hour: Story = { args: { granularity: 'hour' } }
 
-export const Minute24Hour: Story = BasicTemplate.bind({})
-Minute24Hour.args = {
-    granularity: 'minute',
-    use24HourFormat: true,
-}
+export const Minute: Story = { args: { granularity: 'minute' } }
+
+export const Minute24Hour: Story = { args: { granularity: 'minute', use24HourFormat: true } }

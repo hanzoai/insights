@@ -4,7 +4,7 @@
  * Uses insights-js-lite for minimal footprint - we only need capture functionality.
  * Events are only captured if INSIGHTS_UI_APPS_TOKEN is set at build time.
  */
-import { Insights } from './insights-lite'
+import { Insights } from 'insights-js-lite'
 
 // These are injected at build time by Vite
 declare const __INSIGHTS_UI_APPS_TOKEN__: string | undefined
@@ -14,7 +14,7 @@ const INSIGHTS_TOKEN = typeof __INSIGHTS_UI_APPS_TOKEN__ !== 'undefined' ? __INS
 const INSIGHTS_HOST =
     typeof __INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL__ !== 'undefined'
         ? __INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL__
-        : 'https://insights.hanzo.ai'
+        : 'https://us.hanzo.ai'
 
 let client: Insights | null = null
 let currentDistinctId: string | null = null
@@ -156,11 +156,4 @@ export function captureHostContextChanged(params: {
  */
 export function captureLinkOpened(url: string): void {
     capture('mcp_ui_app_link_opened', { url })
-}
-
-/**
- * Capture display mode change requested.
- */
-export function captureDisplayModeRequested(mode: string): void {
-    capture('mcp_ui_app_display_mode_requested', { mode })
 }

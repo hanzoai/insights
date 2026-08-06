@@ -5,6 +5,7 @@ from django.utils.html import format_html
 from insights.models import ColumnConfiguration
 
 
+@admin.register(ColumnConfiguration)
 class ColumnConfigurationAdmin(admin.ModelAdmin):
     list_display = (
         "id",

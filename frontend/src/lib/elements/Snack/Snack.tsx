@@ -3,9 +3,10 @@ import React, { forwardRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 import { IconX } from '@hanzo/icons'
+// eslint-disable-next-line import/no-cycle
 import { Button } from '@hanzo/elements'
 
-export interface SnackProps {
+export interface SnackProps extends React.HTMLAttributes<HTMLSpanElement> {
     type?: 'regular' | 'pill'
     children?: React.ReactNode
     onClick?: React.MouseEventHandler
@@ -17,11 +18,17 @@ export interface SnackProps {
 }
 
 export const Snack: React.FunctionComponent<SnackProps & React.RefAttributes<HTMLSpanElement>> = forwardRef(
-    function Snack({ type = 'regular', children, wrap, onClick, onClose, title, className }, ref): JSX.Element {
+    function Snack(
+        { type = 'regular', children, wrap, onClick, onClose, title, className, ...rest },
+        ref
+    ): JSX.Element {
         const isRegular = type === 'regular'
         const isClickable = !!onClick
         return (
             <span
+                // Spread first so wrappers like Tooltip can attach their trigger
+                // handlers; the explicit props below take precedence.
+                {...rest}
                 ref={ref}
                 className={twMerge(
                     'inline-flex text-primary-alt max-w-full overflow-hidden break-all items-center py-1 leading-5',

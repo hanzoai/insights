@@ -1,6 +1,5 @@
 import { Fragment } from 'react'
 
-import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
     ActivityChange,
     ActivityLogItem,
@@ -11,10 +10,11 @@ import {
     detectBoolean,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
+import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { PropertyFilterButton } from 'lib/components/PropertyFilters/components/PropertyFilterButton'
 import { Link } from 'lib/elements/Link'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
 import {
@@ -24,6 +24,16 @@ import {
     FeatureFlagGroupType,
     FeatureFlagType,
 } from '~/types'
+
+const getChangedPayloadKeys = (
+    filtersBefore: FeatureFlagFilters | undefined,
+    filtersAfter: FeatureFlagFilters
+): string[] =>
+    Object.keys(filtersAfter.payloads ?? {}).filter((key) => {
+        const before = filtersBefore?.payloads?.[key]?.toString() || null
+        const after = filtersAfter.payloads?.[key]?.toString() || null
+        return before !== after
+    })
 
 const nameOrLinkToFlag = (id: string | undefined, name: string | null | undefined): string | JSX.Element => {
     const displayName = name || '(empty string)'
@@ -81,11 +91,10 @@ const featureFlagActionsMapping: Record<
                 // there are no rollout groups or all are at 0%
                 changes.push(<>changed the filter conditions to apply to no users</>)
             } else {
-                filtersAfter.payloads &&
-                    Object.keys(filtersAfter.payloads).forEach((key: string) => {
-                        const changedPayload = filtersAfter.payloads?.[key]?.toString() || null
-                        changes.push(<SentenceList listParts={[changedPayload]} prefix="changed payload to" />)
-                    })
+                getChangedPayloadKeys(filtersBefore, filtersAfter).forEach((key) => {
+                    const changedPayload = filtersAfter.payloads?.[key]?.toString() || null
+                    changes.push(<SentenceList listParts={[changedPayload]} prefix="changed payload to" />)
+                })
 
                 const groupAdditions: (string | JSX.Element | null)[] = []
                 const groupRemovals: (string | JSX.Element | null)[] = []
@@ -108,7 +117,10 @@ const featureFlagActionsMapping: Record<
                                             {' '}
                                             {idx === 0 && (
                                                 <span>
-                                                    <strong>{rollout_percentage ?? 100}%</strong> of{' '}
+                                                    <strong className="tabular-nums">
+                                                        {rollout_percentage ?? 100}%
+                                                    </strong>{' '}
+                                                    of{' '}
                                                 </span>
                                             )}
                                             <PropertyFilterButton item={property} />
@@ -118,7 +130,7 @@ const featureFlagActionsMapping: Record<
                             newButtons[0] = (
                                 <Fragment key={nonEmptyProperties[0].key ?? 0}>
                                     <span>
-                                        <strong>{rollout_percentage ?? 100}%</strong> of{' '}
+                                        <strong className="tabular-nums">{rollout_percentage ?? 100}%</strong> of{' '}
                                     </span>
                                     <PropertyFilterButton
                                         key={nonEmptyProperties[0].key}
@@ -130,7 +142,8 @@ const featureFlagActionsMapping: Record<
                         } else {
                             groupAdditions.push(
                                 <>
-                                    <strong>{rollout_percentage ?? 100}%</strong> of <strong>all users</strong>
+                                    <strong className="tabular-nums">{rollout_percentage ?? 100}%</strong> of{' '}
+                                    <strong>all users</strong>
                                 </>
                             )
                         }
@@ -176,41 +189,48 @@ const featureFlagActionsMapping: Record<
                 />
             )
         } else if (isMultivariateFlag) {
-            filtersAfter.payloads &&
-                Object.keys(filtersAfter.payloads).forEach((key: string) => {
-                    const changedPayload = filtersAfter.payloads?.[key]?.toString() || null
-                    changes.push(
-                        <SentenceList
-                            listParts={[
-                                <span key={key} className="highlighted-activity">
-                                    {changedPayload}
-                                </span>,
-                            ]}
-                            prefix={
-                                <span>
-                                    changed payload on <b>variant: {key}</b> to
-                                </span>
-                            }
-                        />
-                    )
-                })
+            getChangedPayloadKeys(filtersBefore, filtersAfter).forEach((key) => {
+                const changedPayload = filtersAfter.payloads?.[key]?.toString() || null
+                changes.push(
+                    <SentenceList
+                        listParts={[
+                            <span key={key} className="highlighted-activity">
+                                {changedPayload}
+                            </span>,
+                        ]}
+                        prefix={
+                            <span>
+                                changed payload on <b>variant: {key}</b> to
+                            </span>
+                        }
+                    />
+                )
+            })
 
             // Identify removed variants
             const beforeVariants = new Set((filtersBefore?.multivariate?.variants || []).map((v) => v.key))
             const afterVariants = new Set((filtersAfter?.multivariate?.variants || []).map((v) => v.key))
             const removedVariants = [...beforeVariants].filter((key) => !afterVariants.has(key))
 
-            // First add the rollout percentage changes
-            changes.push(
-                <SentenceList
-                    listParts={(filtersAfter.multivariate?.variants || []).map((v) => (
-                        <div key={v.key} className="highlighted-activity">
-                            {v.key}: <strong>{v.rollout_percentage}%</strong>
-                        </div>
-                    ))}
-                    prefix="changed the rollout percentage for the variants to"
-                />
+            // Only show rollout percentage changes if they actually changed
+            const beforeVariantMap = new Map(
+                (filtersBefore?.multivariate?.variants || []).map((v) => [v.key, v.rollout_percentage])
             )
+            const changedVariants = (filtersAfter.multivariate?.variants || []).filter(
+                (v) => beforeVariantMap.get(v.key) !== v.rollout_percentage
+            )
+            if (changedVariants.length > 0) {
+                changes.push(
+                    <SentenceList
+                        listParts={changedVariants.map((v) => (
+                            <div key={v.key} className="highlighted-activity">
+                                {v.key}: <strong className="tabular-nums">{v.rollout_percentage}%</strong>
+                            </div>
+                        ))}
+                        prefix="changed the rollout percentage for the variants to"
+                    />
+                )
+            }
 
             // Then add removed variants if any
             if (removedVariants.length > 0) {
@@ -243,6 +263,13 @@ const featureFlagActionsMapping: Record<
         const isDeleted = detectBoolean(change?.after)
         return {
             description: [<>{isDeleted ? 'deleted' : 'restored'}</>],
+            suffix: <>{nameOrLinkToFlag(logItem?.item_id, logItem?.detail.name)}</>,
+        }
+    },
+    archived: function onArchived(change, logItem) {
+        const isArchived = detectBoolean(change?.after)
+        return {
+            description: [<>{isArchived ? 'archived' : 'unarchived'}</>],
             suffix: <>{nameOrLinkToFlag(logItem?.item_id, logItem?.detail.name)}</>,
         }
     },
@@ -323,26 +350,26 @@ const featureFlagActionsMapping: Record<
 
         return { description: changes }
     },
-    evaluation_tags: function onEvaluationTags(change) {
-        const tagsBefore = change?.before as string[]
-        const tagsAfter = change?.after as string[]
-        const addedTags = tagsAfter.filter((t) => tagsBefore.indexOf(t) === -1)
-        const removedTags = tagsBefore.filter((t) => tagsAfter.indexOf(t) === -1)
+    evaluation_contexts: function onEvaluationContexts(change) {
+        const contextsBefore = (change?.before as string[]) || []
+        const contextsAfter = (change?.after as string[]) || []
+        const addedContexts = contextsAfter.filter((c) => contextsBefore.indexOf(c) === -1)
+        const removedContexts = contextsBefore.filter((c) => contextsAfter.indexOf(c) === -1)
 
         const changes: Description[] = []
-        if (addedTags.length) {
+        if (addedContexts.length) {
             changes.push(
                 <>
-                    added {pluralize(addedTags.length, 'evaluation tag', 'evaluation tags', false)}{' '}
-                    <ObjectTags tags={addedTags} saving={false} style={{ display: 'inline' }} staticOnly />
+                    added {pluralize(addedContexts.length, 'evaluation context', 'evaluation contexts', false)}{' '}
+                    <ObjectTags tags={addedContexts} saving={false} style={{ display: 'inline' }} staticOnly />
                 </>
             )
         }
-        if (removedTags.length) {
+        if (removedContexts.length) {
             changes.push(
                 <>
-                    removed {pluralize(removedTags.length, 'evaluation tag', 'evaluation tags', false)}{' '}
-                    <ObjectTags tags={removedTags} saving={false} style={{ display: 'inline' }} staticOnly />
+                    removed {pluralize(removedContexts.length, 'evaluation context', 'evaluation contexts', false)}{' '}
+                    <ObjectTags tags={removedContexts} saving={false} style={{ display: 'inline' }} staticOnly />
                 </>
             )
         }
@@ -355,6 +382,7 @@ const featureFlagActionsMapping: Record<
     created_by: () => null,
     updated_at: () => null,
     experiment_set: () => null,
+    experiment_set_metadata: () => null,
     features: () => null,
     usage_dashboard: () => null,
     can_edit: () => null,
@@ -404,6 +432,36 @@ export function flagActivityDescriber(logItem: ActivityLogItem, asNotification?:
     }
 
     if (logItem.activity == 'updated') {
+        // A referenced cohort's conditions changed: the flag's own fields are untouched
+        // (only its version moved), so describe the cohort change instead of a field diff.
+        // job_type must stay in sync with COHORT_CONDITIONS_UPDATED_JOB_TYPE in
+        // products/feature_flags/backend/flag_version_sync.py.
+        if (logItem.detail.trigger?.job_type === 'cohort_conditions_updated') {
+            const { cohort_id, cohort_name } = logItem.detail.trigger.payload ?? {}
+            return {
+                description: (
+                    <SentenceList
+                        listParts={[
+                            <Fragment key="cohort-conditions-updated">
+                                changed the conditions of linked cohort{' '}
+                                {cohort_id ? (
+                                    <Link to={urls.cohort(cohort_id)}>{cohort_name || `#${cohort_id}`}</Link>
+                                ) : (
+                                    <span>{cohort_name || 'unknown'}</span>
+                                )}
+                            </Fragment>,
+                        ]}
+                        prefix={getActorName(logItem)}
+                        suffix={
+                            <>
+                                on {asNotification && ' the flag '}
+                                {nameOrLinkToFlag(logItem?.item_id, logItem?.detail.name)}
+                            </>
+                        }
+                    />
+                ),
+            }
+        }
         let changes: Description[] = []
         let changeSuffix: Description = (
             <>

@@ -1,4 +1,4 @@
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { Select } from '@hanzo/elements'
 

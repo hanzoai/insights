@@ -1,0 +1,29 @@
+{
+    "name": "@hanzo/auth-proxy",
+    "version": "1.0.0",
+    "description": "Cross-region OAuth proxy for Insights Cloud (oauth.hanzo.ai)",
+    "keywords": [
+        "auth",
+        "multi-region",
+        "oauth",
+        "insights",
+        "proxy"
+    ],
+    "license": "MIT",
+    "author": "Insights Inc.",
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
+        "cf-typegen": "wrangler types",
+        "test": "vitest",
+        "test:watch": "vitest watch",
+        "typecheck": "tsgo --noEmit"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20260120.0",
+        "typescript": "catalog:",
+        "vite-tsconfig-paths": "^5.1.4",
+        "vitest": "^4.1.0",
+        "wrangler": "^4.98.0"
+    }
+}

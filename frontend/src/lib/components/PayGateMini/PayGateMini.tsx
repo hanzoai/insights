@@ -1,14 +1,14 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useEffect } from 'react'
 
 import { IconInfo, IconOpenSidebar, IconUnlock } from '@hanzo/icons'
 import { Button, Skeleton, Link, Tooltip } from '@hanzo/elements'
 
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import { preflightLogic } from 'lib/logic/preflightLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
-import { getProductIcon } from 'scenes/onboarding/productSelection/ProductSelection'
+import { getProductIcon } from 'scenes/onboarding/shared/utils'
 import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature, BillingFeatureType, BillingProductV2AddonType, BillingProductV2Type } from '~/types'
@@ -212,13 +212,13 @@ function PayGateContent({
 const renderUsageLimitMessage = (
     featureAvailableOnOrg: BillingFeatureType | null | undefined,
     featureInfoOnNextPlan: BillingFeatureType | undefined,
-    gateVariant: 'add-card' | 'contact-sales' | null,
+    gateVariant: 'add-card' | 'contact-sales' | 'move-to-cloud' | null,
     featureInfo: BillingFeatureType,
     productWithFeature: BillingProductV2AddonType | BillingProductV2Type,
     isAddonProduct?: boolean,
     handleCtaClick?: () => void
 ): JSX.Element => {
-    if (featureAvailableOnOrg?.limit) {
+    if (featureAvailableOnOrg?.limit && gateVariant !== 'move-to-cloud') {
         return (
             <div>
                 <p>
@@ -272,11 +272,13 @@ const renderUsageLimitMessage = (
 }
 
 const renderGateVariantMessage = (
-    gateVariant: 'add-card' | 'contact-sales' | null,
+    gateVariant: 'add-card' | 'contact-sales' | 'move-to-cloud' | null,
     productWithFeature: BillingProductV2AddonType | BillingProductV2Type,
     isAddonProduct?: boolean
 ): JSX.Element => {
-    if (isAddonProduct) {
+    if (gateVariant === 'move-to-cloud') {
+        return <>This feature is only available on Insights Cloud.</>
+    } else if (isAddonProduct) {
         return (
             <>
                 Subscribe to the <b>{productWithFeature?.name}</b> addon to use this feature.

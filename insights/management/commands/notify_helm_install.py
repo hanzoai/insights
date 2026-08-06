@@ -26,7 +26,7 @@ class Command(BaseCommand):
         pprint(report)
 
         if not options["dry_run"]:
-            hanzo_insights.api_key = "sTMFPsFhdP1Ssg"
+            hanzo_insights.api_key = "sTMFPsFhdP1Ssg"  # ty: ignore[invalid-assignment]
             disabled = hanzo_insights.disabled
             hanzo_insights.disabled = False
             hanzo_insights.capture(

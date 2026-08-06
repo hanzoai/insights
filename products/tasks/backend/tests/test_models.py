@@ -1,25 +1,35 @@
 import json
 import uuid
+import secrets
+from typing import ClassVar
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 
 from parameterized import parameterized
 
 from insights.models import Integration, Organization, Team
+from insights.models.integration import ERROR_TOKEN_REFRESH_FAILED
+from insights.models.organization import OrganizationMembership
 from insights.models.user import User
+from insights.models.user_integration import UserIntegration
 from insights.storage import object_storage
 
-from products.tasks.backend.models import SandboxEnvironment, SandboxSnapshot, Task, TaskRun
+from products.tasks.backend.models import CodeInvite, SandboxEnvironment, SandboxSnapshot, Task, TaskRun
 
 
 class TestTask(TestCase):
-    def setUp(self):
-        self.organization = Organization.objects.create(name="Test Org")
-        self.team = Team.objects.create(organization=self.organization, name="Test Team")
+    organization: ClassVar[Organization]
+    team: ClassVar[Team]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = Organization.objects.create(name="Test Org")
+        cls.team = Team.objects.create(organization=cls.organization, name="Test Team")
 
     @parameterized.expand(
         [
@@ -47,14 +57,15 @@ class TestTask(TestCase):
         user = User.objects.create(email="test@test.com")
         Integration.objects.create(team=self.team, kind="github", config={})
 
-        task = Task.create_and_run(
-            team=self.team,
-            title="Test Create and Run",
-            description="Test Description",
-            origin_product=Task.OriginProduct.USER_CREATED,
-            user_id=user.id,
-            repository="hanzoai/insights",
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            task = Task.create_and_run(
+                team=self.team,
+                title="Test Create and Run",
+                description="Test Description",
+                origin_product=Task.OriginProduct.USER_CREATED,
+                user_id=user.id,
+                repository="insights/insights",
+            )
 
         self.assertIsNotNone(task.id)
         self.assertEqual(task.title, "Test Create and Run")
@@ -75,20 +86,145 @@ class TestTask(TestCase):
         self.assertEqual(task_run.status, TaskRun.Status.QUEUED)
 
     @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_threads_github_read_access_into_state(self, mock_execute_workflow):
+        from products.tasks.backend.temporal.process_task.activities.get_task_processing_context import (  # noqa: PLC0415 — activities import the workflow stack; keep it off this module's import path
+            TaskProcessingContext,
+        )
+
+        user = User.objects.create(email="test@test.com")
+
+        with self.captureOnCommitCallbacks(execute=True):
+            Task.create_and_run(
+                team=self.team,
+                title="Scout run",
+                description="repo-less run wanting gh evidence access",
+                origin_product=Task.OriginProduct.SIGNAL_REPORT,
+                user_id=user.id,
+                github_read_access=True,
+            )
+
+        state = TaskRun.objects.get(id=mock_execute_workflow.call_args.kwargs["run_id"]).state
+        # Provisioning reads the flag back only through this property — the writer and reader agree
+        # on nothing but the state key, and a drift on either side silently drops the token.
+        ctx = TaskProcessingContext(
+            task_id="t",
+            run_id="r",
+            team_id=1,
+            team_uuid="u",
+            organization_id="o",
+            github_integration_id=None,
+            repository=None,
+            distinct_id="d",
+            state=state,
+        )
+        self.assertTrue(ctx.github_read_access)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            Task.create_and_run(
+                team=self.team,
+                title="Plain run",
+                description="no gh access requested",
+                origin_product=Task.OriginProduct.SIGNAL_REPORT,
+                user_id=user.id,
+            )
+        state = TaskRun.objects.get(id=mock_execute_workflow.call_args.kwargs["run_id"]).state
+        self.assertNotIn("github_read_access", state)
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_threads_initial_permission_mode_into_state(self, mock_execute_workflow):
+        user = User.objects.create(email="test@test.com")
+        Integration.objects.create(team=self.team, kind="github", config={})
+
+        with self.captureOnCommitCallbacks(execute=True):
+            task = Task.create_and_run(
+                team=self.team,
+                title="Slack Task",
+                description="Slack Description",
+                origin_product=Task.OriginProduct.SLACK,
+                user_id=user.id,
+                repository="insights/insights",
+                initial_permission_mode="bypassPermissions",
+            )
+
+        run_id = mock_execute_workflow.call_args.kwargs["run_id"]
+        task_run = TaskRun.objects.get(id=run_id)
+        self.assertEqual(task_run.state["initial_permission_mode"], "bypassPermissions")
+        self.assertEqual(task.origin_product, Task.OriginProduct.SLACK)
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_threads_ai_stage_into_state(self, mock_execute_workflow):
+        user = User.objects.create(email="test@test.com")
+        Integration.objects.create(team=self.team, kind="github", config={})
+
+        with self.captureOnCommitCallbacks(execute=True):
+            Task.create_and_run(
+                team=self.team,
+                title="Signal Task",
+                description="Signal Description",
+                origin_product=Task.OriginProduct.SIGNAL_REPORT,
+                user_id=user.id,
+                repository="insights/insights",
+                ai_stage="research",
+            )
+
+        run_id = mock_execute_workflow.call_args.kwargs["run_id"]
+        task_run = TaskRun.objects.get(id=run_id)
+        self.assertEqual(task_run.state["ai_stage"], "research")
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_omits_ai_stage_when_not_provided(self, mock_execute_workflow):
+        user = User.objects.create(email="test@test.com")
+        Integration.objects.create(team=self.team, kind="github", config={})
+
+        with self.captureOnCommitCallbacks(execute=True):
+            Task.create_and_run(
+                team=self.team,
+                title="Plain Task",
+                description="Plain Description",
+                origin_product=Task.OriginProduct.USER_CREATED,
+                user_id=user.id,
+                repository="insights/insights",
+            )
+
+        run_id = mock_execute_workflow.call_args.kwargs["run_id"]
+        task_run = TaskRun.objects.get(id=run_id)
+        self.assertNotIn("ai_stage", task_run.state)
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_omits_permission_mode_when_not_provided(self, mock_execute_workflow):
+        user = User.objects.create(email="test@test.com")
+        Integration.objects.create(team=self.team, kind="github", config={})
+
+        with self.captureOnCommitCallbacks(execute=True):
+            Task.create_and_run(
+                team=self.team,
+                title="Plain Task",
+                description="Plain Description",
+                origin_product=Task.OriginProduct.USER_CREATED,
+                user_id=user.id,
+                repository="insights/insights",
+            )
+
+        run_id = mock_execute_workflow.call_args.kwargs["run_id"]
+        task_run = TaskRun.objects.get(id=run_id)
+        self.assertNotIn("initial_permission_mode", task_run.state)
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
     def test_create_and_run_with_repository(self, mock_execute_workflow):
         user = User.objects.create(email="test@test.com")
         Integration.objects.create(team=self.team, kind="github", config={})
 
-        task = Task.create_and_run(
-            team=self.team,
-            title="Test Task",
-            description="Test Description",
-            origin_product=Task.OriginProduct.USER_CREATED,
-            user_id=user.id,
-            repository="hanzoai/insights-js",
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            task = Task.create_and_run(
+                team=self.team,
+                title="Test Task",
+                description="Test Description",
+                origin_product=Task.OriginProduct.USER_CREATED,
+                user_id=user.id,
+                repository="insights/insights-js",
+            )
 
-        self.assertEqual(task.repository, "hanzoai/insights-js")
+        self.assertEqual(task.repository, "insights/insights-js")
 
         mock_execute_workflow.assert_called_once()
 
@@ -111,21 +247,110 @@ class TestTask(TestCase):
         mock_execute_workflow.assert_not_called()
 
     @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_public_repo_without_integration(self, mock_execute_workflow):
+        user = User.objects.create(email="test@test.com")
+
+        with self.captureOnCommitCallbacks(execute=True):
+            task = Task.create_and_run(
+                team=self.team,
+                title="Test Task",
+                description="Test Description",
+                origin_product=Task.OriginProduct.USER_CREATED,
+                user_id=user.id,
+                repository="insights/hedgebox",
+            )
+
+        self.assertEqual(task.repository, "insights/hedgebox")
+        self.assertIsNone(task.github_integration)
+        mock_execute_workflow.assert_called_once()
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_non_public_repo_without_integration_raises(self, mock_execute_workflow):
+        user = User.objects.create(email="test@test.com")
+
+        with self.assertRaises(ValueError) as cm:
+            Task.create_and_run(
+                team=self.team,
+                title="Test Task",
+                description="Test Description",
+                origin_product=Task.OriginProduct.USER_CREATED,
+                user_id=user.id,
+                repository="insights/insights",
+            )
+
+        self.assertIn("does not have a GitHub integration", str(cm.exception))
+        mock_execute_workflow.assert_not_called()
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
     def test_create_and_run_with_github_integration(self, mock_execute_workflow):
         user = User.objects.create(email="test@test.com")
         integration = Integration.objects.create(team=self.team, kind="github", config={})
 
-        task = Task.create_and_run(
-            team=self.team,
-            title="Test Task",
-            description="Test Description",
-            origin_product=Task.OriginProduct.USER_CREATED,
-            user_id=user.id,
-            repository="hanzoai/insights",
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            task = Task.create_and_run(
+                team=self.team,
+                title="Test Task",
+                description="Test Description",
+                origin_product=Task.OriginProduct.USER_CREATED,
+                user_id=user.id,
+                repository="insights/insights",
+            )
 
         self.assertEqual(task.github_integration, integration)
         mock_execute_workflow.assert_called_once()
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_signal_report_falls_back_to_user_integration(self, mock_execute_workflow):
+        # Signal reports are BOT-authored. A broken team installation must not override the
+        # healthy user integration that repository selection used for the report.
+        user = User.objects.create(email="signal-report@test.com")
+        OrganizationMembership.objects.create(user=user, organization=self.organization)
+        Integration.objects.create(
+            team=self.team,
+            kind="github",
+            errors=ERROR_TOKEN_REFRESH_FAILED,
+            config={"installation_unavailable_since": 1},
+        )
+        user_integration = UserIntegration.objects.create(
+            user=user,
+            kind=UserIntegration.IntegrationKind.GITHUB,
+            integration_id="install-1",
+            config={"installation_id": "install-1"},
+            sensitive_config={"access_token": "ghs_user_install"},
+            repository_cache=[{"full_name": "insights/insights", "id": 1}],
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            task = Task.create_and_run(
+                team=self.team,
+                title="Signal Report",
+                description="Research",
+                origin_product=Task.OriginProduct.SIGNAL_REPORT,
+                user_id=user.id,
+                repository="insights/insights",
+            )
+
+        self.assertIsNone(task.github_integration)
+        self.assertEqual(task.github_user_integration, user_integration)
+        mock_execute_workflow.assert_called_once()
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_signal_report_raises_when_no_integration_anywhere(self, mock_execute_workflow):
+        user = User.objects.create(email="signal-no-int@test.com")
+        OrganizationMembership.objects.create(user=user, organization=self.organization)
+
+        with self.assertRaises(ValueError) as cm:
+            Task.create_and_run(
+                team=self.team,
+                title="Signal Report",
+                description="Research",
+                origin_product=Task.OriginProduct.SIGNAL_REPORT,
+                user_id=user.id,
+                repository="insights/insights",
+            )
+
+        self.assertIn("does not have a GitHub integration", str(cm.exception))
+        mock_execute_workflow.assert_not_called()
 
     @parameterized.expand(
         [
@@ -147,11 +372,11 @@ class TestTask(TestCase):
 
     @parameterized.expand(
         [
-            ("Hanzo Insights/insights", "insights/insights"),
-            ("insights/Insights-JS", "hanzoai/insights-js"),
+            ("Insights/insights", "insights/insights"),
+            ("insights/Insights-JS", "insights/insights-js"),
             ("Insights/Insights", "insights/insights"),
-            ("INSIGHTS/INSIGHTS-JS", "hanzoai/insights-js"),
-            ("hanzoai/insights-js", "hanzoai/insights-js"),
+            ("INSIGHTS/INSIGHTS-JS", "insights/insights-js"),
+            ("insights/insights-js", "insights/insights-js"),
         ]
     )
     def test_repository_converts_to_lowercase(self, input_repo, expected_repo):
@@ -199,11 +424,95 @@ class TestTask(TestCase):
         task.refresh_from_db()
         self.assertIsNotNone(task.id)
 
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_internal_defaults_to_false(self, mock_execute_workflow):
+        user = User.objects.create(email="internal_default@test.com")
+        Integration.objects.create(team=self.team, kind="github", config={})
+
+        task = Task.create_and_run(
+            team=self.team,
+            title="Non-internal Task",
+            description="Description",
+            origin_product=Task.OriginProduct.USER_CREATED,
+            user_id=user.id,
+            repository="insights/insights",
+        )
+
+        self.assertFalse(task.internal)
+
+    @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
+    def test_create_and_run_with_internal_true(self, mock_execute_workflow):
+        user = User.objects.create(email="internal_true@test.com")
+        Integration.objects.create(team=self.team, kind="github", config={})
+
+        task = Task.create_and_run(
+            team=self.team,
+            title="Internal Task",
+            description="Description",
+            origin_product=Task.OriginProduct.USER_CREATED,
+            user_id=user.id,
+            repository="insights/insights",
+            internal=True,
+        )
+
+        task.refresh_from_db()
+        self.assertTrue(task.internal)
+
+
+class TestTaskSlackPrNotification(TestCase):
+    organization: ClassVar[Organization]
+    team: ClassVar[Team]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = Organization.objects.create(name="Test Org")
+        cls.team = Team.objects.create(organization=cls.organization, name="Test Team")
+
+    def _task(self) -> Task:
+        return Task.objects.create(
+            team=self.team,
+            title="Test Task",
+            description="Test Description",
+            origin_product=Task.OriginProduct.SLACK,
+        )
+
+    def test_mark_slack_pr_notified_records_overrides_and_persists(self):
+        # Records the announced PR, overrides on a new one, and survives a reload.
+        task = self._task()
+        self.assertIsNone(task.slack_notified_pr_url)
+
+        pr_1 = "https://github.com/org/repo/pull/1"
+        pr_2 = "https://github.com/org/repo/pull/2"
+        task.mark_slack_pr_notified(pr_1)
+        self.assertEqual(task.slack_notified_pr_url, pr_1)
+
+        task.mark_slack_pr_notified(pr_2)
+        self.assertEqual(task.slack_notified_pr_url, pr_2)
+
+        task.refresh_from_db()
+        self.assertEqual(task.slack_notified_pr_url, pr_2)
+
+    def test_mark_slack_pr_notified_preserves_other_state_keys(self):
+        # It's a merge into the shared state bag, not a wholesale write.
+        task = self._task()
+        task.state = {"unrelated": "keep-me"}
+        task.save(update_fields=["state"])
+
+        task.mark_slack_pr_notified("https://github.com/org/repo/pull/1")
+
+        task.refresh_from_db()
+        self.assertEqual(task.state["unrelated"], "keep-me")
+        self.assertEqual(task.slack_notified_pr_url, "https://github.com/org/repo/pull/1")
+
 
 class TestTaskSlug(TestCase):
-    def setUp(self):
-        self.organization = Organization.objects.create(name="Test Org")
-        self.team = Team.objects.create(organization=self.organization, name="Test Team")
+    organization: ClassVar[Organization]
+    team: ClassVar[Team]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = Organization.objects.create(name="Test Org")
+        cls.team = Team.objects.create(organization=cls.organization, name="Test Team")
 
     @parameterized.expand(
         [
@@ -286,11 +595,16 @@ class TestTaskSlug(TestCase):
 
 
 class TestTaskRun(TestCase):
-    def setUp(self):
-        self.organization = Organization.objects.create(name="Test Org")
-        self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.task = Task.objects.create(
-            team=self.team,
+    organization: ClassVar[Organization]
+    team: ClassVar[Team]
+    task: ClassVar[Task]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = Organization.objects.create(name="Test Org")
+        cls.team = Team.objects.create(organization=cls.organization, name="Test Team")
+        cls.task = Task.objects.create(
+            team=cls.team,
             title="Test Task",
             description="Test Description",
             origin_product=Task.OriginProduct.USER_CREATED,
@@ -321,6 +635,142 @@ class TestTaskRun(TestCase):
             status=TaskRun.Status.IN_PROGRESS,
         )
         self.assertEqual(str(run), "Run for Test Task - In Progress")
+
+    @patch("products.tasks.backend.models.publish_task_run_stream_event")
+    def test_create_run_seeds_stream_state_event(self, mock_publish_stream_event):
+        run = self.task.create_run(branch="main")
+
+        mock_publish_stream_event.assert_called_once()
+        call_args = mock_publish_stream_event.call_args
+        self.assertEqual(call_args.args[0], str(run.id))
+        self.assertEqual(call_args.args[1]["type"], "task_run_state")
+        self.assertEqual(call_args.args[1]["status"], TaskRun.Status.QUEUED)
+        self.assertEqual(call_args.args[1]["branch"], "main")
+
+    def test_create_run_does_not_inject_permission_mode_by_default(self):
+        run = self.task.create_run(mode="interactive")
+
+        self.assertNotIn("initial_permission_mode", run.state)
+
+    @patch("products.tasks.backend.models.TaskRun.publish_stream_state_event")
+    def test_prepare_for_cloud_handoff_clears_stale_sandbox_routing(self, _publish):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            status=TaskRun.Status.COMPLETED,
+            state={
+                "sandbox_id": "old-sandbox",
+                "sandbox_url": "https://old-sandbox.test",
+                "sandbox_jwt_kid": "old-key",
+                "snapshot_external_id": "snapshot-1",
+            },
+        )
+
+        run.prepare_for_cloud_handoff()
+
+        self.assertNotIn("sandbox_id", run.state)
+        self.assertNotIn("sandbox_url", run.state)
+        self.assertNotIn("sandbox_jwt_kid", run.state)
+        self.assertEqual(run.state["snapshot_external_id"], "snapshot-1")
+        self.assertTrue(run.state["handoff_resumed"])
+
+    def test_s3_prefixes_keep_existing_logs_and_artifact_paths(self):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+        )
+
+        self.assertEqual(
+            run.log_url,
+            f"tasks/logs/team_{self.team.id}/task_{self.task.id}/run_{run.id}.jsonl",
+        )
+        self.assertEqual(
+            run.get_artifact_s3_prefix(),
+            f"tasks/artifacts/team_{self.team.id}/task_{self.task.id}/run_{run.id}",
+        )
+
+    def test_update_state_atomic_merges_against_latest_state(self):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            state={
+                "mode": "interactive",
+                "pending_user_message": "read the attachment",
+                "pending_user_artifact_ids": ["artifact-123"],
+            },
+        )
+
+        TaskRun.update_state_atomic(
+            run.id,
+            remove_keys=["pending_user_message", "pending_user_artifact_ids"],
+        )
+        TaskRun.update_state_atomic(
+            run.id,
+            updates={
+                "sandbox_id": "sandbox-123",
+                "sandbox_url": "https://sandbox.example.com",
+            },
+        )
+
+        run.refresh_from_db()
+        self.assertEqual(run.state["mode"], "interactive")
+        self.assertEqual(run.state["sandbox_id"], "sandbox-123")
+        self.assertEqual(run.state["sandbox_url"], "https://sandbox.example.com")
+        self.assertNotIn("pending_user_message", run.state)
+        self.assertNotIn("pending_user_artifact_ids", run.state)
+
+    def test_clear_sandbox_connection_state_atomic_removes_matching_sandbox(self):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            state={
+                "sandbox_id": "sandbox-123",
+                "sandbox_url": "https://sandbox.example.com",
+                "sandbox_connect_token": "token",
+                "sandbox_jwt_kid": "key",
+                "mode": "interactive",
+            },
+        )
+
+        TaskRun.clear_sandbox_connection_state_atomic(run.id, "sandbox-123")
+
+        run.refresh_from_db()
+        self.assertEqual(run.state, {"mode": "interactive"})
+
+    def test_clear_sandbox_connection_state_atomic_preserves_newer_sandbox(self):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            state={
+                "sandbox_id": "new-sandbox",
+                "sandbox_url": "https://new-sandbox.example.com",
+                "sandbox_connect_token": "new-token",
+                "sandbox_jwt_kid": "new-key",
+            },
+        )
+
+        TaskRun.clear_sandbox_connection_state_atomic(run.id, "old-sandbox")
+
+        run.refresh_from_db()
+        self.assertEqual(run.state["sandbox_id"], "new-sandbox")
+        self.assertEqual(run.state["sandbox_connect_token"], "new-token")
+
+    def test_mutate_state_atomic_can_derive_values_under_lock(self):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            state={"slack_sent_relay_ids": ["relay-1"]},
+        )
+
+        def append_relay(state: dict[str, list[str]]) -> None:
+            sent_relay_ids = state.get("slack_sent_relay_ids") or []
+            sent_relay_ids.append("relay-2")
+            state["slack_sent_relay_ids"] = sent_relay_ids
+
+        TaskRun.mutate_state_atomic(run.id, append_relay)
+
+        run.refresh_from_db()
+        self.assertEqual(run.state["slack_sent_relay_ids"], ["relay-1", "relay-2"])
 
     def test_append_log_to_empty(self):
         run = TaskRun.objects.create(
@@ -440,13 +890,35 @@ class TestTaskRun(TestCase):
             status=TaskRun.Status.IN_PROGRESS,
         )
 
-        error_msg = "Something went wrong"
-        run.mark_failed(error_msg)
+        error_msg = "x" * 1400 + "Error: the root cause sits at the tail"
+        with patch("products.tasks.backend.models.hanzo_insights.capture") as mock_capture:
+            run.mark_failed(error_msg, error_type="stale_queued_cleanup")
 
         run.refresh_from_db()
         self.assertEqual(run.status, TaskRun.Status.FAILED)
         self.assertEqual(run.error_message, error_msg)
         self.assertIsNotNone(run.completed_at)
+        captured = [c for c in mock_capture.call_args_list if c.kwargs.get("event") == "task_run_failed"]
+        self.assertEqual(len(captured), 1)
+        props = captured[0].kwargs["properties"]
+        self.assertEqual(props["error_type"], "stale_queued_cleanup")
+        self.assertEqual(len(props["error_message"]), 500)
+        self.assertTrue(props["error_message"].endswith("Error: the root cause sits at the tail"))
+
+    @parameterized.expand(
+        [
+            ("loop_run", {"loop_id": "loop-abc", "loop_trigger_id": "trig-xyz"}, "loop-abc", "trig-xyz"),
+            ("non_loop_run", {}, None, None),
+        ]
+    )
+    def test_task_run_created_carries_loop_attribution(self, _name, extra_state, expected_loop_id, expected_trigger_id):
+        with patch("products.tasks.backend.models.hanzo_insights.capture") as mock_capture:
+            self.task.create_run(extra_state=extra_state or None)
+        created = [c for c in mock_capture.call_args_list if c.kwargs.get("event") == "task_run_created"]
+        self.assertEqual(len(created), 1)
+        props = created[0].kwargs["properties"]
+        self.assertEqual(props["loop_id"], expected_loop_id)
+        self.assertEqual(props["loop_trigger_id"], expected_trigger_id)
 
     def test_output_jsonfield(self):
         run = TaskRun.objects.create(
@@ -517,6 +989,82 @@ class TestTaskRun(TestCase):
         self.assertEqual(entry["notification"]["params"]["level"], "info")
         self.assertEqual(entry["notification"]["params"]["message"], "Test message")
 
+    @patch("products.tasks.backend.models.publish_task_run_stream_event")
+    def test_emit_console_event_publishes_to_stream(self, mock_publish_stream_event):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+        )
+
+        run.emit_console_event("info", "Test message")
+
+        mock_publish_stream_event.assert_called_once()
+        call_args = mock_publish_stream_event.call_args
+        self.assertEqual(call_args.args[0], str(run.id))
+        self.assertEqual(call_args.args[1]["notification"]["method"], "_insights/console")
+
+    def test_emit_progress_event_acp_format(self):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+        )
+
+        run.emit_progress_event(
+            "container",
+            "in_progress",
+            "Setting up cloud container",
+            group="setup",
+            detail="provisioning",
+        )
+
+        log_content = object_storage.read(run.log_url)
+        assert log_content is not None
+        entry = json.loads(log_content.strip())
+
+        self.assertEqual(entry["type"], "notification")
+        self.assertIn("timestamp", entry)
+        self.assertEqual(entry["notification"]["jsonrpc"], "2.0")
+        self.assertEqual(entry["notification"]["method"], "_insights/progress")
+        params = entry["notification"]["params"]
+        self.assertEqual(params["sessionId"], str(run.id))
+        self.assertEqual(params["step"], "container")
+        self.assertEqual(params["status"], "in_progress")
+        self.assertEqual(params["label"], "Setting up cloud container")
+        self.assertEqual(params["group"], "setup")
+        self.assertEqual(params["detail"], "provisioning")
+
+    def test_emit_progress_event_omits_detail_when_not_provided(self):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+        )
+
+        run.emit_progress_event("agent", "completed", "Started agent", group="setup")
+
+        log_content = object_storage.read(run.log_url)
+        assert log_content is not None
+        entry = json.loads(log_content.strip())
+
+        params = entry["notification"]["params"]
+        self.assertNotIn("detail", params)
+        self.assertEqual(params["group"], "setup")
+
+    @patch("products.tasks.backend.models.publish_task_run_stream_event")
+    def test_emit_progress_event_publishes_to_stream(self, mock_publish_stream_event):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+        )
+
+        run.emit_progress_event("clone", "completed", "Cloned repository", group="setup")
+
+        mock_publish_stream_event.assert_called_once()
+        call_args = mock_publish_stream_event.call_args
+        self.assertEqual(call_args.args[0], str(run.id))
+        self.assertEqual(call_args.args[1]["notification"]["method"], "_insights/progress")
+        self.assertEqual(call_args.args[1]["notification"]["params"]["step"], "clone")
+        self.assertEqual(call_args.args[1]["notification"]["params"]["group"], "setup")
+
     @parameterized.expand(
         [
             (0, "stdout output", "stderr output"),
@@ -545,12 +1093,114 @@ class TestTaskRun(TestCase):
         self.assertEqual(entry["notification"]["params"]["stderr"], stderr)
         self.assertEqual(entry["notification"]["params"]["exitCode"], exit_code)
 
+    @patch("products.tasks.backend.models.publish_task_run_stream_event")
+    def test_emit_sandbox_output_publishes_to_stream(self, mock_publish_stream_event):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+        )
+
+        run.emit_sandbox_output("stdout output", "stderr output", 0)
+
+        mock_publish_stream_event.assert_called_once()
+        call_args = mock_publish_stream_event.call_args
+        self.assertEqual(call_args.args[0], str(run.id))
+        self.assertEqual(call_args.args[1]["notification"]["method"], "_insights/sandbox_output")
+
+    @parameterized.expand(
+        [
+            ("background_mode", {"mode": "background"}, True),
+            ("default_mode_is_background", {}, True),
+            ("interactive_mode", {"mode": "interactive"}, True),
+        ]
+    )
+    @patch("insights.temporal.common.client.sync_connect")
+    def test_heartbeat_workflow_mode_filtering(self, _name, state, expect_signal, mock_connect):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            status=TaskRun.Status.IN_PROGRESS,
+            state=state,
+        )
+
+        from django.core.cache import cache
+
+        cache.delete(f"tasks:task_run:heartbeat:{run.id}:active")
+
+        run.heartbeat_workflow(agent_active=True)
+
+        if expect_signal:
+            mock_connect.assert_called_once()
+        else:
+            mock_connect.assert_not_called()
+
+        cache.delete(f"tasks:task_run:heartbeat:{run.id}:active")
+
+    @patch("insights.temporal.common.client.sync_connect")
+    def test_heartbeat_workflow_rate_limited_by_cache(self, mock_connect):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            status=TaskRun.Status.IN_PROGRESS,
+            state={"mode": "background"},
+        )
+
+        from django.core.cache import cache
+
+        cache_key = f"tasks:task_run:heartbeat:{run.id}:active"
+        cache.delete(cache_key)
+        handle = mock_connect.return_value.get_workflow_handle.return_value
+        handle.signal = AsyncMock()
+
+        run.heartbeat_workflow(agent_active=True)
+        mock_connect.assert_called_once()
+        handle.signal.assert_called_once()
+        self.assertEqual(handle.signal.call_args.kwargs, {"arg": True})
+
+        mock_connect.reset_mock()
+        run.heartbeat_workflow(agent_active=True)
+        mock_connect.assert_not_called()
+
+        cache.delete(cache_key)
+
+    @patch("insights.temporal.common.client.sync_connect")
+    def test_heartbeat_workflow_ignores_idle_heartbeats(self, mock_connect):
+        run = TaskRun.objects.create(
+            task=self.task,
+            team=self.team,
+            status=TaskRun.Status.IN_PROGRESS,
+            state={"mode": "background"},
+        )
+
+        from django.core.cache import cache
+
+        cache.delete(f"tasks:task_run:heartbeat:{run.id}:active")
+
+        handle = mock_connect.return_value.get_workflow_handle.return_value
+        handle.signal = AsyncMock()
+
+        run.heartbeat_workflow(agent_active=False)
+        mock_connect.assert_not_called()
+
+        run.heartbeat_workflow(agent_active=True)
+
+        mock_connect.assert_called_once()
+        handle.signal.assert_called_once()
+        self.assertEqual(handle.signal.call_args.kwargs, {"arg": True})
+
+        cache.delete(f"tasks:task_run:heartbeat:{run.id}:active")
+
 
 class TestSandboxSnapshot(TestCase):
-    def setUp(self):
-        self.organization = Organization.objects.create(name="Test Org")
-        self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.integration = Integration.objects.create(team=self.team, kind="github", config={})
+    organization: ClassVar[Organization]
+    team: ClassVar[Team]
+    integration: ClassVar[Integration]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = Organization.objects.create(name="Test Org")
+        cls.team = Team.objects.create(organization=cls.organization, name="Test Team")
+        cls.integration = Integration.objects.create(team=cls.team, kind="github", config={})
 
     @parameterized.expand(
         [
@@ -564,12 +1214,12 @@ class TestSandboxSnapshot(TestCase):
         snapshot = SandboxSnapshot.objects.create(
             integration=self.integration,
             external_id=external_id,
-            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
+            repos=["Insights/insights", "Insights/insights-js"],
             status=status,
         )
         self.assertEqual(snapshot.integration, self.integration)
         self.assertEqual(snapshot.external_id, external_id)
-        self.assertEqual(snapshot.repos, ["Hanzo Insights/insights", "Hanzo Insights/insights-js"])
+        self.assertEqual(snapshot.repos, ["Insights/insights", "Insights/insights-js"])
         self.assertEqual(snapshot.status, status)
 
     def test_snapshot_default_values(self):
@@ -582,7 +1232,7 @@ class TestSandboxSnapshot(TestCase):
         snapshot = SandboxSnapshot.objects.create(
             integration=self.integration,
             external_id=f"snapshot-{uuid.uuid4()}",
-            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
+            repos=["Insights/insights", "Insights/insights-js"],
             status=SandboxSnapshot.Status.COMPLETE,
         )
         self.assertEqual(str(snapshot), f"Snapshot {snapshot.external_id} (Complete, 2 repos)")
@@ -601,9 +1251,9 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], "Hanzo Insights/insights", True),
-            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], "Insights/other", False),
-            ([], "Hanzo Insights/insights", False),
+            (["Insights/insights", "Insights/insights-js"], "Insights/insights", True),
+            (["Insights/insights", "Insights/insights-js"], "Insights/other", False),
+            ([], "Insights/insights", False),
         ]
     )
     def test_has_repo(self, repos, check_repo, expected):
@@ -614,10 +1264,10 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["Hanzo Insights/insights"], True),
-            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["Hanzo Insights/insights", "Hanzo Insights/insights-js"], True),
-            (["Hanzo Insights/insights"], ["Hanzo Insights/insights", "Hanzo Insights/insights-js"], False),
-            ([], ["Hanzo Insights/insights"], False),
+            (["Insights/insights", "Insights/insights-js"], ["Insights/insights"], True),
+            (["Insights/insights", "Insights/insights-js"], ["Insights/insights", "Insights/insights-js"], True),
+            (["Insights/insights"], ["Insights/insights", "Insights/insights-js"], False),
+            ([], ["Insights/insights"], False),
         ]
     )
     def test_has_repos(self, snapshot_repos, required_repos, expected):
@@ -643,9 +1293,9 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["Hanzo Insights/insights"], "insights/insights", True),
-            (["Hanzo Insights/insights"], "INSIGHTS/INSIGHTS", True),
-            (["hanzoai/insights-js"], "Insights/Insights-JS", True),
+            (["Insights/insights"], "insights/insights", True),
+            (["Insights/insights"], "INSIGHTS/INSIGHTS", True),
+            (["insights/insights-js"], "Insights/Insights-JS", True),
         ]
     )
     def test_has_repo_case_insensitive(self, repos, check_repo, expected):
@@ -656,8 +1306,8 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["insights/insights"], True),
-            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["INSIGHTS/INSIGHTS", "hanzoai/insights-js"], True),
+            (["Insights/insights", "Insights/insights-js"], ["insights/insights"], True),
+            (["Insights/insights", "Insights/insights-js"], ["INSIGHTS/INSIGHTS", "insights/insights-js"], True),
         ]
     )
     def test_has_repos_case_insensitive(self, snapshot_repos, required_repos, expected):
@@ -714,54 +1364,54 @@ class TestSandboxSnapshot(TestCase):
     def test_get_latest_snapshot_with_repos(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["Hanzo Insights/insights"],
+            repos=["Insights/insights"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
         snapshot2 = SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
+            repos=["Insights/insights", "Insights/insights-js"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
-        result = SandboxSnapshot.get_latest_snapshot_with_repos(self.integration.id, ["Hanzo Insights/insights"])
+        result = SandboxSnapshot.get_latest_snapshot_with_repos(self.integration.id, ["Insights/insights"])
         self.assertEqual(result, snapshot2)
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["Hanzo Insights/insights", "Hanzo Insights/insights-js"]
+            self.integration.id, ["Insights/insights", "Insights/insights-js"]
         )
         self.assertEqual(result, snapshot2)
 
     def test_get_latest_snapshot_with_repos_not_found(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["Hanzo Insights/insights"],
+            repos=["Insights/insights"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["Hanzo Insights/insights", "Insights/other"]
+            self.integration.id, ["Insights/insights", "Insights/other"]
         )
         self.assertIsNone(result)
 
     def test_get_latest_snapshot_with_repos_ignores_in_progress(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["Hanzo Insights/insights"],
+            repos=["Insights/insights"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
+            repos=["Insights/insights", "Insights/insights-js"],
             status=SandboxSnapshot.Status.IN_PROGRESS,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["Hanzo Insights/insights", "Hanzo Insights/insights-js"]
+            self.integration.id, ["Insights/insights", "Insights/insights-js"]
         )
         self.assertIsNone(result)
 
@@ -795,10 +1445,15 @@ class TestSandboxSnapshot(TestCase):
 
 
 class TestSandboxEnvironment(TestCase):
-    def setUp(self):
-        self.organization = Organization.objects.create(name="Test Org")
-        self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.user = User.objects.create(email="test@hanzo.ai")
+    organization: ClassVar[Organization]
+    team: ClassVar[Team]
+    user: ClassVar[User]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = Organization.objects.create(name="Test Org")
+        cls.team = Team.objects.create(organization=cls.organization, name="Test Team")
+        cls.user = User.objects.create(email="test@hanzo.ai")
 
     def test_default_values(self):
         env = SandboxEnvironment.objects.create(
@@ -885,6 +1540,50 @@ class TestSandboxEnvironment(TestCase):
 
     @parameterized.expand(
         [
+            ("NODE_OPTIONS", True),
+            ("NODE_REPL_EXTERNAL_MODULE", True),
+            ("LD_PRELOAD", True),
+            ("LD_LIBRARY_PATH", True),
+            ("DYLD_INSERT_LIBRARIES", True),
+            ("BASH_ENV", True),
+            ("GIT_SSH_COMMAND", True),
+            ("GIT_CONFIG_KEY_0", True),
+            ("GIT_CONFIG_VALUE_0", True),
+            ("NODE_ENV", False),
+            ("node_options", False),
+            ("MY_API_KEY", False),
+            ("LDAP_URL", False),
+            ("GITHUB_ACTOR", False),
+        ]
+    )
+    def test_is_blocked_sandbox_env_key(self, key, expected_blocked):
+        from products.tasks.backend.constants import is_blocked_sandbox_env_key
+
+        self.assertEqual(is_blocked_sandbox_env_key(key), expected_blocked)
+
+    def test_filter_user_sandbox_env_vars_drops_reserved_and_blocked(self):
+        from products.tasks.backend.constants import filter_user_sandbox_env_vars
+
+        safe, skipped = filter_user_sandbox_env_vars(
+            {
+                "SAFE_VAR": "ok",
+                "NODE_OPTIONS": "--import=evil",
+                "LD_PRELOAD": "/tmp/evil.so",
+                "GITHUB_TOKEN": "stolen",
+                # Forging either would redirect the agent's model calls to an
+                # attacker host, so both must be reserved.
+                "AI_GATEWAY_URL": "https://evil.example.com",
+                "AI_GATEWAY_PRODUCTS": "signals_scout",
+            }
+        )
+        self.assertEqual(safe, {"SAFE_VAR": "ok"})
+        self.assertEqual(
+            sorted(skipped),
+            ["AI_GATEWAY_PRODUCTS", "AI_GATEWAY_URL", "GITHUB_TOKEN", "LD_PRELOAD", "NODE_OPTIONS"],
+        )
+
+    @parameterized.expand(
+        [
             (SandboxEnvironment.NetworkAccessLevel.FULL, [], False, []),
             (SandboxEnvironment.NetworkAccessLevel.TRUSTED, [], False, ["github.com", "api.github.com"]),
             (SandboxEnvironment.NetworkAccessLevel.CUSTOM, ["custom.com"], False, ["custom.com"]),
@@ -903,3 +1602,170 @@ class TestSandboxEnvironment(TestCase):
         domains = env.get_effective_domains()
         for expected in expected_contains:
             self.assertIn(expected, domains)
+
+    def test_full_access_returns_empty_list(self):
+        env = SandboxEnvironment.objects.create(
+            team=self.team,
+            created_by=self.user,
+            name="Full Access",
+            network_access_level=SandboxEnvironment.NetworkAccessLevel.FULL,
+        )
+        self.assertEqual(env.get_effective_domains(), [])
+
+    def test_custom_with_defaults_does_not_duplicate(self):
+        env = SandboxEnvironment.objects.create(
+            team=self.team,
+            created_by=self.user,
+            name="Custom + Defaults",
+            network_access_level=SandboxEnvironment.NetworkAccessLevel.CUSTOM,
+            allowed_domains=["github.com", "custom.io"],
+            include_default_domains=True,
+        )
+        domains = env.get_effective_domains()
+        self.assertEqual(domains.count("github.com"), 1)
+        self.assertIn("custom.io", domains)
+
+    def test_custom_without_defaults_returns_only_custom(self):
+        env = SandboxEnvironment.objects.create(
+            team=self.team,
+            created_by=self.user,
+            name="Custom Only",
+            network_access_level=SandboxEnvironment.NetworkAccessLevel.CUSTOM,
+            allowed_domains=["only-this.com"],
+            include_default_domains=False,
+        )
+        self.assertEqual(env.get_effective_domains(), ["only-this.com"])
+
+    def test_trusted_includes_all_default_domains(self):
+        from products.tasks.backend.constants import DEFAULT_TRUSTED_DOMAINS
+
+        env = SandboxEnvironment.objects.create(
+            team=self.team,
+            created_by=self.user,
+            name="Trusted",
+            network_access_level=SandboxEnvironment.NetworkAccessLevel.TRUSTED,
+        )
+        self.assertEqual(env.get_effective_domains(), DEFAULT_TRUSTED_DOMAINS)
+
+
+class TestTaskRunGetSandboxEnvironment(TestCase):
+    organization: ClassVar[Organization]
+    team: ClassVar[Team]
+    other_team: ClassVar[Team]
+    user: ClassVar[User]
+    other_user: ClassVar[User]
+    integration: ClassVar[Integration]
+    task: ClassVar[Task]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = Organization.objects.create(name="Test Org")
+        cls.team = Team.objects.create(organization=cls.organization, name="Test Team")
+        cls.other_team = Team.objects.create(organization=cls.organization, name="Other Team")
+        cls.user = User.objects.create(email="creator@hanzo.ai")
+        cls.other_user = User.objects.create(email="other@hanzo.ai")
+        cls.integration = Integration.objects.create(team=cls.team, kind="github")
+        cls.task = Task.objects.create(
+            team=cls.team,
+            created_by=cls.user,
+            title="Test Task",
+            github_integration=cls.integration,
+            repository="org/repo",
+        )
+
+    def _create_run(self, sandbox_environment_id=None):
+        state = {}
+        if sandbox_environment_id:
+            state["sandbox_environment_id"] = str(sandbox_environment_id)
+        return TaskRun.objects.create(task=self.task, team=self.team, state=state)
+
+    def test_returns_none_when_no_environment_id(self):
+        run = self._create_run()
+        self.assertIsNone(run.get_sandbox_environment())
+
+    def test_returns_public_environment_on_same_team(self):
+        env = SandboxEnvironment.objects.create(
+            team=self.team, name="Public", private=False, created_by=self.other_user
+        )
+        run = self._create_run(env.id)
+        self.assertEqual(run.get_sandbox_environment(), env)
+
+    def test_returns_none_for_environment_on_different_team(self):
+        env = SandboxEnvironment.objects.create(
+            team=self.other_team, name="Other Team Env", private=False, created_by=self.other_user
+        )
+        run = self._create_run(env.id)
+        self.assertIsNone(run.get_sandbox_environment())
+
+    def test_returns_private_environment_when_creator_matches(self):
+        env = SandboxEnvironment.objects.create(team=self.team, name="My Private", private=True, created_by=self.user)
+        run = self._create_run(env.id)
+        self.assertEqual(run.get_sandbox_environment(), env)
+
+    def test_returns_none_for_private_environment_when_creator_differs(self):
+        env = SandboxEnvironment.objects.create(
+            team=self.team, name="Others Private", private=True, created_by=self.other_user
+        )
+        run = self._create_run(env.id)
+        self.assertIsNone(run.get_sandbox_environment())
+
+    def test_returns_none_for_private_environment_when_task_creator_is_null(self):
+        self.task.created_by = None
+        self.task.save()
+        env = SandboxEnvironment.objects.create(team=self.team, name="Private", private=True, created_by=self.user)
+        run = self._create_run(env.id)
+        self.assertIsNone(run.get_sandbox_environment())
+
+    def test_returns_none_for_private_environment_when_env_creator_is_null(self):
+        env = SandboxEnvironment.objects.create(
+            team=self.team, name="Private No Creator", private=True, created_by=None
+        )
+        run = self._create_run(env.id)
+        self.assertIsNone(run.get_sandbox_environment())
+
+    def test_returns_none_for_nonexistent_environment_id(self):
+        run = self._create_run(uuid.uuid4())
+        self.assertIsNone(run.get_sandbox_environment())
+
+    def test_returns_none_for_malformed_environment_id(self):
+        run = self._create_run("not-a-uuid")
+        self.assertIsNone(run.get_sandbox_environment())
+
+
+class TestCodeInvite(TestCase):
+    def test_auto_generates_code_on_save(self):
+        invite = CodeInvite.objects.create()
+        self.assertEqual(len(invite.code), 8)
+        self.assertTrue(all(c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" for c in invite.code))
+
+    def test_preserves_explicit_code(self):
+        invite = CodeInvite.objects.create(code="MYCODE42")
+        self.assertEqual(invite.code, "MYCODE42")
+
+    def test_retries_on_code_collision(self):
+        existing = CodeInvite.objects.create(code="AAAAAAAA")
+        self.assertEqual(existing.code, "AAAAAAAA")
+
+        call_count = 0
+        original_choice = secrets.choice
+
+        def mock_choice(alphabet):
+            nonlocal call_count
+            call_count += 1
+            # First 8 calls (first attempt) return "A" to collide, rest are random
+            if call_count <= 8:
+                return "A"
+            return original_choice(alphabet)
+
+        with patch("products.tasks.backend.models.secrets.choice", side_effect=mock_choice):
+            invite = CodeInvite.objects.create()
+
+        self.assertNotEqual(invite.code, "AAAAAAAA")
+        self.assertEqual(len(invite.code), 8)
+
+    def test_raises_after_max_retries(self):
+        CodeInvite.objects.create(code="BBBBBBBB")
+
+        with patch("products.tasks.backend.models.secrets.choice", return_value="B"):
+            with self.assertRaises(IntegrityError):
+                CodeInvite.objects.create()

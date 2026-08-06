@@ -3,10 +3,10 @@
 import { Monaco } from '@monaco-editor/react'
 import { languages } from 'monaco-editor'
 
-import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
-import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvider'
+import { hogQLAutocompleteProvider } from 'lib/monaco/hogQLAutocompleteProvider'
+import { hogQLMetadataProvider } from 'lib/monaco/hogQLMetadataProvider'
 
-import { InsightsLanguage } from '~/queries/schema/schema-general'
+import { HogLanguage } from '~/queries/schema/schema-general'
 
 export const conf: () => languages.LanguageConfiguration = () => ({
     wordPattern: /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,
@@ -79,7 +79,7 @@ export const conf: () => languages.LanguageConfiguration = () => ({
 export const language: () => languages.IMonarchLanguage = () => ({
     // Set defaultToken to invalid to see what you do not tokenize yet
     defaultToken: 'invalid',
-    tokenPostfix: '.iql',
+    tokenPostfix: '.script',
 
     keywords: [
         'fn',
@@ -248,13 +248,13 @@ export const language: () => languages.IMonarchLanguage = () => ({
     },
 })
 
-export function initScriptLanguage(monaco: Monaco): void {
-    if (!monaco.languages.getLanguages().some(({ id }) => id === 'fn')) {
-        monaco.languages.register({ id: 'iql', extensions: ['.iql'], mimetypes: ['application/iql'] })
-        monaco.languages.setLanguageConfiguration('iql', conf())
-        monaco.languages.setMonarchTokensProvider('iql', language())
-        monaco.languages.registerCompletionItemProvider('iql', insightsQLAutocompleteProvider(InsightsLanguage.insightsScript))
-        monaco.languages.registerCodeActionProvider('iql', insightsQLMetadataProvider())
+export function initHogLanguage(monaco: Monaco): void {
+    if (!monaco.languages.getLanguages().some(({ id }: { id: string }) => id === 'script')) {
+        monaco.languages.register({ id: 'script', extensions: ['.script'], mimetypes: ['application/script'] })
+        monaco.languages.setLanguageConfiguration('script', conf())
+        monaco.languages.setMonarchTokensProvider('script', language())
+        monaco.languages.registerCompletionItemProvider('script', hogQLAutocompleteProvider(HogLanguage.script))
+        monaco.languages.registerCodeActionProvider('script', hogQLMetadataProvider())
     }
 }
 
