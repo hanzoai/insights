@@ -2,7 +2,7 @@ import { DestinationDefinition, destinations } from '@segment/action-destination
 
 import { InsightsFunctionFilterEvent, InsightsFunctionInputSchemaType, InsightsFunctionTemplate } from '~/cdp/types'
 
-import { EXTEND_OBJECT_KEY } from '../services/script-executor.service'
+import { EXTEND_OBJECT_KEY } from '../services/script-inputs.service'
 
 export type SegmentDestination = {
     template: InsightsFunctionTemplate

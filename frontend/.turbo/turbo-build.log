@@ -1,0 +1,53 @@
+ WARN  Unsupported engine: wanted: {"node":">=24 <25"} (current: {"node":"v22.23.2","pnpm":"9.15.9"})
+
+> @hanzo/frontend@0.0.0 build /home/z/work/hanzo/insights/frontend
+> pnpm copy-scripts && pnpm build:esbuild
+
+ WARN  Unsupported engine: wanted: {"node":">=24 <25"} (current: {"node":"v22.23.2","pnpm":"9.15.9"})
+
+> @hanzo/frontend@0.0.0 copy-scripts /home/z/work/hanzo/insights/frontend
+> mkdir -p dist/ && ./bin/copy-insights-js
+
+ WARN  Unsupported engine: wanted: {"node":">=24 <25"} (current: {"node":"v22.23.2","pnpm":"9.15.9"})
+
+> @hanzo/frontend@0.0.0 build:esbuild /home/z/work/hanzo/insights/frontend
+> DEBUG=0 node ./build.mjs
+
+🛳 Starting production build
+(node:3917772) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+🧱 "Insights App": Building
+🧱 "Decompression Worker": Building
+🧱 "Render Query": Building
+🧱 "Exporter": Building
+🧱 "Toolbar": Building
+Browserslist: browsers data (caniuse-lite) is 20 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 20 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+▲ [WARNING] Duplicate key "tabs" in object literal [duplicate-object-key]
+
+    src/scenes/persons-management/personsManagementSceneLogic.tsx:81:8:
+      81 │         tabs: [
+         ╵         ~~~~
+
+  The original key "tabs" is here:
+
+    src/scenes/persons-management/personsManagementSceneLogic.tsx:33:8:
+      33 │         tabs: [
+         ╵         ~~~~
+
+🥇 "Decompression Worker": Built in 1.069s
+▲ [WARNING] Expected ";" but found "}" [css-syntax-error]
+
+    ../node_modules/.pnpm/react-data-grid@7.0.0-beta.47_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-data-grid/lib/styles.css:14:8:
+      14 │     Root}@layer rdg.MeasuringCell{.mlln6zg7-0-0-beta-47{contain:st...
+         │         ^
+         ╵         ;
+
+🥇 "Exporter": Built in 5.271s
+🥇 "Render Query": Built in 5.29s
+🥇 "Toolbar": Built in 6.604s
+🥇 "Insights App": Built in 8.313s

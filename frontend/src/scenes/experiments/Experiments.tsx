@@ -13,6 +13,7 @@ import { MemberMultiSelect } from 'lib/components/MemberMultiSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
@@ -23,6 +24,7 @@ import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { atColumn, createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'
 import { Tabs } from 'lib/elements/Tabs'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { pluralize } from 'lib/utils/strings'
 import stringWithWBR from 'lib/utils/stringWithWBR'
@@ -559,8 +561,8 @@ const ExperimentsTable = ({
 
 export function Experiments(): JSX.Element {
     const { tab } = useValues(experimentsLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
     const { setExperimentsTab, loadExperiments } = useActions(experimentsLogic)
-
     const [duplicateModalExperiment, setDuplicateModalExperiment] = useState<Experiment | null>(null)
     const [copyToProjectModalExperiment, setCopyToProjectModalExperiment] = useState<Experiment | null>(null)
     const [surveyModalExperiment, setSurveyModalExperiment] = useState<Experiment | null>(null)
@@ -693,6 +695,9 @@ export function Experiments(): JSX.Element {
                     isOpen={true}
                     onCancel={() => setSurveyModalExperiment(null)}
                 />
+            )}
+            {featureFlags[FEATURE_FLAGS.EXPERIMENTS_LIST_AA_TEST] === 'test' && (
+                <div data-attr="experiments-list-aa-test-variant" className="hidden" />
             )}
         </SceneContent>
     )

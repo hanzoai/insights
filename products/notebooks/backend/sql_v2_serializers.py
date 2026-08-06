@@ -62,6 +62,23 @@ class NotebookSQLV2RunRequestSerializer(serializers.Serializer):
             "DuckDB; a python node materializes the insightsql refs its code reads as pandas frames."
         ),
     )
+    connection_id = serializers.UUIDField(
+        required=False,
+        allow_null=True,
+        default=None,
+        help_text=(
+            "SQL nodes only: id of a direct-query-capable external data source to run against "
+            "instead of Insights's Datastore. Omit to query Insights."
+        ),
+    )
+    send_raw_query = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text=(
+            "Send the code to the selected connection verbatim instead of compiling it from InsightsQL "
+            "first. Ignored without connection_id, and incompatible with references to other cells."
+        ),
+    )
 
 
 class NotebookSQLV2PageRequestSerializer(serializers.Serializer):

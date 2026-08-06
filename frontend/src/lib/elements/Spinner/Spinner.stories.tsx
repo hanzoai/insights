@@ -5,7 +5,7 @@ import { Button } from '@hanzo/elements'
 import { Spinner, SpinnerOverlay, SpinnerProps } from './Spinner'
 
 const meta: Meta<SpinnerProps> = {
-    title: 'Lemon UI/Spinner',
+    title: 'Elements/Spinner',
     component: Spinner,
     parameters: {
         testOptions: {

@@ -1,13 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCode } from '@hanzo/icons'
-import { Button, Divider, Input, TextArea, Spinner, Tooltip } from '@hanzo/elements'
+import { Button, Divider, Spinner } from '@hanzo/elements'
 
 import { More } from 'lib/elements/Button/More'
-import { Field } from 'lib/elements/Field'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
-import { EmailTemplater } from 'scenes/insights-functions/email-templater/EmailTemplater'
+import { EmailTemplater, TemplatePickerModal } from 'scenes/insights-functions/email-templater/EmailTemplater'
+import { emailTemplaterLogic } from 'scenes/insights-functions/email-templater/emailTemplaterLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -30,25 +29,88 @@ export const scene: SceneExport<MessageTemplateSceneLogicProps> = {
 export function MessageTemplate(props: MessageTemplateSceneLogicProps): JSX.Element {
     const sceneLogic = messageTemplateSceneLogic(props)
     const logic = messageTemplateLogic(props)
-    const { submitTemplate, resetTemplate, setTemplateValue, duplicateTemplate, deleteTemplate } = useActions(logic)
-    const { template, originalTemplate, isTemplateSubmitting, templateChanged, messageLoading } = useValues(logic)
+    const {
+        submitTemplate,
+        resetTemplate,
+        setTemplateValue,
+        duplicateTemplate,
+        deleteTemplate,
+        setTemplatePickerOpen,
+    } = useActions(logic)
+    const {
+        template,
+        originalTemplate,
+        isTemplateSubmitting,
+        templateChanged,
+        messageLoading,
+        templateLoading,
+        templatePickerOpen,
+    } = useValues(logic)
+
+    const { setIsSaveTemplateModalOpen } = useActions(emailTemplaterLogic)
 
     // Attach template logic to scene logic so it persists across tab switches
     useAttachedLogic(logic, sceneLogic)
 
     return (
-        <Form logic={messageTemplateLogic} formKey="template" props={props}>
-            <SceneContent>
+        <Form
+            logic={messageTemplateLogic}
+            formKey="template"
+            props={props}
+            {...{ className: 'flex flex-col grow h-full' }}
+        >
+            <SceneContent className="h-full flex flex-col grow">
                 <SceneTitleSection
                     name={template.name}
+                    description={template.description}
                     resourceType={{ type: 'template' }}
+                    canEdit
+                    descriptionAlwaysVisible
+                    isLoading={messageLoading || templateLoading}
+                    onNameChange={(name) => setTemplateValue('name', name)}
+                    onDescriptionChange={(description) => setTemplateValue('description', description)}
                     actions={
                         <>
-                            {props.id !== 'new' && (
-                                <>
-                                    <More
-                                        size="small"
-                                        overlay={
+                            <Divider vertical />
+                            {templateChanged && (
+                                <Button
+                                    data-attr="cancel-message-template"
+                                    type="secondary"
+                                    onClick={() => resetTemplate(originalTemplate)}
+                                    size="small"
+                                >
+                                    Discard changes
+                                </Button>
+                            )}
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                form="template"
+                                onClick={submitTemplate}
+                                loading={isTemplateSubmitting}
+                                disabledReason={
+                                    !templateChanged
+                                        ? 'No changes to save'
+                                        : !template.name
+                                          ? 'Name is required'
+                                          : undefined
+                                }
+                                size="small"
+                            >
+                                {props.id === 'new' ? 'Create' : 'Save'}
+                            </Button>
+                            <More
+                                size="small"
+                                overlay={
+                                    <>
+                                        <Button
+                                            data-attr="save-as-new-template"
+                                            fullWidth
+                                            onClick={() => setIsSaveTemplateModalOpen(true)}
+                                        >
+                                            Save as new template
+                                        </Button>
+                                        {props.id !== 'new' && (
                                             <>
                                                 <Button
                                                     data-attr="duplicate-message-template"
@@ -72,77 +134,30 @@ export function MessageTemplate(props: MessageTemplateSceneLogicProps): JSX.Elem
                                                     Delete
                                                 </Button>
                                             </>
-                                        }
-                                    />
-                                    <Divider vertical />
-                                </>
-                            )}
-                            {templateChanged && (
-                                <Button
-                                    data-attr="cancel-message-template"
-                                    type="secondary"
-                                    onClick={() => resetTemplate(originalTemplate)}
-                                    size="small"
-                                >
-                                    Discard changes
-                                </Button>
-                            )}
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                form="template"
-                                onClick={submitTemplate}
-                                loading={isTemplateSubmitting}
-                                disabledReason={templateChanged ? undefined : 'No changes to save'}
-                                size="small"
-                            >
-                                {props.id === 'new' ? 'Create' : 'Save'}
-                            </Button>
+                                        )}
+                                    </>
+                                }
+                            />
                         </>
                     }
                 />
 
-                <div className="flex flex-wrap gap-4 items-start">
-                    <div className="flex-1 self-start p-3 space-y-2 rounded border min-w-100 bg-surface-primary">
-                        <Field name="name" label="Name">
-                            <Input disabled={messageLoading} />
-                        </Field>
+                <TemplatePickerModal isOpen={templatePickerOpen} onClose={() => setTemplatePickerOpen(false)} />
 
-                        <Field
-                            name="description"
-                            label="Description"
-                            showOptional
-                            info="Add a description to share context with other team members"
-                        >
-                            <TextArea disabled={messageLoading} />
-                        </Field>
-                    </div>
-
-                    <div className="p-3 space-y-2 rounded border flex-2 min-w-100 bg-surface-primary">
-                        <div className="flex justify-between items-center">
-                            <h3>Email template</h3>
-                            <Tooltip
-                                title="You can use Liquid templating in any email text field."
-                                docLink="https://liquidjs.com/filters/overview.html"
-                            >
-                                <span>
-                                    <IconCode fontSize={24} />
-                                </span>
-                            </Tooltip>
-                        </div>
-                        {messageLoading ? (
-                            <Spinner className="text-lg" />
-                        ) : (
-                            <EmailTemplater
-                                value={template?.content.email}
-                                onChange={(value) => setTemplateValue('content.email', value)}
-                                onChangeTemplating={(templating) =>
-                                    setTemplateValue('content.email.templating', templating)
-                                }
-                                type="native_email_template"
-                            />
-                        )}
-                    </div>
+                <div className="flex flex-col flex-1 gap-2 min-h-0 relative">
+                    {messageLoading || templateLoading ? (
+                        <Spinner className="text-lg" />
+                    ) : (
+                        <EmailTemplater
+                            value={template?.content.email}
+                            onChange={(value) => setTemplateValue('content.email', value)}
+                            onChangeTemplating={(templating) =>
+                                setTemplateValue('content.email.templating', templating)
+                            }
+                            type="native_email_template"
+                            layout="inline"
+                        />
+                    )}
                 </div>
             </SceneContent>
         </Form>

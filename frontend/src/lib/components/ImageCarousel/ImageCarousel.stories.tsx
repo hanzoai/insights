@@ -5,7 +5,7 @@ import { ImageCarousel, ImageCarouselProps } from './ImageCarousel'
 
 type Story = StoryObj<ImageCarouselProps>
 const meta: Meta<ImageCarouselProps> = {
-    title: 'Lemon UI/Image Carousel',
+    title: 'Elements/Image Carousel',
     component: ImageCarousel,
     tags: ['autodocs'],
 }

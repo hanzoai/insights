@@ -14,6 +14,7 @@ import { Hub } from '../../../types'
 import { createHub } from '~/common/utils/db/hub'
 import { INSIGHTS_FILTERS_EXAMPLES } from '../../_tests/examples'
 import { createExampleInsightsFlowInvocation } from '../../_tests/fixtures-insightsflows'
+import { HogExecutorAsyncService } from '../script-executor-async.service'
 import { HogExecutorService } from '../script-executor.service'
 import { HogInputsService } from '../script-inputs.service'
 import { EmailService } from '../messaging/email.service'
@@ -89,19 +90,22 @@ describe('Hogflow Executor', () => {
             new RecipientsManagerService(hub.postgres)
         )
         const recipientTokensService = new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL)
-        const hogExecutor = new HogExecutorService(
+        const hogExecutor = new HogExecutorAsyncService(
+            new HogExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, hogInputsService),
             {
-                hogCostTimingUpperMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
                 googleAdwordsDeveloperToken: hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
                 fetchRetries: hub.CDP_FETCH_RETRIES,
                 fetchBackoffBaseMs: hub.CDP_FETCH_BACKOFF_BASE_MS,
                 fetchBackoffMaxMs: hub.CDP_FETCH_BACKOFF_MAX_MS,
+                siteUrl: hub.SITE_URL,
             },
-            { teamManager: hub.teamManager, siteUrl: hub.SITE_URL },
-            hogInputsService,
-            emailService,
-            recipientTokensService,
-            undefined as any
+            {
+                teamManager: hub.teamManager,
+                hogInputsService,
+                emailService,
+                recipientTokensService,
+                pushNotificationService: undefined as any,
+            }
         )
         const insightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(hub.postgres)
         const hogFlowFunctionsService = new InsightsFlowFunctionsService(
@@ -280,7 +284,7 @@ describe('Hogflow Executor', () => {
             expect(result).toEqual({
                 capturedInsightsEvents: [],
                 warehouseWebhookPayloads: [],
-                emailAssets: [],
+                messageAssets: [],
                 invocation: {
                     state: {
                         actionStepCount: 1,
@@ -1480,7 +1484,11 @@ describe('Hogflow Executor', () => {
                 expect(conversionEvents).toHaveLength(1)
                 expect(conversionEvents[0]).toMatchObject({
                     distinct_id: 'distinct_id',
-                    properties: { $workflow_id: hogFlow.id, $workflow_conversion_type: 'property' },
+                    properties: {
+                        $workflow_id: hogFlow.id,
+                        $workflow_version: hogFlow.version,
+                        $workflow_conversion_type: 'property',
+                    },
                 })
             })
 
@@ -2086,6 +2094,15 @@ describe('Hogflow Executor', () => {
 
             // Should not match because email contains @hanzo.ai
             expect(result.invocations).toHaveLength(0)
+            // These metrics are queued straight by the pipeline, not via an invocation result, so they
+            // need the version stamped here or a trigger change that filters everyone out is invisible
+            // in the per-version series.
+            expect(result.metrics).toEqual([
+                expect.objectContaining({
+                    metric_name: 'filtered',
+                    app_source_version: { id: hogFlow.id, version: hogFlow.version },
+                }),
+            ])
         })
 
         it('should allow external users without @hanzo.ai email', async () => {

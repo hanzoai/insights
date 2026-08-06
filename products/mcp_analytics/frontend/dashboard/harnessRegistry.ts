@@ -65,6 +65,7 @@ export const HARNESS_BY_LABEL: Record<string, HarnessDescriptor> = {
     opencode: { logo: { src: opencodeLogo, alt: 'opencode logo' } },
     Kiro: {},
     'Desktop Commander': {},
+    'Insights CLI': {},
 }
 
 export function harnessLogo(label: string): HarnessLogo | undefined {

@@ -6,7 +6,7 @@ import { Modal } from 'lib/elements/Modal'
 import { Skeleton, SkeletonProps } from './Skeleton'
 
 const meta: Meta<SkeletonProps> = {
-    title: 'Lemon UI/Lemon Skeleton',
+    title: 'Elements/Skeleton',
     component: Skeleton,
     parameters: {
         docs: {

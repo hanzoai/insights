@@ -5,7 +5,7 @@ import { IconMagicWand, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { lemonBannerLogic } from 'lib/elements/Banner/lemonBannerLogic'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
 
 import { isSourceMapsRecommendation, recommendationsTabLogic } from '../recommendations/recommendationsTabLogic'
 import { SourceMapsFixModal } from '../recommendations/SourceMapsFixModal'
@@ -18,7 +18,7 @@ const DISMISS_KEY = 'error-tracking-source-maps-banner'
 
 export function SourceMapsBanner(): JSX.Element | null {
     const { recommendations } = useValues(recommendationsTabLogic)
-    const { isDismissed } = useValues(lemonBannerLogic({ dismissKey: DISMISS_KEY }))
+    const { isDismissed } = useValues(bannerLogic({ dismissKey: DISMISS_KEY }))
 
     const sourceMaps = recommendations.find(isSourceMapsRecommendation)
     // Show only once computed and while there's an actual problem (not completed),
@@ -37,7 +37,7 @@ export function SourceMapsBanner(): JSX.Element | null {
 // the outer guards (including dismissal) gate the mount, so mounting here means it was seen.
 function SourceMapsBannerContent({ percent, lookbackHours }: { percent: number; lookbackHours: number }): JSX.Element {
     const { openModal } = useActions(sourceMapsFixWizardLogic)
-    const { dismiss } = useActions(lemonBannerLogic({ dismissKey: DISMISS_KEY }))
+    const { dismiss } = useActions(bannerLogic({ dismissKey: DISMISS_KEY }))
 
     useOnMountEffect(() => {
         insights.capture('error_tracking_source_maps_banner_shown', {
@@ -48,7 +48,9 @@ function SourceMapsBannerContent({ percent, lookbackHours }: { percent: number; 
 
     return (
         <>
-            <div className="mb-2">
+            {/* Use mb-6 (not mb-2) because IssuesList's SceneStickyBar uses -mt-4 to pull up under the tab bar.
+                The extra bottom margin prevents the sticky bar from overlapping the card's bottom edge. */}
+            <div className="mb-6">
                 <div className="rounded-lg border border-border bg-bg-light pl-3 pr-4 py-3 mt-2">
                     <div className="flex items-center gap-4">
                         {/* The script is absolutely positioned so it doesn't drive the card height —

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Slider, SliderProps } from './Slider'
 
 const meta: Meta<SliderProps> = {
-    title: 'Lemon UI/Lemon Slider',
+    title: 'Elements/Slider',
     component: Slider,
     tags: ['autodocs'],
 }

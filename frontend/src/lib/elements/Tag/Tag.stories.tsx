@@ -5,7 +5,7 @@ import { IconFlag, IconInfo } from '@hanzo/icons'
 import { Tag as TagComponent, TagProps, TagType } from './Tag'
 
 const meta: Meta<TagProps> = {
-    title: 'Lemon UI/Lemon Tag',
+    title: 'Elements/Tag',
     component: TagComponent as any,
     tags: ['autodocs'],
 }

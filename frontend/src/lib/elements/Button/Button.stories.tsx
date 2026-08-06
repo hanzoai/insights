@@ -28,7 +28,7 @@ const types: ButtonProps['type'][] = ['primary', 'secondary', 'tertiary']
 
 type Story = StoryObj<ButtonWithoutSideActionProps>
 const meta: Meta<ButtonWithoutSideActionProps> = {
-    title: 'Lemon UI/Lemon Button',
+    title: 'Elements/Button',
     component: Button as any,
     tags: ['autodocs'],
     argTypes: {

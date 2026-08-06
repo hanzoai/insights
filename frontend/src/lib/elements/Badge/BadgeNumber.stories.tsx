@@ -7,7 +7,7 @@ import { Badge, BadgeNumberProps } from './Badge'
 
 type Story = StoryObj<BadgeNumberProps>
 const meta: Meta<BadgeNumberProps> = {
-    title: 'Lemon UI/Lemon Badge/Lemon Badge Number',
+    title: 'Elements/Badge/Badge Number',
     component: Badge.Number as any,
     tags: ['autodocs'],
     render: ({ count, ...props }) => {

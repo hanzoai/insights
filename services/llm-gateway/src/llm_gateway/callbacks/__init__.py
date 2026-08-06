@@ -20,6 +20,7 @@ def init_callbacks() -> None:
                 region_url=settings.insights_api_base_url,
                 secondary_api_key=settings.insights_secondary_project_token,
                 secondary_host=settings.insights_secondary_host,
+                ai_lane_capture=settings.insights_ai_lane_capture,
             )
         )
 

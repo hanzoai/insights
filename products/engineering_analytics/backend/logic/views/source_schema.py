@@ -57,6 +57,10 @@ WORKFLOW_RUNS_COLUMNS: dict[str, dict[str, str]] = {
     # attribution the ci_job_history view extracts; a push run's PR number rides its squash-merge
     # message when the pull_requests association is empty (master pushes). Nullable like every column.
     "head_commit": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
+    # The account GitHub recorded as triggering the run, verbatim as JSON. GitHub sets it; whoever
+    # pushed the branch cannot, which is what makes it the corroboration a merge-queue gate branch
+    # is checked against before its name is trusted for attribution (see logic/merge_queue.py).
+    "actor": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
 }
 
 # Contract for the incoming ``github_workflow_jobs`` warehouse source (job-level CI: queue
@@ -81,6 +85,17 @@ WORKFLOW_JOBS_COLUMNS: dict[str, dict[str, str]] = {
     "started_at": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
     "completed_at": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
     "steps": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
+}
+
+# Contract for the ``github_issue_events`` warehouse source: immutable issue/PR events, every
+# type kept (a source-side filter would pin the desc-walk watermark). ``actor`` / ``issue`` are
+# the nested GitHub objects verbatim as JSON. Same Nullable/string discipline as above.
+ISSUE_EVENTS_COLUMNS: dict[str, dict[str, str]] = {
+    "id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"},
+    "event": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
+    "actor": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
+    "issue": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
+    "created_at": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
 }
 
 # Contract for the ``github_team_members`` warehouse source (org team membership). Member rows

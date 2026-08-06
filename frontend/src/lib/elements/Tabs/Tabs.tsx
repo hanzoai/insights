@@ -9,7 +9,7 @@ import { Link } from '../Link'
 import { Tooltip } from '../Tooltip'
 
 /** A tab that represents one of the options, but doesn't have any content. Render tab-dependent UI yourself. */
-export interface AbstractLemonTab<T extends string | number> {
+export interface AbstractTab<T extends string | number> {
     key: T
     label: string | JSX.Element
     tooltip?: string | JSX.Element
@@ -24,11 +24,11 @@ export interface AbstractLemonTab<T extends string | number> {
 }
 
 /** A tab with content. In this case the Tabs component automatically renders content of the active tab. */
-export interface ConcreteLemonTab<T extends string | number> extends AbstractLemonTab<T> {
+export interface ConcreteTab<T extends string | number> extends AbstractTab<T> {
     content: JSX.Element
 }
 
-export type Tab<T extends string | number> = AbstractLemonTab<T> | ConcreteLemonTab<T>
+export type Tab<T extends string | number> = AbstractTab<T> | ConcreteTab<T>
 
 export interface TabsProps<T extends string | number> {
     activeKey: T

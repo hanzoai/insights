@@ -5,7 +5,7 @@ import { FileInput, FileInputProps } from 'lib/elements/FileInput/FileInput'
 
 type Story = StoryObj<FileInputProps>
 const meta: Meta<FileInputProps> = {
-    title: 'Lemon UI/Lemon File Input',
+    title: 'Elements/File Input',
     component: FileInput,
     tags: ['autodocs'],
     argTypes: {

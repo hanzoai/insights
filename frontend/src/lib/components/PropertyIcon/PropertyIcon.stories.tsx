@@ -7,7 +7,7 @@ import { COUNTRY_CODE_TO_LONG_NAME } from 'lib/utils/country'
 
 type Story = StoryObj<PropertyIconProps>
 const meta: Meta<PropertyIconProps> = {
-    title: 'Lemon UI/Icons/Property Icon',
+    title: 'Elements/Icons/Property Icon',
     component: PropertyIcon,
     tags: ['autodocs', 'test-skip'], // There are too many icons, the snapshots are huge in table form
     render: (args) => {

@@ -8,7 +8,7 @@ import { ColorPicker, ColorPickerProps } from './ColorPicker'
 
 type Story = StoryObj<ColorPickerProps>
 const meta: Meta<ColorPickerProps> = {
-    title: 'Lemon UI/Lemon Color/Lemon Color Picker',
+    title: 'Elements/Color/Color Picker',
     component: ColorPicker,
     tags: ['autodocs'],
 }

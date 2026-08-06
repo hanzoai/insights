@@ -19,7 +19,8 @@ import {
 import { CdpProducerName } from './outputs/producers'
 import { createCdpOutputsRegistry } from './outputs/registry'
 import { CapturedEventsService } from './services/captured-events/captured-events.service'
-import { HogExecutorService, MAX_FETCH_TIMEOUT_MS, cdpTrackedFetch } from './services/script-executor.service'
+import { HogExecutorAsyncService } from './services/script-executor-async.service'
+import { HogExecutorService } from './services/script-executor.service'
 import { HogInputsService } from './services/script-inputs.service'
 import { InsightsFlowDuplicateObserverService } from './services/insightsflows/hogflow-duplicate-observer.service'
 import { InsightsFlowExecutorService } from './services/insightsflows/hogflow-executor.service'
@@ -45,6 +46,7 @@ import { HogWatcherService } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
 import { WarehouseWebhooksService } from './services/warehouse/warehouse-webhooks.service'
+import { MAX_FETCH_TIMEOUT_MS, cdpTrackedFetch } from './utils/cdp-fetch'
 import { EncryptedFields } from './utils/encryption-utils'
 
 /** Union of every output name resolved by `createCdpOutputsRegistry()`. */
@@ -83,7 +85,8 @@ export interface CdpCoreServices {
      * `sendEvents: false` so it never emits duplicate billable team events.
      */
     hogWatcherMirror: HogWatcherService | null
-    hogExecutor: HogExecutorService
+    /** Script execution with async functions (fetch, email, push). Its `hogExecutor` is the synchronous core. */
+    hogExecutorAsync: HogExecutorAsyncService
     /** Rebuilds the templated/resolved input bundle for a script function — used by the rerun path to re-derive `inputs` after they're stripped from the persisted payload. */
     hogInputsService: HogInputsService
     insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
@@ -437,29 +440,33 @@ export function createCdpCoreServices(
             backoffMaxMs: config.CDP_FETCH_BACKOFF_MAX_MS,
         },
         redis,
-        messageAssetsService
+        messageAssetsService,
+        valkeyShadow?.writer ?? null
     )
 
-    const hogExecutor = new HogExecutorService(
+    const hogExecutorAsync = new HogExecutorAsyncService(
+        new HogExecutorService({ executionTimeoutMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, hogInputsService),
         {
-            hogCostTimingUpperMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
             googleAdwordsDeveloperToken: config.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
             fetchRetries: config.CDP_FETCH_RETRIES,
             fetchBackoffBaseMs: config.CDP_FETCH_BACKOFF_BASE_MS,
             fetchBackoffMaxMs: config.CDP_FETCH_BACKOFF_MAX_MS,
+            siteUrl: config.SITE_URL,
         },
-        { teamManager: deps.teamManager, siteUrl: config.SITE_URL },
-        hogInputsService,
-        emailService,
-        recipientTokensService,
-        pushNotificationService
+        {
+            teamManager: deps.teamManager,
+            hogInputsService,
+            emailService,
+            recipientTokensService,
+            pushNotificationService,
+        }
     )
 
     const insightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(deps.postgres)
     const hogFlowFunctionsService = new InsightsFlowFunctionsService(
         config.SITE_URL,
         insightsFunctionTemplateManager,
-        hogExecutor
+        hogExecutorAsync
     )
 
     const recipientPreferencesService = new RecipientPreferencesService(recipientsManager, emailSuppressionService)
@@ -499,7 +506,7 @@ export function createCdpCoreServices(
         hogFlowManager,
         hogWatcher,
         hogWatcherMirror,
-        hogExecutor,
+        hogExecutorAsync,
         hogInputsService,
         insightsFunctionTemplateManager,
         hogFlowFunctionsService,

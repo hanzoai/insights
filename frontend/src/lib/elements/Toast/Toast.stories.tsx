@@ -12,7 +12,7 @@ import * as statusPageCritical from '~/mocks/fixtures/_status_page_critical.json
 import { ToastCloseButton, ToastContent, ToastContentProps, toast } from './Toast'
 
 const meta: Meta<ToastContentProps> = {
-    title: 'Lemon UI/Lemon Toast',
+    title: 'Elements/Toast',
     component: ToastContent,
     parameters: {
         testOptions: {

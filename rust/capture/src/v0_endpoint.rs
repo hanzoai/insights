@@ -190,6 +190,7 @@ pub async fn recording(
                 state.sink.clone(),
                 state.event_restriction_service.clone(),
                 state.replay_overflow_limiter.clone(),
+                state.ingestion_warning_emitter.clone(),
                 events,
                 &context,
             )

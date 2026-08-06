@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconInfo, IconPencil, IconTrash } from '@hanzo/icons'
-import { Button, Table, TableColumns, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconLogomark, IconPencil, IconTrash } from '@hanzo/icons'
+import { Button, Input, Table, TableColumns, Tooltip } from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -30,8 +30,9 @@ const TAG_TYPE_BY_SYNC_LEVEL: Record<SourceSyncStatusLevel, TagType> = {
 }
 
 export function CustomPropertiesConfig(): JSX.Element {
-    const { definitions, definitionsLoading } = useValues(customPropertyDefinitionsLogic)
-    const { openCreateModal, openEditModal, deleteDefinition } = useActions(customPropertyDefinitionsLogic)
+    const { filteredDefinitions, definitionsLoading, searchTerm } = useValues(customPropertyDefinitionsLogic)
+    const { openCreateModal, openEditModal, deleteDefinition, setSearchTerm } =
+        useActions(customPropertyDefinitionsLogic)
     const restrictionReason = useRestrictedArea({
         scope: RestrictionScope.Project,
         minimumAccessLevel: TeamMembershipLevel.Admin,
@@ -54,7 +55,16 @@ export function CustomPropertiesConfig(): JSX.Element {
         {
             title: 'Name',
             dataIndex: 'name',
-            render: (_, definition) => <span className="font-semibold">{definition.name}</span>,
+            render: (_, definition) => (
+                <span className="flex items-center gap-1 font-semibold">
+                    {definition.is_canonical && (
+                        <Tooltip title="Insights sets this property automatically">
+                            <IconLogomark className="text-lg shrink-0" />
+                        </Tooltip>
+                    )}
+                    {definition.name}
+                </span>
+            ),
         },
         {
             title: 'Attach to',
@@ -105,6 +115,9 @@ export function CustomPropertiesConfig(): JSX.Element {
         {
             title: 'Sync',
             render: (_, definition) => {
+                if (definition.is_canonical) {
+                    return <span className="text-secondary">Auto</span>
+                }
                 if (!definition.source) {
                     return <span className="text-secondary">Manual</span>
                 }
@@ -124,25 +137,30 @@ export function CustomPropertiesConfig(): JSX.Element {
         {
             title: '',
             width: 0,
-            render: (_, definition) => (
-                <div className="flex gap-1 justify-end">
-                    <Button
-                        size="small"
-                        icon={<IconPencil />}
-                        tooltip="Edit"
-                        onClick={() => openEditModal(definition)}
-                        disabledReason={restrictionReason}
-                    />
-                    <Button
-                        size="small"
-                        status="danger"
-                        icon={<IconTrash />}
-                        tooltip="Delete"
-                        onClick={() => confirmDelete(definition)}
-                        disabledReason={restrictionReason}
-                    />
-                </div>
-            ),
+            render: (_, definition) => {
+                const canonicalReason = definition.is_canonical
+                    ? "Insights sets this property automatically, so it can't be edited or deleted."
+                    : undefined
+                return (
+                    <div className="flex gap-1 justify-end">
+                        <Button
+                            size="small"
+                            icon={<IconPencil />}
+                            tooltip="Edit"
+                            onClick={() => openEditModal(definition)}
+                            disabledReason={canonicalReason ?? restrictionReason}
+                        />
+                        <Button
+                            size="small"
+                            status="danger"
+                            icon={<IconTrash />}
+                            tooltip="Delete"
+                            onClick={() => confirmDelete(definition)}
+                            disabledReason={canonicalReason ?? restrictionReason}
+                        />
+                    </div>
+                )
+            },
         },
     ]
 
@@ -157,12 +175,23 @@ export function CustomPropertiesConfig(): JSX.Element {
                     New custom property
                 </Button>
             </div>
+            <Input
+                type="search"
+                placeholder="Search custom properties"
+                value={searchTerm}
+                onChange={setSearchTerm}
+                className="max-w-80"
+            />
             <Table
                 columns={columns}
-                dataSource={definitions}
+                dataSource={filteredDefinitions}
                 loading={definitionsLoading}
                 rowKey="id"
-                emptyState="No custom properties yet. Create one to get started."
+                emptyState={
+                    searchTerm
+                        ? 'No custom properties match your search.'
+                        : 'No custom properties yet. Create one to get started.'
+                }
             />
             <CustomPropertyModal />
         </div>

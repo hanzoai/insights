@@ -1,7 +1,7 @@
 import { IconEllipsis } from '@hanzo/icons'
 import { Button, Dialog, Input, Menu, toast } from '@hanzo/elements'
 
-import { getChangeRequestButtonVisibility } from 'scenes/approvals/changeRequestsLogic'
+import { getApproveDisabledReason, getChangeRequestButtonVisibility } from 'scenes/approvals/changeRequestsLogic'
 import { urls } from 'scenes/urls'
 
 import { ChangeRequest } from '~/types'
@@ -12,6 +12,8 @@ export interface ChangeRequestActionsProps {
     onReject: (id: string, reason?: string) => void
     onCancel: (id: string, reason?: string) => void
     showViewButton?: boolean
+    /** When the user can't approve, show a disabled Approve button explaining why instead of hiding it. */
+    showDisabledApproveButton?: boolean
 }
 
 export function ChangeRequestActions({
@@ -20,8 +22,10 @@ export function ChangeRequestActions({
     onReject,
     onCancel,
     showViewButton = false,
+    showDisabledApproveButton = false,
 }: ChangeRequestActionsProps): JSX.Element {
     const { showApproveButton, showRejectButton, showCancelButton } = getChangeRequestButtonVisibility(changeRequest)
+    const approveDisabledReason = getApproveDisabledReason(changeRequest)
 
     const handleApprove = (): void => {
         Dialog.open({
@@ -117,10 +121,17 @@ export function ChangeRequestActions({
 
     return (
         <div className="flex items-center gap-2">
-            {showApproveButton && (
+            {showApproveButton ? (
                 <Button type="primary" size="small" onClick={handleApprove}>
                     Approve
                 </Button>
+            ) : (
+                showDisabledApproveButton &&
+                approveDisabledReason && (
+                    <Button type="primary" size="small" disabledReason={approveDisabledReason}>
+                        Approve
+                    </Button>
+                )
             )}
             {showRejectButton && (
                 <Button type="secondary" size="small" onClick={handleReject}>

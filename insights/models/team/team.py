@@ -23,7 +23,7 @@ from insights.models.filters.mixins.utils import cached_property
 from insights.models.filters.utils import GroupTypeIndex
 from insights.models.instance_setting import get_instance_setting
 from insights.models.organization import Organization, OrganizationMembership
-from insights.models.signals import mutable_receiver
+from insights.models.signals import mutable_receiver, secret_api_token_rotated
 from insights.models.utils import (
     UUIDTClassicModel,
     generate_random_token_project,
@@ -994,6 +994,8 @@ class Team(UUIDTClassicModel):
         if expired_token:
             # Clear the previous backup token from cache since it's being replaced
             set_team_in_cache(expired_token, None)
+
+        secret_api_token_rotated.send(sender=self.__class__, team=self)
 
         # Build up the changes.
 

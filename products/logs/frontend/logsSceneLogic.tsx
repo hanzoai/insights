@@ -45,11 +45,19 @@ export const LOGS_SCENE_VIEWER_ID = `logs-scene-${window.INSIGHTS_APP_CONTEXT?.c
 
 const VALID_VIEW_MODES: LogsViewerViewMode[] = ['logs', 'patterns', 'group']
 
-export type LogsSceneActiveTab = 'viewer' | 'services' | 'alerts' | 'sql' | 'transformations' | 'configuration'
+export type LogsSceneActiveTab =
+    | 'viewer'
+    | 'services'
+    | 'alerts'
+    | 'anomalies'
+    | 'sql'
+    | 'transformations'
+    | 'configuration'
 const VALID_ACTIVE_TABS: LogsSceneActiveTab[] = [
     'viewer',
     'services',
     'alerts',
+    'anomalies',
     'sql',
     'transformations',
     'configuration',

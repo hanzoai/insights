@@ -953,8 +953,8 @@ export function SourceFormComponent({
             {showPrefix && !isDirectQuerySource && !customAiIntroActive && (
                 <Field
                     name="prefix"
-                    label="Table prefix (optional)"
-                    help="Use only letters, numbers, and underscores. Must start with a letter or underscore."
+                    label="Table name prefix (optional)"
+                    help="Renames the tables Insights creates. It doesn't filter which tables get imported. Use only letters, numbers, and underscores, and start with a letter or underscore."
                 >
                     {({ value, onChange }) => {
                         const cleaned = value ? value.trim().replace(/^_+|_+$/g, '') : ''

@@ -195,6 +195,9 @@ const errorTrackingAlertsPartialUpdate = (): ToolBase<
         if (params.execution_order !== undefined) {
             body['execution_order'] = params.execution_order
         }
+        if (params.base_updated_at !== undefined) {
+            body['base_updated_at'] = params.base_updated_at
+        }
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'PATCH',
             path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,

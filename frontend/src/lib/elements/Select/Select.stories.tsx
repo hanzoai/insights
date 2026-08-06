@@ -9,7 +9,7 @@ import { Select, SelectOptions, SelectProps } from './Select'
 
 type Story = StoryObj<SelectProps<any>>
 const meta: Meta<SelectProps<any>> = {
-    title: 'Lemon UI/Lemon Select',
+    title: 'Elements/Select',
     component: Select as any,
     args: {
         options: [

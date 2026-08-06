@@ -4,7 +4,7 @@ import { UploadedLogo, UploadedLogoProps } from './UploadedLogo'
 
 type Story = StoryObj<UploadedLogoProps>
 const meta: Meta<UploadedLogoProps> = {
-    title: 'Lemon UI/Uploaded Logo',
+    title: 'Elements/Uploaded Logo',
     component: UploadedLogo as any,
     parameters: {
         testOptions: {

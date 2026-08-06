@@ -10,7 +10,7 @@ import {
 
 type Story = StoryObj<MenuOverlayProps>
 const meta: Meta<MenuOverlayProps> = {
-    title: 'Lemon UI/Lemon Menu',
+    title: 'Elements/Menu',
     component: MenuOverlayComponent,
     parameters: {
         docs: {

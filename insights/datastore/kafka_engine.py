@@ -29,6 +29,7 @@ CONSUMER_GROUP_DISTINCT_ID_USAGE = "datastore_distinct_id_usage"
 CONSUMER_GROUP_TOPHOG = "datastore_tophog"
 CONSUMER_GROUP_AI_EVENTS = "datastore_ai_events" if _US else "group1"
 CONSUMER_GROUP_PROPERTY_VALUES = "datastore_property_values"
+CONSUMER_GROUP_FLAG_EVALUATIONS = "datastore_flag_evaluations"
 
 # WarpStream consumer groups (separate from MSK so both can coexist)
 CONSUMER_GROUP_LOG_ENTRIES_WS = "datastore_log_entries_ws"

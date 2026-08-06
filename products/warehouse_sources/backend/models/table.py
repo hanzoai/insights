@@ -30,7 +30,12 @@ from insights.insightsql.escape_sql import escape_datastore_identifier, escape_p
 
 from insights.datastore.client import sync_execute
 from insights.datastore.query_tagging import Feature, Product, tag_queries
-from insights.errors import CORRUPTED_PARQUET_METADATA_MESSAGE, wrap_datastore_query_error
+from insights.errors import (
+    CORRUPTED_PARQUET_METADATA_MESSAGE,
+    QueryErrorCategory,
+    classify_query_error,
+    wrap_datastore_query_error,
+)
 from insights.exceptions_capture import capture_exception
 from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
 from insights.schema_enums import DatabaseSerializedFieldType
@@ -931,6 +936,13 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
         # error (or an already user-safe one) behind a misleading user-facing message.
         if not hasattr(err, "message"):
             raise err
+
+        # A cancelled query here means our own client timed out reading, not a bad file or bucket.
+        if classify_query_error(err) == QueryErrorCategory.CANCELLED:
+            raise Exception(
+                "Reading the files from your storage bucket took too long and the query was cancelled. "
+                "This is usually temporary - try again, or narrow the URL pattern if the dataset is very large."
+            )
 
         for key, value in ExtractErrors.items():
             if key in raw_message:

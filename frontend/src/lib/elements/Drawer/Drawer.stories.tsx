@@ -7,7 +7,7 @@ import { Drawer, DrawerProps } from './Drawer'
 
 // Storybook stories for Drawer
 const meta: Meta<DrawerProps> = {
-    title: 'Lemon UI/Lemon Drawer',
+    title: 'Elements/Drawer',
     component: Drawer,
     tags: ['autodocs'],
 }
@@ -15,7 +15,7 @@ export default meta
 
 type Story = StoryObj<DrawerProps>
 
-export const _LemonDrawer: Story = {
+export const _Drawer: Story = {
     render: () => {
         const [isOpen, setIsOpen] = useState(false)
         return (

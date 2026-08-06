@@ -123,6 +123,12 @@ class TestErrorTrackingQueryRunner(DatastoreTestMixin, NonAtomicBaseTestKeepIden
                 materialize("events", property_name, is_nullable=property_name == "$exception_issue_id")
         super().setUpClass()
 
+    def test_fingerprint_grouping_key_uses_stable_json_expression(self):
+        response = self._calculate()
+
+        self.assertIn("JSONExtractString(e.properties, '$exception_fingerprint')", response["insightsql"])
+        self.assertNotIn("mat_$exception_fingerprint", response["insightsql"])
+
     def setUp(self):
         super().setUp()
 

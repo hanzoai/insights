@@ -9,7 +9,7 @@ import { TextArea, type TextAreaProps } from './TextArea'
 
 type Story = StoryObj<TextAreaProps>
 const meta: Meta<TextAreaProps> = {
-    title: 'Lemon UI/Lemon Text Area',
+    title: 'Elements/Text Area',
     component: TextArea as any,
     args: {
         value: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',

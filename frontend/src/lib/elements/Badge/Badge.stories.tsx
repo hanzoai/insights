@@ -9,7 +9,7 @@ import { Badge, BadgeProps } from './Badge'
 
 type Story = StoryObj<BadgeProps>
 const meta: Meta<BadgeProps> = {
-    title: 'Lemon UI/Lemon Badge/Lemon Badge',
+    title: 'Elements/Badge/Badge',
     component: Badge as any,
     tags: ['autodocs'],
 }

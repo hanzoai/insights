@@ -387,6 +387,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             "status": {"state": 0, "tokens": 0},
             "execution_order": None,
             "batch_export_id": None,
+            "version": 1,
+            "draft": None,
+            "draft_updated_at": None,
         }
 
         id = response.json()["id"]
