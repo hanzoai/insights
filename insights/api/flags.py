@@ -32,6 +32,14 @@ cloud -- this identity may not ask -- returns an empty verdict with 200, because
 "none" is the true answer and it grants exactly as little. Everything else is
 502. Collapsing the two made a stable capability state look like an outage on
 every page load, which is how a real outage would have gone unnoticed.
+
+AND SAYS WHICH IT IS. Granting nothing is the right answer to a failure, but
+being silent about it is not. "Evaluated, and nothing is on" and "could not
+evaluate" grant exactly the same flags, so a caller reading only the flags cannot
+tell a broken evaluator from a feature that is deliberately off. Every
+flag-gated surface is absent in both cases, which means a failure here reads as
+evidence that a feature was removed. So the verdict carries `evaluated`, and
+every answer that did not come from the evaluator says so.
 """
 
 from typing import Any
@@ -60,6 +68,15 @@ _TIMEOUT_SECONDS = 5
 # The verdict, exactly as the evaluator names it. `featureFlags` maps key ->
 # true | variant-string; `featureFlagPayloads` maps key -> arbitrary JSON.
 _EMPTY: dict[str, Any] = {"featureFlags": {}, "featureFlagPayloads": {}}
+
+
+def _unevaluated() -> dict[str, Any]:
+    """Grants nothing, and says that is because nothing was evaluated.
+
+    Distinct from an evaluator that ran and turned nothing on, which is the same
+    set of flags and a completely different fact about the deployment.
+    """
+    return {**_EMPTY, "evaluated": False}
 
 
 class EvaluationUnavailable(Exception):
@@ -107,7 +124,7 @@ def _evaluate(user) -> dict[str, Any]:
         # them distinct matters because a 502 on every page load reads as an outage
         # and buries the real one; this is a capability state, and it is stable.
         if response.status_code == 403:
-            return dict(_EMPTY)
+            return _unevaluated()
         response.raise_for_status()
         verdict = response.json()
     except iam.IamUnavailable as e:
@@ -124,6 +141,7 @@ def _evaluate(user) -> dict[str, Any]:
     return {
         "featureFlags": verdict["featureFlags"],
         "featureFlagPayloads": payloads if isinstance(payloads, dict) else {},
+        "evaluated": True,
     }
 
 
@@ -140,6 +158,6 @@ def flags(request: Request) -> Response:
     except EvaluationUnavailable as e:
         logger.warning("flags.unavailable", reason=str(e))
         return Response(
-            {**_EMPTY, "detail": "Feature flags could not be evaluated."},
+            {**_unevaluated(), "detail": "Feature flags could not be evaluated."},
             status=status.HTTP_502_BAD_GATEWAY,
         )
