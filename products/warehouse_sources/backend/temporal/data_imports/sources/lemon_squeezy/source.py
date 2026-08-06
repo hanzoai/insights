@@ -30,11 +30,11 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.common.sch
 from products.warehouse_sources.backend.temporal.data_imports.sources.common.typings import SourceInputs, SourceResponse
 from products.warehouse_sources.backend.temporal.data_imports.sources.common.webhook_s3 import WebhookSourceManager
 from products.warehouse_sources.backend.temporal.data_imports.sources.generated_configs.lemonsqueezy import (
-    SqueezySourceConfig,
+    LemonSqueezySourceConfig,
 )
 from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy import lemon_squeezy as api_client
 from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.lemon_squeezy import (
-    SqueezyResumeConfig,
+    LemonSqueezyResumeConfig,
 )
 from products.warehouse_sources.backend.temporal.data_imports.sources.lemon_squeezy.settings import (
     ENDPOINTS,
@@ -53,9 +53,9 @@ LEMON_SQUEEZY_API_SETTINGS_URL = "https://app.lemonsqueezy.com/settings/api"
 
 
 @SourceRegistry.register
-class SqueezySource(
-    ResumableSource[SqueezySourceConfig, SqueezyResumeConfig],
-    WebhookSource[SqueezySourceConfig],
+class LemonSqueezySource(
+    ResumableSource[LemonSqueezySourceConfig, LemonSqueezyResumeConfig],
+    WebhookSource[LemonSqueezySourceConfig],
 ):
     lists_tables_without_credentials = True  # static endpoint catalog — safe for public docs
     api_docs_url = "https://docs.lemonsqueezy.com/api"
@@ -164,7 +164,7 @@ class SqueezySource(
 
     def get_schemas(
         self,
-        config: SqueezySourceConfig,
+        config: LemonSqueezySourceConfig,
         team_id: int,
         with_counts: bool = False,
         names: list[str] | None = None,
@@ -183,7 +183,7 @@ class SqueezySource(
 
     def validate_credentials(
         self,
-        config: SqueezySourceConfig,
+        config: LemonSqueezySourceConfig,
         team_id: int,
         schema_name: Optional[str] = None,
         api_version: str | None = None,
@@ -192,25 +192,25 @@ class SqueezySource(
             return True, None
         return False, "Invalid Lemon Squeezy API key. Note that keys expire after one year."
 
-    def get_resumable_source_manager(self, inputs: SourceInputs) -> ResumableSourceManager[SqueezyResumeConfig]:
-        return ResumableSourceManager[SqueezyResumeConfig](inputs, SqueezyResumeConfig)
+    def get_resumable_source_manager(self, inputs: SourceInputs) -> ResumableSourceManager[LemonSqueezyResumeConfig]:
+        return ResumableSourceManager[LemonSqueezyResumeConfig](inputs, LemonSqueezyResumeConfig)
 
     def get_webhook_source_manager(self, inputs: SourceInputs) -> WebhookSourceManager:
         return WebhookSourceManager(inputs, inputs.logger)
 
     def create_webhook(
-        self, config: SqueezySourceConfig, webhook_url: str, team_id: int, api_version: str | None = None
+        self, config: LemonSqueezySourceConfig, webhook_url: str, team_id: int, api_version: str | None = None
     ) -> WebhookCreationResult:
         return api_client.create_webhook(config.api_key, webhook_url)
 
     def get_desired_webhook_events(
-        self, config: SqueezySourceConfig, eligible_schema_names: list[str]
+        self, config: LemonSqueezySourceConfig, eligible_schema_names: list[str]
     ) -> list[str] | None:
         return sorted({event for name in eligible_schema_names for event in SCHEMA_TO_WEBHOOK_EVENTS.get(name, [])})
 
     def sync_webhook_events(
         self,
-        config: SqueezySourceConfig,
+        config: LemonSqueezySourceConfig,
         webhook_url: str,
         team_id: int,
         eligible_schema_names: list[str],
@@ -220,19 +220,19 @@ class SqueezySource(
         return api_client.sync_webhook_events(config.api_key, webhook_url, desired_events)
 
     def get_external_webhook_info(
-        self, config: SqueezySourceConfig, webhook_url: str, team_id: int, api_version: str | None = None
+        self, config: LemonSqueezySourceConfig, webhook_url: str, team_id: int, api_version: str | None = None
     ) -> ExternalWebhookInfo | None:
         return api_client.get_external_webhook_info(config.api_key, webhook_url)
 
     def delete_webhook(
-        self, config: SqueezySourceConfig, webhook_url: str, team_id: int, api_version: str | None = None
+        self, config: LemonSqueezySourceConfig, webhook_url: str, team_id: int, api_version: str | None = None
     ) -> WebhookDeletionResult:
         return api_client.delete_webhook(config.api_key, webhook_url)
 
     def source_for_pipeline(
         self,
-        config: SqueezySourceConfig,
-        resumable_source_manager: ResumableSourceManager[SqueezyResumeConfig],
+        config: LemonSqueezySourceConfig,
+        resumable_source_manager: ResumableSourceManager[LemonSqueezyResumeConfig],
         inputs: SourceInputs,
     ) -> SourceResponse:
         return api_client.lemon_squeezy_source(

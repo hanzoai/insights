@@ -34,7 +34,7 @@ import {
     looksLikeXml,
     parseToolArgumentsForDisplay,
 } from '../utils'
-import { HighlightedLemonMarkdown } from './HighlightedLemonMarkdown'
+import { HighlightedMarkdown } from './HighlightedMarkdown'
 import { HighlightedXMLViewer } from './HighlightedXMLViewer'
 import { MessageActionsMenu } from './MessageActionsMenu'
 import { XMLViewer } from './XMLViewer'
@@ -728,9 +728,9 @@ export const LLMMessageDisplay = React.memo(
                         try {
                             // pre-wrap, because especially in system prompts, we want to preserve newlines even if they aren't fully Markdown-style
                             return searchQuery?.trim() ? (
-                                <HighlightedLemonMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
+                                <HighlightedMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
                                     {escapedContent}
-                                </HighlightedLemonMarkdown>
+                                </HighlightedMarkdown>
                             ) : (
                                 <Markdown className="whitespace-pre-wrap">{escapedContent}</Markdown>
                             )
@@ -749,9 +749,9 @@ export const LLMMessageDisplay = React.memo(
                     } else {
                         // pre-wrap, because especially in system prompts, we want to preserve newlines even if they aren't fully Markdown-style
                         return searchQuery?.trim() ? (
-                            <HighlightedLemonMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
+                            <HighlightedMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
                                 {content}
-                            </HighlightedLemonMarkdown>
+                            </HighlightedMarkdown>
                         ) : (
                             <Markdown className="whitespace-pre-wrap">{content}</Markdown>
                         )

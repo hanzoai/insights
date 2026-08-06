@@ -10,8 +10,14 @@ import { KeyedRateLimitRequest, KeyedRateLimiterService } from '../../common/ser
 import { QuotaLimiting } from '../../common/services/quota-limiting.service'
 import { CdpValkeyShadowPools } from '../cdp-services'
 import { counterRateLimited } from '../consumers/metrics'
-import { CyclotronJobInvocation, InsightsFunctionInvocationGlobals, LogEntry, MinimalAppMetric } from '../types'
-import { mirrorCall } from '../utils/mirror-call'
+import {
+    CyclotronJobInvocation,
+    CyclotronJobInvocationInsightsFlow,
+    InsightsFunctionInvocationGlobals,
+    LogEntry,
+    MinimalAppMetric,
+} from '../types'
+import { mirrorCompare } from '../utils/mirror-call'
 import { InsightsFlowExecutorService } from './insightsflows/hogflow-executor.service'
 import { InsightsFlowManagerService } from './insightsflows/hogflow-manager.service'
 import { shouldBlockInsightsFlowDueToQuota } from './insightsflows/hogflow-quota-limiting'
@@ -101,28 +107,30 @@ export class InsightsFlowInvocationPipeline {
         ).flat()
 
         const hogFlowIds = possibleInvocations.map((x) => x.hogFlow.id)
-        const [states] = await Promise.all([
-            instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
-                return await this.deps.hogWatcher.getEffectiveStates(hogFlowIds)
-            }),
-            mirrorCall('script-watcher.getEffectiveStates', () =>
-                this.deps.hogWatcherMirror?.getEffectiveStates(hogFlowIds)
-            ),
-        ])
+        const states = await mirrorCompare(
+            'script-watcher.getEffectiveStates',
+            () =>
+                instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
+                    return await this.deps.hogWatcher.getEffectiveStates(hogFlowIds)
+                }),
+            () => this.deps.hogWatcherMirror?.getEffectiveStates(hogFlowIds)
+        )
 
         const rateLimitInputs: KeyedRateLimitRequest[] = possibleInvocations.map((x) => ({
             id: x.hogFlow.id,
             cost: 1,
         }))
-        const [rateLimits] = await Promise.all([
-            instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitGrouped', async () => {
-                return await this.hogRateLimiter.rateLimitGrouped(rateLimitInputs)
-            }),
-            mirrorCall('script-rate-limiter.rateLimitGrouped', () =>
-                this.hogRateLimiterMirror?.rateLimitGrouped(rateLimitInputs)
-            ),
-        ])
-        const validInvocations: CyclotronJobInvocation[] = []
+        const rateLimits = await mirrorCompare(
+            'script-rate-limiter.rateLimitGrouped',
+            () =>
+                instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitGrouped', async () => {
+                    return await this.hogRateLimiter.rateLimitGrouped(rateLimitInputs)
+                }),
+            () => this.hogRateLimiterMirror?.rateLimitGrouped(rateLimitInputs),
+            (primary, mirror) =>
+                primary.every(([, result], index) => result.isRateLimited === mirror[index]?.[1].isRateLimited)
+        )
+        const validInvocations: CyclotronJobInvocationInsightsFlow[] = []
 
         await Promise.all(
             possibleInvocations.map(async (item, index) => {
@@ -137,6 +145,7 @@ export class InsightsFlowInvocationPipeline {
                                 metric_kind: 'failure',
                                 metric_name: 'rate_limited',
                                 count: 1,
+                                app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
                             },
                             'hog_flow'
                         )
@@ -189,6 +198,7 @@ export class InsightsFlowInvocationPipeline {
                             metric_kind: 'failure',
                             metric_name: 'disabled_permanently',
                             count: 1,
+                            app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
                         },
                         'hog_flow'
                     )
@@ -212,6 +222,7 @@ export class InsightsFlowInvocationPipeline {
                 metric_kind: 'other',
                 metric_name: 'masked',
                 count: 1,
+                app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
             })),
             'hog_flow'
         )
@@ -225,6 +236,7 @@ export class InsightsFlowInvocationPipeline {
                 metric_kind: 'other',
                 metric_name: 'triggered',
                 count: 1,
+                app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
             })
         })
 

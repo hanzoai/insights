@@ -6,6 +6,7 @@ import { Button, Dialog } from '@hanzo/elements'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet/CodeSnippet'
 import { More } from 'lib/elements/Button/More'
 import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
 import { SegmentedButton } from 'lib/elements/SegmentedButton'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { Tag } from 'lib/elements/Tag'
@@ -43,9 +44,9 @@ function TableRefCell({ table, refKey }: { table: string; refKey: string }): JSX
 }
 
 export function RelationshipsTab(): JSX.Element {
-    const { filteredRows, proposalsLoading, joinsLoading, statusFilter, actionsInFlight, joinsById } =
+    const { filteredRows, proposalsLoading, joinsLoading, filters, actionsInFlight, joinsById } =
         useValues(relationshipsLogic)
-    const { setStatusFilter, acceptProposal, rejectProposal, loadProposals, loadJoins, deleteJoin } =
+    const { setFilters, acceptProposal, rejectProposal, loadProposals, loadJoins, deleteJoin } =
         useActions(relationshipsLogic)
     const { toggleNewJoinModal, toggleEditJoinModal } = useActions(viewLinkLogic)
 
@@ -159,13 +160,19 @@ export function RelationshipsTab(): JSX.Element {
     return (
         <div className="flex flex-col gap-4">
             <div className="flex justify-between gap-2 flex-wrap items-center">
-                <SegmentedButton
-                    value={statusFilter}
-                    onChange={setStatusFilter}
-                    options={STATUS_FILTER_OPTIONS}
-                    size="small"
+                <Input
+                    type="search"
+                    placeholder="Search relationships"
+                    value={filters.search}
+                    onChange={(search) => setFilters({ search })}
                 />
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <SegmentedButton
+                        value={filters.status}
+                        onChange={(status) => setFilters({ status })}
+                        options={STATUS_FILTER_OPTIONS}
+                        size="small"
+                    />
                     <Button
                         type="secondary"
                         icon={<IconRefresh />}

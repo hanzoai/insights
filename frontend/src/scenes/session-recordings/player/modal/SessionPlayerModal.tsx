@@ -4,8 +4,9 @@ import { IconX } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
 
 import { IconHeatmap } from 'lib/elements/icons'
-import { buildRecordingMatchingEventFiltersForUrl } from 'scenes/heatmaps/components/heatmapRecordingFallbackLogic'
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'
+
+import { buildRecordingMatchingEventFiltersForUrl } from 'products/web_analytics/frontend/heatmaps/components/heatmapRecordingFallbackLogic'
 
 import { SessionRecordingPlayerLogicProps, sessionRecordingPlayerLogic } from '../sessionRecordingPlayerLogic'
 import { sessionPlayerModalLogic } from './sessionPlayerModalLogic'

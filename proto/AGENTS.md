@@ -24,7 +24,7 @@ cd nodejs && pnpm run generate:personinsights-proto
 
 Then update:
 
-- `nodejs/src/ingestion/personinsights/client.test.ts` — add a default stub to the `SERVICE_DEFAULTS` object for any new RPC
+- `nodejs/src/common/personinsights/client.test.ts` — add a default stub to the `SERVICE_DEFAULTS` object for any new RPC
 
 ### 3. Rust
 

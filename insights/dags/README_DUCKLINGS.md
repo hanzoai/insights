@@ -182,8 +182,8 @@ If multiple partitions for the same team run concurrently, they may race to crea
 - **Job definition**: `insights/dags/events_backfill_to_duckling.py`
 - **Tests**: `insights/dags/test_events_backfill_to_duckling.py`
 - **Dagster registration**: `insights/dags/locations/data_stack.py`
-- **DuckgresServer model**: `insights/ducklake/models.py`
-- **Control-plane team state**: `insights/ducklake/cp_teams.py` and `insights/ducklake/team_state.py`
+- **DuckgresServer / DuckgresSinkSchemaState models**: `products/managed_warehouse/backend/models.py`
+- **Control-plane team state**: `products/managed_warehouse/backend/cp_teams.py` and `products/managed_warehouse/backend/team_state.py`
 
 ## S3 Path Structure
 

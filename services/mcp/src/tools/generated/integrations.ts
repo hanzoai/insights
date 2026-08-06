@@ -12,7 +12,15 @@ import {
     IntegrationsLinearTeamsRetrieveParams,
     IntegrationsListQueryParams,
     IntegrationsRetrieveParams,
+    InsightsConnectionsForwardCreateBody,
+    InsightsConnectionsForwardCreateParams,
 } from '@/generated/integrations/api'
+import { getConfirmedActionRuntime } from '@/tools/confirmed-action-registry'
+import {
+    executeConfirmedAction,
+    prepareConfirmedAction,
+    type PrepareConfirmedActionResult,
+} from '@/tools/confirmed-action-runtime'
 import { withInsightsUrl, pickResponseFields, type WithInsightsUrl } from '@/tools/tool-utils'
 import type { Context, ToolBase, ZodObjectAny } from '@/tools/types'
 
@@ -169,6 +177,83 @@ const integrationsList = (): ToolBase<
     },
 })
 
+const InsightsConnectionForwardSchema = InsightsConnectionsForwardCreateParams.omit({ project_id: true }).extend(
+    InsightsConnectionsForwardCreateBody.shape
+)
+
+const InsightsConnectionForwardSchemaExecute = z.strictObject({
+    confirmation_hash: z
+        .string()
+        .describe('The confirmation_hash returned by the matching -prepare tool. Pass it back verbatim.'),
+    confirmation: z.string().describe('The literal string "confirm", typed by the user in chat. Required to proceed.'),
+})
+
+const insightsConnectionForwardPrepare = (): ToolBase<
+    typeof InsightsConnectionForwardSchema,
+    PrepareConfirmedActionResult
+> => ({
+    name: 'insights-connection-forward-prepare',
+    schema: InsightsConnectionForwardSchema,
+    handler: async (context: Context, params: z.infer<typeof InsightsConnectionForwardSchema>) => {
+        const __runtime = getConfirmedActionRuntime()
+        const __scopeProjectId = await context.stateManager.getProjectId()
+        return await prepareConfirmedAction(context, {
+            args: params,
+            purpose: 'insights-connection-forward',
+            actionLabel: 'forward request through Insights connection',
+            messageTemplate:
+                "About to forward a {method} request to `{path}` in another Insights project through this connection. It runs against the connected project with the creator's granted scopes, and a write there changes that project's data the same as a direct write would. Reply 'confirm' to send it.\n",
+            codec: __runtime.codec,
+            stash: __runtime.stash,
+            boundScope: { projectId: String(__scopeProjectId) },
+        })
+    },
+})
+
+const insightsConnectionForwardExecute = (): ToolBase<
+    typeof InsightsConnectionForwardSchemaExecute,
+    Schemas.InsightsConnectionForwardResponse
+> => ({
+    name: 'insights-connection-forward-execute',
+    schema: InsightsConnectionForwardSchemaExecute,
+    handler: async (context: Context, confirmationParams: z.infer<typeof InsightsConnectionForwardSchemaExecute>) => {
+        const __runtime = getConfirmedActionRuntime()
+        const __scopeProjectId = await context.stateManager.getProjectId()
+        const __guard = await executeConfirmedAction<z.infer<typeof InsightsConnectionForwardSchema>>(context, {
+            incomingArgs: confirmationParams,
+            purpose: 'insights-connection-forward',
+            codec: __runtime.codec,
+            ledger: __runtime.ledger,
+            stash: __runtime.stash,
+            expectedScope: { projectId: String(__scopeProjectId) },
+        })
+        if (!__guard.ok) {
+            return __guard.result as never
+        }
+        const params = __guard.verifiedArgs
+        const projectId = __scopeProjectId
+        const body: Record<string, unknown> = {}
+        if (params.method !== undefined) {
+            body['method'] = params.method
+        }
+        if (params.path !== undefined) {
+            body['path'] = params.path
+        }
+        if (params.query !== undefined) {
+            body['query'] = params.query
+        }
+        if (params.data !== undefined) {
+            body['data'] = params.data
+        }
+        const result = await context.api.request<Schemas.InsightsConnectionForwardResponse>({
+            method: 'POST',
+            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_connections/${encodeURIComponent(String(params.id))}/forward/`,
+            body,
+        })
+        return result
+    },
+})
+
 export const GENERATED_TOOLS: Record<string, () => ToolBase<ZodObjectAny>> = {
     'integration-delete': integrationDelete,
     'integration-get': integrationGet,
@@ -177,4 +262,6 @@ export const GENERATED_TOOLS: Record<string, () => ToolBase<ZodObjectAny>> = {
     'integrations-jira-projects-retrieve': integrationsJiraProjectsRetrieve,
     'integrations-linear-teams-retrieve': integrationsLinearTeamsRetrieve,
     'integrations-list': integrationsList,
+    'insights-connection-forward-prepare': insightsConnectionForwardPrepare,
+    'insights-connection-forward-execute': insightsConnectionForwardExecute,
 }

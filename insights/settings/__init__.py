@@ -19,6 +19,7 @@ from insights.settings.overrides import *
 
 from insights.settings.logs import *
 from insights.settings.base_variables import *
+from insights.settings.canvas import *
 
 from insights.settings.access import *
 from insights.settings.activity_log import *

@@ -21,6 +21,7 @@ LOCATION_MODULES = [
     "insights_ai",
     "revenue_analytics",
     "shared",
+    "signals",
     "web_analytics",
 ]
 

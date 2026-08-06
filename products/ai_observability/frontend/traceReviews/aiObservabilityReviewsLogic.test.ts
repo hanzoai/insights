@@ -37,8 +37,8 @@ jest.mock('../generated/api', () => ({
 
 const mockTraceReviewsList = traceReviewsApi.list as jest.MockedFunction<typeof traceReviewsApi.list>
 const mockCopyToClipboard = copyToClipboard as jest.MockedFunction<typeof copyToClipboard>
-const mockLemonToastError = toast.error as jest.MockedFunction<typeof toast.error>
-const mockLemonToastWarning = toast.warning as jest.MockedFunction<typeof toast.warning>
+const mockToastError = toast.error as jest.MockedFunction<typeof toast.error>
+const mockToastWarning = toast.warning as jest.MockedFunction<typeof toast.warning>
 
 const baseReview: TraceReview = {
     id: 'review-1',
@@ -85,7 +85,7 @@ describe('aiObservabilityReviewsLogic.copyReviewsToClipboard', () => {
             logic.actions.copyReviewsToClipboard('csv')
         }).toFinishAllListeners()
 
-        expect(mockLemonToastError).toHaveBeenCalledWith('No reviews to copy!')
+        expect(mockToastError).toHaveBeenCalledWith('No reviews to copy!')
         expect(mockCopyToClipboard).not.toHaveBeenCalled()
     })
 
@@ -100,8 +100,8 @@ describe('aiObservabilityReviewsLogic.copyReviewsToClipboard', () => {
             logic.actions.copyReviewsToClipboard('csv')
         }).toFinishAllListeners()
 
-        expect(mockLemonToastWarning).toHaveBeenCalledTimes(1)
-        const message = mockLemonToastWarning.mock.calls[0][0] as string
+        expect(mockToastWarning).toHaveBeenCalledTimes(1)
+        const message = mockToastWarning.mock.calls[0][0] as string
         expect(message).toContain(String(CLIPBOARD_ROW_LIMIT + 1))
         expect(message).toContain('Export current columns')
         expect(mockCopyToClipboard).not.toHaveBeenCalled()
@@ -115,7 +115,7 @@ describe('aiObservabilityReviewsLogic.copyReviewsToClipboard', () => {
             logic.actions.copyReviewsToClipboard('csv')
         }).toFinishAllListeners()
 
-        expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
+        expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
     })
 
     it('ignores bare aliases on the shared URL — they belong to the Scorers sub-tab', () => {

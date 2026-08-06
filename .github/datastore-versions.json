@@ -1,6 +1,0 @@
-{
-    "production_eu": "datastore/datastore-server:26.3.10",
-    "production_us": "datastore/datastore-server:26.3.10",
-    "local": "datastore/datastore-server:26.6.1",
-    "oldest_supported": "datastore/datastore-server:26.3.10"
-}
