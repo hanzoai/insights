@@ -10,7 +10,6 @@ import { TableColumns } from '@hanzo/elements'
 import { PaginatedResponse } from 'lib/api'
 import { ChartDataset, ChartType, InteractionItem } from 'lib/Chart'
 import { CommonFilters, HeatmapFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
-import { MascotActorOptions } from 'lib/components/MascotMode/types'
 import { SessionRecordingTriggerGroupsConfig, UrlTriggerConfig } from 'lib/components/IngestionControls/types'
 import type { ProductSetupProbe } from 'lib/components/ProductEmptyState/setupProbes'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
@@ -425,9 +424,9 @@ export type MascotColorOptions =
 
 export type MinimalMascotConfig = {
     use_as_profile: boolean
-    color: MascotActorOptions['color']
-    skin: MascotActorOptions['skin']
-    accessories: MascotActorOptions['accessories']
+    color: MascotColorOptions
+    skin: string
+    accessories: string[]
 }
 
 export type MascotConfig = {
@@ -435,7 +434,7 @@ export type MascotConfig = {
     use_as_profile: boolean
     party_mode_enabled: boolean
     enabled: boolean
-    actor_options: MascotActorOptions
+    actor_options: { color: MascotColorOptions; skin: string; accessories: string[] }
 }
 
 export interface NotificationSettings {

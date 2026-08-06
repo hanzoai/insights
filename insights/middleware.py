@@ -1192,8 +1192,7 @@ class CSPMiddleware:
                 "worker-src 'self'",
                 "child-src 'none'",
                 "object-src 'none'",
-                "media-src https://res.cloudinary.com",
-                f"img-src 'self' data: {resource_url} https://hanzo.ai https://www.gravatar.com https://res.cloudinary.com https://platform.slack-edge.com https://raw.githubusercontent.com",
+                f"img-src 'self' data: {resource_url} https://hanzo.ai https://platform.slack-edge.com https://raw.githubusercontent.com",
                 "frame-ancestors https://hanzo.ai https://preview.hanzo.ai https://vercel.com",
                 f"connect-src 'self' https://www.insightsstatus.com {resource_url} {connect_debug_url} https://raw.githubusercontent.com https://api.github.com",
                 # allow all sites for displaying heatmaps

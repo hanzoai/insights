@@ -17,7 +17,7 @@ import { safeFetch } from './utils'
  * this primitive and adds consistent failure handling, observability, and opt-in toasts.
  * Reach for `toolbarFetch` directly only when you genuinely need the raw `Response` and
  * cannot use `toolbarApi` — currently the dual-context shared logics (`heatmapDataLogic`,
- * `mascotModeLogic`) that interleave authenticated toolbar requests with unauthenticated
+ * `toolbarLogic`) that interleave authenticated toolbar requests with unauthenticated
  * `fetch` and share one response-handling branch across both. Keeping this module free of
  * `toast` (and therefore out of `toolbarApi`'s import graph) also lets those widely
  * imported logics depend on the transport without pulling the toast layer into test setup.

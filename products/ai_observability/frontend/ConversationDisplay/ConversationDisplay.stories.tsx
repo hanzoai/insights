@@ -82,7 +82,7 @@ def meaning_of_life():
 ---
 
 [Learn More](https://example.com)
-![Life Image](https://res.cloudinary.com/dmukukwp6/image/upload/q_100/v1/hanzo.ai/src/components/Home/Slider/images/product-analytics-script)
+![Life Image](https://example.com/image.png)
 
 ~~There is no meaning~~ There is meaning everywhere!`,
                 },

@@ -30,7 +30,17 @@
                     "order": 0
                 }
             ],
-            "bytecode": ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11],
+            "bytecode": [
+                "_H",
+                1,
+                32,
+                "$pageview",
+                32,
+                "event",
+                1,
+                1,
+                11
+            ],
             "filter_test_accounts": false
         }
     },
@@ -82,7 +92,17 @@
                             "order": 0
                         }
                     ],
-                    "bytecode": ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11],
+                    "bytecode": [
+                        "_H",
+                        1,
+                        32,
+                        "$pageview",
+                        32,
+                        "event",
+                        1,
+                        1,
+                        11
+                    ],
                     "filter_test_accounts": false
                 }
             },
@@ -128,7 +148,9 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "columns": [
                                                 {
                                                     "id": "IT_J8vPWTn",
@@ -504,7 +526,10 @@
                                                     "repeat": "no-repeat",
                                                     "size": "custom",
                                                     "position": "center",
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "padding": "0px",
                                                 "anchor": "",
@@ -631,8 +656,14 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": ["function_email"],
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/Template_cover_3_d47f8f10b5.jpg",
-    "tags": ["trial", "email", "messaging"],
+    "billable_action_types": [
+        "function_email"
+    ],
+    "image_url": null,
+    "tags": [
+        "trial",
+        "email",
+        "messaging"
+    ],
     "scope": "global"
 }

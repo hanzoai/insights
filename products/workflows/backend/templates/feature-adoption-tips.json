@@ -30,7 +30,17 @@
                     "order": 0
                 }
             ],
-            "bytecode": ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11],
+            "bytecode": [
+                "_H",
+                1,
+                32,
+                "$pageview",
+                32,
+                "event",
+                1,
+                1,
+                11
+            ],
             "filter_test_accounts": false
         }
     },
@@ -124,7 +134,17 @@
                             "order": 0
                         }
                     ],
-                    "bytecode": ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11],
+                    "bytecode": [
+                        "_H",
+                        1,
+                        32,
+                        "$pageview",
+                        32,
+                        "event",
+                        1,
+                        1,
+                        11
+                    ],
                     "filter_test_accounts": false
                 }
             },
@@ -186,7 +206,9 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "columns": [
                                                 {
                                                     "id": "IT_J8vPWTn",
@@ -562,7 +584,10 @@
                                                     "repeat": "no-repeat",
                                                     "size": "custom",
                                                     "position": "center",
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "padding": "0px",
                                                 "anchor": "",
@@ -680,7 +705,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -730,7 +759,9 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "columns": [
                                                 {
                                                     "id": "IT_J8vPWTn",
@@ -1106,7 +1137,10 @@
                                                     "repeat": "no-repeat",
                                                     "size": "custom",
                                                     "position": "center",
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "padding": "0px",
                                                 "anchor": "",
@@ -1211,7 +1245,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -1261,7 +1299,9 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "columns": [
                                                 {
                                                     "id": "IT_J8vPWTn",
@@ -1679,7 +1719,10 @@
                                                     "repeat": "no-repeat",
                                                     "size": "custom",
                                                     "position": "center",
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "padding": "0px",
                                                 "anchor": "",
@@ -1801,8 +1844,14 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": ["function_email"],
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/b42_blog_repost_1aa6acf050.png",
-    "tags": ["feature adoption", "email", "messaging"],
+    "billable_action_types": [
+        "function_email"
+    ],
+    "image_url": null,
+    "tags": [
+        "feature adoption",
+        "email",
+        "messaging"
+    ],
     "scope": "global"
 }

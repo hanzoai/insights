@@ -1,0 +1,11 @@
+{
+    "name": "posthog-js",
+    "version": "1.409.5",
+    "private": true,
+    "description": "The react wrapper's peer, satisfied by the Hanzo SDK: same surface, our fork, nothing fetched upstream.",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "dependencies": {
+        "@hanzo/insights": "1.358.1"
+    }
+}

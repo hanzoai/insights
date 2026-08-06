@@ -16,7 +16,6 @@ import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useWindowSize } from 'lib/hooks/useWindowSize'
-import { Button, Separator, Tooltip, TooltipContent, TooltipTrigger } from 'lib/ui/quill'
 import {
     TabsPrimitive,
     TabsPrimitiveContent,

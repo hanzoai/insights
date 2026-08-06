@@ -225,7 +225,7 @@ export function AllPreThousandColorOptions(): JSX.Element {
                         return (
                             <div className="relative h-8 w-8">
                                 <div className={`${color as string} absolute inset-0 border rounded z-20`} />
-                                <div className="absolute inset-0 flex items-center justify-center z-10">🦔</div>
+                                <div className="absolute inset-0 flex items-center justify-center z-10">◆</div>
                             </div>
                         )
                     },

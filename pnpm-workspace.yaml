@@ -1,6 +1,7 @@
 packages:
     - '.'
     - common/esbuilder
+    - common/sdk-peer
     - common/scriptvm/typescript
     - common/plugin_transpiler
     - common/storybook
@@ -255,8 +256,9 @@ overrides:
     '@tiptap/extension-underline': '3.20.6'
     '@hanzo/icons': 'npm:@hanzo/insights-icons@0.36.7'
     '@hanzo/insightsql-parser': 'npm:@posthog/hogql-parser@1.3.75'
-    '@hanzo/mascot-mode': 'npm:@hanzo/insights-mascot-mode@0.0.48'
     insights-js: 'npm:@hanzo/insights@1.358.1'
+    # Every posthog-js request (including @posthog/react's peer) resolves to the Hanzo fork; upstream is never fetched.
+    posthog-js: 'npm:@hanzo/insights@1.358.1'
     insights-js-lite: 'npm:@hanzo/insights-lite@4.2.2'
     '@hanzo/brand': 'npm:@posthog/brand@0.9.1'
     '@hanzo/react': 'npm:@posthog/react@1.9.0'

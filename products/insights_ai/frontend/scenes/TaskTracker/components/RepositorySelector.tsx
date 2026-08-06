@@ -2,7 +2,6 @@ import { useValues } from 'kea'
 
 import { IconGitBranch, IconGithub } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
-import { Button, ButtonGroup } from '@hanzo/quill-primitives'
 
 import api from 'lib/api'
 import { GitHubBranchCombobox } from 'lib/integrations/GitHubBranchCombobox'

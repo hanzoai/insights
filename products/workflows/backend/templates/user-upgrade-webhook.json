@@ -109,8 +109,13 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": ["function"],
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/Template_cover_12_c520e0adf4.jpg",
-    "tags": ["webhook", "upgrade"],
+    "billable_action_types": [
+        "function"
+    ],
+    "image_url": null,
+    "tags": [
+        "webhook",
+        "upgrade"
+    ],
     "scope": "global"
 }

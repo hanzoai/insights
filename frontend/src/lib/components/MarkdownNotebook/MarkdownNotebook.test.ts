@@ -676,7 +676,7 @@ continued line
     })
 
     it('round-trips markdown image blocks as image components', () => {
-        const markdown = '![Insights engineering](https://res.cloudinary.com/demo/image/upload/insights.png)'
+        const markdown = '![Insights engineering](https://example.com/image.png)'
         const document = parseMarkdownNotebook(markdown)
 
         expect(document.nodes[0]).toMatchObject({
@@ -684,7 +684,7 @@ continued line
             tagName: 'Image',
             props: {
                 alt: 'Insights engineering',
-                src: 'https://res.cloudinary.com/demo/image/upload/insights.png',
+                src: 'https://example.com/image.png',
             },
         })
         expect(serializeMarkdownNotebook(document)).toEqual(markdown)
@@ -694,10 +694,10 @@ continued line
         expect(
             serializeMarkdownNotebook(
                 parseMarkdownNotebook(
-                    '<Image src="https://res.cloudinary.com/demo/image/upload/insights.png" alt="Insights engineering" />'
+                    '<Image src="https://example.com/image.png" alt="Insights engineering" />'
                 )
             )
-        ).toEqual('![Insights engineering](https://res.cloudinary.com/demo/image/upload/insights.png)')
+        ).toEqual('![Insights engineering](https://example.com/image.png)')
     })
 
     it('round-trips nested markdown lists', () => {

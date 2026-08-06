@@ -170,7 +170,6 @@ export type SettingId =
     | 'feature-previews-coming-soon'
     | 'group-analytics'
     | 'heatmaps'
-    | 'mascot-mode'
     | 'homepage'
     | 'human-friendly-comparison-periods'
     | 'integration-error-tracking'

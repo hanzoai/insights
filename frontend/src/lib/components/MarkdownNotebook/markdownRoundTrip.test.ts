@@ -73,7 +73,7 @@ const TEXT_PIECES = [
     'back\\slash',
     '~~not struck~~',
     '[not](a-link)',
-    'emoji 🦔 test',
+    'emoji ✨ test',
     'naïve café',
     '日本語のテキスト',
     'paren ) here',

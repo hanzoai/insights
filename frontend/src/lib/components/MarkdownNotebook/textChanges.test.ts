@@ -17,7 +17,7 @@ describe('textChanges', () => {
             ['multiple spans', 'one two three', 'ONE two THREE'],
             ['empty base', '', 'something'],
             ['empty next', 'something', ''],
-            ['emoji', 'a 🦔 b', 'a 🦦 b'],
+            ['emoji', 'a 💜 b', 'a 🦦 b'],
         ])('round-trips %s', (_name, baseText, nextText) => {
             expect(applyTextChanges(baseText, getTextChanges(baseText, nextText))).toEqual(nextText)
         })

@@ -1813,7 +1813,7 @@ export const notebookLogic = kea<notebookLogicType>([
                     router.values.currentLocation.searchParams,
                     {
                         ...router.values.currentLocation.hashParams,
-                        '🦔': cache.lastState,
+                        '◆': cache.lastState,
                     }
                 )
             }
@@ -1984,12 +1984,12 @@ export const notebookLogic = kea<notebookLogicType>([
 
     urlToAction(({ values, actions, cache }) => ({
         '*': (_, _search, hashParams) => {
-            if (values.mode === 'canvas' && hashParams?.['🦔']) {
-                if (cache.lastState === hashParams['🦔']) {
+            if (values.mode === 'canvas' && hashParams?.['◆']) {
+                if (cache.lastState === hashParams['◆']) {
                     return
                 }
 
-                actions.setLocalContent(JSON.parse(base64Decode(hashParams['🦔'])))
+                actions.setLocalContent(JSON.parse(base64Decode(hashParams['◆'])))
             }
         },
     })),
@@ -2012,7 +2012,7 @@ export const notebookLogic = kea<notebookLogicType>([
 
     beforeUnmount(() => {
         const hashParams = router.values.currentLocation.hashParams
-        delete hashParams['🦔']
+        delete hashParams['◆']
         router.actions.replace(
             router.values.currentLocation.pathname,
             router.values.currentLocation.searchParams,

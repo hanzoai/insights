@@ -1,0 +1,14 @@
+import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer';
+import * as React from 'react';
+declare function Drawer({ ...props }: DrawerPrimitive.Root.Props): React.ReactElement;
+declare function DrawerTrigger({ ...props }: DrawerPrimitive.Trigger.Props): React.ReactElement;
+declare function DrawerPortal({ ...props }: DrawerPrimitive.Portal.Props): React.ReactElement;
+declare function DrawerClose({ ...props }: DrawerPrimitive.Close.Props): React.ReactElement;
+declare function DrawerBackdrop({ className, ...props }: DrawerPrimitive.Backdrop.Props): React.ReactElement;
+declare function DrawerContent({ className, children, ...props }: DrawerPrimitive.Popup.Props): React.ReactElement;
+declare function DrawerHandle({ className, ...props }: React.ComponentProps<'div'>): React.ReactElement;
+declare function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>): React.ReactElement;
+declare function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>): React.ReactElement;
+declare function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props): React.ReactElement;
+declare function DrawerDescription({ className, ...props }: DrawerPrimitive.Description.Props): React.ReactElement;
+export { Drawer, DrawerPortal, DrawerBackdrop, DrawerTrigger, DrawerClose, DrawerContent, DrawerHandle, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription, };

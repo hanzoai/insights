@@ -37,7 +37,7 @@ function OpenNotebookShareModal({ shortId }: NotebookShareModalProps): JSX.Eleme
     const [interestTracked, setInterestTracked] = useState(false)
 
     const notebookUrl = urls.absolute(urls.currentProject(urls.notebook(shortId)))
-    const canvasUrl = urls.absolute(urls.canvas()) + `#🦔=${base64Encode(JSON.stringify(content))}`
+    const canvasUrl = urls.absolute(urls.canvas()) + `#◆=${base64Encode(JSON.stringify(content))}`
 
     const trackInterest = (): void => {
         insights.capture('pressed interested in notebook sharing', { url: notebookUrl })

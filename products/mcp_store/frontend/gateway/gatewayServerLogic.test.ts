@@ -241,7 +241,7 @@ describe('gatewayServerLogic', () => {
             count: 2,
             results: [{ ...editablePolicy, policy_state: 'needs_approval' }, lockedPolicy],
         })
-        const toast = jest.spyOn(toast, 'success')
+        const toastSpy = jest.spyOn(toast, 'success')
 
         await expectLogic(logic, () => {
             logic.actions.setAllTools({ state: 'needs_approval' })
@@ -254,7 +254,7 @@ describe('gatewayServerLogic', () => {
                 policies: [{ tool_name: editablePolicy.tool_name, policy_state: 'needs_approval' }],
             })
         )
-        expect(toast).toHaveBeenCalledWith('Updated 1 tool')
+        expect(toastSpy).toHaveBeenCalledWith('Updated 1 tool')
     })
 
     it('applies a bulk policy change only to tools matching the active search', async () => {
@@ -425,14 +425,14 @@ describe('gatewayServerLogic', () => {
     ] as const)(
         'handles the %s callback on a standalone server detail while preserving URL state',
         async (queryParameter, toastType, message) => {
-            const toast = jest.spyOn(toast, toastType)
+            const toastSpy = jest.spyOn(toast, toastType)
 
             router.actions.push(
                 `${urls.mcpGatewayServer('server-id')}?scope=team&keep=value&${queryParameter}=true#panel=open`
             )
             await expectLogic(logic).toFinishAllListeners()
 
-            expect(toast).toHaveBeenCalledWith(message)
+            expect(toastSpy).toHaveBeenCalledWith(message)
             expect(router.values.location.pathname).toBe('/project/997/mcp-servers/server/server-id')
             expect(router.values.searchParams).toEqual({ scope: 'team', keep: 'value' })
             expect(router.values.hashParams).toEqual({ panel: 'open' })
@@ -445,12 +445,12 @@ describe('gatewayServerLogic', () => {
         router.actions.push(
             `${urls.mcpGatewayServer('server-id')}?scope=team&keep=value&oauth_complete=true#panel=open`
         )
-        const toast = jest.spyOn(toast, 'success')
+        const toastSpy = jest.spyOn(toast, 'success')
         logic = gatewayServerLogic({ id: 'server-id' })
         logic.mount()
         await expectLogic(logic).toFinishAllListeners()
 
-        expect(toast).toHaveBeenCalledWith('Server connected')
+        expect(toastSpy).toHaveBeenCalledWith('Server connected')
         expect(router.values.searchParams).toEqual({ scope: 'team', keep: 'value' })
         expect(router.values.hashParams).toEqual({ panel: 'open' })
         expect(logic.values.scope).toEqual({ scopeType: 'team', label: 'Team default' })

@@ -1,5 +1,5 @@
 import * as robotPng from '@hanzo/brand/hoggies/png/robot'
-import { IconMCP } from '@hanzo/icons'
+import { IconPlug as IconMCP } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import type { SceneProductEmptyState } from 'lib/components/ProductEmptyState/types'

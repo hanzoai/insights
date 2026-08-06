@@ -1,0 +1,10 @@
+import { NumberField as NumberFieldPrimitive } from '@base-ui/react/number-field';
+import * as React from 'react';
+declare function NumberFieldRoot({ className, ...props }: NumberFieldPrimitive.Root.Props): React.ReactElement;
+declare function NumberFieldGroup({ className, ...props }: NumberFieldPrimitive.Group.Props): React.ReactElement;
+declare const NumberFieldInput: React.ForwardRefExoticComponent<Omit<import('@base-ui/react').NumberFieldInputProps, "ref"> & React.RefAttributes<HTMLInputElement>>;
+declare function NumberFieldIncrement({ className, children, ...props }: NumberFieldPrimitive.Increment.Props): React.ReactElement;
+declare function NumberFieldDecrement({ className, children, ...props }: NumberFieldPrimitive.Decrement.Props): React.ReactElement;
+declare function NumberFieldScrubArea({ className, ...props }: NumberFieldPrimitive.ScrubArea.Props): React.ReactElement;
+declare function NumberFieldScrubAreaCursor({ className, ...props }: NumberFieldPrimitive.ScrubAreaCursor.Props): React.ReactElement;
+export { NumberFieldRoot, NumberFieldGroup, NumberFieldInput, NumberFieldIncrement, NumberFieldDecrement, NumberFieldScrubArea, NumberFieldScrubAreaCursor, };

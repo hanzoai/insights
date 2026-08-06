@@ -1,0 +1,15 @@
+/* @hanzo/quill — Tailwind source directive.
+ *
+ * Consumer imports this file from their Tailwind v4 entry. The
+ * glob path is relative to THIS file's on-disk location (inside
+ * node_modules/@hanzo/quill/dist after install), so it works
+ * under pnpm, hoisted, and Docker layouts without needing
+ * consumer-side `../node_modules/@hanzo/quill/...` paths.
+ *
+ * Tailwind scans the compiled library JS for literal class
+ * strings (cva variants, `cn(...)` calls, template-less className
+ * props) and generates the matching utilities in the consumer's
+ * own `utilities` layer — no pre-compiled stylesheet, no
+ * cascade-layer fight with consumer Tailwind output.
+ */
+@source "./**/*.js";

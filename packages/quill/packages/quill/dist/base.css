@@ -1,0 +1,15 @@
+/* @hanzo/quill — base reset.
+ *
+ * Load-bearing single rule: primitives author plain `border` (no
+ * colour modifier) expecting the current border colour to resolve
+ * to `--color-border`. Without this reset Tailwind v4 falls back
+ * to `currentColor` and every bordered primitive looks broken.
+ *
+ * Deliberately does NOT paint `body { bg-background text-foreground }`
+ * — consumer owns their page chrome.
+ */
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+}

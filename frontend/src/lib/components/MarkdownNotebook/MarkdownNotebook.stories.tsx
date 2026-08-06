@@ -58,7 +58,7 @@ const componentCatalogNotebook = `# Component catalog
 
 const embedsNotebook = `# Embeds
 
-![Insights engineering](https://res.cloudinary.com/dmukukwp6/image/upload/data_warehouse_2c3928e9ad)
+![Insights engineering](https://example.com/image.png)
 
 <Embed src="${window.location.origin}/mock-page.html" title="Insights demo page" />
 
