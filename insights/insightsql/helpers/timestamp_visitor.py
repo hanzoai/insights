@@ -106,9 +106,7 @@ class IsSimpleTimestampFieldExpressionVisitor(Visitor[bool]):
     def visit_alias(self, node: ast.Alias) -> bool:
         from insights.insightsql.database.schema.events import EventsTable
         from insights.insightsql.database.schema.session_replay_events import RawSessionReplayEventsTable
-        from insights.insightsql.database.schema.sessions_v1 import SessionsTableV1
-        from insights.insightsql.database.schema.sessions_v2 import SessionsTableV2
-        from insights.insightsql.database.schema.sessions_v3 import SessionsTableV3
+        from insights.insightsql.database.schema.sessions import SessionsTable
 
         if node.type and isinstance(node.type, ast.FieldAliasType):
             try:
@@ -129,18 +127,7 @@ class IsSimpleTimestampFieldExpressionVisitor(Visitor[bool]):
                 )
                 or (
                     isinstance(table_type, ast.LazyTableType)
-                    and isinstance(table_type.table, SessionsTableV1)
-                    and resolved_field.name in ("$start_timestamp", "$end_timestamp")
-                )
-                or (
-                    isinstance(table_type, ast.LazyTableType)
-                    and isinstance(table_type.table, SessionsTableV2)
-                    # we guarantee that a session is < 24 hours, so with bufferDays being 3 above, we can use $end_timestamp too
-                    and resolved_field.name in ("$start_timestamp", "$end_timestamp")
-                )
-                or (
-                    isinstance(table_type, ast.LazyTableType)
-                    and isinstance(table_type.table, SessionsTableV3)
+                    and isinstance(table_type.table, SessionsTable)
                     # we guarantee that a session is < 24 hours, so with bufferDays being 3 above, we can use $end_timestamp too
                     and resolved_field.name in ("$start_timestamp", "$end_timestamp")
                 )

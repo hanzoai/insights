@@ -2,20 +2,21 @@ import uuid
 from time import time_ns
 
 import pytest
-from insights.test.base import (
-    APIBaseTest,
-    DatastoreTestMixin,
-    _create_event,
-    _create_person,
-    snapshot_datastore_queries,
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
+
+from parameterized import parameterized
+
+from insights.schema import (
+    BounceRatePageViewMode,
+    FilterLogicalOperator,
+    InsightsQLQueryModifiers,
+    SessionsV2JoinMode,
 )
 
-from insights.schema import FilterLogicalOperator, InsightsQLQueryModifiers, SessionTableVersion
-
 from insights.insightsql import ast
-from insights.insightsql.database.schema.sessions_v3 import (
-    get_lazy_session_table_properties_v3,
-    get_lazy_session_table_values_v3,
+from insights.insightsql.database.schema.sessions import (
+    get_lazy_session_table_properties,
+    get_lazy_session_table_values,
 )
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
@@ -24,17 +25,19 @@ from insights.models.property_definition import PropertyType
 from insights.models.utils import uuid7
 
 
-@snapshot_datastore_queries
-class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
-    snapshot_replace_all_numbers = True
-
+class TestSessionsV2(DatastoreTestMixin, APIBaseTest):
     def __execute(
         self,
         query,
+        bounce_rate_mode=BounceRatePageViewMode.COUNT_PAGEVIEWS,
         bounce_rate_duration=None,
+        sessions_v2_join_mode=SessionsV2JoinMode.UUID,
     ):
         modifiers = InsightsQLQueryModifiers(
-            sessionTableVersion=SessionTableVersion.V3, bounceRateDurationSeconds=bounce_rate_duration
+            
+            bounceRatePageViewMode=bounce_rate_mode,
+            bounceRateDurationSeconds=bounce_rate_duration,
+            sessionsV2JoinMode=sessions_v2_join_mode,
         )
         return execute_insightsql_query(
             query=query,
@@ -54,7 +57,7 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
 
         response = self.__execute(
             parse_select(
-                "select * from raw_sessions_v3",
+                "select * from raw_sessions",
                 placeholders={"session_id": ast.Constant(value=session_id)},
             ),
         )
@@ -147,6 +150,32 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
             "Paid Search",
         )
 
+    # TODO: restore once #session_id_uuid is migrated properly
+    # @parameterized.expand([[SessionsV2JoinMode.STRING], [SessionsV2JoinMode.UUID]])
+    # def test_event_dot_session_dot_channel_type(self, join_mode):
+    #     session_id = str(uuid7())
+
+    #     _create_event(
+    #         event="$pageview",
+    #         team=self.team,
+    #         distinct_id="d1",
+    #         properties={"gad_source": "1", "$session_id": session_id},
+    #     )
+
+    #     response = self.__execute(
+    #         parse_select(
+    #             "select events.session.$channel_type from events where $session_id = {session_id}",
+    #             placeholders={"session_id": ast.Constant(value=session_id)},
+    #         ),
+    #         sessions_v2_join_mode=join_mode,
+    #     )
+
+    #     result = (response.results or [])[0]
+    #     self.assertEqual(
+    #         result[0],
+    #         "Paid Search",
+    #     )
+
     def test_session_dot_channel_type(self):
         session_id = str(uuid7())
 
@@ -211,6 +240,13 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
             properties={"$session_id": s1},
             timestamp="2024-07-17",
         )
+
+        response = self.__execute(
+            parse_select(
+                "select uniqMerge(pageview_uniq), uniqMerge(autocapture_uniq), uniqMerge(screen_uniq) from raw_sessions",
+            ),
+        )
+        self.assertEqual(response.results or [], [(0, 0, 0)])
 
         response = self.__execute(
             parse_select(
@@ -340,7 +376,7 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
             properties={"$session_id": s3},
             timestamp="2023-12-02",
         )
-        # >2 pageviews (should still count as 2)
+        # three pageviews (should still count as 2)
         s4 = str(uuid7(time + 4))
         _create_event(
             event="$pageview",
@@ -379,28 +415,22 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
             properties={"$session_id": s5},
             timestamp="2023-12-02",
         )
-        # one autocapture
-        s6 = str(uuid7(time + 6))
-        _create_event(
-            event="$autocapture",
-            team=self.team,
-            distinct_id=s1,
-            properties={"$session_id": s6},
-            timestamp="2023-12-02",
-        )
 
         results = (
             self.__execute(
                 parse_select(
-                    "select $page_screen_count_up_to, $has_autocapture from sessions ORDER BY session_id",
+                    "select $page_screen_autocapture_count_up_to from sessions ORDER BY session_id",
                     placeholders={"session_id": ast.Constant(value=s1)},
                 ),
             ).results
             or []
         )
-        assert results == [(2, False), (1, True), (1, False), (2, False), (1, False), (0, True)]
+        assert results == [(2,), (2,), (1,), (2,), (1,)]
 
-    def test_bounce_rate(self):
+    @parameterized.expand(
+        [[BounceRatePageViewMode.UNIQ_PAGE_SCREEN_AUTOCAPTURES], [BounceRatePageViewMode.COUNT_PAGEVIEWS]]
+    )
+    def test_bounce_rate(self, bounce_rate_mode):
         time = time_ns() // (10**6)
         # ensure the sessions ids are sortable by giving them different time components
         s1a = str(uuid7(time))
@@ -409,7 +439,6 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
         s3 = str(uuid7(time + 3))
         s4 = str(uuid7(time + 4))
         s5 = str(uuid7(time + 5))
-        s6 = str(uuid7(time + 6))
 
         # person with 2 different sessions
         _create_event(
@@ -486,19 +515,11 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
             properties={"$session_id": s5, "$current_url": "https://example.com/7"},
             timestamp="2023-12-11T12:00:11",
         )
-        # session with 1 autocapture
-        _create_event(
-            event="autocapture",
-            team=self.team,
-            distinct_id="d6",
-            properties={"$session_id": s6, "$current_url": "https://example.com/7"},
-            timestamp="2023-12-11T12:00:00",
-        )
-
         response = self.__execute(
             parse_select(
                 "select $is_bounce, session_id from sessions ORDER BY session_id",
             ),
+            bounce_rate_mode=bounce_rate_mode,
         )
         assert (response.results or []) == [
             (0, s1a),
@@ -507,10 +528,12 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
             (0, s3),
             (1, s4),
             (0, s5),
-            (None, s6),
         ]
 
-    def test_custom_bounce_rate_duration(self):
+    @parameterized.expand(
+        [[BounceRatePageViewMode.UNIQ_PAGE_SCREEN_AUTOCAPTURES], [BounceRatePageViewMode.COUNT_PAGEVIEWS]]
+    )
+    def test_custom_bounce_rate_duration(self, bounce_rate_mode):
         time = time_ns() // (10**6)
         # ensure the sessions ids are sortable by giving them different time components
         s = str(uuid7(time))
@@ -537,6 +560,7 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
                 parse_select(
                     "select $is_bounce, session_id from sessions ORDER BY session_id",
                 ),
+                bounce_rate_mode=bounce_rate_mode,
             )
         ).results == [(0, s)]
 
@@ -546,6 +570,7 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
                 parse_select(
                     "select $is_bounce, session_id from sessions ORDER BY session_id",
                 ),
+                bounce_rate_mode=bounce_rate_mode,
                 bounce_rate_duration=10,
             )
         ).results == [(0, s)]
@@ -556,6 +581,7 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
                 parse_select(
                     "select $is_bounce, session_id from sessions ORDER BY session_id",
                 ),
+                bounce_rate_mode=bounce_rate_mode,
                 bounce_rate_duration=30,
             )
         ).results == [(1, s)]
@@ -585,6 +611,53 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
 
         [row1] = response.results or []
         self.assertEqual(row1, ("https://example.com/2",))
+
+    def test_lcp(self):
+        s1 = str(uuid7("2024-10-01"))
+        s2 = str(uuid7("2024-10-02"))
+        s3 = str(uuid7("2024-10-03"))
+        s4 = str(uuid7("2024-10-04"))
+
+        # should be null if there's no $web_vitals_LCP_value
+        _create_event(
+            event="$pageview",
+            team=self.team,
+            distinct_id=s1,
+            properties={"$session_id": s1, "$pathname": "/1"},
+        )
+        # should be able to read the property off the regular "$web_vitals" event
+        _create_event(
+            event="$web_vitals",
+            team=self.team,
+            distinct_id=s2,
+            properties={"$session_id": s2, "$web_vitals_LCP_value": "2.0"},
+        )
+        # should be able to read the property off any event
+        _create_event(
+            event="$pageview",
+            team=self.team,
+            distinct_id=s3,
+            properties={"$session_id": s3, "$web_vitals_LCP_value": "3.0"},
+        )
+        # should take the first value if there's multiple
+        _create_event(
+            event="$web_vitals",
+            team=self.team,
+            distinct_id=s4,
+            properties={"$session_id": s4, "$web_vitals_LCP_value": "4.1"},
+        )
+        _create_event(
+            event="$web_vitals",
+            team=self.team,
+            distinct_id=s4,
+            properties={"$session_id": s4, "$web_vitals_LCP_value": "4.2"},
+        )
+        response = self.__execute(
+            parse_select("select $vitals_lcp from sessions order by session_id"),
+        )
+
+        rows = response.results or []
+        assert rows == [(None,), (2.0,), (3.0,), (4.1,)]
 
     def test_can_use_v1_and_v2_fields(self):
         session_id = str(uuid7())
@@ -621,34 +694,6 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
             (0, 0, "https://example.com/pathname", "https://example.com/pathname", "/pathname", "/pathname")
         ]
 
-    def test_event_sessions_where_event_timestamp(self):
-        session_id = str(uuid7())
-
-        _create_event(
-            event="$pageview",
-            team=self.team,
-            distinct_id="d1",
-            properties={
-                "$current_url": "https://example.com/pathname",
-                "$pathname": "/pathname",
-                "$session_id": session_id,
-            },
-        )
-
-        response = self.__execute(
-            parse_select(
-                """
-                select
-                    session.id as session_id,
-                from events
-                where session_id = {session_id} AND timestamp >= '1970-01-01'
-                """,
-                placeholders={"session_id": ast.Constant(value=session_id)},
-            ),
-        )
-
-        assert response.results == [(session_id,)]
-
     def test_event_sessions_where(self):
         session_id = str(uuid7())
 
@@ -675,10 +720,41 @@ class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
 
         assert response.results == [(1,)]
 
+    def test_case_insensitive_session_id(self):
+        session_id = str(uuid7())
+
+        _create_event(
+            event="$pageview",
+            team=self.team,
+            distinct_id="d1",
+            properties={
+                "$session_id": session_id.lower(),
+            },
+        )
+        _create_event(
+            event="$pageview",
+            team=self.team,
+            distinct_id="d1",
+            properties={
+                "$session_id": session_id.upper(),
+            },
+        )
+
+        response = self.__execute(
+            parse_select(
+                """
+                select countIf(events.session.id = {session_id}) from events
+                """,
+                placeholders={"session_id": ast.Constant(value=session_id)},
+            ),
+        )
+
+        assert response.results == [(2,)]
+
 
 class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
     def test_all(self):
-        results = get_lazy_session_table_properties_v3(None)
+        results = get_lazy_session_table_properties(None)
         self.assertEqual(
             {r["id"] for r in results},
             {
@@ -691,29 +767,11 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
                 "$entry__kx",
                 "$entry_current_url",
                 "$entry_dclid",
-                "$entry_epik",
                 "$entry_fbclid",
                 "$entry_gad_source",
                 "$entry_gbraid",
                 "$entry_gclid",
                 "$entry_gclsrc",
-                "$entry_has__kx",
-                "$entry_has_dclid",
-                "$entry_has_epik",
-                "$entry_has_fbclid",
-                "$entry_has_gbraid",
-                "$entry_has_gclid",
-                "$entry_has_gclsrc",
-                "$entry_has_igshid",
-                "$entry_has_irclid",
-                "$entry_has_li_fat_id",
-                "$entry_has_mc_cid",
-                "$entry_has_msclkid",
-                "$entry_has_qclid",
-                "$entry_has_sccid",
-                "$entry_has_ttclid",
-                "$entry_has_twclid",
-                "$entry_has_wbraid",
                 "$entry_hostname",
                 "$entry_igshid",
                 "$entry_irclid",
@@ -721,9 +779,7 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
                 "$entry_mc_cid",
                 "$entry_msclkid",
                 "$entry_pathname",
-                "$entry_qclid",
                 "$entry_referring_domain",
-                "$entry_sccid",
                 "$entry_ttclid",
                 "$entry_twclid",
                 "$entry_utm_campaign",
@@ -738,7 +794,7 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
                 "$screen_count",
                 "$session_duration",
                 "$start_timestamp",
-                "$has_replay_events",
+                "$vitals_lcp",
             },
         )
         self.assertEqual(
@@ -754,7 +810,7 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
         )
 
     def test_source(self):
-        results = get_lazy_session_table_properties_v3("source")
+        results = get_lazy_session_table_properties("source")
         self.assertEqual(
             results,
             [
@@ -778,16 +834,16 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
         )
 
     def test_entry_utm(self):
-        results = get_lazy_session_table_properties_v3("entry utm")
+        results = get_lazy_session_table_properties("entry utm")
         self.assertEqual(
             [result["name"] for result in results],
             ["$entry_utm_source", "$entry_utm_campaign", "$entry_utm_medium", "$entry_utm_term", "$entry_utm_content"],
         )
 
     def test_can_get_values_for_all(self):
-        results = get_lazy_session_table_properties_v3(None)
+        results = get_lazy_session_table_properties(None)
         for prop in results:
-            get_lazy_session_table_values_v3(key=prop["id"], team=self.team, search_term=None)
+            get_lazy_session_table_values(key=prop["id"], team=self.team, search_term=None)
 
     def test_custom_channel_types(self):
         self.team.modifiers = {
@@ -798,7 +854,7 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
             ]
         }
         self.team.save()
-        results = get_lazy_session_table_values_v3(key="$channel_type", team=self.team, search_term=None)
+        results = get_lazy_session_table_values(key="$channel_type", team=self.team, search_term=None)
         # the custom channel types should be first, there's should be no duplicates, and any custom rules for existing
         # channel types should be bumped to the top
         assert results == [
