@@ -10,12 +10,12 @@ from insights.cdp.templates.insights_function_template import sync_template_to_d
 from products.cdp.backend.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from products.messaging.backend.models import MessageTemplate
 from products.messaging.backend.unlayer import UnlayerRenderError
-from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
-from products.workflows.backend.models.hog_flow_revision import InsightsFlowRevision
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.models.insights_flow_revision import InsightsFlowRevision
 
 webhook_template = MOCK_NODE_TEMPLATES[0]
 
-RENDER_PATH = "products.workflows.backend.api.hog_flow.render_design_html"
+RENDER_PATH = "products.workflows.backend.api.insights_flow.render_design_html"
 RENDERED_HTML = "<html>rendered</html>"
 
 
