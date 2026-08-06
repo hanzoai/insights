@@ -263,7 +263,7 @@ export function DataTable({
         [sourceFeatures, columnsInResponse, columnsInQuery]
     )
     const contextColumns = context?.columns
-    const columnsInLemonTable = useMemo(
+    const columnsInTable = useMemo(
         () =>
             allColumns.filter((colName) => {
                 const col = getContextColumn(colName, contextColumns)
@@ -317,10 +317,10 @@ export function DataTable({
     // Memoized so the columns array keeps its identity between data refreshes: Table derives
     // column groups from it and passes those to every memoized TableRow, so a per-render rebuild
     // here re-renders every row each poll cycle. Intentionally NOT keyed on the response itself.
-    const lemonColumns: TableColumn<DataTableRow, any>[] = useMemo(
+    const columns: TableColumn<DataTableRow, any>[] = useMemo(
         () =>
             [
-                ...columnsInLemonTable.map((key, index) => {
+                ...columnsInTable.map((key, index) => {
                     return {
                         dataIndex: key as any,
                         ...renderColumnMeta(key, query, context),
@@ -334,7 +334,7 @@ export function DataTable({
                                 if (index === (expandable ? 1 : 0)) {
                                     return {
                                         children: label,
-                                        props: { colSpan: columnsInLemonTable.length + (recordingColumnShown ? 1 : 0) },
+                                        props: { colSpan: columnsInTable.length + (recordingColumnShown ? 1 : 0) },
                                     }
                                 }
                                 return { props: { colSpan: 0 } }
@@ -415,7 +415,7 @@ export function DataTable({
                                                         // The actual query may or may not be an events query.
                                                         const source = query.source as EventsQuery
                                                         const columns =
-                                                            columnsInLemonTable ?? getDataNodeDefaultColumns(source)
+                                                            columnsInTable ?? getDataNodeDefaultColumns(source)
                                                         const isAggregation = isInsightsQLAggregation(hogQl)
                                                         const orderKey = orderByForKey(key)
                                                         const isOrderBy = source.orderBy?.[0] === orderKey
@@ -540,7 +540,7 @@ export function DataTable({
                                                         const isAggregation = isInsightsQLAggregation(hogQl)
                                                         const source = query.source as EventsQuery
                                                         const columns =
-                                                            columnsInLemonTable ?? getDataNodeDefaultColumns(source)
+                                                            columnsInTable ?? getDataNodeDefaultColumns(source)
                                                         setQuery({
                                                             ...query,
                                                             source: {
@@ -582,7 +582,7 @@ export function DataTable({
                                                         const isAggregation = isInsightsQLAggregation(hogQl)
                                                         const source = query.source as EventsQuery
                                                         const columns =
-                                                            columnsInLemonTable ?? getDataNodeDefaultColumns(source)
+                                                            columnsInTable ?? getDataNodeDefaultColumns(source)
                                                         setQuery?.({
                                                             ...query,
                                                             source: {
@@ -714,7 +714,7 @@ export function DataTable({
                     : []),
             ].filter((column) => !query.hiddenColumns?.includes(column.dataIndex) && column.dataIndex !== '*'),
         [
-            columnsInLemonTable,
+            columnsInTable,
             query,
             setQuery,
             context,
@@ -1024,7 +1024,7 @@ export function DataTable({
                                 data-attr={dataAttr}
                                 className="DataTable"
                                 loading={responseLoading && !nextDataLoading && !newDataLoading}
-                                columns={lemonColumns}
+                                columns={columns}
                                 embedded={embedded}
                                 key={
                                     [...(columnsInResponse ?? []), ...columnsInQuery].join(

@@ -9,7 +9,7 @@ import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { UsageLimitPaywall } from 'lib/components/PayGateMini/UsageLimitPaywall'
 import { TZLabel } from 'lib/components/TZLabel'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -567,7 +567,7 @@ function EditSubscriptionForm({
                                             mode="multiple"
                                             allowCustomValues
                                             data-attr="subscribed-emails"
-                                            options={usersLemonSelectOptions(meFirstMembers.map((x) => x.user))}
+                                            options={usersSelectOptions(meFirstMembers.map((x) => x.user))}
                                             loading={membersLoading}
                                             placeholder="Enter an email address"
                                         />

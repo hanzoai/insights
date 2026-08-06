@@ -13,7 +13,7 @@ import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Banner } from 'lib/elements/Banner'
-import { lemonBannerLogic } from 'lib/elements/Banner/lemonBannerLogic'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
 import { Tab, Tabs } from 'lib/elements/Tabs'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
@@ -129,7 +129,7 @@ const REPLAY_VISION_PROMO_DISMISS_KEY = 'replay-vision-waitlist-promo'
 function ReplayVisionPromoBanner(): JSX.Element | null {
     // Teams with the flag already have access, so send them to the product instead of the waitlist
     const hasReplayVision = useFeatureFlag('REPLAY_VISION')
-    const { isDismissed } = useValues(lemonBannerLogic({ dismissKey: REPLAY_VISION_PROMO_DISMISS_KEY }))
+    const { isDismissed } = useValues(bannerLogic({ dismissKey: REPLAY_VISION_PROMO_DISMISS_KEY }))
 
     // A dismissed Banner renders null but the viewed tracker would still fire, skewing impressions
     if (isDismissed) {

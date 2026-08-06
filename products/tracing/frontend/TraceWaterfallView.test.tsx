@@ -43,7 +43,7 @@ const child = makeSpan({
 
 describe('TraceWaterfallView', () => {
     // Scope to the render's own container (no auto-cleanup here, and the name renders in both the
-    // visible label and the Lemon Tooltip title — [0] is the label).
+    // visible label and the Tooltip title — [0] is the label).
     const clickSpanRow = (container: HTMLElement, name: string): void => {
         fireEvent.click(within(container).getAllByText(name)[0])
     }

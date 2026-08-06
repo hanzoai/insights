@@ -6,7 +6,7 @@ import { Button } from '@hanzo/elements'
 import { ScrollableShadows, ScrollableShadowsProps } from './ScrollableShadows'
 
 const meta: Meta<ScrollableShadowsProps> = {
-    title: 'Lemon UI/Scrollable Shadows',
+    title: 'Elements/Scrollable Shadows',
     component: ScrollableShadows,
     tags: ['autodocs'],
 }

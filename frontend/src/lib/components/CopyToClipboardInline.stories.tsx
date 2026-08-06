@@ -4,7 +4,7 @@ import { CopyToClipboardInline, type InlineProps } from './CopyToClipboard'
 
 type Story = StoryObj<InlineProps>
 const meta: Meta<InlineProps> = {
-    title: 'Lemon UI/Copy To Clipboard Inline',
+    title: 'Elements/Copy To Clipboard Inline',
     component: CopyToClipboardInline,
     tags: ['autodocs'],
     parameters: {

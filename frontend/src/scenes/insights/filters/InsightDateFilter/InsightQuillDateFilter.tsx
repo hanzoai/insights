@@ -45,7 +45,7 @@ function shortExclusionsLabel(parts: string[]): string {
     return parts.length > 1 ? `excl. ${parts[0]} +${parts.length - 1}` : `excl. ${parts[0]}`
 }
 
-const LEMON_SKIN_PROPS = { 'data-lemon-skin': 'true' }
+const LEMON_SKIN_PROPS = { 'data-elements-skin': 'true' }
 
 type InsightQuillDateFilterProps = {
     disabled: boolean
@@ -120,7 +120,7 @@ export function InsightQuillDateFilter({ disabled }: InsightQuillDateFilterProps
                     <Button
                         variant="outline"
                         data-quill
-                        data-lemon-skin
+                        data-elements-skin
                         disabled={disabled || !!editingDisabledReason}
                         title={editingDisabledReason ?? undefined}
                         data-attr="insight-quill-date-filter"

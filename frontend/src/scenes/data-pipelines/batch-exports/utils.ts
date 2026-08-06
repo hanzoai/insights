@@ -60,7 +60,7 @@ export const dayOptions = [
 /** Run or backfill workflow status (same union on both types). */
 export type BatchExportStatus = BatchExportRun['status']
 
-export function statusToLemonTagType(status: BatchExportStatus, options?: { recordsFailed?: number }): TagType {
+export function statusToTagType(status: BatchExportStatus, options?: { recordsFailed?: number }): TagType {
     if (status === 'Completed' && options?.recordsFailed != null && options.recordsFailed > 0) {
         return 'warning'
     }
