@@ -6,13 +6,13 @@ from insights.insightsql import ast
 from insights.insightsql.ast import CompareOperationOp
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.models import DatabaseField, LazyJoinToAdd, LazyTableToAdd
-from insights.insightsql.database.schema.util.uuid import (
-    uuid_uint128_expr_to_timestamp_expr_v2,
-    uuid_uint128_expr_to_timestamp_expr_v3,
-)
+from insights.insightsql.database.schema.util.uuid import uuid_uint128_expr_to_timestamp_expr_v2
 from insights.insightsql.errors import NotImplementedError, QueryError
 from insights.insightsql.functions.mapping import INSIGHTSQL_COMPARISON_MAPPING
-from insights.insightsql.helpers.timestamp_visitor import is_simple_timestamp_field_expression, is_time_or_interval_constant
+from insights.insightsql.helpers.timestamp_visitor import (
+    is_simple_timestamp_field_expression,
+    is_time_or_interval_constant,
+)
 from insights.insightsql.visitor import CloningVisitor, TraversingVisitor, clone_expr
 
 SESSION_BUFFER_DAYS = 3
@@ -437,6 +437,7 @@ def is_session_id_string_expr(node: ast.Expr, context: InsightsQLContext) -> boo
     if isinstance(node, ast.Field):
         from insights.insightsql.database.schema.events import EventsTable
         from insights.insightsql.database.schema.session_replay_events import RawSessionReplayEventsTable
+        from insights.insightsql.database.schema.sessions import SessionsTable
 
         if node.type and isinstance(node.type, ast.FieldType):
             resolved_field = node.type.resolve_database_field(context)

@@ -1,6 +1,6 @@
 import dataclasses
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Literal, Optional, cast
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.db.models import Prefetch, Q
@@ -14,8 +14,8 @@ from insights.schema import (
     DatabaseSchemaDataWarehouseTable,
     DatabaseSchemaEndpointTable,
     DatabaseSchemaField,
-    DatabaseSchemaManagedViewTable,
     DatabaseSchemaInsightsTable,
+    DatabaseSchemaManagedViewTable,
     DatabaseSchemaSchema,
     DatabaseSchemaSource,
     DatabaseSchemaSystemTable,
