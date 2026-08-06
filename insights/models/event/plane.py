@@ -292,7 +292,7 @@ def EVENT_COLUMNS(historical: bool) -> list[tuple[str, str]]:
 
 def EVENT_SELECT_SQL(historical: bool) -> str:
     projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in EVENT_COLUMNS(historical))
-    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}"
+    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}\nWHERE {EVENT_WHERE()}"
 
 
 def ORG_PROJECT_TABLE_SQL() -> str:
