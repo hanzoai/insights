@@ -16,7 +16,7 @@ import { BatchExportBackfillModal } from './BatchExportBackfillModal'
 import { BatchExportLoadingSkeleton } from './BatchExportLoadingSkeleton'
 import { BatchExportRunsLogicProps, batchExportRunsLogic } from './batchExportRunsLogic'
 import { BatchExportContext } from './types'
-import { statusToLemonTagType } from './utils'
+import { statusToTagType } from './utils'
 
 function isRunInProgress(run: BatchExportRun): boolean {
     return ['Running', 'Starting'].includes(run.status)
@@ -472,7 +472,7 @@ export function BatchExportRunIcon({
     const latestRun = runs[0]
 
     const status = combineFailedStatuses(latestRun.status)
-    const tagType = statusToLemonTagType(status, { recordsFailed: latestRun.records_failed })
+    const tagType = statusToTagType(status, { recordsFailed: latestRun.records_failed })
 
     return (
         <Tooltip

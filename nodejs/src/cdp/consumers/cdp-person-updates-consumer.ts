@@ -33,7 +33,7 @@ export class CdpPersonUpdatesConsumer extends CdpConsumerBase {
         })
         this.insightsFunctionPipeline = new InsightsFunctionInvocationPipeline(config, {
             insightsFunctionManager: this.insightsFunctionManager,
-            hogExecutor: this.hogExecutor,
+            hogInputsService: this.hogInputsService,
             hogWatcher: this.hogWatcher,
             hogWatcherMirror: this.hogWatcherMirror,
             hogMasker: this.hogMasker,

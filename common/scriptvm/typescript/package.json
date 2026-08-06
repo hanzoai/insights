@@ -1,6 +1,6 @@
 {
     "name": "@hanzo/scriptvm",
-    "version": "1.0.67",
+    "version": "1.0.68",
     "description": "Insights Script Virtual Machine",
     "license": "MIT",
     "author": "Insights <hey@hanzo.ai>",

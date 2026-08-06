@@ -5,10 +5,10 @@
 //! enshrine a wrong answer. An optional shared corpus at
 //! `../common/scriptvm/__tests__/cohort_bytecode` is also loaded when present.
 //!
-//! Provenance note: the temporal fixtures (`toDateTime`/`toDate` ordering) are a Rust-vs-Datastore
-//! oracle, not a Python one — the reference Python/TS VMs return `false` for Script temporal ordering,
-//! so `expected_result` reflects the Datastore/instant-ordering answer the Rust VM deliberately
-//! matches; see `rust/common/scriptvm/tests/datetime.rs`.
+//! Provenance note: the temporal fixtures (`toDateTime`/`toDate` ordering) snapshot the
+//! Datastore/instant-ordering answer, which the Rust VM deliberately matches and the Python/TS
+//! reference VMs now also match (both order Script temporals by epoch seconds); see
+//! `rust/common/scriptvm/tests/datetime.rs`.
 
 use std::fs;
 use std::path::{Path, PathBuf};

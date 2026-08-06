@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { IconTrash } from '@hanzo/icons'
 import { Input } from '@hanzo/elements'
 
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { Button } from 'lib/elements/Button'
 import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { Modal } from 'lib/elements/Modal'
@@ -101,7 +101,7 @@ export function CreateRoleModal(): JSX.Element {
                                 onChange={(newValues: string[]) => setRoleMembersToAdd(newValues)}
                                 mode="multiple"
                                 data-attr="subscribed-emails"
-                                options={usersLemonSelectOptions(addableMembers, 'uuid')}
+                                options={usersSelectOptions(addableMembers, 'uuid')}
                             />
                         </div>
                         {!isNewRole && (

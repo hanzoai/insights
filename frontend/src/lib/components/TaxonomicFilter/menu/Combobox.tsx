@@ -952,7 +952,7 @@ export function MenuFilterCombobox({
     // button as its prefix and the category dropdown as its suffix. The button
     // trigger keeps the quill input bar.
     const searchField = iconButton ? (
-        <AutocompleteLemonInput
+        <AutocompleteInput
             value={searchQuery}
             onValueChange={setSearchQuery}
             sharedInputRef={inputRef}
@@ -1121,7 +1121,7 @@ export function MenuFilterCombobox({
     )
 }
 
-interface AutocompleteLemonInputProps {
+interface AutocompleteInputProps {
     value: string
     onValueChange: (value: string) => void
     /** Set alongside base-ui's own ref, so callers (popover `initialFocus`,
@@ -1150,7 +1150,7 @@ interface AutocompleteLemonInputProps {
  * update — the typed destructure below and the input-trigger tests are what guard
  * the contract.
  */
-function AutocompleteLemonInput({
+function AutocompleteInput({
     value,
     onValueChange,
     sharedInputRef,
@@ -1160,7 +1160,7 @@ function AutocompleteLemonInput({
     onKeyDown,
     onPaste,
     'data-attr': dataAttr,
-}: AutocompleteLemonInputProps): JSX.Element {
+}: AutocompleteInputProps): JSX.Element {
     return (
         <Autocomplete.Input
             value={value}

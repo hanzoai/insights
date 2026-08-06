@@ -23,10 +23,10 @@ pub const POSTFN_REQUEST_TIMESTAMP: &str = "Insights-Request-Timestamp";
 
 /// AI-gateway provenance: lowercase-hex HMAC-SHA256 over the canonical tuple
 /// (token, distinct_id, request_id, signed_at). See `gateway_provenance::canonical`.
-pub const POSTFN_AI_GATEWAY_SIGNATURE: &str = "Insights-Ai-Gateway-Signature";
+pub const POSTFN_AI_GATEWAY_SIGNATURE: &str = crate::gateway_provenance::SIGNATURE_HEADER;
 
 /// AI-gateway provenance: RFC3339 timestamp the gateway signed at.
-pub const POSTFN_AI_GATEWAY_SIGNED_AT: &str = "Insights-Ai-Gateway-Signed-At";
+pub const POSTFN_AI_GATEWAY_SIGNED_AT: &str = crate::gateway_provenance::SIGNED_AT_HEADER;
 
 /// AI-gateway provenance: per-call request id; billing dedups exemptions by it.
 pub const POSTFN_AI_GATEWAY_REQUEST_ID: &str = "Insights-Ai-Gateway-Request-Id";

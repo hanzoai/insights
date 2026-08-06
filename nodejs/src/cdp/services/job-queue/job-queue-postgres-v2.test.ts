@@ -52,7 +52,7 @@ describe('CyclotronJobQueuePostgresV2', () => {
             metrics: [],
             capturedInsightsEvents: [],
             warehouseWebhookPayloads: [],
-            emailAssets: [],
+            messageAssets: [],
             ...overrides,
         }
     }

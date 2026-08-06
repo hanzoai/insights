@@ -10,9 +10,11 @@ from django.test import SimpleTestCase
 
 from rest_framework import status
 
+import insights.insightsql.query as insightsql_query_module
 from insights.insightsql.database.database import Database
 from insights.insightsql.database.models import Table, TableNode
 
+from insights.datastore.query_tagging import Product, get_query_tags
 from insights.constants import AvailableFeature
 from insights.models import PropertyDefinition, Team, User
 from insights.models.personal_api_key import PersonalAPIKey
@@ -173,6 +175,31 @@ class TestSessionExperimentContext(DatastoreTestMixin, APILicensedTest):
         response = self._get_session_context()
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"session_id": SESSION_ID, "results": []}
+
+    def test_tags_its_scans_as_experiments(self) -> None:
+        # The scans are experiments' own logic and cost, rendered in the replay player. They used
+        # to inherit product=replay from the recording-metadata lookup that runs first, so the
+        # tag has to be applied after it — and local dev hard-errors on a query with no tag at
+        # all, which TEST mode doesn't reproduce.
+        self._create_recording()
+        self._create_experiment()
+        self._create_session_event(
+            properties={"$feature_flag": "checkout-cta", "$feature_flag_response": "test"},
+        )
+        flush_persons_and_events()
+
+        tagged_products = []
+        original = insightsql_query_module.sync_execute
+
+        def _capturing_sync_execute(*args: Any, **kwargs: Any) -> Any:
+            tagged_products.append(get_query_tags().product)
+            return original(*args, **kwargs)
+
+        with patch.object(insightsql_query_module, "sync_execute", side_effect=_capturing_sync_execute):
+            assert self._get_session_context().status_code == status.HTTP_200_OK
+
+        assert tagged_products
+        assert set(tagged_products) == {Product.EXPERIMENTS}
 
     def test_resolves_variant_from_flag_called_event(self) -> None:
         self._create_recording()

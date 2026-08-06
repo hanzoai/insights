@@ -5,7 +5,7 @@ import { VisualImageDiffViewer, VisualImageDiffViewerProps } from './VisualImage
 type Story = StoryObj<VisualImageDiffViewerProps>
 
 const meta: Meta<VisualImageDiffViewerProps> = {
-    title: 'Lemon UI/Visual image diff viewer',
+    title: 'Elements/Visual image diff viewer',
     component: VisualImageDiffViewer,
     parameters: {
         layout: 'fullscreen',

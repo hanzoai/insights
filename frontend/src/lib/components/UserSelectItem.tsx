@@ -19,7 +19,7 @@ export function UserSelectItem({ user }: UserSelectItemProps): JSX.Element {
     )
 }
 
-export function usersLemonSelectOptions(
+export function usersSelectOptions(
     users: (UserBasicType | UserType)[],
     key: 'email' | 'uuid' = 'email'
 ): InputSelectOption[] {

@@ -43,6 +43,7 @@ import type {
     PaginatedInsightsFlowMinimalListApi,
     PaginatedInsightsFlowRevisionBasicListApi,
     PaginatedInsightsFlowTemplateListApi,
+    PatchedInsightsFlowActionEmailUpdateApi,
     PatchedInsightsFlowApi,
     PatchedInsightsFlowGraphUpdateApi,
     PatchedInsightsFlowScheduleApi,
@@ -327,6 +328,25 @@ export const hogFlowsDestroy = async (projectId: string, id: string, options?: R
     return apiMutator<void>(getInsightsFlowsDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',
+    })
+}
+
+export const getInsightsFlowsActionsEmailPartialUpdateUrl = (projectId: string, id: string, actionId: string) => {
+    return `/api/projects/${projectId}/hog_flows/${id}/actions/${actionId}/email/`
+}
+
+export const hogFlowsActionsEmailPartialUpdate = async (
+    projectId: string,
+    id: string,
+    actionId: string,
+    patchedInsightsFlowActionEmailUpdateApi?: PatchedInsightsFlowActionEmailUpdateApi,
+    options?: RequestInit
+): Promise<InsightsFlowApi> => {
+    return apiMutator<InsightsFlowApi>(getInsightsFlowsActionsEmailPartialUpdateUrl(projectId, id, actionId), {
+        ...options,
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(patchedInsightsFlowActionEmailUpdateApi),
     })
 }
 
@@ -908,6 +928,21 @@ export const hogFlowsUserBlastRadiusCreate = async (
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
         body: JSON.stringify(blastRadiusRequestApi),
+    })
+}
+
+export const getInternalInsightsFlowsAccountAudienceCreateUrl = (teamId: string) => {
+    return `/api/projects/${teamId}/internal/hog_flows/account_audience`
+}
+
+/**
+ * Internal endpoint for the Node batch resolver to page an account audience.
+ * Requires Bearer token authentication via INTERNAL_API_SECRET.
+ */
+export const internalInsightsFlowsAccountAudienceCreate = async (teamId: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getInternalInsightsFlowsAccountAudienceCreateUrl(teamId), {
+        ...options,
+        method: 'POST',
     })
 }
 

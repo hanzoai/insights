@@ -17,8 +17,8 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                         <Markdown>
                             See the complete [Python
                             example](https://github.com/Insights/insights-python/tree/master/examples/example-ai-autogen)
-                            on GitHub. If you're using the Insights SDK wrapper instead of OpenTelemetry, see the [Python
-                            wrapper
+                            on GitHub. If you use the Insights SDK wrapper instead of OpenTelemetry, see this example
+                            instead: [Python wrapper
                             example](https://github.com/Insights/insights-python/tree/7223c52/examples/example-ai-autogen).
                         </Markdown>
                     </CalloutBox>

@@ -12,6 +12,7 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 
 import { CyclotronJobInvocationInsightsFlow, DBInsightsFunctionTemplate } from '../../../types'
+import { HogExecutorAsyncService } from '../../script-executor-async.service'
 import { HogExecutorService } from '../../script-executor.service'
 import { HogInputsService } from '../../script-inputs.service'
 import { InsightsFunctionTemplateManagerService } from '../../managers/script-function-template-manager.service'
@@ -31,7 +32,7 @@ describe('InsightsFunctionHandler', () => {
     let hub: Hub
     let team: Team
     let insightsFunctionHandler: InsightsFunctionHandler
-    let mockInsightsFunctionExecutor: HogExecutorService
+    let mockInsightsFunctionExecutor: HogExecutorAsyncService
     let mockInsightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
     let mockInsightsFlowFunctionsService: InsightsFlowFunctionsService
     let mockRecipientPreferencesService: RecipientPreferencesService
@@ -70,19 +71,22 @@ describe('InsightsFunctionHandler', () => {
             new EmailSuppressionService(hub.postgres, emailSuppressionConfigFromEnv()),
             new RecipientsManagerService(hub.postgres)
         )
-        mockInsightsFunctionExecutor = new HogExecutorService(
+        mockInsightsFunctionExecutor = new HogExecutorAsyncService(
+            new HogExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, hogInputsService),
             {
-                hogCostTimingUpperMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
                 googleAdwordsDeveloperToken: hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
                 fetchRetries: hub.CDP_FETCH_RETRIES,
                 fetchBackoffBaseMs: hub.CDP_FETCH_BACKOFF_BASE_MS,
                 fetchBackoffMaxMs: hub.CDP_FETCH_BACKOFF_MAX_MS,
+                siteUrl: hub.SITE_URL,
             },
-            { teamManager: hub.teamManager, siteUrl: hub.SITE_URL },
-            hogInputsService,
-            emailService,
-            recipientTokensService,
-            undefined as any
+            {
+                teamManager: hub.teamManager,
+                hogInputsService,
+                emailService,
+                recipientTokensService,
+                pushNotificationService: undefined as any,
+            }
         )
         mockInsightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(hub.postgres)
         mockInsightsFlowFunctionsService = new InsightsFlowFunctionsService(
@@ -496,6 +500,41 @@ describe('InsightsFunctionHandler', () => {
         }
     )
 
+    // Live edits reach runs already in flight, so a run that entered on one version can send its
+    // message under a newer one. The conversion belongs to the version whose message the person
+    // received — the same version `email_sent` is counted under — so a send re-pins the attribution
+    // version. A non-message step must leave it alone.
+    it.each([
+        { billingType: 'email' as const, expected: 3 },
+        { billingType: 'push' as const, expected: 3 },
+        { billingType: 'fetch' as const, expected: 1 },
+    ])(
+        'a completed $billingType step leaves the attribution version at $expected',
+        async ({ billingType, expected }) => {
+            const handler = new InsightsFunctionHandler(
+                mockInsightsFlowFunctionsService,
+                mockRecipientPreferencesService,
+                mockEmailValidationService,
+                billingType
+            )
+            // The run entered on v1; v3 is what is live now and what this step executes under.
+            const republished = {
+                ...invocation,
+                hogFlow: { ...invocation.hogFlow, version: 3 },
+                state: { ...invocation.state, flowVersion: 1 },
+            }
+
+            const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(republished, {
+                queue: 'script',
+                queuePriority: 0,
+            })
+
+            await handler.execute({ invocation: republished, action, result: invocationResult })
+
+            expect(invocationResult.invocation.state.flowVersion).toBe(expected)
+        }
+    )
+
     it('should not emit a billable_invocation metric if function is not finished', async () => {
         // Mock the executeWithAsyncFunctions to return a non-finished result
         jest.spyOn(mockInsightsFlowFunctionsService, 'executeWithAsyncFunctions').mockResolvedValueOnce({
@@ -505,7 +544,7 @@ describe('InsightsFunctionHandler', () => {
             metrics: [],
             capturedInsightsEvents: [],
             warehouseWebhookPayloads: [],
-            emailAssets: [],
+            messageAssets: [],
         })
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {

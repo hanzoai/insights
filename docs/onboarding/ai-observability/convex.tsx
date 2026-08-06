@@ -18,7 +18,7 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            npm install @hanzo/ai @ai-sdk/openai ai @opentelemetry/sdk-trace-base @opentelemetry/resources @opentelemetry/api
+                            npm install @hanzo/ai @ai-sdk/openai ai @opentelemetry/sdk-trace-base @opentelemetry/exporter-trace-otlp-http @opentelemetry/resources @opentelemetry/api
                         `}
                     />
                 </>
@@ -59,21 +59,21 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Create a Convex action that initializes a `BasicTracerProvider` with Insights's trace exporter
+                        Create a Convex action that initializes a `BasicTracerProvider` with Insights's span processor
                         and enables telemetry on your AI SDK calls. The provider is initialized at module scope so it
                         persists across warm V8 isolate invocations. Await `provider.forceFlush()` before returning
-                        because Convex may finish the action while the OTLP export is still pending.
+                        because Convex may finish the action while the processor's batch is still pending.
                     </Markdown>
 
                     <CodeBlock
                         language="typescript"
                         code={dedent`
                             import { trace } from '@opentelemetry/api'
-                            import { BasicTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+                            import { BasicTracerProvider } from '@opentelemetry/sdk-trace-base'
                             import { resourceFromAttributes } from '@opentelemetry/resources'
                             import { generateText } from 'ai'
                             import { openai } from '@ai-sdk/openai'
-                            import { InsightsTraceExporter } from '@hanzo/ai/otel'
+                            import { InsightsSpanProcessor } from '@hanzo/ai/otel'
                             import { action } from './_generated/server'
                             import { v } from 'convex/values'
 
@@ -82,12 +82,10 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 'service.name': 'my-convex-app',
                               }),
                               spanProcessors: [
-                                new SimpleSpanProcessor(
-                                  new InsightsTraceExporter({
-                                    projectToken: process.env.POSTFN_PROJECT_TOKEN!,
-                                    host: process.env.POSTFN_HOST,
-                                  })
-                                ),
+                                new InsightsSpanProcessor({
+                                  projectToken: process.env.POSTFN_PROJECT_TOKEN!,
+                                  host: process.env.POSTFN_HOST,
+                                }),
                               ],
                             })
                             trace.setGlobalTracerProvider(provider)
@@ -122,8 +120,9 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            The `InsightsTraceExporter` sends OpenTelemetry `gen_ai.*` spans to Insights's OTLP ingestion
-                            endpoint. Insights converts these into `$ai_generation` events automatically. The
+                            The `InsightsSpanProcessor` sends AI-related OpenTelemetry spans to Insights's OTLP ingestion
+                            endpoint. `provider.forceFlush()` ensures its batch is sent before the Convex action
+                            returns. Insights converts these into `$ai_generation` events automatically. The
                             `insights_distinct_id` metadata field links events to a specific user.
                         </Markdown>
                     </CalloutBox>
@@ -144,11 +143,11 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         language="typescript"
                         code={dedent`
                             import { trace } from '@opentelemetry/api'
-                            import { BasicTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+                            import { BasicTracerProvider } from '@opentelemetry/sdk-trace-base'
                             import { resourceFromAttributes } from '@opentelemetry/resources'
                             import { Agent } from '@convex-dev/agent'
                             import { openai } from '@ai-sdk/openai'
-                            import { InsightsTraceExporter } from '@hanzo/ai/otel'
+                            import { InsightsSpanProcessor } from '@hanzo/ai/otel'
                             import { components } from './_generated/api'
                             import { action } from './_generated/server'
                             import { v } from 'convex/values'
@@ -158,12 +157,10 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 'service.name': 'my-convex-app',
                               }),
                               spanProcessors: [
-                                new SimpleSpanProcessor(
-                                  new InsightsTraceExporter({
-                                    projectToken: process.env.POSTFN_PROJECT_TOKEN!,
-                                    host: process.env.POSTFN_HOST,
-                                  })
-                                ),
+                                new InsightsSpanProcessor({
+                                  projectToken: process.env.POSTFN_PROJECT_TOKEN!,
+                                  host: process.env.POSTFN_HOST,
+                                }),
                               ],
                             })
                             trace.setGlobalTracerProvider(provider)
