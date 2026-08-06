@@ -9,7 +9,7 @@ import { CalendarRangeInline } from './CalendarRangeInline'
 
 type Story = StoryObj<CalendarRangeProps>
 const meta: Meta<CalendarRangeProps> = {
-    title: 'Lemon UI/Lemon Calendar/Lemon Calendar Range Inline',
+    title: 'Elements/Calendar/Calendar Range Inline',
     component: CalendarRangeInline as any,
     parameters: {
         mockDate: '2023-01-26',

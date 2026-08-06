@@ -13,7 +13,7 @@ const DUMMIES: ProfileBubblesProps['people'] = [
 ]
 
 const meta: Meta<ProfileBubblesProps> = {
-    title: 'Lemon UI/Profile Bubbles',
+    title: 'Elements/Profile Bubbles',
     component: ProfileBubblesComponent,
     parameters: {
         testOptions: {

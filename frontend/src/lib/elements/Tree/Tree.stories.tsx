@@ -8,7 +8,7 @@ import { Tree, TreeProps } from './Tree'
 
 type Story = StoryObj<TreeProps>
 const meta: Meta<TreeProps> = {
-    title: 'Lemon UI/Lemon Tree',
+    title: 'Elements/Tree',
     component: Tree as any,
     args: {
         defaultNodeIcon: <IconArchive />,

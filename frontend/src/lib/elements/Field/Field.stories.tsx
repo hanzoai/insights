@@ -9,7 +9,7 @@ import { Field, FieldProps } from './Field'
 
 type Story = StoryObj<FieldProps>
 const meta: Meta<FieldProps> = {
-    title: 'Lemon UI/Lemon Field',
+    title: 'Elements/Field',
     component: Field,
     parameters: {
         docs: {

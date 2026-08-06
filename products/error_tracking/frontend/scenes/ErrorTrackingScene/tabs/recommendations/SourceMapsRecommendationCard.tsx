@@ -1,4 +1,5 @@
 import { useActions } from 'kea'
+import insights from 'insights-js'
 
 import { IconMagicWand } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
@@ -41,7 +42,16 @@ export function SourceMapsRecommendationCard({
                 </div>
             </div>
             <div className="flex justify-center gap-2 mt-2">
-                <Button type="tertiary" to={SOURCE_MAPS_DOCS_URL} targetBlank>
+                <Button
+                    type="tertiary"
+                    to={SOURCE_MAPS_DOCS_URL}
+                    targetBlank
+                    onClick={() => {
+                        insights.capture('error_tracking_source_maps_docs_clicked', {
+                            source: 'recommendation_card',
+                        })
+                    }}
+                >
                     Read docs
                 </Button>
                 <Button type="secondary" icon={<IconMagicWand />} onClick={() => openModal('recommendations')}>

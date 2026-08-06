@@ -6,7 +6,7 @@ import { Calendar, CalendarProps } from './Calendar'
 
 type Story = StoryObj<CalendarProps>
 const meta: Meta<CalendarProps> = {
-    title: 'Lemon UI/Lemon Calendar/Lemon Calendar',
+    title: 'Elements/Calendar/Calendar',
     component: Calendar as any,
     args: {
         onDateClick: (date: dayjs.Dayjs) => {

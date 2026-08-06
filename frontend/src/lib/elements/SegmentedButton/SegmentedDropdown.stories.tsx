@@ -8,7 +8,7 @@ import { SegmentedDropdown, SegmentedDropdownProps } from './SegmentedDropdown'
 
 type Story = StoryObj<SegmentedDropdownProps<string>>
 const meta: Meta<SegmentedDropdownProps<string>> = {
-    title: 'Lemon UI/Lemon Segmented Dropdown',
+    title: 'Elements/Segmented Dropdown',
     component: SegmentedDropdown as any,
     argTypes: {
         options: {

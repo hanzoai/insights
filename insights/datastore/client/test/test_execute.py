@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from insights.datastore.client.connection import DatastoreUser, Workload
 from insights.datastore.client.execute import sync_execute
 from insights.datastore.client.limit import RateLimit, get_llm_analytics_rate_limiter
-from insights.datastore.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import AccessMethod, Product, tags_context
 
 
 @pytest.fixture
@@ -26,22 +26,29 @@ def llm_analytics_slots():
 
 
 @pytest.mark.parametrize(
-    "workload,expected_workload",
+    "workload,access_method,expected_workload,expected_ch_user",
     [
-        (Workload.DEFAULT, Workload.ONLINE),
-        (Workload.OFFLINE, Workload.ONLINE),
-        (Workload.LOGS, Workload.LOGS),
+        (Workload.DEFAULT, None, Workload.ONLINE, DatastoreUser.APP),
+        (Workload.OFFLINE, None, Workload.ONLINE, DatastoreUser.APP),
+        (Workload.LOGS, None, Workload.LOGS, DatastoreUser.APP),
+        (Workload.DEFAULT, AccessMethod.OAUTH, Workload.ONLINE, DatastoreUser.APP),
+        (Workload.DEFAULT, AccessMethod.PERSONAL_API_KEY, Workload.OFFLINE, DatastoreUser.API),
+        (Workload.ONLINE, AccessMethod.PROJECT_SECRET_API_KEY, Workload.OFFLINE, DatastoreUser.API),
+        (Workload.LOGS, AccessMethod.PERSONAL_API_KEY, Workload.LOGS, DatastoreUser.API),
     ],
 )
-def test_process_query_task_workload_routing(client_from_pool, workload, expected_workload):
-    # The async query worker forces queries onto the online cluster, but must not override
+def test_process_query_task_workload_routing(
+    client_from_pool, workload, access_method, expected_workload, expected_ch_user
+):
+    # The async query worker forces app traffic onto the online cluster while API-key traffic
+    # keeps the offline routing it gets when run synchronously. Neither may override
     # cluster-pinned workloads: LOGS-workload tables only exist on the logs cluster.
-    with tags_context(kind="celery", id="insights.tasks.tasks.process_query_task"):
+    with tags_context(kind="celery", id="insights.tasks.tasks.process_query_task", access_method=access_method):
         sync_execute("SELECT 1", workload=workload, flush=False)
 
     called_workload, _, _, called_ch_user = client_from_pool.call_args[0]
     assert called_workload == expected_workload
-    assert called_ch_user == DatastoreUser.APP
+    assert called_ch_user == expected_ch_user
 
 
 @pytest.mark.parametrize(

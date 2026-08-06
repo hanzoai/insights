@@ -44,7 +44,6 @@ opentelemetry_sdk = { workspace = true }
 prost = { workspace = true }
 rand = { workspace = true }
 rdkafka = { workspace = true }
-redis = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-pickle = { version = "1.1.1" }
@@ -85,4 +84,5 @@ rand = { workspace = true }
 rstest = "0.26"
 rdkafka = { workspace = true }
 reqwest = { workspace = true, features = ["multipart"] }
+redis = { workspace = true }
 serde_json = { workspace = true }

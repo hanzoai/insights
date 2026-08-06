@@ -5,6 +5,7 @@ import { Button, Input, Modal, Tag } from '@hanzo/elements'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'
 import { Banner } from 'lib/elements/Banner'
+import { matchesConfirmationText } from 'lib/utils/confirmationText'
 
 import { DataWarehouseManagedViewsetSavedQuery } from '~/types'
 
@@ -41,7 +42,7 @@ export function DataWarehouseManagedViewsetImpactModal({
         minimumAccessLevel: TeamMembershipLevel.Admin,
     })
 
-    const isConfirmationValid = confirmationInput === confirmText
+    const isConfirmationValid = matchesConfirmationText(confirmationInput, confirmText)
     const views = propViews !== undefined ? propViews : logicViews
 
     const onConfirm = async (): Promise<void> => {

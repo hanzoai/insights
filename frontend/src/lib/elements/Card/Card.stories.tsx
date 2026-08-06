@@ -4,7 +4,7 @@ import { Card, CardProps } from './Card'
 
 type Story = StoryObj<CardProps>
 const meta: Meta<CardProps> = {
-    title: 'Lemon UI/Lemon Card',
+    title: 'Elements/Card',
     component: Card as any,
     tags: ['autodocs'],
     render: (props) => {

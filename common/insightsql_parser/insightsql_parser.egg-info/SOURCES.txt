@@ -1,0 +1,16 @@
+InsightsQLLexer.cpp
+InsightsQLParser.cpp
+InsightsQLParserBaseVisitor.cpp
+InsightsQLParserVisitor.cpp
+README.md
+error.cpp
+json.cpp
+parser_python.cpp
+pyproject.toml
+setup.py
+string.cpp
+insightsql_parser-stubs/__init__.pyi
+insightsql_parser.egg-info/PKG-INFO
+insightsql_parser.egg-info/SOURCES.txt
+insightsql_parser.egg-info/dependency_links.txt
+insightsql_parser.egg-info/top_level.txt

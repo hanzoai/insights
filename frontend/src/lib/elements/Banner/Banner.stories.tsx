@@ -4,7 +4,7 @@ import { Banner, BannerProps } from './Banner'
 
 type Story = StoryObj<BannerProps>
 const meta: Meta<BannerProps> = {
-    title: 'Lemon UI/Lemon Banner',
+    title: 'Elements/Banner',
     component: Banner,
     tags: ['autodocs'],
     parameters: {

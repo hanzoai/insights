@@ -11,7 +11,7 @@ import api, { getJSONOrNull } from 'lib/api'
 import { FEATURE_FLAGS, FeatureFlagKey, OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { BannerAction } from 'lib/elements/Banner/Banner'
-import { lemonBannerLogic } from 'lib/elements/Banner/lemonBannerLogic'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
 import { ButtonPropsBase } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -276,10 +276,10 @@ export interface billingLogicActions {
     } // eventUsageLogic
     resetUsageLimitApproachingKey: () => {
         value: true
-    } // lemonBannerLogic
+    } // bannerLogic
     resetUsageLimitExceededKey: () => {
         value: true
-    } // lemonBannerLogic
+    } // bannerLogic
     loadCurrentOrganization: () => any // organizationLogic
     loadUser: (resetOnFailure?: boolean | undefined) => {
         resetOnFailure: boolean | undefined
@@ -702,9 +702,9 @@ export const billingLogic = kea<billingLogicType>([
             ['loadCurrentOrganization'],
             eventUsageLogic,
             ['reportProductUnsubscribed'],
-            lemonBannerLogic({ dismissKey: 'usage-limit-exceeded' }),
+            bannerLogic({ dismissKey: 'usage-limit-exceeded' }),
             ['resetDismissKey as resetUsageLimitExceededKey'],
-            lemonBannerLogic({ dismissKey: 'usage-limit-approaching' }),
+            bannerLogic({ dismissKey: 'usage-limit-approaching' }),
             ['resetDismissKey as resetUsageLimitApproachingKey'],
         ],
     })),

@@ -3,6 +3,9 @@
 from insights.test.base import BaseTest
 from unittest.mock import patch
 
+from parameterized import parameterized
+
+from insights.exceptions import DatastoreAtCapacity
 from insights.models import Team
 from insights.personinsights_client.fake_client import get_active_fake
 from insights.test.persons import add_cohort_members, create_person
@@ -464,3 +467,24 @@ class TestInsertUsersListWithBatchingPersonhog(BaseTest):
 
         cohort.insert_users_list_by_uuid([str(person.uuid)], team_id=self.team.id)
         cohort.insert_users_list_by_uuid([str(person.uuid)], team_id=self.team.id)
+
+    @parameterized.expand([(True,), (False,)])
+    @patch("products.cohorts.backend.models.util.insert_static_cohort")
+    def test_insert_capacity_error_surfaces_only_with_raise_on_error(self, raise_on_error, mock_insert_ch):
+        # A transient Datastore capacity error during static-cohort population must propagate when
+        # raise_on_error=True, so the retrying calculate_cohort_from_list task can re-run it instead
+        # of leaving the cohort half-populated, and terminal state must be left for that task to
+        # finalize. Without the flag it stays swallowed and recorded here, which the create() path
+        # relies on.
+        mock_insert_ch.side_effect = DatastoreAtCapacity()
+        create_person(team=self.team, distinct_ids=["d1"])
+        cohort = self._create_static_cohort()
+
+        if raise_on_error:
+            with self.assertRaises(DatastoreAtCapacity):
+                cohort.insert_users_by_list(["d1"], team_id=self.team.id, raise_on_error=True)
+        else:
+            cohort.insert_users_by_list(["d1"], team_id=self.team.id)
+
+        cohort.refresh_from_db()
+        assert cohort.errors_calculating == (0 if raise_on_error else 1)

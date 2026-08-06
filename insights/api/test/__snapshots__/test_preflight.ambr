@@ -62,6 +62,7 @@
          "insights_organization"."is_ai_training_locked",
          "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
+         "insights_organization"."enforce_verified_domains",
          "insights_organization"."members_can_invite",
          "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",

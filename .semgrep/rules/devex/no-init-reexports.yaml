@@ -64,7 +64,7 @@ rules:
               - 'insights/datastore/metrics/__init__.py'
               - 'insights/datastore/traces/__init__.py'
               - 'insights/dags/common/__init__.py'
-              - 'insights/ducklake/verification/__init__.py'
+              - 'products/managed_warehouse/backend/logic/verification/__init__.py'
               - 'insights/helpers/__init__.py'
               - 'insights/insightsql_queries/insights/funnels/__init__.py'
               - 'insights/plugins/__init__.py'

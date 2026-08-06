@@ -20,6 +20,7 @@ LOCATION_MODULES = [
     "logs",
     "revenue_analytics",
     "shared",
+    "signals",
     "web_analytics",
 ]
 

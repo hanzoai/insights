@@ -6,7 +6,7 @@ import { CalendarSelectInput, CalendarSelectInputProps } from 'lib/elements/Cale
 
 type Story = StoryObj<CalendarSelectInputProps>
 const meta: Meta<CalendarSelectInputProps> = {
-    title: 'Lemon UI/Lemon Calendar/Lemon Calendar Select Input',
+    title: 'Elements/Calendar/Calendar Select Input',
     component: CalendarSelectInput,
     parameters: {
         mockDate: '2023-01-26 16:30:00',
