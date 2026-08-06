@@ -46,7 +46,7 @@ export function openRefundReportDialog({ reportTitle, onConfirm }: OpenRefundRep
                         <Radio value={value} onChange={onChange} options={REFUND_REASON_OPTIONS} />
                     )}
                 </Field>
-                <Field name="note" label="Note" info="Optional – helps us review refunds">
+                <Field name="note" label="Note" info="Optional. Helps us review refunds.">
                     <TextArea placeholder="Optional: add detail" maxLength={4000} rows={3} />
                 </Field>
             </div>

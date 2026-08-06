@@ -66,10 +66,6 @@ impl TestContext {
             .bind(self.team_id as i32)
             .execute(&self.pool)
             .await?;
-        sqlx::query("DELETE FROM insights_personlessdistinctid WHERE team_id = $1")
-            .bind(self.team_id as i32)
-            .execute(&self.pool)
-            .await?;
         sqlx::query("DELETE FROM insights_person WHERE team_id = $1")
             .bind(self.team_id as i32)
             .execute(&self.pool)

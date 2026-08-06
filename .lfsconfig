@@ -1,6 +1,0 @@
-[lfs]
-	fetchexclude = *
-	smudge = cat
-	clean = cat
-	process = false
-	required = false

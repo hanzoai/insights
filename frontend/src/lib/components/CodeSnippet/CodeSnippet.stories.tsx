@@ -6,7 +6,7 @@ import { CodeSnippet, CodeSnippetProps, Language } from './CodeSnippet'
 
 type Story = StoryObj<CodeSnippetProps>
 const meta: Meta<CodeSnippetProps> = {
-    title: 'Lemon UI/Code Snippet',
+    title: 'Elements/Code Snippet',
     component: CodeSnippet,
     tags: ['autodocs'],
 }

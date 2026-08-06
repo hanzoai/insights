@@ -149,6 +149,9 @@ class InsightsConnectionForwardResponseSerializer(serializers.Serializer):
     data = serializers.JSONField(help_text="The target project's response body, passed through.")  # type: ignore[assignment]
 
 
+# A `insights` connection is an integration kind, so route its codegen (frontend types, MCP tools)
+# to the integrations product rather than the core bucket this module's path would otherwise imply.
+@extend_schema(extensions={"x-product": "integrations"})
 class InsightsConnectionViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
     """Replay requests against another Insights project via a `insights` connection you created."""
 

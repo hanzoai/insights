@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { IconTrash } from '@hanzo/icons'
 import { Divider, Modal, Link } from '@hanzo/elements'
 
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { Button } from 'lib/elements/Button'
 import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { Table, TableColumns } from 'lib/elements/Table'
@@ -97,7 +97,7 @@ export function StaffUsersTab(): JSX.Element {
                             onChange={(newValues: string[]) => setStaffUsersToBeAdded(newValues)}
                             mode="multiple"
                             data-attr="subscribed-emails"
-                            options={usersLemonSelectOptions(nonStaffUsers, 'uuid')}
+                            options={usersSelectOptions(nonStaffUsers, 'uuid')}
                         />
                     </div>
                     <Button

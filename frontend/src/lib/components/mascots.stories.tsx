@@ -16,7 +16,7 @@ const allMascots: MascotDefinition[] = Object.entries(mascots).map(([key, Mascot
 }))
 
 const meta: Meta = {
-    title: 'Lemon UI/Script illustrations',
+    title: 'Elements/Script illustrations',
     tags: ['test-skip', 'autodocs'], // Not valuable to take snapshots of these mascots
     parameters: {
         docs: {

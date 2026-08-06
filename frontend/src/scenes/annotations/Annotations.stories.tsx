@@ -44,7 +44,7 @@ const openNewAnnotationModal: Story['play'] = async ({ canvasElement }) => {
     await userEvent.click(await canvas.findByText('New annotation'))
 }
 
-export const NewAnnotationModalLemonUIDatePicker: Story = {
+export const NewAnnotationModalUIDatePicker: Story = {
     play: openNewAnnotationModal,
 }
 

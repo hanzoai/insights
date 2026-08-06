@@ -1,4 +1,5 @@
 import { useActions } from 'kea'
+import insights from 'insights-js'
 
 import { IconBook, IconGear } from '@hanzo/icons'
 
@@ -27,6 +28,10 @@ export function ProductEmptyState({ config, mode }: ProductEmptyStateProps): JSX
         pinProjectId: config.wizard?.pinProjectId,
     })
     const { skipEmptyState } = useActions(productSetupStatusLogic({ productKey: config.productKey }))
+
+    const captureClick = (action: string): void => {
+        insights.capture(`product empty state ${action}`, { product_key: config.productKey, mode })
+    }
 
     // Mode-specific text overrides the base; missing fields fall back to it.
     const text: ProductEmptyStateText = { ...config.text['needs-setup'], ...config.text[mode] }
@@ -65,18 +70,33 @@ export function ProductEmptyState({ config, mode }: ProductEmptyStateProps): JSX
                 {text.hint ? <div className="text-xs text-tertiary mt-2">{text.hint}</div> : null}
 
                 {showWizard ? (
-                    <TerminalCard command={wizardCommand} copyLabel={`${config.productName} wizard command`} />
+                    <TerminalCard
+                        command={wizardCommand}
+                        copyLabel={`${config.productName} wizard command`}
+                        onCopy={() => captureClick('wizard command copied')}
+                    />
                 ) : config.primaryAction ? (
                     <Button
                         type="primary"
                         to={config.primaryAction.to}
-                        onClick={config.primaryAction.onClick}
+                        onClick={() => {
+                            captureClick('primary action clicked')
+                            config.primaryAction?.onClick?.()
+                        }}
                         className="self-start"
+                        data-attr="product-empty-state-primary-action"
                     >
                         {config.primaryAction.label}
                     </Button>
                 ) : manualUrl ? (
-                    <Button type="primary" to={manualUrl} targetBlank className="self-start">
+                    <Button
+                        type="primary"
+                        to={manualUrl}
+                        targetBlank
+                        className="self-start"
+                        onClick={() => captureClick('manual setup clicked')}
+                        data-attr="product-empty-state-manual-setup"
+                    >
                         Set up {config.productName}
                     </Button>
                 ) : null}
@@ -85,16 +105,36 @@ export function ProductEmptyState({ config, mode }: ProductEmptyStateProps): JSX
 
                 <div className="flex items-center gap-4">
                     {showWizard && manualUrl ? (
-                        <Button type="secondary" icon={<IconGear />} to={manualUrl} targetBlank>
+                        <Button
+                            type="secondary"
+                            icon={<IconGear />}
+                            to={manualUrl}
+                            targetBlank
+                            onClick={() => captureClick('manual setup clicked')}
+                            data-attr="product-empty-state-manual-setup"
+                        >
                             Configure manually
                         </Button>
                     ) : null}
                     {config.docsUrl ? (
-                        <Button size="xsmall" type="tertiary" icon={<IconBook />} to={config.docsUrl} targetBlank>
+                        <Button
+                            size="xsmall"
+                            type="tertiary"
+                            icon={<IconBook />}
+                            to={config.docsUrl}
+                            targetBlank
+                            onClick={() => captureClick('docs clicked')}
+                            data-attr="product-empty-state-docs"
+                        >
                             Read the docs
                         </Button>
                     ) : null}
-                    <Button size="xsmall" type="tertiary" onClick={skipEmptyState}>
+                    <Button
+                        size="xsmall"
+                        type="tertiary"
+                        onClick={skipEmptyState}
+                        data-attr="product-empty-state-skip"
+                    >
                         Skip for now
                     </Button>
                 </div>

@@ -29,7 +29,10 @@ import structlog
 
 from insights.caching.ai_gateway_redis_cache import AI_GATEWAY_DEDICATED_CACHE_ALIAS
 from insights.models.team.team import Team
-from insights.storage.cache_expiry_manager import refresh_expiring_caches as refresh_generic
+from insights.storage.cache_expiry_manager import (
+    CacheRefreshCounts,
+    refresh_expiring_caches as refresh_generic,
+)
 from insights.storage.hypercache import HyperCache, HyperCacheStoreMissing, KeyType
 from insights.storage.hypercache_manager import (
     HyperCacheManagementConfig,
@@ -139,7 +142,7 @@ LLM_GATEWAY_POLICY_HYPERCACHE_MANAGEMENT_CONFIG = HyperCacheManagementConfig(
 )
 
 
-def refresh_expiring_caches(ttl_threshold_hours: int = 24, limit: int = 5000) -> tuple[int, int]:
+def refresh_expiring_caches(ttl_threshold_hours: int = 24, limit: int = 5000) -> CacheRefreshCounts:
     """
     Refresh policy caches whose TTL falls below the threshold. Mirrors the
     team_metadata refresh pipeline so the cache stays warm under a growing

@@ -9,6 +9,7 @@ import type {
     PatchedSignalScoutConfigUpdateApi as SignalScoutConfigUpdate,
     SignalScoutConfigApi as SignalScoutConfig,
 } from 'products/signals/frontend/generated/api.schemas'
+import { ScoutConfigNetworkAccessEnumApi } from 'products/signals/frontend/generated/api.schemas'
 
 import {
     dailyCronToTime,
@@ -21,6 +22,7 @@ import {
     timeToDailyCron,
 } from '../../../utils/scoutRunsWindow'
 import { ScoutSlackDestination } from './ScoutSlackDestination'
+import { ScoutTagsEditor } from './ScoutTagsEditor'
 
 interface ScoutConfigControlsProps {
     config: SignalScoutConfig
@@ -137,6 +139,33 @@ export function ScoutConfigForm({
             ) : null}
             <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col min-w-0">
+                    <span className="text-xs text-default">Network access</span>
+                    <span className="text-[11.5px] text-muted">
+                        What the scout can reach while it runs. Trusted domains cover Insights, GitHub, and common
+                        package registries. Full access lets it reach any site.
+                    </span>
+                </div>
+                <Select
+                    size="small"
+                    value={config.network_access}
+                    options={[
+                        { value: ScoutConfigNetworkAccessEnumApi.Trusted, label: 'Trusted domains only' },
+                        { value: ScoutConfigNetworkAccessEnumApi.Full, label: 'Full access' },
+                    ]}
+                    // Editable while the scout is disabled, unlike the schedule controls: a newly
+                    // enabled scout with no prior run is immediately due, so network access must be
+                    // settable BEFORE the enable or the first run races out under the default policy.
+                    disabledReason={updating ? 'Saving scout settings' : undefined}
+                    className="w-44"
+                    onChange={(value) => {
+                        if (value !== config.network_access) {
+                            onUpdate(config.id, { network_access: value })
+                        }
+                    }}
+                />
+            </div>
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col min-w-0">
                     <span className="text-xs text-default">Opt out of auto-pause</span>
                     <span className="text-[11.5px] text-muted">
                         A scout is paused when nobody acts on its reports for a few weeks, and flagged as quiet when it
@@ -150,6 +179,13 @@ export function ScoutConfigForm({
                     onChange={(checked) => onUpdate(config.id, { auto_pause_exempt: checked })}
                     aria-label={`${config.skill_name} opt out of auto-pause`}
                 />
+            </div>
+            <div className="flex flex-col gap-1">
+                <div className="flex flex-col min-w-0">
+                    <span className="text-xs text-default">Tags</span>
+                    <span className="text-[11.5px] text-muted">Use tags to group scouts and filter the list.</span>
+                </div>
+                <ScoutTagsEditor config={config} onUpdate={onUpdate} updating={updating} />
             </div>
             <ScoutSlackDestination
                 destination={config.output_destinations?.slack}

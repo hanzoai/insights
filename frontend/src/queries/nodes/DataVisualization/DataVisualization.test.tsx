@@ -11,16 +11,16 @@ type TableMockProps = {
     allowContentScroll?: boolean
 }
 
-let mockLatestLemonTableProps: TableMockProps | null = null
-const mockLemonTable = jest.fn((props: TableMockProps): null => {
-    mockLatestLemonTableProps = props
+let mockLatestTableProps: TableMockProps | null = null
+const mockTable = jest.fn((props: TableMockProps): null => {
+    mockLatestTableProps = props
     return null
 })
 
 jest.mock('@hanzo/elements', () => ({
     ...jest.requireActual('@hanzo/elements'),
     Table: (props: Record<string, unknown>): null => {
-        mockLemonTable(props)
+        mockTable(props)
         return null
     },
 }))
@@ -43,8 +43,8 @@ describe('DataTableVisualization', () => {
 
     beforeEach(() => {
         initKeaTests()
-        mockLatestLemonTableProps = null
-        mockLemonTable.mockClear()
+        mockLatestTableProps = null
+        mockTable.mockClear()
     })
 
     afterEach(() => {
@@ -69,16 +69,16 @@ describe('DataTableVisualization', () => {
             )
 
             await waitFor(() => {
-                if (!mockLatestLemonTableProps) {
+                if (!mockLatestTableProps) {
                     throw new Error('Expected Table to render')
                 }
             })
 
-            if (!mockLatestLemonTableProps) {
+            if (!mockLatestTableProps) {
                 throw new Error('Expected Table props to be recorded')
             }
-            expect(mockLatestLemonTableProps.embedded).toBe(embedded)
-            expect(mockLatestLemonTableProps.allowContentScroll).toBe(expectedAllowContentScroll)
+            expect(mockLatestTableProps.embedded).toBe(embedded)
+            expect(mockLatestTableProps.allowContentScroll).toBe(expectedAllowContentScroll)
         }
     )
 })

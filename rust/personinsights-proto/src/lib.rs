@@ -9,6 +9,11 @@ pub mod personinsights {
             tonic::include_proto!("personinsights.identity.v1");
         }
     }
+    pub mod lifecycle {
+        pub mod v1 {
+            tonic::include_proto!("personinsights.lifecycle.v1");
+        }
+    }
     pub mod leader {
         pub mod v1 {
             tonic::include_proto!("personinsights.leader.v1");
