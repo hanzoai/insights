@@ -12,7 +12,6 @@ from insights.schema import (
     PersonsArgMaxVersion,
     PropertyGroupsMode,
     SessionsV2JoinMode,
-    SessionTableVersion,
 )
 
 from insights.cloud_utils import is_cloud
@@ -110,9 +109,6 @@ def set_default_modifier_values(modifiers: InsightsQLQueryModifiers, team: "Team
 
     if modifiers.bounceRatePageViewMode is None:
         modifiers.bounceRatePageViewMode = BounceRatePageViewMode.COUNT_PAGEVIEWS
-
-    if modifiers.sessionTableVersion is None:
-        modifiers.sessionTableVersion = SessionTableVersion.AUTO
 
     if modifiers.sessionsV2JoinMode is None:
         modifiers.sessionsV2JoinMode = SessionsV2JoinMode.UUID

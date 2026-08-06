@@ -187,25 +187,6 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                 />
             </Label>
-
-            <Label className={labelClassName}>
-                <div>Session table version:</div>
-                <Select<Exclude<InsightsQLQueryModifiers['sessionTableVersion'], undefined>>
-                    options={[
-                        { value: 'auto', label: 'auto' },
-                        { value: 'v1', label: 'v1' },
-                        { value: 'v2', label: 'v2' },
-                        { value: 'v3', label: 'v3' },
-                    ]}
-                    onChange={(value) =>
-                        setQuery({
-                            ...query,
-                            modifiers: { ...query.modifiers, sessionTableVersion: value },
-                        })
-                    }
-                    value={query.modifiers?.sessionTableVersion ?? response?.modifiers?.sessionTableVersion ?? 'auto'}
-                />
-            </Label>
         </div>
     )
 }
