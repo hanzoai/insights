@@ -15,7 +15,7 @@ from insights.api.utils import action
 from insights.async_migrations.status import async_migrations_ok
 from insights.cloud_utils import is_cloud
 from insights.git import get_git_commit_short
-from insights.permissions import SingleTenancyOrAdmin
+from insights.permissions import IsStaffUser, SingleTenancyOrAdmin
 from insights.storage import object_storage
 from insights.utils import (
     dict_from_cursor_fetchall,
@@ -214,7 +214,9 @@ class InstanceStatusViewSet(viewsets.ViewSet):
             }
         )
 
-    @action(methods=["GET"], detail=False)
+    # Running and recent queries carry inline filter literals from every team on the instance,
+    # so this action is staff-only everywhere — self-hosted instances host multiple teams too.
+    @action(methods=["GET"], detail=False, permission_classes=[IsAuthenticated, IsStaffUser])
     def queries(self, request: Request) -> Response:
         queries = {"postgres_running": self.get_postgres_running_queries()}
 

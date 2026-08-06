@@ -2,7 +2,7 @@ import json
 
 from insights.test.base import BaseTest
 
-from insights.models import ScheduledChange
+from products.feature_flags.backend.models.scheduled_change import ScheduledChange
 
 
 class TestScheduledChange(BaseTest):

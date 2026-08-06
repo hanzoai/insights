@@ -4,6 +4,8 @@ import { IconBadge } from '@hanzo/icons'
 import { Button, Dialog, Label, Select, Table, Link } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { TableLink } from 'lib/elements/Table/TableLink'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -18,6 +20,11 @@ export function DataColorThemes(): JSX.Element {
 
     const { currentTeamLoading } = useValues(teamLogic)
     const { updateCurrentTeam } = useActions(teamLogic)
+
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     const themes = _themes || []
 
@@ -55,7 +62,7 @@ export function DataColorThemes(): JSX.Element {
                         },
                     ]}
                 />
-                <Button type="secondary" onClick={() => selectTheme('new')}>
+                <Button type="secondary" onClick={() => selectTheme('new')} disabledReason={restrictedReason}>
                     Add theme
                 </Button>
 
@@ -78,6 +85,7 @@ export function DataColorThemes(): JSX.Element {
                     }}
                     loading={themesLoading || currentTeamLoading}
                     options={themes.map((theme) => ({ value: theme.id, label: theme.name }))}
+                    disabledReason={restrictedReason}
                 />
 
                 <DataColorThemeModal />

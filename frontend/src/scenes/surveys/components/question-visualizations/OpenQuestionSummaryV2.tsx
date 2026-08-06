@@ -1,5 +1,4 @@
 import { useValues } from 'kea'
-import { useThumbSurvey } from '@hanzo/insights/react/surveys'
 import { useCallback, useEffect, useState } from 'react'
 
 import {
@@ -12,6 +11,7 @@ import {
     IconThumbsUpFilled,
 } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
+import { useThumbSurvey } from '@hanzo/react/surveys'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -222,9 +222,7 @@ export function OpenQuestionSummaryV2({
                 }`}
             >
                 <div className="px-3 pb-3">
-                    <div className="prose prose-base max-w-none">
-                        <Markdown>{summary.content}</Markdown>
-                    </div>
+                    <Markdown className="text-base">{summary.content}</Markdown>
 
                     <div className="flex items-center justify-between text-xs text-muted mt-3 pt-2 border-t">
                         <div className="flex items-center gap-2">

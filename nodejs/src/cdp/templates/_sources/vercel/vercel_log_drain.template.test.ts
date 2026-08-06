@@ -25,7 +25,7 @@ describe('vercel log drain template', () => {
         expect(response.finished).toEqual(true)
         expect(response.capturedInsightsEvents).toHaveLength(1)
         expect(response.capturedInsightsEvents[0].event).toEqual('$http_log')
-        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
+        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^http_log_[A-Za-z0-9+/]{22}$/)
         expect(response.capturedInsightsEvents[0].properties).toMatchObject({
             source: 'lambda',
             level: 'info',
@@ -218,10 +218,10 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
+        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^http_log_[A-Za-z0-9+/]{22}$/)
     })
 
-    it('should capture all Vercel log properties with snake_case naming', async () => {
+    it('snapshot: default config (forward_ip_and_user_agent on) emits PII fields', async () => {
         const response = await tester.invoke(
             {},
             {
@@ -232,7 +232,18 @@ describe('vercel log drain template', () => {
         expect(response.capturedInsightsEvents).toMatchSnapshot()
     })
 
-    it('should flatten proxy properties', async () => {
+    it('snapshot: forward_ip_and_user_agent disabled drops PII fields', async () => {
+        const response = await tester.invoke(
+            { forward_ip_and_user_agent: false },
+            {
+                request: createVercelRequest(vercelLogDrain),
+            }
+        )
+
+        expect(response.capturedInsightsEvents).toMatchSnapshot()
+    })
+
+    it('should flatten all proxy properties (including PII) by default', async () => {
         const response = await tester.invoke(
             {},
             {
@@ -249,7 +260,7 @@ describe('vercel log drain template', () => {
         expect(props.proxy_vercel_cache).toBe('MISS')
     })
 
-    it('should set Insights standard properties from proxy data', async () => {
+    it('should emit $ip, $raw_user_agent, and proxy_* PII by default and set $current_url from proxy data', async () => {
         const response = await tester.invoke(
             {},
             {
@@ -261,7 +272,34 @@ describe('vercel log drain template', () => {
         const props = response.capturedInsightsEvents[0].properties
         expect(props.$ip).toBe('120.75.16.101')
         expect(props.$raw_user_agent).toBe('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
+        expect(props.proxy_client_ip).toBe('120.75.16.101')
+        expect(props.proxy_user_agent).toEqual(['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'])
         expect(props.$current_url).toBe('https://my-app.vercel.app/api/users?page=1')
+    })
+
+    it('should drop $ip, $raw_user_agent, and proxy_* PII when forward_ip_and_user_agent is disabled', async () => {
+        const response = await tester.invoke(
+            { forward_ip_and_user_agent: false },
+            { request: createVercelRequest(vercelLogDrain) }
+        )
+
+        expect(response.error).toBeUndefined()
+        const props = response.capturedInsightsEvents[0].properties
+        expect(props.$ip).toBeUndefined()
+        expect(props.$raw_user_agent).toBeUndefined()
+        expect(props.proxy_client_ip).toBeUndefined()
+        expect(props.proxy_user_agent).toBeUndefined()
+    })
+
+    it.each([
+        ['default (no override)', {}, false],
+        ['explicit anonymous', { person_processing: 'anonymous' }, false],
+        ['identified', { person_processing: 'identified' }, true],
+    ])('person_processing %s emits $process_person_profile=%s', async (_name, inputs, expected) => {
+        const response = await tester.invoke(inputs, { request: createVercelRequest(vercelLogDrain) })
+
+        expect(response.error).toBeUndefined()
+        expect(response.capturedInsightsEvents[0].properties.$process_person_profile).toBe(expected)
     })
 
     it('should handle logs with null message without crashing', async () => {
@@ -294,7 +332,7 @@ describe('vercel log drain template', () => {
 
         expect(response.error).toBeUndefined()
         expect(response.capturedInsightsEvents).toHaveLength(1)
-        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
+        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^http_log_[A-Za-z0-9+/]{22}$/)
         // Proxy fields should be null when proxy is missing
         expect(response.capturedInsightsEvents[0].properties.proxy_method).toBeNull()
     })
@@ -344,6 +382,440 @@ describe('vercel log drain template', () => {
         expect(response.error).toBeUndefined()
         expect(response.capturedInsightsEvents).toHaveLength(1)
         expect(response.capturedInsightsEvents[0].properties.vercel_log_id).toBe('body1')
+    })
+
+    it('should extract $pathname and $host from URL', async () => {
+        const response = await tester.invoke(
+            {},
+            {
+                request: createVercelRequest(vercelLogDrain),
+            }
+        )
+
+        expect(response.error).toBeUndefined()
+        const props = response.capturedInsightsEvents[0].properties
+        expect(props.$pathname).toBe('/api/users')
+        expect(props.$host).toBe('my-app.vercel.app')
+        expect(props.$referrer).toBe('https://my-app.vercel.app')
+    })
+
+    it('should extract UTM parameters from URL query string', async () => {
+        const logWithUtm = {
+            ...vercelLogDrain,
+            proxy: {
+                ...vercelLogDrain.proxy,
+                path: '/api/users?utm_source=google&utm_medium=cpc&utm_campaign=summer_sale&utm_term=shoes&utm_content=banner_ad',
+            },
+        }
+
+        const response = await tester.invoke(
+            {},
+            {
+                request: createVercelRequest(logWithUtm),
+            }
+        )
+
+        expect(response.error).toBeUndefined()
+        const props = response.capturedInsightsEvents[0].properties
+        expect(props.utm_source).toBe('google')
+        expect(props.utm_medium).toBe('cpc')
+        expect(props.utm_campaign).toBe('summer_sale')
+        expect(props.utm_term).toBe('shoes')
+        expect(props.utm_content).toBe('banner_ad')
+    })
+
+    it('should decode URL-encoded UTM values', async () => {
+        const logWithEncodedUtm = {
+            ...vercelLogDrain,
+            proxy: {
+                ...vercelLogDrain.proxy,
+                path: '/api/users?utm_source=hello%20world&utm_campaign=summer%2B2024',
+            },
+        }
+
+        const response = await tester.invoke(
+            {},
+            {
+                request: createVercelRequest(logWithEncodedUtm),
+            }
+        )
+
+        expect(response.error).toBeUndefined()
+        const props = response.capturedInsightsEvents[0].properties
+        expect(props.utm_source).toBe('hello world')
+        expect(props.utm_campaign).toBe('summer+2024')
+    })
+
+    it('should set UTM properties to null when not present in URL', async () => {
+        const logWithoutUtm = {
+            ...vercelLogDrain,
+            proxy: {
+                ...vercelLogDrain.proxy,
+                path: '/api/users?page=1&sort=name',
+            },
+        }
+
+        const response = await tester.invoke(
+            {},
+            {
+                request: createVercelRequest(logWithoutUtm),
+            }
+        )
+
+        expect(response.error).toBeUndefined()
+        const props = response.capturedInsightsEvents[0].properties
+        expect(props.utm_source).toBeNull()
+        expect(props.utm_medium).toBeNull()
+        expect(props.utm_campaign).toBeNull()
+        expect(props.utm_term).toBeNull()
+        expect(props.utm_content).toBeNull()
+    })
+
+    it('should handle URLs without query strings', async () => {
+        const logWithoutQuery = {
+            ...vercelLogDrain,
+            proxy: {
+                ...vercelLogDrain.proxy,
+                path: '/api/users',
+            },
+        }
+
+        const response = await tester.invoke(
+            {},
+            {
+                request: createVercelRequest(logWithoutQuery),
+            }
+        )
+
+        expect(response.error).toBeUndefined()
+        const props = response.capturedInsightsEvents[0].properties
+        expect(props.$pathname).toBe('/api/users')
+        expect(props.utm_source).toBeNull()
+    })
+
+    it('should treat empty UTM values as null', async () => {
+        const logWithEmptyUtm = {
+            ...vercelLogDrain,
+            proxy: {
+                ...vercelLogDrain.proxy,
+                path: '/api/users?utm_source=&utm_medium=cpc',
+            },
+        }
+
+        const response = await tester.invoke(
+            {},
+            {
+                request: createVercelRequest(logWithEmptyUtm),
+            }
+        )
+
+        expect(response.error).toBeUndefined()
+        const props = response.capturedInsightsEvents[0].properties
+        expect(props.utm_source).toBeNull()
+        expect(props.utm_medium).toBe('cpc')
+    })
+
+    it('should handle malformed percent-encoding without crashing', async () => {
+        const logWithMalformedEncoding = {
+            ...vercelLogDrain,
+            proxy: {
+                ...vercelLogDrain.proxy,
+                path: '/api/users?utm_campaign=100%free&utm_source=google',
+            },
+        }
+
+        const response = await tester.invoke(
+            {},
+            {
+                request: createVercelRequest(logWithMalformedEncoding),
+            }
+        )
+
+        expect(response.error).toBeUndefined()
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        const props = response.capturedInsightsEvents[0].properties
+        // Malformed value falls back to raw string
+        expect(props.utm_campaign).toBe('100%free')
+        // Valid encoding still works
+        expect(props.utm_source).toBe('google')
+    })
+
+    describe('distinct_id_strategy', () => {
+        const setMockedDay = (iso: string): void => {
+            jest.spyOn(Date, 'now').mockReturnValue(DateTime.fromISO(iso, { zone: 'utc' }).toMillis())
+        }
+
+        const otherUaProxy = {
+            ...vercelLogDrain.proxy,
+            userAgent: ['curl/8.0'],
+        }
+
+        const otherIpProxy = {
+            ...vercelLogDrain.proxy,
+            clientIp: '203.0.113.7',
+        }
+
+        it('rotating_salt: same inputs same day → same id; different day → different id', async () => {
+            setMockedDay('2025-01-01T00:00:00Z')
+            const day1 = await tester.invoke(
+                { salt_secret: 'test-salt', distinct_id_strategy: 'rotating_salt' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+            const day1Repeat = await tester.invoke(
+                { salt_secret: 'test-salt', distinct_id_strategy: 'rotating_salt' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+            setMockedDay('2025-01-02T00:00:00Z')
+            const day2 = await tester.invoke(
+                { salt_secret: 'test-salt', distinct_id_strategy: 'rotating_salt' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+
+            const id1 = day1.capturedInsightsEvents[0].distinct_id
+            const id1Repeat = day1Repeat.capturedInsightsEvents[0].distinct_id
+            const id2 = day2.capturedInsightsEvents[0].distinct_id
+
+            expect(id1).toMatch(/^http_log_[A-Za-z0-9+/]{22}$/)
+            expect(id1Repeat).toBe(id1)
+            expect(id2).not.toBe(id1)
+            expect(day1.capturedInsightsEvents[0].properties.$distinct_id_strategy).toBe('rotating_salt')
+        })
+
+        it('rotating_salt: different UA on the same IP/day → different id', async () => {
+            setMockedDay('2025-01-01T00:00:00Z')
+            const baseline = await tester.invoke(
+                { salt_secret: 'test-salt', distinct_id_strategy: 'rotating_salt' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+            const otherUa = await tester.invoke(
+                { salt_secret: 'test-salt', distinct_id_strategy: 'rotating_salt' },
+                { request: createVercelRequest({ ...vercelLogDrain, proxy: otherUaProxy }) }
+            )
+
+            expect(otherUa.capturedInsightsEvents[0].distinct_id).not.toBe(baseline.capturedInsightsEvents[0].distinct_id)
+        })
+
+        it('fixed_salt: same inputs different days → same id; rotating salt → different id', async () => {
+            setMockedDay('2025-01-01T00:00:00Z')
+            const day1 = await tester.invoke(
+                { salt_secret: 'salt-v1', distinct_id_strategy: 'fixed_salt' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+            setMockedDay('2025-02-15T00:00:00Z')
+            const day2 = await tester.invoke(
+                { salt_secret: 'salt-v1', distinct_id_strategy: 'fixed_salt' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+            const rotated = await tester.invoke(
+                { salt_secret: 'salt-v2', distinct_id_strategy: 'fixed_salt' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+
+            expect(day1.capturedInsightsEvents[0].distinct_id).toMatch(/^http_log_[A-Za-z0-9+/]{22}$/)
+            expect(day2.capturedInsightsEvents[0].distinct_id).toBe(day1.capturedInsightsEvents[0].distinct_id)
+            expect(rotated.capturedInsightsEvents[0].distinct_id).not.toBe(day1.capturedInsightsEvents[0].distinct_id)
+            expect(day1.capturedInsightsEvents[0].properties.$distinct_id_strategy).toBe('fixed_salt')
+        })
+
+        it('ip: literal client IP after the prefix; stable across days', async () => {
+            setMockedDay('2025-01-01T00:00:00Z')
+            const day1 = await tester.invoke(
+                { salt_secret: 'unused', distinct_id_strategy: 'ip' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+            setMockedDay('2025-03-01T00:00:00Z')
+            const day2 = await tester.invoke(
+                { salt_secret: 'unused', distinct_id_strategy: 'ip' },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+            const otherIp = await tester.invoke(
+                { salt_secret: 'unused', distinct_id_strategy: 'ip' },
+                { request: createVercelRequest({ ...vercelLogDrain, proxy: otherIpProxy }) }
+            )
+
+            expect(day1.capturedInsightsEvents[0].distinct_id).toBe('http_log_120.75.16.101')
+            expect(day2.capturedInsightsEvents[0].distinct_id).toBe('http_log_120.75.16.101')
+            expect(otherIp.capturedInsightsEvents[0].distinct_id).toBe('http_log_203.0.113.7')
+            expect(day1.capturedInsightsEvents[0].properties.$distinct_id_strategy).toBe('ip')
+        })
+
+        it('custom: substitutes placeholders into the template', async () => {
+            const response = await tester.invoke(
+                {
+                    salt_secret: 'unused',
+                    distinct_id_strategy: 'custom',
+                    custom_template: 'tenant_{host}_{ip}',
+                },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+
+            expect(response.error).toBeUndefined()
+            expect(response.capturedInsightsEvents[0].distinct_id).toBe(
+                'http_log_tenant_my-app.vercel.app_120.75.16.101'
+            )
+            expect(response.capturedInsightsEvents[0].properties.$distinct_id_strategy).toBe('custom')
+        })
+
+        it('custom: substituted-to-empty template falls back to rotating_salt', async () => {
+            const logWithoutUa = {
+                ...vercelLogDrain,
+                proxy: { ...vercelLogDrain.proxy, userAgent: [] },
+            }
+            const response = await tester.invoke(
+                {
+                    salt_secret: 'test-salt',
+                    distinct_id_strategy: 'custom',
+                    custom_template: '{ua}',
+                },
+                { request: createVercelRequest(logWithoutUa) }
+            )
+
+            expect(response.error).toBeUndefined()
+            expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^http_log_[A-Za-z0-9+/]{22}$/)
+            expect(response.capturedInsightsEvents[0].properties.$distinct_id_strategy).toBe('rotating_salt_fallback')
+            expect(response.logs.map((l) => l.message)).toContainEqual(expect.stringContaining('substituted to empty'))
+        })
+
+        it('custom: {salt} placeholder is not interpreted (secret never reaches distinct_id)', async () => {
+            const response = await tester.invoke(
+                {
+                    salt_secret: 'super-secret-salt',
+                    distinct_id_strategy: 'custom',
+                    custom_template: 'leak_{salt}_check',
+                },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+
+            expect(response.error).toBeUndefined()
+            const distinctId = response.capturedInsightsEvents[0].distinct_id
+            expect(distinctId).toBe('http_log_leak_{salt}_check')
+            expect(distinctId).not.toContain('super-secret-salt')
+        })
+
+        it('custom: empty template falls back to rotating_salt and warns', async () => {
+            const response = await tester.invoke(
+                {
+                    salt_secret: 'test-salt',
+                    distinct_id_strategy: 'custom',
+                    custom_template: '',
+                },
+                { request: createVercelRequest(vercelLogDrain) }
+            )
+
+            expect(response.error).toBeUndefined()
+            expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^http_log_[A-Za-z0-9+/]{22}$/)
+            expect(response.capturedInsightsEvents[0].properties.$distinct_id_strategy).toBe('rotating_salt_fallback')
+            expect(response.logs.map((l) => l.message)).toContainEqual(
+                expect.stringContaining('custom_template empty, falling back')
+            )
+        })
+
+        it.each(['rotating_salt', 'fixed_salt', 'ip', 'custom'])(
+            'strategy %s: omits $ip and $raw_user_agent when forward toggle is explicitly false',
+            async (strategy) => {
+                const response = await tester.invoke(
+                    {
+                        salt_secret: 'test-salt',
+                        distinct_id_strategy: strategy,
+                        custom_template: strategy === 'custom' ? 'k_{ip}' : undefined,
+                        forward_ip_and_user_agent: false,
+                    },
+                    { request: createVercelRequest(vercelLogDrain) }
+                )
+
+                expect(response.error).toBeUndefined()
+                const props = response.capturedInsightsEvents[0].properties
+                expect(props.$ip).toBeUndefined()
+                expect(props.$raw_user_agent).toBeUndefined()
+            }
+        )
+    })
+
+    describe('page_routes_only', () => {
+        const logWithPath = (path: string) => ({
+            ...vercelLogDrain,
+            proxy: { ...vercelLogDrain.proxy, path },
+        })
+
+        it('is off by default: a sub-resource request is still captured', async () => {
+            const response = await tester.invoke(
+                {},
+                { request: createVercelRequest(logWithPath('/static/app.abc123.js')) }
+            )
+
+            expect(response.error).toBeUndefined()
+            expect(response.capturedInsightsEvents).toHaveLength(1)
+        })
+
+        it.each([
+            ['root', '/'],
+            ['extension-less route', '/pricing'],
+            ['nested extension-less route', '/docs/getting-started'],
+            ['trailing slash', '/docs/'],
+            ['html document', '/index.html'],
+            ['htm document', '/legacy.htm'],
+            ['uppercase HTML extension', '/INDEX.HTML'],
+            ['extension-less api route', '/api/users'],
+        ])('captures %s when enabled', async (_name, path) => {
+            const response = await tester.invoke(
+                { page_routes_only: true },
+                { request: createVercelRequest(logWithPath(path)) }
+            )
+
+            expect(response.error).toBeUndefined()
+            expect(response.capturedInsightsEvents).toHaveLength(1)
+        })
+
+        it.each([
+            ['script bundle', '/static/app.abc123.js'],
+            ['source map', '/static/app.abc123.js.map'],
+            ['stylesheet', '/styles/main.css'],
+            ['gatsby page-data', '/page-data/index/page-data.json'],
+            ['image', '/images/logo.svg'],
+            ['font', '/fonts/inter.woff2'],
+        ])('skips %s when enabled and acknowledges with 200', async (_name, path) => {
+            const response = await tester.invoke(
+                { page_routes_only: true },
+                { request: createVercelRequest(logWithPath(path)) }
+            )
+
+            expect(response.error).toBeUndefined()
+            expect(response.finished).toEqual(true)
+            expect(response.capturedInsightsEvents).toHaveLength(0)
+            expect(response.execResult).toMatchObject({
+                httpResponse: { status: 200, body: 'OK' },
+            })
+        })
+
+        it('selects the first page-route log from a batch even when an asset comes first', async () => {
+            const batch = [
+                { ...logWithPath('/static/app.abc123.js'), id: 'asset1' },
+                { ...logWithPath('/pricing'), id: 'page1' },
+                { ...logWithPath('/styles/main.css'), id: 'asset2' },
+            ]
+
+            const response = await tester.invoke({ page_routes_only: true }, { request: createVercelRequest(batch) })
+
+            expect(response.error).toBeUndefined()
+            expect(response.capturedInsightsEvents).toHaveLength(1)
+            expect(response.capturedInsightsEvents[0].properties.vercel_log_id).toBe('page1')
+            expect(response.capturedInsightsEvents[0].properties.$pathname).toBe('/pricing')
+        })
+
+        it('skips a batch with no page-route log and acknowledges with 200', async () => {
+            const batch = [
+                { ...logWithPath('/static/app.abc123.js'), id: 'asset1' },
+                { ...logWithPath('/styles/main.css'), id: 'asset2' },
+            ]
+
+            const response = await tester.invoke({ page_routes_only: true }, { request: createVercelRequest(batch) })
+
+            expect(response.error).toBeUndefined()
+            expect(response.capturedInsightsEvents).toHaveLength(0)
+            expect(response.execResult).toMatchObject({
+                httpResponse: { status: 200, body: 'OK' },
+            })
+        })
     })
 })
 

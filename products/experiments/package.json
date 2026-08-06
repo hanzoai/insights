@@ -8,8 +8,11 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:"
     },
+    "devDependencies": {
+        "@storybook/react": "catalog:"
+    },
     "peerDependencies": {
-        "@hanzo/icons": "*",
+        "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

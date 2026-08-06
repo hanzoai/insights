@@ -12,7 +12,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to Engage.so",
     icon_url="/static/services/engage.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 fetch('https://api.engage.so/insights', {
     'method': 'POST',
@@ -56,12 +56,12 @@ fetch('https://api.engage.so/insights', {
 
 
 class TemplateEngageMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-engage-so-plugin"
+    plugin_url = "https://github.com/Insights/insights-engage-so-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         public_key = obj.config.get("publicKey", "")

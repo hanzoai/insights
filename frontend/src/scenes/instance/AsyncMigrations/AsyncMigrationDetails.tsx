@@ -5,7 +5,7 @@ import { IconRefresh } from '@hanzo/icons'
 import { Button } from 'lib/elements/Button'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
-import { humanFriendlyDetailedTime } from 'lib/utils'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { AsyncMigration, AsyncMigrationError, asyncMigrationsLogic } from './asyncMigrationsLogic'
 

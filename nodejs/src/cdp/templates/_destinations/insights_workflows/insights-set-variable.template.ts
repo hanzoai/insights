@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Set a variable value in the workflow',
     icon_url: '/static/insights-icon.svg',
     category: ['Custom', 'Analytics'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 return inputs.variable_value
 `,

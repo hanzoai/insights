@@ -1,11 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import * as hogpatchPng from '@hanzo/brand/hoggies/png/hogpatch'
 import { IconArrowRight, IconCheck, IconUpload, IconX } from '@hanzo/icons'
 import { Button, FileInput, Input, Select, Link, Spinner, toast } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
-import { ClimberMascot1, ClimberMascot2, YCMascot } from 'lib/components/mascots'
+import { ClimberHog1, ClimberHog2 } from 'lib/components/mascots'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { Banner } from 'lib/elements/Banner'
 import { CalendarSelectInput } from 'lib/elements/Calendar/CalendarSelect'
@@ -21,6 +23,8 @@ import { BillingProductV2Type, StartupProgramLabel } from '~/types'
 
 import { RAISED_OPTIONS } from './constants'
 import { StartupProgramLogicProps, startupProgramLogic } from './startupProgramLogic'
+
+const MascotHogpatch = pngHoggie(hogpatchPng)
 
 const YC_DEAL_BOOKFACE = 'https://bookface.ycombinator.com/deals/687'
 
@@ -167,7 +171,7 @@ export function StartupProgram(): JSX.Element {
                     <div className="flex flex-col items-center mt-8">
                         <div className="px-4 w-full max-w-100 mb-4">
                             <div className="relative">
-                                <YCMascot className="h-auto w-full" />
+                                <MascotHogpatch className="h-auto w-full" />
                             </div>
                         </div>
                         <div className="text-center">
@@ -184,7 +188,7 @@ export function StartupProgram(): JSX.Element {
                     <div className="flex items-center justify-center -mt-6 md:gap-8 mb-3">
                         <div className="flex items-end self-end">
                             <div className="relative w-35 min-w-18">
-                                <ClimberMascot1 className="h-auto w-full" />
+                                <ClimberHog1 className="h-auto w-full" />
                             </div>
                         </div>
                         <div className="text-center">
@@ -200,7 +204,7 @@ export function StartupProgram(): JSX.Element {
                         </div>
                         <div className="flex items-center">
                             <div className="relative w-35 min-w-18">
-                                <ClimberMascot2 className="h-auto w-full" />
+                                <ClimberHog2 className="h-auto w-full" />
                             </div>
                         </div>
                     </div>
@@ -250,8 +254,8 @@ export function StartupProgram(): JSX.Element {
                         <div className="flex items-start">
                             <IconCheck className="text-success shrink-0 mt-1 mr-2" />
                             <div>
-                                <h4 className="font-semibold">50% off Mintlify for 6 months</h4>
-                                <p className="text-muted text-sm">So you can build better documentation</p>
+                                <h4 className="font-semibold">$1,500 off an Incident.io teams plan</h4>
+                                <p className="text-muted text-sm">So you can avoid stress during an incident</p>
                             </div>
                         </div>
                         <div className="flex items-start">
@@ -307,8 +311,8 @@ export function StartupProgram(): JSX.Element {
                                 </div>
                                 <div className="flex gap-1">
                                     <span className="text-xxs align-super">2</span>
-                                    Boring international customs reasons mean users outside US/Canada get a $150
-                                    Insights merch voucher instead.
+                                    Boring international customs reasons mean users outside US/Canada get a $150 Insights
+                                    merch voucher instead.
                                 </div>
                             </div>
                         </div>

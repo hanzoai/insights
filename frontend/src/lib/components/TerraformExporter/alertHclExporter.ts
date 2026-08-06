@@ -1,7 +1,8 @@
 import { formatHclValue, sanitizeResourceName } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
-import { AlertType } from '~/lib/components/Alerts/types'
 import { InsightsFunctionType } from '~/types'
+
+import { AlertType, isTrendsAlertConfig } from 'products/alerts/frontend/types'
 
 import { FieldMapping, HclExportOptions, HclExportResult, ResourceExporter, generateHCL } from './hclExporter'
 import { generateInsightsFunctionHCL } from './insightsFunctionHclExporter'
@@ -9,7 +10,7 @@ import { generateInsightsFunctionHCL } from './insightsFunctionHclExporter'
 export interface AlertHclExportOptions extends HclExportOptions {
     /** When provided, uses TF reference instead of hardcoded insight id */
     insightTfReference?: string
-    /** Child custom functions to include in export */
+    /** Child script functions to include in export */
     insightsFunctions?: InsightsFunctionType[]
 }
 
@@ -59,14 +60,16 @@ const ALERT_FIELD_MAPPINGS: FieldMapping<Partial<AlertType>, AlertHclExportOptio
     {
         source: 'config',
         target: 'series_index',
-        shouldInclude: (_, alert) => alert.config?.series_index !== undefined,
-        transform: (_, alert) => formatHclValue(alert.config?.series_index),
+        shouldInclude: (_, alert) => isTrendsAlertConfig(alert.config) && alert.config.series_index !== undefined,
+        transform: (_, alert) => (isTrendsAlertConfig(alert.config) ? formatHclValue(alert.config.series_index) : ''),
     },
     {
         source: 'config',
         target: 'check_ongoing_interval',
-        shouldInclude: (_, alert) => alert.config?.check_ongoing_interval !== undefined,
-        transform: (_, alert) => formatHclValue(alert.config?.check_ongoing_interval),
+        shouldInclude: (_, alert) =>
+            isTrendsAlertConfig(alert.config) && alert.config.check_ongoing_interval !== undefined,
+        transform: (_, alert) =>
+            isTrendsAlertConfig(alert.config) ? formatHclValue(alert.config.check_ongoing_interval) : '',
     },
     {
         source: 'skip_weekend',
@@ -140,7 +143,7 @@ export function generateAlertHCL(alert: Partial<AlertType>, options: AlertHclExp
     allWarnings.push(...result.warnings)
     hclSections.push(result.hcl)
 
-    // Generate child custom functions if provided
+    // Generate child script functions if provided
     if (options.insightsFunctions && options.insightsFunctions.length > 0) {
         const alertIdReplacements = new Map<string, string>()
         if (alert.id) {
@@ -157,7 +160,7 @@ export function generateAlertHCL(alert: Partial<AlertType>, options: AlertHclExp
             hclSections.push('')
             hclSections.push(insightsFunctionResult.hcl)
             allWarnings.push(
-                ...insightsFunctionResult.warnings.map((w) => `[Custom Function: ${insightsFunction.name || insightsFunction.id}] ${w}`)
+                ...insightsFunctionResult.warnings.map((w) => `[Script Function: ${insightsFunction.name || insightsFunction.id}] ${w}`)
             )
         }
     }

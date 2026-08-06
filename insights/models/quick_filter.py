@@ -1,8 +1,7 @@
 from django.db import models
 
-from insights.schema import QuickFilterType
-
 from insights.models.utils import UUIDModel
+from insights.schema_enums import QuickFilterType
 
 
 class QuickFilter(UUIDModel):

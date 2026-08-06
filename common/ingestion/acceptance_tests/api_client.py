@@ -113,7 +113,7 @@ class InsightsTestClient:
         logger.debug("Host: %s", self.base_url)
 
         # Create Insights client instance with the API key
-        analytics_client = Insights(api_key, host=self.base_url, debug=True)
+        insights_client = Insights(api_key, host=self.base_url, debug=True)
 
         logger.info("Sending capture event using Insights client")
         logger.debug("Event: %s", event_name)
@@ -124,21 +124,21 @@ class InsightsTestClient:
 
         # Send event using Insights client instance
         if timestamp:
-            analytics_client.capture(
+            insights_client.capture(
                 distinct_id=distinct_id, event=event_name, properties=properties, timestamp=timestamp
             )
         else:
-            analytics_client.capture(distinct_id=distinct_id, event=event_name, properties=properties)
+            insights_client.capture(distinct_id=distinct_id, event=event_name, properties=properties)
 
         logger.info("Event sent via Insights client")
 
         # Flush to ensure the event is sent immediately
         logger.debug("Flushing Insights client")
-        analytics_client.flush()
+        insights_client.flush()
         logger.debug("Insights client flushed")
 
         # Shutdown the client
-        analytics_client.shutdown()
+        insights_client.shutdown()
 
     def query_events_insightsql(
         self, project_id: str, event_name: Optional[str] = None, distinct_id: Optional[str] = None, limit: int = 100

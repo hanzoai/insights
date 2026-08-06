@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 
 import structlog
 
-from insights.models.insights_functions.insights_function import InsightsFunction
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 logger = structlog.get_logger(__name__)
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
             "--team-id", type=int, help="Team ID to refresh InsightsFunctions for (if not provided, processes all teams)"
         )
         parser.add_argument(
-            "--insights-function-id",
+            "--script-function-id",
             type=str,
             help="Specific InsightsFunction ID to refresh (if provided, only this function is processed)",
         )

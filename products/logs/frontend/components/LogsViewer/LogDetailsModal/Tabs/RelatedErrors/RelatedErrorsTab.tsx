@@ -3,9 +3,10 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { Banner, Skeleton } from '@hanzo/elements'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
-import { ErrorTrackingIssueCard } from 'scenes/max/messages/ErrorTrackingIssueCard'
 
 import { MaxErrorTrackingIssuePreview } from '~/queries/schema/schema-assistant-error-tracking'
+
+import { ErrorTrackingIssueCard } from 'products/insights_ai/frontend/api/primitives'
 
 import { RelatedErrorsLogicProps, relatedErrorsLogic } from './relatedErrorsLogic'
 

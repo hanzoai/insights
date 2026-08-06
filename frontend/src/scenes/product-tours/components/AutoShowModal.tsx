@@ -3,8 +3,8 @@ import { useState } from 'react'
 
 import { Button, Modal, SegmentedButton } from '@hanzo/elements'
 
-import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { featureFlagLogic as featureFlagSceneLogic } from 'scenes/feature-flags/featureFlagLogic'
+import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 
 import { DEFAULT_TARGETING_FILTERS, productTourLogic } from '../productTourLogic'
 import { AutoShowSection } from './AutoShowSection'

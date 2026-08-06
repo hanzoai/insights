@@ -1,5 +1,11 @@
-// Mascot illustrations removed — stubs kept for import compatibility
-// All components return null to prevent rendering
+// Upstream's mascot illustrations are not part of this product's identity, so
+// none of them render. The exports stay because ~45 call sites place a mascot
+// as decoration beside real content; a null component removes the artwork and
+// leaves those layouts intact, which deleting the module would not.
+//
+// This is why the artwork keeps coming back: converging with upstream restores
+// both the PNGs and the components that draw them, and a frontend that compiles
+// looks like one that is correct. Rendering is what catches it.
 import { ImgHTMLAttributes } from 'react'
 
 type MascotProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'>
@@ -9,47 +15,18 @@ function NullMascot(props: MascotProps): JSX.Element | null {
     return null
 }
 
-export const SurprisedMascot = NullMascot
-export const XRayMascot = NullMascot
-export const XRayMascot2 = NullMascot
-export const HospitalMascot = NullMascot
-export const BlushingMascot = NullMascot
-export const LaptopMascot1 = NullMascot
-export const LaptopMascot2 = NullMascot
-export const LaptopMascot3 = NullMascot
-export const LaptopMascot4 = NullMascot
-export const LaptopMascotEU = NullMascot
-export const ExplorerMascot = NullMascot
-export const RunningMascot = NullMascot
-export const SpaceMascot = NullMascot
-export const TronMascot = NullMascot
-export const HeartMascot = NullMascot
-export const StarMascot = NullMascot
-export const PoliceMascot = NullMascot
-export const SleepingMascot = NullMascot
-export const BuilderMascot1 = NullMascot
-export const BuilderMascot2 = NullMascot
-export const BuilderMascot3 = NullMascot
-export const ProfessorMascot = NullMascot
-export const SupportHeroMascot = NullMascot
-export const DetectiveMascot = NullMascot
-export const MailMascot = NullMascot
-export const FeatureFlagMascot = NullMascot
-export const ExperimentsMascot = NullMascot
-export const ListMascot = NullMascot
-export const WarningMascot = NullMascot
-export const WavingMascot = NullMascot
-export const ReadingMascot = NullMascot
-export const RobotMascot = NullMascot
-export const MicrophoneMascot = NullMascot
-export const PhonePairMascots = NullMascot
-export const BurningMoneyMascot = NullMascot
-export const FilmCameraMascot = NullMascot
-export const SupermanMascot = NullMascot
-export const JudgeMascot = NullMascot
-export const ClimberMascot1 = NullMascot
-export const ClimberMascot2 = NullMascot
-export const YCMascot = NullMascot
-export const BigLeaguesMascot = NullMascot
-export const StopSignMascot = NullMascot
-export const ThreeBearsMascots = NullMascot
+export const BigLeaguesHog = NullMascot
+export const BurningMoneyHog = NullMascot
+export const ClimberHog1 = NullMascot
+export const ClimberHog2 = NullMascot
+export const ExplorerHog = NullMascot
+export const FeatureFlagHog = NullMascot
+export const HeartHog = NullMascot
+export const HogWelder = NullMascot
+export const MailHog = NullMascot
+export const SleepingHog = NullMascot
+export const StarHog = NullMascot
+export const SupermanHog = NullMascot
+export const SupportHeroHog = NullMascot
+export const WarningHog = NullMascot
+export const WavingHog = NullMascot

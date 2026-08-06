@@ -10,8 +10,8 @@ modifiers = [arg for arg in sys.argv if arg.startswith("-")]
 args = [arg for arg in sys.argv if arg != "" and not arg.startswith("-")]
 filename = args[1]
 
-if not filename.endswith(".iql") and not filename.endswith(".iqle"):
-    raise ValueError("Filename must end with '.iql' or '.iqle'")
+if not filename.endswith(".script") and not filename.endswith(".hoge"):
+    raise ValueError("Filename must end with '.script' or '.hoge'")
 
 with open(filename) as file:
     code = file.read()
@@ -23,7 +23,7 @@ if "--compile" in modifiers and len(args) == 3 and args[2].endswith(".js"):
         file.write(js_program + "\n")
 
 else:
-    if filename.endswith(".iql"):
+    if filename.endswith(".script"):
         bytecode = create_bytecode(parse_program(code)).bytecode
     else:
         bytecode = json.loads(code)
@@ -45,7 +45,7 @@ else:
         if len(args) == 3:
             target = args[2]
         else:
-            target = filename[:-4] + ".iqle"
+            target = filename[:-4] + ".hoge"
             if len(args) != 2:
                 raise ValueError("Must specify exactly one filename")
 

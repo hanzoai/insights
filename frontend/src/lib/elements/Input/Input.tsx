@@ -7,32 +7,32 @@ import React, { useRef, useState } from 'react'
 import { IconEye, IconSearch, IconX } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
 
+import { IconEyeHidden } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Tag } from 'lib/elements/Tag'
-import { IconEyeHidden } from 'lib/elements/icons'
 
 import { RawInputAutosize } from './RawInputAutosize'
 
-interface InputPropsBase
-    extends Pick<
-        // NOTE: We explicitly pick rather than omit to ensure these components aren't used incorrectly
-        React.InputHTMLAttributes<HTMLInputElement>,
-        | 'className'
-        | 'onClick'
-        | 'onFocus'
-        | 'onBlur'
-        | 'autoFocus'
-        | 'maxLength'
-        | 'onKeyDown'
-        | 'onKeyUp'
-        | 'onKeyPress'
-        | 'autoComplete'
-        | 'autoCorrect'
-        | 'autoCapitalize'
-        | 'spellCheck'
-        | 'inputMode'
-        | 'pattern'
-    > {
+interface InputPropsBase extends Pick<
+    // NOTE: We explicitly pick rather than omit to ensure these components aren't used incorrectly
+    React.InputHTMLAttributes<HTMLInputElement>,
+    | 'className'
+    | 'onClick'
+    | 'onFocus'
+    | 'onBlur'
+    | 'autoFocus'
+    | 'maxLength'
+    | 'onKeyDown'
+    | 'onKeyUp'
+    | 'onKeyPress'
+    | 'onPaste'
+    | 'autoComplete'
+    | 'autoCorrect'
+    | 'autoCapitalize'
+    | 'spellCheck'
+    | 'inputMode'
+    | 'pattern'
+> {
     inputRef?: React.Ref<HTMLInputElement>
     id?: string
     placeholder?: string
@@ -72,11 +72,12 @@ export interface InputPropsText extends InputPropsBase {
     value?: string
     defaultValue?: string
     onChange?: (newValue: string) => void
+    /** Seconds between valid values; mainly for `type="time"` (passed to native `<input>`). */
+    step?: number
 }
 
 export interface InputPropsNumber
-    extends InputPropsBase,
-        Pick<React.InputHTMLAttributes<HTMLInputElement>, 'step' | 'min' | 'max'> {
+    extends InputPropsBase, Pick<React.InputHTMLAttributes<HTMLInputElement>, 'step' | 'min' | 'max'> {
     type: 'number'
     value?: number
     defaultValue?: number
@@ -161,9 +162,11 @@ export const Input = React.forwardRef<HTMLDivElement, InputProps>(function Input
             suffix = showPasswordButton
         }
     }
-    // allowClear button takes precedence if set
+    // when allowClear is set with a value, render a clear button alongside any
+    // existing suffix so consumers (e.g. TaxonomicFilter's category dropdown)
+    // remain reachable while the user is typing
     if (allowClear && value) {
-        suffix = (
+        const clearButton = (
             <Button
                 size="small"
                 noPadding
@@ -186,6 +189,14 @@ export const Input = React.forwardRef<HTMLDivElement, InputProps>(function Input
                     focus()
                 }}
             />
+        )
+        suffix = suffix ? (
+            <>
+                {suffix}
+                {clearButton}
+            </>
+        ) : (
+            clearButton
         )
     }
 
@@ -211,7 +222,14 @@ export const Input = React.forwardRef<HTMLDivElement, InputProps>(function Input
                     className
                 )}
                 aria-disabled={disabled || !!disabledReason}
-                onClick={() => focus()}
+                onClick={(event) => {
+                    // Native segmented inputs (notably `type="time"` in Safari) reset to their
+                    // first segment when focused again. The input already handles its own clicks;
+                    // only focus it when the surrounding input chrome was clicked.
+                    if (event.target !== internalInputRef.current) {
+                        focus()
+                    }
+                }}
                 ref={ref}
             >
                 {prefix}
@@ -219,7 +237,9 @@ export const Input = React.forwardRef<HTMLDivElement, InputProps>(function Input
                     className="Input__input"
                     ref={mergedInputRef}
                     type={(type === 'password' && passwordVisible ? 'text' : type) || 'text'}
-                    value={value}
+                    // A cleared controlled number input holds NaN; pass '' so the input stays
+                    // controlled instead of feeding NaN to the DOM (undefined stays uncontrolled)
+                    value={type === 'number' && typeof value === 'number' && Number.isNaN(value) ? '' : value}
                     disabled={disabled || !!disabledReason}
                     onChange={(event) => {
                         if (stopPropagation) {
@@ -254,7 +274,7 @@ export const Input = React.forwardRef<HTMLDivElement, InputProps>(function Input
                         if (stopPropagation) {
                             event.stopPropagation()
                         }
-                        if (onPressEnter && event.key === 'Enter') {
+                        if (onPressEnter && event.key === 'Enter' && !event.nativeEvent.isComposing) {
                             onPressEnter(event)
                         }
                     }}

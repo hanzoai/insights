@@ -31,7 +31,7 @@
 
         .Button:not(:hover) {
             .Button__content {
-                opacity: var(--button-icon-opacity);
+                opacity: var(--lemon-button-icon-opacity);
             }
         }
 
@@ -67,7 +67,7 @@
             z-index: 2;
 
             .Button {
-                --button-icon-opacity: 1;
+                --lemon-button-icon-opacity: 1;
             }
         }
 

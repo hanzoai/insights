@@ -21,13 +21,13 @@ def create_gemini_client():
         if not hanzo_insights.host:
             hanzo_insights.host = settings.SITE_URL
 
-    analytics_client = hanzo_insights.default_client
-    if not analytics_client:
-        logger.warning("Insights default_client not available, LLM analytics will not be tracked")
+    insights_client = hanzo_insights.default_client
+    if not insights_client:
+        logger.warning("Insights default_client not available, AI observability will not be tracked")
 
     return genai.Client(
         api_key=settings.GEMINI_API_KEY,
-        analytics_client=analytics_client,
+        insights_client=insights_client,
     )
 
 

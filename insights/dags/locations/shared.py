@@ -4,7 +4,7 @@ from insights.datastore.cluster import DatastoreCluster
 from insights.datastore.custom_metrics import MetricsClient
 from insights.dags import slack_alerts
 
-from . import resources
+from . import loggers, resources
 
 
 def report_job_status_metric(
@@ -39,5 +39,6 @@ defs = dagster.Definitions(
             ]
         ],
     ],
+    loggers=loggers,
     resources=resources,
 )

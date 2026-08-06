@@ -1,16 +1,18 @@
 import { useValues } from 'kea'
+import { useState } from 'react'
 
 import { IconX } from '@hanzo/icons'
-import { Button, Input, SegmentedButton, Link } from '@hanzo/elements'
+import { Button, Input, InputSelect, SegmentedButton, Link } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
-import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { OperandTag } from 'lib/components/PropertyFilters/components/OperandTag'
 import { DEFAULT_TAXONOMIC_GROUP_TYPES } from 'lib/components/PropertyFilters/components/TaxonomicPropertyFilter'
+import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
+import { URL_MATCHING_HINTS } from 'lib/components/UrlMatchingHints'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { Dialog } from 'lib/elements/Dialog'
 import { Label } from 'lib/elements/Label/Label'
-import { IconOpenInApp } from 'lib/elements/icons'
 
 import { groupsModel } from '~/models/groupsModel'
 import {
@@ -21,7 +23,6 @@ import {
     PropertyOperator,
 } from '~/types'
 
-import { URL_MATCHING_HINTS } from '../utils/hints'
 import {
     SCREEN_NAME_MATCHING_LABEL,
     SCREEN_NAME_PROPERTY,
@@ -59,7 +60,7 @@ export function ActionStep({
         <div className="bg-surface-primary rounded border p-3 relative">
             {index > 0 && !(index % 2 === 0) && (
                 <div className="absolute top-1/2 -left-5">
-                    <OperandTag operand="or" />
+                    <OperandTag operand="or" className="bg-surface-primary" />
                 </div>
             )}
             <div className="deprecated-space-y-4">
@@ -91,7 +92,7 @@ export function ActionStep({
                     step.event !== '$autocapture' &&
                     step.event !== '$pageview' &&
                     step.event !== '$screen' && (
-                        <div className="deprecated-space-y-1">
+                        <div className="flex flex-col gap-2">
                             <Label>Event name</Label>
                             <EventName
                                 value={step.event}
@@ -106,12 +107,9 @@ export function ActionStep({
                                 disabled={!!disabledReason}
                             />
 
-                            <small>
-                                <Link to="https://hanzo.ai/docs/libraries" target="_blank">
-                                    See documentation
-                                </Link>{' '}
-                                on how to send custom events in lots of languages.
-                            </small>
+                            <Link to="https://hanzo.ai/docs/libraries" target="_blank">
+                                See documentation
+                            </Link>
                         </div>
                     )}
                 {step.event === '$pageview' && (
@@ -410,7 +408,8 @@ function TypeSwitcher({
                     },
                     {
                         value: '$screen',
-                        label: 'Screen',
+                        label: 'Mobile screen',
+                        tooltip: 'Screen views from mobile apps ($screen events sent by the mobile SDKs)',
                         'data-attr': 'action-type-screen',
                         disabledReason,
                     },
@@ -438,21 +437,35 @@ function ScreenNameField({
     disabledReason?: string
 }): JSX.Element {
     const existingFilter = step.properties?.find(isScreenNameFilter)
-    const screenName = (existingFilter && 'value' in existingFilter ? (existingFilter.value as string) : '') ?? ''
-    const operator: ScreenNameMatching =
-        existingFilter && 'operator' in existingFilter
-            ? (existingFilter.operator as ScreenNameMatching)
-            : PropertyOperator.IContains
+    const rawValue = existingFilter && 'value' in existingFilter ? existingFilter.value : undefined
+    const screenNames: string[] =
+        rawValue == null || rawValue === '' ? [] : Array.isArray(rawValue) ? rawValue.map(String) : [String(rawValue)]
+    const filterOperator: ScreenNameMatching | undefined =
+        existingFilter && 'operator' in existingFilter ? (existingFilter.operator as ScreenNameMatching) : undefined
 
-    const setFilter = (name: string, op: ScreenNameMatching): void => {
+    // Keep the selected operator even when the value is empty (an empty filter isn't persisted, so we can't
+    // read it back off the step) — otherwise picking "matches exactly" before typing would snap back to the default.
+    // Only seeded once: safe because this component remounts when the step's event type changes away from $screen.
+    const [operator, setOperator] = useState<ScreenNameMatching>(filterOperator ?? PropertyOperator.IContains)
+
+    // Only "matches exactly" supports multiple values (translated to an IN() query); the rest take a single string
+    const isMulti = operator === PropertyOperator.Exact
+    const singleValue = screenNames[0] ?? ''
+
+    const setFilter = (value: string | string[], op: ScreenNameMatching): void => {
         const otherProperties = (step.properties || []).filter((p) => !isScreenNameFilter(p))
+        const isEmpty = Array.isArray(value) ? value.length === 0 : !value
+        if (isEmpty) {
+            sendStep({ ...step, properties: otherProperties })
+            return
+        }
         sendStep({
             ...step,
             properties: [
                 ...otherProperties,
                 {
                     key: SCREEN_NAME_PROPERTY,
-                    value: name,
+                    value,
                     operator: op as PropertyOperator,
                     type: PropertyFilterType.Event,
                 },
@@ -460,17 +473,21 @@ function ScreenNameField({
         })
     }
 
-    const clearFilter = (): void => {
-        sendStep({ ...step, properties: (step.properties || []).filter((p) => !isScreenNameFilter(p)) })
+    const handleOperatorChange = (op: ScreenNameMatching): void => {
+        setOperator(op)
+        const nextValue = op === PropertyOperator.Exact ? screenNames : singleValue
+        setFilter(nextValue, op)
     }
 
     return (
         <div className="deprecated-space-y-1">
             <div className="flex flex-wrap gap-1">
-                <Label>Screen name</Label>
+                <Label info="Matches the $screen_name property on $screen events sent by the mobile SDKs (iOS, Android, React Native, Flutter). This is the mobile equivalent of a pageview URL.">
+                    Screen name
+                </Label>
                 <div className="flex flex-1 justify-end">
                     <SegmentedButton
-                        onChange={(value) => setFilter(screenName, value as ScreenNameMatching)}
+                        onChange={(value) => handleOperatorChange(value as ScreenNameMatching)}
                         value={operator}
                         options={Object.entries(SCREEN_NAME_MATCHING_LABEL).map(([value, label]) => ({
                             value,
@@ -481,14 +498,26 @@ function ScreenNameField({
                     />
                 </div>
             </div>
-            <Input
-                data-attr="edit-action-screen-name-input"
-                allowClear
-                onChange={(val) => (val ? setFilter(val, operator) : clearFilter())}
-                value={screenName}
-                placeholder="e.g. HomeScreen, Settings"
-                disabledReason={disabledReason}
-            />
+            {isMulti ? (
+                <InputSelect
+                    data-attr="edit-action-screen-name-input"
+                    mode="multiple"
+                    allowCustomValues
+                    value={screenNames}
+                    onChange={(vals) => setFilter(vals, operator)}
+                    placeholder="e.g. HomeScreen, Settings"
+                    disabled={!!disabledReason}
+                />
+            ) : (
+                <Input
+                    data-attr="edit-action-screen-name-input"
+                    allowClear
+                    onChange={(val) => setFilter(val, operator)}
+                    value={singleValue}
+                    placeholder="e.g. HomeScreen"
+                    disabledReason={disabledReason}
+                />
+            )}
         </div>
     )
 }

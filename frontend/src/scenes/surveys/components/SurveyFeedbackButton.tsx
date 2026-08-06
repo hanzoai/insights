@@ -2,7 +2,7 @@ import { Button } from '@hanzo/elements'
 
 /**
  * This button does not have any logic attached to it, as that's added using a survey from Insights.
- * On prod, the survey is https://insights.hanzo.ai/project/2/surveys/0196afd4-6617-0000-0bbf-8b0db5b160f9
+ * On prod, the survey is https://us.hanzo.ai/project/2/surveys/0196afd4-6617-0000-0bbf-8b0db5b160f9
  */
 export function SurveyFeedbackButton(): JSX.Element {
     return (

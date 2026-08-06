@@ -7,14 +7,17 @@ import { Button, Dialog, Input, Label, Skeleton } from '@hanzo/elements'
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { CodeSnippet } from 'lib/components/CodeSnippet'
-import { JSSnippet, JSSnippetV2 as JSSnippetV2Component } from 'lib/components/JSSnippet'
+import { JSSnippet } from 'lib/components/JSSnippet'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { getPublicSupportSnippet } from 'lib/components/Support/supportLogic'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Field } from 'lib/elements/Field'
 import { Link } from 'lib/elements/Link'
-import { debounce, inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import { debounce } from 'lib/utils/async'
+import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 import { organizationLogic } from 'scenes/organizationLogic'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
@@ -27,23 +30,27 @@ export function TeamDisplayName({ updateInline = false }: { updateInline?: boole
     const { currentTeam, currentTeamLoading } = useValues(teamLogic)
     const { updateCurrentTeam } = useActions(teamLogic)
     const [name, setName] = useState(currentTeam?.name || '')
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     const debouncedUpdateCurrentTeam = useMemo(() => debounce(updateCurrentTeam, 500), [updateCurrentTeam])
     const handleChange = (value: string): void => {
         setName(value)
-        if (updateInline) {
+        if (updateInline && !restrictedReason) {
             debouncedUpdateCurrentTeam({ name: value })
         }
     }
 
     return (
         <div className="deprecated-space-y-4 max-w-160">
-            <Input value={name} onChange={handleChange} />
+            <Input value={name} onChange={handleChange} disabledReason={restrictedReason} />
             {!updateInline && (
                 <Button
                     type="primary"
                     onClick={() => updateCurrentTeam({ name })}
-                    disabled={!name || !currentTeam || name === currentTeam.name}
+                    disabled={!name || !currentTeam || name === currentTeam.name || !!restrictedReason}
                     loading={currentTeamLoading}
                 >
                     Rename project
@@ -63,19 +70,6 @@ export function WebSnippet(): JSX.Element {
         </div>
     ) : (
         <JSSnippet />
-    )
-}
-
-export function WebSnippetV2(): JSX.Element {
-    const { currentTeam, currentTeamLoading } = useValues(teamLogic)
-
-    return currentTeamLoading && !currentTeam ? (
-        <div className="deprecated-space-y-4">
-            <Skeleton className="w-1/2 h-4" />
-            <Skeleton repeat={3} />
-        </div>
-    ) : (
-        <JSSnippetV2Component />
     )
 }
 
@@ -103,7 +97,11 @@ function DebugInfoPanel(): JSX.Element | null {
             <h3 id="debug-info" className="min-w-[25rem]">
                 Debug information
             </h3>
-            <p>Include this snippet when creating an issue (feature request or bug report) on GitHub.</p>
+            <p>
+                Include this snippet when creating an issue (feature request or bug report) on GitHub. The session and
+                admin links inside it are internal references the Insights team uses to look into your report — they only
+                resolve for Insights staff.
+            </p>
             {anyLoading ? (
                 <Skeleton repeat={2} active={true} />
             ) : (
@@ -118,7 +116,10 @@ function DebugInfoPanel(): JSX.Element | null {
 export function TeamVariables(): JSX.Element {
     const { currentTeam, isTeamTokenResetAvailable } = useValues(teamLogic)
     const { resetToken } = useActions(teamLogic)
-
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
     const { preflight } = useValues(preflightLogic)
 
     const region = preflight?.region
@@ -166,7 +167,13 @@ export function TeamVariables(): JSX.Element {
                     thing="project token"
                     actions={
                         isTeamTokenResetAvailable ? (
-                            <Button icon={<IconRefresh />} noPadding onClick={openDialog} tooltip="Reset token" />
+                            <Button
+                                icon={<IconRefresh />}
+                                disabledReason={restrictedReason}
+                                noPadding
+                                onClick={openDialog}
+                                tooltip="Reset token"
+                            />
                         ) : undefined
                     }
                 >
@@ -241,6 +248,7 @@ export function TeamAuthorizedURLs(): JSX.Element {
             allowWildCards={false}
             allowAdd={canEdit}
             allowDelete={canEdit}
+            displaySuggestions={canEdit}
         />
     )
 }

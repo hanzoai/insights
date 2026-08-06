@@ -1,14 +1,14 @@
-// @ts-nocheck
 import { Counter } from 'prom-client'
 
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+
 import { QuotaLimiting } from '../../../common/services/quota-limiting.service'
-import { InsightsFlow } from '../../../schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow } from '../../types'
-import { InsightsFunctionMonitoringService } from '../monitoring/insights-function-monitoring.service'
+import { InsightsFunctionMonitoringService } from '../monitoring/script-function-monitoring.service'
 
 export const counterInsightsFlowQuotaLimited = new Counter({
-    name: 'cdp_insights_flow_quota_limited',
-    help: 'A custom flow invocation was quota limited',
+    name: 'cdp_hog_flow_quota_limited',
+    help: 'A script flow invocation was quota limited',
     labelNames: ['team_id'],
 })
 
@@ -17,16 +17,16 @@ export interface InsightsFlowQuotaLimitResult {
 }
 
 /**
- * Checks if a customflow is quota limited based on its billable action types.
+ * Checks if a hogflow is quota limited based on its billable action types.
  * Uses the pre-computed billable_action_types field for efficient quota checking.
  */
 export async function checkInsightsFlowQuotaLimits(
-    insightsFlow: InsightsFlow,
+    hogFlow: InsightsFlow,
     teamId: number,
     quotaLimiting: QuotaLimiting
 ): Promise<InsightsFlowQuotaLimitResult> {
     // Ensure billable_action_types is an array (handle null, undefined, or non-array values)
-    const billableActionTypes = Array.isArray(insightsFlow.billable_action_types) ? insightsFlow.billable_action_types : []
+    const billableActionTypes = Array.isArray(hogFlow.billable_action_types) ? hogFlow.billable_action_types : []
 
     // If no billable action types, no need to check quotas
     if (billableActionTypes.length === 0) {
@@ -34,13 +34,18 @@ export async function checkInsightsFlowQuotaLimits(
     }
 
     // Check which quotas the team is limited on
-    const [isEmailQuotaLimited, isDestinationQuotaLimited] = await Promise.all([
+    const [isEmailQuotaLimited, isPushQuotaLimited, isDestinationQuotaLimited] = await Promise.all([
         quotaLimiting.isTeamQuotaLimited(teamId, 'workflow_emails'),
+        quotaLimiting.isTeamQuotaLimited(teamId, 'workflow_push'),
         quotaLimiting.isTeamQuotaLimited(teamId, 'workflow_destinations_dispatched'),
     ])
 
     // Check if any billable action type is quota limited
     if (isEmailQuotaLimited && billableActionTypes.includes('function_email')) {
+        return { isLimited: true }
+    }
+
+    if (isPushQuotaLimited && billableActionTypes.includes('function_push')) {
         return { isLimited: true }
     }
 
@@ -52,21 +57,19 @@ export async function checkInsightsFlowQuotaLimits(
 }
 
 export interface InsightsFlowQuotaLimitingContext {
-    hub: {
-        quotaLimiting: QuotaLimiting
-    }
+    quotaLimiting: QuotaLimiting
     insightsFunctionMonitoringService: InsightsFunctionMonitoringService
 }
 
 /**
- * Checks if a custom flow invocation should be quota limited and handles the appropriate metrics.
+ * Checks if a script flow invocation should be quota limited and handles the appropriate metrics.
  * Returns true if the invocation should be blocked, false otherwise.
  */
 export async function shouldBlockInsightsFlowDueToQuota(
     item: CyclotronJobInvocationInsightsFlow,
     context: InsightsFlowQuotaLimitingContext
 ): Promise<boolean> {
-    const quotaLimitResult = await checkInsightsFlowQuotaLimits(item.insightsFlow, item.teamId, context.hub.quotaLimiting)
+    const quotaLimitResult = await checkInsightsFlowQuotaLimits(item.hogFlow, item.teamId, context.quotaLimiting)
 
     if (quotaLimitResult.isLimited) {
         counterInsightsFlowQuotaLimited.labels({ team_id: item.teamId }).inc()
@@ -79,7 +82,7 @@ export async function shouldBlockInsightsFlowDueToQuota(
                 metric_name: 'quota_limited',
                 count: 1,
             },
-            'insights_flow'
+            'hog_flow'
         )
         return true
     }

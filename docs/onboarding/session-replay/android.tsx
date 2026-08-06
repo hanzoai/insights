@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -41,7 +41,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://us.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
@@ -64,7 +64,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     class SampleApp : Application() {
 
                                         companion object {
-                                            const val INSIGHTS_API_KEY = "<ph_project_api_key>"
+                                            const val INSIGHTS_TOKEN = "<ph_project_token>"
                                             const val INSIGHTS_HOST = "<ph_client_api_host>"
                                         }
 
@@ -72,7 +72,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                             super.onCreate()
 
                                             val config = InsightsAndroidConfig(
-                                                apiKey = INSIGHTS_API_KEY,
+                                                apiKey = INSIGHTS_TOKEN,
                                                 host = INSIGHTS_HOST
                                             )
 
@@ -88,6 +88,10 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                             config.sessionReplayConfig.maskAllImages = true
 
                                             // Capture logs automatically. Default is true.
+                                            // 
+                                            // Support for remote configuration 
+                                            // in the [session replay settings](https://app.hanzo.ai/settings/project-replay#replay-log-capture)
+                                            // requires SDK version 3.32.0 or higher.
                                             config.sessionReplayConfig.captureLogcat = true
 
                                             // Whether replays are created using high quality screenshots. Default is false.
@@ -97,6 +101,15 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
 
                                             // Throttle delay used to reduce the number of snapshots captured. Default is 1000ms
                                             config.sessionReplayConfig.throttleDelayMs = 1000
+
+                                            // Sample rate for session recordings. A value between 0.0 and 1.0.
+                                            // 1.0 means 100% of sessions will be recorded. 0.5 means 50%, and so on.
+                                            // Default is null (all sessions are recorded).
+                                            // 
+                                            // Support for remote configuration
+                                            // in the [session replay triggers](https://us.hanzo.ai/settings/project-replay#replay-triggers)
+                                            // requires SDK version 3.34.0 or higher.
+                                            config.sessionReplayConfig.sampleRate = null
 
                                             InsightsAndroid.setup(this, config)
                                         }

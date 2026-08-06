@@ -6,10 +6,12 @@ import { Banner, Button } from '@hanzo/elements'
 import { DomainConnectProviderName } from '~/queries/schema/schema-general'
 
 import cloudflareLogo from './assets/cloudflare.svg'
-import { DomainConnectLogicProps, DomainConnectProvider, domainConnectLogic } from './domainConnectLogic'
+import vercelLogo from './assets/vercel.png'
+import { DomainConnectLogicProps, domainConnectLogic } from './domainConnectLogic'
 
 const PROVIDER_LOGOS: Record<DomainConnectProviderName, string> = {
     [DomainConnectProviderName.Cloudflare]: cloudflareLogo,
+    [DomainConnectProviderName.Vercel]: vercelLogo,
 }
 
 function ProviderLogo({ name }: { name: DomainConnectProviderName }): JSX.Element | null {
@@ -32,7 +34,7 @@ function ProviderLogo({ name }: { name: DomainConnectProviderName }): JSX.Elemen
  */
 export function DomainConnectBanner(props: DomainConnectLogicProps & { className?: string }): JSX.Element | null {
     const logic = domainConnectLogic(props)
-    const { autoDetected, providerName, availableProviders, domainConnectInfoLoading } = useValues(logic)
+    const { autoDetected, providerName, domainConnectInfoLoading } = useValues(logic)
     const { openDomainConnect } = useActions(logic)
 
     if (domainConnectInfoLoading) {
@@ -59,33 +61,6 @@ export function DomainConnectBanner(props: DomainConnectLogicProps & { className
                     >
                         Configure automatically
                     </Button>
-                </div>
-            </Banner>
-        )
-    }
-
-    if (availableProviders.length > 0) {
-        return (
-            <Banner type="info" className={props.className}>
-                <div className="space-y-2">
-                    <span>
-                        If your DNS provider supports automatic configuration, you can set up these records with a
-                        single click.
-                    </span>
-                    <div className="flex gap-2 flex-wrap">
-                        {availableProviders.map((provider: DomainConnectProvider) => (
-                            <Button
-                                key={provider.endpoint}
-                                type="secondary"
-                                size="small"
-                                onClick={() => openDomainConnect(provider.endpoint)}
-                                icon={<ProviderLogo name={provider.name} />}
-                                sideIcon={<IconExternal />}
-                            >
-                                I use {provider.name}
-                            </Button>
-                        ))}
-                    </div>
                 </div>
             </Banner>
         )

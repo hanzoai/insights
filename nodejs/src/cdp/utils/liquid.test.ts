@@ -1,3 +1,6 @@
+import * as fs from 'fs'
+import * as path from 'path'
+
 import { InsightsFunctionInvocationGlobalsWithInputs } from '../types'
 import { LiquidRenderer } from './liquid'
 
@@ -219,8 +222,36 @@ describe('LiquidRenderer', () => {
         })
     })
 
+    describe.each(['render', 'include', 'layout'])('file inclusion via the %s tag is disabled', (tag) => {
+        it('does not disclose local files within the working directory', () => {
+            // The partial must live under the worker's cwd: LiquidJS confines file lookups there.
+            const fixtureName = `liquid-fs-fixture-${process.pid}.txt`
+            const fixturePath = path.join(process.cwd(), fixtureName)
+            const secret = 'TOP_SECRET_FILE_CONTENTS'
+            fs.writeFileSync(fixturePath, secret)
+
+            try {
+                LiquidRenderer['_liquid'] = null
+                const template = `{% ${tag} '${fixtureName}' %}`
+
+                let result: string
+                try {
+                    result = LiquidRenderer.renderWithInsightsFunctionGlobals(template, globals)
+                } catch {
+                    // A thrown lookup error also means the file was not disclosed
+                    result = ''
+                }
+
+                expect(result).not.toContain(secret)
+            } finally {
+                fs.unlinkSync(fixturePath)
+                LiquidRenderer['_liquid'] = null
+            }
+        })
+    })
+
     describe('renderWithInsightsFunctionGlobals', () => {
-        it('renders with custom function globals', () => {
+        it('renders with script function globals', () => {
             const template = 'Event: {{ event.event }}, Person: {{ person.name }}'
             const globals: InsightsFunctionInvocationGlobalsWithInputs = {
                 event: {

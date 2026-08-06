@@ -1,0 +1,5 @@
+from insights.temporal.sync_events_retention.activities import sync_events_retention
+from insights.temporal.sync_events_retention.workflow import SyncEventsRetentionWorkflow
+
+SYNC_EVENTS_RETENTION_WORKFLOWS = [SyncEventsRetentionWorkflow]
+SYNC_EVENTS_RETENTION_ACTIVITIES = [sync_events_retention]

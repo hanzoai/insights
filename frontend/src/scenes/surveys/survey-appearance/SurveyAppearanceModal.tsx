@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
+import { getNextSurveyStep } from 'insights-js/dist/surveys-preview'
 import { useState } from 'react'
 
 import { IconGear } from '@hanzo/icons'
@@ -146,6 +146,7 @@ export function SurveyAppearanceModal({
     survey,
     selectedPageIndex,
     setSelectedPageIndex,
+    disabledReason,
 }: CommonProps): JSX.Element | null {
     const { setIsAppearanceModalOpen } = useActions(surveysLogic)
     const { surveysStylingAvailable, isAppearanceModalOpen } = useValues(surveysLogic)
@@ -167,6 +168,7 @@ export function SurveyAppearanceModal({
                 onClick={() => {
                     setIsAppearanceModalOpen(true)
                 }}
+                disabledReason={disabledReason || undefined}
             >
                 Full-screen survey editor
             </Button>
@@ -184,6 +186,7 @@ export function SurveyAppearanceModal({
                             onAppearanceChange={onAppearanceChange}
                             validationErrors={validationErrors}
                             surveyType={survey.type}
+                            disabledReason={disabledReason}
                         />
                         <Divider />
                         <SurveyColorsAppearance
@@ -192,6 +195,7 @@ export function SurveyAppearanceModal({
                             validationErrors={validationErrors}
                             customizeRatingButtons={hasRatingButtons}
                             customizePlaceholderText={hasPlaceholderText}
+                            disabledReason={disabledReason}
                         />
                     </div>
                     <SurveyPreview

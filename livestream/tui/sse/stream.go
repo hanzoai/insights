@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hanzoai/insights/livestream/tui/debug"
+	"github.com/insights/insights/livestream/tui/debug"
 )
 
 const maxBuffer = 4096

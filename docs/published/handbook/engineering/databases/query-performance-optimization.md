@@ -65,14 +65,8 @@ Composite indices are useful when you want to optimize querying on multiple non-
 
 To find and debug slow queries in production you have a few options available:
 
-- Browse to the [Diagnose](https://data.heroku.com/datastores/56166304-6297-4dce-af64-a1536ea2197c#diagnose) tab in Heroku Data's dashboard. You can break queries down by:
-  - Most time consuming
-  - Most frequently invoked
-  - Slowest execution time
-  - Slowest I/O
-- You can also use Heroku's [Diagnose](https://blog.heroku.com/pg-diagnose) feature by running `heroku pg:diagnose` to get a breakdown of long running queries, long transactions, among other diagnostics.
-- For a more raw approach you can access real time logs from Heroku by executing `heroku logs --app insights --ps postgres`
-- With any logs pulled from PostgreSQL you can use [pgbadger](https://github.com/darold/pgbadger) to find exactly the queries that are consuming the most time and resources.
+- AWS Console > Aurora and RDS > Performance insights
+- [pganalyze query performance](https://app.pganalyze.com/servers/3nslll4vefgatnwz2cw5w72aa4/queries)
 
 ### How-to fix slow queries
 
@@ -168,7 +162,7 @@ Highly used and slow/unreliable endpoints often indicate issues with queries.
 
 ##### Insights `instance/status` dashboard
 
-Under https://insights.hanzo.ai/instance/status/internal_metrics you will find various metrics and query logs.
+Under https://app.hanzo.ai/instance/status/internal_metrics you will find various metrics and query logs.
 Note: if you are a staff user you can also analyze queries by clicking on them (or copying your own queries).
 
 This analysis will output:

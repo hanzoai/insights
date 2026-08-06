@@ -7,10 +7,10 @@ import { Tag, Tooltip } from '@hanzo/elements'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
-import { formatCurrency } from 'lib/utils/geography/currency'
+import { formatCurrency } from 'lib/utils/currency'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { groupLogic } from 'scenes/groups/groupLogic'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
@@ -290,12 +290,6 @@ export const NotebookNodeGroup = createInsightsWidgetNode<NotebookNodeGroupAttri
         groupTypeIndex: {},
         tabId: {},
         placement: {},
-    },
-    pasteOptions: {
-        find: urls.group('([0-9]+)', '([^/]+)', false),
-        getAttributes: async (match) => {
-            return { groupTypeIndex: parseInt(match[1]), id: decodeURIComponent(match[2]) }
-        },
     },
     serializedText: (attrs) => {
         const title = attrs?.title || ''

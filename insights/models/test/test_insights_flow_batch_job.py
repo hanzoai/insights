@@ -2,9 +2,9 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from insights.models.insights_flow.insights_flow import InsightsFlow
 from insights.models.user import User
 
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
 
 

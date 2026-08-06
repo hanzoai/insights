@@ -1,12 +1,16 @@
+// .StepLegend styles live in FunnelBarVertical.scss; import here so they load on the quill funnel
+// charts that reuse this component (the old FunnelBarVertical that used to pull them in is gone).
+import './FunnelBarVertical.scss'
+
 import { useActions, useValues } from 'kea'
 
 import { IconClock } from '@hanzo/icons'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
+import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { Row } from 'lib/elements/Row'
 import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { getActionFilterFromFunnelStep } from 'scenes/insights/views/Funnels/funnelStepTableUtils'
@@ -14,9 +18,8 @@ import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature, ChartParams, FunnelStepWithConversionMetrics } from '~/types'
 
-import { FunnelStepMore } from '../FunnelStepMore'
-import { ValueInspectorButton } from '../ValueInspectorButton'
 import { funnelPersonsModalLogic } from '../funnelPersonsModalLogic'
+import { FunnelStepMore } from '../FunnelStepMore'
 import {
     formatConvertedCount,
     formatConvertedPercentage,
@@ -26,6 +29,7 @@ import {
     getTooltipTitleForConverted,
     getTooltipTitleForDroppedOff,
 } from '../funnelUtils'
+import { ValueInspectorButton } from '../ValueInspectorButton'
 
 type StepLegendProps = {
     step: FunnelStepWithConversionMetrics
@@ -68,7 +72,7 @@ export function StepLegend({ step, stepIndex, showTime, showPersonsModal, inCard
     )
 
     return (
-        <div className="StepLegend" style={{ opacity: isOptionalStep ? 0.6 : 1 }}>
+        <div className="StepLegend" data-attr="funnel-step-legend" style={{ opacity: isOptionalStep ? 0.6 : 1 }}>
             {/* Step */}
             <Row
                 icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />}
@@ -93,6 +97,7 @@ export function StepLegend({ step, stepIndex, showTime, showPersonsModal, inCard
                     {!!showPersonsModal && canOpenPersonModal && !isInExperimentContext ? (
                         <ValueInspectorButton
                             onClick={() => openPersonsModalForStep({ step, stepIndex, converted: true })}
+                            data-attr="funnel-inspect-converted"
                         >
                             {convertedCountPresentationWithPercentage}
                         </ValueInspectorButton>
@@ -116,6 +121,7 @@ export function StepLegend({ step, stepIndex, showTime, showPersonsModal, inCard
                         {showPersonsModal && stepIndex && !isInExperimentContext ? (
                             <ValueInspectorButton
                                 onClick={() => openPersonsModalForStep({ step, stepIndex, converted: false })}
+                                data-attr="funnel-inspect-dropped-off"
                             >
                                 {droppedOffCountPresentationWithPercentage}
                             </ValueInspectorButton>

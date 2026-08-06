@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -19,7 +19,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'ruby',
                                 file: 'Podfile',
                                 code: dedent`
-                                    pod "Insights", "~> 3.0"
+                                    pod "Insights", "~> 3.56"
                                 `,
                             },
                         ]}
@@ -32,7 +32,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'Package.swift',
                                 code: dedent`
                                     dependencies: [
-                                      .package(url: "https://github.com/hanzoai/insights-ios.git", from: "3.0.0")
+                                      .package(url: "https://github.com/Insights/insights-ios.git", from: "3.56.0")
                                     ]
                                 `,
                             },
@@ -53,7 +53,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://us.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
@@ -79,10 +79,10 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
 
                                     class AppDelegate: NSObject, UIApplicationDelegate {
                                         func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-                                            let INSIGHTS_API_KEY = "<ph_project_api_key>"
+                                            let INSIGHTS_PROJECT_TOKEN = "<ph_project_token>"
                                             let INSIGHTS_HOST = "<ph_client_api_host>"
 
-                                            let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
+                                            let config = InsightsConfig(projectToken: INSIGHTS_PROJECT_TOKEN, host: INSIGHTS_HOST)
 
                                             // Enable session recording. Requires enabling in your project settings as well.
                                             // Default is false.
@@ -95,9 +95,20 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                             // Whether images are masked. Default is true.
                                             config.sessionReplayConfig.maskAllImages = true
 
+                                            // Whether logs are captured in recordings. Default is false.
+                                            //
+                                            // Support for remote configuration 
+                                            // in the [session replay settings](https://app.hanzo.ai/settings/project-replay#replay-log-capture)
+                                            // requires SDK version 3.41.1 or higher.
+                                            config.sessionReplayConfig.captureLogs = false
+
                                             // Whether network requests are captured in recordings. Default is true
                                             // Only metric-like data like speed, size, and response code are captured.
                                             // No data is captured from the request or response body.
+                                            //
+                                            // Support for remote configuration 
+                                            // in the [session replay settings](https://app.hanzo.ai/settings/project-replay#replay-network)
+                                            // requires SDK version 3.41.1 or higher.
                                             config.sessionReplayConfig.captureNetworkTelemetry = true
 
                                             // Whether replays are created using high quality screenshots. Default is false.
@@ -105,6 +116,15 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                             // If disabled, replays are created using wireframes instead.
                                             // The screenshot may contain sensitive information, so use with caution
                                             config.sessionReplayConfig.screenshotMode = true
+
+                                            // Sample rate for session recordings. A value between 0.0 and 1.0.
+                                            // 1.0 means 100% of sessions will be recorded. 0.5 means 50%, and so on.
+                                            // Default is nil (all sessions are recorded).
+                                            // 
+                                            // Support for remote configuration
+                                            // in the [session replay triggers](https://us.hanzo.ai/settings/project-replay#replay-triggers)
+                                            // requires SDK version 3.42.0 or higher.
+                                            config.sessionReplayConfig.sampleRate = nil
 
                                             InsightsSDK.shared.setup(config)
 

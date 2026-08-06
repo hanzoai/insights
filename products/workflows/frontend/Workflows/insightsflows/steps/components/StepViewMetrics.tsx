@@ -3,13 +3,13 @@ import { useValues } from 'kea'
 import { IconCheck, IconFilter, IconX } from '@hanzo/icons'
 import { Skeleton, Tooltip } from '@hanzo/elements'
 
-import { humanFriendlyLargeNumber } from 'lib/utils'
+import { humanFriendlyLargeNumber } from 'lib/utils/numbers'
 
-import { InsightsFlowEditorActionMetrics, insightsFlowEditorLogic } from '../../insightsFlowEditorLogic'
+import { InsightsFlowEditorActionMetrics, hogFlowEditorLogic } from '../../hogFlowEditorLogic'
 import { InsightsFlowAction } from '../../types'
 
 export function StepViewMetrics({ action }: { action: InsightsFlowAction }): JSX.Element {
-    const { actionMetricsById, actionMetricsByIdLoading } = useValues(insightsFlowEditorLogic)
+    const { actionMetricsById, actionMetricsByIdLoading } = useValues(hogFlowEditorLogic)
 
     const metrics: InsightsFlowEditorActionMetrics = actionMetricsById?.[action.id] ?? {
         actionId: action.id,

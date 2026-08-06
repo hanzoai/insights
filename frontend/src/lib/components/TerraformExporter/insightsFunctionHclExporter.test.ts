@@ -34,14 +34,14 @@ describe('insightsFunctionHclExporter test', () => {
     })
 
     describe('generates valid hcl', () => {
-        it('generates valid HCL for a complete custom function', () => {
+        it('generates valid HCL for a complete script function', () => {
             const insightsFunction = createTestInsightsFunction({
                 id: 'func-123',
                 name: 'My Test Function',
-                description: 'A test custom function',
+                description: 'A test script function',
                 type: 'internal_destination',
                 enabled: true,
-                iql: 'print("Hello World")',
+                script: 'print("Hello World")',
                 inputs: { channel: { value: '#general' } },
                 filters: {
                     events: [{ id: '$insight_alert_firing', type: 'events' }],
@@ -55,10 +55,10 @@ describe('insightsFunctionHclExporter test', () => {
 
             expect(hcl).toContain('resource "insights_insights_function" "my_test_function"')
             expect(hcl).toContain('name = "My Test Function"')
-            expect(hcl).toContain('description = "A test custom function"')
+            expect(hcl).toContain('description = "A test script function"')
             expect(hcl).toContain('type = "internal_destination"')
             expect(hcl).toContain('enabled = true')
-            expect(hcl).toContain('iql = "print(\\"Hello World\\")"')
+            expect(hcl).toContain('script = "print(\\"Hello World\\")"')
             expect(hcl).toContain('icon_url = "https://example.com/icon.png"')
 
             expect(hcl).toContain(`inputs_json = jsonencode({
@@ -86,7 +86,7 @@ describe('insightsFunctionHclExporter test', () => {
             expect(result.warnings).toHaveLength(0)
         })
 
-        it('includes import block for saved custom functions by default', () => {
+        it('includes import block for saved script functions by default', () => {
             const insightsFunction = createTestInsightsFunction({
                 id: 'func-456',
                 name: 'Saved Function',
@@ -101,7 +101,7 @@ describe('insightsFunctionHclExporter test', () => {
             expect(hcl).toContain('id = "1/func-456"')
         })
 
-        it('excludes import block for new custom functions', () => {
+        it('excludes import block for new script functions', () => {
             const insightsFunction = createTestInsightsFunction({
                 name: 'New Function',
                 type: 'internal_destination',
@@ -371,14 +371,14 @@ describe('insightsFunctionHclExporter test', () => {
             it('preserves other fields like secret and templating', () => {
                 const inputs: Record<string, CyclotronJobInputType> = {
                     api_key: { value: 'secret', secret: true, bytecode: ['_H'], order: 0 },
-                    template: { value: '{event.name}', templating: 'iql', bytecode: ['_H', 2], order: 1 },
+                    template: { value: '{event.name}', templating: 'script', bytecode: ['_H', 2], order: 1 },
                 }
 
                 const result = stripInputsServerFields(inputs)
 
                 expect(result).toEqual({
                     api_key: { value: 'secret', secret: true },
-                    template: { value: '{event.name}', templating: 'iql' },
+                    template: { value: '{event.name}', templating: 'script' },
                 })
             })
 

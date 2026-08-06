@@ -6,7 +6,7 @@ import { IconX } from '@hanzo/icons'
 import { dayjs } from 'lib/dayjs'
 import { Button } from 'lib/elements/Button'
 import { Switch } from 'lib/elements/Switch'
-import { formatDate, formatDateRange } from 'lib/utils'
+import { formatDate, formatDateRange } from 'lib/utils/datetime'
 
 import { CalendarRangeInline } from './CalendarRangeInline'
 
@@ -36,7 +36,7 @@ export function CalendarRange({
     ])
 
     return (
-        <div className="CalendarRange" data-attr="calendar-range">
+        <div className="CalendarRange" data-attr="lemon-calendar-range">
             <div className="flex justify-between border-b p-2 pb-4">
                 <h3 className="text-base mb-0">Select a date range</h3>
                 {onClose && (
@@ -66,14 +66,14 @@ export function CalendarRange({
                     </div>
                 )}
                 <div className="flex gap-2">
-                    <Button type="secondary" onClick={onClose} data-attr="calendar-range-cancel">
+                    <Button type="secondary" onClick={onClose} data-attr="lemon-calendar-range-cancel">
                         Cancel
                     </Button>
                     <Button
                         type="primary"
                         disabled={!rangeStart || !rangeEnd}
                         onClick={rangeStart && rangeEnd ? () => onChange([rangeStart, rangeEnd]) : undefined}
-                        data-attr="calendar-range-apply"
+                        data-attr="lemon-calendar-range-apply"
                     >
                         Apply
                     </Button>

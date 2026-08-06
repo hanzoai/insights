@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -15,7 +15,7 @@ export const getZapierSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         Zapier lets you connect Insights to thousands of other apps. You can use it to send events to
                         Insights from other services or trigger actions based on Insights events. Go to the [Insights
                         integration page](https://zapier.com/apps/insights/integrations) on Zapier and click **Connect
-                        Insights**. When prompted, enter your Insights project API key:
+                        Insights**. When prompted, enter your Insights project token:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -23,7 +23,7 @@ export const getZapierSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'text',
                                 file: 'API Key',
                                 code: dedent`
-                                <ph_project_api_key>
+                                <ph_project_token>
                             `,
                             },
                         ]}

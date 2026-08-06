@@ -10,12 +10,14 @@ from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.timings import InsightsQLTimings
 
 from insights.models.team.team import Team
+from insights.models.user import User
 from insights.types import InsightQueryNode
 
 
 class QueryContext(ABC):
     query: InsightQueryNode
     team: Team
+    user: Optional[User]
     timings: InsightsQLTimings
     modifiers: InsightsQLQueryModifiers
     limit_context: LimitContext
@@ -30,9 +32,11 @@ class QueryContext(ABC):
         modifiers: Optional[InsightsQLQueryModifiers] = None,
         limit_context: Optional[LimitContext] = None,
         now: Optional[datetime] = None,
+        user: Optional[User] = None,
     ):
         self.query = query
         self.team = team
+        self.user = user
         self.timings = timings or InsightsQLTimings()
         self.limit_context = limit_context or LimitContext.QUERY
         self.modifiers = create_default_modifiers_for_team(team, modifiers)
@@ -41,6 +45,7 @@ class QueryContext(ABC):
             enable_select_queries=True,
             timings=self.timings,
             modifiers=self.modifiers,
+            user=user,
         )
         self.now = now or datetime.now()
 

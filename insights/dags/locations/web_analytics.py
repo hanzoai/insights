@@ -2,16 +2,21 @@ import dagster
 
 from insights.settings import TEST
 
+from products.marketing_analytics.dags import marketing_precompute
 from products.web_analytics.dags import (
     cache_favicons,
     cache_warming,
+    clear_oom_pins,
+    eager_web_analytics_precompute,
+    web_analytics_watchdog,
+    web_dimensional_precompute,
     web_pre_aggregated_accuracy,
     web_preaggregated,
     web_preaggregated_asset_checks,
     web_preaggregated_team_selection,
 )
 
-from . import resources
+from . import loggers, resources
 
 # Build schedules list conditionally based on TEST mode
 schedules = [
@@ -19,7 +24,11 @@ schedules = [
     web_preaggregated.web_pre_aggregate_current_day_schedule,
     web_preaggregated_team_selection.web_analytics_team_candidates_schedule,
     cache_warming.web_analytics_cache_warming_schedule,
+    eager_web_analytics_precompute.web_analytics_eager_baseline_warming_schedule,
+    web_dimensional_precompute.web_dimensional_precompute_schedule,
+    marketing_precompute.marketing_precompute_schedule,
     cache_favicons.cache_authorized_domain_favicons_schedule,
+    web_analytics_watchdog.web_analytics_watchdog_schedule,
 ]
 
 # Only include the backfill schedule when not in TEST mode
@@ -34,6 +43,7 @@ defs = dagster.Definitions(
         web_preaggregated.web_pre_aggregated_bounces,
         web_preaggregated.web_pre_aggregated_stats,
         web_pre_aggregated_accuracy.web_pre_aggregated_accuracy,
+        web_analytics_watchdog.web_analytics_watchdog,
         cache_favicons.cache_favicons,
         cache_favicons.cache_authorized_domain_favicons,
     ],
@@ -43,9 +53,17 @@ defs = dagster.Definitions(
     jobs=[
         web_preaggregated.web_pre_aggregate_job,
         web_preaggregated_team_selection.web_analytics_team_candidates_job,
+        web_analytics_watchdog.web_analytics_watchdog_job,
         cache_warming.web_analytics_cache_warming_job,
+        cache_warming.web_analytics_cache_warming_dry_run_job,
+        eager_web_analytics_precompute.web_analytics_eager_baseline_warming_job,
+        eager_web_analytics_precompute.web_analytics_eager_backfill_job,
+        web_dimensional_precompute.web_dimensional_precompute_job,
+        marketing_precompute.marketing_precompute_job,
         cache_favicons.cache_authorized_domain_favicons_job,
+        clear_oom_pins.web_analytics_clear_precompute_oom_pins_job,
     ],
     schedules=schedules,
+    loggers=loggers,
     resources=resources,
 )

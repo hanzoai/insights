@@ -10,7 +10,8 @@ from insights.insightsql.parser import parse_expr, parse_select
 
 from insights.insightsql_queries.insights.funnels.base import JOIN_ALGOS, FunnelBase
 from insights.insightsql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
-from insights.queries.breakdown_props import get_breakdown_cohort_name
+from insights.insightsql_queries.insights.funnels.utils import get_breakdown_cohort_name
+from insights.insightsql_queries.insights.utils.breakdowns import NOT_IN_COHORT_ID
 from insights.utils import DATERANGE_MAP
 
 
@@ -65,6 +66,11 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
         for property in ("$session_id", "$window_id"):
             if property not in self._extra_event_properties:
                 self._extra_event_properties.append(property)
+
+        # When aggregating by non person property (e.g. session_id)
+        # add the person_id so we can later fetch the person data
+        if self._is_session_aggregation() and "person_id" not in self._extra_event_fields:
+            self._extra_event_fields.append("person_id")
 
     def conversion_window_limit(self) -> int:
         return int(
@@ -132,6 +138,8 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
 
         if not self.context.breakdown:
             prop_selector = self._default_breakdown_selector()
+        elif self.context.breakdownType == BreakdownType.COHORT:
+            prop_selector = "prop_basic"
         elif self._query_has_array_breakdown():
             prop_selector = "arrayMap(x -> ifNull(x, ''), prop_basic)"
         else:
@@ -155,6 +163,12 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
         ):
             assert isinstance(self.context.breakdown, list)
             prop_arg = f"""[empty(prop) ? [{",".join(["''"] * len(self.context.breakdown))}] : prop]"""
+
+        person_id_select = ""
+        if self._is_session_aggregation():
+            # person is already merged with the overrides in the inner query
+            # so we should be safe to pick any of the person_ids
+            person_id_select = "any(person_id) as person_id,"
 
         inner_select = parse_select(
             f"""
@@ -181,6 +195,7 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
                 af_tuple.3 as timings,
                 {self.matched_event_arrays_selects()}
                 af_tuple.5 as steps_bitfield,
+                {person_id_select}
                 aggregation_target
             FROM {{inner_event_query}}
             GROUP BY aggregation_target
@@ -191,15 +206,11 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
         return inner_select
 
     def get_query(self) -> ast.SelectQuery:
-        max_steps = self.context.max_steps
         funnelsFilter = self.context.funnelsFilter
 
         inner_select = self._inner_aggregation_query()
 
         if funnelsFilter.funnelOrderType == StepOrderValue.UNORDERED:
-            for exclusion in funnelsFilter.exclusions or []:
-                if exclusion.funnelFromStep != 0 or exclusion.funnelToStep != max_steps - 1:
-                    raise ValidationError("Partial Exclusions not allowed in unordered funnels")
             if (
                 funnelsFilter.breakdownAttributionType == BreakdownAttributionType.STEP
                 and funnelsFilter.breakdownAttributionValue != 0
@@ -233,11 +244,19 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
         )
         order_by = ",".join([f"step_{i + 1} DESC" for i in reversed(range(self.context.max_steps))])
 
+        # Per-breakdown array of the total time each completer spent in the entire funnel. The global
+        # median is computed once in the outer query (bounded by the breakdown limit) rather than here,
+        # where the number of breakdown groups is unbounded.
+        total_conversion_times = (
+            f"groupArrayIf(arraySum(timings), step_reached >= {self.context.max_steps - 1}) AS total_conversion_times"
+        )
+
         s = parse_select(
             f"""
             SELECT
                 {step_results},
                 {conversion_time_arrays},
+                {total_conversion_times},
                 rowNumberInAllBlocks() as row_number,
                 {final_prop} as final_prop
             FROM
@@ -247,6 +266,20 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
         """,
             {"inner_select": inner_select},
         )
+
+        if self.should_add_not_in_cohort_group:
+            columns: list[ast.Expr] = [
+                ast.Alias(alias=f"step_{i + 1}", expr=ast.Constant(value=0)) for i in range(self.context.max_steps)
+            ]
+            columns.extend(
+                ast.Alias(alias=f"step_{i}_conversion_times", expr=ast.Array(exprs=[]))
+                for i in range(1, self.context.max_steps)
+            )
+            columns.append(ast.Alias(alias="total_conversion_times", expr=ast.Array(exprs=[])))
+            columns.append(ast.Alias(alias="row_number", expr=ast.Constant(value=0)))
+            columns.append(ast.Alias(alias="final_prop", expr=ast.Constant(value=NOT_IN_COHORT_ID)))
+            synthetic_row = ast.SelectQuery(select=columns)
+            s = ast.SelectSetQuery.create_from_queries([s, synthetic_row], "UNION ALL")
 
         mean_conversion_times = ",".join(
             [
@@ -261,6 +294,16 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
             ]
         )
 
+        # Global median of every completer's total funnel time, breakdown-agnostic (a single header number).
+        # Computed here, where rows are bounded by the breakdown limit: each final_prop group flattens its
+        # completer times, the window over () spans all groups, and arrayReduce keeps it a scalar (medianArray
+        # is an aggregate and can't wrap the windowed aggregate). An empty array yields NaN, coerced to NULL.
+        total_median_conversion_time = (
+            "arrayMap(x -> if(isNaN(x), NULL, x), "
+            "[arrayReduce('median', arrayFlatten(groupArray(arrayFlatten(groupArray(total_conversion_times))) OVER ()))])[1] "
+            "AS total_median_conversion_time"
+        )
+
         order_by = ",".join([f"step_{i + 1} DESC" for i in reversed(range(self.context.max_steps))])
         # Weird: unless you reference row_number in this outer block, it doesn't work correctly
         s = cast(
@@ -271,6 +314,7 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
                 {step_results2},
                 {mean_conversion_times},
                 {median_conversion_times},
+                {total_median_conversion_time},
                 groupArray(row_number) as row_number,
                 final_prop
             FROM
@@ -395,6 +439,8 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
             *self._get_timestamp_outer_select(),
             *([ast.Field(chain=[field]) for field in extra_fields or []]),
         ]
+        if self._is_session_aggregation():
+            select.append(ast.Alias(alias="person_id", expr=ast.Field(chain=["person_id"])))
         select_from = ast.JoinExpr(table=self._inner_aggregation_query())
         where = self._get_funnel_person_step_condition()
         order_by = [ast.OrderExpr(expr=ast.Field(chain=["aggregation_target"]))]
@@ -406,6 +452,17 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
             where=where,
             settings=InsightsQLQuerySettings(join_algorithm=JOIN_ALGOS),
         )
+
+    def _extract_total_median_conversion_time(self, results, columns) -> Optional[float]:
+        # Identical across every output row (windowed over all breakdowns); read it off the first row.
+        # Looked up by column name so it's robust to changes in the outer SELECT's column order.
+        if not results or not columns:
+            return None
+        try:
+            index = columns.index("total_median_conversion_time")
+        except ValueError:
+            return None
+        return results[0][index]
 
     def _format_single_funnel(self, results, with_breakdown=False):
         max_steps = self.context.max_steps
@@ -442,7 +499,11 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
                 serialized_result.update(
                     {
                         "breakdown": (
-                            get_breakdown_cohort_name(breakdown_value, self.context.team)
+                            get_breakdown_cohort_name(
+                                breakdown_value,
+                                self.context.team,
+                                not_in_cohort_name=self._not_in_cohort_name,
+                            )
                             if self.context.breakdownFilter.breakdown_type == "cohort"
                             else breakdown_value
                         ),

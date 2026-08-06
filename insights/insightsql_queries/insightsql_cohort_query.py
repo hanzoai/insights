@@ -2,9 +2,8 @@ from collections import defaultdict, namedtuple
 from copy import deepcopy
 from datetime import datetime
 from numbers import Number
-from typing import Literal, Optional, Union, cast
+from typing import Any, Literal, Optional, Union, cast
 
-import hanzo_insights
 from rest_framework.exceptions import ValidationError
 
 from insights.schema import (
@@ -22,6 +21,7 @@ from insights.schema import (
     InsightsQLPropertyFilter,
     InsightsQLQueryModifiers,
     InsightActorsQuery,
+    PersonMetadataPropertyFilter,
     PersonPropertyFilter,
     PersonsOnEventsMode,
     PropertyGroupFilterValue,
@@ -36,9 +36,9 @@ from insights.schema import (
 
 from insights.insightsql import ast
 from insights.insightsql.ast import SelectQuery, SelectSetNode, SelectSetQuery
-from insights.insightsql.constants import InsightsQLGlobalSettings, LimitContext
+from insights.insightsql.constants import InsightsQLGlobalSettings, InsightsQLQuerySettings, LimitContext
 from insights.insightsql.context import InsightsQLContext
-from insights.insightsql.parser import parse_select
+from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.property import get_property_type
 from insights.insightsql.query import InsightsQLQueryExecutor
@@ -47,25 +47,176 @@ from insights.constants import PropertyOperatorType
 from insights.insightsql_queries.actors_query_runner import ActorsQueryRunner
 from insights.insightsql_queries.events_query_runner import EventsQueryRunner
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
-from insights.models import Cohort, Filter, Property, Team
-from insights.models.property import PropertyGroup
-from insights.queries.cohort_query import CohortQuery
-from insights.queries.foss_cohort_query import (
-    INTERVAL_TO_SECONDS,
-    FOSSCohortQuery,
-    parse_and_validate_positive_integer,
-    validate_interval,
-)
+from insights.models import Filter, Property, Team, User
+from insights.models.property import OperatorInterval, PropertyGroup
+from insights.ph_client import feature_enabled_or_false
 from insights.types import AnyPropertyFilter
 
+from products.cohorts.backend.models.cohort import Cohort
 
-class TestWrapperCohortQuery(CohortQuery):
+INTERVAL_TO_SECONDS = {
+    "minute": 60,
+    "hour": 3600,
+    "day": 86400,
+    "week": 604800,
+    "month": 2592000,
+    "year": 31536000,
+}
+
+
+def validate_interval(interval: Optional[OperatorInterval]) -> OperatorInterval:
+    if interval is None or interval not in INTERVAL_TO_SECONDS.keys():
+        raise ValueError(f"Invalid interval: {interval}")
+    else:
+        return interval
+
+
+def parse_and_validate_positive_integer(value: Optional[Union[str, int]], value_name: str) -> int:
+    if value is None:
+        raise ValueError(f"{value_name} cannot be None")
+    try:
+        parsed_value = int(value)
+    except (ValueError, TypeError):
+        raise ValueError(f"{value_name} must be an integer, got {value}")
+    if parsed_value <= 0:
+        raise ValueError(f"{value_name} must be greater than 0, got {value}")
+    return parsed_value
+
+
+def _require_select_query(query: ast.SelectQuery | ast.SelectSetQuery) -> ast.SelectQuery:
+    # A constant `select=["id"]` actors query never yields a set query. Fail loudly rather than
+    # via a strippable assert if that invariant ever breaks.
+    if not isinstance(query, ast.SelectQuery):
+        raise ValueError("Expected a single SELECT query from the actors query, got a set query")
+    return query
+
+
+def _apply_in_order_aggregation(query: ast.SelectQuery) -> ast.SelectQuery:
+    """Set optimize_aggregation_in_order on the inner argMax-dedup subquery.
+
+    The behavioral subqueries fix team_id + condition in WHERE and GROUP BY the trailing
+    precalculated_events sort-key columns (date, distinct_id, uuid), so Datastore can stream
+    the dedup in primary-key order instead of materializing a full hash table over every
+    matched event. Mirrors select_from_person_distinct_id_overrides_table.
+    """
+    inner = query.select_from.table if query.select_from else None
+    if isinstance(inner, ast.SelectQuery):
+        inner.settings = InsightsQLQuerySettings(optimize_aggregation_in_order=True)
+    return query
+
+
+def unwrap_cohort(filter: Filter, team_id: int, team: Optional[Team] = None, cohort: Optional[Cohort] = None) -> Filter:
+    """Flatten cohort-typed properties into nested static/dynamic-cohort PropertyGroups.
+
+    Each ``cohort``/``precalculated-cohort`` property is replaced by an AND group holding a
+    single ``static-cohort``/``dynamic-cohort`` property, while sibling properties are wrapped
+    into AND groups too, propagating negation per De Morgan's law.
+    """
+
+    def _unwrap(property_group: PropertyGroup, negate_group: bool = False) -> PropertyGroup:
+        nonlocal team
+        if len(property_group.values):
+            if isinstance(property_group.values[0], PropertyGroup):
+                # dealing with a list of property groups, so unwrap each one
+                # Propogate the negation to the children and handle as necessary with respect to deMorgan's law
+                if not negate_group:
+                    return PropertyGroup(
+                        type=property_group.type,
+                        values=[_unwrap(v) for v in cast(list[PropertyGroup], property_group.values)],
+                    )
+                else:
+                    return PropertyGroup(
+                        type=(
+                            PropertyOperatorType.AND
+                            if property_group.type == PropertyOperatorType.OR
+                            else PropertyOperatorType.OR
+                        ),
+                        values=[_unwrap(v, True) for v in cast(list[PropertyGroup], property_group.values)],
+                    )
+
+            elif isinstance(property_group.values[0], Property):
+                # dealing with a list of properties
+                # if any single one is a cohort property, unwrap it into a property group
+                # which implies converting everything else in the list into a property group too
+
+                new_property_group_list: list[PropertyGroup] = []
+                for prop in property_group.values:
+                    prop = cast(Property, prop)
+                    current_negation = prop.negation or False
+                    negation_value = not current_negation if negate_group else current_negation
+                    if prop.type in ["cohort", "precalculated-cohort"]:
+                        try:
+                            # Use passed cohort object if it matches the requested cohort ID
+                            if cohort is not None and str(cohort.pk) == str(prop.value):
+                                prop_cohort = cohort
+                            else:
+                                # Use passed team object if available, otherwise fetch from database
+                                if team is None:
+                                    team = Team.objects.get(pk=team_id)
+                                prop_cohort = Cohort.objects.get(
+                                    pk=cast(str | int, prop.value), team__project_id=team.project_id
+                                )
+                            new_property_group_list.append(
+                                PropertyGroup(
+                                    type=PropertyOperatorType.AND,
+                                    values=[
+                                        Property(
+                                            type="static-cohort" if prop_cohort.is_static else "dynamic-cohort",
+                                            key="id",
+                                            value=prop_cohort.pk,
+                                            negation=negation_value,
+                                        )
+                                    ],
+                                )
+                            )
+                        except Cohort.DoesNotExist:
+                            new_property_group_list.append(
+                                PropertyGroup(
+                                    type=PropertyOperatorType.AND,
+                                    values=[
+                                        Property(
+                                            key="fake_key_01r2ho",
+                                            value="0",
+                                            type="person",
+                                        )
+                                    ],
+                                )
+                            )
+                    else:
+                        prop.negation = negation_value
+                        new_property_group_list.append(PropertyGroup(type=PropertyOperatorType.AND, values=[prop]))
+                if not negate_group:
+                    return PropertyGroup(type=property_group.type, values=new_property_group_list)
+                else:
+                    return PropertyGroup(
+                        type=(
+                            PropertyOperatorType.AND
+                            if property_group.type == PropertyOperatorType.OR
+                            else PropertyOperatorType.OR
+                        ),
+                        values=new_property_group_list,
+                    )
+
+        return property_group
+
+    new_props = _unwrap(filter.property_groups)
+    return filter.shallow_clone({"properties": new_props.to_dict()})
+
+
+class TestWrapperCohortQuery:
+    """Runs a filter through InsightsQLCohortQuery for the cohort-query test suite.
+
+    ``insightsql_result`` holds the executed result the tests assert membership against;
+    ``datastore_query`` / ``get_query`` expose the generated SQL.
+    """
+
     def __init__(self, filter: Filter, team: Team):
-        cohort_query = CohortQuery(filter=filter, team=team)
-        executor = InsightsQLCohortQuery(cohort_query=cohort_query).get_query_executor()
+        executor = InsightsQLCohortQuery(filter=filter, team=team).get_query_executor()
         self.insightsql_result = executor.execute()
         self.datastore_query = executor.datastore_sql
-        super().__init__(filter=filter, team=team)
+
+    def get_query(self) -> tuple[str, dict[str, Any]]:
+        return self.datastore_query or "", {}
 
 
 def convert_property(prop: Property) -> PersonPropertyFilter:
@@ -94,40 +245,73 @@ def convert(prop: PropertyGroup) -> PropertyGroupFilterValue:
     return r
 
 
+def _person_test_account_properties(team: Team) -> list[Property]:
+    """Person-property filters from team.test_account_filters.
+
+    Event/element/insightsql-scoped test filters can't be standalone cohort conditions, and
+    cohort-typed ones are excluded here to avoid self-referential cohorts (a team test
+    filter can point at the very cohort being calculated).
+    """
+    return [
+        Property(**prop)
+        for prop in (team.test_account_filters or [])
+        if isinstance(prop, dict) and prop.get("type") == "person"
+    ]
+
+
 class InsightsQLCohortQuery:
     def __init__(
         self,
-        cohort_query: Optional[CohortQuery] = None,
+        filter: Optional[Filter] = None,
         cohort: Optional[Cohort] = None,
         team: Optional[Team] = None,
     ):
         if cohort is not None:
             self.insightsql_context = InsightsQLContext(team_id=cohort.team.pk, enable_select_queries=True)
             self.team = team or cohort.team
-            filter = FOSSCohortQuery.unwrap_cohort(
+            unwrapped = unwrap_cohort(
                 Filter(
                     data={"properties": cohort.properties},
                     team=cohort.team,
                     insightsql_context=self.insightsql_context,
                 ),
                 self.team.pk,
+                self.team,
+                cohort,
             )
-            self.property_groups = filter.property_groups
-        elif cohort_query is not None:
-            self.insightsql_context = InsightsQLContext(team_id=cohort_query._team_id, enable_select_queries=True)
-            self.property_groups = cohort_query._filter.property_groups
-            self.team = team or cohort_query._team
+            property_groups = unwrapped.property_groups
+            if (cohort.filters or {}).get("filterTestAccounts"):
+                test_props = _person_test_account_properties(self.team)
+                if test_props:
+                    property_groups = PropertyGroup(
+                        type=PropertyOperatorType.AND,
+                        values=[
+                            property_groups,
+                            PropertyGroup(type=PropertyOperatorType.AND, values=test_props),
+                        ],
+                    )
+            self.property_groups = property_groups
+        elif filter is not None:
+            if team is None:
+                raise ValueError("InsightsQLCohortQuery requires a team when constructed from a filter")
+            self.insightsql_context = InsightsQLContext(team_id=team.pk, enable_select_queries=True)
+            self.team = team
+            self.property_groups = unwrap_cohort(filter, team.pk, team).property_groups
         else:
-            raise
+            raise ValueError("InsightsQLCohortQuery requires either a cohort or a filter")
 
-    def get_query_executor(self) -> InsightsQLQueryExecutor:
+    def get_query_executor(
+        self, *, user: Optional[User] = None, bypass_warehouse_access_control: bool = False
+    ) -> InsightsQLQueryExecutor:
         return InsightsQLQueryExecutor(
             query_type="InsightsQLCohortQuery",
             query=self.get_query(),
             modifiers=InsightsQLQueryModifiers(personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_JOINED),
             team=self.team,
             limit_context=LimitContext.COHORT_CALCULATION,
-            settings=InsightsQLGlobalSettings(allow_experimental_analyzer=None),
+            settings=InsightsQLGlobalSettings(),
+            user=user,
+            bypass_warehouse_access_control=bypass_warehouse_access_control,
         )
 
     def get_query(self) -> SelectQuery | SelectSetQuery:
@@ -151,7 +335,7 @@ class InsightsQLCohortQuery:
             source=source,
             select=["id"],
         )
-        return ActorsQueryRunner(team=self.team, query=actors_query).to_query()
+        return _require_select_query(ActorsQueryRunner(team=self.team, query=actors_query).to_query())
 
     def get_performed_event_condition(self, prop: Property, first_time: bool = False) -> ast.SelectQuery:
         math = None
@@ -168,13 +352,15 @@ class InsightsQLCohortQuery:
             # Explicit datetime filter, can be a relative or absolute date, follows same convention
             # as all analytics datetime filters
             date_from = prop.explicit_datetime
+            date_to = prop.explicit_datetime_to
         else:
             date_value = parse_and_validate_positive_integer(prop.time_value, "time_value")
             date_interval = validate_interval(prop.time_interval)
             date_from = f"-{date_value}{date_interval[:1]}"
+            date_to = None
 
         trends_query = TrendsQuery(
-            dateRange=DateRange(date_from=date_from),
+            dateRange=DateRange(date_from=date_from, date_to=date_to),
             trendsFilter=TrendsFilter(display="ActionsBarValue"),
             series=series,
         )
@@ -186,12 +372,14 @@ class InsightsQLCohortQuery:
 
         if prop.explicit_datetime:
             date_from = prop.explicit_datetime
+            date_to = prop.explicit_datetime_to
         else:
             date_value = parse_and_validate_positive_integer(prop.time_value, "time_value")
             date_interval = validate_interval(prop.time_interval)
             date_from = f"-{date_value}{date_interval[:1]}"
+            date_to = None
 
-        events_query = EventsQuery(after=date_from, select=["person_id", "count()"])
+        events_query = EventsQuery(after=date_from, before=date_to, select=["person_id", "count()"])
         if prop.event_type == "events":
             events_query.event = prop.key
         elif prop.event_type == "actions":
@@ -248,10 +436,12 @@ class InsightsQLCohortQuery:
 
         if prop.explicit_datetime:
             date_from = prop.explicit_datetime
+            date_to = prop.explicit_datetime_to
         else:
             date_value = parse_and_validate_positive_integer(prop.time_value, "time_value")
             date_interval = validate_interval(prop.time_interval)
             date_from = f"-{date_value}{date_interval[:1]}"
+            date_to = None
 
         date_value = parse_and_validate_positive_integer(prop.seq_time_value, "seq_time_value")
         date_interval = validate_interval(prop.seq_time_interval)
@@ -259,7 +449,7 @@ class InsightsQLCohortQuery:
 
         funnel_query = FunnelsQuery(
             series=series,
-            dateRange=DateRange(date_from=date_from),
+            dateRange=DateRange(date_from=date_from, date_to=date_to),
             funnelsFilter=FunnelsFilter(
                 funnelWindowInterval=funnelWindowInterval,
                 funnelWindowIntervalUnit=FunnelConversionWindowTimeUnit.SECOND,
@@ -390,28 +580,50 @@ class InsightsQLCohortQuery:
             select=["id"],
         )
         query_runner = ActorsQueryRunner(team=self.team, query=actors_query)
-        return query_runner.to_query()
+        return _require_select_query(query_runner.to_query())
+
+    def get_person_metadata_condition(self, prop: Property) -> ast.SelectQuery:
+        # type = "person_metadata"
+        # key = "created_at" (a top-level column on the persons table, not properties JSON)
+        actors_query = ActorsQuery(
+            properties=[
+                PersonMetadataPropertyFilter(
+                    key=prop.key, value=prop.value, operator=prop.operator or PropertyOperator.EXACT
+                )
+            ],
+            select=["id"],
+        )
+        query_runner = ActorsQueryRunner(team=self.team, query=actors_query)
+        return _require_select_query(query_runner.to_query())
 
     def get_static_cohort_condition(self, prop: Property) -> ast.SelectQuery:
-        cohort = Cohort.objects.get(pk=cast(int, prop.value), team__project_id=self.team.project_id)
+        # Convert the cohort id to an int (not the no-op typing.cast) and bind it as a parameter.
+        # prop.value is normally a cohort pk, but an internal cohort property smuggled through the
+        # unvalidated legacy `groups` field could carry an arbitrary string; binding it (rather than
+        # interpolating into parse_select) keeps it out of the query structure.
+        if isinstance(prop.value, list):
+            raise ValueError(f"cohort id must be an integer, got {prop.value}")
+        cohort = Cohort.objects.get(
+            pk=parse_and_validate_positive_integer(prop.value, "cohort id"), team__project_id=self.team.project_id
+        )
         return cast(
             ast.SelectQuery,
             parse_select(
-                f"SELECT person_id as id FROM static_cohort_people WHERE cohort_id = {cohort.pk} AND team_id = {self.team.pk}",
+                "SELECT person_id as id FROM static_cohort_people WHERE cohort_id = {cohort_id} AND team_id = {team_id}",
+                {"cohort_id": ast.Constant(value=cohort.pk), "team_id": ast.Constant(value=self.team.pk)},
             ),
         )
 
     def get_dynamic_cohort_condition(self, prop: Property) -> ast.SelectQuery:
-        cohort_id = cast(int, prop.value)
-
+        # See get_static_cohort_condition: convert + bind so a non-int value can't alter the query.
+        if isinstance(prop.value, list):
+            raise ValueError(f"cohort id must be an integer, got {prop.value}")
+        cohort_id = parse_and_validate_positive_integer(prop.value, "cohort id")
         return cast(
             ast.SelectQuery,
             parse_select(
-                f"""
-                SELECT person_id as id FROM cohort_people
-                WHERE cohort_id = {cohort_id}
-                AND team_id = {self.team.pk}
-                """,
+                "SELECT person_id as id FROM cohort_people WHERE cohort_id = {cohort_id} AND team_id = {team_id}",
+                {"cohort_id": ast.Constant(value=cohort_id), "team_id": ast.Constant(value=self.team.pk)},
             ),
         )
 
@@ -435,6 +647,8 @@ class InsightsQLCohortQuery:
                 raise ValueError(f"Invalid behavioral property value for Cohort: {prop.value}")
         elif prop.type == "person":
             return self.get_person_condition(prop)
+        elif prop.type == "person_metadata":
+            return self.get_person_metadata_condition(prop)
         elif prop.type == "static-cohort":  # static cohorts are handled by flattening during initialization
             return self.get_static_cohort_condition(prop)
         elif prop.type == "dynamic-cohort":
@@ -443,7 +657,7 @@ class InsightsQLCohortQuery:
             raise ValueError(f"Invalid property type for Cohort queries: {prop.type}")
 
     def _should_combine_person_properties_and(self) -> bool:
-        return hanzo_insights.feature_enabled(
+        return feature_enabled_or_false(
             "insightsql-cohort-combine-person-properties",
             str(self.team.uuid),
             groups={
@@ -463,7 +677,7 @@ class InsightsQLCohortQuery:
         )
 
     def _should_combine_person_properties_or(self) -> bool:
-        return hanzo_insights.feature_enabled(
+        return feature_enabled_or_false(
             "insightsql-cohort-combine-person-properties-or",
             str(self.team.uuid),
             groups={
@@ -532,7 +746,7 @@ class InsightsQLCohortQuery:
                 select=["id"],
             )
             query_runner = ActorsQueryRunner(team=self.team, query=actors_query)
-            return query_runner.to_query()
+            return _require_select_query(query_runner.to_query())
 
         def build_conditions(
             prop: Optional[Union[PropertyGroup, Property]],
@@ -620,11 +834,11 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
 
     def __init__(
         self,
-        cohort_query: Optional[CohortQuery] = None,
+        filter: Optional[Filter] = None,
         cohort: Optional[Cohort] = None,
         team: Optional[Team] = None,
     ):
-        super().__init__(cohort_query=cohort_query, cohort=cohort, team=team)
+        super().__init__(filter=filter, cohort=cohort, team=team)
         self.cohort = cohort
         # Preprocess to merge properties with same key and operator
         self.property_groups = self._preprocess_property_groups(self.property_groups)  # type: ignore[assignment]
@@ -686,7 +900,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
         """
         Unwrap PropertyGroups that contain only a single child.
 
-        FOSSCohortQuery.unwrap_cohort creates nested PropertyGroups like:
+        unwrap_cohort creates nested PropertyGroups like:
         PropertyGroup(AND) -> PropertyGroup(AND) -> Property
 
         This unwraps them to just: Property
@@ -698,7 +912,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
         unwrapped_values: list[Union[Property, PropertyGroup]] = [
             self._unwrap_single_property_groups(v) for v in prop_or_group.values
         ]
-        prop_or_group.values = unwrapped_values  # type: ignore[assignment]
+        prop_or_group.values = cast(Union[list[Property], list[PropertyGroup]], unwrapped_values)
 
         # If this group has only one child, return the child instead
         if len(prop_or_group.values) == 1:
@@ -738,7 +952,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                 else v
                 for v in prop_group.values
             ]
-            prop_group.values = processed_values  # type: ignore[assignment]
+            prop_group.values = cast(Union[list[Property], list[PropertyGroup]], processed_values)
             return prop_group
 
         # Group person properties by (key, operator)
@@ -776,7 +990,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                 merged_values.extend(props)
 
         merged_values.extend(non_mergeable)
-        prop_group.values = merged_values  # type: ignore[assignment]
+        prop_group.values = cast(Union[list[Property], list[PropertyGroup]], merged_values)
 
         # After merging within groups, also merge sibling single-property groups
         prop_group = self._merge_sibling_single_property_groups(prop_group)
@@ -855,7 +1069,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                 merged_values.append(PropertyGroup(type=PropertyOperatorType.OR, values=[single_prop]))
 
         merged_values.extend(other_values)
-        prop_group.values = merged_values  # type: ignore[assignment]
+        prop_group.values = cast(Union[list[Property], list[PropertyGroup]], merged_values)
         return prop_group
 
     def _should_combine_person_properties(self) -> bool:
@@ -893,13 +1107,15 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
         if prop.explicit_datetime:
             # Explicit datetime filter, can be a relative or absolute date
             date_from_str = prop.explicit_datetime
+            date_to_str = prop.explicit_datetime_to
         else:
             date_value = parse_and_validate_positive_integer(prop.time_value, "time_value")
             date_interval = validate_interval(prop.time_interval)
             date_from_str = f"-{date_value}{date_interval[:1]}"
+            date_to_str = None
 
         # Parse the date string using QueryDateRange to get actual datetime
-        date_range = DateRange(date_from=date_from_str)
+        date_range = DateRange(date_from=date_from_str, date_to=date_to_str)
         query_date_range = QueryDateRange(
             date_range=date_range,
             team=self.team,
@@ -907,29 +1123,46 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
             now=datetime.now(),
         )
         date_from_datetime = query_date_range.date_from()
+        date_to_datetime = query_date_range.date_to() if date_to_str else None
 
-        # Build query using precalculated_events
-        query_str = """
+        # Build date filter - include date_to if provided for range filtering
+        date_filter = "date >= toDate({date_from})"
+        if date_to_datetime:
+            date_filter = "date >= toDate({date_from}) AND date <= toDate({date_to})"
+
+        # Build query using precalculated_events. person_id is resolved with argMax over
+        # (distinct_id, date, uuid) rather than read raw: a person merge re-emits the row for
+        # the same key with a new person_id, and ReplacingMergeTree only collapses the stale
+        # copy on its own schedule, not synchronously with the write. Without this, a merged-away
+        # person keeps matching until the background merge happens to run.
+        query_str = f"""
             SELECT DISTINCT
                 person_id as id
-            FROM precalculated_events
-            WHERE
-                team_id = {team_id}
-                AND condition = {condition_hash}
-                AND date >= toDate({date_from})
+            FROM
+            (
+                SELECT
+                    distinct_id,
+                    date,
+                    uuid,
+                    argMax(person_id, _timestamp) as person_id
+                FROM precalculated_events
+                WHERE
+                    team_id = {{team_id}}
+                    AND condition = {{condition_hash}}
+                    AND {date_filter}
+                GROUP BY date, distinct_id, uuid
+            )
         """
 
-        return cast(
-            ast.SelectQuery,
-            parse_select(
-                query_str,
-                {
-                    "team_id": ast.Constant(value=self.team.pk),
-                    "condition_hash": ast.Constant(value=condition_hash),
-                    "date_from": ast.Constant(value=date_from_datetime),
-                },
-            ),
-        )
+        query_params: dict[str, ast.Expr] = {
+            "team_id": ast.Constant(value=self.team.pk),
+            "condition_hash": ast.Constant(value=condition_hash),
+            "date_from": ast.Constant(value=date_from_datetime),
+        }
+        if date_to_datetime:
+            query_params["date_to"] = ast.Constant(value=date_to_datetime)
+
+        return _apply_in_order_aggregation(cast(ast.SelectQuery, parse_select(query_str, query_params)))
 
     def get_performed_event_multiple(self, prop: Property) -> ast.SelectQuery:
         """
@@ -950,13 +1183,15 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
         if prop.explicit_datetime:
             # Explicit datetime filter, can be a relative or absolute date
             date_from_str = prop.explicit_datetime
+            date_to_str = prop.explicit_datetime_to
         else:
             date_value = parse_and_validate_positive_integer(prop.time_value, "time_value")
             date_interval = validate_interval(prop.time_interval)
             date_from_str = f"-{date_value}{date_interval[:1]}"
+            date_to_str = None
 
         # Parse the date string using QueryDateRange to get actual datetime
-        date_range = DateRange(date_from=date_from_str)
+        date_range = DateRange(date_from=date_from_str, date_to=date_to_str)
         query_date_range = QueryDateRange(
             date_range=date_range,
             team=self.team,
@@ -964,6 +1199,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
             now=datetime.now(),
         )
         date_from_datetime = query_date_range.date_from()
+        date_to_datetime = query_date_range.date_to() if date_to_str else None
 
         # Map operator to SQL comparison - validated to prevent SQL injection
         VALID_OPERATORS: dict[str, str] = {
@@ -982,29 +1218,46 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
             )
         sql_operator = VALID_OPERATORS[operator_str]
 
+        # Build date filter - include date_to if provided for range filtering
+        date_filter = "date >= toDate({date_from})"
+        if date_to_datetime:
+            date_filter = "date >= toDate({date_from}) AND date <= toDate({date_to})"
+
         query_str = f"""
             SELECT
                 person_id as id
-            FROM precalculated_events
-            WHERE
-                team_id = {{team_id}}
-                AND condition = {{condition_hash}}
-                AND date >= toDate({{date_from}})
+            FROM
+            (
+                SELECT
+                    distinct_id,
+                    date,
+                    uuid,
+                    argMax(person_id, _timestamp) as person_id
+                FROM precalculated_events
+                WHERE
+                    team_id = {{team_id}}
+                    AND condition = {{condition_hash}}
+                    AND {date_filter}
+                GROUP BY date, distinct_id, uuid
+            )
             GROUP BY person_id
             HAVING count() {sql_operator} {{min_matches}}
         """
 
-        return cast(
-            ast.SelectQuery,
-            parse_select(
-                query_str,
-                {
-                    "team_id": ast.Constant(value=self.team.pk),
-                    "condition_hash": ast.Constant(value=condition_hash),
-                    "date_from": ast.Constant(value=date_from_datetime),
-                    "min_matches": ast.Constant(value=min_matches),
-                },
-            ),
+        query_params: dict[str, ast.Expr] = {
+            "team_id": ast.Constant(value=self.team.pk),
+            "condition_hash": ast.Constant(value=condition_hash),
+            "date_from": ast.Constant(value=date_from_datetime),
+            "min_matches": ast.Constant(value=min_matches),
+        }
+        if date_to_datetime:
+            query_params["date_to"] = ast.Constant(value=date_to_datetime)
+
+        return _apply_in_order_aggregation(
+            cast(
+                ast.SelectQuery,
+                parse_select(query_str, query_params),
+            )
         )
 
     def get_dynamic_cohort_condition(self, prop: Property) -> ast.SelectQuery:
@@ -1012,7 +1265,9 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
         Query cohort_membership table for realtime cohort membership.
         Filters most recent status='entered' to find current members.
         """
-        cohort_id = cast(int, prop.value)
+        if isinstance(prop.value, list):
+            raise ValueError(f"cohort id must be an integer, got {prop.value}")
+        cohort_id = parse_and_validate_positive_integer(prop.value, "cohort id")
 
         return cast(
             ast.SelectQuery,
@@ -1034,36 +1289,21 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
             ),
         )
 
-    def _build_or_semantics_query(self, merged_hashes: list[str]) -> ast.SelectQuery:
-        """
-        Build query for OR semantics where at least ONE condition must match.
+    def _build_single_condition_query(self, condition_hash: str) -> ast.SelectQuery:
+        """One-pass query for a single condition: latest match per person via argMax.
 
-        For example: email contains X OR email contains Y
-        Uses HAVING matching_count >= 1
-
-        Args:
-            merged_hashes: List of condition hashes to match against
-
-        Returns:
-            SelectQuery AST that returns person_ids matching at least one condition
+        No outer aggregation is needed when there's only one condition, so this avoids the
+        second GROUP BY pass that the counting query below would otherwise do for N=1.
         """
         query_str = """
             SELECT
                 person_id as id
-            FROM
-            (
-                SELECT
-                    person_id,
-                    condition,
-                    argMax(matches, _timestamp) as latest_matches
-                FROM precalculated_person_properties
-                WHERE
-                    team_id = {team_id}
-                    AND condition IN {condition_hashes}
-                GROUP BY person_id, condition
-            )
+            FROM precalculated_person_properties
+            WHERE
+                team_id = {team_id}
+                AND condition = {condition_hash}
             GROUP BY person_id
-            HAVING countIf(latest_matches = 1) >= 1
+            HAVING argMax(matches, (_timestamp, _offset)) = 1
         """
 
         return cast(
@@ -1072,23 +1312,45 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                 query_str,
                 {
                     "team_id": ast.Constant(value=self.team.pk),
-                    "condition_hashes": ast.Tuple(exprs=[ast.Constant(value=h) for h in merged_hashes]),
+                    "condition_hash": ast.Constant(value=condition_hash),
                 },
             ),
         )
 
-    def _build_and_semantics_query(self, merged_hashes: list[str]) -> ast.SelectQuery:
+    def _build_count_match_query(self, hashes: list[str], operator: PropertyOperatorType) -> ast.SelectQuery:
+        """Build a single-scan query counting how many of `hashes` each person matches.
+
+        One pass over precalculated_person_properties: compute the latest match state per
+        (person, condition) with argMax, then count matching conditions per person. Peak group
+        count is still O(persons × conditions) (person_id isn't a prefix of the table's ORDER BY,
+        so the inner aggregation can't stream), but what fixes the OOM is the constant factor:
+        N full-table scans collapse into one, and each group holds a tiny argMax(Bool) state
+        instead of N materialized person-UUID sets joined by INTERSECT/UNION DISTINCT.
+
+            AND: every condition must match  → HAVING countIf(...) >= N
+            OR:  at least one must match     → HAVING countIf(...) >= 1
+
+        `>= N` is used for AND rather than `= N`: hashes are deduplicated and the inner
+        GROUP BY person_id, condition emits at most one row per condition, so countIf can never
+        exceed N. The two are equivalent, and a single operator keeps one query path.
         """
-        Build query for AND semantics where ALL conditions must match.
+        deduplicated = self._deduplicate_hashes(hashes)
+        # A single condition needs no cross-condition counting; use the cheaper one-pass query.
+        if len(deduplicated) == 1:
+            return self._build_single_condition_query(deduplicated[0])
 
-        For example: email contains X AND email contains Y
-        Uses HAVING matching_count = len(merged_hashes)
+        threshold = len(deduplicated) if operator == PropertyOperatorType.AND else 1
+        having = parse_expr("countIf(latest_matches = 1) >= {threshold}", {"threshold": ast.Constant(value=threshold)})
+        return self._single_scan_membership_query(deduplicated, having)
 
-        Args:
-            merged_hashes: List of condition hashes that all must match
+    def _single_scan_membership_query(self, hashes: list[str], having: ast.Expr) -> ast.SelectQuery:
+        """Assemble the single-scan SELECT over precalculated_person_properties for a given HAVING expr.
 
-        Returns:
-            SelectQuery AST that returns person_ids matching all conditions
+        Shared scaffold for both the flat-count path (_build_count_match_query) and the boolean-tree
+        path (_build_boolean_tree_query): one inner GROUP BY (person_id, condition) with argMax, one
+        outer GROUP BY person_id with HAVING. Keeping the scan template in one place ensures future
+        changes to the table access pattern (sort key, column renames, extra filters) are applied
+        consistently.
         """
         query_str = """
             SELECT
@@ -1098,7 +1360,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                 SELECT
                     person_id,
                     condition,
-                    argMax(matches, _timestamp) as latest_matches
+                    argMax(matches, (_timestamp, _offset)) as latest_matches
                 FROM precalculated_person_properties
                 WHERE
                     team_id = {team_id}
@@ -1106,7 +1368,7 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                 GROUP BY person_id, condition
             )
             GROUP BY person_id
-            HAVING countIf(latest_matches = 1) = {num_conditions}
+            HAVING {having}
         """
 
         return cast(
@@ -1115,8 +1377,8 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                 query_str,
                 {
                     "team_id": ast.Constant(value=self.team.pk),
-                    "condition_hashes": ast.Tuple(exprs=[ast.Constant(value=h) for h in merged_hashes]),
-                    "num_conditions": ast.Constant(value=len(merged_hashes)),
+                    "condition_hashes": ast.Tuple(exprs=[ast.Constant(value=h) for h in hashes]),
+                    "having": having,
                 },
             ),
         )
@@ -1142,11 +1404,8 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
 
             # Check if this is from an OR group (OR semantics) or AND group (AND semantics)
             is_or_group = getattr(prop, "_is_or_group", False)
-
-            if is_or_group:
-                return self._build_or_semantics_query(merged_hashes)
-            else:
-                return self._build_and_semantics_query(merged_hashes)
+            operator = PropertyOperatorType.OR if is_or_group else PropertyOperatorType.AND
+            return self._build_count_match_query(merged_hashes, operator)
         else:
             # Single condition - original logic
             condition_hash = getattr(prop, "conditionHash", None)
@@ -1157,27 +1416,160 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
                     f"All realtime cohorts MUST have conditionHash for person property filters. Property: {prop}"
                 )
 
-            query_str = """
-                SELECT
-                    person_id as id
-                FROM precalculated_person_properties
-                WHERE
-                    team_id = {team_id}
-                    AND condition = {condition_hash}
-                GROUP BY person_id
-                HAVING argMax(matches, _timestamp) = 1
-            """
+            return self._build_single_condition_query(condition_hash)
 
-            return cast(
-                ast.SelectQuery,
-                parse_select(
-                    query_str,
-                    {
-                        "team_id": ast.Constant(value=self.team.pk),
-                        "condition_hash": ast.Constant(value=condition_hash),
-                    },
-                ),
-            )
+    def _collect_person_property_hashes(
+        self, prop_group: PropertyGroup
+    ) -> Optional[tuple[list[str], PropertyOperatorType]]:
+        """Collect all condition hashes from a flat AND/OR of person properties.
+
+        Returns (hashes, operator) if every leaf is a non-negated person property with a
+        conditionHash, None otherwise (mixed/behavioral/negated conditions fall through to
+        the multi-subquery path).
+
+        Only inspects one level of nesting: a top-level AND/OR whose children are either
+        plain Properties or single-property PropertyGroups wrapping a plain Property.
+        """
+        operator = prop_group.type
+        hashes: list[str] = []
+        for value in prop_group.values:
+            if isinstance(value, Property):
+                prop = value
+            elif len(value.values) == 1 and isinstance(value.values[0], Property):
+                prop = value.values[0]
+            else:
+                # Nested group with multiple or non-Property children → not a flat person-property group.
+                return None
+
+            # Must be a non-negated person property with a conditionHash
+            condition_hash = getattr(prop, "conditionHash", None)
+            if prop.type != "person" or prop.negation or not condition_hash:
+                return None
+
+            # Merged properties carry multiple hashes
+            merged = getattr(prop, "_merged_condition_hashes", None)
+            if merged:
+                # A merged child encodes its own AND/OR across its hashes. Flattening them into
+                # the parent's single threshold only preserves semantics when the child's boolean
+                # type matches the top-level operator (e.g. an OR-merged child under a top-level
+                # AND would wrongly require ALL its hashes). Otherwise defer to the multi-subquery
+                # path, which expresses the nested boolean correctly.
+                if len(merged) > 1:
+                    child_is_or = getattr(prop, "_is_or_group", False)
+                    parent_is_or = operator == PropertyOperatorType.OR
+                    if child_is_or != parent_is_or:
+                        return None
+                hashes.extend(merged)
+            else:
+                hashes.append(condition_hash)
+
+        if not hashes:
+            return None
+        return hashes, operator
+
+    def _leaf_having_expr(self, prop: Property, all_hashes: list[str]) -> Optional[ast.Expr]:
+        """Build the HAVING predicate for one person-property leaf, over the single-scan rows.
+
+        The inner scan emits one row per (person, condition) with `latest_matches`, so in the
+        outer GROUP BY person_id a leaf is "did this person's latest row(s) for these hashes
+        match?":
+            - single hash / OR-merged → maxIf(latest_matches, condition IN hashes) = 1  (any matched)
+            - AND-merged             → countIf(latest_matches = 1 AND condition IN hashes) = N  (all matched)
+
+        Returns None for anything that isn't a non-negated person property with a conditionHash
+        (behavioral, dynamic-cohort, negated, …), so the caller falls through to the parent path.
+        """
+        if prop.type != "person" or prop.negation:
+            return None
+        condition_hash = getattr(prop, "conditionHash", None)
+        if not condition_hash:
+            return None
+
+        merged = getattr(prop, "_merged_condition_hashes", None)
+        hashes = self._deduplicate_hashes(merged) if merged else [condition_hash]
+        all_hashes.extend(hashes)
+        hashes_tuple = ast.Tuple(exprs=[ast.Constant(value=h) for h in hashes])
+
+        # A single hash or an OR-merged leaf matches if ANY of its hashes is the person's latest 1.
+        if len(hashes) == 1 or getattr(prop, "_is_or_group", False):
+            return parse_expr("maxIf(latest_matches, condition IN {hashes}) = 1", {"hashes": hashes_tuple})
+        # An AND-merged leaf matches only if ALL of its hashes are the person's latest 1.
+        return parse_expr(
+            "countIf(latest_matches = 1 AND condition IN {hashes}) = {n}",
+            {"hashes": hashes_tuple, "n": ast.Constant(value=len(hashes))},
+        )
+
+    def _build_person_property_having(self, prop_group: PropertyGroup, all_hashes: list[str]) -> Optional[ast.Expr]:
+        """Recursively turn a nested AND/OR of person properties into one HAVING boolean expr.
+
+        Every leaf hash is appended to `all_hashes` so the caller can scope the scan's
+        `condition IN (...)` filter. Returns None if any leaf is unsupported, so the whole cohort
+        falls through to the parent's multi-subquery path.
+        """
+        operator = prop_group.type
+        if operator not in (PropertyOperatorType.AND, PropertyOperatorType.OR):
+            return None
+
+        child_exprs: list[ast.Expr] = []
+        for value in prop_group.values:
+            if isinstance(value, PropertyGroup):
+                child = self._build_person_property_having(value, all_hashes)
+            else:
+                child = self._leaf_having_expr(value, all_hashes)
+            if child is None:
+                return None
+            child_exprs.append(child)
+
+        if not child_exprs:
+            return None
+        if len(child_exprs) == 1:
+            return child_exprs[0]
+        return ast.And(exprs=child_exprs) if operator == PropertyOperatorType.AND else ast.Or(exprs=child_exprs)
+
+    def _build_boolean_tree_query(self, prop_group: PropertyGroup) -> Optional[ast.SelectQuery]:
+        """One scan for an arbitrarily nested AND/OR of person properties.
+
+        Generalises the flat single-scan: instead of INTERSECT/UNION DISTINCT-ing N person sets
+        (which materialises N intermediate sets and OOMs on large cohorts), it reads the table
+        once and evaluates the whole boolean expression per person in the HAVING.
+        """
+        all_hashes: list[str] = []
+        having = self._build_person_property_having(prop_group, all_hashes)
+        if having is None or not all_hashes:
+            return None
+
+        deduplicated = self._deduplicate_hashes(all_hashes)
+        return self._single_scan_membership_query(deduplicated, having)
+
+    def _get_conditions(self) -> ast.SelectQuery | ast.SelectSetQuery:
+        """Override to emit a single-scan query when all conditions are person properties.
+
+        For cohorts backed entirely by precalculated_person_properties, the parent would produce
+        N separate subqueries joined by INTERSECT/UNION DISTINCT. Each subquery reads the full
+        table and the set operations materialise large intermediate person sets — a common source
+        of OOMs for large cohorts. We instead read the table once.
+
+        Two shapes qualify, tried in order:
+          1. Flat AND/OR of leaves → count matched conditions per person (HAVING countIf >= N).
+          2. Arbitrarily nested AND/OR of leaves → evaluate the boolean tree per person in the
+             HAVING (maxIf/countIf leaves combined with AND/OR).
+
+        Shape 1 is a strict subset of shape 2 (the tree would produce an equivalent AND/OR of
+        per-leaf maxIf predicates), but it's kept as a faster path: one `countIf >= N` over the
+        whole group is cheaper than N separate `maxIf` leaves.
+
+        Cohorts with any non-person leaf (behavioral, dynamic-cohort, static-cohort) or a negated
+        person property fall through to the parent's multi-subquery path unchanged.
+        """
+        if self.property_groups is not None:
+            result = self._collect_person_property_hashes(self.property_groups)
+            if result is not None:
+                hashes, operator = result
+                return self._build_count_match_query(hashes, operator)
+            tree_query = self._build_boolean_tree_query(self.property_groups)
+            if tree_query is not None:
+                return tree_query
+        return super()._get_conditions()
 
     def get_static_cohort_condition(self, prop: Property) -> ast.SelectQuery:
         """
@@ -1187,6 +1579,15 @@ class InsightsQLRealtimeCohortQuery(InsightsQLCohortQuery):
         raise ValueError(
             "Realtime cohorts do not support static cohort filters. "
             "Only dynamic cohorts and behavioral filters are supported for realtime calculation."
+        )
+
+    def get_person_metadata_condition(self, prop: Property) -> ast.SelectQuery:
+        # TODO: realtime cohorts read from precalculated_person_properties keyed by conditionHash, which only
+        # carries values from the persons properties JSON blob — top-level columns like created_at are not
+        # exposed. Extend the realtime backfill/consumer if/when there's demand.
+        raise ValueError(
+            "Realtime cohorts do not support 'person_metadata' filters. "
+            "Use a non-realtime cohort to filter on top-level person columns like created_at."
         )
 
     def get_performed_event_sequence(self, prop: Property) -> ast.SelectQuery:

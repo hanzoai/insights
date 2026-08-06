@@ -57,7 +57,7 @@ export const externalAdsCostTile = (
         return null
     }
 
-    let mathInsightsql: string
+    let mathHogql: string
 
     if (tileColumnSelection === 'roas') {
         const costColumn = sanitizeColumnName(table.source_map.cost)
@@ -67,7 +67,16 @@ export const externalAdsCostTile = (
         if (!costColumn || !conversionValueColumn) {
             return null
         }
-        mathInsightsql = `${sumSafeFloat(conversionValueColumn)} / nullIf(SUM(toFloat(${costColumn})), 0)`
+        mathHogql = `${sumSafeFloat(conversionValueColumn)} / nullIf(SUM(toFloat(${costColumn})), 0)`
+    } else if (tileColumnSelection === 'cost_per_reported_conversion') {
+        const costColumn = sanitizeColumnName(table.source_map.cost)
+        const conversionColumn = table.source_map.reported_conversion
+            ? sanitizeColumnName(table.source_map.reported_conversion)
+            : null
+        if (!costColumn || !conversionColumn) {
+            return null
+        }
+        mathHogql = `SUM(toFloat(${costColumn})) / nullIf(${sumSafeFloat(conversionColumn)}, 0)`
     } else {
         const rawColumn = table.source_map[tileColumnSelection]
         const column = rawColumn ? sanitizeColumnName(rawColumn) : null
@@ -77,7 +86,7 @@ export const externalAdsCostTile = (
         const currencyExpr = buildCurrencyExpr(table.source_map.currency, baseCurrency)
         const dateExpr = buildDateExpr(table)
         const safeCurrency = sanitizeCurrencyCode(baseCurrency) ?? 'USD'
-        mathInsightsql = `SUM(convertCurrency(${currencyExpr}, '${safeCurrency}', ${safeFloat(column)}, _toDate(${dateExpr})))`
+        mathHogql = `SUM(convertCurrency(${currencyExpr}, '${safeCurrency}', ${safeFloat(column)}, _toDate(${dateExpr})))`
     }
 
     const dateField = sanitizeColumnName(table.source_map.date)
@@ -96,6 +105,6 @@ export const externalAdsCostTile = (
         table_name: table.name,
         dw_source_type: table.dw_source_type,
         math: InsightsQLMathType.InsightsQL,
-        math_insightsql: mathInsightsql,
+        math_insightsql: mathHogql,
     }
 }

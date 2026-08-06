@@ -1,11 +1,11 @@
 import dataclasses
 from typing import TYPE_CHECKING, Literal, Optional
 
-from insights.api.insights_function_template import InsightsFunctionTemplateSerializer
-from insights.models.insights_function_template import InsightsFunctionTemplate
+from products.cdp.backend.api.insights_function_template import InsightsFunctionTemplateSerializer
+from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 
 if TYPE_CHECKING:
-    from insights.models.plugin import PluginConfig
+    from products.cdp.backend.models.plugin import PluginConfig
 else:
     PluginConfig = None
 
@@ -29,6 +29,7 @@ InsightsFunctionTemplateType = Literal[
     "warehouse_source_webhook",
     "site_app",
     "transformation",
+    "transformation_log",
 ]
 
 
@@ -44,6 +45,7 @@ class InsightsFunctionMapping:
 class InsightsFunctionMappingTemplate:
     name: str
     include_by_default: Optional[bool] = None
+    use_all_events_by_default: Optional[bool] = None
     filters: Optional[dict] = None
     inputs: Optional[dict] = None
     inputs_schema: Optional[list[dict]] = None
@@ -57,7 +59,7 @@ class InsightsFunctionTemplateDC:
     id: str
     name: str
     code: str
-    code_language: Literal["javascript", "iql"]
+    code_language: Literal["javascript", "script"]
     inputs_schema: list[dict]
     category: list[str]
     description: Optional[str] = None

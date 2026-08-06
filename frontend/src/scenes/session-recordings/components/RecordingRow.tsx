@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 import { useActions } from 'kea'
 
+import { IconPlayCircle } from 'lib/elements/icons'
 import { Snack } from 'lib/elements/Snack'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
-import { IconPlayCircle } from 'lib/elements/icons'
-import { humanFriendlyDuration } from 'lib/utils'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 import { asDisplay } from 'scenes/persons/person-utils'
 import { sessionPlayerModalLogic } from 'scenes/session-recordings/player/modal/sessionPlayerModalLogic'
 import { sessionRecordingEventUsageLogic } from 'scenes/session-recordings/sessionRecordingEventUsageLogic'

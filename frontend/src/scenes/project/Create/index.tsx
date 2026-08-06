@@ -1,9 +1,11 @@
 import { useValues } from 'kea'
+import { router } from 'kea-router'
 
 import { Banner } from 'lib/elements/Banner'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
+import { urls } from 'scenes/urls'
 
 import { CreateProjectModal } from '../CreateProjectModal'
 
@@ -20,6 +22,7 @@ export function ProjectCreate(): JSX.Element {
             {projectCreationForbiddenReason}
         </Banner>
     ) : (
-        <CreateProjectModal isVisible inline />
+        // Give the inline scene a working exit (Cancel + close) so a failed create doesn't trap the user.
+        <CreateProjectModal isVisible inline onClose={() => router.actions.push(urls.projectHomepage())} />
     )
 }

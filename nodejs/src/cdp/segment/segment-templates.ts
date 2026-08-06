@@ -253,7 +253,7 @@ const translateInputs = (defaultVal: any, multiple: boolean = false) => {
         return defaultVal
     }
     if (['boolean'].includes(typeof defaultVal)) {
-        return defaultVal ? 'true' : 'false'
+        return defaultVal
     }
     if (typeof defaultVal === 'object') {
         if (defaultVal && '@path' in defaultVal) {
@@ -351,7 +351,7 @@ const getFieldType = (field: any) => {
         return 'dictionary'
     }
 
-    if (['number', 'integer', 'datetime', 'password', 'boolean'].includes(field.type)) {
+    if (['number', 'integer', 'datetime', 'password'].includes(field.type)) {
         return 'string'
     }
 
@@ -420,6 +420,7 @@ const getIconUrl = (id: string, slug: string | undefined) => {
         'segment-actions-saleswings': 'saleswingsapp.com',
         'segment-actions-schematic': 'schematichq.com',
         'segment-actions-canny': 'canny.io',
+        'segment-actions-koala-cloud': 'getkoala.com',
     }
 
     if (!slug && !(id in icon_overrides)) {
@@ -478,7 +479,7 @@ const HIDDEN_DESTINATIONS = [
     'segment-actions-toplyne-cloud',
     'segment-actions-heap-cloud',
 
-    // these destinations require a raw segment event (https://github.com/hanzoai/insights/pull/33451)
+    // these destinations require a raw segment event (https://github.com/Insights/insights/pull/33451)
     'segment-actions-equals',
     'segment-actions-gainsight-px-cloud',
     'segment-actions-iqm',

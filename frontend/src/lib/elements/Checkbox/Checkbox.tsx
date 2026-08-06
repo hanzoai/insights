@@ -24,7 +24,7 @@ export interface CheckboxProps {
     fullWidth?: boolean
     size?: 'xsmall' | 'small' | 'medium'
     bordered?: boolean
-    /** @deprecated See https://github.com/hanzoai/insights/pull/9357#pullrequestreview-933783868. */
+    /** @deprecated See https://github.com/Insights/insights/pull/9357#pullrequestreview-933783868. */
     color?: string
     'data-attr'?: string
     /** Whether to stop propagation of events from the input */
@@ -63,7 +63,7 @@ export function Checkbox({
     const indeterminate = checked === 'indeterminate'
     disabled = disabled || !!disabledReason
 
-    const id = useMemo(() => rawId || `checkbox-${checkboxCounter++}`, [rawId])
+    const id = useMemo(() => rawId || `lemon-checkbox-${checkboxCounter++}`, [rawId])
     const [localChecked, setLocalChecked] = useState(indeterminate || (checked ?? defaultChecked ?? false))
     const [wasIndeterminateLast, setWasIndeterminateLast] = useState(false)
 

@@ -1,29 +1,33 @@
 import clsx from 'clsx'
-import { useValues } from 'kea'
-import { useMemo } from 'react'
+import { useActions, useValues } from 'kea'
+import { useEffect, useMemo } from 'react'
 
 import { Banner } from '@hanzo/elements'
 
+import type { Sorting } from 'lib/elements/Table/sorting'
+import { SortingIndicator, getNextSorting } from 'lib/elements/Table/sorting'
 import { InsightEmptyState } from 'scenes/insights/EmptyStates'
 
 import { HeatmapSettings } from '~/queries/schema/schema-general'
 
-import { dataVisualizationLogic, formatDataWithSettings } from '../../dataVisualizationLogic'
+import { getContrastingTextClass } from '../../colorUtils'
+import { dataVisualizationLogic } from '../../dataVisualizationLogic'
 import {
     buildFallbackGradientStops,
-    getHeatmapTextClassName,
+    formatHeatmapLabel,
+    formatHeatmapValue,
+    getHeatmapNullLabel,
+    getHeatmapNullValue,
     interpolateHeatmapColor,
     resolveGradientStops,
     stretchGradientStopsToValues,
 } from './heatmapUtils'
-
-const formatCategoryValue = (value: unknown): string => {
-    if (value === null || value === undefined || value === '') {
-        return '[No value]'
-    }
-
-    return String(value)
-}
+import {
+    getHeatmapSettingsWithSorting,
+    getSortingFromHeatmapSettings,
+    HEATMAP_ROW_LABEL_SORT_KEY,
+    sortHeatmapRows,
+} from './twoDimensionalHeatmapUtils'
 
 const parseNumericValue = (value: unknown): number | null => {
     if (value === null || value === undefined || value === '') {
@@ -46,14 +50,21 @@ type HeatmapData = {
     duplicateCellCount: number
 }
 
+type HeatmapDataSettings = Pick<
+    HeatmapSettings,
+    'xAxisColumn' | 'yAxisColumn' | 'valueColumn' | 'nullLabel' | 'nullValue'
+>
+
 const buildHeatmapData = (
     rows: any[],
-    heatmapSettings: HeatmapSettings,
+    heatmapSettings: HeatmapDataSettings,
     columnIndexes: Record<string, number>
 ): HeatmapData => {
     const xValues: string[] = []
     const yValues: string[] = []
-    const cellValues: Record<string, Record<string, number | null>> = {}
+    // Prototype-less: row labels are attacker-controlled and used as keys, so a `__proto__`
+    // label on a plain object would write through to Object.prototype (prototype pollution).
+    const cellValues: Record<string, Record<string, number | null>> = Object.create(null)
     const numericValues: number[] = []
     let duplicateCellCount = 0
 
@@ -74,10 +85,11 @@ const buildHeatmapData = (
     const xIndexMap = new Map<string, number>()
     const yIndexMap = new Map<string, number>()
     const seenCells = new Set<string>()
+    const nullLabel = getHeatmapNullLabel(heatmapSettings)
 
     rows.forEach((row) => {
-        const xLabel = formatCategoryValue(row[xIndex])
-        const yLabel = formatCategoryValue(row[yIndex])
+        const xLabel = formatHeatmapLabel(row[xIndex], nullLabel)
+        const yLabel = formatHeatmapLabel(row[yIndex], nullLabel)
         const numericValue = parseNumericValue(row[valueIndex])
 
         if (!xIndexMap.has(xLabel)) {
@@ -91,7 +103,7 @@ const buildHeatmapData = (
         }
 
         if (!cellValues[yLabel]) {
-            cellValues[yLabel] = {}
+            cellValues[yLabel] = Object.create(null)
         }
 
         const cellKey = `${yLabel}||${xLabel}`
@@ -121,12 +133,41 @@ const buildHeatmapData = (
     }
 }
 
-export const TwoDimensionalHeatmap = (): JSX.Element => {
+const getAriaSort = (order: Sorting['order'] | null): 'ascending' | 'descending' | 'none' => {
+    if (order === 1) {
+        return 'ascending'
+    }
+
+    if (order === -1) {
+        return 'descending'
+    }
+
+    return 'none'
+}
+
+const getNextSortingTitle = (currentSorting: Sorting | null, columnKey: string, defaultSortOrder: 1 | -1): string => {
+    const nextSorting = getNextSorting(currentSorting, columnKey, false, defaultSortOrder)
+
+    if (!nextSorting) {
+        return 'Click to cancel sorting'
+    }
+
+    return `Click to sort rows ${nextSorting.order === 1 ? 'ascending' : 'descending'}`
+}
+
+export function TwoDimensionalHeatmap({ allowSorting = true }: { allowSorting?: boolean }): JSX.Element {
     const { response, columns, chartSettings } = useValues(dataVisualizationLogic)
+    const { updateChartSettings } = useActions(dataVisualizationLogic)
 
     const heatmapSettings = chartSettings.heatmap ?? {}
-    const selectedColumns = [heatmapSettings.xAxisColumn, heatmapSettings.yAxisColumn, heatmapSettings.valueColumn]
-    const rows = response?.['results'] ?? response?.['result'] ?? []
+    const { xAxisColumn, yAxisColumn, valueColumn, nullLabel, nullValue } = heatmapSettings
+    const sorting = useMemo(
+        () => getSortingFromHeatmapSettings(heatmapSettings),
+        [heatmapSettings.sortColumn, heatmapSettings.sortOrder, heatmapSettings]
+    )
+    const selectedColumns = [xAxisColumn, yAxisColumn, valueColumn]
+    const rows =
+        response && 'results' in response ? response.results : response && 'result' in response ? response.result : []
     const columnIndexes = useMemo(() => {
         return columns.reduce(
             (acc, column) => {
@@ -156,8 +197,33 @@ export const TwoDimensionalHeatmap = (): JSX.Element => {
             }
         }
 
-        return buildHeatmapData(rows, heatmapSettings, columnIndexes)
-    }, [rows, hasSelection, hasValidColumns, heatmapSettings, columnIndexes])
+        return buildHeatmapData(rows, { xAxisColumn, yAxisColumn, valueColumn, nullLabel, nullValue }, columnIndexes)
+    }, [
+        rows,
+        hasSelection,
+        hasValidColumns,
+        xAxisColumn,
+        yAxisColumn,
+        valueColumn,
+        nullLabel,
+        nullValue,
+        columnIndexes,
+    ])
+
+    useEffect(() => {
+        if (
+            sorting &&
+            sorting.columnKey !== HEATMAP_ROW_LABEL_SORT_KEY &&
+            !heatmapData.xValues.includes(sorting.columnKey)
+        ) {
+            updateChartSettings({ heatmap: getHeatmapSettingsWithSorting(heatmapSettings, null) })
+        }
+    }, [heatmapData.xValues, heatmapSettings, sorting, updateChartSettings])
+
+    const sortedYValues = useMemo(
+        () => sortHeatmapRows(heatmapData.yValues, heatmapData.cellValues, sorting),
+        [heatmapData.cellValues, heatmapData.yValues, sorting]
+    )
 
     const gradientStops = resolveGradientStops(
         chartSettings.heatmap?.gradient,
@@ -169,6 +235,7 @@ export const TwoDimensionalHeatmap = (): JSX.Element => {
             : gradientStops
     const xAxisLabel = heatmapSettings.xAxisLabel || heatmapSettings.xAxisColumn || 'X-axis'
     const yAxisLabel = heatmapSettings.yAxisLabel || heatmapSettings.yAxisColumn || 'Y-axis'
+    const nullValueDisplay = getHeatmapNullValue(heatmapSettings)
 
     if (!hasSelection || !hasValidColumns) {
         return (
@@ -203,18 +270,85 @@ export const TwoDimensionalHeatmap = (): JSX.Element => {
                 <table className="min-w-full border-collapse text-xs">
                     <thead>
                         <tr>
-                            <th className="sticky left-0 z-10 bg-surface-primary border border-border px-2 py-1 text-left">
-                                {yAxisLabel}
+                            <th
+                                className="sticky left-0 z-10 bg-surface-primary border border-border px-2 py-1 text-left"
+                                aria-sort={
+                                    allowSorting
+                                        ? getAriaSort(
+                                              sorting?.columnKey === HEATMAP_ROW_LABEL_SORT_KEY ? sorting.order : null
+                                          )
+                                        : undefined
+                                }
+                            >
+                                {allowSorting ? (
+                                    <button
+                                        type="button"
+                                        className={clsx(
+                                            'flex w-full min-w-0 items-center justify-between gap-1 text-left',
+                                            sorting?.columnKey === HEATMAP_ROW_LABEL_SORT_KEY && 'font-medium'
+                                        )}
+                                        onClick={() =>
+                                            updateChartSettings({
+                                                heatmap: getHeatmapSettingsWithSorting(
+                                                    heatmapSettings,
+                                                    getNextSorting(sorting, HEATMAP_ROW_LABEL_SORT_KEY, false, 1)
+                                                ),
+                                            })
+                                        }
+                                        title={getNextSortingTitle(sorting, HEATMAP_ROW_LABEL_SORT_KEY, 1)}
+                                    >
+                                        <span className="truncate">{yAxisLabel}</span>
+                                        <SortingIndicator
+                                            order={
+                                                sorting?.columnKey === HEATMAP_ROW_LABEL_SORT_KEY ? sorting.order : null
+                                            }
+                                        />
+                                    </button>
+                                ) : (
+                                    yAxisLabel
+                                )}
                             </th>
                             {heatmapData.xValues.map((xValue, index) => (
-                                <th key={`${xValue}-${index}`} className="border border-border px-2 py-1 text-left">
-                                    {xValue}
+                                <th
+                                    key={`${xValue}-${index}`}
+                                    className="border border-border px-2 py-1 text-left"
+                                    aria-sort={
+                                        allowSorting
+                                            ? getAriaSort(sorting?.columnKey === xValue ? sorting.order : null)
+                                            : undefined
+                                    }
+                                >
+                                    {allowSorting ? (
+                                        <button
+                                            type="button"
+                                            className={clsx(
+                                                'flex w-full min-w-0 items-center justify-between gap-1 text-left',
+                                                sorting?.columnKey === xValue && 'font-medium'
+                                            )}
+                                            onClick={() =>
+                                                updateChartSettings({
+                                                    heatmap: getHeatmapSettingsWithSorting(
+                                                        heatmapSettings,
+                                                        getNextSorting(sorting, xValue, false, -1)
+                                                    ),
+                                                })
+                                            }
+                                            title={getNextSortingTitle(sorting, xValue, -1)}
+                                        >
+                                            <span className="truncate">{xValue}</span>
+                                            <SortingIndicator
+                                                order={sorting?.columnKey === xValue ? sorting.order : null}
+                                            />
+                                        </button>
+                                    ) : (
+                                        xValue
+                                    )}
                                 </th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {heatmapData.yValues.map((yValue) => (
+                        {sortedYValues.map((yValue) => (
                             <tr key={yValue}>
                                 <th className="sticky left-0 z-10 bg-surface-primary border border-border px-2 py-1 text-left">
                                     {yValue}
@@ -225,20 +359,17 @@ export const TwoDimensionalHeatmap = (): JSX.Element => {
                                         cellValue === null
                                             ? 'transparent'
                                             : interpolateHeatmapColor(cellValue, scaledGradientStops)
-                                    const formattedValue = formatDataWithSettings(cellValue, undefined)
 
                                     return (
                                         <td
                                             key={`${yValue}-${xValue}`}
                                             className={clsx(
                                                 'border border-border px-2 py-1 text-center',
-                                                cellValue !== null && getHeatmapTextClassName(cellColor)
+                                                cellValue !== null && getContrastingTextClass(cellColor)
                                             )}
                                             style={{ backgroundColor: cellColor }}
                                         >
-                                            {typeof formattedValue === 'object'
-                                                ? JSON.stringify(formattedValue)
-                                                : (formattedValue ?? '')}
+                                            {formatHeatmapValue(cellValue, nullValueDisplay)}
                                         </td>
                                     )
                                 })}

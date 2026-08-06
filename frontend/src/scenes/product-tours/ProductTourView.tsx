@@ -1,4 +1,5 @@
 import { BindLogic, useActions, useValues } from 'kea'
+import { router } from 'kea-router'
 import { useState } from 'react'
 
 import { IconCode, IconCursorClick, IconDocument, IconTrash } from '@hanzo/icons'
@@ -7,21 +8,29 @@ import { Banner, Button, Dialog, Divider, Select, Tag } from '@hanzo/elements'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { SceneFile } from 'lib/components/Scenes/SceneFile'
+import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Tabs } from 'lib/elements/Tabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
-import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
+import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { SurveyMatchTypeLabels } from 'scenes/surveys/constants'
 
+import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import {
+    SceneMenuBar,
+    SceneMenuBarItem,
+    SceneMenuBarMenu,
+    SceneMenuBarSeparator,
+} from '~/layout/scenes/components/SceneMenuBar'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import {
     ScenePanel,
     ScenePanelActionsSection,
     ScenePanelDivider,
     ScenePanelInfoSection,
 } from '~/layout/scenes/SceneLayout'
-import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { Query } from '~/queries/Query/Query'
 import { DateRange, FunnelsQuery, NodeKind } from '~/queries/schema/schema-general'
 import {
@@ -129,7 +138,8 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
     } = useActions(productTourLogic({ id }))
     const { deleteProductTour } = useActions(productToursLogic)
 
-    const [tabKey, setTabKey] = useState('overview')
+    const [tabKey, setTabKey] = useState(() => (router.values.searchParams.activity ? 'history' : 'overview'))
+    const sceneMenuBarEnabled = useFeatureFlag('SCENE_MENU_BAR')
 
     if (productTourLoading || !productTour) {
         return <Skeleton />
@@ -140,6 +150,43 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
 
     return (
         <SceneContent>
+            {sceneMenuBarEnabled && (
+                <SceneMenuBar>
+                    <SceneMenuBarMenu label="File" dataAttr="product_tour-menubar-file">
+                        <SceneMenuBarFileItems dataAttrKey="product_tour" />
+                        <SceneMenuBarSeparator />
+                        <SceneMenuBarItem
+                            variant="destructive"
+                            opensFloatingUi
+                            onClick={() => {
+                                Dialog.open({
+                                    title: 'Delete this product tour?',
+                                    content: (
+                                        <div className="text-sm text-secondary">
+                                            This action cannot be undone. All tour data will be permanently removed.
+                                        </div>
+                                    ),
+                                    primaryButton: {
+                                        children: 'Delete',
+                                        type: 'primary',
+                                        onClick: () => deleteProductTour(id),
+                                        size: 'small',
+                                    },
+                                    secondaryButton: {
+                                        children: 'Cancel',
+                                        type: 'tertiary',
+                                        size: 'small',
+                                    },
+                                })
+                            }}
+                            data-attr="product_tour-menubar-delete"
+                        >
+                            <IconTrash />
+                            Delete product tour
+                        </SceneMenuBarItem>
+                    </SceneMenuBarMenu>
+                </SceneMenuBar>
+            )}
             <ScenePanel>
                 <ScenePanelInfoSection>
                     <SceneFile dataAttrKey="product_tour" />
@@ -524,7 +571,7 @@ function TargetingSummary({
             {hasTargetingFilters && (
                 <div>
                     <BindLogic logic={featureFlagLogic} props={{ id: tour.internal_targeting_flag?.id || 'new' }}>
-                        <span className="font-medium">User properties:</span>
+                        <span className="font-medium">Person properties:</span>
                         <FeatureFlagReleaseConditions readOnly excludeTitle filters={targetingFlagFilters} />
                     </BindLogic>
                 </div>

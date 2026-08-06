@@ -1,20 +1,22 @@
 import inspect
 from collections import Counter
-from typing import Any, Literal, Optional
+from typing import TYPE_CHECKING, Any, Literal, Optional
 
 from django.conf import settings
 
 from rest_framework.exceptions import ValidationError
 
-from insights.schema import RevenueCurrencyPropertyConfig
-
 from insights.constants import TREND_FILTER_TYPE_ACTIONS, TREND_FILTER_TYPE_DATA_WAREHOUSE, TREND_FILTER_TYPE_EVENTS
-from insights.models.action import Action
 from insights.models.filters.mixins.funnel import FunnelFromToStepsMixin
 from insights.models.filters.mixins.property import PropertyMixin
 from insights.models.filters.utils import validate_group_type_index
 from insights.models.property import GroupTypeIndex
 from insights.models.utils import sane_repr
+
+from products.actions.backend.models.action import Action
+
+if TYPE_CHECKING:
+    from insights.schema import RevenueCurrencyPropertyConfig
 
 MathType = Literal[
     "total",
@@ -60,7 +62,7 @@ class Entity(PropertyMixin):
     custom_name: Optional[str]
     math: Optional[MathType]
     math_property: Optional[str]
-    math_property_revenue_currency: Optional[RevenueCurrencyPropertyConfig]
+    math_property_revenue_currency: Optional["RevenueCurrencyPropertyConfig"]
     math_insightsql: Optional[str]
     math_group_type_index: Optional[GroupTypeIndex]
     # Index is not set at all by default (meaning: access = AttributeError) - it's populated in EntitiesMixin.entities

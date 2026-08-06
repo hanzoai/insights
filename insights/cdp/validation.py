@@ -1,18 +1,28 @@
+import re
 import json
 import logging
 from typing import Any, Optional
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from insights.insightsql import ast
 from insights.insightsql.compiler.bytecode import create_bytecode
 from insights.insightsql.compiler.javascript import JavaScriptCompiler
+from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.parser import parse_program, parse_string_template
 from insights.insightsql.visitor import TraversingVisitor
 
 from insights.cdp.filters import compile_filters_bytecode, compile_filters_expr
-from insights.models.insights_functions.insights_function import TYPES_WITH_JAVASCRIPT_SOURCE, TYPES_WITH_TRANSPILED_FILTERS
+
+from products.cdp.backend.models.insights_functions.insights_function import (
+    TYPES_WITH_JAVASCRIPT_SOURCE,
+    TYPES_WITH_TRANSPILED_FILTERS,
+)
+
+from common.scriptvm.python.stl import STL
+from common.scriptvm.python.stl.bytecode import BYTECODE_STL
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +38,30 @@ def register_supported_function(name: str) -> None:
 
 register_supported_function("insightsGetTicket")
 register_supported_function("insightsUpdateTicket")
+register_supported_function("insightsGetAccount")
+register_supported_function("insightsUpdateAccount")
+register_supported_function("insightsSetAccountProperties")
+
+
+# Globals that the realtime transformer actually populates at runtime.
+# Keep in sync with HogTransformerService.createInvocationGlobals
+# (nodejs/src/cdp/script-transformations/script-transformer.service.ts).
+TRANSFORMATION_AVAILABLE_GLOBALS = {"project", "event", "inputs"}
+
+# Globals available to log transformations, which run per log record in the logs
+# ingestion pipeline and see a log record instead of an event.
+TRANSFORMATION_LOG_AVAILABLE_GLOBALS = {"project", "record", "inputs"}
+
+# Helper functions that the transformer exposes via getTransformationFunctions
+# (nodejs/src/cdp/script-transformations/transformation-functions.ts). These resolve
+# via GET_GLOBAL when referenced as a closure rather than called inline.
+# insightsCapture is intentionally omitted — it lives in CORE_SUPPORTED_FUNCTIONS.
+TRANSFORMATION_RUNTIME_FUNCTIONS = {
+    "geoipLookup",
+    "cleanNullValues",
+    "isKnownBotUserAgent",
+    "isKnownBotIp",
+}
 
 
 class InputCollector(TraversingVisitor):
@@ -42,6 +76,79 @@ class InputCollector(TraversingVisitor):
         if node.chain[0] == "inputs":
             if len(node.chain) > 1:
                 self.inputs.add(str(node.chain[1]))
+
+
+class TransformationGlobalsValidator(TraversingVisitor):
+    """Reject input templates that reference globals unavailable to the realtime
+    transformer (e.g. `person`, `groups`, `source`). Without this check, the bytecode
+    compiles fine and the failure surfaces only at ingestion time as
+    "Could not execute bytecode for input field" / "Global variable not found".
+    """
+
+    invalid_globals: set[str]
+
+    def __init__(
+        self,
+        available_globals: Optional[set[str]] = None,
+        runtime_functions: Optional[set[str]] = None,
+    ):
+        super().__init__()
+        self.invalid_globals = set()
+        self._available_globals = (
+            available_globals if available_globals is not None else TRANSFORMATION_AVAILABLE_GLOBALS
+        )
+        self._runtime_functions = (
+            runtime_functions if runtime_functions is not None else TRANSFORMATION_RUNTIME_FUNCTIONS
+        )
+
+    def visit_field(self, node: ast.Field):
+        super().visit_field(node)
+        if not node.chain:
+            return
+        root = str(node.chain[0])
+        if (
+            root in self._available_globals
+            or root in self._runtime_functions
+            or root in CORE_SUPPORTED_FUNCTIONS
+            or root in PRODUCT_ASYNC_FUNCTIONS
+            or root in STL
+            or root in BYTECODE_STL
+        ):
+            return
+        self.invalid_globals.add(root)
+
+
+class DeclaredNamesCollector(TraversingVisitor):
+    """Collect every identifier a script program declares (variables, functions, params,
+    loop vars, lambda args) so program-level global validation can ignore them.
+    Deliberately flat rather than scope-precise: a false negative just defers the
+    error to runtime, while a false positive would reject valid code.
+    """
+
+    names: set[str]
+
+    def __init__(self):
+        super().__init__()
+        self.names = set()
+
+    def visit_variable_declaration(self, node: ast.VariableDeclaration):
+        self.names.add(node.name)
+        super().visit_variable_declaration(node)
+
+    def visit_function(self, node: ast.Function):
+        self.names.add(node.name)
+        self.names.update(node.params)
+        super().visit_function(node)
+
+    def visit_lambda(self, node: ast.Lambda):
+        self.names.update(node.args)
+        super().visit_lambda(node)
+
+    def visit_for_in_statement(self, node: ast.ForInStatement):
+        if node.keyVar:
+            self.names.add(node.keyVar)
+        self.names.add(node.valueVar)
+        super().visit_for_in_statement(node)
 
 
 class HyphenatedPropertyDetector(TraversingVisitor):
@@ -78,34 +185,77 @@ class HyphenatedPropertyDetector(TraversingVisitor):
         return True
 
 
+class RecordAliasRewriter(TraversingVisitor):
+    """Rewrite `{record.x}` template references to `{event.properties.x}` for data-warehouse-table
+    sources. The synced row is delivered under `event.properties` at runtime, so `record` is a
+    friendlier alias users can write in destination/workflow templates instead of `event.properties`.
+    """
+
+    def visit_field(self, node: ast.Field):
+        super().visit_field(node)
+        if node.chain and str(node.chain[0]) == "record":
+            node.chain = ["event", "properties", *node.chain[1:]]
+
+
 def collect_inputs(node: ast.Expr) -> set[str]:
     input_collector = InputCollector()
     input_collector.visit(node)
     return input_collector.inputs
 
 
-def generate_template_bytecode(obj: Any, input_collector: set[str]) -> Any:
+def generate_template_bytecode(
+    obj: Any,
+    input_collector: set[str],
+    function_type: Optional[str] = None,
+    is_dwh_source: bool = False,
+) -> Any:
     """
     Clones an object, compiling any string values to bytecode templates
     """
 
     if isinstance(obj, dict):
-        return {key: generate_template_bytecode(value, input_collector) for key, value in obj.items()}
+        return {
+            key: generate_template_bytecode(value, input_collector, function_type, is_dwh_source)
+            for key, value in obj.items()
+        }
     elif isinstance(obj, list):
-        return [generate_template_bytecode(item, input_collector) for item in obj]
+        return [generate_template_bytecode(item, input_collector, function_type, is_dwh_source) for item in obj]
     elif isinstance(obj, str):
         node = parse_string_template(obj)
+        if is_dwh_source:
+            RecordAliasRewriter().visit(node)
         input_collector.update(collect_inputs(node))
         detector = HyphenatedPropertyDetector()
         detector.visit(node)
         if detector.errors:
             raise Exception(detector.errors[0])
+        if function_type == "transformation":
+            transformation_validator = TransformationGlobalsValidator()
+            transformation_validator.visit(node)
+            if transformation_validator.invalid_globals:
+                names = ", ".join(sorted(transformation_validator.invalid_globals))
+                raise Exception(
+                    f"Variable not available in transformations: {names}. "
+                    f"Transformations only have access to project, event, and inputs."
+                )
+        elif function_type == "transformation_log":
+            log_validator = TransformationGlobalsValidator(
+                available_globals=TRANSFORMATION_LOG_AVAILABLE_GLOBALS,
+                runtime_functions=set(),
+            )
+            log_validator.visit(node)
+            if log_validator.invalid_globals:
+                names = ", ".join(sorted(log_validator.invalid_globals))
+                raise Exception(
+                    f"Variable not available in log transformations: {names}. "
+                    f"Log transformations only have access to project, record, and inputs."
+                )
         return create_bytecode(node).bytecode
     else:
         return obj
 
 
-def transpile_template_code(obj: Any, compiler: JavaScriptCompiler) -> str:
+def transpile_template_code(obj: Any, compiler: JavaScriptCompiler, is_dwh_source: bool = False) -> str:
     """
     Clones an object, compiling any string values to bytecode templates
     """
@@ -115,7 +265,7 @@ def transpile_template_code(obj: Any, compiler: JavaScriptCompiler) -> str:
             + (
                 ", ".join(
                     [
-                        f"{json.dumps(str(key))}: {transpile_template_code(value, compiler)}"
+                        f"{json.dumps(str(key))}: {transpile_template_code(value, compiler, is_dwh_source)}"
                         for key, value in obj.items()
                     ]
                 )
@@ -123,11 +273,31 @@ def transpile_template_code(obj: Any, compiler: JavaScriptCompiler) -> str:
             + "}"
         )
     elif isinstance(obj, list):
-        return "[" + (", ".join([transpile_template_code(item, compiler) for item in obj])) + "]"
+        return "[" + (", ".join([transpile_template_code(item, compiler, is_dwh_source) for item in obj])) + "]"
     elif isinstance(obj, str):
-        return compiler.visit(parse_string_template(obj))
+        node = parse_string_template(obj)
+        if is_dwh_source:
+            RecordAliasRewriter().visit(node)
+        return compiler.visit(node)
     else:
         return json.dumps(obj)
+
+
+def _contains_liquid_style_syntax(value: Any) -> bool:
+    if isinstance(value, str):
+        return "{{" in value
+    if isinstance(value, dict):
+        return any(_contains_liquid_style_syntax(v) for v in value.values())
+    if isinstance(value, list):
+        return any(_contains_liquid_style_syntax(v) for v in value)
+    return False
+
+
+@extend_schema_field({"oneOf": [{"type": "boolean"}, {"type": "string", "enum": ["script", "liquid"]}]})
+class _TemplatingChoiceField(serializers.ChoiceField):
+    """drf-spectacular 0.29 crashes on sorted() with mixed bool/str choice keys."""
+
+    pass
 
 
 class InputsSchemaItemSerializer(serializers.Serializer):
@@ -140,14 +310,23 @@ class InputsSchemaItemSerializer(serializers.Serializer):
             "choice",
             "json",
             "integration",
+            "integration_multi",
             "integration_field",
             "email",
             "native_email",
+            "insights_assignee",
+            "insights_ticket_tags",
+            "insights_business_hours",
+            "non_failure_status_codes",
+            "customer_analytics_account_properties",
+            "customer_analytics_account_relationships",
         ]
     )
     key = serializers.CharField()
     label = serializers.CharField(required=False, allow_blank=True)  # type: ignore
     choices = serializers.ListField(child=serializers.DictField(), required=False)
+    # For `choice` inputs: render as a searchable select on the frontend.
+    searchable = serializers.BooleanField(required=False)
     required = serializers.BooleanField(default=False)  # type: ignore
     default = serializers.JSONField(required=False)
     secret = serializers.BooleanField(default=False)
@@ -158,12 +337,13 @@ class InputsSchemaItemSerializer(serializers.Serializer):
     requires_field = serializers.CharField(required=False)
     integration_field = serializers.CharField(required=False)
     requiredScopes = serializers.CharField(required=False)
-    # Indicates if custom templating should be used for this input
-    templating = serializers.ChoiceField(choices=[True, False, "fn", "liquid"], required=False)
+    # Indicates if script templating should be used for this input
+    templating = _TemplatingChoiceField(choices=[True, False, "script", "liquid"], required=False)
 
     # TODO Validate choices if type=choice
 
 
+@extend_schema_field({})
 class AnyInputField(serializers.Field):
     def to_internal_value(self, data):
         return data
@@ -174,7 +354,7 @@ class AnyInputField(serializers.Field):
 
 class InputsItemSerializer(serializers.Serializer):
     value = AnyInputField(required=False)
-    templating = serializers.ChoiceField(choices=["fn", "liquid"], required=False)
+    templating = serializers.ChoiceField(choices=["script", "liquid"], required=False)
     bytecode = serializers.ListField(required=False, read_only=True)
     order = serializers.IntegerField(required=False, read_only=True)
     transpiled = serializers.JSONField(required=False, read_only=True)
@@ -186,6 +366,7 @@ class InputsItemSerializer(serializers.Serializer):
     def validate(self, attrs):
         schema = self.context["schema"]
         function_type = self.context["function_type"]
+        is_dwh_source = self.context.get("is_dwh_source", False)
         value = attrs.get("value")
         item_type = schema["type"]
 
@@ -203,14 +384,32 @@ class InputsItemSerializer(serializers.Serializer):
             if not isinstance(value, int | float):
                 raise serializers.ValidationError({"input": f"Value must be a number."})
         elif item_type == "boolean":
-            if not isinstance(value, bool):
-                raise serializers.ValidationError({"input": f"Value must be a boolean."})
-        elif item_type == "dictionary":
+            templating_enabled = schema.get("templating", True)
+            if templating_enabled:
+                if not isinstance(value, bool) and not isinstance(value, str):
+                    raise serializers.ValidationError({"input": f"Value must be a boolean or a template string."})
+                # Liquid templating always renders to strings, which bypasses boolean type guarantees.
+                # Only Script templating is allowed for boolean fields as it preserves the actual boolean type.
+                if isinstance(value, str) and attrs.get("templating") == "liquid":
+                    raise serializers.ValidationError(
+                        {"input": "Liquid templating is not supported for boolean fields. Use Script templating instead."}
+                    )
+            else:
+                if not isinstance(value, bool):
+                    raise serializers.ValidationError({"input": f"Value must be a boolean."})
+        elif item_type in (
+            "dictionary",
+            "customer_analytics_account_properties",
+            "customer_analytics_account_relationships",
+        ):
             if not isinstance(value, dict):
                 raise serializers.ValidationError({"input": f"Value must be a dictionary."})
         elif item_type == "integration":
             if not isinstance(value, int):
                 raise serializers.ValidationError({"input": f"Value must be an Integration ID."})
+        elif item_type == "integration_multi":
+            if not isinstance(value, list) or not all(isinstance(v, int) and not isinstance(v, bool) for v in value):
+                raise serializers.ValidationError({"input": "Value must be a list of Integration IDs."})
         elif item_type == "email" or item_type == "native_email":
             if not isinstance(value, dict):
                 raise serializers.ValidationError({"input": f"Value must be an email object."})
@@ -220,6 +419,20 @@ class InputsItemSerializer(serializers.Serializer):
 
             if not value.get("text") and not value.get("html"):
                 raise serializers.ValidationError({"input": f"Either 'text' or 'html' is required."})
+        elif item_type == "non_failure_status_codes":
+            if not isinstance(value, list):
+                raise serializers.ValidationError({"input": "Value must be a list of status codes."})
+            for entry in value:
+                if isinstance(entry, bool) or not isinstance(entry, int | str):
+                    raise serializers.ValidationError(
+                        {"input": "Entries must be integers between 400 and 599 or wildcards '4xx' or '5xx'."}
+                    )
+                if isinstance(entry, int):
+                    if not (400 <= entry <= 599):
+                        raise serializers.ValidationError({"input": "Status code numbers must be between 400 and 599."})
+                else:
+                    if not re.fullmatch(r"[4-5]xx", entry, re.IGNORECASE):
+                        raise serializers.ValidationError({"input": "Wildcards must be '4xx' or '5xx'."})
 
         try:
             if value and schema.get("templating", True):
@@ -228,25 +441,51 @@ class InputsItemSerializer(serializers.Serializer):
                     # and we don't care about it being invalid at this stage.
                     pass
                 else:
-                    # If we have a value and custom templating is enabled, we need to transpile the value
-                    if item_type in ["string", "dictionary", "json", "email", "native_email"]:
+                    # If we have a value and script templating is enabled, we need to transpile the value
+                    value_is_transpiled = item_type in [
+                        "string",
+                        "boolean",
+                        "dictionary",
+                        "json",
+                        "email",
+                        "native_email",
+                        "insights_ticket_tags",
+                        "customer_analytics_account_properties",
+                        "customer_analytics_account_relationships",
+                    ] or (item_type == "boolean" and isinstance(value, str))
+                    if value_is_transpiled:
                         if item_type in ("email", "native_email") and isinstance(value, dict):
                             # We want to exclude the "design" property
                             value = {key: value[key] for key in value if key != "design"}
 
                         if function_type in TYPES_WITH_JAVASCRIPT_SOURCE:
                             compiler = JavaScriptCompiler()
-                            code = transpile_template_code(value, compiler)
+                            code = transpile_template_code(value, compiler, is_dwh_source=is_dwh_source)
                             attrs["transpiled"] = {"lang": "ts", "code": code, "stl": list(compiler.stl_functions)}
                             if "bytecode" in attrs:
                                 del attrs["bytecode"]
                         else:
                             input_collector: set[str] = set()
-                            attrs["bytecode"] = generate_template_bytecode(value, input_collector)
+                            attrs["bytecode"] = generate_template_bytecode(
+                                value, input_collector, function_type=function_type, is_dwh_source=is_dwh_source
+                            )
                             attrs["input_deps"] = list(input_collector)
                             if "transpiled" in attrs:
                                 del attrs["transpiled"]
         except Exception as e:
+            # Liquid-style {{ ... }} in a script-templated field is the dominant authoring mistake
+            # behind transpile failures, and the compiler's own message ("Placeholders are not
+            # allowed in this context") never names it - callers bisect blind without this hint.
+            if _contains_liquid_style_syntax(value):
+                raise serializers.ValidationError(
+                    {
+                        "input": (
+                            "Invalid template: this field uses single-curly templating like "
+                            "{person.properties.email}. Liquid-style {{ ... }} syntax is not "
+                            f"supported here. ({str(e)})"
+                        )
+                    }
+                )
             raise serializers.ValidationError({"input": f"Invalid template: {str(e)}"})
 
         return attrs
@@ -287,7 +526,7 @@ class InputsSerializer(serializers.DictField):
                 templating_val = schema["templating"]
                 if isinstance(templating_val, bool):
                     if templating_val:
-                        value["templating"] = "fn"
+                        value["templating"] = "script"
                     # If False, do not set templating field
                 else:
                     value["templating"] = templating_val
@@ -358,6 +597,21 @@ class InsightsFunctionFiltersSerializer(serializers.Serializer):
         # Ensure data is initialized as an empty dict if it's None
         data = data or {}
 
+        if function_type == "transformation_log":
+            # Filter bytecode is compiled against event-shaped globals, which log records
+            # don't have — silently accepting filters would mis-evaluate at ingestion time.
+            # Log transformations express conditions in Script code instead.
+            disallowed = [
+                key
+                for key in ("events", "actions", "properties", "data_warehouse", "filter_test_accounts")
+                if data.get(key)
+            ]
+            if disallowed:
+                raise serializers.ValidationError(
+                    f"Filters are not supported for log transformations (got: {', '.join(disallowed)}). "
+                    "Use conditions in the Script code instead."
+                )
+
         if data.get("source") == "events":
             # Don't allow events or actions for person-updates
             data.pop("data_warehouse", None)
@@ -387,8 +641,10 @@ class InsightsFunctionFiltersSerializer(serializers.Serializer):
                 del data["bytecode"]
         else:
             data = compile_filters_bytecode(data, team)
-            # Check if bytecode compilation resulted in an error
-            if data.get("bytecode_error"):
+            # Uncompilable filters are only fatal when the function will run (stay enabled).
+            # Callers that allow saving anyway (e.g. disabling/deleting a script function) opt out
+            # via context; the error stays persisted on the filters for the UI to surface.
+            if data.get("bytecode_error") and self.context.get("function_will_be_enabled", True):
                 raise serializers.ValidationError(f"Invalid filter configuration: {data['bytecode_error']}")
 
         return data
@@ -441,24 +697,73 @@ def topological_sort(nodes: list[str], edges: dict[str, list[str]]) -> list[str]
     return sorted_list
 
 
-def compile_script(fn: str, script_type: str, in_repl: Optional[bool] = False) -> list[Any]:
+def compile_hog(
+    script: str,
+    hog_type: str,
+    in_repl: Optional[bool] = False,
+    null_safe_comparisons: bool = False,
+) -> list[Any]:
     # Attempt to compile the script
     try:
-        program = parse_program(fn)
+        program = parse_program(script)
 
         detector = HyphenatedPropertyDetector()
         detector.visit(program)
         if detector.errors:
-            raise serializers.ValidationError({"fn": detector.errors[0]})
+            raise serializers.ValidationError({"script": detector.errors[0]})
 
-        supported_functions = set()
+        supported_functions: set[str] = set()
 
-        if script_type == "destination":
+        if hog_type == "destination":
             supported_functions = CORE_SUPPORTED_FUNCTIONS | PRODUCT_ASYNC_FUNCTIONS
+        elif hog_type == "tagger":
+            # Taggers classify; they must not perform side effects, so we deliberately exclude
+            # CORE_SUPPORTED_FUNCTIONS (fetch, insightsCapture) and PRODUCT_ASYNC_FUNCTIONS.
+            # Stated explicitly so a future refactor can't silently widen the surface.
+            supported_functions = set()
+        elif hog_type == "transformation_log":
+            # Log transformations run synchronously per log record in the logs ingestion
+            # hot path — no async functions (fetch, insightsCapture) can ever be allowed.
+            # Stated explicitly so a future refactor can't silently widen the surface.
+            supported_functions = set()
 
-        return create_bytecode(program, supported_functions=supported_functions, in_repl=in_repl).bytecode
+            # Validate the code body's globals like input templates are: without this,
+            # code referencing `event`/`person` compiles fine and only fails per record
+            # at ingestion time. Declared locals are excluded from the check.
+            declared = DeclaredNamesCollector()
+            declared.visit(program)
+            body_validator = TransformationGlobalsValidator(
+                available_globals=TRANSFORMATION_LOG_AVAILABLE_GLOBALS | declared.names,
+                runtime_functions=set(),
+            )
+            body_validator.visit(program)
+            if body_validator.invalid_globals:
+                names = ", ".join(sorted(body_validator.invalid_globals))
+                raise serializers.ValidationError(
+                    {
+                        "script": f"Variable not available in log transformations: {names}. "
+                        f"Log transformations only have access to project, record, and inputs."
+                    }
+                )
+
+        context = InsightsQLContext(team_id=None)
+        bytecode = create_bytecode(
+            program,
+            supported_functions=supported_functions,
+            in_repl=in_repl,
+            null_safe_comparisons=null_safe_comparisons,
+            context=context,
+        ).bytecode
+
+        # The compiler only records unknown-function calls as context errors; the call still
+        # compiles and fails at runtime. Log transformations run in a synchronous VM with no
+        # async functions registered, so surface the error at save time instead.
+        if hog_type == "transformation_log" and context.errors:
+            raise serializers.ValidationError({"script": context.errors[0].message})
+
+        return bytecode
     except serializers.ValidationError:
         raise
     except Exception as e:
         logger.error(f"Failed to compile script {e}", exc_info=True)
-        raise serializers.ValidationError({"fn": "Custom code has errors."})
+        raise serializers.ValidationError({"script": "Script code has errors."})

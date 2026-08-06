@@ -21,10 +21,10 @@
         bottom: 0;
         left: 0;
         z-index: 0;
-        width: var(--segmented-button-slider-width);
+        width: var(--lemon-segmented-button-slider-width);
         pointer-events: none;
         border-radius: var(--radius);
-        transform: translateX(var(--segmented-button-slider-offset));
+        transform: translateX(var(--lemon-segmented-button-slider-offset));
 
         &--first {
             border-top-left-radius: var(--radius);
@@ -59,7 +59,7 @@
 
         .Button:not(:hover) {
             .Button__content {
-                opacity: var(--button-icon-opacity);
+                opacity: var(--lemon-button-icon-opacity);
             }
         }
 
@@ -95,7 +95,7 @@
             z-index: 2;
 
             .Button {
-                --button-icon-opacity: 1;
+                --lemon-button-icon-opacity: 1;
             }
         }
 

@@ -5,12 +5,21 @@ import { useEffect, useRef, useState } from 'react'
 import { IconArchive, IconCopy, IconScreen } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { More } from 'lib/elements/Button/More'
+import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
+import { FEATURE_FLAGS } from 'lib/constants'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
-import { ScenePanel, ScenePanelActionsSection, ScenePanelDivider } from '~/layout/scenes/SceneLayout'
+import {
+    SceneMenuBar,
+    SceneMenuBarItem,
+    SceneMenuBarMenu,
+    SceneMenuBarSeparator,
+} from '~/layout/scenes/components/SceneMenuBar'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { ScenePanel, ScenePanelActionsSection, ScenePanelDivider } from '~/layout/scenes/SceneLayout'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { InsightsFlowManualTriggerButton } from './insightsflows/InsightsFlowManualTriggerButton'
 import { SaveAsTemplateModal } from './templates/SaveAsTemplateModal'
@@ -19,17 +28,17 @@ import { workflowLogic } from './workflowLogic'
 import { WorkflowSceneLogicProps } from './workflowSceneLogic'
 
 export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.Element => {
-    const logic = workflowLogic(props)
     const {
         workflow,
-        workflowChanged,
+        hasUnsavedChanges,
         isWorkflowSubmitting,
         workflowLoading,
         workflowHasErrors,
         workflowHasActionErrors,
-    } = useValues(logic)
-    const { saveWorkflowPartial, submitWorkflow, discardChanges, setWorkflowValue, duplicate, archiveWorkflow } =
-        useActions(logic)
+        workflowUserAccessLevel,
+    } = useValues(workflowLogic)
+    const { saveWorkflowPartial, submitWorkflow, setWorkflowValue, duplicate, archiveWorkflow, discardChanges } =
+        useActions(workflowLogic)
     const { searchParams } = useValues(router)
     const editTemplateId = searchParams.editTemplateId as string | undefined
     const templateId = searchParams.templateId as string | undefined
@@ -38,12 +47,12 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
 
     const isSavedWorkflow = props.id && props.id !== 'new'
     const isCreatedFromTemplate = props.id === 'new' && !!templateId
-    const isManualWorkflow = ['manual', 'schedule', 'batch'].includes(workflow?.trigger?.type || '')
+    const isManualWorkflow = ['manual', 'batch'].includes(workflow?.trigger?.type || '')
+    const { featureFlags } = useValues(featureFlagLogic)
+    const sceneMenuBarEnabled = !!featureFlags[FEATURE_FLAGS.SCENE_MENU_BAR]
     const [displayStatus, setDisplayStatus] = useState(workflow?.status)
     const [isTransitioning, setIsTransitioning] = useState(false)
     const prevStatusRef = useRef(workflow?.status)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
-
     useEffect(() => {
         // Only transition if status actually changed (not on initial mount)
         if (workflow?.status !== displayStatus && prevStatusRef.current !== undefined) {
@@ -64,6 +73,46 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
     return (
         <>
             <SaveAsTemplateModal {...props} editTemplateId={editTemplateId} />
+            {sceneMenuBarEnabled && isSavedWorkflow && (
+                <SceneMenuBar>
+                    <SceneMenuBarMenu label="File" dataAttr="workflow-menubar-file">
+                        <SceneMenuBarFileItems dataAttrKey="workflow" />
+                        <SceneMenuBarSeparator />
+                        <AccessControlAction
+                            resourceType={AccessControlResourceType.Workflow}
+                            minAccessLevel={AccessControlLevel.Editor}
+                            userAccessLevel={workflowUserAccessLevel ?? undefined}
+                        >
+                            {({ disabledReason }) => (
+                                <SceneMenuBarItem
+                                    variant="destructive"
+                                    onClick={() => archiveWorkflow(workflow)}
+                                    data-attr="workflow-menubar-archive"
+                                    disabled={!!disabledReason}
+                                    tooltip={disabledReason ?? undefined}
+                                >
+                                    <IconArchive />
+                                    Archive
+                                </SceneMenuBarItem>
+                            )}
+                        </AccessControlAction>
+                    </SceneMenuBarMenu>
+                    <SceneMenuBarMenu label="Edit" dataAttr="workflow-menubar-edit">
+                        <SceneMenuBarItem onClick={() => duplicate()} data-attr="workflow-menubar-duplicate">
+                            <IconCopy />
+                            Duplicate
+                        </SceneMenuBarItem>
+                        <SceneMenuBarItem
+                            opensFloatingUi
+                            onClick={showSaveAsTemplateModal}
+                            data-attr="workflow-menubar-save-as-template"
+                        >
+                            <IconScreen />
+                            Save as template
+                        </SceneMenuBarItem>
+                    </SceneMenuBarMenu>
+                </SceneMenuBar>
+            )}
             <SceneTitleSection
                 name={workflow?.name}
                 description={workflow?.description}
@@ -78,83 +127,84 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                         {isManualWorkflow && <InsightsFlowManualTriggerButton {...props} />}
                         {isSavedWorkflow && (
                             <>
-                                <Button
-                                    type={displayStatus === 'active' ? 'primary' : 'secondary'}
-                                    onClick={() =>
-                                        saveWorkflowPartial({
-                                            status: workflow?.status === 'draft' ? 'active' : 'draft',
-                                        })
-                                    }
-                                    size="small"
-                                    disabledReason={
-                                        workflowChanged
-                                            ? 'Save changes first'
-                                            : workflow?.status === 'draft' && workflowHasActionErrors
-                                              ? 'Fix all errors before enabling'
-                                              : undefined
-                                    }
-                                    className="transition-colors duration-300 ease-in-out"
-                                    data-attr="workflow-launch"
+                                <AccessControlAction
+                                    resourceType={AccessControlResourceType.Workflow}
+                                    minAccessLevel={AccessControlLevel.Editor}
+                                    userAccessLevel={workflowUserAccessLevel ?? undefined}
                                 >
-                                    <span
-                                        className={`inline-block transition-opacity duration-300 ease-in-out ${
-                                            isTransitioning ? 'opacity-0' : 'opacity-100'
-                                        }`}
-                                    >
-                                        {displayStatus === 'draft' ? 'Enable' : 'Disable'}
-                                    </span>
-                                </Button>
-                                <Divider vertical />
-                                {isRemovingSidePanelFlag ? (
-                                    <ScenePanel>
-                                        <ScenePanelActionsSection>
-                                            <ButtonPrimitive menuItem onClick={() => duplicate()}>
-                                                <IconCopy />
-                                                Duplicate
-                                            </ButtonPrimitive>
-                                            <ButtonPrimitive menuItem onClick={showSaveAsTemplateModal}>
-                                                <IconScreen />
-                                                Save as template
-                                            </ButtonPrimitive>
-                                        </ScenePanelActionsSection>
-                                        <ScenePanelDivider />
-                                        <ScenePanelActionsSection>
-                                            <ButtonPrimitive
-                                                menuItem
-                                                onClick={() => archiveWorkflow(workflow)}
-                                                variant="danger"
-                                            >
-                                                <IconArchive />
-                                                Archive
-                                            </ButtonPrimitive>
-                                        </ScenePanelActionsSection>
-                                    </ScenePanel>
-                                ) : (
-                                    <More
-                                        size="small"
-                                        overlay={
-                                            <>
-                                                <Button fullWidth onClick={() => duplicate()}>
-                                                    Duplicate
-                                                </Button>
-                                                <Button fullWidth onClick={showSaveAsTemplateModal}>
-                                                    Save as template
-                                                </Button>
-                                                <Divider />
-                                                <Button
-                                                    status="danger"
-                                                    fullWidth
-                                                    onClick={() => archiveWorkflow(workflow)}
-                                                >
-                                                    Archive
-                                                </Button>
-                                            </>
+                                    <Button
+                                        type={displayStatus === 'active' ? 'primary' : 'secondary'}
+                                        onClick={() =>
+                                            saveWorkflowPartial({
+                                                status: workflow?.status === 'draft' ? 'active' : 'draft',
+                                            })
                                         }
-                                    />
-                                )}
+                                        size="small"
+                                        disabledReason={
+                                            hasUnsavedChanges
+                                                ? 'Save changes first'
+                                                : workflow?.status === 'draft' && workflowHasActionErrors
+                                                  ? 'Fix all errors before enabling'
+                                                  : undefined
+                                        }
+                                        className="transition-colors duration-300 ease-in-out"
+                                        data-attr="workflow-launch"
+                                    >
+                                        <span
+                                            className={`inline-block transition-opacity duration-300 ease-in-out ${
+                                                isTransitioning ? 'opacity-0' : 'opacity-100'
+                                            }`}
+                                        >
+                                            {displayStatus === 'draft' ? 'Enable' : 'Disable'}
+                                        </span>
+                                    </Button>
+                                </AccessControlAction>
+                                <Divider vertical />
+                                <ScenePanel>
+                                    <ScenePanelActionsSection>
+                                        <ButtonPrimitive
+                                            menuItem
+                                            onClick={() => duplicate()}
+                                            data-attr="workflow-duplicate-btn"
+                                        >
+                                            <IconCopy />
+                                            Duplicate
+                                        </ButtonPrimitive>
+                                        <ButtonPrimitive
+                                            menuItem
+                                            onClick={showSaveAsTemplateModal}
+                                            data-attr="workflow-save-as-template-btn"
+                                        >
+                                            <IconScreen />
+                                            Save as template
+                                        </ButtonPrimitive>
+                                    </ScenePanelActionsSection>
+                                    <ScenePanelDivider />
+                                    <ScenePanelActionsSection>
+                                        <AccessControlAction
+                                            resourceType={AccessControlResourceType.Workflow}
+                                            minAccessLevel={AccessControlLevel.Editor}
+                                            userAccessLevel={workflowUserAccessLevel ?? undefined}
+                                        >
+                                            {({ disabledReason }) => (
+                                                <ButtonPrimitive
+                                                    menuItem
+                                                    onClick={() => archiveWorkflow(workflow)}
+                                                    variant="danger"
+                                                    data-attr="workflow-archive-btn"
+                                                    disabled={!!disabledReason}
+                                                    tooltip={disabledReason ?? undefined}
+                                                >
+                                                    <IconArchive />
+                                                    Archive
+                                                </ButtonPrimitive>
+                                            )}
+                                        </AccessControlAction>
+                                    </ScenePanelActionsSection>
+                                </ScenePanel>
                             </>
                         )}
-                        {workflowChanged && (
+                        {hasUnsavedChanges && (
                             <Button
                                 data-attr="discard-workflow-changes"
                                 type="secondary"
@@ -174,25 +224,34 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                                 Update template
                             </Button>
                         ) : (
-                            <Button
-                                type="primary"
-                                size="small"
-                                htmlType="submit"
-                                form="workflow"
-                                onClick={submitWorkflow}
-                                loading={isWorkflowSubmitting}
-                                disabledReason={
-                                    workflowHasErrors
-                                        ? 'Some fields still need work'
-                                        : isCreatedFromTemplate
-                                          ? undefined
-                                          : workflowChanged
-                                            ? undefined
-                                            : 'No changes to save'
+                            <AccessControlAction
+                                resourceType={AccessControlResourceType.Workflow}
+                                minAccessLevel={AccessControlLevel.Editor}
+                                userAccessLevel={
+                                    props.id === 'new' ? undefined : (workflowUserAccessLevel ?? undefined)
                                 }
                             >
-                                {props.id === 'new' ? 'Create as draft' : 'Save'}
-                            </Button>
+                                <Button
+                                    data-attr="workflow-save"
+                                    type="primary"
+                                    size="small"
+                                    htmlType="submit"
+                                    form="workflow"
+                                    onClick={submitWorkflow}
+                                    loading={isWorkflowSubmitting}
+                                    disabledReason={
+                                        workflowHasErrors
+                                            ? 'Some fields still need work'
+                                            : isCreatedFromTemplate
+                                              ? undefined
+                                              : hasUnsavedChanges
+                                                ? undefined
+                                                : 'No changes to save'
+                                    }
+                                >
+                                    {props.id === 'new' ? 'Create as draft' : 'Save'}
+                                </Button>
+                            </AccessControlAction>
                         )}
                     </>
                 }

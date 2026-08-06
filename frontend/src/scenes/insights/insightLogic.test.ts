@@ -4,6 +4,7 @@ import { router } from 'kea-router'
 import { expectLogic, partial, truth } from 'kea-test-utils'
 
 import api from 'lib/api'
+import { objectsEqual } from 'lib/utils/objects'
 import 'lib/constants'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import { savedInsightsLogic } from 'scenes/saved-insights/savedInsightsLogic'
@@ -15,14 +16,15 @@ import { useMocks } from '~/mocks/jest'
 import { dashboardsModel } from '~/models/dashboardsModel'
 import { insightsModel } from '~/models/insightsModel'
 import { examples } from '~/queries/examples'
-import { queryFromFilters } from '~/queries/nodes/InsightViz/utils'
-import { DataTableNode, NodeKind } from '~/queries/schema/schema-general'
+import { DataTableNode, type InsightVizNode, NodeKind } from '~/queries/schema/schema-general'
 import { initKeaTests } from '~/test/init'
 import {
     AccessControlLevel,
     AnyPropertyFilter,
+    BaseMathType,
     DashboardTile,
     DashboardType,
+    FilterLogicalOperator,
     FilterType,
     InsightLogicProps,
     InsightShortId,
@@ -41,6 +43,18 @@ const API_FILTERS: Partial<FilterType> = {
     properties: [{ value: 'a', operator: PropertyOperator.Exact, key: 'a', type: 'a' } as any as AnyPropertyFilter],
 }
 
+const API_QUERY = {
+    kind: NodeKind.InsightVizNode,
+    source: {
+        kind: NodeKind.TrendsQuery,
+        series: [{ kind: NodeKind.EventsNode, event: 3, math: 'total' }],
+        properties: {
+            type: 'AND',
+            values: [{ type: 'AND', values: [{ key: 'a', type: 'a', value: 'a', operator: PropertyOperator.Exact }] }],
+        },
+    },
+}
+
 const Insight12 = '12' as InsightShortId
 const Insight42 = '42' as InsightShortId
 const Insight43 = '43' as InsightShortId
@@ -48,10 +62,24 @@ const Insight44 = '44' as InsightShortId
 
 const MOCK_DASHBOARD_ID = 34
 
+const partialInsight42 = {
+    id: 42,
+    short_id: Insight42,
+    result: ['result 42'],
+    filters: API_FILTERS,
+}
+
 const partialInsight43 = {
     id: 43,
     short_id: Insight43,
     result: ['result 43'],
+    filters: API_FILTERS,
+}
+
+const partialInsight44 = {
+    id: 44,
+    short_id: Insight44,
+    result: ['result 44'],
     filters: API_FILTERS,
 }
 
@@ -78,7 +106,7 @@ function insightModelWith(properties: Record<string, any>): QueryBasedInsightMod
         id: 42,
         short_id: Insight42,
         result: ['result 42'],
-        query: queryFromFilters(API_FILTERS),
+        query: API_QUERY,
         dashboards: [],
         dashboard_tiles: [],
         saved: true,
@@ -114,16 +142,20 @@ describe('insightLogic', () => {
         useMocks({
             get: {
                 '/api/projects/:team/tags': [],
-                '/api/environments/:team_id/insights/trend/': async (req) => {
-                    const clientQueryId = req.url.searchParams.get('client_query_id')
+                '/api/environments/:team_id/quick_filters/': {
+                    results: [],
+                },
+                '/api/environments/:team_id/insights/trend/': async ({ request }) => {
+                    const url = new URL(request.url)
+                    const clientQueryId = url.searchParams.get('client_query_id')
                     if (clientQueryId !== null) {
                         seenQueryIDs.push(clientQueryId)
                     }
 
-                    if (JSON.parse(req.url.searchParams.get('events') || '[]')?.[0]?.throw) {
+                    if (JSON.parse(url.searchParams.get('events') || '[]')?.[0]?.throw) {
                         return [500, { status: 0, detail: 'error from the API' }]
                     }
-                    if (req.url.searchParams.get('date_from') === '-180d') {
+                    if (url.searchParams.get('date_from') === '-180d') {
                         // delay for 2 seconds before response without pausing
                         return new Promise<[number, { result: string[] }]>((resolve) =>
                             setTimeout(() => {
@@ -137,15 +169,12 @@ describe('insightLogic', () => {
                 '/api/environments/:team_id/insights/path': { result: ['result from api'] },
                 '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
                 '/api/environments/:team_id/insights/retention/': { result: ['result from api'] },
+                '/api/environments/:team_id/insights/42': partialInsight42,
                 '/api/environments/:team_id/insights/43/': partialInsight43,
-                '/api/environments/:team_id/insights/44/': {
-                    id: 44,
-                    short_id: Insight44,
-                    result: ['result 44'],
-                    filters: API_FILTERS,
-                },
-                '/api/environments/:team_id/insights/': (req) => {
-                    if (req.url.searchParams.get('saved')) {
+                '/api/environments/:team_id/insights/44/': partialInsight44,
+                '/api/environments/:team_id/insights/': ({ request }) => {
+                    const url = new URL(request.url)
+                    if (url.searchParams.get('saved')) {
                         return [
                             200,
                             {
@@ -163,7 +192,7 @@ describe('insightLogic', () => {
                             },
                         ]
                     }
-                    const shortId = req.url.searchParams.get('short_id') || ''
+                    const shortId = url.searchParams.get('short_id') || ''
                     if (shortId === '500') {
                         return [500, { status: 0, detail: 'error from the API' }]
                     }
@@ -175,7 +204,7 @@ describe('insightLogic', () => {
                                     result: parseInt(shortId) === 42 ? ['result from api'] : null,
                                     id: parseInt(shortId),
                                     short_id: shortId.toString(),
-                                    filters: JSON.parse(req.url.searchParams.get('filters') || 'false') || API_FILTERS,
+                                    filters: JSON.parse(url.searchParams.get('filters') || 'false') || API_FILTERS,
                                     name: 'original name',
                                     dashboards: [1, 2, 3],
                                 },
@@ -221,30 +250,31 @@ describe('insightLogic', () => {
             post: {
                 '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
                 '/api/environments/:team_id/insights/viewed': [201],
-                '/api/environments/:team_id/insights/': (req) => [
+                '/api/environments/:team_id/insights/': async ({ request }) => [
                     200,
-                    { id: 12, short_id: Insight12, ...(req.body as any) },
+                    { ...((await request.json()) as any), id: 12, short_id: Insight12 },
                 ],
                 '/api/environments/997/insights/cancel/': [201],
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async (req) => {
-                    const payload = await req.json()
+                '/api/environments/:team_id/insights/:id': async ({ request, params }) => {
+                    const payload = (await request.json()) as Record<string, any>
                     const response = patchResponseFor(
                         payload,
-                        req.params['id'] as string,
-                        JSON.parse(req.url.searchParams.get('filters') || 'false')
+                        params.id as string,
+                        JSON.parse(new URL(request.url).searchParams.get('filters') || 'false')
                     )
                     return [200, response]
+                },
+                '/api/projects/:team/insights/:id': async ({ request, params }) => {
+                    const payload = (await request.json()) as Record<string, any>
+                    return [200, { ...payload, id: params.id }]
                 },
             },
         })
         initKeaTests(true, { ...MOCK_DEFAULT_TEAM, test_account_filters_default_checked: true })
         teamLogic.mount()
         sceneLogic.mount()
-        sceneLogic.actions.setTabs([
-            { id: '1', title: '...', pathname: '/', search: '', hash: '', active: true, iconType: 'blank' },
-        ])
         await expectLogic(teamLogic)
             .toFinishAllListeners()
             .toMatchValues({ currentTeam: partial({ test_account_filters_default_checked: true }) })
@@ -344,15 +374,31 @@ describe('insightLogic', () => {
 
         describe('props with filters, no cached results, respects doNotLoad', () => {
             it('does not make a query', async () => {
-                const insight: Partial<QueryBasedInsightModel> = {
+                const insight: Partial<QueryBasedInsightModel<InsightVizNode>> = {
                     short_id: Insight42,
-                    query: queryFromFilters({
-                        insight: InsightType.TRENDS,
-                        events: [{ id: 3, throw: true }],
-                        properties: [
-                            { value: 'a', operator: PropertyOperator.Exact, key: 'a', type: PropertyFilterType.Person },
-                        ],
-                    }),
+                    query: {
+                        kind: NodeKind.InsightVizNode,
+                        source: {
+                            kind: NodeKind.TrendsQuery,
+                            series: [{ kind: NodeKind.EventsNode, event: '3', math: BaseMathType.TotalCount }],
+                            properties: {
+                                type: FilterLogicalOperator.And,
+                                values: [
+                                    {
+                                        type: FilterLogicalOperator.And,
+                                        values: [
+                                            {
+                                                value: 'a',
+                                                operator: PropertyOperator.Exact,
+                                                key: 'a',
+                                                type: PropertyFilterType.Person,
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        },
+                    },
                 }
                 logic = insightLogic({
                     dashboardItemId: Insight42,
@@ -378,7 +424,7 @@ describe('insightLogic', () => {
                                             },
                                         ],
                                     },
-                                    series: [partial({ event: 3 })],
+                                    series: [partial({ event: '3' })],
                                 },
                             },
                         },
@@ -428,13 +474,10 @@ describe('insightLogic', () => {
         it('does not load from the savedInsightLogic when in a dashboard context', async () => {
             // 1. open saved insights
             router.actions.push(urls.savedInsights(), {}, {})
-            savedInsightsLogic({ tabId: '1' }).mount()
+            savedInsightsLogic().mount()
 
             // 2. the insights are loaded
-            await expectLogic(savedInsightsLogic({ tabId: '1' })).toDispatchActions([
-                'loadInsights',
-                'loadInsightsSuccess',
-            ])
+            await expectLogic(savedInsightsLogic()).toDispatchActions(['loadInsights', 'loadInsightsSuccess'])
 
             // 3. mount the insight
             logic = insightLogic({ dashboardItemId: Insight42, dashboardId: 33 })
@@ -447,7 +490,7 @@ describe('insightLogic', () => {
     test('keeps saved name, description, tags', async () => {
         const insightProps: InsightLogicProps = {
             dashboardItemId: Insight43,
-            cachedInsight: { ...createEmptyInsight(Insight43), id: 123, query: queryFromFilters(API_FILTERS) },
+            cachedInsight: { ...createEmptyInsight(Insight43), id: 123, query: API_QUERY },
         }
 
         logic = insightLogic(insightProps)
@@ -456,7 +499,7 @@ describe('insightLogic', () => {
         insightDataLogic(insightProps).mount()
 
         const expectedPartialInsight = {
-            name: '',
+            name: undefined,
             description: '',
             tags: [],
             query: partial({
@@ -480,7 +523,7 @@ describe('insightLogic', () => {
             logic.actions.setInsightMetadataLocal({ name: 'Foobar 43', description: 'Lorem ipsum.', tags: ['good'] })
         }).toMatchValues({
             insight: partial({ name: 'Foobar 43', description: 'Lorem ipsum.', tags: ['good'] }),
-            savedInsight: partial({ name: '', description: '', tags: [] }),
+            savedInsight: partial({ name: undefined, description: '', tags: [] }),
             insightChanged: true,
         })
 
@@ -511,7 +554,7 @@ describe('insightLogic', () => {
     })
 
     test('saveInsight and updateInsight update the saved insights list', async () => {
-        savedInsightsLogic({ tabId: '1' }).mount()
+        savedInsightsLogic().mount()
 
         const insightProps: InsightLogicProps = {
             dashboardItemId: Insight42,
@@ -528,10 +571,36 @@ describe('insightLogic', () => {
         insightDataLogic(insightProps).mount()
 
         logic.actions.saveInsight()
-        await expectLogic(logic).toDispatchActions([savedInsightsLogic({ tabId: '1' }).actionTypes.addInsight])
+        await expectLogic(logic).toDispatchActions([savedInsightsLogic().actionTypes.addInsight])
 
         logic.actions.updateInsight({ name: 'my new name' })
-        await expectLogic(logic).toDispatchActions([savedInsightsLogic({ tabId: '1' }).actionTypes.updateInsight])
+        await expectLogic(logic).toDispatchActions([savedInsightsLogic().actionTypes.updateInsight])
+    })
+
+    test('saveInsight clears the browser draft only when saving a new insight', async () => {
+        const draftKey = `draft-query-${MOCK_TEAM_ID}`
+        localStorage.setItem(draftKey, JSON.stringify({ query: { kind: 'TrendsQuery' }, timestamp: 1 }))
+
+        const updateProps: InsightLogicProps = {
+            dashboardItemId: Insight42,
+            cachedInsight: { id: 42, short_id: Insight42, query: examples.FunnelsQuery, result: {} },
+        }
+        logic = insightLogic(updateProps)
+        logic.mount()
+        insightDataLogic(updateProps).mount()
+        await expectLogic(logic, () => {
+            logic.actions.saveInsight()
+        }).toFinishAllListeners()
+        expect(localStorage.getItem(draftKey)).not.toBeNull()
+
+        const newProps: InsightLogicProps = { dashboardItemId: 'new' }
+        logic = insightLogic(newProps)
+        logic.mount()
+        insightDataLogic(newProps).mount()
+        await expectLogic(logic, () => {
+            logic.actions.saveInsight()
+        }).toFinishAllListeners()
+        expect(localStorage.getItem(draftKey)).toBeNull()
     })
 
     test('saveInsight updates dashboards', async () => {
@@ -539,7 +608,7 @@ describe('insightLogic', () => {
         dashLogic.mount()
         await expectLogic(dashLogic).toDispatchActions(['loadDashboard'])
 
-        savedInsightsLogic({ tabId: '1' }).mount()
+        savedInsightsLogic().mount()
 
         const insightProps: InsightLogicProps = {
             dashboardItemId: Insight43,
@@ -555,7 +624,7 @@ describe('insightLogic', () => {
     })
 
     test('updateInsight updates dashboards', async () => {
-        savedInsightsLogic({ tabId: '1' }).mount()
+        savedInsightsLogic().mount()
         logic = insightLogic({
             dashboardItemId: Insight43,
             cachedInsight: {
@@ -586,12 +655,14 @@ describe('insightLogic', () => {
         }).toDispatchActions(['updateInsightSuccess'])
     })
 
-    test('save as new insight', async () => {
-        savedInsightsLogic({ tabId: '1' }).mount()
+    test('after save as from a dashboard tile, the editor state stays on the tile insight until navigation opens the copy', async () => {
+        savedInsightsLogic().mount()
 
         const insightProps: InsightLogicProps = {
             dashboardItemId: Insight42,
             cachedInsight: {
+                id: 42,
+                short_id: Insight42,
                 query: examples.InsightFunnels,
             },
         }
@@ -604,14 +675,11 @@ describe('insightLogic', () => {
         await expectLogic(logic, () => {
             logic.actions.saveAsConfirmation('New Insight (copy)')
         })
-            .toDispatchActions(['setInsight'])
-            .toDispatchActions(savedInsightsLogic({ tabId: '1' }), ['loadInsights'])
+            .toDispatchActions(savedInsightsLogic(), ['loadInsights'])
             .toMatchValues({
                 savedInsight: partial({ query: partial({ source: partial({ kind: NodeKind.FunnelsQuery }) }) }),
                 insight: partial({
-                    id: 12,
-                    short_id: Insight12,
-                    name: 'New Insight (copy)',
+                    short_id: Insight42,
                     query: partial({ source: partial({ kind: NodeKind.FunnelsQuery }) }),
                 }),
                 insightChanged: false,
@@ -642,15 +710,42 @@ describe('insightLogic', () => {
                         result: ['result 42'],
                         filters: API_FILTERS,
                         name: 'new name',
+                        description: 'new description',
                     })
                 )
             })
                 .toFinishAllListeners()
                 .toMatchValues({
-                    insight: truth(({ name }) => {
-                        return name === 'new name'
+                    insight: truth(({ name, description }) => {
+                        return name === 'new name' && description === 'new description'
                     }),
                 })
+        })
+
+        it('updates query and savedInsight.query on renameInsightSuccess (display-option save)', async () => {
+            const updatedQuery: InsightVizNode = {
+                kind: NodeKind.InsightVizNode,
+                source: {
+                    kind: NodeKind.TrendsQuery,
+                    series: [],
+                    trendsFilter: { showLegend: true },
+                },
+            }
+            const originalResult = logic.values.insight.result
+
+            insightsModel.actions.renameInsightSuccess(
+                insightModelWith({
+                    id: 42,
+                    short_id: Insight42,
+                    query: updatedQuery,
+                    result: null, // display-option PATCHes don't recompute — server returns null
+                })
+            )
+
+            // query updated, existing result preserved (not blanked by the null in the response)
+            expect(objectsEqual(logic.values.insight.query, updatedQuery)).toBe(true)
+            expect(logic.values.insight.result).toEqual(originalResult)
+            expect(objectsEqual(logic.values.savedInsight.query, updatedQuery)).toBe(true)
         })
 
         it('does not react to rename of a different insight', async () => {
@@ -740,6 +835,52 @@ describe('insightLogic', () => {
         })
     })
 
+    describe('setInsight name preservation', () => {
+        it('preserves user-edited name when loading new data for the same insight', async () => {
+            logic = insightLogic({ dashboardItemId: Insight42 })
+            logic.mount()
+            await expectLogic(logic).toDispatchActions(['loadInsight']).toFinishAllListeners()
+
+            // simulate user editing the name locally
+            logic.actions.setInsightMetadataLocal({ name: 'User Edited Name' })
+
+            await expectLogic(logic).toMatchValues({
+                insight: partial({ name: 'User Edited Name', short_id: Insight42 }),
+            })
+
+            // simulate reloading data for the same insight (e.g. query refresh) — name should be preserved
+            logic.actions.setInsight(
+                { ...logic.values.insight, name: '', short_id: Insight42 },
+                { fromPersistentApi: false, overrideQuery: false }
+            )
+
+            await expectLogic(logic).toMatchValues({
+                insight: partial({ name: 'User Edited Name' }),
+            })
+        })
+
+        it('does not preserve name when switching to a new insight', async () => {
+            logic = insightLogic({ dashboardItemId: Insight42 })
+            logic.mount()
+            await expectLogic(logic).toDispatchActions(['loadInsight']).toFinishAllListeners()
+
+            // confirm the loaded insight has a name
+            await expectLogic(logic).toMatchValues({
+                insight: partial({ name: 'original name', short_id: Insight42 }),
+            })
+
+            // simulate switching to a brand new insight (no short_id)
+            logic.actions.setInsight(
+                { ...createEmptyInsight('new'), query: logic.values.insight.query },
+                { fromPersistentApi: false, overrideQuery: true }
+            )
+
+            await expectLogic(logic).toMatchValues({
+                insight: partial({ name: undefined }),
+            })
+        })
+    })
+
     describe('saving query based insights', () => {
         beforeEach(async () => {
             const insightProps: InsightLogicProps = { dashboardItemId: 'new' }
@@ -754,7 +895,12 @@ describe('insightLogic', () => {
 
             await expectLogic(logic, () => {
                 logic.actions.setInsight(
-                    { query: { kind: NodeKind.DataTableNode } as DataTableNode },
+                    {
+                        query: {
+                            kind: NodeKind.DataTableNode,
+                            source: { kind: NodeKind.EventsQuery, select: ['*'] },
+                        } as DataTableNode,
+                    },
                     { overrideQuery: true }
                 )
                 logic.actions.saveInsight()
@@ -765,23 +911,404 @@ describe('insightLogic', () => {
                 [
                     `api/environments/${MOCK_TEAM_ID}/insights`,
                     expect.objectContaining({
-                        derived_name: 'DataTableNode query',
+                        derived_name: '* from events',
                         query: {
                             kind: 'DataTableNode',
+                            source: { kind: 'EventsQuery', select: ['*'] },
                         },
                         saved: true,
                     }),
                     expect.objectContaining({
-                        data: {
-                            derived_name: 'DataTableNode query',
+                        data: expect.objectContaining({
+                            derived_name: '* from events',
                             query: {
                                 kind: 'DataTableNode',
+                                source: { kind: 'EventsQuery', select: ['*'] },
                             },
                             saved: true,
-                        },
+                        }),
                     }),
                 ],
             ])
+        })
+    })
+
+    describe('confirmDeleteInsight', () => {
+        beforeEach(async () => {
+            const insightProps: InsightLogicProps = { dashboardItemId: Insight42 }
+            logic = insightLogic(insightProps)
+            logic.mount()
+
+            await expectLogic(logic)
+                .toFinishAllListeners()
+                .toMatchValues({
+                    insight: partial({ id: 42 }),
+                })
+        })
+
+        it.each([
+            { scenario: 'with dashboardId', dashboardId: 5 },
+            { scenario: 'without dashboardId', dashboardId: null },
+        ])('$scenario deletes via API then navigates', async ({ dashboardId }) => {
+            jest.spyOn(api, 'update')
+
+            logic.actions.confirmDeleteInsight(dashboardId)
+            await expectLogic(logic).toFinishAllListeners()
+
+            expect(api.update).toHaveBeenCalledWith(
+                expect.stringContaining('/insights/42'),
+                expect.objectContaining({ deleted: true })
+            )
+
+            const expectedUrl = dashboardId ? urls.dashboard(dashboardId) : urls.savedInsights()
+            await expectLogic(router).toDispatchActions([router.actionCreators.push(expectedUrl)])
+        })
+
+        it('restores insight on undo from dashboard', async () => {
+            logic.actions.confirmDeleteInsight(5)
+            await expectLogic(logic).toFinishAllListeners()
+
+            // Simulate undo — the callback with undo=true should restore the insight
+            await expectLogic(dashboardsModel, () => {
+                dashboardsModel
+                    .findMounted()
+                    ?.actions.updateDashboardInsight(
+                        { ...(logic.values.insight as QueryBasedInsightModel), deleted: false },
+                        [5]
+                    )
+            }).toDispatchActions([
+                (action: any) =>
+                    action.type === dashboardsModel.actionTypes.updateDashboardInsight &&
+                    action.payload.insight.deleted === false,
+            ])
+        })
+    })
+
+    describe('duplicateInsight', () => {
+        beforeEach(async () => {
+            const insightProps: InsightLogicProps = { dashboardItemId: Insight42 }
+            logic = insightLogic(insightProps)
+            logic.mount()
+
+            await expectLogic(logic)
+                .toFinishAllListeners()
+                .toMatchValues({
+                    insight: partial({ id: 42 }),
+                })
+        })
+
+        it('fetches clean insight before duplicating', async () => {
+            jest.spyOn(api, 'create')
+
+            logic.actions.duplicateInsight(logic.values.insight as QueryBasedInsightModel, true)
+            await expectLogic(logic).toFinishAllListeners()
+
+            // The POST body should contain the clean insight fetched via getByShortId,
+            // not the one passed in (which may have dashboard filter overrides)
+            expect(api.create).toHaveBeenCalledWith(
+                expect.stringContaining('/insights'),
+                expect.objectContaining({ name: 'original name (copy)' }),
+                expect.anything()
+            )
+        })
+
+        it('falls back to original insight when fetch fails', async () => {
+            jest.spyOn(api, 'create')
+
+            const insightWithBadShortId = {
+                ...(logic.values.insight as QueryBasedInsightModel),
+                short_id: '500' as InsightShortId,
+                name: 'fallback name',
+            }
+            logic.actions.duplicateInsight(insightWithBadShortId, false)
+            await expectLogic(logic).toFinishAllListeners()
+
+            expect(api.create).toHaveBeenCalledWith(
+                expect.stringContaining('/insights'),
+                expect.objectContaining({ name: 'fallback name (copy)' }),
+                expect.anything()
+            )
+        })
+
+        it('with redirectToInsight=true navigates to edit URL', async () => {
+            // POST mock returns short_id: Insight12 — listen on router before dispatching
+            await expectLogic(router, () => {
+                logic.actions.duplicateInsight(logic.values.insight as QueryBasedInsightModel, true)
+            }).toDispatchActions([router.actionCreators.push(urls.insightEdit(Insight12))])
+        })
+
+        it('with redirectToInsight=false does not navigate', async () => {
+            await expectLogic(logic, () => {
+                logic.actions.duplicateInsight(logic.values.insight as QueryBasedInsightModel, false)
+            }).toFinishAllListeners()
+
+            await expectLogic(router).toNotHaveDispatchedActions(['push'])
+        })
+    })
+
+    describe('hasOverrides', () => {
+        it.each([
+            ['no overrides present', { filtersOverride: null, variablesOverride: null }, false],
+            ['filtersOverride has a date_from', { filtersOverride: { date_from: '-7d' } }, true],
+            [
+                'variablesOverride is non-empty',
+                { variablesOverride: { var1: { code_name: 'var1', variableId: '123', value: 'x' } } },
+                true,
+            ],
+            ['filtersOverride is an empty object', { filtersOverride: {} }, false],
+            ['tileFiltersOverride has a date_from', { tileFiltersOverride: { date_from: '-30d' } }, true],
+        ])('is %s → %s', (_label, propsOverride, expected) => {
+            logic = insightLogic({
+                dashboardItemId: Insight42,
+                cachedInsight: { ...partialInsight42, query: API_QUERY },
+                ...propsOverride,
+            })
+            logic.mount()
+
+            expect(logic.values.hasOverrides).toBe(expected)
+        })
+    })
+
+    describe('loadInsight refresh mode', () => {
+        // Overridden queries get their own cache key, which nothing warms — a cache-only-ish
+        // `async` read yields `result: null` and the scene shows "Chart data didn't load".
+        const seenRefreshParams: (string | null)[] = []
+
+        beforeEach(() => {
+            seenRefreshParams.length = 0
+            useMocks({
+                get: {
+                    '/api/environments/:team_id/insights/': ({ request }) => {
+                        const url = new URL(request.url)
+                        seenRefreshParams.push(url.searchParams.get('refresh'))
+                        return [
+                            200,
+                            {
+                                results: [
+                                    {
+                                        id: 42,
+                                        short_id: Insight42,
+                                        result: ['result from api'],
+                                        filters: API_FILTERS,
+                                        name: 'original name',
+                                    },
+                                ],
+                            },
+                        ]
+                    },
+                },
+            })
+        })
+
+        it('uses async without overrides', async () => {
+            logic = insightLogic({ dashboardItemId: Insight42 })
+            logic.mount()
+            await expectLogic(logic).toDispatchActions(['loadInsightSuccess'])
+
+            expect(seenRefreshParams).toEqual(['async'])
+        })
+
+        it('blocks on a cache miss when overrides are present', async () => {
+            logic = insightLogic({
+                dashboardItemId: Insight42,
+                dashboardId: 33,
+                filtersOverride: { date_from: '-14d' },
+            })
+            logic.mount()
+            await expectLogic(logic).toDispatchActions(['loadInsightSuccess'])
+
+            expect(seenRefreshParams).toEqual(['async_except_on_cache_miss'])
+        })
+
+        it('treats empty overrides as no overrides', async () => {
+            logic = insightLogic({
+                dashboardItemId: Insight42,
+                dashboardId: 33,
+                filtersOverride: {},
+            })
+            logic.mount()
+            await expectLogic(logic).toDispatchActions(['loadInsightSuccess'])
+
+            expect(seenRefreshParams).toEqual(['async'])
+        })
+    })
+
+    describe('editingDisabledReason', () => {
+        it.each([
+            ['overrides present', { filtersOverride: { date_from: '-7d' } }, 'Discard overrides to edit the insight.'],
+            ['no overrides', { filtersOverride: null }, null],
+        ])('returns correct value when %s', (_label, propsOverride, expected) => {
+            logic = insightLogic({
+                dashboardItemId: Insight42,
+                cachedInsight: { ...partialInsight42, query: API_QUERY },
+                ...propsOverride,
+            })
+            logic.mount()
+
+            expect(logic.values.editingDisabledReason).toBe(expected)
+        })
+    })
+
+    describe('canEditInsight', () => {
+        it.each([
+            ['editor access level', AccessControlLevel.Editor, true],
+            ['viewer access level', AccessControlLevel.Viewer, false],
+        ])('is correct with %s', (_label, accessLevel, expected) => {
+            logic = insightLogic({
+                dashboardItemId: Insight42,
+                cachedInsight: {
+                    ...partialInsight42,
+                    query: API_QUERY,
+                    user_access_level: accessLevel,
+                },
+            })
+            logic.mount()
+
+            expect(logic.values.canEditInsight).toBe(expected)
+        })
+    })
+
+    describe('setInsightMetadataSuccess on savedInsight', () => {
+        it('syncs name, description, and tags to savedInsight after metadata save', async () => {
+            const insightProps: InsightLogicProps = {
+                dashboardItemId: Insight43,
+                cachedInsight: {
+                    ...partialInsight43,
+                    query: API_QUERY,
+                    name: 'Original 43',
+                    description: 'Original description',
+                    tags: [],
+                },
+            }
+
+            logic = insightLogic(insightProps)
+            logic.mount()
+
+            await expectLogic(logic).toMatchValues({
+                savedInsight: partial({ name: 'Original 43', description: 'Original description', tags: [] }),
+                insightChanged: false,
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.setInsightMetadataLocal({
+                    name: 'Foobar 43',
+                    description: 'Lorem ipsum.',
+                    tags: ['good'],
+                })
+            }).toMatchValues({
+                insight: partial({ name: 'Foobar 43', description: 'Lorem ipsum.', tags: ['good'] }),
+                savedInsight: partial({ name: 'Original 43', description: 'Original description', tags: [] }),
+                insightChanged: true,
+            })
+
+            // The PATCH mock for id=43 returns name: 'Foobar 43', description: 'Lorem ipsum.', tags: ['good']
+            await expectLogic(logic, () => {
+                logic.actions.setInsightMetadata({ name: 'Foobar 43', description: 'Lorem ipsum.', tags: ['good'] })
+            })
+                .toDispatchActions(['setInsightMetadataSuccess'])
+                .toMatchValues({
+                    savedInsight: partial({ name: 'Foobar 43', description: 'Lorem ipsum.', tags: ['good'] }),
+                    insightChanged: false,
+                })
+        })
+
+        it('syncs favorited to savedInsight on metadata save', async () => {
+            useMocks({
+                patch: {
+                    '/api/environments/:team_id/insights/:id': async ({ request }) => {
+                        const payload = (await request.json()) as Record<string, any>
+                        return [
+                            200,
+                            {
+                                ...partialInsight43,
+                                name: 'Foobar 43',
+                                description: 'Lorem ipsum.',
+                                tags: ['good'],
+                                ...payload,
+                            },
+                        ]
+                    },
+                },
+            })
+
+            const insightProps: InsightLogicProps = {
+                dashboardItemId: Insight43,
+                cachedInsight: {
+                    ...partialInsight43,
+                    query: API_QUERY,
+                    name: 'Foobar 43',
+                    description: 'Lorem ipsum.',
+                    tags: ['good'],
+                    favorited: false,
+                },
+            }
+
+            logic = insightLogic(insightProps)
+            logic.mount()
+
+            await expectLogic(logic).toMatchValues({
+                savedInsight: partial({ favorited: false }),
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.setInsightMetadata({ favorited: true })
+            })
+                .toDispatchActions(['setInsightMetadataSuccess'])
+                .toMatchValues({
+                    savedInsight: partial({ favorited: true }),
+                })
+        })
+    })
+
+    describe('updateDashboardInsight query merge', () => {
+        const canonicalQuery = {
+            kind: NodeKind.InsightVizNode,
+            source: {
+                kind: NodeKind.TrendsQuery,
+                series: [{ kind: NodeKind.EventsNode, event: '$pageview', math: BaseMathType.TotalCount }],
+                dateRange: { date_from: 'all' },
+            },
+        }
+        const dashboardOverriddenQuery = {
+            ...canonicalQuery,
+            source: {
+                ...canonicalQuery.source,
+                dateRange: { date_from: '-14d' },
+            },
+        }
+
+        beforeEach(() => {
+            logic = insightLogic({
+                dashboardItemId: Insight42,
+                dashboardId: MOCK_DASHBOARD_ID,
+                cachedInsight: insightModelWith({ query: canonicalQuery }),
+            })
+            logic.mount()
+        })
+
+        it('does not overwrite the canonical query on a dashboard-scoped refresh', async () => {
+            dashboardsModel.actions.updateDashboardInsight(
+                insightModelWith({
+                    query: dashboardOverriddenQuery,
+                    dashboards: [MOCK_DASHBOARD_ID],
+                    dashboard_tiles: [{ dashboard_id: MOCK_DASHBOARD_ID }],
+                }),
+                undefined,
+                MOCK_DASHBOARD_ID
+            )
+
+            await expectLogic(logic).toMatchValues({ insight: partial({ query: canonicalQuery }) })
+        })
+
+        it('applies the query from a non-scoped update', async () => {
+            dashboardsModel.actions.updateDashboardInsight(
+                insightModelWith({
+                    query: dashboardOverriddenQuery,
+                    dashboards: [MOCK_DASHBOARD_ID],
+                })
+            )
+
+            await expectLogic(logic).toMatchValues({ insight: partial({ query: dashboardOverriddenQuery }) })
         })
     })
 })

@@ -14,10 +14,19 @@ export const defaultDataTableEventColumns: InsightsQLExpression[] = [
 
 export const defaultDataTablePersonColumns: InsightsQLExpression[] = [PERSON_DISPLAY_NAME_COLUMN_NAME, 'id', 'created_at']
 
-export const defaultDataTableGroupColumns: InsightsQLExpression[] = ['group_name', 'key', 'created_at']
+export function getDefaultDataTablePersonColumns(personLastSeenAtEnabled: boolean): InsightsQLExpression[] {
+    const columns = [...defaultDataTablePersonColumns]
+    if (personLastSeenAtEnabled) {
+        columns.push('last_seen_at')
+    }
+    return columns
+}
+
+export const defaultDataTableGroupColumns: InsightsQLExpression[] = ['group_name', 'created_at']
 
 export const defaultDataTableSessionColumns: InsightsQLExpression[] = [
     'session_id',
+    'session.distinct_id -- Distinct ID',
     '$start_timestamp',
     '$end_timestamp',
     '$session_duration',
@@ -26,9 +35,12 @@ export const defaultDataTableSessionColumns: InsightsQLExpression[] = [
     '$is_bounce',
 ]
 
-export function defaultDataTableColumns(kind: NodeKind): InsightsQLExpression[] {
+export function defaultDataTableColumns(
+    kind: NodeKind,
+    personLastSeenAtEnabled: boolean = false // Temporary, until last_seen_at is enabled for everyone
+): InsightsQLExpression[] {
     return kind === NodeKind.PersonsNode || kind === NodeKind.ActorsQuery
-        ? defaultDataTablePersonColumns
+        ? getDefaultDataTablePersonColumns(personLastSeenAtEnabled)
         : kind === NodeKind.EventsQuery
           ? defaultDataTableEventColumns
           : kind === NodeKind.SessionsQuery
@@ -62,6 +74,19 @@ export function extractExpressionComment(query: string): string {
     return query
 }
 
+/**
+ * Strip a trailing `AS <alias>` clause from a InsightsQL/SQL expression.
+ * Handles backticked, double-quoted, and bare-word aliases, with an optional
+ * trailing `-- comment`. The trailing `$` anchor prevents accidental matches
+ * inside string literals.
+ */
+export function removeAsAlias(query: string): string {
+    if (!query || typeof query !== 'string') {
+        return query
+    }
+    return query.replace(/\s+[Aa][Ss]\s+(`[^`]+`|"[^"]+"|[\w\u0080-\uFFFF]+)(\s*--.*)?$/, '')
+}
+
 /** Extract AS alias from SQL expression (e.g., "expr AS foo" -> "foo") */
 export function extractAsAlias(query: string): string | null {
     if (!query || typeof query !== 'string') {
@@ -72,13 +97,32 @@ export function extractAsAlias(query: string): string | null {
         return null
     }
 
-    // Match: whitespace + AS (case-insensitive) + whitespace + (backticked or word alias), optionally followed by comment
-    const asMatch = trimmed.match(/\s+[Aa][Ss]\s+(`[^`]+`|[\w\u0080-\uFFFF]+)(\s*--.*)?$/)
+    // Match: whitespace + AS (case-insensitive) + whitespace + (backticked, double-quoted, or word alias),
+    // optionally followed by comment. Per the InsightsQL grammar, both `backticks` and "double quotes" delimit
+    // quoted identifiers, so both forms are valid alias delimiters.
+    const asMatch = trimmed.match(/\s+[Aa][Ss]\s+(`[^`]+`|"[^"]+"|[\w\u0080-\uFFFF]+)(\s*--.*)?$/)
     if (asMatch) {
         const alias = asMatch[1]
-        return alias.startsWith('`') && alias.endsWith('`') ? alias.slice(1, -1) : alias
+        if ((alias.startsWith('`') && alias.endsWith('`')) || (alias.startsWith('"') && alias.endsWith('"'))) {
+            return alias.slice(1, -1)
+        }
+        return alias
     }
     return null
+}
+
+/**
+ * Resolve a column header `key` to a InsightsQL expression suitable for ORDER BY.
+ *
+ * The events query response returns resolved alias names (e.g. `Absolute Time`)
+ * for aliased columns, which is what we get as `key` when the user clicks Sort.
+ * But events ORDER BY does not resolve SELECT aliases by name — it needs the
+ * underlying expression. Look up the matching raw select entry, then strip the
+ * trailing AS clause to ORDER BY the bare expression.
+ */
+export function orderByForSelectKey(key: string, select: readonly string[]): string {
+    const matchingRaw = select.find((s) => s === key) ?? select.find((s) => extractAsAlias(s) === key) ?? key
+    return removeAsAlias(matchingRaw)
 }
 
 /** Get display label for an expression, trying AS alias first, then comment syntax */

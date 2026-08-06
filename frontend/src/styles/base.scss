@@ -287,7 +287,7 @@
     --color-neutral-900: hsl(0deg 0% 10%);
     --color-neutral-950: hsl(0deg 0% 5%);
 
-    // Hanzo 3000 (neutral greys) — replaced warm Insights yellows with pure neutral scale
+    // Insights 3000 (yellow-greys) colors
     --color-insights-3000-25: hsl(0deg 0% 96.5%);
     --color-insights-3000-50: hsl(0deg 0% 95%);
     --color-insights-3000-100: hsl(0deg 0% 93%);
@@ -300,7 +300,8 @@
     --color-insights-3000-450: hsl(0deg 0% 60%);
     --color-insights-3000-500: hsl(0deg 0% 55%);
 
-    // Hanzo brand colors (monochrome)
+    // Insights brand colors
+    // Split into hue, saturation, lightness to make it easier to change the brand colors
     // //////////////////////////////////////////////////////////
     --color-insights-brand-orange-hue: 0;
     --color-insights-brand-orange-saturation: 0%;
@@ -338,7 +339,15 @@
     --color-product-llm-datasets-light: rgb(124 58 237);
     --color-product-llm-evaluations-light: rgb(167 139 250);
     --color-product-llm-prompts-light: rgb(196 181 253);
+    --color-product-ai-gateway-light: rgb(99 102 241);
+    --color-product-ai-gateway-dark: rgb(129 140 248);
+    --color-product-mcp-analytics-light: rgb(205 48 180);
+    --color-product-mcp-analytics-dark: rgb(229 105 205);
     --color-product-links-light: rgb(143 7 255);
+    --color-product-tracing-light: rgb(6 182 212);
+    --color-product-tracing-dark: rgb(34 211 238);
+    --color-product-metrics-light: rgb(234 88 12);
+    --color-product-metrics-dark: rgb(251 146 60);
     --color-product-revenue-analytics-light: rgb(52 175 102);
     --color-product-revenue-analytics-dark: rgb(54 196 111);
     --color-product-user-interviews-light: rgb(0 140 255);
@@ -347,18 +356,6 @@
     --color-product-early-access-features-dark: rgb(53 213 189);
     --color-product-support-light: rgb(243 84 84);
     --color-product-support-dark: rgb(247 165 1);
-
-    // Insight colors
-    --color-insight-funnel-light: rgb(47 128 250);
-    --color-insight-trends-light: rgb(247 165 1);
-    --color-insight-user-paths-light: rgb(30 179 152);
-    --color-user-paths-dark: rgb(41 219 187);
-    --color-insight-retention-light: rgb(243 84 84);
-    --color-insight-stickiness-light: rgb(247 165 1);
-    --color-insight-lifecycle-light: rgb(48 171 198);
-    --color-insight-calendar-heatmap-light: rgb(12 39 146);
-    --color-insight-calendar-heatmap-dark: rgb(61 91 215);
-    --color-insight-sql-light: rgb(245 78 0);
 
     // Generic brand color assignments
     // Change these to change the brand colors
@@ -563,7 +560,7 @@
     --breakpoint-xl: 1200px;
     --breakpoint-xxl: 1600px;
 
-    // Brand colors (Hanzo monochrome)
+    // Brand colors
     // //////////////////////////////////////////////////////////
     --brand-blue: #555;
     --brand-red: #333;
@@ -572,11 +569,10 @@
 
     // Shadows
     // //////////////////////////////////////////////////////////
-    // FLAT. `0 3px 0 <border>` is a hard offset shadow with no blur — it reads
-    // as a raised, embossed 3D slab, which is the upstream look, not ours. Our
-    // controls are flat surfaces separated by a hairline border and radius.
     --shadow-elevation-3000: none;
 
+    // Non-color vars
+    --radius: 0.625rem; // 10px — controls: buttons, inputs, selects
     // Non-color vars
     //
     // RADIUS IS THE @hanzo/brand v2 REGISTER: card 8 / control 10 / panel 12.
@@ -592,9 +588,7 @@
     // (Button.scss), so pointing that at the control radius rounds every
     // button from here — nothing needs a per-component override.
     --radius-sm: 0.375rem; // 6px — inner/nested elements, one step down
-    --radius: 0.625rem; // 10px — controls: buttons, inputs, selects
-    --radius-base: var(--radius);
-    --radius-card: 0.5rem; // 8px — cards and surfaces
+    --radius-base: var(--radius); // Increased from Tailwind's default of 0.25rem
     --radius-lg: 0.75rem; // 12px — panels, modals, popovers
     --radius-full: 9999px;
     --modal-shadow-elevation: 0px 16px 16px -16px rgb(0 0 0 / 35%);
@@ -602,16 +596,16 @@
     --font-medium: 500;
     --font-semibold: 600;
     --font-sans:
-        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
-        helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-title:
-        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
         'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-button:
-        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
-        helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-mono:
-        'Emoji Flags Polyfill', 'Geist Mono', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
+        'Emoji Flags Polyfill', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
         monospace;
 
     // Dashboard item colors
@@ -666,6 +660,7 @@
     --z-definition-popover: 1250;
     --z-popover: 1200;
     --z-graph-tooltip: 1150;
+    --z-chart-tooltip: calc(var(--z-modal) - 50);
 
     // 1161 and 1162 are reserved to be set from code
     // 1166 through 1169 are reserved to be set from code
@@ -682,13 +677,14 @@
     --z-scene-layout-content-panel-under: 769;
     --z-layout-panel: 760;
     --z-layout-panel-under: 759;
+    --z-layout-panel-over-nav: 759; // mobile dim sitting above the nav (756), below the panel (761)
     --z-layout-navbar-over: 757;
     --z-layout-navbar: 756;
     --z-layout-navbar-under: 755;
     --z-main-nav: 750;
     --z-resizer: 701;
-    --z-sidebar: 700;
-    --z-activation-sidebar: 650;
+    --z-lemon-sidebar: 700;
+    --z-lemon-activation-sidebar: 650;
     --z-mobile-nav-overlay: 600;
     --z-top-navigation: 550;
     --z-top-navigation-under: 549;
@@ -717,9 +713,6 @@
     --toastify-color-warning: var(--warning);
     --toastify-color-error: var(--danger);
     --toastify-color-progress-info: var(--toastify-color-info);
-    // react-toastify ships a purple default for these two; override both.
-    --toastify-color-progress-dark: var(--color-neutral-cool-300);
-    --toastify-color-progress-light: var(--color-neutral-cool-600);
     --toastify-color-progress-success: var(--toastify-color-success);
     --toastify-color-progress-warning: var(--toastify-color-warning);
     --toastify-color-progress-error: var(--toastify-color-error);
@@ -824,7 +817,7 @@
     --secondary-3000-button-bg-light: #f5f5f5;
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
-    --danger-3000-frame-bg-light: #33380;
+    --danger-3000-frame-bg-light: #33333380;
     --danger-3000-button-border-light: #333;
     --danger-3000-button-border-hover-light: #333;
     // Flat in both themes — see --shadow-elevation-3000 above.
@@ -864,7 +857,7 @@
     --secondary-3000-button-bg-dark: #1f1f1f;
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
-    --danger-3000-frame-bg-dark: #33380;
+    --danger-3000-frame-bg-dark: #33333380;
     --danger-3000-button-border-dark: #666;
     --danger-3000-button-border-hover-dark: #333;
 
@@ -980,8 +973,6 @@
 
     // Backgrounds (dark mode)
     // //////////////////////////////////////////////////////////
-    // #000, not the 8%-lightness neutral — the app ground is true black and
-    // every surface above it layers up. Same value as --color-bg-3000-dark.
     --color-bg-primary: #000;
     // The RAISED content panel — the one surface the eye reads as "the page".
     // #262626, a step ABOVE the #212121 it sits on, which is itself a step above
@@ -1058,16 +1049,13 @@
     --color-text-secondary-inverse: var(--color-neutral-650);
     --color-text-secondary: var(--color-neutral-350);
     --color-text-tertiary: var(--color-neutral-400);
-    // Dimming is not symmetric between themes. On white, 0.65 opacity moves text
-    // TOWARD the background and still reads. On black it moves toward the
-    // background too — but the text started closer to it, so a disabled control
-    // stops being readable rather than looking unavailable. The onboarding
-    // "Next" button was the visible case: legible enough to click for, not
-    // legible enough to read.
-    //
-    // 0.8 still reads as unavailable next to a full-strength control while
-    // leaving the label legible. Disabled means "you cannot use this", never
-    // "you cannot see this".
+
+    // 0.8 in dark, against 0.65 in light. Dimming is subtractive, so the same
+    // ratio that reads as "unavailable" on a white ground reads as "gone" on a
+    // black one -- at 0.65 a disabled control stops being readable rather than
+    // looking unavailable. The onboarding "Next" button was the visible case:
+    // legible enough to click for, not legible enough to read. Disabled means
+    // "you cannot use this", never "you cannot see this".
     --opacity-disabled: 0.8;
     --color-text-success: var(--color-green-400);
     --color-text-warning: var(--color-yellow-400);
@@ -1076,10 +1064,6 @@
     // Borders (dark mode)
     // Borders for surfaces/fills
     // //////////////////////////////////////////////////////////
-    // 15%, not 20%. On a #000 ground a 20% hairline is the brightest thing in a
-    // quiet UI -- every table row, card and input is outlined in it, so the eye
-    // reads the grid instead of the data. 15% sits just above the raised surface
-    // it separates, which is all a border on black has to do.
     --color-border-primary: var(--color-neutral-cool-850);
     --color-border-secondary: var(--color-neutral-cool-600);
     --color-border-info: var(--color-blue-900);
@@ -1147,6 +1131,34 @@
     --data-color-5: #4f4f4f;
     --data-color-6: #b8b8b8;
     --data-color-10: #c2c2c2;
+
+    // Rainbow brand gradient (dark mode) — lighter shades so the gradient stays
+    // readable inside toasts and command blocks. See light-mode definition below.
+    --rainbow-gradient: linear-gradient(
+        90deg,
+        #5b8def 0%,
+        #7aa6ff 24%,
+        #ff7a59 47%,
+        #ffa170 66%,
+        #ffc55c 83%,
+        #5b8def 100%
+    );
+}
+
+// Restore a real default border color (Tailwind v4 preflight resets it to currentColor).
+// Kept in @layer components — one layer above preflight's @layer base — so it wins by layer
+// order rather than source order. Source order is unreliable: vite 8's rolldown CSS pipeline
+// can emit preflight after this rule, and inside the toolbar's shadow root there is no <html>
+// to raise specificity against. Layer order holds in both places, so a bare `*` still yields
+// to component and utility borders (higher layers / unlayered) as before.
+@layer components {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-border-primary, currentColor);
+    }
 }
 
 @layer base {
@@ -1156,14 +1168,6 @@
 
     // allowing @import to be first
     /* stylelint-disable-next-line order/order */
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        border-color: var(--color-border-primary, currentColor);
-    }
-
     .rendering-pixelated {
         image-rendering: pixelated;
     }
@@ -1189,6 +1193,17 @@
     button:focus-visible,
     [data-highlighted]:not(:hover) {
         outline: 2px solid var(--color-accent);
+    }
+
+    /* Radix menus highlight items on pointer-move; only show the outline for
+       keyboard focus, and render it inset so the container's rounded
+       overflow:hidden mask can't clip the corners */
+    .primitive-menu-content [data-highlighted]:not(:focus-visible) {
+        outline: none;
+    }
+
+    .primitive-menu-content [data-highlighted]:focus-visible {
+        outline-offset: -2px;
     }
 
     .input-like {
@@ -1613,20 +1628,6 @@
 
     html {
         text-size-adjust: 100%;
-
-        // Paint black BEFORE the bundle runs. useThemedHtml sets
-        // document.body[theme] from a React hook, so until that fires the page
-        // shows the UA default -- white -- and dark-mode users get a flash of it
-        // on every load. The theme is a stored preference the server does not
-        // know at first byte, so the honest fix is to make the FIRST paint the
-        // dark ground and let light mode override once the theme resolves.
-        background: #000;
-    }
-
-    // Light mode wins the moment the attribute lands.
-    body[theme='light'],
-    body[theme='light'] ~ * {
-        background: var(--color-bg-primary);
     }
 
     input::placeholder,
@@ -1678,6 +1679,43 @@
             animation-fill-mode: forwards !important;
             animation-duration: 0ms !important;
             animation-iteration-count: 1 !important;
+        }
+
+        // The animation-duration:0ms + forwards override above is meant to snap every
+        // animation to its final keyframe, but headless Chromium in CI handles a
+        // zero-duration animation's fill inconsistently and can paint the 0% keyframe
+        // instead. For entrance animations whose final layout exists ONLY via the
+        // forwards fill, that doesn't just dim the element — it collapses it (faded-in
+        // content stays invisible; width-expanded markers stay at width 0 and pile up at
+        // the bar's left edge). Pin the end state directly for those components; as
+        // !important author rules these override the animation regardless of how the
+        // frame settles.
+        .fade-component-container {
+            // Fade animates opacity 0 -> 1.
+            opacity: 1 !important;
+        }
+
+        .BillingGaugeItem {
+            // BillingGaugeItem animates width 0 -> --billing-gauge-item-width, which
+            // positions its marker/label along the gauge bar.
+            width: var(--billing-gauge-item-width) !important;
+        }
+
+        // Entrance animations with an opacity:0 base that fade in via forwards fill.
+        .InsightQuickStart__card,
+        .QuestionInput__SuggestionsList,
+        .QuestionInput__QuestionSuggestion,
+        // insights-js survey preview (`ph-survey-fade-in`)
+        .survey-form,
+        .thank-you-message {
+            opacity: 1 !important;
+        }
+
+        // react-toastify zooms the toast icon in via `Toastify__zoomIn` (opacity 0 + scale(0.3)
+        // -> 1); the 0% keyframe leaves it invisible and shrunk, so pin both end values.
+        .Toastify__toast-icon {
+            opacity: 1 !important;
+            transform: none !important;
         }
 
         // Hide some parts of the UI that were causing flakiness
@@ -1782,6 +1820,38 @@
         display: flex;
         flex-direction: column;
         gap: 1px;
+    }
+
+    // Safe-triangle hover cone for vertical menubars.
+    // An invisible triangle tracks the cursor and extends toward the popup,
+    // preventing accidental sibling menu activation while traveling to the open popup.
+    // The vertex follows --cone-x / --cone-y set by JS on mousemove.
+    .menubar-hover-cone {
+        overflow: visible;
+
+        // Active trigger sits above the cone so it keeps its hover state
+        [data-popup-open] {
+            position: relative;
+            z-index: 20;
+        }
+    }
+
+    .menubar-hover-cone-overlay {
+        position: absolute;
+        inset: -3rem -8px -3rem 0;
+        z-index: 10;
+
+        // Offset --cone-y by 3rem to compensate for the element extending above the container
+        clip-path: polygon(var(--cone-x, 50%) calc(var(--cone-y, 50%) + 3rem), 100% 0%, 100% 100%);
+        pointer-events: none;
+    }
+
+    .menubar-hover-cone:has([data-popup-open]) > .menubar-hover-cone-overlay {
+        pointer-events: auto;
+
+        &.debug {
+            background-color: rgb(255 255 255 / 50%);
+        }
     }
 
     .animate-mark {
@@ -1948,91 +2018,9 @@
         outline-offset: 2px;
     }
 
-    .animate-logomark-jump {
-        --logomark-jump-height-base: 12px;
-        --logomark-jump-magnitude: 1; // Overidden in code when someone wants a bigger jump
-        --logomark-airtime: 0.4s; // Sync with LOGOMARK_AIRTIME_MS in Intro.tsx
-
-        svg {
-            overflow: visible;
-
-            // Animate each child with a staggered delay
-            > * {
-                // Times 25 because the actual animation is 4% of the keyframes (so 1/25)
-                animation: Logomark__jump calc(var(--logomark-airtime) * 25) cubic-bezier(0.6, 0, 0.2, 0.8) infinite;
-            }
-
-            // Delay one after the other to create a nice jump effect
-            // Delay in reverse order because we want the head to jump first (it's last on SVG)
-            @for $i from 1 through 4 {
-                > *:nth-child(#{$i}) {
-                    // Dividing by 15 just because it feels good
-                    animation-delay: calc(
-                        var(--logomark-airtime) / 15 / calc(sqrt(var(--logomark-jump-magnitude))) * (4 - ($i - 1))
-                    );
-                }
-            }
-        }
-
-        @keyframes Logomark__jump {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            2% {
-                transform: translateY(calc(var(--logomark-jump-height-base) * var(--logomark-jump-magnitude) * -1));
-            }
-
-            4% {
-                // Only 4% so that this repeats every now and then nicely
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes Logomark__jump-continuous {
-            0%,
-            44%,
-            100% {
-                transform: translateY(0);
-            }
-
-            22% {
-                transform: translateY(calc(var(--logomark-jump-height-base) * var(--logomark-jump-magnitude) * -1));
-            }
-        }
-
-        /* stylelint-disable-next-line order/order */
-        &-continuous {
-            @extend .animate-logomark-jump;
-
-            /* stylelint-disable-next-line order/order */
-            svg > * {
-                animation-name: Logomark__jump-continuous;
-                animation-duration: 0.9s;
-            }
-        }
-    }
-
     /* stylelint-disable-next-line order/order */
     .animate-fade-in {
         animation: fade-in 0.4s ease-out forwards;
-    }
-
-    /* Overlay fade in/out transitions */
-    .overlay-fade {
-        opacity: 1;
-        transition: opacity 0.2s ease-out;
-
-        /* Exit animation - opacity controlled by utility class */
-        &.opacity-0 {
-            opacity: 0;
-        }
-
-        /* Entry animation - fade in from 0 */
-        @starting-style {
-            opacity: 0;
-        }
     }
 
     /* stylelint-disable-next-line keyframes-name-pattern */
@@ -2100,5 +2088,68 @@
         outline: 3px solid var(--color-accent);
         outline-offset: 2px;
         box-shadow: 0 0 24px 8px var(--color-accent);
+    }
+}
+
+// Rainbow brand gradient — animated horizontal scroll of Insights brand colors.
+// Apply via `background-image: var(--rainbow-gradient)` or via the helper
+// classes below. The text variants use `background-clip: text` so the gradient
+// fills the glyphs; `*-fading` additionally plays a one-shot fade-in on mount,
+// useful for elements that swap content via a key change.
+// Dark mode override lives in the consolidated `[theme='dark']` block above.
+:root {
+    --rainbow-gradient: linear-gradient(
+        90deg,
+        #0143cb 0%,
+        #2b6ff4 24%,
+        #d23401 47%,
+        #ff651f 66%,
+        #fba000 83%,
+        #0143cb 100%
+    );
+
+    // Deliberately gentle so the scroll reads as a slow shimmer, not a strobe.
+    --rainbow-scroll-duration: 6s;
+}
+
+.rainbow-text,
+.rainbow-text-fading {
+    color: transparent;
+    background-image: var(--rainbow-gradient);
+    background-clip: text;
+    background-size: 200% 100%;
+}
+
+.rainbow-text.rainbow-text-animating {
+    animation: rainbow-scroll var(--rainbow-scroll-duration) linear infinite;
+}
+
+.rainbow-text-fading.rainbow-text-animating {
+    animation:
+        rainbow-scroll var(--rainbow-scroll-duration) linear infinite,
+        rainbow-fade-in 300ms ease-out;
+}
+
+/* stylelint-disable-next-line keyframes-name-pattern */
+@keyframes rainbow-scroll {
+    0% {
+        background-position-x: 0%;
+    }
+
+    100% {
+        background-position-x: 200%;
+    }
+}
+
+/* stylelint-disable-next-line keyframes-name-pattern */
+@keyframes rainbow-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(2px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

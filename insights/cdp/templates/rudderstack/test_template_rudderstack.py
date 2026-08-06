@@ -5,7 +5,8 @@ from insights.cdp.templates.rudderstack.template_rudderstack import (
     TemplateRudderstackMigrator,
     template as template_rudderstack,
 )
-from insights.models import PluginConfig
+
+from products.cdp.backend.models.plugin import PluginConfig
 
 
 class TestTemplateRudderstack(BaseInsightsFunctionTemplateTest):
@@ -69,7 +70,7 @@ class TestTemplateRudderstack(BaseInsightsFunctionTemplateTest):
                             "anonymousId": "85bcd2e4-d10d-4a99-9dc8-43789b7226a1",
                         }
                     ],
-                    "sentAt": {"__iqlDateTime__": True, "dt": 1724946899.775266, "zone": "UTC"},
+                    "sentAt": {"__hogDateTime__": True, "dt": 1724946899.775266, "zone": "UTC"},
                 },
             },
         )

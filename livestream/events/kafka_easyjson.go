@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents(in *jlexer.Lexer, out *InsightsEventWrapper) {
+func easyjsonB70d1354DecodeGithubComInsightsInsightsLivestreamEvents(in *jlexer.Lexer, out *InsightsEventWrapper) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -58,7 +58,7 @@ func easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents(in *jlexer.L
 		in.Consumed()
 	}
 }
-func easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents(out *jwriter.Writer, in InsightsEventWrapper) {
+func easyjsonB70d1354EncodeGithubComInsightsInsightsLivestreamEvents(out *jwriter.Writer, in InsightsEventWrapper) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -98,27 +98,27 @@ func easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents(out *jwriter
 // MarshalJSON supports json.Marshaler interface
 func (v InsightsEventWrapper) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents(&w, v)
+	easyjsonB70d1354EncodeGithubComInsightsInsightsLivestreamEvents(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v InsightsEventWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents(w, v)
+	easyjsonB70d1354EncodeGithubComInsightsInsightsLivestreamEvents(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *InsightsEventWrapper) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents(&r, v)
+	easyjsonB70d1354DecodeGithubComInsightsInsightsLivestreamEvents(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *InsightsEventWrapper) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents(l, v)
+	easyjsonB70d1354DecodeGithubComInsightsInsightsLivestreamEvents(l, v)
 }
-func easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents1(in *jlexer.Lexer, out *InsightsEvent) {
+func easyjsonB70d1354DecodeGithubComInsightsInsightsLivestreamEvents1(in *jlexer.Lexer, out *InsightsEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -181,6 +181,14 @@ func easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents1(in *jlexer.
 			out.Lng = float64(in.Float64())
 		case "CountryCode":
 			out.CountryCode = string(in.String())
+		case "IsBot":
+			out.IsBot = bool(in.Bool())
+		case "TrafficType":
+			out.TrafficType = string(in.String())
+		case "TrafficCategory":
+			out.TrafficCategory = string(in.String())
+		case "BotName":
+			out.BotName = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -191,7 +199,7 @@ func easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents1(in *jlexer.
 		in.Consumed()
 	}
 }
-func easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents1(out *jwriter.Writer, in InsightsEvent) {
+func easyjsonB70d1354EncodeGithubComInsightsInsightsLivestreamEvents1(out *jwriter.Writer, in InsightsEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -274,29 +282,49 @@ func easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents1(out *jwrite
 		out.RawString(prefix)
 		out.String(string(in.CountryCode))
 	}
+	{
+		const prefix string = ",\"IsBot\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.IsBot))
+	}
+	{
+		const prefix string = ",\"TrafficType\":"
+		out.RawString(prefix)
+		out.String(string(in.TrafficType))
+	}
+	{
+		const prefix string = ",\"TrafficCategory\":"
+		out.RawString(prefix)
+		out.String(string(in.TrafficCategory))
+	}
+	{
+		const prefix string = ",\"BotName\":"
+		out.RawString(prefix)
+		out.String(string(in.BotName))
+	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
 func (v InsightsEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents1(&w, v)
+	easyjsonB70d1354EncodeGithubComInsightsInsightsLivestreamEvents1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v InsightsEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonB70d1354EncodeGithubComHanzoaiInsightsLivestreamEvents1(w, v)
+	easyjsonB70d1354EncodeGithubComInsightsInsightsLivestreamEvents1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *InsightsEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents1(&r, v)
+	easyjsonB70d1354DecodeGithubComInsightsInsightsLivestreamEvents1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *InsightsEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonB70d1354DecodeGithubComHanzoaiInsightsLivestreamEvents1(l, v)
+	easyjsonB70d1354DecodeGithubComInsightsInsightsLivestreamEvents1(l, v)
 }

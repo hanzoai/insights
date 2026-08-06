@@ -1,12 +1,12 @@
 import './Collapse.scss'
 
 import clsx from 'clsx'
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
-import { Transition } from 'react-transition-group'
-import { ENTERED, ENTERING } from 'react-transition-group/Transition'
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
 import { IconCollapse, IconExpand } from '@hanzo/icons'
+
+import { useAnimatedPresence } from 'lib/hooks/useAnimatedPresence'
 
 import { Button, ButtonProps } from '../Button'
 
@@ -40,7 +40,7 @@ interface CollapsePropsMultiple<K extends React.Key> extends CollapsePropsBase<K
     multiple: true
 }
 
-type CollapseProps<K extends React.Key> = CollapsePropsSingle<K> | CollapsePropsMultiple<K>
+export type CollapseProps<K extends React.Key> = CollapsePropsSingle<K> | CollapsePropsMultiple<K>
 
 export function Collapse<K extends React.Key>({
     panels,
@@ -131,6 +131,8 @@ function CollapsePanel({
     onHeaderClick,
 }: CollapsePanelProps): JSX.Element {
     const { height: contentHeight, ref: contentRef } = useResizeObserver({ box: 'border-box' })
+    const bodyRef = useRef<HTMLDivElement>(null)
+    const { rendered, shown } = useAnimatedPresence(isExpanded, 200, bodyRef)
 
     const { headerChildren, headerProps } = useMemo((): HeaderDefinition => {
         if (header && typeof header === 'object' && 'children' in header) {
@@ -171,26 +173,19 @@ function CollapsePanel({
                 </Button>
             )}
 
-            <Transition in={isExpanded} timeout={200} mountOnEnter unmountOnExit>
-                {(status) => (
-                    <div
-                        className="CollapsePanel__body"
-                        // eslint-disable-next-line react/forbid-dom-props
-                        style={
-                            status === ENTERING || status === ENTERED
-                                ? {
-                                      height: contentHeight,
-                                  }
-                                : undefined
-                        }
-                        aria-busy={status.endsWith('ing')}
-                    >
-                        <div className={clsx('CollapsePanel__content', className)} ref={contentRef}>
-                            {content}
-                        </div>
+            {rendered && (
+                <div
+                    ref={bodyRef}
+                    className="CollapsePanel__body"
+                    // eslint-disable-next-line react/forbid-dom-props
+                    style={{ height: shown ? contentHeight : 0 }}
+                    aria-busy={rendered !== shown}
+                >
+                    <div className={clsx('CollapsePanel__content', className)} ref={contentRef}>
+                        {content}
                     </div>
-                )}
-            </Transition>
+                </div>
+            )}
         </div>
     )
 }

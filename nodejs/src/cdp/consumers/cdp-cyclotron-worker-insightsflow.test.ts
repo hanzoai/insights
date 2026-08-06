@@ -1,14 +1,17 @@
+import { createMockJobQueue } from '~/tests/helpers/mocks/job-queue.mock'
+
 import { DateTime } from 'luxon'
 
-import { InsightsFlow } from '~/schema/insightsflow'
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InternalPersonWithDistinctId, PersonReadRepository } from '~/common/persons/repositories/person-repository'
+import { closeHub, createHub } from '~/common/utils/db/hub'
+import { PostgresUse } from '~/common/utils/db/postgres'
+import { UUIDT } from '~/common/utils/utils'
+import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { createTeam, getFirstTeam, getTeam, resetTestDatabase } from '~/tests/helpers/sql'
-import { PostgresUse } from '~/utils/db/postgres'
-import { UUIDT } from '~/utils/utils'
-import { PostgresPersonRepository } from '~/worker/ingestion/persons/repositories/postgres-person-repository'
 
 import { Hub, InternalPerson, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
 import { createInsightsFlowInvocationContext, insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import {
     CyclotronJobInvocation,
@@ -16,24 +19,80 @@ import {
     CyclotronJobInvocationResult,
     InsightsFlowInvocationContext,
 } from '../types'
-import { CdpCyclotronWorkerInsightsFlow } from './cdp-cyclotron-worker-insightsflow.consumer'
+import { CdpCyclotronWorkerInsightsFlow } from './cdp-cyclotron-worker-hogflow.consumer'
 
 jest.setTimeout(1000)
+
+const TIMESTAMP = DateTime.fromISO('2000-10-14T11:42:06.502Z').toUTC()
+
+type TestPerson = {
+    id: string
+    uuid: string
+    teamId: number
+    distinctId: string
+    properties: Record<string, any>
+}
+
+function toInternalPerson(p: TestPerson): InternalPerson {
+    return {
+        id: p.id,
+        uuid: p.uuid,
+        team_id: p.teamId,
+        properties: p.properties,
+        properties_last_updated_at: {},
+        properties_last_operation: null,
+        created_at: TIMESTAMP,
+        version: 1,
+        is_identified: true,
+        is_user_id: null,
+        last_seen_at: null,
+    }
+}
+
+function createMockPersonReadRepository(persons: TestPerson[]): jest.Mocked<PersonReadRepository> {
+    return {
+        fetchPerson: jest.fn().mockImplementation((teamId: number, distinctId: string) => {
+            const match = persons.find((p) => p.teamId === teamId && p.distinctId === distinctId)
+            return Promise.resolve(match ? toInternalPerson(match) : undefined)
+        }),
+        fetchPersonsByDistinctIds: jest
+            .fn()
+            .mockImplementation((teamPersons: { teamId: number; distinctId: string }[]) => {
+                const results: InternalPersonWithDistinctId[] = persons
+                    .filter((p) => teamPersons.some((tp) => tp.teamId === p.teamId && tp.distinctId === p.distinctId))
+                    .map((p) => ({ ...toInternalPerson(p), distinct_id: p.distinctId }))
+                return Promise.resolve(results)
+            }),
+        fetchPersonsByPersonIds: jest.fn().mockImplementation((teamPersons: { teamId: number; personId: string }[]) => {
+            const results: InternalPerson[] = persons
+                .filter((p) => teamPersons.some((tp) => tp.teamId === p.teamId && tp.personId === p.uuid))
+                .map(toInternalPerson)
+            return Promise.resolve(results)
+        }),
+        fetchDistinctIdsForPersons: jest.fn().mockImplementation((teamId: number, personIntIds: string[]) => {
+            const result: Record<string, string[]> = {}
+            for (const intId of personIntIds) {
+                const match = persons.find((p) => p.teamId === teamId && p.id === intId)
+                if (match) {
+                    result[intId] = [match.distinctId]
+                }
+            }
+            return Promise.resolve(result)
+        }),
+    }
+}
 
 describe('CdpCyclotronWorkerInsightsFlow', () => {
     let processor: CdpCyclotronWorkerInsightsFlow
     let hub: Hub
-    let personRepository: PostgresPersonRepository
     let team: Team
     let team2: Team
-    let insightsFlows: InsightsFlow[]
+    let hogFlows: InsightsFlow[]
 
     const createSerializedInsightsFlowInvocation = (
-        insightsFlow: InsightsFlow,
+        hogFlow: InsightsFlow,
         _context: Partial<InsightsFlowInvocationContext> = {}
     ): CyclotronJobInvocation => {
-        // Add the source of the trigger to the globals
-
         const context = createInsightsFlowInvocationContext(_context)
 
         return {
@@ -41,45 +100,79 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
             state: {
                 ...context,
             },
-            teamId: insightsFlow.team_id,
-            functionId: insightsFlow.id,
-            queue: 'customflow',
+            teamId: hogFlow.team_id,
+            functionId: hogFlow.id,
+            queue: 'hogflow',
             queuePriority: 0,
         }
-    }
-
-    const createPerson = async (
-        teamId: number,
-        uuid: string,
-        distinctId: string,
-        properties: any
-    ): Promise<InternalPerson> => {
-        const TIMESTAMP = DateTime.fromISO('2000-10-14T11:42:06.502Z').toUTC()
-        const result = await personRepository.createPerson(TIMESTAMP, properties, {}, {}, teamId, null, true, uuid, {
-            distinctId,
-        })
-        if (!result.success) {
-            throw new Error('Failed to create person')
-        }
-        return result.person
     }
 
     beforeEach(async () => {
         await resetTestDatabase()
         hub = await createHub()
-        personRepository = new PostgresPersonRepository(hub.postgres)
-        team = await getFirstTeam(hub)
+        team = await getFirstTeam(hub.postgres)
         const team2Id = await createTeam(hub.postgres, team.organization_id)
-        team2 = (await getTeam(hub, team2Id))!
+        team2 = (await getTeam(hub.postgres, team2Id))!
 
-        processor = new CdpCyclotronWorkerInsightsFlow(hub)
+        const testPersons: TestPerson[] = [
+            {
+                id: '1',
+                uuid: 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e1',
+                teamId: team.id,
+                distinctId: 'distinct_A_1',
+                properties: { name: 'Person A 1' },
+            },
+            {
+                id: '2',
+                uuid: 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e2',
+                teamId: team.id,
+                distinctId: 'distinct_A_2',
+                properties: { name: 'Person A 2' },
+            },
+            {
+                id: '3',
+                uuid: 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e3',
+                teamId: team2.id,
+                distinctId: 'distinct_A_1',
+                properties: { name: 'Person A 3' },
+            },
+            {
+                id: '4',
+                uuid: 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7f0',
+                teamId: team.id,
+                distinctId: 'distinct_batch_1',
+                properties: { name: 'Batch Person', email: 'batch@hanzo.ai' },
+            },
+            {
+                id: '5',
+                uuid: 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e4',
+                teamId: team.id,
+                distinctId: 'distinct_person_1',
+                properties: { name: 'Person 1' },
+            },
+            {
+                id: '6',
+                uuid: 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e5',
+                teamId: team.id,
+                distinctId: 'distinct_person_2',
+                properties: { name: 'Person 2' },
+            },
+        ]
 
-        insightsFlows = []
-        insightsFlows.push(
+        const mockRepo = createMockPersonReadRepository(testPersons)
+        const mockJobQueue = createMockJobQueue()
+        processor = new CdpCyclotronWorkerInsightsFlow(
+            hub,
+            { ...createCdpConsumerDeps(hub), personRepository: mockRepo },
+            mockJobQueue
+        )
+
+        hogFlows = []
+        hogFlows.push(
             await insertInsightsFlow(
                 hub.postgres,
                 new FixtureInsightsFlowBuilder()
-                    .withName('Test Custom Flow team 2')
+                    .withName('Test Script Flow team 2')
                     .withTeamId(team.id)
                     .withStatus('active')
                     .withSimpleWorkflow()
@@ -87,11 +180,11 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
             )
         )
 
-        insightsFlows.push(
+        hogFlows.push(
             await insertInsightsFlow(
                 hub.postgres,
                 new FixtureInsightsFlowBuilder()
-                    .withName('Test Custom Flow team 2')
+                    .withName('Test Script Flow team 2')
                     .withTeamId(team2.id)
                     .withStatus('active')
                     .withSimpleWorkflow()
@@ -108,18 +201,8 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
     describe('loadInsightsFlows', () => {
         let invocations: CyclotronJobInvocation[]
 
-        beforeEach(async () => {
-            await createPerson(team.id, 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e1', 'distinct_A_1', {
-                name: 'Person A 1',
-            })
-            await createPerson(team.id, 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e2', 'distinct_A_2', {
-                name: 'Person A 2',
-            })
-            await createPerson(team2.id, 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e3', 'distinct_A_1', {
-                name: 'Person A 3',
-            })
-
-            const invocation1 = createSerializedInsightsFlowInvocation(insightsFlows[0], {
+        beforeEach(() => {
+            const invocation1 = createSerializedInsightsFlowInvocation(hogFlows[0], {
                 event: {
                     distinct_id: 'distinct_A_1',
                     properties: {
@@ -127,7 +210,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                     },
                 } as any,
             })
-            const invocation2 = createSerializedInsightsFlowInvocation(insightsFlows[0], {
+            const invocation2 = createSerializedInsightsFlowInvocation(hogFlows[0], {
                 event: {
                     distinct_id: 'distinct_A_2',
                     properties: {
@@ -135,15 +218,15 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                     },
                 } as any,
             })
-            const invocation3 = createSerializedInsightsFlowInvocation(insightsFlows[1], {
+            const invocation3 = createSerializedInsightsFlowInvocation(hogFlows[1], {
                 event: {
-                    distinct_id: 'distinct_A_1', // Same distinct_id but different custom flow
+                    distinct_id: 'distinct_A_1', // Same distinct_id but different script flow
                     properties: {
                         foo: 'bar3',
                     },
                 } as any,
             })
-            const invocation4 = createSerializedInsightsFlowInvocation(insightsFlows[1], {
+            const invocation4 = createSerializedInsightsFlowInvocation(hogFlows[1], {
                 event: {
                     distinct_id: 'missing_person', // Missing person
                     properties: {
@@ -155,7 +238,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
             invocations = [invocation1, invocation2, invocation3, invocation4]
         })
 
-        it('should load custom flows and their persons and globals', async () => {
+        it('should load script flows and their persons and globals', async () => {
             const results = (await processor.processInvocations(
                 invocations
             )) as CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>[]
@@ -164,7 +247,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                 result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>
             ): Record<string, unknown> => {
                 return {
-                    insightsFlowName: result.invocation.insightsFlow.name,
+                    hogFlowName: result.invocation.hogFlow.name,
                     filterGlobals: result.invocation.filterGlobals
                         ? {
                               eventProperties: result.invocation.filterGlobals.properties,
@@ -175,7 +258,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                 }
             }
 
-            // Check all custom functions were loaded
+            // Check all script functions were loaded
             expect(results.map(toMinimalCompare)).toMatchInlineSnapshot(`
                 [
                   {
@@ -190,7 +273,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                         },
                       },
                     },
-                    "insightsFlowName": "Test Custom Flow team 2",
+                    "hogFlowName": "Test Script Flow team 2",
                     "personName": "Person A 1",
                   },
                   {
@@ -205,7 +288,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                         },
                       },
                     },
-                    "insightsFlowName": "Test Custom Flow team 2",
+                    "hogFlowName": "Test Script Flow team 2",
                     "personName": "Person A 2",
                   },
                   {
@@ -220,7 +303,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                         },
                       },
                     },
-                    "insightsFlowName": "Test Custom Flow team 2",
+                    "hogFlowName": "Test Script Flow team 2",
                     "personName": "Person A 3",
                   },
                   {
@@ -230,7 +313,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
                       },
                       "person": null,
                     },
-                    "insightsFlowName": "Test Custom Flow team 2",
+                    "hogFlowName": "Test Script Flow team 2",
                     "personName": undefined,
                   },
                 ]
@@ -238,7 +321,7 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
         })
 
         it('should make minimal calls to the person manager', async () => {
-            const personManagerSpy = jest.spyOn(processor['personsManager'] as any, 'fetchPersons')
+            const personManagerSpy = jest.spyOn(processor['personsManager'] as any, 'fetchPersonsByDistinctIds')
             await processor.processInvocations(invocations)
             expect(personManagerSpy).toHaveBeenCalledTimes(1)
             expect(personManagerSpy.mock.calls[0][0]).toEqual([
@@ -249,27 +332,55 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
             ])
         })
 
+        it('should resolve person by personId when distinct_id is empty (batch invocations)', async () => {
+            const personUuid = 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7f0'
+
+            // Batch invocations set distinct_id: '' and use personId instead
+            const invocation = createSerializedInsightsFlowInvocation(hogFlows[0], {
+                event: {
+                    distinct_id: '',
+                    properties: { foo: 'batch' },
+                } as any,
+                personId: personUuid,
+            })
+
+            const results = (await processor.processInvocations([
+                invocation,
+            ])) as CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>[]
+
+            expect(results).toHaveLength(1)
+            expect(results[0].invocation.person?.properties).toEqual({
+                name: 'Batch Person',
+                email: 'batch@hanzo.ai',
+            })
+            expect(results[0].invocation.filterGlobals?.person?.id).toBe(personUuid)
+        })
+
+        it('persists the resolved person UUID into state so a re-parked wait keeps its person_id', async () => {
+            const results = (await processor.processInvocations(
+                invocations
+            )) as CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>[]
+
+            // invocation1 (distinct_A_1) resolves to Person A 1 — its UUID is written back into
+            // state.personId, so a later re-park keeps person_id even if re-resolution transiently misses.
+            // datastore_person wakes match on person_id only, so this is what lets a person-property
+            // change wake the wait without relying on the polling backstop.
+            expect(results[0].invocation.state.personId).toBe('dd3d6f80-60ad-45c3-bd61-e2300f2ba7e1')
+            // invocation4 (missing_person) resolves to nothing — no person_id to persist.
+            expect(results[3].invocation.state.personId).toBeUndefined()
+        })
+
         it('should skip invocations when workflow is disabled after being queued', async () => {
-            // Scenario: workflow is active, invocations are queued, then workflow is disabled
-            // Remaining invocations should be skipped
+            const hogFlow = hogFlows[0]
 
-            const insightsFlow = insightsFlows[0]
-
-            await createPerson(team.id, 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e4', 'distinct_person_1', {
-                name: 'Person 1',
-            })
-            await createPerson(team.id, 'dd3d6f80-60ad-45c3-bd61-e2300f2ba7e5', 'distinct_person_2', {
-                name: 'Person 2',
-            })
-
-            const invocation1 = createSerializedInsightsFlowInvocation(insightsFlow, {
+            const invocation1 = createSerializedInsightsFlowInvocation(hogFlow, {
                 event: {
                     distinct_id: 'distinct_person_1',
                     properties: { foo: 'bar1' },
                 } as any,
             })
 
-            const invocation2 = createSerializedInsightsFlowInvocation(insightsFlow, {
+            const invocation2 = createSerializedInsightsFlowInvocation(hogFlow, {
                 event: {
                     distinct_id: 'distinct_person_2',
                     properties: { foo: 'bar2' },
@@ -287,13 +398,13 @@ describe('CdpCyclotronWorkerInsightsFlow', () => {
             // Now disable the workflow (simulate user archiving it)
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET status = 'archived' WHERE id = $1`,
-                [insightsFlow.id],
+                `UPDATE insights_hogflow SET status = 'archived' WHERE id = $1`,
+                [hogFlow.id],
                 'disableInsightsFlow'
             )
 
-            // Mark the customflow for refresh so it fetches fresh data
-            ;(processor['insightsFlowManager'] as any)['lazyLoader'].markForRefresh(insightsFlow.id)
+            // Mark the hogflow for refresh so it fetches fresh data
+            ;(processor['hogFlowManager'] as any)['lazyLoader'].markForRefresh(hogFlow.id)
 
             // Mock cancelInvocations to track what gets skipped
             const cancelInvocationsSpy = jest.spyOn(processor['cyclotronJobQueue'], 'cancelInvocations')

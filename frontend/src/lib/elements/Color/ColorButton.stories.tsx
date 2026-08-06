@@ -1,10 +1,10 @@
 import { Meta, StoryObj } from '@storybook/react'
 
-import { ColorButton } from './ColorButton'
+import { ColorButton, ColorButtonProps } from './ColorButton'
 
-type Story = StoryObj<typeof ColorButton>
-const meta: Meta<typeof ColorButton> = {
-    title: 'Elements/Color/Color Button',
+type Story = StoryObj<ColorButtonProps>
+const meta: Meta<ColorButtonProps> = {
+    title: 'Lemon UI/Lemon Color/Lemon Color Button',
     component: ColorButton,
     tags: ['autodocs'],
 }

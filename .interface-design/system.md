@@ -98,8 +98,8 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 | ------------- | ------------------------------------------------- |
 | Base size     | 14px                                              |
 | Line height   | 1.5715                                            |
-| Font sans     | -apple-system, BlinkMacSystemFont, Inter, ...     |
-| Font title    | MatterSQ, -apple-system, Inter, ...               |
+| Font sans     | RoundHog, -apple-system, Inter, ...               |
+| Font title    | RoundHog, -apple-system, Inter, ...               |
 | Font mono     | ui-monospace, SFMono-Regular, SF Mono, Menlo, ... |
 | Font medium   | 500                                               |
 | Font semibold | 600                                               |
@@ -214,7 +214,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 | `--z-mascot-buddy`  | 1050  |
 | `--z-drawer`          | 900   |
 | `--z-main-nav`        | 750   |
-| `--z-sidebar`   | 700   |
+| `--z-lemon-sidebar`   | 700   |
 | `--z-top-navigation`  | 550   |
 | `--z-content-overlay` | 500   |
 | `--z-raised`          | 5     |
@@ -232,7 +232,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 Three-tier architecture:
 
 1. **Primitives** (`frontend/src/lib/ui/`) — Low-level React primitives (Button, Combobox, DropdownMenu, etc.)
-2. **Elements** (`frontend/src/lib/elements/`) — 50+ published components (Button, Input, Modal, Table, etc.)
-3. **Composed components** (`frontend/src/lib/components/`) — Feature-specific composed components built on Elements
+2. **Lemon UI** (`frontend/src/lib/elements/`) — 50+ published components (Button, Input, Modal, Table, etc.)
+3. **Composed components** (`frontend/src/lib/components/`) — Feature-specific composed components built on Lemon UI
 
-Always prefer Elements components over custom implementations.
+Always prefer Lemon UI components over custom implementations.

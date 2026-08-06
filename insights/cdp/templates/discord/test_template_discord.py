@@ -1,5 +1,7 @@
 import pytest
 
+from parameterized import parameterized
+
 from insights.cdp.templates.discord.template_discord import template as template_discord
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 
@@ -10,7 +12,7 @@ class TestTemplateDiscord(BaseInsightsFunctionTemplateTest):
     def _inputs(self, **kwargs):
         inputs = {
             "webhookUrl": "https://discord.com/api/webhooks/00000000000000000/xxxxxxxxxxxxxx",
-            "content": "**max@hanzo.ai** triggered event: '$pageview'",
+            "content": "Alert <@123456789> triggered",
         }
         inputs.update(kwargs)
         return inputs
@@ -26,10 +28,23 @@ class TestTemplateDiscord(BaseInsightsFunctionTemplateTest):
                     "Content-Type": "application/json",
                 },
                 "body": {
-                    "content": "**max@hanzo.ai** triggered event: '$pageview'",
+                    "content": "Alert <@123456789> triggered",
+                    "allowed_mentions": {"parse": []},
                 },
             },
         )
+
+    @parameterized.expand(
+        [
+            ["none", []],
+            ["roles_users", ["roles", "users"]],
+            ["everyone", ["everyone", "roles", "users"]],
+        ]
+    )
+    def test_allowed_mentions_maps_to_parse(self, choice, expected_parse):
+        self.run_function(inputs=self._inputs(allowedMentions=choice))
+
+        assert self.get_mock_fetch_calls()[0][1]["body"]["allowed_mentions"] == {"parse": expected_parse}
 
     def test_only_allow_teams_url(self):
         for url, allowed in [

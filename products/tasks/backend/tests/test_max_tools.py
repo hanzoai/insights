@@ -40,6 +40,7 @@ class BaseTaskToolTest(BaseTest):
         repository=None,
         origin_product=None,
         deleted=False,
+        runtime=Task.Runtime.ACP,
     ):
         task = Task.objects.create(
             team=self.team,
@@ -48,6 +49,7 @@ class BaseTaskToolTest(BaseTest):
             origin_product=origin_product or Task.OriginProduct.USER_CREATED,
             repository=repository,
             created_by=self.user,
+            runtime=runtime,
         )
         if deleted:
             task.deleted = True
@@ -61,8 +63,11 @@ class BaseTaskToolTest(BaseTest):
         repository=None,
         origin_product=None,
         deleted=False,
+        runtime=Task.Runtime.ACP,
     ):
-        return await sync_to_async(self._create_task_sync)(title, description, repository, origin_product, deleted)
+        return await sync_to_async(self._create_task_sync)(
+            title, description, repository, origin_product, deleted, runtime
+        )
 
     def _create_task_run_sync(
         self,
@@ -103,7 +108,7 @@ class TestCreateTaskTool(BaseTaskToolTest):
         tool = self._create_tool(CreateTaskTool)
 
         content, artifact = await tool._arun_impl(
-            title="New Task", description="Task description", repository="hanzoai/insights-js"
+            title="New Task", description="Task description", repository="insights/insights-js"
         )
 
         assert "Created and started task" in content
@@ -116,7 +121,7 @@ class TestCreateTaskTool(BaseTaskToolTest):
         task = await sync_to_async(Task.objects.get)(id=artifact["task_id"])
         assert task.title == "New Task"
         assert task.description == "Task description"
-        assert task.repository == "hanzoai/insights-js"
+        assert task.repository == "insights/insights-js"
         mock_execute_workflow.assert_called_once()
 
     @pytest.mark.django_db
@@ -177,6 +182,20 @@ class TestRunTaskTool(BaseTaskToolTest):
         assert "run_id" in artifact
 
         mock_execute_workflow.assert_called_once()
+
+    @patch("products.tasks.backend.max_tools.execute_task_processing_workflow_async")
+    @pytest.mark.django_db
+    @pytest.mark.asyncio
+    async def test_run_task_rejects_pi_task(self, mock_execute_workflow):
+        task = await self._create_task(runtime=Task.Runtime.PI)
+        tool = self._create_tool(RunTaskTool)
+
+        content, artifact = await tool._arun_impl(task_id=str(task.id))
+
+        assert content == "Pi tasks cannot be run through the ACP task workflow."
+        assert artifact["error"] == "unsupported_runtime"
+        assert not await sync_to_async(task.runs.exists)()
+        mock_execute_workflow.assert_not_called()
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -514,15 +533,15 @@ class TestListTasksTool(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_tasks_filter_by_repository(self):
-        await self._create_task("Task 1", repository="hanzoai/insights-js")
-        await self._create_task("Task 2", repository="hanzoai/insights")
+        await self._create_task("Task 1", repository="insights/insights-js")
+        await self._create_task("Task 2", repository="insights/insights")
 
         tool = self._create_tool(ListTasksTool)
 
-        content, artifact = await tool._arun_impl(repository="hanzoai/insights-js")
+        content, artifact = await tool._arun_impl(repository="insights/insights-js")
 
         assert len(artifact["tasks"]) == 1
-        assert artifact["tasks"][0]["repository"] == "hanzoai/insights-js"
+        assert artifact["tasks"][0]["repository"] == "insights/insights-js"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -565,15 +584,15 @@ class TestListTasksTool(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_tasks_repo_partial_match(self):
-        await self._create_task("JS Task", repository="hanzoai/insights-js")
-        await self._create_task("Main Task", repository="hanzoai/insights")
+        await self._create_task("JS Task", repository="insights/insights-js")
+        await self._create_task("Main Task", repository="insights/insights")
 
         tool = self._create_tool(ListTasksTool)
 
         content, artifact = await tool._arun_impl(repository="insights-js")
 
         assert len(artifact["tasks"]) == 1
-        assert artifact["tasks"][0]["repository"] == "hanzoai/insights-js"
+        assert artifact["tasks"][0]["repository"] == "insights/insights-js"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -582,7 +601,7 @@ class TestListTasksTool(BaseTaskToolTest):
 
         tool = self._create_tool(ListTasksTool)
 
-        content, artifact = await tool._arun_impl(repository="hanzoai/insights-js")
+        content, artifact = await tool._arun_impl(repository="insights/insights-js")
 
         assert len(artifact["tasks"]) == 1
 
@@ -655,7 +674,7 @@ class TestListTasksTool(BaseTaskToolTest):
 @parameterized_class(
     ("filter_value", "should_match"),
     [
-        ("hanzoai/insights-js", True),
+        ("insights/insights-js", True),
         ("Insights/Insights-JS", True),
         ("insights-js", True),
         ("insights/insights", False),
@@ -668,7 +687,7 @@ class TestListTasksToolRepositoryFiltering(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_repository_filtering(self):
-        await self._create_task("Target Task", repository="hanzoai/insights-js")
+        await self._create_task("Target Task", repository="insights/insights-js")
 
         tool = self._create_tool(ListTasksTool)
         content, artifact = await tool._arun_impl(repository=self.filter_value)
@@ -807,9 +826,9 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         content, artifact = await tool._arun_impl()
 
         assert "No GitHub repositories available" in content
-        assert "/settings/project-integrations" in content
+        assert "/integrations/github" in content
         assert artifact["repositories"] == []
-        assert artifact["settings_url"] == "/settings/project-integrations"
+        assert artifact["settings_url"] == "/integrations/github"
 
     @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
@@ -830,7 +849,11 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         mock_github_instance = mock_github_class.return_value
         mock_github_instance.organization.return_value = "insights"
-        mock_github_instance.list_repositories.return_value = ["insights-js", "hanzo-insights", "insights"]
+        mock_github_instance.list_all_cached_repositories.return_value = [
+            {"id": 1, "name": "insights-js", "full_name": "insights/insights-js"},
+            {"id": 2, "name": "insights-python", "full_name": "insights/insights-python"},
+            {"id": 3, "name": "insights", "full_name": "insights/insights"},
+        ]
 
         tool = self._create_tool(ListRepositoriesTool)
 
@@ -838,7 +861,7 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         assert "3 repository(ies)" in content
         assert len(artifact["repositories"]) == 3
-        assert artifact["repositories"][0]["repository"] == "hanzoai/insights-js"
+        assert artifact["repositories"][0]["repository"] == "insights/insights-js"
         assert artifact["repositories"][0]["organization"] == "insights"
         assert artifact["repositories"][0]["name"] == "insights-js"
 
@@ -861,7 +884,11 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         mock_github_instance = mock_github_class.return_value
         mock_github_instance.organization.return_value = "insights"
-        mock_github_instance.list_repositories.return_value = ["insights-js", "hanzo-insights", "insights"]
+        mock_github_instance.list_all_cached_repositories.return_value = [
+            {"id": 1, "name": "insights-js", "full_name": "insights/insights-js"},
+            {"id": 2, "name": "insights-python", "full_name": "insights/insights-python"},
+            {"id": 3, "name": "insights", "full_name": "insights/insights"},
+        ]
 
         tool = self._create_tool(ListRepositoriesTool)
 
@@ -869,7 +896,7 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         assert "1 repository(ies)" in content
         assert len(artifact["repositories"]) == 1
-        assert artifact["repositories"][0]["repository"] == "insights/hanzo-insights"
+        assert artifact["repositories"][0]["repository"] == "insights/insights-python"
 
     @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
@@ -890,7 +917,9 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         mock_github_instance = mock_github_class.return_value
         mock_github_instance.organization.return_value = "Insights"
-        mock_github_instance.list_repositories.return_value = ["Insights-JS"]
+        mock_github_instance.list_all_cached_repositories.return_value = [
+            {"id": 1, "name": "Insights-JS", "full_name": "Insights/Insights-JS"},
+        ]
 
         tool = self._create_tool(ListRepositoriesTool)
 
@@ -917,7 +946,10 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         mock_github_instance = mock_github_class.return_value
         mock_github_instance.organization.return_value = "insights"
-        mock_github_instance.list_repositories.return_value = ["insights-js", "hanzo-insights"]
+        mock_github_instance.list_all_cached_repositories.return_value = [
+            {"id": 1, "name": "insights-js", "full_name": "insights/insights-js"},
+            {"id": 2, "name": "insights-python", "full_name": "insights/insights-python"},
+        ]
 
         tool = self._create_tool(ListRepositoriesTool)
 
@@ -950,9 +982,9 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         content, artifact = await tool._arun_impl()
 
         assert "No GitHub repositories available" in content
-        assert "/settings/project-integrations" in content
+        assert "/integrations/github" in content
         assert artifact["repositories"] == []
-        assert artifact["settings_url"] == "/settings/project-integrations"
+        assert artifact["settings_url"] == "/integrations/github"
 
     @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
@@ -979,6 +1011,6 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         content, artifact = await tool._arun_impl()
 
         assert "No GitHub repositories available" in content
-        assert "/settings/project-integrations" in content
+        assert "/integrations/github" in content
         assert artifact["repositories"] == []
-        assert artifact["settings_url"] == "/settings/project-integrations"
+        assert artifact["settings_url"] == "/integrations/github"

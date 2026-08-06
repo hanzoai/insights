@@ -71,9 +71,9 @@ To set up a new team with their own Dagster definitions and Slack alerts, follow
 
 3. **Configure production deployment**:
 
-   For Insights employees, add the new location to the Dagster configuration in the [charts repository](https://github.com/Hanzo Insights/charts) (see `argocd/dagster/`).
+   For Insights employees, add the new location to the Dagster configuration in the [charts repository](https://github.com/Insights/charts) (see `argocd/dagster/`).
 
-   Sample PR: https://github.com/Hanzo Insights/charts/pull/6366
+   Sample PR: https://github.com/Insights/charts/pull/6366
 
 4. **Add team to the `JobOwners` enum** in `common/common.py`:
 
@@ -160,7 +160,7 @@ export DEBUG=1 # Important: Set DEBUG=1 when running locally to use local resour
 dagster dev --workspace $DAGSTER_HOME/workspace.yaml
 ```
 
-The Dagster UI will be available at http://localhost:3000 by default, where you can:
+The Dagster UI will be available at http://localhost:3030 by default, where you can:
 
 - Browse assets, jobs, and schedules
 - Manually trigger job runs
@@ -251,7 +251,7 @@ export DAGSTER_HOME=$(pwd)/.dagster_home && DAGSTER_WEB_PREAGGREGATED_MAX_PARTIT
 #### Production Configuration
 
 For production deployments, configure similar concurrency settings in your `dagster.yaml`.
-For Insights employees, it is on our charts repo: https://github.com/Hanzo Insights/charts/tree/main/argocd/dagster
+For Insights employees, it is on our charts repo: https://github.com/Insights/charts/tree/master/argocd/dagster
 
 ## Additional Resources
 

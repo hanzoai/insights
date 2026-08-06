@@ -5,7 +5,7 @@
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
-      <env name="BILLING_SERVICE_URL" value="https://billing.dev.insights.hanzo.ai" />
+      <env name="BILLING_SERVICE_URL" value="https://billing.dev.insights.dev" />
       <env name="CAPTURE_TIME_TO_SEE_DATA" value="0" />
       <env name="DATASTORE_SECURE" value="False" />
       <env name="DATABASE_URL" value="postgres://insights:insights@localhost:5432/insights" />

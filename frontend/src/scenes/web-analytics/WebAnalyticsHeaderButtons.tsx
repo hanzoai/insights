@@ -1,27 +1,40 @@
 import { useActions, useValues } from 'kea'
+import insights from 'insights-js'
 import { useState } from 'react'
 
-import { IconBolt } from '@hanzo/icons'
+import { IconBolt, IconPerson } from '@hanzo/icons'
 
 import { LiveUserCount } from 'lib/components/LiveUserCount'
 import { FEATURE_FLAGS } from 'lib/constants'
+import { IconLink } from 'lib/elements/icons'
+import { Button } from 'lib/elements/Button'
 import { Switch } from 'lib/elements/Switch'
-import { Tag } from 'lib/elements/Tag'
 import { Popover } from 'lib/elements/Popover'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { teamLogic } from 'scenes/teamLogic'
+import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 import { WebAnalyticsMenu } from 'scenes/web-analytics/WebAnalyticsMenu'
 
 export function WebAnalyticsHeaderButtons(): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
     const { currentTeam } = useValues(teamLogic)
     const { updateCurrentTeam } = useActions(teamLogic)
+    const { shouldFilterTestAccounts } = useValues(webAnalyticsLogic)
+    const { setShouldFilterTestAccounts } = useActions(webAnalyticsLogic)
     const [showPopover, setShowPopover] = useState(false)
 
     const hasFeatureFlag = featureFlags[FEATURE_FLAGS.SETTINGS_WEB_ANALYTICS_PRE_AGGREGATED_TABLES]
     const isUsingNewEngine = currentTeam?.modifiers?.useWebAnalyticsPreAggregatedTables
     const showLiveUserCount =
         featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_FILTERS_V2] || featureFlags[FEATURE_FLAGS.CONDENSED_FILTER_BAR]
+    const showShareButton =
+        !featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_FILTERS_V2] && !featureFlags[FEATURE_FLAGS.CONDENSED_FILTER_BAR]
+
+    const handleShare = (): void => {
+        void copyToClipboard(window.location.href, 'link')
+        insights.capture('web analytics share link copied', { source: 'header_button' })
+    }
 
     const handleToggleEngine = (checked: boolean): void => {
         updateCurrentTeam({
@@ -40,20 +53,35 @@ export function WebAnalyticsHeaderButtons(): JSX.Element {
                     dataAttr="web-analytics-live-user-count"
                 />
             )}
+            {showShareButton && (
+                <Button
+                    type="secondary"
+                    size="small"
+                    icon={<IconLink fontSize="16" />}
+                    tooltip="Share"
+                    tooltipPlacement="top"
+                    onClick={handleShare}
+                    data-attr="web-analytics-share-button"
+                />
+            )}
+            <Button
+                type="secondary"
+                size="small"
+                icon={<IconPerson />}
+                tooltip="Filter out internal and test users"
+                tooltipPlacement="top"
+                onClick={() => setShouldFilterTestAccounts(!shouldFilterTestAccounts)}
+                data-attr="web-analytics-filter-test-accounts"
+            >
+                Filter test accounts <Switch checked={shouldFilterTestAccounts} className="ml-1" />
+            </Button>
             {hasFeatureFlag && (
                 <Popover
                     visible={showPopover}
                     onClickOutside={() => setShowPopover(false)}
                     overlay={
                         <div className="p-4 max-w-160">
-                            <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-semibold flex items-center gap-2">
-                                    About the New Query Engine
-                                    <Tag type="warning" className="uppercase">
-                                        Beta
-                                    </Tag>
-                                </h3>
-                            </div>
+                            <h3 className="font-semibold mb-2">About the new query engine</h3>
                             <p className="mb-3">
                                 Our new Web Analytics Query Engine powers faster queries using pre-aggregated data,
                                 giving you quicker access to insights and it's much better at handling large datasets.

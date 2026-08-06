@@ -1,7 +1,7 @@
 {
     "id": 60,
     "short_id": "kFAIVJnC",
-    "name": "",
+    "name": null,
     "derived_name": "Pageview or Pageleave → Pageview user conversion rate",
     "filters": {},
     "filters_hash": "cache_group_funnel_test",
@@ -12,6 +12,7 @@
     "color": null,
     "last_refresh": null,
     "refreshing": false,
+    "total_median_conversion_time": 691.5,
     "result": [
         {
             "action_id": "$pageview, $pageleave",

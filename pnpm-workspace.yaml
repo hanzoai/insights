@@ -1,49 +1,77 @@
 packages:
-    - .
+    - '.'
     - common/esbuilder
     - common/scriptvm/typescript
     - common/plugin_transpiler
     - common/storybook
+    - common/replay-shared
+    - common/replay-headless
     - common/tailwind
-    - common/insightsql_parser
-    - common/plugin-scaffold
-    - common/siphash
-    - common/insights-node
+    - packages/quill
+    - packages/quill/apps/*
+    - packages/quill/packages/*
     - frontend
-    # The design system lives under frontend/ but is its own package, and three
-    # products depend on it by name ("@hanzo/elements": "*"). Without this entry
-    # pnpm does not know it is local, resolves that "*" against the npm registry,
-    # and every install fails — which is why `pnpm install` could not run in this
-    # repo at all. The Docker build survives only because it filters to one
-    # package with --no-frozen-lockfile.
+    # The design system lives under frontend/ but is its own package, and
+    # products depend on it by name ("@hanzo/elements": "*"). Without this
+    # entry pnpm does not know it is local, resolves that "*" against the npm
+    # registry, and every install fails.
     - frontend/@hanzo/*
     - playwright
     - nodejs
     - nodejs/src/scripts
     - products/*
+    # products/desktop is a nested standalone workspace (own lockfile, catalog,
+    # overrides, Node version); the root install must not absorb it.
+    - '!products/desktop'
     - docs/onboarding
+    - services/agent-proxy
+    - services/oauth-proxy
     - services/mcp
+    - services/stripe-app
+    - tools/*
+    - '!tools/hedgebox-dummy'
     - rust/cyclotron-node
+    - rust/common/scriptvm/node
+    - rust/replay-anonymizer-node
+
+blockExoticSubdeps: true
+
+# Our workspace packages are not published, so a plain range like "*" has to
+# resolve locally. pnpm 10 defaults this off, which sends every such range to
+# the registry and 404s on the design system.
+linkWorkspacePackages: true
+trustPolicy: no-downgrade
+
+# no-downgrade refuses a version published after a version that carried stronger
+# trust evidence, on the reading that a package which used to sign and suddenly
+# does not may have been taken over. Two semver versions trip it for a reason
+# that is not a takeover, and neither can be pinned forward out of trouble:
+#
+#   7.5.1 shipped 2023-05-12 with provenance. The terminal security backports on
+#   the legacy lines -- 5.7.2 and 6.3.1 -- shipped 2023-07-10 without it, because
+#   those release paths predate the maintainer wiring provenance in. The policy
+#   compares across the whole package rather than per major, so it reads the
+#   older lines as a regression from the newer one.
+#
+# 5.7.2 and 6.3.1 are the LAST releases of 5.x and 6.x and no 5.x or 6.x release
+# is attested at all, so there is no trusted version on either line to move to.
+# The only pin available would be a major bump of a transitive dependency, which
+# trades a real compatibility risk for a metadata gap.
+#
+# Excluded by exact version, never by name alone, so a future semver release is
+# checked like anything else and this stays one reviewable line rather than a
+# blanket switch-off. Everything else in the tree is still checked.
+#
+# Both versions belong to ONE entry joined by `||`. The matcher returns on the
+# first rule whose NAME matches and hands back only that rule's version list, so
+# a second `semver@...` line below is dead -- listing them separately excludes
+# 5.7.2 and lets 6.3.1 fail, which is exactly how this first went wrong.
+trustPolicyExclude:
+    - semver@5.7.2 || 6.3.1
 
 catalog:
-    '@hanzo/insights': ^1.358.1
-    '@hanzo/insights-lite': ^4.2.2
-    '@parcel/packager-ts': 2.13.3
-    '@parcel/transformer-typescript-types': 2.13.3
-    '@storybook/addon-actions': ^7.6.4
-    '@storybook/react': ^7.6.4
-    '@storybook/testing-library': ^0.2.2
-    '@storybook/types': ^7.6.4
-    '@types/jest': ^29.5.12
-    '@types/node': ^22.13.14
-    '@types/react': ^18.3.27
-    '@types/react-dom': ^18.3.7
-    concurrently: ^9.2.1
-    fast-deep-equal: ^3.1.3
-    fuse.js: ^7.1.0
-    husky: ^9.1.7
-    jest: ^29.7.0
-    kea: ^4.0.0-pre.3
+    # Kea ecosystem - state management
+    kea: ^4.0.0-pre.6
     kea-forms: ^3.2.0
     kea-loaders: ^3.1.1
     kea-localstorage: ^3.1.0
@@ -52,33 +80,218 @@ catalog:
     kea-test-utils: ^0.2.4
     kea-waitfor: ^0.2.1
     kea-window-values: ^3.0.1
-    lint-staged: ~16.4.0
-    prettier: ^3.8.1
+    # Insights packages
+    #
+    # Our icons are a published fork, so the specifier has to name it. The
+    # rename turns the import into `@hanzo/icons`, but the package that backs
+    # it is `@hanzo/insights-icons` -- a different package from the
+    # `@hanzo/icons` that also exists on npm, and the only one that renders an
+    # icon with `className="Icon"`. That class is the whole contract: the
+    # package draws its SVGs at width 100% with no height, so an icon is sized
+    # entirely by the `.Icon` rules in the design system, and one that arrives
+    # under any other class paints at its container's width.
+    #
+    # Version lines are not shared with upstream -- upstream's ^0.38.0 is their
+    # package's line; the fork's is 0.36.x -- so this does not track theirs.
+    '@hanzo/icons': npm:@hanzo/insights-icons@0.36.7
+    '@hanzo/brand': 0.9.1
+    '@hanzo/react': ^1.9.0
+    insights-js: ^1.409.5
+    # Build tools
+    '@parcel/packager-ts': 2.16.4
+    '@parcel/transformer-typescript-types': 2.16.4
+    typescript: 6.0.3
+    oxfmt: ^0.57.0
+    vite: ^8.1.0
+    '@vitejs/plugin-react': ^5.2.0
+    # Testing
+    jest: ^29.7.0
+    jest-junit: ^16.0.0
+    '@types/jest': ^29.5.12
+    '@types/node': ^22.13.14
+    '@playwright/test': 1.60.0
+    # Storybook
+    '@storybook/react': ^10.4.3
+    '@storybook/react-vite': ^10.4.3
+    storybook: ^10.4.3
+    # Common utilities
+    fast-equals: ^6.0.0
+    fuse.js: ^7.1.0
     ts-pattern: '4.3'
-    typescript: 5.4.5
     use-debounce: ^9.0.3
+    # React types
+    '@types/react': ^18.3.27
+    '@types/react-dom': ^18.3.7
+    '@base-ui/react': 1.6.0
+    # Other shared
+    husky: ^7.0.4
+    lint-staged: ~15.4.3
+    concurrently: ^5.3.0
+    yaml: ^2.8.2
 
-minimumReleaseAge: 4320
-
+# Insights packages are released by our own workflows. insights-js is also
+# uploaded to the browser SDK CDN from the insights-js release workflow, so
+# dependency automation should not delay these package updates.
+minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-    - node-forge@1.3.2
-    - '@modelcontextprotocol/sdk'
-    - kea@4.0.0-pre.3
+    # Scoped to the exact version we pin, not the whole scope: upstream trusts
+    # its own '@posthog/*' publishes, but we only consume them, so the gate has
+    # to keep protecting every version we did not deliberately choose.
+    - '@posthog/brand@0.9.1'
+    - insights-js
+    - insights-js-lite
+    - insights-node
+    - '@hanzo/*'
+    - kea@4.0.0-pre.6
+    - kea-typegen@3.8.3
+    - '@earendil-works/*'
+    - typebox
+    - chartjs-plugin-stacked100@1.7.1
     - torph@0.0.5
-    - '@hanzo/insights'
-    - '@hanzo/insights-lite'
-    - '@hanzo/insights-node'
-    - '@hanzo/insights-core'
-    - '@hanzo/insights-types'
-    - '@hanzo/insights-icons'
-    - '@hanzo/insights-mascot-mode'
-    - '@hanzo/insights-rrweb'
-    - '@hanzo/insights-rrweb-types'
-    - '@hanzo/insights-rrweb-plugin-console-record'
-    - '@hanzo/insights-rrweb-utils'
-    - '@hanzo/insights-rrweb-snapshot'
-    - '@hanzo/insights-rrdom'
-    - '@hanzo/icons'
-    - '@hanzo/mascot-mode'
-    - '@hanzo/types'
-    - '@hanzo/elements'
+    - oxfmt@0.57.0
+    - '@oxfmt/*'
+    - bloommx@1.0.3
+    - '@shadcn/react'
+    - mermaid@11.15.0
+    - kea-typegen
+    - '@typescript/native-preview'
+    - '@typescript/native-preview-darwin-arm64'
+    - '@typescript/native-preview-darwin-x64'
+    - '@typescript/native-preview-linux-arm'
+    - '@typescript/native-preview-linux-arm64'
+    - '@typescript/native-preview-linux-x64'
+    - '@typescript/native-preview-win32-arm64'
+    - '@typescript/native-preview-win32-x64'
+    - shiki
+    - shadcn
+    - '@shikijs/*'
+
+# pnpm 10 reads these here; the `pnpm` field in package.json is ignored,
+# which had left every pin below inert — including the security bumps.
+overrides:
+    axios: '^1.15.0'
+    '@modelcontextprotocol/sdk': '^1.29.0'
+    '@types/react': '18.3.27'
+    '@types/react-dom': '18.3.7'
+    cipher-base: '>=1.0.5'
+    d3-geo: '>=3.1.0'
+    d3-selection: '>=3.0.0'
+    d3-zoom: '>=3.0.0'
+    form-data: '>=4.0.4'
+    node-forge: '>=1.4.0'
+    pbkdf2: '>=3.1.3'
+    react: '18.3.1'
+    react-dom: '18.3.1'
+    sha.js: '>=2.4.12'
+    typescript: '6.0.3'
+    'ultimate-express>uWebSockets.js': '-'
+    # rollup 2.x ended at 2.79.2 (Sept 2024); 2.80.0 appeared 17 months later on
+    # that dead line with no trust evidence, and trustPolicy: no-downgrade refuses
+    # it. Pin the last trusted 2.x on this path rather than relax the policy.
+    'tsup>rollup': '2.79.2'
+    # Same policy, same shape, one dependency deeper. @types/node@22.18.8 asks for
+    # undici-types ~6.21.0, and that tilde lands inside the one unattested stretch
+    # of the 6.x line: 6.17.0-6.19.2 carry provenance, 6.19.3-6.21.0 carry none,
+    # and 6.23.0 onward carry it again. no-downgrade reads a version with no
+    # evidence published after versions that had it as a possible takeover and
+    # stops the install, which is what took the frontend stage down.
+    #
+    # 6.23.0 is the nearest version that satisfies the policy: same major, the
+    # first attested release above the gap, and types-only, so nothing it carries
+    # reaches runtime. Pinning it keeps the check doing its job -- the alternative,
+    # relaxing trustPolicy, would switch the check off for every package here to
+    # settle one of them.
+    '@types/node>undici-types': '6.23.0'
+    'fast-xml-parser@^4': '>=4.5.4'
+    'fast-xml-parser@^5': '>=5.3.5'
+    'jest-playwright-preset>playwright-core': '1.60.0'
+    '@smithy/node-http-handler': '4.4.9'
+    '@smithy/core': '3.24.6'
+    rolldown: '1.1.4'
+    '@tiptap/core': '3.20.6'
+    '@tiptap/extensions': '3.20.6'
+    '@tiptap/html': '3.20.6'
+    '@tiptap/markdown': '3.20.6'
+    '@tiptap/pm': '3.20.6'
+    '@tiptap/react': '3.20.6'
+    '@tiptap/starter-kit': '3.20.6'
+    '@tiptap/suggestion': '3.20.6'
+    '@tiptap/extension-blockquote': '3.20.6'
+    '@tiptap/extension-bold': '3.20.6'
+    '@tiptap/extension-bubble-menu': '3.20.6'
+    '@tiptap/extension-bullet-list': '3.20.6'
+    '@tiptap/extension-code': '3.20.6'
+    '@tiptap/extension-code-block': '3.20.6'
+    '@tiptap/extension-code-block-lowlight': '3.20.6'
+    '@tiptap/extension-collaboration': '3.20.6'
+    '@tiptap/extension-color': '3.20.6'
+    '@tiptap/extension-document': '3.20.6'
+    '@tiptap/extension-drag-handle': '3.20.6'
+    '@tiptap/extension-drag-handle-react': '3.20.6'
+    '@tiptap/extension-dropcursor': '3.20.6'
+    '@tiptap/extension-floating-menu': '3.20.6'
+    '@tiptap/extension-gapcursor': '3.20.6'
+    '@tiptap/extension-hard-break': '3.20.6'
+    '@tiptap/extension-heading': '3.20.6'
+    '@tiptap/extension-horizontal-rule': '3.20.6'
+    '@tiptap/extension-image': '3.20.6'
+    '@tiptap/extension-italic': '3.20.6'
+    '@tiptap/extension-link': '3.20.6'
+    '@tiptap/extension-list': '3.20.6'
+    '@tiptap/extension-list-item': '3.20.6'
+    '@tiptap/extension-list-keymap': '3.20.6'
+    '@tiptap/extension-node-range': '3.20.6'
+    '@tiptap/extension-ordered-list': '3.20.6'
+    '@tiptap/extension-paragraph': '3.20.6'
+    '@tiptap/extension-placeholder': '3.20.6'
+    '@tiptap/extension-strike': '3.20.6'
+    '@tiptap/extension-table': '3.20.6'
+    '@tiptap/extension-table-of-contents': '3.20.6'
+    '@tiptap/extension-text': '3.20.6'
+    '@tiptap/extension-text-align': '3.20.6'
+    '@tiptap/extension-text-style': '3.20.6'
+    '@tiptap/extension-underline': '3.20.6'
+    '@hanzo/icons': 'npm:@hanzo/insights-icons@0.36.7'
+    '@hanzo/insightsql-parser': 'npm:@posthog/hogql-parser@1.3.75'
+    '@hanzo/mascot-mode': 'npm:@hanzo/insights-mascot-mode@0.0.48'
+    insights-js: 'npm:@hanzo/insights@1.358.1'
+    insights-js-lite: 'npm:@hanzo/insights-lite@4.2.2'
+    '@hanzo/brand': 'npm:@posthog/brand@0.9.1'
+    '@hanzo/react': 'npm:@posthog/react@1.9.0'
+    '@datastore/client': 'npm:@clickhouse/client@^1.12.0'
+    '@hanzo/cli': 'npm:@posthog/cli@^0.8.2'
+    '@hanzo/mcp-analytics': 'npm:@posthog/mcp@0.5.0'
+    '@hanzo/rollup-plugin': 'npm:@posthog/rollup-plugin@^1.4.4'
+    '@hanzo/siphash': 'npm:@posthog/siphash@1.1.1'
+    insights-node: 'npm:posthog-node@5.25.0'
+    insights-react-native: 'npm:posthog-react-native@^4.18.0'
+    insights-react-native-session-replay: 'npm:posthog-react-native-session-replay@^1.6.0'
+
+patchedDependencies:
+    heatmap.js@2.0.5: patches/heatmap.js@2.0.5.patch
+    dayjs@1.11.11: patches/dayjs@1.11.11.patch
+    chartjs-plugin-crosshair@2.0.0: patches/chartjs-plugin-crosshair@2.0.0.patch
+    kea@4.0.0-pre.6: patches/kea@4.0.0-pre.6.patch
+
+onlyBuiltDependencies:
+    - '@modelcontextprotocol/ext-apps'
+    - '@mongodb-js/zstd'
+    - '@parcel/watcher'
+    - chartjs-plugin-stacked100
+    - '@swc/core'
+    - core-js
+    - core-js-pure
+    - cpu-features
+    - esbuild
+    - lmdb
+    - lz4
+    - msgpackr-extract
+    - msw
+    - node-gyp
+    - node-rdkafka
+    - protobufjs
+    - re2
+    - sharp
+    - ssh2
+    - unrs-resolver
+    - workerd

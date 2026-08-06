@@ -5,14 +5,18 @@ import { useState } from 'react'
 import { IconGear } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { FEATURE_FLAGS } from 'lib/constants'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { cn } from 'lib/utils/css-classes'
 import { MaxMemorySettings } from 'scenes/settings/environment/MaxMemorySettings'
 import { maxSettingsLogic } from 'scenes/settings/environment/maxSettingsLogic'
 
-import { sidePanelSettingsLogic } from '~/layout/navigation-3000/sidepanel/panels/sidePanelSettingsLogic'
+import { AgentMode } from '~/queries/schema/schema-assistant-messages'
 
-import { maxLogic } from '../maxLogic'
+import { capabilitiesForGrouping, capabilityGroupingFromVariant } from '../maxCapabilities'
+import { QUESTION_SUGGESTIONS_DATA, RESEARCH_SUGGESTIONS_DATA, maxLogic } from '../maxLogic'
+import { maxThreadLogic } from '../maxThreadLogic'
+import { CAPABILITY_CARDS_HEIGHT_PX, CapabilityBadges, CapabilitySuggestions } from './CapabilityBadges'
 import { FloatingSuggestionsDisplay } from './FloatingSuggestionsDisplay'
 import { SidebarQuestionInput } from './SidebarQuestionInput'
 
@@ -21,26 +25,33 @@ export function SidebarQuestionInputWithSuggestions({
 }: {
     hideSuggestions?: boolean
 }): JSX.Element {
-    const { dataProcessingAccepted, activeSuggestionGroup } = useValues(maxLogic)
-    const { setActiveGroup } = useActions(maxLogic)
+    const { dataProcessingAccepted, dataProcessingApprovalDisabledReason, activeSuggestionGroup } = useValues(maxLogic)
+    const { setActiveGroup, setQuestion, focusInput, setFillInHint } = useActions(maxLogic)
+    const { agentMode } = useValues(maxThreadLogic)
+    const { askMax } = useActions(maxThreadLogic)
     const { coreMemory, coreMemoryLoading } = useValues(maxSettingsLogic)
-    const { openSettingsPanel } = useActions(sidePanelSettingsLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
 
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
     const [settingsModalOpen, setSettingsModalOpen] = useState(false)
+    const [selectedCapability, setSelectedCapability] = useState<string | null>(null)
 
     const handleSettingsClick = (): void => {
-        if (isRemovingSidePanelFlag) {
-            setSettingsModalOpen(true)
-        } else {
-            openSettingsPanel({ sectionId: 'environment-max' })
-        }
+        setSettingsModalOpen(true)
     }
+
+    // Capability badges (same experiment as the homepage) replace the pills — except in Research
+    // mode, which keeps its own tailored suggestions.
+    const grouping = capabilityGroupingFromVariant(featureFlags[FEATURE_FLAGS.MAX_HOMEPAGE_CAPABILITIES])
+    const showBadges = !!grouping && agentMode !== AgentMode.Research
+    const capabilities = grouping ? capabilitiesForGrouping(grouping) : []
+    const selectedCapabilityData = capabilities.find((capability) => capability.key === selectedCapability) ?? null
 
     const tip =
         !coreMemoryLoading && !coreMemory?.text
             ? 'Tip: Run /init to initialize Insights AI in this project'
-            : 'Try Insights AI for…'
+            : agentMode === AgentMode.Research
+              ? 'Try Insights AI Research Mode for…'
+              : 'Try Insights AI for…'
 
     return (
         <DismissableLayer
@@ -49,6 +60,7 @@ export function SidebarQuestionInputWithSuggestions({
                 if (activeSuggestionGroup) {
                     setActiveGroup(null)
                 }
+                setSelectedCapability(null)
             }}
         >
             <SidebarQuestionInput />
@@ -60,31 +72,59 @@ export function SidebarQuestionInputWithSuggestions({
                 )}
             >
                 <h3 className="text-center text-xs font-medium mb-0 text-secondary">{tip}</h3>
-                <FloatingSuggestionsDisplay
-                    type="secondary"
-                    dataProcessingAccepted={dataProcessingAccepted}
-                    additionalSuggestions={[
-                        <Button
-                            key="edit-max-memory"
-                            onClick={handleSettingsClick}
-                            size="xsmall"
-                            type="secondary"
-                            icon={<IconGear />}
-                            tooltip="Edit Insights AI memory"
-                        />,
-                    ]}
-                />
+                {showBadges ? (
+                    <div className="flex flex-col items-center gap-6 w-full">
+                        <CapabilityBadges
+                            capabilities={capabilities}
+                            selectedKey={selectedCapability}
+                            onSelect={(key) => {
+                                setFillInHint(null)
+                                setSelectedCapability(key)
+                            }}
+                        />
+                        {selectedCapabilityData && (
+                            <div className="w-full overflow-hidden" style={{ height: CAPABILITY_CARDS_HEIGHT_PX }}>
+                                <CapabilitySuggestions
+                                    capability={selectedCapabilityData}
+                                    onType={setQuestion}
+                                    onSubmit={(text) => askMax(text)}
+                                    onFillIn={(hint) => {
+                                        setFillInHint(hint)
+                                        focusInput()
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <FloatingSuggestionsDisplay
+                        type="secondary"
+                        dataProcessingAccepted={dataProcessingAccepted}
+                        dataProcessingApprovalDisabledReason={dataProcessingApprovalDisabledReason}
+                        suggestionsData={
+                            agentMode === AgentMode.Research ? RESEARCH_SUGGESTIONS_DATA : QUESTION_SUGGESTIONS_DATA
+                        }
+                        additionalSuggestions={[
+                            <Button
+                                key="edit-max-memory"
+                                onClick={handleSettingsClick}
+                                size="xsmall"
+                                type="secondary"
+                                icon={<IconGear />}
+                                tooltip="Edit Insights AI memory"
+                            />,
+                        ]}
+                    />
+                )}
             </div>
-            {isRemovingSidePanelFlag && (
-                <Modal
-                    title="Insights AI memory"
-                    isOpen={settingsModalOpen}
-                    onClose={() => setSettingsModalOpen(false)}
-                    width="40rem"
-                >
-                    <MaxMemorySettings />
-                </Modal>
-            )}
+            <Modal
+                title="Insights AI memory"
+                isOpen={settingsModalOpen}
+                onClose={() => setSettingsModalOpen(false)}
+                width="40rem"
+            >
+                <MaxMemorySettings />
+            </Modal>
         </DismissableLayer>
     )
 }

@@ -1,27 +1,39 @@
 import './SupportEditor.scss'
 
 import { JSONContent, TextSerializer } from '@tiptap/core'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import ExtensionDocument from '@tiptap/extension-document'
 import { Image } from '@tiptap/extension-image'
 import { Link } from '@tiptap/extension-link'
 import { Underline } from '@tiptap/extension-underline'
 import { Placeholder } from '@tiptap/extensions'
-import { EditorContent } from '@tiptap/react'
+import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
+import {
+    EditorContent,
+    Extension,
+    NodeViewContent,
+    NodeViewProps,
+    NodeViewWrapper,
+    ReactNodeViewRenderer,
+} from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
-import { useEffect, useRef, useState } from 'react'
+import { common, createLowlight } from 'lowlight'
+import insights from 'insights-js'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconCode, IconImage } from '@hanzo/icons'
+import { IconCode, IconCopy, IconImage, IconTerminal } from '@hanzo/icons'
 
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
 import { useRichContentEditor } from 'lib/components/RichContentEditor'
 import { CommandEnterExtension } from 'lib/components/RichContentEditor/CommandEnterExtension'
+import { EmojiSuggestionExtension } from 'lib/components/RichContentEditor/EmojiSuggestionExtension'
 import { MentionsExtension } from 'lib/components/RichContentEditor/MentionsExtension'
 import { RichContentNodeMention } from 'lib/components/RichContentEditor/RichContentNodeMention'
 import { RichContentEditorType, RichContentNodeType, TTEditor } from 'lib/components/RichContentEditor/types'
 import { createEditor } from 'lib/components/RichContentEditor/utils'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
+import { IconBold, IconItalic, IconLink } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { FileInput } from 'lib/elements/FileInput'
 import { Input } from 'lib/elements/Input'
@@ -29,9 +41,81 @@ import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 import { toast } from 'lib/elements/Toast'
 import { Popover } from 'lib/elements/Popover'
 import { Spinner } from 'lib/elements/Spinner'
-import { IconBold, IconItalic, IconLink } from 'lib/elements/icons'
+import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+
+const lowlight = createLowlight(common)
+lowlight.register('plaintext', () => ({ contains: [] }))
+
+function SupportCodeBlockComponent({ node }: NodeViewProps): JSX.Element {
+    const code = node.textContent
+
+    return (
+        <NodeViewWrapper className="SupportEditor__code-block">
+            <div className="SupportEditor__code-block-copy" contentEditable={false}>
+                <Button
+                    size="xsmall"
+                    icon={<IconCopy />}
+                    onClick={() => void copyToClipboard(code, 'code')}
+                    tooltip="Copy code"
+                />
+            </div>
+            <pre>
+                <code>
+                    <NodeViewContent />
+                </code>
+            </pre>
+        </NodeViewWrapper>
+    )
+}
+
+const SupportCodeBlockExtension = CodeBlockLowlight.extend({
+    addNodeView() {
+        return ReactNodeViewRenderer(SupportCodeBlockComponent)
+    },
+    addKeyboardShortcuts() {
+        return {
+            ...this.parent?.(),
+            Tab: ({ editor }) => {
+                if (editor.isActive('codeBlock')) {
+                    editor.commands.insertContent('\t')
+                    return true
+                }
+                return false
+            },
+            'Shift-Tab': ({ editor }) => {
+                if (editor.isActive('codeBlock')) {
+                    return true
+                }
+                return false
+            },
+        }
+    },
+}).configure({ lowlight })
+
+type LinkShortcutExtensionOptions = {
+    onLinkShortcut: () => void
+}
+
+const LinkShortcutExtension = Extension.create<LinkShortcutExtensionOptions>({
+    name: 'link-shortcut',
+
+    addOptions() {
+        return {
+            onLinkShortcut: () => {},
+        }
+    },
+
+    addKeyboardShortcuts() {
+        return {
+            'Mod-Shift-u': () => {
+                this.options.onLinkShortcut()
+                return true
+            },
+        }
+    },
+})
 
 // Underline icon (not in @hanzo/icons)
 function IconUnderline(): JSX.Element {
@@ -87,8 +171,57 @@ const LinkExtension = Link.configure({
     },
 })
 
+/** True when the whole string is a single http(s) URL with no whitespace. */
+function isSingleHttpUrl(text: string): boolean {
+    if (!text || /\s/.test(text)) {
+        return false
+    }
+    try {
+        const { protocol } = new URL(text)
+        return protocol === 'http:' || protocol === 'https:'
+    } catch {
+        return false
+    }
+}
+
+// TipTap's built-in linkOnPaste only wraps the selection when linkify matches the
+// clipboard text exactly, which it fails to do for some long URLs, leaving the
+// selection overwritten with plain text instead of hyperlinked. Handle the
+// "URL pasted over a selection" case ourselves so URL length doesn't matter.
+const LinkOnPasteExtension = Extension.create({
+    name: 'supportLinkOnPaste',
+    priority: 150, // Run before the Link extension's own paste handler
+    addProseMirrorPlugins() {
+        const linkType = this.editor.schema.marks.link
+        return [
+            new Plugin({
+                key: new PluginKey('supportLinkOnPaste'),
+                props: {
+                    handlePaste: (view, event) => {
+                        const { selection } = view.state
+                        // Only wrap a non-empty text selection. Node selections (e.g. an image)
+                        // can't hold inline marks, so let those pastes fall through untouched.
+                        if (!(selection instanceof TextSelection) || selection.empty || !linkType) {
+                            return false
+                        }
+                        const text = event.clipboardData?.getData('text/plain').trim()
+                        if (!text || !isSingleHttpUrl(text)) {
+                            return false
+                        }
+                        view.dispatch(
+                            view.state.tr.addMark(selection.from, selection.to, linkType.create({ href: text }))
+                        )
+                        return true
+                    },
+                },
+            }),
+        ]
+    },
+})
+
 export const SUPPORT_EXTENSIONS = [
     MentionsExtension,
+    EmojiSuggestionExtension,
     RichContentNodeMention,
     ExtensionDocument,
     StarterKit.configure({
@@ -99,7 +232,7 @@ export const SUPPORT_EXTENSIONS = [
         // bold: enabled - Cmd+B
         bulletList: false,
         // code: enabled - inline code (Cmd+E) - just visual styling, not executable
-        codeBlock: false,
+        codeBlock: false, // We use our own SupportCodeBlockExtension
         // hardBreak: enabled - allows Shift+Enter for line breaks within paragraphs
         // dropcursor: enabled - shows visual indicator when dragging content
         // gapcursor: enabled - helps position cursor near images/blocks
@@ -113,6 +246,8 @@ export const SUPPORT_EXTENSIONS = [
     Underline, // Cmd+U
     ImageExtension,
     LinkExtension,
+    LinkOnPasteExtension,
+    SupportCodeBlockExtension,
 ]
 
 // Plain text serialization options for generateText() - used by Comment.tsx
@@ -228,6 +363,12 @@ function serializeNode(node: JSONContent): string {
         case RichContentNodeType.Mention:
             return `@member:${node.attrs?.id}`
 
+        case 'codeBlock': {
+            const language = node.attrs?.language || ''
+            const code = (node.content || []).map((n) => n.text || '').join('')
+            return `\`\`\`${language}\n${code}\n\`\`\`\n\n`
+        }
+
         default:
             // For unknown nodes, try to serialize children
             if (node.content) {
@@ -256,11 +397,25 @@ export function SupportEditor({
     const [linkUrl, setLinkUrl] = useState('')
     const { objectStorageAvailable } = useValues(preflightLogic)
     const { emojiUsed } = useActions(emojiUsageLogic)
+
+    const openLinkPopover = useCallback(() => {
+        const existingHref = ttEditor?.getAttributes('link').href
+        setLinkUrl(existingHref || '')
+        setLinkPopoverOpen(true)
+    }, [ttEditor])
+
+    // Use ref to hold the link shortcut callback so it can access latest state
+    const linkShortcutCallbackRef = useRef<() => void>(() => {})
+    const handleLinkShortcut = useCallback(() => {
+        linkShortcutCallbackRef.current()
+    }, [])
+
     const editor = useRichContentEditor({
         extensions: [
             ...SUPPORT_EXTENSIONS,
             Placeholder.configure({ placeholder }),
             CommandEnterExtension.configure({ onPressCmdEnter }),
+            LinkShortcutExtension.configure({ onLinkShortcut: handleLinkShortcut }),
         ],
         disabled,
         initialContent: initialContent ?? DEFAULT_INITIAL_CONTENT,
@@ -296,6 +451,11 @@ export function SupportEditor({
         },
     })
 
+    // Update the link shortcut callback ref when ttEditor changes
+    useEffect(() => {
+        linkShortcutCallbackRef.current = openLinkPopover
+    }, [openLinkPopover])
+
     // Notify parent of upload state changes
     useEffect(() => {
         onUploadingChange?.(uploading)
@@ -323,6 +483,32 @@ export function SupportEditor({
     const handleDrop = (): void => {
         setIsDragging(false)
     }
+
+    const handlePaste = useCallback(
+        (e: ClipboardEvent): void => {
+            if (!objectStorageAvailable || !e.clipboardData) {
+                return
+            }
+            const imageItem = Array.from(e.clipboardData.items).find((item) => item.type.startsWith('image/'))
+            if (imageItem) {
+                const imageFile = imageItem.getAsFile()
+                if (imageFile) {
+                    e.preventDefault()
+                    setFilesToUpload([imageFile])
+                }
+            }
+        },
+        [objectStorageAvailable, setFilesToUpload]
+    )
+
+    useEffect(() => {
+        const el = dropRef.current
+        if (!el) {
+            return
+        }
+        el.addEventListener('paste', handlePaste)
+        return () => el.removeEventListener('paste', handlePaste)
+    }, [handlePaste])
 
     return (
         <div
@@ -372,6 +558,13 @@ export function SupportEditor({
                         onClick={() => ttEditor?.chain().focus().toggleCode().run()}
                         icon={<IconCode />}
                         tooltip="Inline code (Cmd+E)"
+                    />
+                    <Button
+                        size="small"
+                        active={ttEditor?.isActive('codeBlock')}
+                        onClick={() => ttEditor?.chain().focus().toggleCodeBlock().run()}
+                        icon={<IconTerminal />}
+                        tooltip="Code block (Cmd+Alt+C)"
                     />
                     <Popover
                         visible={linkPopoverOpen}
@@ -434,14 +627,9 @@ export function SupportEditor({
                         <Button
                             size="small"
                             active={ttEditor?.isActive('link')}
-                            onClick={() => {
-                                // Pre-fill with existing link URL if editing
-                                const existingHref = ttEditor?.getAttributes('link').href
-                                setLinkUrl(existingHref || '')
-                                setLinkPopoverOpen(true)
-                            }}
+                            onClick={openLinkPopover}
                             icon={<IconLink />}
-                            tooltip="Add link (Cmd+K)"
+                            tooltip="Add link (Cmd+Shift+U)"
                         />
                     </Popover>
                     <div className="w-px h-4 bg-border mx-1" />
@@ -475,7 +663,7 @@ export function SupportEditor({
                     />
                     <EmojiPickerPopover
                         key="emoj-picker"
-                        data-attr="rich-text-editor-emoji-popover"
+                        data-attr="lemon-rich-text-editor-emoji-popover"
                         onSelect={(emoji: string) => {
                             if (ttEditor) {
                                 ttEditor.commands.insertContent(emoji)

@@ -14,7 +14,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Identify or track events against customers in Customer.io",
     icon_url="/static/services/customerio.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 let action := inputs.action
 let name := event.event
@@ -221,12 +221,12 @@ if (res.status >= 400) {
 
 
 class TemplateCustomerioMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/customerio-plugin"
+    plugin_url = "https://github.com/Insights/customerio-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("host", "track.customer.io")

@@ -1,6 +1,6 @@
 import { Modal } from '@hanzo/elements'
 
-import { capitalizeFirstLetter } from 'lib/utils'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
 
 import { BillingPlanType, BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 

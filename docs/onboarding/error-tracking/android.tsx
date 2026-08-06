@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getAndroidSteps as getAndroidStepsPA } from '../product-analytics/android'
 import { StepDefinition } from '../steps'
@@ -16,9 +16,9 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 <CalloutBox type="fyi" title="Client-side configuration only">
                     <Markdown>
                         {dedent`
-                            This configuration is client-side only. Support for remote configuration 
-                            in the [error tracking settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture) 
-                            will be added in a future release.
+                            Support for remote configuration 
+                            in the [error tracking settings](https://app.hanzo.ai/settings/project-error-tracking#exception-autocapture) 
+                            requires SDK version 3.32.0 or higher.
                         `}
                     </Markdown>
                 </CalloutBox>
@@ -36,7 +36,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             code: dedent`
                               import com.insights.android.InsightsAndroidConfig
                               val config = InsightsAndroidConfig(
-                                  apiKey = INSIGHTS_API_KEY,
+                                  apiKey = INSIGHTS_PROJECT_TOKEN,
                                   host = INSIGHTS_HOST
                               ).apply {
                                   ...
@@ -55,7 +55,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 <CalloutBox type="fyi" title="Planned features">
                     <Markdown>
                         {dedent`
-                            We currently don't support [source code context](/docs/error-tracking/stack-traces.md) associated with an exception.
+                            We currently don't support [source code context](https://hanzo.ai/docs/error-tracking/stack-traces) associated with an exception.
 
                             These features will be added in a future release.
                         `}
@@ -107,18 +107,13 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        exceptionAutocaptureStep,
-        manualCaptureStep,
-        verifyStep,
-    ]
+    return [...installSteps, exceptionAutocaptureStep, manualCaptureStep, verifyStep]
 }
 
 export const AndroidInstallation = createInstallation(getAndroidSteps)

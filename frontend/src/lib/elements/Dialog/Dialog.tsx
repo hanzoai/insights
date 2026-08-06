@@ -1,13 +1,25 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
+import insights from 'insights-js'
 import { ReactNode, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Root, createRoot } from 'react-dom/client'
 
+import { ApiError } from 'lib/api-error'
 import { Button, ButtonProps } from 'lib/elements/Button'
 import { Modal, ModalProps } from 'lib/elements/Modal'
+import { uuid } from 'lib/utils/dom'
 
-import { DialogFormPropsType, dialogLogic } from './dialogLogic'
+import { DialogFormPropsType, lemonDialogLogic } from './lemonDialogLogic'
+
+// A rejected await-submit keeps the dialog open so the user can retry. Capture only genuinely
+// unexpected failures — not 4xx validation errors the user is expected to cause (e.g. a reserved
+// name), which would otherwise flood the exception tracker on every validation failure.
+function captureUnexpectedSubmitError(error: unknown): void {
+    if (!(error instanceof ApiError) || (error.status ?? 500) >= 500) {
+        insights.captureException(error)
+    }
+}
 
 export type FormDialogProps = DialogFormPropsType &
     Omit<DialogProps, 'primaryButton' | 'secondaryButton' | 'content'> & {
@@ -108,6 +120,12 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>(function Dialog(
                         try {
                             // eslint-disable-next-line @typescript-eslint/await-thenable
                             await button.onClick?.(e)
+                        } catch (error) {
+                            // The submit handler is responsible for surfacing the error to the user
+                            // (e.g. via a toast). Keep the dialog open so they can correct and retry,
+                            // and capture genuine bugs so they aren't silently swallowed.
+                            captureUnexpectedSubmitError(error)
+                            return
                         } finally {
                             setIsLoading(false)
                             isLoadingCallback?.(false)
@@ -167,9 +185,12 @@ export const FormDialog = ({
     errors,
     content,
     primaryButtonProps,
+    dialogKey,
+    showErrorsOnTouch,
     ...props
 }: FormDialogProps): JSX.Element => {
-    const logic = dialogLogic({ errors })
+    const logicProps = { errors, dialogKey, showErrorsOnTouch }
+    const logic = lemonDialogLogic(logicProps)
     const { form, isFormValid, formValidationErrors } = useValues(logic)
     const { setFormValues } = useActions(logic)
     const [isLoading, setIsLoading] = useState(false)
@@ -205,13 +226,22 @@ export const FormDialog = ({
 
     return (
         <Form
-            logic={dialogLogic}
+            logic={lemonDialogLogic}
+            props={logicProps}
             formKey="form"
             onKeyDown={
                 props.shouldAwaitSubmit
                     ? async (e: React.KeyboardEvent<HTMLFormElement>): Promise<void> => {
                           if (e.key === 'Enter' && primaryButton?.htmlType === 'submit' && isFormValid) {
-                              await onSubmit(form)
+                              try {
+                                  await onSubmit(form)
+                              } catch (error) {
+                                  // Mirror the button path: keep the dialog open on failure so the
+                                  // user can correct and retry, and capture instead of leaking an
+                                  // unhandled rejection.
+                                  captureUnexpectedSubmitError(error)
+                                  return
+                              }
                               ref?.current?.closeDialog()
                           }
                       }
@@ -261,5 +291,7 @@ Dialog.open = (props: DialogProps) => {
 
 Dialog.openForm = (props: FormDialogProps) => {
     const { root, onDestroy } = createAndInsertRoot()
-    root.render(<FormDialog {...props} onAfterClose={onDestroy} />)
+    // Each dialog gets a unique key so nested dialogs don't share the same
+    // lemonDialogLogic instance and corrupt each other's form state.
+    root.render(<FormDialog {...props} dialogKey={uuid()} onAfterClose={onDestroy} />)
 }

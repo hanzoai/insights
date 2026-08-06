@@ -16,6 +16,7 @@ from insights.insightsql.database.schema.exchange_rate import convert_currency_c
 from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.placeholders import replace_placeholders
 
+from insights.datastore.query_tagging import tag_contains_user_insightsql
 from insights.constants import NON_TIME_SERIES_DISPLAY_TYPES
 from insights.insightsql_queries.insights.data_warehouse_mixin import DataWarehouseInsightQueryMixin
 from insights.insightsql_queries.insights.trends.utils import is_groups_math
@@ -74,11 +75,20 @@ class AggregationOperations(DataWarehouseInsightQueryMixin):
 
     def select_aggregation(self) -> ast.Expr:
         if self.series.math == "insightsql" and self.series.math_insightsql is not None:
+            tag_contains_user_insightsql()
+            parsed = parse_expr(self.series.math_insightsql)
+            # An outer alias on the user expression (`avg(x) as foo`) is shadowed by the
+            # `AS total` wrap added downstream. If we leave it in place, Datastore's
+            # new analyzer expands `ORDER BY total` into a copy of the SELECT expression
+            # with the inner alias stripped, producing two AST-different `AS total`
+            # projections and a MULTIPLE_EXPRESSIONS_FOR_ALIAS rejection.
+            if isinstance(parsed, ast.Alias):
+                parsed = parsed.expr
             # Wrap in ifNull to handle empty result sets - formulas can't handle NULL values
             return ast.Call(
                 name="ifNull",
                 args=[
-                    ast.Call(name="toFloat", args=[parse_expr(self.series.math_insightsql)]),
+                    ast.Call(name="toFloat", args=[parsed]),
                     ast.Constant(value=0),
                 ],
             )
