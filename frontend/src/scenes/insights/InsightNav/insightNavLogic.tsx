@@ -536,7 +536,7 @@ export const insightNavLogic = kea<insightNavLogicType>([
 
                 if (featureFlags[FEATURE_FLAGS.HOG] || activeView === InsightType.HOG) {
                     tabs.push({
-                        label: <>Script 🦔</>,
+                        label: <>Script ◆</>,
                         type: InsightType.HOG,
                         dataAttr: 'insight-script-tab',
                     })

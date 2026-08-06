@@ -2,7 +2,7 @@
     "id": "019b6fc6-ad68-0000-2c21-f701205f3f5c",
     "name": "Trial started → upgrade nudge",
     "description": "Use this workflow to convert trial users based on intent, not deadlines.\n\nInstead of blasting everyone with “your trial ends soon” emails, this workflow waits for signs that a user is actually using the product, then nudges them to upgrade, with a few well-timed reminders and a clear stop.",
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/Elon_53dbe00271.jpg",
+    "image_url": null,
     "scope": "global",
     "created_at": "2025-12-30T15:00:50.152615Z",
     "created_by": {
@@ -132,7 +132,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -168,7 +172,9 @@
                                     "rows": [
                                         {
                                             "id": "hRyXdBXlFw",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -192,7 +198,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -421,7 +430,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -457,7 +470,9 @@
                                     "rows": [
                                         {
                                             "id": "raAlZJvm2u",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -481,7 +496,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -710,7 +728,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -760,7 +782,9 @@
                                     "rows": [
                                         {
                                             "id": "rEPj_az68m",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -784,7 +808,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""

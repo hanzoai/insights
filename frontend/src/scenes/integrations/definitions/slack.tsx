@@ -33,7 +33,6 @@ export const Slack = defineIntegration(
         kind: 'slack',
         name: 'Slack',
         logo: ICONS.slack,
-        banner: 'https://res.cloudinary.com/dmukukwp6/image/upload/slack_app_update_docs_f0c917f70a',
         subtitle: 'Bring Insights into Slack — from scheduled reports to an AI agent that ships code',
         description:
             'Tag @Insights in any Slack thread to draft pull requests, ship code changes, ask data questions, and run SQL — all without leaving Slack. You also get insights, dashboards, and alerts delivered straight to your channels.',

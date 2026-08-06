@@ -128,7 +128,7 @@ const EXAMPLES: Record<
                 },
             },
             {
-                message: '[CDP-PROCESSED-EVENTS] 🦔 [InsightsFunction] Filter took longer than expected',
+                message: '[CDP-PROCESSED-EVENTS] ◆ [InsightsFunction] Filter took longer than expected',
                 level: 'warn',
                 attributes: {
                     insights_function_id: '123',

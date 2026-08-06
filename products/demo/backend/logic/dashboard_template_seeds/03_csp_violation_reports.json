@@ -208,6 +208,6 @@
         }
     ],
     "variables": [],
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/Group_9520_67a2ff6557.png",
+    "image_url": "https://example.com/image.png",
     "scope": "global"
 }

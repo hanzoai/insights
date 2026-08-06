@@ -103,7 +103,9 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "columns": [
                                                 {
                                                     "id": "IT_J8vPWTn",
@@ -413,7 +415,10 @@
                                                     "repeat": "no-repeat",
                                                     "size": "custom",
                                                     "position": "center",
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "padding": "0px",
                                                 "anchor": "",
@@ -535,8 +540,14 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": ["function_email"],
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/Template_cover_5_012dbe0114.jpg",
-    "tags": ["milestone", "email", "messaging"],
+    "billable_action_types": [
+        "function_email"
+    ],
+    "image_url": null,
+    "tags": [
+        "milestone",
+        "email",
+        "messaging"
+    ],
     "scope": "global"
 }

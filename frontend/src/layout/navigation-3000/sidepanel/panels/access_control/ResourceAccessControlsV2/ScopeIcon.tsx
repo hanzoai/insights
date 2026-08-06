@@ -15,7 +15,7 @@ import {
     IconLive,
     IconListTree,
     IconLlmAnalytics,
-    IconMCP,
+    IconPlug as IconMCP,
     IconLlmPromptManagement,
     IconMessage,
     IconNotebook,

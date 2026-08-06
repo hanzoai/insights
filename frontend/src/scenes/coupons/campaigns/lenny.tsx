@@ -10,16 +10,6 @@ const LennyHero: React.FC = () => {
         <div className="flex items-center justify-center gap-3 mb-4">
             <Logo size="xl" />
             <IconX className="size-8 opacity-60" />
-            <img
-                src="https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/lenny_logo_4f52d3bb15.webp"
-                alt="Lenny's Newsletter"
-                className="h-12 w-12 rounded-lg"
-            />
-            <img
-                src="https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/lenny_ca568a9fda.png"
-                alt="Lenny's Newsletter"
-                className="h-6"
-            />
         </div>
     )
 }

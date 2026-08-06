@@ -27,6 +27,9 @@
             // use-debounce@9.0.3 only exposes types under `node`/`browser` conditions,
             // which TS bundler resolution doesn't activate. Point at the .d.ts directly.
             "use-debounce": ["./frontend/node_modules/use-debounce/dist/index"],
+            // The SDK fork publishes its rrweb types as a sibling package rather than a subpath.
+            "insights-js/rrweb-types": ["./frontend/node_modules/@hanzo/insights-rrweb-types"],
+            "insights-js/rrweb": ["./frontend/node_modules/@hanzo/insights-rrweb"],
             "*": ["./frontend/*"]
         },
         // https://www.sitepoint.com/react-with-typescript-best-practices/

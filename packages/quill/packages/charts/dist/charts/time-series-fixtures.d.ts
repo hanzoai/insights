@@ -1,0 +1,15 @@
+import { Series } from '../core/types';
+export declare const DAYS: string[];
+export declare const SERIES: Series[];
+export declare const HOURLY_LABELS: string[];
+export declare const HOURLY_SERIES: Series[];
+export declare const DAILY_LABELS: string[];
+export declare const DAILY_SERIES: Series[];
+export declare const MONTHLY_LABELS: string[];
+export declare const MONTHLY_SERIES: Series[];
+export declare const NUMERIC_SERIES: Series[];
+export declare const PERCENTAGE_SERIES: Series[];
+export declare const PERCENTAGE_SCALED_SERIES: Series[];
+export declare const CURRENCY_SERIES: Series[];
+export declare const DURATION_SERIES: Series[];
+export declare const DURATION_MS_SERIES: Series[];

@@ -16,7 +16,6 @@ import { Spinner } from 'lib/elements/Spinner'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import BlankWorkflowImage from 'public/blank-dashboard-mascot.png'
 
 import type { InsightsFlowTemplate } from '../insightsflows/types'
 import { newWorkflowLogic } from '../newWorkflowLogic'
@@ -55,7 +54,7 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
                     template={{
                         name: 'Empty workflow',
                         description: 'Create a blank workflow from scratch',
-                        image_url: BlankWorkflowImage,
+                        image_url: null,
                         scope: 'team',
                         tags: [],
                     }}

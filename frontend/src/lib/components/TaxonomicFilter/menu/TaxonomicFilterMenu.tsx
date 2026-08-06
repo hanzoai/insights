@@ -41,7 +41,6 @@ import {
 
 import type { SeriesRename } from 'lib/components/EntityFilterInfo'
 import { formatPropertyLabel } from 'lib/components/PropertyFilters/utils'
-import { Button } from 'lib/elements/Button'
 import { isDefinitionStale } from 'lib/utils/definitions'
 
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'

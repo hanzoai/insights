@@ -463,7 +463,7 @@ describe('mcpGatewayLogic', () => {
 
     it('surfaces access update failures and clears the loading state', async () => {
         const server = gatewayServer({ is_team_enabled: true })
-        const toast = jest.spyOn(toast, 'error')
+        const toastSpy = jest.spyOn(toast, 'error')
         mockServersPartialUpdate.mockRejectedValue(apiError('You cannot update this server.'))
         logic.actions.loadServersSuccess([server])
 
@@ -471,7 +471,7 @@ describe('mcpGatewayLogic', () => {
             logic.actions.toggleServerEnabled(server.id, false)
         }).toFinishAllListeners()
 
-        expect(toast).toHaveBeenCalledWith('You cannot update this server.')
+        expect(toastSpy).toHaveBeenCalledWith('You cannot update this server.')
         expect(logic.values.serverEnabledLoadingIds).toEqual(new Set())
         expect(logic.values.servers[0].is_team_enabled).toBe(true)
     })

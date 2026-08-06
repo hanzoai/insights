@@ -203,7 +203,7 @@ export function WebAnalyticsRecapScene(): JSX.Element {
     if (!recap) {
         return (
             <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-4">
-                <span className="text-2xl">🦔</span>
+                <span className="text-2xl">◆</span>
                 <h2>Your recap isn't ready yet</h2>
                 <p className="text-secondary max-w-md">
                     We couldn't build a recap for this project right now. Once there's some traffic, check back here.

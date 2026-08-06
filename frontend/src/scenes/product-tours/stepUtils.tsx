@@ -91,7 +91,7 @@ export function getExplainerStepContent(): JSONContent {
             },
             {
                 type: 'paragraph',
-                content: [{ type: 'text', text: 'Here are some tips to get you going 🦔' }],
+                content: [{ type: 'text', text: 'Here are some tips to get you going ◆' }],
             },
             {
                 type: 'bulletList',

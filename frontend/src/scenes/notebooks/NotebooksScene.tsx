@@ -59,7 +59,7 @@ export function NotebooksScene(): JSX.Element {
                                                     urls.canvas(),
                                                     {},
                                                     {
-                                                        '🦔': base64Encode(text),
+                                                        '◆': base64Encode(text),
                                                     }
                                                 )
                                             })

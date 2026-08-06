@@ -1,0 +1,13 @@
+import { AlertDialog as AlertDialogPrimitive } from '@base-ui/react/alert-dialog';
+import * as React from 'react';
+declare function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props): React.ReactElement;
+declare function AlertDialogTrigger({ ...props }: AlertDialogPrimitive.Trigger.Props): React.ReactElement;
+declare function AlertDialogPortal({ ...props }: AlertDialogPrimitive.Portal.Props): React.ReactElement;
+declare function AlertDialogClose({ ...props }: AlertDialogPrimitive.Close.Props): React.ReactElement;
+declare function AlertDialogOverlay({ className, ...props }: AlertDialogPrimitive.Backdrop.Props): React.ReactElement;
+declare function AlertDialogContent({ className, children, ...props }: AlertDialogPrimitive.Popup.Props): React.ReactElement;
+declare function AlertDialogTitle({ className, ...props }: AlertDialogPrimitive.Title.Props): React.ReactElement;
+declare function AlertDialogDescription({ className, ...props }: AlertDialogPrimitive.Description.Props): React.ReactElement;
+declare function AlertDialogHeader({ className, ...props }: React.ComponentProps<'div'>): React.ReactElement;
+declare function AlertDialogFooter({ className, ...props }: React.ComponentProps<'div'>): React.ReactElement;
+export { AlertDialog, AlertDialogClose, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertDialogPortal, AlertDialogTitle, AlertDialogTrigger, };

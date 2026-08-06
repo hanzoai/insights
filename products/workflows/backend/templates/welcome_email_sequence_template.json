@@ -2,7 +2,7 @@
     "id": "019b6f44-f9a3-0000-c4a7-b8050d25d690",
     "name": "Welcome Email Sequence",
     "description": "This is a simple workflow you can use when a user signs up for your product, and you want to send an email introducing the product, followed up by emails checking in on how your users are doing.",
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/f_webp,h_270,w_480,c_fill,g_auto,q_auto/growth_think_905cd0fa65?_a=AXAH4nI0",
+    "image_url": null,
     "scope": "global",
     "created_at": "2025-12-30T12:39:09.987406Z",
     "created_by": {
@@ -31,14 +31,33 @@
             ],
             "source": "events",
             "actions": [],
-            "bytecode": ["_H", 1, 32, "user signed up", 32, "event", 1, 1, 11]
+            "bytecode": [
+                "_H",
+                1,
+                32,
+                "user signed up",
+                32,
+                "event",
+                1,
+                1,
+                11
+            ]
         }
     },
     "trigger_masking": {
         "ttl": null,
         "threshold": null,
         "hash": "{person.id}",
-        "bytecode": ["_H", 1, 32, "id", 32, "person", 1, 2]
+        "bytecode": [
+            "_H",
+            1,
+            32,
+            "id",
+            32,
+            "person",
+            1,
+            2
+        ]
     },
     "conversion": {
         "filters": [],
@@ -91,7 +110,17 @@
                     ],
                     "source": "events",
                     "actions": [],
-                    "bytecode": ["_H", 1, 32, "user signed up", 32, "event", 1, 1, 11]
+                    "bytecode": [
+                        "_H",
+                        1,
+                        32,
+                        "user signed up",
+                        32,
+                        "event",
+                        1,
+                        1,
+                        11
+                    ]
                 }
             },
             "output_variable": null
@@ -125,7 +154,9 @@
                                     "rows": [
                                         {
                                             "id": "Bl8ZJpyRQR",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -149,7 +180,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -327,7 +361,9 @@
                                     "rows": [
                                         {
                                             "id": "i_RJrsPJ_N",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -351,7 +387,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""

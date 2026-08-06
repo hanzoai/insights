@@ -5,7 +5,7 @@ import { legalDocumentsLogic } from '../../../scenes/legalDocumentsLogic'
 import { Placeholder } from '../../base/Placeholder'
 import { SignatureBlock } from '../../base/SignatureBlock'
 
-const CLOUDINARY_BASE = 'https://res.cloudinary.com/dmukukwp6/image/upload'
+const CLOUDINARY_BASE = 'https://example.com/image.png'
 const FAIRYTALE_IMG = {
     map: `${CLOUDINARY_BASE}/hanzo.ai/src/images/dpa/map.png`,
     sword: `${CLOUDINARY_BASE}/hanzo.ai/src/images/dpa/sword.png`,

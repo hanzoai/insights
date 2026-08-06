@@ -51,16 +51,6 @@ export function HowToReadTooltip(): JSX.Element {
                                 <span>Not statistically significant</span>
                             </div>
                         </div>
-                        <img
-                            src={
-                                isDarkModeOn
-                                    ? 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/sig_light_2_4f2a9648ec.png'
-                                    : 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/sign_dark_2_ce4e9018ad.png'
-                            }
-                            width={350}
-                            className="rounded border object-contain mb-3"
-                            alt="Significance indicators example"
-                        />
                         <p className="mb-3">
                             The bars show{' '}
                             {statsMethod === ExperimentStatsMethod.Bayesian
@@ -68,20 +58,6 @@ export function HowToReadTooltip(): JSX.Element {
                                 : '95% confidence intervals'}
                             . When an interval doesn't cross the 0% line, the result is significant.
                         </p>
-                        <img
-                            src={
-                                isDarkModeOn
-                                    ? statsMethod === ExperimentStatsMethod.Bayesian
-                                        ? 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/interval_bayesian_light_cc0eab723d.png'
-                                        : 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/interval_frequentist_light_de8a266b6f.png'
-                                    : statsMethod === ExperimentStatsMethod.Bayesian
-                                      ? 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/interval_b_1d344c42f6.png'
-                                      : 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/interval_f_9b8ae12438.png'
-                            }
-                            width={350}
-                            className="rounded border object-contain mb-2"
-                            alt="How to read metrics"
-                        />
                         <p className="mb-0">
                             Insights uses its own statistical methods. Results may differ from other tools.
                         </p>

@@ -4,8 +4,6 @@ import { Logo } from 'lib/brand'
 
 import { CampaignConfig } from './types'
 
-const EVERY_LOGO_BLACK = 'https://res.cloudinary.com/dmukukwp6/image/upload/every_black_d4ba0c3a4d.svg'
-const EVERY_LOGO_WHITE = 'https://res.cloudinary.com/dmukukwp6/image/upload/every_white_438ee9fa45.svg'
 // TODO: Keep this date in sync with EveryGoodieBagStrategy.INVOICE_CUTOFF_DATE in billing.
 const EVERY_CREDIT_ELIGIBILITY_CUTOFF = 'July 14, 2026'
 
@@ -14,8 +12,6 @@ const EveryHero: React.FC = () => {
         <div className="flex items-center justify-center gap-3 mb-4">
             <Logo size="xl" />
             <IconX className="size-8 opacity-60" />
-            <img src={EVERY_LOGO_BLACK} alt="EVERY" className="h-8 w-auto [filter:brightness(0)] dark:hidden" />
-            <img src={EVERY_LOGO_WHITE} alt="EVERY" className="hidden h-8 w-auto dark:block" />
         </div>
     )
 }

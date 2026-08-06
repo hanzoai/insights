@@ -73,11 +73,11 @@ describe('mcpGatewaySceneLogic', () => {
         async (queryParameter, toastType, message) => {
             mountLogics()
             await expectLogic(gatewayLogic).toFinishAllListeners()
-            const toast = jest.spyOn(toast, toastType)
+            const toastSpy = jest.spyOn(toast, toastType)
 
             router.actions.push(`${urls.mcpGateway()}?keep=value&${queryParameter}=true#panel=open`)
 
-            expect(toast).toHaveBeenCalledWith(message)
+            expect(toastSpy).toHaveBeenCalledWith(message)
             expect(router.values.location.pathname).toBe('/project/997/mcp-servers')
             expect(router.values.searchParams).toEqual({ keep: 'value' })
             expect(router.values.hashParams).toEqual({ panel: 'open' })

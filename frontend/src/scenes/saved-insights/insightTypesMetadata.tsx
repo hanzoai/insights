@@ -6,7 +6,7 @@ import {
     IconCursor,
     IconFlask,
     IconGraph,
-    IconInsightsQL,
+    IconHogQL as IconInsightsQL,
     IconLineGraph,
     IconLive,
     IconLlmAnalytics,

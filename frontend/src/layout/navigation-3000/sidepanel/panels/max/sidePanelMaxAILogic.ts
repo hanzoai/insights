@@ -203,7 +203,7 @@ export const sidePanelMaxAILogic = kea<sidePanelMaxAILogicType>([
                         // Don't retry more than twice
                         if (values.retryAttempts >= 3) {
                             actions.appendAssistantMessage(
-                                "😮‍💨 I'm still experiencing rate limits. Please leave me alone for a few minutes. Scroll down and hit `End chat`, then try me again after I've had a nap. 🦔"
+                                "😮‍💨 I'm still experiencing rate limits. Please leave me alone for a few minutes. Scroll down and hit `End chat`, then try me again after I've had a nap. ◆"
                             )
                             actions.setSearchingThinking(false)
                             return null
