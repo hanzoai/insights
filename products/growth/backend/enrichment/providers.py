@@ -1,10 +1,8 @@
-"""Enrichment provider interface.
+"""Enrichment provider interface and the Harmonic implementation.
 
-The interface keeps the enrichment core provider-agnostic. This fork ships no
-firmographic provider: the only implementation looked companies up through an
-enterprise-licensed client that is not carried here, so a domain lookup has no
-source and `enrich_organization` has no caller from the signup workflow. The seam
-stays because the Clay bridge and the scoring path are built on it.
+The interface keeps the enrichment core provider-agnostic; Harmonic is the first
+provider. AsyncHarmonicClient (ee/billing/salesforce_enrichment) is reused as-is —
+tach already allows products.growth to import ee.
 """
 
 import abc
@@ -12,6 +10,9 @@ import dataclasses
 from typing import Any, Optional
 
 from products.growth.backend.enrichment.fields import EnrichmentFields
+from products.growth.backend.enrichment.transform import transform_harmonic_company
+
+from ee.billing.salesforce_enrichment.harmonic_client import AsyncHarmonicClient
 
 
 @dataclasses.dataclass
@@ -38,3 +39,12 @@ class EnrichmentProvider(abc.ABC):
         Raises on operational failure (network, provider outage) so the caller can retry
         and alert, rather than conflating an outage with a genuine not-found.
         """
+
+
+class HarmonicEnrichmentProvider(EnrichmentProvider):
+    name = "harmonic"
+
+    async def enrich_by_domain(self, domain: str) -> ProviderLookup:
+        async with AsyncHarmonicClient() as client:
+            company = await client.enrich_company_by_domain_strict(domain)
+        return ProviderLookup(fields=transform_harmonic_company(company), raw_payload=company)
