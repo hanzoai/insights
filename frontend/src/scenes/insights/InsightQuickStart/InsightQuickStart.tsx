@@ -19,49 +19,9 @@ import { InsightType } from '~/types'
 
 // Preview images/GIFs for each insight type
 // Static images shown by default, GIFs play on hover
-const INSIGHT_PREVIEWS: Partial<Record<InsightType, { static: string; animated: string }>> = {
-    [InsightType.TRENDS]: {
-        static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_10_T18_10_03_522_Z_ab651a8800.png',
-        animated:
-            'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_10_T18_10_27_131_Z_0177e963f0.gif',
-    },
-    [InsightType.FUNNELS]: {
-        static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_10_T18_14_07_880_Z_7ee2fb90ed.png',
-        animated:
-            'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_10_T18_14_34_264_Z_3f0f703d98.gif',
-    },
-    [InsightType.RETENTION]: {
-        static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_10_T18_20_00_462_Z_fabdd95b9e.png',
-        animated:
-            'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_10_T18_20_19_530_Z_c6f565345c.gif',
-    },
-    [InsightType.PATHS]: {
-        static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_10_T18_23_20_097_Z_30f1fda15b.png',
-        animated:
-            'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_10_T18_23_22_284_Z_752ff95327.gif',
-    },
-    [InsightType.STICKINESS]: {
-        static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_10_T18_25_59_328_Z_531c3fd175.png',
-        animated:
-            'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_10_T18_26_03_428_Z_fc19cf49aa.gif',
-    },
-    [InsightType.LIFECYCLE]: {
-        static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_10_T18_27_42_832_Z_c0b26ea9c3.png',
-        animated:
-            'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_10_T18_27_44_710_Z_57de365180.gif',
-    },
-    [InsightType.SQL]: {
-        static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_10_T18_30_00_396_Z_133afc4f54.png',
-        animated:
-            'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_10_T18_30_06_034_Z_56a680a474.gif',
-    },
-}
+const INSIGHT_PREVIEWS: Partial<Record<InsightType, { static: string; animated: string }>> = {}
 
-const AI_PREVIEW = {
-    static: 'https://res.cloudinary.com/dmukukwp6/image/upload/w_500,c_limit,q_auto,f_auto/pasted_image_2026_03_20_T21_23_11_734_Z_907eebad83.png',
-    animated:
-        'https://res.cloudinary.com/dmukukwp6/image/upload/pasted_image_2026_03_20_T21_23_13_996_Z_90dc0c74e9.gif',
-}
+const AI_PREVIEW: { static: string; animated: string } | undefined = undefined
 
 export const scene: SceneExport = {
     component: InsightQuickStart,

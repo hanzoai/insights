@@ -317,8 +317,8 @@ describe('collaboration text utilities', () => {
         })
 
         it('treats offsets as UTF-16 code units', () => {
-            // 🦔 is two code units, so the trailing char sits at offset 2
-            expect(tryApplyTextChanges('🦔a', [{ start: 2, end: 3, text: 'b' }])).toEqual('🦔b')
+            // 💜 is two code units, so the trailing char sits at offset 2
+            expect(tryApplyTextChanges('💜a', [{ start: 2, end: 3, text: 'b' }])).toEqual('💜b')
         })
 
         it.each([
@@ -345,7 +345,7 @@ describe('collaboration text utilities', () => {
         it.each([
             ['', 0],
             ['hello', 1427272415],
-            ['# Title\n\nSome text 🦔', 2055511376],
+            ['# Title\n\nSome text 💜', 2055511376],
             ['naïve café ✨', 591606638],
         ])('matches the backend CRC for %j', (text, expected) => {
             expect(markdownCrc(text as string)).toEqual(expected)

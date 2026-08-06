@@ -30,7 +30,11 @@
             ],
             "source": "events",
             "actions": [],
-            "bytecode": ["_H", 1, 29],
+            "bytecode": [
+                "_H",
+                1,
+                29
+            ],
             "filter_test_accounts": false
         }
     },
@@ -93,7 +97,11 @@
                     ],
                     "source": "events",
                     "actions": [],
-                    "bytecode": ["_H", 1, 29],
+                    "bytecode": [
+                        "_H",
+                        1,
+                        29
+                    ],
                     "filter_test_accounts": false
                 }
             },
@@ -127,7 +135,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -227,8 +239,14 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": ["function"],
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/Template_cover_1_9c2359b4aa.jpg",
-    "tags": ["slack", "failure alert", "incident management"],
+    "billable_action_types": [
+        "function"
+    ],
+    "image_url": null,
+    "tags": [
+        "slack",
+        "failure alert",
+        "incident management"
+    ],
     "scope": "global"
 }

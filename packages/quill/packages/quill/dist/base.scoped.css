@@ -1,0 +1,8 @@
+/* @hanzo/quill — scoped base reset.
+ * Same as base.css but only applies inside [data-quill] boundaries.
+ */
+@layer base {
+    [data-quill], [data-quill] * {
+        @apply border-border outline-ring/50;
+    }
+}

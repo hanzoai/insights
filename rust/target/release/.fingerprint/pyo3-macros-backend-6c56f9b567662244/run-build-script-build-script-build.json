@@ -1,0 +1,1 @@
+{"rustc":12019306335353385202,"features":"","declared_features":"","target":0,"profile":0,"path":0,"deps":[[7446959865346612610,"build_script_build",false,16699054653763359404]],"local":[{"Precalculated":"0.28.3"}],"rustflags":["-C","link-args=-Wl,-rpath,/opt/rocm/core-7.13/lib,-rpath,/opt/rocm/lib"],"config":0,"compile_kind":0}

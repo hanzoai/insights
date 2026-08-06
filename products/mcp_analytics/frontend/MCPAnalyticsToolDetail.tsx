@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconArrowLeft, IconArrowRight, IconCopy } from '@hanzo/icons'
-import { Button, Divider, Modal, Skeleton, Tooltip } from '@hanzo/elements'
+import { Button, Divider, Modal, Tooltip } from '@hanzo/elements'
 import {
     type ChartTheme,
     type Series,

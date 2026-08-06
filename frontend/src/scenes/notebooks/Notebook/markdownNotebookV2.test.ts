@@ -133,7 +133,7 @@ describe('markdownNotebookV2', () => {
                 {
                     type: NotebookNodeType.Image,
                     attrs: {
-                        src: 'https://res.cloudinary.com/demo/image/upload/insights.png',
+                        src: 'https://example.com/image.png',
                         alt: 'Insights engineering',
                     },
                 },
@@ -148,7 +148,7 @@ A **bold** paragraph.
 
 <Recording hideFilters id="018b4205-f670-7fa8-928a-040abaaf596d" title="Session replay" />
 
-![Insights engineering](https://res.cloudinary.com/demo/image/upload/insights.png)`)
+![Insights engineering](https://example.com/image.png)`)
     })
 
     it('preserves explicitly open legacy widget filters', () => {

@@ -259,8 +259,6 @@ function piiMaskingMenuItem(
 
 function MoreMenu(): JSX.Element {
     const {
-        mascotModeEnabled,
-        mascotModeAvailable,
         theme,
         insights,
         piiMaskingEnabled,
@@ -268,12 +266,10 @@ function MoreMenu(): JSX.Element {
         piiWarning,
     } = useValues(toolbarLogic)
     const {
-        setMascotModeEnabled,
         toggleTheme,
         togglePiiMasking,
         setPiiMaskingColor,
         startGracefulExit,
-        openMascotOptions,
     } = useActions(toolbarLogic)
     const { isAuthenticated } = useValues(toolbarConfigLogic)
     const { logout } = useActions(toolbarConfigLogic)
@@ -303,25 +299,6 @@ function MoreMenu(): JSX.Element {
                 fallbackPlacements={['bottom-end']}
                 items={
                     [
-                        {
-                            icon: <>🦔</>,
-                            label: mascotModeEnabled ? 'Disable mascot mode' : 'Mascot mode',
-                            disabledReason: !mascotModeAvailable
-                                ? "Mascot mode is disabled. Mascot mode uses `new Function` directives to render WebGL, and that requires 'unsafe-eval' in your Content Security Policy's script-src directive"
-                                : undefined,
-                            onClick: () => {
-                                setMascotModeEnabled(!mascotModeEnabled)
-                            },
-                        },
-                        mascotModeEnabled && mascotModeAvailable
-                            ? {
-                                  icon: <IconFlare />,
-                                  label: 'Mascot options',
-                                  onClick: () => {
-                                      openMascotOptions()
-                                  },
-                              }
-                            : undefined,
                         {
                             icon: currentlyLightMode ? <IconNight /> : <IconDay />,
                             label: `Switch to ${currentlyLightMode ? 'dark' : 'light'} mode`,
@@ -445,7 +422,7 @@ export function ToolbarInfoMenu(): JSX.Element | null {
 
 export function Toolbar(): JSX.Element | null {
     const ref = useRef<HTMLDivElement | null>(null)
-    const { minimized, position, isDragging, mascotMode, isEmbeddedInApp, isExiting, isLoading } =
+    const { minimized, position, isDragging, isEmbeddedInApp, isExiting, isLoading } =
         useValues(toolbarLogic)
     const { setVisibleMenu, toggleMinimized, onMouseOrTouchDown, setElement, setIsBlurred, completeGracefulExit } =
         useActions(toolbarLogic)
@@ -514,7 +491,6 @@ export function Toolbar(): JSX.Element | null {
                 ref={ref}
                 className={clsx('Toolbar', {
                     'Toolbar--minimized': minimized,
-                    'Toolbar--mascot-mode': mascotMode,
                     'Toolbar--dragging': isDragging,
                     'Toolbar--extra-buttons-1':
                         1 + (showProductTours ? 1 : 0) + (showFieldNotes ? 1 : 0) + (showSurveys ? 1 : 0) === 1,

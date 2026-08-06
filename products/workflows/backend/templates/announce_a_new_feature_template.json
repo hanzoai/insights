@@ -2,7 +2,7 @@
     "id": "019b6fc4-282c-0000-50c9-aef7a834102d",
     "name": "Announce a new feature",
     "description": "Use this workflow when you release a new feature and want to notify only the users it actually applies to. This avoids blanket announcements and keeps feature messaging relevant. This pattern is especially useful when features are gated by:\n\n- plan or account type\n- role or permissions\n- rollout conditions\n- product usage level\n\nWe've left the event points empty so you can add your own events, but feel free to use the suggested email copy we've added.",
-    "image_url": "https://res.cloudinary.com/dmukukwp6/image/upload/insights_mobile_sessions_1aa340c741.jpg",
+    "image_url": null,
     "scope": "global",
     "created_at": "2025-12-30T14:58:04.972674Z",
     "created_by": {
@@ -31,7 +31,17 @@
             ],
             "source": "events",
             "actions": [],
-            "bytecode": ["_H", 1, 32, "$feature_view", 32, "event", 1, 1, 11]
+            "bytecode": [
+                "_H",
+                1,
+                32,
+                "$feature_view",
+                32,
+                "event",
+                1,
+                1,
+                11
+            ]
         }
     },
     "trigger_masking": null,
@@ -129,7 +139,17 @@
                     ],
                     "source": "events",
                     "actions": [],
-                    "bytecode": ["_H", 1, 32, "$feature_view", 32, "event", 1, 1, 11]
+                    "bytecode": [
+                        "_H",
+                        1,
+                        32,
+                        "$feature_view",
+                        32,
+                        "event",
+                        1,
+                        1,
+                        11
+                    ]
                 }
             },
             "output_variable": null
@@ -148,7 +168,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -184,7 +208,9 @@
                                     "rows": [
                                         {
                                             "id": "GYHnX-Y3UN",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -208,7 +234,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -437,7 +466,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -473,7 +506,9 @@
                                     "rows": [
                                         {
                                             "id": "COIHSVdxrl",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -497,7 +532,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -740,7 +778,11 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": ["_H", 1, 29]
+                            "bytecode": [
+                                "_H",
+                                1,
+                                29
+                            ]
                         }
                     }
                 ]
@@ -776,7 +818,9 @@
                                     "rows": [
                                         {
                                             "id": "Vr7NvY0HaA",
-                                            "cells": [1],
+                                            "cells": [
+                                                1
+                                            ],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -800,7 +844,10 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": ["50%", "50%"]
+                                                    "customPosition": [
+                                                        "50%",
+                                                        "50%"
+                                                    ]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""

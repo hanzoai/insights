@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconCheckCircle, IconExternal, IconHourglass, IconPause, IconXCircle } from '@hanzo/icons'
+import { IconCheckCircle, IconExternal, IconHourglass, IconPause, IconX as IconXCircle } from '@hanzo/icons'
 import { Button, Skeleton, Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
