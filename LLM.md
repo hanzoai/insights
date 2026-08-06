@@ -1,37 +1,39 @@
-# Hanzo Insights — served Django monolith (RESTORED) + native Go observability
+# Hanzo Insights — the converged tree (upstream fa1a9a60 + the live line)
 
 ## Status
 
-The served **Django** monolith is **RESTORED** and published to
-`ghcr.io/hanzoai/insights` for the `insights.hanzo.ai` deploy (K8s pulls ghcr).
-`manage.py` + `bin/docker*` serve again (real management + server/worker/migrate
-startup), IAM-OIDC login is wired, and the surface is Hanzo-branded. It runs on
-Hanzo SQL (`insights-sql`), Hanzo KV (`KV_URL`, RESP wire — never `REDIS_URL`;
-`data_stores.py` normalizes kv://→RESP at the driver boundary), the
-`hanzoai/stream` Kafka-shim over NATS, and Hanzo Datastore (Datastore).
+`main` is the grand convergence: the live production lineage merged with
+`converge/final` (the 2026-08-01 upstream rebase + ee deletion + red fixes),
+the ONE sessions model (`sessions_v1/v2/v3` collapsed; resolver tags
+`events_to_sessions` + `replay_to_sessions`; no `sessionTableVersion`
+anywhere), `names/retire-version-suffix`, `schema/event-fact`, and upstream
+master `fa1a9a60` (2026-08-06) re-derived through `bin/debrand`. The tag for
+this state is v1.53.0.
 
-Alongside it, the native-Go `hanzoai/cloud` binary serves the observability API:
+ONE ingest door: `POST https://api.hanzo.ai/v1/event` (cloud binary). Every
+SDK wire path (`/e`, `/batch`, `/capture`, `/i/v0/e`, `/v1/e`) on
+insights/analytics/sentry hosts rewrites to it at the ingress. Cloud also
+serves the Sentry wires (`/v1/event/:project/envelope|store`), the tag script
+(`GET /v1/event.js`), the sentry read surface (`/v1/sentry/*` for
+sentry.hanzo.ai's embedded console), and projects error + gen_ai span signals
+into o11y (sentry lens + LLM lens; kill switches CLOUD_SENTRY_LENS /
+CLOUD_LLM_LENS). o11y.hanzo.ai emits its SDK events to insights.hanzo.ai —
+no separate ingest route exists or is needed.
 
-- **`/v1/evals/*`** — datasets, dataset-items, evaluators, score-configs,
-  scores, **traces**, runs. Org-scoped by the IAM `owner` claim (one tenancy).
-  LIVE: `GET https://api.hanzo.ai/v1/evals/health` → `200`; unauth
-  `/v1/evals/datasets` → `403` (org-gated). Source: `hanzoai/cloud/clients/eval`.
-- **`/v1/analytics/*`** — the LLM/product analytics lens (overview, timeseries,
-  realtime, top/*, llm/*). Read-only per-org Datastore warehouse. Consumed by
-  `console2` `AnalyticsModule`. Backend `cloud/clients/analytics` — see GAP below.
+Branding: zero upstream art. Workflow template cards, choosers, auth
+wallpaper, previews and fixtures carry no posthog cloudinary; the CSP does
+not allow that host; the mascot easter egg is deleted with its sprite
+package; `insights-js` resolves to `@hanzo/insights` for every consumer —
+the react wrapper's peer included, via `common/sdk-peer` (a workspace package
+carrying the peer's name). The wrapper package's own export names
+(`PostHog*`) are aliased at import sites listed in `bin/debrand`'s allowlist.
 
-LLM telemetry (traces / observations / scores) is written by the **AI gateway**
-(`hanzoai/ai` → `object/observability.go`) into the Datastore warehouse
-(`hanzo.traces`, `hanzo.observations`, `hanzo.scores`) and read
-back through `/v1/evals` + `/v1/analytics`.
-
-The Django `manage.py` and every serving entrypoint (`bin/docker`,
-`bin/docker-server`, `bin/docker-worker`, `bin/docker-worker-celery`,
-`bin/docker-migrate`) run for real again (restored from pre-`175eace7b`). The
-retirement of the served surface (`175eace7b`) is reversed; the ghcr publisher
-(`.github/workflows/container-images-cd.yml`, deleted in `657c5fbcef`) is
-restored so CI builds the monolith `Dockerfile` and pushes to
-`ghcr.io/hanzoai/insights`.
+Known debt, deliberate: ~85 type-level errors under `tsgo --noEmit`
+(size-prop enums, generated deep-relative imports in a few products,
+stories typing) — the production esbuild bundle and the Django image build
+are the shipping gates and both are green; the tsc debt is tracked for a
+follow-up pass. The prune's closure keeps 21 upstream products the new core
+imports; they are inert (not in INSTALLED_APPS).
 
 ## Django → Go observability map (both planes live)
 

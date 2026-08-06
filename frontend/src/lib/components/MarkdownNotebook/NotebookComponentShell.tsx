@@ -25,7 +25,7 @@ import {
     IconTrash,
 } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
-import { InsightsErrorBoundary } from '@hanzo/react'
+import { PostHogErrorBoundary as InsightsErrorBoundary } from '@hanzo/react'
 
 import { ComponentPanelContext } from './componentPanelContext'
 import {
