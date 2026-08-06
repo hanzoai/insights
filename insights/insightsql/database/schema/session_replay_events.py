@@ -29,7 +29,6 @@ from insights.insightsql.database.schema.sessions import (
 from insights.insightsql.errors import ResolutionError
 
 
-
 def join_replay_table_to_sessions_table(
     join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: SelectQuery
 ) -> JoinExpr:

@@ -8,7 +8,6 @@ from insights.insightsql.database.schema.sessions import (
     get_lazy_session_table_properties,
     get_lazy_session_table_values,
 )
-from insights.insightsql.modifiers import create_default_modifiers_for_team
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import action
@@ -41,7 +40,6 @@ class SessionViewSet(
             span.set_attribute("property_key", key)
             span.set_attribute("has_search_term", search_term is not None)
 
-            modifiers = create_default_modifiers_for_team(team)
             result = get_lazy_session_table_values(key, search_term=search_term, team=team)
 
             span.set_attribute("result_count", len(result))
