@@ -8,7 +8,11 @@ import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
 import { QueryBasedInsightModel } from '~/types'
 
-import { SubscriptionBaseProps, urlForSubscriptions } from '../Subscriptions/utils'
+import {
+    SubscriptionBaseProps,
+    urlForSubscriptions,
+} from 'products/subscriptions/frontend/components/Subscriptions/utils'
+
 import { SceneDataAttrKeyProps } from './utils'
 
 interface SceneSubscribeButtonProps extends SubscriptionBaseProps, SceneDataAttrKeyProps {
@@ -20,6 +24,7 @@ export function SceneSubscribeButton({
     dataAttrKey,
     insight,
     dashboardId,
+    disabledReasons,
 }: SceneSubscribeButtonProps): JSX.Element | null {
     const { push } = useActions(router)
 
@@ -32,8 +37,11 @@ export function SceneSubscribeButton({
     return (
         <ButtonPrimitive
             menuItem
-            onClick={() => push(urlForSubscriptions({ insightShortId: insight?.short_id, dashboardId }))}
+            onClick={() => {
+                push(urlForSubscriptions({ insightShortId: insight?.short_id, dashboardId }))
+            }}
             data-attr={`${dataAttrKey}-subscribe-dropdown-menu-item`}
+            disabledReasons={disabledReasons}
         >
             <IconBell />
             Subscribe

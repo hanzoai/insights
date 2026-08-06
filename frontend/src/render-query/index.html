@@ -22,11 +22,15 @@
                 div.style.color = '#fef6f6'
                 div.style.background = '#920c0c'
                 div.style.padding = '5px 10px'
-                div.innerHTML = 'You are using a really old browser. Please upgrade to fully enjoy Hanzo Insights!'
+                div.innerHTML = 'You are using a really old browser. Please upgrade to fully enjoy Insights!'
                 document.body.prepend(div)
             }
             if (!window.process) {
-                window.process = { cwd: function () { return '' } }
+                window.process = {
+                    cwd: function () {
+                        return ''
+                    },
+                }
             }
         </script>
         <div id="root"></div>

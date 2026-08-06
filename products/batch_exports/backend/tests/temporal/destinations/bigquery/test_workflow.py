@@ -16,14 +16,14 @@ from temporalio.common import RetryPolicy
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from insights.batch_exports.service import (
+from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export, afetch_batch_export_runs
+
+from products.batch_exports.backend.service import (
     BackfillDetails,
     BatchExportModel,
     BatchExportSchema,
     BigQueryBatchExportInputs,
 )
-from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export, afetch_batch_export_runs
-
 from products.batch_exports.backend.temporal.batch_exports import finish_batch_export_run, start_batch_export_run
 from products.batch_exports.backend.temporal.destinations.bigquery_batch_export import (
     BigQueryBatchExportWorkflow,
@@ -258,9 +258,9 @@ async def test_bigquery_export_workflow_without_events(
 
 @pytest.mark.parametrize(
     "data_interval_start",
-    # This is set to 24 hours before the `data_interval_end` to ensure that the data created is outside the batch
-    # interval.
-    [TEST_TIME - dt.timedelta(hours=24)],
+    # Use 72 hours so that with 10 randomly sampled persons the probability of none landing
+    # more than 12 hours before the end is negligible ((12/72)^10 ≈ 1 in 60 million).
+    [TEST_TIME - dt.timedelta(hours=72)],
     indirect=True,
 )
 @pytest.mark.parametrize("interval", ["hour"], indirect=True)

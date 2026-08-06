@@ -1,10 +1,10 @@
-<img src="https://github.com/Hanzo Insights/livestream/assets/391319/d4a4964d-4b19-4605-b268-157366817863" width="280" height="280" />
+<img src="https://github.com/Insights/livestream/assets/391319/d4a4964d-4b19-4605-b268-157366817863" width="280" height="280" />
 
-# RealTime Insights 3000
+# RealTime Script 3000
 
 The start of something fresh.
 
-Hog 3000 powers live event stream on Insights: https://insights.hanzo.ai/project/0/activity/live
+Script 3000 powers live event stream on Insights: https://us.hanzo.ai/project/0/activity/live
 
 ## Endpoints
 
@@ -16,6 +16,9 @@ Hog 3000 powers live event stream on Insights: https://insights.hanzo.ai/project
   - `eventType` - event type name,
   - `distinctId` - only events with a given distinctId,
   - `geo` - return only coordinates guessed based on IP,
+  - `property` - repeatable; each value is `key=value` for exact-match
+    filtering on top-level event properties. Multiple params with the same
+    key OR together, different keys AND together.
 - `/debug` - dummy html for SSE testing,
 - `/debug/sse/` - backend for `/debug` generating a server side events,
 - `/metrics` - exposes metrics in Prometheus format

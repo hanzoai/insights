@@ -565,7 +565,7 @@
         "$exception_type": "ConnectionError",
         "$geoip_disable": true,
         "$python_runtime": "CPython",
-        "$exception_personURL": "http://localhost:8010/project/hi_ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7/person/a7a336a0-32a4",
+        "$exception_personURL": "http://localhost:8010/project/phc_ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7/person/a7a336a0-32a4",
         "$lib": "insights-python",
         "$exception_types": ["ConnectionRefusedError", "ConnectionError"],
         "$exception_values": [

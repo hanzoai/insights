@@ -64,10 +64,10 @@ services:
             - ./docker/datastore/entrypoint.sh:/entrypoint.sh
             - ./insights/idl:/idl
             - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./docker/datastore/config.xml:/etc/clickhouse-server/config.xml
-            - ./docker/datastore/config.d/data_node.xml:/etc/clickhouse-server/config.d/data_node.xml
-            - ./docker/datastore/users-dev.xml:/etc/clickhouse-server/users.xml
-            - ./docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/data_node.xml:/etc/datastore-server/config.d/data_node.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
             - ./insights/user_scripts:/var/lib/datastore/user_scripts
         extra_hosts:
             - 'host.docker.internal:host-gateway'
@@ -83,10 +83,10 @@ services:
             - ./docker/datastore/entrypoint.sh:/entrypoint.sh
             - ./insights/idl:/idl
             - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./docker/datastore/config.xml:/etc/clickhouse-server/config.xml
-            - ./docker/datastore/config.d/coordinator.xml:/etc/clickhouse-server/config.d/coordinator.xml
-            - ./docker/datastore/users-dev.xml:/etc/clickhouse-server/users.xml
-            - ./docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/coordinator.xml:/etc/datastore-server/config.d/coordinator.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
             - ./insights/user_scripts:/var/lib/datastore/user_scripts
         ports:
             - '9001:9001'

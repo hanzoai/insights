@@ -1,16 +1,27 @@
 import dagster
 
 from insights.dags import sessions, sessions_v1_cleanup
+from insights.dags.backfill_internal_test_users_cohort import backfill_internal_test_users_cohort_job
+from insights.dags.backfill_persons_on_events_mode import backfill_persons_on_events_mode_job
+from insights.dags.backfill_user_auth_sessions import backfill_user_auth_sessions_job
 from insights.dags.sessions import (
     experimental_sessions_backfill_job,
     experimental_sessions_v3_backfill,
     sessions_backfill_job,
 )
 
-from . import resources
+from . import loggers, resources
 
 defs = dagster.Definitions(
     assets=[sessions.sessions_v3_backfill, sessions.sessions_v3_backfill_replay, experimental_sessions_v3_backfill],
-    jobs=[sessions_backfill_job, sessions_v1_cleanup.sessions_v1_cleanup_job, experimental_sessions_backfill_job],
+    jobs=[
+        sessions_backfill_job,
+        sessions_v1_cleanup.sessions_v1_cleanup_job,
+        experimental_sessions_backfill_job,
+        backfill_internal_test_users_cohort_job,
+        backfill_persons_on_events_mode_job,
+        backfill_user_auth_sessions_job,
+    ],
+    loggers=loggers,
     resources=resources,
 )

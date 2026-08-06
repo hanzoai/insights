@@ -1,5 +1,5 @@
 {
-    "api_key": "hi_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
+    "api_key": "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
     "event": "$autocapture",
     "timestamp": "2025-07-01T00:00:00Z",
     "distinct_id": "019833ae-4913-7179-b6bc-019570abb1c9",
@@ -55,7 +55,7 @@
             "fps": 3,
             "quality": "0.4"
         },
-        "token": "hi_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
+        "token": "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
         "$session_entry_referring_domain": "$direct",
         "$console_log_recording_enabled_server_side": true,
         "$pathname": "/testing",

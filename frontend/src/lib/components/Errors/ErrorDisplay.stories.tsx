@@ -1,13 +1,18 @@
 import { Meta } from '@storybook/react'
 
-import { ErrorDisplay } from 'lib/components/Errors/ErrorDisplay'
+import { ErrorDisplay, ErrorDisplayProps } from 'lib/components/Errors/ErrorDisplay'
 
 import { mswDecorator } from '~/mocks/browser'
 import { EventType } from '~/types'
 
-const meta: Meta<typeof ErrorDisplay> = {
+const meta: Meta<ErrorDisplayProps> = {
     title: 'Components/Errors/Error Display',
     component: ErrorDisplay,
+    parameters: {
+        testOptions: {
+            viewport: { width: 720, height: 720 },
+        },
+    },
     decorators: [
         mswDecorator({
             get: {
@@ -59,8 +64,8 @@ function errorProperties(properties: Record<string, any>): EventType['properties
         $os_version: '10.0',
         $browser: 'Chrome',
         $device_type: 'Desktop',
-        $current_url: 'https://insights.hanzo.ai/home',
-        $host: 'insights.hanzo.ai',
+        $current_url: 'https://app.hanzo.ai/home',
+        $host: 'app.hanzo.ai',
         $pathname: '/home',
         $browser_version: 113,
         $browser_language: 'es-ES',
@@ -81,10 +86,10 @@ function errorProperties(properties: Record<string, any>): EventType['properties
             project: '00000000-0000-0000-1847-88f0ffa23444',
             organization: '00000000-0000-0000-a050-5d4557279956',
             customer: 'the-customer',
-            instance: 'https://insights.hanzo.ai',
+            instance: 'https://app.hanzo.ai',
         },
         $exception_fingerprint: 'Error',
-        $exception_personURL: 'https://insights.hanzo.ai/person/the-person-id',
+        $exception_personURL: 'https://app.hanzo.ai/person/the-person-id',
         $sentry_event_id: 'id-from-the-sentry-integration',
         $sentry_exception: {
             values: [
@@ -101,7 +106,7 @@ function errorProperties(properties: Record<string, any>): EventType['properties
                         frames: [
                             {
                                 column: 0,
-                                source: 'https://insights.hanzo.ai/home',
+                                source: 'https://app.hanzo.ai/home',
                                 resolved_name: '?',
                                 in_app: true,
                                 line: 0,
@@ -114,8 +119,8 @@ function errorProperties(properties: Record<string, any>): EventType['properties
         $sentry_exception_message: 'ResizeObserver loop limit exceeded',
         $sentry_exception_type: 'Error',
         $sentry_tags: {
-            'Insights Person URL': 'https://insights.hanzo.ai/person/the-person-id',
-            'Insights Recording URL': 'https://insights.hanzo.ai/replay/the-session-id?t=866',
+            'Insights Person URL': 'https://app.hanzo.ai/person/the-person-id',
+            'Insights Recording URL': 'https://app.hanzo.ai/replay/the-session-id?t=866',
         },
         $sentry_url:
             'https://sentry.io/organizations/insights/issues/?project=the-sentry-project-id&query=the-sentry-id',
@@ -228,19 +233,19 @@ export function ChainedErrorStack(): JSX.Element {
                     },
                     {
                         module: '__main__',
-                        type: 'CustomException',
-                        value: 'This is a custom exception',
+                        type: 'CustomException \n aaa',
+                        value: "This is a custom exception that's very very long and would look very very bad because having something this long is not cool \n but gladly there's a newline",
                         stacktrace: {
                             type: 'resolved',
                             frames: [
                                 {
-                                    source: '/Users/neilkakkar/Project/insights-python/example2.py',
+                                    source: '/Users/maxthemascot/Project/insights-python/example2.py',
                                     resolved_name: '<module>',
                                     line: 37,
                                     in_app: true,
                                 },
                                 {
-                                    source: '/Users/neilkakkar/Project/insights-python/example2.py',
+                                    source: '/Users/maxthemascot/Project/insights-python/example2.py',
                                     resolved_name: 'will_raise',
                                     line: 35,
                                     in_app: true,
@@ -312,7 +317,7 @@ export function LegacyEventProperties(): JSX.Element {
             eventProperties={errorProperties({
                 $exception_message: 'ResizeObserver loop limit exceeded',
                 $exception_type: 'Error',
-                $exception_personURL: 'https://insights.hanzo.ai/person/the-person-id',
+                $exception_personURL: 'https://app.hanzo.ai/person/the-person-id',
                 $exception_synthetic: true,
             })}
             eventId="error"

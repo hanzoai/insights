@@ -1,64 +1,42 @@
 import re
 import json
 from collections.abc import Callable
-from typing import Any, Literal, Optional, cast
+from typing import Any, Optional, cast
 
 from django.conf import settings
 
 import dagster
-import requests
 import structlog
 
 from insights.dags.common import JobOwners
 from insights.dags.common.resources import redis
+from insights.egress.github.transport import github_request
 from insights.exceptions_capture import capture_exception
+
+from products.growth.backend.constants import SDK_CACHE_EXPIRY, SDK_TYPES, SdkTypes, github_sdk_versions_key
+
+# Re-exported for backward compatibility with callers that still import from here.
+__all__ = ["SDK_CACHE_EXPIRY", "SDK_TYPES", "SdkTypes", "github_sdk_versions_key"]
 
 logger = structlog.get_logger(__name__)
 
-CACHE_EXPIRY = 60 * 60 * 24 * 7  # 7 days
 MAX_REQUEST_RETRIES = 3
 INITIAL_RETRIES_BACKOFF = 1  # in seconds
-
-
-SdkTypes = Literal[
-    "web",
-    "insights-ios",
-    "insights-android",
-    "insights-node",
-    "hanzo-insights",
-    "insights-php",
-    "insights-ruby",
-    "insights-go",
-    "insights-flutter",
-    "insights-react-native",
-    "insights-dotnet",
-    "insights-elixir",
-]
-SDK_TYPES: list[SdkTypes] = [
-    "web",
-    "insights-ios",
-    "insights-android",
-    "insights-node",
-    "hanzo-insights",
-    "insights-php",
-    "insights-ruby",
-    "insights-go",
-    "insights-flutter",
-    "insights-react-native",
-    "insights-dotnet",
-    "insights-elixir",
-]
+UNPREFIXED_SEMVER_TAG = re.compile(r"\d+\.\d+(?:\.\d+)*$")
 
 
 # Using lambda here to be able to define this before defining the functions
 SDK_FETCH_FUNCTIONS: dict[SdkTypes, Callable[[], dict[str, Any]]] = {
     "web": lambda: fetch_web_sdk_data(),
-    "hanzo-insights": lambda: fetch_python_sdk_data(),
+    "insights-python": lambda: fetch_python_sdk_data(),
     "insights-node": lambda: fetch_node_sdk_data(),
     "insights-react-native": lambda: fetch_react_native_sdk_data(),
     "insights-flutter": lambda: fetch_flutter_sdk_data(),
+    "insights-kmp": lambda: fetch_kmp_sdk_data(),
     "insights-ios": lambda: fetch_ios_sdk_data(),
     "insights-android": lambda: fetch_android_sdk_data(),
+    "insights-java": lambda: fetch_java_sdk_data(),
+    "insights-server": lambda: fetch_java_server_sdk_data(),
     "insights-go": lambda: fetch_go_sdk_data(),
     "insights-php": lambda: fetch_php_sdk_data(),
     "insights-ruby": lambda: fetch_ruby_sdk_data(),
@@ -73,6 +51,11 @@ def fetch_github_data_for_sdk(lib_name: str) -> Optional[dict[str, Any]]:
     if fetch_fn:
         return fetch_fn()
     return None
+
+
+def prefixed_or_unprefixed_semver_tags(*prefixes: str) -> list[str | re.Pattern]:
+    """Match semver-style release tags with optional string prefixes."""
+    return [*prefixes, UNPREFIXED_SEMVER_TAG]
 
 
 def fetch_sdk_data_from_releases(repo: str, tag_prefixes: list[str | re.Pattern] | None = None) -> dict[str, Any]:
@@ -143,7 +126,7 @@ def fetch_releases_from_repo(repo: str, skip_cache: bool = False) -> list[Any]:
         skip_cache = True
 
     if repo in local_releases_cache and not skip_cache:
-        logger.info(f"[SDK Doctor] Returning cached releases for {repo}")
+        logger.info(f"[SDK Health] Returning cached releases for {repo}")
         return local_releases_cache[repo]
 
     releases = []
@@ -152,21 +135,22 @@ def fetch_releases_from_repo(repo: str, skip_cache: bool = False) -> list[Any]:
     while page <= 10:  # Github only permits us to list the first 1000 items, so that's 100 items * 10 pages
         try:
             url = f"https://api.github.com/repos/{repo}/releases?per_page=100&page={page}"
-            logger.info(f"[SDK Doctor] Fetching releases from {url}")
+            logger.info(f"[SDK Health] Fetching releases from {url}")
 
-            response = requests.get(url, timeout=10)
+            # Identity-blind, unauthenticated call — records volume telemetry, no installation budget.
+            response = github_request("GET", url, source="growth", timeout=10)
 
             if not response.ok:
-                logger.error(f"[SDK Doctor] Failed to fetch releases for {repo}", status_code=response.status_code)
+                logger.error(f"[SDK Health] Failed to fetch releases for {repo}", status_code=response.status_code)
                 break
 
             releases_json = response.json()
             if releases_json is None:
-                logger.error(f"[SDK Doctor] Expected list of releases, got empty response", repo=repo)
+                logger.error(f"[SDK Health] Expected list of releases, got empty response", repo=repo)
                 break
 
             if not isinstance(releases_json, list):
-                logger.error(f"[SDK Doctor] Expected list of releases, got {type(releases_json)}", repo=repo)
+                logger.error(f"[SDK Health] Expected list of releases, got {type(releases_json)}", repo=repo)
                 break
 
             if len(releases_json) == 0:
@@ -175,7 +159,7 @@ def fetch_releases_from_repo(repo: str, skip_cache: bool = False) -> list[Any]:
             releases.extend(releases_json)
             page += 1
         except Exception as e:
-            logger.exception(f"[SDK Doctor] Failed to fetch releases for {repo}", repo=repo)
+            logger.exception(f"[SDK Health] Failed to fetch releases for {repo}", repo=repo)
             capture_exception(e, additional_properties={"repo": repo, "page": page, "url": url})
             break
 
@@ -189,12 +173,12 @@ def fetch_web_sdk_data() -> dict[str, Any]:
 
     # Newer versions in `insights-js` use a monorepo approach where we prefix tags with `insights-js@`
     # while older versions before the monorepo used simple `v`-prefixed tags
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-js", tag_prefixes=["insights-js@", "v"])
+    return fetch_sdk_data_from_releases("Insights/insights-js", tag_prefixes=["insights-js@", "v"])
 
 
 def fetch_python_sdk_data() -> dict[str, Any]:
     """Fetch Python SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/hanzo-insights", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Insights/insights-python", tag_prefixes=prefixed_or_unprefixed_semver_tags("v"))
 
 
 def fetch_node_sdk_data() -> dict[str, Any]:
@@ -202,8 +186,8 @@ def fetch_node_sdk_data() -> dict[str, Any]:
 
     # `insights-node` was originally developed on the `insights-js-lite` repo, but was later moved to the `insights-js` monorepo
     # We fetch the latest version from both repos and join them together.
-    insights_js = fetch_sdk_data_from_releases("Hanzo Insights/insights-js", tag_prefixes=["insights-node@"])
-    insights_js_lite = fetch_sdk_data_from_releases("Hanzo Insights/insights-js-lite", tag_prefixes=["insights-node-v"])
+    insights_js = fetch_sdk_data_from_releases("Insights/insights-js", tag_prefixes=["insights-node@"])
+    insights_js_lite = fetch_sdk_data_from_releases("Insights/insights-js-lite", tag_prefixes=["insights-node-v"])
 
     # Shouldn't happen, but just in case
     if not insights_js:
@@ -224,8 +208,8 @@ def fetch_react_native_sdk_data() -> dict[str, Any]:
 
     # `insights-react-native` was originally developed on the `insights-js-lite` repo, but was later moved to the `insights-js` monorepo
     # We fetch the latest version from both repos and join them together.
-    insights_js = fetch_sdk_data_from_releases("Hanzo Insights/insights-js", tag_prefixes=["insights-react-native@"])
-    insights_js_lite = fetch_sdk_data_from_releases("Hanzo Insights/insights-js-lite", tag_prefixes=["insights-react-native-v"])
+    insights_js = fetch_sdk_data_from_releases("Insights/insights-js", tag_prefixes=["insights-react-native@"])
+    insights_js_lite = fetch_sdk_data_from_releases("Insights/insights-js-lite", tag_prefixes=["insights-react-native-v"])
 
     # Shouldn't happen, but just in case
     if not insights_js:
@@ -244,42 +228,59 @@ def fetch_react_native_sdk_data() -> dict[str, Any]:
 def fetch_flutter_sdk_data() -> dict[str, Any]:
     """Fetch Flutter SDK data from GitHub releases API"""
     # First attempt to cut the trailing `v` prefix and then just fallback to the full tag
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-flutter", tag_prefixes=["v", ""])
+    return fetch_sdk_data_from_releases("Insights/insights-flutter", tag_prefixes=["v", ""])
 
 
 def fetch_ios_sdk_data() -> dict[str, Any]:
     """Fetch iOS SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-ios")
+    return fetch_sdk_data_from_releases("Insights/insights-ios")
+
+
+def fetch_kmp_sdk_data() -> dict[str, Any]:
+    """Fetch Kotlin Multiplatform SDK data from GitHub releases API"""
+    return fetch_sdk_data_from_releases("Insights/insights-kmp", tag_prefixes=["v"])
 
 
 def fetch_android_sdk_data() -> dict[str, Any]:
     """Fetch Android SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-android", tag_prefixes=["android-v", re.compile(r"[0-9]")])
+    return fetch_sdk_data_from_releases(
+        "Insights/insights-android", tag_prefixes=prefixed_or_unprefixed_semver_tags("android-v")
+    )
+
+
+def fetch_java_sdk_data() -> dict[str, Any]:
+    """Fetch releases for the archived Java SDK."""
+    return fetch_sdk_data_from_releases("Insights/insights-java", tag_prefixes=[UNPREFIXED_SEMVER_TAG])
+
+
+def fetch_java_server_sdk_data() -> dict[str, Any]:
+    """Fetch Java server SDK data from its dedicated tags in the Android monorepo."""
+    return fetch_sdk_data_from_releases("Insights/insights-android", tag_prefixes=["server-v"])
 
 
 def fetch_go_sdk_data() -> dict[str, Any]:
     """Fetch Go SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-go", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Insights/insights-go", tag_prefixes=prefixed_or_unprefixed_semver_tags("v"))
 
 
 def fetch_php_sdk_data() -> dict[str, Any]:
     """Fetch PHP SDK data from History.md with release dates"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-php")
+    return fetch_sdk_data_from_releases("Insights/insights-php")
 
 
 def fetch_ruby_sdk_data() -> dict[str, Any]:
     """Fetch Ruby SDK data from CHANGELOG.md with release dates"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-ruby")
+    return fetch_sdk_data_from_releases("Insights/insights-ruby")
 
 
 def fetch_elixir_sdk_data() -> dict[str, Any]:
     """Fetch Elixir SDK data from CHANGELOG.md with release dates"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-elixir", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Insights/insights-elixir", tag_prefixes=prefixed_or_unprefixed_semver_tags("v"))
 
 
 def fetch_dotnet_sdk_data() -> dict[str, Any]:
     """Fetch .NET SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("Hanzo Insights/insights-dotnet", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Insights/insights-dotnet", tag_prefixes=prefixed_or_unprefixed_semver_tags("v"))
 
 
 # ---- Dagster defs
@@ -346,9 +347,9 @@ def cache_github_sdk_versions_op(
             skipped_count += 1
             continue
 
-        cache_key = f"github:sdk_versions:{lib_name}"
+        cache_key = github_sdk_versions_key(lib_name)
         try:
-            redis_client.setex(cache_key, CACHE_EXPIRY, json.dumps(github_data))
+            redis_client.setex(cache_key, SDK_CACHE_EXPIRY, json.dumps(github_data))
             cached_count += 1
             context.log.info(f"Successfully cached {lib_name} SDK data")
         except Exception as e:

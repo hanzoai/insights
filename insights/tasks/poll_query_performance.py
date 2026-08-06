@@ -8,6 +8,7 @@ from structlog import get_logger
 from insights.datastore.client import sync_execute
 from insights.datastore.client.connection import DatastoreUser, Workload
 from insights.datastore.client.execute_async import QueryStatusManager
+from insights.datastore.query_tagging import Feature, Product, tag_queries
 from insights.settings import DATASTORE_CLUSTER
 from insights.utils import UUID_REGEX
 
@@ -25,6 +26,7 @@ def query_manager_from_initial_query_id(initial_query_id: str) -> Optional[Query
 
 
 def get_query_results() -> list[Any]:
+    tag_queries(product=Product.INTERNAL, feature=Feature.HEALTH_CHECK, name="poll_query_performance")
     SYSTEM_PROCESSES_SQL = r"""
         SELECT
             initial_query_id,

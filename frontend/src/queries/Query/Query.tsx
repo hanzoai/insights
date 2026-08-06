@@ -1,17 +1,18 @@
 import { BuiltLogic, LogicWrapper } from 'kea'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { Divider } from 'lib/elements/Divider'
-import { ScriptDebug } from 'scenes/debug/ScriptDebug'
+import { Spinner } from 'lib/elements/Spinner'
+import { lazyWithRetry } from 'lib/utils/retryImport'
+import { HogDebug } from 'scenes/debug/HogDebug'
 import { MarketingAnalyticsOverview } from 'scenes/web-analytics/tabs/marketing-analytics/frontend/components/MarketingAnalyticsOverview/MarketingAnalyticsOverview'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
-import { QueryEditor } from '~/queries/QueryEditor/QueryEditor'
 import { DataNode } from '~/queries/nodes/DataNode/DataNode'
 import { DataTable } from '~/queries/nodes/DataTable/DataTable'
 import { InsightViz, insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
 import { WebOverview } from '~/queries/nodes/WebOverview/WebOverview'
-import { WebVitals } from '~/queries/nodes/WebVitals/WebVitals'
+import { QueryEditor } from '~/queries/QueryEditor/QueryEditor'
 import {
     AnyResponseType,
     DashboardFilter,
@@ -24,35 +25,31 @@ import {
 import { QueryContext } from '~/queries/types'
 
 import { EndpointsUsageOverviewNode, EndpointsUsageTrendsNode } from 'products/endpoints/frontend/nodes'
-import {
-    RevenueAnalyticsGrossRevenueNode,
-    RevenueAnalyticsMRRNode,
-    RevenueAnalyticsMetricsNode,
-    RevenueAnalyticsOverviewNode,
-    RevenueAnalyticsTopCustomersNode,
-} from 'products/revenue_analytics/frontend/nodes'
+import { MetricsQueryNode } from 'products/metrics/frontend/nodes'
 
 import { DataTableVisualization } from '../nodes/DataVisualization/DataVisualization'
 import { SavedInsight } from '../nodes/SavedInsight/SavedInsight'
-import { WebVitalsPathBreakdown } from '../nodes/WebVitals/WebVitalsPathBreakdown'
 import {
     isDataTableNode,
     isDataVisualizationNode,
     isEndpointsUsageOverviewQuery,
     isEndpointsUsageTrendsQuery,
-    isScriptQuery,
+    isHogQuery,
     isInsightVizNode,
     isMarketingAnalyticsAggregatedQuery,
-    isRevenueAnalyticsGrossRevenueQuery,
-    isRevenueAnalyticsMRRQuery,
-    isRevenueAnalyticsMetricsQuery,
-    isRevenueAnalyticsOverviewQuery,
-    isRevenueAnalyticsTopCustomersQuery,
+    isMetricsQuery,
     isSavedInsightNode,
     isWebOverviewQuery,
     isWebVitalsPathBreakdownQuery,
     isWebVitalsQuery,
 } from '../utils'
+
+const WebVitals = lazyWithRetry(() =>
+    import('~/queries/nodes/WebVitals/WebVitals').then((m) => ({ default: m.WebVitals }))
+)
+const WebVitalsPathBreakdown = lazyWithRetry(() =>
+    import('../nodes/WebVitals/WebVitalsPathBreakdown').then((m) => ({ default: m.WebVitalsPathBreakdown }))
+)
 
 export interface QueryProps<Q extends Node> {
     /** An optional key to identify the query */
@@ -105,7 +102,7 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
         }
     }, [propsQuery]) // oxlint-disable-line react-hooks/exhaustive-deps
 
-    const query = readOnly ? propsQuery : localQuery
+    const query = readOnly || propsSetQuery ? propsQuery : localQuery
     const setQuery = propsSetQuery ?? localSetQuery
 
     const queryContext = props.context || {}
@@ -150,6 +147,7 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                 uniqueKey={uniqueKey}
                 context={queryContext}
                 readOnly={readOnly}
+                embedded={embedded}
                 editMode={!!editMode}
                 variablesOverride={props.variablesOverride}
             />
@@ -182,45 +180,9 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                 variablesOverride={variablesOverride}
             />
         )
-    } else if (isRevenueAnalyticsGrossRevenueQuery(query)) {
+    } else if (isMetricsQuery(query)) {
         component = (
-            <RevenueAnalyticsGrossRevenueNode
-                attachTo={props.attachTo}
-                query={query}
-                cachedResults={props.cachedResults}
-                context={queryContext}
-            />
-        )
-    } else if (isRevenueAnalyticsMetricsQuery(query)) {
-        component = (
-            <RevenueAnalyticsMetricsNode
-                attachTo={props.attachTo}
-                query={query}
-                cachedResults={props.cachedResults}
-                context={queryContext}
-            />
-        )
-    } else if (isRevenueAnalyticsMRRQuery(query)) {
-        component = (
-            <RevenueAnalyticsMRRNode
-                attachTo={props.attachTo}
-                query={query}
-                cachedResults={props.cachedResults}
-                context={queryContext}
-            />
-        )
-    } else if (isRevenueAnalyticsOverviewQuery(query)) {
-        component = (
-            <RevenueAnalyticsOverviewNode
-                attachTo={props.attachTo}
-                query={query}
-                cachedResults={props.cachedResults}
-                context={queryContext}
-            />
-        )
-    } else if (isRevenueAnalyticsTopCustomersQuery(query)) {
-        component = (
-            <RevenueAnalyticsTopCustomersNode
+            <MetricsQueryNode
                 attachTo={props.attachTo}
                 query={query}
                 cachedResults={props.cachedResults}
@@ -267,25 +229,29 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
         )
     } else if (isWebVitalsQuery(query)) {
         component = (
-            <WebVitals
-                attachTo={props.attachTo}
-                query={query}
-                cachedResults={props.cachedResults}
-                context={queryContext}
-            />
+            <Suspense fallback={<Spinner />}>
+                <WebVitals
+                    attachTo={props.attachTo}
+                    query={query}
+                    cachedResults={props.cachedResults}
+                    context={queryContext}
+                />
+            </Suspense>
         )
     } else if (isWebVitalsPathBreakdownQuery(query)) {
         component = (
-            <WebVitalsPathBreakdown
-                attachTo={props.attachTo}
-                query={query}
-                cachedResults={props.cachedResults}
-                context={queryContext}
-            />
+            <Suspense fallback={<Spinner />}>
+                <WebVitalsPathBreakdown
+                    attachTo={props.attachTo}
+                    query={query}
+                    cachedResults={props.cachedResults}
+                    context={queryContext}
+                />
+            </Suspense>
         )
-    } else if (isScriptQuery(query)) {
+    } else if (isHogQuery(query)) {
         component = (
-            <ScriptDebug
+            <HogDebug
                 attachTo={props.attachTo}
                 query={query}
                 setQuery={setQuery as (query: any) => void}

@@ -21,7 +21,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 
 **ActivityScope & Types System:**
 
-- ActivityScope type literal with ~52 predefined scopes including: Cohort, FeatureFlag, Person, Group, Insight, Plugin, HogFunction, Dashboard, Experiment, Survey, Organization, Team, BatchExport, ExternalDataSource, etc.
+- ActivityScope type literal with ~52 predefined scopes including: Cohort, FeatureFlag, Person, Group, Insight, Plugin, InsightsFunction, Dashboard, Experiment, Survey, Organization, Team, BatchExport, ExternalDataSource, etc.
 - Note: Not all defined scopes are actively logged. Some scopes (Integration, LLMTrace, Log, OrganizationDomain, Role, Subscription, UserGroup) are defined but have no logging implementation.
 - ChangeAction types: "changed", "created", "deleted", "merged", "split", "exported", "revoked", "logged_in", "logged_out"
 - Change dataclass with type, action, field, before/after values for granular tracking
@@ -137,7 +137,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 
 - Activity logs emit `$activity_log_entry_created` internal events when created
 - These events can trigger data pipeline destinations (Slack, email, webhooks, etc.)
-- Notifications are configured via HogFunctions with the `activity-log` sub-template
+- Notifications are configured via InsightsFunctions with the `activity-log` sub-template
 - Organization-level notifications only sent if `receive_org_level_activity_logs` is enabled for the project
 - Celery task (`insights/tasks/activity_log.py`) broadcasts org-scoped logs to subscribed teams
 

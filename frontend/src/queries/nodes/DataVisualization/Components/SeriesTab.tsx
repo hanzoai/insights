@@ -1,9 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconGear, IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { IconGear, IconInfo, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
     Button,
+    ColorButton,
     ColorGlyph,
     ColorPicker,
     Input,
@@ -14,20 +15,24 @@ import {
     Tabs,
     Tag,
     Popover,
+    Tooltip,
 } from '@hanzo/elements'
 
-import { getSeriesColor, getSeriesColorPalette } from 'lib/colors'
+import { DataColorToken, getSeriesColor, getSeriesColorPalette } from 'lib/colors'
 import { Field } from 'lib/elements/Field'
+import { dataThemeLogic } from 'scenes/dataThemeLogic'
+import { INSIGHT_UNIT_OPTIONS_SHORT } from 'scenes/insights/aggregationAxisFormat'
 
+import { ResultCustomizationBy } from '~/queries/schema/schema-general'
 import { ChartDisplayType } from '~/types'
 
 import { AxisSeries, dataVisualizationLogic } from '../dataVisualizationLogic'
 import { HeatmapSeriesTab } from './Heatmap/HeatmapSeriesTab'
-import { AxisBreakdownSeries, seriesBreakdownLogic } from './seriesBreakdownLogic'
+import { AxisBreakdownSeries, BREAKDOWN_LIMIT_LABEL, seriesBreakdownLogic } from './seriesBreakdownLogic'
+import { getAvailableSeriesBreakdownColumns } from './seriesBreakdownUtils'
 import { YSeriesLogicProps, YSeriesSettingsTab, ySeriesLogic } from './ySeriesLogic'
 
 export const SeriesTab = (): JSX.Element => {
-    const { visualizationType } = useValues(dataVisualizationLogic)
     const {
         columns,
         numericalColumns,
@@ -35,29 +40,50 @@ export const SeriesTab = (): JSX.Element => {
         yData,
         responseLoading,
         showTableSettings,
-        tabularColumns,
+        sourceTabularColumns,
+        isTransposed,
         selectedXAxis,
+        selectedYAxis,
         dataVisualizationProps,
+        effectiveVisualizationType,
     } = useValues(dataVisualizationLogic)
-    const { updateXSeries, addYSeries } = useActions(dataVisualizationLogic)
+    const { updateXSeries, addYSeries, updateSeriesIndex, deleteYSeries, setTransposeResults } =
+        useActions(dataVisualizationLogic)
     const breakdownLogic = seriesBreakdownLogic({ key: dataVisualizationProps.key })
-    const { showSeriesBreakdown } = useValues(breakdownLogic)
+    const { selectedSeriesBreakdownColumn, showSeriesBreakdown } = useValues(breakdownLogic)
     const { addSeriesBreakdown } = useActions(breakdownLogic)
 
+    const availableBreakdownColumns = getAvailableSeriesBreakdownColumns(columns, selectedXAxis, selectedYAxis)
     const hideAddYSeries = yData.length >= numericalColumns.length
-    const hideAddSeriesBreakdown = !(!showSeriesBreakdown && selectedXAxis && columns.length > yData.length)
+    const hideAddSeriesBreakdown =
+        showSeriesBreakdown || selectedXAxis === null || availableBreakdownColumns.length === 0
+    const showSeriesBreakdownSelector =
+        selectedXAxis !== null &&
+        showSeriesBreakdown &&
+        (selectedSeriesBreakdownColumn !== null || availableBreakdownColumns.length > 0)
 
-    if (visualizationType === ChartDisplayType.TwoDimensionalHeatmap) {
+    if (effectiveVisualizationType === ChartDisplayType.TwoDimensionalHeatmap) {
         return <HeatmapSeriesTab />
     }
 
     if (showTableSettings) {
         return (
-            <div className="flex flex-col w-full p-3">
-                <Label>Columns</Label>
-                {tabularColumns.map((series, index) => (
-                    <YSeries series={series} index={index} key={`${series.column.name}-${index}`} />
-                ))}
+            <div className="flex flex-col w-full p-3 gap-4">
+                {effectiveVisualizationType === ChartDisplayType.ActionsTable && (
+                    <Switch
+                        className="flex-1 w-full"
+                        label="Transpose results"
+                        checked={isTransposed}
+                        onChange={setTransposeResults}
+                        tooltip="Rotate the table so rows become columns and columns become rows."
+                    />
+                )}
+                <div>
+                    <Label>Columns</Label>
+                    {sourceTabularColumns.map((series, index) => (
+                        <YSeries series={series} index={index} key={`${series.column.name}-${index}`} />
+                    ))}
+                </div>
             </div>
         )
     }
@@ -73,6 +99,66 @@ export const SeriesTab = (): JSX.Element => {
             </div>
         ),
     }))
+
+    if (effectiveVisualizationType === ChartDisplayType.ActionsPie) {
+        const valueColumn = selectedYAxis?.find((series) => series !== null)?.name ?? null
+        const valueOptions = numericalColumns.map(({ name, type }) => ({
+            value: name,
+            label: (
+                <div className="items-center flex-1">
+                    {name}
+                    <Tag className="ml-2" type="default">
+                        {type.name}
+                    </Tag>
+                </div>
+            ),
+        }))
+
+        // A pie encodes a single value column. Set it on the first series and drop any others
+        // the chart may have carried over from another chart type.
+        const setValueColumn = (columnName: string): void => {
+            if (!selectedYAxis || selectedYAxis.length === 0) {
+                addYSeries(columnName)
+                return
+            }
+            updateSeriesIndex(0, columnName)
+            for (let index = selectedYAxis.length - 1; index >= 1; index--) {
+                deleteYSeries(index)
+            }
+        }
+
+        return (
+            <div className="flex flex-col w-full p-3">
+                <Label className="mb-1">Label</Label>
+                <Select
+                    className="w-full"
+                    value={xData !== null ? xData.column.name : 'None'}
+                    options={options}
+                    disabledReason={responseLoading ? 'Query loading...' : undefined}
+                    onChange={(value) => {
+                        const column = columns.find((n) => n.name === value)
+                        if (column) {
+                            updateXSeries(column.name)
+                        }
+                    }}
+                />
+
+                <Label className="mt-4 mb-1">Value</Label>
+                <Select
+                    className="w-full"
+                    placeholder="Select a column"
+                    value={valueColumn}
+                    options={valueOptions}
+                    disabledReason={responseLoading ? 'Query loading...' : undefined}
+                    onChange={(value) => {
+                        if (value) {
+                            setValueColumn(value)
+                        }
+                    }}
+                />
+            </div>
+        )
+    }
 
     return (
         <div className="flex flex-col w-full p-3">
@@ -100,7 +186,7 @@ export const SeriesTab = (): JSX.Element => {
                     Add series breakdown
                 </Button>
             )}
-            {showSeriesBreakdown && <SeriesBreakdownSelector />}
+            {showSeriesBreakdownSelector && <SeriesBreakdownSelector />}
 
             <Label className="mt-4 mb-1">Y-axis</Label>
             {yData.map((series, index) => (
@@ -121,9 +207,72 @@ export const SeriesTab = (): JSX.Element => {
     )
 }
 
-const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number }): JSX.Element => {
-    const { columns, numericalColumns, responseLoading, dataVisualizationProps, showTableSettings } =
-        useValues(dataVisualizationLogic)
+const FORMATTING_STYLE_LABELS: Record<string, string> = {
+    none: 'None',
+    number: 'Number',
+    short: 'Short Number',
+    percent: 'Percentage',
+}
+
+const FORMATTING_STYLE_SHORT_LABELS: Record<string, string> = {
+    none: '',
+    number: '',
+    short: INSIGHT_UNIT_OPTIONS_SHORT.short,
+    percent: INSIGHT_UNIT_OPTIONS_SHORT.percentage,
+}
+
+const SeriesFormattingTag = ({ style }: { style?: string }): JSX.Element | null => {
+    const shortLabel = style ? FORMATTING_STYLE_SHORT_LABELS[style] : ''
+
+    if (!shortLabel) {
+        return null
+    }
+
+    return (
+        <Tag className="ml-2 shrink-0" type="default">
+            {shortLabel}
+        </Tag>
+    )
+}
+
+const SeriesSelectLabel = ({
+    name,
+    color,
+    showSeriesColor,
+    formattingStyle,
+    typeName,
+    showType,
+}: {
+    name: string
+    color: string
+    showSeriesColor: boolean
+    formattingStyle?: string
+    typeName?: string
+    showType?: boolean
+}): JSX.Element => {
+    return (
+        <div className="flex items-center min-w-0 w-full">
+            {showSeriesColor && <ColorGlyph className="mr-2 shrink-0" color={color} />}
+            <span className="min-w-0 grow truncate">{name}</span>
+            <SeriesFormattingTag style={formattingStyle} />
+            {showType && typeName ? (
+                <Tag className="ml-2 shrink-0" type="default">
+                    {typeName}
+                </Tag>
+            ) : null}
+        </div>
+    )
+}
+
+const YSeries = ({ series, index }: { series: AxisSeries<number | null>; index: number }): JSX.Element => {
+    const {
+        columns,
+        numericalColumns,
+        responseLoading,
+        dataVisualizationProps,
+        showTableSettings,
+        effectiveVisualizationType,
+    } = useValues(dataVisualizationLogic)
     const { updateSeriesIndex, deleteYSeries } = useActions(dataVisualizationLogic)
     const { selectedSeriesBreakdownColumn } = useValues(seriesBreakdownLogic({ key: dataVisualizationProps.key }))
 
@@ -133,6 +282,7 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
     const { isSettingsOpen, canOpenSettings, activeSettingsTab } = useValues(seriesLogic)
     const { setSettingsOpen, submitFormatting, submitDisplay, setSettingsTab } = useActions(seriesLogic)
 
+    const isPieChart = effectiveVisualizationType === ChartDisplayType.ActionsPie
     const seriesColor = series.settings?.display?.color ?? getSeriesColor(index)
     const showSeriesColor = !showTableSettings && !selectedSeriesBreakdownColumn
 
@@ -140,20 +290,52 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
     const options = columnsInOptions.map(({ name, type }) => ({
         value: name,
         label: (
-            <div className="items-center flex flex-1">
-                {showSeriesColor && <ColorGlyph className="mr-2" color={seriesColor} />}
-                {series.settings?.display?.label && series.column.name === name ? series.settings.display.label : name}
-                <Tag className="ml-2" type="default">
-                    {type.name}
-                </Tag>
-            </div>
+            <SeriesSelectLabel
+                name={
+                    series.settings?.display?.label && series.column.name === name
+                        ? series.settings.display.label
+                        : name
+                }
+                color={seriesColor}
+                showSeriesColor={showSeriesColor}
+                formattingStyle={series.settings?.formatting?.style}
+            />
+        ),
+        labelInMenu: (
+            <SeriesSelectLabel
+                name={
+                    series.settings?.display?.label && series.column.name === name
+                        ? series.settings.display.label
+                        : name
+                }
+                color={seriesColor}
+                showSeriesColor={showSeriesColor}
+                formattingStyle={series.settings?.formatting?.style}
+                typeName={type.name}
+                showType
+            />
         ),
     }))
+
+    const settingsTabs = isPieChart
+        ? [
+              {
+                  label: Y_SERIES_SETTINGS_TABS[YSeriesSettingsTab.Formatting].label,
+                  key: YSeriesSettingsTab.Formatting,
+                  content: <YSeriesFormattingTab ySeriesLogicProps={seriesLogicProps} />,
+              },
+          ]
+        : Object.values(Y_SERIES_SETTINGS_TABS).map(({ label, Component }, index) => ({
+              label: label,
+              key: Object.keys(Y_SERIES_SETTINGS_TABS)[index],
+              content: <Component ySeriesLogicProps={seriesLogicProps} />,
+          }))
 
     return (
         <div className="flex gap-1 mb-1">
             <Select
-                className="grow flex-1 break-all"
+                className="grow flex-1 min-w-0"
+                truncateText={{ maxWidthClass: 'max-w-full' }}
                 value={series !== null ? series.column.name : 'None'}
                 options={options}
                 disabledReason={responseLoading ? 'Query loading...' : undefined}
@@ -171,11 +353,7 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
                             activeKey={activeSettingsTab}
                             barClassName="justify-around"
                             onChange={(tab) => setSettingsTab(tab as YSeriesSettingsTab)}
-                            tabs={Object.values(Y_SERIES_SETTINGS_TABS).map(({ label, Component }, index) => ({
-                                label: label,
-                                key: Object.keys(Y_SERIES_SETTINGS_TABS)[index],
-                                content: <Component ySeriesLogicProps={seriesLogicProps} />,
-                            }))}
+                            tabs={settingsTabs}
                         />
                     </div>
                 }
@@ -208,40 +386,106 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
     )
 }
 
-const YSeriesFormattingTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLogicProps }): JSX.Element => {
+export const YSeriesFormattingTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLogicProps }): JSX.Element => {
+    const { formatting } = useValues(ySeriesLogic(ySeriesLogicProps))
+    const { updateSeriesIndex } = useActions(dataVisualizationLogic)
+
+    const updateFormatting = (nextFormatting: typeof formatting): void => {
+        updateSeriesIndex(ySeriesLogicProps.seriesIndex, ySeriesLogicProps.series.column.name, {
+            formatting: {
+                prefix: nextFormatting.prefix,
+                suffix: nextFormatting.suffix,
+                style: nextFormatting.style,
+                decimalPlaces: Number.isNaN(nextFormatting.decimalPlaces) ? undefined : nextFormatting.decimalPlaces,
+            },
+        })
+    }
+
     return (
         <Form logic={ySeriesLogic} props={ySeriesLogicProps} formKey="formatting" className="deprecated-space-y-4">
             {ySeriesLogicProps.series.column.type.isNumerical && (
                 <Field name="style" label="Style" className="gap-1">
-                    <Select
-                        options={[
-                            { value: 'none', label: 'None' },
-                            { value: 'number', label: 'Number' },
-                            { value: 'percent', label: 'Percentage' },
-                        ]}
-                    />
+                    {({ value, onChange }) => (
+                        <Select
+                            value={value}
+                            options={['none', 'number', 'short', 'percent'].map((optionValue) => ({
+                                value: optionValue,
+                                label: FORMATTING_STYLE_LABELS[optionValue] ?? optionValue,
+                            }))}
+                            onChange={(newValue) => {
+                                onChange(newValue)
+                                updateFormatting({
+                                    ...formatting,
+                                    style: newValue as typeof formatting.style,
+                                })
+                            }}
+                        />
+                    )}
                 </Field>
             )}
             <Field name="prefix" label="Prefix">
-                <Input placeholder="$" />
+                {({ value, onChange }) => (
+                    <Input
+                        value={value ?? ''}
+                        placeholder="$"
+                        onChange={(newValue) => {
+                            onChange(newValue)
+                            updateFormatting({
+                                ...formatting,
+                                prefix: newValue,
+                            })
+                        }}
+                    />
+                )}
             </Field>
             <Field name="suffix" label="Suffix">
-                <Input placeholder="USD" />
+                {({ value, onChange }) => (
+                    <Input
+                        value={value ?? ''}
+                        placeholder="USD"
+                        onChange={(newValue) => {
+                            onChange(newValue)
+                            updateFormatting({
+                                ...formatting,
+                                suffix: newValue,
+                            })
+                        }}
+                    />
+                )}
             </Field>
             {ySeriesLogicProps.series.column.type.isNumerical && (
                 <Field name="decimalPlaces" label="Decimal places">
-                    <Input type="number" min={0} />
+                    {({ value, onChange }) => (
+                        <Input
+                            value={value ?? ''}
+                            type="number"
+                            min={0}
+                            disabledReason={
+                                formatting.style === 'short'
+                                    ? 'Decimal places has no effect when using short number format'
+                                    : undefined
+                            }
+                            onChange={(newValue) => {
+                                onChange(newValue)
+                                updateFormatting({
+                                    ...formatting,
+                                    decimalPlaces: newValue as typeof formatting.decimalPlaces,
+                                })
+                            }}
+                        />
+                    )}
                 </Field>
             )}
         </Form>
     )
 }
 
-const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLogicProps }): JSX.Element => {
-    const { showTableSettings, dataVisualizationProps } = useValues(dataVisualizationLogic)
+export const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLogicProps }): JSX.Element => {
+    const { showTableSettings, dataVisualizationProps, effectiveVisualizationType } = useValues(dataVisualizationLogic)
     const { selectedSeriesBreakdownColumn } = useValues(seriesBreakdownLogic({ key: dataVisualizationProps.key }))
     const { updateSeriesIndex } = useActions(dataVisualizationLogic)
 
+    const isPieChart = effectiveVisualizationType === ChartDisplayType.ActionsPie
     const showColorPicker = !showTableSettings && !selectedSeriesBreakdownColumn
     const showLabelInput = showTableSettings || !selectedSeriesBreakdownColumn
 
@@ -298,7 +542,7 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                     )}
                 </div>
             )}
-            {!showTableSettings && (
+            {!showTableSettings && !isPieChart && (
                 <>
                     {!selectedSeriesBreakdownColumn && (
                         <Field name="trendLine" label="Trend line">
@@ -369,6 +613,10 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                                         label: 'Bar',
                                         value: 'bar',
                                     },
+                                    {
+                                        label: 'Area',
+                                        value: 'area',
+                                    },
                                 ]}
                                 onChange={(newValue) => {
                                     onChange(newValue)
@@ -377,7 +625,7 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                                         ySeriesLogicProps.series.column.name,
                                         {
                                             display: {
-                                                displayType: newValue as 'auto' | 'line' | 'bar',
+                                                displayType: newValue as 'auto' | 'line' | 'bar' | 'area',
                                             },
                                         }
                                     )
@@ -403,24 +651,29 @@ const Y_SERIES_SETTINGS_TABS = {
 }
 
 export const SeriesBreakdownSelector = (): JSX.Element => {
-    const { columns, responseLoading, selectedXAxis, dataVisualizationProps } = useValues(dataVisualizationLogic)
+    const { columns, responseLoading, selectedXAxis, selectedYAxis, dataVisualizationProps } =
+        useValues(dataVisualizationLogic)
     const breakdownLogic = seriesBreakdownLogic({ key: dataVisualizationProps.key })
     const { selectedSeriesBreakdownColumn, seriesBreakdownData } = useValues(breakdownLogic)
     const { addSeriesBreakdown, deleteSeriesBreakdown } = useActions(breakdownLogic)
 
-    const seriesBreakdownOptions = columns
-        .map(({ name, type }) => ({
-            value: name,
-            label: (
-                <div className="items-center flex-1">
-                    {name}
-                    <Tag className="ml-2" type="default">
-                        {type.name}
-                    </Tag>
-                </div>
-            ),
-        }))
-        .filter((column) => column.value !== selectedXAxis)
+    const availableBreakdownColumns = getAvailableSeriesBreakdownColumns(columns, selectedXAxis, selectedYAxis)
+
+    if (selectedXAxis === null || (selectedSeriesBreakdownColumn === null && availableBreakdownColumns.length === 0)) {
+        return <></>
+    }
+
+    const seriesBreakdownOptions = availableBreakdownColumns.map(({ name, type }) => ({
+        value: name,
+        label: (
+            <div className="items-center flex-1">
+                {name}
+                <Tag className="ml-2" type="default">
+                    {type.name}
+                </Tag>
+            </div>
+        ),
+    }))
 
     return (
         <>
@@ -446,30 +699,62 @@ export const SeriesBreakdownSelector = (): JSX.Element => {
                     onClick={() => deleteSeriesBreakdown()}
                 />
             </div>
-            <div className="ml-4 mt-2">
-                {seriesBreakdownData.error ? (
-                    <div className="text-danger font-bold mt-1">{seriesBreakdownData.error}</div>
-                ) : (
-                    seriesBreakdownData.seriesData.map((series, index) => (
-                        <BreakdownSeries series={series} index={index} key={`${series.name}-${index}`} />
-                    ))
-                )}
+            <div className="ml-1 mt-2">
+                {seriesBreakdownData.warning ? (
+                    <div className="flex items-center gap-1.5 text-warning bg-warning-highlight rounded px-2 py-1 mt-1 mb-2 text-xs font-medium">
+                        <span>{BREAKDOWN_LIMIT_LABEL}</span>
+                        <Tooltip title={seriesBreakdownData.warning}>
+                            <IconInfo className="text-base shrink-0 ml-auto" />
+                        </Tooltip>
+                    </div>
+                ) : null}
+                {seriesBreakdownData.seriesData.map((series, index) => (
+                    <BreakdownSeries series={series} index={index} key={`${series.name}-${index}`} />
+                ))}
             </div>
         </>
     )
 }
 
-const BreakdownSeries = ({ series, index }: { series: AxisBreakdownSeries<number>; index: number }): JSX.Element => {
+const BreakdownSeries = ({
+    series,
+    index,
+}: {
+    series: AxisBreakdownSeries<number | null>
+    index: number
+}): JSX.Element => {
+    const { chartSettings } = useValues(dataVisualizationLogic)
+    const { updateChartSettings } = useActions(dataVisualizationLogic)
+    const { getTheme } = useValues(dataThemeLogic)
+
+    const theme = getTheme(undefined)
+    const themeTokens = theme ? (Object.keys(theme) as DataColorToken[]) : []
+    const selectedToken = chartSettings.resultCustomizations?.[series.breakdownValue]?.color ?? null
     const seriesColor = series.settings?.display?.color ?? getSeriesColor(index)
 
     return (
-        <div className="flex gap-1 mb-2">
-            <div className="flex gap-2">
-                <ColorGlyph color={seriesColor} className="mr-2" />
-                <span>{series.name ? series.name : '[No value]'}</span>
-            </div>
-            {/* For now let's keep things simple and not allow too much configuration */}
-            {/* We may just want to add a show/hide button here */}
+        <div className="flex gap-1 mb-2 items-center">
+            <ColorPicker
+                colorTokens={themeTokens}
+                selectedColorToken={selectedToken}
+                customButton={<ColorButton type="tertiary" color={seriesColor} className="mr-2" />}
+                onSelectColorToken={(token) => {
+                    updateChartSettings({
+                        resultCustomizations: {
+                            ...chartSettings.resultCustomizations,
+                            [series.breakdownValue]: {
+                                assignmentBy: ResultCustomizationBy.Value,
+                                color: token,
+                            },
+                        },
+                    })
+                }}
+                onClearColorToken={() => {
+                    const { [series.breakdownValue]: _removed, ...rest } = chartSettings.resultCustomizations ?? {}
+                    updateChartSettings({ resultCustomizations: rest })
+                }}
+            />
+            <span>{series.name ? series.name : '[No value]'}</span>
         </div>
     )
 }

@@ -1,11 +1,14 @@
 import { useActions, useValues } from 'kea'
 
+import * as remoteWork from '@hanzo/brand/hoggies/png/remote-work'
 import { Button, Modal } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 
-import { LaptopMascot3 } from '../mascots'
 import { upgradeModalLogic } from './upgradeModalLogic'
+
+const MascotRemoteWork = pngHoggie(remoteWork)
 
 export function UpgradeModal(): JSX.Element {
     const {
@@ -23,11 +26,11 @@ export function UpgradeModal(): JSX.Element {
 
     if (shouldShowPlatformAddonMessage) {
         return (
-            <Modal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey}>
+            <Modal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey} zIndex="1169">
                 <div className="max-w-2xl mt-8">
                     <div className="PayGateMini rounded flex flex-col items-center p-4 text-center bg-primary border border-primary">
                         <div className="mb-3 max-w-72">
-                            <LaptopMascot3 />
+                            <MascotRemoteWork />
                         </div>
                         <p className="max-w-140 mb-4">
                             You've reached your usage limit for <b>projects</b>. To create more than{' '}
@@ -49,7 +52,7 @@ export function UpgradeModal(): JSX.Element {
     }
 
     return (
-        <Modal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey}>
+        <Modal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey} zIndex="1169">
             <div className="max-w-2xl">
                 <PayGateMini
                     feature={upgradeModalFeatureKey}

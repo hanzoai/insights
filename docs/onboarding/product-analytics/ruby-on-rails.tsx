@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -79,7 +79,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <>
                     <Markdown>
                         {dedent`
-                            Update \`config/initializers/insights.rb\` with your project API key and host:
+                            Update \`config/initializers/insights.rb\` with your project token and host:
                         `}
                     </Markdown>
                     <CodeBlock
@@ -89,7 +89,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 file: 'config/initializers/insights.rb',
                                 code: dedent`
                                     Insights.init do |config|
-                                      config.api_key = '<ph_project_api_key>'
+                                      config.api_key = '<ph_project_token>'
                                       config.host = '<ph_client_api_host>'
                                     end
                                 `,

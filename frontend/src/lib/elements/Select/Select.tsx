@@ -14,7 +14,7 @@ import {
     MenuItemNode,
     MenuProps,
     MenuSection,
-    isMenuSection,
+    isLemonMenuSection,
 } from '../Menu/Menu'
 import { PopoverProps } from '../Popover'
 import { TooltipProps } from '../Tooltip'
@@ -51,25 +51,24 @@ export interface SelectSection<T> {
 
 export type SelectOptions<T> = SelectSection<T>[] | SelectOption<T>[]
 
-export interface SelectPropsBase<T>
-    extends Pick<
-        ButtonProps,
-        | 'id'
-        | 'className'
-        | 'loading'
-        | 'fullWidth'
-        | 'disabled'
-        | 'disabledReason'
-        | 'data-attr'
-        | 'aria-label'
-        | 'onClick'
-        | 'tabIndex'
-        | 'type'
-        | 'status'
-        | 'active'
-        | 'tooltip'
-        | 'icon'
-    > {
+export interface SelectPropsBase<T> extends Pick<
+    ButtonProps,
+    | 'id'
+    | 'className'
+    | 'loading'
+    | 'fullWidth'
+    | 'disabled'
+    | 'disabledReason'
+    | 'data-attr'
+    | 'aria-label'
+    | 'onClick'
+    | 'tabIndex'
+    | 'type'
+    | 'status'
+    | 'active'
+    | 'tooltip'
+    | 'icon'
+> {
     options: SelectOptions<T>
     /** Callback fired when a value is selected, even if it already is set. */
     onSelect?: (newValue: T) => void
@@ -80,7 +79,7 @@ export interface SelectPropsBase<T>
     className?: string
     placeholder?: string
     size?: ButtonProps['size']
-    menu?: Pick<MenuProps, 'className' | 'closeParentPopoverOnClickInside'>
+    menu?: Pick<MenuProps, 'className' | 'closeParentPopoverOnClickInside' | 'onVisibilityChange'>
     visible?: DropdownProps['visible']
     startVisible?: DropdownProps['startVisible']
     truncateText?: { maxWidthClass: string }
@@ -148,9 +147,10 @@ export function Select<T extends string | number | boolean | null>({
             className={menu?.className}
             maxContentWidth={dropdownMaxContentWidth}
             activeItemIndex={items
-                .flatMap((i) => (isMenuSection(i) ? i.items.filter(Boolean) : i))
+                .flatMap((i) => (isLemonMenuSection(i) ? i.items.filter(Boolean) : i))
                 .findIndex((i) => (i as MenuItem).active)}
             closeParentPopoverOnClickInside={menu?.closeParentPopoverOnClickInside}
+            onVisibilityChange={menu?.onVisibilityChange}
             visible={visible}
             startVisible={startVisible}
         >
@@ -188,11 +188,28 @@ export function Select<T extends string | number | boolean | null>({
                         ? renderButtonContent(activeLeaf)
                         : activeLeaf
                           ? activeLeaf.label
-                          : ((value ?? placeholder) as React.ReactNode)}
+                          : formatValueFallback(value, placeholder)}
                 </span>
             </Button>
         </Menu>
     )
+}
+
+// `value` is typed as a scalar, but data from JSON-backed sources can violate that at
+// runtime, and objects aren't valid React children (React error #31) — show them as
+// JSON rather than crash the page.
+function formatValueFallback(value: unknown, placeholder: string): React.ReactNode {
+    if (value == null) {
+        return placeholder
+    }
+    if (typeof value === 'object') {
+        try {
+            return JSON.stringify(value)
+        } catch {
+            return String(value)
+        }
+    }
+    return value as React.ReactNode
 }
 
 /**
@@ -219,7 +236,7 @@ function convertToMenuSingle<T>(
     onSelect: NonNullable<SelectPropsBase<T>['onSelect']>,
     acc: SelectOptionLeaf<T>[]
 ): MenuItem | MenuSection | null {
-    if (isSelectSection(option)) {
+    if (isLemonSelectSection(option)) {
         const { options: childOptions, ...section } = option
         const items = option.options.map((o) => convertToMenuSingle(o, activeValue, onSelect, acc)).filter(Boolean)
         if (!items.length) {
@@ -230,7 +247,7 @@ function convertToMenuSingle<T>(
             ...section,
             items,
         } as MenuSection
-    } else if (isSelectOptionNode(option)) {
+    } else if (isLemonSelectOptionNode(option)) {
         const { options: childOptions, ...node } = option
         const items = childOptions.map((o) => convertToMenuSingle(o, activeValue, onSelect, acc)).filter(Boolean)
         if (option.hidden) {
@@ -269,13 +286,13 @@ function convertToMenuSingle<T>(
     } as MenuItemLeaf
 }
 
-export function isSelectSection<T>(
+export function isLemonSelectSection<T>(
     candidate: SelectSection<T> | SelectOption<T>
 ): candidate is SelectSection<T> {
     return candidate && 'options' in candidate && !('label' in candidate)
 }
 
-export function isSelectOptionNode<T>(
+export function isLemonSelectOptionNode<T>(
     candidate: SelectSection<T> | SelectOption<T>
 ): candidate is SelectOptionNode<T> {
     return candidate && 'options' in candidate && 'label' in candidate

@@ -20,12 +20,14 @@ from insights.insightsql.database.schema.sessions_v3 import (
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.models.property_definition import PropertyType
-from insights.models.utils import uuid7
+from insights.uuidt import uuid7
+
+from products.event_definitions.backend.models.property_definition import PropertyType
 
 
 @snapshot_datastore_queries
 class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
+    allow_dual_schema_snapshots = True
     snapshot_replace_all_numbers = True
 
     def __execute(
@@ -738,6 +740,8 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
                 "$screen_count",
                 "$session_duration",
                 "$start_timestamp",
+                "$hosts",
+                "$emails",
                 "$has_replay_events",
             },
         )
@@ -814,6 +818,7 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
             ["Organic Social"],
             ["Organic Video"],
             ["Organic Shopping"],
+            ["AI"],
             ["Push"],
             ["SMS"],
             ["Audio"],

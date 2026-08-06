@@ -4,21 +4,21 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { ReactNode } from 'react'
 
+import { IconX } from '@hanzo/icons'
+
 import { InsightLabel } from 'lib/components/InsightLabel'
 import { dayjs } from 'lib/dayjs'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
-import { IconHandClick } from 'lib/elements/icons'
-import { shortTimeZone } from 'lib/utils'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { shortTimeZone } from 'lib/utils/timezones'
 import { formatAggregationValue } from 'scenes/insights/utils'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { FormatPropertyValueForDisplayFunction, propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 
 import {
-    COL_CUTOFF,
     InsightTooltipProps,
     InvertedSeriesDatum,
-    ROW_CUTOFF,
     SeriesDatum,
     getFormattedDate,
     getTooltipTitle,
@@ -26,31 +26,23 @@ import {
 } from './insightTooltipUtils'
 
 export function ClickToInspectActors({
-    isTruncated,
+    inspectLabel,
     groupTypeLabel,
     showShiftKeyHint,
 }: {
-    isTruncated?: boolean
+    inspectLabel?: string
     groupTypeLabel: string
     showShiftKeyHint?: boolean
 }): JSX.Element {
     return (
         <div className="table-subtext">
-            {isTruncated && (
-                <div className="table-subtext-truncated">
-                    For readability, <b>not all series are displayed</b>.<br />
-                </div>
-            )}
             {showShiftKeyHint && (
                 <>
                     <div>Hold Shift (⇧) to highlight individual bars</div>
                     <br />
                 </>
             )}
-            <div className="table-subtext-click-to-inspect">
-                <IconHandClick className="mr-1 mb-0.5" />
-                Click to view {groupTypeLabel}
-            </div>
+            <div className="table-subtext-click-to-inspect">{inspectLabel ?? `Click to view ${groupTypeLabel}`}</div>
         </div>
     )
 }
@@ -82,6 +74,24 @@ function renderDatumToTableCell(
     )
 }
 
+function closeColumn<T extends Record<string, any>>(onClose: () => void): TableColumn<T, keyof T | undefined> {
+    return {
+        key: 'close',
+        className: 'InsightTooltip__close-column',
+        width: 0,
+        title: (
+            <button
+                type="button"
+                className="InsightTooltip__close p-0.5 ml-2 rounded hover:bg-fill-button-tertiary-hover cursor-pointer"
+                onClick={onClose}
+            >
+                <IconX className="w-3 h-3" />
+            </button>
+        ),
+        render: () => null,
+    }
+}
+
 export function InsightTooltip({
     date,
     timezone = 'UTC',
@@ -93,14 +103,18 @@ export function InsightTooltip({
     embedded = false,
     hideColorCol = false,
     hideInspectActorsSection = false,
-    rowCutoff = ROW_CUTOFF,
-    colCutoff = COL_CUTOFF,
+    rowCutoff,
+    colCutoff,
     showHeader = true,
+    inspectLabel,
     groupTypeLabel = 'people',
     breakdownFilter,
     interval,
     dateRange,
     showShiftKeyHint,
+    formatCompareLabel,
+    onClose,
+    onRowClick,
 }: InsightTooltipProps): JSX.Element {
     // Display entities as columns if multiple exist (e.g., pageview + autocapture, or multiple formulas)
     // and the insight has a breakdown or compare option enabled. This gives us space for labels
@@ -108,6 +122,11 @@ export function InsightTooltip({
     const itemizeEntitiesAsColumns =
         (seriesData?.length ?? 0) > 1 &&
         (seriesData?.[0]?.breakdown_value !== undefined || seriesData?.[0]?.compare_label !== undefined)
+
+    const hasMultipleDatapoints = (seriesData?.length ?? 0) > 1
+    const defaultInspectLabel = hasMultipleDatapoints
+        ? `Click a series above to view ${groupTypeLabel}`
+        : `Click to view ${groupTypeLabel}`
 
     const { formatPropertyValueForDisplay } = useValues(propertyDefinitionsModel)
     const { weekStartDay } = useValues(teamLogic)
@@ -118,20 +137,39 @@ export function InsightTooltip({
         weekStartDay,
     })
 
+    const shortFormattedDate = getFormattedDate(date, {
+        interval,
+        dateRange,
+        timezone,
+        weekStartDay,
+        short: true,
+    })
+
     const concreteTooltipTitle = altTitle ? getTooltipTitle(seriesData, altTitle, formattedDate) : null
+
+    const fullDateTitle = date
+        ? `${interval === 'day' ? `${dayjs.tz(date, timezone).format('dddd')}, ` : ''}${formattedDate} (${timezone ? shortTimeZone(timezone) : 'UTC'})`
+        : null
 
     const title: ReactNode | null =
         concreteTooltipTitle ||
-        (date
-            ? `${interval === 'day' ? `${dayjs.tz(date, timezone).format('dddd')}, ` : ''}${formattedDate} (${timezone ? shortTimeZone(timezone) : 'UTC'})`
-            : null)
+        (date ? (
+            // Only the column-per-entity layout is width-constrained enough to need the date shortened.
+            itemizeEntitiesAsColumns ? (
+                <Tooltip title={fullDateTitle}>
+                    <span>{shortFormattedDate}</span>
+                </Tooltip>
+            ) : (
+                fullDateTitle
+            )
+        ) : null)
     const rightTitle: ReactNode | null = altRightTitle
         ? getTooltipTitle(seriesData, altRightTitle, formattedDate)
         : null
 
     if (itemizeEntitiesAsColumns) {
         hideColorCol = true
-        const dataSource = invertDataSource(seriesData, breakdownFilter)
+        const dataSource = invertDataSource(seriesData, breakdownFilter, formatCompareLabel)
         const columns: TableColumns<InvertedSeriesDatum> = [
             {
                 key: 'datum',
@@ -139,19 +177,44 @@ export function InsightTooltip({
                 title,
                 sticky: true,
                 render: function renderDatum(_, datum) {
-                    return <div>{datum.datumTitle}</div>
+                    return <div className="datum-title">{datum.datumTitle}</div>
                 },
             },
         ]
         const numDataPoints = Math.max(...dataSource.map((ds) => ds?.seriesData?.length ?? 0))
-        const isTruncated = numDataPoints > colCutoff || dataSource.length > rowCutoff
 
-        if (numDataPoints > 0) {
-            const indexOfLongestSeries = dataSource.findIndex((ds) => ds?.seriesData?.length === numDataPoints)
-            const truncatedCols = dataSource?.[indexOfLongestSeries !== -1 ? indexOfLongestSeries : 0].seriesData.slice(
-                0,
-                colCutoff
-            )
+        if (numDataPoints === 1) {
+            // Each row holds one series; breaking multiple series down by event name gives them
+            // distinct `order`s, so an order-keyed column would blank every non-matching row.
+            columns.push({
+                key: 'value',
+                className: 'datum-counts-column',
+                align: 'right',
+                title: <span className="whitespace-nowrap">{rightTitle ?? undefined}</span>,
+                render: function renderSingleSeriesValue(_, datum) {
+                    const seriesColumnData = datum.seriesData[0]
+                    return renderDatumToTableCell(
+                        seriesColumnData?.action?.math_property,
+                        seriesColumnData?.count,
+                        formatPropertyValueForDisplay,
+                        renderCount,
+                        seriesColumnData?.color
+                    )
+                },
+            })
+        } else if (numDataPoints > 1) {
+            // Key columns off the union of orders across all rows, not just the longest one, so a
+            // series present in only some rows still gets a column instead of a dash.
+            const seriesByOrder = new Map<number, SeriesDatum>()
+            for (const ds of dataSource) {
+                for (const s of ds?.seriesData ?? []) {
+                    if (!seriesByOrder.has(s.order)) {
+                        seriesByOrder.set(s.order, s)
+                    }
+                }
+            }
+            const sortedColumnSeries = [...seriesByOrder.values()].sort((a, b) => a.order - b.order)
+            const truncatedCols = colCutoff !== undefined ? sortedColumnSeries.slice(0, colCutoff) : sortedColumnSeries
             const dataColumns: TableColumn<InvertedSeriesDatum, keyof InvertedSeriesDatum | undefined>[] = []
             truncatedCols.forEach((seriesColumn) => {
                 const colIdx = seriesColumn.order
@@ -162,7 +225,6 @@ export function InsightTooltip({
                     title:
                         (colIdx === 0 ? rightTitle : undefined) ||
                         (!concreteTooltipTitle &&
-                            numDataPoints > 1 &&
                             renderSeries(
                                 <InsightLabel
                                     action={seriesColumn.action}
@@ -171,7 +233,6 @@ export function InsightTooltip({
                                     hideBreakdown
                                     hideCompare
                                     hideIcon
-                                    allowWrap
                                 />,
                                 seriesColumn,
                                 colIdx
@@ -180,38 +241,61 @@ export function InsightTooltip({
                         const seriesColumnData: SeriesDatum | undefined = datum.seriesData.find(
                             (s) => s.order === colIdx
                         )
-                        return renderDatumToTableCell(
+                        const cell = renderDatumToTableCell(
                             seriesColumnData?.action?.math_property,
                             seriesColumnData?.count,
                             formatPropertyValueForDisplay,
                             renderCount,
                             seriesColumnData?.color
                         )
+                        if (onRowClick && seriesColumnData) {
+                            return (
+                                <div
+                                    className="cursor-pointer hover:bg-accent-highlight-secondary -mx-2 px-2 -my-1 py-1"
+                                    onClick={() => onRowClick(seriesColumnData)}
+                                >
+                                    {cell}
+                                </div>
+                            )
+                        }
+                        return cell
                     },
                 })
-            })
-            dataColumns.sort((a, b) => {
-                const itemA = truncatedCols?.find((s) => s.order === parseInt(a.key as string))
-                const itemB = truncatedCols?.find((s) => s.order === parseInt(b.key as string))
-
-                return (itemA?.order || 0) - (itemB?.order || 0)
             })
             columns.push(...dataColumns)
         }
 
+        if (onClose) {
+            columns.push(closeColumn(onClose))
+        }
+
         return (
-            <div className={clsx('InsightTooltip', embedded && 'InsightTooltip--embedded')}>
-                <Table
-                    dataSource={dataSource.slice(0, rowCutoff)}
-                    columns={columns}
-                    rowKey="id"
-                    uppercaseHeader={false}
-                    rowRibbonColor={hideColorCol ? undefined : (datum) => datum.color || null}
-                    showHeader={showHeader}
-                />
+            <div className={clsx('InsightTooltip', embedded && 'InsightTooltip--embedded')} data-attr="insight-tooltip">
+                <div className="InsightTooltip__scrollable">
+                    <Table
+                        dataSource={rowCutoff !== undefined ? dataSource.slice(0, rowCutoff) : dataSource}
+                        columns={columns}
+                        rowKey="id"
+                        uppercaseHeader={false}
+                        rowRibbonColor={hideColorCol ? undefined : (datum) => datum.color || null}
+                        showHeader={showHeader}
+                        onRow={
+                            onRowClick && numDataPoints === 1
+                                ? (datum) => ({
+                                      onClick: () => {
+                                          const seriesDatum = datum.seriesData[0]
+                                          if (seriesDatum) {
+                                              onRowClick(seriesDatum)
+                                          }
+                                      },
+                                  })
+                                : undefined
+                        }
+                    />
+                </div>
                 {!hideInspectActorsSection && (
                     <ClickToInspectActors
-                        isTruncated={isTruncated}
+                        inspectLabel={inspectLabel ?? defaultInspectLabel}
                         groupTypeLabel={groupTypeLabel}
                         showShiftKeyHint={showShiftKeyHint}
                     />
@@ -223,10 +307,10 @@ export function InsightTooltip({
     // Itemize tooltip entities as rows
     const dataSource = [...seriesData]
     const columns: TableColumn<SeriesDatum, keyof SeriesDatum | undefined>[] = []
-    const isTruncated = dataSource?.length > rowCutoff
 
     columns.push({
         key: 'datum',
+        className: 'datum-column',
         width: 200,
         title: <span className="whitespace-nowrap">{title}</span>,
         sticky: true,
@@ -239,7 +323,6 @@ export function InsightTooltip({
                     hideBreakdown
                     hideCompare
                     hideIcon
-                    allowWrap
                 />,
                 datum,
                 rowIdx
@@ -254,28 +337,50 @@ export function InsightTooltip({
         title: <span className="whitespace-nowrap">{rightTitle ?? undefined}</span>,
         align: 'right',
         render: function renderDatum(_, datum) {
-            return renderDatumToTableCell(
-                datum.action?.math_property,
-                datum.count,
-                formatPropertyValueForDisplay,
-                renderCount
+            return (
+                <div>
+                    {renderDatumToTableCell(
+                        datum.action?.math_property,
+                        datum.count,
+                        formatPropertyValueForDisplay,
+                        renderCount
+                    )}
+                    {datum.anomalyScore != null && (
+                        <span className="ml-1 text-xs font-semibold text-danger whitespace-nowrap">
+                            Anomaly: {Math.round(datum.anomalyScore * 100)}%
+                        </span>
+                    )}
+                </div>
             )
         },
     })
 
+    if (onClose) {
+        columns.push(closeColumn(onClose))
+    }
+
     return (
-        <div className={clsx('InsightTooltip', embedded && 'InsightTooltip--embedded')}>
-            <Table
-                dataSource={dataSource.slice(0, rowCutoff)}
-                columns={columns}
-                rowKey="id"
-                uppercaseHeader={false}
-                rowRibbonColor={hideColorCol ? undefined : (datum: SeriesDatum) => datum.color || null}
-                showHeader={showHeader}
-            />
+        <div className={clsx('InsightTooltip', embedded && 'InsightTooltip--embedded')} data-attr="insight-tooltip">
+            <div className="InsightTooltip__scrollable">
+                <Table
+                    dataSource={rowCutoff !== undefined ? dataSource.slice(0, rowCutoff) : dataSource}
+                    columns={columns}
+                    rowKey="id"
+                    uppercaseHeader={false}
+                    rowRibbonColor={hideColorCol ? undefined : (datum: SeriesDatum) => datum.color || null}
+                    showHeader={showHeader}
+                    onRow={
+                        onRowClick
+                            ? (datum) => ({
+                                  onClick: () => onRowClick(datum),
+                              })
+                            : undefined
+                    }
+                />
+            </div>
             {!hideInspectActorsSection && (
                 <ClickToInspectActors
-                    isTruncated={isTruncated}
+                    inspectLabel={inspectLabel ?? defaultInspectLabel}
                     groupTypeLabel={groupTypeLabel}
                     showShiftKeyHint={showShiftKeyHint}
                 />

@@ -4,6 +4,7 @@ import { IconInfo, IconPencil } from '@hanzo/icons'
 import { Banner, Input } from '@hanzo/elements'
 
 import { DataWarehousePopoverField } from 'lib/components/TaxonomicFilter/types'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Label } from 'lib/elements/Label'
 import { Radio } from 'lib/elements/Radio'
 import { Select } from 'lib/elements/Select'
@@ -12,7 +13,6 @@ import { toast } from 'lib/elements/Toast'
 import { Link } from 'lib/elements/Link'
 import { Spinner } from 'lib/elements/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconOpenInNew } from 'lib/elements/icons'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { urls } from 'scenes/urls'
 
@@ -36,10 +36,15 @@ import { ExperimentMetricGoal, ExperimentMetricMathType, FilterType, FunnelConve
 
 import { ExperimentMetricConversionWindowFilter } from './ExperimentMetricConversionWindowFilter'
 import { ExperimentMetricFunnelOrderSelector } from './ExperimentMetricFunnelOrderSelector'
-import { ExperimentMetricOutlierHandling } from './ExperimentMetricOutlierHandling'
-import { commonActionFilterProps } from './Metrics/Selectors'
+import {
+    ExperimentMetricOutlierHandling,
+    ExperimentRatioMetricOutlierHandling,
+} from './ExperimentMetricOutlierHandling'
+import { ExperimentMetricThreshold, isThresholdAvailableForMath } from './ExperimentMetricThreshold'
+import { EXPOSURE_DEFAULT_EVENT } from './exposureContract'
 import { filterToMetricConfig, filterToMetricSource } from './metricQueryUtils'
 import { createFilterForSource, getFilter } from './metricQueryUtils'
+import { commonActionFilterProps } from './Metrics/Selectors'
 import {
     getAllowedMathTypes,
     getDefaultExperimentMetric,
@@ -51,7 +56,7 @@ import {
 export function getExposureCriteriaLabel(exposureCriteria: ExperimentExposureCriteria | undefined): string {
     const exposureConfig = exposureCriteria?.exposure_config
     if (!exposureConfig) {
-        return '$feature_flag_called'
+        return EXPOSURE_DEFAULT_EVENT
     }
 
     return getExposureConfigDisplayName(exposureConfig)
@@ -95,17 +100,21 @@ const dataWarehousePopoverFields: DataWarehousePopoverField[] = [
     {
         key: 'timestamp_field',
         label: 'Timestamp Field',
+        description: 'The column in your data warehouse table that contains the timestamp of each row',
     },
     {
         key: 'data_warehouse_join_key',
         label: 'Data Warehouse Join Key',
+        description:
+            'The column in your data warehouse table that identifies which user each row belongs to (e.g. user_id, email)',
         allowInsightsQL: true,
     },
     {
         key: 'events_join_key',
         label: 'Events Join Key',
+        description: 'The field on Insights events to match against the data warehouse join key (usually distinct_id)',
         allowInsightsQL: true,
-        insightsQLOnly: true,
+        hogQLOnly: true,
         tableName: 'events',
     },
 ]
@@ -123,7 +132,7 @@ export function ExperimentMetricForm({
     handleSetMetric: (newMetric: ExperimentMetric) => void
     filterTestAccounts: boolean
     exposureCriteria?: ExperimentExposureCriteria | undefined
-    openExposureCriteriaModal?: (() => void) | null
+    openExposureCriteriaModal?: (exposureCriteria?: ExperimentExposureCriteria) => void
 }): JSX.Element {
     const mathAvailability = getMathAvailability(metric.metric_type)
     const allowedMathTypes = getAllowedMathTypes(metric.metric_type)
@@ -145,10 +154,16 @@ export function ExperimentMetricForm({
     const handleSetFilters = ({ actions, events, data_warehouse }: Partial<FilterType>): void => {
         const metricConfig = filterToMetricConfig(metric.metric_type, actions, events, data_warehouse)
         if (metricConfig) {
-            handleSetMetric({
-                ...metric,
-                ...metricConfig,
-            })
+            const updatedMetric = { ...metric, ...metricConfig }
+            /**
+             * Switching to a math type that doesn't support thresholds must clear any stale
+             * threshold, otherwise the disabled threshold input traps the value and outlier
+             * handling stays disabled with no way to recover.
+             */
+            if (isExperimentMeanMetric(updatedMetric) && !isThresholdAvailableForMath(updatedMetric.source.math)) {
+                updatedMetric.threshold = undefined
+            }
+            handleSetMetric(updatedMetric)
         }
     }
 
@@ -179,10 +194,12 @@ export function ExperimentMetricForm({
             if (newMetricType === ExperimentMetricType.MEAN && isExperimentMeanMetric(newMetric)) {
                 newMetric.source = sources[0]
             } else if (newMetricType === ExperimentMetricType.FUNNEL && isExperimentFunnelMetric(newMetric)) {
-                // Funnel metrics only support EventsNode and ActionsNode, not DataWarehouseNode
                 newMetric.series = sources.filter(
                     (s): s is ExperimentFunnelMetricStep =>
-                        s && (s.kind === NodeKind.EventsNode || s.kind === NodeKind.ActionsNode)
+                        s &&
+                        (s.kind === NodeKind.EventsNode ||
+                            s.kind === NodeKind.ActionsNode ||
+                            s.kind === NodeKind.ExperimentDataWarehouseNode)
                 )
             } else if (newMetricType === ExperimentMetricType.RATIO && isExperimentRatioMetric(newMetric)) {
                 newMetric.numerator = sources[0]
@@ -275,7 +292,7 @@ export function ExperimentMetricForm({
                         exposureCriteria && openExposureCriteriaModal
                             ? {
                                   size: 'xsmall',
-                                  onClick: () => openExposureCriteriaModal(),
+                                  onClick: () => openExposureCriteriaModal(exposureCriteria),
                                   icon: <IconPencil />,
                                   tooltip: 'Edit exposure criteria',
                               }
@@ -290,10 +307,12 @@ export function ExperimentMetricForm({
                             </>
                         ) : (
                             <>
-                                Counts only after exposure event (<Tag>$feature_flag_called</Tag> by default)
+                                Counts only after exposure event (<Tag>{EXPOSURE_DEFAULT_EVENT}</Tag> by
+                                default)
                             </>
                         )}
                         <Tooltip
+                            docLink="https://hanzo.ai/docs/experiments/exposures"
                             title={
                                 <div className="space-y-2">
                                     <p>
@@ -305,9 +324,6 @@ export function ExperimentMetricForm({
                                             ? 'The exposure event is shared across all metrics in this experiment.'
                                             : 'The exposure event will be configured at the experiment level and shared across all metrics.'}
                                     </p>
-                                    <Link to="https://hanzo.ai/docs/experiments/exposures">
-                                        Learn more in the docs
-                                    </Link>
                                 </div>
                             }
                         >
@@ -346,6 +362,25 @@ export function ExperimentMetricForm({
                                 </Link>
                             </div>
                         )}
+                        <ExperimentMetricThreshold
+                            math={metric.source.math}
+                            value={metric.threshold}
+                            onChange={(value) =>
+                                handleSetMetric({
+                                    ...metric,
+                                    threshold: value,
+                                    /**
+                                     * Setting a threshold disables outlier handling, so clear any stale
+                                     * bounds to keep the metric consistent with the UI and pass validation.
+                                     */
+                                    ...(value !== undefined && {
+                                        lower_bound_percentile: undefined,
+                                        upper_bound_percentile: undefined,
+                                        ignore_zeros: undefined,
+                                    }),
+                                })
+                            }
+                        />
                     </>
                 )}
 
@@ -364,11 +399,9 @@ export function ExperimentMetricForm({
                         // showNumericalPropsOnly={true}
                         mathAvailability={mathAvailability}
                         allowedMathTypes={allowedMathTypes}
-                        // Data warehouse is not supported for funnel metrics - enforced at schema level
-                        actionsTaxonomicGroupTypes={commonActionFilterProps.actionsTaxonomicGroupTypes?.filter(
-                            (type) => type !== 'data_warehouse'
-                        )}
+                        actionsTaxonomicGroupTypes={commonActionFilterProps.actionsTaxonomicGroupTypes}
                         propertiesTaxonomicGroupTypes={commonActionFilterProps.propertiesTaxonomicGroupTypes}
+                        dataWarehousePopoverFields={dataWarehousePopoverFields}
                     />
                 )}
 
@@ -609,7 +642,7 @@ export function ExperimentMetricForm({
                             { value: ExperimentMetricGoal.Decrease, label: 'Decrease' },
                         ]}
                     />
-                    <div className="text-muted text-sm">
+                    <div className="text-muted text-xs mt-1">
                         For example, conversion rates should increase, while bounce rates should decrease.
                     </div>
                 </div>
@@ -626,6 +659,12 @@ export function ExperimentMetricForm({
             {isExperimentMeanMetric(metric) && (
                 <>
                     <ExperimentMetricOutlierHandling metric={metric} handleSetMetric={handleSetMetric} />
+                    <SceneDivider />
+                </>
+            )}
+            {isExperimentRatioMetric(metric) && (
+                <>
+                    <ExperimentRatioMetricOutlierHandling metric={metric} handleSetMetric={handleSetMetric} />
                     <SceneDivider />
                 </>
             )}

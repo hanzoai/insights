@@ -1,9 +1,9 @@
 import { Edge, Node } from '@xyflow/react'
-import { z } from 'zod'
+import z from 'zod'
 
 import { CyclotronJobInputsValidationResult } from 'lib/components/CyclotronJob/CyclotronJobInputsValidation'
 
-import { UserBasicType } from '~/types'
+import { AccessControlLevel, UserBasicType } from '~/types'
 
 import { CyclotronJobInputSchemaTypeSchema, InsightsFlowActionSchema, InsightsFlowTriggerSchema } from './steps/types'
 
@@ -34,8 +34,17 @@ export const InsightsFlowSchema = z.object({
         .nullable(),
     conversion: z
         .object({
-            window_minutes: z.number(),
+            window_minutes: z.number().nullable(),
             filters: z.any(),
+            events: z
+                .array(
+                    z.object({
+                        filters: z.any().optional().nullable(),
+                        name: z.string().optional(),
+                    })
+                )
+                .optional(),
+            bytecode: z.array(z.union([z.string(), z.number()])).optional(), // Bytecode only present after save
         })
         .optional(),
     exit_condition: z.enum([
@@ -60,11 +69,10 @@ export const InsightsFlowTemplateSchema = InsightsFlowSchema.omit({ status: true
 
 export const InsightsFlowBatchJobSchema = z.object({
     id: z.string(),
-    insights_flow: z.string(),
-    variables: z.record(z.any()),
+    hog_flow: z.string(),
+    variables: z.record(z.string(), z.any()),
     status: z.enum(['waiting', 'queued', 'active', 'completed', 'cancelled', 'failed']),
     filters: z.any(),
-    scheduled_at: z.string().nullable(),
     created_at: z.string(),
     updated_at: z.string(),
 })
@@ -72,6 +80,8 @@ export const InsightsFlowBatchJobSchema = z.object({
 // NOTE: these are purposefully exported as interfaces to support kea typegen
 export interface InsightsFlow extends z.infer<typeof InsightsFlowSchema> {
     created_by?: UserBasicType | null
+    // Effective access level of the current user for this workflow (resource access control).
+    user_access_level?: AccessControlLevel
 }
 export interface InsightsFlowEdge extends z.infer<typeof InsightsFlowEdgeSchema> {}
 export interface InsightsFlowActionEdge extends Edge<{ edge: InsightsFlowEdge; label?: string }> {}
@@ -92,4 +102,16 @@ export interface InsightsFlowTemplate extends z.infer<typeof InsightsFlowTemplat
 
 export interface InsightsFlowBatchJob extends z.infer<typeof InsightsFlowBatchJobSchema> {
     created_by?: UserBasicType | null
+}
+
+export interface InsightsFlowSchedule {
+    id: string
+    rrule: string
+    starts_at: string
+    timezone?: string
+    variables?: Record<string, unknown>
+    status?: string
+    next_run_at?: string | null
+    created_at?: string
+    updated_at?: string
 }

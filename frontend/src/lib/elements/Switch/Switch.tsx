@@ -10,7 +10,8 @@ import { cn } from 'lib/utils/css-classes'
 export interface SwitchProps {
     className?: string
     onChange?: (newChecked: boolean) => void
-    checked: boolean
+    /** `'indeterminate'` shows a mixed state (centered handle with a dash); clicking it resolves to checked. */
+    checked: boolean | 'indeterminate'
     label?: string | JSX.Element
     labelClassName?: string
     id?: string
@@ -27,6 +28,8 @@ export interface SwitchProps {
     sliderColorOverrideChecked?: string
     sliderColorOverrideUnchecked?: string
     loading?: boolean
+    /** Forwarded to the switch element so autocapture can read them off the click. Autocapture only fires on the interactive (`onChange`) variant, which renders a button; a read-only switch renders a div and these never reach an autocapture event. */
+    [captureAttribute: `data-ph-capture-attribute-${string}`]: string | boolean | undefined
 }
 
 /** Counter used for collision-less automatic switch IDs. */
@@ -52,10 +55,11 @@ export const Switch: React.FunctionComponent<SwitchProps & React.RefAttributes<H
             sliderColorOverrideChecked,
             sliderColorOverrideUnchecked,
             loading = false,
+            ...captureAttributes
         },
         ref
     ): JSX.Element {
-        const id = useMemo(() => rawId || `switch-${switchCounter++}`, [rawId])
+        const id = useMemo(() => rawId || `lemon-switch-${switchCounter++}`, [rawId])
         const [isActive, setIsActive] = useState(false)
 
         const conditionalProps: { 'aria-label'?: string } = {}
@@ -81,14 +85,15 @@ export const Switch: React.FunctionComponent<SwitchProps & React.RefAttributes<H
                 id={id}
                 className={`Switch__button ${
                     sliderColorOverrideChecked || sliderColorOverrideUnchecked
-                        ? `bg-${checked ? sliderColorOverrideChecked : sliderColorOverrideUnchecked}`
+                        ? `bg-${checked === true ? sliderColorOverrideChecked : sliderColorOverrideUnchecked}`
                         : ''
                 }`}
                 type="button"
                 role="switch"
+                aria-checked={checked === 'indeterminate' ? 'mixed' : checked}
                 onClick={() => {
                     if (onChange && !loading) {
-                        onChange(!checked)
+                        onChange(checked !== true)
                     }
                 }}
                 onMouseDown={() => !loading && setIsActive(true)}
@@ -97,6 +102,7 @@ export const Switch: React.FunctionComponent<SwitchProps & React.RefAttributes<H
                 data-attr={dataAttr}
                 disabled={isDisabled}
                 {...conditionalProps}
+                {...captureAttributes}
             >
                 <div className="Switch__handle">
                     {loading && (
@@ -124,7 +130,8 @@ export const Switch: React.FunctionComponent<SwitchProps & React.RefAttributes<H
             <div
                 ref={ref}
                 className={clsx('Switch', className, `Switch--${size}`, {
-                    'Switch--checked': checked,
+                    'Switch--checked': checked === true,
+                    'Switch--indeterminate': checked === 'indeterminate',
                     'Switch--active': isActive,
                     'Switch--bordered': bordered,
                     'Switch--disabled': isDisabled,

@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 
 export enum InsightsJwtAudience {
     SUBSCRIPTION_PREFERENCES = 'insights:messaging:subscription_preferences',
+    WORKFLOWS_RESCHEDULE_PARKED = 'insights:workflows:reschedule_parked',
 }
 
 export class JWT {

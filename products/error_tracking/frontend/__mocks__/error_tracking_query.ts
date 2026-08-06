@@ -1,4 +1,5 @@
-import { range, uuid } from 'lib/utils'
+import { range } from 'lib/utils/arrays'
+import { uuid } from 'lib/utils/dom'
 
 import { ErrorTrackingQueryResponse, ErrorTrackingRelationalIssue } from '~/queries/schema/schema-general'
 
@@ -7,12 +8,12 @@ const eventProperties = JSON.stringify({
     $os_version: '10.15.7',
     $browser: 'Chrome',
     $device_type: 'Desktop',
-    $host: 'insights.hanzo.ai',
+    $host: 'us.hanzo.ai',
     distinct_id: 'person_id',
     $exception_message: "Cannot read properties of undefined (reading 'onLCP')",
     $exception_type: 'TypeError',
     $exception_fingerprint: 'fingerprint',
-    $exception_personURL: 'https://insights.hanzo.ai/project/:id/person/:person_id',
+    $exception_personURL: 'https://us.hanzo.ai/project/:id/person/:person_id',
     $exception_level: 'error',
     $sentry_event_id: '790b4d4b9ec6430fb88f18ba2dc7e7c4',
     $sentry_exception: {
@@ -83,8 +84,8 @@ const eventProperties = JSON.stringify({
     $sentry_exception__values__0__stacktrace__frames__2__colno: 117937,
     $sentry_exception__values__0__mechanism__type: 'onerror',
     $sentry_exception__values__0__mechanism__handled: false,
-    '$sentry_tags__Insights Person URL': 'https://insights.hanzo.ai/project/:project_id/person/:person_id',
-    '$sentry_tags__Insights Recording URL': 'https://insights.hanzo.ai/project/:project_id/replay/:recording_id',
+    '$sentry_tags__Insights Person URL': 'https://us.hanzo.ai/project/:project_id/person/:person_id',
+    '$sentry_tags__Insights Recording URL': 'https://us.hanzo.ai/project/:project_id/replay/:recording_id',
 })
 
 const errorTrackingTypeIssue: ErrorTrackingRelationalIssue = {

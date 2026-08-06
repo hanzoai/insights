@@ -7,9 +7,9 @@ export const template: InsightsFunctionTemplate = {
     id: 'template-url-masking',
     name: 'URL Parameter Masking',
     description: 'Masks sensitive information in URL parameters (query strings) of specified properties',
-    icon_url: '',
+    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png',
     category: ['Custom'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 // Function to check if parameter matches any mask pattern
 fun isParameterInList(paramName, paramsString) {

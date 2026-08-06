@@ -1,9 +1,10 @@
-from typing import Optional
+from dataclasses import dataclass
+from typing import Literal, Optional, overload
 
 import structlog
 import pydantic_core
 from pydantic import BaseModel
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import APIException, ValidationError
 
 from insights.schema import (
     DashboardFilter,
@@ -19,25 +20,89 @@ from insights.schema import (
 )
 
 from insights.insightsql.autocomplete import get_insightsql_autocomplete
-from insights.insightsql.compiler.bytecode import execute_iql
+from insights.insightsql.compiler.bytecode import execute_hog
 from insights.insightsql.constants import LimitContext
 from insights.insightsql.context import InsightsQLContext
-from insights.insightsql.database.database import Database
+from insights.insightsql.direct_connection import resolve_database_for_connection
+from insights.insightsql.errors import ExposedInsightsQLError, ResolutionError
 from insights.insightsql.metadata import get_insightsql_metadata
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 
 from insights.datastore.query_tagging import tag_queries
 from insights.cloud_utils import is_cloud
+from insights.event_usage import AnalyticsProps
+from insights.exceptions import DatabaseSchemaUnavailable
 from insights.exceptions_capture import capture_exception
-from insights.insightsql_queries.query_runner import CacheMissResponse, ExecutionMode, QueryResponse, get_query_runner
+from insights.insightsql_queries.query_runner import CacheMissResponse, ExecutionMode, QueryResponse, get_query_runner_or_none
 from insights.models import Team, User
+from insights.rbac.user_access_control import UserAccessControl, UserAccessControlError
 from insights.schema_migrations.upgrade import upgrade
 
-from products.data_warehouse.backend.models import DataWarehouseJoin
+from products.data_tools.backend.models.join import DataWarehouseJoin
 
 from common.scriptvm.python.debugger import color_bytecode
 
 logger = structlog.get_logger(__name__)
+
+
+@dataclass(frozen=True)
+class RawCachedQueryResponse:
+    """A cached query response whose `results` field is carried as raw JSON bytes.
+
+    `response.results` holds an empty-list placeholder; `raw_results` is the JSON-encoded
+    results segment straight from the cache, ready to be embedded into a JSON response
+    (e.g. via orjson.Fragment) without a parse/re-serialize round trip. Only produced when
+    a caller passes allow_raw_results=True.
+    """
+
+    response: BaseModel
+    raw_results: bytes
+
+
+# The overloads keep the public contract at `dict | BaseModel` for the vast majority of
+# callers: only allow_raw_results=True can produce a RawCachedQueryResponse.
+@overload
+def process_query_dict(
+    team: Team,
+    query_json: dict,
+    *,
+    dashboard_filters_json: Optional[dict] = ...,
+    variables_override_json: Optional[dict] = ...,
+    limit_context: Optional[LimitContext] = ...,
+    execution_mode: ExecutionMode = ...,
+    user: Optional[User] = ...,
+    user_access_control: Optional[UserAccessControl] = ...,
+    query_id: Optional[str] = ...,
+    insight_id: Optional[int] = ...,
+    dashboard_id: Optional[int] = ...,
+    is_query_service: bool = ...,
+    cache_age_seconds: Optional[int] = ...,
+    pagination_cursor: Optional[str] = ...,
+    analytics_props: Optional[AnalyticsProps] = ...,
+    allow_raw_results: Literal[False] = ...,
+) -> dict | BaseModel: ...
+
+
+@overload
+def process_query_dict(
+    team: Team,
+    query_json: dict,
+    *,
+    dashboard_filters_json: Optional[dict] = ...,
+    variables_override_json: Optional[dict] = ...,
+    limit_context: Optional[LimitContext] = ...,
+    execution_mode: ExecutionMode = ...,
+    user: Optional[User] = ...,
+    user_access_control: Optional[UserAccessControl] = ...,
+    query_id: Optional[str] = ...,
+    insight_id: Optional[int] = ...,
+    dashboard_id: Optional[int] = ...,
+    is_query_service: bool = ...,
+    cache_age_seconds: Optional[int] = ...,
+    pagination_cursor: Optional[str] = ...,
+    analytics_props: Optional[AnalyticsProps] = ...,
+    allow_raw_results: bool,
+) -> dict | BaseModel | RawCachedQueryResponse: ...
 
 
 def process_query_dict(
@@ -49,11 +114,16 @@ def process_query_dict(
     limit_context: Optional[LimitContext] = None,
     execution_mode: ExecutionMode = ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
     user: Optional[User] = None,
+    user_access_control: Optional[UserAccessControl] = None,
     query_id: Optional[str] = None,
     insight_id: Optional[int] = None,
     dashboard_id: Optional[int] = None,
     is_query_service: bool = False,
-) -> dict | BaseModel:
+    cache_age_seconds: Optional[int] = None,
+    pagination_cursor: Optional[str] = None,
+    analytics_props: Optional[AnalyticsProps] = None,
+    allow_raw_results: bool = False,
+) -> dict | BaseModel | RawCachedQueryResponse:
     upgraded_query_json = upgrade(query_json)
     try:
         model = QuerySchemaRoot.model_validate(upgraded_query_json)
@@ -97,11 +167,108 @@ def process_query_dict(
         limit_context=limit_context,
         execution_mode=execution_mode,
         user=user,
+        user_access_control=user_access_control,
         query_id=query_id,
         insight_id=insight_id,
         dashboard_id=dashboard_id,
         is_query_service=is_query_service,
+        cache_age_seconds=cache_age_seconds,
+        pagination_cursor=pagination_cursor,
+        analytics_props=analytics_props,
+        allow_raw_results=allow_raw_results,
     )
+
+
+def process_database_schema_query(
+    team: Team, query: DatabaseSchemaQuery, *, user: Optional[User] = None
+) -> DatabaseSchemaQueryResponse:
+    try:
+        _, database = resolve_database_for_connection(
+            team,
+            query.connectionId,
+            user=user,
+            error_factory=ValidationError,
+            modifiers=create_default_modifiers_for_team(team),
+        )
+        context = InsightsQLContext(team_id=team.pk, team=team, database=database, user=user)
+        serialized_tables = database.serialize(context, include_hidden_insights_tables=True)
+    except (APIException, ExposedInsightsQLError, ResolutionError, UserAccessControlError):
+        # These already carry an actionable message, and the query view maps them to a 4xx.
+        raise
+    except Exception as e:
+        # This request backs the SQL editor's table list. Untyped, it surfaces as a bare 500 with
+        # "A server error occurred.", which the sidebar can't tell apart from an empty project.
+        logger.exception(
+            "database_schema_query_failed", team_id=team.pk, connection_id=query.connectionId, error=str(e)
+        )
+        capture_exception(e, {"team_id": team.pk, "query_kind": "DatabaseSchemaQuery"})
+        raise DatabaseSchemaUnavailable() from e
+
+    table_names = set(serialized_tables.keys())
+    joins = DataWarehouseJoin.objects.filter(team_id=team.pk).exclude(deleted=True)
+    joins = joins.filter(source_table_name__in=table_names, joining_table_name__in=table_names)
+
+    join_models: list[DataWarehouseViewLink] = []
+    for join in joins.iterator():
+        join_models.append(
+            DataWarehouseViewLink.model_validate(
+                {
+                    "id": str(join.id),
+                    "source_table_name": join.source_table_name,
+                    "source_table_key": join.source_table_key,
+                    "joining_table_name": join.joining_table_name,
+                    "joining_table_key": join.joining_table_key,
+                    "field_name": join.field_name,
+                    "created_at": join.created_at.isoformat(),
+                }
+            )
+        )
+
+    return DatabaseSchemaQueryResponse(tables=serialized_tables, joins=join_models)
+
+
+@overload
+def process_query_model(
+    team: Team,
+    query: BaseModel,
+    *,
+    dashboard_filters: Optional[DashboardFilter] = ...,
+    variables_override: Optional[list[InsightsQLVariable]] = ...,
+    limit_context: Optional[LimitContext] = ...,
+    execution_mode: ExecutionMode = ...,
+    user: Optional[User] = ...,
+    user_access_control: Optional[UserAccessControl] = ...,
+    query_id: Optional[str] = ...,
+    insight_id: Optional[int] = ...,
+    dashboard_id: Optional[int] = ...,
+    is_query_service: bool = ...,
+    cache_age_seconds: Optional[int] = ...,
+    pagination_cursor: Optional[str] = ...,
+    analytics_props: Optional[AnalyticsProps] = ...,
+    allow_raw_results: Literal[False] = ...,
+) -> dict | BaseModel: ...
+
+
+@overload
+def process_query_model(
+    team: Team,
+    query: BaseModel,
+    *,
+    dashboard_filters: Optional[DashboardFilter] = ...,
+    variables_override: Optional[list[InsightsQLVariable]] = ...,
+    limit_context: Optional[LimitContext] = ...,
+    execution_mode: ExecutionMode = ...,
+    user: Optional[User] = ...,
+    user_access_control: Optional[UserAccessControl] = ...,
+    query_id: Optional[str] = ...,
+    insight_id: Optional[int] = ...,
+    dashboard_id: Optional[int] = ...,
+    is_query_service: bool = ...,
+    cache_age_seconds: Optional[int] = ...,
+    pagination_cursor: Optional[str] = ...,
+    analytics_props: Optional[AnalyticsProps] = ...,
+    allow_raw_results: bool,
+) -> dict | BaseModel | RawCachedQueryResponse: ...
 
 
 def process_query_model(
@@ -113,17 +280,39 @@ def process_query_model(
     limit_context: Optional[LimitContext] = None,
     execution_mode: ExecutionMode = ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
     user: Optional[User] = None,
+    user_access_control: Optional[UserAccessControl] = None,
     query_id: Optional[str] = None,
     insight_id: Optional[int] = None,
     dashboard_id: Optional[int] = None,
     is_query_service: bool = False,
     cache_age_seconds: Optional[int] = None,
-) -> dict | BaseModel:
-    result: dict | BaseModel
+    pagination_cursor: Optional[str] = None,
+    analytics_props: Optional[AnalyticsProps] = None,
+    allow_raw_results: bool = False,
+) -> dict | BaseModel | RawCachedQueryResponse:
+    result: dict | BaseModel | RawCachedQueryResponse
 
-    try:
-        query_runner = get_query_runner(query, team, limit_context=limit_context)
-    except ValueError:  # This query doesn't run via query runner
+    if isinstance(query, InsightsQLAutocomplete):
+        _, database = resolve_database_for_connection(
+            team,
+            query.connectionId,
+            user=user,
+            error_factory=ValidationError,
+            modifiers=create_default_modifiers_for_team(team),
+        )
+        return get_insightsql_autocomplete(query=query, team=team, database_arg=database, user=user)
+
+    if isinstance(query, InsightsQLMetadata):
+        metadata_query = InsightsQLMetadata.model_validate(query)
+        return get_insightsql_metadata(query=metadata_query, team=team, user=user)
+
+    if isinstance(query, DatabaseSchemaQuery):
+        return process_database_schema_query(team, query, user=user)
+
+    query_runner = get_query_runner_or_none(
+        query, team, limit_context=limit_context, user=user, user_access_control=user_access_control
+    )
+    if query_runner is None:  # This query doesn't run via query runner
         if hasattr(query, "source") and isinstance(query.source, BaseModel):
             result = process_query_model(
                 team,
@@ -133,11 +322,14 @@ def process_query_model(
                 limit_context=limit_context,
                 execution_mode=execution_mode,
                 user=user,
+                user_access_control=user_access_control,
                 query_id=query_id,
                 insight_id=insight_id,
                 dashboard_id=dashboard_id,
                 is_query_service=is_query_service,
                 cache_age_seconds=cache_age_seconds,
+                analytics_props=analytics_props,
+                allow_raw_results=allow_raw_results,
             )
         elif execution_mode == ExecutionMode.CACHE_ONLY_NEVER_CALCULATE:
             # Caching is handled by query runners, so in this case we can only return a cache miss
@@ -147,44 +339,16 @@ def process_query_model(
                 return {"results": "Script queries currently require staff user privileges."}
 
             try:
-                iql_result = execute_iql(query.code or "", team=team)
-                bytecode = iql_result.bytecodes.get("root", None)
+                hog_result = execute_hog(query.code or "", team=team)
+                bytecode = hog_result.bytecodes.get("root", None)
                 result = HogQueryResponse(
-                    results=iql_result.result,
+                    results=hog_result.result,
                     bytecode=bytecode,
                     coloredBytecode=color_bytecode(bytecode) if bytecode else None,
-                    stdout="\n".join(iql_result.stdout),
+                    stdout="\n".join(hog_result.stdout),
                 )
             except Exception as e:
                 result = HogQueryResponse(results=f"ERROR: {str(e)}")
-        elif isinstance(query, InsightsQLAutocomplete):
-            result = get_insightsql_autocomplete(query=query, team=team)
-        elif isinstance(query, InsightsQLMetadata):
-            metadata_query = InsightsQLMetadata.model_validate(query)
-            metadata_response = get_insightsql_metadata(query=metadata_query, team=team)
-            result = metadata_response
-        elif isinstance(query, DatabaseSchemaQuery):
-            joins = DataWarehouseJoin.objects.filter(team_id=team.pk).exclude(deleted=True)
-            database = Database.create_for(team=team, modifiers=create_default_modifiers_for_team(team))
-            context = InsightsQLContext(team_id=team.pk, team=team, database=database)
-            result = DatabaseSchemaQueryResponse(
-                tables=database.serialize(context, include_hidden_insights_tables=True),
-                joins=[
-                    DataWarehouseViewLink.model_validate(
-                        {
-                            "id": str(join.id),
-                            "source_table_name": join.source_table_name,
-                            "source_table_key": join.source_table_key,
-                            "joining_table_name": join.joining_table_name,
-                            "joining_table_key": join.joining_table_key,
-                            "field_name": join.field_name,
-                            "configuration": join.configuration,
-                            "created_at": join.created_at.isoformat(),
-                        }
-                    )
-                    for join in joins
-                ],
-            )
         else:
             raise ValidationError(f"Unsupported query kind: {query.__class__.__name__}")
     else:  # Query runner available - it will handle execution as well as caching
@@ -192,7 +356,11 @@ def process_query_model(
             query_runner.apply_dashboard_filters(dashboard_filters)
         if variables_override:
             query_runner.apply_variable_overrides(variables_override)
+        if pagination_cursor:
+            query_runner.apply_pagination_cursor(pagination_cursor)
         query_runner.is_query_service = is_query_service
+        if allow_raw_results:
+            query_runner.serve_raw_cached_results = True
 
         result = query_runner.run(
             execution_mode=execution_mode,
@@ -201,6 +369,10 @@ def process_query_model(
             insight_id=insight_id,
             dashboard_id=dashboard_id,
             cache_age_seconds=cache_age_seconds,
+            analytics_props=analytics_props,
         )
+        raw_results = query_runner.raw_cached_results_bytes
+        if raw_results is not None and isinstance(result, BaseModel):
+            return RawCachedQueryResponse(response=result, raw_results=raw_results)
 
     return result

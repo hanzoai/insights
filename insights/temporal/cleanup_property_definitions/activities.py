@@ -7,7 +7,6 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity
 
 from insights.models import PropertyDefinition, Team
-from insights.models.event_property import EventProperty
 from insights.sync import database_sync_to_async
 from insights.temporal.cleanup_property_definitions.types import (
     CleanupPropertyDefinitionsError,
@@ -17,6 +16,8 @@ from insights.temporal.cleanup_property_definitions.types import (
 )
 from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_write_only_logger
+
+from products.event_definitions.backend.models.event_property import EventProperty
 
 LOGGER = get_write_only_logger()
 

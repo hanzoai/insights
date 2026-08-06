@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Send conversion events to LinkedIn Ads',
     icon_url: '/static/services/linkedin.png',
     category: ['Advertisement'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 let body := {
     'conversion': f'urn:lla:llaPartnerConversion:{inputs.conversionRuleId}',

@@ -3,8 +3,8 @@ import { useActions } from 'kea'
 import { Button } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { IconErrorOutline } from 'lib/elements/icons'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { urls } from 'scenes/urls'
 
 import { parseErrorMessage } from '~/queries/query'
@@ -19,10 +19,18 @@ type MetricErrorStateProps = {
     metric: ExperimentMetric
     query?: Record<string, any>
     onRetry?: () => void
+    /** Disables the "Try again" button (with a tooltip) while a recalculation is already in flight. */
+    retryDisabledReason?: string
     height?: number
 }
 
-export const MetricErrorState = ({ error, query, onRetry, height = 200 }: MetricErrorStateProps): JSX.Element => {
+export const MetricErrorState = ({
+    error,
+    query,
+    onRetry,
+    retryDisabledReason,
+    height = 200,
+}: MetricErrorStateProps): JSX.Element => {
     const { openSupportForm } = useActions(supportLogic)
 
     const errorMessage = parseErrorMessage(error.detail)
@@ -51,6 +59,7 @@ export const MetricErrorState = ({ error, query, onRetry, height = 200 }: Metric
                         type="primary"
                         size="xsmall"
                         onClick={onRetry}
+                        disabledReason={retryDisabledReason}
                         sideAction={
                             query
                                 ? {

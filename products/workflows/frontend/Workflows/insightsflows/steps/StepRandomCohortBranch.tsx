@@ -8,7 +8,7 @@ import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input'
 import { Label } from 'lib/elements/Label'
 
-import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { InsightsFlow, InsightsFlowAction } from '../types'
 import { StepSchemaErrors } from './components/StepSchemaErrors'
 import { useDebouncedNameInputs } from './utils'
@@ -19,10 +19,10 @@ export function StepRandomCohortBranchConfiguration({
     node: Node<Extract<InsightsFlowAction, { type: 'random_cohort_branch' }>>
 }): JSX.Element {
     const action = node.data
-    const { cohorts } = action.config
+    const cohorts = action.config.cohorts ?? []
 
-    const { edgesByActionId } = useValues(insightsFlowEditorLogic)
-    const { setWorkflowAction, setWorkflowActionEdges } = useActions(insightsFlowEditorLogic)
+    const { edgesByActionId } = useValues(hogFlowEditorLogic)
+    const { setWorkflowAction, setWorkflowActionEdges } = useActions(hogFlowEditorLogic)
 
     const nodeEdges = edgesByActionId[action.id] ?? []
 

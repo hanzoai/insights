@@ -1,61 +1,88 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { useEffect, useState } from 'react'
 
-import { IconGear, IconPencil, IconWarning } from '@hanzo/icons'
-import { Button, Modal, Tag, Link, ProfilePicture, Tooltip } from '@hanzo/elements'
+import { IconPencil, IconWarning } from '@hanzo/icons'
+import { Button, Tag, Link, ProfilePicture, Tooltip } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { TextArea } from 'lib/elements/TextArea/TextArea'
 import { IconOpenInNew } from 'lib/elements/icons'
 import { Label } from 'lib/ui/Label/Label'
-import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'
 
-import { ExperimentProgressStatus, ExperimentStatsMethod } from '~/types'
+import { ExperimentStatsMethod, ExperimentStatus } from '~/types'
 
 import { CONCLUSION_DISPLAY_CONFIG } from '../constants'
 import { experimentLogic } from '../experimentLogic'
-import type { ExperimentSceneLogicProps } from '../experimentSceneLogic'
-import { getExperimentStatus } from '../experimentsLogic'
+import { getExperimentStatus, isExperimentPaused } from '../experimentsLogic'
 import { modalsLogic } from '../modalsLogic'
 import { ExperimentDuration } from './ExperimentDuration'
-import { ExperimentReloadAction } from './ExperimentReloadAction'
-import { RunningTimeNew } from './RunningTimeNew'
-import { StatsMethodModal } from './StatsMethodModal'
-import { StatusTag } from './components'
+import { ExperimentReloadActionContainer } from './ExperimentReloadActionContainer'
+import { flagCleanupTaskLogic } from './flagCleanupTaskLogic'
+import { RunningTime } from './RunningTime'
+import { StatusTag } from './StatusTag'
 
-export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.Element {
+function FlagCleanupLine({ experimentId, taskId }: { experimentId: number; taskId: string }): JSX.Element | null {
+    const { cleanupTask } = useValues(flagCleanupTaskLogic({ experimentId }))
+
+    if (!cleanupTask) {
+        return null
+    }
+
+    let text = 'Preparing cleanup PR…'
+    let prUrl: string | null = null
+    if (cleanupTask.is_terminal) {
+        if (cleanupTask.run_status === 'completed' && cleanupTask.pr_url) {
+            text = 'Cleanup PR opened'
+            prUrl = cleanupTask.pr_url
+        } else if (cleanupTask.run_status === 'completed') {
+            text = 'Cleanup found no flag code to remove'
+        } else if (cleanupTask.run_status === 'failed') {
+            text = 'Cleanup PR failed'
+        } else {
+            text = 'Cleanup PR cancelled'
+        }
+    }
+
+    const isExternalLink = prUrl !== null
+    // The task page 404s for everyone but the task's creator — hide the internal link from others.
+    const showLink = isExternalLink || cleanupTask.can_view_task
+
+    return (
+        <div className="text-xs text-muted mt-1 mb-3 flex items-center gap-1">
+            {text}
+            {showLink && (
+                <>
+                    ·
+                    <Link
+                        target={isExternalLink ? '_blank' : undefined}
+                        className="flex items-center gap-0.5"
+                        to={prUrl ?? urls.taskDetail(taskId)}
+                    >
+                        {isExternalLink ? (
+                            <>
+                                View on GitHub <IconOpenInNew fontSize="12" />
+                            </>
+                        ) : (
+                            'View task'
+                        )}
+                    </Link>
+                </>
+            )}
+        </div>
+    )
+}
+
+export function Info(): JSX.Element {
     const {
         experiment,
-        legacyPrimaryMetricsResults,
-        legacySecondaryMetricsResults,
         primaryMetricsResults,
         secondaryMetricsResults,
-        primaryMetricsResultsLoading,
-        secondaryMetricsResultsLoading,
         statsMethod,
-        usesNewQueryRunner,
         isExperimentDraft,
         isSingleVariantShipped,
         shippedVariantKey,
-        autoRefresh,
     } = useValues(experimentLogic)
-    const { updateExperiment, refreshExperimentResults, reportExperimentMetricsRefreshed } = useActions(experimentLogic)
-    const {
-        openEditConclusionModal,
-        openDescriptionModal,
-        closeDescriptionModal,
-        openStatsEngineModal,
-        openRunningTimeConfigModal,
-    } = useActions(modalsLogic)
-    const { isDescriptionModalOpen } = useValues(modalsLogic)
-
-    const [tempDescription, setTempDescription] = useState(experiment.description || '')
-
-    useEffect(() => {
-        setTempDescription(experiment.description || '')
-    }, [experiment.description])
+    const { openEditConclusionModal, openRunningTimeConfigModal } = useActions(modalsLogic)
 
     const { created_by } = experiment
 
@@ -65,25 +92,22 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
 
     // Get the last refresh timestamp from either legacy or new results format
     // Check both primary and secondary metrics for the most recent timestamp
-    const lastRefresh =
-        legacyPrimaryMetricsResults?.[0]?.last_refresh ||
-        legacySecondaryMetricsResults?.[0]?.last_refresh ||
-        primaryMetricsResults?.[0]?.last_refresh ||
-        secondaryMetricsResults?.[0]?.last_refresh
+    const lastRefresh = primaryMetricsResults?.[0]?.last_refresh || secondaryMetricsResults?.[0]?.last_refresh
 
     const status = getExperimentStatus(experiment)
+    const isPaused = isExperimentPaused(experiment)
 
     return (
         <>
-            <div className="grid gap-2 overflow-hidden grid-cols-1 min-[1400px]:grid-cols-[2fr_3fr]">
+            <div className="grid gap-2 overflow-hidden grid-cols-1 min-[1100px]:grid-cols-[1fr_1fr]">
                 {/* Column 1 */}
                 <div className="flex flex-col gap-0 overflow-hidden min-w-0">
                     {/* Row 1: Status, Feature flag, Stats engine */}
-                    <div className="flex flex-wrap gap-x-8 gap-y-2">
+                    <div className="flex flex-wrap gap-x-4 gap-y-2">
                         <div className="flex flex-col" data-attr="experiment-status">
                             <Label intent="menu">Status</Label>
                             <div className="flex gap-1">
-                                {status === ExperimentProgressStatus.Paused ? (
+                                {isPaused ? (
                                     <Tooltip
                                         placement="bottom"
                                         title="Your experiment is paused. The linked flag is disabled and no data is being collected."
@@ -108,7 +132,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                             <div className="flex flex-col max-w-[500px]">
                                 <Label intent="menu">Feature flag</Label>
                                 <div className="flex gap-1 items-center">
-                                    {status === ExperimentProgressStatus.Paused && (
+                                    {isPaused && (
                                         <Tooltip
                                             placement="bottom"
                                             title="Your experiment is paused. The linked flag is disabled and no data is being collected."
@@ -121,7 +145,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                                         </Tooltip>
                                     )}
                                     <CopyToClipboardInline
-                                        iconStyle={{ color: 'var(--button-icon-opacity)' }}
+                                        iconStyle={{ color: 'var(--lemon-button-icon-opacity)' }}
                                         className="font-normal text-sm"
                                         description="feature flag key"
                                     >
@@ -143,111 +167,32 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                         )}
                         <div className="flex flex-col">
                             <Label intent="menu">Statistics</Label>
-                            <div className="inline-flex deprecated-space-x-2">
-                                <span>
-                                    {statsMethod === ExperimentStatsMethod.Bayesian ? 'Bayesian' : 'Frequentist'}
-                                    {' / '}
-                                    {statsMethod === ExperimentStatsMethod.Bayesian
-                                        ? `${((experiment.stats_config?.bayesian?.ci_level ?? 0.95) * 100).toFixed(0)}%`
-                                        : `${((1 - (experiment.stats_config?.frequentist?.alpha ?? 0.05)) * 100).toFixed(0)}%`}
-                                </span>
-                                {usesNewQueryRunner && (
-                                    <>
-                                        <Button
-                                            type="secondary"
-                                            size="xsmall"
-                                            onClick={() => {
-                                                openStatsEngineModal()
-                                            }}
-                                            icon={<IconGear />}
-                                            tooltip="Configure statistics"
-                                        />
-                                        <StatsMethodModal />
-                                    </>
-                                )}
-                            </div>
+                            <span>
+                                {statsMethod === ExperimentStatsMethod.Bayesian ? 'Bayesian' : 'Frequentist'}
+                                {' / '}
+                                {statsMethod === ExperimentStatsMethod.Bayesian
+                                    ? `${((experiment.stats_config?.bayesian?.ci_level ?? 0.95) * 100).toFixed(0)}%`
+                                    : `${((1 - (experiment.stats_config?.frequentist?.alpha ?? 0.05)) * 100).toFixed(0)}%`}
+                            </span>
                         </div>
-                    </div>
-
-                    <div className="w-[500px]">
-                        <div className="flex items-center gap-2 mt-2">
-                            <Label intent="menu">Hypothesis</Label>
-                            <Button
-                                type="secondary"
-                                size="xsmall"
-                                icon={<IconPencil />}
-                                onClick={openDescriptionModal}
-                            />
-                        </div>
-                        {experiment.description ? (
-                            <p className={cn('m-0 mt-2')}>{experiment.description}</p>
-                        ) : (
-                            <p className={cn('m-0 mt-2 text-secondary italic')}>Add your hypothesis for this test</p>
-                        )}
-
-                        <Modal
-                            isOpen={isDescriptionModalOpen}
-                            onClose={closeDescriptionModal}
-                            title="Edit hypothesis"
-                            footer={
-                                <div className="flex items-center gap-2 justify-end">
-                                    <Button type="secondary" onClick={closeDescriptionModal}>
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        type="primary"
-                                        onClick={() => {
-                                            updateExperiment({ description: tempDescription })
-                                            closeDescriptionModal()
-                                        }}
-                                    >
-                                        Save
-                                    </Button>
-                                </div>
-                            }
-                        >
-                            <TextArea
-                                className="w-full"
-                                value={tempDescription}
-                                onChange={(value) => setTempDescription(value)}
-                                placeholder="Add your hypothesis for this test"
-                                minRows={6}
-                                maxLength={400}
-                            />
-                        </Modal>
                     </div>
                 </div>
 
                 {/* Column 2 */}
-                <div className="flex flex-col gap-4 overflow-hidden items-start min-[1400px]:items-end min-w-0">
+                <div className="flex flex-col gap-4 overflow-hidden items-start min-[1100px]:items-end min-w-0">
                     {/* Row 1: Duration (date pickers) - only for launched experiments */}
                     {!isExperimentDraft && <ExperimentDuration />}
 
                     {/* Row 2: Running time, Last refreshed, Created by */}
-                    <div className="flex flex-col overflow-hidden items-start min-[1400px]:items-end">
+                    <div className="flex flex-col overflow-hidden items-start min-[1100px]:items-end">
                         <div className="flex flex-wrap gap-x-8 gap-y-2 justify-end">
-                            {tabId && (
-                                <RunningTimeNew
-                                    experiment={experiment}
-                                    tabId={tabId}
-                                    onClick={openRunningTimeConfigModal}
-                                    isExperimentDraft={isExperimentDraft}
-                                />
-                            )}
-                            {experiment.start_date && (
-                                <ExperimentReloadAction
-                                    isRefreshing={primaryMetricsResultsLoading || secondaryMetricsResultsLoading}
-                                    lastRefresh={lastRefresh}
-                                    onClick={() => {
-                                        // Track manual refresh click
-                                        reportExperimentMetricsRefreshed(experiment, true, {
-                                            triggered_by: 'manual',
-                                            auto_refresh_enabled: autoRefresh.enabled,
-                                            auto_refresh_interval: autoRefresh.interval,
-                                        })
-                                        refreshExperimentResults(true)
-                                    }}
-                                />
+                            <RunningTime
+                                experiment={experiment}
+                                onClick={openRunningTimeConfigModal}
+                                isExperimentDraft={isExperimentDraft}
+                            />
+                            {status !== ExperimentStatus.Draft && (
+                                <ExperimentReloadActionContainer experiment={experiment} lastRefresh={lastRefresh} />
                             )}
                             <div className="flex flex-col">
                                 <Label intent="menu">Created by</Label>
@@ -259,7 +204,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
             </div>
             <div className="flex gap-6">
                 {experiment.conclusion && experiment.end_date && (
-                    <div className="w-[500px]">
+                    <div className="max-w-[500px]">
                         <div className="flex items-center gap-2">
                             <Label intent="menu">Conclusion</Label>
                             <Button
@@ -282,6 +227,12 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                                 </span>
                             </div>
                             <div>{experiment.conclusion_comment}</div>
+                            {experiment.flag_cleanup_task_id && typeof experiment.id === 'number' && (
+                                <FlagCleanupLine
+                                    experimentId={experiment.id}
+                                    taskId={experiment.flag_cleanup_task_id}
+                                />
+                            )}
                         </div>
                     </div>
                 )}

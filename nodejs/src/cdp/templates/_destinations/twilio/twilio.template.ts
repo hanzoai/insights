@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Send SMS messages using Twilio',
     icon_url: '/static/services/twilio.png',
     category: ['Communication'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 let toNumber := inputs.to_number
 let message := inputs.message

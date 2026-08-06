@@ -32,6 +32,12 @@ def _select(
     return parsed
 
 
+def prop_read(blob: str, *keys: Union[str, int]) -> ast.PropertyAccess:
+    """The lowered form of a `blob.key...` property read: `prop_read("properties", "email")` matches `properties.email`
+    after lowering. Build expected clauses with it via placeholders, e.g. `_expr("{e} = 'x'", {"e": prop_read(...)})`."""
+    return ast.PropertyAccess(expr=ast.Field(chain=[blob]), keys=list(keys))
+
+
 class RemoveHiddenAliases(CloningVisitor):
     def visit_alias(self, node):
         if node.hidden:
@@ -60,15 +66,19 @@ class TestPersonWhereClauseExtractor(DatastoreTestMixin, APIBaseTest):
 
         assert isinstance(new_select, ast.SelectQuery)
         assert isinstance(new_select.select_from, ast.JoinExpr)
-        assert isinstance(new_select.select_from.next_join, ast.JoinExpr)
-        assert isinstance(new_select.select_from.next_join.next_join, ast.JoinExpr)
-        assert isinstance(new_select.select_from.next_join.next_join.next_join, ast.JoinExpr)
-        assert isinstance(new_select.select_from.next_join.next_join.next_join.table, ast.SelectQuery)
 
-        assert new_select.select_from.next_join.next_join.alias == "events__pdi"
-        assert new_select.select_from.next_join.next_join.next_join.alias == "events__pdi__person"
+        pdi_join = new_select.select_from.next_join
+        while pdi_join is not None and pdi_join.alias != "events__pdi":
+            pdi_join = pdi_join.next_join
+        assert pdi_join is not None, "events__pdi join not found"
 
-        where = new_select.select_from.next_join.next_join.next_join.table.where
+        person_join = pdi_join.next_join
+        while person_join is not None and person_join.alias != "events__pdi__person":
+            person_join = person_join.next_join
+        assert person_join is not None, "events__pdi__person join not found"
+        assert isinstance(person_join.table, ast.SelectQuery)
+
+        where = person_join.table.where
         if where is None:
             return None
 
@@ -82,12 +92,12 @@ class TestPersonWhereClauseExtractor(DatastoreTestMixin, APIBaseTest):
 
     def test_person_properties(self):
         actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai'")
-        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
+        expected = _expr("{e} = 'jimmy@hanzo.ai'", {"e": prop_read("properties", "email")})
         assert actual == expected
 
     def test_person_properties_andor_1(self):
         actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or false")
-        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
+        expected = _expr("{e} = 'jimmy@hanzo.ai'", {"e": prop_read("properties", "email")})
         assert actual == expected
 
     def test_person_properties_andor_2(self):
@@ -98,28 +108,40 @@ class TestPersonWhereClauseExtractor(DatastoreTestMixin, APIBaseTest):
         actual = self.get_clause(
             "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' and person.properties.email = 'timmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@hanzo.ai' and properties.email = 'timmy@hanzo.ai'")
+        expected = _expr(
+            "{e1} = 'jimmy@hanzo.ai' and {e2} = 'timmy@hanzo.ai'",
+            {"e1": prop_read("properties", "email"), "e2": prop_read("properties", "email")},
+        )
         assert actual == expected
 
     def test_person_properties_andor_4(self):
         actual = self.get_clause(
             "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or person.properties.email = 'timmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@hanzo.ai' or properties.email = 'timmy@hanzo.ai'")
+        expected = _expr(
+            "{e1} = 'jimmy@hanzo.ai' or {e2} = 'timmy@hanzo.ai'",
+            {"e1": prop_read("properties", "email"), "e2": prop_read("properties", "email")},
+        )
         assert actual == expected
 
     def test_person_properties_andor_5(self):
         actual = self.get_clause(
             "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or (1 and person.properties.email = 'timmy@hanzo.ai')"
         )
-        expected = _expr("properties.email = 'jimmy@hanzo.ai' or properties.email = 'timmy@hanzo.ai'")
+        expected = _expr(
+            "{e1} = 'jimmy@hanzo.ai' or {e2} = 'timmy@hanzo.ai'",
+            {"e1": prop_read("properties", "email"), "e2": prop_read("properties", "email")},
+        )
         assert actual == expected
 
     def test_person_properties_andor_6(self):
         actual = self.get_clause(
             "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or (0 or person.properties.email = 'timmy@hanzo.ai')"
         )
-        expected = _expr("properties.email = 'jimmy@hanzo.ai' or properties.email = 'timmy@hanzo.ai'")
+        expected = _expr(
+            "{e1} = 'jimmy@hanzo.ai' or {e2} = 'timmy@hanzo.ai'",
+            {"e1": prop_read("properties", "email"), "e2": prop_read("properties", "email")},
+        )
         assert actual == expected
 
     def test_person_properties_andor_7(self):
@@ -132,7 +154,7 @@ class TestPersonWhereClauseExtractor(DatastoreTestMixin, APIBaseTest):
         actual = self.get_clause(
             "SELECT * FROM events WHERE event == '$pageview' and person.properties.email = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
+        expected = _expr("{e} = 'jimmy@hanzo.ai'", {"e": prop_read("properties", "email")})
         assert actual == expected
 
     def test_person_properties_andor_9(self):
@@ -151,26 +173,26 @@ class TestPersonWhereClauseExtractor(DatastoreTestMixin, APIBaseTest):
         actual = self.get_clause(
             "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' and person.properties.email = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
+        expected = _expr("{e} = 'jimmy@hanzo.ai'", {"e": prop_read("properties", "email")})
         assert actual == expected
 
     def test_person_array(self):
         actual = self.get_clause("SELECT * FROM events WHERE person.properties.email IN ['jimmy@hanzo.ai']")
-        expected = _expr("properties.email IN ['jimmy@hanzo.ai']")
+        expected = _expr("{e} IN ['jimmy@hanzo.ai']", {"e": prop_read("properties", "email")})
         assert actual == expected
 
     def test_person_properties_function_calls(self):
         actual = self.get_clause(
             "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' and toString(person.properties.email) = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("toString(properties.email) = 'jimmy@hanzo.ai'")
+        expected = _expr("toString({e}) = 'jimmy@hanzo.ai'", {"e": prop_read("properties", "email")})
         assert actual == expected
 
     def test_person_properties_function_call_args(self):
         actual = self.get_clause(
             "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' and substring(person.properties.email, 10) = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("substring(properties.email, 10) = 'jimmy@hanzo.ai'")
+        expected = _expr("substring({e}, 10) = 'jimmy@hanzo.ai'", {"e": prop_read("properties", "email")})
         assert actual == expected
 
     def test_person_properties_function_call_args_complex(self):
@@ -198,6 +220,6 @@ class TestPersonWhereClauseExtractor(DatastoreTestMixin, APIBaseTest):
         )
         actual = self.print_query("SELECT * FROM events WHERE person.properties.person_boolean = false")
         assert (
-            f"ifNull(equals(toBool(transform(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(person.properties"
+            f"ifNull(equals(accurateCastOrNull(transform(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(person.properties"
             in actual
         )

@@ -1,15 +1,19 @@
 from datetime import UTC, date, datetime
-from typing import Any, Optional, cast
+from typing import Any, ClassVar, Optional, cast
 from uuid import UUID
 
 import pytest
 from freezegun import freeze_time
 from insights.test.base import BaseTest
+from unittest.mock import patch
 
 from django.test import override_settings
 
 from parameterized import parameterized
 
+from insights.schema import InsightsQLQueryModifiers
+
+import insights.insightsql.resolver_utils as resolver_utils
 from insights.insightsql import ast
 from insights.insightsql.constants import MAX_SELECT_RETURNED_ROWS
 from insights.insightsql.context import InsightsQLContext
@@ -22,12 +26,16 @@ from insights.insightsql.database.models import (
     StringJSONDatabaseField,
     Table,
     TableNode,
+    UUIDDatabaseField,
 )
 from insights.insightsql.database.schema.events import EventsTable
+from insights.insightsql.database.schema.persons import PersonsTable
 from insights.insightsql.errors import QueryError
+from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_and_print_ast, print_prepared_ast
 from insights.insightsql.resolver import ResolutionError, resolve_types
+from insights.insightsql.resolver_utils import extract_base_table_types, lookup_field_by_name
 from insights.insightsql.test.utils import pretty_dataclasses
 from insights.insightsql.visitor import clone_expr
 
@@ -50,8 +58,20 @@ class TestResolver(BaseTest):
             "insightsql",
         )[0]
 
+    # _fetch_sources hits Postgres a dozen times and its inputs never change within this class
+    # (fixed team, no warehouse objects), so cache the fetched sources per effective modifiers —
+    # the only input that varies (via @override_settings). Building the Database stays per-test
+    # because several tests mutate their instance's tables.
+    _sources_cache: ClassVar[dict[str, Any]] = {}
+
     def setUp(self):
-        self.database = Database.create_for(team=self.team)
+        modifiers = create_default_modifiers_for_team(self.team)
+        cache_key = modifiers.model_dump_json()
+        sources = TestResolver._sources_cache.get(cache_key)
+        if sources is None:
+            sources = Database._fetch_sources(team=self.team, modifiers=modifiers)
+            TestResolver._sources_cache[cache_key] = sources
+        self.database = Database._build_from_sources(sources)
         self.context = InsightsQLContext(database=self.database, team_id=self.team.pk, enable_select_queries=True)
 
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -81,6 +101,341 @@ class TestResolver(BaseTest):
         expr = self._select("SELECT event as ee, ee, ee as e, e.timestamp FROM events e WHERE e.event = 'test'")
         expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
+
+    def test_resolve_table_column_aliases_dialect_guard(self):
+        expr = self._select("SELECT 1 FROM events AS e (event_alias)")
+
+        # Resolver allows column_aliases in any dialect; the printer enforces the dialect guard
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert isinstance(resolved.select_from, ast.JoinExpr)
+        assert resolved.select_from.column_aliases == ["event_alias"]
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(resolved.select_from, ast.JoinExpr)
+        assert resolved.select_from.column_aliases == ["event_alias"]
+
+    def test_resolve_limit_percent_dialect_guard(self):
+        expr = self._select("SELECT 1 FROM events LIMIT 10 %")
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert resolved.limit_percent is True
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert resolved.limit_percent is True
+
+    def test_resolve_limit_percent_expression_guard_datastore(self):
+        expr = self._select("SELECT 1 FROM events LIMIT (60 + 7) %")
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="datastore")
+        self.assertEqual(
+            str(context.exception),
+            "LIMIT percent with expressions is not supported in datastore dialect",
+        )
+
+    def test_resolve_limit_percent_range_guard(self):
+        expr = self._select("SELECT 1 FROM events LIMIT (100.1) %")
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="postgres")
+        self.assertEqual(
+            str(context.exception),
+            "Limit percent must be between 0 and 100",
+        )
+
+    @parameterized.expand(
+        [
+            ("current_date",),
+            ("current_time",),
+            ("current_timestamp",),
+            ("localtime",),
+            ("localtimestamp",),
+        ]
+    )
+    def test_postgres_current_date_keyword_resolves_to_keyword(self, keyword: str):
+        expr = self._select(f"SELECT {keyword}")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+
+        assert len(resolved.select) == 1
+        select_expr = resolved.select[0]
+        assert isinstance(select_expr, ast.Keyword)
+        assert select_expr.name == keyword
+
+    def test_postgres_current_date_alias_not_treated_as_keyword(self):
+        expr = self._select(
+            """
+            SELECT
+                distinct_id as current_date
+            FROM
+                events
+            WHERE
+                current_date is not null
+            """
+        )
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+
+        assert isinstance(resolved.where, ast.CompareOperation)
+        left = resolved.where.left
+        if isinstance(left, ast.Alias):
+            left = left.expr
+        assert isinstance(left, ast.Field)
+
+    @parameterized.expand(
+        [
+            ("events.created_at", None),
+            ("created_at", None),
+            ("e.created_at", "e"),
+            ("events.created_at", "e"),
+        ]
+    )
+    def test_resolve_exclude_qualified_columns(self, exclude, alias):
+        expr = ast.SelectQuery(
+            select=[ast.ColumnsExpr(all_columns=True, exclude=[exclude])],
+            select_from=ast.JoinExpr(table=ast.Field(chain=["events"]), alias=alias),
+        )
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        selected_names = [str(field.chain[-1]) for field in resolved.select if isinstance(field, ast.Field)]
+        assert "created_at" not in selected_names
+
+    def test_resolve_exclude_missing_column(self):
+        expr = ast.SelectQuery(
+            select=[ast.ColumnsExpr(all_columns=True, exclude=["first_names"])],
+            select_from=ast.JoinExpr(table=ast.Field(chain=["events"])),
+        )
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="datastore")
+        self.assertEqual(
+            str(context.exception),
+            'Column "first_names" in EXCLUDE list was not found in events',
+        )
+
+    def test_resolve_exclude_with_column_aliases(self):
+        expr = ast.SelectQuery(
+            select=[ast.ColumnsExpr(all_columns=True, exclude=["a", "b", "c"])],
+            select_from=ast.JoinExpr(
+                table=ast.Field(chain=["events"]),
+                alias="c",
+                column_aliases=["a", "b", "c"],
+            ),
+        )
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        selected_names = [str(field.chain[-1]) for field in resolved.select if isinstance(field, ast.Field)]
+        assert "a" not in selected_names
+        assert "b" not in selected_names
+        assert "c" not in selected_names
+
+    def test_column_aliases_create_column_aliased_table_type(self):
+        expr = self._select("SELECT e.a FROM events AS e (a, b, c)")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert resolved.select_from is not None
+        assert isinstance(resolved.select_from.type, ast.ColumnAliasedTableType)
+        assert resolved.select_from.type.alias == "e"
+        assert resolved.select_from.type.alias_to_original["a"] == "uuid"
+        assert resolved.select_from.type.alias_to_original["b"] == "event"
+        assert resolved.select_from.type.alias_to_original["c"] == "properties"
+
+    def test_column_aliases_remaining_columns_keep_original_names(self):
+        expr = self._select("SELECT e.timestamp FROM events AS e (a, b, c)")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert resolved.select_from is not None
+        assert isinstance(resolved.select_from.type, ast.ColumnAliasedTableType)
+        # timestamp was not aliased, so it maps to itself
+        assert resolved.select_from.type.alias_to_original["timestamp"] == "timestamp"
+
+    def test_column_aliases_original_name_not_resolvable(self):
+        expr = self._select("SELECT e.uuid FROM events AS e (a, b, c)")
+        with self.assertRaises(QueryError) as ctx:
+            resolve_types(expr, self.context, dialect="datastore")
+        assert "Field not found: uuid" in str(ctx.exception)
+
+    def test_column_aliases_star_expands_to_aliased_names(self):
+        expr = self._select("SELECT * FROM (SELECT 1 AS x, 2 AS y, 3 AS z) AS s (a, b, c)")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        selected_names = []
+        for item in resolved.select:
+            if isinstance(item, ast.Field):
+                selected_names.append(str(item.chain[-1]))
+            elif isinstance(item, ast.Alias):
+                selected_names.append(item.alias)
+        assert "a" in selected_names
+        assert "b" in selected_names
+        assert "c" in selected_names
+
+    def test_column_aliases_unqualified_field_resolves(self):
+        expr = self._select("SELECT a FROM events AS e (a, b, c)")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert len(resolved.select) > 0
+        node = resolved.select[0]
+        # Fields get wrapped in a hidden Alias during resolution
+        assert isinstance(node, ast.Alias)
+        assert isinstance(node.type, ast.FieldAliasType)
+        assert node.type.alias == "a"
+        field_type = node.type.type
+        assert isinstance(field_type, ast.FieldType)
+        assert field_type.name == "a"
+        assert isinstance(field_type.table_type, ast.ColumnAliasedTableType)
+
+    def test_column_aliases_too_many_aliases_error(self):
+        expr = ast.SelectQuery(
+            select=[ast.Field(chain=["a"])],
+            select_from=ast.JoinExpr(
+                table=ast.Field(chain=["events"]),
+                alias="e",
+                column_aliases=["c" + str(i) for i in range(100)],
+            ),
+        )
+        with self.assertRaises(QueryError) as ctx:
+            resolve_types(expr, self.context, dialect="datastore")
+        assert "alias(es) were provided" in str(ctx.exception)
+
+    def test_column_aliases_duplicate_alias_error(self):
+        expr = self._select("SELECT e.a FROM events AS e (a, a, c)")
+        with self.assertRaises(QueryError) as ctx:
+            resolve_types(expr, self.context, dialect="datastore")
+        assert "Duplicate column alias 'a'" in str(ctx.exception)
+
+    def test_resolve_replace_columns(self):
+        expr = self._select("SELECT (* REPLACE (1 AS event)) FROM events")
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        selected_names = [str(field.chain[-1]) for field in resolved.select if isinstance(field, ast.Field)]
+        assert "event" not in selected_names
+
+        aliases = [alias for alias in resolved.select if isinstance(alias, ast.Alias)]
+        assert any(
+            alias.alias == "event" and isinstance(alias.expr, ast.Constant) and alias.expr.value == 1
+            for alias in aliases
+        )
+
+    def test_resolve_replace_columns_with_exclude(self):
+        expr = self._select("SELECT (* EXCLUDE (uuid) REPLACE (1 AS event)) FROM events")
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        selected_names = [str(field.chain[-1]) for field in resolved.select if isinstance(field, ast.Field)]
+        assert "uuid" not in selected_names
+        assert "event" not in selected_names
+
+        aliases = [alias for alias in resolved.select if isinstance(alias, ast.Alias)]
+        assert any(
+            alias.alias == "event" and isinstance(alias.expr, ast.Constant) and alias.expr.value == 1
+            for alias in aliases
+        )
+
+    def test_resolve_replace_missing_column(self):
+        expr = self._select("SELECT (* REPLACE (1 AS does_not_exist)) FROM events")
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="postgres")
+        self.assertEqual(
+            str(context.exception),
+            'Column "does_not_exist" in REPLACE list was not found in events',
+        )
+
+    def test_resolve_replace_exclude_same_column(self):
+        expr = self._select("SELECT (* EXCLUDE (event) REPLACE (1 AS event)) FROM events")
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="postgres")
+        self.assertEqual(
+            str(context.exception),
+            'Column "event" cannot occur in both EXCLUDE and REPLACE list',
+        )
+
+    def test_resolve_replace_expression_references_excluded_column(self):
+        expr = self._select("SELECT (* EXCLUDE (event) REPLACE (concat(event, 'x') AS other)) FROM events")
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="postgres")
+        self.assertEqual(
+            str(context.exception),
+            'Replace expression for "other" cannot reference excluded column "event"',
+        )
+
+    def test_resolve_replace_with_column_aliases_success(self):
+        expr = self._select(
+            "SELECT (* REPLACE (0 AS a)) FROM (SELECT 1 AS customer_id, 2 AS b, 3 AS c) AS customers (a, b, c)"
+        )
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        selected_names = [str(field.chain[-1]) for field in resolved.select if isinstance(field, ast.Field)]
+        assert "a" not in selected_names
+        aliases = [alias for alias in resolved.select if isinstance(alias, ast.Alias)]
+        assert any(
+            alias.alias == "a" and isinstance(alias.expr, ast.Constant) and alias.expr.value == 0 for alias in aliases
+        )
+
+    def test_resolve_replace_with_column_aliases_missing_column(self):
+        expr = self._select(
+            "SELECT (* REPLACE (0 AS customer_id)) FROM (SELECT 1 AS customer_id, 2 AS b, 3 AS c) AS customers (a, b, c)"
+        )
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="postgres")
+        self.assertEqual(
+            str(context.exception),
+            'Column "customer_id" in REPLACE list was not found in customers',
+        )
+
+    def test_resolve_unpivot_tuple_shape_guard(self):
+        expr = self._select(
+            "SELECT field_name, field_value FROM events UNPIVOT ((field_value) FOR field_name IN ((event, uuid)))"
+        )
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="postgres")
+        self.assertEqual(
+            str(context.exception),
+            "UNPIVOT value and name columns must both be tuples or both be single columns",
+        )
+
+    def test_resolve_unpivot_tuple_length_guard(self):
+        expr = self._select(
+            "SELECT field_name, field_value FROM events UNPIVOT ((field_value, other_value) FOR (field_name, other_name) IN ((event)))"
+        )
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="postgres")
+        self.assertEqual(
+            str(context.exception),
+            "UNPIVOT IN values must be tuples of length 2",
+        )
+
+    def test_resolve_lambda_style_dialect_guard(self):
+        expr = self._select("SELECT lambda x: x + 1")
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert isinstance(resolved.select[0], ast.Lambda)
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(resolved.select[0], ast.Lambda)
+
+    def test_resolve_array_slice_dialect_guard(self):
+        expr = self._select("SELECT [1, 2, 3][1:2]")
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert isinstance(resolved.select[0], ast.ArraySlice)
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(resolved.select[0], ast.ArraySlice)
+
+    def test_resolve_try_cast_dialect_guard(self):
+        expr = self._select("SELECT try_cast(1 AS Int64)")
+
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="datastore")
+        self.assertEqual(str(context.exception), "TRY_CAST is not allowed in datastore dialect")
+
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(resolved.select[0], ast.TryCast)
+
+    def test_resolve_is_distinct_from_unresolved_field(self):
+        expr = self._select("SELECT missing is distinct from 1")
+        with self.assertRaises(QueryError) as context:
+            resolve_types(expr, self.context, dialect="datastore")
+        self.assertEqual(str(context.exception), "Unable to resolve field: missing")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_events_table_column_alias_inside_subquery(self):
@@ -143,6 +498,35 @@ class TestResolver(BaseTest):
         select = cast(ast.SelectQuery, resolve_types(select, self.context, dialect="insightsql"))
         assert isinstance(select.select[0].type, ast.UnresolvedFieldType)
 
+    def test_unknown_table_suggests_close_matches(self):
+        with self.assertRaises(QueryError) as ctx:
+            resolve_types(
+                self._select("SELECT 1 FROM event"),  # typo: 'event' singular
+                self.context,
+                dialect="datastore",
+            )
+        message = str(ctx.exception)
+        self.assertIn("Unknown table `event`", message)
+        self.assertIn("Did you mean:", message)
+        self.assertIn("events", message)
+
+    def test_unresolved_field_suggests_close_matches(self):
+        # user_id isn't on events, but distinct_id and person_id are close enough to suggest
+        with self.assertRaises(QueryError) as ctx:
+            resolve_types(
+                self._select("SELECT user_id FROM events"),
+                self.context,
+                dialect="datastore",
+            )
+        message = str(ctx.exception)
+        self.assertIn("Unable to resolve field: user_id", message)
+        self.assertIn("Did you mean:", message)
+        # At least one of the obvious suggestions should show up
+        self.assertTrue(
+            "distinct_id" in message or "person_id" in message,
+            f"expected a plausible suggestion in: {message}",
+        )
+
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_lazy_pdi_person_table(self):
         expr = self._select("select distinct_id, person.id from person_distinct_ids")
@@ -199,6 +583,71 @@ class TestResolver(BaseTest):
         printed = self._print_insightsql("with cte as (select event from events) select event from cte")
 
         assert printed == "WITH cte AS (SELECT event FROM events) SELECT event FROM cte LIMIT 50000"
+
+    @parameterized.expand(
+        [
+            ("SELECT event FROM (SELECT event FROM events) AS e", ["events"]),
+            ("WITH event_cte AS (SELECT event FROM events) SELECT event FROM event_cte", ["events"]),
+        ]
+    )
+    def test_extract_base_table_types(self, query: str, expected_tables: list[str]):
+        node = self._select(query)
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
+
+        assert node.type is not None
+        table_names = [table_type.table.to_printed_insightsql() for table_type in extract_base_table_types(node.type)]
+
+        self.assertEqual(table_names, expected_tables)
+
+    def test_extract_base_table_types_from_select_set_type(self):
+        select_set_type = ast.SelectSetQueryType(
+            types=[
+                ast.SelectQueryType(tables={"events": ast.TableType(table=EventsTable())}),
+                ast.SelectQueryType(tables={"persons": ast.TableType(table=PersonsTable())}),
+            ]
+        )
+
+        table_names = [table_type.table.to_printed_insightsql() for table_type in extract_base_table_types(select_set_type)]
+
+        self.assertEqual(table_names, ["events", "persons"])
+
+    @parameterized.expand(
+        [
+            (
+                "table_names",
+                {
+                    "events": ast.TableType(table=EventsTable()),
+                    "persons": ast.TableType(table=PersonsTable()),
+                },
+                "events.properties, persons.properties",
+            ),
+            (
+                "table_aliases",
+                {
+                    "e": ast.TableAliasType(alias="e", table_type=ast.TableType(table=EventsTable())),
+                    "p": ast.TableAliasType(alias="p", table_type=ast.TableType(table=PersonsTable())),
+                },
+                "e.properties, p.properties",
+            ),
+        ]
+    )
+    def test_lookup_field_by_name_lists_ambiguous_field_sources(
+        self, _label: str, tables: dict[str, ast.TableOrSelectType], expected_sources: str
+    ):
+        scope = ast.SelectQueryType(tables=tables)
+
+        with self.assertRaises(ResolutionError) as context:
+            lookup_field_by_name(scope, "properties", self.context)
+
+        self.assertEqual(
+            str(context.exception),
+            f"Ambiguous query. Found multiple sources for field: properties ({expected_sources}). "
+            "Use a qualified field name.",
+        )
+
+    def test_select_set_order_by_prints(self):
+        printed = self._print_insightsql("select 1 union all select 2 order by 1")
+        self.assertEqual(printed, "SELECT 1 LIMIT 50000 UNION ALL SELECT 2 ORDER BY 1 ASC LIMIT 50000")
 
     def test_ctes_loop(self):
         with self.assertRaises(QueryError) as e:
@@ -263,6 +712,116 @@ class TestResolver(BaseTest):
             ),
             "WITH initial_alias AS (SELECT 1 AS a) SELECT a FROM initial_alias AS new_alias WHERE equals(new_alias.a, 1) LIMIT 50000",
         )
+
+    def _cte_build_ids(self, query: str) -> list[int]:
+        # A repeated id means a CTE table was rebuilt instead of served from the cache.
+        built_ids: list[int] = []
+        real = resolver_utils._build_cte_database_table
+
+        def counting(select_query_type, context):
+            built_ids.append(id(select_query_type))
+            return real(select_query_type, context)
+
+        with patch.object(resolver_utils, "_build_cte_database_table", side_effect=counting):
+            self._print_insightsql(query)
+        return built_ids
+
+    def test_cte_synthetic_table_built_at_most_once(self):
+        built_ids = self._cte_build_ids(
+            "with base as (select event from events), "
+            "mid as (select x.event from base x, base y), "
+            "top as (select p.event from mid p, mid q) "
+            "select r.event from top r, top s"
+        )
+        assert len(built_ids) == len(set(built_ids)), (
+            f"a CTE table was rebuilt: {len(built_ids)} builds for {len(set(built_ids))} distinct CTEs"
+        )
+        assert len(set(built_ids)) == 3, "all 3 CTEs (base, mid, top) should be built exactly once"
+
+    def test_same_named_ctes_in_different_scopes_do_not_collide(self):
+        # Same name, different scopes: keyed by type identity not name, so they must not collide.
+        query = (
+            "with base as (select event as outer_col from events) "
+            "select inner_q.inner_col, base.outer_col "
+            "from (with base as (select timestamp as inner_col from events) select inner_col from base) inner_q, base"
+        )
+        build_ids = self._cte_build_ids(query)
+        assert len(build_ids) == 2
+        assert len(set(build_ids)) == 2
+
+    @parameterized.expand([(2, 2), (4, 2), (6, 2), (3, 3), (5, 3)])
+    def test_cte_chain_built_once(self, depth: int, fanout: int):
+        # Each level references the previous `fanout` times; uncached, the base rebuilds fanout**depth times.
+        ctes = ["c0 as (select event from events)"]
+        for i in range(1, depth):
+            refs = ", ".join(f"c{i - 1} a{j}" for j in range(fanout))
+            ctes.append(f"c{i} as (select a0.event from {refs})")
+        final_refs = ", ".join(f"c{depth - 1} z{j}" for j in range(fanout))
+        query = "with " + ", ".join(ctes) + f" select z0.event from {final_refs}"
+
+        build_ids = self._cte_build_ids(query)
+        assert len(build_ids) == len(set(build_ids)), (
+            f"a CTE table was rebuilt: {len(build_ids)} builds for {len(set(build_ids))} distinct CTEs"
+        )
+        assert len(set(build_ids)) == depth
+
+    def test_cte_select_star_chain_built_once(self):
+        # SELECT * re-expands the upstream columns on every build.
+        query = (
+            "with base as (select event, timestamp from events), "
+            "mid as (select * from base) "
+            "select m1.event from mid m1, mid m2"
+        )
+        build_ids = self._cte_build_ids(query)
+        assert len(build_ids) == len(set(build_ids))
+        assert len(set(build_ids)) == 2
+
+    def test_shared_base_cte_built_once_across_consumers(self):
+        # One base CTE reused by several independent consumers — built once, not once per consumer.
+        query = (
+            "with base as (select event, timestamp from events), "
+            "a as (select base.event from base), "
+            "b as (select base.timestamp from base), "
+            "c as (select base.event from base) "
+            "select a.event, b.timestamp, c.event from a, b, c"
+        )
+        build_ids = self._cte_build_ids(query)
+        assert len(build_ids) == len(set(build_ids))
+        assert len(set(build_ids)) == 4
+
+    def test_star_cte_shared_by_union_branches_projects_all_columns(self):
+        # Regression: pushdown pruned a `SELECT *` CTE to the first UNION branch's column, and
+        # the cached CTE table (built pre-prune) masked the failure into silently broken SQL.
+        query = cast(
+            ast.SelectSetQuery,
+            clone_expr(
+                parse_select(
+                    "with base as (select * from (select 1 as a, 2 as b, 3 as d)) "
+                    "select a as v from base "
+                    "union all select b as v from base "
+                    "union all select d as v from base"
+                ),
+                clear_locations=True,
+            ),
+        )
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            modifiers=InsightsQLQueryModifiers(optimizeProjections=True),
+        )
+        _, prepared = prepare_and_print_ast(query, context, "datastore")
+
+        # The single shared CTE must project every column referenced across the branches.
+        assert isinstance(prepared, ast.SelectSetQuery)
+        first_branch = prepared.initial_select_query
+        assert isinstance(first_branch, ast.SelectQuery) and first_branch.ctes is not None
+        base_cte = first_branch.ctes["base"].expr
+        assert isinstance(base_cte, ast.SelectQuery)
+        cte_cols: set[str] = set()
+        for col in base_cte.select:
+            assert isinstance(col, ast.Alias | ast.Field)
+            cte_cols.add(col.alias if isinstance(col, ast.Alias) else str(col.chain[-1]))
+        assert cte_cols == {"a", "b", "d"}, f"CTE dropped columns referenced by sibling UNION branches: got {cte_cols}"
 
     def test_ctes_with_aliases_in_joins(self):
         self.assertEqual(
@@ -338,6 +897,13 @@ class TestResolver(BaseTest):
         self.assertEqual(
             printed,
             "WITH page_view_stats AS (SELECT 1 AS a) SELECT a FROM page_view_stats LIMIT 50000 UNION ALL WITH purchase_stats AS (SELECT 2 AS a) SELECT a FROM page_view_stats LIMIT 50000",
+        )
+
+    def test_with_clause_before_parens_select_set(self):
+        printed = self._print_insightsql("WITH cte AS (SELECT 1 AS a) (SELECT a FROM cte UNION ALL SELECT a FROM cte)")
+        self.assertEqual(
+            printed,
+            "WITH cte AS (SELECT 1 AS a) SELECT a FROM cte LIMIT 50000 UNION ALL SELECT a FROM cte LIMIT 50000",
         )
 
     def test_ctes_scalar_subquery(self):
@@ -463,26 +1029,26 @@ class TestResolver(BaseTest):
         assert "events__override" in sql
         assert "LEFT" in sql.upper()
 
-    def test_join_using(self):
-        node = self._select(
-            "WITH my_table AS (SELECT 1 AS a) SELECT q1.a FROM my_table AS q1 INNER JOIN my_table AS q2 USING a"
-        )
+    @parameterized.expand(
+        [
+            (
+                "cte",
+                "WITH my_table AS (SELECT 1 AS a) SELECT q1.a FROM my_table AS q1 INNER JOIN my_table AS q2 USING a",
+            ),
+            ("table", "SELECT q1.event FROM events AS q1 INNER JOIN events AS q2 USING event"),
+        ],
+    )
+    def test_join_using_desugars_to_on(self, _name: str, query: str):
+        node = self._select(query)
         node = resolve_types(node, self.context, dialect="datastore")
         assert isinstance(node, ast.SelectQuery)
         assert isinstance(node.select_from, ast.JoinExpr)
         assert isinstance(node.select_from.next_join, ast.JoinExpr)
-        assert isinstance(node.select_from.next_join.constraint, ast.JoinConstraint)
         constraint = node.select_from.next_join.constraint
-        assert constraint.constraint_type == "USING"
-        assert cast(ast.Alias, constraint.expr).alias == "a"
-
-        node = self._select("SELECT q1.event FROM events AS q1 INNER JOIN events AS q2 USING event")
-        node = resolve_types(node, self.context, dialect="datastore")
-        assert isinstance(node, ast.SelectQuery)
-        assert isinstance(node.select_from, ast.JoinExpr)
-        assert isinstance(node.select_from.next_join, ast.JoinExpr)
-        assert isinstance(node.select_from.next_join.constraint, ast.JoinConstraint)
-        assert node.select_from.next_join.constraint.constraint_type == "USING"
+        assert isinstance(constraint, ast.JoinConstraint)
+        assert constraint.constraint_type == "ON"
+        assert isinstance(constraint.expr, ast.CompareOperation)
+        assert constraint.expr.op == ast.CompareOperationOp.Eq
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -574,6 +1140,86 @@ class TestResolver(BaseTest):
         node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
+    @parameterized.expand(
+        [
+            ("regex", "select COLUMNS('time') from events", ["timestamp"]),
+            ("regex_caret", "select COLUMNS('^event$') from events", ["event"]),
+            ("list", "select COLUMNS(event, timestamp) from events", ["event", "timestamp"]),
+            ("subquery", "select COLUMNS('a') from (select 1 as a1, 2 as a2, 3 as b1)", ["a1", "a2"]),
+        ]
+    )
+    def test_columns_expr_resolves(self, _name: str, query: str, expected_names: list[str]):
+        node = self._select(query)
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
+        column_names = [
+            col.type.name if isinstance(col.type, ast.FieldType) else cast(ast.Alias, col).alias for col in node.select
+        ]
+        assert sorted(column_names) == sorted(expected_names)
+
+    def test_columns_expr_no_match_raises(self):
+        node = self._select("select COLUMNS('^nonexistent_xyz$') from events")
+        with self.assertRaises(QueryError) as e:
+            resolve_types(node, self.context, dialect="datastore")
+        assert "No columns matched" in str(e.exception)
+
+    def test_columns_expr_subquery(self):
+        node = self._select("select COLUMNS('a') from (select 1 as a1, 2 as a2, 3 as b1)")
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
+        column_names = [
+            col.type.name if isinstance(col.type, ast.FieldType) else cast(ast.Alias, col).alias for col in node.select
+        ]
+        assert sorted(column_names) == ["a1", "a2"]
+
+    @parameterized.expand(
+        [
+            (
+                "regex",
+                "select coalesce(*COLUMNS('a')) from (select 1 as a1, 2 as a2, 3 as b1)",
+                "coalesce",
+                ["a1", "a2"],
+            ),
+            (
+                "list",
+                "select coalesce(*COLUMNS(event, timestamp)) from events",
+                "coalesce",
+                ["event", "timestamp"],
+            ),
+        ]
+    )
+    def test_spread_columns_in_function_call(self, _name, query, expected_fn, expected_args):
+        node = self._select(query)
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
+        call = node.select[0]
+        assert isinstance(call, ast.Call)
+        assert call.name == expected_fn
+        assert len(call.args) == len(expected_args)
+        arg_names = [
+            arg.type.name if isinstance(arg.type, ast.FieldType) else arg.type.alias
+            for arg in call.args
+            if isinstance(arg.type, (ast.FieldType, ast.FieldAliasType))
+        ]
+        assert sorted(arg_names) == sorted(expected_args)
+
+    @parameterized.expand(
+        [
+            (
+                "top_level",
+                "select *COLUMNS('^event$') from events",
+                "*COLUMNS",
+            ),
+            (
+                "no_match",
+                "select coalesce(*COLUMNS('^nonexistent$')) from events",
+                "No columns matched",
+            ),
+        ]
+    )
+    def test_spread_columns_raises(self, _name, query, expected_msg):
+        with self.assertRaises(QueryError) as e:
+            node = self._select(query)
+            resolve_types(node, self.context, dialect="datastore")
+        assert expected_msg in str(e.exception)
+
     def test_lambda_parent_scope(self):
         # does not raise
         node = self._select("select timestamp, arrayMap(x -> x + timestamp, [2]) as am from events")
@@ -605,16 +1251,25 @@ class TestResolver(BaseTest):
 
         # all columns resolve to a type in the end
         assert cast(ast.FieldType, node.select[0].type).resolve_database_field(self.context) == StringDatabaseField(
-            name="event", array=None, nullable=False
+            name="event",
+            array=None,
+            nullable=False,
+            description="Event name, e.g. '$pageview' or 'purchase'. Autocapture/Insights events are prefixed with '$'.",
         )
-        assert cast(ast.FieldType, node.select[1].type).resolve_database_field(self.context) == StringDatabaseField(
-            name="person_id", array=None, nullable=False
+        assert cast(ast.FieldType, node.select[1].type).resolve_database_field(self.context) == UUIDDatabaseField(
+            name="person_id",
+            array=None,
+            nullable=False,
+            description="Resolved person this distinct_id belongs to; matches `persons.id`.",
         )
         assert cast(ast.FieldType, node.select[2].type).resolve_database_field(self.context) == StringJSONDatabaseField(
             name="person_properties", nullable=False
         )
         assert cast(ast.FieldType, node.select[3].type).resolve_database_field(self.context) == DateTimeDatabaseField(
-            name="created_at", array=None, nullable=False
+            name="created_at",
+            array=None,
+            nullable=False,
+            description="When the person was first seen by Insights.",
         )
 
     def test_visit_insightsqlx_tag(self):
@@ -856,6 +1511,30 @@ class TestResolver(BaseTest):
         assert isinstance(selected.type, ast.CallType)
         assert selected.type.return_type == ast.DateTimeType(nullable=False)
 
+    def test_assume_not_null_with_unknown_arg_type(self):
+        # When the inner function has no signatures (returns UnknownType), assumeNotNull should still force nullable=False
+        node = self._select("SELECT assumeNotNull(formatReadableSize(1024))")
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
+
+        [selected] = node.select
+        assert isinstance(selected.type, ast.CallType)
+        assert selected.type.return_type.nullable is False
+
+    @parameterized.expand(
+        [
+            ("toNullable('hello')", ""),
+            ("toNullable(event)", "FROM events"),
+            ("nullIf(event, '')", "FROM events"),
+        ],
+    )
+    def test_nullable_functions_force_nullable_true(self, expr, from_clause):
+        node = self._select(f"SELECT {expr} {from_clause}".strip())
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
+
+        [selected] = node.select
+        assert isinstance(selected.type, ast.CallType)
+        assert selected.type.return_type.nullable is True
+
     def test_interval_type_arithmetic(self):
         operators = ["+", "-"]
         granularites = ["Second", "Minute", "Hour", "Day", "Week", "Month", "Quarter", "Year"]
@@ -1055,3 +1734,392 @@ class TestResolver(BaseTest):
                 assert isinstance(revenue_field.expr, ast.Field)
                 chain = revenue_field.expr.chain
                 assert chain == expected_chain
+
+    def test_cte_column_name_list_resolves_columns(self):
+        expr = self._select("WITH stats(a, b) AS (SELECT 'x', 'y') SELECT a, b FROM stats")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+
+        # The resolved CTE's inner select should have the column names from the list
+        assert resolved.ctes is not None
+        cte = resolved.ctes["stats"]
+        assert isinstance(cte.expr, ast.SelectQuery)
+        assert isinstance(cte.expr.type, ast.SelectQueryType)
+        assert list(cte.expr.type.columns.keys()) == ["a", "b"]
+
+    def test_cte_column_name_list_overrides_existing_aliases(self):
+        expr = self._select(
+            "WITH stats(a, b) AS (SELECT event AS orig_a, timestamp AS orig_b FROM events) SELECT a, b FROM stats"
+        )
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+
+        assert resolved.ctes is not None
+        cte = resolved.ctes["stats"]
+        assert isinstance(cte.expr, ast.SelectQuery)
+        assert isinstance(cte.expr.type, ast.SelectQueryType)
+        assert list(cte.expr.type.columns.keys()) == ["a", "b"]
+
+    def test_cte_column_name_list_qualified_access(self):
+        expr = self._select("WITH stats(a, b) AS (SELECT 'x', 'y') SELECT stats.a, stats.b FROM stats")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+
+        assert len(resolved.select) == 2
+        for i, name in enumerate(["a", "b"]):
+            col = resolved.select[i]
+            assert isinstance(col, ast.Alias)
+            assert col.alias == name
+            assert isinstance(col.expr, ast.Field)
+            assert isinstance(col.expr.type, ast.FieldType)
+            assert col.expr.type.name == name
+
+    def test_cte_column_name_list_mismatch(self):
+        query = "WITH stats (a, b, c) AS (SELECT 'a', 'b') SELECT a FROM stats"
+        with self.assertRaisesMessage(
+            QueryError,
+            "CTE 'stats' has 2 column(s) but 3 column name(s) were provided",
+        ):
+            resolve_types(self._select(query), self.context, dialect="postgres")
+
+        query = "WITH stats (a) AS (SELECT 'a', 'b') SELECT a FROM stats"
+        with self.assertRaisesMessage(
+            QueryError,
+            "CTE 'stats' has 2 column(s) but 1 column name(s) were provided",
+        ):
+            resolve_types(self._select(query), self.context, dialect="postgres")
+
+    def test_cte_column_name_list_union_all_resolves_columns(self):
+        expr = self._select("WITH stats(a, b) AS (SELECT 'x', 'y' UNION ALL SELECT 'p', 'q') SELECT a, b FROM stats")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+
+        assert resolved.ctes is not None
+        cte = resolved.ctes["stats"]
+        assert isinstance(cte.expr, ast.SelectSetQuery)
+        assert isinstance(cte.expr.type, ast.SelectSetQueryType)
+        first_type = cte.expr.type.types[0]
+        while isinstance(first_type, ast.SelectSetQueryType):
+            first_type = first_type.types[0]
+        assert list(first_type.columns.keys()) == ["a", "b"]
+
+    @parameterized.expand(
+        [
+            (
+                "too_many",
+                "WITH stats (a, b, c) AS (SELECT 'x', 'y' UNION ALL SELECT 'p', 'q') SELECT a FROM stats",
+                2,
+                3,
+            ),
+            ("too_few", "WITH stats (a) AS (SELECT 'x', 'y' UNION ALL SELECT 'p', 'q') SELECT a FROM stats", 2, 1),
+        ]
+    )
+    def test_cte_column_name_list_union_all_mismatch(self, _name, query, n_cols, n_names):
+        with self.assertRaisesMessage(
+            QueryError,
+            f"CTE 'stats' has {n_cols} column(s) but {n_names} column name(s) were provided",
+        ):
+            resolve_types(self._select(query), self.context, dialect="postgres")
+
+    def test_cte_using_key_valid_with_column_list(self):
+        expr = self._select("WITH x(a, b) USING KEY (a) AS (SELECT 'hello' AS a, 'world' AS b) SELECT * FROM x")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert resolved.ctes is not None
+        assert resolved.ctes["x"].using_key == ["a"]
+
+    def test_cte_using_key_valid_without_column_list(self):
+        expr = self._select("WITH stats USING KEY (event) AS (SELECT event, timestamp FROM events) SELECT * FROM stats")
+        resolved = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert resolved.ctes is not None
+        assert resolved.ctes["stats"].using_key == ["event"]
+
+    def test_cte_using_key_invalid_column_with_column_list(self):
+        with self.assertRaisesMessage(QueryError, "USING KEY column(s) 'd' not found in CTE 'x'"):
+            resolve_types(
+                self._select("WITH x(a, b, c) USING KEY (d) AS (SELECT 1, 2, 3) SELECT * FROM x"),
+                self.context,
+                dialect="postgres",
+            )
+
+    def test_cte_using_key_invalid_column_without_column_list(self):
+        with self.assertRaisesMessage(QueryError, "USING KEY column(s) 'nonexistent' not found in CTE 'stats'"):
+            resolve_types(
+                self._select(
+                    "WITH stats USING KEY (nonexistent) AS (SELECT event, timestamp FROM events) SELECT * FROM stats"
+                ),
+                self.context,
+                dialect="postgres",
+            )
+
+    def test_values_query_basic(self):
+        expr = self._select("SELECT * FROM (VALUES (1, 'a'), (2, 'b')) AS v (id, name)")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.type, ast.SelectQueryAliasType)
+        assert expr.select_from.alias == "v"
+        assert isinstance(expr.select_from.type.select_query_type, ast.SelectQueryType)
+        columns = expr.select_from.type.select_query_type.columns
+        assert "id" in columns
+        assert "name" in columns
+
+    def test_values_query_default_column_names(self):
+        expr = self._select("SELECT * FROM (VALUES (1, 'a')) AS v")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.table, ast.ValuesQuery)
+        assert expr.select_from.table.type is not None
+        columns = expr.select_from.table.type.columns
+        assert "col0" in columns
+        assert "col1" in columns
+
+    def test_values_query_row_length_mismatch(self):
+        with self.assertRaisesMessage(QueryError, "VALUES row 2 has 1 columns, expected 2"):
+            expr = self._select("SELECT * FROM (VALUES (1, 'a'), (2)) AS v")
+            resolve_types(expr, self.context, dialect="postgres")
+
+    def test_values_query_alias_column_count_mismatch(self):
+        with self.assertRaisesMessage(QueryError, "VALUES has 2 column(s) but 3 column name(s) were provided"):
+            expr = self._select("SELECT * FROM (VALUES (1, 'a')) AS v (id, name, extra)")
+            resolve_types(expr, self.context, dialect="postgres")
+
+    def test_unpivot_basic_resolves(self):
+        expr = self._select(
+            "SELECT field_name, field_value, distinct_id FROM events UNPIVOT (field_value FOR field_name IN (event))"
+        )
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.table, ast.UnpivotExpr)
+        assert isinstance(expr.select_from.type, ast.SelectQueryType)
+
+        columns = expr.select_from.type.columns
+        assert "field_name" in columns
+        assert "field_value" in columns
+        assert "distinct_id" in columns
+        assert "event" not in columns
+
+        for column in expr.select:
+            field = column.expr if isinstance(column, ast.Alias) else column
+            assert isinstance(field, ast.Field)
+            assert isinstance(field.type, ast.FieldType)
+
+    def test_unpivot_non_postgres_dialect_error(self):
+        with self.assertRaisesMessage(QueryError, "UNPIVOT is not allowed in datastore dialect"):
+            expr = self._select(
+                "SELECT field_name, field_value FROM events UNPIVOT (field_value FOR field_name IN (event))"
+            )
+            resolve_types(expr, self.context, dialect="datastore")
+
+    def test_unpivot_non_identifier_output_columns_error(self):
+        with self.assertRaisesMessage(QueryError, "UNPIVOT columns must be identifiers"):
+            expr = self._select("SELECT * FROM events UNPIVOT (field_value + 1 FOR field_name IN (event))")
+            resolve_types(expr, self.context, dialect="postgres")
+
+    def test_unpivot_unknown_in_column_error(self):
+        with self.assertRaisesMessage(QueryError, 'UNPIVOT value column "does_not_exist" was not found'):
+            expr = self._select("SELECT * FROM events UNPIVOT (field_value FOR field_name IN (does_not_exist))")
+            resolve_types(expr, self.context, dialect="postgres")
+
+    def test_pivot_basic_resolves(self):
+        expr = self._select("SELECT 1 FROM events PIVOT (count() FOR event IN ('a'))")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.table, ast.PivotExpr)
+        assert isinstance(expr.select_from.type, ast.SelectQueryType)
+
+        pivot = expr.select_from.table
+        column_expr = pivot.columns[0].column
+        if isinstance(column_expr, ast.Alias):
+            column_expr = column_expr.expr
+        assert isinstance(column_expr, ast.Field)
+        assert isinstance(column_expr.type, ast.FieldType)
+
+    def test_pivot_join_basic_resolves(self):
+        expr = self._select("SELECT 1 FROM events JOIN events AS e2 ON 1 PIVOT (count() FOR events.event IN ('a'))")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.table, ast.PivotExpr)
+        pivot = expr.select_from.table
+        assert isinstance(pivot.table, ast.JoinExpr)
+        column_expr = pivot.columns[0].column
+        if isinstance(column_expr, ast.Alias):
+            column_expr = column_expr.expr
+        assert isinstance(column_expr, ast.Field)
+        assert isinstance(column_expr.type, ast.FieldType)
+
+    def test_pivot_expression_column_resolves(self):
+        expr = self._select("SELECT 1 FROM events PIVOT (count() FOR toYear(timestamp) IN (2015))")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.table, ast.PivotExpr)
+
+    def test_pivot_expression_unknown_column_error(self):
+        with self.assertRaisesMessage(QueryError, 'PIVOT column "does_not_exist" was not found'):
+            expr = self._select("SELECT 1 FROM events PIVOT (count() FOR toYear(does_not_exist) IN (2015))")
+            resolve_types(expr, self.context, dialect="postgres")
+
+    def test_pivot_aggregate_unknown_column_error(self):
+        with self.assertRaisesMessage(QueryError, 'PIVOT column "thing" was not found'):
+            expr = self._select("SELECT 1 FROM events PIVOT (sum(thing) FOR toYear(timestamp) IN (2015))")
+            resolve_types(expr, self.context, dialect="postgres")
+
+    def test_pivot_unknown_column_error(self):
+        with self.assertRaisesMessage(QueryError, 'PIVOT column "does_not_exist" was not found'):
+            expr = self._select("SELECT 1 FROM events PIVOT (count() FOR does_not_exist IN ('a'))")
+            resolve_types(expr, self.context, dialect="postgres")
+
+    def test_pivot_non_postgres_dialect_error(self):
+        with self.assertRaisesMessage(QueryError, "PIVOT is not allowed in datastore dialect"):
+            expr = self._select("SELECT 1 FROM events PIVOT (count() FOR event IN ('a'))")
+            resolve_types(expr, self.context, dialect="datastore")
+
+    def test_limit_with_ties_postgres_error(self):
+        # WITH TIES is rejected by the Postgres printer's ``_assert_with_ties_supported`` hook
+        # rather than by the resolver, so we need to run the full print pipeline to observe it.
+        with self.assertRaisesMessage(QueryError, "WITH TIES is not supported in postgres dialect"):
+            prepare_and_print_ast(
+                self._select("SELECT 1 FROM events ORDER BY 1 LIMIT 1 WITH TIES"),
+                self.context,
+                "postgres",
+            )
+
+    def test_positional_refs_postgres(self):
+        expr = self._select("SELECT #1, #2 FROM events")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select[0], ast.PositionalRef)
+        assert isinstance(expr.select[1], ast.PositionalRef)
+
+    def test_function_call_order_by_resolves(self):
+        expr = self._select("SELECT sum(event ORDER BY timestamp DESC) FROM events")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select[0], ast.Call)
+        call = expr.select[0]
+        assert call.order_by is not None
+        assert len(call.order_by) == 1
+        assert call.order_by[0].order == "DESC"
+        order_expr = call.order_by[0].expr
+        if isinstance(order_expr, ast.Alias):
+            order_expr = order_expr.expr
+        assert isinstance(order_expr, ast.Field)
+        assert isinstance(order_expr.type, ast.FieldType)
+
+    def test_function_call_filter_resolves(self):
+        expr = self._select("SELECT sum(event) FILTER (WHERE event = 'a') FROM events")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select[0], ast.Call)
+        call = expr.select[0]
+        assert call.filter_expr is not None
+        assert isinstance(call.filter_expr, ast.CompareOperation)
+        left = call.filter_expr.left
+        if isinstance(left, ast.Alias):
+            left = left.expr
+        assert isinstance(left, ast.Field)
+        assert isinstance(left.type, ast.FieldType)
+
+    def test_unpivot_include_nulls_resolves(self):
+        expr = self._select(
+            "SELECT field_name, field_value FROM events UNPIVOT INCLUDE NULLS (field_value FOR field_name IN (event))"
+        )
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.table, ast.UnpivotExpr)
+        assert expr.select_from.table.include_nulls is True
+
+    def test_unpivot_join_basic_resolves(self):
+        expr = self._select(
+            "SELECT field_name, field_value FROM events JOIN events AS e2 ON 1 "
+            "UNPIVOT (field_value FOR field_name IN (events.event))"
+        )
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="postgres"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.table, ast.UnpivotExpr)
+        assert isinstance(expr.select_from.type, ast.SelectQueryType)
+
+    def test_positional_refs_non_postgres_error(self):
+        with self.assertRaisesMessage(QueryError, "Positional references are not allowed in datastore dialect"):
+            expr = self._select("SELECT #1 FROM events")
+            resolve_types(expr, self.context, dialect="datastore")
+
+    def test_subquery_alias_columns_remap(self):
+        # Subquery with alias column list: SELECT * FROM (SELECT 1, 'a') AS v(id, name)
+        # The resolver should remap columns so that v.id and v.name resolve correctly,
+        # and SELECT * expansion uses the aliased names, not the original ones.
+        expr = self._select("SELECT * FROM (SELECT 1, 'a') AS v(id, name)")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert isinstance(expr.select_from, ast.JoinExpr)
+        assert isinstance(expr.select_from.type, ast.SelectQueryAliasType)
+        assert isinstance(expr.select_from.type.select_query_type, ast.SelectQueryType)
+        columns = expr.select_from.type.select_query_type.columns
+        assert "id" in columns, f"Expected 'id' in columns, got {list(columns.keys())}"
+        assert "name" in columns, f"Expected 'name' in columns, got {list(columns.keys())}"
+
+    def test_subquery_alias_columns_qualified_access(self):
+        # Qualified access via alias column names should resolve
+        expr = self._select("SELECT v.id, v.name FROM (SELECT 1, 'a') AS v(id, name)")
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
+        assert len(expr.select) == 2
+        for col in expr.select:
+            assert isinstance(col, ast.Alias)
+            assert isinstance(col.expr, ast.Field)
+            assert isinstance(col.expr.type, ast.FieldType)
+        assert cast(ast.Alias, expr.select[0]).alias == "id"
+        assert cast(ast.Alias, expr.select[1]).alias == "name"
+
+    def test_subquery_alias_columns_count_mismatch(self):
+        # Providing wrong number of alias columns for a subquery should error
+        with self.assertRaises(QueryError):
+            expr = self._select("SELECT * FROM (SELECT 1, 'a') AS v(id, name, extra)")
+            resolve_types(expr, self.context, dialect="datastore")
+
+    @parameterized.expand(
+        [
+            (
+                "select_alias_shadows_properties",
+                "SELECT argMin(properties, timestamp) as properties FROM events WHERE properties.foo = 'bar'",
+            ),
+            (
+                "select_alias_shadows_deeper_chain",
+                "SELECT argMin(properties, timestamp) as properties FROM events WHERE properties.a.b = 1",
+            ),
+        ]
+    )
+    def test_alias_shadowing_table_field_property_access(self, _name, query):
+        expr = self._select(query)
+        with self.assertRaisesRegex(QueryError, "Cannot access property.*renaming the alias"):
+            resolve_types(expr, self.context, dialect="datastore")
+
+    # A malformed string literal compared to a UUID column (events.uuid, person ids) would fail
+    # the whole query at Datastore execution time with the opaque CANNOT_PARSE_UUID, so the
+    # resolver must reject it with a message naming the value
+    @parameterized.expand(
+        [
+            ("person_id_eq", "SELECT event FROM events WHERE person_id = '2026072018044213140'"),
+            ("person_id_literal_on_left", "SELECT event FROM events WHERE '2026072018044213140' != person_id"),
+            (
+                "events_uuid_in_tuple",
+                "SELECT event FROM events WHERE uuid IN ('0198a4c2-8b3d-7e50-b4a1-2f9c6d8e0a1b', 'nope')",
+            ),
+            ("person_subtable_id", "SELECT event FROM events WHERE person.id = 'not-a-uuid'"),
+            (
+                "trailing_newline",
+                "SELECT event FROM events WHERE person_id = '0198a4c2-8b3d-7e50-b4a1-2f9c6d8e0a1b\n'",
+            ),
+            ("persons_scope_id", "SELECT id FROM persons WHERE id = 'not-a-uuid'"),
+        ]
+    )
+    def test_invalid_uuid_literal_comparison_raises(self, _name, query):
+        expr = self._select(query)
+        with self.assertRaisesRegex(QueryError, "is not a valid UUID"):
+            resolve_types(expr, self.context, dialect="datastore")
+
+    @parameterized.expand(
+        [
+            ("valid_uuid", "SELECT event FROM events WHERE person_id = '0198a4c2-8b3d-7e50-b4a1-2f9c6d8e0a1b'"),
+            ("string_column_untouched", "SELECT event FROM events WHERE distinct_id = 'not-a-uuid'"),
+            ("subquery_untouched", "SELECT event FROM events WHERE person_id IN (SELECT person_id FROM events)"),
+        ]
+    )
+    def test_uuid_literal_comparison_allows(self, _name, query):
+        expr = self._select(query)
+        resolve_types(expr, self.context, dialect="datastore")
+
+    def test_uuid_literal_guard_skipped_for_non_datastore_dialects(self):
+        # other target dialects accept UUID text forms Datastore doesn't (braces, no dashes),
+        # so the canonical-form guard must not reject their queries
+        expr = self._select("SELECT event FROM events WHERE person_id = 'not-a-uuid'")
+        resolve_types(expr, self.context, dialect="postgres")

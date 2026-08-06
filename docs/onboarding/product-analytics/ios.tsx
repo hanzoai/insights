@@ -1,29 +1,33 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
-export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
-    const { CodeBlock, Markdown, dedent } = ctx
+export const getIOSSteps = (
+    ctx: OnboardingComponentsContext,
+    options?: {
+        includeExperimentalSpi?: boolean
+        experimentalDescription?: string
+        minVersionPod?: string
+        minVersionSPM?: string
+    }
+): StepDefinition[] => {
+    const { CodeBlock, Markdown, CalloutBox, dedent } = ctx
+
+    const podVersion = options?.minVersionPod || '3.56'
+    const spmVersion = options?.minVersionSPM || '3.56.0'
 
     return [
         {
-            title: 'Install via CocoaPods',
+            title: 'Install dependency',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add Insights to your Podfile:</Markdown>
-                    <CodeBlock
-                        blocks={[
-                            {
-                                language: 'ruby',
-                                file: 'Podfile',
-                                code: dedent`
-                                    pod "Insights", "~> 3.0"
-                                `,
-                            },
-                        ]}
-                    />
-                    <Markdown>Or install via Swift Package Manager:</Markdown>
+                    {options?.experimentalDescription && (
+                        <CalloutBox type="fyi" title="Experimental API">
+                            <Markdown>{options.experimentalDescription}</Markdown>
+                        </CalloutBox>
+                    )}
+                    <Markdown>Install via Swift Package Manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -31,8 +35,20 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'Package.swift',
                                 code: dedent`
                                     dependencies: [
-                                      .package(url: "https://github.com/hanzoai/insights-ios.git", from: "3.0.0")
+                                      .package(url: "https://github.com/Insights/insights-ios.git", from: "${spmVersion}")
                                     ]
+                                `,
+                            },
+                        ]}
+                    />
+                    <Markdown>Or add Insights to your Podfile:</Markdown>
+                    <CodeBlock
+                        blocks={[
+                            {
+                                language: 'ruby',
+                                file: 'Podfile',
+                                code: dedent`
+                                    pod "Insights", "~> ${podVersion}"
                                 `,
                             },
                         ]}
@@ -53,15 +69,15 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'AppDelegate.swift',
                                 code: dedent`
                                     import Foundation
-                                    import Insights
+                                    ${options?.includeExperimentalSpi ? '@_spi(Experimental) ' : ''}import Insights
                                     import UIKit
 
                                     class AppDelegate: NSObject, UIApplicationDelegate {
                                         func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-                                            let INSIGHTS_API_KEY = "<ph_project_api_key>"
+                                            let INSIGHTS_PROJECT_TOKEN = "<ph_project_token>"
                                             let INSIGHTS_HOST = "<ph_client_api_host>"
 
-                                            let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
+                                            let config = InsightsConfig(projectToken: INSIGHTS_PROJECT_TOKEN, host: INSIGHTS_HOST)
                                             InsightsSDK.shared.setup(config)
 
                                             return true

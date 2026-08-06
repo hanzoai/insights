@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hanzoai/insights/livestream/tui/sse"
+	"github.com/insights/insights/livestream/tui/sse"
 	"github.com/stretchr/testify/assert"
 )
 

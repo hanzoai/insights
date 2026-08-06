@@ -9,7 +9,7 @@ exports[`LegacyPluginExecutorService smoke tests should run the destination plug
 
 exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-hubspot-plugin', plugin: [Object] } 1`] = `
 [
-  "Created Hubspot Contact for test@insights.com",
+  "Created Hubspot Contact for test@hanzo.ai",
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
@@ -46,7 +46,7 @@ exports[`LegacyPluginExecutorService smoke tests should run the destination plug
 
 exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-intercom-plugin', plugin: [Object] } 1`] = `
 [
-  "Contact test@insights.com in Intercom not found",
+  "Contact test@hanzo.ai in Intercom not found",
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
@@ -156,7 +156,7 @@ exports[`LegacyPluginExecutorService smoke tests should run the transformation p
 
 exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-insights-url-normalizer-plugin', plugin: [Object] } 1`] = `
 [
-  "event.$current_url: "https://insights.com" normalized to "https://insights.com/"",
+  "event.$current_url: "https://hanzo.ai" normalized to "https://hanzo.ai/"",
 ]
 `;
 
@@ -180,7 +180,7 @@ exports[`LegacyPluginExecutorService smoke tests should run the transformation p
 
 exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: {\\n  name: 'plugin-insights-plugin-snowplow-referer-parser',\\n  plugin: [Object]\\n} 1`] = `
 [
-  "(Event: $pageview) URL: https://insights.com, Referrer: undefined, Referring domain: undefined",
+  "(Event: $pageview) URL: https://hanzo.ai, Referrer: undefined, Referring domain: undefined",
   "(SNOWPLOW) Medium: unknown, Source: unknown, Term: undefined",
 ]
 `;

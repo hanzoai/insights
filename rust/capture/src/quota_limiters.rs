@@ -54,7 +54,7 @@ pub struct CaptureQuotaLimiter {
     capture_mode: CaptureMode,
 
     redis_timeout: Duration,
-    kv_key_prefix: Option<String>,
+    redis_key_prefix: Option<String>,
     redis_client: Arc<dyn Client + Send + Sync>,
 
     // these are scoped to a specific event subset (e.g. survey events, AI events, etc.)
@@ -81,7 +81,7 @@ impl CaptureQuotaLimiter {
             redis_timeout,
             redis_client.clone(),
             QUOTA_LIMITER_CACHE_KEY.to_string(),
-            config.kv_key_prefix.clone(),
+            config.redis_key_prefix.clone(),
             Self::get_resource_for_mode(config.capture_mode),
             ServiceName::Capture,
         )
@@ -90,7 +90,7 @@ impl CaptureQuotaLimiter {
         Self {
             capture_mode: config.capture_mode,
             redis_timeout,
-            kv_key_prefix: config.kv_key_prefix.clone(),
+            redis_key_prefix: config.redis_key_prefix.clone(),
             redis_client: redis_client.clone(),
             global_limiter,
             scoped_limiters: vec![],
@@ -108,7 +108,7 @@ impl CaptureQuotaLimiter {
                 self.redis_timeout,
                 self.redis_client.clone(),
                 QUOTA_LIMITER_CACHE_KEY.to_string(),
-                self.kv_key_prefix.clone(),
+                self.redis_key_prefix.clone(),
                 resource.clone(),
                 ServiceName::Capture,
             )
@@ -211,9 +211,27 @@ impl CaptureQuotaLimiter {
         Ok(filtered_events)
     }
 
+    /// Check if a token is limited for a specific quota resource bucket.
+    /// Checks the global limiter directly if the resource matches the capture
+    /// mode's global resource, otherwise finds the matching scoped limiter.
+    /// Each call targets exactly one DashMap — the caller controls ordering.
+    pub async fn is_quota_limited_v1(&self, token: &str, resource: &QuotaResource) -> bool {
+        // Global resource — direct check, no loop
+        if *resource == Self::get_resource_for_mode(self.capture_mode) {
+            return self.global_limiter.is_limited(token).await;
+        }
+        // Scoped resource — find the matching limiter
+        for limiter in &self.scoped_limiters {
+            if *limiter.resource() == *resource {
+                return limiter.is_limited(token).await;
+            }
+        }
+        false
+    }
+
     pub fn get_resource_for_mode(mode: CaptureMode) -> QuotaResource {
         match mode {
-            CaptureMode::Events | CaptureMode::Ai => QuotaResource::Events,
+            CaptureMode::Events | CaptureMode::Ai | CaptureMode::Import => QuotaResource::Events,
             CaptureMode::Recordings => QuotaResource::Recordings,
         }
     }

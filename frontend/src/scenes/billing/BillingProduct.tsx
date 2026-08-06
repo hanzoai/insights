@@ -7,34 +7,36 @@ import { IconChevronRight } from '@hanzo/icons'
 import { Button, Tag, Link } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
-import { UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
+import { FeatureFlagKey, UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { Banner } from 'lib/elements/Banner'
 import { More } from 'lib/elements/Button/More'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { capitalizeFirstLetter, humanFriendlyCurrency } from 'lib/utils'
-import { getProductIcon } from 'scenes/onboarding/productSelection/ProductSelection'
+import { humanFriendlyCurrency } from 'lib/utils/numbers'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
+import { getProductIcon } from 'scenes/onboarding/shared/utils'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 import { BillingProductV2AddonType, BillingProductV2Type, BillingTierType } from '~/types'
 
-import { BillingGauge } from './BillingGauge'
-import { BillingLimit } from './BillingLimit'
-import { BillingProductAddon } from './BillingProductAddon'
-import { BillingProductPricingTable } from './BillingProductPricingTable'
-import { ProductPricingModal } from './ProductPricingModal'
-import { UnsubscribeSurveyModal } from './UnsubscribeSurveyModal'
 import {
     createGaugeItems,
     createProductValueFormatter,
     getProductUnitLabel,
     isProductVariantPrimary,
 } from './billing-utils'
+import { BillingGauge } from './BillingGauge'
+import { BillingLimit } from './BillingLimit'
 import { billingLogic } from './billingLogic'
+import { BillingProductAddon } from './BillingProductAddon'
 import { billingProductLogic } from './billingProductLogic'
+import { BillingProductPricingTable } from './BillingProductPricingTable'
 import { REALTIME_DESTINATIONS_BILLING_START_DATE } from './constants'
 import { paymentEntryLogic } from './paymentEntryLogic'
+import { PlatformAddonComparison } from './PlatformAddonComparison'
+import { ProductPricingModal } from './ProductPricingModal'
+import { UnsubscribeSurveyModal } from './UnsubscribeSurveyModal'
 
 export const getTierDescription = (
     tiers: BillingTierType[],
@@ -91,6 +93,8 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
         workflows_emails: 'Workflows',
     }
     const displayProductName = productDisplayNameOverrides[product.type] || product.name
+    const isPlatformProduct = product.type === 'platform_and_support'
+    const addonSectionLabel = isPlatformProduct ? 'Packages' : 'Add-ons'
 
     const upgradeToPlanKey = upgradePlan?.plan_key
     const currentPlanKey = currentPlan?.plan_key
@@ -105,11 +109,18 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
     const isTemporaryFreeProduct =
         (!product.tiered && !product.free_allocation && !product.inclusion_only) ||
         (product.tiered && product.tiers?.length === 1 && product.tiers[0].unit_amount_usd === '0')
+    const monetaryGaugeProduct = {
+        ...product,
+        unit: '$',
+        display_unit: null,
+        display_decimals: null,
+        display_divisor: null,
+    }
 
     // If the feature flag `billing_hide_product_{product.type}` is true,
     // don't show the product in the billing page.
     const hideProductFlag = `billing_hide_product_${product.type}`
-    if (featureFlags[hideProductFlag] === true) {
+    if (featureFlags[hideProductFlag as FeatureFlagKey] === true) {
         return null
     }
 
@@ -126,7 +137,12 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                     <div className="flex gap-4 items-center justify-between">
                         {/* Product name and description */}
                         <div className="flex gap-x-2">
-                            <div>{getProductIcon(product.icon_key, { className: 'text-2xl shrink-0' })}</div>
+                            <div>
+                                {getProductIcon(product.icon_key, {
+                                    className: 'text-2xl shrink-0',
+                                    productType: product.type,
+                                })}
+                            </div>
                             <div>
                                 <h3 className="font-bold mb-0 flex items-center gap-x-2">
                                     {displayProductName}{' '}
@@ -221,10 +237,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                         <div className="mt-6 mb-4 ml-2">
                             <div className="grid grid-cols-[1fr_130px_100px] gap-4 items-center">
                                 <div>
-                                    <BillingGauge
-                                        items={combinedMonetaryGaugeItems}
-                                        product={{ ...product, unit: '$' }}
-                                    />
+                                    <BillingGauge items={combinedMonetaryGaugeItems} product={monetaryGaugeProduct} />
                                 </div>
                                 <Tooltip
                                     title={`The current ${
@@ -495,7 +508,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                                     </div>
                                                 ) : null}
                                             </>
-                                        ) : product.current_amount_usd ? (
+                                        ) : product.current_amount_usd && product.type !== 'platform_and_support' ? (
                                             <div className="mt-8 mb-4 flex justify-end w-full">
                                                 <Tooltip
                                                     title={`The current amount you will be billed for this ${billing?.billing_period?.interval}.`}
@@ -529,29 +542,14 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                     {/* Add-ons (hide for product variants) */}
                     {product.addons?.length > 0 && !isProductWithVariants && (
                         <div className="pb-8">
-                            {/* Legacy teams addon */}
-                            {product.type === 'platform_and_support' &&
-                                product.addons.find((addon) => addon.legacy_product && addon.subscribed) && (
-                                    <Banner type="warning" className="my-4" hideIcon>
-                                        <p>
-                                            You're currently subscribed to our legacy{' '}
-                                            {
-                                                product.addons.find((addon) => addon.legacy_product && addon.subscribed)
-                                                    ?.name
-                                            }{' '}
-                                            add-on. If you'd like to move to one of our new add-ons please subscribe
-                                            below.
-                                        </p>
-                                    </Banner>
-                                )}
-
                             {/* Add-ons title */}
-                            <h4 className="my-4">Add-ons</h4>
+                            <h4 className="my-4">{addonSectionLabel}</h4>
                             {billing?.subscription_level == 'free' && (
                                 <Banner type="warning" className="text-sm mb-4" hideIcon>
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            Add-ons are only available on paid plans. Upgrade to access these features.
+                                            {addonSectionLabel} are only available on paid plans. Upgrade to access
+                                            these features.
                                         </div>
                                         <BillingUpgradeCTA
                                             type="primary"
@@ -566,11 +564,15 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                     </div>
                                 </Banner>
                             )}
-                            <div className="gap-y-4 flex flex-col">
-                                {visibleAddons.map((addon: BillingProductV2AddonType, i: number) => {
-                                    return <BillingProductAddon key={i} addon={addon} />
-                                })}
-                            </div>
+                            {product.type === 'platform_and_support' ? (
+                                <PlatformAddonComparison product={product} />
+                            ) : (
+                                <div className="flex flex-col gap-y-4">
+                                    {visibleAddons.map((addon: BillingProductV2AddonType, i: number) => (
+                                        <BillingProductAddon key={i} addon={addon} />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

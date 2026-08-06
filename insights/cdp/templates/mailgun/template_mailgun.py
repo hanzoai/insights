@@ -12,14 +12,15 @@ template_mailgun_send_email: InsightsFunctionTemplateDC = InsightsFunctionTempla
     description="Send emails using the Mailgun HTTP API",
     icon_url="/static/services/mailgun.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.template.to)) {
     return false
 }
 
 fun multiPartFormEncode(data) {
-    let boundary := f'---011000010111000001101001'
+    // Random boundary prevents multipart form injection via user-controlled field values
+    let boundary := f'---{generateUUIDv4()}'
     let bodyBoundary := f'--{boundary}\\r\\n'
     let body := bodyBoundary
 

@@ -78,13 +78,24 @@ RUN mkdir -p /scripts && \
 
 # Download agent runner script from GitHub
 RUN cd /scripts && \
-    curl -fsSL https://raw.githubusercontent.com/hanzoai/insights/main/products/tasks/scripts/runAgent.mjs \
+    curl -fsSL https://raw.githubusercontent.com/Insights/insights/master/products/tasks/scripts/runAgent.mjs \
     -o runAgent.mjs && \
     chmod +x runAgent.mjs
 
-# Configure git for commits - TODO: Use user's email and name
-RUN git config --global user.email "dev@hanzo.ai" && \
-    git config --global user.name "Hanzo"
+# Default git identity for bot-authored commits.
+# Runs configured for user-authored pull requests receive
+# GIT_AUTHOR_*/GIT_COMMITTER_* env vars that override these defaults.
+RUN git config --global user.email "code@hanzo.ai" && \
+    git config --global user.name "Insights Desktop"
+
+# Block `git commit`/`git push` so unsigned commits cannot leave the sandbox.
+COPY products/tasks/backend/sandbox/images/git-guard.sh /opt/insights/bin/git
+RUN chmod +x /opt/insights/bin/git
+# Inject the per-actor GitHub token into every `gh` call (BASH_ENV only reaches
+# non-interactive `bash -c`; the agent's interactive shell needs this shim).
+COPY products/tasks/backend/sandbox/images/gh-guard.sh /opt/insights/bin/gh
+RUN chmod +x /opt/insights/bin/gh
+ENV PATH="/opt/insights/bin:${PATH}"
 
 # This is required for the Claude Code SDK to allow --dangerously-skip-permissions as the root user
 ENV IS_SANDBOX=1

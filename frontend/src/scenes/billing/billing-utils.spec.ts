@@ -1,5 +1,6 @@
 import tk from 'timekeeper'
 
+import { OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 
 import { billingJson } from '~/mocks/fixtures/_billing'
@@ -8,12 +9,14 @@ import billingJsonWithFlatFee from '~/mocks/fixtures/_billing_with_flat_fee.json
 import {
     buildUsageLimitApproachingMessage,
     buildUsageLimitExceededMessage,
+    canAccessBilling,
     convertAmountToUsage,
     convertLargeNumberToWords,
     convertUsageToAmount,
     formatDisplayUsage,
     formatProductNames,
     formatWithDecimals,
+    getMinimumBillingAccessLevel,
     getProration,
     getUsageLimitConsequence,
     projectUsage,
@@ -514,6 +517,49 @@ describe('buildUsageLimitExceededMessage', () => {
         ])
         expect(result.message).toContain('upgrade your plan')
     })
+
+    it.each([
+        {
+            hasBillingAccess: true,
+            subscribed: true,
+            expected: 'increase your billing limit',
+        },
+        {
+            hasBillingAccess: true,
+            subscribed: false,
+            expected: 'upgrade your plan',
+        },
+        {
+            hasBillingAccess: false,
+            subscribed: true,
+            expected: 'ask an organization admin to increase the billing limit',
+        },
+        {
+            hasBillingAccess: false,
+            subscribed: false,
+            expected: 'ask an organization admin to upgrade the plan',
+        },
+    ])(
+        'should use "$expected" when hasBillingAccess=$hasBillingAccess and subscribed=$subscribed',
+        ({ hasBillingAccess, subscribed, expected }) => {
+            const result = buildUsageLimitExceededMessage([{ name: 'Session replay', subscribed }], hasBillingAccess)
+            expect(result.message).toContain(expected)
+        }
+    )
+
+    it('should say "owner" when minimumBillingAccessLevel is Owner and user has no billing access', () => {
+        const result = buildUsageLimitExceededMessage(
+            [{ name: 'Session replay', subscribed: true }],
+            false,
+            OrganizationMembershipLevel.Owner
+        )
+        expect(result.message).toContain('ask an organization owner')
+    })
+
+    it('should default to admin message when hasBillingAccess is not provided', () => {
+        const result = buildUsageLimitExceededMessage([{ name: 'Session replay', subscribed: true }])
+        expect(result.message).toContain('increase your billing limit')
+    })
 })
 
 describe('buildUsageLimitApproachingMessage', () => {
@@ -526,7 +572,7 @@ describe('buildUsageLimitApproachingMessage', () => {
             { name: 'Session replay', percentage_usage: 0.9, usage_key: 'recordings' },
         ])
         expect(result.title).toEqual('You will soon hit your usage limit')
-        expect(result.message).toEqual('You have currently used 90% of your recordings allocation.')
+        expect(result.message).toEqual('You have currently used 90% of your Session replay allocation.')
     })
 
     it('should build message for multiple products', () => {
@@ -536,13 +582,17 @@ describe('buildUsageLimitApproachingMessage', () => {
         ])
         expect(result.title).toEqual('You will soon hit your usage limits')
         expect(result.message).toEqual(
-            'You are approaching your usage limits: 90% of your recordings allocation, 87% of your feature_flag_requests allocation.'
+            'You are approaching your usage limits: 90% of your Session replay allocation, 87% of your Feature flags & Experiments allocation.'
         )
     })
 
-    it('should handle missing usage_key', () => {
-        const result = buildUsageLimitApproachingMessage([{ name: 'Session replay', percentage_usage: 0.9 }])
-        expect(result.message).toContain('usage allocation')
+    it.each([
+        { name: 'Session replay', usage_key: undefined, expected: 'Session replay allocation' },
+        { name: '', usage_key: 'signals_credits', expected: 'signals_credits allocation' },
+        { name: '', usage_key: undefined, expected: 'usage allocation' },
+    ])('should resolve label to "$expected" (name="$name", usage_key=$usage_key)', ({ name, usage_key, expected }) => {
+        const result = buildUsageLimitApproachingMessage([{ name, percentage_usage: 0.9, usage_key }])
+        expect(result.message).toContain(expected)
     })
 
     it('should format percentage with up to 2 decimal places', () => {
@@ -550,5 +600,70 @@ describe('buildUsageLimitApproachingMessage', () => {
             { name: 'Session replay', percentage_usage: 0.8567, usage_key: 'recordings' },
         ])
         expect(result.message).toContain('85.67%')
+    })
+
+    it.each([
+        {
+            hasBillingAccess: true,
+            expectedSuffix: false,
+        },
+        {
+            hasBillingAccess: false,
+            expectedSuffix: true,
+        },
+    ])(
+        'should include admin contact message when hasBillingAccess=$hasBillingAccess',
+        ({ hasBillingAccess, expectedSuffix }) => {
+            const result = buildUsageLimitApproachingMessage(
+                [{ name: 'Session replay', percentage_usage: 0.9, usage_key: 'recordings' }],
+                hasBillingAccess
+            )
+            if (expectedSuffix) {
+                expect(result.message).toContain('Please ask an organization admin to increase the billing limit.')
+            } else {
+                expect(result.message).not.toContain('organization admin')
+            }
+        }
+    )
+
+    it('should say "owner" when minimumBillingAccessLevel is Owner and user has no billing access', () => {
+        const result = buildUsageLimitApproachingMessage(
+            [{ name: 'Session replay', percentage_usage: 0.9, usage_key: 'recordings' }],
+            false,
+            OrganizationMembershipLevel.Owner
+        )
+        expect(result.message).toContain('ask an organization owner')
+    })
+
+    it('should default to no admin suffix when hasBillingAccess is not provided', () => {
+        const result = buildUsageLimitApproachingMessage([
+            { name: 'Session replay', percentage_usage: 0.9, usage_key: 'recordings' },
+        ])
+        expect(result.message).not.toContain('organization admin')
+    })
+})
+
+describe('getMinimumBillingAccessLevel', () => {
+    it('returns Admin when ownerOnlyBilling is false', () => {
+        expect(getMinimumBillingAccessLevel(false)).toBe(OrganizationMembershipLevel.Admin)
+    })
+
+    it('returns Owner when ownerOnlyBilling is true', () => {
+        expect(getMinimumBillingAccessLevel(true)).toBe(OrganizationMembershipLevel.Owner)
+    })
+})
+
+describe('canAccessBilling', () => {
+    it.each([
+        { level: OrganizationMembershipLevel.Owner, ownerOnly: false, expected: true },
+        { level: OrganizationMembershipLevel.Owner, ownerOnly: true, expected: true },
+        { level: OrganizationMembershipLevel.Admin, ownerOnly: false, expected: true },
+        { level: OrganizationMembershipLevel.Admin, ownerOnly: true, expected: false },
+        { level: OrganizationMembershipLevel.Member, ownerOnly: false, expected: false },
+        { level: OrganizationMembershipLevel.Member, ownerOnly: true, expected: false },
+        { level: null, ownerOnly: false, expected: false },
+        { level: null, ownerOnly: true, expected: false },
+    ])('returns $expected for level=$level, ownerOnly=$ownerOnly', ({ level, ownerOnly, expected }) => {
+        expect(canAccessBilling(level, ownerOnly)).toBe(expected)
     })
 })

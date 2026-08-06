@@ -1,10 +1,10 @@
-<clickhouse>
+<datastore>
     <tcp_port>9000</tcp_port>
     <remote_servers>
         <insights>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
@@ -12,7 +12,7 @@
         <insights_single_shard>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
@@ -20,13 +20,13 @@
         <insights_migrations>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
             <shard>
                 <replica>
-                    <host>clickhouse-coordinator</host>
+                    <host>datastore-coordinator</host>
                     <port>9001</port>
                 </replica>
             </shard>
@@ -39,4 +39,4 @@
         <hostClusterType>online</hostClusterType>
         <hostClusterRole>data</hostClusterRole>
     </macros>
-</clickhouse>
+</datastore>

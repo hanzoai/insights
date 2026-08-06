@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { Tooltip } from '@hanzo/elements'
 
 import { InsightLabel } from 'lib/components/InsightLabel'
-import { capitalizeFirstLetter } from 'lib/utils'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { IndexedTrendResult } from 'scenes/trends/types'
 
 import { TrendResult } from '~/types'
@@ -16,6 +16,7 @@ type SeriesColumnItemProps = {
     handleEditClick: (item: IndexedTrendResult) => void
     hasMultipleSeries: boolean
     hasBreakdown: boolean
+    hideCompare?: boolean
 }
 
 export function SeriesColumnItem({
@@ -26,6 +27,7 @@ export function SeriesColumnItem({
     handleEditClick,
     hasMultipleSeries,
     hasBreakdown,
+    hideCompare,
 }: SeriesColumnItemProps): JSX.Element {
     const showCountedByTag = !!indexedResults.find(({ action }) => action?.math && action.math !== 'total')
 
@@ -44,7 +46,10 @@ export function SeriesColumnItem({
                         'font-medium': !hasBreakdown,
                     })}
                     pillMaxWidth={165}
-                    compareValue={item.compare ? formatCompareLabel(item) : undefined}
+                    compareValue={
+                        // Formula results synthesized from filler rows can carry compare_label without compare
+                        (item.compare || item.compare_label) && !hideCompare ? formatCompareLabel(item) : undefined
+                    }
                     onLabelClick={canEditSeriesNameInline ? () => handleEditClick(item) : undefined}
                 />
             </div>

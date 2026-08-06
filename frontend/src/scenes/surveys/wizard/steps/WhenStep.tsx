@@ -1,26 +1,85 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
-import { Button, Checkbox, Input } from '@hanzo/elements'
+import { IconInfo, IconX } from '@hanzo/icons'
+import { Button, Checkbox, Input, SegmentedButton, Snack } from '@hanzo/elements'
 
+import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
+import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Radio } from 'lib/elements/Radio'
 import { AddEventButton } from 'scenes/surveys/AddEventButton'
+import { MAX_ITERATION_COUNT } from 'scenes/surveys/constants'
+import { doesSurveyRepeatOnEveryEvent } from 'scenes/surveys/utils'
 
-import { SurveyAppearance, SurveyDisplayConditions } from '~/types'
+import {
+    AnyPropertyFilter,
+    SurveyAppearance,
+    SurveyDisplayConditions,
+    SurveyEventsWithProperties,
+    SurveySchedule,
+} from '~/types'
 
+import {
+    SUPPORTED_OPERATORS,
+    convertArrayToPropertyFilters,
+    convertPropertyFiltersToArray,
+    getEventPropertyFilterCount,
+    useExcludedObjectProperties,
+} from '../../SurveyEventTrigger'
 import { surveyLogic } from '../../surveyLogic'
+import { surveyWizardLogic } from '../surveyWizardLogic'
+import { WizardPanel, WizardSection, WizardStepLayout } from '../WizardLayout'
+
+const DEFAULT_ITERATION_COUNT = 10
+const MIN_ITERATION_COUNT = 2
+
+const FREQUENCY_OPTIONS: { value: string; days: number | undefined; label: string }[] = [
+    { value: 'once', days: undefined, label: 'Once ever' },
+    { value: 'yearly', days: 365, label: 'Every year' },
+    { value: 'quarterly', days: 90, label: 'Every 3 months' },
+    { value: 'monthly', days: 30, label: 'Every month' },
+]
 
 export function WhenStep(): JSX.Element {
     const { survey } = useValues(surveyLogic)
     const { setSurveyValue } = useActions(surveyLogic)
+    const { recommendedFrequency } = useValues(surveyWizardLogic({ id: survey.id || 'new' }))
 
     const conditions: Partial<SurveyDisplayConditions> = survey.conditions || {}
     const appearance: Partial<SurveyAppearance> = survey.appearance || {}
-    const triggerEvents = conditions.events?.values?.map((e) => e.name) || []
+    const triggerEvents = conditions.events?.values || []
     // Check if events object exists (even if empty) to determine mode
     const triggerMode = conditions.events !== null && conditions.events !== undefined ? 'event' : 'pageview'
     const repeatedActivation = conditions.events?.repeatedActivation ?? false
+    // Repeated event activation makes the SDK re-show the survey on every trigger-event capture,
+    // bypassing the schedule — so render the schedule as not applicable, the same treatment as
+    // SurveyRepeatSchedule in the full editor (the explanation is deliberately not shared with it:
+    // the contexts differ too much). The stored schedule/iteration fields are left untouched so
+    // unchecking the box restores the previous cadence.
+    const repeatsOnEveryEvent = doesSurveyRepeatOnEveryEvent(survey)
     const delaySeconds = appearance.surveyPopupDelaySeconds ?? 0
+    const excludedObjectProperties = useExcludedObjectProperties()
+    // Derive frequency strictly from the iteration model — the universal wait-period is a separate
+    // across-surveys gate and must not influence which cadence is highlighted.
+    const presetFrequency = FREQUENCY_OPTIONS.find((opt) => opt.days === survey.iteration_frequency_days)?.value
+    // A recurring survey with a non-preset cadence (set in the full editor) must not render as
+    // 'Once ever' — surface it as a custom option instead.
+    const frequency =
+        survey.schedule === SurveySchedule.Once || !survey.iteration_frequency_days
+            ? 'once'
+            : (presetFrequency ?? 'custom')
+    const frequencyOptions =
+        frequency === 'custom'
+            ? [
+                  ...FREQUENCY_OPTIONS,
+                  {
+                      value: 'custom',
+                      days: survey.iteration_frequency_days ?? undefined,
+                      label: `Every ${survey.iteration_frequency_days} days`,
+                  },
+              ]
+            : FREQUENCY_OPTIONS
+    const iterationCount = survey.iteration_count ?? DEFAULT_ITERATION_COUNT
+    const seenSurveyWaitPeriodInDays = conditions.seenSurveyWaitPeriodInDays ?? null
 
     const setTriggerMode = (mode: 'pageview' | 'event'): void => {
         if (mode === 'pageview') {
@@ -33,6 +92,56 @@ export function WhenStep(): JSX.Element {
 
     const setDelaySeconds = (seconds: number): void => {
         setSurveyValue('appearance', { ...appearance, surveyPopupDelaySeconds: seconds })
+    }
+
+    const setFrequency = (value: string): void => {
+        if (value === 'custom') {
+            // Already the active cadence — nothing to change.
+            return
+        }
+        const option = FREQUENCY_OPTIONS.find((opt) => opt.value === value)
+        if (value === 'once') {
+            setSurveyValue('schedule', SurveySchedule.Once)
+            setSurveyValue('iteration_count', 0)
+            setSurveyValue('iteration_frequency_days', 0)
+            return
+        }
+        setSurveyValue('schedule', SurveySchedule.Recurring)
+        setSurveyValue(
+            'iteration_count',
+            survey.iteration_count && survey.iteration_count >= MIN_ITERATION_COUNT
+                ? survey.iteration_count
+                : DEFAULT_ITERATION_COUNT
+        )
+        setSurveyValue('iteration_frequency_days', option?.days)
+    }
+
+    const setIterationCount = (value: number | undefined): void => {
+        // Don't clamp to min on every keystroke — typing "10" briefly passes through 1, and aggressive
+        // clamping prevents the second digit from being appended. The blur handler enforces the floor.
+        if (value === undefined) {
+            return
+        }
+        setSurveyValue('iteration_count', Math.min(value, MAX_ITERATION_COUNT))
+    }
+
+    const commitIterationCount = (): void => {
+        if (!survey.iteration_count || survey.iteration_count < MIN_ITERATION_COUNT) {
+            setSurveyValue('iteration_count', MIN_ITERATION_COUNT)
+        }
+    }
+
+    // Reactive gate: typing a positive number turns the wait-period switch on; clearing or
+    // entering 0 turns it off. The switch itself just provides a quick way to seed/clear the value.
+    const setSeenSurveyWaitPeriod = (value: number | null | undefined): void => {
+        setSurveyValue('conditions', {
+            ...conditions,
+            seenSurveyWaitPeriodInDays: value && value > 0 ? value : null,
+        })
+    }
+
+    const setResponsesLimit = (value: number | null | undefined): void => {
+        setSurveyValue('responses_limit', value && value > 0 ? value : null)
     }
 
     const setRepeatedActivation = (enabled: boolean): void => {
@@ -64,75 +173,213 @@ export function WhenStep(): JSX.Element {
         })
     }
 
+    const updateTriggerEvent = (eventName: string, updatedEvent: SurveyEventsWithProperties): void => {
+        const currentEvents = conditions.events?.values || []
+        const newEvents = currentEvents.map((event) => (event.name === eventName ? updatedEvent : event))
+        setSurveyValue('conditions', {
+            ...conditions,
+            events: {
+                ...conditions.events,
+                values: newEvents,
+            },
+        })
+    }
+
+    const updateTriggerEventFilters = (event: SurveyEventsWithProperties, filters: AnyPropertyFilter[]): void => {
+        updateTriggerEvent(event.name, {
+            ...event,
+            propertyFilters: convertArrayToPropertyFilters(filters),
+        })
+    }
+
     return (
-        <div className="space-y-6">
-            <div className="space-y-1">
-                <h2 className="text-xl font-semibold">When should this appear?</h2>
-                <p className="text-secondary text-sm">Choose when to show this survey to your users</p>
-            </div>
+        <WizardStepLayout>
+            <WizardSection
+                title="When should this appear?"
+                description="Choose when to show this survey to your users"
+                descriptionClassName="text-sm"
+            >
+                <Radio
+                    value={triggerMode}
+                    onChange={setTriggerMode}
+                    options={[
+                        {
+                            value: 'pageview',
+                            label: 'On page load',
+                            description: 'Shows when the user visits the page',
+                        },
+                        {
+                            value: 'event',
+                            label: 'When an event is captured',
+                            description: 'Trigger the survey after specific events occur',
+                        },
+                    ]}
+                />
 
-            <Radio
-                value={triggerMode}
-                onChange={setTriggerMode}
-                options={[
-                    {
-                        value: 'pageview',
-                        label: 'On page load',
-                        description: 'Shows when the user visits the page',
-                    },
-                    {
-                        value: 'event',
-                        label: 'When an event is captured',
-                        description: 'Trigger the survey after specific events occur',
-                    },
-                ]}
-            />
-
-            {triggerMode === 'event' && (
-                <div className="ml-6 space-y-3">
-                    {triggerEvents.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                            {triggerEvents.map((event) => (
-                                <div
-                                    key={event}
-                                    className="flex items-center gap-2 px-3 py-1.5 border border-border rounded-lg bg-bg-light"
-                                >
-                                    <code className="text-sm font-mono">{event}</code>
-                                    <Button
-                                        size="xsmall"
-                                        icon={<IconX />}
-                                        onClick={() => removeTriggerEvent(event)}
-                                        type="tertiary"
-                                    />
+                {triggerMode === 'event' && (
+                    <div className="ml-6 space-y-2.5 mt-2">
+                        {triggerEvents.length > 0 && (
+                            <div className="space-y-2.5">
+                                <div className="text-xs text-muted">
+                                    Each event can be narrowed with optional property filters right below it.
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                    <AddEventButton onEventSelect={addTriggerEvent} addButtonText="Add event" />
-                    <Checkbox
-                        checked={repeatedActivation}
-                        onChange={setRepeatedActivation}
-                        label="Show every time the event is captured"
-                    />
-                </div>
-            )}
+                                {triggerEvents.map((event) => {
+                                    const propertyFilterCount = getEventPropertyFilterCount(event.propertyFilters)
 
-            <div className="border-t border-border pt-6 space-y-2">
-                <label className="text-sm font-medium">Delay before showing</label>
-                <div className="flex items-center gap-2">
+                                    return (
+                                        <WizardPanel key={event.name} className="bg-bg-light">
+                                            <div className="flex items-start justify-between gap-3 mb-3">
+                                                <div className="space-y-1">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <code className="text-sm font-mono">{event.name}</code>
+                                                        <span className="text-xs text-muted bg-border px-1.5 py-0.5 rounded">
+                                                            {propertyFilterCount > 0
+                                                                ? `${propertyFilterCount} filter${propertyFilterCount !== 1 ? 's' : ''}`
+                                                                : 'No filters yet'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-xs text-muted">
+                                                        Show the survey only when this event matches the properties
+                                                        below.
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    size="xsmall"
+                                                    icon={<IconX />}
+                                                    onClick={() => removeTriggerEvent(event.name)}
+                                                    type="tertiary"
+                                                />
+                                            </div>
+                                            <PropertyFilters
+                                                propertyFilters={convertPropertyFiltersToArray(event.propertyFilters)}
+                                                onChange={(filters: AnyPropertyFilter[]) =>
+                                                    updateTriggerEventFilters(event, filters)
+                                                }
+                                                pageKey={`survey-wizard-event-${event.name}`}
+                                                taxonomicGroupTypes={[TaxonomicFilterGroupType.EventProperties]}
+                                                excludedProperties={excludedObjectProperties}
+                                                eventNames={[event.name]}
+                                                buttonText="Add property filter"
+                                                buttonSize="small"
+                                                operatorAllowlist={SUPPORTED_OPERATORS}
+                                            />
+                                            <div className="text-xs text-muted mt-2">
+                                                Only primitive types are supported here. Array and object properties are
+                                                excluded.
+                                            </div>
+                                        </WizardPanel>
+                                    )
+                                })}
+                            </div>
+                        )}
+                        <AddEventButton onEventSelect={addTriggerEvent} addButtonText="Add event" />
+                        <div className="pt-1">
+                            <Checkbox
+                                checked={repeatedActivation}
+                                onChange={setRepeatedActivation}
+                                label="Show every time the event is captured"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 text-sm mt-5">
+                    <span>Then wait</span>
                     <Input
                         type="number"
                         min={0}
                         value={delaySeconds}
                         onChange={(val) => setDelaySeconds(Number(val) || 0)}
-                        className="w-20"
+                        className="w-20 tabular-nums"
                     />
-                    <span className="text-secondary text-sm">seconds after conditions are met</span>
+                    <span className="text-secondary">seconds before showing it.</span>
                 </div>
-                <p className="text-muted text-xs">
-                    Once a user matches the targeting conditions, wait this long before displaying the survey
-                </p>
-            </div>
-        </div>
+            </WizardSection>
+
+            <WizardSection
+                title="How often should this survey show?"
+                description="How many times this survey repeats, and how often. Repeats count from the launch date, so all users become eligible again at the same time."
+                descriptionClassName="text-sm"
+            >
+                {repeatsOnEveryEvent ? (
+                    <div className="text-sm" data-attr="survey-schedule-repeats-on-event-note">
+                        <IconInfo className="mr-0.5" />
+                        This survey is displayed whenever the{' '}
+                        <Snack>{triggerEvents.map((event) => event.name).join(', ')}</Snack>{' '}
+                        {triggerEvents.length === 1 ? 'event is' : 'events are'} captured, so the schedule options don't
+                        apply. To set a schedule instead, uncheck 'Show every time the event is captured' above.
+                    </div>
+                ) : (
+                    <>
+                        <SegmentedButton
+                            value={frequency}
+                            onChange={setFrequency}
+                            options={frequencyOptions.map((opt) => ({
+                                ...opt,
+                                tooltip:
+                                    opt.value === recommendedFrequency.value
+                                        ? `Recommended for this survey type`
+                                        : undefined,
+                            }))}
+                            fullWidth
+                        />
+
+                        {recommendedFrequency.value === frequency && (
+                            <p className="text-sm text-success mt-2 mb-0">{recommendedFrequency.reason}</p>
+                        )}
+
+                        {frequency !== 'once' && (
+                            <div className="flex flex-wrap items-center gap-2 text-sm mt-5">
+                                <span>Show up to</span>
+                                <Input
+                                    type="number"
+                                    min={MIN_ITERATION_COUNT}
+                                    max={MAX_ITERATION_COUNT}
+                                    value={iterationCount}
+                                    onChange={(val) => setIterationCount(val ?? undefined)}
+                                    onBlur={commitIterationCount}
+                                    className="w-20 tabular-nums"
+                                />
+                                <span className="text-secondary">
+                                    times in total ({MIN_ITERATION_COUNT}–{MAX_ITERATION_COUNT}).
+                                </span>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 text-sm mt-5">
+                    <Checkbox
+                        checked={seenSurveyWaitPeriodInDays != null}
+                        onChange={(checked) => setSeenSurveyWaitPeriod(checked ? 30 : null)}
+                        label="Don't show this survey if another one was shown to the user in the last"
+                    />
+                    <Input
+                        type="number"
+                        min={1}
+                        value={seenSurveyWaitPeriodInDays ?? undefined}
+                        onChange={setSeenSurveyWaitPeriod}
+                        className="w-20 tabular-nums"
+                    />
+                    <span className="text-secondary">days.</span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 text-sm mt-3">
+                    <Checkbox
+                        checked={survey.responses_limit != null}
+                        onChange={(checked) => setResponsesLimit(checked ? 100 : null)}
+                        label="Stop after"
+                    />
+                    <Input
+                        type="number"
+                        min={1}
+                        value={survey.responses_limit ?? undefined}
+                        onChange={setResponsesLimit}
+                        className="w-20 tabular-nums"
+                    />
+                    <span className="text-secondary">completed responses.</span>
+                </div>
+            </WizardSection>
+        </WizardStepLayout>
     )
 }

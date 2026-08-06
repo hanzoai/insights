@@ -67,14 +67,14 @@ describe('the property definitions model', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/property_definitions/': (req) => {
-                    const propertiesToFind = (req.url.searchParams.get('properties') || '').split(',')
+                '/api/projects/:team_id/property_definitions/': ({ request }) => {
+                    const url = new URL(request.url)
+                    const propertiesToFind = (url.searchParams.get('properties') || '').split(',')
                     if (propertiesToFind[0] === 'network error') {
-                        return
+                        return [500, { detail: 'simulated network error' }]
                     }
                     const filteredPropertyDefinitions =
-                        req.url.searchParams.get('type') === 'group' &&
-                        req.url.searchParams.get('group_type_index') !== null
+                        url.searchParams.get('type') === 'group' && url.searchParams.get('group_type_index') !== null
                             ? groupPropertyDefinitions
                             : propertyDefinitions
                     const foundProperties = filteredPropertyDefinitions.filter(
@@ -207,6 +207,25 @@ describe('the property definitions model', () => {
                 })
         })
 
+        it('marks unfetchable definition types as missing without wedging the queue', async () => {
+            // account_custom_property has no definitions endpoint; a stale key for it (e.g. from
+            // a saved view for a deleted definition) must not block other types from resolving.
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyDefinitions(
+                    ['11111111-2222-3333-4444-555555555555'],
+                    PropertyDefinitionType.AccountCustomProperty
+                )
+                logic.actions.loadPropertyDefinitions(['a string'], PropertyDefinitionType.Event)
+            })
+                .toFinishAllListeners()
+                .toMatchValues({
+                    propertyDefinitionStorage: partial({
+                        'account_custom_property/11111111-2222-3333-4444-555555555555': PropertyDefinitionState.Missing,
+                        'event/a string': partial({ name: 'a string' }),
+                    }),
+                })
+        })
+
         it('handles local definitions', async () => {
             await expectLogic(logic, () => {
                 logic.actions.loadPropertyDefinitions(['$session_duration'], PropertyDefinitionType.Event)
@@ -242,6 +261,12 @@ describe('the property definitions model', () => {
                         'event_metadata/timestamp': partial({
                             name: 'timestamp',
                         }),
+                        'person_metadata/created_at': {
+                            id: 'created_at',
+                            name: 'created_at',
+                            property_type: 'DateTime',
+                            type: 'person_metadata',
+                        },
                         'resource/assignee': partial({ name: 'assignee' }),
                         'resource/first_seen': partial({ name: 'first_seen' }),
                     },
@@ -409,6 +434,212 @@ describe('the property definitions model', () => {
         it('can format a null value for display', () => {
             expect(logic.values.formatPropertyValueForDisplay('$timestamp', null)).toEqual(null)
             expect(logic.values.formatPropertyValueForDisplay('$timestamp', undefined)).toEqual(null)
+        })
+    })
+
+    describe('loading property values', () => {
+        it.each([
+            [
+                'valid array results',
+                { results: [{ name: 'chrome' }, { name: 'firefox' }], refreshing: false },
+                [{ name: 'chrome' }, { name: 'firefox' }],
+            ],
+            ['non-array object in results', { results: { some: 'object' }, refreshing: false }, []],
+            ['null results', { results: null, refreshing: false }, []],
+            ['missing results key', { refreshing: false }, []],
+        ])('handles %s without crashing and stores correct values', async (_label, apiResponse, expectedValues) => {
+            useMocks({
+                get: {
+                    '/api/event/values/': () => [200, apiResponse],
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyValues({
+                    endpoint: undefined,
+                    type: PropertyDefinitionType.Event,
+                    propertyKey: 'browser',
+                    eventNames: [],
+                    newInput: undefined,
+                })
+            }).toFinishAllListeners()
+
+            expect(logic.values.options['browser'].values).toEqual(expectedValues)
+        })
+
+        it('handles API errors by setting error state and stopping loading', async () => {
+            useMocks({
+                get: {
+                    '/api/event/values/': () => [503, { detail: 'Service Unavailable' }],
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyValues({
+                    endpoint: undefined,
+                    type: PropertyDefinitionType.Event,
+                    propertyKey: 'browser',
+                    eventNames: [],
+                    newInput: undefined,
+                })
+            })
+                .toDispatchActions(['setOptionsLoading', 'setOptionsError'])
+                .toFinishAllListeners()
+
+            expect(logic.values.options['browser'].status).toEqual('error')
+            expect(logic.values.options['browser'].refreshing).toEqual(false)
+        })
+    })
+
+    describe('log_entry property values', () => {
+        it('returns local options for log_entry/level without a network request', async () => {
+            let networkCalled = false
+
+            useMocks({
+                get: {
+                    '/api/log_entry/values': () => {
+                        networkCalled = true
+                        return [200, { results: [], refreshing: false }]
+                    },
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyValues({
+                    endpoint: undefined,
+                    type: PropertyDefinitionType.LogEntry,
+                    propertyKey: 'level',
+                    newInput: undefined,
+                })
+            }).toFinishAllListeners()
+
+            expect(networkCalled).toBe(false)
+            expect(logic.values.options['level'].values).toEqual([
+                { id: 0, name: 'info' },
+                { id: 1, name: 'warn' },
+                { id: 2, name: 'error' },
+            ])
+        })
+
+        it('does not fetch from a nonexistent endpoint for log_entry properties without local options', async () => {
+            let networkCalled = false
+
+            useMocks({
+                get: {
+                    '/api/log_entry/values': () => {
+                        networkCalled = true
+                        return [200, { results: [], refreshing: false }]
+                    },
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyValues({
+                    endpoint: undefined,
+                    type: PropertyDefinitionType.LogEntry,
+                    propertyKey: 'message',
+                    newInput: undefined,
+                })
+            }).toFinishAllListeners()
+
+            expect(networkCalled).toBe(false)
+        })
+    })
+
+    describe('loadPropertyValues', () => {
+        it('includes refresh=force_cache in the URL when polling', async () => {
+            let capturedUrl: string | undefined
+
+            useMocks({
+                get: {
+                    '/api/event/values': ({ request }) => {
+                        capturedUrl = request.url
+                        return [200, { results: [], refreshing: false }]
+                    },
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyValues({
+                    endpoint: undefined,
+                    type: PropertyDefinitionType.Event,
+                    newInput: undefined,
+                    propertyKey: 'browser',
+                    refresh: 'force_cache',
+                })
+            }).toFinishAllListeners()
+
+            expect(capturedUrl).toContain('refresh=force_cache')
+        })
+
+        it('does not include refresh in the URL by default', async () => {
+            let capturedUrl: string | undefined
+
+            useMocks({
+                get: {
+                    '/api/event/values': ({ request }) => {
+                        capturedUrl = request.url
+                        return [200, { results: [], refreshing: false }]
+                    },
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyValues({
+                    endpoint: undefined,
+                    type: PropertyDefinitionType.Event,
+                    newInput: undefined,
+                    propertyKey: 'browser',
+                })
+            }).toFinishAllListeners()
+
+            expect(capturedUrl).not.toContain('refresh=')
+        })
+
+        it('sends refresh=force_cache on the follow-up poll after a refreshing response', async () => {
+            let pollCallback: (() => void) | null = null
+            const capturedUrls: string[] = []
+
+            // Intercept only the 2000ms polling timer; let all other timers run normally
+            const originalSetTimeout = global.setTimeout.bind(global)
+            jest.spyOn(global, 'setTimeout').mockImplementation(((
+                fn: TimerHandler,
+                delay?: number,
+                ...args: unknown[]
+            ) => {
+                if (delay === 2000) {
+                    pollCallback = () => (fn as (...a: unknown[]) => unknown)(...args)
+                    return 0 as unknown as ReturnType<typeof setTimeout>
+                }
+                return originalSetTimeout(fn, delay, ...args)
+            }) as typeof setTimeout)
+
+            useMocks({
+                get: {
+                    '/api/event/values': ({ request }) => {
+                        capturedUrls.push(request.url)
+                        return [200, { results: [], refreshing: capturedUrls.length === 1 }]
+                    },
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.loadPropertyValues({
+                    endpoint: undefined,
+                    type: PropertyDefinitionType.Event,
+                    newInput: undefined,
+                    propertyKey: 'browser',
+                })
+            }).toFinishAllListeners()
+
+            jest.restoreAllMocks()
+
+            expect(pollCallback).not.toBeNull()
+
+            await expectLogic(logic, () => pollCallback!()).toFinishAllListeners()
+
+            expect(capturedUrls).toHaveLength(2)
+            expect(capturedUrls[1]).toContain('refresh=force_cache')
         })
     })
 })

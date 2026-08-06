@@ -1,6 +1,10 @@
-import { Link } from 'lib/elements/Link'
+import { Suspense } from 'react'
+
+import { lazyWithRetry } from 'lib/utils/retryImport'
 
 import { CoreFilterDefinition } from '~/types'
+
+const LazyLink = lazyWithRetry(() => import('lib/elements/Link').then((m) => ({ default: m.Link })))
 
 type RawCoreFilterDefinition = {
     label: string
@@ -28,9 +32,9 @@ function transformDescription(description: string): React.ReactNode {
                 if (linkMatch) {
                     const [_, text, url] = linkMatch
                     return (
-                        <Link key={i} to={url}>
-                            {text}
-                        </Link>
+                        <Suspense key={i} fallback={text}>
+                            <LazyLink to={url}>{text}</LazyLink>
+                        </Suspense>
                     )
                 }
                 return part

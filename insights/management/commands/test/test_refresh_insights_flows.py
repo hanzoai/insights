@@ -7,7 +7,8 @@ from django.core.management import call_command
 
 from insights.management.commands.refresh_insights_flows import remove_event_filters_from_conditionals
 from insights.models import Team
-from insights.models.insights_flow.insights_flow import InsightsFlow
+
+from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
 class TestRefreshInsightsFlows(BaseTest):
@@ -18,7 +19,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.team2 = Team.objects.create(organization=self.organization, name="Test Team 2")
 
         # Create InsightsFlows for testing with proper trigger actions
-        with patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers"):
+        with patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers"):
             trigger_config_1 = {
                 "type": "event",
                 "filters": {
@@ -94,7 +95,7 @@ class TestRefreshInsightsFlows(BaseTest):
                 version=1,
             )
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_refresh_all_insights_flows(self, mock_reload):
         """Test refreshing all InsightsFlows across all teams."""
 
@@ -110,7 +111,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Updated: 4", output)
         self.assertIn("Errors: 0", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_refresh_by_team_id(self, mock_reload):
         """Test refreshing InsightsFlows for a specific team."""
 
@@ -125,7 +126,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Found 3 InsightsFlows to process", output)
         self.assertIn("Updated: 3", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_refresh_by_insights_flow_id(self, mock_reload):
         """Test refreshing a specific InsightsFlow by ID."""
 
@@ -140,7 +141,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Found 1 InsightsFlows to process", output)
         self.assertIn("Updated: 1", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_nonexistent_team_id(self, mock_reload):
         """Test handling of nonexistent team ID."""
 
@@ -153,7 +154,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Found 0 InsightsFlows to process", output)
         self.assertIn("No InsightsFlows found matching criteria", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_nonexistent_insights_flow_id(self, mock_reload):
         """Test handling of nonexistent InsightsFlow ID."""
 
@@ -168,7 +169,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Found 0 InsightsFlows to process", output)
         self.assertIn("No InsightsFlows found matching criteria", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_page_size_option(self, mock_reload):
         """Test that the page_size option works correctly."""
 
@@ -186,7 +187,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Processed: 4", output)
         self.assertIn("Updated: 4", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_error_handling(self, mock_reload):
         """Test error handling when a flow fails to save."""
 
@@ -217,7 +218,7 @@ class TestRefreshInsightsFlows(BaseTest):
             self.assertIn("Errors: 1", output)  # 1 failure
             self.assertIn("Check logs for details on 1 errors encountered", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
     def test_bytecode_regeneration_on_conditional_branch(self, mock_reload):
         """Test that bytecode is regenerated when a conditional branch action is missing bytecode."""
 

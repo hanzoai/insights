@@ -3,17 +3,20 @@ import { DashboardFilter, InsightsQLVariable, QuerySchema } from '~/queries/sche
 import { integer } from '~/queries/schema/type-utils'
 import { ActionType, DashboardType, EventDefinition, InsightShortId, QueryBasedInsightModel } from '~/types'
 
-import { RevenueAnalyticsQuery } from 'products/revenue_analytics/frontend/revenueAnalyticsLogic'
-
 export enum MaxContextType {
     DASHBOARD = 'dashboard',
     INSIGHT = 'insight',
     EVENT = 'event',
     ACTION = 'action',
     ERROR_TRACKING_ISSUE = 'error_tracking_issue',
+    EVALUATION = 'evaluation',
+    NOTEBOOK = 'notebook',
 }
 
-export type InsightWithQuery = Pick<Partial<QueryBasedInsightModel>, 'query'> & Partial<QueryBasedInsightModel>
+export type InsightWithQuery = Pick<
+    Partial<QueryBasedInsightModel>,
+    'query' | 'short_id' | 'name' | 'derived_name' | 'description' | 'id'
+>
 
 export interface MaxInsightContext {
     type: MaxContextType.INSIGHT
@@ -54,6 +57,26 @@ export interface MaxErrorTrackingIssueContext {
     name?: string | null
 }
 
+export type EvaluationRuntime = 'script' | 'llm_judge' | 'sentiment'
+
+export interface MaxEvaluationContext {
+    type: MaxContextType.EVALUATION
+    id: string
+    name?: string | null
+    description?: string | null
+    evaluation_type: EvaluationRuntime
+    hog_source?: string | null
+}
+
+export interface MaxNotebookContext {
+    type: MaxContextType.NOTEBOOK
+    id: string // short_id
+    name?: string | null
+    markdown_with_insertion_placeholder?: string
+    insertion_placeholder_block_id?: string
+    insertion_placeholder_marker?: string
+}
+
 // The main shape for the UI context sent to the backend
 export interface MaxUIContext {
     dashboards?: MaxDashboardContext[]
@@ -61,7 +84,13 @@ export interface MaxUIContext {
     events?: MaxEventContext[]
     actions?: MaxActionContext[]
     error_tracking_issues?: MaxErrorTrackingIssueContext[]
+    evaluations?: MaxEvaluationContext[]
+    notebooks?: MaxNotebookContext[]
     form_answers?: Record<string, string> // question_id -> answer for create_form tool responses
+    // Request modality: true when the user is asking via hands-free voice mode. Backend
+    // appends a voice-formatting instruction to the prompt so the response is suitable
+    // for TTS (numbers spelled out, no markdown, etc).
+    voice_mode?: boolean
 }
 
 // Taxonomic filter options
@@ -80,17 +109,18 @@ export type MaxContextItem =
     | MaxEventContext
     | MaxActionContext
     | MaxErrorTrackingIssueContext
+    | MaxEvaluationContext
+    | MaxNotebookContext
 
 type MaxInsightContextInput = {
     type: MaxContextType.INSIGHT
     data: InsightWithQuery
     filtersOverride?: DashboardFilter
     variablesOverride?: Record<string, InsightsQLVariable>
-    revenueAnalyticsQuery?: RevenueAnalyticsQuery
 }
 type MaxDashboardContextInput = {
     type: MaxContextType.DASHBOARD
-    data: DashboardType<QueryBasedInsightModel>
+    data: DashboardType<InsightWithQuery>
 }
 type MaxEventContextInput = {
     type: MaxContextType.EVENT
@@ -104,12 +134,39 @@ type MaxErrorTrackingIssueContextInput = {
     type: MaxContextType.ERROR_TRACKING_ISSUE
     data: { id: string; name?: string | null }
 }
+type MaxEvaluationContextInput = {
+    type: MaxContextType.EVALUATION
+    data: {
+        id: string
+        name?: string | null
+        description?: string | null
+        evaluation_type: EvaluationRuntime
+        hog_source?: string | null
+    }
+}
+type MaxNotebookContextInput = {
+    type: MaxContextType.NOTEBOOK
+    data: { short_id: string; title?: string | null }
+}
 export type MaxContextInput =
     | MaxInsightContextInput
     | MaxDashboardContextInput
     | MaxEventContextInput
     | MaxActionContextInput
     | MaxErrorTrackingIssueContextInput
+    | MaxEvaluationContextInput
+    | MaxNotebookContextInput
+
+function pickInsightFields(insight: Partial<QueryBasedInsightModel>): InsightWithQuery {
+    return {
+        id: insight.id,
+        short_id: insight.short_id,
+        name: insight.name,
+        derived_name: insight.derived_name,
+        description: insight.description,
+        query: insight.query,
+    }
+}
 
 /**
  * Helper functions to create maxContext items safely
@@ -118,7 +175,13 @@ export type MaxContextInput =
 export const createMaxContextHelpers = {
     dashboard: (dashboard: DashboardType<QueryBasedInsightModel>): MaxDashboardContextInput => ({
         type: MaxContextType.DASHBOARD,
-        data: dashboard,
+        data: {
+            ...dashboard,
+            tiles: (dashboard.tiles ?? []).map((tile) => ({
+                ...tile,
+                insight: tile.insight ? pickInsightFields(tile.insight) : tile.insight,
+            })),
+        },
     }),
 
     insight: (
@@ -126,18 +189,15 @@ export const createMaxContextHelpers = {
         {
             filtersOverride,
             variablesOverride,
-            revenueAnalyticsQuery,
         }: {
             filtersOverride?: DashboardFilter
             variablesOverride?: Record<string, InsightsQLVariable>
-            revenueAnalyticsQuery?: RevenueAnalyticsQuery
         } = {}
     ): MaxInsightContextInput => ({
         type: MaxContextType.INSIGHT,
-        data: insight,
+        data: pickInsightFields(insight),
         filtersOverride,
         variablesOverride,
-        revenueAnalyticsQuery,
     }),
 
     event: (event: EventDefinition): MaxEventContextInput => ({
@@ -154,8 +214,46 @@ export const createMaxContextHelpers = {
         type: MaxContextType.ERROR_TRACKING_ISSUE,
         data: issue,
     }),
+
+    evaluation: (evaluation: {
+        id: string
+        name?: string | null
+        description?: string | null
+        evaluation_type: EvaluationRuntime
+        hog_source?: string | null
+    }): MaxEvaluationContextInput => ({
+        type: MaxContextType.EVALUATION,
+        data: evaluation,
+    }),
+
+    notebook: (notebook: { short_id: string; title?: string | null }): MaxNotebookContextInput => ({
+        type: MaxContextType.NOTEBOOK,
+        data: notebook,
+    }),
 }
 
 export function isAgentMode(mode: unknown): mode is AgentMode {
     return typeof mode === 'string' && Object.values(AgentMode).includes(mode as AgentMode)
+}
+
+// `ToolCallMessage` now lives with the relocated sandbox renderer. Re-exported here so
+// the frozen LangGraph path and any in-flight branches keep resolving it from `maxTypes`.
+export type { ToolCallMessage } from 'products/insights_ai/frontend/api/types'
+
+/**
+ * Flat context attachment sent to the sandbox agent runtime (`agent_runtime === 'sandbox'`).
+ *
+ * Unlike the rich `MaxUIContext` payloads used by the LangGraph runtime, the sandbox runtime
+ * carries only typed references the agent fetches on demand via its read tools. This is a new
+ * export added alongside the existing context types during the coexistence window — existing
+ * types are untouched.
+ */
+export interface AttachedContext {
+    type: 'dashboard' | 'insight' | 'event' | 'action' | 'error_tracking_issue' | 'evaluation' | 'notebook' | 'text'
+    /** Entity id — int for dashboards/actions, short_id for insights/notebooks, UUID for error tracking issues. */
+    id?: string | number
+    /** Optional human-readable label for entity types. */
+    name?: string
+    /** Free-text value — only set when `type === 'text'`. */
+    value?: string
 }

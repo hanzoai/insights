@@ -5,8 +5,8 @@ import { Placement } from '@floating-ui/react'
 import { IconChevronLeft, IconChevronRight, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
-import { Popover } from 'lib/elements/Popover/Popover'
 import { IconOpenInNew } from 'lib/elements/icons'
+import { Popover } from 'lib/elements/Popover/Popover'
 
 export type ActionableTooltipProps = {
     title?: string

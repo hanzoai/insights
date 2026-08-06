@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { DataColorToken } from 'lib/colors'
 
 import { Button } from '../Button'
-import { ColorPicker } from './ColorPicker'
+import { ColorPicker, ColorPickerProps } from './ColorPicker'
 
-type Story = StoryObj<typeof ColorPicker>
-const meta: Meta<typeof ColorPicker> = {
-    title: 'Elements/Color/Color Picker',
+type Story = StoryObj<ColorPickerProps>
+const meta: Meta<ColorPickerProps> = {
+    title: 'Lemon UI/Lemon Color/Lemon Color Picker',
     component: ColorPicker,
     tags: ['autodocs'],
 }
@@ -64,6 +64,21 @@ export const CustomButton: Story = {
                 selectedColorToken={colorToken}
                 onSelectColorToken={setColorToken}
                 customButton={<Button>Customize color</Button>}
+            />
+        )
+    },
+}
+
+export const WithUnset: Story = {
+    render: () => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const [color, setColor] = useState<string | null>('#ff0000')
+        return (
+            <ColorPicker
+                colors={colors}
+                selectedColor={color}
+                onSelectColor={setColor}
+                onClearColor={() => setColor(null)}
             />
         )
     },

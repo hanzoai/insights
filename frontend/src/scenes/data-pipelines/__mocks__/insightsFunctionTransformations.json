@@ -13,7 +13,7 @@
             "created_by": null,
             "updated_at": "2025-05-27T14:49:22.040684Z",
             "enabled": true,
-            "iql": "return event",
+            "script": "return event",
             "bytecode": null,
             "transpiled": null,
             "inputs_schema": [],
@@ -32,7 +32,7 @@
                 "type": "transformation",
                 "id": "plugin-insights-plugin-geoip",
                 "name": "GeoIP",
-                "iql": "return event",
+                "script": "return event",
                 "inputs_schema": [],
                 "category": ["Custom"],
                 "description": "Enrich events with GeoIP data",
@@ -68,7 +68,7 @@
             },
             "updated_at": "2025-05-27T14:49:22.078803Z",
             "enabled": true,
-            "iql": "return null",
+            "script": "return null",
             "bytecode": ["_H", 1, 31, 38],
             "transpiled": null,
             "inputs_schema": [],
@@ -86,7 +86,7 @@
             },
             "masking": null,
             "mappings": null,
-            "icon_url": "/static/mascot/builder-fn-01.png",
+            "icon_url": "https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png",
             "template": {
                 "mapping_templates": null,
                 "mappings": null,
@@ -95,7 +95,7 @@
                 "type": "transformation",
                 "id": "template-drop-events",
                 "name": "Drop Events",
-                "iql": "return null",
+                "script": "return null",
                 "inputs_schema": [],
                 "category": ["Custom"],
                 "description": "Drop events based on defined filters.",
@@ -110,7 +110,7 @@
                     ]
                 },
                 "masking": null,
-                "icon_url": "/static/mascot/builder-fn-01.png",
+                "icon_url": "https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png",
                 "kind": null
             },
             "status": {

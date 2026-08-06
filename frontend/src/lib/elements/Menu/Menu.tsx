@@ -1,6 +1,7 @@
-import React, { FunctionComponent, ReactNode, useCallback, useMemo } from 'react'
+import { useMergeRefs } from '@floating-ui/react'
+import React, { FunctionComponent, ReactNode, cloneElement, useCallback, useMemo } from 'react'
 
-import { KeyboardShortcut, KeyboardShortcutProps } from '~/layout/navigation-3000/components/KeyboardShortcut'
+import { KeyboardShortcut, KeyboardShortcutProps } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 
 import { Button, ButtonProps } from '../Button'
 import { Divider } from '../Divider'
@@ -11,20 +12,19 @@ import { useKeyboardNavigation } from './useKeyboardNavigation'
 
 type KeyboardShortcut = Array<keyof KeyboardShortcutProps>
 
-export interface MenuItemBase
-    extends Pick<
-        ButtonProps,
-        | 'icon'
-        | 'sideIcon'
-        | 'sideAction'
-        | 'disabledReason'
-        | 'tooltip'
-        | 'tooltipPlacement'
-        | 'active'
-        | 'status'
-        | 'data-attr'
-        | 'size'
-    > {
+export interface MenuItemBase extends Pick<
+    ButtonProps,
+    | 'icon'
+    | 'sideIcon'
+    | 'sideAction'
+    | 'disabledReason'
+    | 'tooltip'
+    | 'tooltipPlacement'
+    | 'active'
+    | 'status'
+    | 'data-attr'
+    | 'size'
+> {
     label: string | JSX.Element
     key?: React.Key
     /** @deprecated You're probably doing something wrong if you're setting per-item classes. */
@@ -82,7 +82,8 @@ export interface MenuSection {
 export type MenuItems = (MenuItem | MenuSection | false | null)[]
 
 export interface MenuProps
-    extends Pick<
+    extends
+        Pick<
             DropdownProps,
             | 'placement'
             | 'fallbackPlacements'
@@ -96,6 +97,7 @@ export interface MenuProps
             | 'onClickOutside'
             | 'middleware'
             | 'startVisible'
+            | 'trigger'
         >,
         MenuOverlayProps {
     /** Must support `ref` and `onKeyDown` for keyboard navigation. */
@@ -111,16 +113,20 @@ export interface MenuProps
     focusBasedKeyboardNavigation?: boolean
 }
 
-export function Menu({
-    items,
-    activeItemIndex,
-    tooltipPlacement,
-    onVisibilityChange,
-    focusBasedKeyboardNavigation = true,
-    ...dropdownProps
-}: MenuProps): JSX.Element {
+export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
+    {
+        items,
+        activeItemIndex,
+        tooltipPlacement,
+        onVisibilityChange,
+        focusBasedKeyboardNavigation = true,
+        children,
+        ...dropdownProps
+    },
+    ref
+): JSX.Element {
     const { referenceRef, itemsRef } = useKeyboardNavigation<HTMLElement, HTMLButtonElement>(
-        items.flatMap((item) => (item && isMenuSection(item) ? item.items : item)).length,
+        items.flatMap((item) => (item && isLemonMenuSection(item) ? item.items : item)).length,
         activeItemIndex,
         { enabled: focusBasedKeyboardNavigation }
     )
@@ -138,6 +144,11 @@ export function Menu({
         [onVisibilityChange, activeItemIndex]
     )
 
+    // Menu renders no DOM itself — only the trigger child does. Forward an externally-provided
+    // ref (e.g. from <Shortcut />) onto that child so it lands on a real DOM node, otherwise consumers
+    // attaching a ref to Menu silently get nothing.
+    const triggerRef = useMergeRefs([ref, (children as { ref?: React.Ref<HTMLElement> }).ref])
+
     return (
         <Dropdown
             overlay={
@@ -152,9 +163,12 @@ export function Menu({
             referenceRef={referenceRef}
             onVisibilityChange={_onVisibilityChange}
             {...dropdownProps}
-        />
+        >
+            {cloneElement(children, { ref: triggerRef })}
+        </Dropdown>
     )
-}
+})
+Menu.displayName = 'Menu'
 
 export interface MenuOverlayProps {
     items: MenuItems
@@ -172,7 +186,7 @@ export function MenuOverlay({
 }: MenuOverlayProps): JSX.Element {
     const sectionsOrItems = useMemo(() => normalizeItems(items), [items])
 
-    return sectionsOrItems.length > 0 && isMenuSection(sectionsOrItems[0]) ? (
+    return sectionsOrItems.length > 0 && isLemonMenuSection(sectionsOrItems[0]) ? (
         <MenuSectionList
             sections={sectionsOrItems as MenuSection[]}
             buttonSize={buttonSize}
@@ -350,7 +364,7 @@ function normalizeItems(sectionsAndItems: MenuItems): MenuItem[] | MenuSection[]
         if (!sectionOrItem) {
             continue // Ignore falsy items
         }
-        if (isMenuSection(sectionOrItem)) {
+        if (isLemonMenuSection(sectionOrItem)) {
             if (implicitSection.items.length > 0) {
                 sections.push(implicitSection)
                 implicitSection = { items: [] }
@@ -370,6 +384,6 @@ function normalizeItems(sectionsAndItems: MenuItems): MenuItem[] | MenuSection[]
     return sections
 }
 
-export function isMenuSection(candidate: MenuSection | MenuItem): candidate is MenuSection {
+export function isLemonMenuSection(candidate: MenuSection | MenuItem): candidate is MenuSection {
     return candidate && 'items' in candidate && !('label' in candidate)
 }

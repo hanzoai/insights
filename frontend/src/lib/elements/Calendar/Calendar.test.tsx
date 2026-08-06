@@ -2,7 +2,7 @@ import { render, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { dayjs } from 'lib/dayjs'
-import { range } from 'lib/utils'
+import { range } from 'lib/utils/arrays'
 
 import { getAllByDataAttr, getByDataAttr } from '~/test/byDataAttr'
 
@@ -23,39 +23,39 @@ describe('Calendar', () => {
         )
 
         // find just one month
-        const calendarMonths = getAllByDataAttr(container, 'calendar-month')
-        expect(calendarMonths.length).toBe(1)
-        const [calendar] = calendarMonths
+        const lemonCalendarMonths = getAllByDataAttr(container, 'lemon-calendar-month')
+        expect(lemonCalendarMonths.length).toBe(1)
+        const [calendar] = lemonCalendarMonths
 
         // make sure there are 5 weeks in the February 2020 calendar
-        const calendarWeeks = getAllByDataAttr(container, 'calendar-week')
-        expect(calendarWeeks.length).toBe(5)
+        const lemonCalendarWeeks = getAllByDataAttr(container, 'lemon-calendar-week')
+        expect(lemonCalendarWeeks.length).toBe(5)
 
         // find February 2020
         expect(await within(calendar).findByText('February 2020')).toBeTruthy()
 
         // go to January 2020
-        const previousMonth = getByDataAttr(container, 'calendar-month-previous')
-        userEvent.click(previousMonth)
+        const previousMonth = getByDataAttr(container, 'lemon-calendar-month-previous')
+        await userEvent.click(previousMonth)
         expect(onLeftmostMonthChanged).toHaveBeenCalledWith(dayjs('2020-01-01'))
         expect(await within(calendar).findByText('January 2020')).toBeTruthy()
 
         // click on 15
         let fifteenth = await within(container).findByText('15')
-        userEvent.click(fifteenth)
+        await userEvent.click(fifteenth)
         expect(onDateClick).toHaveBeenCalledWith(dayjs('2020-01-15'))
 
         // go to March 2020
-        const nextMonth = getByDataAttr(container, 'calendar-month-next')
-        userEvent.click(nextMonth)
-        userEvent.click(nextMonth)
+        const nextMonth = getByDataAttr(container, 'lemon-calendar-month-next')
+        await userEvent.click(nextMonth)
+        await userEvent.click(nextMonth)
         expect(onLeftmostMonthChanged).toHaveBeenCalledWith(dayjs('2020-02-01'))
         expect(onLeftmostMonthChanged).toHaveBeenCalledWith(dayjs('2020-03-01'))
         expect(await within(calendar).findByText('March 2020')).toBeTruthy()
 
         // click on 15
         fifteenth = await within(container).findByText('15') // the cell moved
-        userEvent.click(fifteenth)
+        await userEvent.click(fifteenth)
         expect(onDateClick).toHaveBeenCalledWith(dayjs('2020-03-15'))
     })
 
@@ -73,30 +73,30 @@ describe('Calendar', () => {
         )
 
         // find just one month
-        const calendars = getAllByDataAttr(container, 'calendar-month')
-        expect(calendars.length).toBe(2)
-        const [cal1, cal2] = calendars
+        const lemonCalendars = getAllByDataAttr(container, 'lemon-calendar-month')
+        expect(lemonCalendars.length).toBe(2)
+        const [cal1, cal2] = lemonCalendars
 
         // find February 2020
         expect(await within(cal1).findByText('February 2020')).toBeTruthy()
         expect(await within(cal2).findByText('March 2020')).toBeTruthy()
 
         // go to January 2020
-        const previousMonth = getByDataAttr(container, 'calendar-month-previous')
-        userEvent.click(previousMonth)
+        const previousMonth = getByDataAttr(container, 'lemon-calendar-month-previous')
+        await userEvent.click(previousMonth)
         expect(onLeftmostMonthChanged).toHaveBeenCalledWith(dayjs('2020-01-01'))
         expect(await within(cal1).findByText('January 2020')).toBeTruthy()
         expect(await within(cal2).findByText('February 2020')).toBeTruthy()
 
         // click on 15
         let fifteenth = await within(cal1).findByText('15')
-        userEvent.click(fifteenth)
+        await userEvent.click(fifteenth)
         expect(onDateClick).toHaveBeenCalledWith(dayjs('2020-01-15'))
 
         // go to March 2020
-        const nextMonth = getByDataAttr(container, 'calendar-month-next')
-        userEvent.click(nextMonth)
-        userEvent.click(nextMonth)
+        const nextMonth = getByDataAttr(container, 'lemon-calendar-month-next')
+        await userEvent.click(nextMonth)
+        await userEvent.click(nextMonth)
         expect(onLeftmostMonthChanged).toHaveBeenCalledWith(dayjs('2020-02-01'))
         expect(onLeftmostMonthChanged).toHaveBeenCalledWith(dayjs('2020-03-01'))
         expect(await within(cal1).findByText('March 2020')).toBeTruthy()
@@ -104,14 +104,14 @@ describe('Calendar', () => {
 
         // click on 15
         fifteenth = await within(cal1).findByText('15') // the cell moved
-        userEvent.click(fifteenth)
+        await userEvent.click(fifteenth)
         expect(onDateClick).toHaveBeenCalledWith(dayjs('2020-03-15'))
     })
 
     test('renders many months', async () => {
         const { container } = render(<Calendar months={10} />)
-        const calendarMonths = getAllByDataAttr(container, 'calendar-month')
-        expect(calendarMonths.length).toBe(10)
+        const lemonCalendarMonths = getAllByDataAttr(container, 'lemon-calendar-month')
+        expect(lemonCalendarMonths.length).toBe(10)
     })
 
     test('renders the current month by default', async () => {
@@ -122,75 +122,111 @@ describe('Calendar', () => {
             <Calendar onLeftmostMonthChanged={onLeftmostMonthChanged} onDateClick={onDateClick} />
         )
 
-        const calendar = getByDataAttr(container, 'calendar')
+        const calendar = getByDataAttr(container, 'lemon-calendar')
         const thisMonth = dayjs().format('MMMM YYYY')
         expect(await within(calendar).findByText(thisMonth)).toBeTruthy()
     })
 
-    test('calls getButtonProps for each day', async () => {
-        const calls: any = []
-        const { container } = render(
+    test('calls getDateState for each day with its date', async () => {
+        const dates: dayjs.Dayjs[] = []
+        render(
             <Calendar
                 leftmostMonth={dayjs('2020-02-20')}
-                getButtonProps={({ date, props: defaultProps }) => {
-                    const props = { ...defaultProps }
-                    if (date.isSame('2020-02-14')) {
-                        props['data-attr'] = 's6brap2ev'
-                        props['className'] = 'yolo'
-                    }
-                    calls.push([date, props])
-                    return props
+                getDateState={({ date }) => {
+                    dates.push(date)
+                    return {}
                 }}
             />
         )
-        expect(calls.length).toBe(35)
-        expect(calls).toEqual([
-            [dayjs('2020-01-26'), { className: 'flex-col opacity-25' }],
-            [dayjs('2020-01-27'), { className: 'flex-col opacity-25' }],
-            [dayjs('2020-01-28'), { className: 'flex-col opacity-25' }],
-            [dayjs('2020-01-29'), { className: 'flex-col opacity-25' }],
-            [dayjs('2020-01-30'), { className: 'flex-col opacity-25' }],
-            [dayjs('2020-01-31'), { className: 'flex-col opacity-25' }],
-            [dayjs('2020-02-01'), { className: 'flex-col' }],
-            [dayjs('2020-02-02'), { className: 'flex-col' }],
-            [dayjs('2020-02-03'), { className: 'flex-col' }],
-            [dayjs('2020-02-04'), { className: 'flex-col' }],
-            [dayjs('2020-02-05'), { className: 'flex-col' }],
-            [dayjs('2020-02-06'), { className: 'flex-col' }],
-            [dayjs('2020-02-07'), { className: 'flex-col' }],
-            [dayjs('2020-02-08'), { className: 'flex-col' }],
-            [dayjs('2020-02-09'), { className: 'flex-col' }],
-            [dayjs('2020-02-10'), { className: 'flex-col' }],
-            [dayjs('2020-02-11'), { className: 'flex-col' }],
-            [dayjs('2020-02-12'), { className: 'flex-col' }],
-            [dayjs('2020-02-13'), { className: 'flex-col' }],
-            [dayjs('2020-02-14'), { className: 'yolo', 'data-attr': 's6brap2ev' }],
-            [dayjs('2020-02-15'), { className: 'flex-col' }],
-            [dayjs('2020-02-16'), { className: 'flex-col' }],
-            [dayjs('2020-02-17'), { className: 'flex-col' }],
-            [dayjs('2020-02-18'), { className: 'flex-col' }],
-            [dayjs('2020-02-19'), { className: 'flex-col' }],
-            [dayjs('2020-02-20'), { className: 'flex-col' }],
-            [dayjs('2020-02-21'), { className: 'flex-col' }],
-            [dayjs('2020-02-22'), { className: 'flex-col' }],
-            [dayjs('2020-02-23'), { className: 'flex-col' }],
-            [dayjs('2020-02-24'), { className: 'flex-col' }],
-            [dayjs('2020-02-25'), { className: 'flex-col' }],
-            [dayjs('2020-02-26'), { className: 'flex-col' }],
-            [dayjs('2020-02-27'), { className: 'flex-col' }],
-            [dayjs('2020-02-28'), { className: 'flex-col' }],
-            [dayjs('2020-02-29'), { className: 'flex-col' }],
+        expect(dates.length).toBe(35)
+        expect(dates).toEqual([
+            dayjs('2020-01-26'),
+            dayjs('2020-01-27'),
+            dayjs('2020-01-28'),
+            dayjs('2020-01-29'),
+            dayjs('2020-01-30'),
+            dayjs('2020-01-31'),
+            dayjs('2020-02-01'),
+            dayjs('2020-02-02'),
+            dayjs('2020-02-03'),
+            dayjs('2020-02-04'),
+            dayjs('2020-02-05'),
+            dayjs('2020-02-06'),
+            dayjs('2020-02-07'),
+            dayjs('2020-02-08'),
+            dayjs('2020-02-09'),
+            dayjs('2020-02-10'),
+            dayjs('2020-02-11'),
+            dayjs('2020-02-12'),
+            dayjs('2020-02-13'),
+            dayjs('2020-02-14'),
+            dayjs('2020-02-15'),
+            dayjs('2020-02-16'),
+            dayjs('2020-02-17'),
+            dayjs('2020-02-18'),
+            dayjs('2020-02-19'),
+            dayjs('2020-02-20'),
+            dayjs('2020-02-21'),
+            dayjs('2020-02-22'),
+            dayjs('2020-02-23'),
+            dayjs('2020-02-24'),
+            dayjs('2020-02-25'),
+            dayjs('2020-02-26'),
+            dayjs('2020-02-27'),
+            dayjs('2020-02-28'),
+            dayjs('2020-02-29'),
         ])
-        const fourteen = getByDataAttr(container, 's6brap2ev')
-        expect(fourteen).toBeTruthy()
-        expect(fourteen.className.split(' ')).toContain('yolo')
     })
 
-    test('calls getButtonTimeProps for each time', async () => {
+    test.each([
+        ['selected', { selected: true }, 'Button--primary'],
+        ['range start', { isStart: true }, 'Calendar__range--boundary'],
+        ['range end', { isEnd: true }, 'Calendar__range--boundary'],
+        ['in range', { isBetween: true }, 'Button--active'],
+    ])('renders the %s date state as %j', async (_name, state, expectedClass) => {
+        const { container } = render(
+            <Calendar
+                leftmostMonth={dayjs('2020-02-01')}
+                months={1}
+                getDateState={({ date }) => (date.isSame('2020-02-14', 'd') ? state : {})}
+            />
+        )
+        const fourteen = within(container).getByText('14').closest('[data-attr="lemon-calendar-day"]')
+        expect(fourteen?.className.split(' ')).toContain(expectedClass)
+    })
+
+    test('disables a date when getDateState returns a disabledReason', async () => {
+        const { container } = render(
+            <Calendar
+                leftmostMonth={dayjs('2020-02-01')}
+                months={1}
+                getDateState={({ date }) => (date.isSame('2020-02-14', 'd') ? { disabledReason: 'nope' } : {})}
+            />
+        )
+        const fourteen = within(container).getByText('14').closest('[data-attr="lemon-calendar-day"]')
+        expect(fourteen?.getAttribute('aria-disabled')).toBe('true')
+    })
+
+    test('renders the default cell styling when no getDateState is given', async () => {
+        const { container } = render(<Calendar leftmostMonth={dayjs('2020-02-01')} months={1} />)
+        // 30 only exists as a faded out-of-month (January) cell in the February grid
+        const outOfMonth = within(container).getByText('30').closest('[data-attr="lemon-calendar-day"]')
+        expect(outOfMonth?.className.split(' ')).toContain('opacity-25')
+        const inMonth = within(container).getByText('15').closest('[data-attr="lemon-calendar-day"]')
+        expect(inMonth?.className.split(' ')).toContain('flex-col')
+        expect(inMonth?.className.split(' ')).not.toContain('opacity-25')
+    })
+
+    test('marks today with the today class', async () => {
+        const { container } = render(<Calendar />)
+        expect(container.querySelector('.Calendar__today')).toBeTruthy()
+    })
+
+    test('calls getTimeState for each time', async () => {
         const calls: any = []
         render(
             <Calendar
-                getButtonTimeProps={({ unit, value }) => {
+                getTimeState={({ unit, value }) => {
                     calls.push([unit, value])
                     return {}
                 }}
@@ -222,7 +258,7 @@ describe('Calendar', () => {
         const calls: any = []
         render(
             <Calendar
-                getButtonTimeProps={({ unit, value }) => {
+                getTimeState={({ unit, value }) => {
                     calls.push([unit, value])
                     return {}
                 }}

@@ -1,211 +1,245 @@
-# Hanzo Insights — served Django monolith (RESTORED) + native Go observability
+# Insights Development Guide
 
-## Status
+## Codebase Structure
 
-The served **Django** monolith is **RESTORED** and published to
-`ghcr.io/hanzoai/insights` for the `insights.hanzo.ai` deploy (K8s pulls ghcr).
-`manage.py` + `bin/docker*` serve again (real management + server/worker/migrate
-startup), IAM-OIDC login is wired, and the surface is Hanzo-branded. It runs on
-Hanzo SQL (`insights-sql`), Hanzo KV (`KV_URL`, RESP wire — never `REDIS_URL`;
-`data_stores.py` normalizes kv://→RESP at the driver boundary), the
-`hanzoai/stream` Kafka-shim over NATS, and Hanzo Datastore (Datastore).
+- Key entry points: `insights/api/__init__.py` (API URL routing skeleton; products register their own routes in `products/<name>/backend/routes.py` via `register_routes(routers)`), `insights/settings/web.py` (Django settings, INSTALLED_APPS), `products/` (product apps)
+- [Monorepo layout](docs/internal/monorepo-layout.md) - high-level directory structure (products, services, common, tools)
+- [Products README](products/README.md) - how to create and structure products
+- [Products architecture](products/architecture.md) - DTOs, facades, isolated testing
 
-Alongside it, the native-Go `hanzoai/cloud` binary serves the observability API:
+## Commands
 
-- **`/v1/evals/*`** — datasets, dataset-items, evaluators, score-configs,
-  scores, **traces**, runs. Org-scoped by the IAM `owner` claim (one tenancy).
-  LIVE: `GET https://api.hanzo.ai/v1/evals/health` → `200`; unauth
-  `/v1/evals/datasets` → `403` (org-gated). Source: `hanzoai/cloud/clients/eval`.
-- **`/v1/analytics/*`** — the LLM/product analytics lens (overview, timeseries,
-  realtime, top/*, llm/*). Read-only per-org Datastore warehouse. Consumed by
-  `console2` `AnalyticsModule`. Backend `cloud/clients/analytics` — see GAP below.
+- Environment:
+  - This is a full dev environment, not a restricted patch-editing sandbox — it has `node`, `pnpm`, a package mirror, and `apt`, so tools and dependencies that aren't present yet can be installed, and tests, Storybook, and the app can actually be run. A missing `node_modules`, browser binary, or flox usually just means setup hasn't run yet (`pnpm install`, `npx playwright install --with-deps chromium`, or building the nested `@hanzo/quill` workspace that `global.scss` imports), rather than that running things is impossible.
+  - So the absence of a tool isn't evidence that a task can't be done — installing it is the first step. The honest signal that something genuinely can't run is an attempt that fails for a specific, nameable reason (no network access, `apt` unavailable, out of memory), which is worth reporting alongside whatever fallback you take.
+  - This matters most for visual and UX work, where reading the code isn't the same as seeing the result. Rendering the affected surface (for example in Storybook via a headless browser) and comparing before and after is what actually confirms such a change, and is usually worth the setup cost.
+  - Use flox when available — prefer `flox activate -- bash -c "<command>"` if commands fail
+    - Never use `flox activate` in interactive sessions (it hangs if you try)
+- Tests:
+  - Universal: `insightscli test <file_or_directory>` — auto-detects test type (Python, Jest, Playwright, Rust, Go)
+  - Single test: `insightscli test path/to/test.py::TestClass::test_method`
+  - Watch mode: `insightscli test path/to/test.py --watch`
+  - Changed files only: `insightscli test --changed`
+- Lint:
+  - Python:
+    - `ruff check . --fix` and `ruff format .`
+  - Frontend: `pnpm --filter=@hanzo/frontend fix` (safe Oxlint fixes + Oxfmt; suggestion fixes are not applied). `format` runs Oxfmt only; `lint` and `format:check` only verify.
+  - TypeScript check: `pnpm --filter=@hanzo/frontend typescript:check`
+- Build:
+  - Frontend: `pnpm --filter=@hanzo/frontend build`
+  - Start dev: `./bin/start` or `insightscli start` (interactive TUI). Detached mode: `insightscli up -d` paired with `insightscli wait` / `insightscli down`
+    - Cloud task VMs (prebaked dev-stack image): run `bootstrap-dev-stack` first (restores compose host aliases, starts dockerd), then `uv sync`, `source .venv/bin/activate`, `insightscli start -y -d`, and `insightscli wait` (the detached start returns while the stack is still booting; `insightscli wait` blocks until every process is ready) — always detached: the sandbox has no TTY, and phrocs under a pseudo-TTY balloons in memory until OOM-killed
+    - Cloud task VMs, frontend work: `pnpm install --frozen-lockfile --prefer-offline` links from the prebaked pnpm store, and Playwright Chromium is preinstalled; product/Storybook builds still run from source
+- OpenAPI/types: `insightscli build:openapi` (regenerate after changing serializers/viewsets)
+- New product: `bin/insightscli product:bootstrap <name>`
+- LSP: Pyright is configured against the flox venv. Prefer LSP (`goToDefinition`, `findReferences`, `hover`) over grep when navigating or refactoring Python code.
+- Dev experience feedback: `insightscli devex:feedback "<message>"` sends feedback about repo tooling — insightscli, the dev stack, tests, CI, migrations, this setup — straight to the devex team as a `insightscli_feedback` event (add `-c bug|idea|praise|question`).
+  **Agents must use it too**: when a insightscli command or dev workflow is broken, slow, or confusing, run it — e.g. `insightscli devex:feedback -c bug "migrations:run failed with <error>"`. Agent-sent feedback is tagged as such, and it's the fastest signal the devex team gets, so use it liberally rather than suffering friction silently.
 
-LLM telemetry (traces / observations / scores) is written by the **AI gateway**
-(`hanzoai/ai` → `object/observability.go`) into the Datastore warehouse
-(`hanzo.traces`, `hanzo.observations`, `hanzo.scores`) and read
-back through `/v1/evals` + `/v1/analytics`.
+## Commits and Pull Requests
 
-The Django `manage.py` and every serving entrypoint (`bin/docker`,
-`bin/docker-server`, `bin/docker-worker`, `bin/docker-worker-celery`,
-`bin/docker-migrate`) run for real again (restored from pre-`175eace7b`). The
-retirement of the served surface (`175eace7b`) is reversed; the ghcr publisher
-(`.github/workflows/container-images-cd.yml`, deleted in `657c5fbcef`) is
-restored so CI builds the monolith `Dockerfile` and pushes to
-`ghcr.io/hanzoai/insights`.
+- Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for all commit messages and PR titles.
+- When a change touches user-facing behavior, an API, a config/setting, or a documented workflow, update the matching doc under `docs/` **in the same PR** — treat a stale doc as part of the breakage, not a follow-up.
 
-## Django → Go observability map (both planes live)
+### Commit types
 
-| Django surface | Go replacement | Status |
-|---|---|---|
-| LLM analytics (`products/llm_analytics`, `api/llm_proxy`) | `/v1/evals/*` + `/v1/analytics/llm/*` | **evals LIVE**; analytics/llm backend = GAP (below) |
-| Evals / datasets / scores | `/v1/evals/{datasets,dataset-items,evaluators,score-configs,scores,traces,runs}` | **LIVE** (`cloud/clients/eval`) |
-| Trace/observation query | `/v1/evals/traces` (+ `hanzo.traces`/`hanzo.observations`) | **LIVE** |
-| Product / web / revenue / marketing / customer analytics, insights, dashboards, funnels, retention, trends | `/v1/analytics/{overview,timeseries,realtime,top/*}` | **GAP** — backend not shipped (below) |
-| Org / user / project / `personal_api_keys` / `login` | **Hanzo IAM** (`hanzo.id`, OIDC `owner`) + `/v1/projects` | covered by IAM (auth/tenancy, not observability) |
-| Data warehouse / data_modeling / batch_exports | Datastore warehouse (`hanzoai/datastore`) direct | substrate retained |
-| Feature flags, early access, surveys, experiments, product tours, session replay, error tracking, CDP, notebooks, groups, user interviews | — | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
+- `feat`: New feature or functionality (touches production code)
+- `fix`: Bug fix (touches production code)
+- `chore`: Non-production changes (docs, tests, config, CI, refactoring agents instructions, etc.)
+- Scope convention: use `aio` for AI observability changes (for example, `feat(aio): ...`)
 
-### Honest GAPs (must port before claiming full parity)
-1. **`cloud/clients/analytics` is NOT shipped.** `console2` allow-lists and calls
-   `/v1/analytics/{overview,timeseries,realtime,llm/overview}` but the cloud
-   subsystem does not exist → `GET /v1/analytics/health` → `404`. The LLM-lens
-   read path is therefore not yet live. This is a **pre-existing** gap (Django
-   product-analytics was already `502`), owned by the cloud lane — not created by
-   this retirement. Until it lands, only `/v1/evals/*` serves observability reads.
-2. **Legacy product-analytics / flags / replay / surveys / experiments** are
-   formally **sunset**, not migrated. If any is still required, it must be
-   re-platformed deliberately.
+### Format
 
-## Ingest is NATIVE — the capture/kafka tier is GONE (verified 2026-07-26)
-
-Do not go looking for `insights-capture`, `insights-plugin`, `insights-kafka` or
-`insights-kv`. **Those CRs and pods no longer exist.** The only insights
-workloads in ns `hanzo` are `insights-web`, `insights-worker`, `insights-sql`.
-Events are ingested by the **cloud Go binary**, not by the Rust capture service:
-
-```
-insights.hanzo.ai/{e,/e/,v1/e,/v1/e/,batch,capture}   (ingress prio 150)
-  → middleware insights-cloud-ingest-rewrite (fixed replacePath)
-  → service api-hanzo-ai → cloud.hanzo.svc:8000
-  → POST /v1/insights/e → cloud/clients/analytics insightsIngest → hanzo.events
+```text
+<type>(<scope>): <description>
 ```
 
-Tenant is resolved SERVER-SIDE by `captureTenant`, in this order: validated
-principal → presented project key (`cloud.OrgForKey`) → brand host. It fails
-**CLOSED** on a presented-but-unresolvable key, and deliberately does NOT fall
-back to the brand host in that case, so a bogus key cannot borrow the host's
-org. Consequence when testing: verify anonymously (no `api_key`) to exercise the
-brand-host path, or a valid-looking key will make a working route look broken.
+Examples:
 
-`/v1/e` was NOT on this router until 2026-07-26 — it fell to the Django
-catch-all, which answers **403 HTML**, so every event sent to the path our own
-SDK posts to was discarded silently. When debugging a 403 here, read the BODY:
-Django answers HTML, cloud answers
-`{"status":403,"error":"valid bearer or a recognized brand host required"}`.
+- `feat(insights): add retention graph export`
+- `fix(cohorts): handle empty cohort in query builder`
+- `chore(ci): update GitHub Actions workflow`
+- `chore: update AGENTS.md instructions`
 
-`POST /v1/ai` is likewise unrouted and falls through to Django.
+### PR descriptions
 
-**`POST /v1/s` (session recordings) is BROKEN and losing data.** It still points
-at `insights-hanzo-ai-capture` → `insights-capture.hanzo.svc`, which has no
-pods, so it 502s — ~16 real posts per 3h are being dropped.
-`insights.session_replay_events` has **0 rows**; replay has never worked in this
-deploy. Reviving it is a project, not a config fix: that Distributed table is
-fed by `kafka_session_replay_events` + `session_replay_events_mv`, and with the
-Kafka tier deleted **nothing can write the index** even if snapshot blobs landed
-in S3. It needs a new writer path in cloud, or the Kafka tier back. Do not "fix"
-the route alone — pointing it somewhere that returns 200 would only lose the
-data more quietly.
+**Required:** Before creating any PR, read `.github/pull_request_template.md` and use its exact section structure.
+Do not invent a different format.
+Always fill the `## 🤖 Agent context` section when creating PRs.
+NEVER share sensitive information in a PR description. Users may share sensitive data in an agent session, but those should never surface to a PR description, or comments.
 
-Relatedly, `insights` still carries **23 Kafka-engine tables** pointing at
-`kafka:9092`, which does not resolve. They error in the background forever and
-are why `preflight.kafka` is `false`.
+**Screenshots:** Upload frontend/visual changes with `insightscli pr:upload-image <file>` and embed the printed markdown. The first run only warns and uploads nothing; re-run with `--yes` to confirm. Only Insights employees can upload, but the public can permanently view these assets, so only upload the image if you're certain it doesn't contain customer data (including customer names), secrets, or sensitive internal info.
 
-The `ingress-routes` CM hot-reloads via file-provider fsnotify — NEVER
-`rollout restart deploy/ingress` (ACME/TLS outage). Routes live in
-`universe infra/k8s/ingress/routes.yaml`; change them by pushing to universe
-main, never by `kubectl patch` (Hanzo CD selfHeal reverts within ~90s).
+### Rules
 
-## `/` is the marketing landing page when signed out
+- Scope is optional but encouraged when the change is specific to a feature area
+- Description should be lowercase and not end with a period
+- Keep the first line under 72 characters
 
-Anonymous `/` used to bounce straight to SSO, so the product had no public face.
-`insights/urls.py:root` now branches: `home` (the SPA, unchanged) for an
-authenticated user, `templates/landing.html` for everyone else.
+### Pushing to remote
 
-Its CTAs point OUT to `hanzo.ai/pricing` on purpose — **`GET /api/billing` is
-404 in this deployment**, so an in-app upgrade funnel would dead-end. There is
-also no Insights SKU in `@hanzo/plans` (its 11 tiers are compute), so no plan
-copy is written in the template; minting that SKU is a pricing decision, not a
-template edit. Tests in `insights/test/test_landing.py` fail the build if
-`/api/billing` or any third-party asset host reappears on the page (prod refuses
-third-party CDNs and fails SILENTLY).
+Once a branch already has an open PR, push incremental changes and fixes to it without waiting for human guidance — keeping the PR current is part of the work.
+Pushes still trigger CI, which burns runner credits, so batch related commits and push once the increment is ready rather than after every change.
 
-## `preflight.cloud` is FALSE here — and that drove a real bug
+#### Forcing the full CI matrix on a draft
 
-`is_cloud()` is `CLOUD_DEPLOYMENT in (EU, US, DEV, E2E)`, an upstream
-multi-region SaaS concept we do not have, so it reads false on our own hosted
-deploy. Upstream's `move-to-cloud` PayGateMini variant keys off exactly that, so
-insights.hanzo.ai advertised "Move to Insights Cloud" **to its own paying
-users**. That variant is deleted: the paywall now has one path
-(add-card / contact-sales) regardless of who hosts. Before adding any behaviour
-behind `is_cloud()`, check it is not this same trap.
+Draft PRs run a narrowed matrix.
+The `run-ci-backend` and `run-ci-frontend` labels force the full one, but a label alone starts nothing: it takes effect on the next push, or when the PR is marked ready for review.
+An empty commit is enough.
 
-### Clean single-`insights_` table names (double `insights_insights*` dropped)
+```bash
+git commit --allow-empty -m "chore(ci): run the full matrix" && git push
+```
 
-The debrand left three CDP tables double-named (`insights_insightsfunction`,
-`insights_insightsflow`, `insights_insightsfunctiontemplate`). Migration
-`1019_rename_insights_tables_clean` (`AlterModelTable`, runs LAST so it's safe
-for fresh + live) + `Meta.db_table` on the 3 models renamed them to
-`insights_function` / `insights_flow` / `insights_function_template`. Plugin SQL
-queries the clean names (`plugin sha-fe74083`). NOTE: `manage.py migrate` is a
-SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
-`manage.py migrate` in the web pod after a schema bump.
+Do not add `labeled`/`unlabeled` back to a merge gate's `on.pull_request.types` to avoid that push.
+GitHub cannot filter a label trigger by name, so every unrelated label re-runs the full matrices against a commit CI has already covered.
+Guarding it inside the workflow is worse: skipping the gate job cascades to the `if: always()` aggregator, which counts a skipped dependency as success and posts a green required check with no tests behind it.
 
-## Live deploy (do-sfo3-hanzo-k8s / ns hanzo)
+#### Stacked PRs
 
-- `ghcr.io/hanzoai/insights:<FULL-40-CHAR-SHA>` — built by the NATIVE pipeline
-  in `.hanzo/workflows/deploy.yml` (git.hanzo.ai push → in-cluster act_runner →
-  docker build → GHCR), tagged by **commit sha only**, never semver: a re-pushed
-  tag means two digests behind one name. `container-images-cd.yml` is
-  neutralized; GitHub Actions is a mirror and builds nothing.
-- `insights-web` (Django) + `insights-worker` (Celery) — **LIVE** on
-  `insights.hanzo.ai`. Operator App CRs in `hanzoai/universe`
-  (`infra/k8s/operator/crs/insights-*`, `infra/k8s/ingress/routes.yaml`) pin the
-  sha. Env: `DATABASE_URL` (`insights-sql`), `KV_URL` (`kv://kv.hanzo.svc:6379`
-  — the SHARED fleet KV; the dedicated `insights-kv` is gone), the
-  `hanzoai/stream` shim, Datastore (`DATASTORE_DATABASE=insights`). Probes are
-  `tcpSocket:8000` (Django rejects kubelet `httpGet` Host under restricted
-  `ALLOWED_HOSTS`; the CRD probe schema has no `httpHeaders`).
-- **Only three insights workloads exist**: `insights-web`, `insights-worker`,
-  `insights-sql`. The `insights-capture` / `-kafka` / `-kv` / `-plugin` CRs were
-  deleted — earlier revisions of this file listed them as retained, which is no
-  longer true. See the ingest section above.
-- Rollout is verified BY IMAGE, never by `readyReplicas` alone: gate on
-  `updatedReplicas == replicas` with the old ReplicaSet at zero, and exec a pod
-  selected by its image. Reading a pod mid-rollout returns the OLD build and
-  makes a shipped fix look absent (or an absent one look shipped).
+Restacking force-pushes every branch, and each push triggers a full CI fan-out.
+If the Trunk merge queue is re-enabled (it is paused, see below), never restack while any branch in the stack is sitting in it: the force-push removes the PR from the queue.
+Pushing a deep stack at once can exceed GitHub's per-repo dispatch cap (500 workflow runs / 10s).
+The overflow fails as `startup_failure` and takes unrelated runs in the same window down too.
+Draft status doesn't help, since runs are dispatched before draft/skip logic applies.
 
-## Auth / tenancy
+- Keep stacks shallow; merge the base before extending.
+- Restack only when you need to, rather than rebasing the whole stack on master repeatedly.
+- When a restack must push many branches, stagger them instead of force-pushing all at once.
 
-Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability
-(`/v1/evals`, `/v1/analytics`) scopes exclusively by `c.Org()`; secrets via KMS.
+#### Pre-push checks — ci:preflight
 
-## Django migrations — squashed to a clean baseline (v1.52.0)
+A pre-push hook runs `insightscli ci:preflight --strict`, failing the push on deterministic CI breakage reachable from your diff (lint, lockfiles, migration conflicts). Never bypass it (`--no-verify`).
+If it blocks the push, run `insightscli ci:preflight --fix`, resolve the remaining `✗ fail` lines, act on the `→ advisory` ones (regenerate OpenAPI types, merge master in), and push again.
+In environments without hooks (no `node_modules`), run `insightscli ci:preflight --fix` yourself before pushing or reporting a task done. If the command reports it is disabled, that's intentional — proceed.
 
-The Postgres/Django migrations were **squashed to a fresh `0001_initial` per app**
-(v1.52.0, `6e3d624ac4`). ~1050 upstream-era migrations across 21 apps collapsed to
-one initial each — no customers, forward-only. This ended the old
-"never-rewrite-migration-internals / double `insights_insightsfunction` names are
-correct plumbing" era: table names are now clean natively (`insights_function`),
-there is no doubled-name history, and `makemigrations` is the source of truth.
+### Merging PRs
 
-Three insights migrations carry what `makemigrations` can't express (all captured
-verbatim from the live DB so a fresh migrate hits EXACT schema parity):
+Merges into `master` currently go through `gh pr merge <number> --squash`.
+Squash is the only merge method the repo allows, so `--merge` and `--rebase` are rejected.
 
-- `0001_initial` — 5 pg extensions (`pg_trgm`, `btree_gin`, `btree_gist`,
-  `ltree`, `intarray`) prepended; `atomic = False` (custom
-  `UniqueConstraintByExpression` emits `CREATE INDEX CONCURRENTLY`).
-- `0002_managed_tables` — the 18 `managed=False` tables (`Person`/`Group`/
-  `PersonOverride`/`CohortPeople`/`Role` families + task/workflow) via `RunSQL`;
-  depends on all app leaves so FK targets exist.
-- `0003_special_indexes` — 15 `RunSQL`-added feature columns + 20 special indexes
-  (GIN jsonb, partial `WHERE`, unique-partial integrity), all `IF NOT EXISTS`.
+**The Trunk merge queue is paused.** Its ruleset is disabled, so `/trunk merge` and `/trunk cancel` comments and the `trunk-merge-queue-submit` label are no-ops: no `Trunk Merge Queue (master)` check run appears and the bot never replies. Don't reach for them.
 
-Helper modules inside migration dirs (`insights/rbac/migrations/rbac_*_migration.py`)
-are imported by app code — they are NOT migrations; never delete them in a squash
-(the delete filter must match `class Migration` only). Datastore
-(`insights/datastore/migrations/`, 225 files) and async migrations
-(`insights/async_migrations/migrations/`, 11) are SEPARATE systems — untouched by
-the squash.
+- Branch protection on `master` is unchanged and still enforced: an approving review, code owner review, the required status checks, and signed commits. `gh pr merge` refuses until all of those pass.
+- Shortly after a force-push or a label change, GitHub's mergeability cache can be stale and the first attempt fails with "the base branch policy prohibits the merge". Retrying a moment later works.
+- [`.agents/skills/merging-prs/SKILL.md`](./.agents/skills/merging-prs/SKILL.md) is still written for the Trunk flow, so it's stale pending a follow-up. Its preflight and CI failure-handling advice still applies; its enqueue and queue-watching steps don't.
+- If Trunk is re-enabled, the old flow was: enqueue with `gh pr comment <number> --body "/trunk merge"`, watch the `Trunk Merge Queue (master)` check run on the head commit rather than the PR's own checks, and never force-push while the PR sits in the queue.
 
-### Guard + adoption
-- **Fresh install / CI guard**: `manage.py migrate` from zero on a scratch
-  Postgres must reach head clean (validated: 246/246 tables, 0 missing columns,
-  index parity).
-- **Adoption on an EXISTING DB (e.g. live `insights.hanzo.ai`)**: the squash does
-  NOT change the schema, so do NOT re-migrate destructively. Run a **`--fake`
-  adoption** when moving that DB to a squash-containing image:
-  `manage.py migrate <app> zero --fake` for each app (clears records, keeps
-  tables) then `manage.py migrate --fake` (re-records the new initials as
-  applied). Live intentionally stays on `1.51.10` (identical schema, old history);
-  the operator CR pins an explicit tag so it won't auto-move to a squash image
-  without this step.
+### Public open source repo guidance
+
+This repository is public and all commit messages, pull request titles, and pull request descriptions must be safe for public readers.
+
+- Never mention internal-only systems, private incidents, customer data, Slack thread contents, unreleased roadmap details, or security-sensitive implementation details. Slack thread links and channel references are fine to include — they sit behind Insights auth and are useful as origin context — but do not quote or paraphrase what was said in the thread.
+- Use product-facing and code-facing context that a public OSS contributor could understand from this repository alone.
+- If context is sensitive, summarize it at a high level without naming internal tools, accounts, or people.
+- Avoid citing private operational scale or incident metrics (for example, exact affected team counts, internal row-volume anecdotes, or customer-specific performance numbers) unless that data is already public and linkable.
+
+Examples:
+
+- ✅ `fix(insights): handle missing series color in trend export`
+- ✅ A PR description that links to the originating Slack thread for context
+- ❌ `fix: patch issue found in acme-co prod workspace after sales escalation` — references internal customer
+- ❌ `fix: will run fine on our 12 million rows there now` — leaks private operational scale
+- ❌ A PR description that quotes verbatim what a coworker said in a Slack thread
+
+## CI / GitHub Actions
+
+- `.nvmrc` controls the Node.js version for all CI workflows (via `actions/setup-node`) — changing it affects every CI job that runs Node
+- Every job in `.github/workflows/` must declare `timeout-minutes` — prevents stuck runners from burning credits indefinitely
+- **CI workflow changes must stay backwards compatible with open PRs that haven't rebased.** A workflow edit hits every in-flight PR immediately (it runs against the PR merged with master), but companion changes — a new dependency, file, or config — only reach a branch once it rebases. If the workflow starts requiring something an unrebased branch lacks, every such PR fails before its tests run. Make the new behavior degrade gracefully when the prerequisite is absent, or gate it so unrebased branches are unaffected. This has broken CI repeatedly.
+
+## Security
+
+See [.agents/security.md](.agents/security.md) for security guidelines — least privilege, secrets & service-to-service auth (don't add new `INTERNAL_API_SECRET` callers), SQL, InsightsQL, and semgrep.
+
+## Architecture guidelines
+
+- API views should declare request/response schemas — prefer `@validated_request` from `insights.api.mixins` or `@extend_schema` from drf-spectacular. Plain `ViewSet` methods that validate manually need `@extend_schema(request=YourSerializer)` — without it, drf-spectacular can't discover the request body and generated code gets empty schemas
+- Django serializers are the source of truth for frontend API types — `insightscli build:openapi` generates TypeScript via drf-spectacular + Orval. Generated files (`api.schemas.ts`, `api.ts`, `api.zod.ts`) live in `frontend/src/generated/core/` and `products/{product}/frontend/generated/` — don't edit them manually, change serializers and rerun. See [type system guide](docs/published/handbook/engineering/type-system.md) for the full pipeline
+- MCP tools are generated from the same OpenAPI spec — see [implementing MCP tools](docs/published/handbook/engineering/ai/implementing-mcp-tools.md) for the YAML config and codegen workflow
+- MCP UI apps (interactive visualizations for tool results) are defined in `products/*/mcp/tools.yaml` under `ui_apps` and auto-generated — see [services/mcp/CONTRIBUTING.md](services/mcp/CONTRIBUTING.md) or use the `implementing-mcp-ui-apps` skill
+- When touching a viewset or serializer, ensure schema annotations are present (`@extend_schema` or `@validated_request` on viewset methods, `help_text` on serializer fields) — these flow into generated frontend types and MCP tool schemas
+- New features should live in `products/` — read [products/README.md](products/README.md) for layout and setup. When _creating a new_ product, follow [products/architecture.md](products/architecture.md) (DTOs, facades, isolation). Code a single product owns — not just backend/frontend, but scripts, CLIs, services, packages, MCP tools, skills — belongs under `products/<product>/`; reserve top-level `tools/`/`services/`/`packages/`/`cli/` for cross-product things
+- **Every tenant-data model must have `team_id`** — either as a FK (`models.ForeignKey("insights.Team", ...)`) or a plain `BigIntegerField` (for multi-DB products). This is the primary tenant isolation boundary. Models without `team_id` must be org-scoped, user-scoped, or instance-global — never silently unscoped. New models should inherit from `TeamScopedRootMixin` (main DB) or `ProductTeamModel` (separate DB) so they start fail-closed — see `insights/models/scoping/README.md`. CI enforces this via `insights/models/scoping/baseline_unmigrated.txt`: any new team-scoped model not on a fail-closed manager fails the IDOR coverage check. In serializers, access the team via `self.context["get_team"]()`. When querying a fail-closed model for one team outside request context (Temporal activities, Celery tasks, management commands), use `Model.objects.for_team(team_id)` — not `Model.all_teams.filter(team_id=...)` or `objects.unscoped().filter(...)`; reserve `all_teams`/`unscoped()` for genuinely cross-team access and Django framework internals. Caveat: `for_team(...).get_or_create(...)`/`.create(...)` still need `team_id` passed explicitly — queryset filters don't propagate into row creation
+- **Do not add domain-specific fields to the `Team` model.** Use a Team Extension model instead — see `insights/models/team/README.md` for the pattern and helpers
+- **Insights event capture in Celery tasks:** Do not use `hanzo_insights.capture()` in Celery tasks — events are silently lost. Use `ph_scoped_capture` from `insights.ph_client` instead (see its docstring for why and usage).
+- **Django admin `ForeignKey` fields need explicit widget config.** When adding a `ForeignKey`/`OneToOneField` to a model that's exposed in Django admin (including via inlines attached to a _related_ admin), list the new field in `autocomplete_fields`, `raw_id_fields`, or `readonly_fields` on **every** admin class that renders the model — otherwise the default `<select>` widget loads the entire target table per row on each change-page render. Prefer declaring the config on a shared base inline so per-parent variants (e.g., subclasses differentiated by `fk_name`) inherit it automatically.
+- **Use personinsights client for all person/group data access — do not query persons DB tables via the Django ORM or raw SQL.** The `insights/personinsights_client/` gRPC client is the required interface for reading and writing person-related data. This applies to the following tables: `insights_person`, `insights_persondistinctid`, `insights_cohortpeople`, `insights_group`, `insights_grouptypemapping`, and related override tables (`insights_personoverride`, `insights_pendingpersonoverride`, `insights_flatpersonoverride`, `insights_featureflaghashkeyoverride`, `insights_personlessdistinctid`, `insights_personoverridemapping`). Use the helpers in `insights/models/person/util.py` (e.g. `get_person_by_uuid`, `get_persons_by_distinct_ids`, `get_person_by_distinct_id`) and `insights/models/group_type_mapping.py` (`get_group_types_for_project`) — these already route through personinsights with ORM fallback via `_personinsights_routed()`. When adding new person/group data access, follow the same `_personinsights_routed()` pattern: provide a `personinsights_fn` using `get_personinsights_client()` and an `orm_fn` fallback. Never add new direct ORM queries like `Person.objects.filter(...)` or `PersonDistinctId.objects.filter(...)` — use the existing routed helpers or create new ones following the established pattern. See `insights/personinsights_client/README.md` for client details and `insights/personinsights_client/client.py` for the full RPC interface.
+- **Insights does not enable `ATOMIC_REQUESTS` — there is no implicit per-request transaction.** Each database operation runs in autocommit mode unless explicitly wrapped. Use `with transaction.atomic():` around the specific writes that must succeed or fail together. Do not wrap an entire view method atomically — keep the block as narrow as possible around the related writes. Avoid performing irreversible side effects (sending emails, calling external APIs, enqueuing Celery tasks) inside an atomic block: if the transaction rolls back, those side effects have already happened. Schedule such side effects after the commit, or use `transaction.on_commit()` for Celery task dispatch.
+- **Object storage is SeaweedFS — do not add new MinIO dependencies.** Both S3-compatible stores in the dev/CI stack are SeaweedFS: the `objectstorage` service (S3 API on `:19000`) backs general object storage (`OBJECT_STORAGE_*` settings — exports, media uploads, error-tracking source maps, query cache, tasks), and the `seaweedfs` service (S3 API on `:8333`) backs session replay v2 (`SESSION_RECORDING_V2_S3_*` settings). MinIO now survives only as migration tooling: `docker-compose.hobby.yml` keeps it as a source for `bin/migrate-storage-hobby`, and `bin/upgrade-objectstorage` starts a throwaway MinIO to salvage objects off the pre-swap volume. Outside that, don't add docker-compose services, scripts, tests, or docs that stand up a `minio/minio` container. Code that talks to object storage should go through the existing `OBJECT_STORAGE_*` / `SESSION_RECORDING_V2_S3_*` config and a standard S3 client rather than hardcoding an endpoint — that keeps backends swappable. Note the `objectstorage` service registers its credentials at runtime via a bootstrap loop and returns `InvalidAccessKeyId` until that completes, so anything depending on it must wait for its readiness sentinel rather than just for the container to start.
+- **Temporal activity payloads have a ~2 MiB hard limit — pass large data by reference, not by value.** Activity inputs and outputs are serialized across a gRPC boundary that Temporal caps at ~2 MiB per payload (the server rejects larger payloads via `blobSizeLimitError`). As a conservative field-level rule, if a field could exceed ~256 KB once serialized (serialized query results, exported file contents, LLM context, rendered HTML, image bytes, unbounded `list[dict[str, Any]]`), write it to Postgres / S3 / object storage from _inside_ the activity and return only the reference (row ID, S3 key). The workflow already has access to any row ID created earlier in the same run; it does not need the content to flow back through. Shuttling large data through the workflow on the way to persistence is a foreseeable failure mode that produces `PayloadSizeError` (`TMPRL1103`) the moment the underlying data crosses the limit.
+- **Outbound calls to a third-party API that need rate-limiting or egress telemetry belong in `insights/egress/` — add a `<domain>/` incarnation (GitHub is the reference) and route callers through its gated, recorded transport, never hand-rolled `requests`. See `insights/egress/README.md`.**
+
+## Code Style
+
+- Python: Write as if mypy `--strict` is enabled — annotate all function signatures (arguments + return types), avoid `Any`, use `TYPE_CHECKING` imports for type-only references. When a change is type-risky, run mypy the way CI does — `uv run mypy --cache-fine-grained .`, repo-wide, never a file subset (it follows imports, so a subset misses reverse-dependency breakage); `insightscli ci:preflight` reminds you, and CI blocks on the same command. The config isn't fully strict yet, but new code should be
+- Python imports: keep imports at module level — not inside functions, methods, or conditionals. Inline imports hide dependencies from static analysis, slow hot paths with repeated lookups, and mask circular-import problems instead of fixing them; ruff's `PLC0415` enforces this. Defer an import only to (1) break a true unavoidable circular import (fix the structure first if you can), (2) reference types under `TYPE_CHECKING`, or (3) keep a heavy/optional dependency off the import path so it loads only when its code runs. For (3), add a justified `# noqa: PLC0415` on the import line (e.g. `# noqa: PLC0415 — keeps the heavy dep off the import path`) — never blanket-suppress the rule
+- Python: prefer a frozen dataclass (`@dataclass(frozen=True)`) over a tuple when returning or passing multiple values, in two cases: (1) two or more elements share a type, so callers can silently swap them (e.g. `(start, end)`, `(width, height)`); add `kw_only=True` here so construction is keyword-only and a swap is impossible at the call site too; (2) the tuple is big (roughly 3+ elements), where positional access hurts readability. Named fields make the code easier to read and, combined with keyword-only construction, make swapped-value bugs impossible. Small tuples with unambiguous, differently typed elements are fine as-is
+- Frontend: for any frontend work — the main app (`frontend/src/`) **or** a product frontend (`products/*/frontend/`) — follow [frontend/src/AGENTS.md](frontend/src/AGENTS.md): reuse existing Lemon/quill components instead of hand-rolling tables/badges/labels, import generated `*Api` types instead of handwriting them, and run typecheck/typegen at the right moments. Product frontends share the same components and generated types, so the same rules apply there
+- Frontend: TypeScript required, explicit return types
+- Frontend: If there is a kea logic file, write all business logic there, avoid React hooks at all costs.
+- Frontend (quill design system): before writing UI that imports `@hanzo/quill` / `lib/ui/quill`, read [packages/quill/packages/primitives/AGENTS.md](packages/quill/packages/primitives/AGENTS.md) — component choice (dropdown vs select vs combobox, accordion vs collapsible, etc.), composition, and spacing rules. Charts: [packages/quill/packages/charts/AGENTS.md](packages/quill/packages/charts/AGENTS.md); DataTable/DateTimePicker: [packages/quill/packages/components/AGENTS.md](packages/quill/packages/components/AGENTS.md)
+- Frontend (quill vs UI): quill is for MCP apps and the desktop app. It is deliberately more compact than UI, so its components look out of place in the main app, and there is no active migration of the main app onto it. In `frontend/src/` and `products/*/frontend/`, use UI, including for menus — `Menu` with a `Button` trigger is the default there. `lib/ui/DropdownMenu` (Radix) is legacy; don't add new ones. Where quill is the right library, don't mix quill and Lemon components within one component's internals, and note that quill uses Base UI's `render` prop rather than Radix's `asChild`, so don't carry `asChild` over when converting
+- Frontend: Any button or form submit that triggers a network request must guard against double-submission — disable the button and show a loading state (`loading` / `disabledReason` on `Button`, or equivalent) while the request is in flight. Never leave a submit button clickable during an active mutation; reset the state in both success and error paths. This applies to `<form onSubmit>` handlers, `onClick` handlers that call `api.*`, and any kea `listener` that issues a request — wire the in-flight state (loader `*Loading` selectors, local `useState`, or a reducer) into the trigger's disabled/loading props.
+- Imports: Use oxfmt import sorting (automatically runs on format), avoid direct dayjs imports (use lib/dayjs)
+- CSS: Use tailwind utility classes instead of inline styles
+- Error handling: Prefer explicit error handling with typed errors
+- Naming: Use descriptive names, camelCase for JS/TS, snake_case for Python
+- Comments: default to short or 1-line comments. Explain _why_, not _what_, and only when a future reader (with no access to this PR or chat) would otherwise be confused
+- Comments: never log change history or chat context in code — no "previously did X, now does Y", "per <task/PR>", "changed because…", or "AI:"/"agent:" notes. That goes in the commit message and PR description
+- Comments: when refactoring or moving code, preserve existing comments unless they are explicitly made obsolete by the change
+- Python tests: do not add doc comments
+- Python: do not create empty `__init__.py` files
+- jest tests: when writing jest tests, prefer a single top-level describe block in a file
+- Tests: prefer parameterized tests (use the `parameterized` library in Python) — if you're writing multiple assertions for variations of the same logic, it should be parameterized
+- Tests must earn their place: every new test has to catch a realistic regression no existing test already catches (if you can't name it, don't add it), assert observable behavior through the public interface rather than implementation details, and stay cheap — deterministic, isolated, and at the lowest level that catches the bug (see `/writing-tests`)
+- Reduce nesting: Use early returns, guard clauses, and helper methods to avoid deeply nested code
+- Markdown: prefer semantic line breaks; no hard wrapping
+- Use American English spelling
+
+## User-facing copy
+
+For any text a person reads (UI labels, tooltips, empty/error states, notifications, docs, support replies). Invoke `/writing-user-facing-copy` before writing or editing it — that skill carries the full voice, em-dash, and feature-naming rules. When unsure whether copy reads well, ask a human.
+
+- Sentence case, not Title Case: capitalize only the first word and proper nouns ('Product analytics', 'Save as view').
+- Avoid the tells of AI-generated text: em dashes (—), "not just X, but Y", rule-of-three padding, hedging preambles. Write like a person typed it; if you can't tell, ask a human.
+- Plain language, no jargon. Use the labels users see, not internal names (`surveyPopupDelaySeconds` becomes "Delay the survey popup").
+- Be direct and friendly: short sentences, consistent tone across surfaces.
+- Errors and empty states guide, don't dead-end: say what happened and the next action.
+
+## Agent automation
+
+When automating a convention, try these in order — only fall back to the next if the previous isn't suitable:
+
+1. **Linters** (ruff, oxlint, semgrep) — code pattern enforcement, always paired with CI
+2. **lint-staged / husky** — file-level validation or warnings at commit time
+3. **Skills** (`.agents/skills/`) — scaffold with `insightscli init:skill`
+4. **AGENTS.md / CLAUDE.md instructions** — when automated enforcement isn't suitable
+
+Claude Code hooks are reserved for environment bootstrapping (`SessionStart` only) — do not add `PreToolUse`, `PostToolUse`, or `Notification` hooks as they add latency and are fragile. Changes to `.claude/hooks/` trigger a lint-staged warning; changes to `.claude/settings.json` are blocked outright.
+
+### Mandatory skill invocation
+
+ALWAYS invoke the matching skill **before** writing or reviewing code in these areas — do not skip, do not attempt the work without loading the skill first.
+
+**Always invoke:**
+
+- `/improving-drf-endpoints` — any DRF viewset or serializer change
+- `/django-migrations` — any Django migration, including deleting a model, table, column, or whole product/app (even when no migration file is written, e.g. removing a product folder)
+- `/datastore-migrations` — any Datastore migration
+- `/adopting-generated-api-types` — any frontend file using `lib/api`, `api.get<`, `api.create<`, or handwritten API types
+- `/writing-tests` — adding or substantially changing any test (pytest, Jest, or Playwright)
+- `/writing-user-facing-copy` — writing or editing any text a user reads (UI labels, tooltips, empty/error states, notifications, docs, support replies), or any code change that adds or changes a visible string
+- `/writing-code-comments` — writing or editing a code comment in any language, or reviewing a diff that adds comments
+
+**Invoke when in the area:**
+
+- `/merging-prs` — merging a PR, or babysitting one through CI (written for the Trunk queue, so partly stale while it's paused)
+- `/implementing-mcp-tools` — adding/modifying endpoints or `tools.yaml`
+- `/modifying-taxonomic-filter` — any TaxonomicFilter change
+- `/sending-notifications` — adding notification support
+- `/writing-skills` — creating or updating skills in `.agents/skills/`
+- `/writing-evals` — adding or changing eval suites, cases, scorers, or seeders under `products/insights_ai/evals/` or `products/*/evals/`, touching the harness in `products/insights_ai/eval_harness/`, or running those evals
+- `/authoring-ci-workflows` — adding or editing any `.github/workflows` workflow, composite action, or reusable workflow
+- `/reviewing-personinsights-protocol` — any personinsights coordination-protocol change (leases, fencing, handoffs, supervisors, budgets, warming, changelog semantics), and any request for an exhaustive review of personinsights code
+- `/gating-production-deploys` — any workflow that builds and pushes a production image or dispatches a deploy

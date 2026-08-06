@@ -1,5 +1,10 @@
 import dataclasses
 
+# Temporal retry ceiling for the per-metric calc activities. Shared with the activity code, which emits the
+# terminal `experiment metric error` analytics event only on the final attempt — keep the RetryPolicy in
+# workflows.py and this constant in lockstep or terminal failures get emitted early / not at all.
+TIMESERIES_METRIC_MAX_ATTEMPTS = 3
+
 
 @dataclasses.dataclass
 class ExperimentRegularMetricsWorkflowInputs:
@@ -53,3 +58,10 @@ class ExperimentSavedMetricResult:
     fingerprint: str
     success: bool
     error_message: str | None = None
+
+
+@dataclasses.dataclass
+class ExperimentTimeseriesRecalculationWorkflowInputs:
+    """Input to the timeseries recalculation workflow."""
+
+    recalculation_id: str  # UUID as string

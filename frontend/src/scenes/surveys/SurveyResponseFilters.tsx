@@ -5,12 +5,12 @@ import { IconCode, IconCopy, IconFilter, IconRefresh, IconX } from '@hanzo/icons
 import { Button, Select, SelectOptions, Switch } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
+import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Divider } from 'lib/elements/Divider'
-import { allOperatorsMapping } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
+import { allOperatorsMapping } from 'lib/utils/operators'
 import { QUESTION_TYPE_ICON_MAP, SurveyQuestionLabel } from 'scenes/surveys/constants'
 import { getSurveyEndDateForQuery, getSurveyIdBasedResponseKey, getSurveyStartDateForQuery } from 'scenes/surveys/utils'
 
@@ -27,8 +27,8 @@ import {
     SurveyQuestionType,
 } from '~/types'
 
-import { SurveySQLHelper } from './SurveySQLHelper'
 import { surveyLogic } from './surveyLogic'
+import { SurveySQLHelper } from './SurveySQLHelper'
 
 type OperatorOption = { label: string; value: PropertyOperator }
 

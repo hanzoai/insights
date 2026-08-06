@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to Braze",
     icon_url="/static/services/braze.png",
     category=["Customer Success"],
-    code_language="fn",
+    code_language="script",
     code="""
 let getPayload := () -> {
   'attributes': [inputs.attributes],

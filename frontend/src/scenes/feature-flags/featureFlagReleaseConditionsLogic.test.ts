@@ -2,18 +2,22 @@ import { expectLogic } from 'kea-test-utils'
 import { v4 as uuidv4 } from 'uuid'
 
 import api from 'lib/api'
+import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 import {
+    AnyPropertyFilter,
     FeatureFlagGroupType,
     FeatureFlagType,
+    FlagPropertyFilter,
     MultivariateFlagOptions,
     PropertyFilterType,
     PropertyOperator,
 } from '~/types'
 
-import { featureFlagReleaseConditionsLogic } from './featureFlagReleaseConditionsLogic'
+import { resolveAggregationGroupTypeIndex } from './aggregation'
+import { featureFlagReleaseConditionsLogic, withResolvedFlagLabels } from './featureFlagReleaseConditionsLogic'
 
 jest.mock('uuid', () => ({
     v4: jest.fn(),
@@ -48,6 +52,7 @@ describe('the feature flag release conditions logic', () => {
                 {
                     properties: [],
                     rollout_percentage: 50,
+                    sort_key: 'group-1',
                     variant: null,
                 },
             ]),
@@ -56,10 +61,7 @@ describe('the feature flag release conditions logic', () => {
 
         useMocks({
             post: {
-                '/api/projects/:team/feature_flags/user_blast_radius': () => [
-                    200,
-                    { users_affected: 120, total_users: 2000 },
-                ],
+                '/api/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 120, total: 2000 }],
             },
         })
     })
@@ -89,11 +91,70 @@ describe('the feature flag release conditions logic', () => {
             await expectLogic(logic, () => {
                 logic.mount()
             })
-                .toDispatchActions(['calculateBlastRadius', 'setAffectedUsers', 'setTotalUsers'])
+                .toDispatchActions(['calculateBlastRadius', 'setAffectedCount', 'setTotalCount'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
                 .toMatchValues({
-                    affectedUsers: { A: 120 },
-                    totalUsers: 2000,
+                    affectedCounts: { A: 120 },
+                    totalCounts: { A: 2000 },
                 })
+        })
+
+        it('flags a distinct error state when the blast radius call fails', async () => {
+            const createSpy = jest.spyOn(api, 'create').mockRejectedValue(new Error('boom'))
+
+            try {
+                await expectLogic(logic, () => {
+                    logic.actions.calculateBlastRadiusForCondition(
+                        'X',
+                        [
+                            {
+                                key: 'aloha',
+                                value: 'aloha',
+                                type: PropertyFilterType.Person,
+                                operator: PropertyOperator.Exact,
+                            },
+                        ],
+                        null
+                    )
+                }).toFinishAllListeners()
+
+                // The error is surfaced distinctly rather than masked as -1, which the render
+                // path can't tell apart from the still-loading (undefined) state.
+                expect(logic.values.blastRadiusErrors.X).toBe(true)
+                expect(logic.values.affectedCounts.X).toBeUndefined()
+                expect(logic.values.totalCounts.X).toBeUndefined()
+            } finally {
+                createSpy.mockRestore()
+            }
+        })
+
+        it('clears the error state once a recalculation succeeds', async () => {
+            logic.actions.setBlastRadiusError('X')
+            expect(logic.values.blastRadiusErrors.X).toBe(true)
+
+            const createSpy = jest.spyOn(api, 'create').mockResolvedValue({ affected: 10, total: 100 })
+            try {
+                await expectLogic(logic, () => {
+                    logic.actions.calculateBlastRadiusForCondition(
+                        'X',
+                        [
+                            {
+                                key: 'aloha',
+                                value: 'aloha',
+                                type: PropertyFilterType.Person,
+                                operator: PropertyOperator.Exact,
+                            },
+                        ],
+                        null
+                    )
+                }).toFinishAllListeners()
+
+                expect(logic.values.blastRadiusErrors.X).toBeUndefined()
+                expect(logic.values.affectedCounts.X).toBe(10)
+                expect(logic.values.totalCounts.X).toBe(100)
+            } finally {
+                createSpy.mockRestore()
+            }
         })
 
         it('loads when editing a flag with multiple conditions', async () => {
@@ -146,45 +207,60 @@ describe('the feature flag release conditions logic', () => {
             })
             await expectLogic(logic, () => {
                 jest.spyOn(api, 'create')
-                    .mockReturnValueOnce(Promise.resolve({ users_affected: 140, total_users: 2000 }))
-                    .mockReturnValueOnce(Promise.resolve({ users_affected: 240, total_users: 2002 }))
-                    .mockReturnValueOnce(Promise.resolve({ users_affected: 500, total_users: 2000 }))
-                    .mockReturnValueOnce(Promise.resolve({ users_affected: 750, total_users: 2001 }))
+                    .mockReturnValueOnce(Promise.resolve({ affected: 140, total: 2000 }))
+                    .mockReturnValueOnce(Promise.resolve({ affected: 240, total: 2002 }))
+                    .mockReturnValueOnce(Promise.resolve({ affected: 500, total: 2000 }))
+                    .mockReturnValueOnce(Promise.resolve({ affected: 750, total: 2001 }))
 
                 logic.mount()
             })
-                .toDispatchActions(['setAffectedUsers', 'setAffectedUsers', 'setAffectedUsers', 'setAffectedUsers'])
+                .toDispatchActions([
+                    'setAffectedCount',
+                    'setTotalCount',
+                    'setAffectedCount',
+                    'setTotalCount',
+                    'setAffectedCount',
+                    'setTotalCount',
+                    'setAffectedCount',
+                    'setTotalCount',
+                ])
                 .toMatchValues({
-                    affectedUsers: { A: undefined, B: undefined, C: undefined, D: undefined },
-                    totalUsers: null,
+                    affectedCounts: { A: undefined, B: undefined, C: undefined, D: undefined },
+                    totalCounts: { A: undefined, B: undefined, C: undefined, D: undefined },
                 })
-                .toDispatchActions(['setAffectedUsers'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
                 .toMatchValues({
-                    affectedUsers: { A: 140, B: undefined, C: undefined, D: undefined },
-                    totalUsers: null,
+                    affectedCounts: { A: 140, B: undefined, C: undefined, D: undefined },
+                    totalCounts: { A: 2000, B: undefined, C: undefined, D: undefined },
                 })
-                .toDispatchActions(['setAffectedUsers', 'setTotalUsers'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
                 .toMatchValues({
-                    affectedUsers: { A: 140, B: 240 },
-                    totalUsers: 2002,
+                    affectedCounts: { A: 140, B: 240, C: undefined, D: undefined },
+                    totalCounts: { A: 2000, B: 2002, C: undefined, D: undefined },
                 })
-                .toDispatchActions(['setAffectedUsers', 'setTotalUsers'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
                 .toMatchValues({
-                    affectedUsers: { A: 140, B: 240, C: 500 },
-                    totalUsers: 2000,
+                    affectedCounts: { A: 140, B: 240, C: 500, D: undefined },
+                    totalCounts: { A: 2000, B: 2002, C: 2000, D: undefined },
                 })
-                .toDispatchActions(['setAffectedUsers', 'setTotalUsers'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
                 .toMatchValues({
-                    affectedUsers: { A: 140, B: 240, C: 500, D: 750 },
-                    totalUsers: 2001,
+                    affectedCounts: { A: 140, B: 240, C: 500, D: 750 },
+                    totalCounts: { A: 2000, B: 2002, C: 2000, D: 2001 },
                 })
         })
 
         it('updates when adding conditions to a flag', async () => {
             jest.spyOn(api, 'create')
-                .mockReturnValueOnce(Promise.resolve({ users_affected: 124, total_users: 2000 }))
-                .mockReturnValueOnce(Promise.resolve({ users_affected: 248, total_users: 2000 }))
-                .mockReturnValueOnce(Promise.resolve({ users_affected: 496, total_users: 2000 }))
+                // Mount: calculateBlastRadiusForCondition('A', []) makes an API call
+                // because [].some(isEmptyProperty) is false (no elements to test)
+                .mockReturnValueOnce(Promise.resolve({ affected: 2000, total: 2000 }))
+                // updateConditionSet for A with complete properties
+                .mockReturnValueOnce(Promise.resolve({ affected: 124, total: 2000 }))
+                // addConditionSet: calculateBlastRadiusForCondition('B', []) makes an API call
+                .mockReturnValueOnce(Promise.resolve({ affected: 2000, total: 2000 }))
+                // updateConditionSet for B with complete properties
+                .mockReturnValueOnce(Promise.resolve({ affected: 248, total: 2000 }))
 
             logic = featureFlagReleaseConditionsLogic({
                 id: '5678',
@@ -197,8 +273,16 @@ describe('the feature flag release conditions logic', () => {
                     },
                 ]),
             })
-            logic.mount()
 
+            // Mount triggers calculateBlastRadiusForCondition for condition A (empty props → API call).
+            // Use toDispatchActions (not toFinishAllListeners) to advance historyIndex past mount's actions.
+            await expectLogic(logic, () => {
+                logic.mount()
+            })
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+
+            // Update with incomplete property — clears counts but no API call
             await expectLogic(logic, () => {
                 logic.actions.updateConditionSet(0, 20, [
                     {
@@ -208,16 +292,10 @@ describe('the feature flag release conditions logic', () => {
                         value: null,
                     },
                 ])
-            })
-                // first call is to clear the affected users on mount
-                // second call is to set the affected users for mount logic conditions
-                // third call is to set the affected users for the updateConditionSet action
-                .toDispatchActions(['setAffectedUsers', 'setAffectedUsers', 'setAffectedUsers', 'setTotalUsers'])
-                .toMatchValues({
-                    affectedUsers: { A: 124 },
-                    totalUsers: 2000,
-                })
+            }).toDispatchActions(['setAffectedCount', 'setTotalCount'])
 
+            // Update with complete property — triggers API call after debounce.
+            // Three pairs: the immediate reset, calculateBlastRadiusForCondition's reset, the API result.
             await expectLogic(logic, () => {
                 logic.actions.updateConditionSet(0, 20, [
                     {
@@ -228,49 +306,23 @@ describe('the feature flag release conditions logic', () => {
                     },
                 ])
             })
-                .toDispatchActions(['setAffectedUsers'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
                 .toMatchValues({
-                    affectedUsers: { A: undefined },
-                    totalUsers: 2000,
-                })
-                .toDispatchActions(['setAffectedUsers', 'setTotalUsers'])
-                .toMatchValues({
-                    affectedUsers: { A: 248 },
-                    totalUsers: 2000,
+                    affectedCounts: { A: 124 },
+                    totalCounts: { A: 2000 },
                 })
 
-            // Add another condition set (auto-generated sortKey)
+            // Add condition B — triggers calculateBlastRadiusForCondition('B', []) → API call
             await expectLogic(logic, () => {
                 nextUuid = 'B'
                 logic.actions.addConditionSet()
             })
-                .toDispatchActions(['setAffectedUsers'])
-                .toMatchValues({
-                    // expect the new empty condition set to initialize affected users to be same as total users
-                    affectedUsers: { A: 248, B: 2000 },
-                    totalUsers: 2000,
-                })
-                .toNotHaveDispatchedActions(['setTotalUsers'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
 
-            // update newly added condition set
-            await expectLogic(logic, () => {
-                logic.actions.updateConditionSet(1, 20, [
-                    {
-                        key: 'aloha',
-                        type: PropertyFilterType.Person,
-                        operator: PropertyOperator.Exact,
-                        value: null,
-                    },
-                ])
-            })
-                .toDispatchActions(['setAffectedUsers'])
-                .toMatchValues({
-                    affectedUsers: { A: 248, B: undefined },
-                    totalUsers: 2000,
-                })
-                .toNotHaveDispatchedActions(['setTotalUsers'])
-
-            // select its value
+            // Update condition B with complete property
             await expectLogic(logic, () => {
                 logic.actions.updateConditionSet(1, 20, [
                     {
@@ -281,29 +333,28 @@ describe('the feature flag release conditions logic', () => {
                     },
                 ])
             })
-                .toDispatchActions(['setAffectedUsers'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+                .toDispatchActions(['setAffectedCount', 'setTotalCount'])
                 .toMatchValues({
-                    affectedUsers: { A: 248, B: undefined },
-                    totalUsers: 2000,
-                })
-                .toDispatchActions(['setAffectedUsers', 'setTotalUsers'])
-                .toMatchValues({
-                    affectedUsers: { A: 248, B: 496 },
-                    totalUsers: 2000,
+                    affectedCounts: { A: 124, B: 248 },
+                    totalCounts: { A: 2000, B: 2000 },
                 })
 
-            // Remove a condition set
+            // Remove condition A — no blast radius recalculation
             await expectLogic(logic, () => {
                 logic.actions.removeConditionSet(0)
             })
-                .toNotHaveDispatchedActions(['setAffectedUsers'])
+                .toNotHaveDispatchedActions(['setAffectedCount'])
                 .toMatchValues({
-                    affectedUsers: { A: 248, B: 496 },
+                    affectedCounts: { A: 124, B: 248 },
                 })
         })
 
         it('uses explicit sortKey when provided to addConditionSet', async () => {
-            jest.spyOn(api, 'create').mockReturnValueOnce(Promise.resolve({ users_affected: 500, total_users: 1000 }))
+            jest.spyOn(api, 'create')
+                .mockReturnValueOnce(Promise.resolve({ affected: 500, total: 1000 }))
+                .mockReturnValueOnce(Promise.resolve({ affected: 500, total: 1000 }))
 
             const testLogic = featureFlagReleaseConditionsLogic({
                 id: 'sortkey-test',
@@ -321,7 +372,7 @@ describe('the feature flag release conditions logic', () => {
             const explicitSortKey = 'my-custom-sort-key'
             await expectLogic(testLogic, () => {
                 testLogic.actions.addConditionSet(explicitSortKey)
-            }).toDispatchActions(['setAffectedUsers'])
+            }).toDispatchActions(['setAffectedCount'])
 
             // Verify the new condition set has the explicit sortKey
             expect(testLogic.values.filterGroups[1].sort_key).toBe(explicitSortKey)
@@ -330,10 +381,12 @@ describe('the feature flag release conditions logic', () => {
         })
 
         it('computes blast radius percentages accurately', async () => {
-            logic.actions.setAffectedUsers('A', 100)
-            logic.actions.setAffectedUsers('B', 200)
-            logic.actions.setAffectedUsers('C', 346)
-            logic.actions.setTotalUsers(1000)
+            logic.actions.setAffectedCount('A', 100)
+            logic.actions.setAffectedCount('B', 200)
+            logic.actions.setAffectedCount('C', 346)
+            logic.actions.setTotalCount('A', 1000)
+            logic.actions.setTotalCount('B', 1000)
+            logic.actions.setTotalCount('C', 1000)
 
             expect(logic.values.computeBlastRadiusPercentage(20, 'A')).toBeCloseTo(2, 2)
             expect(logic.values.computeBlastRadiusPercentage(33, 'A')).toBeCloseTo(3.3, 2)
@@ -346,9 +399,9 @@ describe('the feature flag release conditions logic', () => {
         })
 
         it('computes blast radius percentages accurately with missing information', async () => {
-            logic.actions.setAffectedUsers('A', -1)
-            logic.actions.setAffectedUsers('B', undefined)
-            logic.actions.setAffectedUsers('C', 25)
+            logic.actions.setAffectedCount('A', -1)
+            logic.actions.setAffectedCount('B', undefined)
+            logic.actions.setAffectedCount('C', 25)
             // total users is null as well
 
             expect(logic.values.computeBlastRadiusPercentage(20, 'A')).toBeCloseTo(20, 2)
@@ -360,21 +413,189 @@ describe('the feature flag release conditions logic', () => {
             expect(logic.values.computeBlastRadiusPercentage(100, 'C')).toBeCloseTo(100, 2)
             expect(logic.values.computeBlastRadiusPercentage(10, 'C')).toBeCloseTo(10, 2)
 
-            logic.actions.setTotalUsers(100)
+            logic.actions.setTotalCount('A', 100)
+            logic.actions.setTotalCount('B', 100)
+            logic.actions.setTotalCount('C', 100)
             expect(logic.values.computeBlastRadiusPercentage(67, 'A')).toBeCloseTo(67, 2)
-            // total users is defined but affected users is not. UI side should handle not showing the result in this case
+            // total is defined but affected is not. UI side should handle not showing the result in this case
             // and computation resolves to rollout percentage
             expect(logic.values.computeBlastRadiusPercentage(75, 'B')).toEqual(75)
             expect(logic.values.computeBlastRadiusPercentage(100, 'C')).toBeCloseTo(25, 2)
 
-            logic.actions.setTotalUsers(500_000_000)
-            logic.actions.setAffectedUsers('A', 249_999_000)
+            logic.actions.setTotalCount('A', 500_000_000)
+            logic.actions.setTotalCount('C', 500_000_000)
+            logic.actions.setAffectedCount('A', 249_999_000)
             expect(logic.values.computeBlastRadiusPercentage(100, 'A')).toEqual(49.9998)
             expect(logic.values.computeBlastRadiusPercentage(5, 'C')).toEqual(0)
         })
 
+        it('sends condition-level aggregation_group_type_index to blast radius API', async () => {
+            logic?.unmount()
+
+            const createSpy = jest.spyOn(api, 'create').mockImplementation((_url, data: any) => {
+                if (data?.group_type_index != null) {
+                    return Promise.resolve({
+                        affected: 10,
+                        total: 100,
+                    })
+                }
+                return Promise.resolve({
+                    affected: 50,
+                    total: 500,
+                })
+            })
+
+            try {
+                logic = featureFlagReleaseConditionsLogic({
+                    id: 'condition-agg-test',
+                    filters: {
+                        ...generateFeatureFlagFilters([
+                            {
+                                properties: [
+                                    {
+                                        key: 'plan',
+                                        value: 'pro',
+                                        type: PropertyFilterType.Group,
+                                        operator: PropertyOperator.Exact,
+                                        group_type_index: 1,
+                                    },
+                                ],
+                                rollout_percentage: 100,
+                                variant: null,
+                                sort_key: 'A',
+                                aggregation_group_type_index: 1,
+                            },
+                            {
+                                properties: [
+                                    {
+                                        key: 'email',
+                                        value: 'test',
+                                        type: PropertyFilterType.Group,
+                                        operator: PropertyOperator.Exact,
+                                        group_type_index: 0,
+                                    },
+                                ],
+                                rollout_percentage: 50,
+                                variant: null,
+                                sort_key: 'B',
+                            },
+                        ]),
+                        aggregation_group_type_index: 0,
+                    },
+                })
+
+                await expectLogic(logic, () => {
+                    logic.mount()
+                }).toFinishAllListeners()
+
+                // Condition A has its own aggregation_group_type_index=1, should override flag-level 0
+                expect(createSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('user_blast_radius'),
+                    expect.objectContaining({ group_type_index: 1 })
+                )
+                // Condition B has no condition-level override, should fall back to flag-level 0
+                expect(createSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('user_blast_radius'),
+                    expect.objectContaining({ group_type_index: 0 })
+                )
+            } finally {
+                createSpy.mockRestore()
+            }
+        })
+
+        it('sends user scope to blast radius when a condition explicitly targets users over a flag-level group', async () => {
+            logic?.unmount()
+
+            const createSpy = jest.spyOn(api, 'create').mockResolvedValue({ affected: 10, total: 100 })
+
+            try {
+                logic = featureFlagReleaseConditionsLogic({
+                    id: 'condition-null-override-test',
+                    filters: {
+                        ...generateFeatureFlagFilters([
+                            {
+                                properties: [
+                                    {
+                                        key: 'email',
+                                        value: 'test',
+                                        type: PropertyFilterType.Person,
+                                        operator: PropertyOperator.Exact,
+                                    },
+                                ],
+                                rollout_percentage: 100,
+                                variant: null,
+                                sort_key: 'A',
+                                // Explicit null = "users", must override the flag-level group index below
+                                aggregation_group_type_index: null,
+                            },
+                        ]),
+                        aggregation_group_type_index: 0,
+                    },
+                })
+
+                await expectLogic(logic, () => {
+                    logic.mount()
+                }).toFinishAllListeners()
+
+                expect(createSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('user_blast_radius'),
+                    expect.objectContaining({ group_type_index: null })
+                )
+                expect(createSpy).not.toHaveBeenCalledWith(
+                    expect.stringContaining('user_blast_radius'),
+                    expect.objectContaining({ group_type_index: 0 })
+                )
+            } finally {
+                createSpy.mockRestore()
+            }
+        })
+
+        it('stores counts from group-aggregated blast radius response', async () => {
+            logic?.unmount()
+
+            const createSpy = jest.spyOn(api, 'create').mockResolvedValue({
+                affected: 15,
+                total: 80,
+            })
+
+            try {
+                logic = featureFlagReleaseConditionsLogic({
+                    id: 'group-counts-test',
+                    filters: {
+                        ...generateFeatureFlagFilters([
+                            {
+                                properties: [
+                                    {
+                                        key: 'plan',
+                                        value: 'pro',
+                                        type: PropertyFilterType.Person,
+                                        operator: PropertyOperator.Exact,
+                                    },
+                                ],
+                                rollout_percentage: 100,
+                                variant: null,
+                                sort_key: 'A',
+                            },
+                        ]),
+                        aggregation_group_type_index: 0,
+                    },
+                })
+
+                await expectLogic(logic, () => {
+                    logic.mount()
+                })
+                    .toDispatchActions(['setAffectedCount', 'setTotalCount'])
+                    .toFinishAllListeners()
+
+                expect(logic.values.affectedCounts).toEqual({ A: 15 })
+                expect(logic.values.totalCounts).toEqual({ A: 80 })
+            } finally {
+                createSpy.mockRestore()
+            }
+        })
+
         describe('API calls', () => {
-            beforeEach(() => {
+            it('doesnt make extra API calls when rollout percentage or variants change', async () => {
                 logic?.unmount()
 
                 jest.spyOn(api, 'create').mockClear()
@@ -411,40 +632,25 @@ describe('the feature flag release conditions logic', () => {
                         },
                     ]),
                 })
+
+                // Mount and wait for all listeners to finish
                 logic.mount()
-            })
+                await expectLogic(logic).toFinishAllListeners()
 
-            it('doesnt make extra API calls when rollout percentage or variants change', async () => {
-                await expectLogic(logic)
-                    .toDispatchActions([
-                        'setAffectedUsers',
-                        'setAffectedUsers',
-                        'setAffectedUsers',
-                        'setAffectedUsers',
-                        'setAffectedUsers',
-                        'setAffectedUsers',
-                        'setTotalUsers',
-                    ])
-                    .toMatchValues({
-                        affectedUsers: { A: 120, B: 120, C: 120 },
-                        totalUsers: 2000,
-                    })
+                // Verify final state - all conditions have their blast radius calculated
+                expect(logic.values.affectedCounts).toEqual({ A: 120, B: 120, C: 120 })
+                expect(logic.values.totalCounts).toEqual({ A: 2000, B: 2000, C: 2000 })
 
+                // 3 API calls made (one for each condition)
                 expect(api.create).toHaveBeenCalledTimes(3)
 
-                await expectLogic(logic, () => {
-                    logic.actions.updateConditionSet(0, 20, undefined, undefined)
-                }).toNotHaveDispatchedActions(['setAffectedUsers', 'setTotalUsers'])
+                // Change rollout percentage and variant - should NOT trigger additional API calls
+                logic.actions.updateConditionSet(0, 20, undefined, undefined)
+                logic.actions.updateConditionSet(1, 30, undefined, 'test-variant')
+                logic.actions.updateConditionSet(2, undefined, undefined, 'test-variant2')
+                await expectLogic(logic).toFinishAllListeners()
 
-                await expectLogic(logic, () => {
-                    logic.actions.updateConditionSet(1, 30, undefined, 'test-variant')
-                }).toNotHaveDispatchedActions(['setAffectedUsers', 'setTotalUsers'])
-
-                await expectLogic(logic, () => {
-                    logic.actions.updateConditionSet(2, undefined, undefined, 'test-variant2')
-                }).toNotHaveDispatchedActions(['setAffectedUsers', 'setTotalUsers'])
-
-                // no extra calls when changing rollout percentage
+                // No extra API calls when only changing rollout percentage or variant
                 expect(api.create).toHaveBeenCalledTimes(3)
             })
         })
@@ -603,17 +809,53 @@ describe('the feature flag release conditions logic', () => {
             )
         })
 
-        it('accepts valid rollout percentages', () => {
+        it.each([
+            ['integer boundary values', 0, 50, 100],
+            ['decimal sub-1% values', 0.01, 0.15, 33.33],
+        ])('accepts valid rollout percentages (%s)', (_label, a, b, c) => {
             const filters = generateFeatureFlagFilters([
-                { properties: [], rollout_percentage: 0, variant: null, sort_key: 'A' },
-                { properties: [], rollout_percentage: 50, variant: null, sort_key: 'B' },
-                { properties: [], rollout_percentage: 100, variant: null, sort_key: 'C' },
+                { properties: [], rollout_percentage: a, variant: null, sort_key: 'A' },
+                { properties: [], rollout_percentage: b, variant: null, sort_key: 'B' },
+                { properties: [], rollout_percentage: c, variant: null, sort_key: 'C' },
             ])
             logic.actions.setFilters(filters)
 
             expect(logic.values.propertySelectErrors[0].rollout_percentage).toBeUndefined()
             expect(logic.values.propertySelectErrors[1].rollout_percentage).toBeUndefined()
             expect(logic.values.propertySelectErrors[2].rollout_percentage).toBeUndefined()
+        })
+    })
+
+    describe('semver value validation', () => {
+        // Wiring guard: the form gates submit on `propertySelectErrors`, so a bad semver value must
+        // surface here rather than reaching the backend and failing with an opaque 400.
+        const semverProperty = (value: string): AnyPropertyFilter => ({
+            key: 'app_version',
+            value,
+            operator: PropertyOperator.SemverGt,
+            type: PropertyFilterType.Person,
+        })
+
+        it('flags a non-semver value paired with a semver operator', () => {
+            logic.actions.setFilters(
+                generateFeatureFlagFilters([
+                    { properties: [semverProperty('not-a-version')], rollout_percentage: 50, variant: null },
+                ])
+            )
+
+            expect(logic.values.propertySelectErrors[0].properties?.[0]?.value).toBe(
+                'Enter a valid semver value (e.g. 1.2.3)'
+            )
+        })
+
+        it('accepts a valid semver value', () => {
+            logic.actions.setFilters(
+                generateFeatureFlagFilters([
+                    { properties: [semverProperty('1.2.3')], rollout_percentage: 50, variant: null },
+                ])
+            )
+
+            expect(logic.values.propertySelectErrors[0].properties?.[0]).toEqual({ value: undefined })
         })
     })
 
@@ -684,6 +926,34 @@ describe('the feature flag release conditions logic', () => {
             ])
             expect(logic.values.filters.groups[0].description).toBe('My test condition')
             expect(logic.values.filters.groups[0].properties).toHaveLength(1)
+        })
+    })
+
+    describe('early exit', () => {
+        it('enables early exit at the flag level', () => {
+            logic.actions.setEarlyExit(true)
+
+            expect(logic.values.filters.early_exit).toBe(true)
+        })
+
+        it('disables early exit', () => {
+            logic.actions.setEarlyExit(true)
+            logic.actions.setEarlyExit(false)
+
+            expect(logic.values.filters.early_exit).toBe(false)
+        })
+
+        it('preserves condition sets when toggling early exit', () => {
+            const filters = generateFeatureFlagFilters([
+                { properties: [], rollout_percentage: 50, variant: null, sort_key: 'A' },
+                { properties: [], rollout_percentage: 75, variant: null, sort_key: 'B' },
+            ])
+            logic.actions.setFilters(filters)
+
+            logic.actions.setEarlyExit(true)
+
+            expect(logic.values.filters.early_exit).toBe(true)
+            expect(logic.values.filters.groups).toEqual(filters.groups)
         })
     })
 
@@ -811,16 +1081,754 @@ describe('the feature flag release conditions logic', () => {
                     openConditions: ['condition-OLD-KEY'],
                 })
 
-            // Switch to group aggregation - this resets groups with new sort_key
+            // Switch to group aggregation - direct user→group resets groups with new sort_key
             nextUuid = 'NEW-KEY'
             await expectLogic(logic, () => {
                 logic.actions.setAggregationGroupTypeIndex(0)
             })
                 .toDispatchActions(['setAggregationGroupTypeIndex', 'setOpenConditions'])
                 .toMatchValues({
-                    // The open state should be preserved by index (first condition stays open)
                     openConditions: ['condition-NEW-KEY'],
                 })
+        })
+
+        it('can reorder condition sets', async () => {
+            logic?.unmount()
+
+            // Create logic with multiple condition sets
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'reorder-test',
+                filters: generateFeatureFlagFilters([
+                    { properties: [], rollout_percentage: 50, variant: null, sort_key: 'first' },
+                    { properties: [], rollout_percentage: 30, variant: null, sort_key: 'second' },
+                    { properties: [], rollout_percentage: 20, variant: null, sort_key: 'third' },
+                ]),
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            }).toMatchValues({
+                filterGroups: [
+                    expect.objectContaining({ sort_key: 'first', rollout_percentage: 50 }),
+                    expect.objectContaining({ sort_key: 'second', rollout_percentage: 30 }),
+                    expect.objectContaining({ sort_key: 'third', rollout_percentage: 20 }),
+                ],
+            })
+
+            // Reorder: move 'first' to after 'second'
+            await expectLogic(logic, () => {
+                logic.actions.reorderConditionSets('first', 'second')
+            }).toMatchValues({
+                filterGroups: [
+                    expect.objectContaining({ sort_key: 'second', rollout_percentage: 30 }),
+                    expect.objectContaining({ sort_key: 'first', rollout_percentage: 50 }),
+                    expect.objectContaining({ sort_key: 'third', rollout_percentage: 20 }),
+                ],
+            })
+
+            // Reorder: move 'third' to the beginning
+            await expectLogic(logic, () => {
+                logic.actions.reorderConditionSets('third', 'second')
+            }).toMatchValues({
+                filterGroups: [
+                    expect.objectContaining({ sort_key: 'third', rollout_percentage: 20 }),
+                    expect.objectContaining({ sort_key: 'second', rollout_percentage: 30 }),
+                    expect.objectContaining({ sort_key: 'first', rollout_percentage: 50 }),
+                ],
+            })
+        })
+
+        it('ignores reorder when activeId equals overId', async () => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'reorder-same-test',
+                filters: generateFeatureFlagFilters([
+                    { properties: [], rollout_percentage: 50, variant: null, sort_key: 'first' },
+                    { properties: [], rollout_percentage: 30, variant: null, sort_key: 'second' },
+                ]),
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            }).toMatchValues({
+                filterGroups: [
+                    expect.objectContaining({ sort_key: 'first', rollout_percentage: 50 }),
+                    expect.objectContaining({ sort_key: 'second', rollout_percentage: 30 }),
+                ],
+            })
+
+            // Try to reorder same item to itself - should be ignored
+            await expectLogic(logic, () => {
+                logic.actions.reorderConditionSets('first', 'first')
+            }).toMatchValues({
+                // Should remain unchanged
+                filterGroups: [
+                    expect.objectContaining({ sort_key: 'first', rollout_percentage: 50 }),
+                    expect.objectContaining({ sort_key: 'second', rollout_percentage: 30 }),
+                ],
+            })
+        })
+    })
+
+    describe('targeting mode transitions', () => {
+        const userProperties: AnyPropertyFilter[] = [
+            {
+                key: 'email',
+                value: ['test@hanzo.ai'],
+                operator: PropertyOperator.Exact,
+                type: PropertyFilterType.Person,
+            },
+        ]
+
+        const groupProperties: AnyPropertyFilter[] = [
+            {
+                key: 'industry',
+                value: ['tech'],
+                operator: PropertyOperator.Exact,
+                type: PropertyFilterType.Group,
+            },
+        ]
+
+        it('fully resets conditions when switching between incompatible types (user to group)', async () => {
+            logic?.unmount()
+
+            nextUuid = 'RESET'
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'transition-user-to-group',
+                filters: {
+                    ...generateFeatureFlagFilters([
+                        {
+                            properties: userProperties,
+                            rollout_percentage: 50,
+                            variant: 'control',
+                            sort_key: 'cond-1',
+                            description: 'Beta users',
+                        },
+                        {
+                            properties: userProperties,
+                            rollout_percentage: 30,
+                            variant: 'test',
+                            sort_key: 'cond-2',
+                            description: 'Alpha users',
+                        },
+                    ]),
+                    aggregation_group_type_index: null,
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            })
+
+            // Direct user→group transition resets to a single empty condition
+            nextUuid = 'NEW'
+            await expectLogic(logic, () => {
+                logic.actions.setAggregationGroupTypeIndex(0)
+            }).toMatchValues({
+                filters: expect.objectContaining({
+                    aggregation_group_type_index: 0,
+                    groups: [
+                        expect.objectContaining({
+                            sort_key: 'NEW',
+                            rollout_percentage: 50, // Preserves first condition's rollout %
+                            variant: null,
+                            properties: [],
+                        }),
+                    ],
+                }),
+            })
+        })
+
+        it.each([
+            {
+                name: 'mixed → user',
+                targetAggregation: null as number | null,
+                expectedGroups: [
+                    { sort_key: 'user-cond', rollout_percentage: 50, properties: userProperties },
+                    { sort_key: 'group-cond', rollout_percentage: 30, variant: 'test', properties: [] },
+                ],
+            },
+            {
+                name: 'mixed → group',
+                targetAggregation: 0 as number | null,
+                expectedGroups: [
+                    { sort_key: 'user-cond', rollout_percentage: 50, properties: [] },
+                    { sort_key: 'group-cond', rollout_percentage: 30, properties: groupProperties },
+                ],
+            },
+        ])('selectively clears properties when switching $name', async ({ targetAggregation, expectedGroups }) => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: `transition-from-mixed`,
+                filters: {
+                    ...generateFeatureFlagFilters([
+                        {
+                            properties: userProperties,
+                            rollout_percentage: 50,
+                            variant: null,
+                            sort_key: 'user-cond',
+                            aggregation_group_type_index: null,
+                        },
+                        {
+                            properties: groupProperties,
+                            rollout_percentage: 30,
+                            variant: 'test',
+                            sort_key: 'group-cond',
+                            aggregation_group_type_index: 0,
+                        },
+                    ]),
+                    aggregation_group_type_index: null,
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.setAggregationGroupTypeIndex(targetAggregation)
+            }).toMatchValues({
+                filters: expect.objectContaining({
+                    aggregation_group_type_index: targetAggregation,
+                    groups: expectedGroups.map((g) => expect.objectContaining(g)),
+                }),
+            })
+        })
+
+        it("keeps an explicit-user condition's properties when the flag-level index is a group", async () => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'transition-user-cond-under-group-flag',
+                filters: {
+                    ...generateFeatureFlagFilters([
+                        {
+                            properties: userProperties,
+                            rollout_percentage: 50,
+                            variant: null,
+                            sort_key: 'user-cond',
+                            aggregation_group_type_index: null,
+                        },
+                        {
+                            properties: groupProperties,
+                            rollout_percentage: 30,
+                            variant: 'test',
+                            sort_key: 'group-cond',
+                            aggregation_group_type_index: 0,
+                        },
+                    ]),
+                    // Flag-level index is a group (a number). This is what makes the resolver
+                    // differ from `??`: the explicit-null user condition must resolve to users,
+                    // not collapse into this group index, so toggling to users leaves its
+                    // properties untouched (under the old `??` they were wrongly wiped).
+                    aggregation_group_type_index: 1,
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.setAggregationGroupTypeIndex(null)
+            }).toMatchValues({
+                filters: expect.objectContaining({
+                    aggregation_group_type_index: null,
+                    groups: [
+                        expect.objectContaining({ sort_key: 'user-cond', properties: userProperties }),
+                        expect.objectContaining({ sort_key: 'group-cond', properties: [] }),
+                    ],
+                }),
+            })
+        })
+
+        // v2 Properties → Device: the UI calls setAggregationGroupTypeIndex(null) when switching
+        // to Device mode. Group-scoped condition properties are dropped (incompatible with
+        // distinct_id bucketing) while person-scoped condition properties are preserved.
+        it('drops group-scoped condition properties when v2 switches to Device mode', async () => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'v2-properties-to-device',
+                filters: {
+                    ...generateFeatureFlagFilters([
+                        {
+                            properties: userProperties,
+                            rollout_percentage: 50,
+                            variant: null,
+                            sort_key: 'user-cond',
+                            aggregation_group_type_index: null,
+                        },
+                        {
+                            properties: groupProperties,
+                            rollout_percentage: 30,
+                            variant: 'test',
+                            sort_key: 'group-cond',
+                            aggregation_group_type_index: 0,
+                        },
+                    ]),
+                    aggregation_group_type_index: null,
+                },
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            })
+
+            await expectLogic(logic, () => {
+                logic.actions.setAggregationGroupTypeIndex(null)
+            }).toMatchValues({
+                filters: expect.objectContaining({
+                    aggregation_group_type_index: null,
+                    groups: [
+                        expect.objectContaining({
+                            sort_key: 'user-cond',
+                            rollout_percentage: 50,
+                            properties: userProperties,
+                        }),
+                        expect.objectContaining({
+                            sort_key: 'group-cond',
+                            rollout_percentage: 30,
+                            properties: [],
+                        }),
+                    ],
+                }),
+            })
+        })
+    })
+
+    describe('distinct_id display names', () => {
+        function distinctIdFilters(value: string | string[]): FeatureFlagType['filters'] {
+            return generateFeatureFlagFilters([
+                {
+                    properties: [
+                        {
+                            key: 'distinct_id',
+                            type: PropertyFilterType.Person,
+                            value,
+                            operator: PropertyOperator.Exact,
+                        },
+                    ],
+                    rollout_percentage: 100,
+                    variant: null,
+                    sort_key: 'A',
+                },
+            ])
+        }
+
+        it.each([
+            {
+                name: 'array value, falling back to the raw id for unmatched persons',
+                value: ['distinct-1', 'distinct-2'] as string | string[],
+                // distinct-2 has no matching person, so it's absent from results.
+                results: { 'distinct-1': { name: 'alice@example.com' } },
+                expectedDistinctIds: ['distinct-1', 'distinct-2'],
+                expectedCache: { 'distinct-1': 'alice@example.com', 'distinct-2': 'distinct-2' },
+                expectedLabels: {
+                    'distinct-1': 'distinct-1 (alice@example.com)',
+                    // Unresolved ids and unknown ids both fall back to the raw distinct id.
+                    'distinct-2': 'distinct-2',
+                    'never-requested': 'never-requested',
+                },
+            },
+            {
+                name: 'scalar value',
+                value: 'distinct-1' as string | string[],
+                results: { 'distinct-1': { name: 'alice@example.com' } },
+                expectedDistinctIds: ['distinct-1'],
+                expectedCache: { 'distinct-1': 'alice@example.com' },
+                expectedLabels: { 'distinct-1': 'distinct-1 (alice@example.com)' },
+            },
+        ])(
+            'resolves person names for distinct_id targeting ($name)',
+            async ({ value, results, expectedDistinctIds, expectedCache, expectedLabels }) => {
+                logic?.unmount()
+
+                useMocks({
+                    post: {
+                        '/api/projects/:team/feature_flags/user_blast_radius': () => [
+                            200,
+                            { affected: 10, total: 100 },
+                        ],
+                        '/api/environments/:team/persons/batch_by_distinct_ids/': () => [200, { results }],
+                    },
+                })
+
+                logic = featureFlagReleaseConditionsLogic({
+                    id: 'distinct-id-names',
+                    filters: distinctIdFilters(value),
+                })
+
+                await expectLogic(logic, () => {
+                    logic.mount()
+                })
+                    .toDispatchActions(['loadDistinctIdNames', 'setDistinctIdNames'])
+                    .toMatchValues({ distinctIdNameCache: expectedCache })
+
+                expect(logic.values.distinctIds).toEqual(expectedDistinctIds)
+                for (const [id, label] of Object.entries(expectedLabels)) {
+                    expect(logic.values.getDistinctIdName(id)).toBe(label)
+                }
+            }
+        )
+
+        describe('when the persons request fails', () => {
+            // loadDistinctIdNames reports the failed request via console.error by design
+            let consoleErrorSpy: jest.SpyInstance
+
+            beforeEach(() => {
+                consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+            })
+
+            afterEach(() => {
+                consoleErrorSpy.mockRestore()
+            })
+
+            it('falls back to raw ids without caching', async () => {
+                logic?.unmount()
+
+                useMocks({
+                    post: {
+                        '/api/projects/:team/feature_flags/user_blast_radius': () => [
+                            200,
+                            { affected: 10, total: 100 },
+                        ],
+                        '/api/environments/:team/persons/batch_by_distinct_ids/': () => [500, {}],
+                    },
+                })
+
+                logic = featureFlagReleaseConditionsLogic({
+                    id: 'distinct-id-error',
+                    filters: distinctIdFilters(['distinct-1', 'distinct-2']),
+                })
+
+                await expectLogic(logic, () => {
+                    logic.mount()
+                })
+                    .toDispatchActions(['loadDistinctIdNames'])
+                    .toFinishAllListeners()
+                    // Failed ids stay uncached so a later setFilters/updateConditionSet retries them.
+                    .toMatchValues({ distinctIdNameCache: {} })
+
+                expect(logic.values.getDistinctIdName('distinct-1')).toBe('distinct-1')
+            })
+
+            it('preserves resolved names from earlier chunks when a later chunk fails', async () => {
+                logic?.unmount()
+
+                // More than one batch worth of ids so the request is chunked.
+                const ids = Array.from({ length: 250 }, (_, i) => `d-${i}`)
+                const firstChunkResults = Object.fromEntries(
+                    ids.slice(0, 200).map((id) => [id, { name: `name-${id}` }])
+                )
+
+                let callCount = 0
+                useMocks({
+                    post: {
+                        '/api/projects/:team/feature_flags/user_blast_radius': () => [
+                            200,
+                            { affected: 10, total: 100 },
+                        ],
+                        '/api/environments/:team/persons/batch_by_distinct_ids/': () => {
+                            callCount += 1
+                            // First chunk resolves, second chunk fails.
+                            return callCount === 1 ? [200, { results: firstChunkResults }] : [500, {}]
+                        },
+                    },
+                })
+
+                logic = featureFlagReleaseConditionsLogic({
+                    id: 'distinct-id-chunked',
+                    filters: distinctIdFilters(ids),
+                })
+
+                await expectLogic(logic, () => {
+                    logic.mount()
+                })
+                    .toDispatchActions(['loadDistinctIdNames', 'setDistinctIdNames'])
+                    .toFinishAllListeners()
+
+                // First-chunk names survive; the failed second chunk stays uncached and renders raw.
+                expect(logic.values.getDistinctIdName('d-0')).toBe('d-0 (name-d-0)')
+                expect(logic.values.getDistinctIdName('d-200')).toBe('d-200')
+            })
+        })
+
+        it('resolves names when a distinct_id filter is added to a mounted flag', async () => {
+            logic?.unmount()
+
+            useMocks({
+                post: {
+                    '/api/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 10, total: 100 }],
+                    '/api/environments/:team/persons/batch_by_distinct_ids/': () => [
+                        200,
+                        { results: { 'distinct-1': { name: 'alice@example.com' } } },
+                    ],
+                },
+            })
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'distinct-id-edit',
+                filters: generateFeatureFlagFilters([
+                    { properties: [], rollout_percentage: 100, variant: null, sort_key: 'A' },
+                ]),
+            })
+            logic.mount()
+
+            await expectLogic(logic, () => {
+                logic.actions.updateConditionSet(0, undefined, [
+                    {
+                        key: 'distinct_id',
+                        type: PropertyFilterType.Person,
+                        value: ['distinct-1'],
+                        operator: PropertyOperator.Exact,
+                    },
+                ])
+            }).toDispatchActions(['loadDistinctIdNames', 'setDistinctIdNames'])
+
+            expect(logic.values.getDistinctIdName('distinct-1')).toBe('distinct-1 (alice@example.com)')
+        })
+
+        it('does not re-fetch names for ids already in the cache', async () => {
+            logic?.unmount()
+
+            let callCount = 0
+            useMocks({
+                post: {
+                    '/api/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 10, total: 100 }],
+                    '/api/environments/:team/persons/batch_by_distinct_ids/': () => {
+                        callCount += 1
+                        return [200, { results: { 'distinct-1': { name: 'alice@example.com' } } }]
+                    },
+                },
+            })
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'distinct-id-no-refetch',
+                filters: distinctIdFilters(['distinct-1']),
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            })
+                .toDispatchActions(['loadDistinctIdNames', 'setDistinctIdNames'])
+                .toFinishAllListeners()
+
+            expect(callCount).toBe(1)
+
+            // Re-adding the same id re-triggers resolution, but the cache filter should skip the fetch.
+            await expectLogic(logic, () => {
+                logic.actions.updateConditionSet(0, undefined, [
+                    {
+                        key: 'distinct_id',
+                        type: PropertyFilterType.Person,
+                        value: ['distinct-1'],
+                        operator: PropertyOperator.Exact,
+                    },
+                ])
+            })
+                .toDispatchActions(['loadDistinctIdNames'])
+                .toFinishAllListeners()
+
+            expect(callCount).toBe(1)
+        })
+
+        it('does not fetch names when there are no distinct_id filters', async () => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'no-distinct-id',
+                filters: generateFeatureFlagFilters([
+                    {
+                        properties: [
+                            {
+                                key: 'email',
+                                type: PropertyFilterType.Person,
+                                value: 'a@b.com',
+                                operator: PropertyOperator.Exact,
+                            },
+                        ],
+                        rollout_percentage: 100,
+                        variant: null,
+                        sort_key: 'A',
+                    },
+                ]),
+            })
+
+            await expectLogic(logic, () => {
+                logic.mount()
+            }).toNotHaveDispatchedActions(['loadDistinctIdNames'])
+
+            expect(logic.values.distinctIds).toEqual([])
+        })
+    })
+
+    describe('per-condition aggregation scope resolution', () => {
+        // Mirrors the backend's effective_aggregation (rust/feature-flags/src/flags/flag_property_group.rs):
+        // a condition's explicit null ("users") must win over a flag-level group index, while an
+        // absent (undefined) value inherits the flag-level index.
+        it.each([
+            // [conditionLevel, flagLevel, expected]
+            [undefined, 1, 1], // absent → inherit flag-level group
+            [undefined, null, null], // absent → inherit flag-level user
+            [null, 1, null], // explicit user wins over flag-level group
+            [2, null, 2], // explicit group wins over flag-level user
+            [2, 1, 2], // explicit group wins over flag-level group
+        ])('resolveAggregationGroupTypeIndex(%p, %p) === %p', (conditionLevel, flagLevel, expected) => {
+            expect(resolveAggregationGroupTypeIndex(conditionLevel, flagLevel)).toEqual(expected)
+        })
+
+        it('resolves an explicit-user condition to users even when the flag targets a group', async () => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'scope-resolution-test',
+                filters: {
+                    ...generateFeatureFlagFilters([
+                        { properties: [], rollout_percentage: 100, variant: null, sort_key: 'A' },
+                    ]),
+                    aggregation_group_type_index: 0,
+                },
+            })
+            logic.mount()
+
+            // Explicit null = users, despite the flag-level group index of 0
+            expect(logic.values.aggregationTargetName(null)).toEqual('users')
+            expect(logic.values.taxonomicGroupTypesForCondition(null)).toContain(
+                TaxonomicFilterGroupType.PersonProperties
+            )
+            // An absent value still inherits the flag-level group scope (not user properties)
+            expect(logic.values.taxonomicGroupTypesForCondition(undefined)).not.toContain(
+                TaxonomicFilterGroupType.PersonProperties
+            )
+        })
+    })
+
+    describe('withResolvedFlagLabels', () => {
+        // Flag dependencies store the numeric flag ID in `key`; `getFlagKey` resolves it to the slug
+        // and falls back to the raw ID when the cache hasn't resolved it yet.
+        const flagKeys: Record<string, string> = { '10': 'beta-banner', '20': 'new-checkout' }
+        const getFlagKey = (flagId: string): string => flagKeys[flagId] ?? flagId
+
+        const flagFilter = (key: string, label?: string): FlagPropertyFilter =>
+            ({
+                type: PropertyFilterType.Flag,
+                operator: PropertyOperator.FlagEvaluatesTo,
+                key,
+                value: true,
+                ...(label !== undefined ? { label } : {}),
+            }) as FlagPropertyFilter
+
+        it('backfills the resolved flag key onto label while keeping the ID in key', () => {
+            const [result] = withResolvedFlagLabels([flagFilter('10')], getFlagKey) as FlagPropertyFilter[]
+            expect(result.label).toBe('beta-banner')
+            // `key` still holds the ID the backend evaluates against — only the display label changes
+            expect(result.key).toBe('10')
+        })
+
+        it('leaves non-flag filters untouched by reference', () => {
+            const personFilter = {
+                type: PropertyFilterType.Person,
+                key: 'email',
+                operator: PropertyOperator.Exact,
+                value: 'a@b.com',
+            } as AnyPropertyFilter
+            expect(withResolvedFlagLabels([personFilter], getFlagKey)[0]).toBe(personFilter)
+        })
+
+        it('does not inject the raw ID as a label while the key is unresolved', () => {
+            // 999 is not in the cache, so getFlagKey returns the ID — we must not show it as a name
+            const unresolved = flagFilter('999')
+            const [result] = withResolvedFlagLabels([unresolved], getFlagKey) as FlagPropertyFilter[]
+            expect(result.label).toBeUndefined()
+            expect(result).toBe(unresolved)
+        })
+
+        it('re-resolves over a stale label instead of trusting it', () => {
+            // A label injected earlier round-trips back through onChange; if the flag was renamed the
+            // cache now holds a different key and the stale label must be overridden, not kept.
+            const stale = flagFilter('20', 'old-checkout-name')
+            const [result] = withResolvedFlagLabels([stale], getFlagKey) as FlagPropertyFilter[]
+            expect(result.label).toBe('new-checkout')
+        })
+
+        it('returns the same object when the label already matches the resolved key', () => {
+            // Avoids creating a new object every render, which would churn re-renders and onChange
+            const fresh = flagFilter('10', 'beta-banner')
+            expect(withResolvedFlagLabels([fresh], getFlagKey)[0]).toBe(fresh)
+        })
+
+        it('handles undefined properties', () => {
+            expect(withResolvedFlagLabels(undefined, getFlagKey)).toEqual([])
+        })
+
+        it('resolves only flag filters in a mixed array, preserving order', () => {
+            const personFilter = {
+                type: PropertyFilterType.Person,
+                key: 'email',
+                operator: PropertyOperator.Exact,
+                value: 'a@b.com',
+            } as AnyPropertyFilter
+            const result = withResolvedFlagLabels([personFilter, flagFilter('10'), flagFilter('20')], getFlagKey)
+            expect(result[0]).toBe(personFilter)
+            expect((result[1] as FlagPropertyFilter).label).toBe('beta-banner')
+            expect((result[2] as FlagPropertyFilter).label).toBe('new-checkout')
+        })
+    })
+
+    describe('propsChanged does not clobber fresher local edits', () => {
+        it('keeps a local rollout edit when the parent prop has not caught up', async () => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'stale-prop-test',
+                filters: generateFeatureFlagFilters([
+                    { properties: [], rollout_percentage: 0, variant: null, sort_key: 'group-1' },
+                ]),
+            })
+            logic.mount()
+
+            // User drags the rollout to 100 locally
+            logic.actions.updateConditionSet(0, 100)
+            expect(logic.values.filters.groups[0].rollout_percentage).toEqual(100)
+
+            // A re-render fires propsChanged with the pre-edit parent snapshot (0%) before the
+            // local edit has round-tripped back to the parent. It must not reset the fresher edit.
+            await expectLogic(logic, () => {
+                featureFlagReleaseConditionsLogic({
+                    id: 'stale-prop-test',
+                    filters: generateFeatureFlagFilters([
+                        { properties: [], rollout_percentage: 0, variant: null, sort_key: 'group-1' },
+                    ]),
+                })
+            }).toNotHaveDispatchedActions(['setFilters'])
+
+            expect(logic.values.filters.groups[0].rollout_percentage).toEqual(100)
+        })
+
+        it('adopts a genuine external filters change from the parent', async () => {
+            logic?.unmount()
+
+            logic = featureFlagReleaseConditionsLogic({
+                id: 'external-change-test',
+                filters: generateFeatureFlagFilters([
+                    { properties: [], rollout_percentage: 0, variant: null, sort_key: 'group-1' },
+                ]),
+            })
+            logic.mount()
+
+            await expectLogic(logic, () => {
+                featureFlagReleaseConditionsLogic({
+                    id: 'external-change-test',
+                    filters: generateFeatureFlagFilters([
+                        { properties: [], rollout_percentage: 25, variant: null, sort_key: 'group-1' },
+                    ]),
+                })
+            }).toDispatchActions(['setFilters'])
+
+            expect(logic.values.filters.groups[0].rollout_percentage).toEqual(25)
         })
     })
 })

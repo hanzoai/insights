@@ -1,137 +1,156 @@
+import type { ASTNode } from '@hanzo/insightsql-parser'
+
+import { parseSelect } from './insightsqlParserSingleton'
+
 export const normalizeIdentifier = (identifier: string): string => {
-    return identifier.replace(/^[`"']|[`"']$/g, '').toLowerCase()
+    return identifier.replace(/[`"']/g, '').toLowerCase()
 }
 
-const parseSelectedColumns = (selectedColumns: string): string[] => {
-    return selectedColumns
-        .split(',')
-        .map((column) => column.trim())
-        .filter((column) => column.length > 0)
+export const queryUsesFiltersPlaceholder = (query: string | null): boolean => {
+    if (!query) {
+        return false
+    }
+
+    let i = 0
+    while (i < query.length) {
+        const ch = query[i]
+
+        if (ch === "'" || ch === '"' || ch === '`') {
+            const quote = ch
+            i++
+            while (i < query.length) {
+                if (query[i] === '\\') {
+                    i += 2
+                    continue
+                }
+                if (query[i] === quote && query[i + 1] === quote) {
+                    i += 2
+                    continue
+                }
+                if (query[i] === quote) {
+                    i++
+                    break
+                }
+                i++
+            }
+            continue
+        }
+
+        if (ch === '-' && query[i + 1] === '-') {
+            i += 2
+            while (i < query.length && query[i] !== '\n') {
+                i++
+            }
+            continue
+        }
+
+        if (ch === '/' && query[i + 1] === '*') {
+            i += 2
+            while (i < query.length) {
+                if (query[i] === '*' && query[i + 1] === '/') {
+                    i += 2
+                    break
+                }
+                i++
+            }
+            continue
+        }
+
+        if (query.startsWith('{filters}', i) || query.startsWith('{filters.', i)) {
+            return true
+        }
+
+        i++
+    }
+
+    return false
 }
 
-export const buildQueryForColumnClick = (
-    currentQuery: string | null,
-    tableName: string,
-    columnName: string
-): string => {
-    const limitOffsetClause = currentQuery ? extractLimitOffsetClause(currentQuery) : null
-    const baseQuery = `select ${columnName} from ${tableName} ${limitOffsetClause ?? 'limit 100'}`
-
-    if (!currentQuery) {
-        return baseQuery
-    }
-
-    const match = currentQuery.match(/^\s*select\s+([\s\S]+?)\s+from\s+([^\s;]+)[\s\S]*$/i)
-
-    if (!match) {
-        return baseQuery
-    }
-
-    const [, selectedColumnsRaw, selectedTableRaw] = match
-
-    if (normalizeIdentifier(selectedTableRaw) !== normalizeIdentifier(tableName)) {
-        return baseQuery
-    }
-
-    let columns = parseSelectedColumns(selectedColumnsRaw)
-    const normalizedColumnName = normalizeIdentifier(columnName)
-    const isStarOnly = columns.length === 1 && columns[0] === '*'
-
-    if (isStarOnly) {
-        columns = []
-    } else {
-        columns = columns.filter((column) => column !== '*')
-    }
-
-    const existingIndex = columns.findIndex((column) => normalizeIdentifier(column) === normalizedColumnName)
-
-    if (existingIndex >= 0) {
-        columns.splice(existingIndex, 1)
-    } else {
-        columns.push(columnName)
-    }
-
-    if (columns.length === 0) {
-        columns = ['*']
-    }
-
-    return `select ${columns.join(', ')} from ${tableName} ${limitOffsetClause ?? 'limit 100'}`
-}
-
-const normalizeKeywordSpacing = (query: string): string => {
-    return query.replace(/\s+/g, ' ').trim()
-}
-
-const extractLimitOffsetClause = (query: string): string | null => {
-    const matches = Array.from(query.matchAll(/\b(limit\s+\d+(?:\s+offset\s+\d+)?|offset\s+\d+)\b/gi))
-
-    if (matches.length === 0) {
+/** Try to parse a SELECT query, returning the AST node or null on failure. */
+const tryParseSelect = async (query: string): Promise<ASTNode | null> => {
+    try {
+        const result = JSON.parse(await parseSelect(query))
+        if (result.error || result.node !== 'SelectQuery') {
+            return null
+        }
+        return result as ASTNode
+    } catch {
         return null
     }
-
-    return matches[matches.length - 1][0].replace(/;$/, '').trim()
 }
 
-export const parseQueryTablesAndColumns = (queryInput: string | null): Record<string, Record<string, boolean>> => {
+/** Collect all table names from a JoinExpr chain. */
+const collectTablesFromJoinExpr = (joinExpr: ASTNode | null): string[] => {
+    const tables: string[] = []
+    let current = joinExpr
+    while (current) {
+        if (current.table?.node === 'Field') {
+            tables.push((current.table.chain as string[]).join('.'))
+        }
+        current = current.next_join ?? null
+    }
+    return tables
+}
+
+export const parseQueryTablesAndColumns = async (
+    queryInput: string | null
+): Promise<Record<string, Record<string, boolean>>> => {
     if (!queryInput) {
         return {}
     }
 
-    const normalizedQuery = normalizeKeywordSpacing(queryInput)
-    const selectMatch = normalizedQuery.match(/\bselect\b\s+(.+?)\s+\bfrom\b\s+(.+)/i)
-
-    if (!selectMatch) {
+    const ast = await tryParseSelect(queryInput)
+    if (!ast) {
         return {}
     }
 
-    const [, rawColumns, rawFrom] = selectMatch
-    const columns = parseSelectedColumns(rawColumns)
-    const fromClause = rawFrom.split(/\bwhere\b|\bgroup\b|\border\b|\blimit\b/i)[0] ?? ''
-    const tableMatches = `from ${fromClause}`.match(/\bfrom\b\s+([^\s,]+)|\bjoin\b\s+([^\s,]+)/gi) ?? []
-    const tables = tableMatches
-        .flatMap((match) => match.split(/\s+/).slice(1))
-        .map((table) => table.replace(/,$/, ''))
-        .filter((table) => table.length > 0)
-    const selectedTables = Array.from(new Set(tables))
-
-    const selectedColumnsByTable: Record<string, Record<string, boolean>> = {}
-
+    const selectedTables = collectTablesFromJoinExpr(ast.select_from)
     if (selectedTables.length === 0) {
-        return selectedColumnsByTable
+        return {}
     }
 
-    columns.forEach((column) => {
-        if (column === '*') {
-            selectedTables.forEach((table) => {
+    const selectedColumnsByTable: Record<string, Record<string, boolean>> = {}
+    const selectNodes: ASTNode[] = ast.select ?? []
+
+    for (const node of selectNodes) {
+        // Handle SELECT *
+        if (node.node === 'Field' && node.chain.length === 1 && node.chain[0] === '*') {
+            for (const table of selectedTables) {
                 selectedColumnsByTable[table] = {
                     '*': true,
                     ...selectedColumnsByTable[table],
                 }
-            })
-            return
-        }
-
-        const [tablePrefix, columnName] = column.split('.')
-        if (
-            columnName &&
-            selectedTables.some((table) => normalizeIdentifier(table) === normalizeIdentifier(tablePrefix))
-        ) {
-            const tableKey = selectedTables.find(
-                (table) => normalizeIdentifier(table) === normalizeIdentifier(tablePrefix)
-            ) as string
-            selectedColumnsByTable[tableKey] = {
-                [columnName]: true,
-                ...selectedColumnsByTable[tableKey],
             }
-            return
+            continue
         }
 
-        const fallbackTable = selectedTables[0]
-        selectedColumnsByTable[fallbackTable] = {
-            [column]: true,
-            ...selectedColumnsByTable[fallbackTable],
+        if (node.node === 'Field') {
+            const chain = node.chain as string[]
+
+            // table.column form
+            if (chain.length >= 2) {
+                const tablePrefix = chain.slice(0, -1).join('.')
+                const col = chain[chain.length - 1]
+                const tableKey = selectedTables.find(
+                    (table) => normalizeIdentifier(table) === normalizeIdentifier(tablePrefix)
+                )
+                if (tableKey) {
+                    selectedColumnsByTable[tableKey] = {
+                        [col]: true,
+                        ...selectedColumnsByTable[tableKey],
+                    }
+                    continue
+                }
+            }
+
+            // Bare column — assign to first table
+            const fallbackTable = selectedTables[0]
+            selectedColumnsByTable[fallbackTable] = {
+                [chain.join('.')]: true,
+                ...selectedColumnsByTable[fallbackTable],
+            }
         }
-    })
+    }
 
     return selectedColumnsByTable
 }

@@ -1,8 +1,6 @@
 import re
 from typing import TYPE_CHECKING, Optional, cast
 
-from insights.schema import BounceRatePageViewMode, CustomChannelRule, SessionsV2JoinMode
-
 from insights.insightsql import ast
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.models import (
@@ -21,18 +19,22 @@ from insights.insightsql.database.models import (
 )
 from insights.insightsql.database.schema.channel_type import DEFAULT_CHANNEL_TYPES, ChannelTypeExprs, create_channel_type_expr
 from insights.insightsql.database.schema.sessions_v1 import DEFAULT_BOUNCE_RATE_DURATION_SECONDS, null_if_empty
-from insights.insightsql.database.schema.util.where_clause_extractor import SessionMinTimestampWhereClauseExtractorV2
+from insights.insightsql.database.schema.util.where_clause_extractor import (
+    SessionMinTimestampWhereClauseExtractorV2,
+    build_session_id_literal_pushdown_predicate,
+    build_session_id_v7_pushdown_predicate,
+    build_session_property_pre_aggregation_predicate,
+)
 from insights.insightsql.errors import ResolutionError
 from insights.insightsql.modifiers import create_default_modifiers_for_team
+from insights.insightsql.visitor import clone_expr
 
-from insights.models.property_definition import PropertyType
-from insights.models.raw_sessions.sessions_v2 import (
-    RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL,
-    RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_WITH_FILTER,
-)
 from insights.queries.insight import insight_sync_execute
+from insights.schema_enums import BounceRatePageViewMode, SessionsV2JoinMode
 
 if TYPE_CHECKING:
+    from insights.schema import CustomChannelRule
+
     from insights.models.team import Team
 
 RAW_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
@@ -79,14 +81,20 @@ RAW_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
 }
 
 LAZY_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
-    "id": StringDatabaseField(name="id"),
+    "id": StringDatabaseField(name="id", description="Session identifier; matches `events.$session_id`."),
     # # TODO remove this, it's a duplicate of the correct session_id field below to get some trends working on a deadline
-    "session_id": StringDatabaseField(name="session_id"),
+    "session_id": StringDatabaseField(
+        name="session_id", description="Session identifier; matches `events.$session_id`."
+    ),
     "session_id_v7": IntegerDatabaseField(name="session_id_v7"),
     "team_id": IntegerDatabaseField(name="team_id"),
     "distinct_id": StringDatabaseField(name="distinct_id"),
-    "$start_timestamp": DateTimeDatabaseField(name="$start_timestamp"),
-    "$end_timestamp": DateTimeDatabaseField(name="$end_timestamp"),
+    "$start_timestamp": DateTimeDatabaseField(
+        name="$start_timestamp", description="Timestamp of the first event in the session."
+    ),
+    "$end_timestamp": DateTimeDatabaseField(
+        name="$end_timestamp", description="Timestamp of the last event in the session."
+    ),
     "max_inserted_at": DateTimeDatabaseField(name="max_inserted_at"),
     "$urls": StringArrayDatabaseField(name="$urls"),
     "$num_uniq_urls": IntegerDatabaseField(name="$num_uniq_urls"),
@@ -185,7 +193,10 @@ class RawSessionsTableV2(Table):
 
 
 def select_from_sessions_table_v2(
-    requested_fields: dict[str, list[str | int]], node: ast.SelectQuery, context: InsightsQLContext
+    requested_fields: dict[str, list[str | int]],
+    node: ast.SelectQuery,
+    context: InsightsQLContext,
+    extra_where: Optional[ast.Expr] = None,
 ):
     from insights.insightsql import ast
 
@@ -424,9 +435,12 @@ def select_from_sessions_table_v2(
             select_fields.append(
                 ast.Alias(alias=name, expr=ast.Field(chain=cast(list[str | int], [table_name]) + chain))
             )
-            group_by_fields.append(ast.Field(chain=cast(list[str | int], [table_name]) + chain))
+            if name != "session_id_v7":
+                group_by_fields.append(ast.Field(chain=cast(list[str | int], [table_name]) + chain))
 
     where = SessionMinTimestampWhereClauseExtractorV2(context).get_inner_where(node)
+    if extra_where is not None:
+        where = ast.And(exprs=[where, extra_where]) if where is not None else extra_where
 
     return ast.SelectQuery(
         select=select_fields,
@@ -436,7 +450,167 @@ def select_from_sessions_table_v2(
     )
 
 
+def _single_sessions_occurrence_type(node: ast.SelectQuery, lazy_table: "SessionsTableV2") -> Optional[ast.Type]:
+    """The resolved type of the query's only ``sessions`` occurrence, or None.
+
+    Returns None when the sessions table appears more than once in the FROM/JOIN
+    chain (a self-join — ownership of a ``session_id`` filter is then ambiguous
+    because lazy expansion processes occurrences one at a time against the same
+    node), or when it cannot be identified. Used to prove a WHERE term belongs to
+    the occurrence currently being expanded before pushing it down.
+    """
+    found: Optional[ast.Type] = None
+    join: Optional[ast.JoinExpr] = node.select_from
+    while join is not None:
+        if isinstance(join.table, ast.Field):
+            table_type = join.table.type
+            unwrapped = table_type.table_type if isinstance(table_type, ast.TableAliasType) else table_type
+            if isinstance(unwrapped, ast.LazyTableType) and unwrapped.table is lazy_table:
+                if found is not None:
+                    return None
+                found = table_type
+        join = join.next_join
+    return found
+
+
+def build_direct_session_id_in_pushdown(
+    node: ast.SelectQuery, context: InsightsQLContext, lazy_table: "SessionsTableV2"
+) -> Optional[ast.Expr]:
+    """Push a top-level ``session_id IN (SELECT …)`` filter below the per-session GROUP BY.
+
+    A direct select over ``sessions`` aggregates every session in the date range
+    before outer WHERE filters apply, so an id-set filter (the session-id-set
+    pattern: events side first, sessions restricted to matching ids) pays the full
+    aggregation anyway. Rewriting it onto ``raw_sessions.session_id_v7`` inside the
+    subquery prunes before aggregation — memory and CPU then scale with matching
+    sessions, not all sessions. ``GlobalIn`` keeps the id subquery executing once
+    on the initiator instead of once per shard. When the rewrite fires, the
+    original outer term is neutralized in place (rewritten to ``1 = 1``) so the id
+    subquery is not executed a second time above the GROUP BY.
+
+    Exposure: this is keyed on the ``sessionIdPushdown`` modifier, which teams can
+    persist in ``team.modifiers`` — so any InsightsQL query with a matching shape
+    (including SQL editor queries) can hit this rewrite, not just the web overview
+    runner. That is safe because the rewrite is semantics-preserving: the filter is
+    on the GROUP BY key itself, so pruning before aggregation returns the same rows
+    as filtering after, string ids are matched only in their canonical (lowercase)
+    UUID form exactly like the un-rewritten string comparison, and the rewrite only
+    fires when the filtered column provably belongs to this sessions occurrence —
+    the query's single one; joined tables' own ``session_id`` columns and sessions
+    self-joins are left untouched (locked by the parity and hijack tests in
+    test_session_v2_where_clause_extractor.py). Fails open (returns None, outer
+    term untouched) on any shape it doesn't recognize — NOT IN, literal lists,
+    OR-nested terms, multi-column subqueries — preserving exact original semantics
+    there.
+    """
+    if not context.modifiers or not context.modifiers.sessionIdPushdown:
+        return None
+    if node.where is None:
+        return None
+    occurrence_type = _single_sessions_occurrence_type(node, lazy_table)
+    if occurrence_type is None:
+        return None
+
+    def flatten_and(expr: ast.Expr) -> list[ast.Expr]:
+        if isinstance(expr, ast.And):
+            return [t for sub in expr.exprs for t in flatten_and(sub)]
+        if isinstance(expr, ast.Call) and expr.name == "and":
+            return [t for sub in expr.args for t in flatten_and(sub)]
+        return [expr]
+
+    for term in flatten_and(node.where):
+        if not isinstance(term, ast.CompareOperation) or term.op not in (
+            ast.CompareOperationOp.In,
+            ast.CompareOperationOp.GlobalIn,
+        ):
+            continue
+        left = term.left.expr if isinstance(term.left, ast.Alias) else term.left
+        if (
+            not isinstance(left, ast.Field)
+            or left.chain[-1] not in ("session_id", "session_id_v7")
+            or not isinstance(term.right, ast.SelectQuery)
+        ):
+            continue
+        # Ownership: the field must resolve to THIS sessions occurrence. Chain
+        # names alone would also match e.g. `events.properties.session_id`, a
+        # replay/warehouse table's own session_id column, or the other side of a
+        # sessions self-join — rewriting those would silently drop the user's
+        # filter and apply a different one to a different table.
+        if not isinstance(left.type, ast.FieldType) or left.type.table_type is not occurrence_type:
+            continue
+
+        subquery = cast(ast.SelectQuery, clone_expr(term.right, clear_types=True, clear_locations=True))
+        if len(subquery.select) != 1:
+            return None
+        inner = subquery.select[0]
+        if isinstance(inner, ast.Alias):
+            alias = inner.alias
+        else:
+            alias = "session_id_value"
+            subquery.select[0] = ast.Alias(alias=alias, expr=inner)
+
+        if left.chain[-1] == "session_id_v7":
+            # Already UInt128 — no conversion needed.
+            id_expr: ast.Expr = ast.Field(chain=[alias])
+        else:
+            # String session ids: accurateCastOrNull keeps malformed values from
+            # aborting the query (they become NULL and drop out of the set, which
+            # matches the join path leaving them unmatched). The toString
+            # round-trip keeps only canonical (lowercase) UUID strings: the
+            # un-rewritten predicate is a byte-exact string comparison against
+            # sessions.session_id (always canonical), so a non-canonical form
+            # like an uppercased UUID must not match here either.
+            # Two separate cast nodes on purpose — sharing one AST node between
+            # parents breaks cloning/resolution assumptions.
+            cast_for_check = ast.Call(
+                name="accurateCastOrNull", args=[ast.Field(chain=[alias]), ast.Constant(value="UUID")]
+            )
+            cast_for_value = ast.Call(
+                name="accurateCastOrNull", args=[ast.Field(chain=[alias]), ast.Constant(value="UUID")]
+            )
+            id_expr = ast.Call(
+                name="_toUInt128",
+                args=[
+                    ast.Call(
+                        name="if",
+                        args=[
+                            ast.CompareOperation(
+                                op=ast.CompareOperationOp.Eq,
+                                left=ast.Call(name="toString", args=[cast_for_check]),
+                                right=ast.Field(chain=[alias]),
+                            ),
+                            cast_for_value,
+                            ast.Constant(value=None),
+                        ],
+                    )
+                ],
+            )
+
+        wrapped = ast.SelectQuery(
+            select=[id_expr],
+            select_from=ast.JoinExpr(table=subquery),
+        )
+        # Neutralize the original outer predicate in place: keeping it would make
+        # Datastore execute the identical GLOBAL IN id-subquery twice (once pushed
+        # down, once post-aggregation) — measured as an extra full filtered-events
+        # scan per query. The pushed copy below subsumes it exactly.
+        term.op = ast.CompareOperationOp.Eq
+        term.left = ast.Constant(value=1)
+        term.right = ast.Constant(value=1)
+
+        return ast.CompareOperation(
+            op=ast.CompareOperationOp.GlobalIn,
+            left=ast.Field(chain=["raw_sessions", "session_id_v7"]),
+            right=wrapped,
+        )
+    return None
+
+
 class SessionsTableV2(LazyTable):
+    description: str = (
+        "Aggregated user sessions (one row per session), with entry/exit URLs, attribution, and duration. "
+        "Join from events via `events.$session_id = sessions.session_id`."
+    )
     fields: dict[str, FieldOrTable] = LAZY_SESSIONS_FIELDS
 
     def lazy_select(
@@ -445,7 +619,8 @@ class SessionsTableV2(LazyTable):
         context,
         node: ast.SelectQuery,
     ):
-        return select_from_sessions_table_v2(table_to_add.fields_accessed, node, context)
+        extra_where = build_direct_session_id_in_pushdown(node, context, self)
+        return select_from_sessions_table_v2(table_to_add.fields_accessed, node, context, extra_where=extra_where)
 
     def to_printed_datastore(self, context):
         return "sessions"
@@ -479,7 +654,40 @@ def join_events_table_to_sessions_table_v2(
     if not join_to_add.fields_accessed:
         raise ResolutionError("No fields requested from events")
 
-    join_expr = ast.JoinExpr(table=select_from_sessions_table_v2(join_to_add.fields_accessed, node, context))
+    extra_where: Optional[ast.Expr] = None
+    # Only push down in UUID join mode — the `$session_id` string mode would require wrapping
+    # the IN-subquery output in `_toUInt128(toUUID(...))` and isn't needed for the common path.
+    if context.modifiers.sessionsV2JoinMode == SessionsV2JoinMode.UUID:
+        # literal id sets push down ungated: no extra events scan, prune-only
+        extra_where = build_session_id_literal_pushdown_predicate(
+            node,
+            join_to_add,
+            session_id_v7_field=ast.Field(chain=["raw_sessions", "session_id_v7"]),
+        )
+        if extra_where is None and context.modifiers.sessionIdPushdown:
+            extra_where = build_session_id_v7_pushdown_predicate(
+                node,
+                join_to_add,
+                context,
+                session_id_v7_field=ast.Field(chain=["raw_sessions", "session_id_v7"]),
+                events_session_id_field=["$session_id_uuid"],
+            )
+
+    if context.modifiers.sessionPropertyPreAggregation:
+        pre_agg_where = build_session_property_pre_aggregation_predicate(
+            node,
+            join_to_add,
+            context,
+            requested_fields=join_to_add.fields_accessed,
+            select_from_fn=select_from_sessions_table_v2,
+            session_id_v7_field=ast.Field(chain=["raw_sessions", "session_id_v7"]),
+        )
+        if pre_agg_where is not None:
+            extra_where = ast.And(exprs=[extra_where, pre_agg_where]) if extra_where is not None else pre_agg_where
+
+    join_expr = ast.JoinExpr(
+        table=select_from_sessions_table_v2(join_to_add.fields_accessed, node, context, extra_where=extra_where)
+    )
     join_expr.join_type = "LEFT JOIN"
     join_expr.alias = join_to_add.to_table
     if context.modifiers.sessionsV2JoinMode == SessionsV2JoinMode.UUID:
@@ -524,6 +732,9 @@ def get_lazy_session_table_properties_v2(search: Optional[str]):
         "$exit_pathname",
     }
 
+    # lazy import keeps the event-definitions ORM off this module's import path
+    from products.event_definitions.backend.models.property_definition import PropertyType  # noqa: PLC0415
+
     # some fields should have a specific property type which isn't derivable from the type of database field
     property_type_overrides = {
         "$session_duration": PropertyType.Duration,
@@ -565,7 +776,7 @@ def get_lazy_session_table_properties_v2(search: Optional[str]):
     return results
 
 
-# NOTE: Keep the AD IDs in sync with `insights.insightsql_queries.web_analytics.session_attribution_explorer_query_runner.py`
+# NOTE: Keep the AD IDs in sync with `products.web_analytics.backend.insightsql_queries.session_attribution_explorer_query_runner.py`
 SESSION_PROPERTY_TO_RAW_SESSIONS_EXPR_MAP = {
     "$entry_referring_domain": "finalizeAggregation(initial_referring_domain)",
     "$entry_utm_source": "finalizeAggregation(initial_utm_source)",
@@ -598,6 +809,12 @@ SESSION_PROPERTY_TO_RAW_SESSIONS_EXPR_MAP = {
 
 
 def get_lazy_session_table_values_v2(key: str, search_term: Optional[str], team: "Team"):
+    # lazy import keeps the raw-sessions SQL module (Django ORM) off this module's import path
+    from insights.models.raw_sessions.sessions_v2 import (  # noqa: PLC0415
+        RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL,
+        RAW_SELECT_SESSION_PROP_STRING_VALUES_SQL_WITH_FILTER,
+    )
+
     # the sessions table does not have a properties json object like the events and person tables
 
     if key == "$channel_type":

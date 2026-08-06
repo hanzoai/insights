@@ -18,6 +18,7 @@ def translate_insightsql(
     dialect: Literal["insightsql", "datastore"] = "datastore",
     *,
     events_table_alias: Optional[str] = None,
+    events_table_use_new_schema: Optional[bool] = None,
     placeholders: Optional[dict[str, ast.Expr]] = None,
 ) -> str:
     """Translate a InsightsQL expression into a Datastore expression."""
@@ -27,8 +28,11 @@ def translate_insightsql(
     # TRICKY: As `translate_insightsql` is only used in legacy queries (not the all-InsightsQL ones), we must guard against
     # the PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_JOINED being used here, as that is not supported in legacy
     actual_poe_mode = context.modifiers.personsOnEventsMode
+    actual_use_new_events_schema = context.use_new_events_schema
     try:
         context.modifiers.personsOnEventsMode = alias_poe_mode_for_legacy(actual_poe_mode)
+        if events_table_use_new_schema is not None:
+            context.use_new_events_schema = events_table_use_new_schema
         # Create a fake query that selects from "events" to have fields to select from.
         if context.database is None:
             if context.team_id is None:
@@ -59,3 +63,4 @@ def translate_insightsql(
         raise
     finally:
         context.modifiers.personsOnEventsMode = actual_poe_mode  # Restore the original value
+        context.use_new_events_schema = actual_use_new_events_schema

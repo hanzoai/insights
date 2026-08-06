@@ -1,4 +1,4 @@
-import { Insights } from '~/lib/insights-browser'
+import { Insights } from 'insights-js'
 import { useEffect, useRef } from 'react'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'

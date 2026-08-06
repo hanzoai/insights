@@ -1,12 +1,11 @@
-// @ts-nocheck
-import { filterFunctionInstrumented } from '~/cdp/utils/insights-function-filtering'
-import { InsightsFlowAction } from '~/schema/insightsflow'
+import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { filterFunctionInstrumented } from '~/cdp/utils/script-function-filtering'
 
-import { findContinueAction } from '../insightsflow-utils'
+import { findContinueAction } from '../hogflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 // NOTE: This is not an actively used action as the triggering is done by the scheduler
-// but useful for testing the customflow executor
+// but useful for testing the hogflow executor
 export class TriggerHandler implements ActionHandler {
     async execute({
         invocation,
@@ -17,7 +16,7 @@ export class TriggerHandler implements ActionHandler {
         }
 
         const filterResults = await filterFunctionInstrumented({
-            fn: invocation.insightsFlow,
+            fn: invocation.hogFlow,
             filters: action.config.filters,
             filterGlobals: invocation.filterGlobals,
         })

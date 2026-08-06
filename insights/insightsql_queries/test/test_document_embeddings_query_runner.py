@@ -13,7 +13,7 @@ from insights.schema import (
     DocumentSimilarityQueryResponse,
     EmbeddedDocument,
     OrderBy,
-    OrderDirection,
+    OrderDirection1,
 )
 
 from insights.datastore.client import sync_execute
@@ -28,7 +28,7 @@ def build_document_similarity_query(
     renderings: list[str] | None = None,
     distance_func: DistanceFunc = DistanceFunc.COSINE_DISTANCE,
     order_by: OrderBy = OrderBy.DISTANCE,
-    order_direction: OrderDirection = OrderDirection.ASC,
+    order_direction: OrderDirection1 = OrderDirection1.ASC,
     limit: int | None = None,
     offset: int | None = None,
 ) -> DocumentSimilarityQuery:
@@ -53,7 +53,8 @@ def build_document_similarity_query(
 
 
 class TestDocumentEmbeddingsQueryRunner(DatastoreTestMixin, APIBaseTest):
-    base_timestamp = datetime(2024, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC"))
+    # Must track real now(): the tables carry a 3-month real-clock TTL on timestamp, so a fixed past date seeds already-expired rows.
+    base_timestamp = datetime.now(tz=ZoneInfo("UTC")) - timedelta(hours=1)
     product_documents = (
         ("product_a", "document_a", "doc_product_a"),
         ("product_b", "document_b", "doc_product_b"),
@@ -248,7 +249,7 @@ class TestDocumentEmbeddingsQueryRunner(DatastoreTestMixin, APIBaseTest):
         query = build_document_similarity_query(
             origin=origin_document,
             model=origin_row.model_name,
-            order_direction=OrderDirection.DESC,
+            order_direction=OrderDirection1.DESC,
         )
 
         response = DocumentEmbeddingsQueryRunner(team=self.team, query=query).calculate()

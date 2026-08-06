@@ -3,8 +3,8 @@
 set -eu
 
 EXPECT_HOSTS=(
-  "clickhouse"
-  "clickhouse-coordinator"
+  "datastore"
+  "datastore-coordinator"
   "kafka"
 )
 

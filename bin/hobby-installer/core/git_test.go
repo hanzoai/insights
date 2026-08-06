@@ -98,7 +98,7 @@ func TestUpdateInsights(t *testing.T) {
 		defer cleanupDir()
 
 		mock := newMockRunner()
-		mock.on("insights:git branch --show-current", "main\n", nil)
+		mock.on("insights:git branch --show-current", "master\n", nil)
 		cleanupMock := setupMock(t, mock)
 		defer cleanupMock()
 
@@ -154,7 +154,7 @@ func TestUpdateInsights(t *testing.T) {
 		defer cleanupDir()
 
 		mock := newMockRunner()
-		mock.on("insights:git branch --show-current", "main\n", nil)
+		mock.on("insights:git branch --show-current", "master\n", nil)
 		mock.on("insights:git pull", "", fmt.Errorf("merge conflict"))
 		cleanupMock := setupMock(t, mock)
 		defer cleanupMock()
@@ -177,7 +177,7 @@ func TestUpdateInsights(t *testing.T) {
 		defer func() { _ = os.Chdir(origDir) }()
 
 		mock := newMockRunner()
-		mock.on(":git clone --filter=blob:none https://github.com/hanzoai/insights.git", "", fmt.Errorf("clone failed"))
+		mock.on(":git clone --filter=blob:none https://github.com/Insights/insights.git", "", fmt.Errorf("clone failed"))
 		cleanupMock := setupMock(t, mock)
 		defer cleanupMock()
 
@@ -185,7 +185,7 @@ func TestUpdateInsights(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected clone error")
 		}
-		mock.assertCalled(t, ":git clone --filter=blob:none https://github.com/hanzoai/insights.git")
+		mock.assertCalled(t, ":git clone --filter=blob:none https://github.com/Insights/insights.git")
 		mock.assertNotCalled(t, "insights:git fetch --prune")
 	})
 }
@@ -212,7 +212,7 @@ func TestCheckoutVersion(t *testing.T) {
 		defer cleanupDir()
 
 		mock := newMockRunner()
-		mock.on("insights:git branch --show-current", "main\n", nil)
+		mock.on("insights:git branch --show-current", "master\n", nil)
 		cleanupMock := setupMock(t, mock)
 		defer cleanupMock()
 
@@ -221,7 +221,7 @@ func TestCheckoutVersion(t *testing.T) {
 			t.Fatalf("expected no error, got: %v", err)
 		}
 		mock.assertCalled(t, "insights:git fetch origin")
-		mock.assertCalled(t, "insights:git reset --hard origin/main")
+		mock.assertCalled(t, "insights:git reset --hard origin/master")
 	})
 
 	t.Run("latest-release checks out described tag", func(t *testing.T) {

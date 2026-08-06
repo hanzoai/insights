@@ -1,13 +1,13 @@
-import equal from 'fast-deep-equal'
+import { deepEqual as equal } from 'fast-equals'
 
 import { ApiError } from 'lib/api'
-import { getEventNamesForAction } from 'lib/utils'
+import { getEventNamesForAction } from 'lib/utils/events'
 
 import { examples } from '~/queries/examples'
 import {
     DataTableNode,
     DataVisualizationNode,
-    ScriptQuery,
+    HogQuery,
     InsightQueryNode,
     InsightVizNode,
     Node,
@@ -90,7 +90,16 @@ type ReturnInsightModel<T> = T extends InsightModel
 /** Get an insight with `query` only. Eventual `filters` will be converted.  */
 export function getQueryBasedInsightModel<T extends InputInsightModel>(insight: T): ReturnInsightModel<T> {
     const { filters, ...baseInsight } = insight
-    return { ...baseInsight, query: getQueryFromInsightLike(insight) } as unknown as ReturnInsightModel<T>
+    // The API is phasing out the deprecated `dashboards` field (already omitted for token
+    // callers, eventually for all); derive it from `dashboard_tiles` so remaining readers
+    // keep working regardless of whether the response still carries it.
+    const dashboards =
+        insight.dashboards ?? insight.dashboard_tiles?.filter((tile) => !tile.deleted).map((tile) => tile.dashboard_id)
+    return {
+        ...baseInsight,
+        ...(dashboards ? { dashboards } : {}),
+        query: getQueryFromInsightLike(insight),
+    } as unknown as ReturnInsightModel<T>
 }
 
 /** Get a `query` from an object that potentially has `filters` instead of a `query`.  */
@@ -102,18 +111,16 @@ export function getQueryFromInsightLike(insight: {
     if (insight.query) {
         query = insight.query
     } else if (insight.filters && Object.keys(insight.filters).filter((k) => k != 'filter_test_accounts').length > 0) {
-        query = { kind: NodeKind.InsightVizNode, source: filtersToQueryNode(insight.filters) } as InsightVizNode
+        query = {
+            kind: NodeKind.InsightVizNode,
+            source: filtersToQueryNode(insight.filters, { source: 'insight_viz_get_query_from_insight_like' }),
+        } as InsightVizNode
     } else {
         query = null
     }
 
     return query
 }
-
-export const queryFromFilters = (filters: Partial<FilterType>): InsightVizNode => ({
-    kind: NodeKind.InsightVizNode,
-    source: filtersToQueryNode(filters),
-})
 
 export const queryFromKind = (
     kind: ProductAnalyticsInsightNodeKind,
@@ -130,20 +137,20 @@ export const queryFromKind = (
 export const getDefaultQuery = (
     insightType: InsightType,
     filterTestAccountsDefault: boolean
-): DataTableNode | DataVisualizationNode | ScriptQuery | InsightVizNode => {
+): DataTableNode | DataVisualizationNode | HogQuery | InsightVizNode => {
     // Web Analytics insights should always come from Web Analytics tiles with a pre-configured query
     // This is a fallback that should rarely be used
     if (insightType === InsightType.WEB_ANALYTICS) {
         throw new Error('Web Analytics insights must be created from Web Analytics tiles')
     }
 
-    if ([InsightType.SQL, InsightType.JSON, InsightType.SCRIPT].includes(insightType)) {
+    if ([InsightType.SQL, InsightType.JSON, InsightType.HOG].includes(insightType)) {
         if (insightType === InsightType.JSON) {
             return examples.TotalEventsTable as DataTableNode
         } else if (insightType === InsightType.SQL) {
             return examples.DataVisualization as DataVisualizationNode
-        } else if (insightType === InsightType.SCRIPT) {
-            return examples.FibonacciScript as ScriptQuery
+        } else if (insightType === InsightType.HOG) {
+            return examples.Hoggonacci as HogQuery
         }
     }
 
@@ -166,7 +173,7 @@ export const getDefaultQuery = (
 
 /** Get a dashboard where eventual `filters` based tiles are converted to `query` based ones. */
 export const getQueryBasedDashboard = (
-    dashboard: DashboardType<InsightModel> | null
+    dashboard: DashboardType<InsightModel> | DashboardType<QueryBasedInsightModel> | null
 ): DashboardType<QueryBasedInsightModel> | null => {
     if (dashboard == null) {
         return null
@@ -184,18 +191,34 @@ export const getQueryBasedDashboard = (
     }
 }
 
+// Statuses whose responses carry an actionable validation message: 400 (bad query), 512 (query
+// estimated too expensive to run), 513 (out of memory)
+const VALIDATION_ERROR_STATUSES = new Set([400, 512, 513])
+
+const hasValidationErrorStatus = (error: Error | Record<string, any> | null | undefined): boolean =>
+    VALIDATION_ERROR_STATUSES.has((error as Record<string, any> | null | undefined)?.status)
+
 export const extractValidationError = (error: Error | Record<string, any> | null | undefined): string | null => {
-    if (error instanceof ApiError || (error && typeof error === 'object' && 'status' in error)) {
-        // We use 512 for query timeouts
+    if (hasValidationErrorStatus(error)) {
         // Async queries put the error message on data.error_message, while synchronous ones use detail
-        return error?.status === 400 || error?.status === 512
-            ? (error.detail || error.data?.error_message)?.replace('Try ', 'Try\u00A0') // Add unbreakable space for better line breaking
-            : null
+        const anyError = error as Record<string, any>
+        // Add unbreakable space for better line breaking
+        return (anyError.detail || anyError.data?.error_message)?.replace('Try ', 'Try\u00A0') ?? null
     }
 
     return null
 }
 
+export const extractValidationErrorCode = (error: Error | Record<string, any> | null | undefined): string | null => {
+    if (hasValidationErrorStatus(error)) {
+        const anyError = error as Record<string, any>
+        return anyError.code ?? anyError.data?.code ?? null
+    }
+
+    return null
+}
+
+// 512 only (query estimated too expensive) — OOM is 513, so this can't misfire on a memory error.
 export const isTimeoutError = (error: Error | Record<string, any> | null | undefined): boolean => {
     if (error instanceof ApiError || (error && typeof error === 'object' && 'status' in error)) {
         return error?.status === 512

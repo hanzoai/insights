@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useState } from 'react'
 import { TextMorph } from 'torph/react'
 
@@ -8,8 +8,8 @@ import { Button } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
-import { Tooltip } from 'lib/elements/Tooltip'
 import { IconLink } from 'lib/elements/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 interface TemplateLinkSectionProps {

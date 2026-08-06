@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { ProcessedPluginEvent, RetryError } from '@hanzo/plugin-scaffold'
+import { ProcessedPluginEvent, RetryError } from '~/plugin-scaffold'
 
 import { LegacyDestinationPluginMeta } from '../../types'
 
@@ -58,7 +57,7 @@ export const onEvent = async (
         return
     }
 
-    const { team_id, person: _, ...sendableEvent } = { ...event, token: config.project_api_key }
+    const { team_id, ...sendableEvent } = { ...event, token: config.project_api_key }
 
     if (config.disable_geoip === 'Yes') {
         sendableEvent.properties.$geoip_disable = true
@@ -92,7 +91,7 @@ export const onEvent = async (
                     throw new RetryError(`Server error: ${res.status}`)
                 } else {
                     // node-fetch handles 300s internaly, so we're left with 400s here: skip the batch and move forward
-                    // We might have old events in datastore that don't pass new stricter checks, don't fail the whole export if that happens
+                    // We might have old events in Datastore that don't pass new stricter checks, don't fail the whole export if that happens
                     logger.warn(`Skipping ${batchDescription}, rejected by ${config.host}: ${res.status}`)
                 }
             },

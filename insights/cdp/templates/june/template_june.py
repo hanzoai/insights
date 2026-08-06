@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to June.so ",
     icon_url="/static/services/june.png",
     category=["Analytics"],
-    code_language="fn",
+    code_language="script",
     code="""
 let type := 'track'
 

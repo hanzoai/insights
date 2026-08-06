@@ -14,8 +14,9 @@ import { TZLabel } from 'lib/components/TZLabel'
 import { PaginationControl, usePagination } from 'lib/elements/PaginationControl'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 
+import { editorSceneLogic } from './editorSceneLogic'
+import { InsightHistory } from './InsightHistory'
 import { queryHistoryLogic } from './queryHistoryLogic'
-import { sqlEditorLogic } from './sqlEditorLogic'
 
 function QueryHistoryLogRow({ logItem }: { logItem: HumanizedActivityLogItem }): JSX.Element {
     const [isExpanded, setIsExpanded] = useState(false)
@@ -88,7 +89,7 @@ function QueryDiffViewer({ before, after }: QueryDiffViewerProps): JSX.Element {
                 key="diff-viewer"
                 original={before?.query ?? ''}
                 modified={after?.query ?? ''}
-                language="insightsQL"
+                language="hogQL"
                 width={width}
                 options={{
                     renderOverviewRuler: false,
@@ -138,15 +139,23 @@ function QueryHistoryLog({ id }: { id?: number | string }): JSX.Element {
 }
 
 export function QueryHistoryModal(): JSX.Element {
-    const { isHistoryModalOpen } = useValues(sqlEditorLogic)
-    const { closeHistoryModal } = useActions(sqlEditorLogic)
-    const { editingView } = useValues(sqlEditorLogic)
+    const { editingView, editingInsight, insightLoading, isHistoryModalOpen } = useValues(editorSceneLogic)
+    const { closeHistoryModal } = useActions(editorSceneLogic)
 
     return (
-        <Modal title="View history" isOpen={isHistoryModalOpen} onClose={closeHistoryModal} width={800}>
-            <div className="ActivityLog">
-                <QueryHistoryLog id={editingView?.id} />
-            </div>
+        <Modal
+            title={editingView ? 'View history' : 'Insight history'}
+            isOpen={isHistoryModalOpen}
+            onClose={closeHistoryModal}
+            width={800}
+        >
+            {editingView ? (
+                <div className="ActivityLog">
+                    <QueryHistoryLog id={editingView.id} />
+                </div>
+            ) : editingInsight || insightLoading ? (
+                <InsightHistory insight={editingInsight ?? null} />
+            ) : null}
         </Modal>
     )
 }

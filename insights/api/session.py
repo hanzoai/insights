@@ -14,8 +14,13 @@ from insights.insightsql.database.schema.sessions_v2 import (
     get_lazy_session_table_properties_v2,
     get_lazy_session_table_values_v2,
 )
+from insights.insightsql.database.schema.sessions_v3 import (
+    get_lazy_session_table_properties_v3,
+    get_lazy_session_table_values_v3,
+)
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 
+from insights.api.property_value_metrics import PROPERTY_VALUES_DURATION
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import action
 from insights.rate_limit import DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle
@@ -34,7 +39,10 @@ class SessionViewSet(
 
     @action(methods=["GET"], detail=False)
     def values(self, request: request.Request, **kwargs) -> response.Response:
-        with tracer.start_as_current_span("session_api_property_values") as span:
+        with (
+            PROPERTY_VALUES_DURATION.labels(endpoint_type="session").time(),
+            tracer.start_as_current_span("session_api_property_values") as span,
+        ):
             team = self.team
 
             key = request.GET.get("key")
@@ -48,10 +56,12 @@ class SessionViewSet(
             span.set_attribute("has_search_term", search_term is not None)
 
             modifiers = create_default_modifiers_for_team(team)
-            if (
-                modifiers.sessionTableVersion == SessionTableVersion.V2
-                or modifiers.sessionTableVersion == SessionTableVersion.AUTO
-            ):
+            version = modifiers.sessionTableVersion
+
+            if version == SessionTableVersion.V3:
+                span.set_attribute("session_table_version", "v3")
+                result = get_lazy_session_table_values_v3(key, search_term=search_term, team=team)
+            elif version == SessionTableVersion.V2 or version == SessionTableVersion.AUTO:
                 span.set_attribute("session_table_version", "v2")
                 result = get_lazy_session_table_values_v2(key, search_term=search_term, team=team)
             else:
@@ -67,22 +77,34 @@ class SessionViewSet(
                     flattened.append(json.loads(value[0]))
                 except json.decoder.JSONDecodeError:
                     flattened.append(value[0])
-            return response.Response([{"name": convert_property_value(value)} for value in flatten(flattened)])
+
+            return response.Response(
+                {
+                    "results": [{"name": convert_property_value(value)} for value in flatten(flattened)],
+                    "refreshing": False,
+                }
+            )
 
     @action(methods=["GET"], detail=False)
     def property_definitions(self, request: request.Request, **kwargs) -> response.Response:
         search = request.GET.get("search")
+        is_numerical = request.GET.get("is_numerical")
 
         # unlike e.g. event properties, there's a very limited number of session properties,
         # so we can just return them all
         modifiers = create_default_modifiers_for_team(self.team)
-        if (
-            modifiers.sessionTableVersion == SessionTableVersion.V2
-            or modifiers.sessionTableVersion == SessionTableVersion.AUTO
-        ):
+        version = modifiers.sessionTableVersion
+        if version == SessionTableVersion.V3:
+            results = get_lazy_session_table_properties_v3(search)
+        elif version == SessionTableVersion.V2 or version == SessionTableVersion.AUTO:
             results = get_lazy_session_table_properties_v2(search)
         else:
             results = get_lazy_session_table_properties_v1(search)
+
+        if is_numerical is not None:
+            want_numerical = is_numerical.lower() == "true"
+            results = [r for r in results if r.get("is_numerical") == want_numerical]
+
         return response.Response(
             {
                 "count": len(results),

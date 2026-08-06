@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getLaravelSteps as getLaravelStepsPA } from '../product-analytics/laravel'
 import { StepDefinition } from '../steps'
@@ -8,9 +8,7 @@ export const getLaravelSteps = (ctx: OnboardingComponentsContext): StepDefinitio
     const ExperimentImplementation = snippets?.ExperimentImplementationSnippet
 
     // Get installation steps from product-analytics only
-    const installationSteps = getLaravelStepsPA(ctx).filter(
-        (step: StepDefinition) => step.title !== 'Send events'
-    )
+    const installationSteps = getLaravelStepsPA(ctx).filter((step: StepDefinition) => step.title !== 'Send events')
 
     // Add experiments-specific steps
     const experimentSteps: StepDefinition[] = [

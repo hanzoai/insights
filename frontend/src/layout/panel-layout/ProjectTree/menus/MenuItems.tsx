@@ -1,7 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconChevronRight } from '@hanzo/icons'
+import {
+    IconArrowRight,
+    IconChevronRight,
+    IconEye,
+    IconPencil,
+    IconShortcut,
+    IconStar,
+    IconTrash,
+} from '@hanzo/icons'
 
 import { linkToLogic } from 'lib/components/FileSystem/LinkTo/linkToLogic'
 import { moveToLogic } from 'lib/components/FileSystem/MoveTo/moveToLogic'
@@ -23,15 +31,15 @@ import {
     DropdownMenuSubContent,
     DropdownMenuSubTrigger,
 } from 'lib/ui/DropdownMenu/DropdownMenu'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 import { openDeleteGroupTypeDialog } from 'scenes/settings/environment/GroupAnalyticsConfig'
 import { groupAnalyticsConfigLogic } from 'scenes/settings/environment/groupAnalyticsConfigLogic'
 
 import { FileSystemEntry } from '~/queries/schema/schema-general'
 
-import { editCustomProductsModalLogic } from '../../PinnedFolder/editCustomProductsModalLogic'
 import { NewMenu } from '../../menus/NewMenu'
 import { panelLayoutLogic } from '../../panelLayoutLogic'
+import { customProductsLogic } from '../customProductsLogic'
 import { projectTreeDataLogic } from '../projectTreeDataLogic'
 import { projectTreeLogic } from '../projectTreeLogic'
 import { joinPath, splitPath } from '../utils'
@@ -64,7 +72,7 @@ export function MenuItems({
     const { deleteShortcut, addShortcutItem } = useActions(projectTreeDataLogic)
     const { groupTypes } = useValues(groupAnalyticsConfigLogic)
     const { deleteGroupType } = useActions(groupAnalyticsConfigLogic)
-    const { selectedPaths: customProductsSelectedPaths } = useValues(editCustomProductsModalLogic)
+    const { enabledToolPaths: customProductsSelectedPaths } = useValues(customProductsLogic)
 
     const projectTreeLogicProps = { key: logicKey ?? uniqueKey, root }
     const { checkedItems, checkedItemCountNumeric, checkedItemsArray } = useValues(
@@ -83,7 +91,7 @@ export function MenuItems({
     } = useActions(projectTreeLogic(projectTreeLogicProps))
     const { openMoveToModal } = useActions(moveToLogic)
     const { openLinkToModal } = useActions(linkToLogic)
-    const { toggleProduct } = useActions(editCustomProductsModalLogic)
+    const { setToolEnabled } = useActions(customProductsLogic)
 
     const { resetPanelLayout } = useActions(panelLayoutLogic)
 
@@ -201,7 +209,7 @@ export function MenuItems({
                         data-attr="tree-item-menu-create-shortcut-button"
                     >
                         <ButtonPrimitive menuItem>
-                            Create {pluralize(checkedItemCountNumeric, 'shortcut')} here
+                            Star {pluralize(checkedItemCountNumeric, 'selected item')} here
                         </ButtonPrimitive>
                     </MenuItem>
                     <MenuSeparator />
@@ -243,12 +251,14 @@ export function MenuItems({
                         }}
                         data-attr="tree-item-menu-remove-from-shortcuts-button"
                     >
-                        <ButtonPrimitive menuItem>Remove from shortcuts</ButtonPrimitive>
+                        <ButtonPrimitive menuItem variant="danger" forceVariant>
+                            <IconStar className="size-4 text-inherit" /> Remove from starred
+                        </ButtonPrimitive>
                     </MenuItem>
                 ) : isItemAlreadyInShortcut ? (
                     <MenuItem asChild disabled={true} data-attr="tree-item-menu-add-to-shortcuts-disabled-button">
                         <ButtonPrimitive menuItem disabled={true}>
-                            Already in shortcuts panel
+                            <IconStar className="size-4 text-tertiary" /> Already starred
                         </ButtonPrimitive>
                     </MenuItem>
                 ) : root !== 'custom-products://' ? (
@@ -262,7 +272,9 @@ export function MenuItems({
                         }}
                         data-attr="tree-item-menu-add-to-shortcuts-button"
                     >
-                        <ButtonPrimitive menuItem>Add to shortcuts panel</ButtonPrimitive>
+                        <ButtonPrimitive menuItem>
+                            <IconStar className="size-4 text-tertiary" /> Add to starred
+                        </ButtonPrimitive>
                     </MenuItem>
                 ) : null
             ) : null}
@@ -272,7 +284,7 @@ export function MenuItems({
                     asChild
                     onClick={(e) => {
                         e.stopPropagation()
-                        toggleProduct(item.record?.path as string)
+                        setToolEnabled(item.record!.path as string, false)
                     }}
                 >
                     <ButtonPrimitive menuItem>Remove from sidebar panel</ButtonPrimitive>
@@ -284,7 +296,7 @@ export function MenuItems({
                     asChild
                     onClick={(e) => {
                         e.stopPropagation()
-                        toggleProduct(item.record?.path as string)
+                        setToolEnabled(item.record!.path as string, true)
                     }}
                 >
                     <ButtonPrimitive menuItem>Add to sidebar panel</ButtonPrimitive>
@@ -306,7 +318,9 @@ export function MenuItems({
                         }
                     }}
                 >
-                    <ButtonPrimitive menuItem>Move to...</ButtonPrimitive>
+                    <ButtonPrimitive menuItem>
+                        <IconArrowRight className="size-4 text-tertiary" /> Move to...
+                    </ButtonPrimitive>
                 </MenuItem>
             ) : null}
 
@@ -325,7 +339,10 @@ export function MenuItems({
                         }
                     }}
                 >
-                    <ButtonPrimitive menuItem>Create shortcut in...</ButtonPrimitive>
+                    <ButtonPrimitive menuItem>
+                        <IconShortcut className="size-4 text-tertiary" />
+                        Create shortcut in...
+                    </ButtonPrimitive>
                 </MenuItem>
             ) : null}
 
@@ -340,7 +357,9 @@ export function MenuItems({
                     }}
                     data-attr="tree-item-menu-rename-button"
                 >
-                    <ButtonPrimitive menuItem>Rename</ButtonPrimitive>
+                    <ButtonPrimitive menuItem>
+                        <IconPencil className="size-4 text-tertiary" /> Rename
+                    </ButtonPrimitive>
                 </MenuItem>
             ) : null}
 
@@ -353,7 +372,9 @@ export function MenuItems({
                     }}
                     data-attr="tree-item-menu-show-original-button"
                 >
-                    <ButtonPrimitive menuItem>Show original</ButtonPrimitive>
+                    <ButtonPrimitive menuItem>
+                        <IconEye className="size-4 text-tertiary" /> Show original
+                    </ButtonPrimitive>
                 </MenuItem>
             ) : null}
 
@@ -370,7 +391,9 @@ export function MenuItems({
                     }}
                     data-attr="tree-item-menu-delete-shortcut-button"
                 >
-                    <ButtonPrimitive menuItem>Delete shortcut</ButtonPrimitive>
+                    <ButtonPrimitive variant="danger" forceVariant menuItem>
+                        <IconTrash className="size-4 text-inherit" /> Delete shortcut
+                    </ButtonPrimitive>
                 </MenuItem>
             ) : item.record?.path &&
               item.record?.type === 'folder' &&
@@ -387,7 +410,9 @@ export function MenuItems({
                     }}
                     data-attr="tree-item-menu-delete-folder-button"
                 >
-                    <ButtonPrimitive menuItem>Delete folder</ButtonPrimitive>
+                    <ButtonPrimitive menuItem variant="danger" forceVariant>
+                        <IconTrash className="size-4 text-inherit" /> Delete folder
+                    </ButtonPrimitive>
                 </MenuItem>
             ) : item.record?.path && (item.id.startsWith('project/') || item.id.startsWith('project://')) ? (
                 <MenuItem
@@ -402,7 +427,9 @@ export function MenuItems({
                     }}
                     data-attr="tree-item-menu-delete-item-button"
                 >
-                    <ButtonPrimitive menuItem>Delete</ButtonPrimitive>
+                    <ButtonPrimitive menuItem variant="danger" forceVariant>
+                        <IconTrash className="size-4 text-inherit" /> Delete
+                    </ButtonPrimitive>
                 </MenuItem>
             ) : root === 'persons://' && item.record?.category === 'Groups' && item.record?.href ? (
                 <MenuItem

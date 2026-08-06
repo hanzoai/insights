@@ -12,12 +12,13 @@ import { IconCheck, IconPencil, IconX } from '@hanzo/icons'
 import { Checkbox, Tooltip } from '@hanzo/elements'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
+import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
+import { SortableDragIcon } from 'lib/elements/icons'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Snack } from 'lib/elements/Snack/Snack'
-import { SortableDragIcon } from 'lib/elements/icons'
-import { range } from 'lib/utils'
-
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
+import { range } from 'lib/utils/arrays'
+import { createFuse } from 'lib/utils/fuseSearch'
 
 import { Button, ButtonPropsBase, SideAction } from '../Button'
 import { Dropdown } from '../Dropdown'
@@ -120,6 +121,7 @@ export interface InputSelectOption<T = string> {
     key: string
     label: string
     labelComponent?: React.ReactNode
+    /** Shown when hovering the dropdown option row and any snack rendered for the selected value. */
     tooltip?: TooltipTitle
     /** @internal */
     __isInput?: boolean
@@ -134,7 +136,7 @@ export type InputSelectAction = SideAction & Pick<ButtonPropsBase, 'children'>
 export type InputSelectProps<T = string> = Pick<
     // NOTE: We explicitly pick rather than omit to ensure these components aren't used incorrectly
     InputProps,
-    'autoFocus' | 'autoWidth' | 'fullWidth' | 'status'
+    'autoFocus' | 'autoWidth' | 'disabledReason' | 'fullWidth' | 'status'
 > & {
     options?: InputSelectOption<T>[]
     value?: T[] | null
@@ -142,7 +144,7 @@ export type InputSelectProps<T = string> = Pick<
     disabled?: boolean
     loading?: boolean
     placeholder?: string
-    title?: string // Title shown at the top of the list. Looks the same as section titles in Menu.
+    title?: React.ReactNode // Title shown at the top of the list. Looks the same as section titles in Menu.
     disableFiltering?: boolean
     disablePrompting?: boolean
     mode: 'multiple' | 'single'
@@ -188,7 +190,8 @@ export function InputSelect<T = string>({
     onFocus,
     onBlur,
     mode,
-    disabled,
+    disabled: disabledProp,
+    disabledReason,
     disableFiltering = false,
     formatCreateLabel,
     inputTransform,
@@ -212,12 +215,16 @@ export function InputSelect<T = string>({
     status = 'default',
     singleValueAsSnack = false,
 }: InputSelectProps<T>): JSX.Element {
+    // A disabledReason disables the whole control, not just the inner input - value
+    // snacks, clear buttons, and drag reordering must all be inert too
+    const disabled = disabledProp || !!disabledReason
     const [showPopover, setShowPopover] = useState(false)
     const [inputValue, _setInputValue] = useState('')
     const [itemBeingEditedIndex, setItemBeingEditedIndex] = useState<number | null>(null)
     const popoverFocusRef = useRef<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null)
     const [selectedIndex, setSelectedIndex] = useState(0)
+    const [frozenOptions, setFrozenOptions] = useState<InputSelectOption<T>[] | null>(null)
     const values = value ? value.slice() : []
     if (itemBeingEditedIndex !== null) {
         // If we're editing an item, we don't want it to be in the values list - it's ephemeral in that state
@@ -285,15 +292,23 @@ export function InputSelect<T = string>({
     )
 
     const fuseRef = useRef<Fuse<InputSelectOption<T>>>(
-        new Fuse(options, {
+        createFuse(options, {
             keys: ['label', 'key'],
         })
     )
 
     const separateOnComma = allowCustomValues && mode === 'multiple' && !disableCommaSplitting
 
-    // We stringify the objects to prevent wasteful recalculations (esp. Fuse). Note: labelComponent is not serializable
-    const optionsKey = JSON.stringify(options, (key, value) => (key === 'labelComponent' ? value?.name : value))
+    // We stringify the objects to prevent wasteful recalculations (esp. Fuse). Note: labelComponent and non-string tooltips are not serializable
+    const optionsKey = JSON.stringify(options, (key, value) => {
+        if (key === 'labelComponent') {
+            return value?.name
+        }
+        if (key === 'tooltip' && typeof value !== 'string') {
+            return value?.type?.name
+        }
+        return value
+    })
     const stringKeys = values.map(getStringKey)
     const valuesKey = JSON.stringify(stringKeys)
     const allOptionsMap: Map<string, InputSelectOption<T>> = useMemo(() => {
@@ -363,19 +378,29 @@ export function InputSelect<T = string>({
         stringKeys,
         getDisplayLabel,
         getStringKey,
-        values,
         disableFiltering,
         values.length,
         virtualized,
         optionMaps,
     ])
 
-    // Reset the selected index when the visible options change
+    const displayOptions = frozenOptions ?? visibleOptions
+
+    // Reset the selected index when the displayed options change
     useEffect(() => {
         setSelectedIndex(0)
-    }, [visibleOptions.map((option) => option.key).join(':::')])
+    }, [displayOptions.map((option) => option.key).join(':::')])
+
+    useEffect(() => {
+        if (!showPopover) {
+            setFrozenOptions(null)
+        }
+    }, [showPopover])
 
     const setInputValue = (newValue: string): void => {
+        if (newValue) {
+            setFrozenOptions(null)
+        }
         // Apply input transformation if provided
         if (inputTransform) {
             newValue = inputTransform(newValue)
@@ -426,13 +451,16 @@ export function InputSelect<T = string>({
     }
 
     const _addItem = (item: string, atIndex?: number | null, currentValues: T[] = values): void => {
-        setInputValue('')
-        // Convert string key back to typed value
         const actualTypedValue = getTypedValue(item)
         if (mode === 'single') {
+            setInputValue('')
             onChange?.([actualTypedValue])
             return
         }
+        if (mode === 'multiple' && inputValue) {
+            setFrozenOptions(visibleOptions.filter((o) => !o.__isInput))
+        }
+        setInputValue('')
         const newValues = currentValues.slice()
         if (!newValues.includes(actualTypedValue)) {
             if (atIndex != undefined) {
@@ -511,8 +539,11 @@ export function InputSelect<T = string>({
     }
 
     const _onFocus = (): void => {
-        // In single mode, when focusing with a selected value, enter edit mode right away
-        if (mode === 'single' && values.length > 0 && !inputValue) {
+        // In single mode with a free-text (custom) value, seed the input with the current value
+        // so the user can edit it. Don't do this for option-backed selects: there the key is an
+        // opaque id (e.g. a UUID), and seeding it makes the dropdown filter down to just the
+        // selected option, hiding every other choice. Leaving the input empty shows the full list.
+        if (mode === 'single' && values.length > 0 && !inputValue && allowCustomValues) {
             setInputValue(getStringKey(values[0]))
         }
         onFocus?.()
@@ -532,10 +563,10 @@ export function InputSelect<T = string>({
     const _onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
         if (e.key === 'Enter') {
             e.preventDefault()
-            const itemToAdd = visibleOptions[selectedIndex]?.key
+            const itemToAdd = displayOptions[selectedIndex]?.key
 
             if (itemToAdd) {
-                _onActionItem(visibleOptions[selectedIndex]?.key, null)
+                _onActionItem(displayOptions[selectedIndex]?.key, null)
             }
             e.currentTarget.blur()
         } else if (e.key === 'Backspace') {
@@ -555,7 +586,7 @@ export function InputSelect<T = string>({
             }
         } else if (e.key === 'ArrowDown') {
             e.preventDefault()
-            setSelectedIndex(Math.min(selectedIndex + 1, visibleOptions.length - 1))
+            setSelectedIndex(Math.min(selectedIndex + 1, displayOptions.length - 1))
         } else if (e.key === 'ArrowUp') {
             e.preventDefault()
             setSelectedIndex(Math.max(selectedIndex - 1, 0))
@@ -564,6 +595,9 @@ export function InputSelect<T = string>({
 
     const handleDragEnd = useCallback(
         (event: DragEndEvent): void => {
+            if (disabled) {
+                return
+            }
             const { active, over } = event
 
             if (over && active.id !== over.id) {
@@ -576,31 +610,35 @@ export function InputSelect<T = string>({
                 }
             }
         },
-        [values, getStringKey, onChange]
+        [getStringKey, onChange, disabled]
     )
 
     const valuesPrefix = useMemo(() => {
         // For single mode with a selected value and no active input, show the value as prefix since
         // showing the entered value as placeholder was unintuitive
         if (mode === 'single' && values.length > 0 && !inputValue) {
-            const label = allOptionsMap.get(getStringKey(values[0]))?.label ?? getDisplayLabel(values[0])
+            const selectedOption = allOptionsMap.get(getStringKey(values[0]))
+            const label = selectedOption?.label ?? getDisplayLabel(values[0])
             if (singleValueAsSnack) {
-                const canClear = allowCustomValues && !disableEditing
+                const canClear = allowCustomValues && !disableEditing && !disabled
+                const snack = (
+                    <Snack
+                        title={String(label)}
+                        onClose={
+                            canClear
+                                ? () => {
+                                      setInputValue('')
+                                      onChange?.([])
+                                  }
+                                : undefined
+                        }
+                    >
+                        {label}
+                    </Snack>
+                )
                 return (
                     <PopoverReferenceContext.Provider value={null}>
-                        <Snack
-                            title={String(label)}
-                            onClose={
-                                canClear
-                                    ? () => {
-                                          setInputValue('')
-                                          onChange?.([])
-                                      }
-                                    : undefined
-                            }
-                        >
-                            {label}
-                        </Snack>
+                        {selectedOption?.tooltip ? <Tooltip title={selectedOption.tooltip}>{snack}</Tooltip> : snack}
                     </PopoverReferenceContext.Provider>
                 )
             }
@@ -623,9 +661,11 @@ export function InputSelect<T = string>({
                 <ValueSnacks
                     values={preInputValues.map(getStringKey)}
                     options={options}
-                    onClose={(value) => _onActionItem(value, null)}
+                    onClose={disabled ? undefined : (value) => _onActionItem(value, null)}
                     onInitiateEdit={
-                        allowCustomValues && !disableEditing ? (value) => _onActionItem(value, null, true) : null
+                        allowCustomValues && !disableEditing && !disabled
+                            ? (value) => _onActionItem(value, null, true)
+                            : null
                     }
                     sortable={sortable}
                     onDragEnd={handleDragEnd}
@@ -645,7 +685,7 @@ export function InputSelect<T = string>({
         options,
         allowCustomValues,
         disableEditing,
-        _onActionItem,
+        disabled,
         sortable,
         handleDragEnd,
         singleValueAsSnack,
@@ -661,6 +701,7 @@ export function InputSelect<T = string>({
             mode !== 'multiple' &&
             allowCustomValues &&
             !disableEditing &&
+            !disabled &&
             values.length &&
             !inputValue
 
@@ -676,9 +717,11 @@ export function InputSelect<T = string>({
                 <ValueSnacks
                     values={postInputValues.map(getStringKey)}
                     options={options}
-                    onClose={(value) => _onActionItem(value, null)}
+                    onClose={disabled ? undefined : (value) => _onActionItem(value, null)}
                     onInitiateEdit={
-                        allowCustomValues && !disableEditing ? (value) => _onActionItem(value, null, true) : null
+                        allowCustomValues && !disableEditing && !disabled
+                            ? (value) => _onActionItem(value, null, true)
+                            : null
                     }
                     sortable={sortable}
                     onDragEnd={handleDragEnd}
@@ -710,10 +753,10 @@ export function InputSelect<T = string>({
         values,
         allowCustomValues,
         disableEditing,
+        disabled,
         itemBeingEditedIndex,
         inputValue,
         getStringKey,
-        _onActionItem,
         displayMode,
         _onFocus,
         options,
@@ -742,16 +785,16 @@ export function InputSelect<T = string>({
     }, [displayMode, mode, inputValue, loading, values.length, options.length])
 
     const virtualizedListHeight = useMemo(() => {
-        if (visibleOptions.length <= 1) {
+        if (displayOptions.length <= 1) {
             return VIRTUALIZED_SELECT_OPTION_HEIGHT
         }
-        const height = visibleOptions.length * VIRTUALIZED_SELECT_OPTION_HEIGHT
+        const height = displayOptions.length * VIRTUALIZED_SELECT_OPTION_HEIGHT
 
         if (height > VIRTUALIZED_MAX_DROPDOWN_HEIGHT) {
             return VIRTUALIZED_MAX_DROPDOWN_HEIGHT
         }
         return height
-    }, [visibleOptions])
+    }, [displayOptions])
 
     const wasLimitReached = values.length >= limit
 
@@ -806,7 +849,7 @@ export function InputSelect<T = string>({
             className={popoverClassName}
             placement="bottom-start"
             fallbackPlacements={['bottom-end', 'top-start', 'top-end']}
-            loadingBar={loading && visibleOptions.length > 0}
+            loadingBar={loading && displayOptions.length > 0}
             overlay={
                 <div className="deprecated-space-y-px overflow-y-auto">
                     {title && <h5 className="mx-2 my-1">{title}</h5>}
@@ -871,7 +914,7 @@ export function InputSelect<T = string>({
                         </div>
                     )}
 
-                    {visibleOptions.length > 0 ? (
+                    {displayOptions.length > 0 ? (
                         virtualized ? (
                             <div>
                                 <AutoSizer
@@ -879,12 +922,12 @@ export function InputSelect<T = string>({
                                         width ? (
                                             <List<VirtualizedOptionRowProps<T>>
                                                 style={{ width, height: virtualizedListHeight }}
-                                                rowCount={visibleOptions.length}
+                                                rowCount={displayOptions.length}
                                                 overscanCount={100}
                                                 rowHeight={VIRTUALIZED_SELECT_OPTION_HEIGHT}
                                                 rowComponent={VirtualizedOptionRow}
                                                 rowProps={{
-                                                    visibleOptions,
+                                                    visibleOptions: displayOptions,
                                                     selectedIndex,
                                                     stringKeys,
                                                     wasLimitReached,
@@ -905,7 +948,7 @@ export function InputSelect<T = string>({
                                 />
                             </div>
                         ) : (
-                            visibleOptions.map((option, index) => {
+                            displayOptions.map((option, index) => {
                                 const isFocused = index === selectedIndex
                                 const isSelected = stringKeys.includes(option.key)
                                 const isDisabled = wasLimitReached && !isSelected
@@ -1013,6 +1056,7 @@ export function InputSelect<T = string>({
                 onClick={_onClick}
                 onKeyDown={_onKeyDown}
                 disabled={disabled}
+                disabledReason={disabledReason}
                 autoFocus={autoFocus}
                 transparentBackground={transparentBackground}
                 className={clsx(
@@ -1040,7 +1084,7 @@ function DraggableValueSnack<T = string>({
 }: {
     value: string
     option: InputSelectOption<T>
-    onClose: (value: string) => void
+    onClose?: (value: string) => void
     onInitiateEdit: ((value: string) => void) | null
 }): JSX.Element {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -1057,17 +1101,20 @@ function DraggableValueSnack<T = string>({
     return (
         <Tooltip
             title={
-                <>
-                    <span>
-                        {onInitiateEdit && (
-                            <>
-                                Click on the text to edit.
-                                <br />
-                            </>
-                        )}
-                    </span>
-                    <span>Click on the X to remove.</span>
-                </>
+                option.tooltip ??
+                (onClose || onInitiateEdit ? (
+                    <>
+                        <span>
+                            {onInitiateEdit && (
+                                <>
+                                    Click on the text to edit.
+                                    <br />
+                                </>
+                            )}
+                        </span>
+                        {onClose && <span>Click on the X to remove.</span>}
+                    </>
+                ) : null)
             }
         >
             <span
@@ -1075,7 +1122,7 @@ function DraggableValueSnack<T = string>({
                 // eslint-disable-next-line react/forbid-dom-props
                 style={style}
                 {...attributes}
-                className="inline-flex text-primary-alt max-w-full overflow-hidden break-all items-center py-1 leading-5 bg-accent-highlight-secondary rounded"
+                className={`inline-flex text-primary-alt max-w-full overflow-hidden break-all items-center py-1 leading-5 bg-accent-highlight-secondary rounded ${CLICK_OUTSIDE_BLOCK_CLASS}`}
             >
                 <span
                     className="shrink-0 flex items-center pl-1 pr-0.5 cursor-grab active:cursor-grabbing"
@@ -1090,17 +1137,19 @@ function DraggableValueSnack<T = string>({
                 >
                     {option?.labelComponent ?? option?.label}
                 </span>
-                <span className="shrink-0 mx-1">
-                    <Button
-                        size="xsmall"
-                        noPadding
-                        icon={<IconX />}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            onClose(value)
-                        }}
-                    />
-                </span>
+                {onClose && (
+                    <span className="shrink-0 mx-1">
+                        <Button
+                            size="xsmall"
+                            noPadding
+                            icon={<IconX />}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onClose(value)
+                            }}
+                        />
+                    </span>
+                )}
             </span>
         </Tooltip>
     )
@@ -1116,7 +1165,7 @@ function ValueSnacks<T = string>({
 }: {
     values: string[]
     options: InputSelectOption<T>[]
-    onClose: (value: string) => void
+    onClose?: (value: string) => void
     onInitiateEdit: ((value: string) => void) | null
     sortable?: boolean
     onDragEnd?: (event: DragEndEvent) => void
@@ -1152,24 +1201,29 @@ function ValueSnacks<T = string>({
             <Tooltip
                 key={value}
                 title={
-                    <>
-                        <span>
-                            {onInitiateEdit && (
-                                <>
-                                    Click on the text to edit.
-                                    <br />
-                                </>
-                            )}
-                        </span>
-                        <span>Click on the X to remove.</span>
-                    </>
+                    option.tooltip ??
+                    (onClose || onInitiateEdit ? (
+                        <>
+                            <span>
+                                {onInitiateEdit && (
+                                    <>
+                                        Click on the text to edit.
+                                        <br />
+                                    </>
+                                )}
+                            </span>
+                            {onClose && <span>Click on the X to remove.</span>}
+                        </>
+                    ) : null)
                 }
             >
                 <Snack
                     title={option?.label}
-                    onClose={() => onClose(value)}
+                    onClose={onClose ? () => onClose(value) : undefined}
                     onClick={onInitiateEdit ? () => onInitiateEdit(value) : undefined}
-                    className="cursor-text"
+                    // Snacks live in the input's prefix (outside floating-ui's reference node), so a click on the
+                    // remove button reads as an outside press and dismisses/blurs the field before the click lands.
+                    className={`cursor-text ${CLICK_OUTSIDE_BLOCK_CLASS}`}
                 >
                     {option?.labelComponent ?? option?.label}
                 </Snack>

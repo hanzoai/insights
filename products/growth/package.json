@@ -1,3 +1,19 @@
 {
-    "name": "@hanzo/products-growth"
+    "name": "@hanzo/products-growth",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
+    "dependencies": {
+        "kea": "catalog:",
+        "kea-loaders": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/icons": "catalog:",
+        "@storybook/react": "catalog:",
+        "@types/react": "*",
+        "clsx": "*",
+        "jest": "*",
+        "react": "*",
+        "typescript": "catalog:*"
+    }
 }

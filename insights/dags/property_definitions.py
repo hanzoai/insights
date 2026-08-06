@@ -6,13 +6,14 @@ import pydantic
 
 from insights.datastore.cluster import DatastoreCluster, Query
 from insights.dags.common import JobOwners
-from insights.models.property_definition import PropertyDefinition
+
+from products.event_definitions.backend.models.property_definition import PropertyDefinition
 
 
 @dataclass(frozen=True)
 class TimeRange:
-    start_time: datetime
-    end_time: datetime
+    start_time: datetime.datetime
+    end_time: datetime.datetime
 
     def get_expression(self, column: str) -> str:
         return f"{column} >= '{self.start_time.isoformat()}' AND {column} < '{self.end_time.isoformat()}'"
@@ -32,7 +33,7 @@ class PropertyDefinitionsConfig(dagster.Config):
         default="1 hour",
     )
 
-    def validate(self, cluster: DatastoreCluster) -> TimeRange:
+    def get_time_range(self, cluster: DatastoreCluster) -> TimeRange:
         """Validate the configuration values, returning a time range."""
         [[start_time, end_time]] = cluster.any_host(
             Query(
@@ -49,7 +50,7 @@ def setup_job(
     config: PropertyDefinitionsConfig,
 ) -> TimeRange:
     """Validates the job configuration to be provided to other ops."""
-    return config.validate(cluster)
+    return config.get_time_range(cluster)
 
 
 @dataclass(frozen=True)
@@ -57,7 +58,7 @@ class DetectPropertyTypeExpression:
     source_column: str
 
     def __str__(self) -> str:
-        # largely derived from https://github.com/Hanzo Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L314-L373
+        # largely derived from https://github.com/Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L314-L373
         return f"""
             arrayMap(
                 (name, value) -> (name, multiIf(
@@ -91,9 +92,9 @@ class DetectPropertyTypeExpression:
                 )),
                 arrayFilter(
                     (name, value) -> (
-                        -- https://github.com/Hanzo Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L17-L28
+                        -- https://github.com/Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L17-L28
                         name NOT IN ('$set', '$set_once', '$unset', '$group_0', '$group_1', '$group_2', '$group_3', '$group_4', '$groups')
-                        -- https://github.com/Hanzo Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L279-L286
+                        -- https://github.com/Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L279-L286
                         AND length(name) <= 200
                     ),
                     JSONExtractKeysAndValuesRaw({self.source_column})
@@ -122,17 +123,17 @@ def ingest_event_properties(
         team_id as project_id,
         (arrayJoin({DetectPropertyTypeExpression("properties")}) as property).1 as name,
         property.2 as property_type,
-        replaceAll(event, '\\0', '\ufffd') as event,  -- https://github.com/Hanzo Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L172
+        replaceAll(event, '\\0', '\ufffd') as event,  -- https://github.com/Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L172
         NULL as group_type_index,
         {int(PropertyDefinition.Type.EVENT)} as type,
-        -- NOTE: not floored, need to check if needed https://github.com/Hanzo Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L175
+        -- NOTE: not floored, need to check if needed https://github.com/Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L175
         max(timestamp) as last_seen_at
     FROM events_recent
     WHERE
         {time_range.get_expression("timestamp")}
-        -- https://github.com/Hanzo Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L13-L14C52
+        -- https://github.com/Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L13-L14C52
         AND event NOT IN ('$$plugin_metrics')
-        -- https://github.com/Hanzo Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L187-L191
+        -- https://github.com/Insights/insights/blob/052f4ea40c5043909115f835f09445e18dd9727c/rust/property-defs-rs/src/types.rs#L187-L191
         AND length(event) <= 200
     GROUP BY team_id, event, name, property_type
     ORDER BY team_id, event, name, property_type NULLS LAST
@@ -169,7 +170,7 @@ def ingest_person_properties(
     context.log.info(f"Ingesting person properties for {time_range!r}")
 
     # Query to insert person properties into property_definitions table
-    # NOTE: this is a different data source from current, see https://github.com/Hanzo Insights/product-internal/pull/748/files#diff-78e7399938cb790eae10d5c5769f7edcb531972f33a32e0655872bded13f4977R165-R170
+    # NOTE: this is a different data source from current, see https://github.com/Insights/product-internal/pull/748/files#diff-78e7399938cb790eae10d5c5769f7edcb531972f33a32e0655872bded13f4977R165-R170
     insert_query = f"""
     INSERT INTO property_definitions
     SELECT
@@ -219,7 +220,7 @@ def ingest_group_properties(
     context.log.info(f"Ingesting group properties for {time_range!r}")
 
     # Query to insert group properties into property_definitions table
-    # NOTE: this is a different data source from current, see https://github.com/Hanzo Insights/product-internal/pull/748/files#diff-78e7399938cb790eae10d5c5769f7edcb531972f33a32e0655872bded13f4977R165-R170
+    # NOTE: this is a different data source from current, see https://github.com/Insights/product-internal/pull/748/files#diff-78e7399938cb790eae10d5c5769f7edcb531972f33a32e0655872bded13f4977R165-R170
     insert_query = f"""
     INSERT INTO property_definitions
     SELECT

@@ -2,7 +2,7 @@ import { IconFilter } from '@hanzo/icons'
 import { Menu } from '@hanzo/elements'
 
 import { Button } from 'lib/elements/Button'
-import { capitalizeFirstLetter } from 'lib/utils'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { ALL_LOG_LEVELS } from 'scenes/insights-functions/logs/logsViewerLogic'
 
 import { LogEntryLevel } from '~/types'

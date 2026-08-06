@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS insights_person_reconciliation_backup (
     is_identified BOOLEAN NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     is_user_id INTEGER,
-    -- Operations to be applied (from ClickHouse query)
+    -- Operations to be applied (from Datastore query)
     pending_operations JSONB NOT NULL,
     -- AFTER state (computed before update)
     properties_after JSONB,

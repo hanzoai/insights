@@ -1,6 +1,6 @@
-from insights.schema import DatabaseSchemaManagedViewTableKind
-
 from insights.insightsql.database.models import DecimalDatabaseField, StringDatabaseField
+
+from insights.schema_enums import DatabaseSchemaManagedViewTableKind
 
 from ._definitions import FieldsDict, Schema
 

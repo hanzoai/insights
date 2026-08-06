@@ -8,6 +8,7 @@ import {
     CohortType,
     DataColorThemeModel,
     ExperimentStatsMethod,
+    ExperimentVelocityStats,
     FilterLogicalOperator,
     GroupType,
     OrganizationInviteType,
@@ -49,12 +50,11 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
     uuid: MOCK_TEAM_UUID,
     organization: MOCK_ORGANIZATION_ID,
     api_token: 'default-team-api-token',
-    secret_api_token: 'his_default-team-secret-api-token',
-    secret_api_token_backup: 'his_default-team-secret-api-token-backup',
-    app_urls: ['https://hanzo.ai/', 'https://insights.hanzo.ai', 'https://example.com', 'http://127.0.0.1:*'],
+    secret_api_token: 'phs_default-team-secret-api-token',
+    secret_api_token_backup: 'phs_default-team-secret-api-token-backup',
+    app_urls: ['https://hanzo.ai/', 'https://app.hanzo.ai', 'https://example.com', 'http://127.0.0.1:*'],
     recording_domains: ['https://recordings.hanzo.ai/'],
-    name: 'MockInsights App + Marketing',
-    slack_incoming_webhook: '',
+    name: 'MockHog App + Marketing',
     created_at: '2020-06-30T09:53:35.932534Z',
     updated_at: '2022-03-17T16:09:21.566253Z',
     anonymize_ips: false,
@@ -89,6 +89,8 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
         maskAllInputs: true,
     },
     session_recording_retention_period: '30d',
+    event_retention_months: 84,
+    events_retention_enforced: false,
     session_replay_config: null,
     capture_console_log_opt_in: true,
     capture_performance_opt_in: true,
@@ -151,36 +153,6 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
             },
         ],
         filter_test_accounts: false,
-        goals: [
-            // Past goal
-            {
-                due_date: '2020-12-31',
-                name: '2020 Q4',
-                goal: 1_000_000,
-                mrr_or_gross: 'gross',
-            },
-            // Very in the future to avoid flappy snapshots until 2035, assuming I'll be a multimillionaire by then and wont have to handle this
-            // These are both "Current" goals since they're for the same day
-            {
-                due_date: '2035-12-31',
-                name: '2035 Q4',
-                goal: 1_500_000,
-                mrr_or_gross: 'gross',
-            },
-            {
-                due_date: '2035-12-31',
-                name: '2035 Q4 MRR',
-                goal: 1_200_000,
-                mrr_or_gross: 'mrr',
-            },
-            // Future goal
-            {
-                due_date: '2040-12-31',
-                name: '2040 Q4',
-                goal: 1_800_000,
-                mrr_or_gross: 'gross',
-            },
-        ],
     },
     flags_persistence_default: false,
     feature_flag_confirmation_enabled: false,
@@ -205,6 +177,9 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
         subscription_event: {},
         payment_event: {},
     } as CustomerAnalyticsConfig,
+    workflows_config: {
+        capture_workflows_engagement_events: false,
+    },
     base_currency: CurrencyCode.USD,
     default_evaluation_contexts_enabled: false,
     managed_viewsets: { revenue_analytics: true },
@@ -217,16 +192,17 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
 
 export const MOCK_DEFAULT_PROJECT: ProjectType = {
     id: MOCK_TEAM_ID,
-    name: 'MockInsights App + Marketing',
+    name: 'MockHog App + Marketing',
     organization_id: MOCK_ORGANIZATION_ID,
     created_at: '2020-06-30T09:53:35.932534Z',
+    is_pending_deletion: false,
 }
 
 export const MOCK_DEFAULT_ORGANIZATION: OrganizationType = {
     customer_id: null,
     id: MOCK_ORGANIZATION_ID,
-    name: 'MockInsights',
-    slug: 'mockinsights-fstn',
+    name: 'MockHog',
+    slug: 'mockhog-fstn',
     created_at: '2020-09-24T15:05:01.254111Z',
     updated_at: '2022-01-03T13:50:55.369557Z',
     membership_level: OrganizationMembershipLevel.Admin,
@@ -244,6 +220,8 @@ export const MOCK_DEFAULT_ORGANIZATION: OrganizationType = {
     default_experiment_stats_method: ExperimentStatsMethod.Bayesian,
     is_active: true,
     is_not_active_reason: null,
+    is_pending_deletion: false,
+    is_ai_data_processing_approved: true,
 }
 
 export const MOCK_DEFAULT_BASIC_USER: UserBasicType = {
@@ -267,6 +245,8 @@ export const MOCK_DEFAULT_USER: UserType = {
         error_tracking_issue_assigned: false,
         error_tracking_weekly_digest: true,
         discussions_mentioned: false,
+        web_analytics_weekly_digest: false,
+        organization_member_join_email_disabled: {},
     },
     anonymize_data: false,
     allow_impersonation: true,
@@ -294,6 +274,7 @@ export const MOCK_DEFAULT_USER: UserType = {
             allow_publicly_shared_resources,
             is_active,
             is_not_active_reason,
+            is_pending_deletion,
         }) => ({
             id,
             name,
@@ -304,6 +285,7 @@ export const MOCK_DEFAULT_USER: UserType = {
             logo_media_id: null,
             is_active,
             is_not_active_reason,
+            is_pending_deletion,
         })
     ),
     events_column_config: {
@@ -413,7 +395,7 @@ export const MOCK_DEFAULT_PLUGIN: PluginType = {
     metrics: {},
     public_jobs: {},
     // urls are hard-coded in frontend/src/scenes/pipeline/utils.tsx so it must be one of those URLs for tests to work
-    url: 'https://github.com/hanzoai/downsampling-plugin',
+    url: 'https://github.com/Insights/downsampling-plugin',
 }
 
 export const MOCK_DEFAULT_PLUGIN_CONFIG: PluginConfigWithPluginInfo = {
@@ -423,7 +405,6 @@ export const MOCK_DEFAULT_PLUGIN_CONFIG: PluginConfigWithPluginInfo = {
     order: 1,
     config: {},
     team_id: MOCK_TEAM_ID,
-    delivery_rate_24h: 0.999,
     created_at: '2020-12-01T14:00:00.000Z',
     plugin_info: MOCK_DEFAULT_PLUGIN,
 }
@@ -458,3 +439,11 @@ export const MOCK_DATA_COLOR_THEMES: DataColorThemeModel[] = [
         is_global: false,
     },
 ]
+
+export const MOCK_EXPERIMENTS_STATS_RESPONSE: ExperimentVelocityStats = {
+    launched_last_30d: 0,
+    launched_previous_30d: 0,
+    percent_change: 0,
+    active_experiments: 0,
+    completed_last_30d: 0,
+}

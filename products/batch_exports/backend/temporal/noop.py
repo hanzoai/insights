@@ -6,8 +6,9 @@ from typing import Any
 
 from temporalio import activity, workflow
 
-from insights.batch_exports.service import BackfillDetails, NoOpInputs
 from insights.temporal.common.base import InsightsWorkflow
+
+from products.batch_exports.backend.service import BackfillDetails, NoOpInputs
 
 
 @dataclass

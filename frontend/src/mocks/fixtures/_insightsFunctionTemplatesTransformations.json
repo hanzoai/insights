@@ -12,13 +12,13 @@
             "type": "transformation",
             "id": "template-blank-transformation",
             "name": "Custom transformation",
-            "iql": "// This is a blank template for custom transformations\n// The function receives 'event' as a global object and expects it to be returned\n// If you return null then the event will be discarded\nreturn event",
+            "script": "// This is a blank template for custom transformations\n// The function receives 'event' as a global object and expects it to be returned\n// If you return null then the event will be discarded\nreturn event",
             "inputs_schema": [],
             "category": ["Custom"],
             "description": "This is a starter template for custom transformations",
             "filters": null,
             "masking": null,
-            "icon_url": "/static/mascot/builder-fn-01.png"
+            "icon_url": "https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png"
         },
         {
             "mapping_templates": null,
@@ -29,7 +29,7 @@
             "type": "transformation",
             "id": "template-geoip",
             "name": "GeoIP",
-            "iql": "// Define the properties to be added to the event\nlet geoipProperties := {\n    'city_name': null,\n    'city_confidence': null,\n    'subdivision_2_name': null,\n    'subdivision_2_code': null,\n    'subdivision_1_name': null,\n    'subdivision_1_code': null,\n    'country_name': null,\n    'country_code': null,\n    'continent_name': null,\n    'continent_code': null,\n    'postal_code': null,\n    'latitude': null,\n    'longitude': null,\n    'accuracy_radius': null,\n    'time_zone': null\n}\n// Check if the event has an IP address\nif (event.properties?.$geoip_disable or empty(event.properties?.$ip)) {\n    print('geoip disabled or no ip.')\n    return event\n}\nlet ip := event.properties.$ip\nif (ip == '127.0.0.1') {\n    print('spoofing ip for local development', ip)\n    ip := '89.160.20.129'\n}\nlet response := geoipLookup(ip)\nif (not response) {\n    print('geoip lookup failed for ip', ip)\n    return event\n}\nlet location := {}\nif (response.city) {\n    location['city_name'] := response.city.names?.en\n}\nif (response.country) {\n    location['country_name'] := response.country.names?.en\n    location['country_code'] := response.country.isoCode\n}\nif (response.continent) {\n    location['continent_name'] := response.continent.names?.en\n    location['continent_code'] := response.continent.code\n}\nif (response.postal) {\n    location['postal_code'] := response.postal.code\n}\nif (response.location) {\n    location['latitude'] := response.location?.latitude\n    location['longitude'] := response.location?.longitude\n    location['accuracy_radius'] := response.location?.accuracyRadius\n    location['time_zone'] := response.location?.timeZone\n}\nif (response.subdivisions) {\n    for (let index, subdivision in response.subdivisions) {\n        location[f'subdivision_{index + 1}_code'] := subdivision.isoCode\n        location[f'subdivision_{index + 1}_name'] := subdivision.names?.en\n    }\n}\nprint('geoip location data for ip:', location) \nlet returnEvent := event\nreturnEvent.properties := returnEvent.properties ?? {}\nreturnEvent.properties.$set := returnEvent.properties.$set ?? {}\nreturnEvent.properties.$set_once := returnEvent.properties.$set_once ?? {}\nfor (let key, value in geoipProperties) {\n    if (value != null) {\n        returnEvent.properties.$set[f'$geoip_{key}'] := value\n        returnEvent.properties.$set_once[f'$initial_geoip_{key}'] := value\n    }\n    returnEvent.properties.$set[f'$geoip_{key}'] := value\n    returnEvent.properties.$set_once[f'$initial_geoip_{key}'] := value\n}\nfor (let key, value in location) {\n    returnEvent.properties[f'$geoip_{key}'] := value\n    returnEvent.properties.$set[f'$geoip_{key}'] := value\n    returnEvent.properties.$set_once[f'$initial_geoip_{key}'] := value\n}\nreturn returnEvent",
+            "script": "// Define the properties to be added to the event\nlet geoipProperties := {\n    'city_name': null,\n    'city_confidence': null,\n    'subdivision_2_name': null,\n    'subdivision_2_code': null,\n    'subdivision_1_name': null,\n    'subdivision_1_code': null,\n    'country_name': null,\n    'country_code': null,\n    'continent_name': null,\n    'continent_code': null,\n    'postal_code': null,\n    'latitude': null,\n    'longitude': null,\n    'accuracy_radius': null,\n    'time_zone': null\n}\n// Check if the event has an IP address\nif (event.properties?.$geoip_disable or empty(event.properties?.$ip)) {\n    print('geoip disabled or no ip.')\n    return event\n}\nlet ip := event.properties.$ip\nif (ip == '127.0.0.1') {\n    print('spoofing ip for local development', ip)\n    ip := '89.160.20.129'\n}\nlet response := geoipLookup(ip)\nif (not response) {\n    print('geoip lookup failed for ip', ip)\n    return event\n}\nlet location := {}\nif (response.city) {\n    location['city_name'] := response.city.names?.en\n}\nif (response.country) {\n    location['country_name'] := response.country.names?.en\n    location['country_code'] := response.country.isoCode\n}\nif (response.continent) {\n    location['continent_name'] := response.continent.names?.en\n    location['continent_code'] := response.continent.code\n}\nif (response.postal) {\n    location['postal_code'] := response.postal.code\n}\nif (response.location) {\n    location['latitude'] := response.location?.latitude\n    location['longitude'] := response.location?.longitude\n    location['accuracy_radius'] := response.location?.accuracyRadius\n    location['time_zone'] := response.location?.timeZone\n}\nif (response.subdivisions) {\n    for (let index, subdivision in response.subdivisions) {\n        location[f'subdivision_{index + 1}_code'] := subdivision.isoCode\n        location[f'subdivision_{index + 1}_name'] := subdivision.names?.en\n    }\n}\nprint('geoip location data for ip:', location) \nlet returnEvent := event\nreturnEvent.properties := returnEvent.properties ?? {}\nreturnEvent.properties.$set := returnEvent.properties.$set ?? {}\nreturnEvent.properties.$set_once := returnEvent.properties.$set_once ?? {}\nfor (let key, value in geoipProperties) {\n    if (value != null) {\n        returnEvent.properties.$set[f'$geoip_{key}'] := value\n        returnEvent.properties.$set_once[f'$initial_geoip_{key}'] := value\n    }\n    returnEvent.properties.$set[f'$geoip_{key}'] := value\n    returnEvent.properties.$set_once[f'$initial_geoip_{key}'] := value\n}\nfor (let key, value in location) {\n    returnEvent.properties[f'$geoip_{key}'] := value\n    returnEvent.properties.$set[f'$geoip_{key}'] := value\n    returnEvent.properties.$set_once[f'$initial_geoip_{key}'] := value\n}\nreturn returnEvent",
             "inputs_schema": [],
             "category": ["Custom"],
             "description": "Adds geoip data to the event",
@@ -46,13 +46,13 @@
             "type": "transformation",
             "id": "template-ip-anonymization",
             "name": "IP Anonymization",
-            "iql": "// Check if the event has an IP address\nif (empty(event.properties?.$ip)) {\n    print('No IP address found in event')\n    return event\n}\n\nlet ip := event.properties.$ip\nlet parts := splitByString('.', ip)\n\n// Check if we have exactly 4 parts for IPv4\nif (length(parts) != 4) {\n    print('Invalid IP address format: wrong number of octets')\n    return event\n}\n\n// Validate each octet is a number between 0 and 255\nfor (let i := 1; i \u003C= 4; i := i + 1) {\n    let octet := toInt(parts[i])\n    if (octet = null or octet \u003C 0 or octet \u003E 255) {\n        print('Invalid IP address: octets must be numbers between 0 and 255')\n        return event\n    }\n}\n\n// Replace the last octet with '0'\nlet anonymizedIp := concat(parts[1], '.', parts[2], '.', parts[3], '.0')\n    \nlet returnEvent := event\nreturnEvent.properties.$ip := anonymizedIp\nreturn returnEvent",
+            "script": "// Check if the event has an IP address\nif (empty(event.properties?.$ip)) {\n    print('No IP address found in event')\n    return event\n}\n\nlet ip := event.properties.$ip\nlet parts := splitByString('.', ip)\n\n// Check if we have exactly 4 parts for IPv4\nif (length(parts) != 4) {\n    print('Invalid IP address format: wrong number of octets')\n    return event\n}\n\n// Validate each octet is a number between 0 and 255\nfor (let i := 1; i \u003C= 4; i := i + 1) {\n    let octet := toInt(parts[i])\n    if (octet = null or octet \u003C 0 or octet \u003E 255) {\n        print('Invalid IP address: octets must be numbers between 0 and 255')\n        return event\n    }\n}\n\n// Replace the last octet with '0'\nlet anonymizedIp := concat(parts[1], '.', parts[2], '.', parts[3], '.0')\n    \nlet returnEvent := event\nreturnEvent.properties.$ip := anonymizedIp\nreturn returnEvent",
             "inputs_schema": [],
             "category": ["Custom"],
             "description": "This transformation sets the last octet of an IP address to zero (e.g., 12.214.31.144 → 12.214.31.0), protecting user privacy and reducing disclosure risk.",
             "filters": null,
             "masking": null,
-            "icon_url": "/static/mascot/builder-fn-01.png"
+            "icon_url": "https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png"
         },
         {
             "mapping_templates": null,
@@ -63,13 +63,13 @@
             "type": "transformation",
             "id": "template-remove-null-properties",
             "name": "Remove Null Properties",
-            "iql": "// Check if the event has properties\nif (empty(event.properties)) {\n    return event\n}\n\nlet returnEvent := event\nreturnEvent.properties := cleanNullValues(event.properties)\nreturn returnEvent",
+            "script": "// Check if the event has properties\nif (empty(event.properties)) {\n    return event\n}\n\nlet returnEvent := event\nreturnEvent.properties := cleanNullValues(event.properties)\nreturn returnEvent",
             "inputs_schema": [],
             "category": ["Custom"],
             "description": "This transformation removes null properties from the event properties object. If the object nesting exceeds 3 levels, deeper levels will be returned unchanged.",
             "filters": null,
             "masking": null,
-            "icon_url": "/static/mascot/builder-fn-01.png"
+            "icon_url": "https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png"
         },
         {
             "mapping_templates": null,
@@ -80,7 +80,7 @@
             "type": "transformation",
             "id": "plugin-downsampling-plugin",
             "name": "Downsample",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "type": "string",
@@ -124,7 +124,7 @@
             "type": "transformation",
             "id": "plugin-language-url-splitter-app",
             "name": "Language URL stripper",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "key": "pattern",
@@ -185,7 +185,7 @@
             "description": "Replace the language from the URL with a custom value",
             "filters": null,
             "masking": null,
-            "icon_url": "/static/mascot/builder-fn-01.png"
+            "icon_url": "https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png"
         },
         {
             "mapping_templates": null,
@@ -196,7 +196,7 @@
             "type": "transformation",
             "id": "plugin-insights-app-url-parameters-to-event-properties",
             "name": "URL parameters to event properties",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "key": "parameters",
@@ -310,7 +310,7 @@
             "type": "transformation",
             "id": "plugin-insights-filter-out-plugin",
             "name": "Filter Out Plugin",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "key": "filters",
@@ -361,7 +361,7 @@
             "type": "transformation",
             "id": "plugin-insights-plugin-geoip",
             "name": "GeoIP",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [],
             "category": ["Custom"],
             "description": "Enrich events with GeoIP data",
@@ -378,7 +378,7 @@
             "type": "transformation",
             "id": "plugin-insights-url-normalizer-plugin",
             "name": "URL Normalizer",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [],
             "category": ["Transformation"],
             "description": "Normalize the format of urls in your application allowing you to more easily compare them in insights.",
@@ -395,7 +395,7 @@
             "type": "transformation",
             "id": "plugin-property-filter-plugin",
             "name": "Property Filter",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "templating": false,
@@ -422,7 +422,7 @@
             "type": "transformation",
             "id": "plugin-semver-flattener-plugin",
             "name": "SemVer Flattener",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "key": "properties",
@@ -449,7 +449,7 @@
             "type": "transformation",
             "id": "plugin-taxonomy-plugin",
             "name": "Taxonomy",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "key": "defaultNamingConvention",
@@ -497,7 +497,7 @@
             "type": "transformation",
             "id": "plugin-timestamp-parser-plugin",
             "name": "Timestamp Parser",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [],
             "category": ["Transformation"],
             "description": "Parse your event timestamps into useful date properties.",
@@ -514,7 +514,7 @@
             "type": "transformation",
             "id": "plugin-user-agent-plugin",
             "name": "User Agent Populator",
-            "iql": "return event",
+            "script": "return event",
             "inputs_schema": [
                 {
                     "key": "overrideUserAgentDetails",

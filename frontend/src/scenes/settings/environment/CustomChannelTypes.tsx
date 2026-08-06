@@ -1,18 +1,21 @@
+import { deepEqual as equal } from 'fast-equals'
 import { useActions, useValues } from 'kea'
-import isEqual from 'lodash.isequal'
 import { useMemo, useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
 
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { VerticalNestedDND } from 'lib/components/VerticalNestedDND/VerticalNestedDND'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Button } from 'lib/elements/Button'
 import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect'
 import { Select } from 'lib/elements/Select'
 import { Link } from 'lib/elements/Link'
-import { UnexpectedNeverError, genericOperatorMap, uuid } from 'lib/utils'
-import { userHasAccess } from 'lib/utils/accessControlUtils'
+import { uuid } from 'lib/utils/dom'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
+import { UnexpectedNeverError } from 'lib/utils/guards'
+import { genericOperatorMap } from 'lib/utils/operators'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
@@ -23,13 +26,7 @@ import {
     CustomChannelRule,
     DefaultChannelTypes,
 } from '~/queries/schema/schema-general'
-import {
-    AccessControlLevel,
-    AccessControlResourceType,
-    FilterLogicalOperator,
-    PropertyFilterType,
-    PropertyOperator,
-} from '~/types'
+import { FilterLogicalOperator, PropertyFilterType, PropertyOperator } from '~/types'
 
 const combinerOptions = [
     { label: 'All', value: FilterLogicalOperator.And },
@@ -153,7 +150,10 @@ export function CustomChannelTypes(): JSX.Element {
             .map((channelType) => ({ label: channelType, key: channelType }))
     }, [customChannelTypeRules])
 
-    const canEdit = userHasAccess(AccessControlResourceType.WebAnalytics, AccessControlLevel.Editor)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     return (
         <div>
@@ -185,8 +185,8 @@ export function CustomChannelTypes(): JSX.Element {
                     reportCustomChannelTypeRulesUpdated(customChannelTypeRules.length)
                     setSavedCustomChannelTypeRules(customChannelTypeRules)
                 }}
-                isSaveDisabled={isEqual(customChannelTypeRules, savedCustomChannelTypeRules)}
-                canEdit={canEdit}
+                isSaveDisabled={equal(customChannelTypeRules, savedCustomChannelTypeRules)}
+                canEdit={!restrictedReason}
             />
         </div>
     )
