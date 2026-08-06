@@ -3,7 +3,7 @@ import datetime
 from insights.test.base import BaseTest, DatastoreTestMixin, _create_event
 
 from insights.datastore.client import query_with_columns, sync_execute
-from insights.models.raw_sessions.sessions_v2 import RAW_SESSION_TABLE_BACKFILL_SELECT_SQL
+from insights.models.raw_sessions.sessions import RAW_SESSION_TABLE_BACKFILL_SELECT_SQL
 from insights.models.utils import uuid7
 
 distinct_id_counter = 0
