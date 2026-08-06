@@ -1,77 +1,53 @@
 import { hasScopes } from '@/lib/api'
+import { filterStaffOnlyTools } from '@/lib/staff-only-tools'
 
-// Actions
-import createAction from './actions/create'
-import deleteAction from './actions/delete'
-import getAction from './actions/get'
-import getAllActions from './actions/getAll'
-import updateAction from './actions/update'
-// Dashboards
-import addInsightToDashboard from './dashboards/addInsight'
-import createDashboard from './dashboards/create'
-import deleteDashboard from './dashboards/delete'
-import getDashboard from './dashboards/get'
-import getAllDashboards from './dashboards/getAll'
-import reorderDashboardTiles from './dashboards/reorderTiles'
-import updateDashboard from './dashboards/update'
-// Demo
-import demoMcpUiApps from './demo/demoMcpUiApps'
-// Documentation
-import searchDocs from './documentation/searchDocs'
-// Error Tracking
-import errorDetails from './errorTracking/errorDetails'
-import listErrors from './errorTracking/listErrors'
-// Experiments
-import createExperiment from './experiments/create'
-import deleteExperiment from './experiments/delete'
-import getExperiment from './experiments/get'
-import getAllExperiments from './experiments/getAll'
+// AI observability
+import getLLMCosts from './aiObservability/getLLMCosts'
+// Debug
+import debugMcpUiApps from './debug/debugMcpUiApps'
+// Experiments (hand-written — CRUD + lifecycle are codegen in generated/experiments.ts)
 import getExperimentResults from './experiments/getResults'
-import updateExperiment from './experiments/update'
-// Feature Flags
-import createFeatureFlag from './featureFlags/create'
-import deleteFeatureFlag from './featureFlags/delete'
-import getAllFeatureFlags from './featureFlags/getAll'
-import getFeatureFlagDefinition from './featureFlags/getDefinition'
-import updateFeatureFlag from './featureFlags/update'
+import experimentListDeprecated from './experiments/listDeprecated'
+// Feature flags (get-definition-by-key is hand-written; get-definition-by-id is codegen)
+import featureFlagGetDefinitionByKey from './featureFlags/getDefinitionByKey'
+// Feedback
+import submitFeedback from './feedback/submit'
+// Generated tools (from definitions/*.yaml)
+import { GENERATED_TOOL_MAP } from './generated'
 // Insights
-import createInsight from './insights/create'
-import deleteInsight from './insights/delete'
-import getInsight from './insights/get'
-import getAllInsights from './insights/getAll'
 import queryInsight from './insights/query'
-import updateInsight from './insights/update'
-// LLM Observability
-import getLLMCosts from './llmAnalytics/getLLMCosts'
-import logsListAttributeValues from './logs/listAttributeValues'
-import logsListAttributes from './logs/listAttributes'
-// Logs
-import logsQuery from './logs/query'
+// Links (utility — builds canonical app URLs from the frontend's route table)
+import generateAppUrl from './links/generate-app-url'
+import loopsReview from './loops/loopsReview'
+// Notebooks (edit + cell tools are hand-written — generated CRUD lives in generated/notebooks.ts)
+import notebookAddCell from './notebooks/addCell'
+import notebookCreateMarkdown from './notebooks/createMarkdown'
+import notebookDeleteCell from './notebooks/deleteCell'
+import notebookEdit from './notebooks/edit'
+import notebookUpdateCell from './notebooks/updateCell'
 // Organizations
-import getOrganizationDetails from './organizations/getDetails'
 import getOrganizations from './organizations/getOrganizations'
 import setActiveOrganization from './organizations/setActive'
 // Insights AI tools
-import { executeSql, readDataSchema, readDataWarehouseSchema } from './insightsAiTools'
+import {
+    EXECUTE_SQL_TOOL_NAME,
+    executeSql,
+    externalDataSourcesDbSchema,
+    externalDataSourcesJobs,
+    externalDataSourcesPreview,
+    externalDataSyncLogs,
+    readDataSchema,
+} from './insightsAiTools'
 // Projects
-import eventDefinitions from './projects/eventDefinitions'
 import getProjects from './projects/getProjects'
-import getProperties from './projects/propertyDefinitions'
 import setActiveProject from './projects/setActive'
 import updateEventDefinition from './projects/updateEventDefinition'
-// Query
-import generateInsightsQLFromQuestion from './query/generateInsightsQLFromQuestion'
-import queryRun from './query/run'
-// Search
-import entitySearch from './search/entitySearch'
-// Surveys
-import createSurvey from './surveys/create'
-import deleteSurvey from './surveys/delete'
-import getSurvey from './surveys/get'
-import getAllSurveys from './surveys/getAll'
-import surveysGlobalStats from './surveys/global-stats'
-import surveyStats from './surveys/stats'
-import updateSurvey from './surveys/update'
+import updatePathCleaning from './projects/updatePathCleaning'
+import updatePropertyDefinition from './projects/updatePropertyDefinition'
+// Replay
+import sessionRecordingSummarize from './replay/sessionRecordingSummarize'
+// Skills (deprecation aliases for the llma-skill-* → skill-* rename)
+import { SKILL_DEPRECATED_ALIASES } from './skills/deprecatedAliases'
 // Misc
 import {
     type ToolFilterOptions,
@@ -79,122 +55,107 @@ import {
     getToolDefinition,
 } from './toolDefinitions'
 import type { Context, Tool, ToolBase, ZodObjectAny } from './types'
+// Workflows (batch — orchestration over existing REST endpoints with a blast-radius guard)
+import { workflowsBlastRadius, workflowsRunBatch, workflowsScheduleCreate } from './workflows/batch'
+// Workflows (lifecycle — CRUD lives in generated/workflows.ts). workflows-disable is intentionally
+// not registered: editing active workflows is blocked, and exposing disable invited a
+// disable→edit→enable workaround. The factory stays in lifecycle.ts for easy re-enable.
+import { workflowsArchive, workflowsEnable } from './workflows/lifecycle'
 
 // Map of tool names to tool factory functions
-const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
-    // Feature Flags
-    'feature-flag-get-definition': getFeatureFlagDefinition,
-    'feature-flag-get-all': getAllFeatureFlags,
-    'create-feature-flag': createFeatureFlag,
-    'update-feature-flag': updateFeatureFlag,
-    'delete-feature-flag': deleteFeatureFlag,
-
+export const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
     // Organizations
     'organizations-get': getOrganizations,
     'switch-organization': setActiveOrganization,
-    'organization-details-get': getOrganizationDetails,
 
     // Projects
     'projects-get': getProjects,
     'switch-project': setActiveProject,
-    'event-definitions-list': eventDefinitions,
     'event-definition-update': updateEventDefinition,
-    'properties-list': getProperties,
+    'property-definition-update': updatePropertyDefinition,
 
-    // Documentation - handled separately due to env check
-    // "docs-search": searchDocs,
+    // Feature flags (get-definition-by-key is hand-written; get-definition by numeric id is codegen)
+    'feature-flag-get-definition-by-key': featureFlagGetDefinitionByKey,
 
-    // Error Tracking
-    'list-errors': listErrors,
-    'error-details': errorDetails,
+    'path-cleaning-rules-update': updatePathCleaning,
 
-    // Logs
-    'logs-query': logsQuery,
-    'logs-list-attributes': logsListAttributes,
-    'logs-list-attribute-values': logsListAttributeValues,
-
-    // Experiments
-    'experiment-get-all': getAllExperiments,
-    'experiment-get': getExperiment,
+    // Experiments (results is hand-written; CRUD + lifecycle are codegen)
     'experiment-results-get': getExperimentResults,
-    'experiment-create': createExperiment,
-    'experiment-delete': deleteExperiment,
-    'experiment-update': updateExperiment,
+    // Deprecated alias for experiment-list — forwards and annotates the response.
+    'experiment-get-all': experimentListDeprecated,
 
     // Insights
-    'insights-get-all': getAllInsights,
-    'insight-get': getInsight,
-    'insight-create-from-query': createInsight,
-    'insight-update': updateInsight,
-    'insight-delete': deleteInsight,
     'insight-query': queryInsight,
 
-    // Queries
-    'query-generate-insightsql-from-question': generateInsightsQLFromQuestion,
-    'query-run': queryRun,
+    // Links (utility — canonical app URLs so the model never hand-builds/mis-slugs entity links)
+    'generate-app-url': generateAppUrl,
 
-    // Dashboards
-    'dashboards-get-all': getAllDashboards,
-    'dashboard-get': getDashboard,
-    'dashboard-create': createDashboard,
-    'dashboard-update': updateDashboard,
-    'dashboard-delete': deleteDashboard,
-    'dashboard-reorder-tiles': reorderDashboardTiles,
-    'add-insight-to-dashboard': addInsightToDashboard,
-
-    // LLM Observability
+    // AI observability
     'get-llm-total-costs-for-project': getLLMCosts,
 
-    // Surveys
-    'surveys-get-all': getAllSurveys,
-    'survey-get': getSurvey,
-    'survey-create': createSurvey,
-    'survey-update': updateSurvey,
-    'survey-delete': deleteSurvey,
-    'surveys-global-stats': surveysGlobalStats,
-    'survey-stats': surveyStats,
+    // Notebooks
+    'notebook-edit': notebookEdit,
+    'notebooks-add-cell': notebookAddCell,
+    'notebooks-create-markdown': notebookCreateMarkdown,
+    'notebooks-delete-cell': notebookDeleteCell,
+    'notebooks-update-cell': notebookUpdateCell,
 
-    // Actions
-    'actions-get-all': getAllActions,
-    'action-get': getAction,
-    'action-create': createAction,
-    'action-update': updateAction,
-    'action-delete': deleteAction,
+    // Debug
+    'debug-mcp-ui-apps': debugMcpUiApps,
+    'loops-review': loopsReview,
 
-    // Search
-    'entity-search': entitySearch,
-
-    // Demo
-    'demo-mcp-ui-apps': demoMcpUiApps,
+    // Feedback
+    'agent-feedback': submitFeedback,
 
     // Insights AI tools
-    'execute-sql': executeSql,
+    [EXECUTE_SQL_TOOL_NAME]: executeSql,
     'read-data-schema': readDataSchema,
-    'read-data-warehouse-schema': readDataWarehouseSchema,
+
+    // Replay
+    'session-recording-summarize': sessionRecordingSummarize,
+
+    // Data warehouse (custom handlers for non-standard request shapes)
+    'external-data-sources-db-schema': externalDataSourcesDbSchema,
+    'external-data-sources-preview-resource': externalDataSourcesPreview,
+    'external-data-sources-jobs': externalDataSourcesJobs,
+    'external-data-sync-logs': externalDataSyncLogs,
+
+    // Workflows lifecycle (thin wrappers over hog_flows_partial_update so MCP gets
+    // an idiomatic enable/disable/archive surface without three new REST endpoints).
+    'workflows-enable': workflowsEnable,
+    'workflows-archive': workflowsArchive,
+
+    // Workflows batch (hand-rolled: blast-radius sizing + echo-back guard before fan-out,
+    // composing the existing user_blast_radius / batch_jobs / schedules endpoints).
+    'workflows-blast-radius': workflowsBlastRadius,
+    'workflows-run-batch': workflowsRunBatch,
+    'workflows-schedule-create': workflowsScheduleCreate,
+
+    // Skills — deprecated llma-skill-* aliases forwarding to the renamed skill-* tools.
+    ...SKILL_DEPRECATED_ALIASES,
 }
 
 export const getToolsFromContext = async (
     context: Context,
     options?: ToolFilterOptions
 ): Promise<Tool<ZodObjectAny>[]> => {
+    // Check org AI consent to gate tools that use LLMs internally (cached in StateManager)
+    const aiConsentGiven = await context.stateManager.getAiConsentGiven()
+    const effectiveOptions = aiConsentGiven !== undefined ? { ...options, aiConsentGiven } : options
+    const effectiveMap = { ...TOOL_MAP, ...GENERATED_TOOL_MAP }
     const excludeTools = options?.excludeTools ?? []
-    const allowedToolNames = getFilteredToolNames(options).filter((name) => !excludeTools.includes(name))
+    const allowedToolNames = getFilteredToolNames(effectiveOptions).filter((name) => !excludeTools.includes(name))
     const toolBases: ToolBase<ZodObjectAny>[] = []
 
     for (const toolName of allowedToolNames) {
-        // Special handling for docs-search which requires API key
-        if (toolName === 'docs-search' && context.env.INKEEP_API_KEY) {
-            toolBases.push(searchDocs())
-        } else {
-            const toolFactory = TOOL_MAP[toolName]
-            if (toolFactory) {
-                toolBases.push(toolFactory())
-            }
+        const toolFactory = effectiveMap[toolName]
+        if (toolFactory) {
+            toolBases.push(toolFactory())
         }
     }
 
     const tools: Tool<ZodObjectAny>[] = toolBases.map((toolBase) => {
-        const definition = getToolDefinition(toolBase.name, options?.version)
+        const definition = getToolDefinition(toolBase.name)
         return {
             ...toolBase,
             title: definition.title,
@@ -207,5 +168,7 @@ export const getToolsFromContext = async (
     const apiKey = await context.stateManager.getApiKey()
     const scopes = apiKey?.scopes ?? []
 
-    return tools.filter((tool) => hasScopes(scopes, tool.scopes))
+    const candidates = tools.filter((tool) => hasScopes(scopes, tool.scopes))
+
+    return filterStaffOnlyTools(candidates, apiKey ?? { scopes: [] }, () => context.stateManager.getUser())
 }

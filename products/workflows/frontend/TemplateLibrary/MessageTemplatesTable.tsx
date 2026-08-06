@@ -3,11 +3,12 @@ import './MessageTemplatesGrid.scss'
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
+import * as readingIsMagicPng from '@hanzo/brand/hoggies/png/reading-is-magic'
 import { IconTrash } from '@hanzo/icons'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ReadingMascot } from 'lib/components/mascots'
 import { More } from 'lib/elements/Button/More'
 import { Input } from 'lib/elements/Input'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
@@ -18,6 +19,8 @@ import { urls } from 'scenes/urls'
 import { MessageTemplateCard } from './MessageTemplateCard'
 import { messageTemplatesLogic } from './messageTemplatesLogic'
 
+const MascotReadingIsMagic = pngHoggie(readingIsMagicPng)
+
 export function MessageTemplatesTable(): JSX.Element {
     useMountedLogic(messageTemplatesLogic)
     const { filteredTemplates, templates, templatesLoading, search, createdByFilter } = useValues(messageTemplatesLogic)
@@ -27,7 +30,7 @@ export function MessageTemplatesTable(): JSX.Element {
     const showProductIntroduction = !templatesLoading && templates.length === 0
 
     return (
-        <div className="templates-section">
+        <div className="templates-section" data-attr="message-templates-table">
             {showProductIntroduction && (
                 <ProductIntroduction
                     productName="Message template"
@@ -37,7 +40,7 @@ export function MessageTemplatesTable(): JSX.Element {
                     action={() => {
                         router.actions.push(urls.workflowsLibraryTemplateNew())
                     }}
-                    customInsights={ReadingMascot}
+                    customHog={MascotReadingIsMagic}
                     isEmpty
                 />
             )}
@@ -51,7 +54,13 @@ export function MessageTemplatesTable(): JSX.Element {
                 <div className="relative" />
             </MaxTool>
             <div className="flex items-center gap-2 mb-4">
-                <Input type="search" placeholder="Search templates" value={search} onChange={setSearch} />
+                <Input
+                    type="search"
+                    placeholder="Search templates"
+                    value={search}
+                    onChange={setSearch}
+                    data-attr="templates-search"
+                />
                 <div className="flex items-center gap-2">
                     <span className="text-secondary whitespace-nowrap">Created by:</span>
                     <MemberSelect value={createdByFilter} onChange={(user) => setCreatedByFilter(user?.id ?? null)} />

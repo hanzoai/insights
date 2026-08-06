@@ -2,87 +2,32 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconPauseFilled, IconPlayFilled, IconRefresh, IconTerminal } from '@hanzo/icons'
-import { Button, Link, Spinner, Tooltip } from '@hanzo/elements'
+import { Button, Link } from '@hanzo/elements'
 
 import { LiveRecordingsCount, LiveUserCount } from 'lib/components/LiveUserCount'
-import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
-import { TZLabel } from 'lib/components/TZLabel'
+import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { Banner } from 'lib/elements/Banner'
-import { More } from 'lib/elements/Button/More'
-import { Table, TableColumns } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ActivitySceneTabs } from 'scenes/activity/ActivitySceneTabs'
-import { PersonDisplay } from 'scenes/persons/PersonDisplay'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { EventCopyLinkButton } from '~/queries/nodes/DataTable/EventRowActions'
 import { ProductKey } from '~/queries/schema/schema-general'
-import { ActivityTab, LiveEvent } from '~/types'
+import { ActivityTab, PropertyOperator } from '~/types'
 
 import { EventName } from 'products/actions/frontend/components/EventName'
 
-import { liveEventsLogic } from './liveEventsLogic'
+import { LiveBotPanel } from './LiveBotPanel'
+import { LiveEventsFeed } from './LiveEventsFeed'
+import { LIVE_EVENTS_SUPPORTED_OPERATORS, liveEventsLogic } from './liveEventsLogic'
 import { liveEventsTableSceneLogic } from './liveEventsTableSceneLogic'
 
 const LIVE_EVENTS_POLL_INTERVAL_MS = 1500
-
-const columns: TableColumns<LiveEvent> = [
-    {
-        title: 'Event',
-        key: 'event',
-        className: 'max-w-80',
-        render: function Render(_, event: LiveEvent) {
-            return <PropertyKeyInfo value={event.event} type={TaxonomicFilterGroupType.Events} />
-        },
-    },
-    {
-        title: 'Person distinct ID',
-        tooltip:
-            'Some events may be missing a person profile – this is expected, because live events are streamed before person processing completes',
-        key: 'person',
-        className: 'max-w-80',
-        render: function Render(_, event: LiveEvent) {
-            return <PersonDisplay person={{ distinct_id: event.distinct_id }} />
-        },
-    },
-    {
-        title: 'URL / Screen',
-        key: '$current_url',
-        className: 'max-w-80',
-        render: function Render(_, event: LiveEvent) {
-            return <span>{event.properties['$current_url'] || event.properties['$screen_name']}</span>
-        },
-    },
-    {
-        title: 'Time',
-        key: 'timestamp',
-        className: 'max-w-80',
-        render: function Render(_, event: LiveEvent) {
-            return <TZLabel time={event.timestamp} />
-        },
-    },
-    {
-        dataIndex: '__more' as any,
-        render: function Render(_, event: LiveEvent) {
-            return (
-                <More
-                    overlay={
-                        <Tooltip title="It may take up to a few minutes for the event to show up in the Explore view">
-                            <EventCopyLinkButton event={event} />
-                        </Tooltip>
-                    }
-                />
-            )
-        },
-        width: 0,
-    },
-]
 
 export const scene: SceneExport = {
     component: LiveEventsTable,
@@ -107,17 +52,15 @@ export function LiveEventsTable(): JSX.Element {
     return (
         <SceneContent data-attr="manage-events-table">
             <ActivitySceneTabs activeKey={ActivityTab.LiveEvents} />
-            {featureFlags[FEATURE_FLAGS.LIVESTREAM_TUI] && (
-                <Banner type="info" className="mb-4" icon={<IconTerminal />} dismissKey="livestream-tui-banner">
-                    Stream live events directly in your terminal with <code>insights-live</code>.{' '}
-                    <Link to="https://hanzo.ai/docs/live-events/cli" target="_blank">
-                        Learn more
-                    </Link>
-                </Banner>
-            )}
+            <Banner type="info" className="mb-4" icon={<IconTerminal />} dismissKey="livestream-tui-banner">
+                Stream live events directly in your terminal with <code>insights-live</code>.{' '}
+                <Link to="https://hanzo.ai/docs/activity#terminal-live-events-insights-live" target="_blank">
+                    Learn more
+                </Link>
+            </Banner>
             <SceneTitleSection
-                name={sceneConfigurations[Scene.EventExplorer].name}
-                description={sceneConfigurations[Scene.EventExplorer].description}
+                name={sceneConfigurations[Scene.Activity].name}
+                description={sceneConfigurations[Scene.Activity].description}
                 resourceType={{
                     type: sceneConfigurations[Scene.LiveEvents].iconType || 'default_icon_type',
                 }}
@@ -142,6 +85,18 @@ export function LiveEventsTable(): JSX.Element {
                         placeholder="Filter by event"
                         allEventsOption="clear"
                     />
+                    <PropertyFilters
+                        pageKey="live-events"
+                        propertyFilters={filters.properties ?? []}
+                        onChange={(properties) => setFilters({ ...filters, properties })}
+                        taxonomicGroupTypes={[TaxonomicFilterGroupType.EventProperties]}
+                        operatorAllowlist={
+                            featureFlags[FEATURE_FLAGS.LIVE_EVENTS_RICH_FILTERS]
+                                ? LIVE_EVENTS_SUPPORTED_OPERATORS
+                                : [PropertyOperator.Exact]
+                        }
+                        buttonText="Filter by property"
+                    />
                     <Button
                         icon={
                             streamPaused ? (
@@ -158,26 +113,8 @@ export function LiveEventsTable(): JSX.Element {
                     </Button>
                 </div>
             </div>
-            <Table
-                columns={columns}
-                data-attr="live-events-table"
-                rowKey="uuid"
-                dataSource={events}
-                useURLForSorting={false}
-                emptyState={
-                    <div className="flex flex-col justify-center items-center gap-4 p-6">
-                        {!streamPaused ? (
-                            <Spinner className="text-4xl" textColored />
-                        ) : (
-                            <IconPauseFilled className="text-4xl" />
-                        )}
-                        <span className="text-lg font-title font-semibold leading-tight">
-                            {!streamPaused ? 'Waiting for events…' : 'Stream paused'}
-                        </span>
-                    </div>
-                }
-                nouns={['event', 'events']}
-            />
+            <LiveBotPanel events={events} className="mb-2" />
+            <LiveEventsFeed events={events} streamPaused={streamPaused} />
         </SceneContent>
     )
 }

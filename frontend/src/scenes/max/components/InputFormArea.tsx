@@ -3,97 +3,270 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
 import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
-import { Divider, Tabs, Spinner } from '@hanzo/elements'
+import { Button, Divider, Tabs, Tag, Spinner } from '@hanzo/elements'
 
-import { DangerousOperationResponse, MultiQuestionForm } from '~/queries/schema/schema-assistant-messages'
+import {
+    DangerousOperationResponse,
+    MultiQuestionForm,
+    MultiQuestionFormQuestion,
+} from '~/queries/schema/schema-assistant-messages'
 
-import { MarkdownMessage } from '../MarkdownMessage'
+import {
+    isFieldValid,
+    MarkdownMessage,
+    MultiFieldQuestion,
+    type Option,
+    OptionSelector,
+    PermissionInput,
+    QuestionField,
+    QuestionInput,
+} from 'products/insights_ai/frontend/api/primitives'
+
 import { maxThreadLogic } from '../maxThreadLogic'
-import { Option, OptionSelector } from './OptionSelector'
+
+function isQuestionComplete(
+    q: MultiQuestionFormQuestion,
+    answers: Record<string, string | string[]>,
+    confirmedQuestions?: Set<string>,
+    skippedQuestions?: Set<string>
+): boolean {
+    if (skippedQuestions?.has(q.id)) {
+        return true
+    }
+    if (q.fields?.length) {
+        // Multi_field questions with defaults (toggles, sliders) can appear "valid" on mount.
+        // Require the user to explicitly confirm by clicking the submit button.
+        if (confirmedQuestions && !confirmedQuestions.has(q.id)) {
+            return false
+        }
+        return q.fields.every((field) => isFieldValid(field, answers[field.id]))
+    }
+    if (q.type === 'multi_select') {
+        // Multi_select questions accumulate selections before submission.
+        // Require explicit confirmation like multi_field questions.
+        if (!confirmedQuestions?.has(q.id)) {
+            return false
+        }
+        const val = answers[q.id]
+        return Array.isArray(val) && val.length > 0
+    }
+    return answers[q.id] !== undefined
+}
+
+function getClearedAnswersForQuestion(
+    question: MultiQuestionFormQuestion,
+    answers: Record<string, string | string[]>
+): Record<string, string | string[]> {
+    const nextAnswers = { ...answers }
+
+    if (question.fields?.length) {
+        for (const field of question.fields) {
+            delete nextAnswers[field.id]
+        }
+    } else {
+        delete nextAnswers[question.id]
+    }
+
+    return nextAnswers
+}
+
+function removeQuestionFromSet(questionId: string, values: Set<string>): Set<string> {
+    if (!values.has(questionId)) {
+        return values
+    }
+
+    const nextValues = new Set(values)
+    nextValues.delete(questionId)
+    return nextValues
+}
 
 interface MultiQuestionFormInputProps {
     form: MultiQuestionForm
     /** Initial answers for stories/testing */
-    initialAnswers?: Record<string, string>
+    initialAnswers?: Record<string, string | string[]>
 }
 
-function MultiQuestionFormInput({ form, initialAnswers = {} }: MultiQuestionFormInputProps): JSX.Element | null {
-    const { continueAfterForm } = useActions(maxThreadLogic)
+export function MultiQuestionFormInput({ form, initialAnswers = {} }: MultiQuestionFormInputProps): JSX.Element | null {
+    const { continueAfterForm, continueAfterFormDismissal } = useActions(maxThreadLogic)
     const questions = form.questions
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-    const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers)
-    // Track custom input text separately from answers, so switching tabs preserves typed text
-    const [customInputs, setCustomInputs] = useState<Record<string, string>>({})
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    // Track which multi_field questions the user has explicitly confirmed
+    const [confirmedQuestions, setConfirmedQuestions] = useState<Set<string>>(() => new Set())
+    const [skippedQuestions, setSkippedQuestions] = useState<Set<string>>(() => new Set())
+    const [answers, setAnswers] = useState<Record<string, string | string[]>>(() => {
+        const initial = { ...initialAnswers }
+        for (const q of questions) {
+            if (!q.fields) {
+                continue
+            }
+            for (const field of q.fields) {
+                if (initial[field.id] !== undefined) {
+                    continue
+                }
+                if (field.type === 'toggle') {
+                    initial[field.id] = 'false'
+                } else if (field.type === 'slider') {
+                    initial[field.id] = String(field.min ?? 0)
+                }
+            }
+        }
+        return initial
+    })
+    const [submissionState, setSubmissionState] = useState<'idle' | 'submitting' | 'dismissing'>('idle')
+
+    const answersRef = useRef(answers)
+    answersRef.current = answers
+    const confirmedQuestionsRef = useRef(confirmedQuestions)
+    confirmedQuestionsRef.current = confirmedQuestions
+    const skippedQuestionsRef = useRef(skippedQuestions)
+    skippedQuestionsRef.current = skippedQuestions
 
     const currentQuestion = questions[currentQuestionIndex]
-    const allowCustomAnswer = currentQuestion?.allow_custom_answer !== false
-    const isLastQuestion = currentQuestionIndex >= questions.length - 1
 
     const contentRef = useRef<HTMLDivElement>(null)
     const { height: contentHeight } = useResizeObserver({ ref: contentRef })
 
-    const options: Option[] = useMemo(() => {
-        if (!currentQuestion) {
-            return []
-        }
-        return currentQuestion.options.map((option) => ({
-            label: option.value,
-            value: option.value,
-            description: option.description,
-        }))
-    }, [currentQuestion])
-
-    const allQuestionsAnswered = Object.keys(answers).length === questions.length
+    const allQuestionsCompleted = questions.every((q) =>
+        isQuestionComplete(q, answers, confirmedQuestions, skippedQuestions)
+    )
 
     const advanceToNextQuestion = useCallback(
-        (updatedAnswers: Record<string, string>) => {
-            const allAnswered = Object.keys(updatedAnswers).length === questions.length
-            if (allAnswered) {
-                setIsSubmitting(true)
+        (
+            updatedAnswers: Record<string, string | string[]>,
+            nextConfirmedQuestions: Set<string> = confirmedQuestionsRef.current,
+            nextSkippedQuestions: Set<string> = skippedQuestionsRef.current
+        ) => {
+            const allCompleted = questions.every((q) =>
+                isQuestionComplete(q, updatedAnswers, nextConfirmedQuestions, nextSkippedQuestions)
+            )
+            if (allCompleted) {
+                setSubmissionState('submitting')
                 continueAfterForm(updatedAnswers)
-            } else if (isLastQuestion) {
-                const firstMissingQuestion = questions.find((question) => !updatedAnswers[question.id])
-                if (firstMissingQuestion) {
-                    setCurrentQuestionIndex(questions.indexOf(firstMissingQuestion))
-                }
             } else {
-                setCurrentQuestionIndex((prev) => prev + 1)
+                const nextIncompleteQuestionIndex = questions.findIndex(
+                    (q, index) =>
+                        index > currentQuestionIndex &&
+                        !isQuestionComplete(q, updatedAnswers, nextConfirmedQuestions, nextSkippedQuestions)
+                )
+
+                if (nextIncompleteQuestionIndex !== -1) {
+                    setCurrentQuestionIndex(nextIncompleteQuestionIndex)
+                    return
+                }
+
+                const firstIncompleteQuestionIndex = questions.findIndex(
+                    (q) => !isQuestionComplete(q, updatedAnswers, nextConfirmedQuestions, nextSkippedQuestions)
+                )
+                if (firstIncompleteQuestionIndex !== -1) {
+                    setCurrentQuestionIndex(firstIncompleteQuestionIndex)
+                }
             }
         },
-        [isLastQuestion, questions, continueAfterForm]
+        [continueAfterForm, currentQuestionIndex, questions]
     )
 
-    const handleSelect = useCallback(
-        (value: string) => {
-            const updatedAnswers = { ...answers, [currentQuestion.id]: value }
+    const handleSingleFieldAnswer = useCallback(
+        (value: string | string[] | null) => {
+            const nextSkippedQuestions = removeQuestionFromSet(currentQuestion.id, skippedQuestionsRef.current)
+            if (nextSkippedQuestions !== skippedQuestionsRef.current) {
+                setSkippedQuestions(nextSkippedQuestions)
+                skippedQuestionsRef.current = nextSkippedQuestions
+            }
+
+            if (value === null) {
+                const updatedAnswers = { ...answersRef.current }
+                delete updatedAnswers[currentQuestion.id]
+                setAnswers(updatedAnswers)
+                answersRef.current = updatedAnswers
+                return
+            }
+
+            const updatedAnswers = { ...answersRef.current, [currentQuestion.id]: value }
             setAnswers(updatedAnswers)
-            advanceToNextQuestion(updatedAnswers)
+            advanceToNextQuestion(updatedAnswers, confirmedQuestionsRef.current, nextSkippedQuestions)
         },
-        [answers, currentQuestion, advanceToNextQuestion]
+        [currentQuestion, advanceToNextQuestion]
     )
 
-    const handleCustomSubmit = useCallback(
-        (value: string) => {
-            // Store the custom input text and use it as the answer
-            setCustomInputs((prev) => ({ ...prev, [currentQuestion.id]: value }))
-            const updatedAnswers = { ...answers, [currentQuestion.id]: value }
-            setAnswers(updatedAnswers)
-            advanceToNextQuestion(updatedAnswers)
+    const handleFieldChange = useCallback(
+        (fieldId: string, value: string | string[]) => {
+            const nextSkippedQuestions = removeQuestionFromSet(currentQuestion.id, skippedQuestionsRef.current)
+            if (nextSkippedQuestions !== skippedQuestionsRef.current) {
+                setSkippedQuestions(nextSkippedQuestions)
+                skippedQuestionsRef.current = nextSkippedQuestions
+            }
+            setAnswers((prev) => ({ ...prev, [fieldId]: value }))
         },
-        [answers, currentQuestion, advanceToNextQuestion]
+        [currentQuestion.id]
     )
+
+    const handleMultiSelectChange = useCallback(
+        (value: string[]) => {
+            const nextSkippedQuestions = removeQuestionFromSet(currentQuestion.id, skippedQuestionsRef.current)
+            if (nextSkippedQuestions !== skippedQuestionsRef.current) {
+                setSkippedQuestions(nextSkippedQuestions)
+                skippedQuestionsRef.current = nextSkippedQuestions
+            }
+            const nextConfirmedQuestions = removeQuestionFromSet(currentQuestion.id, confirmedQuestionsRef.current)
+            if (nextConfirmedQuestions !== confirmedQuestionsRef.current) {
+                setConfirmedQuestions(nextConfirmedQuestions)
+                confirmedQuestionsRef.current = nextConfirmedQuestions
+            }
+            const updatedAnswers = { ...answersRef.current, [currentQuestion.id]: value }
+            setAnswers(updatedAnswers)
+            answersRef.current = updatedAnswers
+        },
+        [currentQuestion.id]
+    )
+
+    const handleMultiFieldSubmit = useCallback(() => {
+        const nextConfirmedQuestions = new Set(confirmedQuestionsRef.current)
+        nextConfirmedQuestions.add(currentQuestion.id)
+        setConfirmedQuestions(nextConfirmedQuestions)
+        confirmedQuestionsRef.current = nextConfirmedQuestions
+
+        const nextSkippedQuestions = removeQuestionFromSet(currentQuestion.id, skippedQuestionsRef.current)
+        if (nextSkippedQuestions !== skippedQuestionsRef.current) {
+            setSkippedQuestions(nextSkippedQuestions)
+            skippedQuestionsRef.current = nextSkippedQuestions
+        }
+
+        advanceToNextQuestion(answersRef.current, nextConfirmedQuestions, nextSkippedQuestions)
+    }, [advanceToNextQuestion, currentQuestion])
+
+    const handleSkipQuestion = useCallback(() => {
+        const updatedAnswers = getClearedAnswersForQuestion(currentQuestion, answersRef.current)
+        setAnswers(updatedAnswers)
+
+        const nextSkippedQuestions = new Set(skippedQuestionsRef.current)
+        nextSkippedQuestions.add(currentQuestion.id)
+        setSkippedQuestions(nextSkippedQuestions)
+        skippedQuestionsRef.current = nextSkippedQuestions
+
+        const nextConfirmedQuestions = removeQuestionFromSet(currentQuestion.id, confirmedQuestionsRef.current)
+        if (nextConfirmedQuestions !== confirmedQuestionsRef.current) {
+            setConfirmedQuestions(nextConfirmedQuestions)
+            confirmedQuestionsRef.current = nextConfirmedQuestions
+        }
+
+        advanceToNextQuestion(updatedAnswers, nextConfirmedQuestions, nextSkippedQuestions)
+    }, [advanceToNextQuestion, currentQuestion])
+
+    const handleDismissForm = useCallback(() => {
+        setSubmissionState('dismissing')
+        continueAfterFormDismissal()
+    }, [continueAfterFormDismissal])
 
     const handleTabClick = useCallback((index: number) => {
         setCurrentQuestionIndex(index)
     }, [])
 
-    if (!currentQuestion || isSubmitting) {
+    if (!currentQuestion || submissionState !== 'idle') {
         return (
             <div className="flex items-center gap-2 text-muted p-3">
                 <Spinner className="size-4" />
-                <span>Submitting answers...</span>
+                <span>{submissionState === 'dismissing' ? 'Dismissing form...' : 'Submitting answers...'}</span>
             </div>
         )
     }
@@ -101,21 +274,29 @@ function MultiQuestionFormInput({ form, initialAnswers = {} }: MultiQuestionForm
     return (
         <div className="flex flex-col gap-2 p-3">
             {questions.length > 1 && (
-                <div className="w-full">
-                    <Tabs
-                        size="xsmall"
-                        activeKey={currentQuestionIndex}
-                        onChange={handleTabClick}
-                        tabs={questions.map((question, index) => {
-                            return {
-                                key: index,
-                                label: question.title,
-                                completed: answers[question.id] !== undefined,
-                            }
-                        })}
-                        className="w-[calc(100%+var(--spacing-3))] -mx-3 [&>ul]:pl-3 -mt-2.5"
-                    />
-                </div>
+                <Tabs
+                    size="xsmall"
+                    activeKey={currentQuestionIndex}
+                    onChange={handleTabClick}
+                    tabs={questions.map((question, index) => {
+                        return {
+                            key: index,
+                            label: question.title,
+                            completed: isQuestionComplete(question, answers, confirmedQuestions, skippedQuestions),
+                        }
+                    })}
+                    className="w-[calc(100%+var(--spacing-3))] -mx-3 [&>ul]:pl-3 -mt-2.5"
+                    rightSlot={
+                        <Button
+                            size="xsmall"
+                            type="tertiary"
+                            icon={<IconX />}
+                            onClick={handleDismissForm}
+                            aria-label="Dismiss form"
+                        />
+                    }
+                    rightSlotClassName="pr-1 bg-unset"
+                />
             )}
             <div
                 className="transition-[height] duration-150 motion-reduce:transition-none"
@@ -123,22 +304,43 @@ function MultiQuestionFormInput({ form, initialAnswers = {} }: MultiQuestionForm
                 style={{ height: contentHeight }}
             >
                 <div ref={contentRef}>
-                    <div
-                        key={currentQuestion.id}
-                        className="flex flex-col gap-3 starting:opacity-0 opacity-100 transition-[opacity] duration-150 motion-reduce:transition-none"
-                    >
-                        <div className="font-medium text-sm">{currentQuestion.question}</div>
-                        <OptionSelector
-                            options={options}
-                            onSelect={handleSelect}
-                            allowCustom={allowCustomAnswer}
-                            customPlaceholder="Type your answer..."
-                            onCustomSubmit={handleCustomSubmit}
-                            initialCustomValue={customInputs[currentQuestion.id]}
-                            selectedValue={answers[currentQuestion.id]}
-                            submitLabel={allQuestionsAnswered ? 'Submit' : 'Next'}
-                        />
-                    </div>
+                    {questions.map((q, index) => {
+                        const active = index === currentQuestionIndex
+                        const qIsMultiField = q.type === 'multi_field' || !!(q.fields && q.fields.length > 0)
+
+                        return (
+                            <div
+                                key={q.id}
+                                className={
+                                    active
+                                        ? 'flex flex-col gap-3 starting:opacity-0 opacity-100 transition-[opacity] duration-150 motion-reduce:transition-none'
+                                        : 'hidden'
+                                }
+                            >
+                                <div className="font-medium text-sm">{q.question}</div>
+                                {qIsMultiField ? (
+                                    <MultiFieldQuestion
+                                        question={q}
+                                        answers={answers}
+                                        onFieldChange={handleFieldChange}
+                                        onSubmit={handleMultiFieldSubmit}
+                                        onSkip={handleSkipQuestion}
+                                        submitLabel={allQuestionsCompleted ? 'Submit' : 'Next'}
+                                    />
+                                ) : (
+                                    <QuestionField
+                                        question={q}
+                                        value={answers[q.id]}
+                                        onAnswer={handleSingleFieldAnswer}
+                                        onChange={handleMultiSelectChange}
+                                        onSubmit={handleMultiFieldSubmit}
+                                        onSkip={handleSkipQuestion}
+                                        submitLabel={allQuestionsCompleted ? 'Submit' : 'Next'}
+                                    />
+                                )}
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
         </div>
@@ -158,7 +360,7 @@ function DangerousOperationInput({ operation }: DangerousOperationInputProps): J
         { label: 'Reject this operation', value: 'reject', icon: <IconX /> },
     ]
 
-    const handleSelect = (value: string): void => {
+    const handleSelect = (value: string | null): void => {
         if (value === 'approve') {
             setStatus('approving')
             continueAfterApproval(operation.proposalId)
@@ -208,10 +410,37 @@ function DangerousOperationInput({ operation }: DangerousOperationInputProps): J
     )
 }
 
+/**
+ * Compact badge showing the active ACP permission mode (e.g. plan vs default) for sandbox
+ * conversations. Hidden when no mode has been reported. Reads the mode via `maxThreadLogic`'s
+ * alias — this renders outside ThreadView's BindLogic subtree, so it cannot bind the keyed
+ * stream logic itself.
+ */
+export function SandboxModeBadge(): JSX.Element | null {
+    const { conversation, sandboxCurrentMode } = useValues(maxThreadLogic)
+
+    if (conversation?.agent_runtime !== 'sandbox' || !sandboxCurrentMode) {
+        return null
+    }
+
+    const isPlan = sandboxCurrentMode === 'plan'
+    return (
+        <Tag size="small" type={isPlan ? 'highlight' : 'muted'}>
+            {isPlan ? 'Plan mode' : 'Default mode'}
+        </Tag>
+    )
+}
+
 export function InputFormArea(): JSX.Element | null {
     // Use raw state values instead of selector to ensure re-renders on state changes
-    const { activeMultiQuestionForm, pendingApprovalProposalId, pendingApprovalsData, resolvedApprovalStatuses } =
-        useValues(maxThreadLogic)
+    const {
+        activeMultiQuestionForm,
+        pendingApprovalProposalId,
+        pendingApprovalsData,
+        resolvedApprovalStatuses,
+        sandboxConversationKey,
+        pendingSandboxPermissionRequest,
+    } = useValues(maxThreadLogic)
 
     // Build the approval object to display - only show if not yet resolved
     // Resolved approvals are shown as summaries in the chat thread, not in the input area
@@ -235,6 +464,31 @@ export function InputFormArea(): JSX.Element | null {
             payload: approval.payload as Record<string, unknown>,
         }
     }, [pendingApprovalProposalId, pendingApprovalsData, resolvedApprovalStatuses])
+
+    // Sandbox permission requests take precedence in the input area, mirroring the LangGraph
+    // dangerous-operation flow but driven by runStreamLogic. A pending request only ever
+    // originates from the sandbox stream, so its presence is sufficient — gating on `agent_runtime`
+    // would strand approvals on new conversations whose runtime isn't resolved yet.
+    if (pendingSandboxPermissionRequest) {
+        // An `AskUserQuestion` rides the same permission rails but is a question, not an approval —
+        // render the interactive question overlay instead of the approve/decline card.
+        if (pendingSandboxPermissionRequest.questions?.length) {
+            return (
+                <QuestionInput
+                    key={pendingSandboxPermissionRequest.requestId}
+                    streamKey={sandboxConversationKey}
+                    request={pendingSandboxPermissionRequest}
+                />
+            )
+        }
+        return (
+            <PermissionInput
+                key={pendingSandboxPermissionRequest.requestId}
+                streamKey={sandboxConversationKey}
+                request={pendingSandboxPermissionRequest}
+            />
+        )
+    }
 
     if (activeDangerousOperationApproval) {
         return (

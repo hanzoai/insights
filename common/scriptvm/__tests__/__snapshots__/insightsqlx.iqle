@@ -31,5 +31,5 @@ false, 42, 3, 32, "right", 36, 0, 32, "email", 45, 32, "op", 32, "==", 42, 4, 43
 "__hx_ast", 32, "JoinExpr", 32, "table", 32, "__hx_ast", 32, "Field", 32, "chain", 32, "events", 43, 1, 32,
 "from_asterisk", 33, false, 42, 3, 42, 2, 32, "where", 32, "name", 32, "__hx_ast", 32, "Constant", 32, "value", 32,
 "John", 42, 2, 32, "email", 32, "__hx_ast", 32, "Constant", 32, "value", 32, "john@gmail.com", 42, 2, 42, 2, 36, 3, 54,
-1, 42, 5, 36, 6, 36, 0, 54, 1, 35, 36, 7, 36, 0, 54, 1, 35, 36, 7, 2, "jsonStringify", 1, 32, "HogQLXAttribute", 21, 40,
+1, 42, 5, 36, 6, 36, 0, 54, 1, 35, 36, 7, 36, 0, 54, 1, 35, 36, 7, 2, "jsonStringify", 1, 32, "InsightsQLXAttribute", 21, 40,
 4, 32, "FAILED", 39, 2, 32, "PASSED", 2, "print", 1, 35, 35, 35, 35, 35, 35, 35, 35, 35]

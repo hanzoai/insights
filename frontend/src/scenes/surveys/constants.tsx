@@ -1,7 +1,7 @@
 import { IconComment } from '@hanzo/icons'
 
 import { IconAreaChart, IconGridView, IconLink, IconListView } from 'lib/elements/icons'
-import { allOperatorsMapping } from 'lib/utils'
+import { allOperatorsMapping } from 'lib/utils/operators'
 
 import {
     AccessControlLevel,
@@ -22,6 +22,14 @@ import { QuickSurveyContext, QuickSurveyType } from './quick-create/types'
 export const SURVEY_PAGE_SIZE = 100
 
 export const LINK_PAGE_SIZE = 100
+
+// Max recurring-survey iterations. Mirrors MAX_ITERATION_COUNT in products/surveys/backend/models.py,
+// which caps the generated iteration windows (and the API enforces the same limit).
+export const MAX_ITERATION_COUNT = 500
+
+// Stamped into a translation's choices/text fields when the editor auto-fills a spot that needs
+// a human translation. Must never be treated as real translated content.
+export const TRANSLATION_NEEDED_PLACEHOLDER = '[Translation needed]'
 
 export const SurveyQuestionLabel: Record<SurveyQuestionType, string> = {
     [SurveyQuestionType.Open]: 'Freeform text',
@@ -170,38 +178,39 @@ export const defaultSurveyFieldValues = {
     },
 }
 
-export interface NewSurvey
-    extends Pick<
-        Survey,
-        | 'name'
-        | 'description'
-        | 'type'
-        | 'conditions'
-        | 'questions'
-        | 'start_date'
-        | 'end_date'
-        | 'linked_flag'
-        | 'targeting_flag'
-        | 'archived'
-        | 'appearance'
-        | 'targeting_flag_filters'
-        | 'responses_limit'
-        | 'iteration_count'
-        | 'iteration_frequency_days'
-        | 'iteration_start_dates'
-        | 'current_iteration'
-        | 'response_sampling_start_date'
-        | 'response_sampling_interval_type'
-        | 'response_sampling_interval'
-        | 'response_sampling_limit'
-        | 'schedule'
-        | 'enable_partial_responses'
-        | 'enable_iframe_embedding'
-        | 'user_access_level'
-        | 'headline_summary'
-        | 'headline_response_count'
-        | 'form_content'
-    > {
+export interface NewSurvey extends Pick<
+    Survey,
+    | 'name'
+    | 'description'
+    | 'type'
+    | 'conditions'
+    | 'questions'
+    | 'start_date'
+    | 'end_date'
+    | 'linked_flag'
+    | 'targeting_flag'
+    | 'archived'
+    | 'appearance'
+    | 'targeting_flag_filters'
+    | 'responses_limit'
+    | 'iteration_count'
+    | 'iteration_frequency_days'
+    | 'iteration_start_dates'
+    | 'current_iteration'
+    | 'response_sampling_start_date'
+    | 'response_sampling_interval_type'
+    | 'response_sampling_interval'
+    | 'response_sampling_limit'
+    | 'schedule'
+    | 'enable_partial_responses'
+    | 'enable_iframe_embedding'
+    | 'user_access_level'
+    | 'headline_summary'
+    | 'headline_response_count'
+    | 'form_content'
+    | 'translations'
+    | 'base_language'
+> {
     id: 'new'
     linked_flag_id: number | null
 }
@@ -237,6 +246,7 @@ export const NEW_SURVEY: NewSurvey = {
     enable_partial_responses: true,
     user_access_level: AccessControlLevel.Editor,
     form_content: null,
+    base_language: 'en',
 }
 
 export enum SurveyTemplateType {
@@ -253,7 +263,11 @@ export enum SurveyTemplateType {
     OnboardingFeedback = 'Onboarding feedback',
     BetaFeedback = 'Beta feedback',
     Announcement = 'Announcement',
+    UserResearchIntake = 'User research intake',
+    ProductResearch = 'Product research',
 }
+
+export type SurveyTemplateMode = 'in_app' | 'hosted'
 
 export interface QuickSurveyFromTemplate {
     context: QuickSurveyContext
@@ -268,6 +282,8 @@ export type SurveyTemplate = Partial<Survey> & {
     badge?: string
     featured?: boolean
     quickSurvey?: QuickSurveyFromTemplate
+    // Which template modes this template should appear in. Omitted = available in all modes.
+    modes?: SurveyTemplateMode[]
 }
 
 export const defaultSurveyTemplates: SurveyTemplate[] = [
@@ -294,8 +310,8 @@ export const defaultSurveyTemplates: SurveyTemplate[] = [
         questions: [
             {
                 type: SurveyQuestionType.Link,
-                question: 'Custom mode is now available!',
-                description: 'Try out the latest features.',
+                question: 'Script mode is now available!',
+                description: 'You can never have too many mascots.',
                 descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
                 buttonText: 'Check it out 👉',
                 link: null,
@@ -310,6 +326,7 @@ export const defaultSurveyTemplates: SurveyTemplate[] = [
         category: 'Business',
         badge: 'New!',
         featured: true,
+        modes: ['in_app'],
         quickSurvey: {
             context: { type: QuickSurveyType.ANNOUNCEMENT },
             modalTitle: 'New announcement',
@@ -511,6 +528,7 @@ export const defaultSurveyTemplates: SurveyTemplate[] = [
         description: 'Get user context when errors occur to debug faster.',
         tagType: 'default',
         category: 'General',
+        modes: ['in_app'],
         appearance: {
             ...defaultSurveyAppearance,
             surveyPopupDelaySeconds: 2,
@@ -576,6 +594,7 @@ export const defaultSurveyTemplates: SurveyTemplate[] = [
         description: "Capture first impressions while they're fresh.",
         tagType: 'primary',
         category: 'Product',
+        modes: ['in_app'],
         appearance: defaultSurveyAppearance,
     },
     {
@@ -616,6 +635,105 @@ export const defaultSurveyTemplates: SurveyTemplate[] = [
         tagType: 'primary',
         category: 'Product',
         appearance: defaultSurveyAppearance,
+    },
+    {
+        type: SurveyType.ExternalSurvey,
+        templateType: SurveyTemplateType.UserResearchIntake,
+        questions: [
+            {
+                type: SurveyQuestionType.SingleChoice,
+                question: 'Would you be open to a 30-minute conversation with our team?',
+                description: 'We are exploring how customers use our product and would love to hear from you.',
+                descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
+                choices: ['Yes, I am interested', 'Maybe later', 'No thanks'],
+                skipSubmitButton: true,
+            },
+            {
+                type: SurveyQuestionType.Open,
+                question: 'What is the best email to reach you at?',
+                description: 'We will send a calendar invite within one business day.',
+                descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
+                buttonText: 'Submit',
+            },
+            {
+                type: SurveyQuestionType.Open,
+                question: 'Anything specific you would like to talk about?',
+                description: 'Optional. Helps us prepare for the call.',
+                descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
+                optional: true,
+                buttonText: 'Send',
+            },
+        ],
+        appearance: {
+            ...defaultSurveyAppearance,
+            displayThankYouMessage: true,
+            thankYouMessageHeader: 'Thanks — we will be in touch shortly!',
+            allowGoBack: true,
+        },
+        description: 'Recruit research participants via a shareable link.',
+        tagType: 'completion',
+        category: 'Business',
+        modes: ['hosted'],
+    },
+    {
+        type: SurveyType.ExternalSurvey,
+        templateType: SurveyTemplateType.ProductResearch,
+        questions: [
+            {
+                type: SurveyQuestionType.SingleChoice,
+                question: 'How would you describe your role?',
+                choices: ['Founder / leadership', 'Product manager', 'Engineer', 'Designer', 'Marketing', 'Other'],
+                hasOpenChoice: true,
+                skipSubmitButton: true,
+            },
+            {
+                type: SurveyQuestionType.SingleChoice,
+                question: 'How often do you use the product?',
+                choices: ['Daily', 'A few times a week', 'A few times a month', 'Rarely', 'Never'],
+                skipSubmitButton: true,
+            },
+            {
+                type: SurveyQuestionType.Rating,
+                question: 'How likely are you to recommend us to a colleague?',
+                description: '',
+                descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
+                display: 'number',
+                scale: SURVEY_RATING_SCALE.NPS_10_POINT,
+                lowerBoundLabel: 'Not at all likely',
+                upperBoundLabel: 'Extremely likely',
+                isNpsQuestion: true,
+                skipSubmitButton: true,
+            },
+            {
+                type: SurveyQuestionType.Open,
+                question: 'What is the single biggest benefit you get from our product?',
+                description: '',
+                descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
+            },
+            {
+                type: SurveyQuestionType.Open,
+                question: 'What would you like us to improve next?',
+                description: '',
+                descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
+            },
+            {
+                type: SurveyQuestionType.Open,
+                question: 'What would you use instead if our product did not exist?',
+                description: '',
+                descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
+                optional: true,
+            },
+        ],
+        appearance: {
+            ...defaultSurveyAppearance,
+            displayThankYouMessage: true,
+            thankYouMessageHeader: 'Thanks for sharing your perspective!',
+            allowGoBack: true,
+        },
+        description: 'Go deep on segmentation, satisfaction, and roadmap signal.',
+        tagType: 'primary',
+        category: 'Product',
+        modes: ['hosted'],
     },
 ]
 
@@ -805,3 +923,17 @@ export const surveyThemes: SurveyTheme[] = [
         },
     },
 ]
+
+export function getMatchingSurveyThemeId(appearance?: Partial<SurveyAppearance> | null): string | null {
+    if (!appearance) {
+        return 'clean'
+    }
+
+    const matchingTheme = surveyThemes.find(
+        (theme) =>
+            theme.appearance.backgroundColor === appearance.backgroundColor &&
+            theme.appearance.submitButtonColor === appearance.submitButtonColor
+    )
+
+    return matchingTheme?.id ?? null
+}

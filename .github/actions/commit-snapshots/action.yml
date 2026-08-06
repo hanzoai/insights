@@ -1,5 +1,5 @@
 name: Commit Aggregated Snapshots
-description: Applies snapshot patches, counts changes, commits, and posts PR comment
+description: Applies snapshot patches, counts changes, commits, and updates the CI report
 
 inputs:
     workflow-type:
@@ -29,6 +29,10 @@ inputs:
     github-token:
         description: 'GitHub token for authentication'
         required: true
+    extra-files:
+        description: 'Additional file paths to include in the commit (space-separated)'
+        required: false
+        default: ''
 
 outputs:
     committed:
@@ -54,10 +58,15 @@ runs:
                   echo "::group::Applying snapshot patches"
                   echo "Applying patches from $PATCH_PATH..."
                   for patch in $PATCHES; do
-                    echo "Applying $patch"
-                    git apply --index "$patch"
+                    if git apply --check "$patch" 2>/dev/null; then
+                      echo "Applying $patch"
+                      git apply --index "$patch"
+                    elif git apply --reverse --check "$patch" 2>/dev/null; then
+                      echo "Skipping $patch (already applied)"
+                    else
+                      echo "::warning::Patch $patch could not be applied — skipping"
+                    fi
                   done
-                  echo "Applied all patches successfully"
                   echo "::endgroup::"
                 else
                   echo "No patch files found in $PATCH_PATH"
@@ -70,8 +79,6 @@ runs:
           shell: bash
           run: |
               git config --global --add safe.directory '*'
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
 
         - name: Verify branch hasn't advanced
           id: verify
@@ -96,24 +103,25 @@ runs:
               fi
               echo "::endgroup::"
 
-        - name: Post skip comment
+        - name: Post skipped snapshot update to CI report
           if: steps.verify.outputs.branch-advanced == 'true'
           shell: bash
           env:
-              GH_TOKEN: ${{ inputs.github-token }}
+              GITHUB_TOKEN: ${{ github.token }}
               TESTED_SHA: ${{ inputs.commit-sha }}
               CURRENT_SHA: ${{ steps.verify.outputs.current-sha }}
-              PR_NUMBER: ${{ inputs.pr-number }}
+              WORKFLOW_TYPE: ${{ inputs.workflow-type }}
+              REPOSITORY: ${{ inputs.repository }}
           run: |
-              gh pr comment $PR_NUMBER --body "⏭️ Skipped snapshot commit because branch advanced to \`${CURRENT_SHA:0:7}\` while workflow was testing \`${TESTED_SHA:0:7}\`.
+              node .github/scripts/post-snapshot-section.mjs \
+                "$WORKFLOW_TYPE" \
+                "skip" \
+                '{}' \
+                "$REPOSITORY" \
+                "$TESTED_SHA" \
+                "$CURRENT_SHA"
 
-              The new commit will trigger its own snapshot update workflow.
-
-              **If you expected this workflow to succeed:** This can happen due to concurrent commits. To get a fresh workflow run, either:
-              - Merge main into your branch, or
-              - Push an empty commit: \`git commit --allow-empty -m 'trigger CI' && git push\`"
-
-        - name: Count and commit changes
+        - name: Count changes and disable auto-merge
           id: commit
           if: steps.verify.outputs.branch-advanced == 'false'
           shell: bash
@@ -121,8 +129,6 @@ runs:
               GH_TOKEN: ${{ inputs.github-token }}
               SNAPSHOT_PATH: ${{ inputs.snapshot-path }}
               PR_NUMBER: ${{ inputs.pr-number }}
-              COMMIT_MESSAGE: ${{ inputs.commit-message }}
-              BRANCH_NAME: ${{ inputs.branch-name }}
           run: |
               CHANGES_JSON=$(.github/scripts/count-snapshot-changes.sh $SNAPSHOT_PATH)
               echo "changes=$CHANGES_JSON" >> $GITHUB_OUTPUT
@@ -134,41 +140,50 @@ runs:
                 # This ensures auto-merge is disabled even if workflow gets cancelled after push
                 gh pr merge --disable-auto $PR_NUMBER || echo "Auto-merge was not enabled"
                 echo "::notice::🔒 Auto-merge disabled - snapshot changes require manual review"
-
-                # Now commit and push
-                git add $SNAPSHOT_PATH -A
-                git commit -m "$COMMIT_MESSAGE"
-                # Push directly - SHA verification already ensured we're up to date
-                git push origin HEAD:"$BRANCH_NAME" --quiet
-                SNAPSHOT_SHA=$(git rev-parse HEAD)
-                echo "::notice::📸 Committed snapshot changes"
                 echo "committed=true" >> $GITHUB_OUTPUT
-                echo "snapshot-sha=$SNAPSHOT_SHA" >> $GITHUB_OUTPUT
               else
                 echo "No snapshot changes to commit"
                 echo "committed=false" >> $GITHUB_OUTPUT
               fi
 
-        - name: Post snapshot comment
+        - name: Commit snapshots via GitHub API (signed)
+          id: ghcommit
+          if: steps.commit.outputs.committed == 'true'
+          uses: planetscale/ghcommit-action@25309d8005ac7c3bcd61d3fe19b69e0fe47dbdde # v0.2.20
+          with:
+              commit_message: ${{ inputs.commit-message }}
+              repo: ${{ inputs.repository }}
+              branch: ${{ inputs.branch-name }}
+              file_pattern: '${{ inputs.snapshot-path }} ${{ inputs.extra-files }}'
+          env:
+              GITHUB_TOKEN: ${{ inputs.github-token }}
+
+        - name: Post snapshot section to CI report comment
           if: steps.commit.outputs.committed == 'true'
           shell: bash
           env:
-              GH_TOKEN: ${{ inputs.github-token }}
-              SNAPSHOT_SHA: ${{ steps.commit.outputs.snapshot-sha }}
-              PR_NUMBER: ${{ inputs.pr-number }}
+              # Deliberately the workflow token, NOT inputs.github-token (an app token):
+              # the report engine only recognizes comments authored by github-actions[bot],
+              # so a section posted under an app identity would be invisible to its own
+              # verify pass and spawn duplicate report comments.
+              GITHUB_TOKEN: ${{ github.token }}
+              SNAPSHOT_SHA: ${{ steps.ghcommit.outputs.commit-hash }}
               COMMIT_SHA: ${{ inputs.commit-sha }}
               WORKFLOW_TYPE: ${{ inputs.workflow-type }}
               CHANGES: ${{ steps.commit.outputs.changes }}
               REPOSITORY: ${{ inputs.repository }}
           run: |
-              .github/scripts/post-snapshot-comment.js \
-                "$WORKFLOW_TYPE" \
-                "update" \
-                "$CHANGES" \
-                "$PR_NUMBER" \
-                "$REPOSITORY" \
-                "$COMMIT_SHA" \
-                "$SNAPSHOT_SHA"
+              if [ -f .github/scripts/post-snapshot-section.mjs ]; then
+                  node .github/scripts/post-snapshot-section.mjs \
+                    "$WORKFLOW_TYPE" \
+                    "update" \
+                    "$CHANGES" \
+                    "$REPOSITORY" \
+                    "$COMMIT_SHA" \
+                    "$SNAPSHOT_SHA"
+              else
+                  echo "Skipping snapshot section — script not present on this checkout"
+              fi
 
         - name: Fail workflow to signal snapshot changes
           if: steps.commit.outputs.committed == 'true'

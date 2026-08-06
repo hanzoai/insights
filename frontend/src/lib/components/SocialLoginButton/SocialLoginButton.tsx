@@ -6,13 +6,13 @@ import { SSO_PROVIDER_NAMES } from 'lib/constants'
 import { Button, ButtonWithoutSideActionProps } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
 import { Tag } from 'lib/elements/Tag'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
-import { BeginPasskeyLoginParams, passkeyLogic } from 'scenes/authentication/passkeyLogic'
+import { preflightLogic } from 'lib/logic/preflightLogic'
+import { BeginPasskeyLoginParams, passkeyLogic } from 'scenes/authentication/shared/passkeyLogic'
 
 import { LoginMethod, SSOProvider } from '~/types'
 
-import { SocialLoginIcon } from './SocialLoginIcon'
 import passkeyLogo from './passkey.svg'
+import { SocialLoginIcon } from './SocialLoginIcon'
 
 interface SocialLoginLinkProps {
     provider: SSOProvider

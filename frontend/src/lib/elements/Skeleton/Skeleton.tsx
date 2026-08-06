@@ -1,7 +1,8 @@
 import './Skeleton.scss'
 
+import { useCancelAnimationsOnUnmount } from 'lib/hooks/useCancelAnimationsOnUnmount'
 import { ButtonProps } from 'lib/elements/Button'
-import { range } from 'lib/utils'
+import { range } from 'lib/utils/arrays'
 import { cn } from 'lib/utils/css-classes'
 
 export interface SkeletonProps {
@@ -12,27 +13,42 @@ export interface SkeletonProps {
     fade?: boolean
     active?: boolean
 }
-export function Skeleton({ className, repeat, active = true, fade = false }: SkeletonProps): JSX.Element {
-    const content = (
-        <div className={cn('Skeleton rounded', !active && 'Skeleton--static', className || 'h-4 w-full')}>
+
+// Extracted as its own component so each `repeat={N}` instance gets its own
+// ref + `useCancelAnimationsOnUnmount` hook. Inlining this back into
+// `Skeleton` would mean the same JSX is reused across N repeats, all
+// sharing one ref — only the last-mounted skeleton would have its animations
+// cancelled, silently disabling the leak fix for the repeat case.
+function SkeletonItem({
+    className,
+    active = true,
+}: Pick<SkeletonProps, 'className' | 'active'>): JSX.Element {
+    const ref = useCancelAnimationsOnUnmount<HTMLDivElement>()
+    return (
+        <div
+            ref={ref}
+            className={cn('Skeleton rounded', !active && 'Skeleton--static', className || 'h-4 w-full')}
+        >
             {/* The span is for accessibility, but also because @storybook/test-runner smoke tests require content */}
             <span>Loading…</span>
         </div>
     )
+}
 
+export function Skeleton({ className, repeat, active = true, fade = false }: SkeletonProps): JSX.Element {
     if (repeat) {
         return (
             <>
                 {range(repeat).map((i) => (
                     // eslint-disable-next-line react/forbid-dom-props
                     <div key={i} style={fade ? { opacity: 1 - i / repeat } : undefined}>
-                        {content}
+                        <SkeletonItem className={className} active={active} />
                     </div>
                 ))}
             </>
         )
     }
-    return content
+    return <SkeletonItem className={className} active={active} />
 }
 
 Skeleton.Text = function SkeletonText({ className, ...props }: SkeletonProps) {

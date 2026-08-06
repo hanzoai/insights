@@ -3,10 +3,10 @@ import { Meta } from '@storybook/react'
 import { Label } from 'lib/elements/Label/Label'
 import { Modal } from 'lib/elements/Modal'
 
-import { Skeleton } from './Skeleton'
+import { Skeleton, SkeletonProps } from './Skeleton'
 
-const meta: Meta<typeof Skeleton> = {
-    title: 'Elements/Skeleton',
+const meta: Meta<SkeletonProps> = {
+    title: 'Lemon UI/Lemon Skeleton',
     component: Skeleton,
     parameters: {
         docs: {

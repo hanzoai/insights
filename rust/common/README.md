@@ -1,4 +1,4 @@
-# Common crates for the fn-rs services
+# Common crates for the script-rs services
 
 This folder holds internal crates for code reuse between services in the monorepo. To keep maintenance costs low,
 these crates should ideally:

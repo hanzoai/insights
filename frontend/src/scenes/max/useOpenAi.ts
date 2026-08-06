@@ -1,6 +1,5 @@
-import { useActions, useValues } from 'kea'
+import { useValues } from 'kea'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { urls } from 'scenes/urls'
 
@@ -11,41 +10,30 @@ import { PENDING_MAX_CONTEXT_KEY } from './maxLogic'
 import { MaxOpenContext, convertToMaxUIContext } from './utils'
 
 export interface UseOpenAiReturn {
-    /** Whether the AI side panel is currently open */
+    /** Whether the Max side panel is currently open */
     isMaxOpen: boolean
-    /** Function to open AI - either as new tab (if flag enabled) or side panel */
+    /** Function to open AI in a new tab */
     openAi: (initialPrompt?: string, context?: MaxOpenContext) => void
 }
 
-/**
- * Hook that abstracts opening Insights AI.
- * When UX_REMOVE_SIDEPANEL flag is enabled, opens AI in a new tab.
- * Otherwise, opens the AI side panel.
- */
 export function useOpenAi(): UseOpenAiReturn {
-    const { openSidePanel } = useActions(sidePanelStateLogic)
     const { sidePanelOpen, selectedTab } = useValues(sidePanelStateLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
 
     const isMaxOpen = sidePanelOpen && selectedTab === SidePanelTab.Max
 
     const openAi = (initialPrompt?: string, context?: MaxOpenContext): void => {
-        if (isRemovingSidePanelFlag) {
-            if (context) {
-                try {
-                    const storedContext = {
-                        context: convertToMaxUIContext(context),
-                        timestamp: Date.now(),
-                    }
-                    sessionStorage.setItem(PENDING_MAX_CONTEXT_KEY, JSON.stringify(storedContext))
-                } catch {
-                    // sessionStorage unavailable, silently fail, agent will handle it
+        if (context) {
+            try {
+                const storedContext = {
+                    context: convertToMaxUIContext(context),
+                    timestamp: Date.now(),
                 }
+                sessionStorage.setItem(PENDING_MAX_CONTEXT_KEY, JSON.stringify(storedContext))
+            } catch {
+                // sessionStorage unavailable, silently fail, agent will handle it
             }
-            newInternalTab(urls.ai(undefined, initialPrompt))
-        } else {
-            openSidePanel(SidePanelTab.Max, initialPrompt)
         }
+        newInternalTab(urls.ai(undefined, initialPrompt))
     }
 
     return {

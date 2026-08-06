@@ -1,22 +1,19 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import { Markdown as MarkdownComponent, MarkdownProps } from './Markdown'
+import { MarkdownWithMermaid } from './MarkdownWithMermaid'
 
-type Story = StoryObj<typeof MarkdownComponent>
-const meta: Meta<typeof MarkdownComponent> = {
-    title: 'Elements/Markdown',
+type Story = StoryObj<MarkdownProps>
+const meta: Meta<MarkdownProps> = {
+    title: 'Lemon UI/Lemon Markdown',
     component: MarkdownComponent,
     tags: ['autodocs'],
 }
 export default meta
 
-const Template: StoryFn<typeof MarkdownComponent> = (props: MarkdownProps) => {
-    return <MarkdownComponent {...props} />
-}
-
-export const Default: Story = Template.bind({})
-Default.args = {
-    children: `# Lorem ipsum
+export const Default: Story = {
+    args: {
+        children: `# Lorem ipsum
 
 ## Linguae despexitque sine sua tibi
 
@@ -35,20 +32,22 @@ print("X")
 1. Quattuor creditur
 2. Veniebat patriaeque cavatu
 3. En anguem tamen`,
+    },
 }
 
-export const LowKeyHeadings: Story = Template.bind({})
-LowKeyHeadings.args = {
-    children: `# Level 1
+export const LowKeyHeadings: Story = {
+    args: {
+        children: `# Level 1
 ## Level 2
 
 **Strong** and *emphasized* text.`,
-    lowKeyHeadings: true,
+        lowKeyHeadings: true,
+    },
 }
 
-export const WithTables: Story = Template.bind({})
-WithTables.args = {
-    children: `# Analytics dashboard
+export const WithTables: Story = {
+    args: {
+        children: `# Analytics dashboard
 
 Here's a breakdown of our top traffic sources:
 
@@ -57,8 +56,8 @@ Here's a breakdown of our top traffic sources:
 | Direct | 362,389 | 45.2% |
 | Google | 122,910 | 15.3% |
 | hanzo.ai | 23,067 | 2.9% |
-| insights.hanzo.ai | 21,593 | 2.7% |
-| insights.hanzo.ai | 10,723 | 1.3% |
+| us.hanzo.ai | 21,593 | 2.7% |
+| eu.hanzo.ai | 10,723 | 1.3% |
 | LinkedIn | 5,255 | 0.7% |
 | GitHub | 4,019 | 0.5% |
 | Bing | 2,950 | 0.4% |
@@ -75,11 +74,12 @@ Here's a breakdown of our top traffic sources:
 | Other | 13,890 | 2.2% |
 
 *Data from the last 30 days*`,
+    },
 }
 
-export const GitHubFlavoredMarkdown: Story = Template.bind({})
-GitHubFlavoredMarkdown.args = {
-    children: `# GitHub-flavored Markdown features
+export const GitHubFlavoredMarkdown: Story = {
+    args: {
+        children: `# GitHub-flavored Markdown features
 
 ## Strikethrough text
 This text is ~~deleted~~ and this text is **bold**.
@@ -90,7 +90,7 @@ You can also combine ~~**bold and deleted**~~ text.
 Here's our development progress:
 
 - [x] Add remark-gfm plugin support
-- [x] Implement table styling  
+- [x] Implement table styling
 - [x] Create Storybook stories
 - [ ] Add comprehensive documentation
 - [ ] Performance optimization
@@ -99,25 +99,27 @@ Here's our development progress:
 ## Autolink literals
 Visit https://hanzo.ai for more information about our product.
 
-You can also check out our GitHub repository at https://github.com/hanzoai/insights
+You can also check out our GitHub repository at https://github.com/Insights/insights
 
 Email us at hello@hanzo.ai for support.`,
+    },
 }
 
-export const Strikethrough: Story = Template.bind({})
-Strikethrough.args = {
-    children: `# Text Formatting
+export const Strikethrough: Story = {
+    args: {
+        children: `# Text Formatting
 
 This is ~~incorrect~~ **correct** information.
 
 ~~The old way~~ → The new way
 
 You can combine ~~strikethrough~~ with *emphasis* and **bold** text.`,
+    },
 }
 
-export const TaskLists: Story = Template.bind({})
-TaskLists.args = {
-    children: `# Project Todo List
+export const TaskLists: Story = {
+    args: {
+        children: `# Project Todo List
 
 ## Sprint 1
 - [x] Setup project repository
@@ -126,7 +128,7 @@ TaskLists.args = {
 - [ ] Implement core features
 - [ ] Add comprehensive tests
 
-## Sprint 2  
+## Sprint 2
 - [ ] Performance optimization
 - [ ] Security audit
 - [ ] User acceptance testing
@@ -136,24 +138,58 @@ TaskLists.args = {
 - Use [x] for completed tasks
 - Use [ ] for pending tasks
 - Tasks can be nested and combined with other markdown`,
+    },
 }
 
-export const AutolinkLiterals: Story = Template.bind({})
-AutolinkLiterals.args = {
-    children: `# Automatic Links
+export const MermaidDiagrams: Story = {
+    render: (args) => <MarkdownWithMermaid {...args}>{args.children}</MarkdownWithMermaid>,
+    args: {
+        children: `# Mermaid diagrams
+
+Code fences with the \`mermaid\` language are rendered as diagrams when the surface uses \`MarkdownWithMermaid\`.
+
+## Flowchart
+
+\`\`\`mermaid
+flowchart LR
+    A[User] --> B{Has skill?}
+    B -- Yes --> C[Render markdown]
+    B -- No --> D[Show empty state]
+    C --> E[Done]
+    D --> E
+\`\`\`
+
+## Sequence diagram
+
+\`\`\`mermaid
+sequenceDiagram
+    participant U as User
+    participant S as Skill
+    participant L as Markdown
+    U->>S: Open skill
+    S->>L: Render body
+    L-->>U: Diagram + text
+\`\`\``,
+    },
+}
+
+export const AutolinkLiterals: Story = {
+    args: {
+        children: `# Automatic Links
 
 ## Websites
 Visit https://hanzo.ai to learn more about our platform.
 
 Check out our documentation at https://hanzo.ai/docs
 
-## Email Addresses  
+## Email Addresses
 Contact us at hello@hanzo.ai for general inquiries.
 
 For technical support: support@hanzo.ai
 
 ## Mixed Content
-Our GitHub repository (https://github.com/hanzoai/insights) contains the full source code.
+Our GitHub repository (https://github.com/Insights/insights) contains the full source code.
 
 For questions, email team@hanzo.ai or visit https://hanzo.ai/questions`,
+    },
 }

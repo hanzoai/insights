@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheckCircle, IconPlus, IconX } from '@hanzo/icons'
+import { IconCheckCircle, IconPlus, IconX, IconInfo } from '@hanzo/icons'
 import { Select, Switch } from '@hanzo/elements'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
@@ -16,20 +16,20 @@ import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { Label } from 'lib/elements/Label'
 import { Spinner } from 'lib/elements/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { timeZoneLabel } from 'lib/utils'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import { timeZoneLabel } from 'lib/utils/timezones'
 import { DatabaseTable } from 'scenes/data-management/database/DatabaseTable'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { NodeKind } from '~/queries/schema/schema-general'
 import { AnyPropertyFilter, BatchExportConfigurationTest, BatchExportConfigurationTestStep } from '~/types'
 
+import { batchExportConfigFormLogic } from './batchExportConfigFormLogic'
 import {
     BatchExportConfigurationClearChangesButton,
     BatchExportConfigurationSaveButton,
 } from './BatchExportConfigurationButtons'
 import { BatchExportGeneralEditFields, BatchExportsEditFields } from './BatchExportEditForm'
-import { batchExportConfigurationLogic } from './batchExportConfigurationLogic'
 import { BatchExportConfigurationForm } from './types'
 import { dayOptions, hourOptions } from './utils'
 
@@ -39,16 +39,15 @@ export function BatchExportConfiguration(): JSX.Element {
         batchExportConfigTest,
         batchExportConfigTestLoading,
         configuration,
-        configurationChanged,
         tables,
         batchExportConfig,
         selectedModel,
         runningStep,
         isDatabaseDestination,
         service,
-    } = useValues(batchExportConfigurationLogic)
+    } = useValues(batchExportConfigFormLogic)
     const { setSelectedModel, setConfigurationValue, runBatchExportConfigTestStep } =
-        useActions(batchExportConfigurationLogic)
+        useActions(batchExportConfigFormLogic)
     const { featureFlags } = useValues(featureFlagLogic)
     const { preflight } = useValues(preflightLogic)
     const { timezone: teamTimezone, weekStartDay } = useValues(teamLogic)
@@ -66,10 +65,14 @@ export function BatchExportConfiguration(): JSX.Element {
     const requiredFieldsMissing = requiredFields.filter((field) => !configuration[field])
 
     return (
-        <Form logic={batchExportConfigurationLogic} formKey="configuration" className="flex flex-col gap-3">
+        <Form logic={batchExportConfigFormLogic} formKey="configuration" className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-4 items-start">
                 <div className="flex flex-col flex-1 max-w-200 min-w-100 gap-y-3">
                     <div className="flex flex-col p-3 rounded border bg-surface-primary gap-y-2">
+                        <div className="flex flex-col gap-y-1 mb-2">
+                            <h3 className="mb-0">Schedule</h3>
+                            <p className="text-secondary text-xs mb-0">Controls when this batch export runs</p>
+                        </div>
                         <Field
                             label="Status"
                             name="paused"
@@ -108,6 +111,11 @@ export function BatchExportConfiguration(): JSX.Element {
                                             label: 'Every 5 minutes',
                                             hidden: !highFrequencyBatchExports,
                                         },
+                                        {
+                                            value: 'every 15 minutes',
+                                            label: 'Every 15 minutes',
+                                            hidden: !highFrequencyBatchExports,
+                                        },
                                     ]}
                                 />
                             </Field>
@@ -115,31 +123,6 @@ export function BatchExportConfiguration(): JSX.Element {
 
                         {showTimezoneAndOffsetSelector && (
                             <>
-                                <div className="flex gap-2 min-h-16">
-                                    <Field
-                                        name="timezone"
-                                        label="Timezone"
-                                        className="flex-1"
-                                        info={`Timezone used for determining ${configuration.interval} boundaries for batch export runs`}
-                                    >
-                                        {({ value, onChange }) => {
-                                            const currentTimezone = value || teamTimezone || 'UTC'
-                                            return (
-                                                <InputSelect
-                                                    mode="single"
-                                                    placeholder="Select a time zone"
-                                                    value={[currentTimezone]}
-                                                    onChange={(newValue) => {
-                                                        onChange(newValue[0] || teamTimezone || 'UTC')
-                                                    }}
-                                                    options={timezoneOptions || []}
-                                                    popoverClassName="z-[1000]"
-                                                    virtualized
-                                                />
-                                            )
-                                        }}
-                                    </Field>
-                                </div>
                                 {configuration.interval === 'day' && (
                                     <div className="flex gap-2 min-h-16">
                                         <Field
@@ -201,10 +184,39 @@ export function BatchExportConfiguration(): JSX.Element {
                                         </Field>
                                     </div>
                                 )}
+                                <div className="flex gap-2 min-h-16">
+                                    <Field
+                                        name="timezone"
+                                        label="Timezone"
+                                        className="flex-1"
+                                        info={`Timezone used for determining ${configuration.interval} boundaries when scheduling batch export runs. This does not change the timezone of the exported data.`}
+                                    >
+                                        {({ value, onChange }) => {
+                                            const currentTimezone = value || teamTimezone || 'UTC'
+                                            return (
+                                                <InputSelect
+                                                    mode="single"
+                                                    placeholder="Select a time zone"
+                                                    value={[currentTimezone]}
+                                                    onChange={(newValue) => {
+                                                        onChange(newValue[0] || teamTimezone || 'UTC')
+                                                    }}
+                                                    options={timezoneOptions || []}
+                                                    popoverClassName="z-[1000]"
+                                                    virtualized
+                                                />
+                                            )
+                                        }}
+                                    </Field>
+                                </div>
                             </>
                         )}
                     </div>
                     <div className="flex flex-col p-3 rounded border bg-surface-primary gap-y-2">
+                        <div className="flex flex-col gap-y-1 mb-2">
+                            <h3 className="mb-0">Data</h3>
+                            <p className="text-secondary text-xs mb-0">Controls which data is exported</p>
+                        </div>
                         <div className="flex gap-2 min-h-16">
                             <Field
                                 name="model"
@@ -355,7 +367,6 @@ export function BatchExportConfiguration(): JSX.Element {
                         <BatchExportConfigurationFields
                             isNew={isNew}
                             formValues={configuration as BatchExportConfigurationForm}
-                            configurationChanged={configurationChanged}
                         />
                     </div>
                     {batchExportConfigTest && (
@@ -382,20 +393,14 @@ export function BatchExportConfiguration(): JSX.Element {
 function BatchExportConfigurationFields({
     isNew,
     formValues,
-    configurationChanged,
 }: {
     isNew: boolean
     formValues: BatchExportConfigurationForm
-    configurationChanged: boolean
 }): JSX.Element {
     return (
         <>
             <BatchExportGeneralEditFields isNew={isNew} isPipeline batchExportConfigForm={formValues} />
-            <BatchExportsEditFields
-                isNew={isNew}
-                batchExportConfigForm={formValues}
-                configurationChanged={configurationChanged}
-            />
+            <BatchExportsEditFields isNew={isNew} batchExportConfigForm={formValues} />
         </>
     )
 }
@@ -432,6 +437,8 @@ export function BatchExportConfigurationTests({
 
         return step.result.status === 'Passed' ? (
             <IconCheckCircle className="text-green-500 shrink-0" />
+        ) : step.result.status === 'Skipped' ? (
+            <IconInfo className="text-yellow-500 shrink-0" />
         ) : (
             <IconX className="text-red-500 shrink-0" />
         )
@@ -489,7 +496,15 @@ export function BatchExportConfigurationTests({
                                     </Label>
                                     {step.result && (
                                         <div className="mt-2">
-                                            <Banner type={step.result.status === 'Passed' ? 'success' : 'error'}>
+                                            <Banner
+                                                type={
+                                                    step.result.status === 'Passed'
+                                                        ? 'success'
+                                                        : step.result.status === 'Skipped'
+                                                          ? 'info'
+                                                          : 'error'
+                                                }
+                                            >
                                                 {step.result.status === 'Passed' ? 'Success' : `${step.result.message}`}
                                             </Banner>
                                         </div>

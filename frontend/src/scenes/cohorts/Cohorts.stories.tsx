@@ -14,11 +14,12 @@ const meta: Meta = {
         layout: 'fullscreen',
         viewMode: 'story',
         mockDate: '2023-07-04',
+        testOptions: { viewport: { width: 1300, height: 2000 } },
     },
 }
 export default meta
 
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<{}>
 
 const createCohort = (id: number, name: string, count: number, isStatic: boolean, isCalculating = false): CohortType =>
     ({

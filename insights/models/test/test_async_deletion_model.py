@@ -14,17 +14,21 @@ from insights.datastore.client import sync_execute
 from insights.models import AsyncDeletion, DeletionType, Team, User
 from insights.models.async_deletion.delete_cohorts import AsyncCohortDeletion
 from insights.models.async_deletion.delete_events import AsyncEventDeletion
-from insights.models.cohort.util import insert_static_cohort
 from insights.models.group.util import create_group
 from insights.models.person.util import create_person, create_person_distinct_id
-from insights.models.plugin import PluginLogEntrySource, PluginLogEntryType
 from insights.test.test_plugin_log_entry import create_plugin_log_entry
+
+from products.cdp.backend.models.plugin import PluginLogEntrySource, PluginLogEntryType
+from products.cohorts.backend.models.util import insert_static_cohort
 
 uuid = str(UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8"))
 uuid2 = str(UUID("7ba7b810-9dad-11d1-80b4-00c04fd430c8"))
 
 
 class TestAsyncDeletion(DatastoreTestMixin, DatastoreDestroyTablesMixin, BaseTest):
+    # Deletions verify against both events tables, so snapshots differ per schema mode.
+    allow_dual_schema_snapshots = True
+
     def setUp(self):
         super().setUp()
         self.user = User.objects.create(email="test@hanzo.ai")

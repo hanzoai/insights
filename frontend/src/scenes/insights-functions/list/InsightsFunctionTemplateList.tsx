@@ -2,16 +2,19 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconMegaphone, IconPlusSmall } from '@hanzo/icons'
-import { Button, Input, Table, Link } from '@hanzo/elements'
+import { Button, Input, Select, Table, Link } from '@hanzo/elements'
 
 import { TableLink } from 'lib/elements/Table/TableLink'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
-import { isManagedSourceTemplate } from 'scenes/data-warehouse/utils'
 
-import { AccessControlLevel, AccessControlResourceType } from '~/types'
+import { AccessControlLevel, AccessControlResourceType, InsightsFunctionTemplateType } from '~/types'
+
+import { SourceReleaseTag } from 'products/data_warehouse/frontend/shared/components/SourceReleaseTag'
+import { isManagedSourceTemplate } from 'products/data_warehouse/frontend/utils'
 
 import { InsightsFunctionIcon } from '../configuration/InsightsFunctionIcon'
 import { InsightsFunctionStatusTag } from '../misc/InsightsFunctionStatusTag'
+import { DELIVERY_TYPE_FILTER_OPTIONS, DeliveryTypeTag } from './DeliveryTypeTag'
 import { insightsFunctionRequestModalLogic } from './insightsFunctionRequestModalLogic'
 import { InsightsFunctionTemplateListLogicProps, insightsFunctionTemplateListLogic } from './insightsFunctionTemplateListLogic'
 
@@ -45,6 +48,14 @@ export function InsightsFunctionTemplateList({
                     </Link>
                 ) : null}
                 <div className="flex-1" />
+                {props.type === 'destination' && (
+                    <Select
+                        size="small"
+                        value={filters.deliveryType ?? null}
+                        onChange={(value) => setFilters({ deliveryType: value ?? undefined })}
+                        options={DELIVERY_TYPE_FILTER_OPTIONS}
+                    />
+                )}
                 {extraControls}
             </div>
 
@@ -86,6 +97,9 @@ export function InsightsFunctionTemplateList({
                                         <>
                                             {template.name}
                                             {template.status && <InsightsFunctionStatusTag status={template.status} />}
+                                            {template.releaseStatus && (
+                                                <SourceReleaseTag releaseStatus={template.releaseStatus} />
+                                            )}
                                         </>
                                     }
                                     description={template.description}
@@ -94,6 +108,17 @@ export function InsightsFunctionTemplateList({
                         },
                     },
 
+                    ...(props.type === 'destination'
+                        ? [
+                              {
+                                  title: 'Type',
+                                  width: 0,
+                                  render: function RenderDeliveryType(_: any, template: InsightsFunctionTemplateType) {
+                                      return <DeliveryTypeTag item={template} />
+                                  },
+                              },
+                          ]
+                        : []),
                     {
                         width: 0,
                         render: function Render(_, template) {
@@ -123,8 +148,8 @@ export function InsightsFunctionTemplateList({
                                     type="primary"
                                     data-attr="new-destination"
                                     icon={<IconPlusSmall />}
+                                    className="whitespace-nowrap"
                                     to={urlForTemplate(template) ?? undefined}
-                                    fullWidth
                                     disabledReason={dataWarehouseSourceAccessDisabledReason ?? undefined}
                                 >
                                     Create

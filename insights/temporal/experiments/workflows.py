@@ -8,14 +8,17 @@ from insights.temporal.common.base import InsightsWorkflow
 
 with temporalio.workflow.unsafe.imports_passed_through():
     from insights.temporal.experiments.activities import (
+        backfill_experiment_metric,
         calculate_experiment_regular_metric,
         calculate_experiment_saved_metric,
         get_experiment_regular_metrics_for_hour,
         get_experiment_saved_metrics_for_hour,
     )
     from insights.temporal.experiments.models import (
+        TIMESERIES_METRIC_MAX_ATTEMPTS,
         ExperimentRegularMetricsWorkflowInputs,
         ExperimentSavedMetricsWorkflowInputs,
+        ExperimentTimeseriesRecalculationWorkflowInputs,
     )
 
 MAX_CONCURRENT_METRICS = 10
@@ -64,7 +67,7 @@ class ExperimentRegularMetricsWorkflow(InsightsWorkflow):
                     args=[em.experiment_id, em.metric_uuid, em.fingerprint],
                     start_to_close_timeout=timedelta(minutes=15),
                     retry_policy=RetryPolicy(
-                        maximum_attempts=3,
+                        maximum_attempts=TIMESERIES_METRIC_MAX_ATTEMPTS,
                         initial_interval=timedelta(seconds=10),
                         maximum_interval=timedelta(seconds=60),
                     ),
@@ -136,7 +139,7 @@ class ExperimentSavedMetricsWorkflow(InsightsWorkflow):
                     args=[em.experiment_id, em.metric_uuid, em.fingerprint],
                     start_to_close_timeout=timedelta(minutes=15),
                     retry_policy=RetryPolicy(
-                        maximum_attempts=3,
+                        maximum_attempts=TIMESERIES_METRIC_MAX_ATTEMPTS,
                         initial_interval=timedelta(seconds=10),
                         maximum_interval=timedelta(seconds=60),
                     ),
@@ -163,3 +166,20 @@ class ExperimentSavedMetricsWorkflow(InsightsWorkflow):
             "succeeded": succeeded,
             "failed": failed,
         }
+
+
+@temporalio.workflow.defn(name="experiment-timeseries-recalculation-workflow")
+class ExperimentTimeseriesRecalculationWorkflow(InsightsWorkflow):
+    @staticmethod
+    def parse_inputs(inputs: list[str]) -> ExperimentTimeseriesRecalculationWorkflowInputs:
+        return ExperimentTimeseriesRecalculationWorkflowInputs(recalculation_id=inputs[0])
+
+    @temporalio.workflow.run
+    async def run(self, inputs: ExperimentTimeseriesRecalculationWorkflowInputs) -> dict:
+        return await temporalio.workflow.execute_activity(
+            backfill_experiment_metric,
+            inputs.recalculation_id,
+            start_to_close_timeout=timedelta(hours=3),
+            retry_policy=RetryPolicy(maximum_attempts=3, initial_interval=timedelta(minutes=5)),
+            heartbeat_timeout=timedelta(minutes=20),
+        )

@@ -18,6 +18,7 @@ AUDIO_SAMPLES_DIR = Path(__file__).parent / "audio_samples"
 AUDIO_EXTENSIONS = {".mp3", ".m4a", ".wav", ".webm", ".mp4", ".mpeg", ".mpga", ".oga", ".ogg", ".flac"}
 
 skip_without_openai_key = pytest.mark.skipif(not OPENAI_API_KEY, reason="OPENAI_API_KEY not set")
+pytestmark = pytest.mark.xfail(strict=False, reason="OpenAI may be rate-limited or temporarily unavailable")
 
 
 @pytest.fixture
@@ -57,7 +58,7 @@ class TestOpenAIAudioTranscription:
 
     def test_transcription_with_product_route(self, gateway_url: str, audio_file: Path):
         client = OpenAI(
-            api_key="hix_fake_personal_api_key",
+            api_key="phx_fake_personal_api_key",
             base_url=f"{gateway_url}/llm_gateway/v1",
         )
 

@@ -1,4 +1,5 @@
-const { createEvent } = require('@hanzo/plugin-scaffold/test/utils.js')
+import { createEvent } from '../../test-utils'
+
 const { processEvent } = require('./index')
 
 const nestedEventProperties = {

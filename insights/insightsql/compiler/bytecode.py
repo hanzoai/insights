@@ -113,7 +113,7 @@ def create_bytecode(
 
 
 class BytecodeCompiler(Visitor):
-    mode: Literal["iql", "ast"]
+    mode: Literal["script", "ast"]
 
     def __init__(
         self,
@@ -128,7 +128,7 @@ class BytecodeCompiler(Visitor):
     ):
         super().__init__()
         self.enclosing = enclosing
-        self.mode = enclosing.mode if enclosing else "iql"
+        self.mode = enclosing.mode if enclosing else "script"
         self.supported_functions = supported_functions or set()
         self.in_repl = in_repl
         self.locals: list[Local] = locals or []
@@ -178,12 +178,12 @@ class BytecodeCompiler(Visitor):
         return len(self.locals) - 1
 
     def visit(self, node: ast.AST | None):
-        # In "iql" mode we compile AST nodes to bytecode.
+        # In "script" mode we compile AST nodes to bytecode.
         # In "ast" mode we pass through as they are.
         # You may enter "ast" mode with `sql()` or `(select ...)`
-        if self.mode == "iql" or isinstance(node, ast.Placeholder):
+        if self.mode == "script" or isinstance(node, ast.Placeholder):
             return super().visit(node)
-        return self._visit_iql_ast(node)
+        return self._visit_hog_ast(node)
 
     def visit_and(self, node: ast.And):
         response = []
@@ -518,7 +518,7 @@ class BytecodeCompiler(Visitor):
                     pass
                 else:
                     self.context.add_error(
-                        start=node.start, end=node.end, message=f"Custom function `{node.name}` is not implemented"
+                        start=node.start, end=node.end, message=f"Script function `{node.name}` is not implemented"
                     )
 
                 response.extend([Operation.CALL_GLOBAL, node.name, len(args)])
@@ -893,8 +893,8 @@ class BytecodeCompiler(Visitor):
         body = node.body
 
         # Sometimes blocks like `fn x() {foo}` get parsed as placeholders
-        if isinstance(body, ast.Placeholder):
-            body = ast.Block(declarations=[ast.ExprStatement(expr=body.expr), ast.ReturnStatement(expr=None)])
+        if isinstance(body, ast.Placeholder):  # type: ignore[unreachable]
+            body = ast.Block(declarations=[ast.ExprStatement(expr=body.expr), ast.ReturnStatement(expr=None)])  # type: ignore[unreachable]
         elif isinstance(node.body, ast.Block):
             if len(node.body.declarations) == 0 or not isinstance(node.body.declarations[-1], ast.ReturnStatement):
                 body = ast.Block(declarations=[*node.body.declarations, ast.ReturnStatement(expr=None)])
@@ -1004,7 +1004,7 @@ class BytecodeCompiler(Visitor):
             response.append(len(node.attributes) + 1)
         return response
 
-    def _visit_iql_ast(self, node: ast.AST | None):
+    def _visit_hog_ast(self, node: ast.AST | None):
         if node is None:
             return [Operation.NULL]
         if isinstance(node, ast.InsightsQLXTag):
@@ -1048,16 +1048,16 @@ class BytecodeCompiler(Visitor):
             return [*elems, Operation.DICT, len(value.items())]
         if isinstance(value, ast.AST):
             if isinstance(value, ast.Placeholder):
-                if self.mode == "fn":
+                if self.mode == "script":
                     raise QueryError("Placeholders are not allowed in this context")
                 prev_mode = self.mode
-                self.mode = "iql"
+                self.mode = "script"
                 try:
                     response = self.visit(value.expr)
                 finally:
                     self.mode = prev_mode
                 return response
-            return self._visit_iql_ast(value)
+            return self._visit_hog_ast(value)
         if isinstance(value, StrEnum):
             return [Operation.STRING, value.value]
         if isinstance(value, int):
@@ -1074,7 +1074,7 @@ class BytecodeCompiler(Visitor):
 
     def visit_placeholder(self, node: ast.Placeholder):
         if self.mode == "ast":
-            self.mode = "iql"
+            self.mode = "script"
             try:
                 result = self.visit(node.expr)
             finally:
@@ -1087,7 +1087,7 @@ class BytecodeCompiler(Visitor):
         prev_mode = self.mode
         self.mode = "ast"
         try:
-            response = self._visit_iql_ast(node)
+            response = self._visit_hog_ast(node)
         finally:
             self.mode = prev_mode
         return response
@@ -1097,13 +1097,13 @@ class BytecodeCompiler(Visitor):
         prev_mode = self.mode
         self.mode = "ast"
         try:
-            response = self._visit_iql_ast(node)
+            response = self._visit_hog_ast(node)
         finally:
             self.mode = prev_mode
         return response
 
 
-def execute_iql(
+def execute_hog(
     source_code: str,
     team: Optional["Team"] = None,
     globals: Optional[dict[str, Any]] = None,

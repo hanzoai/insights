@@ -2,14 +2,14 @@ import { randomUUID } from 'crypto'
 import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 
+import { PostgresRouter } from '~/common/utils/db/postgres'
+import { UUIDT } from '~/common/utils/utils'
 import { insertRow } from '~/tests/helpers/sql'
 
 import { DatastorePerson, DatastoreTimestamp, ProjectId, RawDatastoreEvent, Team } from '../../types'
-import { PostgresRouter } from '../../utils/db/postgres'
-import { UUIDT } from '../../utils/utils'
 import { CohortMembershipChange } from '../consumers/cdp-cohort-membership.consumer'
 import { CdpInternalEvent } from '../schema'
-import { compileFn } from '../templates/compiler'
+import { compileHog } from '../templates/compiler'
 import {
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobQueueKind,
@@ -44,7 +44,7 @@ export const createInsightsFunction = (insightsFunction: Partial<InsightsFunctio
     const item: InsightsFunctionType = {
         id: randomUUID(),
         type: 'destination',
-        name: 'Custom Function',
+        name: 'Script Function',
         team_id: 1,
         enabled: true,
         script: '',
@@ -87,7 +87,7 @@ export const createIncomingEvent = (teamId: number, data: Partial<RawDatastoreEv
     }
 }
 
-export const createStreamMessage = (event: any, overrides: Partial<Message> = {}): Message => {
+export const createKafkaMessage = (event: any, overrides: Partial<Message> = {}): Message => {
     return {
         partition: 1,
         topic: 'test',
@@ -137,7 +137,7 @@ export const insertInsightsFunction = async (
 ): Promise<InsightsFunctionType> => {
     // This is only used for testing so we need to override some values
 
-    const res = await insertRow(postgres, 'insights_function', {
+    const res = await insertRow(postgres, 'insights_hogfunction', {
         ...createInsightsFunction({
             ...insightsFunction,
             team_id: team_id,
@@ -159,10 +159,10 @@ export const createInsightsFunctionTemplate = (
         status: 'stable',
         free: true,
         type: 'destination',
-        name: 'Custom Function Template',
-        description: 'Custom Function Template',
-        code_language: 'fn',
-        code: 'Custom Function Template',
+        name: 'Script Function Template',
+        description: 'Script Function Template',
+        code_language: 'script',
+        code: 'Script Function Template',
         inputs_schema: [],
         category: [],
         bytecode: [],
@@ -179,11 +179,11 @@ export const insertInsightsFunctionTemplate = async (
     const template = createInsightsFunctionTemplate({
         ...insightsFunctionTemplate,
     })
-    if (template.code_language === 'fn') {
-        template.bytecode = await compileFn(template.code)
+    if (template.code_language === 'script') {
+        template.bytecode = await compileHog(template.code)
     }
 
-    const res = await insertRow(postgres, 'insights_function_template', {
+    const res = await insertRow(postgres, 'insights_hogfunctiontemplate', {
         id: randomUUID(),
         template_id: template.id,
         sha: 'sha',
@@ -220,11 +220,12 @@ export const insertIntegration = async (
         errors: '',
         created_at: new Date().toISOString(),
         created_by_id: 1001,
+        repository_cache: JSON.stringify([]),
     })
     return res
 }
 
-export const createScriptExecutionGlobals = (
+export const createHogExecutionGlobals = (
     data: Partial<InsightsFunctionInvocationGlobals> = {}
 ): InsightsFunctionInvocationGlobals => {
     return {
@@ -264,15 +265,15 @@ export const createScriptExecutionGlobals = (
 export const createExampleInvocation = (
     _insightsFunction: Partial<InsightsFunctionType> = {},
     _globals: Partial<InsightsFunctionInvocationGlobalsWithInputs> = {},
-    queue: CyclotronJobQueueKind = 'fn'
+    queue: CyclotronJobQueueKind = 'script'
 ): CyclotronJobInvocationInsightsFunction => {
     const insightsFunction = createInsightsFunction(_insightsFunction)
     // Add the source of the trigger to the globals
 
-    const globals = createScriptExecutionGlobals(_globals)
+    const globals = createHogExecutionGlobals(_globals)
     globals.source = {
-        name: insightsFunction.name ?? `Custom function: ${insightsFunction.id}`,
-        url: `${globals.project.url}/pipeline/destinations/insights-function-${insightsFunction.id}/configuration/`,
+        name: insightsFunction.name ?? `Script function: ${insightsFunction.id}`,
+        url: `${globals.project.url}/pipeline/destinations/script-${insightsFunction.id}/configuration/`,
     }
 
     return {
@@ -340,4 +341,33 @@ export const insertCohortMemberships = async (
         results.push(await insertCohortMembership(db, membership))
     }
     return results
+}
+
+export const insertBatchExport = async (postgres: PostgresRouter, team_id: Team['id'], id: string): Promise<any> => {
+    const destination = await insertBatchExportDestination(postgres)
+    const res = await insertRow(postgres, 'insights_batchexport', {
+        id: id,
+        team_id: team_id,
+        destination_id: destination.id,
+        name: 'test-batch-export',
+        interval: 'hour',
+        paused: false,
+        deleted: false,
+        created_at: new Date().toISOString(),
+        last_updated_at: new Date().toISOString(),
+        timezone: 'UTC',
+    })
+    return res
+}
+
+export const insertBatchExportDestination = async (postgres: PostgresRouter): Promise<any> => {
+    const res = await insertRow(postgres, 'insights_batchexportdestination', {
+        id: new UUIDT().toString(),
+        type: 'S3',
+        config: {},
+        integration_id: null,
+        created_at: new Date().toISOString(),
+        last_updated_at: new Date().toISOString(),
+    })
+    return res
 }

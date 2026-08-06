@@ -39,7 +39,7 @@
     },
     "applications": {
         "insights": {
-            "type": "python 3.12",
+            "type": "python 3",
             "processes": $NGINX_UNIT_APP_PROCESSES,
             "threads": $NGINX_UNIT_APP_THREADS,
             "working_directory": "/code",
@@ -52,7 +52,7 @@
             }
         },
         "metrics": {
-            "type": "python 3.12",
+            "type": "python 3",
             "processes": 1,
             "working_directory": "/code/bin",
             "path": ".",

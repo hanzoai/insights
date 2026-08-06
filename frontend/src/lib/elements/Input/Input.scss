@@ -1,12 +1,12 @@
 .Input {
-    --input-height: calc(2.125rem + 3px); // Medium size button height + button shadow height;
+    --lemon-input-height: calc(2.125rem + 3px); // Medium size button height + button shadow height;
 
     display: flex;
     gap: 0.375rem;
     align-items: center;
     justify-content: left;
-    height: var(--input-height);
-    min-height: var(--input-height);
+    height: var(--lemon-input-height);
+    min-height: var(--lemon-input-height);
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -61,7 +61,7 @@
     }
 
     &.Input--xsmall {
-        --input-height: 1.5rem;
+        --lemon-input-height: 1.5rem;
 
         padding: 0.125rem 0.25rem;
 
@@ -71,7 +71,7 @@
     }
 
     &.Input--small {
-        --input-height: 2rem;
+        --lemon-input-height: 2rem;
 
         padding: 0.125rem 0.25rem;
 
@@ -81,7 +81,7 @@
     }
 
     &.Input--large {
-        --input-height: 3rem;
+        --lemon-input-height: 3rem;
 
         .Icon {
             font-size: 1.5rem;
@@ -103,6 +103,15 @@
         .Input__input {
             font-variant-numeric: tabular-nums;
             text-overflow: clip;
+
+            // Hide native spin buttons so they don't crowd the input text
+            appearance: textfield;
+
+            &::-webkit-outer-spin-button,
+            &::-webkit-inner-spin-button {
+                margin: 0;
+                appearance: none;
+            }
         }
     }
 

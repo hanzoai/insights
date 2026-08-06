@@ -3,11 +3,13 @@ import './PersonDisplay.scss'
 import { PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES } from 'lib/constants'
 import { NUM_LETTERMARK_STYLES } from 'lib/elements/Lettermark/Lettermark'
 import { ProfilePictureProps } from 'lib/elements/ProfilePicture'
-import { isUUIDLike, midEllipsis } from 'lib/utils'
+import { isUUIDLike } from 'lib/utils/guards'
+import { midEllipsis } from 'lib/utils/strings'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { InsightsQLQueryString, insightsql } from '~/queries/utils'
+import { PersonType } from '~/types'
 
 /**
  * Generates a stable color index from a string using djb2 hash.
@@ -43,7 +45,7 @@ const EMAIL_REGEX = /.+@.+\..+/i
 /** Very rough UUID format. It's loose around length, because the insights-js UUID util returns non-normative IDs. */
 const BROWSER_ANON_ID_REGEX = /^(?:[a-fA-F0-9]+-){4}[a-fA-F0-9]+$/i
 /** Score distinct IDs for display: UUID-like (i.e. anon ID) gets 0, custom format gets 1, email-like gets 2. */
-function scoreDistinctId(id: string): number {
+export function scoreDistinctId(id: string): number {
     if (EMAIL_REGEX.test(id)) {
         return 2
     }
@@ -52,6 +54,22 @@ function scoreDistinctId(id: string): number {
         return 0
     }
     return 1
+}
+
+/**
+ * Pick the most human-readable distinct ID for a person, preferring identified IDs (emails, custom
+ * IDs) over auto-generated anonymous IDs. Returns `undefined` when there are no distinct IDs.
+ *
+ * Use this anywhere a single distinct ID must represent a person — profile/replay links,
+ * copy-to-clipboard, the "IDs" caption — instead of blindly taking `distinct_ids[0]`. The order of
+ * `distinct_ids` is not guaranteed to put the identified ID first (it varies by data source), so
+ * `[0]` frequently surfaces the auto-generated anonymous ID even when a user-defined one exists.
+ */
+export function pickBestPersonDistinctId(distinctIds: string[] | null | undefined): string | undefined {
+    if (!distinctIds?.length) {
+        return undefined
+    }
+    return distinctIds.slice().sort((a, b) => scoreDistinctId(b) - scoreDistinctId(a))[0]
 }
 
 /**
@@ -92,9 +110,7 @@ export function asDisplay(
     const display: string | undefined = (
         customIdentifier ||
         person.distinct_id ||
-        (person.distinct_ids
-            ? person.distinct_ids.slice().sort((a, b) => scoreDistinctId(b) - scoreDistinctId(a))[0]
-            : undefined)
+        pickBestPersonDistinctId(person.distinct_ids)
     )?.trim()
 
     // Force return of the UUID truncated to 22 characters (unless maxLength is specified)
@@ -107,22 +123,72 @@ export function asDisplay(
     return display ? midEllipsis(display, maxLength || 40) : 'Anonymous'
 }
 
-export const asLink = (person?: PersonPropType | null): string | undefined =>
-    person?.distinct_id
-        ? urls.personByDistinctId(person.distinct_id)
-        : person?.distinct_ids?.length
-          ? urls.personByDistinctId(person.distinct_ids[0])
-          : person?.id
-            ? urls.personByUUID(person.id)
-            : undefined
+// Property editor inputs are always strings — coerce to native types before persisting
+export function coercePropertyValue(value: string | number | boolean | null): string | number | boolean | null {
+    if (value === null || value === '') {
+        return value
+    }
 
-export const getInsightsqlQueryStringForPersonId = (): InsightsQLQueryString => {
+    let result: string | number | boolean | null = value
+
+    const attemptedParsedNumber = Number(value)
+    if (Number.isFinite(attemptedParsedNumber) && typeof value !== 'boolean') {
+        result = attemptedParsedNumber
+    }
+
+    if (typeof result === 'string') {
+        const lowercaseValue = result.toLowerCase()
+        if (lowercaseValue === 'true' || lowercaseValue === 'false' || lowercaseValue === 'null') {
+            result = lowercaseValue === 'true' ? true : lowercaseValue === 'null' ? null : false
+        }
+    }
+
+    return result
+}
+
+export const asLink = (person?: PersonPropType | null): string | undefined => {
+    if (!person?.properties) {
+        return undefined
+    }
+    if (person.distinct_id) {
+        return urls.personByDistinctId(person.distinct_id)
+    }
+    const bestDistinctId = pickBestPersonDistinctId(person.distinct_ids)
+    if (bestDistinctId) {
+        return urls.personByDistinctId(bestDistinctId)
+    }
+    return person.id ? urls.personByUUID(person.id) : undefined
+}
+
+/**
+ * Parse a row from the InsightsQL person query into a PersonType.
+ * Column order matches getHogqlQueryStringForPersonId:
+ * [id, distinct_ids, properties, is_identified, created_at, last_seen_at]
+ */
+export function parsePersonFromInsightsQLRow(row: any[]): PersonType {
+    let properties = {}
+    try {
+        properties = JSON.parse(row[2] || '{}')
+    } catch {}
+    return {
+        id: row[0],
+        uuid: row[0],
+        distinct_ids: row[1],
+        properties,
+        is_identified: !!row[3],
+        created_at: row[4],
+        last_seen_at: row[5],
+    }
+}
+
+export const getHogqlQueryStringForPersonId = (): InsightsQLQueryString => {
     return insightsql`SELECT
                     id,
                     groupArray(101)(pdi2.distinct_id) as distinct_ids,
                     properties,
                     is_identified,
-                    created_at
+                    created_at,
+                    last_seen_at
                 FROM persons
                 LEFT JOIN (
                     SELECT
@@ -139,5 +205,5 @@ export const getInsightsqlQueryStringForPersonId = (): InsightsQLQueryString => 
                         AND argMax(pdi2.person_id, pdi2.version) = {id}
                 ) AS pdi2 ON pdi2.person_id = persons.id
                 WHERE persons.id = {id}
-                GROUP BY id, properties, is_identified, created_at`
+                GROUP BY id, properties, is_identified, created_at, last_seen_at`
 }

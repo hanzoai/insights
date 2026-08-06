@@ -9,9 +9,9 @@ import { Divider } from '@hanzo/elements'
 
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
+import { CohortLogicProps, cohortEditLogic } from 'scenes/cohorts/cohortEditLogic'
 import { ROWS, renderField } from 'scenes/cohorts/CohortFilters/constants'
 import { BehavioralFilterType, CohortFieldProps, Field, FilterType } from 'scenes/cohorts/CohortFilters/types'
-import { CohortLogicProps, cohortEditLogic } from 'scenes/cohorts/cohortEditLogic'
 import { cleanCriteria } from 'scenes/cohorts/cohortUtils'
 
 import { AnyCohortCriteriaType, BehavioralEventType, FilterLogicalOperator } from '~/types'

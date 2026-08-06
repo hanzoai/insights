@@ -1,4 +1,4 @@
-from insights.schema import CurrencyCode
+from insights.schema_enums import CurrencyCode
 
 # This is a list with all the currencies we support
 #

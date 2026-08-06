@@ -4,25 +4,42 @@ import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch
 import { filterTestAccountsDefaultsLogic } from 'scenes/settings/environment/filterTestAccountDefaultsLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { DataNode, EventsQuery, InsightsQLQuery, TracesQuery } from '~/queries/schema/schema-general'
-import { isEventsQuery, isInsightsQLQuery, isTracesQuery } from '~/queries/utils'
+import {
+    ActorsQuery,
+    DataNode,
+    EventsQuery,
+    InsightsQLQuery,
+    SessionsQuery,
+    TracesQuery,
+} from '~/queries/schema/schema-general'
+import { isActorsQuery, isEventsQuery, isInsightsQLQuery, isSessionsQuery, isTracesQuery } from '~/queries/utils'
 
 interface TestAccountFiltersProps {
     query: DataNode
-    setQuery?: (query: EventsQuery | InsightsQLQuery | TracesQuery) => void
+    setQuery?: (query: ActorsQuery | EventsQuery | InsightsQLQuery | SessionsQuery | TracesQuery) => void
 }
 export function TestAccountFilters({ query, setQuery }: TestAccountFiltersProps): JSX.Element | null {
     const { currentTeam } = useValues(teamLogic)
     const hasFilters = (currentTeam?.test_account_filters || []).length > 0
     const { setLocalDefault } = useActions(filterTestAccountsDefaultsLogic)
 
-    if (!isEventsQuery(query) && !isInsightsQLQuery(query) && !isTracesQuery(query)) {
+    // A source-less ActorsQuery is the persons list, which carries its own filterTestAccounts flag
+    // (like EventsQuery). Actors queries with an insight source use the source query's toggle instead.
+    const isSourcelessActorsQuery = isActorsQuery(query) && !query.source
+
+    if (
+        !isEventsQuery(query) &&
+        !isInsightsQLQuery(query) &&
+        !isSessionsQuery(query) &&
+        !isTracesQuery(query) &&
+        !isSourcelessActorsQuery
+    ) {
         return null
     }
     const checked = hasFilters
         ? !!(isInsightsQLQuery(query)
               ? query.filters?.filterTestAccounts
-              : isEventsQuery(query) || isTracesQuery(query)
+              : isEventsQuery(query) || isSessionsQuery(query) || isTracesQuery(query) || isSourcelessActorsQuery
                 ? query.filterTestAccounts
                 : false)
         : false
@@ -37,9 +54,9 @@ export function TestAccountFilters({ query, setQuery }: TestAccountFiltersProps)
               }
               setQuery?.(newQuery)
           }
-        : isEventsQuery(query) || isTracesQuery(query)
+        : isEventsQuery(query) || isSessionsQuery(query) || isTracesQuery(query) || isSourcelessActorsQuery
           ? (checked: boolean) => {
-                const newQuery: EventsQuery | TracesQuery = {
+                const newQuery: ActorsQuery | EventsQuery | SessionsQuery | TracesQuery = {
                     ...query,
                     filterTestAccounts: checked,
                 }
@@ -54,6 +71,8 @@ export function TestAccountFilters({ query, setQuery }: TestAccountFiltersProps)
                 onChange?.(checked)
                 setLocalDefault(checked)
             }}
+            // The persons list is a person-level query: only person and cohort test filters apply.
+            applicableFilterTypes={isSourcelessActorsQuery ? ['person', 'cohort'] : undefined}
         />
     )
 }

@@ -9,7 +9,7 @@ template_user: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Updates a contact in Klaviyo",
     icon_url="/static/services/klaviyo.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.externalId) and empty(inputs.email)) {
     print('Email or External ID has to be set. Skipping...')
@@ -144,7 +144,7 @@ template_event: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to Klaviyo",
     icon_url="/static/services/klaviyo.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.externalId) and empty(inputs.email)) {
     print('Email or External ID has to be set. Skipping...')

@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getIOSSteps as getIOSStepsPA } from '../product-analytics/ios'
 import { StepDefinition } from '../steps'
@@ -28,7 +28,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                     language: 'swift',
                                     file: 'AppDelegate.swift',
                                     code: dedent`
-                                        let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
+                                        let config = InsightsConfig(projectToken: INSIGHTS_PROJECT_TOKEN, host: INSIGHTS_HOST)
                                         config.captureScreenViews = true
                                         InsightsSDK.shared.setup(config)
                                     `,

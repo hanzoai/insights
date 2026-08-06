@@ -5,7 +5,7 @@ from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDMode
 
 class CustomerJourney(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
-    insight = models.ForeignKey("insights.Insight", on_delete=models.CASCADE)
+    insight = models.ForeignKey("product_analytics.Insight", on_delete=models.CASCADE)
     name = models.CharField(max_length=400)
     description = models.TextField(null=True, blank=True)
 

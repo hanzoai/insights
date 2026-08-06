@@ -1,11 +1,12 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { Input, Select, Snack, Table, Tag, Link, Tooltip } from '@hanzo/elements'
+import { Input, Select, Snack, Table, Tag, Tooltip } from '@hanzo/elements'
 
 import { TableColumns } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
 import stringWithWBR from 'lib/utils/stringWithWBR'
+import { InsightErrorState } from 'scenes/insights/EmptyStates'
 import { urls } from 'scenes/urls'
 
 import { FeatureFlagReleaseType } from '~/types'
@@ -36,118 +37,115 @@ const featureFlagMatchMapping = {
     [FeatureFlagMatchReason.Disabled]: 'Disabled',
 }
 
+const columns: TableColumns<RelatedFeatureFlag> = [
+    {
+        title: 'Key',
+        dataIndex: 'key',
+        className: 'ph-no-capture',
+        sticky: true,
+        width: '40%',
+        sorter: (a: RelatedFeatureFlag, b: RelatedFeatureFlag) => (a.key || '').localeCompare(b.key || ''),
+        render: function Render(_, featureFlag: RelatedFeatureFlag) {
+            const isExperiment = (featureFlag.experiment_set || []).length > 0
+            return (
+                <TableLink
+                    to={featureFlag.id ? urls.featureFlag(featureFlag.id) : undefined}
+                    title={
+                        <>
+                            {stringWithWBR(featureFlag.key, 17)}
+                            <Tag type={isExperiment ? 'completion' : 'default'} className="ml-2">
+                                {isExperiment ? 'Experiment' : 'Feature flag'}
+                            </Tag>
+                        </>
+                    }
+                    description={featureFlag.name}
+                />
+            )
+        },
+    },
+    {
+        title: 'Type',
+        width: 100,
+        render: function Render(_, featureFlag: RelatedFeatureFlag) {
+            return featureFlag.filters.multivariate
+                ? FeatureFlagReleaseType.Variants
+                : FeatureFlagReleaseType.ReleaseToggle
+        },
+    },
+    {
+        title: 'Value',
+        dataIndex: 'value',
+        width: 150,
+        render: function Render(_, featureFlag: RelatedFeatureFlag) {
+            return (
+                <div className="break-words">
+                    {featureFlag.active && featureFlag.value ? featureFlag.value.toString() : 'false'}
+                </div>
+            )
+        },
+    },
+    {
+        title: (
+            <div className="inline-flex items-center deprecated-space-x-1">
+                <div>Match evaluation</div>
+                <Tooltip
+                    docLink="https://hanzo.ai/docs/feature-flags/local-evaluation#step-3-evaluate-your-feature-flag"
+                    title={
+                        <div className="deprecated-space-y-2">
+                            <div>
+                                This column simulates the feature flag evaluation based on the selected distinct ID,
+                                current properties, and groups associated with the user. If the actual flag value
+                                differs, it could be due to different inputs used during evaluation.
+                            </div>
+                            <div>
+                                If you are using local flag evaluation, you must ensure that you provide any person
+                                properties, groups, or group properties used to evaluate the release conditions of the
+                                flag.
+                            </div>
+                        </div>
+                    }
+                >
+                    <IconInfo className="text-secondary text-base ml-1" />
+                </Tooltip>
+            </div>
+        ),
+        dataIndex: 'evaluation',
+        width: 150,
+        render: function Render(_, featureFlag: RelatedFeatureFlag) {
+            const matchesSet = featureFlag.evaluation.reason === FeatureFlagMatchReason.ConditionMatch
+            return (
+                <div>
+                    {featureFlag.active ? <>{featureFlagMatchMapping[featureFlag.evaluation.reason]}</> : '--'}
+
+                    {matchesSet && <Snack>Set {(featureFlag.evaluation.condition_index ?? 0) + 1}</Snack>}
+                </div>
+            )
+        },
+    },
+    {
+        title: 'Status',
+        dataIndex: 'active',
+        sorter: (a: RelatedFeatureFlag, b: RelatedFeatureFlag) => Number(a.active) - Number(b.active),
+        width: 100,
+        render: function RenderActive(_, featureFlag: RelatedFeatureFlag) {
+            return <span className="font-normal">{featureFlag.active ? 'Enabled' : 'Disabled'}</span>
+        },
+    },
+]
+
+const options = [
+    { label: 'All types', value: 'all' },
+    {
+        label: FeatureFlagReleaseType.ReleaseToggle,
+        value: FeatureFlagReleaseType.ReleaseToggle,
+    },
+    { label: FeatureFlagReleaseType.Variants, value: FeatureFlagReleaseType.Variants },
+]
+
 export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Props): JSX.Element {
     const relatedFlagsLogic = relatedFeatureFlagsLogic({ distinctId, groupTypeIndex, groups })
-    const { filteredMappedFlags, isLoading, searchTerm, filters, pagination } = useValues(relatedFlagsLogic)
-    const { setSearchTerm, setFilters } = useActions(relatedFlagsLogic)
-
-    const columns: TableColumns<RelatedFeatureFlag> = [
-        {
-            title: 'Key',
-            dataIndex: 'key',
-            className: 'ph-no-capture',
-            sticky: true,
-            width: '40%',
-            sorter: (a: RelatedFeatureFlag, b: RelatedFeatureFlag) => (a.key || '').localeCompare(b.key || ''),
-            render: function Render(_, featureFlag: RelatedFeatureFlag) {
-                const isExperiment = (featureFlag.experiment_set || []).length > 0
-                return (
-                    <TableLink
-                        to={featureFlag.id ? urls.featureFlag(featureFlag.id) : undefined}
-                        title={
-                            <>
-                                {stringWithWBR(featureFlag.key, 17)}
-                                <Tag type={isExperiment ? 'completion' : 'default'} className="ml-2">
-                                    {isExperiment ? 'Experiment' : 'Feature flag'}
-                                </Tag>
-                            </>
-                        }
-                        description={featureFlag.name}
-                    />
-                )
-            },
-        },
-        {
-            title: 'Type',
-            width: 100,
-            render: function Render(_, featureFlag: RelatedFeatureFlag) {
-                return featureFlag.filters.multivariate
-                    ? FeatureFlagReleaseType.Variants
-                    : FeatureFlagReleaseType.ReleaseToggle
-            },
-        },
-        {
-            title: 'Value',
-            dataIndex: 'value',
-            width: 150,
-            render: function Render(_, featureFlag: RelatedFeatureFlag) {
-                return (
-                    <div className="break-words">
-                        {featureFlag.active && featureFlag.value ? featureFlag.value.toString() : 'false'}
-                    </div>
-                )
-            },
-        },
-        {
-            title: (
-                <div className="inline-flex items-center deprecated-space-x-1">
-                    <div>Match evaluation</div>
-                    <Tooltip
-                        title={
-                            <div className="deprecated-space-y-2">
-                                <div>
-                                    This column simulates the feature flag evaluation based on the selected distinct ID,
-                                    current properties, and groups associated with the user. If the actual flag value
-                                    differs, it could be due to different inputs used during evaluation.
-                                </div>
-                                <div>
-                                    If you are using local flag evaluation, you must ensure that you provide any person
-                                    properties, groups, or group properties used to evaluate the release conditions of
-                                    the flag. Read more in the{' '}
-                                    <Link to="https://hanzo.ai/docs/feature-flags/local-evaluation#step-3-evaluate-your-feature-flag">
-                                        documentation.
-                                    </Link>
-                                </div>
-                            </div>
-                        }
-                        closeDelayMs={200}
-                    >
-                        <IconInfo className="text-secondary text-base ml-1" />
-                    </Tooltip>
-                </div>
-            ),
-            dataIndex: 'evaluation',
-            width: 150,
-            render: function Render(_, featureFlag: RelatedFeatureFlag) {
-                const matchesSet = featureFlag.evaluation.reason === FeatureFlagMatchReason.ConditionMatch
-                return (
-                    <div>
-                        {featureFlag.active ? <>{featureFlagMatchMapping[featureFlag.evaluation.reason]}</> : '--'}
-
-                        {matchesSet && <Snack>Set {(featureFlag.evaluation.condition_index ?? 0) + 1}</Snack>}
-                    </div>
-                )
-            },
-        },
-        {
-            title: 'Status',
-            dataIndex: 'active',
-            sorter: (a: RelatedFeatureFlag, b: RelatedFeatureFlag) => Number(a.active) - Number(b.active),
-            width: 100,
-            render: function RenderActive(_, featureFlag: RelatedFeatureFlag) {
-                return <span className="font-normal">{featureFlag.active ? 'Enabled' : 'Disabled'}</span>
-            },
-        },
-    ]
-
-    const options = [
-        { label: 'All types', value: 'all' },
-        {
-            label: FeatureFlagReleaseType.ReleaseToggle,
-            value: FeatureFlagReleaseType.ReleaseToggle,
-        },
-        { label: FeatureFlagReleaseType.Variants, value: FeatureFlagReleaseType.Variants },
-    ]
+    const { filteredMappedFlags, isLoading, searchTerm, filters, pagination, loadError } = useValues(relatedFlagsLogic)
+    const { setSearchTerm, setFilters, loadRelatedFeatureFlags } = useActions(relatedFlagsLogic)
 
     return (
         <>
@@ -238,6 +236,15 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
                 loading={isLoading}
                 dataSource={filteredMappedFlags}
                 pagination={pagination}
+                emptyState={
+                    loadError && !isLoading ? (
+                        <InsightErrorState
+                            title="Failed to load this person's feature flags"
+                            excludeDetail
+                            onRetry={() => loadRelatedFeatureFlags()}
+                        />
+                    ) : undefined
+                }
             />
         </>
     )

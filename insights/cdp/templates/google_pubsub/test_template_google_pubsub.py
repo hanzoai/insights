@@ -4,7 +4,9 @@ from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from insights.cdp.templates.google_pubsub.template_google_pubsub import TemplateGooglePubSubMigrator
-from insights.models import Integration, Plugin, PluginAttachment, PluginConfig
+from insights.models import Integration
+
+from products.cdp.backend.models.plugin import Plugin, PluginAttachment, PluginConfig
 
 
 class TestTemplateMigration(BaseTest):
@@ -59,8 +61,8 @@ class TestTemplateMigration(BaseTest):
         integration = Integration.objects.last()
         assert integration is not None
         assert integration.kind == "google-pubsub"
-        assert integration.sensitive_config == {"cloud": "key"}
-        assert integration.config.get("access_token") == "ACCESS_TOKEN"
+        assert integration.sensitive_config["key_info"] == {"cloud": "key"}
+        assert integration.sensitive_config.get("access_token") == "ACCESS_TOKEN"
 
     @patch("google.oauth2.service_account.Credentials.from_service_account_info")
     def test_ignore_events(self, mock_credentials):

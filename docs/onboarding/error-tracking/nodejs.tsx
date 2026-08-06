@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getNodeJSSteps as getNodeJSStepsPA } from '../product-analytics/nodejs'
 import { StepDefinition } from '../steps'
@@ -26,7 +26,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             code: dedent`
                                 import { Insights } from 'insights-node'
                                 const client = new Insights(
-                                    '<ph_project_api_key>',
+                                    '<ph_project_token>',
                                     { host: 'https://us.i.hanzo.ai', enableExceptionAutocapture: true }
                                 )
                             `,
@@ -47,7 +47,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 import express from 'express'
                                 import { Insights, setupExpressErrorHandler } from 'insights-node'
                                 const app = express()
-                                const insights = new Insights(PH_API_KEY)
+                                const insights = new Insights(INSIGHTS_PROJECT_TOKEN)
                                 setupExpressErrorHandler(insights, app)
                             `,
                         },
@@ -103,18 +103,13 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        exceptionAutocaptureStep,
-        manualCaptureStep,
-        verifyStep,
-    ]
+    return [...installSteps, exceptionAutocaptureStep, manualCaptureStep, verifyStep]
 }
 
 export const NodeJSInstallation = createInstallation(getNodeJSSteps)

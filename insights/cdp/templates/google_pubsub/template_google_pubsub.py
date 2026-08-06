@@ -16,7 +16,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send data to a Google Pub/Sub topic",
     icon_url="/static/services/google-cloud.png",
     category=["Custom"],
-    code_language="fn",
+    code_language="script",
     code="""
 let headers := () -> {
   'Authorization': f'Bearer {inputs.auth.access_token}',
@@ -76,18 +76,18 @@ if (res.status >= 200 and res.status < 300) {
 
 
 class TemplateGooglePubSubMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/pubsub-plugin"
+    plugin_url = "https://github.com/Insights/pubsub-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         exportEventsToIgnore = [x.strip() for x in obj.config.get("exportEventsToIgnore", "").split(",") if x]
         topicId = obj.config.get("topicId", "")
 
-        from insights.models.plugin import PluginAttachment
+        from products.cdp.backend.models.plugin import PluginAttachment
 
         attachment: PluginAttachment | None = PluginAttachment.objects.filter(
             plugin_config=obj, key="googleCloudKeyJson"

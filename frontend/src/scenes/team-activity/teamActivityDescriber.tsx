@@ -1,4 +1,3 @@
-import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
     ActivityChange,
     ActivityLogItem,
@@ -8,12 +7,14 @@ import {
     defaultDescriber,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
+import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import { PathCleanFilterItem } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { keyFromFilter } from 'lib/components/PathCleanFilters/PathCleanFilters'
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
 import { Link } from 'lib/elements/Link'
-import { isObject, pluralize } from 'lib/utils'
-import { CURRENCY_SYMBOL_TO_EMOJI_MAP, CURRENCY_SYMBOL_TO_NAME_MAP } from 'lib/utils/geography/currency'
+import { CURRENCY_SYMBOL_TO_EMOJI_MAP, CURRENCY_SYMBOL_TO_NAME_MAP } from 'lib/utils/currency'
+import { isObject } from 'lib/utils/guards'
+import { pluralize } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
 import { CurrencyCode } from '~/queries/schema/schema-general'
@@ -157,7 +158,7 @@ function createFixedVerbValueHandler(
 
 const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) => ChangeMapping | null> = {
     // API-related tokens
-    api_token: createApiTokenHandler('project API key', 'set', 'reset'),
+    api_token: createApiTokenHandler('project token', 'set', 'reset'),
     secret_api_token: createApiTokenHandler('Feature Flags secure API key', 'generated', 'rotated'),
     secret_api_token_backup: (change) => {
         if (change.after === undefined || change.action !== 'deleted') {
@@ -358,6 +359,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
         return { description: [<>{recordCanvasAfter ? 'enabled' : 'disabled'} canvas recording in session replay</>] }
     },
     session_recording_retention_period: createSimpleValueHandler('session replay data retention'),
+    session_recording_trigger_groups: createSessionRecordingConfigHandler('session recording trigger groups'),
 
     // Survey config
     surveys_opt_in: createBooleanToggleHandler('surveys'),
@@ -432,7 +434,6 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
         '"internal & test account filters" for all insights'
     ),
     anonymize_ips: createBooleanToggleHandler('anonymizing IP addresses'),
-    slack_incoming_webhook: createSimpleValueHandler('Slack incoming webhook'),
     timezone: createSimpleValueHandler('timezone', { useEmphasis: true }),
     business_model: createSimpleValueHandler('business model'),
     data_attributes: createArrayChangeHandler('data attributes'),
@@ -690,7 +691,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
         ) {
             descriptions.push(
                 <>
-                    set <em>excluded user properties</em> to{' '}
+                    set <em>excluded person properties</em> to{' '}
                     <code>{after.excluded_person_property_names.join(', ')}</code>
                 </>
             )
@@ -751,10 +752,10 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
     has_group_types: () => null,
     web_analytics_pre_aggregated_tables_enabled: () => null,
     web_analytics_pre_aggregated_tables_version: () => null,
-    experiment_recalculation_time: () => null,
-    default_experiment_confidence_level: () => null,
-    default_experiment_stats_method: () => null,
     managed_viewsets: () => null,
+    workflows_config: () => null,
+    event_retention_months: () => null,
+    events_retention_enforced: () => null,
 }
 
 function nameAndLink(logItem?: ActivityLogItem): JSX.Element {
@@ -771,6 +772,20 @@ export function teamActivityDescriber(logItem: ActivityLogItem, asNotification?:
     if (logItem.scope !== ActivityScope.TEAM) {
         console.error('team describer received a non-Team activity')
         return { description: null }
+    }
+
+    if (logItem.activity === 'email_sending_suspended' || logItem.activity === 'email_sending_unsuspended') {
+        const wasSuspended = logItem.activity === 'email_sending_suspended'
+        const reason = logItem.detail?.context?.reason as string | undefined
+        return {
+            description: (
+                <>
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong>{' '}
+                    {wasSuspended ? 'suspended' : 're-enabled'} workflow email sending on {nameAndLink(logItem)}
+                    {wasSuspended && reason ? <> (reason: {reason})</> : null}
+                </>
+            ),
+        }
     }
 
     if (logItem.activity == 'changed' || logItem.activity == 'updated') {

@@ -1,21 +1,26 @@
-from typing import TypeGuard
+from typing import TypeIs
 
 from rest_framework.exceptions import ValidationError
 
 from insights.schema import (
     ActionsNode,
-    DataWarehouseNode,
     EventsNode,
     FunnelConversionWindowTimeUnit,
     FunnelExclusionActionsNode,
     FunnelExclusionEventsNode,
+    FunnelsDataWarehouseNode,
 )
 
 from insights.insightsql import ast
 from insights.insightsql.parser import parse_expr
+from insights.insightsql.property import apply_path_cleaning
 
 from insights.constants import FUNNEL_WINDOW_INTERVAL_TYPES
-from insights.types import EntityNode, ExclusionEntityNode
+from insights.insightsql_queries.insights.utils.breakdowns import ALL_USERS_COHORT_ID, NOT_IN_COHORT_ID
+from insights.models.team.team import Team
+from insights.types import FunnelEntityNode, FunnelExclusionEntityNode
+
+from products.cohorts.backend.models.cohort import Cohort
 
 
 def funnel_window_interval_unit_to_sql(
@@ -40,7 +45,11 @@ def funnel_window_interval_unit_to_sql(
 
 
 def get_breakdown_expr(
-    breakdowns: list[str | int] | str | int, properties_column: str | None, normalize_url: bool | None = False
+    breakdowns: list[str | int] | str | int,
+    properties_column: str | None,
+    normalize_url: bool | None = False,
+    path_cleaning: bool | None = False,
+    team: Team | None = None,
 ) -> ast.Expr:
     def make_field(breakdown: str | int) -> ast.Expr:
         if properties_column is None:
@@ -48,6 +57,10 @@ def get_breakdown_expr(
             return ast.Field(chain=[breakdown])
         else:
             return ast.Field(chain=[*properties_column.split("."), breakdown])
+
+    # Fail loudly rather than silently skipping cleaning if a caller forgets the team
+    if path_cleaning and team is None:
+        raise ValueError("get_breakdown_expr: path_cleaning=True requires a team")
 
     if isinstance(breakdowns, str) or isinstance(breakdowns, int) or breakdowns is None:
         return ast.Call(
@@ -67,6 +80,8 @@ def get_breakdown_expr(
                     ast.Constant(value=""),
                 ],
             )
+            if path_cleaning and team is not None:
+                expr = apply_path_cleaning(expr, team)
             if normalize_url:
                 regex = "[\\\\/?#]*$"
                 expr = parse_expr(
@@ -79,7 +94,9 @@ def get_breakdown_expr(
     return expression
 
 
-def is_events_entity(entity: EntityNode | ExclusionEntityNode) -> TypeGuard[EventsNode | FunnelExclusionEventsNode]:
+def is_events_entity(
+    entity: FunnelEntityNode | FunnelExclusionEntityNode | None,
+) -> TypeIs[EventsNode | FunnelExclusionEventsNode]:
     return (
         isinstance(entity, EventsNode)
         or isinstance(entity, FunnelExclusionEventsNode)
@@ -88,27 +105,23 @@ def is_events_entity(entity: EntityNode | ExclusionEntityNode) -> TypeGuard[Even
     )
 
 
-def is_data_warehouse_entity(entity: EntityNode | ExclusionEntityNode) -> TypeGuard[DataWarehouseNode]:
-    return isinstance(entity, DataWarehouseNode)
-
-
-def data_warehouse_config_key(node: DataWarehouseNode) -> tuple[str, str, str, str]:
+def data_warehouse_config_key(node: FunnelsDataWarehouseNode) -> tuple[str, str, str, str]:
     return (
         node.table_name,
         node.id_field,
-        node.distinct_id_field,
+        node.aggregation_target_field,
         node.timestamp_field,
     )
 
 
-def entity_config_mismatch(step_entity: EntityNode, table_entity: EntityNode | None) -> bool:
-    if isinstance(step_entity, DataWarehouseNode) != isinstance(table_entity, DataWarehouseNode):
+def entity_config_mismatch(step_entity: FunnelEntityNode, table_entity: FunnelEntityNode | None) -> bool:
+    if isinstance(step_entity, FunnelsDataWarehouseNode) != isinstance(table_entity, FunnelsDataWarehouseNode):
         return True
 
-    if not isinstance(step_entity, DataWarehouseNode):
+    if not isinstance(step_entity, FunnelsDataWarehouseNode):
         return False
 
-    assert isinstance(table_entity, DataWarehouseNode)
+    assert table_entity is not None and isinstance(table_entity, FunnelsDataWarehouseNode)
     return data_warehouse_config_key(step_entity) != data_warehouse_config_key(table_entity)
 
 
@@ -129,3 +142,15 @@ def alias_columns_in_select(columns: list[ast.Expr], table_alias: str) -> list[a
         else:
             raise ValueError(f"Unexpected select expression {col!r}")
     return result
+
+
+def get_breakdown_cohort_name(cohort_id: int, team: Team, not_in_cohort_name: str | None = None) -> str:
+    if cohort_id == ALL_USERS_COHORT_ID:
+        return "all users"
+    elif cohort_id == NOT_IN_COHORT_ID:
+        if not_in_cohort_name:
+            return f"Not in {not_in_cohort_name}"
+        return "Not in cohort"
+    else:
+        cohort_name = Cohort.objects.get(pk=cohort_id, team__project_id=team.project_id).name
+        return cohort_name or ""

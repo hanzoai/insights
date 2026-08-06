@@ -28,7 +28,7 @@ class TestTemplateKnock(BaseInsightsFunctionTemplateTest):
                     "timestamp": "2024-09-16T16:11:48.577Z",
                     "url": "http://localhost:8000/project/1/events/",
                     "properties": {
-                        "$current_url": "http://localhost:8000/project/1/pipeline/destinations/fn-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
+                        "$current_url": "http://localhost:8000/project/1/pipeline/destinations/script-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
                         "$browser": "Chrome",
                         "price": 15,
                         "phone": "0123456789",
@@ -66,7 +66,7 @@ class TestTemplateKnock(BaseInsightsFunctionTemplateTest):
                     "timestamp": "2024-09-16T16:11:48.577Z",
                     "url": "http://localhost:8000/project/1/events/",
                     "properties": {
-                        "$current_url": "http://localhost:8000/project/1/pipeline/destinations/fn-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
+                        "$current_url": "http://localhost:8000/project/1/pipeline/destinations/script-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
                         "$browser": "Chrome",
                         "price": 15,
                     },
@@ -86,7 +86,7 @@ class TestTemplateKnock(BaseInsightsFunctionTemplateTest):
                     "timestamp": "2024-09-16T16:11:48.577Z",
                     "url": "http://localhost:8000/project/1/events/",
                     "properties": {
-                        "$current_url": "http://localhost:8000/project/1/pipeline/destinations/fn-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
+                        "$current_url": "http://localhost:8000/project/1/pipeline/destinations/script-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
                         "$browser": "Chrome",
                         "price": 15,
                     },
@@ -96,7 +96,7 @@ class TestTemplateKnock(BaseInsightsFunctionTemplateTest):
 
         assert self.get_mock_fetch_calls()[0][1]["body"]["properties"] == {
             "price": 15,
-            "$current_url": "http://localhost:8000/project/1/pipeline/destinations/fn-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
+            "$current_url": "http://localhost:8000/project/1/pipeline/destinations/script-0191fb90-bb37-0000-fba4-3377db3ac5e6/configuration",
             "$browser": "Chrome",
             "phone": "0123456789",
         }

@@ -1,6 +1,6 @@
 import { createHash } from 'crypto'
 
-import { PluginEvent } from '@hanzo/plugin-scaffold'
+import { PluginEvent } from '~/plugin-scaffold'
 
 import { LegacyTransformationPluginMeta } from '../../types'
 

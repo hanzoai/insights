@@ -9,7 +9,8 @@ from insights.management.commands.sync_insights_function_templates import (
     TEST_INCLUDE_PYTHON_TEMPLATE_IDS,
     TYPES_WITH_JAVASCRIPT_SOURCE,
 )
-from insights.models.insights_function_template import InsightsFunctionTemplate
+
+from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 
 pytestmark = pytest.mark.django_db
 
@@ -84,7 +85,7 @@ class TestSyncInsightsFunctionTemplates:
         mock_invalid_template = {
             "id": "invalid_template",
             "type": "destination",  # Valid type but missing other required fields
-            # Missing required fields like name, code, etc.
+            # Missing required fields like name, script, etc.
         }
 
         # Mock the Node.js API response with an invalid template
@@ -145,7 +146,7 @@ class TestSyncInsightsFunctionTemplates:
         output = stdout.getvalue()
 
         # Just check that the command ran successfully
-        assert "Sync completed" in output
+        assert "Script function template sync complete" in output
 
     @patch("insights.plugins.plugin_server_api.get_insights_function_templates")
     def test_template_contents(self, mock_get_insights_function_templates):
@@ -223,7 +224,7 @@ class TestSyncInsightsFunctionTemplates:
             status="beta",
             free=True,
             category=["Custom"],
-            code_language="fn",
+            code_language="script",
         )
 
         # Verify the old template was created
@@ -266,7 +267,7 @@ class TestSyncInsightsFunctionTemplates:
             status="beta",
             free=True,
             category=["Custom"],
-            code_language="fn",
+            code_language="script",
         )
 
         # Verify the old template was created

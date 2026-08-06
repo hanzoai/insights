@@ -5,7 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/hanzoai/insights/bin/hobby-installer/ui"
+	"github.com/insights/insights/bin/hobby-installer/ui"
 )
 
 type versionMode int
@@ -110,7 +110,7 @@ func (m VersionModel) View() string {
 			m.textInput.View(),
 			"",
 			ui.MutedStyle.Render("Check available versions at:"),
-			ui.MutedStyle.Render("https://hub.docker.com/r/hanzoai/insights/tags"),
+			ui.MutedStyle.Render("https://hub.docker.com/r/insights/insights/tags"),
 			"",
 			ui.HelpStyle.Render("enter confirm • esc back"),
 		)

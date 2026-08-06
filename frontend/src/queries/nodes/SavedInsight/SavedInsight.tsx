@@ -37,13 +37,21 @@ export function SavedInsight({
 
     if (insightLoading) {
         return (
-            <div className="text-center">
+            <div className="flex flex-col flex-1 justify-center items-center w-full h-full">
                 <LoadingBar />
             </div>
         )
     }
 
-    const query = { ...propsQuery, ...dataQuery, full: propsQuery.full }
+    // `showResults` is reapplied only when the caller set it: a stored query carrying an explicit
+    // `false` would otherwise override an embed that asked for the result body and draw a card with
+    // nothing in it, while callers that say nothing keep deferring to what the insight stored.
+    const query = {
+        ...propsQuery,
+        ...dataQuery,
+        full: propsQuery.full,
+        ...(propsQuery.showResults === undefined ? {} : { showResults: propsQuery.showResults }),
+    }
 
     return (
         <Query

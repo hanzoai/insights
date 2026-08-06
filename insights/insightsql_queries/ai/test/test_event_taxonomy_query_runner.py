@@ -15,13 +15,35 @@ from django.utils import timezone
 
 from insights.schema import CachedEventTaxonomyQueryResponse, EventTaxonomyQuery
 
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.printer import prepare_and_print_ast
+
 from insights.insightsql_queries.ai.event_taxonomy_query_runner import EventTaxonomyQueryRunner
-from insights.models import Action, PropertyDefinition
-from insights.models.property_definition import PropertyType
+from insights.models import PropertyDefinition
+
+from products.actions.backend.models.action import Action
+from products.event_definitions.backend.models.property_definition import PropertyType
 
 
 @override_settings(IN_UNIT_TESTING=True)
 class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
+    @override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=True)
+    def test_targeted_properties_read_individual_json_subcolumns(self):
+        runner = EventTaxonomyQueryRunner(
+            team=self.team,
+            query=EventTaxonomyQuery(event="event1", properties=["$host", "custom_property"]),
+        )
+
+        sql, _ = prepare_and_print_ast(
+            runner.to_query(),
+            InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, use_new_events_schema=True),
+            "datastore",
+        )
+
+        self.assertIn("events.properties.`$host`", sql)
+        self.assertIn("events.properties.custom_property", sql)
+        self.assertNotIn("JSONExtractKeysAndValuesRaw", sql)
+
     @snapshot_datastore_queries
     def test_event_taxonomy_query_runner(self):
         _create_person(
@@ -255,6 +277,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
 
         response = EventTaxonomyQueryRunner(team=self.team, query=EventTaxonomyQuery(event="event1")).calculate()
         self.assertEqual(len(response.results), 500)
+        self.assertTrue(response.hasMore)
 
     def test_property_taxonomy_returns_unique_values_for_specified_property(self):
         _create_person(
@@ -271,7 +294,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "insights.hanzo.ai"},
+            properties={"$host": "us.hanzo.ai"},
             team=self.team,
         )
 
@@ -279,7 +302,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
             _create_event(
                 event="event1",
                 distinct_id="person1",
-                properties={"$host": "insights.com"},
+                properties={"$host": "hanzo.ai"},
                 team=self.team,
             )
 
@@ -287,7 +310,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
             _create_event(
                 event="event1",
                 distinct_id="person2",
-                properties={"$host": "insights.hanzo.ai"},
+                properties={"$host": "eu.hanzo.ai"},
                 team=self.team,
             )
 
@@ -296,7 +319,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         ).calculate()
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].property, "$host")
-        self.assertEqual(response.results[0].sample_values, ["insights.com", "insights.hanzo.ai", "insights.hanzo.ai"])
+        self.assertEqual(response.results[0].sample_values, ["hanzo.ai", "eu.hanzo.ai", "us.hanzo.ai"])
         self.assertEqual(response.results[0].sample_count, 3)
 
     def test_property_taxonomy_filters_events_by_event_name(self):
@@ -314,7 +337,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "insights.hanzo.ai", "$browser": "Chrome"},
+            properties={"$host": "us.hanzo.ai", "$browser": "Chrome"},
             team=self.team,
         )
 
@@ -322,7 +345,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
             _create_event(
                 event="event2",
                 distinct_id="person1",
-                properties={"$host": "insights.com", "prop": 10},
+                properties={"$host": "hanzo.ai", "prop": 10},
                 team=self.team,
             )
 
@@ -338,7 +361,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         ).calculate()
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].property, "$host")
-        self.assertEqual(response.results[0].sample_values, ["insights.hanzo.ai"])
+        self.assertEqual(response.results[0].sample_values, ["us.hanzo.ai"])
         self.assertEqual(response.results[0].sample_count, 1)
 
     def test_property_taxonomy_handles_multiple_properties_in_query(self):
@@ -356,7 +379,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "insights.hanzo.ai", "$browser": "Chrome"},
+            properties={"$host": "us.hanzo.ai", "$browser": "Chrome"},
             team=self.team,
         )
 
@@ -364,7 +387,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
             _create_event(
                 event="event1",
                 distinct_id="person1",
-                properties={"$host": "insights.com", "prop": 10},
+                properties={"$host": "hanzo.ai", "prop": 10},
                 team=self.team,
             )
 
@@ -379,12 +402,12 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
             team=self.team, query=EventTaxonomyQuery(event="event1", properties=["$host", "prop"])
         ).calculate()
         self.assertEqual(len(response.results), 2)
-        self.assertEqual(response.results[0].property, "prop")
-        self.assertEqual(response.results[0].sample_values, ["10"])
-        self.assertEqual(response.results[0].sample_count, 1)
-        self.assertEqual(response.results[1].property, "$host")
-        self.assertEqual(response.results[1].sample_values, ["insights.com", "insights.hanzo.ai"])
-        self.assertEqual(response.results[1].sample_count, 2)
+        self.assertEqual(response.results[0].property, "$host")
+        self.assertEqual(response.results[0].sample_values, ["hanzo.ai", "us.hanzo.ai"])
+        self.assertEqual(response.results[0].sample_count, 2)
+        self.assertEqual(response.results[1].property, "prop")
+        self.assertEqual(response.results[1].sample_values, ["10"])
+        self.assertEqual(response.results[1].sample_count, 1)
 
     def test_property_taxonomy_includes_events_with_partial_property_matches(self):
         _create_person(
@@ -395,7 +418,7 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "insights.hanzo.ai"},
+            properties={"$host": "us.hanzo.ai"},
             team=self.team,
         )
         _create_event(
@@ -409,11 +432,11 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
             team=self.team, query=EventTaxonomyQuery(event="event1", properties=["$host", "prop"])
         ).calculate()
         self.assertEqual(len(response.results), 2)
-        self.assertEqual(response.results[0].property, "prop")
-        self.assertEqual(response.results[0].sample_values, ["10"])
+        self.assertEqual(response.results[0].property, "$host")
+        self.assertEqual(response.results[0].sample_values, ["us.hanzo.ai"])
         self.assertEqual(response.results[0].sample_count, 1)
-        self.assertEqual(response.results[1].property, "$host")
-        self.assertEqual(response.results[1].sample_values, ["insights.hanzo.ai"])
+        self.assertEqual(response.results[1].property, "prop")
+        self.assertEqual(response.results[1].sample_values, ["10"])
         self.assertEqual(response.results[1].sample_count, 1)
 
     def test_query_count(self):
@@ -478,6 +501,32 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].property, "prop")
         self.assertEqual(response.results[0].sample_count, 2)
+
+    def test_dynamic_property_patterns_are_omitted(self):
+        _create_person(
+            distinct_ids=["person1"],
+            properties={"email": "person1@example.com"},
+            team=self.team,
+        )
+        _create_event(
+            event="event1",
+            distinct_id="person1",
+            properties={
+                "$feature_enrollment/beta-flag": "true",
+                "$feature_interaction/new-dashboard": "true",
+                "$product_tour_dismissed/tour123": "true",
+                "$product_tour_shown/tour123": "true",
+                "$product_tour_completed/tour456": "true",
+                "survey_dismissed/abc": "true",
+                "survey_responded/abc": "true",
+                "visible_prop": "value",
+            },
+            team=self.team,
+        )
+
+        response = EventTaxonomyQueryRunner(team=self.team, query=EventTaxonomyQuery(event="event1")).calculate()
+        self.assertEqual(len(response.results), 1)
+        self.assertEqual(response.results[0].property, "visible_prop")
 
     @snapshot_datastore_queries
     def test_retrieves_action_properties(self):
@@ -603,3 +652,38 @@ class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
         ).calculate()
 
         self.assertEqual(len(response.results), 0)
+
+    def test_pagination_with_limit_and_offset(self):
+        _create_person(
+            distinct_ids=["person1"],
+            properties={"email": "person1@example.com"},
+            team=self.team,
+        )
+        _create_event(
+            event="event1",
+            distinct_id="person1",
+            properties={"prop_a": "1", "prop_b": "2", "prop_c": "3"},
+            team=self.team,
+        )
+
+        # First page
+        response = EventTaxonomyQueryRunner(
+            team=self.team,
+            query=EventTaxonomyQuery(event="event1", properties=["prop_a", "prop_b", "prop_c"], limit=2, offset=0),
+        ).calculate()
+
+        self.assertEqual(len(response.results), 2)
+        self.assertTrue(response.hasMore)
+        self.assertEqual(response.limit, 2)
+        self.assertEqual(response.offset, 0)
+
+        # Second page
+        response = EventTaxonomyQueryRunner(
+            team=self.team,
+            query=EventTaxonomyQuery(event="event1", properties=["prop_a", "prop_b", "prop_c"], limit=2, offset=2),
+        ).calculate()
+
+        self.assertEqual(len(response.results), 1)
+        self.assertFalse(response.hasMore)
+        self.assertEqual(response.limit, 2)
+        self.assertEqual(response.offset, 2)

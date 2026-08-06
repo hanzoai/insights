@@ -1,4 +1,16 @@
-import { toIQLDate, toIQLDateTime } from './stl/date'
+import { isHogDate, isHogDateTime } from './objects'
+import { toHogDate, toHogDateTime } from './stl/date'
+
+/** Epoch seconds for a Script datetime/date value, else null. A bare HogDate is UTC midnight. */
+function temporalSeconds(value: any): number | null {
+    if (isHogDateTime(value)) {
+        return value.dt
+    }
+    if (isHogDate(value)) {
+        return toHogDateTime(value).dt
+    }
+    return null
+}
 
 export class ScriptVMException extends Error {
     constructor(message: string) {
@@ -60,7 +72,7 @@ export function getNestedValue(obj: any, chain: any[], nullish = false): any {
                     obj = obj[obj.length + key] ?? null
                 }
             } else {
-                obj = obj[key] ?? null
+                obj = Object.prototype.hasOwnProperty.call(obj, key) ? (obj[key] ?? null) : null
             }
         }
         return obj
@@ -112,11 +124,11 @@ export function convertJSToHog(x: any, found?: Map<any, any>): any {
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__iqlDateTime__) {
-            return toIQLDateTime(x.dt, x.zone)
-        } else if (x.__iqlDate__) {
-            return toIQLDate(x.year, x.month, x.day)
-        } else if (x.__iqlClosure__ || x.__iqlCallable__) {
+        if (x.__hogDateTime__) {
+            return toHogDateTime(x.dt, x.zone)
+        } else if (x.__hogDate__) {
+            return toHogDate(x.year, x.month, x.day)
+        } else if (x.__hogClosure__ || x.__hogCallable__) {
             return x
         }
         const map = new Map()
@@ -152,7 +164,7 @@ export function convertHogToJS(x: any, found?: Map<any, any>): any {
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__iqlDateTime__ || x.__iqlDate__ || x.__iqlClosure__ || x.__iqlCallable__) {
+        if (x.__hogDateTime__ || x.__hogDate__ || x.__hogClosure__ || x.__hogCallable__) {
             return x
         }
         const obj: Record<string, any> = {}
@@ -165,10 +177,6 @@ export function convertHogToJS(x: any, found?: Map<any, any>): any {
     }
     return x
 }
-
-// Aliases for IQL naming convention
-export const convertJSToIQL = convertJSToHog
-export const convertIQLToJS = convertHogToJS
 
 export function calculateCost(object: any, marked: Set<any> | undefined = undefined): any {
     if (!marked) {
@@ -208,6 +216,14 @@ export function calculateCost(object: any, marked: Set<any> | undefined = undefi
 }
 
 export function unifyComparisonTypes(left: any, right: any): [any, any] {
+    // Two temporal values order by epoch seconds (matching Datastore and the Rust VM). Without this they
+    // stay as objects and `object > object` coerces to "[object Object]", which is always false — silently
+    // breaking realtime `is date after`/`is date before` filters.
+    const leftSeconds = temporalSeconds(left)
+    const rightSeconds = temporalSeconds(right)
+    if (leftSeconds !== null && rightSeconds !== null) {
+        return [leftSeconds, rightSeconds]
+    }
     if (typeof left === 'number' && typeof right === 'string') {
         return [left, Number(right)]
     }

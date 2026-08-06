@@ -1,23 +1,27 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
+import * as moneyPng from '@hanzo/brand/hoggies/png/money'
 import { IconArrowRight } from '@hanzo/icons'
 import { Button, Card, Link } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { FilmCameraMascot } from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 
+import { MarketingAnalyticsSourceStatusBanner } from '../../web-analytics/tabs/marketing-analytics/frontend/components/MarketingAnalyticsSourceStatusBanner'
 import { ConversionGoalsConfiguration } from '../../web-analytics/tabs/marketing-analytics/frontend/components/settings/ConversionGoalsConfiguration'
 import { marketingAnalyticsLogic } from '../../web-analytics/tabs/marketing-analytics/frontend/logic/marketingAnalyticsLogic'
 import { marketingAnalyticsSettingsLogic } from '../../web-analytics/tabs/marketing-analytics/frontend/logic/marketingAnalyticsSettingsLogic'
 import { AddSourceStep } from './AddSourceStep'
-import { MarketingWizardStepper } from './MarketingWizardStepper'
 import { MarketingOnboardingStep, marketingOnboardingLogic } from './marketingOnboardingLogic'
+import { MarketingWizardStepper } from './MarketingWizardStepper'
+
+const MascotMoney = pngHoggie(moneyPng)
 
 interface OnboardingProps {
     completeOnboarding: () => void
@@ -74,7 +78,12 @@ export function Onboarding({ completeOnboarding }: OnboardingProps): JSX.Element
 
             {currentStep === 'welcome' && <WelcomeStep onContinue={() => setStep('add-source')} />}
 
-            {currentStep === 'add-source' && <AddSourceStep onContinue={handleNextStep} hasSources={hasSources} />}
+            {currentStep === 'add-source' && (
+                <>
+                    <MarketingAnalyticsSourceStatusBanner />
+                    <AddSourceStep onContinue={handleNextStep} hasSources={hasSources} />
+                </>
+            )}
 
             {currentStep === 'conversion-goals' && (
                 <ConversionGoalsStep onContinue={handleComplete} onSkip={handleComplete} />
@@ -99,7 +108,7 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }): JSX.Element {
             }
             isEmpty={true}
             docsURL="https://hanzo.ai/docs/web-analytics/marketing-analytics"
-            customInsights={FilmCameraMascot}
+            customHog={MascotMoney}
         />
     )
 }

@@ -4,18 +4,18 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { IconCheck, IconPlusSmall, IconSearch, IconX } from '@hanzo/icons'
 
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { UploadedLogo } from 'lib/elements/UploadedLogo'
 import { IconBlank } from 'lib/elements/icons'
+import { UploadedLogo } from 'lib/elements/UploadedLogo'
+import { preflightLogic } from 'lib/logic/preflightLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuSeparator } from 'lib/ui/Menus/Menus'
 import { cn } from 'lib/utils/css-classes'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { userLogic } from 'scenes/userLogic'
 
-import { globalModalsLogic } from '~/layout/GlobalModals'
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
+import { globalModalsLogic } from '~/layout/globalModalsLogic'
 import { AccessLevelIndicator } from '~/layout/navigation/AccessLevelIndicator'
 import { AvailableFeature, OrganizationBasicType } from '~/types'
 

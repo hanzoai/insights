@@ -1,6 +1,6 @@
 import { migrateKafkaCyclotronInvocation } from './job-queue-kafka'
 
-describe('CyclotronJobQueue - kafka', () => {
+describe('CyclotronJobQueueKafka', () => {
     describe('migrateKafkaCyclotronInvocation', () => {
         // Pulled from a real job in kafka
         const legacyFormat = {
@@ -9,11 +9,11 @@ describe('CyclotronJobQueue - kafka', () => {
                 event: { event: 'foo' },
             },
             teamId: 1,
-            queue: 'fn',
+            queue: 'script',
             queuePriority: 0,
             timings: [
                 {
-                    kind: 'fn',
+                    kind: 'script',
                     duration_ms: 0.6164590120315552,
                 },
             ],
@@ -50,7 +50,7 @@ describe('CyclotronJobQueue - kafka', () => {
                 {
                   "functionId": "0196a6b9-1104-0000-f099-9cf11985a307",
                   "id": "01971158-5dd2-0000-2dde-9d3478269401",
-                  "queue": "fn",
+                  "queue": "script",
                   "queueParameters": {
                     "body": "",
                     "response": {
@@ -79,7 +79,7 @@ describe('CyclotronJobQueue - kafka', () => {
                     "timings": [
                       {
                         "duration_ms": 0.6164590120315552,
-                        "kind": "fn",
+                        "kind": "script",
                       },
                     ],
                     "vmState": {

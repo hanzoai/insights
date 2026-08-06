@@ -15,15 +15,21 @@ from insights.api.github import (
     GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN,
     GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN,
     GITHUB_TYPE_FOR_PERSONAL_API_KEY,
-    GITHUB_TYPE_FOR_PROJECT_SECRET,
+    GITHUB_TYPE_FOR_SECURE_API_KEY,
     SignatureVerificationError,
     relay_to_eu,
     verify_github_signature,
 )
 from insights.models import PersonalAPIKey
 from insights.models.oauth import OAuthAccessToken, OAuthApplication, OAuthGrant, OAuthRefreshToken
-from insights.models.personal_api_key import hash_key_value
-from insights.models.utils import generate_random_token_personal, mask_key_value
+from insights.models.personal_api_key import LEGACY_PERSONAL_API_KEY_SALT
+from insights.models.utils import (
+    generate_random_token_personal,
+    generate_random_token_secret,
+    hash_key_value,
+    mask_key_value,
+)
+from insights.test.api_keys import create_project_secret_api_key
 
 
 class TestGitHubSignatureVerification(TestCase):
@@ -200,9 +206,9 @@ class TestSecretAlertEndpoint(APIBaseTest):
         # Valid test payload (uses project secret type)
         self.valid_payload = [
             {
-                "token": "hix_test_token_123",
-                "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
-                "url": "https://github.com/hanzoai/insights/blob/main/example.py",
+                "token": "phx_test_token_123",
+                "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
+                "url": "https://github.com/insights/insights/blob/master/example.py",
                 "source": "github",
             }
         ]
@@ -241,7 +247,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         self.assertIn("token_hash", data[0])
         self.assertIn("token_type", data[0])
         self.assertIn("label", data[0])
-        self.assertEqual(data[0]["token_type"], GITHUB_TYPE_FOR_PROJECT_SECRET)
+        self.assertEqual(data[0]["token_type"], GITHUB_TYPE_FOR_SECURE_API_KEY)
 
     def test_secret_alert_missing_headers(self):
         """Test that missing headers are rejected."""
@@ -318,6 +324,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
             label="Test Key",
             secure_value=hash_key_value(token),
             mask_value=mask_key_value(token),
+            scopes=["*"],
         )
         original_secure_value = key.secure_value
 
@@ -366,7 +373,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
             data=json.dumps(
                 [
                     {
-                        "token": "hix_nonexistent_token_12345678901234567890",
+                        "token": "phx_nonexistent_token_12345678901234567890",
                         "type": GITHUB_TYPE_FOR_PERSONAL_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
@@ -390,12 +397,13 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Create a key with legacy PBKDF2 hash (260000 iterations)
         token = generate_random_token_personal()
-        legacy_hash = hash_key_value(token, mode="pbkdf2", iterations=260000)
+        legacy_hash = hash_key_value(token, mode="pbkdf2", legacy_salt=LEGACY_PERSONAL_API_KEY_SALT, iterations=260000)
         key = PersonalAPIKey.objects.create(
             user=self.user,
             label="Legacy Key",
             secure_value=legacy_hash,
             mask_value=mask_key_value(token),
+            scopes=["*"],
         )
 
         # Send alert with the token
@@ -439,6 +447,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
             label="Inactive User Key",
             secure_value=hash_key_value(token),
             mask_value=mask_key_value(token),
+            scopes=["*"],
         )
 
         # Send alert with the token
@@ -465,13 +474,13 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         self.assertEqual(data[0]["label"], "false_positive")
 
     @patch("insights.api.github.verify_github_signature")
-    @patch("insights.api.github.send_project_secret_api_key_exposed")
+    @patch("insights.api.github.send_feature_flags_secure_api_key_exposed")
     def test_secret_alert_finds_project_secret_and_sends_email(self, mock_send_email, mock_verify):
         """Test that a project secret API key is found and email is sent to admins."""
         mock_verify.return_value = None
 
         # Set up a secret token on the team
-        token = "hix_test_secret_token_1234567890"
+        token = "phx_test_secret_token_1234567890"
         self.team.secret_api_token = token
         self.team.save()
 
@@ -482,7 +491,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -496,7 +505,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         data = response.json()
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["label"], "true_positive")
-        self.assertEqual(data[0]["token_type"], GITHUB_TYPE_FOR_PROJECT_SECRET)
+        self.assertEqual(data[0]["token_type"], GITHUB_TYPE_FOR_SECURE_API_KEY)
 
         # Verify email task was called
         mock_send_email.assert_called_once()
@@ -506,14 +515,14 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         self.assertIn("https://github.com/test/repo/blob/main/config.py", call_args[0][2])
 
     @patch("insights.api.github.verify_github_signature")
-    @patch("insights.api.github.send_project_secret_api_key_exposed")
+    @patch("insights.api.github.send_feature_flags_secure_api_key_exposed")
     def test_secret_alert_finds_project_secret_backup_and_sends_email(self, mock_send_email, mock_verify):
         """Test that a backup project secret API key is also detected."""
         mock_verify.return_value = None
 
         # Set up a backup secret token on the team
-        token = "hix_test_backup_secret_token_123"
-        self.team.secret_api_token = "hix_different_primary_token"
+        token = "phx_test_backup_secret_token_123"
+        self.team.secret_api_token = "phx_different_primary_token"
         self.team.secret_api_token_backup = token
         self.team.save()
 
@@ -524,7 +533,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/old_config.py",
                         "source": "github",
                     }
@@ -543,6 +552,106 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         mock_send_email.assert_called_once()
 
 
+class TestProjectSecretAPIKeySecretAlert(APIBaseTest):
+    def _post_alert(self, tokens: list[str]):
+        return self.client.post(
+            "/api/alerts/github",
+            data=json.dumps(
+                [
+                    {
+                        "token": token,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
+                        "url": "https://github.com/test/repo/blob/main/config.py",
+                        "source": "github",
+                    }
+                    for token in tokens
+                ]
+            ),
+            content_type="application/json",
+            headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "test_sig"},
+        )
+
+    @patch("insights.api.github.verify_github_signature")
+    @patch("insights.api.github.send_feature_flags_secure_api_key_exposed")
+    @patch("insights.api.project_secret_api_key.send_project_secret_api_key_exposed")
+    def test_finds_and_rolls_project_secret_api_key(self, mock_psak_exposed, mock_ff_exposed, mock_verify):
+        mock_verify.return_value = None
+        key, value = create_project_secret_api_key(team=self.team, created_by=self.user, label="Production key")
+        old_secure_value = key.secure_value
+        old_mask_value = key.mask_value
+
+        response = self._post_alert([value])
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["label"], "true_positive")
+        self.assertEqual(data[0]["token_type"], GITHUB_TYPE_FOR_SECURE_API_KEY)
+
+        key.refresh_from_db()
+        self.assertNotEqual(key.secure_value, old_secure_value)
+        self.assertNotEqual(key.mask_value, old_mask_value)
+        self.assertIsNotNone(key.last_rolled_at)
+
+        mock_psak_exposed.assert_called_once()
+        call_args = mock_psak_exposed.call_args[0]
+        self.assertEqual(call_args[0], self.team.id)
+        self.assertEqual(call_args[1], key.id)
+        self.assertEqual(call_args[2], old_mask_value)
+        self.assertIn("https://github.com/test/repo/blob/main/config.py", call_args[3])
+        mock_ff_exposed.assert_not_called()
+
+    @patch("insights.api.github.verify_github_signature")
+    @patch("insights.api.github.send_feature_flags_secure_api_key_exposed")
+    @patch("insights.api.project_secret_api_key.send_project_secret_api_key_exposed")
+    def test_legacy_team_secret_token_is_not_rolled(self, mock_psak_exposed, mock_ff_exposed, mock_verify):
+        mock_verify.return_value = None
+        token = "phs_legacy_team_secret_token_123"
+        self.team.secret_api_token = token
+        self.team.save()
+
+        response = self._post_alert([token])
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]["label"], "true_positive")
+
+        self.team.refresh_from_db()
+        self.assertEqual(self.team.secret_api_token, token)
+        mock_ff_exposed.assert_called_once()
+        mock_psak_exposed.assert_not_called()
+
+    @patch("insights.api.github.verify_github_signature")
+    @patch("insights.api.github.send_feature_flags_secure_api_key_exposed")
+    @patch("insights.api.project_secret_api_key.send_project_secret_api_key_exposed")
+    def test_unknown_phs_token_is_false_positive(self, mock_psak_exposed, mock_ff_exposed, mock_verify):
+        mock_verify.return_value = None
+
+        response = self._post_alert([generate_random_token_secret()])
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]["label"], "false_positive")
+        mock_ff_exposed.assert_not_called()
+        mock_psak_exposed.assert_not_called()
+
+    @patch("insights.api.github.verify_github_signature")
+    @patch("insights.api.github.send_feature_flags_secure_api_key_exposed")
+    @patch("insights.api.project_secret_api_key.send_project_secret_api_key_exposed")
+    def test_mixed_batch_labels_each_token_independently(self, mock_psak_exposed, mock_ff_exposed, mock_verify):
+        mock_verify.return_value = None
+        _, psak_value = create_project_secret_api_key(team=self.team, created_by=self.user)
+        legacy_token = "phs_legacy_team_secret_token_123"
+        self.team.secret_api_token = legacy_token
+        self.team.save()
+
+        response = self._post_alert([psak_value, legacy_token, generate_random_token_secret()])
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        labels = [item["label"] for item in response.json()]
+        self.assertEqual(labels, ["true_positive", "true_positive", "false_positive"])
+        mock_psak_exposed.assert_called_once()
+        mock_ff_exposed.assert_called_once()
+
+
 class TestRelayToEu(TestCase):
     def test_returns_none_when_setting_empty(self):
         """Verify no call when GITHUB_SECRET_ALERT_RELAY_URL is None."""
@@ -550,7 +659,7 @@ class TestRelayToEu(TestCase):
             result = relay_to_eu('{"test": "data"}', "kid", "sig")
             self.assertIsNone(result)
 
-    @override_settings(GITHUB_SECRET_ALERT_RELAY_URL="https://insights.hanzo.ai/api/github/secret_alert/")
+    @override_settings(GITHUB_SECRET_ALERT_RELAY_URL="https://eu.hanzo.ai/api/github/secret_alert/")
     @patch("insights.api.github.requests.post")
     def test_relay_success(self, mock_post):
         """Test successful relay returns EU results."""
@@ -563,7 +672,7 @@ class TestRelayToEu(TestCase):
 
         self.assertEqual(result, expected)
         mock_post.assert_called_once_with(
-            "https://insights.hanzo.ai/api/github/secret_alert/",
+            "https://eu.hanzo.ai/api/github/secret_alert/",
             data='{"test": "data"}',
             headers={
                 "Content-Type": "application/json",
@@ -573,7 +682,7 @@ class TestRelayToEu(TestCase):
             timeout=15,
         )
 
-    @override_settings(GITHUB_SECRET_ALERT_RELAY_URL="https://insights.hanzo.ai/api/github/secret_alert/")
+    @override_settings(GITHUB_SECRET_ALERT_RELAY_URL="https://eu.hanzo.ai/api/github/secret_alert/")
     @patch("insights.api.github.requests.post")
     def test_relay_failure_returns_none(self, mock_post):
         """Test that EU request failure returns None (graceful degradation)."""
@@ -583,7 +692,7 @@ class TestRelayToEu(TestCase):
 
         self.assertIsNone(result)
 
-    @override_settings(GITHUB_SECRET_ALERT_RELAY_URL="https://insights.hanzo.ai/api/github/secret_alert/")
+    @override_settings(GITHUB_SECRET_ALERT_RELAY_URL="https://eu.hanzo.ai/api/github/secret_alert/")
     @patch("insights.api.github.get_instance_region")
     def test_returns_none_when_in_eu_region(self, mock_get_region):
         """Prevent infinite loop if relay URL accidentally configured in EU."""
@@ -601,7 +710,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         """Verify no HTTP call to EU when all results are true_positive."""
         mock_verify.return_value = None
 
-        token = "hix_test_secret_token_1234567890"
+        token = "phx_test_secret_token_1234567890"
         self.team.secret_api_token = token
         self.team.save()
 
@@ -611,7 +720,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -633,11 +742,11 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         mock_verify.return_value = None
         mock_relay.return_value = None
 
-        token = "hix_unknown_token_1234567890"
+        token = "phx_unknown_token_1234567890"
         payload = [
             {
                 "token": token,
-                "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                 "url": "https://github.com/test/repo/blob/main/config.py",
                 "source": "github",
             }
@@ -664,11 +773,11 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         """US returns false_positive, EU returns true_positive → final is true_positive."""
         mock_verify.return_value = None
 
-        token = "hix_eu_key_1234567890"
+        token = "phx_eu_key_1234567890"
         token_hash = sha256(token.encode("utf-8")).hexdigest()
 
         mock_relay.return_value = [
-            {"token_hash": token_hash, "label": "true_positive", "token_type": GITHUB_TYPE_FOR_PROJECT_SECRET}
+            {"token_hash": token_hash, "label": "true_positive", "token_type": GITHUB_TYPE_FOR_SECURE_API_KEY}
         ]
 
         response = self.client.post(
@@ -677,7 +786,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -698,7 +807,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         mock_verify.return_value = None
         mock_relay.return_value = None
 
-        token = "hix_unknown_token_1234567890"
+        token = "phx_unknown_token_1234567890"
 
         response = self.client.post(
             "/api/alerts/github",
@@ -706,7 +815,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -727,7 +836,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         """Verify no call when GITHUB_SECRET_ALERT_RELAY_URL is None."""
         mock_verify.return_value = None
 
-        token = "hix_unknown_token_1234567890"
+        token = "phx_unknown_token_1234567890"
 
         response = self.client.post(
             "/api/alerts/github",
@@ -735,7 +844,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -756,7 +865,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
     @patch("insights.api.github.verify_github_signature")
     @patch("insights.api.github.hanzo_insights.capture")
     @patch("insights.api.github.get_instance_region")
-    @patch("insights.api.github.send_project_secret_api_key_exposed")
+    @patch("insights.api.github.send_feature_flags_secure_api_key_exposed")
     def test_local_find_sets_key_found_region_to_current_region(
         self, mock_send_email, mock_get_region, mock_capture, mock_verify
     ):
@@ -764,7 +873,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         mock_verify.return_value = None
         mock_get_region.return_value = "US"
 
-        token = "hix_test_secret_token_for_region"
+        token = "phx_test_secret_token_for_region"
         self.team.secret_api_token = token
         self.team.save()
 
@@ -774,7 +883,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -800,11 +909,11 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         mock_verify.return_value = None
         mock_get_region.return_value = "US"
 
-        token = "hix_eu_only_key_1234567890"
+        token = "phx_eu_only_key_1234567890"
         token_hash = sha256(token.encode("utf-8")).hexdigest()
 
         mock_relay.return_value = [
-            {"token_hash": token_hash, "label": "true_positive", "token_type": GITHUB_TYPE_FOR_PROJECT_SECRET}
+            {"token_hash": token_hash, "label": "true_positive", "token_type": GITHUB_TYPE_FOR_SECURE_API_KEY}
         ]
 
         self.client.post(
@@ -813,7 +922,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -838,7 +947,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         mock_verify.return_value = None
         mock_relay.return_value = None
 
-        token = "hix_nonexistent_token_1234567890"
+        token = "phx_nonexistent_token_1234567890"
 
         self.client.post(
             "/api/alerts/github",
@@ -846,7 +955,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
                 [
                     {
                         "token": token,
-                        "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
+                        "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
                     }
@@ -866,26 +975,16 @@ class TestSecretAlertRegionTracking(APIBaseTest):
 
 class TestOAuthTokenSecretAlert(APIBaseTest):
     def _create_oauth_app(self):
-        from django.conf import settings
-
-        from insights.models.test.test_oauth import generate_rsa_key
-
-        with self.settings(
-            OAUTH2_PROVIDER={
-                **settings.OAUTH2_PROVIDER,
-                "OIDC_RSA_PRIVATE_KEY": generate_rsa_key(),
-            }
-        ):
-            return OAuthApplication.objects.create(
-                name="Test OAuth App",
-                client_type=OAuthApplication.CLIENT_CONFIDENTIAL,
-                authorization_grant_type=OAuthApplication.GRANT_AUTHORIZATION_CODE,
-                redirect_uris="https://example.com/callback",
-                algorithm="RS256",
-                skip_authorization=False,
-                organization=self.organization,
-                user=self.user,
-            )
+        return OAuthApplication.objects.create(
+            name="Test OAuth App",
+            client_type=OAuthApplication.CLIENT_CONFIDENTIAL,
+            authorization_grant_type=OAuthApplication.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="https://example.com/callback",
+            algorithm="RS256",
+            skip_authorization=False,
+            organization=self.organization,
+            user=self.user,
+        )
 
     @patch("insights.api.github.verify_github_signature")
     @patch("insights.api.github.send_oauth_token_exposed")
@@ -893,7 +992,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         oauth_app = self._create_oauth_app()
-        token = "hia_test_access_token_github_alert_123"
+        token = "pha_test_access_token_github_alert_123"
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
@@ -938,7 +1037,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         oauth_app = self._create_oauth_app()
-        token = "hir_test_refresh_token_github_alert_123"
+        token = "phr_test_refresh_token_github_alert_123"
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
@@ -984,7 +1083,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
             data=json.dumps(
                 [
                     {
-                        "token": "hia_nonexistent_access_token_12345678901234567890",
+                        "token": "pha_nonexistent_access_token_12345678901234567890",
                         "type": GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
@@ -1009,7 +1108,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
             data=json.dumps(
                 [
                     {
-                        "token": "hir_nonexistent_refresh_token_12345678901234567890",
+                        "token": "phr_nonexistent_refresh_token_12345678901234567890",
                         "type": GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
@@ -1035,13 +1134,13 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hir_related_refresh_token_123",
+            token="phr_related_refresh_token_123",
         )
 
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hia_test_access_with_refresh_123",
+            token="pha_test_access_with_refresh_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=refresh_token,
@@ -1065,7 +1164,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
             data=json.dumps(
                 [
                     {
-                        "token": "hia_test_access_with_refresh_123",
+                        "token": "pha_test_access_with_refresh_123",
                         "type": GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",
@@ -1097,13 +1196,13 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hir_leaked_refresh_token_456",
+            token="phr_leaked_refresh_token_456",
         )
 
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hia_related_access_token_456",
+            token="pha_related_access_token_456",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=refresh_token,
@@ -1127,7 +1226,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
             data=json.dumps(
                 [
                     {
-                        "token": "hir_leaked_refresh_token_456",
+                        "token": "phr_leaked_refresh_token_456",
                         "type": GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",
@@ -1154,7 +1253,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         oauth_app = self._create_oauth_app()
-        token = "hir_already_revoked_token_123"
+        token = "phr_already_revoked_token_123"
         OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
@@ -1195,7 +1294,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hia_initial_access_token_no_source",
+            token="pha_initial_access_token_no_source",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=None,  # Initial token has no source_refresh_token
@@ -1206,7 +1305,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hir_paired_refresh_no_link",
+            token="phr_paired_refresh_no_link",
             access_token=access_token,
         )
 
@@ -1229,7 +1328,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
             data=json.dumps(
                 [
                     {
-                        "token": "hia_initial_access_token_no_source",
+                        "token": "pha_initial_access_token_no_source",
                         "type": GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",
@@ -1266,7 +1365,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hia_initial_access_for_refresh_leak",
+            token="pha_initial_access_for_refresh_leak",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=None,
@@ -1277,7 +1376,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="hir_initial_refresh_to_leak",
+            token="phr_initial_refresh_to_leak",
             access_token=access_token,
         )
 
@@ -1300,7 +1399,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
             data=json.dumps(
                 [
                     {
-                        "token": "hir_initial_refresh_to_leak",
+                        "token": "phr_initial_refresh_to_leak",
                         "type": GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",

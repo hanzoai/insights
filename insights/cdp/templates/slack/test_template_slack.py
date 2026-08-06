@@ -14,7 +14,7 @@ class TestTemplateSlack(BaseInsightsFunctionTemplateTest):
             "slack_workspace": {
                 "access_token": "xoxb-1234",
             },
-            "icon_emoji": ":bar_chart:",
+            "icon_emoji": ":mascot:",
             "username": "Insights",
             "channel": "channel",
             "blocks": [],
@@ -33,7 +33,7 @@ class TestTemplateSlack(BaseInsightsFunctionTemplateTest):
             {
                 "body": {
                     "channel": "channel",
-                    "icon_emoji": ":bar_chart:",
+                    "icon_emoji": ":mascot:",
                     "username": "Insights",
                     "blocks": [],
                     "text": None,

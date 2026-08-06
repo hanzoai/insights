@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getSvelteSteps as getSvelteStepsPA } from '../product-analytics/svelte'
 import { StepDefinition } from '../steps'
@@ -26,7 +26,7 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             language: 'javascript',
                             file: 'src/hooks.client.js',
                             code: dedent`
-                              import insights from '@hanzo/insights';
+                              import insights from 'insights-js';
                               import type { HandleClientError } from '@sveltejs/kit';
                               export const handleError = ({ error, status }: HandleClientError) => {
                                 // SvelteKit 2.0 offers a reliable way to check for a 404 error:
@@ -61,7 +61,7 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                               import type { HandleServerError } from '@sveltejs/kit';
                               import { Insights } from 'insights-node';
                               const client = new Insights(
-                                '<ph_project_api_key>',
+                                '<ph_project_token>',
                                 { host: 'https://us.i.hanzo.ai' }
                               )
                               export const handleError = async ({ error, status }: HandleServerError) => {
@@ -87,18 +87,13 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        clientExceptionCaptureStep,
-        serverExceptionCaptureStep,
-        verifyStep,
-    ]
+    return [...installSteps, clientExceptionCaptureStep, serverExceptionCaptureStep, verifyStep]
 }
 
 export const SvelteInstallation = createInstallation(getSvelteSteps)

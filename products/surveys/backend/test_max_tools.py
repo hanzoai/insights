@@ -20,7 +20,9 @@ from insights.schema import (
     SurveyType,
 )
 
-from insights.models import FeatureFlag, Insight, Survey
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
+from products.product_analytics.backend.models.insight import Insight
+from products.surveys.backend.models import Survey
 
 from products.surveys.backend.max_tools import SurveyUpdateSchema
 

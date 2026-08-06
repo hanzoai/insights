@@ -1,13 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis, IconSearch } from '@hanzo/icons'
+import { IconDownload, IconGear, IconSearch, IconStar, IconTarget, IconX } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { Button } from 'lib/elements/Button'
-import { Menu, MenuSection } from 'lib/elements/Menu'
 import { Switch } from 'lib/elements/Switch'
 import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { urls } from 'scenes/urls'
@@ -15,7 +13,12 @@ import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 
 import { ScenePanel, ScenePanelActionsSection, ScenePanelDivider, ScenePanelLabel } from '~/layout/scenes/SceneLayout'
 
+import { isWebAnalyticsAchievementsEnabled } from './achievements/gating'
+import { webAnalyticsAchievementsLogic } from './achievements/webAnalyticsAchievementsLogic'
+import { webAnalyticsAchievementsPreferencesLogic } from './achievements/webAnalyticsAchievementsPreferencesLogic'
 import { ProductTab, TILE_LABELS, TileId } from './common'
+import { shareNudgeLogic } from './shareNudgeLogic'
+import { exportAllTilesAsCsvZip } from './webAnalyticsExportUtils'
 
 const ANALYTICS_TILES = [
     TileId.OVERVIEW,
@@ -33,118 +36,110 @@ const ANALYTICS_TILES = [
 ]
 
 export const WebAnalyticsMenu = (): JSX.Element => {
-    const { shouldFilterTestAccounts, hiddenTiles, productTab } = useValues(webAnalyticsLogic)
+    const {
+        hasSavedFocusMode,
+        hiddenTiles,
+        isFocusModeActive,
+        productTab,
+        showFocusMode,
+        tiles,
+        useWebAnalyticsPrecompute,
+    } = useValues(webAnalyticsLogic)
     const { featureFlags } = useValues(featureFlagLogic)
+    const { achievementsOptOut } = useValues(webAnalyticsAchievementsPreferencesLogic)
 
-    const { setShouldFilterTestAccounts, setTileVisibility, resetTileVisibility } = useActions(webAnalyticsLogic)
+    const { enterFocusMode, exitFocusMode, openFocusModeModal, setUseWebAnalyticsPrecompute, setTileVisibility } =
+        useActions(webAnalyticsLogic)
+    const { openModal: openAchievementsModal } = useActions(webAnalyticsAchievementsLogic)
+    const { exportTriggered } = useActions(shareNudgeLogic)
 
     const showTileToggles = featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_TILE_TOGGLES]
+    const showAchievements = isWebAnalyticsAchievementsEnabled(featureFlags, achievementsOptOut)
     const availableTiles = productTab === ProductTab.ANALYTICS ? ANALYTICS_TILES : []
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
-
-    const sections: MenuSection[] = [
-        {
-            items: [
-                {
-                    label: 'Session Attribution Explorer',
-                    to: urls.sessionAttributionExplorer(),
-                    icon: <IconSearch />,
-                },
-            ],
-        },
-        {
-            items: [
-                {
-                    label: () => (
-                        <Switch
-                            checked={shouldFilterTestAccounts}
-                            onChange={() => {
-                                setShouldFilterTestAccounts(!shouldFilterTestAccounts)
-                            }}
-                            fullWidth={true}
-                            label="Filter out internal and test users"
-                        />
-                    ),
-                },
-            ],
-        },
-    ]
-
-    if (showTileToggles && availableTiles.length > 0) {
-        sections.push({
-            title: 'Visible tiles',
-            items: availableTiles.map((tileId) => ({
-                label: () => (
-                    <Switch
-                        checked={!hiddenTiles.includes(tileId)}
-                        onChange={() => {
-                            setTileVisibility(tileId, hiddenTiles.includes(tileId))
-                        }}
-                        fullWidth={true}
-                        label={TILE_LABELS[tileId]}
-                    />
-                ),
-            })),
-        })
-
-        if (hiddenTiles.length > 0) {
-            sections.push({
-                items: [
-                    {
-                        label: 'Reset to defaults',
-                        onClick: resetTileVisibility,
-                    },
-                ],
-            })
-        }
-    }
-
-    if (isRemovingSidePanelFlag) {
-        return (
-            <ScenePanel>
-                <ScenePanelActionsSection>
-                    <Link to={urls.sessionAttributionExplorer()} buttonProps={{ menuItem: true }}>
-                        <IconSearch /> Session Attribution Explorer
-                    </Link>
-                </ScenePanelActionsSection>
-                <ScenePanelDivider />
-                <ScenePanelActionsSection>
-                    <ButtonPrimitive
-                        menuItem
-                        onClick={() => {
-                            setShouldFilterTestAccounts(!shouldFilterTestAccounts)
-                        }}
-                    >
-                        <Switch checked={shouldFilterTestAccounts} size="xsmall" />
-                        Filter out internal and test users
-                    </ButtonPrimitive>
-                </ScenePanelActionsSection>
-                <ScenePanelDivider />
-                <ScenePanelActionsSection>
-                    <ScenePanelLabel title="Visible tiles" className="px-1.5">
-                        {availableTiles.map((tileId) => (
-                            <ButtonPrimitive
-                                key={tileId}
-                                menuItem
-                                onClick={() => {
-                                    setTileVisibility(tileId, hiddenTiles.includes(tileId))
-                                }}
-                            >
-                                <Switch checked={!hiddenTiles.includes(tileId)} size="xsmall" />
-                                {TILE_LABELS[tileId]}
-                            </ButtonPrimitive>
-                        ))}
-                    </ScenePanelLabel>
-                </ScenePanelActionsSection>
-            </ScenePanel>
-        )
-    }
 
     return (
-        <>
-            <Menu items={sections} closeOnClickInside={false}>
-                <Button icon={<IconEllipsis />} size="small" />
-            </Menu>
-        </>
+        <ScenePanel>
+            <ScenePanelActionsSection>
+                <ButtonPrimitive
+                    menuItem
+                    data-attr="web-analytics-export-all-csv"
+                    onClick={() => {
+                        if (exportAllTilesAsCsvZip(tiles)) {
+                            exportTriggered()
+                        }
+                    }}
+                >
+                    <IconDownload />
+                    Export all as CSV (.zip)
+                </ButtonPrimitive>
+                <Link to={urls.sessionAttributionExplorer()} buttonProps={{ menuItem: true }}>
+                    <IconSearch /> Session Attribution Explorer
+                </Link>
+                {showFocusMode && (
+                    <ButtonPrimitive menuItem onClick={() => openFocusModeModal()}>
+                        <IconGear />
+                        Focus mode settings...
+                    </ButtonPrimitive>
+                )}
+                {showFocusMode &&
+                    (isFocusModeActive ? (
+                        <ButtonPrimitive menuItem onClick={exitFocusMode}>
+                            <IconX />
+                            Exit focus mode
+                        </ButtonPrimitive>
+                    ) : hasSavedFocusMode ? (
+                        <ButtonPrimitive menuItem onClick={enterFocusMode}>
+                            <IconTarget />
+                            Enter focus mode
+                        </ButtonPrimitive>
+                    ) : null)}
+                {showAchievements && (
+                    <ButtonPrimitive menuItem onClick={() => openAchievementsModal()}>
+                        <IconStar />
+                        Achievements
+                    </ButtonPrimitive>
+                )}
+            </ScenePanelActionsSection>
+            {featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_PRECOMPUTE_TOGGLE] && (
+                <>
+                    <ScenePanelDivider />
+                    <ScenePanelActionsSection>
+                        <Tooltip title="When on, eligible web analytics tiles load from a pre-computed result instead of running a live query. Results are faster but may be a few minutes behind the latest events. Other tiles run live as usual.">
+                            <ButtonPrimitive
+                                menuItem
+                                onClick={() => {
+                                    // `null` (untouched) is treated as on, so toggling off opts out explicitly.
+                                    setUseWebAnalyticsPrecompute(!(useWebAnalyticsPrecompute ?? true))
+                                }}
+                            >
+                                <Switch checked={useWebAnalyticsPrecompute ?? true} size="xsmall" />
+                                Allow precompute
+                            </ButtonPrimitive>
+                        </Tooltip>
+                    </ScenePanelActionsSection>
+                </>
+            )}
+            {showTileToggles && availableTiles.length > 0 && (
+                <>
+                    <ScenePanelDivider />
+                    <ScenePanelActionsSection>
+                        <ScenePanelLabel title="Visible tiles" className="px-1.5">
+                            {availableTiles.map((tileId) => (
+                                <ButtonPrimitive
+                                    key={tileId}
+                                    menuItem
+                                    onClick={() => {
+                                        setTileVisibility(tileId, hiddenTiles.includes(tileId))
+                                    }}
+                                >
+                                    <Switch checked={!hiddenTiles.includes(tileId)} size="xsmall" />
+                                    {TILE_LABELS[tileId]}
+                                </ButtonPrimitive>
+                            ))}
+                        </ScenePanelLabel>
+                    </ScenePanelActionsSection>
+                </>
+            )}
+        </ScenePanel>
     )
 }

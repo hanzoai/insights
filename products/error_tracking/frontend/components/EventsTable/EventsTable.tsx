@@ -7,15 +7,17 @@ import { ErrorEventType } from 'lib/components/Errors/types'
 import { getExceptionAttributes, getRecordingStatus, getSessionId } from 'lib/components/Errors/utils'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { IconLink } from 'lib/elements/icons'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
-import { PersonDisplay, PersonIcon } from 'scenes/persons/PersonDisplay'
 import { asDisplay } from 'scenes/persons/person-utils'
+import { PersonDisplay, PersonIcon } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 
 import { EventsQuery } from '~/queries/schema/schema-general'
+
+import { ViewLogsButton } from 'products/logs/frontend/components/ViewLogsButton'
 
 import { useErrorTagRenderer } from '../../hooks/use-error-tag-renderer'
 import { cancelEvent } from '../../utils'
@@ -134,6 +136,17 @@ const Actions = (record: ErrorEventType): JSX.Element => {
                     timestamp={record.timestamp}
                     size="xsmall"
                     data-attr="error-tracking-view-recording"
+                    iconOnly
+                />
+            </div>
+            <div className="flex justify-end align-middle items-center" onClick={(event) => cancelEvent(event)}>
+                <ViewLogsButton
+                    type="secondary"
+                    sessionId={sessionId}
+                    timestamp={record.timestamp}
+                    size="xsmall"
+                    data-attr="error-tracking-view-logs"
+                    iconOnly
                 />
             </div>
             {record.properties.$ai_trace_id && (
@@ -142,7 +155,7 @@ const Actions = (record: ErrorEventType): JSX.Element => {
                     icon={<IconAI />}
                     onClick={(event) => {
                         cancelEvent(event)
-                        urls.llmAnalyticsTrace(record.properties.$ai_trace_id, {
+                        urls.aiObservabilityTrace(record.properties.$ai_trace_id, {
                             event: record.uuid,
                             timestamp: record.timestamp,
                         })

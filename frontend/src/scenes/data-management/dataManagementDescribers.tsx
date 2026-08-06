@@ -1,4 +1,3 @@
-import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
     ActivityChange,
     ActivityLogItem,
@@ -9,10 +8,11 @@ import {
     detectBoolean,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
+import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { Link } from 'lib/elements/Link'
 import { IconVerifiedEvent } from 'lib/elements/icons'
-import { pluralize } from 'lib/utils'
+import { Link } from 'lib/elements/Link'
+import { pluralize } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
 import { ActivityScope } from '~/types'

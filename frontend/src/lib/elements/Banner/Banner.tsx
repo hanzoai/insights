@@ -8,7 +8,7 @@ import { IconInfo, IconSparkles, IconWarning, IconX } from '@hanzo/icons'
 import { Button, SideAction } from 'lib/elements/Button'
 import { ButtonPropsBase } from 'lib/elements/Button'
 
-import { bannerLogic } from './bannerLogic'
+import { lemonBannerLogic } from './lemonBannerLogic'
 
 export type BannerAction = SideAction & Pick<ButtonPropsBase, 'children'>
 
@@ -42,7 +42,7 @@ export function Banner({
     square = false,
     icon,
 }: BannerProps): JSX.Element | null {
-    const logic = bannerLogic({ dismissKey })
+    const logic = lemonBannerLogic({ dismissKey })
     const { isDismissed } = useValues(logic)
     const { dismiss } = useActions(logic)
     const showCloseButton = dismissKey || onClose
@@ -82,7 +82,9 @@ export function Banner({
                     ))}
                 <div className="grow overflow-hidden">{children}</div>
                 {action && <Button className="!hidden @md:!flex" type="secondary" {...action} />}
-                {showCloseButton && <Button size="small" icon={<IconX />} onClick={_onClose} aria-label="close" />}
+                {showCloseButton && (
+                    <Button size="xsmall" icon={<IconX />} onClick={_onClose} aria-label="close" />
+                )}
             </div>
             {action && <Button className="@md:!hidden" type="secondary" fullWidth {...action} />}
         </div>

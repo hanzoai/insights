@@ -2,17 +2,17 @@ import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconPlusSmall } from '@hanzo/icons'
 
-import { UploadedLogo } from 'lib/elements/UploadedLogo'
 import { IconBlank } from 'lib/elements/icons'
+import { UploadedLogo } from 'lib/elements/UploadedLogo'
+import { preflightLogic } from 'lib/logic/preflightLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Combobox } from 'lib/ui/Combobox/Combobox'
 import { DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'
 import { Label } from 'lib/ui/Label/Label'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { userLogic } from 'scenes/userLogic'
 
-import { globalModalsLogic } from '~/layout/GlobalModals'
+import { globalModalsLogic } from '~/layout/globalModalsLogic'
 import { AccessLevelIndicator } from '~/layout/navigation/AccessLevelIndicator'
 import { AvailableFeature } from '~/types'
 

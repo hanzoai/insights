@@ -1,5 +1,5 @@
 import { useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { IconEllipsis, IconInfo } from '@hanzo/icons'
 import { Button, Menu, PopoverReferenceContext, Tooltip } from '@hanzo/elements'
@@ -11,8 +11,8 @@ import { userLogic } from 'scenes/userLogic'
 import { PathsFilter } from '~/queries/schema/schema-general'
 import { AvailableFeature } from '~/types'
 
+import type { pathsDataLogicType } from './pathsDataLogic'
 import { PathNodeData, pageUrl } from './pathUtils'
-import { pathsDataLogicType } from './pathsDataLogicType'
 
 type PathNodeCardButton = {
     name: string
@@ -64,7 +64,9 @@ export function PathNodeCardButton({
             <div className="font-semibold overflow-hidden max-h-16">
                 <span className="text-xxs text-secondary mr-1">{`0${name[0]}`}</span>
                 <Tooltip title={tooltipContent} placement="right">
-                    <span className="text-xs break-words">{displayName}</span>
+                    <span className="text-xs break-words" data-attr="path-node-name">
+                        {displayName}
+                    </span>
                     {isTruncated && <IconInfo className="ml-1 text-muted align-text-bottom" />}
                 </Tooltip>
             </div>
@@ -72,7 +74,9 @@ export function PathNodeCardButton({
             <PopoverReferenceContext.Provider value={null}>
                 <div className="flex flex-nowrap">
                     <Button size="small" onClick={openModal}>
-                        <span className="text-link text-xs px-1 font-medium">{count}</span>
+                        <span className="text-link text-xs px-1 font-medium" data-attr="path-node-count">
+                            {count}
+                        </span>
                     </Button>
                     <Menu
                         items={[

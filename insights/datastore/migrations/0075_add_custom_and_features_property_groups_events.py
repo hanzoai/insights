@@ -1,5 +1,5 @@
 # This migration was partially applied and will need to be retried/resumed later, see:
-# https://hanzo.slack.com/archives/C0185UNBSJZ/p1723489464588849
+# https://insights.slack.com/archives/C0185UNBSJZ/p1723489464588849
 
 # from insights.datastore.client.migration_tools import run_sql_with_exceptions
 # from insights.datastore.property_groups import property_groups

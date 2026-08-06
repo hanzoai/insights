@@ -17,8 +17,9 @@ import datetime as dt
 from django.core.management.base import BaseCommand
 
 from insights.api.capture import capture_internal
-from insights.demo.products.hedgebox import HedgeboxMatrix
 from insights.models.team import Team
+
+from products.demo.backend.facade.api import HedgeboxMatrix
 
 
 class Command(BaseCommand):

@@ -1,14 +1,14 @@
-import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'
+import { ACCESS_TOKEN_PLACEHOLDER } from '~/common/config/constants'
 
 import { PropertyOperator } from '../../types'
 import { InsightsFunctionType } from '../types'
 
 /**
- * Custom functions are largely generated and built in the django service, making it tricky to test on this side.
+ * Script functions are largely generated and built in the django service, making it tricky to test on this side.
  * As such we have a bunch of prebuilt examples here for usage in tests.
  */
 
-export const FN_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'script' | 'bytecode' | 'type'>> = {
+export const INSIGHTS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'script' | 'bytecode' | 'type'>> = {
     // Simple return examples (no async functions)
     simple_return_object: {
         type: 'destination',
@@ -314,7 +314,7 @@ export const FN_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'script' | '
     },
 }
 
-export const FN_INPUTS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'inputs' | 'inputs_schema'>> = {
+export const INSIGHTS_INPUTS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'inputs' | 'inputs_schema'>> = {
     simple_fetch: {
         inputs_schema: [
             { key: 'url', type: 'string', label: 'Webhook URL', secret: false, required: true },
@@ -574,7 +574,7 @@ export const FN_INPUTS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'inpu
     },
 }
 
-export const FN_FILTERS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'filters'>> = {
+export const INSIGHTS_FILTERS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'filters'>> = {
     no_filters: { filters: { events: [], actions: [], bytecode: ['_h', 29] } },
     broken_filters: { filters: { events: [], actions: [], bytecode: ['_H', 1, 29, 35, 35, 35] } },
     // Test account filter: filters out users with @hanzo.ai in their email
@@ -839,7 +839,7 @@ export const FN_FILTERS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'fil
     no_filters_data_warehouse_table: { filters: { source: 'data-warehouse-table', bytecode: ['_h', 29] } },
 }
 
-export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'masking'>> = {
+export const INSIGHTS_MASK_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'masking'>> = {
     all: {
         masking: {
             ttl: 30,
@@ -861,6 +861,80 @@ export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'ma
             ttl: 30,
             hash: '{concat(person.id, event.event)}',
             bytecode: ['_H', 1, 32, 'id', 32, 'person', 1, 2, 32, 'event', 32, 'event', 1, 2, 2, 'concat', 2],
+            threshold: null,
+        },
+    },
+    personPerDay: {
+        masking: {
+            ttl: 86400,
+            hash: "{concat(toString(person.id), '-', formatDateTime(now(), '%Y-%m-%d'))}",
+            bytecode: [
+                '_H',
+                1,
+                32,
+                'id',
+                32,
+                'person',
+                1,
+                2,
+                2,
+                'toString',
+                1,
+                32,
+                '-',
+                2,
+                'now',
+                0,
+                32,
+                '%Y-%m-%d',
+                2,
+                'formatDateTime',
+                2,
+                2,
+                'concat',
+                3,
+            ],
+            threshold: null,
+        },
+    },
+    personPerEventPerDay: {
+        masking: {
+            ttl: 86400,
+            hash: "{concat(toString(person.id), '-', event.event, '-', formatDateTime(now(), '%Y-%m-%d'))}",
+            bytecode: [
+                '_H',
+                1,
+                32,
+                'id',
+                32,
+                'person',
+                1,
+                2,
+                2,
+                'toString',
+                1,
+                32,
+                '-',
+                32,
+                'event',
+                32,
+                'event',
+                1,
+                2,
+                32,
+                '-',
+                2,
+                'now',
+                0,
+                32,
+                '%Y-%m-%d',
+                2,
+                'formatDateTime',
+                2,
+                2,
+                'concat',
+                5,
+            ],
             threshold: null,
         },
     },
@@ -888,6 +962,39 @@ export const INSIGHTS_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_mask
             ttl: null,
             hash: '{person.id}',
             bytecode: ['_h', 32, 'id', 32, 'person', 1, 2],
+            threshold: null,
+        },
+    },
+    oncePerCalendarDay: {
+        trigger_masking: {
+            ttl: 86400,
+            hash: "{concat(toString(person.id), '-', formatDateTime(now(), '%Y-%m-%d'))}",
+            bytecode: [
+                '_H',
+                1,
+                32,
+                'id',
+                32,
+                'person',
+                1,
+                2,
+                2,
+                'toString',
+                1,
+                32,
+                '-',
+                2,
+                'now',
+                0,
+                32,
+                '%Y-%m-%d',
+                2,
+                'formatDateTime',
+                2,
+                2,
+                'concat',
+                3,
+            ],
             threshold: null,
         },
     },

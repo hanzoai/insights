@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getReactNativeSteps as getReactNativeStepsPA } from '../product-analytics/react-native'
 import { StepDefinition } from '../steps'
@@ -16,7 +16,9 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <CalloutBox type="fyi" title="Client-side configuration only">
                     <Markdown>
                         {dedent`
-                            This configuration is client-side only. Support for remote configuration in the [error tracking settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture) will be added in a future release.
+                            Support for remote configuration 
+                            in the [error tracking settings](https://app.hanzo.ai/settings/project-error-tracking#exception-autocapture)
+                            requires SDK version 4.35.0 or higher.
                         `}
                     </Markdown>
                 </CalloutBox>
@@ -31,12 +33,13 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                             language: 'jsx',
                             file: 'React Native',
                             code: dedent`
-                              export const insights = new Insights('<ph_project_api_key>', {
+                              export const insights = new Insights('<ph_project_token>', {
                                 errorTracking: {
                                   autocapture: {
                                     uncaughtExceptions: true,
                                     unhandledRejections: true,
                                     console: ['error', 'warn'],
+                                    nativeCrashes: true, // native iOS/Android crashes (see below)
                                   },
                                 },
                               })
@@ -53,8 +56,20 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                         | \`uncaughtExceptions\` | Captures Uncaught exceptions (\`ReactNativeGlobal.ErrorUtils.setGlobalHandler\`) |
                         | \`unhandledRejections\` | Captures Unhandled rejections (\`ReactNativeGlobal.onunhandledrejection\`) |
                         | \`console\` | Captures console logs as errors according to the reported \`LogLevel\` |
+                        | \`nativeCrashes\` | Captures native iOS/Android crashes. Requires \`@hanzo/react-native-plugin\` and uploaded native symbols (see below) |
                     `}
                 </Markdown>
+                <CalloutBox type="fyi" title="Capturing native crashes">
+                    <Markdown>
+                        {dedent`
+                            \`nativeCrashes\` captures native iOS and Android crashes that the JavaScript layer can't see. Beyond the config above, it needs:
+
+                            1. The optional native plugin installed — \`npx expo install @hanzo/react-native-plugin\` (Expo) or \`npm i @hanzo/react-native-plugin\` (bare React Native). If it's missing, native capture is a no-op and your JS-level autocapture is unaffected.
+                            2. Your project's **Enable exception autocapture** setting enabled in [error tracking settings](https://app.hanzo.ai/settings/project-error-tracking#exception-autocapture) — the same server-side setting that gates JavaScript autocapture.
+                            3. Native debug symbols uploaded at build time, so crash stack traces are readable. See [native crash symbolication](https://hanzo.ai/docs/error-tracking/upload-source-maps/react-native#native-crash-symbolication).
+                        `}
+                    </Markdown>
+                </CalloutBox>
             </>
         ),
     }
@@ -80,7 +95,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
 
                                 const App = () => {
                                   return (
-                                    <InsightsProvider apiKey="<ph_project_api_key>">
+                                    <InsightsProvider apiKey="<ph_project_token>">
                                       <InsightsErrorBoundary
                                         fallback={YourFallbackComponent}
                                         additionalProperties={{ screen: "home" }}
@@ -165,7 +180,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
@@ -179,10 +194,9 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                 {dedent`
                     We currently don't support the following features:
 
-                    - No native Android and iOS exception capture
                     - No automatic source map uploads on React Native web
 
-                    These features will be added in future releases. We recommend you stay up to date with the latest version of the Insights React Native SDK.
+                    This will be added in a future release. We recommend you stay up to date with the latest version of the Insights React Native SDK.
                 `}
             </Markdown>
         ),

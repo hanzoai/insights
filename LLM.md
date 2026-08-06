@@ -56,11 +56,8 @@ restored so CI builds the monolith `Dockerfile` and pushes to
    formally **sunset**, not migrated. If any is still required, it must be
    re-platformed deliberately.
 
-## Ingest is NATIVE — the capture/kafka tier is GONE (verified 2026-07-26)
+## Ingest is NATIVE — events go to cloud, replay goes through the plugin
 
-Do not go looking for `insights-capture`, `insights-plugin`, `insights-kafka` or
-`insights-kv`. **Those CRs and pods no longer exist.** The only insights
-workloads in ns `hanzo` are `insights-web`, `insights-worker`, `insights-sql`.
 Events are ingested by the **cloud Go binary**, not by the Rust capture service:
 
 ```
@@ -85,20 +82,40 @@ Django answers HTML, cloud answers
 
 `POST /v1/ai` is likewise unrouted and falls through to Django.
 
-**`POST /v1/s` (session recordings) is BROKEN and losing data.** It still points
-at `insights-hanzo-ai-capture` → `insights-capture.hanzo.svc`, which has no
-pods, so it 502s — ~16 real posts per 3h are being dropped.
-`insights.session_replay_events` has **0 rows**; replay has never worked in this
-deploy. Reviving it is a project, not a config fix: that Distributed table is
-fed by `kafka_session_replay_events` + `session_replay_events_mv`, and with the
-Kafka tier deleted **nothing can write the index** even if snapshot blobs landed
-in S3. It needs a new writer path in cloud, or the Kafka tier back. Do not "fix"
-the route alone — pointing it somewhere that returns 200 would only lose the
-data more quietly.
+### Session replay writes again — measure it, do not assume it (2026-08-02)
 
-Relatedly, `insights` still carries **23 Kafka-engine tables** pointing at
-`kafka:9092`, which does not resolve. They error in the background forever and
-are why `preflight.kafka` is `false`.
+The paragraph that used to sit here said replay had never worked, that
+`session_replay_events` had 0 rows, that `insights-plugin` and the Kafka tier no
+longer existed, and that `kafka:9092` did not resolve. Every one of those is now
+false, so re-measure before repeating any of it:
+
+- `insights-plugin` IS running, with `OBJECT_STORAGE_ENABLED=true` and bucket
+  `hanzo-sessions` — it is the blob ingester.
+- `kafka` resolves (`kafka.hanzo.svc.cluster.local`). `KAFKA_HOSTS` is UNSET on
+  both web and plugin, so everything runs on the `kafka:9092` fallback in
+  `settings/kafka.py`. That file's comment claims prod always sets
+  `KAFKA_DEFAULT_HOSTS`; here it does not, and the fallback is load-bearing.
+- `insights.session_replay_events` holds real sessions, most recently written
+  2026-08-01 19:46. The 24 Kafka-engine tables are being served, not erroring
+  into the void.
+- Live workloads are `insights-web`, `insights-worker`, `insights-sql`,
+  `insights-plugin`, `insights-livestream`, against services `kafka`, `kv`,
+  `datastore`, `s3`.
+
+What is still absent is a *dedicated* write door. `rust/capture` has
+`CaptureMode::Recordings` in source but NO workflow builds it — `.hanzo/workflows`
+builds exactly three images (`insights`, `insights-plugin`, `insights-livestream`).
+`/v1/s` no longer 502s at a retired capture service; it falls through to the
+Django catch-all. So the standing warning still holds, for the original reason:
+**do not point `/v1/s` at something that returns 200 with no producer wired** —
+that loses recordings more quietly than a visible failure.
+
+`RECORDING_API_URL` is empty on `insights-web`, and that is CORRECT. It belongs
+to session-replay **v2**, a separate `recording-api` service we do not run and do
+not build; its client raises `RuntimeError("RECORDING_API_URL is not configured")`
+rather than degrading. v2 stays off by itself — `SESSION_RECORDING_V2_S3_ENABLED`
+defaults to False outside DEBUG — so convergence does not silently switch to it.
+Leave the variable empty until a recorder exists to point it at.
 
 The `ingress-routes` CM hot-reloads via file-provider fsnotify — NEVER
 `rollout restart deploy/ingress` (ACME/TLS outage). Routes live in
@@ -326,9 +343,74 @@ the squash.
   adoption** when moving that DB to a squash-containing image:
   `manage.py migrate <app> zero --fake` for each app (clears records, keeps
   tables) then `manage.py migrate --fake` (re-records the new initials as
-  applied). Live intentionally stays on `1.51.10` (identical schema, old history);
-  the operator CR pins an explicit tag so it won't auto-move to a squash image
-  without this step.
+  applied). NOTE: live has since moved past this — it runs `1.52.51`, and the DB
+  shows the adoption was only half-done. `migrate <app> zero --fake` was never
+  run (all 924 historical records are still there); the squash's `0002`-`0004`
+  were simply recorded alongside them, and `0001_initial` counts as applied only
+  by NAME collision with upstream's 2020 `0001_initial`. The end state is
+  correct — state matches schema, `migrate` is a no-op — but it was reached by
+  coincidence, so verify `django_migrations` rather than assuming the documented
+  procedure ran.
+
+### Converging on upstream: the schema gap is the ship gate (measured 2026-08-02)
+
+Read this before merging an upstream convergence to `main`. `main` auto-deploys.
+
+The live DB's `django_migrations` is the only authority on applied state, and it
+disagrees with the tree: the tree carries 4 migrations, the DB carries **924**
+`insights` records. Both are correct. The historical upstream chain is recorded
+in full and complete to **1017**, then two fork-authored migrations —
+`1018_rename_legacy_app_label` and `1019_rename_insights_tables_clean`, which
+gave us the physical `insights_*` table names — sit on numbers upstream also
+uses. The squash's `0001_initial` counts as applied only because it collides by
+NAME with upstream's 2020 `0001_initial`. So `manage.py migrate` is a no-op for
+this app, and convergence cannot detonate the DB on its own.
+
+The danger is the opposite of a bad migration: **models that outrun the schema.**
+Upstream master reaches 1280, so the tree ships models 262 migrations ahead of
+the database, and `bin/debrand` drops `posthog/migrations` — there are no files
+to close the gap with. Measured against the live DB, the converged models expect
+**26 tables and 162 columns that do not exist**, and 25 of those columns sit on
+`insights_user`, `_team`, `_organization`, `_project`. Django SELECTs every
+concrete field, so this is not degraded features — `select id, ui_configuration
+from insights_user` already fails on the live DB, which means the first
+authenticated request 500s. **Migrate the database BEFORE the converged image
+ships, not after.**
+
+The 262-migration gap is safe to cross. Every `RemoveField` (156) and every
+`DeleteModel` (79) in it is wrapped in `SeparateDatabaseAndState` with empty
+`database_operations` — upstream extracting models into `products/*`, no DDL.
+Only 7 operations touch the database (3 `RemoveConstraint`, 2
+`AlterUniqueTogether`, 2 `RemoveIndex`), each on a table upstream itself
+introduces and each paired with a replacement `AddConstraint`. Upstream's own
+policy forbids dropping a column in the release that stops reading it, so the
+gap contains **zero column drops and zero table drops**.
+
+Generating the delta is the remediation, but do NOT run a bare
+`makemigrations && migrate`: it emits at least one real `DROP COLUMN`.
+`Organization.default_role_id_legacy` is the known case — upstream's applied
+`0829` added `default_role_id` as a uuid FK to `ee_role`; the fork, having
+dropped `ee`, remodelled it as a plain `IntegerField` with
+`db_column="default_role_id"`; upstream master has no such field, so the
+autodetector wants it gone:
+
+```sql
+ALTER TABLE "insights_organization" DROP COLUMN "default_role_id";
+```
+
+Low risk today (the column is entirely NULL) but irreversible, so make it
+state-only (`SeparateDatabaseAndState(state_operations=[RemoveField(...)],
+database_operations=[])`) and keep the column, exactly as upstream does.
+
+Operator procedure, in order:
+
+1. Build the converged image (Django + deps only resolve there).
+2. In that image, `manage.py makemigrations insights` → `0005_*`.
+3. Read every operation. Additive only. Any `RemoveField`/`DeleteModel`/
+   `RenameField` becomes state-only or stops the release.
+4. Apply to a RESTORED SNAPSHOT of prod and run the app against it. A migration
+   that has only ever run on an empty database has not been tested.
+5. Only then apply to prod, and only then merge the converged tree.
 
 ## What the Ship-it step needs, and how it failed silently for a day
 

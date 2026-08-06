@@ -1,38 +1,66 @@
 import { useActions, useValues } from 'kea'
+import { useState } from 'react'
 
-import { IconDatabase, IconRefresh } from '@hanzo/icons'
-import { Banner, Button, Divider, Select, Switch, Tag } from '@hanzo/elements'
+import { IconBrackets, IconClock, IconDatabase, IconInfo, IconList, IconRefresh, IconSparkles } from '@hanzo/icons'
+import {
+    Banner,
+    Button,
+    Checkbox,
+    Collapse,
+    Select,
+    Skeleton,
+    Switch,
+    Tag,
+    Tooltip,
+} from '@hanzo/elements'
 
+import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Field } from 'lib/elements/Field'
+import { MaterializationStatusModal } from 'scenes/data-warehouse/saved_queries/MaterializationStatusModal'
 
-import { SceneSection } from '~/layout/scenes/components/SceneSection'
-import { DataWarehouseSyncInterval } from '~/types'
+import { NodeKind } from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { endpointLogic } from '../endpointLogic'
-import { endpointSceneLogic } from '../endpointSceneLogic'
+import { endpointSceneLogic, extractBreakdownPropertyNames, MaterializationPreview } from '../endpointSceneLogic'
+import { MaterializationSuggestionModal } from '../MaterializationSuggestionModal'
 
-interface EndpointConfigurationProps {
-    tabId: string
+// Names where flipping a breakdown to optional is most likely a customer-data leak — show
+// a soft warning when the user does so. Not a hard block; the author may have legitimate
+// reasons (e.g. an internal-only endpoint). Keep this list short and conservative; false
+// positives are cheap, false negatives cost data.
+const SENSITIVE_BREAKDOWN_NAME_PATTERNS = ['team', 'account', 'customer', 'tenant', 'user_id', 'org']
+
+function isSensitiveBreakdownName(name: string): boolean {
+    const lower = name.toLowerCase()
+    return SENSITIVE_BREAKDOWN_NAME_PATTERNS.some((p) => lower.includes(p))
 }
 
-type CacheAgeOption = number | null
-const CACHE_AGE_OPTIONS: { value: CacheAgeOption; label: string }[] = [
-    { value: 300, label: '5 minutes' },
+const DATA_FRESHNESS_OPTIONS: { value: number; label: string }[] = [
     { value: 900, label: '15 minutes' },
     { value: 1800, label: '30 minutes' },
     { value: 3600, label: '1 hour' },
-    { value: 10800, label: '3 hours' },
-    { value: null, label: '6 hours (default)' },
-    { value: 86400, label: '1 day' },
-    { value: 259200, label: '3 days' },
+    { value: 21600, label: '6 hours' },
+    { value: 43200, label: '12 hours' },
+    { value: 86400, label: '1 day (default)' },
+    { value: 604800, label: '7 days' },
 ]
 
-const SYNC_FREQUENCY_OPTIONS: { value: DataWarehouseSyncInterval; label: string }[] = [
-    { value: '1hour', label: 'Every hour' },
-    { value: '6hour', label: 'Every 6 hours' },
-    { value: '24hour', label: 'Once a day' },
-    { value: '7day', label: 'Once a week' },
+const BUCKET_OPTIONS: { value: string; label: string }[] = [
+    { value: 'hour', label: 'Hour' },
+    { value: 'day', label: 'Day' },
+    { value: 'week', label: 'Week' },
+    { value: 'month', label: 'Month' },
 ]
+
+const BUCKET_FN_TO_KEY: Record<string, string> = {
+    toStartOfHour: 'hour',
+    toStartOfDay: 'day',
+    toStartOfWeek: 'week',
+    toStartOfMonth: 'month',
+}
 
 function getStatusTagType(status: string | undefined): 'success' | 'danger' | 'warning' | 'default' {
     if (!status) {
@@ -50,85 +78,380 @@ function getStatusTagType(status: string | undefined): 'success' | 'danger' | 'w
     }
 }
 
-export function EndpointConfiguration({ tabId }: EndpointConfigurationProps): JSX.Element {
-    const { loadMaterializationStatus } = useActions(endpointLogic({ tabId }))
+export function EndpointConfiguration(): JSX.Element {
+    const { endpoint } = useValues(endpointLogic)
+    const { setDataFreshness, toggleBreakdownOptional } = useActions(endpointSceneLogic)
     const {
-        endpoint,
-        materializationStatus: loadedMaterializationStatus,
-        materializationStatusLoading,
-    } = useValues(endpointLogic({ tabId }))
-    const { setCacheAge, setSyncFrequency, setIsMaterialized } = useActions(endpointSceneLogic({ tabId }))
-    const {
-        cacheAge,
-        syncFrequency,
-        isMaterialized: localIsMaterialized,
+        dataFreshness,
         viewingVersion,
-    } = useValues(endpointSceneLogic({ tabId }))
+        materializationPreview,
+        materializationPreviewLoading,
+        isMaterialized: localIsMaterialized,
+        currentQuery,
+        optionalBreakdownProperties,
+    } = useValues(endpointSceneLogic)
+    const { loadMaterializationPreview } = useActions(endpointSceneLogic)
+    const [leftActiveKeys, setLeftActiveKeys] = useState<string[]>(['materialization'])
 
     if (!endpoint) {
         return <></>
     }
 
-    // When viewing a specific version, show that version's values
-    // Local state overrides viewed version values (for pending changes)
-    // materializationStatus (from refresh) takes priority over initial version data
+    const effectiveDataFreshness =
+        dataFreshness ?? viewingVersion?.data_freshness_seconds ?? endpoint.data_freshness_seconds ?? 86400
+    const baseIsMaterialized = viewingVersion?.is_materialized ?? endpoint.is_materialized
+    const isMaterialized = localIsMaterialized ?? baseIsMaterialized
+    const materializationExpanded = leftActiveKeys.includes('materialization')
+
+    const breakdownProperties = extractBreakdownPropertyNames(currentQuery)
+
+    return (
+        <div className="flex gap-6">
+            {/* Left column — settings (fixed width) */}
+            <div className="w-120 shrink-0">
+                <Collapse
+                    multiple
+                    activeKeys={leftActiveKeys}
+                    onChange={setLeftActiveKeys}
+                    panels={[
+                        {
+                            key: 'materialization',
+                            header: (
+                                <div className="flex items-center gap-2">
+                                    <IconDatabase className="text-lg" />
+                                    <span>Materialization</span>
+                                    <Tooltip title="We run your query on a schedule and store results in a table. When you execute this endpoint, we read from that stored table instead of running the full query again. You'll get results much faster, but data is only as fresh as the last time materialization ran.">
+                                        <IconInfo className="text-lg text-secondary" />
+                                    </Tooltip>
+                                </div>
+                            ),
+                            content: <MaterializationContent />,
+                        },
+                        {
+                            key: 'data-freshness',
+                            header: (
+                                <div className="flex items-center gap-2">
+                                    <IconClock className="text-lg" />
+                                    <span>Data freshness</span>
+                                    <Tooltip title="Controls how long results are cached and how often materialized endpoints refresh.">
+                                        <IconInfo className="text-lg text-secondary" />
+                                    </Tooltip>
+                                </div>
+                            ),
+                            content: (
+                                <div className="flex flex-col gap-4 max-w-md p-1">
+                                    <p className="text-sm text-secondary m-0">
+                                        Choose how fresh the returned data should be. Shorter periods serve fresher
+                                        data, but consume more compute.
+                                    </p>
+                                    <AccessControlAction
+                                        resourceType={AccessControlResourceType.Endpoint}
+                                        minAccessLevel={AccessControlLevel.Editor}
+                                    >
+                                        <Select
+                                            value={effectiveDataFreshness}
+                                            onChange={setDataFreshness}
+                                            options={DATA_FRESHNESS_OPTIONS}
+                                        />
+                                    </AccessControlAction>
+                                </div>
+                            ),
+                        },
+                        ...(breakdownProperties.length > 0
+                            ? [
+                                  {
+                                      key: 'variables',
+                                      header: (
+                                          <div className="flex items-center gap-2">
+                                              <IconBrackets className="text-lg" />
+                                              <span>Variables</span>
+                                              <Tooltip title="Required variables must be passed on every execution. Optional ones may be omitted; the response aggregates across every value.">
+                                                  <IconInfo className="text-lg text-secondary" />
+                                              </Tooltip>
+                                          </div>
+                                      ),
+                                      content: (
+                                          <BreakdownRequirementContent
+                                              breakdownProperties={breakdownProperties}
+                                              optionalBreakdownProperties={optionalBreakdownProperties}
+                                              onToggle={toggleBreakdownOptional}
+                                          />
+                                      ),
+                                  },
+                              ]
+                            : []),
+                    ]}
+                />
+            </div>
+
+            {/* Right column — query previews, visible when materialization is expanded and enabled */}
+            {materializationExpanded && isMaterialized && (
+                <div className="flex-1 min-w-0">
+                    <Collapse
+                        multiple
+                        defaultActiveKeys={['materialized-query']}
+                        panels={[
+                            {
+                                key: 'materialized-query',
+                                header: 'Query we materialize',
+                                content: (
+                                    <div className="p-1">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <p className="text-sm text-secondary m-0">
+                                                This is the query we run on a schedule and materialize results in S3.
+                                                Variables are removed and their columns are added to the output columns.
+                                            </p>
+                                            <Button
+                                                size="xsmall"
+                                                icon={<IconRefresh />}
+                                                onClick={() => loadMaterializationPreview()}
+                                                loading={materializationPreviewLoading}
+                                                tooltip="Refresh preview"
+                                            />
+                                        </div>
+                                        {materializationPreviewLoading && !materializationPreview && (
+                                            <Skeleton className="h-24 w-full" />
+                                        )}
+                                        {materializationPreview?.transformed_query && (
+                                            <CodeSnippet language={Language.SQL} wrap>
+                                                {materializationPreview.transformed_query}
+                                            </CodeSnippet>
+                                        )}
+                                    </div>
+                                ),
+                            },
+                            ...(materializationPreview?.execution_query
+                                ? [
+                                      {
+                                          key: 'execution-query',
+                                          header: 'Query we run',
+                                          content: (
+                                              <ExecutionQueryPanel materializationPreview={materializationPreview} />
+                                          ),
+                                      },
+                                  ]
+                                : []),
+                        ]}
+                    />
+                </div>
+            )}
+        </div>
+    )
+}
+
+function BreakdownRequirementContent({
+    breakdownProperties,
+    optionalBreakdownProperties,
+    onToggle,
+}: {
+    breakdownProperties: string[]
+    optionalBreakdownProperties: string[]
+    onToggle: (property: string) => void
+}): JSX.Element {
+    const sensitiveMarkedOptional = optionalBreakdownProperties.filter(
+        (p) => breakdownProperties.includes(p) && isSensitiveBreakdownName(p)
+    )
+    return (
+        <div className="flex flex-col gap-3 p-1">
+            <p className="text-sm text-secondary m-0">
+                Uncheck <strong>Required</strong> to let callers omit a breakdown — the response then aggregates across
+                every value.
+            </p>
+            <div className="flex flex-col gap-2">
+                {breakdownProperties.map((property) => {
+                    const isOptional = optionalBreakdownProperties.includes(property)
+                    return (
+                        <div
+                            key={property}
+                            className="flex items-center justify-between gap-3 p-3 bg-accent-3000 border border-border rounded"
+                        >
+                            <div className="flex flex-col">
+                                <code className="text-sm">{property}</code>
+                                <span className="text-xs text-secondary">
+                                    {isOptional
+                                        ? 'May be omitted — aggregates across every value.'
+                                        : 'Must be passed on every execution.'}
+                                </span>
+                            </div>
+                            <Checkbox
+                                checked={!isOptional}
+                                onChange={() => onToggle(property)}
+                                label="Required"
+                                bordered
+                            />
+                        </div>
+                    )
+                })}
+            </div>
+            {sensitiveMarkedOptional.length > 0 && (
+                <Banner type="warning">
+                    <strong>{sensitiveMarkedOptional.map((p) => `"${p}"`).join(', ')}</strong> looks like it identifies
+                    a tenant. Marking it optional lets callers execute this endpoint without that filter — double-check
+                    it isn't customer-facing.
+                </Banner>
+            )}
+        </div>
+    )
+}
+
+function ExecutionQueryPanel({
+    materializationPreview,
+}: {
+    materializationPreview: MaterializationPreview
+}): JSX.Element {
+    const displayQuery = materializationPreview.display_execution_query || materializationPreview.execution_query
+
+    const reaggregates = materializationPreview.aggregates.filter((a) => a.reaggregate_fn)
+
+    return (
+        <div className="p-1">
+            <p className="text-sm text-secondary mb-4">
+                When you execute this endpoint, this is the query we run against the pre-computed table instead of
+                scanning raw data. Variables from the request become filters in the WHERE clause.
+            </p>
+            <CodeSnippet language={Language.SQL} wrap>
+                {displayQuery ?? ''}
+            </CodeSnippet>
+            {reaggregates.length > 0 && (
+                <p className="text-xs text-secondary mt-3 m-0">
+                    Aggregates like <code className="text-xs">count(*)</code> are re-aggregated as{' '}
+                    <code className="text-xs">sum(count(*))</code> because results are pre-grouped into buckets.
+                </p>
+            )}
+        </div>
+    )
+}
+
+function MaterializationContent(): JSX.Element {
+    const { loadMaterializationStatus } = useActions(endpointLogic)
+    const {
+        endpoint,
+        materializationStatus: loadedMaterializationStatus,
+        materializationStatusLoading,
+    } = useValues(endpointLogic)
+    const { setIsMaterialized, setBucketOverride, openMaterializationSuggestionModal } = useActions(endpointSceneLogic)
+    const {
+        isMaterialized: localIsMaterialized,
+        viewingVersion,
+        materializationPreview,
+        bucketOverrides,
+        localQuery,
+    } = useValues(endpointSceneLogic)
+    const [runsModalOpen, setRunsModalOpen] = useState(false)
+    const materializationFixFlagEnabled = useFeatureFlag('ENDPOINTS_AI_MATERIALIZATION_FIX')
+
+    if (!endpoint) {
+        return <></>
+    }
+
+    const savedQueryId =
+        viewingVersion?.materialization?.saved_query_id ??
+        loadedMaterializationStatus?.saved_query_id ??
+        endpoint.materialization?.saved_query_id ??
+        null
+
     const versionMaterialization = viewingVersion?.materialization ?? endpoint.materialization
     const freshMaterialization = loadedMaterializationStatus ?? versionMaterialization
 
     const baseIsMaterialized = viewingVersion?.is_materialized ?? endpoint.is_materialized
-    const effectiveCacheAge = cacheAge ?? viewingVersion?.cache_age_seconds ?? endpoint.cache_age_seconds
     const effectiveIsMaterialized = localIsMaterialized ?? baseIsMaterialized
     const effectiveMaterializationStatus = freshMaterialization?.status
     const effectiveLastMaterializedAt = freshMaterialization?.last_materialized_at
     const effectiveMaterializationError = freshMaterialization?.error
-    const effectiveSyncFrequency = syncFrequency ?? freshMaterialization?.sync_frequency
 
-    const canMaterialize = freshMaterialization?.can_materialize ?? endpoint.materialization?.can_materialize ?? false
-    const isMaterialized = effectiveIsMaterialized
-    const materializationStatus = effectiveMaterializationStatus
-    const lastMaterializedAt = effectiveLastMaterializedAt
+    const hasUnsavedMaterializationChange = localIsMaterialized !== null && localIsMaterialized !== baseIsMaterialized
+
+    const canMaterialize =
+        materializationPreview?.can_materialize ??
+        freshMaterialization?.can_materialize ??
+        endpoint.materialization?.can_materialize ??
+        false
+    const cannotMaterializeReason =
+        materializationPreview?.reason ?? freshMaterialization?.reason ?? endpoint.materialization?.reason ?? null
+    const isMaterialized = effectiveIsMaterialized || effectiveMaterializationStatus?.toLowerCase() === 'running'
 
     const handleToggleMaterialization = (): void => {
         setIsMaterialized(!isMaterialized)
     }
 
-    return (
-        <SceneSection
-            title="Configure this endpoint"
-            description="If your use case does not require real-time data, consider materializing your endpoint resulting in faster response times, at the cost of slightly less fresh data."
-        >
-            <div className="flex flex-col gap-4 max-w-2xl">
-                <Field.Pure
-                    label="Cache age"
-                    info="How long cached results are served before re-running the query. Longer cache times improve performance but may return stale data."
-                >
-                    <Select value={effectiveCacheAge} onChange={setCacheAge} options={CACHE_AGE_OPTIONS} />
-                </Field.Pure>
-                <Field.Pure
-                    label="Materialization"
-                    info="Pre-compute and store query results in S3 for faster response times. Best for queries that don't need real-time data. Enabled by default for new endpoints."
-                >
-                    <Switch
-                        label="Enable materialization"
-                        checked={isMaterialized}
-                        onChange={handleToggleMaterialization}
-                        disabled={!canMaterialize}
-                        disabledReason={!canMaterialize ? endpoint.materialization?.reason : undefined}
-                        bordered
-                    />
-                </Field.Pure>
+    // Offer an AI rewrite only where it can help: a SQL endpoint, on its latest version,
+    // whose live checks reject the query.
+    const isLatestVersion = !viewingVersion || viewingVersion.version === endpoint.current_version
+    const showOptimizeWithAI =
+        materializationFixFlagEnabled &&
+        isLatestVersion &&
+        endpoint.query?.kind === NodeKind.InsightsQLQuery &&
+        !isMaterialized
 
-                <div className="space-y-4">
-                    {isMaterialized && (
+    const rangePairs = materializationPreview?.range_pairs ?? []
+
+    return (
+        <div className="p-1">
+            <p className="text-sm text-secondary mb-6">
+                Pre-compute query results on a schedule for faster response times.
+            </p>
+
+            {!canMaterialize && cannotMaterializeReason && (
+                <div className="flex flex-col gap-4 items-start">
+                    <Banner type="warning" hideIcon={false} className="w-full">
+                        <div className="flex flex-col gap-1">
+                            <span className="font-semibold">
+                                This endpoint can't be materialized yet, so every execution runs the full query.
+                            </span>
+                            <span className="font-normal">Reason: {cannotMaterializeReason}</span>
+                        </div>
+                    </Banner>
+                    {showOptimizeWithAI && (
+                        <Button
+                            type="secondary"
+                            icon={<IconSparkles />}
+                            onClick={openMaterializationSuggestionModal}
+                            disabledReason={
+                                localQuery
+                                    ? 'Save or discard your query changes first — the AI rewrites the saved query'
+                                    : undefined
+                            }
+                            tooltip="AI rewrites the query into an equivalent form that passes our materialization checks. You review the suggested change in the SQL editor before anything is saved."
+                            data-attr="endpoint-optimize-with-ai"
+                        >
+                            Optimize with AI
+                        </Button>
+                    )}
+                </div>
+            )}
+
+            {canMaterialize && (
+                <div className="flex flex-col gap-4">
+                    <AccessControlAction
+                        resourceType={AccessControlResourceType.Endpoint}
+                        minAccessLevel={AccessControlLevel.Editor}
+                    >
+                        <Switch
+                            label={isMaterialized ? 'Materialization enabled' : 'Enable materialization'}
+                            checked={isMaterialized}
+                            onChange={handleToggleMaterialization}
+                            bordered
+                        />
+                    </AccessControlAction>
+
+                    {hasUnsavedMaterializationChange && (
+                        <Banner type="info">
+                            {isMaterialized
+                                ? 'Save your changes to start materialization.'
+                                : 'Save your changes to disable materialization.'}
+                        </Banner>
+                    )}
+
+                    {isMaterialized && !hasUnsavedMaterializationChange && (
                         <div className="space-y-3 p-4 bg-accent-3000 border border-border rounded">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <IconDatabase className="text-lg" />
-                                    <span className="font-medium">Materialization status</span>
+                                    <span className="font-medium">Status</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Tag type={getStatusTagType(materializationStatus)}>
-                                        {materializationStatus || 'Pending'}
+                                    <Tag type={getStatusTagType(effectiveMaterializationStatus)}>
+                                        {effectiveMaterializationStatus || 'Pending'}
                                     </Tag>
                                     <Button
                                         size="xsmall"
@@ -146,13 +469,23 @@ export function EndpointConfiguration({ tabId }: EndpointConfigurationProps): JS
                                         loading={materializationStatusLoading}
                                         tooltip="Refresh status"
                                     />
+                                    {savedQueryId && (
+                                        <Button
+                                            size="xsmall"
+                                            icon={<IconList />}
+                                            onClick={() => setRunsModalOpen(true)}
+                                            tooltip="View materialization runs"
+                                        />
+                                    )}
                                 </div>
                             </div>
 
-                            {lastMaterializedAt && (
+                            {effectiveLastMaterializedAt && (
                                 <div className="flex items-center gap-2 text-xs text-secondary">
                                     <IconRefresh className="text-base" />
-                                    <span>Last materialized: {new Date(lastMaterializedAt).toLocaleString()}</span>
+                                    <span>
+                                        Last materialized: {new Date(effectiveLastMaterializedAt).toLocaleString()}
+                                    </span>
                                 </div>
                             )}
 
@@ -164,22 +497,46 @@ export function EndpointConfiguration({ tabId }: EndpointConfigurationProps): JS
                         </div>
                     )}
 
-                    {isMaterialized && (
-                        <Field.Pure
-                            label="Sync frequency"
-                            info="How often the materialized data is refreshed with new query results. More frequent syncs = fresher data but higher costs."
-                        >
-                            <Select
-                                value={effectiveSyncFrequency || '24hour'}
-                                onChange={setSyncFrequency}
-                                options={SYNC_FREQUENCY_OPTIONS}
-                                disabledReason={!isMaterialized ? 'Requires materializing the endpoint.' : undefined}
-                            />
-                        </Field.Pure>
+                    {isMaterialized && rangePairs.length > 0 && (
+                        <div className="space-y-3">
+                            {rangePairs.map((pair) => (
+                                <Field.Pure
+                                    key={pair.column}
+                                    label={
+                                        <>
+                                            <code>{pair.column}</code> bucket size
+                                        </>
+                                    }
+                                    info="Your date range variables are bucketed into this interval in the stored materialized table. Smaller bucket - more precise results. Larger bucket - less granular results."
+                                >
+                                    <AccessControlAction
+                                        resourceType={AccessControlResourceType.Endpoint}
+                                        minAccessLevel={AccessControlLevel.Editor}
+                                    >
+                                        <Select
+                                            value={
+                                                bucketOverrides[pair.column] ||
+                                                BUCKET_FN_TO_KEY[pair.bucket_fn] ||
+                                                'day'
+                                            }
+                                            onChange={(value) => setBucketOverride(pair.column, value)}
+                                            options={BUCKET_OPTIONS}
+                                        />
+                                    </AccessControlAction>
+                                </Field.Pure>
+                            ))}
+                        </div>
                     )}
                 </div>
-            </div>
-            <Divider />
-        </SceneSection>
+            )}
+            <MaterializationStatusModal
+                isOpen={runsModalOpen}
+                onClose={() => setRunsModalOpen(false)}
+                viewId={savedQueryId}
+                viewName={endpoint.name}
+                kind="endpoint"
+            />
+            <MaterializationSuggestionModal />
+        </div>
     )
 }

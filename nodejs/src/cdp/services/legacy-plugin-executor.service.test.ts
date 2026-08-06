@@ -2,13 +2,13 @@ import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { DateTime } from 'luxon'
 
+import { closeHub, createHub } from '~/common/utils/db/hub'
+import { PostgresUse } from '~/common/utils/db/postgres'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
-import { PostgresUse } from '../../utils/db/postgres'
-import { createExampleInvocation, createScriptExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
+import { createExampleInvocation, createHogExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID, TRANSFORMATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyDestinationPlugin, LegacyTransformationPlugin } from '../legacy-plugins/types'
 import {
@@ -44,7 +44,7 @@ describe('LegacyPluginExecutorService', () => {
         hub = await createHub()
         await resetTestDatabase()
         service = new LegacyPluginExecutorService(hub.postgres, hub.geoipService)
-        team = await getFirstTeam(hub)
+        team = await getFirstTeam(hub.postgres)
 
         fn = createInsightsFunction({
             name: 'Plugin test',
@@ -118,7 +118,7 @@ describe('LegacyPluginExecutorService', () => {
         )
 
         globals = {
-            ...createScriptExecutionGlobals({
+            ...createHogExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,

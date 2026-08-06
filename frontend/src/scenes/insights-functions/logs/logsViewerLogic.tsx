@@ -1,4 +1,5 @@
 import {
+    MakeLogicType,
     actions,
     afterMount,
     beforeUnmount,
@@ -23,16 +24,15 @@ import { teamLogic } from 'scenes/teamLogic'
 import { InsightsQLQueryString, insightsql } from '~/queries/utils'
 import { LogEntryLevel } from '~/types'
 
-import type { logsViewerLogicType } from './logsViewerLogicType'
-
 export const ALL_LOG_LEVELS: LogEntryLevel[] = ['DEBUG', 'LOG', 'INFO', 'WARN', 'ERROR']
-export const DEFAULT_LOG_LEVELS: LogEntryLevel[] = ['DEBUG', 'LOG', 'INFO', 'WARN', 'ERROR']
 export const POLLING_INTERVAL = 5000
 export const LOG_VIEWER_LIMIT = 100
+export const LOG_GROUP_LIMIT = 10
+export const LOG_GROUP_TOTAL_LOGS_LIMIT = 5000
 
 export type LogsViewerLogicProps = {
     logicKey?: string
-    sourceType: 'insights_function' | 'insights_flow' | 'batch_exports' | 'external_data_jobs'
+    sourceType: 'insights_function' | 'hog_flow' | 'batch_exports' | 'external_data_jobs' | 'data_modeling_run' | 'endpoints'
     sourceId: string
     groupByInstanceId?: boolean
     searchGroups?: string[]
@@ -51,18 +51,21 @@ export type LogEntry = {
     instanceId: string
     level: LogEntryLevel
     timestamp: Dayjs
+    rawTimestamp: string
 }
 
 export type GroupedLogEntry = {
     instanceId: string
     maxTimestamp: Dayjs
+    maxRawTimestamp: string
     minTimestamp: Dayjs
+    minRawTimestamp: string
     logLevel: LogEntryLevel
     entries: LogEntry[]
 }
 
 export type LogEntryParams = {
-    sourceType: 'insights_function' | 'insights_flow'
+    sourceType: LogsViewerLogicProps['sourceType']
     sourceId: string
     levels: LogEntryLevel[]
     searchGroups: string[]
@@ -74,14 +77,24 @@ export type LogEntryParams = {
 }
 
 const toKey = (log: LogEntry): string => {
-    return `${log.instanceId}-${log.level}-${log.timestamp.toISOString()}`
+    return `${log.instanceId}-${log.level}-${log.rawTimestamp}`
 }
 
 export const toAbsoluteDatastoreTimestamp = (timestamp: Dayjs): string => {
-    // TRICKY: CH query is timezone aware so we dont send iso, and we need to convert to UTC
-    // See https://github.com/hanzoai/insights/pull/45651
-    return timestamp.tz('UTC').format('YYYY-MM-DD HH:mm:ss.SSS')
+    // TRICKY: InsightsQL interprets bare timestamps as being in the team's timezone,
+    // so we must format in the team timezone (not UTC).
+    // See https://github.com/Insights/insights/pull/45651
+    const teamTimezone = teamLogic.findMounted()?.values.currentTeam?.timezone ?? 'UTC'
+    return timestamp.tz(teamTimezone).format('YYYY-MM-DD HH:mm:ss.SSS')
 }
+
+// An empty `levels` selection means "all levels" in the picker (it renders as
+// "All levels"), so omit the predicate entirely. Emitting `lower(level) IN ()`
+// is invalid InsightsQL ("empty parentheses are not a valid expression") and fails
+// the whole query — which surfaced as a toast when deselecting the last level
+// or paging older entries. Values come from a fixed enum, so raw is safe here.
+const levelInClause = (levels: LogEntryLevel[]): string =>
+    levels.length > 0 ? `AND lower(level) IN (${levels.map((level) => `'${level.toLowerCase()}'`).join(',')})` : ''
 
 const buildBoundaryFilters = (request: LogEntryParams): string => {
     return insightsql`
@@ -89,11 +102,12 @@ const buildBoundaryFilters = (request: LogEntryParams): string => {
         AND log_source_id = ${request.sourceId}
         AND timestamp > {filters.dateRange.from}
         AND timestamp < {filters.dateRange.to}
+        ${insightsql.raw(levelInClause(request.levels))}
     `
 }
 
 const buildSearchFilters = ({ searchGroups, levels, instanceId }: LogEntryParams): string => {
-    let query = insightsql`\nAND lower(level) IN (${insightsql.raw(levels.map((level) => `'${level.toLowerCase()}'`).join(','))})`
+    let query = insightsql`\n${insightsql.raw(levelInClause(levels))}`
 
     searchGroups.forEach((search) => {
         query = (query +
@@ -133,28 +147,49 @@ const loadLogs = async (request: LogEntryParams): Promise<LogEntry[]> => {
         (result): LogEntry => ({
             instanceId: result[0],
             timestamp: dayjs(result[1]),
+            rawTimestamp: result[1],
             level: result[2].toUpperCase(),
             message: result[3],
         })
     )
 }
 
-const loadGroupedLogs = async (request: LogEntryParams): Promise<LogEntry[]> => {
-    const query = insightsql`
+// Grouped pagination keyset-pages over instance groups by offsetting the group subquery, ordered by
+// most recent activity. We deliberately do NOT paginate with a `timestamp < cursor` boundary: batch
+// workflows emit hundreds of instances within the same millisecond, so a timestamp cursor (truncated
+// to ms) excludes every remaining group at once and the viewer falsely reports "No older entries".
+// The instance_id tiebreaker keeps the ordering stable across pages.
+export const buildGroupedLogsQuery = (
+    request: LogEntryParams,
+    groupLimit: number,
+    groupOffset: number = 0
+): InsightsQLQueryString => {
+    return insightsql`
         SELECT instance_id, timestamp, level, message
         FROM log_entries
         WHERE 1=1
         ${insightsql.raw(buildBoundaryFilters(request))}
         AND instance_id in (
-            SELECT DISTINCT instance_id
+            SELECT instance_id
             FROM log_entries
             WHERE 1=1
             ${insightsql.raw(buildBoundaryFilters(request))}
             ${insightsql.raw(buildSearchFilters(request))}
-            ORDER BY timestamp ${insightsql.raw(request.order)}
-            LIMIT ${LOG_VIEWER_LIMIT}
+            GROUP BY instance_id
+            ORDER BY max(timestamp) ${insightsql.raw(request.order)}, instance_id DESC
+            LIMIT ${groupLimit}
+            OFFSET ${groupOffset}
         )
-        ORDER BY timestamp DESC`
+        ORDER BY timestamp DESC
+        LIMIT ${LOG_GROUP_TOTAL_LOGS_LIMIT}`
+}
+
+const loadGroupedLogs = async (
+    request: LogEntryParams,
+    groupLimit: number = LOG_GROUP_LIMIT,
+    groupOffset: number = 0
+): Promise<LogEntry[]> => {
+    const query = buildGroupedLogsQuery(request, groupLimit, groupOffset)
 
     const response = await api.queryInsightsQL(
         query,
@@ -172,46 +207,258 @@ const loadGroupedLogs = async (request: LogEntryParams): Promise<LogEntry[]> => 
         (result): LogEntry => ({
             instanceId: result[0],
             timestamp: dayjs(result[1]),
+            rawTimestamp: result[1],
             level: result[2].toUpperCase(),
             message: result[3],
         })
     )
 }
 
-const groupLogs = (logs: LogEntry[]): GroupedLogEntry[] => {
+export const groupLogs = (logs: LogEntry[]): GroupedLogEntry[] => {
+    const sorted = [...logs].sort((a, b) =>
+        a.rawTimestamp < b.rawTimestamp ? -1 : a.rawTimestamp > b.rawTimestamp ? 1 : 0
+    )
+
     const byId: Record<string, GroupedLogEntry> = {}
     const dedupeCache = new Set<string>()
 
-    for (const log of logs) {
+    for (const log of sorted) {
         const key = toKey(log)
         if (dedupeCache.has(key)) {
             continue
         }
         dedupeCache.add(key)
-        const group = byId[log.instanceId] ?? {
+        const group = (byId[log.instanceId] ??= {
             instanceId: log.instanceId,
             maxTimestamp: log.timestamp,
+            maxRawTimestamp: log.rawTimestamp,
             minTimestamp: log.timestamp,
+            minRawTimestamp: log.rawTimestamp,
             logLevel: log.level,
             entries: [],
-        }
-        byId[log.instanceId] = group
+        })
         group.entries.push(log)
-        group.maxTimestamp = log.timestamp.isAfter(group.maxTimestamp) ? log.timestamp : group.maxTimestamp
-        group.minTimestamp = log.timestamp.isBefore(group.minTimestamp) ? log.timestamp : group.minTimestamp
-        if (ALL_LOG_LEVELS.indexOf(log.level) > ALL_LOG_LEVELS.indexOf(group.logLevel)) {
-            group.logLevel = log.level
-        }
+        // Since logs are sorted ascending, the last entry always has the max timestamp
+        group.maxTimestamp = log.timestamp
+        group.maxRawTimestamp = log.rawTimestamp
+        group.logLevel = log.level
     }
 
-    return Object.values(byId).map((group) => ({
-        ...group,
-        entries: group.entries.sort((a, b) => a.timestamp.diff(b.timestamp)),
-    }))
+    return Object.values(byId).reverse()
 }
 
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface logsViewerLogicValues {
+    allLogEntries: LogEntry[]
+    allLogEntryKeys: Set<string>
+    expandedRows: Record<string, boolean>
+    filters: LogsViewerFilters
+    groupedLogs: GroupedLogEntry[]
+    groupedLogsLoading: boolean
+    hiddenLogs: LogEntry[]
+    hiddenLogsLoading: boolean
+    isGrouped: boolean
+    isThereMoreToLoad: boolean
+    logEntryParams: LogEntryParams
+    logsLoading: boolean
+    newestLogTimestamp: Dayjs | null
+    oldestLogTimestamp: Dayjs | null
+    unGroupedLogs: LogEntry[]
+    unGroupedLogsLoading: boolean
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface logsViewerLogicActions {
+    addLogGroups: (logGroups: GroupedLogEntry[]) => {
+        logGroups: GroupedLogEntry[]
+    }
+    addLogGroupsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    addLogGroupsSuccess: (
+        groupedLogs: GroupedLogEntry[],
+        payload?: {
+            logGroups: GroupedLogEntry[]
+        }
+    ) => {
+        groupedLogs: GroupedLogEntry[]
+        payload?: {
+            logGroups: GroupedLogEntry[]
+        }
+    }
+    clearHiddenLogs: () => {
+        value: true
+    }
+    clearHiddenLogsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    clearHiddenLogsSuccess: (
+        hiddenLogs: never[],
+        payload?: {
+            value: true
+        }
+    ) => {
+        hiddenLogs: never[]
+        payload?: {
+            value: true
+        }
+    }
+    clearLogs: () => {
+        value: true
+    }
+    loadGroupedLogs: () => {
+        value: true
+    }
+    loadGroupedLogsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadGroupedLogsSuccess: (
+        groupedLogs: GroupedLogEntry[],
+        payload?: {
+            value: true
+        }
+    ) => {
+        groupedLogs: GroupedLogEntry[]
+        payload?: {
+            value: true
+        }
+    }
+    loadLogs: () => {
+        value: true
+    }
+    loadMoreGroupedLogs: () => any
+    loadMoreGroupedLogsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadMoreGroupedLogsSuccess: (
+        groupedLogs: GroupedLogEntry[],
+        payload?: any
+    ) => {
+        groupedLogs: GroupedLogEntry[]
+        payload?: any
+    }
+    loadMoreUngroupedLogs: () => any
+    loadMoreUngroupedLogsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadMoreUngroupedLogsSuccess: (
+        unGroupedLogs: LogEntry[],
+        payload?: any
+    ) => {
+        unGroupedLogs: LogEntry[]
+        payload?: any
+    }
+    loadNewerLogs: () => {
+        value: true
+    }
+    loadNewerLogsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadNewerLogsSuccess: (
+        hiddenLogs: LogEntry[],
+        payload?: {
+            value: true
+        }
+    ) => {
+        hiddenLogs: LogEntry[]
+        payload?: {
+            value: true
+        }
+    }
+    loadOlderLogs: () => {
+        value: true
+    }
+    loadUngroupedLogs: () => {
+        value: true
+    }
+    loadUngroupedLogsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadUngroupedLogsSuccess: (
+        unGroupedLogs: LogEntry[],
+        payload?: {
+            value: true
+        }
+    ) => {
+        unGroupedLogs: LogEntry[]
+        payload?: {
+            value: true
+        }
+    }
+    markLogsEnd: () => {
+        value: true
+    }
+    revealHiddenLogs: () => {
+        value: true
+    }
+    scheduleLoadNewerLogs: () => {
+        value: true
+    }
+    setFilters: (filters: Partial<LogsViewerFilters>) => {
+        filters: Partial<LogsViewerFilters>
+    }
+    setIsGrouped: (isGrouped: boolean) => {
+        isGrouped: boolean
+    }
+    setRowExpanded: (
+        instanceId: string,
+        expanded: boolean
+    ) => {
+        expanded: boolean
+        instanceId: string
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface logsViewerLogicMeta {
+    key: string
+    __keaTypeGenInternalSelectorTypes: {
+        logsLoading: (groupedLogsLoading: boolean, unGroupedLogsLoading: boolean) => boolean
+        logEntryParams: (arg: any, filters: LogsViewerFilters) => LogEntryParams
+        allLogEntries: (groupedLogs: GroupedLogEntry[], unGroupedLogs: LogEntry[], hiddenLogs: LogEntry[]) => LogEntry[]
+        allLogEntryKeys: (allLogEntries: LogEntry[]) => Set<string>
+        newestLogTimestamp: (allLogEntries: LogEntry[]) => Dayjs | null
+        oldestLogTimestamp: (allLogEntries: LogEntry[]) => Dayjs | null
+    }
+}
+
+export type logsViewerLogicType = MakeLogicType<
+    logsViewerLogicValues,
+    logsViewerLogicActions,
+    LogsViewerLogicProps,
+    logsViewerLogicMeta
+>
+
 export const logsViewerLogic = kea<logsViewerLogicType>([
-    path((key) => ['scenes', 'pipeline', 'customfunctions', 'logs', 'logsViewerLogic', key]),
+    path((key) => ['scenes', 'pipeline', 'hogfunctions', 'logs', 'logsViewerLogic', key]),
     props({} as LogsViewerLogicProps), // TODO: Remove `stage` from props, it isn't needed here for anything
     key(({ sourceType, sourceId, logicKey }) => logicKey || `${sourceType}:${sourceId}`),
     actions({
@@ -240,7 +487,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
         filters: [
             {
                 search: '',
-                levels: props.defaultFilters?.levels ?? DEFAULT_LOG_LEVELS,
+                levels: props.defaultFilters?.levels ?? ALL_LOG_LEVELS,
                 date_from: props.defaultFilters?.dateFrom ?? '-7d',
                 date_to: props.defaultFilters?.dateTo,
             } as LogsViewerFilters,
@@ -329,16 +576,11 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
                     return groupLogs(results)
                 },
                 loadMoreGroupedLogs: async () => {
-                    if (!values.oldestLogTimestamp) {
-                        return values.groupedLogs
-                    }
-                    const logParams: LogEntryParams = {
-                        ...values.logEntryParams,
-                        dateTo: toAbsoluteDatastoreTimestamp(values.oldestLogTimestamp),
-                        limit: values.groupedLogs.length + LOG_VIEWER_LIMIT,
-                    }
-
-                    const results = await loadGroupedLogs(logParams)
+                    const results = await loadGroupedLogs(
+                        values.logEntryParams,
+                        LOG_GROUP_LIMIT,
+                        values.groupedLogs.length
+                    )
 
                     if (!results.length) {
                         actions.markLogsEnd()
@@ -429,13 +671,13 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
     selectors(() => ({
         logsLoading: [
             (s) => [s.groupedLogsLoading, s.unGroupedLogsLoading],
-            (groupedLogsLoading, unGroupedLogsLoading): boolean => {
+            (groupedLogsLoading: boolean, unGroupedLogsLoading: boolean): boolean => {
                 return groupedLogsLoading || unGroupedLogsLoading
             },
         ],
         logEntryParams: [
             (s) => [(_, p) => p, s.filters],
-            (props, filters): LogEntryParams => {
+            (props, filters: LogsViewerFilters): LogEntryParams => {
                 const searchGroups = [filters.search, ...(props.searchGroups || [])].filter((x) => !!x) as string[]
                 return {
                     ...props.defaultFilters,
@@ -452,21 +694,21 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
 
         allLogEntries: [
             (s) => [s.groupedLogs, s.unGroupedLogs, s.hiddenLogs],
-            (groupedLogs, unGroupedLogs, hiddenLogs): LogEntry[] => {
+            (groupedLogs: GroupedLogEntry[], unGroupedLogs: LogEntry[], hiddenLogs: LogEntry[]): LogEntry[] => {
                 return [...groupedLogs.flatMap((log) => log.entries), ...unGroupedLogs, ...hiddenLogs]
             },
         ],
 
         allLogEntryKeys: [
             (s) => [s.allLogEntries],
-            (allLogEntries): Set<string> => {
+            (allLogEntries: LogEntry[]): Set<string> => {
                 return new Set(allLogEntries.map(toKey))
             },
         ],
 
         newestLogTimestamp: [
             (s) => [s.allLogEntries],
-            (allLogEntries): Dayjs | null => {
+            (allLogEntries: LogEntry[]): Dayjs | null => {
                 const item = allLogEntries.reduce(
                     (max, log) => {
                         if (!max) {
@@ -483,7 +725,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
 
         oldestLogTimestamp: [
             (s) => [s.allLogEntries],
-            (allLogEntries): Dayjs | null => {
+            (allLogEntries: LogEntry[]): Dayjs | null => {
                 return allLogEntries.reduce(
                     (min, log) => {
                         if (!min) {

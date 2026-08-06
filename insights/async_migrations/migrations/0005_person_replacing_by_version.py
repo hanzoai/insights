@@ -74,21 +74,17 @@ class Migration(AsyncMigrationDefinition):
     insights_max_version = "1.41.99"
 
     def is_required(self) -> bool:
-        result = sync_execute(
+        person_table_engine = sync_execute(
             "SELECT engine_full FROM system.tables WHERE database = %(database)s AND name = %(name)s",
             {"database": settings.DATASTORE_DATABASE, "name": "person"},
-        )
-        if not result:
-            # Table doesn't exist (fresh install or CH migrations still running) — not required
-            return False
+        )[0][0]
 
-        person_table_engine = result[0][0]
         has_new_engine = "ReplicatedReplacingMergeTree" in person_table_engine and ", version)" in person_table_engine
         persons_backfill_ongoing = get_client().get(REDIS_HIGHWATERMARK_KEY) is not None
         return not has_new_engine or persons_backfill_ongoing
 
-    @cached_property
-    def operations(self):
+    @property
+    def operations(self) -> list[AsyncMigrationOperation]:
         return [
             AsyncMigrationOperationSQL(
                 database=AnalyticsDBMS.DATASTORE,

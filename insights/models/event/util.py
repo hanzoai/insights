@@ -4,22 +4,46 @@ from datetime import UTC, datetime
 from typing import Any, Literal, Optional, Union
 from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.utils import timezone
 
 from dateutil.parser import isoparse
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 
 from insights.datastore.client import sync_execute
 from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_EVENTS_JSON
-from insights.models import Group
 from insights.models.element.element import Element, chain_to_elements, elements_to_string
-from insights.models.event.sql import BULK_INSERT_EVENT_SQL, INSERT_EVENT_SQL
+from insights.models.event.sql import BULK_INSERT_EVENT_SQL, EVENTS_JSON_DATA_TABLE, INSERT_EVENT_SQL
 from insights.models.person import Person
+from insights.models.person.util import get_person_by_distinct_id
 from insights.models.team import Team
 from insights.settings import TEST
 
 ZERO_DATE = datetime(1970, 1, 1)
+DATASTORE_JSON_MIN_INT = -(2**63)
+DATASTORE_JSON_MAX_UINT = 2**64 - 1
+
+
+def _normalize_datastore_json_value(value: Any) -> Any:
+    if isinstance(value, bool) or value is None:
+        return value
+    if isinstance(value, int):
+        if DATASTORE_JSON_MIN_INT <= value <= DATASTORE_JSON_MAX_UINT:
+            return value
+        return float(value)
+    if isinstance(value, list):
+        return [_normalize_datastore_json_value(item) for item in value]
+    if isinstance(value, tuple):
+        return [_normalize_datastore_json_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _normalize_datastore_json_value(nested_value) for key, nested_value in value.items()}
+    return value
+
+
+def _json_dumps_for_datastore(value: dict[str, Any] | None) -> str:
+    return json.dumps(_normalize_datastore_json_value(value or {}))
 
 
 def create_event(
@@ -83,6 +107,13 @@ def create_event(
         "person_mode": person_mode,
     }
     p = DatastoreProducer()
+    if TEST and settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+        json_data = {
+            **data,
+            "properties": _json_dumps_for_datastore(properties),
+            "person_properties": _json_dumps_for_datastore(person_properties),
+        }
+        p.produce(topic=KAFKA_EVENTS_JSON, sql=INSERT_EVENT_SQL(table_name=EVENTS_JSON_DATA_TABLE), data=json_data)
     p.produce(topic=KAFKA_EVENTS_JSON, sql=INSERT_EVENT_SQL(), data=data)
 
     return str(event_uuid)
@@ -100,6 +131,14 @@ def format_datastore_timestamp(
         else (raw_timestamp or default).astimezone(ZoneInfo("UTC"))
     )
     return parsed_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
+
+
+def _resolve_person_for_bulk_event(team_id: int, distinct_id: str) -> Optional[Person]:
+    """Resolve the person for a test event by distinct_id via personinsights."""
+    try:
+        return get_person_by_distinct_id(int(team_id), str(distinct_id))
+    except Exception:
+        return None
 
 
 def bulk_create_events(
@@ -120,6 +159,7 @@ def bulk_create_events(
         raise Exception("This function is only meant for setting up tests")
     inserts = []
     params: dict[str, Any] = {}
+    json_params: dict[str, Any] = {}
     for index, event in enumerate(events):
         datetime64_default_timestamp = timezone.now().astimezone(ZoneInfo("UTC")).strftime("%Y-%m-%d %H:%M:%S")
         _timestamp = event.get("_timestamp") or datetime.now()
@@ -173,21 +213,19 @@ def bulk_create_events(
         #  use person properties mapping to populate person properties in given event
         team_id = event.get("team_id") or event["team"].pk
         person_mode = event.get("person_mode", "full")
+        person_created_at: Any
         if person_mapping and person_mapping.get(event["distinct_id"]):
             person = person_mapping[event["distinct_id"]]
             person_properties = person.properties
             person_id = person.uuid
-            person_created_at = person.created_at
+            person_created_at = person.created_at or datetime64_default_timestamp
         else:
-            try:
-                person = Person.objects.get(
-                    persondistinctid__distinct_id=event["distinct_id"],
-                    persondistinctid__team_id=team_id,
-                )
-                person_properties = person.properties
-                person_id = person.uuid
-                person_created_at = person.created_at
-            except Person.DoesNotExist:
+            resolved_person = _resolve_person_for_bulk_event(team_id, event["distinct_id"])
+            if resolved_person is not None:
+                person_properties = resolved_person.properties
+                person_id = resolved_person.uuid
+                person_created_at = resolved_person.created_at or datetime64_default_timestamp
+            else:
                 person_properties = {}
                 person_id = event.get("person_id", uuid.uuid4())
                 person_created_at = datetime64_default_timestamp
@@ -203,30 +241,30 @@ def bulk_create_events(
         }
 
         # Populate group properties as well
+        from insights.models.group.util import get_group_by_key
+
         for property_key, value in (event.get("properties") or {}).items():
             if property_key.startswith("$group_"):
                 group_type_index = property_key[-1]
                 try:
-                    group = Group.objects.get(
-                        team_id=team_id,
-                        group_type_index=group_type_index,
-                        group_key=value,
-                    )
-                    group_property_key = f"group{group_type_index}_properties"
-                    group_created_at_key = f"group{group_type_index}_created_at"
-
-                    event = {
-                        **event,
-                        group_property_key: {
-                            **group.group_properties,
-                            **event.get(group_property_key, {}),
-                        },
-                        group_created_at_key: event.get(group_created_at_key, datetime64_default_timestamp),
-                    }
-
-                except Group.DoesNotExist:
+                    group = get_group_by_key(team_id, int(group_type_index), value)
+                except Exception:
+                    group = None
+                if group is None:
                     continue
+                group_property_key = f"group{group_type_index}_properties"
+                group_created_at_key = f"group{group_type_index}_created_at"
+
+                event = {
+                    **event,
+                    group_property_key: {
+                        **group.group_properties,
+                        **event.get(group_property_key, {}),
+                    },
+                    group_created_at_key: event.get(group_created_at_key, datetime64_default_timestamp),
+                }
         properties = event.get("properties", {})
+        person_properties_for_insert = event["person_properties"] if event.get("person_properties") else {}
 
         event = {
             "uuid": str(event["event_uuid"]) if event.get("event_uuid") else str(uuid.uuid4()),
@@ -270,9 +308,24 @@ def bulk_create_events(
             **params,
             **{"{}_{}".format(key, index): value for key, value in event.items()},
         }
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            json_event = {
+                **event,
+                "properties": _json_dumps_for_datastore(properties),
+                "person_properties": _json_dumps_for_datastore(person_properties_for_insert),
+            }
+            json_params = {
+                **json_params,
+                **{"{}_{}".format(key, index): value for key, value in json_event.items()},
+            }
+    if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+        sync_execute(
+            BULK_INSERT_EVENT_SQL(table_name=EVENTS_JSON_DATA_TABLE) + ", ".join(inserts), json_params, flush=False
+        )
     sync_execute(BULK_INSERT_EVENT_SQL() + ", ".join(inserts), params, flush=False)
 
 
+@extend_schema_serializer(component_name="EventElement")
 class ElementSerializer(serializers.ModelSerializer):
     event = serializers.CharField()
 
@@ -316,40 +369,65 @@ class DatastoreEventSerializer(serializers.Serializer):
     elements = serializers.SerializerMethodField()
     elements_chain = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.CharField())
     def get_id(self, event):
         return str(event["uuid"])
 
+    @extend_schema_field(serializers.CharField())
     def get_distinct_id(self, event):
         return event["distinct_id"]
 
+    @extend_schema_field(serializers.DictField())
     def get_properties(self, event):
-        return parse_properties(event["properties"])
+        props = parse_properties(event["properties"])
+        restricted = self.context.get("restricted_event_properties")
+        if restricted:
+            props = {k: v for k, v in props.items() if k not in restricted}
 
+        restricted_person = self.context.get("restricted_person_properties")
+        if restricted_person:
+            for key in ("$set", "$set_once"):
+                nested = props.get(key)
+                if isinstance(nested, dict):
+                    props[key] = {k: v for k, v in nested.items() if k not in restricted_person}
+            unset = props.get("$unset")
+            if isinstance(unset, list):
+                props["$unset"] = [k for k in unset if k not in restricted_person]
+        return props
+
+    @extend_schema_field(serializers.CharField())
     def get_event(self, event):
         return event["event"]
 
+    @extend_schema_field(serializers.DateTimeField())
     def get_timestamp(self, event):
         dt = event["timestamp"].replace(tzinfo=UTC)
-        return dt.astimezone().isoformat()
+        return dt.isoformat()
 
+    @extend_schema_field(serializers.DictField(allow_null=True))
     def get_person(self, event):
         if not self.context.get("people") or event["distinct_id"] not in self.context["people"]:
             return None
 
         person = self.context["people"][event["distinct_id"]]
+        restricted = self.context.get("restricted_person_properties", set())
         return {
             "is_identified": person.is_identified,
             "distinct_ids": person.distinct_ids[:1],  # only send the first one to avoid a payload bloat
             "properties": {
-                key: person.properties[key] for key in ["email", "name", "username"] if key in person.properties
+                key: person.properties[key]
+                for key in ["email", "name", "username"]
+                if key in person.properties and key not in restricted
             },
         }
 
+    @extend_schema_field(ElementSerializer(many=True))
     def get_elements(self, event):
         if not event["elements_chain"]:
             return []
         return ElementSerializer(chain_to_elements(event["elements_chain"]), many=True).data
 
+    @extend_schema_field(serializers.CharField())
     def get_elements_chain(self, event):
         return event["elements_chain"]
 

@@ -1,17 +1,17 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock, IconPlayFilled } from '@hanzo/icons'
+import { IconPlayFilled } from '@hanzo/icons'
 import { IconChevronDown } from '@hanzo/icons'
 import { Button, Input, Popover } from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
-import { humanFriendlyNumber } from 'lib/utils'
+import { humanFriendlyNumber } from 'lib/utils/numbers'
 
 import { CyclotronJobInputSchemaType } from '~/types'
 
 import { WorkflowLogicProps, workflowLogic } from '../workflowLogic'
-import { insightsFlowManualTriggerButtonLogic } from './InsightsFlowManualTriggerButtonLogic'
-import { batchTriggerLogic } from './steps/batchTriggerLogic'
+import { hogFlowManualTriggerButtonLogic } from './InsightsFlowManualTriggerButtonLogic'
+import { batchTriggerLogic, getAudienceDedupeKey } from './steps/batchTriggerLogic'
 
 const TriggerPopover = ({
     setPopoverVisible,
@@ -20,28 +20,32 @@ const TriggerPopover = ({
     setPopoverVisible: (visible: boolean) => void
     props: WorkflowLogicProps
 }): JSX.Element => {
-    const logic = insightsFlowManualTriggerButtonLogic(props)
-    const { workflow, variableValues, inputs, isScheduleTrigger } = useValues(logic)
+    const logic = hogFlowManualTriggerButtonLogic(props)
+    const { workflow, variableValues, inputs } = useValues(logic)
     const { setInput, clearInputs, triggerManualWorkflow, triggerBatchWorkflow } = useActions(logic)
 
     const { blastRadius, blastRadiusLoading } = useValues(
         batchTriggerLogic({
             id: props.id,
             filters: workflow?.trigger?.type === 'batch' ? workflow?.trigger?.filters : undefined,
+            dedupeKey: getAudienceDedupeKey(workflow),
         })
     )
 
+    const blastRadiusExceeded =
+        workflow?.trigger?.type === 'batch' &&
+        blastRadius != null &&
+        blastRadius.limit != null &&
+        blastRadius.affected > blastRadius.limit
+
     const blastRadiusSuffix = (): string => {
         if (workflow?.trigger?.type === 'batch') {
-            return blastRadius ? ` for ${humanFriendlyNumber(blastRadius.users_affected)} users` : ' for ...'
+            return blastRadius ? ` for ${humanFriendlyNumber(blastRadius.affected)} users` : ' for ...'
         }
         return ''
     }
 
-    const getButtonText = (): string => {
-        const action = isScheduleTrigger ? 'Schedule workflow' : 'Run workflow'
-        return `${action}${blastRadiusSuffix()}`
-    }
+    const getButtonText = (): string => `Run workflow${blastRadiusSuffix()}`
 
     const variablesSection =
         !workflow?.variables || workflow.variables.length === 0 ? (
@@ -103,24 +107,23 @@ const TriggerPopover = ({
                     type="primary"
                     status="alt"
                     loading={blastRadiusLoading}
+                    disabledReason={
+                        blastRadiusExceeded && blastRadius?.limit != null
+                            ? `Batch size exceeds the limit of ${humanFriendlyNumber(blastRadius.limit)} users. Add filters to narrow your audience. This limit will be loosened in the future.`
+                            : undefined
+                    }
                     onClick={() => {
                         if (workflow?.trigger?.type === 'batch') {
-                            triggerBatchWorkflow(
-                                variableValues,
-                                workflow?.trigger?.filters || { properties: [] },
-                                workflow?.trigger?.scheduled_at || null
-                            )
-                        } else if (workflow?.trigger?.type === 'manual') {
+                            triggerBatchWorkflow(variableValues, workflow?.trigger?.filters || { properties: [] })
+                        } else {
                             triggerManualWorkflow(variableValues)
-                        } else if (workflow?.trigger?.type === 'schedule') {
-                            triggerManualWorkflow(variableValues, workflow?.trigger?.scheduled_at)
                         }
 
                         setPopoverVisible(false)
                         clearInputs()
                     }}
                     data-attr="run-workflow-btn"
-                    sideIcon={isScheduleTrigger ? <IconClock /> : <IconPlayFilled />}
+                    sideIcon={<IconPlayFilled />}
                 >
                     {getButtonText()}
                 </Button>
@@ -130,12 +133,10 @@ const TriggerPopover = ({
 }
 
 export const InsightsFlowManualTriggerButton = (props: WorkflowLogicProps = {}): JSX.Element => {
-    const logic = insightsFlowManualTriggerButtonLogic(props)
-    const { workflow, workflowChanged } = useValues(workflowLogic(props))
+    const logic = hogFlowManualTriggerButtonLogic(props)
+    const { workflow, hasUnsavedChanges } = useValues(workflowLogic(props))
     const { popoverVisible } = useValues(logic)
     const { setPopoverVisible } = useActions(logic)
-
-    const isScheduleTrigger = workflow?.trigger?.type === 'schedule'
 
     const triggerButton = (
         <Button
@@ -144,15 +145,15 @@ export const InsightsFlowManualTriggerButton = (props: WorkflowLogicProps = {}):
             disabledReason={
                 workflow?.status !== 'active'
                     ? 'Must enable workflow to use trigger'
-                    : workflowChanged
+                    : hasUnsavedChanges
                       ? 'Save changes first'
                       : undefined
             }
             sideIcon={<IconChevronDown className={`transition-transform ${popoverVisible ? 'rotate-180' : ''}`} />}
-            tooltip={isScheduleTrigger ? 'Schedule workflow' : 'Triggers workflow immediately'}
+            tooltip="Triggers workflow immediately"
             onClick={() => setPopoverVisible(!popoverVisible)}
         >
-            {isScheduleTrigger ? 'Schedule' : 'Trigger'}
+            Trigger
         </Button>
     )
 

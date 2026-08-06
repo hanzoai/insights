@@ -1,14 +1,15 @@
 import { useActions, useValues } from 'kea'
 
+import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
 import { IconPencil } from '@hanzo/icons'
 import { Select, Link } from '@hanzo/elements'
 
-import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
+import { pngHoggie } from 'lib/brand/hoggies'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
+import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
+import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { TZLabel } from 'lib/components/TZLabel'
-import { MicrophoneMascot } from 'lib/components/mascots'
 import { Button } from 'lib/elements/Button'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { createdAtColumn } from 'lib/elements/Table/columnUtils'
@@ -17,8 +18,8 @@ import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 import { organizationLogic } from 'scenes/organizationLogic'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
@@ -31,6 +32,8 @@ import { AnnotationScope, AnnotationType, InsightShortId } from '~/types'
 import { AnnotationModal } from './AnnotationModal'
 import { annotationModalLogic, annotationScopeToLevel, annotationScopeToName } from './annotationModalLogic'
 import { annotationScopesMenuOptions, annotationsLogic } from './annotationsLogic'
+
+const MascotReporter = pngHoggie(reporterPng)
 
 export const scene: SceneExport = {
     component: Annotations,
@@ -55,29 +58,28 @@ export function Annotations(): JSX.Element {
         {
             title: 'Annotation',
             key: 'annotation',
-            width: '30%',
             render: function RenderAnnotation(_, annotation: AnnotationType): JSX.Element {
-                let renderedContent = <>{annotation.content ?? ''}</>
-                if ((annotation.content || '').trim().length > 30) {
-                    renderedContent = (
-                        <Tooltip
-                            title={
-                                <TextContent
-                                    text={annotation.content ?? ''}
-                                    data-attr="annotation-scene-comment-title-rendered-content"
-                                />
-                            }
-                        >
-                            {(annotation.content ?? '').slice(0, 27) + '...'}
-                        </Tooltip>
-                    )
-                }
                 return (
-                    <div className="font-semibold">
-                        <Link subtle to={urls.annotation(annotation.id)}>
-                            {renderedContent}
-                        </Link>
-                    </div>
+                    <Tooltip
+                        title={
+                            <TextContent
+                                text={annotation.content ?? ''}
+                                data-attr="annotation-scene-comment-title-rendered-content"
+                            />
+                        }
+                    >
+                        <div className="flex items-center gap-1.5">
+                            {annotation.emoji && (
+                                <span className="text-base leading-none shrink-0">{annotation.emoji}</span>
+                            )}
+                            {/* line-clamp-2 must stay on its own element — combining it with flex breaks the clamp */}
+                            <div className="font-semibold line-clamp-2 min-w-0">
+                                <Link subtle to={urls.annotation(annotation.id)}>
+                                    {annotation.content ?? ''}
+                                </Link>
+                            </div>
+                        </div>
+                    </Tooltip>
                 )
             },
         },
@@ -163,7 +165,7 @@ export function Annotations(): JSX.Element {
                     type: sceneConfigurations[Scene.Annotations].iconType || 'default_icon_type',
                 }}
                 actions={
-                    <AppShortcut
+                    <Shortcut
                         name="NewAnnotation"
                         keybind={[keyBinds.new]}
                         intent="New annotation"
@@ -172,13 +174,14 @@ export function Annotations(): JSX.Element {
                     >
                         <Button
                             type="primary"
+                            data-attr="create-annotation"
                             onClick={() => openModalToCreateAnnotation()}
                             size="small"
                             tooltip="New annotation"
                         >
                             New annotation
                         </Button>
-                    </AppShortcut>
+                    </Shortcut>
                 }
             />
             <div className="flex flex-row items-center gap-2 justify-end">
@@ -195,7 +198,8 @@ export function Annotations(): JSX.Element {
                         docsURL="https://hanzo.ai/docs/data/annotations"
                         action={() => openModalToCreateAnnotation()}
                         isEmpty={shouldShowEmptyState}
-                        customInsights={MicrophoneMascot}
+                        customHog={MascotReporter}
+                        mcpSurfaceKey="annotations.create"
                     />
                 </div>
                 {!shouldShowEmptyState && (

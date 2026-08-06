@@ -5,52 +5,98 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconWarning } from '@hanzo/icons'
+import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
+import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconRefresh, IconWarning } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { MCPUseCaseCard } from 'lib/components/MCPHint/MCPUseCaseCard'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { BuilderMascot3 } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { holidaysMatcher, isChristmas } from 'lib/holidays'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
+import { IconChristmasOrnament, IconErrorOutline, IconOpenInNew } from 'lib/elements/icons'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { Link } from 'lib/elements/Link'
 import { LoadingBar } from 'lib/elements/LoadingBar'
-import { IconChristmasOrnament, IconErrorOutline, IconOpenInNew } from 'lib/elements/icons'
-import { humanFriendlyNumber, humanizeBytes, inStorybook, inStorybookTestRunner } from 'lib/utils'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import insights from 'lib/insights-typed'
+import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
+import { humanFriendlyNumber, humanizeBytes } from 'lib/utils/numbers'
+import { isTrustedInsightsUrl } from 'lib/utils/trustedUrl'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { entityFilterLogic } from 'scenes/insights/filters/ActionFilter/entityFilterLogic'
-import { insightLogic } from 'scenes/insights/insightLogic'
+import { insightLogic, insightOverridesPresent } from 'scenes/insights/insightLogic'
+import { autoRunMaxPrompt } from 'scenes/max/maxPrompt'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SavedInsightFilters } from 'scenes/saved-insights/savedInsightsLogic'
+import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
+import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { actionsAndEventsToSeries } from '~/queries/nodes/InsightQuery/utils/filtersToQueryNode'
 import { seriesToActionsAndEvents } from '~/queries/nodes/InsightQuery/utils/queryNodeToFilter'
-import { FunnelsQuery, Node, QueryStatus } from '~/queries/schema/schema-general'
+import { FunnelsQuery, Node, NodeKind, QueryStatus } from '~/queries/schema/schema-general'
+import { isFunnelsDataWarehouseNode } from '~/queries/utils'
 import {
     AccessControlLevel,
     AccessControlResourceType,
     FilterType,
     InsightLogicProps,
     SavedInsightsTabs,
+    SidePanelTab,
 } from '~/types'
 
 import { MathAvailability } from '../filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 import { insightDataLogic } from '../insightDataLogic'
 import { insightVizDataLogic } from '../insightVizDataLogic'
+import { SampleDataState, SampleDataVariant } from './SampleDataState'
+import { sampleDataStateLogic } from './sampleDataStateLogic'
+
+const MascotConstruction2 = pngHoggie(construction2Png)
+
+// Matches DatastoreQueryMemoryLimitExceeded.default_code on the backend. Keep the two in sync.
+const DATASTORE_MEMORY_LIMIT_ERROR_CODE = 'datastore_memory_limit_exceeded'
+
+const MEMORY_LIMIT_AI_PROMPT = autoRunMaxPrompt(
+    "This insight ran out of memory before it could finish. Help me work out why it's scanning so much data and how to fix it: a shorter date range, narrower filters, or materializing the data."
+)
+
+// Stop the capture before trailing sentence punctuation so a URL ending a sentence (".", ")") keeps
+// a clean href. No `g` flag needed: split() finds all matches and interleaves the captured URLs.
+const DETAIL_URL_REGEX = /(https?:\/\/[^\s]*[^\s.,;:!?)\]}'"])/
 
 export function InsightEmptyState({
-    heading = 'There are no matching events for this query',
-    detail = 'Try changing the date range, or pick another action, event or breakdown.',
+    heading,
+    detail,
     icon: iconProp,
+    sampleDataVariant,
 }: {
     heading?: string
     detail?: string | JSX.Element
     icon?: JSX.Element
+    /**
+     * Shape of the pre-ingestion sample-data placeholder. When omitted, a line chart is shown unless
+     * custom heading/detail copy was provided; pass a variant to opt in even with custom copy, or
+     * `null` to opt this call site out entirely.
+     */
+    sampleDataVariant?: SampleDataVariant | null
 }): JSX.Element {
+    const { shouldShowSampleData } = useValues(sampleDataStateLogic)
+
+    // Before a project has ingested any events, "no matching events" is misleading — every chart is
+    // empty because nothing is flowing in yet. Show clearly-fake sample data instead, explaining on
+    // hover how to get real data. Call sites with purposeful custom copy keep their empty state
+    // unless they explicitly opted in with a variant.
+    const hasCustomCopy = heading !== undefined || detail !== undefined
+    if (shouldShowSampleData && sampleDataVariant !== null && (sampleDataVariant !== undefined || !hasCustomCopy)) {
+        return <SampleDataState variant={sampleDataVariant ?? 'line'} />
+    }
+
+    heading = heading ?? 'There are no matching events for this query'
+    detail = detail ?? 'Try changing the date range, or pick another action, event or breakdown.'
     const icon =
         iconProp ??
         (isChristmas() ? (
@@ -67,6 +113,43 @@ export function InsightEmptyState({
             {icon}
             <h2 className="text-xl leading-tight">{heading}</h2>
             <p className="text-sm text-tertiary">{detail}</p>
+        </div>
+    )
+}
+
+/** Shown when the chart area would otherwise be blank (e.g. cache miss + aborted refresh). */
+export function InsightRefreshDataHint({
+    onRetry,
+    insightProps,
+}: {
+    onRetry: () => void
+    insightProps?: InsightLogicProps
+}): JSX.Element {
+    // This dead-end state used to be invisible outside session replay — capture it so blank
+    // tiles are measurable and can be sliced by dashboard context and override presence.
+    useOnMountEffect(() => {
+        insights.capture('insight refresh hint shown', {
+            dashboard_id: insightProps?.dashboardId ?? null,
+            insight_short_id: typeof insightProps?.dashboardItemId === 'string' ? insightProps.dashboardItemId : null,
+            has_overrides: insightOverridesPresent(
+                insightProps?.filtersOverride,
+                insightProps?.variablesOverride,
+                insightProps?.tileFiltersOverride
+            ),
+        })
+    })
+
+    return (
+        <div
+            data-attr="insight-refresh-data-hint"
+            className="flex flex-col flex-1 rounded px-4 py-6 w-full items-center justify-center text-center text-balance gap-3"
+        >
+            <IconInfo className="text-5xl mb-2 text-tertiary" />
+            <h2 className="text-xl leading-tight">Chart data didn&apos;t load</h2>
+            <p className="text-sm text-tertiary max-w-md">Refresh to get the latest data.</p>
+            <Button type="primary" size="small" onClick={onRetry} icon={<IconRefresh />}>
+                Refresh
+            </Button>
         </div>
     )
 }
@@ -110,24 +193,23 @@ const RetryButton = ({
     onRetry: () => void
     query?: Record<string, any> | Node | null
 }): JSX.Element => {
-    let sideAction = {}
-    if (query) {
-        sideAction = {
-            dropdown: {
-                overlay: (
-                    <MenuOverlay
-                        items={[
-                            {
-                                label: 'Open in query debugger',
-                                to: urls.debugQuery(query),
-                            },
-                        ]}
-                    />
-                ),
-                placement: 'bottom-end',
-            },
-        }
-    }
+    const sideAction = query
+        ? {
+              dropdown: {
+                  overlay: (
+                      <MenuOverlay
+                          items={[
+                              {
+                                  label: 'Open in query debugger',
+                                  to: urls.debugQuery(query),
+                              },
+                          ]}
+                      />
+                  ),
+                  placement: 'bottom-end' as const,
+              },
+          }
+        : undefined
 
     return (
         <Button
@@ -363,7 +445,13 @@ export function SlowQuerySuggestions({
 }): JSX.Element | null {
     const { slowQueryPossibilities } = useValues(insightVizDataLogic(insightProps))
 
-    if (loadingTimeSeconds < SLOW_LOADING_TIME) {
+    // `loadingTimeSeconds` only advances on dataNodeLogic's wall-clock timer, which Storybook has no
+    // way to fast-forward, so a story covering these suggestions would have to sit through
+    // SLOW_LOADING_TIME of real loading before they render. Dropping the threshold in Storybook makes
+    // them a consequence of the insight loading instead of a race against the clock.
+    const slowLoadingTime = inStorybook() || inStorybookTestRunner() ? 0 : SLOW_LOADING_TIME
+
+    if (loadingTimeSeconds < slowLoadingTime) {
         return null
     }
 
@@ -408,10 +496,12 @@ export function InsightLoadingState({
     queryId,
     insightProps,
     renderEmptyStateAsSkeleton = false,
+    suppressSlowQuerySuggestions = false,
 }: {
     queryId?: string | null
     insightProps: InsightLogicProps
     renderEmptyStateAsSkeleton?: boolean
+    suppressSlowQuerySuggestions?: boolean
 }): JSX.Element {
     const { insightPollResponse, insightLoadingTimeSeconds } = useValues(insightDataLogic(insightProps))
     const { currentTeam } = useValues(teamLogic)
@@ -426,10 +516,12 @@ export function InsightLoadingState({
             loadingTimeSeconds={insightLoadingTimeSeconds}
             renderEmptyStateAsSkeleton={renderEmptyStateAsSkeleton}
             suggestion={
-                personsOnEventsMode === 'person_id_override_properties_joined' ? (
+                suppressSlowQuerySuggestions ? (
+                    <></>
+                ) : personsOnEventsMode === 'person_id_override_properties_joined' ? (
                     <div className="text-xs">
                         You can speed this query up by changing the{' '}
-                        <Link to="/settings/project#persons-on-events">user properties mode</Link> setting.
+                        <Link to="/settings/project#persons-on-events">person properties mode</Link> setting.
                     </div>
                 ) : (
                     <SlowQuerySuggestions insightProps={insightProps} loadingTimeSeconds={insightLoadingTimeSeconds} />
@@ -467,15 +559,55 @@ export function InsightTimeoutState({ queryId }: { queryId?: string | null }): J
     )
 }
 
+// Render embedded URLs (e.g. backend docs links) as clickable links. Only Insights-host URLs are
+// linkified — error detail can echo user-controlled text.
+export function renderDetailWithLinks(detail: string): (string | JSX.Element)[] {
+    // Splitting on a capturing group interleaves text and URL matches, so odd indexes are the URLs
+    return detail.split(DETAIL_URL_REGEX).map((part, index) =>
+        index % 2 === 1 && isTrustedInsightsUrl(part) ? (
+            <Link key={index} to={part} target="_blank">
+                {part}
+            </Link>
+        ) : (
+            part
+        )
+    )
+}
+
+/** Kind of the query that errored, unwrapping InsightVizNode/DataTableNode wrappers to the source query. */
+function queryKindForReporting(query: Record<string, any> | Node | null | undefined): string | null {
+    const record = query as Record<string, any> | null | undefined
+    return record?.source?.kind ?? record?.kind ?? null
+}
+
 export function InsightValidationError({
     detail,
+    validationErrorCode,
     query,
     onRetry,
+    cta,
 }: {
     detail: string
+    validationErrorCode?: string | null
     query?: Record<string, any> | null
     onRetry?: () => void
+    cta?: JSX.Element
 }): JSX.Element {
+    const { openSidePanel } = useActions(sidePanelStateLogic)
+    const debugWithAI = (): void => openSidePanel(SidePanelTab.Max, MEMORY_LIMIT_AI_PROMPT)
+    const isMemoryLimitError = validationErrorCode === DATASTORE_MEMORY_LIMIT_ERROR_CODE
+    const defaultCta =
+        cta ?? (onRetry ? <RetryButton onRetry={onRetry} query={query} /> : <QueryDebuggerButton query={query} />)
+
+    // Raw error detail can echo query fragments, so telemetry only gets the code and coarse metadata
+    useOnMountEffect(() => {
+        insights.capture('insight error message shown', {
+            error_type: 'validation',
+            code: validationErrorCode ?? null,
+            query_kind: queryKindForReporting(query),
+        })
+    })
+
     return (
         <div
             data-attr="insight-empty-state"
@@ -495,9 +627,28 @@ export function InsightValidationError({
                 {/* but rather that it's something with the definition of the query itself */}
             </h2>
 
-            <p className="text-sm text-muted max-w-120 mb-2">{detail}</p>
+            <p className="text-sm text-muted max-w-120 mb-2">{renderDetailWithLinks(detail)}</p>
 
-            {onRetry ? <RetryButton onRetry={onRetry} query={query} /> : <QueryDebuggerButton query={query} />}
+            {/* For memory-limit errors, lead with the AI debugger but keep the retry/debugger action
+                beside it so users who decline AI consent (or lack AI access) still have a next step.
+                onClick fires when consent was already given (popover hidden); onApprove fires after
+                the consent flow completes — same pattern as InsightAIAnalysis. */}
+            {isMemoryLimitError && !cta ? (
+                <div className="flex items-center gap-2">
+                    <AIConsentPopoverWrapper onApprove={debugWithAI}>
+                        <Button
+                            type="primary"
+                            onClick={debugWithAI}
+                            data-attr="insight-memory-limit-debug-with-ai"
+                        >
+                            Debug with Insights AI
+                        </Button>
+                    </AIConsentPopoverWrapper>
+                    {defaultCta}
+                </div>
+            ) : (
+                defaultCta
+            )}
 
             {detail.includes('Exclusion') && (
                 <div className="mt-4">
@@ -516,11 +667,12 @@ export function InsightValidationError({
 }
 
 export interface InsightErrorStateProps {
-    title?: string | null
+    title?: string | JSX.Element | null
     query?: Record<string, any> | Node | null
     queryId?: string | null
     excludeDetail?: boolean
     excludeActions?: boolean
+    supportOnly?: boolean
     fixWithAIComponent?: JSX.Element
     onRetry?: () => void
 }
@@ -531,22 +683,48 @@ export function InsightErrorState({
     queryId,
     excludeDetail = false,
     excludeActions = false,
+    supportOnly = false,
     fixWithAIComponent,
     onRetry,
 }: InsightErrorStateProps): JSX.Element {
     const { preflight } = useValues(preflightLogic)
     const { openSupportForm } = useActions(supportLogic)
 
+    // Raw error detail can echo query fragments, so telemetry only gets coarse metadata;
+    // query_id lets staff look the actual error up server-side
+    useOnMountEffect(() => {
+        insights.capture('insight error message shown', {
+            error_type: 'server',
+            query_kind: queryKindForReporting(query),
+            query_id: queryId ?? null,
+        })
+    })
+
     if (!preflight?.cloud) {
         excludeDetail = true // We don't provide support for self-hosted instances
     }
+
+    if (supportOnly) {
+        excludeActions = true
+    }
+
+    const bugReportLink = (
+        <Link
+            data-attr="insight-error-bug-report"
+            onClick={() => {
+                openSupportForm({ kind: 'bug', target_area: 'analytics' })
+            }}
+        >
+            If this persists, submit a bug report.
+        </Link>
+    )
 
     return (
         <div
             data-attr="insight-empty-state"
             className="flex flex-col items-center gap-2 justify-center rounded px-4 py-6 h-full w-full"
         >
-            <IconErrorOutline className="text-5xl shrink-0" />
+            <IconErrorOutline className="text-4xl shrink-0 text-danger" />
 
             <h2 className="text-xl text-danger leading-tight mb-6" data-attr="insight-loading-too-long">
                 {/* Note that this default phrasing signals the issue is intermittent, */}
@@ -554,26 +732,21 @@ export function InsightErrorState({
                 {title || <span>There was a problem completing this query</span>}
             </h2>
 
-            {!excludeDetail && (
+            {!excludeDetail && !supportOnly && (
                 <div className="mt-4">
                     We apologize for this unexpected situation. There are a couple of things you can do:
                     <ol>
                         <li>
                             First and foremost you can <b>try again</b>. We recommend you wait a moment before doing so.
                         </li>
-                        <li>
-                            <Link
-                                data-attr="insight-error-bug-report"
-                                onClick={() => {
-                                    openSupportForm({ kind: 'bug', target_area: 'analytics' })
-                                }}
-                            >
-                                If this persists, submit a bug report.
-                            </Link>
-                        </li>
+                        <li>{bugReportLink}</li>
                     </ol>
                 </div>
             )}
+
+            {/* Outside the excludeDetail gate: self-hosted sets excludeDetail=true, but
+                supportOnly still needs the bug-report path or it dead-ends. */}
+            {supportOnly && <div className="mt-4">{bugReportLink}</div>}
 
             {!excludeActions && (
                 <div className="flex gap-2 mt-4">
@@ -596,7 +769,12 @@ export function FunnelSingleStepState({ actionable = true }: FunnelSingleStepSta
     const filters = series ? seriesToActionsAndEvents(series) : {}
     const setFilters = (payload: Partial<FilterType>): void => {
         updateQuerySource({
-            series: actionsAndEventsToSeries(payload as any, true, MathAvailability.None),
+            series: actionsAndEventsToSeries(
+                payload as any,
+                true,
+                MathAvailability.None,
+                NodeKind.FunnelsDataWarehouseNode
+            ),
         } as Partial<FunnelsQuery>)
     }
 
@@ -647,9 +825,104 @@ export function FunnelSingleStepState({ actionable = true }: FunnelSingleStepSta
     )
 }
 
+export function FunnelDataWarehouseStepIncompleteState(): JSX.Element {
+    const { insightProps } = useValues(insightLogic)
+    const { series } = useValues(funnelDataLogic(insightProps))
+
+    const incompleteSteps = (series || [])
+        .map((step, index) => {
+            if (!isFunnelsDataWarehouseNode(step)) {
+                return null
+            }
+
+            const missingFields = [
+                !step.table_name ? 'Table' : null,
+                !step.id_field ? 'Unique ID' : null,
+                !step.timestamp_field ? 'Timestamp' : null,
+                !step.aggregation_target_field ? 'Aggregation target' : null,
+            ].filter((field): field is string => field !== null)
+
+            if (missingFields.length === 0) {
+                return null
+            }
+
+            const stepName = step.custom_name || step.name || step.table_name
+            const stepLabel = `Step ${index + 1}`
+
+            return {
+                index,
+                label: stepName ? `${stepLabel} — ` + stepName : stepLabel,
+                missingFields,
+            }
+        })
+        .filter((step): step is NonNullable<typeof step> => step !== null)
+
+    return (
+        <div
+            data-attr="insight-empty-state"
+            className="flex flex-col items-center justify-center gap-2 rounded px-4 py-6 h-full w-full text-center text-balance"
+        >
+            <IconFunnels className="text-4xl shrink-0 text-muted mb-2" />
+
+            <h2 className="text-xl leading-tight font-medium mb-0">
+                Complete your data warehouse step{incompleteSteps.length === 1 ? '' : 's'}!
+            </h2>
+            <p className="text-sm text-muted mb-1">
+                {incompleteSteps.length > 1
+                    ? 'These funnel steps are missing required fields:'
+                    : 'This funnel step is missing required fields:'}
+            </p>
+            {incompleteSteps.length > 0 && (
+                <ul className="text-sm text-muted mb-1 list-disc list-inside text-left">
+                    {incompleteSteps.map((step) => (
+                        <li key={step.index}>
+                            <span className="font-medium text-primary">{step.label}</span>:{' '}
+                            {step.missingFields.join(', ')}
+                        </li>
+                    ))}
+                </ul>
+            )}
+            <p className="text-sm text-muted mb-1">
+                Click on the step to open it and fill in the missing fields to run this funnel.
+            </p>
+            <div className="mt-3">
+                <Link
+                    data-attr="funnels-incomplete-warehouse-step-help"
+                    to="https://hanzo.ai/docs/data-warehouse/insights#funnel-insights"
+                    target="_blank"
+                    className="flex items-center justify-center"
+                    targetBlankIcon
+                >
+                    Learn more about data warehouse funnels in Insights docs
+                </Link>
+            </div>
+        </div>
+    )
+}
+
+export function BoxPlotMissingPropertyState(): JSX.Element {
+    return (
+        <div
+            data-attr="insight-empty-state"
+            className="flex flex-col items-center justify-center gap-2 rounded px-4 py-6 h-full w-full text-center text-balance"
+        >
+            <IconArchive className="text-4xl shrink-0 text-muted mb-2" />
+
+            <h2 className="text-xl leading-tight font-medium mb-0">Choose a numeric property</h2>
+            <p className="text-sm text-muted mb-1">
+                Select a numeric property to see a box plot of its values over time.
+            </p>
+        </div>
+    )
+}
+
 const SAVED_INSIGHTS_COPY = {
     [`${SavedInsightsTabs.All}`]: {
         title: 'There are no insights $CONDITION.',
+        description: 'Once you create an insight, it will show up here.',
+    },
+    [`${SavedInsightsTabs.Yours}`]: {
+        title: 'You have no insights $CONDITION.',
         description: 'Once you create an insight, it will show up here.',
     },
 }
@@ -674,7 +947,7 @@ export function SavedInsightsEmptyState({
             className="saved-insight-empty-state flex flex-col flex-1 items-center justify-center"
         >
             <div className="illustration-main w-40 m-auto">
-                <BuilderMascot3 className="w-full h-full" />
+                <MascotConstruction2 className="w-full h-full" />
             </div>
             <h2>
                 {usingFilters
@@ -719,6 +992,11 @@ export function SavedInsightsEmptyState({
                     </Link>
                 )}
             </div>
+            {!usingFilters && (
+                <div className="mt-4">
+                    <MCPUseCaseCard surfaceKey="insights.create" className="max-w-140" />
+                </div>
+            )}
         </div>
     )
 }

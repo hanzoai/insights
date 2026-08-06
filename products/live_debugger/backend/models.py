@@ -45,7 +45,7 @@ class BreakpointHit:
 
 class LiveDebuggerBreakpoint(UUIDModel):
     team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
-    repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "Hanzo Insights/insights")
+    repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "Insights/insights")
     filename = models.TextField()
     line_number = models.PositiveIntegerField()
     enabled = models.BooleanField(default=True)
@@ -66,13 +66,17 @@ class LiveDebuggerBreakpoint(UUIDModel):
             models.Index(fields=["team_id", "repository"], name="live_debug_team_repo_idx"),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         repo_str = f"{self.repository}/" if self.repository else ""
         return f"Breakpoint at {repo_str}{self.filename}:{self.line_number} for team {self.team.pk}"
 
     @classmethod
     def get_breakpoint_hits(
-        cls, team: "Team", breakpoint_ids: Optional[list] = None, limit: int = 100, offset: int = 0
+        cls,
+        team: "Team",
+        breakpoint_ids: Optional[list] = None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> list[BreakpointHit]:
         """
         Query Datastore for breakpoint hit events using InsightsQL.

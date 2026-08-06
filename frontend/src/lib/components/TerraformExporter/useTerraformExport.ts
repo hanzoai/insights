@@ -1,12 +1,13 @@
 import { useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { buildAlertFilterConfig } from 'lib/utils/alertUtils'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { AlertType } from '~/lib/components/Alerts/types'
 import { DashboardType, InsightsFunctionType, InsightModel, QueryBasedInsightModel } from '~/types'
+
+import { buildAlertFilterConfig } from 'products/alerts/frontend/logic/alertNotifications'
+import { AlertType } from 'products/alerts/frontend/types'
 
 import api from '../../api'
 import { DashboardExportResult, generateDashboardHCL } from './dashboardHclExporter'

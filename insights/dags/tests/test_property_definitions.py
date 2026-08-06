@@ -13,7 +13,8 @@ from insights.dags.property_definitions import (
     property_definitions_ingestion_job,
     setup_job,
 )
-from insights.models.property_definition import PropertyDefinition
+
+from products.event_definitions.backend.models.property_definition import PropertyDefinition
 
 
 @dataclass

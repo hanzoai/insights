@@ -4,12 +4,9 @@ import { IconCheck, IconX } from '@hanzo/icons'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { Resizer } from 'lib/components/Resizer/Resizer'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Button } from 'lib/elements/Button'
 import { CodeEditor, CodeEditorProps } from 'lib/monaco/CodeEditor'
-import MaxTool from 'scenes/max/MaxTool'
 
-import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
 import { InsightsQLQuery } from '~/queries/schema/schema-general'
 
 import { editorSizingLogic } from './editorSizingLogic'
@@ -23,18 +20,13 @@ interface QueryPaneProps {
     originalValue?: string
     onRun?: () => void
     editorVimModeEnabled?: boolean
+    constrainHeight?: boolean
 }
 
 export function QueryPane(props: QueryPaneProps): JSX.Element {
-    const { queryPaneHeight, queryPaneResizerProps } = useValues(editorSizingLogic)
-    const {
-        setSuggestedQueryInput,
-        onAcceptSuggestedQueryInput,
-        onRejectSuggestedQueryInput,
-        reportAIQueryPromptOpen,
-    } = useActions(sqlEditorLogic)
+    const { queryPaneHeight, queryPaneDesiredSize, queryPaneResizerProps } = useValues(editorSizingLogic)
+    const { onAcceptSuggestedQueryInput, onRejectSuggestedQueryInput } = useActions(sqlEditorLogic)
     const { acceptText, rejectText, diffShowRunButton } = useValues(sqlEditorLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
 
     return (
         <>
@@ -43,6 +35,7 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                 // eslint-disable-next-line react/forbid-dom-props
                 style={{
                     height: `${queryPaneHeight}px`,
+                    maxHeight: props.constrainHeight !== false && queryPaneDesiredSize === null ? '35%' : undefined,
                 }}
                 ref={queryPaneResizerProps.containerRef}
             >
@@ -52,15 +45,15 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                             renderProp={({ height, width }) =>
                                 height && width ? (
                                     <CodeEditor
-                                        language="insightsQL"
+                                        language="hogQL"
                                         value={props.queryInput}
                                         sourceQuery={props.sourceQuery}
                                         height={height}
                                         width={width}
                                         originalValue={props.originalValue}
                                         enableVimMode={props.editorVimModeEnabled}
-                                        {...props.codeEditorProps}
                                         autoFocus={true}
+                                        {...props.codeEditorProps}
                                         options={{
                                             minimap: {
                                                 enabled: false,
@@ -69,6 +62,7 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                                             scrollBeyondLastLine: !!props.originalValue,
                                             automaticLayout: true,
                                             fixedOverflowWidgets: true,
+                                            glyphMargin: true,
                                             suggest: {
                                                 showInlineDetails: true,
                                             },
@@ -79,33 +73,6 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                             }
                         />
                     </div>
-                    {!isRemovingSidePanelFlag && (
-                        <div className={`absolute right-4 ${props.editorVimModeEnabled ? 'bottom-12' : 'bottom-6'}`}>
-                            <MaxTool
-                                identifier="execute_sql"
-                                context={{
-                                    current_query: props.queryInput,
-                                }}
-                                contextDescription={{
-                                    text: 'Current query',
-                                    icon: iconForType('sql_editor'),
-                                }}
-                                callback={(toolOutput: string) => {
-                                    setSuggestedQueryInput(toolOutput, 'max_ai')
-                                }}
-                                suggestions={[]}
-                                onMaxOpen={() => {
-                                    reportAIQueryPromptOpen()
-                                }}
-                                introOverride={{
-                                    headline: 'What data do you want to analyze?',
-                                    description: 'Let me help you quickly write SQL, and tweak it.',
-                                }}
-                            >
-                                <div className="relative" />
-                            </MaxTool>
-                        </div>
-                    )}
                     {props.originalValue && (
                         <div
                             className="absolute flex gap-1 bg-bg-light rounded border py-1 px-1.5 z-10 left-1/2 -translate-x-1/2 bottom-4 whitespace-nowrap"

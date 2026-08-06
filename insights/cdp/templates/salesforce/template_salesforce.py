@@ -30,7 +30,7 @@ template_create: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Create objects in Salesforce",
     icon_url="/static/services/salesforce.png",
     category=["CRM", "Customer Success"],
-    code_language="fn",
+    code_language="script",
     code="""
 let getPayload := () -> {
   let properties := {}
@@ -121,7 +121,7 @@ template_update: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Update objects in Salesforce",
     icon_url="/static/services/salesforce.png",
     category=["CRM", "Customer Success"],
-    code_language="fn",
+    code_language="script",
     code="""
 let getPayload := () -> {
   let properties := {}
@@ -203,7 +203,7 @@ if (res.status >= 400) {
 
 
 class TemplatSalesforceMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-plugin-replicator"
+    plugin_url = "https://github.com/Insights/insights-plugin-replicator"
 
     @classmethod
     def migrate(cls, obj):

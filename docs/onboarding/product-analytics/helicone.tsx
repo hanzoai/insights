@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -40,7 +40,7 @@ export const getHeliconeSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                                     base_url="https://oai.hconeai.com/v1",  # Set the API endpoint
                                     default_headers={
                                         "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-                                        "Helicone-Insights-Key": "<ph_project_api_key>",
+                                        "Helicone-Insights-Key": "<ph_project_token>",
                                         "Helicone-Insights-Host": "<ph_client_api_host>",
                                     }
                                 )

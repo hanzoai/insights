@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
-import { SurveyQuestionType } from '@hanzo/insights'
+import { SurveyQuestionType } from 'insights-js'
 
 import { Button, Divider, Modal } from '@hanzo/elements'
 

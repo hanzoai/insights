@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
-import { KeyboardEvent, useEffect, useState } from 'react'
+import insights from 'insights-js'
+import { KeyboardEvent, useEffect, useRef, useState } from 'react'
 
 import { Input, Tag, Tooltip } from '@hanzo/elements'
 
@@ -14,7 +14,7 @@ import { notebookNodeLogic } from '../notebookNodeLogic'
 const getNodeIndex = ({
     isPythonNode,
     isDuckSqlNode,
-    isInsightsqlSqlNode,
+    isHogqlSqlNode,
     isSqlNode,
     nodeId,
     pythonNodeIndices,
@@ -24,7 +24,7 @@ const getNodeIndex = ({
 }: {
     isPythonNode: boolean
     isDuckSqlNode: boolean
-    isInsightsqlSqlNode: boolean
+    isHogqlSqlNode: boolean
     isSqlNode: boolean
     nodeId: string
     pythonNodeIndices: Map<string, number>
@@ -38,7 +38,7 @@ const getNodeIndex = ({
     if (isDuckSqlNode) {
         return duckSqlNodeIndices.get(nodeId)
     }
-    if (isInsightsqlSqlNode) {
+    if (isHogqlSqlNode) {
         return insightsqlSqlNodeIndices.get(nodeId)
     }
     if (isSqlNode) {
@@ -70,10 +70,11 @@ export function NotebookNodeTitle(): JSX.Element {
     const { nodeAttributes, title, titlePlaceholder, isEditingTitle, nodeType } = useValues(notebookNodeLogic)
     const { updateAttributes, toggleEditingTitle } = useActions(notebookNodeLogic)
     const [newValue, setNewValue] = useState('')
+    const initialValueRef = useRef('')
 
     const isPythonNode = nodeType === NotebookNodeType.Python
     const isDuckSqlNode = nodeType === NotebookNodeType.DuckSQL
-    const isInsightsqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
+    const isHogqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
     const isSqlNode =
         nodeType === NotebookNodeType.Query &&
         (isInsightsQLQuery(nodeAttributes.query) ||
@@ -82,7 +83,7 @@ export function NotebookNodeTitle(): JSX.Element {
     const nodeIndex = getNodeIndex({
         isPythonNode,
         isDuckSqlNode,
-        isInsightsqlSqlNode,
+        isHogqlSqlNode,
         isSqlNode,
         nodeId: nodeAttributes.nodeId,
         pythonNodeIndices,
@@ -95,18 +96,16 @@ export function NotebookNodeTitle(): JSX.Element {
     const cellTitle = cellLabel ? (customTitle ? `${cellLabel} • ${customTitle}` : cellLabel) : title
 
     useEffect(() => {
-        setNewValue(nodeAttributes.title ?? '')
+        const prefill = cellLabel ? (nodeAttributes.title ?? '') : nodeAttributes.title || title || ''
+        setNewValue(prefill)
+        initialValueRef.current = prefill
     }, [isEditingTitle]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     const commitEdit = (): void => {
-        updateAttributes({
-            title: newValue ?? undefined,
-        })
-
-        if (title != newValue) {
+        if (newValue !== initialValueRef.current) {
+            updateAttributes({ title: newValue || undefined })
             insights.capture('notebook node title updated')
         }
-
         toggleEditingTitle(false)
     }
 

@@ -2,6 +2,7 @@ import re
 import logging
 from functools import wraps
 from time import perf_counter
+from typing import cast
 
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
@@ -55,7 +56,7 @@ def trace_datastore_query_decorator(func):
             span.set_attribute("db.system", "datastore")
             span.set_attribute("db.name", DATASTORE_DATABASE)
             span.set_attribute("db.user", ch_user.value)
-            span.set_attribute("db.statement", query)
+            span.set_attribute("db.statement", query if isinstance(query, str) else repr(query))
             span.set_attribute("net.peer.name", DATASTORE_HOST)
             span.set_attribute("net.peer.port", 9000)  # Default Datastore port
             span.set_attribute("span.kind", "client")
@@ -68,7 +69,7 @@ def trace_datastore_query_decorator(func):
             if args_param:
                 if isinstance(args_param, dict):
                     span.set_attribute("datastore.args_count", len(args_param))
-                    span.set_attribute("datastore.args_keys", list(args_param.keys()))
+                    span.set_attribute("datastore.args_keys", cast(list[str], list(args_param.keys())))
                 elif isinstance(args_param, list | tuple):
                     span.set_attribute("datastore.args_count", len(args_param))
 

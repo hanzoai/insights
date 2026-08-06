@@ -5,11 +5,11 @@ import { IconCollapse, IconExpand, IconPlus } from '@hanzo/icons'
 import { Menu, Switch } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
+import { IconFeedback } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
 import { Link } from 'lib/elements/Link'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconFeedback } from 'lib/elements/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -209,7 +209,7 @@ export function SessionAttributionExplorer(): JSX.Element {
                         <p>
                             If you believe that a session is attributed incorrectly, please let us know! If you'd like
                             to customize your Channel attribution, please leave feedback on the{' '}
-                            <Link to="https://github.com/hanzoai/insights/issues/21195">feature request</Link>.
+                            <Link to="https://github.com/Insights/insights/issues/21195">feature request</Link>.
                         </p>
                     </div>
                     {showSupportOptions ? (

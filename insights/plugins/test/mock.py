@@ -48,7 +48,7 @@ def mocked_plugin_requests_get(*args, **kwargs):
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/Hanzo Insights/insights/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Insights/insights/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
@@ -59,7 +59,7 @@ def mocked_plugin_requests_get(*args, **kwargs):
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/Hanzo Insights/insights/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Insights/insights/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
@@ -70,7 +70,7 @@ def mocked_plugin_requests_get(*args, **kwargs):
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/Hanzo Insights/insights/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Insights/insights/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
@@ -81,7 +81,7 @@ def mocked_plugin_requests_get(*args, **kwargs):
             [
                 {
                     "sha": HELLO_WORLD_PLUGIN_GITHUB_ZIP[0],
-                    "html_url": "https://www.github.com/Hanzo Insights/helloworldplugin/commit/{}".format(
+                    "html_url": "https://www.github.com/Insights/helloworldplugin/commit/{}".format(
                         HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]
                     ),
                 }
@@ -120,23 +120,23 @@ def mocked_plugin_requests_get(*args, **kwargs):
     if args[0] == "https://registry.npmjs.org/insights-helloworld-plugin/latest":
         return MockJSONResponse({"pkg": "insights-helloworld-plugin", "version": "MOCK"}, 200)
 
-    if args[0] == "https://registry.npmjs.org/@insights/helloworldplugin/latest":
-        return MockJSONResponse({"pkg": "@insights/helloworldplugin", "version": "MOCK"}, 200)
+    if args[0] == "https://registry.npmjs.org/@hanzo/helloworldplugin/latest":
+        return MockJSONResponse({"pkg": "@hanzo/helloworldplugin", "version": "MOCK"}, 200)
 
-    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]):
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1], 200)
 
-    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[1], 200)
 
-    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_SECRET_GITHUB_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_SECRET_GITHUB_ZIP[1], 200)
 
-    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_GITHUB_SUBDIR_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_SUBDIR_ZIP[1], 200)
@@ -172,19 +172,19 @@ def mocked_plugin_requests_get(*args, **kwargs):
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITLAB_ZIP[1], 200)
 
-    if args[0] == "https://registry.npmjs.org/@insights/helloworldplugin/-/helloworldplugin-0.0.0.tgz":
+    if args[0] == "https://registry.npmjs.org/@hanzo/helloworldplugin/-/helloworldplugin-0.0.0.tgz":
         return MockBase64Response(HELLO_WORLD_PLUGIN_NPM_TGZ[1], 200)
 
     if args[0] == "https://registry.npmjs.org/insights-helloworld-plugin/-/insights-helloworld-plugin-0.0.0.tgz":
         return MockBase64Response(HELLO_WORLD_PLUGIN_NPM_TGZ[1], 200)
 
-    if args[0] == "https://raw.githubusercontent.com/Hanzo Insights/integrations-repository/main/plugins.json":
+    if args[0] == "https://raw.githubusercontent.com/Insights/integrations-repository/main/plugins.json":
         return MockTextResponse(
             json.dumps(
                 [
                     {
                         "name": "insights-currency-normalization-plugin",
-                        "url": "https://github.com/hanzoai/insights-currency-normalization-plugin",
+                        "url": "https://github.com/insights/insights-currency-normalization-plugin",
                         "description": "Normalise monerary values into a base currency",
                         "icon": "https://raw.githubusercontent.com/insights/insights-currency-normalization-plugin/main/logo.png",
                         "verified": False,

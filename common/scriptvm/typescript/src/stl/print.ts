@@ -1,4 +1,4 @@
-import { isIQLAST, isIQLCallable, isIQLClosure, isIQLDate, isIQLDateTime, isIQLError } from '../objects'
+import { isHogAST, isHogCallable, isHogClosure, isHogDate, isHogDateTime, isHogError } from '../objects'
 import { convertJSToHog } from '../utils'
 
 const escapeCharsMap: Record<string, string> = {
@@ -17,9 +17,10 @@ const singlequoteEscapeCharsMap: Record<string, string> = {
     "'": "\\'",
 }
 
+// The InsightsQL/Script parsers only accept a doubled backtick inside a quoted identifier, not a backslash-escaped one.
 const backquoteEscapeCharsMap: Record<string, string> = {
     ...escapeCharsMap,
-    '`': '\\`',
+    '`': '``',
 }
 
 export function escapeString(value: string): string {
@@ -42,61 +43,61 @@ export function escapeIdentifier(identifier: string | number): string {
         .join('')}\``
 }
 
-export function printIQLValue(obj: any, marked: Set<any> | undefined = undefined): string {
+export function printHogValue(obj: any, marked: Set<any> | undefined = undefined): string {
     if (!marked) {
         marked = new Set()
     }
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
         if (
             marked.has(obj) &&
-            !isIQLDateTime(obj) &&
-            !isIQLDate(obj) &&
-            !isIQLError(obj) &&
-            !isIQLClosure(obj) &&
-            !isIQLCallable(obj) &&
-            !isIQLAST(obj)
+            !isHogDateTime(obj) &&
+            !isHogDate(obj) &&
+            !isHogError(obj) &&
+            !isHogClosure(obj) &&
+            !isHogCallable(obj) &&
+            !isHogAST(obj)
         ) {
             return 'null'
         }
         marked.add(obj)
         try {
             if (Array.isArray(obj)) {
-                if ((obj as any).__isIQLTuple) {
+                if ((obj as any).__isHogTuple) {
                     if (obj.length < 2) {
-                        return `tuple(${obj.map((o) => printIQLValue(o, marked)).join(', ')})`
+                        return `tuple(${obj.map((o) => printHogValue(o, marked)).join(', ')})`
                     }
-                    return `(${obj.map((o) => printIQLValue(o, marked)).join(', ')})`
+                    return `(${obj.map((o) => printHogValue(o, marked)).join(', ')})`
                 }
-                return `[${obj.map((o) => printIQLValue(o, marked)).join(', ')}]`
+                return `[${obj.map((o) => printHogValue(o, marked)).join(', ')}]`
             }
-            if (isIQLDateTime(obj)) {
+            if (isHogDateTime(obj)) {
                 const millis = String(obj.dt)
                 return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${escapeString(obj.zone)})`
             }
-            if (isIQLDate(obj)) {
+            if (isHogDate(obj)) {
                 return `Date(${obj.year}, ${obj.month}, ${obj.day})`
             }
-            if (isIQLError(obj)) {
+            if (isHogError(obj)) {
                 return `${String(obj.type)}(${escapeString(obj.message)}${
-                    obj.payload ? `, ${printIQLValue(obj.payload, marked)}` : ''
+                    obj.payload ? `, ${printHogValue(obj.payload, marked)}` : ''
                 })`
             }
-            if (isIQLClosure(obj)) {
-                return printIQLValue(obj.callable, marked)
+            if (isHogClosure(obj)) {
+                return printHogValue(obj.callable, marked)
             }
-            if (isIQLCallable(obj)) {
-                return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printIQLValue(obj.argCount)})>`
+            if (isHogCallable(obj)) {
+                return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printHogValue(obj.argCount)})>`
             }
-            if (isIQLAST(obj)) {
+            if (isHogAST(obj)) {
                 return `sql(${new InsightsQLPrinter(false, marked).print(obj)})`
             }
             if (obj instanceof Map) {
                 return `{${Array.from(obj.entries())
-                    .map(([key, value]) => `${printIQLValue(key, marked)}: ${printIQLValue(value, marked)}`)
+                    .map(([key, value]) => `${printHogValue(key, marked)}: ${printHogValue(value, marked)}`)
                     .join(', ')}}`
             }
             return `{${Object.entries(obj)
-                .map(([key, value]) => `${printIQLValue(key, marked)}: ${printIQLValue(value, marked)}`)
+                .map(([key, value]) => `${printHogValue(key, marked)}: ${printHogValue(value, marked)}`)
                 .join(', ')}}`
         } finally {
             marked.delete(obj)
@@ -111,11 +112,11 @@ export function printIQLValue(obj: any, marked: Set<any> | undefined = undefined
     return obj.toString()
 }
 
-export function printIQLStringOutput(obj: any): string {
+export function printHogStringOutput(obj: any): string {
     if (typeof obj === 'string') {
         return obj
     }
-    return printIQLValue(obj)
+    return printHogValue(obj)
 }
 
 type ASTNode = Map<string, any> | null
@@ -147,7 +148,7 @@ export class InsightsQLPrinter {
             return ''
         }
         if (!(node instanceof Map)) {
-            if (isIQLAST(node)) {
+            if (isHogAST(node)) {
                 node = convertJSToHog(node)
             } else {
                 return this.escapeValue(node)
@@ -751,6 +752,6 @@ export class InsightsQLPrinter {
     }
 
     private escapeValue(value: any): string {
-        return printIQLValue(value, this.marked)
+        return printHogValue(value, this.marked)
     }
 }

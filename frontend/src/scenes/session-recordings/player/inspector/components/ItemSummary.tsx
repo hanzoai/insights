@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { IconCursor, IconKeyboard, IconWarning } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
 
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 
 import { InspectorListItemSummary } from '../playerInspectorLogic'
 
@@ -27,9 +27,7 @@ export function ItemSummary({ item }: { item: InspectorListItemSummary }): JSX.E
                     (item.errorCount || 0) > 0 ? 'text-danger' : 'text-success'
                 )}
             >
-                <Tooltip
-                    title={`A count of $exception events in this recording. Captured by Insights's error tracking.`}
-                >
+                <Tooltip title="A count of $exception events in this recording. Captured by Insights's error tracking.">
                     <IconWarning className="mr-1" />
                     <span>{pluralize(item.errorCount || 0, 'error')}</span>
                 </Tooltip>

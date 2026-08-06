@@ -22,7 +22,7 @@ export function InsightsSDKIssueBanner({ event }: InsightsSDKIssueBannerProps): 
     return (
         <Banner
             type="error"
-            action={{ to: 'https://statinsights.hanzo.ai/incidents/l70cgmt7475m', children: 'Read more' }}
+            action={{ to: 'https://status.hanzo.ai/incidents/l70cgmt7475m', children: 'Read more' }}
             className="mb-4"
         >
             This issue was captured because of a bug in the Insights SDK. We've fixed the issue, and you won't be charged

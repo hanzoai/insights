@@ -9,13 +9,16 @@ import { Field } from 'lib/elements/Field'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { signupLogic } from '../signupLogic'
+import { TurnstileChallenge } from '../TurnstileChallenge'
 
 const UTM_TAGS = 'utm_campaign=in-product&utm_tag=signup-header'
 
 export function SignupPanelOnboarding(): JSX.Element | null {
     const { preflight } = useValues(preflightLogic)
     const { setSignupPanelOnboardingManualErrors } = useActions(signupLogic)
-    const { isSignupPanelOnboardingSubmitting } = useValues(signupLogic)
+    const { isSignupPanelOnboardingSubmitting, challengeRequired, turnstileSiteKey, turnstileToken, signupPanelEmail } =
+        useValues(signupLogic)
+    const { setTurnstileToken } = useActions(signupLogic)
 
     return (
         <div className="deprecated-space-y-4 Signup__panel__onboarding">
@@ -28,6 +31,7 @@ export function SignupPanelOnboarding(): JSX.Element | null {
                 <Field name="name" label="Your name">
                     <Input
                         className="ph-ignore-input"
+                        autoFocus
                         data-attr="signup-name"
                         placeholder="Jane Doe"
                         disabled={isSignupPanelOnboardingSubmitting}
@@ -37,7 +41,7 @@ export function SignupPanelOnboarding(): JSX.Element | null {
                     <Input
                         className="ph-ignore-input"
                         data-attr="signup-organization-name"
-                        placeholder="Acme Inc"
+                        placeholder="Hogflix Movies"
                         disabled={isSignupPanelOnboardingSubmitting}
                     />
                 </Field>
@@ -45,24 +49,33 @@ export function SignupPanelOnboarding(): JSX.Element | null {
                 <SignupReferralSource disabled={isSignupPanelOnboardingSubmitting} />
                 <div className="divider" />
 
-                <Button
-                    fullWidth
-                    type="primary"
-                    center
-                    htmlType="submit"
-                    data-attr="signup-submit"
-                    onClick={() => setSignupPanelOnboardingManualErrors({})}
-                    loading={isSignupPanelOnboardingSubmitting}
-                    disabled={isSignupPanelOnboardingSubmitting}
-                    status="alt"
-                    size="large"
-                >
-                    {!preflight?.demo
-                        ? 'Create account'
-                        : !isSignupPanelOnboardingSubmitting
-                          ? 'Enter the demo environment'
-                          : 'Preparing demo data…'}
-                </Button>
+                {challengeRequired && turnstileSiteKey ? (
+                    <TurnstileChallenge
+                        siteKey={turnstileSiteKey}
+                        onSuccess={setTurnstileToken}
+                        tokenReceived={!!turnstileToken}
+                        email={signupPanelEmail.email}
+                    />
+                ) : (
+                    <Button
+                        fullWidth
+                        type="primary"
+                        center
+                        htmlType="submit"
+                        data-attr="signup-submit"
+                        onClick={() => setSignupPanelOnboardingManualErrors({})}
+                        loading={isSignupPanelOnboardingSubmitting}
+                        disabled={isSignupPanelOnboardingSubmitting}
+                        status="alt"
+                        size="large"
+                    >
+                        {!preflight?.demo
+                            ? 'Create account'
+                            : !isSignupPanelOnboardingSubmitting
+                              ? 'Enter the demo environment'
+                              : 'Preparing demo data…'}
+                    </Button>
+                )}
             </Form>
 
             <div className="text-center text-secondary">

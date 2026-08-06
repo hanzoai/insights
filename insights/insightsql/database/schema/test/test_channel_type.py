@@ -3,13 +3,15 @@ from urllib.parse import parse_qs, urlparse
 
 from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
+from parameterized import parameterized
+
 from insights.schema import CustomChannelCondition, CustomChannelRule, FilterLogicalOperator, InsightsQLQueryModifiers
 
 from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.models.utils import uuid7
+from insights.uuidt import uuid7
 
 
 class TestReferringDomainType(DatastoreTestMixin, APIBaseTest):
@@ -105,6 +107,26 @@ class TestChannelType(DatastoreTestMixin, APIBaseTest):
         )
         return (person_response.results or [])[0][0]
 
+    def _get_person_initial_channel_type_with_rules(self, properties=None, custom_channel_rules=None):
+        person_id = str(uuid.uuid4())
+
+        _create_person(
+            uuid=person_id,
+            team_id=self.team.pk,
+            distinct_ids=[person_id],
+            properties=properties,
+        )
+
+        person_response = execute_insightsql_query(
+            parse_select(
+                "select $virt_initial_channel_type as channel_type from persons where id = {person_id}",
+                placeholders={"person_id": ast.Constant(value=person_id)},
+            ),
+            self.team,
+            modifiers=InsightsQLQueryModifiers(customChannelTypeRules=custom_channel_rules),
+        )
+        return (person_response.results or [])[0][0]
+
     def _get_session_channel_type(self, properties=None, custom_channel_rules=None):
         person_id = str(uuid.uuid4())
         properties = {
@@ -126,6 +148,17 @@ class TestChannelType(DatastoreTestMixin, APIBaseTest):
             modifiers=InsightsQLQueryModifiers(customChannelTypeRules=custom_channel_rules),
         )
         return (session_response.results or [])[0][0]
+
+    def test_nested_expanded_function_is_rejected(self):
+        # Nesting a printer-expanded marker (only reachable from user-written InsightsQL) would expand
+        # exponentially; the printer must reject it rather than blow up.
+        inner = "_defaultChannelType('a', 'b', 'c', 'd', 'e', 'f', 'g')"
+        with self.assertRaises(Exception) as ctx:
+            execute_insightsql_query(
+                parse_select(f"select _defaultChannelType({inner}, 'b', 'c', 'd', 'e', 'f', 'g') from events"),
+                self.team,
+            )
+        assert "cannot be nested" in str(ctx.exception)
 
     def test_direct(self):
         self.assertEqual(
@@ -264,6 +297,20 @@ class TestChannelType(DatastoreTestMixin, APIBaseTest):
                 }
             ),
         )
+
+    @parameterized.expand(
+        [
+            (
+                "utm_source_chatgpt_with_stripped_referrer",
+                {"$initial_referring_domain": "$direct", "$initial_utm_source": "chatgpt"},
+            ),
+            ("referring_domain_chatgpt", {"$initial_referring_domain": "chatgpt.com"}),
+            ("referring_domain_claude", {"$initial_referring_domain": "claude.ai"}),
+            ("referring_domain_perplexity", {"$initial_referring_domain": "perplexity.ai"}),
+        ]
+    )
+    def test_ai(self, _name, properties):
+        self.assertEqual("AI", self._get_person_initial_channel_type(properties))
 
     def test_direct_with_red_herring_utm_tags_is_direct(self):
         self.assertEqual(
@@ -862,4 +909,20 @@ class TestChannelType(DatastoreTestMixin, APIBaseTest):
                 }
             )
             == "Email"
+        )
+
+    def test_initial_channel_type_custom_url_rule_matches_initial_current_url(self):
+        assert (
+            self._get_person_initial_channel_type_with_rules(
+                {"$initial_current_url": "https://example.com/login"},
+                custom_channel_rules=[
+                    CustomChannelRule(
+                        items=[CustomChannelCondition(key="url", op="icontains", value="/login", id="1")],
+                        channel_type="Login",
+                        combiner=FilterLogicalOperator.AND_,
+                        id="a",
+                    )
+                ],
+            )
+            == "Login"
         )

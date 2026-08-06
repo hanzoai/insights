@@ -1,3 +1,3 @@
 locals {
-  insights_host = "https://us.insights.com"
+  insights_host = "https://us.hanzo.ai"
 }

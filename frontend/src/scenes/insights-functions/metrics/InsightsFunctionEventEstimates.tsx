@@ -5,7 +5,7 @@ import { Label, Select, SpinnerOverlay } from '@hanzo/elements'
 import { Sparkline } from 'lib/components/Sparkline'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
-import { base64Encode } from 'lib/utils'
+import { base64Encode } from 'lib/utils/base64'
 import { urls } from 'scenes/urls'
 
 import { Query } from '~/queries/Query/Query'

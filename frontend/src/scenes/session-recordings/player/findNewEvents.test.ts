@@ -1,5 +1,5 @@
-import { EventType } from '@hanzo/rrweb-types'
-import type { eventWithTime } from '@hanzo/rrweb-types'
+import { EventType } from 'insights-js/rrweb-types'
+import type { eventWithTime } from 'insights-js/rrweb-types'
 
 import { findNewEvents } from './sessionRecordingPlayerLogic'
 

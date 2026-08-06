@@ -4,9 +4,10 @@ from typing import Any
 from insights.insightsql.insightsql import InsightsQLContext
 
 from insights.constants import TREND_FILTER_TYPE_ACTIONS
-from insights.models.action.util import format_action_filter, format_action_filter_event_only
 from insights.models.entity import Entity
 from insights.queries.util import PersonPropertiesMode
+
+from products.actions.backend.models.util import format_action_filter, format_action_filter_event_only
 
 
 def get_entity_filtering_params(

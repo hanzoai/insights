@@ -1,15 +1,8 @@
 import '@testing-library/jest-dom'
+
 import { render } from '@testing-library/react'
 
 import { FeatureFlagFiltersSection } from './FeatureFlagFilters'
-
-jest.mock('lib/logic/featureFlagLogic', () => ({
-    featureFlagLogic: {
-        values: {
-            featureFlags: {},
-        },
-    },
-}))
 
 const mockFilters = {
     search: '',
@@ -161,6 +154,7 @@ describe('FeatureFlagFiltersSection', () => {
         expect(container.querySelector('[data-attr="feature-flag-select-type"]')).toBeInTheDocument()
         expect(container.querySelector('[data-attr="feature-flag-select-status"]')).toBeInTheDocument()
         expect(container.querySelector('[data-attr="feature-flag-select-created-by"]')).toBeInTheDocument()
+        expect(container.querySelector('[data-attr="feature-flag-select-runtime"]')).toBeInTheDocument()
     })
 
     it('ignores false values in config', () => {

@@ -88,7 +88,7 @@ CREATE TABLE insights_featureflaghashkeyoverride (
 
 ```python
 # You must manually include $anon_distinct_id
-requests.post('https://insights.hanzo.ai/flags/', json={
+requests.post('https://app.hanzo.ai/flags/', json={
     'token': 'phc_abc123',
     'distinct_id': 'user_456',
     '$anon_distinct_id': 'anon_abc123',  # Top-level, NOT in person_properties

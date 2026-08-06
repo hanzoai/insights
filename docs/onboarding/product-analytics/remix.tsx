@@ -1,6 +1,7 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
+import { SDK_DEFAULTS_DATE } from './_snippets/sdkDefaults'
 
 export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, CalloutBox, dedent, snippets } = ctx
@@ -54,7 +55,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Add `insights-js` and `insights-js/react` to `ssr.noExternal` in your `vite.config.ts` so they get
+                        Add `insights-js` and `@hanzo/react` to `ssr.noExternal` in your `vite.config.ts` so they get
                         bundled for SSR:
                     </Markdown>
                     <CodeBlock
@@ -79,7 +80,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                         tsconfigPaths(),
                                       ],
                                       ssr: {
-                                        noExternal: ["insights-js", "insights-js/react"],
+                                        noExternal: ["insights-js", "@hanzo/react"],
                                       },
                                     });
                                 `,
@@ -106,15 +107,15 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 code: dedent`
                                     import { useEffect, useState } from "react";
                                     import insights from "insights-js";
-                                    import { InsightsProvider } from "insights-js/react";
+                                    import { InsightsProvider } from "@hanzo/react";
 
                                     export function PHProvider({ children }: { children: React.ReactNode }) {
                                       const [hydrated, setHydrated] = useState(false);
 
                                       useEffect(() => {
-                                        insights.init("<ph_project_api_key>", {
+                                        insights.init("<ph_project_token>", {
                                           api_host: "<ph_client_api_host>",
-                                          defaults: "2026-01-30"
+                                          defaults: "${SDK_DEFAULTS_DATE}"
                                         });
 
                                         setHydrated(true);

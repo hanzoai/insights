@@ -1,12 +1,14 @@
+from collections.abc import Sequence
 from datetime import datetime
 
-from insights.schema import DateRange, RecordingsQuery
+from insights.schema import DateRange, FilterLogicalOperator, PropertyGroupFilterValue, RecordingsQuery
 
 from insights.insightsql import ast
 
 from insights.constants import PropertyOperatorType
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 from insights.models import Team
+from insights.types import AnyPropertyFilter
 from insights.utils import relative_date_parse
 
 
@@ -69,6 +71,13 @@ class SessionRecordingsListingBaseQuery:
 
     def wrapped_with_query_operand(self, exprs: list[ast.Expr]) -> ast.Expr:
         return ast.And(exprs=exprs) if self.property_operand == "AND" else ast.Or(exprs=exprs)
+
+    def property_group_with_operand(self, values: Sequence[AnyPropertyFilter]) -> PropertyGroupFilterValue:
+        """Group property filters under the user's AND/OR operand for property_to_expr."""
+        return PropertyGroupFilterValue(
+            type=FilterLogicalOperator.AND_ if self.property_operand == "AND" else FilterLogicalOperator.OR_,
+            values=list(values),
+        )
 
     @property
     def query_date_range(self):

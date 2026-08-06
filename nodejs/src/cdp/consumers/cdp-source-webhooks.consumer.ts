@@ -1,18 +1,17 @@
-// @ts-nocheck
 import { DateTime } from 'luxon'
 
-import { ModifiedRequest } from '~/api/router'
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+import type { ModifiedRequest } from '~/common/api/router'
 import { instrumented } from '~/common/tracing/tracing-utils'
-import { InsightsFlow } from '~/schema/insightsflow'
+import { logger } from '~/common/utils/logger'
+import { PromiseScheduler } from '~/common/utils/promise-scheduler'
+import { UUID, UUIDT } from '~/common/utils/utils'
 
-import { HealthCheckResult, HealthCheckResultOk, Hub, PluginsServerConfig } from '../../types'
-import { logger } from '../../utils/logger'
-import { PromiseScheduler } from '../../utils/promise-scheduler'
-import { UUID, UUIDT } from '../../utils/utils'
-import { createInsightsFlowInvocation } from '../services/insightsflows/insightsflow-executor.service'
-import { actionIdForLogging } from '../services/insightsflows/insightsflow-utils'
-import { CyclotronJobQueue } from '../services/job-queue/job-queue'
-import { ScriptWatcherFunctionState, ScriptWatcherState } from '../services/monitoring/script-watcher.service'
+import { HealthCheckResult, HealthCheckResultOk, PluginsServerConfig } from '../../types'
+import { createInsightsFlowInvocation } from '../services/insightsflows/hogflow-executor.service'
+import { actionIdForLogging } from '../services/insightsflows/hogflow-utils'
+import { JobQueue } from '../services/job-queue/job-queue.interface'
+import { HogWatcherFunctionState, HogWatcherState } from '../services/monitoring/script-watcher.service'
 import {
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
@@ -24,7 +23,7 @@ import {
 } from '../types'
 import { logEntry } from '../utils'
 import { createInvocation, createInvocationResult } from '../utils/invocation-utils'
-import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
+import { CdpConsumerBase, CdpConsumerBaseDeps } from './cdp-base.consumer'
 
 const DISALLOWED_HEADERS = [
     'x-forwarded-for',
@@ -48,6 +47,7 @@ export type InsightsFunctionWebhookResult = {
     status: number
     body: Record<string, any> | string
     contentType?: string
+    isBase64Encoded?: boolean
 }
 
 export const getCustomHttpResponse = (
@@ -58,6 +58,14 @@ export const getCustomHttpResponse = (
         return {
             status: 'status' in httpResponse && typeof httpResponse.status === 'number' ? httpResponse.status : 500,
             body: 'body' in httpResponse ? httpResponse.body : '',
+            contentType:
+                'contentType' in httpResponse && typeof httpResponse.contentType === 'string'
+                    ? httpResponse.contentType
+                    : undefined,
+            isBase64Encoded:
+                'isBase64Encoded' in httpResponse && typeof httpResponse.isBase64Encoded === 'boolean'
+                    ? httpResponse.isBase64Encoded
+                    : undefined,
         }
     }
 
@@ -74,37 +82,35 @@ export class SourceWebhookError extends Error {
     }
 }
 
-/**
- * Hub type for CdpSourceWebhooksConsumer.
- * Extends CdpConsumerBaseHub with webhook-specific fields.
- */
-export type CdpSourceWebhooksConsumerHub = CdpConsumerBaseHub &
-    PluginsServerConfig & // For CyclotronJobQueue (to be narrowed later)
-    Pick<Hub, 'SITE_URL'>
-
-export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooksConsumerHub> {
+export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConfig> {
     protected name = 'CdpSourceWebhooksConsumer'
-    private cyclotronJobQueue: CyclotronJobQueue
+    private hogQueue: JobQueue
+    private hogflowQueue: JobQueue
     private promiseScheduler: PromiseScheduler
 
-    constructor(hub: CdpSourceWebhooksConsumerHub) {
-        super(hub)
+    constructor(
+        config: PluginsServerConfig,
+        deps: CdpConsumerBaseDeps,
+        jobQueues: { hogQueue: JobQueue; hogflowQueue: JobQueue }
+    ) {
+        super(config, deps)
         this.promiseScheduler = new PromiseScheduler()
-        this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'fn')
+        this.hogQueue = jobQueues.hogQueue
+        this.hogflowQueue = jobQueues.hogflowQueue
     }
 
-    public async getWebhook(webhookId: string): Promise<{ insightsFlow?: InsightsFlow; insightsFunction: InsightsFunctionType } | null> {
+    public async getWebhook(webhookId: string): Promise<{ hogFlow?: InsightsFlow; insightsFunction: InsightsFunctionType } | null> {
         if (!UUID.validateString(webhookId, false)) {
             return null
         }
 
-        // Check for custom functions
+        // Check for script functions
         const insightsFunction = await this.insightsFunctionManager.getInsightsFunction(webhookId)
-        if (insightsFunction?.type === 'source_webhook' && insightsFunction?.enabled) {
+        if (insightsFunction?.type === 'source_webhook' && insightsFunction.enabled && !insightsFunction.deleted) {
             return { insightsFunction }
         }
 
-        if (insightsFunction?.type === 'warehouse_source_webhook' && insightsFunction?.enabled) {
+        if (insightsFunction?.type === 'warehouse_source_webhook' && insightsFunction.enabled && !insightsFunction.deleted) {
             const templateId = insightsFunction.template_id ?? 'template-warehouse-source-default'
             const template = await this.insightsFunctionTemplateManager.getInsightsFunctionTemplate(templateId)
             if (template) {
@@ -113,19 +119,18 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
             }
         }
 
-        // Otherwise check for custom flows
-        const insightsFlow = await this.insightsFlowManager.getInsightsFlow(webhookId)
+        // Otherwise check for script flows
+        const hogFlow = await this.hogFlowManager.getInsightsFlow(webhookId)
         if (
-            insightsFlow &&
-            insightsFlow.status === 'active' &&
-            (insightsFlow.trigger?.type === 'webhook' ||
-                insightsFlow.trigger?.type === 'tracking_pixel' ||
-                insightsFlow.trigger?.type === 'manual' ||
-                insightsFlow.trigger?.type === 'schedule')
+            hogFlow &&
+            hogFlow.status === 'active' &&
+            (hogFlow.trigger?.type === 'webhook' ||
+                hogFlow.trigger?.type === 'tracking_pixel' ||
+                hogFlow.trigger?.type === 'manual')
         ) {
-            const insightsFunction = await this.insightsFlowFunctionsService.buildInsightsFunction(insightsFlow, insightsFlow.trigger)
+            const insightsFunction = await this.hogFlowFunctionsService.buildInsightsFunction(hogFlow, hogFlow.trigger)
 
-            return { insightsFlow, insightsFunction }
+            return { hogFlow, insightsFunction }
         }
 
         return null
@@ -139,7 +144,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
         const ips = ipValue?.split(',').map((ip) => ip.trim()) || []
         const ip = ips[0]
 
-        const projectUrl = `${this.hub.SITE_URL}/project/${insightsFunction.team_id}`
+        const projectUrl = `${this.config.SITE_URL}/project/${insightsFunction.team_id}`
         const headers: Record<string, string> = {}
 
         for (const [key, value] of Object.entries(req.headers)) {
@@ -157,7 +162,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
 
         return {
             source: {
-                name: insightsFunction.name ?? `Custom function: ${insightsFunction.id}`,
+                name: insightsFunction.name ?? `Script function: ${insightsFunction.id}`,
                 url: `${projectUrl}/functions/${insightsFunction.id}`,
             },
             project: {
@@ -188,52 +193,52 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
 
     private async executeInsightsFlow(
         req: ModifiedRequest,
-        insightsFlow: InsightsFlow,
+        hogFlow: InsightsFlow,
         insightsFunction: InsightsFunctionType
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
-        logger.info('Executing custom flow trigger', {
-            id: insightsFlow.id,
+        logger.info('Executing script flow trigger', {
+            id: hogFlow.id,
             template_id: insightsFunction.template_id,
-            team_id: insightsFlow.team_id,
+            team_id: hogFlow.team_id,
         })
         const invocationId = new UUIDT().toString()
-        const triggerActionId = insightsFlow.actions.find((action) => action.type === 'trigger')?.id ?? 'trigger_node'
+        const triggerActionId = hogFlow.actions.find((action) => action.type === 'trigger')?.id ?? 'trigger_node'
 
         const addLog = (level: LogEntryLevel, message: string) => {
             this.insightsFunctionMonitoringService.queueLogs(
                 [
                     {
-                        team_id: insightsFlow.team_id,
-                        log_source: 'insights_flow',
-                        log_source_id: insightsFlow.id,
+                        team_id: hogFlow.team_id,
+                        log_source: 'hog_flow',
+                        log_source_id: hogFlow.id,
                         instance_id: invocationId,
                         ...logEntry(level, `${actionIdForLogging({ id: triggerActionId })} ${message}`),
                     },
                 ],
-                'insights_flow'
+                'hog_flow'
             )
         }
 
         const addMetric = (metric: Pick<MinimalAppMetric, 'metric_kind' | 'metric_name' | 'count'>) => {
             this.insightsFunctionMonitoringService.queueAppMetric(
                 {
-                    team_id: insightsFlow.team_id,
-                    app_source_id: insightsFlow.id,
+                    team_id: hogFlow.team_id,
+                    app_source_id: hogFlow.id,
                     ...metric,
                 },
-                'insights_flow'
+                'hog_flow'
             )
         }
 
         try {
             const globals: InsightsFunctionInvocationGlobals = this.buildRequestGlobals(insightsFunction, req)
 
-            const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
+            const globalsWithInputs = await this.hogExecutor.buildInputsWithGlobals(insightsFunction, globals)
             const invocation = createInvocation(globalsWithInputs, insightsFunction)
 
-            // Slightly different handling for custom flows
+            // Slightly different handling for script flows
             // Run the initial step - this allows functions not using fetches to respond immediately
-            const functionResult = await this.insightsFlowFunctionsService.execute(invocation)
+            const functionResult = await this.hogFlowFunctionsService.execute(invocation)
             functionResult.logs.forEach((log) => addLog(log.level, log.message))
             functionResult.logs = []
 
@@ -265,7 +270,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                 // triggering the infinite loop protection.
                 const { $insights_function_execution_count, ...cleanProperties } = capturedInsightsEvent.properties || {}
 
-                // Invoke the customflow
+                // Invoke the hogflow
                 const triggerGlobals: InsightsFunctionInvocationGlobals = {
                     ...invocation.state.globals,
                     event: {
@@ -276,24 +281,13 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                         url: '',
                     },
                 }
-                const insightsFlowInvocation = createInsightsFlowInvocation(
+                const hogFlowInvocation = createInsightsFlowInvocation(
                     triggerGlobals,
-                    insightsFlow,
+                    hogFlow,
                     {} as InsightsFunctionFilterGlobals
                 )
 
-                const scheduledAt = insightsFlow.trigger && 'scheduled_at' in insightsFlow.trigger && insightsFlow.trigger.scheduled_at
-                if (scheduledAt) {
-                    const scheduledDateTime = DateTime.fromISO(scheduledAt)
-                    if (!scheduledDateTime.isValid) {
-                        addLog('warn', `Invalid scheduled_at date format: ${scheduledAt}`)
-                    } else {
-                        insightsFlowInvocation.queueScheduledAt = scheduledDateTime
-                        addLog('info', `Workflow run scheduled for ${scheduledAt}`)
-                    }
-                }
-
-                insightsFlowInvocation.id = invocationId // Keep the IDs consistent
+                hogFlowInvocation.id = invocationId // Keep the IDs consistent
 
                 addMetric({
                     metric_kind: 'other',
@@ -307,7 +301,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                     count: 1,
                 })
 
-                await this.cyclotronJobQueue.queueInvocations([insightsFlowInvocation])
+                await this.hogflowQueue.queueInvocations([hogFlowInvocation])
             } else {
                 addMetric({
                     metric_kind: 'failure',
@@ -315,12 +309,12 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                     count: 1,
                 })
             }
-            // Always set to false for custom flows as this triggers the flow to continue so we dont want metrics for this
+            // Always set to false for script flows as this triggers the flow to continue so we dont want metrics for this
             functionResult.finished = false
 
             return functionResult
         } catch (error) {
-            logger.error('Error triggering custom flow', { error })
+            logger.error('Error triggering script flow', { error })
             addMetric({
                 metric_kind: 'failure',
                 metric_name: 'trigger_failed',
@@ -329,7 +323,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
 
             addLog('error', `Error triggering flow: ${error.message}`)
 
-            // NOTE: We only return a custom function result. We track out own logs and errors here
+            // NOTE: We only return a script function result. We track out own logs and errors here
             return createInvocationResult(
                 createInvocation({} as any, insightsFunction),
                 {},
@@ -344,19 +338,19 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
     private async executeInsightsFunction(
         req: ModifiedRequest,
         insightsFunction: InsightsFunctionType,
-        insightsFunctionState: ScriptWatcherFunctionState | null
+        insightsFunctionState: HogWatcherFunctionState | null
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         let result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>
 
         try {
             const globals: InsightsFunctionInvocationGlobals = this.buildRequestGlobals(insightsFunction, req)
-            const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
+            const globalsWithInputs = await this.hogExecutor.buildInputsWithGlobals(insightsFunction, globals)
             const invocation = createInvocation(globalsWithInputs, insightsFunction)
 
-            if (insightsFunctionState?.state === ScriptWatcherState.degraded) {
+            if (insightsFunctionState?.state === HogWatcherState.degraded) {
                 // Degraded functions are not executed immediately
-                invocation.queue = 'scriptoverflow'
-                await this.cyclotronJobQueue.queueInvocations([invocation])
+                invocation.queue = 'hogoverflow'
+                await this.hogQueue.queueInvocations([invocation])
 
                 result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(
                     invocation,
@@ -382,11 +376,11 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                 }
             } else {
                 // Run the initial step - this allows functions not using fetches to respond immediately
-                result = await this.scriptExecutor.execute(invocation)
+                result = await this.hogExecutor.execute(invocation)
 
                 // Queue any queued work here. This allows us to enable delayed work like fetching eventually without blocking the API.
                 if (!result.finished) {
-                    await this.cyclotronJobQueue.queueInvocationResults([result])
+                    await this.hogQueue.queueInvocationResults([result])
                 }
 
                 const customHttpResponse = getCustomHttpResponse(result)
@@ -411,7 +405,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                 }
             }
         } catch (error) {
-            logger.error('Error executing custom function', { error })
+            logger.error('Error executing script function', { error })
             result = createInvocationResult(
                 createInvocation({} as any, insightsFunction),
                 {},
@@ -423,7 +417,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
             )
         }
 
-        await this.insightsFunctionMonitoringService.queueInvocationResults([result])
+        await this.invocationResultsService.queueInvocationResults([result])
         return result
     }
 
@@ -438,16 +432,16 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
 
         const [webhook, insightsFunctionState] = await Promise.all([
             this.getWebhook(webhookId),
-            this.scriptWatcher.getCachedEffectiveState(webhookId),
+            this.hogWatcher.getCachedEffectiveState(webhookId),
         ])
 
         if (!webhook) {
             throw new SourceWebhookError(404, 'Not found')
         }
 
-        const { insightsFunction, insightsFlow } = webhook
+        const { insightsFunction, hogFlow } = webhook
 
-        if (insightsFunctionState?.state === ScriptWatcherState.disabled) {
+        if (insightsFunctionState?.state === HogWatcherState.disabled) {
             this.insightsFunctionMonitoringService.queueAppMetric(
                 {
                     team_id: insightsFunction.team_id,
@@ -456,37 +450,38 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                     metric_name: 'disabled_permanently',
                     count: 1,
                 },
-                insightsFlow ? 'insights_flow' : 'insights_function'
+                hogFlow ? 'hog_flow' : 'insights_function'
             )
             throw new SourceWebhookError(429, 'Disabled')
         }
 
-        const result = insightsFlow
-            ? await this.executeInsightsFlow(req, insightsFlow, insightsFunction)
+        const result = hogFlow
+            ? await this.executeInsightsFlow(req, hogFlow, insightsFunction)
             : await this.executeInsightsFunction(req, insightsFunction, insightsFunctionState)
 
         void this.promiseScheduler.schedule(
-            Promise.all([this.insightsFunctionMonitoringService.flush(), this.scriptWatcher.observeResultsBuffered(result)])
+            this.invocationResultsService.flush(),
+            this.hogWatcher.observeResultsBuffered(result)
         )
 
         return result
     }
 
-    public async start(): Promise<void> {
+    public override async start(): Promise<void> {
         await super.start()
         // Make sure we are ready to produce to cyclotron first
-        await this.cyclotronJobQueue.startAsProducer()
+        await Promise.all([this.hogQueue.startAsProducer(), this.hogflowQueue.startAsProducer()])
     }
 
-    public async stop(): Promise<void> {
-        await this.cyclotronJobQueue.stop()
+    public override async stop(): Promise<void> {
+        await Promise.all([this.hogQueue.stopProducer(), this.hogflowQueue.stopProducer()])
         await this.promiseScheduler.waitForAllSettled()
         // IMPORTANT: super always comes last
         await super.stop()
     }
 
     public isHealthy(): HealthCheckResult {
-        // TODO: What should we consider healthy / unhealthy here? stream?
+        // TODO: What should we consider healthy / unhealthy here? kafka?
         return new HealthCheckResultOk()
     }
 }

@@ -1,11 +1,11 @@
 package core
 
 import (
-	insights "github.com/hanzoai/insights-go"
+	"github.com/insights/insights-go"
 )
 
 const insightsAPIKey = "sTMFPsFhdP1Ssg"
-const endpoint = "https://us.i.insights.hanzo.ai"
+const endpoint = "https://us.i.hanzo.ai"
 
 var client insights.Client
 

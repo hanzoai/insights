@@ -6,12 +6,12 @@ import { Button, Dropdown } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 import { cn } from 'lib/utils/css-classes'
 import { playerCommentOverlayLogic } from 'scenes/session-recordings/player/commenting/playerFrameCommentOverlayLogic'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 export function EmojiCommentRow({ onSelectEmoji }: { onSelectEmoji?: () => void }): JSX.Element {

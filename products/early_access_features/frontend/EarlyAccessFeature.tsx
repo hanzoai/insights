@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconFlag, IconQuestion, IconTrash, IconX } from '@hanzo/icons'
+import { IconCopy, IconFlag, IconQuestion, IconTrash, IconX } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -15,39 +15,55 @@ import {
     Link,
 } from '@hanzo/elements'
 
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { FlagSelector } from 'lib/components/FlagSelector'
 import { NotFound } from 'lib/components/NotFound'
 import { SceneFile } from 'lib/components/Scenes/SceneFile'
+import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
 import { SceneMetalyticsSummaryButton } from 'lib/components/Scenes/SceneMetalyticsSummaryButton'
 import { SceneSelect } from 'lib/components/Scenes/SceneSelect'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
 import { Tabs } from 'lib/elements/Tabs'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
+import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { JSONEditorInput } from 'scenes/feature-flags/JSONEditorInput'
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
+import { interProjectCopyLogic } from 'scenes/resource-transfer/interProjectCopyLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
+import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
+import {
+    SceneMenuBar,
+    SceneMenuBarItem,
+    SceneMenuBarMenu,
+    SceneMenuBarSeparator,
+} from '~/layout/scenes/components/SceneMenuBar'
+import { SceneSection } from '~/layout/scenes/components/SceneSection'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import {
     ScenePanel,
     ScenePanelActionsSection,
     ScenePanelDivider,
     ScenePanelInfoSection,
+    ScenePanelLabel,
 } from '~/layout/scenes/SceneLayout'
-import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
-import { SceneSection } from '~/layout/scenes/components/SceneSection'
-import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { Query } from '~/queries/Query/Query'
 import { defaultDataTableColumns } from '~/queries/nodes/DataTable/utils'
+import { Query } from '~/queries/Query/Query'
 import { Node, NodeKind, ProductIntentContext, ProductKey, QuerySchema } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 import {
+    AccessControlLevel,
+    AccessControlResourceType,
     CyclotronJobFiltersType,
     EarlyAccessFeatureStage,
     EarlyAccessFeatureTabs,
@@ -60,10 +76,66 @@ import {
     ReplayTabs,
 } from '~/types'
 
-import { InstructionsModal } from './InstructionsModal'
+import {
+    AssigneeIconDisplay,
+    AssigneeLabelDisplay,
+} from 'products/error_tracking/frontend/components/Assignee/AssigneeDisplay'
+import { AssigneeSelect } from 'products/error_tracking/frontend/components/Assignee/AssigneeSelect'
+
 import { EarlyAccessFeatureLogicProps, earlyAccessFeatureLogic } from './earlyAccessFeatureLogic'
+import { InstructionsModal } from './InstructionsModal'
 
 const RESOURCE_TYPE = 'early-access-feature'
+
+const ACTIVE_STAGES = new Set([
+    EarlyAccessFeatureStage.Alpha,
+    EarlyAccessFeatureStage.Beta,
+    EarlyAccessFeatureStage.GeneralAvailability,
+])
+
+function StageTransitionWarning({
+    from,
+    to,
+}: {
+    from: EarlyAccessFeatureStage | null
+    to: EarlyAccessFeatureStage
+}): JSX.Element | null {
+    if (!from || from === to) {
+        return null
+    }
+
+    const wasActive = ACTIVE_STAGES.has(from)
+    const willBeActive = ACTIVE_STAGES.has(to)
+
+    if (to === EarlyAccessFeatureStage.GeneralAvailability) {
+        return (
+            <Banner type="warning" className="mt-2">
+                Promoting to general availability is permanent. The feature becomes read-only and the feature flag stays
+                enabled for all opted-in users.
+            </Banner>
+        )
+    }
+
+    if (!wasActive && willBeActive) {
+        return (
+            <Banner type="warning" className="mt-2">
+                This will enable the feature flag for all opted-in users. They will gain access to the feature when you
+                save.
+            </Banner>
+        )
+    }
+
+    if (wasActive && !willBeActive) {
+        return (
+            <Banner type="warning" className="mt-2">
+                This will disable the feature flag for opted-in users. They will lose access to the feature when you
+                save.
+            </Banner>
+        )
+    }
+
+    return null
+}
 
 export const scene: SceneExport<EarlyAccessFeatureLogicProps> = {
     component: EarlyAccessFeature,
@@ -85,7 +157,6 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
         originalEarlyAccessFeatureStage,
     } = useValues(earlyAccessFeatureLogic)
     const {
-        submitEarlyAccessFeatureRequest,
         loadEarlyAccessFeature,
         editFeature,
         updateStage,
@@ -94,14 +165,25 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
         showGAPromotionConfirmation,
         saveEarlyAccessFeature,
         setEarlyAccessFeatureValue,
+        submitEarlyAccessFeature,
     } = useActions(earlyAccessFeatureLogic)
     const { currentTeamId } = useValues(teamLogic)
+    const { canCopyToProject } = useValues(interProjectCopyLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
+    const sceneMenuBarEnabled = !!featureFlags[FEATURE_FLAGS.SCENE_MENU_BAR]
 
     const isNewEarlyAccessFeature = id === 'new' || id === undefined
 
     // Determine if Save/Cancel buttons should be visible
     const wasOriginallyGA = originalEarlyAccessFeatureStage === EarlyAccessFeatureStage.GeneralAvailability
     const canShowSaveButtons = !wasOriginallyGA && (isNewEarlyAccessFeature || isEditingFeature)
+
+    const userAccessLevel = 'id' in earlyAccessFeature ? earlyAccessFeature.user_access_level : undefined
+    const accessControlDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.EarlyAccessFeature,
+        AccessControlLevel.Editor,
+        userAccessLevel
+    )
 
     const earlyAccessFeatureId =
         earlyAccessFeature && 'id' in earlyAccessFeature && earlyAccessFeature.id !== 'new'
@@ -112,7 +194,6 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
         type: 'early_access_feature',
         ref: earlyAccessFeatureId,
         enabled: Boolean(currentTeamId && earlyAccessFeatureId && !earlyAccessFeatureLoading),
-        deps: [currentTeamId, earlyAccessFeatureId, earlyAccessFeatureLoading],
     })
 
     if (earlyAccessFeatureMissing) {
@@ -146,13 +227,66 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
     return (
         <Form id="early-access-feature" formKey="earlyAccessFeature" logic={earlyAccessFeatureLogic}>
             <SceneContent>
+                {sceneMenuBarEnabled && !isNewEarlyAccessFeature && (
+                    <SceneMenuBar>
+                        <SceneMenuBarMenu label="File" dataAttr={`${RESOURCE_TYPE}-menubar-file`}>
+                            <SceneMenuBarFileItems dataAttrKey={RESOURCE_TYPE} />
+                            {canCopyToProject && earlyAccessFeatureId && (
+                                <SceneMenuBarItem
+                                    onClick={() =>
+                                        router.actions.push(
+                                            urls.resourceTransfer('EarlyAccessFeature', earlyAccessFeatureId)
+                                        )
+                                    }
+                                    data-attr={`${RESOURCE_TYPE}-menubar-copy-to-project`}
+                                >
+                                    <IconCopy />
+                                    Copy to another project
+                                </SceneMenuBarItem>
+                            )}
+                            <SceneMenuBarSeparator />
+                            <SceneMenuBarItem
+                                variant="destructive"
+                                opensFloatingUi
+                                disabled={!!accessControlDisabledReason}
+                                tooltip={accessControlDisabledReason ?? undefined}
+                                onClick={() => {
+                                    Dialog.open({
+                                        title: 'Permanently delete feature?',
+                                        description:
+                                            'Doing so will remove any opt in conditions from the feature flag.',
+                                        primaryButton: {
+                                            children: 'Delete',
+                                            type: 'primary',
+                                            status: 'danger',
+                                            'data-attr': 'confirm-delete-feature',
+                                            onClick: () => {
+                                                deleteEarlyAccessFeature(
+                                                    (earlyAccessFeature as EarlyAccessFeatureType)?.id
+                                                )
+                                            },
+                                        },
+                                        secondaryButton: {
+                                            children: 'Close',
+                                            type: 'secondary',
+                                        },
+                                    })
+                                }}
+                                data-attr={`${RESOURCE_TYPE}-menubar-delete`}
+                            >
+                                <IconTrash />
+                                Delete
+                            </SceneMenuBarItem>
+                        </SceneMenuBarMenu>
+                    </SceneMenuBar>
+                )}
                 <SceneTitleSection
                     name={earlyAccessFeature.name}
                     description={earlyAccessFeature.description}
                     resourceType={{
                         type: 'early_access_feature',
                     }}
-                    canEdit={isNewEarlyAccessFeature || isEditingFeature}
+                    canEdit={(isNewEarlyAccessFeature || isEditingFeature) && !accessControlDisabledReason}
                     onNameChange={(name) => {
                         setEarlyAccessFeatureValue('name', name)
                     }}
@@ -181,30 +315,21 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                         >
                                             Cancel
                                         </Button>
-                                        <Button
-                                            type="primary"
-                                            htmlType="submit"
-                                            data-attr="save-feature"
-                                            onClick={() => {
-                                                // Check if user is promoting to General Availability
-                                                const isPromotingToGA =
-                                                    earlyAccessFeature.stage ===
-                                                    EarlyAccessFeatureStage.GeneralAvailability
-
-                                                if (isPromotingToGA) {
-                                                    showGAPromotionConfirmation(() =>
-                                                        submitEarlyAccessFeatureRequest(earlyAccessFeature)
-                                                    )
-                                                } else {
-                                                    submitEarlyAccessFeatureRequest(earlyAccessFeature)
-                                                }
-                                            }}
-                                            loading={isEarlyAccessFeatureSubmitting}
-                                            form="early-access-feature"
-                                            size="small"
+                                        <AccessControlAction
+                                            resourceType={AccessControlResourceType.EarlyAccessFeature}
+                                            minAccessLevel={AccessControlLevel.Editor}
+                                            userAccessLevel={userAccessLevel}
                                         >
-                                            {isNewEarlyAccessFeature ? 'Save as draft' : 'Save'}
-                                        </Button>
+                                            <Button
+                                                type="primary"
+                                                onClick={submitEarlyAccessFeature}
+                                                data-attr="save-feature"
+                                                loading={isEarlyAccessFeatureSubmitting}
+                                                size="small"
+                                            >
+                                                {isNewEarlyAccessFeature ? 'Save as draft' : 'Save'}
+                                            </Button>
+                                        </AccessControlAction>
                                     </>
                                 ) : (
                                     <>
@@ -216,21 +341,29 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                                         items: [
                                                             {
                                                                 label: 'Concept',
+                                                                tooltip:
+                                                                    'Users can opt in to register interest, but the feature flag will not be enabled for them.',
                                                                 onClick: () =>
                                                                     updateStage(EarlyAccessFeatureStage.Concept),
                                                             },
                                                             {
                                                                 label: 'Alpha',
+                                                                tooltip:
+                                                                    'Early testing. Opted-in users will have the feature flag enabled.',
                                                                 onClick: () =>
                                                                     updateStage(EarlyAccessFeatureStage.Alpha),
                                                             },
                                                             {
                                                                 label: 'Beta (default)',
+                                                                tooltip:
+                                                                    'Wider testing. Opted-in users will have the feature flag enabled.',
                                                                 onClick: () =>
                                                                     updateStage(EarlyAccessFeatureStage.Beta),
                                                             },
                                                             {
-                                                                label: 'General availability / Archived',
+                                                                label: 'General availability',
+                                                                tooltip:
+                                                                    'Feature becomes read-only. All opted-in users retain access.',
                                                                 onClick: () =>
                                                                     updateStage(
                                                                         EarlyAccessFeatureStage.GeneralAvailability
@@ -240,25 +373,35 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                                     },
                                                 ]}
                                             >
+                                                {/* The trigger must stay the direct child of Menu — it
+                                                    clones the trigger to inject the menu-toggle onClick, which an
+                                                    AccessControlAction wrapper would swallow. Gate via disabledReason. */}
                                                 <Button
                                                     tooltip="Publish this feature to make it available"
                                                     type="primary"
                                                     size="small"
+                                                    disabledReason={accessControlDisabledReason ?? undefined}
                                                 >
                                                     Release
                                                 </Button>
                                             </Menu>
                                         )}
                                         {earlyAccessFeature.stage != EarlyAccessFeatureStage.GeneralAvailability && (
-                                            <Button
-                                                type="secondary"
-                                                onClick={() => editFeature(true)}
-                                                loading={false}
-                                                data-attr="edit-feature"
-                                                size="small"
+                                            <AccessControlAction
+                                                resourceType={AccessControlResourceType.EarlyAccessFeature}
+                                                minAccessLevel={AccessControlLevel.Editor}
+                                                userAccessLevel={userAccessLevel}
                                             >
-                                                Edit
-                                            </Button>
+                                                <Button
+                                                    type="secondary"
+                                                    onClick={() => editFeature(true)}
+                                                    loading={false}
+                                                    data-attr="edit-feature"
+                                                    size="small"
+                                                >
+                                                    Edit
+                                                </Button>
+                                            </AccessControlAction>
                                         )}
                                     </>
                                 )
@@ -275,10 +418,11 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                 const isPromotingToGA = value === EarlyAccessFeatureStage.GeneralAvailability
 
                                 if (isPromotingToGA) {
-                                    showGAPromotionConfirmation(() =>
+                                    showGAPromotionConfirmation((rolloutToAll: boolean) =>
                                         saveEarlyAccessFeature({
                                             ...earlyAccessFeature,
                                             stage: value as EarlyAccessFeatureStage,
+                                            ...(rolloutToAll ? { rollout_to_all: true } : {}),
                                         })
                                     )
                                 } else {
@@ -291,6 +435,8 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             value={earlyAccessFeature.stage}
                             name="stage"
                             dataAttrKey={RESOURCE_TYPE}
+                            canEdit={!accessControlDisabledReason}
+                            buttonProps={{ tooltip: accessControlDisabledReason ?? undefined }}
                             options={[
                                 {
                                     label: 'Draft (default)',
@@ -310,12 +456,49 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                     value: 'beta',
                                 },
                                 {
-                                    label: 'General availability / Archived',
+                                    label: 'General availability',
                                     value: 'general-availability',
                                 },
                             ]}
                         />
+                        {!isNewEarlyAccessFeature && (
+                            <ScenePanelLabel title="Assignee">
+                                <AssigneeSelect
+                                    assignee={earlyAccessFeature.assignee ?? null}
+                                    onChange={(assignee) => {
+                                        if (isEditingFeature) {
+                                            setEarlyAccessFeatureValue('assignee', assignee)
+                                        } else {
+                                            saveEarlyAccessFeature({ ...earlyAccessFeature, assignee })
+                                        }
+                                    }}
+                                    fullWidth
+                                >
+                                    {(displayAssignee, isOpen) => (
+                                        <ButtonPrimitive
+                                            fullWidth
+                                            variant="panel"
+                                            disabled={!!accessControlDisabledReason}
+                                            tooltip={accessControlDisabledReason ?? undefined}
+                                            data-state={isOpen ? 'open' : 'closed'}
+                                            data-attr={`${RESOURCE_TYPE}-assignee`}
+                                        >
+                                            <AssigneeIconDisplay assignee={displayAssignee} size="small" />
+                                            <AssigneeLabelDisplay assignee={displayAssignee} size="small" />
+                                            <MenuOpenIndicator className="ml-auto" />
+                                        </ButtonPrimitive>
+                                    )}
+                                </AssigneeSelect>
+                            </ScenePanelLabel>
+                        )}
                         <SceneFile dataAttrKey={RESOURCE_TYPE} />
+                        <Link
+                            to="https://hanzo.ai/docs/feature-flags/early-access-feature-management"
+                            target="_blank"
+                            className="text-xs"
+                        >
+                            Learn more about early access features
+                        </Link>
                     </ScenePanelInfoSection>
 
                     <ScenePanelDivider />
@@ -323,6 +506,21 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                     <ScenePanelActionsSection>
                         <SceneMetalyticsSummaryButton dataAttrKey={RESOURCE_TYPE} />
                         <ScenePanelDivider />
+                        {!isNewEarlyAccessFeature && canCopyToProject && earlyAccessFeatureId && (
+                            <ButtonPrimitive
+                                menuItem
+                                onClick={() =>
+                                    router.actions.push(
+                                        urls.resourceTransfer('EarlyAccessFeature', earlyAccessFeatureId)
+                                    )
+                                }
+                                data-attr="early-access-feature-copy-to-project"
+                                tooltip="Copy this early access feature to another project"
+                            >
+                                <IconCopy />
+                                Copy to another project
+                            </ButtonPrimitive>
+                        )}
                         <ButtonPrimitive
                             onClick={() => {
                                 Dialog.open({
@@ -346,6 +544,8 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             }}
                             variant="danger"
                             menuItem
+                            disabled={!!accessControlDisabledReason}
+                            tooltip={accessControlDisabledReason ?? undefined}
                             data-attr={`${RESOURCE_TYPE}-delete`}
                         >
                             <IconTrash />
@@ -354,15 +554,33 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                     </ScenePanelActionsSection>
                 </ScenePanel>
 
-                {earlyAccessFeature.stage === EarlyAccessFeatureStage.Concept && !isEditingFeature && (
+                {!isEditingFeature && earlyAccessFeature.stage === EarlyAccessFeatureStage.Concept && (
                     <Banner type="info">
                         The{' '}
                         <Tag type="default" className="uppercase">
                             Concept
                         </Tag>{' '}
-                        stage assigns the feature flag to the user. Gate your code behind a different feature flag if
-                        you'd like to keep it hidden, and then switch your code to this feature flag when you're ready
-                        to release to your early access users.
+                        stage is for gathering interest. Users can opt in, but the feature flag will not be enabled
+                        until you promote this feature to Alpha or later. This lets you gauge demand before releasing
+                        any functionality.
+                    </Banner>
+                )}
+                {!isEditingFeature && earlyAccessFeature.stage === EarlyAccessFeatureStage.Alpha && (
+                    <Banner type="info">
+                        Opted-in users have the feature flag enabled for early testing. When you change the stage,
+                        enrolled users will receive a notification event (<code>$feature_enrollment_update</code>).
+                    </Banner>
+                )}
+                {!isEditingFeature && earlyAccessFeature.stage === EarlyAccessFeatureStage.Beta && (
+                    <Banner type="info">
+                        Opted-in users have the feature flag enabled for wider testing. When you change the stage,
+                        enrolled users will receive a notification event (<code>$feature_enrollment_update</code>).
+                    </Banner>
+                )}
+                {!isEditingFeature && earlyAccessFeature.stage === EarlyAccessFeatureStage.GeneralAvailability && (
+                    <Banner type="success">
+                        This feature has been promoted to general availability and can no longer be edited. Opted-in
+                        users retain access via the feature flag.
                     </Banner>
                 )}
                 <div className="flex-1 min-w-[20rem] max-w-prose">
@@ -410,28 +628,34 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                         <b>Stage</b>
                         <div>
                             {isEditingFeature ? (
-                                <Field name="stage">
-                                    <Select
-                                        options={[
-                                            {
-                                                value: 'concept',
-                                                label: 'Concept',
-                                            },
-                                            {
-                                                value: 'alpha',
-                                                label: 'Alpha',
-                                            },
-                                            {
-                                                value: 'beta',
-                                                label: 'Beta',
-                                            },
-                                            {
-                                                value: 'general-availability',
-                                                label: 'General availability / Archived',
-                                            },
-                                        ]}
+                                <>
+                                    <Field name="stage">
+                                        <Select
+                                            options={[
+                                                {
+                                                    value: 'concept',
+                                                    label: 'Concept',
+                                                },
+                                                {
+                                                    value: 'alpha',
+                                                    label: 'Alpha',
+                                                },
+                                                {
+                                                    value: 'beta',
+                                                    label: 'Beta',
+                                                },
+                                                {
+                                                    value: 'general-availability',
+                                                    label: 'General availability',
+                                                },
+                                            ]}
+                                        />
+                                    </Field>
+                                    <StageTransitionWarning
+                                        from={originalEarlyAccessFeatureStage}
+                                        to={earlyAccessFeature.stage}
                                     />
-                                </Field>
+                                </>
                             ) : (
                                 <Tag
                                     type={
@@ -479,9 +703,17 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             showOptional
                             help={
                                 <>
-                                    Specify a valid JSON payload as a dictionary. This will be exposed by{' '}
-                                    <code>insights-js</code> and can be used to customize your UI or behavior after the
-                                    user opts in to the feature.
+                                    This payload is delivered via the Early Access Features API and{' '}
+                                    <code>insights-js</code> when users browse available features. It is{' '}
+                                    <strong>separate from the feature flag payload</strong>, which is returned during
+                                    flag evaluation. Use this for metadata like release notes or UI configuration that
+                                    your opt-in interface can display.{' '}
+                                    <Link
+                                        to="https://hanzo.ai/docs/feature-flags/early-access-feature-management"
+                                        target="_blank"
+                                    >
+                                        Learn more
+                                    </Link>
                                 </>
                             }
                         >
@@ -495,7 +727,10 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             {earlyAccessFeature.payload && Object.keys(earlyAccessFeature.payload).length > 0 ? (
                                 <JSONEditorInput readOnly value={earlyAccessFeature.payload} />
                             ) : (
-                                <span className="text-secondary">No payload configured</span>
+                                <span className="text-secondary">
+                                    No payload configured. Payloads let you attach metadata (like release notes) that is
+                                    delivered to users via the Early Access Features API.
+                                </span>
                             )}
                         </div>
                     </div>
@@ -690,6 +925,7 @@ function PersonsTableByFilter({ recordingsFilters, properties }: PersonsTableByF
                                     person={{ id: person.id }}
                                     displayName={person.display_name}
                                     noPopover
+                                    withComposeTicketButton
                                 />
                             </CopyToClipboardInline>
                         )
@@ -702,9 +938,9 @@ function PersonsTableByFilter({ recordingsFilters, properties }: PersonsTableByF
 
     return (
         <div className="relative">
-            {/* 
+            {/*
             NOTE: This is a bit of a placement hack - ideally we would be able to add it to the Query
-            UPDATE: Absolute postion was overlapping with filters, so we put a bit on top. Still need to find a better solution.       
+            UPDATE: Absolute postion was overlapping with filters, so we put a bit on top. Still need to find a better solution.
              */}
             <div className="flex justify-end mb-2">
                 <Button

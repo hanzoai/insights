@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getGoSteps as getGoStepsPA } from '../product-analytics/go'
 import { StepDefinition } from '../steps'
@@ -8,9 +8,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
     const ExperimentImplementation = snippets?.ExperimentImplementationSnippet
 
     // Get installation steps from product-analytics only
-    const installationSteps = getGoStepsPA(ctx).filter(
-        (step: StepDefinition) => step.title !== 'Send events'
-    )
+    const installationSteps = getGoStepsPA(ctx).filter((step: StepDefinition) => step.title !== 'Send events')
 
     // Add experiments-specific steps
     const experimentSteps: StepDefinition[] = [

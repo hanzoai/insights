@@ -241,7 +241,7 @@ See [Client Types](#client-types) section for detailed explanation.
 
 OAuth supports all the same scopes as Personal API Keys. Each scope has a `read` and/or `write` action (e.g., `experiment:read`, `experiment:write`).
 
-For a complete list of available scopes, see [frontend/src/lib/scopes.tsx](https://github.com/Hanzo Insights/insights/blob/main/frontend/src/lib/scopes.tsx#L15).
+For a complete list of available scopes, see [frontend/src/lib/scopes.tsx](https://github.com/Insights/insights/blob/master/frontend/src/lib/scopes.tsx#L15).
 
 ### OpenID Connect Scopes
 

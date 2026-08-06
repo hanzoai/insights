@@ -42,8 +42,8 @@ const meta: Meta = {
                 '/api/projects/:team_id/event_definitions': () => [200, { count: 5 }],
             },
             post: {
-                '/api/environments/:team_id/query': (req) => {
-                    const query = (req.body as any).query
+                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                    const query = ((await request.json()) as any).query
                     const queryKind = query.kind
 
                     if (queryKind === 'DatabaseSchemaQuery') {
@@ -84,7 +84,11 @@ export function WebAnalyticsDashboard(): JSX.Element {
     return <App />
 }
 
-export function WebAnalyticsDashboardMobile(): JSX.Element {
+WebAnalyticsDashboardMetricCards.parameters = {
+    ...meta.parameters,
+    featureFlags: [...((meta.parameters?.featureFlags as string[]) ?? []), FEATURE_FLAGS.WEB_ANALYTICS_METRIC_CARDS],
+}
+export function WebAnalyticsDashboardMetricCards(): JSX.Element {
     const { setSourceTab, setDeviceTab } = useActions(webAnalyticsLogic)
 
     useEffect(() => {
@@ -95,11 +99,32 @@ export function WebAnalyticsDashboardMobile(): JSX.Element {
     return <App />
 }
 
-WebAnalyticsDashboardMobile.parameters = {
+WebAnalyticsDashboardLoading.parameters = {
+    layout: 'fullscreen',
+    viewMode: 'story',
+    mockDate: '2023-02-01',
+    pageUrl: urls.webAnalytics(),
+    featureFlags: [FEATURE_FLAGS.WEB_ANALYTICS_FILTERS_V2, FEATURE_FLAGS.WEB_ANALYTICS_TILE_SKELETONS],
     testOptions: {
         includeNavigationInSnapshot: true,
-        waitForLoadersToDisappear: true,
-        waitForSelector: '[data-attr=trend-line-graph] > canvas',
-        viewport: { width: 414, height: 896 },
+        waitForLoadersToDisappear: false,
+        waitForSelector: '[data-attr=web-analytics-skeleton-table], [data-attr=web-analytics-skeleton-chart]',
     },
+    msw: {
+        handlers: [],
+    },
+}
+WebAnalyticsDashboardLoading.decorators = [
+    mswDecorator({
+        get: {
+            '/stats': () => [200, { users_on_product: 2387 }],
+            '/api/projects/:team_id/event_definitions': () => [200, { count: 5 }],
+        },
+        post: {
+            '/api/environments/:team_id/query/:kind': () => new Promise<never>(() => {}),
+        },
+    }),
+]
+export function WebAnalyticsDashboardLoading(): JSX.Element {
+    return <App />
 }

@@ -34,11 +34,11 @@ You can test web analytics queries directly using Insights's `/query` API endpoi
 **Resources:**
 
 - [Insights Query API Documentation](https://hanzo.ai/docs/api/query)
-- [API Schema (Swagger UI)](https://insights.hanzo.ai/api/schema/swagger-ui)
+- [API Schema (Swagger UI)](https://app.hanzo.ai/api/schema/swagger-ui)
 
-### 1. Create a Personal Access Token
+### 1. Create a personal API key
 
-1. Go to your Insights instance → Settings → Personal API Keys (`/project/<project_id>/settings/user-api-keys`)
+1. Go to your Insights instance → Settings → Personal API keys (`/project/<project_id>/settings/user-api-keys`)
 2. Click "Create personal API key"
 3. Give it a name and select the appropriate scopes (At least 'Query: Read' is required)
 4. Copy the token
@@ -48,7 +48,7 @@ You can test web analytics queries directly using Insights's `/query` API endpoi
 #### Example: Web Overview Query
 
 ```bash
-curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -66,7 +66,7 @@ curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
 #### Example: Web Stats Table Query with Breakdown
 
 ```bash
-curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -86,7 +86,7 @@ curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
 #### Example: With Event Property Filter
 
 ```bash
-curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -114,7 +114,7 @@ curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
 This query powers the "Unique visitors" trend line in the web analytics graphs tab:
 
 ```bash
-curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -172,7 +172,7 @@ The examples above use high-level query types like `WebOverviewQuery` and `WebSt
 Use the `InsightsQLQuery` kind instead of web analytics-specific kinds:
 
 ```bash
-curl -s -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
+curl -s -X POST https://app.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d @- <<'EOF'
@@ -227,7 +227,7 @@ LIMIT 50000
 **2. API request:**
 
 ```bash
-curl -X POST https://insights.hanzo.ai/api/projects/123/query \
+curl -X POST https://app.hanzo.ai/api/projects/123/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d @- <<'EOF'
@@ -440,7 +440,7 @@ WHERE or(equals(event, '$pageview'), equals(event, '$screen'))
 To print the InsightsQL syntax in tests instead of Datastore SQL:
 
 ```python
-from insights.insightsql.printer import print_ast
+from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.context import InsightsQLContext
 
 # In your test
@@ -451,7 +451,8 @@ context = InsightsQLContext(
     team_id=team.pk,
     enable_select_queries=True,
 )
-insightsql = print_ast(query_ast, context=context, dialect="insightsql")
+# prepare_and_print_ast returns a (sql, prepared_ast) tuple
+insightsql, _ = prepare_and_print_ast(query_ast, context=context, dialect="insightsql")
 print(insightsql)
 ```
 

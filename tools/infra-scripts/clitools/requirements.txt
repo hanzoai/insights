@@ -1,0 +1,4 @@
+# Insights Python SDK — used by toolbox/telemetry.py to capture usage events.
+# https://hanzo.ai/docs/libraries/python
+# >=3 required: the `Insights` client class doesn't exist in older 1.x/2.x releases.
+insights>=7.19.0

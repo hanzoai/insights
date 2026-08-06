@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING, Any, Optional
 from rest_framework import request
 from rest_framework.exceptions import ValidationError
 
-from insights.insightsql.context import InsightsQLContext
-
 from insights.constants import PROPERTIES
 from insights.models.utils import sane_repr
 from insights.utils import encode_get_request_params
@@ -14,6 +12,8 @@ from insights.utils import encode_get_request_params
 from .mixins.common import BaseParamMixin
 
 if TYPE_CHECKING:
+    from insights.insightsql.context import InsightsQLContext
+
     from insights.models.team.team import Team
 
 
@@ -21,7 +21,7 @@ class BaseFilter(BaseParamMixin):
     _data: dict
     team: Optional["Team"]
     kwargs: dict
-    insightsql_context: InsightsQLContext
+    insightsql_context: "InsightsQLContext"
 
     def __init__(
         self,
@@ -53,6 +53,10 @@ class BaseFilter(BaseParamMixin):
         self._data = data
         self.kwargs = kwargs
         self.team = team
+
+        # Deferred: insightsql.context pulls the InsightsQL/schema layer, and the legacy filter
+        # classes load at django.setup() in every process via the models package.
+        from insights.insightsql.context import InsightsQLContext  # noqa: PLC0415
 
         # Set the InsightsQL context for the request
         self.insightsql_context = self.kwargs.get(

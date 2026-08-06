@@ -11,7 +11,7 @@ export function AllowImpersonation(): JSX.Element {
     return (
         <div>
             <p>
-                Support staff may need to log in as you to help debug issues. If you disable this setting,
+                Insights support staff may need to log in as you to help debug issues. If you disable this setting,
                 support staff will not be able to access your account directly. Read our{' '}
                 <Link to="https://hanzo.ai/handbook/company/security#impersonating-users" target="_blank">
                     policy on user impersonation

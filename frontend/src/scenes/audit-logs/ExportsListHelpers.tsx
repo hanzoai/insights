@@ -1,6 +1,7 @@
 import { Tag } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
+import { teamLogic } from 'scenes/teamLogic'
 
 import { AdvancedActivityLogFilters, ExportedAsset } from './advancedActivityLogsLogic'
 
@@ -60,6 +61,12 @@ export const getFilterSummary = (exportAsset: ExportedAsset): string => {
     if (filters.item_ids && filters.item_ids.length > 0) {
         activeFilters.push(`Item IDs: ${filters.item_ids.length}`)
     }
+    if (filters.clients && filters.clients.length > 0) {
+        activeFilters.push(`Clients: ${filters.clients.length}`)
+    }
+    if (filters.ip_addresses && filters.ip_addresses.length > 0) {
+        activeFilters.push(`IP addresses: ${filters.ip_addresses.length}`)
+    }
 
     return activeFilters.length > 0 ? activeFilters.join(', ') : 'No filters'
 }
@@ -73,7 +80,7 @@ export const getFilterTooltip = (exportAsset: ExportedAsset): JSX.Element => {
     const filterSections: JSX.Element[] = []
 
     if (filters.start_date || filters.end_date) {
-        const formatDate = (dateStr: string) => {
+        const formatDate = (dateStr: string): string => {
             try {
                 return dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss')
             } catch {
@@ -175,6 +182,28 @@ export const getFilterTooltip = (exportAsset: ExportedAsset): JSX.Element => {
         )
     }
 
+    if (filters.clients && filters.clients.length > 0) {
+        filterSections.push(
+            <div key="clients">
+                <strong>Clients ({filters.clients.length}):</strong>
+                <br />
+                {filters.clients.slice(0, 5).join(', ')}
+                {filters.clients.length > 5 && `... and ${filters.clients.length - 5} more`}
+            </div>
+        )
+    }
+
+    if (filters.ip_addresses && filters.ip_addresses.length > 0) {
+        filterSections.push(
+            <div key="ip_addresses">
+                <strong>IP addresses ({filters.ip_addresses.length}):</strong>
+                <br />
+                {filters.ip_addresses.slice(0, 5).join(', ')}
+                {filters.ip_addresses.length > 5 && `... and ${filters.ip_addresses.length - 5} more`}
+            </div>
+        )
+    }
+
     if (filterSections.length === 0) {
         return <div>No filters applied</div>
     }
@@ -190,7 +219,7 @@ export const getFilterTooltip = (exportAsset: ExportedAsset): JSX.Element => {
 
 export const downloadExport = (exportAsset: ExportedAsset): void => {
     const link = document.createElement('a')
-    link.href = `/api/environments/@current/exports/${exportAsset.id}/content/?download=true`
+    link.href = `/api/environments/${teamLogic.values.currentTeamIdStrict}/exports/${exportAsset.id}/content/?download=true`
     link.download = exportAsset.filename || ''
     document.body.appendChild(link)
     link.click()

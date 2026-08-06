@@ -176,7 +176,7 @@ export function PersonSelectList({
                         </div>
                     ) : persons.length === 0 ? (
                         <div className="flex items-center justify-center h-full text-muted">
-                            {searchValue ? 'No users found matching your search.' : 'Search for users to add.'}
+                            {searchValue ? 'No persons found matching your search.' : 'Search for persons to add.'}
                         </div>
                     ) : (
                         <AutoSizer

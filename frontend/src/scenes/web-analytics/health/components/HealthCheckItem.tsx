@@ -4,6 +4,7 @@ import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
 
 import { Link } from 'lib/elements/Link'
+import { isExternalLink } from 'lib/utils/url'
 
 import { HealthCheck, HealthCheckStatus } from '../healthCheckTypes'
 import { webAnalyticsHealthLogic } from '../webAnalyticsHealthLogic'
@@ -31,7 +32,7 @@ export function HealthCheckItem({ check }: HealthCheckItemProps): JSX.Element {
                         <span className="font-medium">{check.title}</span>
                     )}
                     {check.docsUrl && (
-                        <Link to={check.docsUrl} className="text-xs text-muted">
+                        <Link to={check.docsUrl} target="_blank" className="text-xs text-muted">
                             Docs
                         </Link>
                     )}
@@ -43,7 +44,15 @@ export function HealthCheckItem({ check }: HealthCheckItemProps): JSX.Element {
             {check.action && (
                 <div className="flex-shrink-0">
                     {check.action.to ? (
-                        <Button type="secondary" size="small" to={check.action.to} onClick={handleActionClick}>
+                        <Button
+                            type="secondary"
+                            size="small"
+                            to={check.action.to}
+                            // External docs links must open in a new tab — navigating in place tears
+                            // down the app (and ends any active session recording).
+                            targetBlank={isExternalLink(check.action.to)}
+                            onClick={handleActionClick}
+                        >
                             {check.action.label}
                         </Button>
                     ) : check.action.onClick ? (

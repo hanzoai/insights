@@ -6,7 +6,8 @@ from unittest.mock import patch
 from django.core.management import call_command
 
 from insights.models import Team
-from insights.models.insights_functions.insights_function import InsightsFunction
+
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 
 class TestRefreshInsightsFunctions(BaseTest):
@@ -17,13 +18,13 @@ class TestRefreshInsightsFunctions(BaseTest):
         self.team2 = Team.objects.create(organization=self.organization, name="Test Team 2")
 
         # Create InsightsFunctions for testing
-        with patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers"):
+        with patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers"):
             self.insights_function1 = InsightsFunction.objects.create(
                 team=self.team,
                 name="Test Function 1",
                 type="destination",
                 description="Test Description 1",
-                iql="return event",
+                script="return event",
                 enabled=True,
             )
 
@@ -32,7 +33,7 @@ class TestRefreshInsightsFunctions(BaseTest):
                 name="Test Function 2",
                 type="transformation",
                 description="Test Description 2",
-                iql="return event",
+                script="return event",
                 enabled=True,
             )
 
@@ -41,7 +42,7 @@ class TestRefreshInsightsFunctions(BaseTest):
                 name="Test Function 3",
                 type="destination",
                 description="Test Description 3",
-                iql="return event",
+                script="return event",
                 enabled=True,
             )
 
@@ -62,7 +63,7 @@ class TestRefreshInsightsFunctions(BaseTest):
                 deleted=True,
             )
 
-    @patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers")
+    @patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers")
     def test_refresh_all_insights_functions(self, mock_reload):
         """Test refreshing all non-deleted destination InsightsFunctions (both enabled and disabled) across all teams."""
 
@@ -80,7 +81,7 @@ class TestRefreshInsightsFunctions(BaseTest):
         self.assertIn("Updated: 3", output)
         self.assertIn("Errors: 0", output)
 
-    @patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers")
+    @patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers")
     def test_refresh_by_team_id(self, mock_reload):
         """Test refreshing destination InsightsFunctions for a specific team."""
 
@@ -96,7 +97,7 @@ class TestRefreshInsightsFunctions(BaseTest):
         self.assertIn("Found 2 InsightsFunctions to process", output)
         self.assertIn("Updated: 2", output)
 
-    @patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers")
+    @patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers")
     def test_refresh_by_insights_function_id(self, mock_reload):
         """Test refreshing a specific InsightsFunction by ID."""
 
@@ -111,7 +112,7 @@ class TestRefreshInsightsFunctions(BaseTest):
         self.assertIn("Found 1 InsightsFunctions to process", output)
         self.assertIn("Updated: 1", output)
 
-    @patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers")
+    @patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers")
     def test_nonexistent_team_id(self, mock_reload):
         """Test handling of nonexistent team ID."""
 
@@ -124,7 +125,7 @@ class TestRefreshInsightsFunctions(BaseTest):
         self.assertIn("Found 0 InsightsFunctions to process", output)
         self.assertIn("No InsightsFunctions found matching criteria", output)
 
-    @patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers")
+    @patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers")
     def test_nonexistent_insights_function_id(self, mock_reload):
         """Test handling of nonexistent InsightsFunction ID."""
 

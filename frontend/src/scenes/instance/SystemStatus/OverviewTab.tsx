@@ -2,8 +2,9 @@ import { useValues } from 'kea'
 
 import { Table } from '@hanzo/elements'
 
-import { Link } from 'lib/elements/Link'
 import { IconOpenInNew } from 'lib/elements/icons'
+import { Link } from 'lib/elements/Link'
+import { isKeyOf } from 'lib/utils/guards'
 
 import { SystemStatusRow, SystemStatusSubrows } from '~/types'
 
@@ -18,7 +19,7 @@ function RenderMetric(_: any, systemStatusRow: SystemStatusRow): JSX.Element {
     return (
         <span>
             {systemStatusRow.metric}{' '}
-            {METRIC_KEY_TO_INTERNAL_LINK[systemStatusRow.key] ? (
+            {isKeyOf(systemStatusRow.key, METRIC_KEY_TO_INTERNAL_LINK) ? (
                 <Link to={METRIC_KEY_TO_INTERNAL_LINK[systemStatusRow.key]}>
                     <IconOpenInNew style={{ verticalAlign: 'middle' }} />
                 </Link>

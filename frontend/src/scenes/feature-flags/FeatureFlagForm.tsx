@@ -1,14 +1,29 @@
 import './FeatureFlag.scss'
 
+import {
+    DndContext,
+    DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
+    PointerSensor,
+    UniqueIdentifier,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 import { Form, Group } from 'kea-forms'
 import { router } from 'kea-router'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 import {
     IconBalance,
+    IconCheckCircle,
     IconCode,
     IconFlag,
+    IconCollapse,
+    IconExpand,
     IconGlobe,
     IconInfo,
     IconList,
@@ -18,6 +33,7 @@ import {
 } from '@hanzo/icons'
 import {
     Button,
+    Checkbox,
     Collapse,
     Divider,
     Input,
@@ -32,31 +48,108 @@ import {
     Tooltip,
 } from '@hanzo/elements'
 
+import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { IconArrowDown, IconArrowUp, SortableDragIcon } from 'lib/elements/icons'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
 import 'lib/elements/Lettermark'
-import { featureFlagLogic as enabledFeaturesLogic } from 'lib/logic/featureFlagLogic'
-import { alphabet } from 'lib/utils'
+import { alphabet } from 'lib/utils/strings'
+import { ApprovalActionKey } from 'scenes/approvals/utils'
 import { JSONEditorInput } from 'scenes/feature-flags/JSONEditorInput'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { tagsModel } from '~/models/tagsModel'
-import { FeatureFlagEvaluationRuntime } from '~/types'
+import { FeatureFlagBucketingIdentifier, FeatureFlagEvaluationRuntime, MultivariateFlagVariant } from '~/types'
 
 import { FeatureFlagCodeExample } from './FeatureFlagCodeExample'
-import { FeatureFlagEvaluationTags } from './FeatureFlagEvaluationTags'
+import { FeatureFlagEvaluationContexts } from './FeatureFlagEvaluationContexts'
+import { FeatureFlagLogicProps, featureFlagLogic, slugifyFeatureFlagKey } from './featureFlagLogic'
 import { FeatureFlagReleaseConditionsCollapsible } from './FeatureFlagReleaseConditionsCollapsible'
-import { FeatureFlagLogicProps, featureFlagLogic } from './featureFlagLogic'
+import { PercentageInput } from './PercentageInput'
+
+interface SortableVariantHeaderProps {
+    variant: MultivariateFlagVariant
+    index: number
+    variants: MultivariateFlagVariant[]
+    alphabet: string[]
+    moveVariantUp: (index: number) => void
+    moveVariantDown: (index: number) => void
+}
+
+function SortableVariantHeader({
+    variant,
+    index,
+    variants,
+    alphabet,
+    moveVariantUp,
+    moveVariantDown,
+}: SortableVariantHeaderProps): JSX.Element {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+        id: `variant-${index}`,
+    })
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    }
+
+    return (
+        <div ref={setNodeRef} style={style} className="flex gap-2 items-center justify-between w-full">
+            <div className="flex gap-2 items-center">
+                <Lettermark name={alphabet[index] ?? String(index + 1)} color={LettermarkColor.Gray} size="small" />
+                <span className="text-sm font-medium">{variant.key || `Variant ${index + 1}`}</span>
+                <span className="text-xs text-muted tabular-nums">({variant.rollout_percentage || 0}%)</span>
+            </div>
+            <div className="flex gap-1 items-center ml-auto">
+                <Button
+                    size="xsmall"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        moveVariantUp(index)
+                    }}
+                    disabled={index === 0}
+                    tooltip="Move up"
+                    icon={<IconArrowUp />}
+                />
+                <Button
+                    size="xsmall"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        moveVariantDown(index)
+                    }}
+                    disabled={index === variants.length - 1}
+                    tooltip="Move down"
+                    icon={<IconArrowDown />}
+                />
+                <Button
+                    size="xsmall"
+                    tooltip="Drag to reorder"
+                    icon={<SortableDragIcon className="text-muted hover:text-default shrink-0" />}
+                    onClick={(e) => e.stopPropagation()}
+                    {...listeners}
+                    {...attributes}
+                    style={{ cursor: 'grab' }}
+                    onMouseDown={(e) => {
+                        e.currentTarget.style.cursor = 'grabbing'
+                    }}
+                    onMouseUp={(e) => {
+                        e.currentTarget.style.cursor = 'grab'
+                    }}
+                />
+            </div>
+        </div>
+    )
+}
 
 export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
     const {
         props,
         featureFlag,
+        originalFeatureFlag,
         multivariateEnabled,
         variants,
         nonEmptyVariants,
@@ -65,12 +158,17 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
         showImplementation,
         openVariants,
         payloadExpanded,
+        expandAdvancedOnEdit,
+        hasEncryptedPayloadBeenSaved,
     } = useValues(featureFlagLogic)
     const {
         setMultivariateEnabled,
         setFeatureFlag,
         addVariant,
         removeVariant,
+        moveVariantUp,
+        moveVariantDown,
+        reorderVariants,
         distributeVariantsEqually,
         setFeatureFlagFilters,
         editFeatureFlag,
@@ -78,20 +176,40 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
         setShowImplementation,
         setOpenVariants,
         setPayloadExpanded,
+        resetEncryptedPayload,
     } = useActions(featureFlagLogic)
     const { tags: availableTags } = useValues(tagsModel)
-    const { featureFlags } = useValues(enabledFeaturesLogic)
-    const hasEvaluationTags = useFeatureFlag('FLAG_EVALUATION_TAGS')
-    const featureFlagsV2Enabled = !!featureFlags[FEATURE_FLAGS.FEATURE_FLAGS_V2]
-
+    const { isApprovalRequired } = useValues(approvalsGateLogic)
+    const hasEvaluationContexts = useFeatureFlag('FLAG_EVALUATION_TAGS') // NB: the tag was named "flag-evaluation-tags" before we renamed the concept – i.e. this powers evaluation contexts even though the name implies tags
     const isNewFeatureFlag = id === 'new' || id === undefined
     const implementationRef = useRef<HTMLDivElement>(null)
 
     const handleShowImplementation = (): void => {
         setShowImplementation(true)
         setTimeout(() => {
-            implementationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            implementationRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            })
         }, 150)
+    }
+
+    const confirmEncryptedPayloadReset = (): void => {
+        Dialog.open({
+            title: 'Reset payload?',
+            description: 'The existing payload will not be reset until the feature flag is saved.',
+            primaryButton: {
+                children: 'Reset',
+                onClick: resetEncryptedPayload,
+                size: 'small',
+                status: 'danger',
+            },
+            secondaryButton: {
+                children: 'Cancel',
+                type: 'tertiary',
+                size: 'small',
+            },
+        })
     }
 
     const updateVariant = (
@@ -101,17 +219,9 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
     ): void => {
         const coercedValue = field === 'rollout_percentage' ? Number(value) || 0 : String(value)
         const currentVariants = [...variants]
-        const oldKey = currentVariants[index]?.key
-        currentVariants[index] = { ...currentVariants[index], [field]: coercedValue }
-
-        // If the key is being changed, migrate any existing payload to the new key
-        let updatedPayloads = { ...featureFlag?.filters?.payloads }
-        if (field === 'key' && oldKey && oldKey !== coercedValue) {
-            const existingPayload = updatedPayloads[oldKey]
-            if (existingPayload !== undefined) {
-                delete updatedPayloads[oldKey]
-                updatedPayloads[coercedValue as string] = existingPayload
-            }
+        currentVariants[index] = {
+            ...currentVariants[index],
+            [field]: coercedValue,
         }
 
         setFeatureFlag({
@@ -122,21 +232,16 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                     ...featureFlag?.filters?.multivariate,
                     variants: currentVariants,
                 },
-                payloads: updatedPayloads,
             },
         })
     }
 
     const updateVariantPayload = (index: number, value: string | undefined): void => {
-        const variantKey = variants[index]?.key
-        if (!variantKey) {
-            return
-        }
         const currentPayloads = { ...featureFlag?.filters?.payloads }
         if (value === '' || value === undefined) {
-            delete currentPayloads[variantKey]
+            delete currentPayloads[index]
         } else {
-            currentPayloads[variantKey] = value
+            currentPayloads[index] = value
         }
         setFeatureFlag({
             ...featureFlag,
@@ -146,6 +251,116 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
             },
         })
     }
+
+    const currentFlagType = featureFlag?.is_remote_configuration
+        ? 'remote_config'
+        : multivariateEnabled
+          ? 'multivariate'
+          : 'boolean'
+
+    const onSelectFlagType = (value: string): void => {
+        // Leaving remote config: the backend invariant requires
+        // has_encrypted_payloads=true only on remote config flags,
+        // and the prior ciphertext is no longer valid.
+        const wasLeavingRemoteConfig =
+            featureFlag?.is_remote_configuration === true &&
+            value !== 'remote_config' &&
+            featureFlag?.has_encrypted_payloads
+
+        if (value === 'remote_config') {
+            setFeatureFlag({
+                ...featureFlag,
+                is_remote_configuration: true,
+            })
+            setMultivariateEnabled(false)
+        } else if (value === 'multivariate') {
+            setFeatureFlag({
+                ...featureFlag,
+                is_remote_configuration: false,
+                filters: {
+                    ...featureFlag?.filters,
+                    payloads: {},
+                },
+            })
+            setMultivariateEnabled(true)
+        } else {
+            setFeatureFlag({
+                ...featureFlag,
+                is_remote_configuration: false,
+            })
+            setMultivariateEnabled(false)
+        }
+
+        if (wasLeavingRemoteConfig) {
+            resetEncryptedPayload()
+        }
+    }
+
+    const FLAG_TYPE_OPTIONS = [
+        {
+            value: 'boolean',
+            icon: <IconFlag className="text-lg" />,
+            label: 'Boolean',
+            description: 'Release toggle with optional static payload',
+        },
+        {
+            value: 'multivariate',
+            icon: <IconList className="text-lg" />,
+            label: 'Multivariate',
+            description: 'Multiple variants with rollout percentages (A/B/n test)',
+        },
+        {
+            value: 'remote_config',
+            icon: <IconCode className="text-lg" />,
+            label: 'Remote config',
+            description: 'Single payload without feature flag logic',
+        },
+    ] as const
+
+    // Drag and drop functionality
+    const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        })
+    )
+
+    const handleDragStart = (event: DragStartEvent): void => {
+        setActiveId(event.active.id)
+    }
+
+    const handleDragEnd = (event: DragEndEvent): void => {
+        const { active, over } = event
+
+        if (over && active.id !== over.id) {
+            const fromIndex = variants.findIndex((_, index) => `variant-${index}` === active.id)
+            const toIndex = variants.findIndex((_, index) => `variant-${index}` === over.id)
+
+            if (fromIndex !== -1 && toIndex !== -1) {
+                reorderVariants(fromIndex, toIndex)
+            }
+        }
+
+        setActiveId(null)
+    }
+
+    const getActiveVariant = (): MultivariateFlagVariant | null => {
+        if (!activeId) {
+            return null
+        }
+        const index = variants.findIndex((_, index) => `variant-${index}` === String(activeId))
+        return index !== -1 ? variants[index] : null
+    }
+
+    // Calculate active variant index for drag overlay
+    const activeVariantIndex = activeId ? variants.findIndex((_, index) => `variant-${index}` === String(activeId)) : -1
+
+    // Calculate expand/collapse button state
+    const allVariantKeys = variants.map((_, index) => `variant-${index}`)
+    const allExpanded = allVariantKeys.every((key) => openVariants.includes(key))
+    const anyExpanded = openVariants.length > 0
 
     if (!featureFlag) {
         return (
@@ -162,7 +377,7 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                 props={props}
                 formKey="featureFlag"
                 enableFormOnSubmit
-                className="deprecated-space-y-4"
+                className="flex flex-col gap-4"
             >
                 <SceneTitleSection
                     name={featureFlag.key || 'New feature flag'}
@@ -170,8 +385,12 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                         type: featureFlag.active ? 'feature_flag' : 'feature_flag_off',
                     }}
                     forceBackTo={
-                        isNewFeatureFlag && featureFlagsV2Enabled
-                            ? { key: 'FeatureFlagTemplates', name: 'Templates', path: urls.featureFlagTemplates() }
+                        isNewFeatureFlag
+                            ? {
+                                  key: 'FeatureFlagTemplates',
+                                  name: 'Templates',
+                                  path: urls.featureFlagTemplates(),
+                              }
                             : undefined
                     }
                     actions={
@@ -214,12 +433,26 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                 <Field
                                     name="key"
                                     label="Flag key"
-                                    info="Unique identifier used in your code. Cannot be changed after creation."
+                                    info="Unique identifier used in your code."
+                                    help={
+                                        !isNewFeatureFlag &&
+                                        originalFeatureFlag &&
+                                        featureFlag.key !== originalFeatureFlag.key ? (
+                                            <span className="text-warning">
+                                                <b>Warning! </b>Changing this key will break any existing code that
+                                                references it (e.g.{' '}
+                                                <code className="text-xs bg-fill-secondary rounded px-1 py-0.5">
+                                                    getFeatureFlag('{originalFeatureFlag.key}')
+                                                </code>
+                                                ). Make sure to update all SDK calls and integrations.
+                                            </span>
+                                        ) : undefined
+                                    }
                                 >
                                     {({ value, onChange }) => (
                                         <Input
                                             value={value}
-                                            onChange={onChange}
+                                            onChange={(v) => onChange(slugifyFeatureFlagKey(v))}
                                             data-attr="feature-flag-key"
                                             className="ph-ignore-input"
                                             autoComplete="off"
@@ -242,29 +475,45 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                 <Divider />
 
                                 <Field name="active">
-                                    {({ value, onChange }) => (
-                                        <Switch
-                                            checked={value}
-                                            onChange={onChange}
-                                            label={
-                                                <span className="flex items-center gap-1">
-                                                    <span>Enabled</span>
-                                                    <Tooltip title="When disabled, all SDKs return false without checking release conditions.">
-                                                        <IconInfo className="text-secondary text-base" />
-                                                    </Tooltip>
-                                                </span>
-                                            }
-                                            bordered
-                                            fullWidth
-                                            data-attr="feature-flag-enabled"
-                                        />
-                                    )}
+                                    {({ value, onChange }) => {
+                                        const requiresApprovalToEnable =
+                                            isNewFeatureFlag &&
+                                            isApprovalRequired(ApprovalActionKey.FEATURE_FLAG_ENABLE)
+
+                                        if (requiresApprovalToEnable && value) {
+                                            queueMicrotask(() => onChange(false))
+                                        }
+
+                                        return (
+                                            <Switch
+                                                checked={value}
+                                                onChange={onChange}
+                                                disabledReason={
+                                                    requiresApprovalToEnable
+                                                        ? 'Enabling feature flags requires approval. Create the flag first, then enable it.'
+                                                        : undefined
+                                                }
+                                                label={
+                                                    <span className="flex items-center gap-1">
+                                                        <span>Enabled</span>
+                                                        <Tooltip title="When disabled, all SDKs return false without checking release conditions.">
+                                                            <IconInfo className="text-secondary text-base" />
+                                                        </Tooltip>
+                                                    </span>
+                                                }
+                                                bordered
+                                                fullWidth
+                                                data-attr="feature-flag-enabled"
+                                            />
+                                        )
+                                    }}
                                 </Field>
                             </div>
 
-                            {/* Advanced options - collapsed by default */}
+                            {/* Advanced options - collapsed by default unless opened via overview pencil */}
                             <Collapse
                                 className="bg-bg-light"
+                                defaultActiveKey={expandAdvancedOnEdit ? 'advanced' : undefined}
                                 panels={[
                                     {
                                         key: 'advanced',
@@ -273,58 +522,44 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                                 <div className="py-1">
                                                     <div className="font-semibold">Advanced options</div>
                                                     <div className="text-secondary text-sm font-normal">
-                                                        Tags, evaluation contexts, runtime settings, and persistence.
+                                                        Tags,{hasEvaluationContexts ? ' evaluation contexts,' : ''}{' '}
+                                                        runtime settings, and persistence.
                                                     </div>
                                                 </div>
                                             ),
                                         },
                                         content: (
                                             <div className="flex flex-col gap-4">
-                                                {/* Tags section */}
+                                                {/* Tags and evaluation contexts */}
                                                 <div className="flex flex-col gap-2">
-                                                    <label className="text-sm font-medium flex items-center gap-1">
-                                                        {hasEvaluationTags ? 'Tags & evaluation contexts' : 'Tags'}
-                                                        <Tooltip
-                                                            title={
-                                                                hasEvaluationTags ? (
-                                                                    <>
-                                                                        Use tags to organize flags. Mark a tag as an
-                                                                        evaluation context to restrict where this flag
-                                                                        can evaluate.{' '}
-                                                                        <Link
-                                                                            to="https://hanzo.ai/docs/feature-flags/evaluation-contexts"
-                                                                            target="_blank"
-                                                                        >
-                                                                            Learn more
-                                                                        </Link>
-                                                                    </>
-                                                                ) : (
-                                                                    'Organize and filter your flags.'
-                                                                )
-                                                            }
-                                                            interactive={hasEvaluationTags}
-                                                        >
-                                                            <IconInfo className="text-secondary text-base" />
-                                                        </Tooltip>
-                                                    </label>
-                                                    {hasEvaluationTags ? (
+                                                    {!hasEvaluationContexts && (
+                                                        <label className="text-sm font-medium flex items-center gap-1">
+                                                            Tags
+                                                            <Tooltip title="Organize and filter your flags.">
+                                                                <IconInfo className="text-secondary text-base" />
+                                                            </Tooltip>
+                                                        </label>
+                                                    )}
+                                                    {hasEvaluationContexts ? (
                                                         <Field name="tags">
                                                             {({ value: formTags, onChange: onChangeTags }) => (
-                                                                <Field name="evaluation_tags">
+                                                                <Field name="evaluation_contexts">
                                                                     {({
-                                                                        value: formEvalTags,
-                                                                        onChange: onChangeEvalTags,
+                                                                        value: formEvalContexts,
+                                                                        onChange: onChangeEvalContexts,
                                                                     }) => (
-                                                                        <FeatureFlagEvaluationTags
+                                                                        <FeatureFlagEvaluationContexts
                                                                             tags={formTags}
-                                                                            evaluationTags={formEvalTags || []}
+                                                                            evaluationContexts={formEvalContexts || []}
                                                                             context="form"
                                                                             onChange={(
                                                                                 updatedTags,
-                                                                                updatedEvaluationTags
+                                                                                updatedEvaluationContexts
                                                                             ) => {
                                                                                 onChangeTags(updatedTags)
-                                                                                onChangeEvalTags(updatedEvaluationTags)
+                                                                                onChangeEvalContexts(
+                                                                                    updatedEvaluationContexts
+                                                                                )
                                                                             }}
                                                                             tagsAvailable={availableTags.filter(
                                                                                 (tag: string) =>
@@ -421,37 +656,42 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                                     />
                                                 </Field>
 
-                                                <Divider className="my-1" />
+                                                {/* Persistence - hide when device ID bucketing is selected */}
+                                                {featureFlag.bucketing_identifier !==
+                                                    FeatureFlagBucketingIdentifier.DEVICE_ID && (
+                                                    <>
+                                                        <Divider className="my-1" />
 
-                                                {/* Persistence */}
-                                                <Field
-                                                    name="ensure_experience_continuity"
-                                                    label="Persistence"
-                                                    labelClassName="text-sm font-medium"
-                                                    info={
-                                                        <>
-                                                            Keep flag values consistent before and after login. Requires
-                                                            anonymous user profiles.{' '}
-                                                            <Link
-                                                                to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
-                                                                target="_blank"
-                                                            >
-                                                                Learn more
-                                                            </Link>
-                                                        </>
-                                                    }
-                                                >
-                                                    {({ value, onChange }) => (
-                                                        <Switch
-                                                            checked={value}
-                                                            onChange={onChange}
-                                                            bordered
-                                                            fullWidth
-                                                            label="Persist flag across authentication steps"
-                                                            data-attr="feature-flag-persist-across-auth"
-                                                        />
-                                                    )}
-                                                </Field>
+                                                        <Field
+                                                            name="ensure_experience_continuity"
+                                                            label="Persistence"
+                                                            labelClassName="text-sm font-medium"
+                                                            info={
+                                                                <>
+                                                                    Keep flag values consistent before and after login.
+                                                                    Requires anonymous user profiles.{' '}
+                                                                    <Link
+                                                                        to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
+                                                                        target="_blank"
+                                                                    >
+                                                                        Learn more
+                                                                    </Link>
+                                                                </>
+                                                            }
+                                                        >
+                                                            {({ value, onChange }) => (
+                                                                <Switch
+                                                                    checked={value}
+                                                                    onChange={onChange}
+                                                                    bordered
+                                                                    fullWidth
+                                                                    label="Persist flag across authentication steps"
+                                                                    data-attr="feature-flag-persist-across-auth"
+                                                                />
+                                                            )}
+                                                        </Field>
+                                                    </>
+                                                )}
                                             </div>
                                         ),
                                     },
@@ -461,89 +701,54 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
 
                         {/* Right column */}
                         <div className="flex-2 flex flex-col gap-4" style={{ minWidth: '30rem' }}>
-                            {/* Flag type card */}
+                            {/* Flag type cards */}
                             <div className="rounded border p-3 bg-bg-light gap-4 flex flex-col">
                                 <div className="flex flex-col gap-2">
                                     <Label info="Changing type may remove existing variants or payloads.">
                                         Flag type
                                     </Label>
-                                    <Select
-                                        fullWidth
-                                        value={
-                                            featureFlag.is_remote_configuration
-                                                ? 'remote_config'
-                                                : multivariateEnabled
-                                                  ? 'multivariate'
-                                                  : 'boolean'
-                                        }
-                                        onChange={(value) => {
-                                            if (value === 'remote_config') {
-                                                setFeatureFlag({
-                                                    ...featureFlag,
-                                                    is_remote_configuration: true,
-                                                })
-                                                // setMultivariateEnabled(false) cleans up variant payloads via setMultivariateOptions(null)
-                                                setMultivariateEnabled(false)
-                                            } else if (value === 'multivariate') {
-                                                setFeatureFlag({
-                                                    ...featureFlag,
-                                                    is_remote_configuration: false,
-                                                    filters: {
-                                                        ...featureFlag.filters,
-                                                        // Clear boolean payload when switching to multivariate
-                                                        payloads: {},
-                                                    },
-                                                })
-                                                setMultivariateEnabled(true)
-                                            } else {
-                                                setFeatureFlag({
-                                                    ...featureFlag,
-                                                    is_remote_configuration: false,
-                                                })
-                                                // setMultivariateEnabled(false) cleans up variant payloads via setMultivariateOptions(null)
-                                                setMultivariateEnabled(false)
-                                            }
-                                        }}
-                                        options={[
-                                            {
-                                                label: (
-                                                    <div className="flex flex-col">
-                                                        <span className="font-medium">Boolean</span>
-                                                        <span className="text-xs text-muted">
-                                                            Release toggle (boolean) with optional static payload
-                                                        </span>
-                                                    </div>
-                                                ),
-                                                value: 'boolean',
-                                                icon: <IconFlag />,
-                                            },
-                                            {
-                                                label: (
-                                                    <div className="flex flex-col">
-                                                        <span className="font-medium">Multivariate</span>
-                                                        <span className="text-xs text-muted">
-                                                            Multiple variants with rollout percentages (A/B/n test)
-                                                        </span>
-                                                    </div>
-                                                ),
-                                                value: 'multivariate',
-                                                icon: <IconList />,
-                                            },
-                                            {
-                                                label: (
-                                                    <div className="flex flex-col">
-                                                        <span className="font-medium">Remote config</span>
-                                                        <span className="text-xs text-muted">
-                                                            Single payload without feature flag logic
-                                                        </span>
-                                                    </div>
-                                                ),
-                                                value: 'remote_config',
-                                                icon: <IconCode />,
-                                            },
-                                        ]}
+                                    <div
+                                        className="grid grid-cols-1 md:grid-cols-3 gap-3"
+                                        role="radiogroup"
+                                        aria-label="Flag type"
                                         data-attr="feature-flag-type"
-                                    />
+                                    >
+                                        {FLAG_TYPE_OPTIONS.map((option) => {
+                                            const isSelected = currentFlagType === option.value
+                                            return (
+                                                <div
+                                                    key={option.value}
+                                                    role="radio"
+                                                    aria-checked={isSelected}
+                                                    tabIndex={0}
+                                                    className={`rounded p-3 cursor-pointer transition-colors ${
+                                                        isSelected
+                                                            ? 'bg-accent-highlight-light border-2 border-accent'
+                                                            : 'border bg-surface-primary border-primary hover:bg-fill-button-tertiary-hover'
+                                                    }`}
+                                                    onClick={() => onSelectFlagType(option.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                            e.preventDefault()
+                                                            onSelectFlagType(option.value)
+                                                        }
+                                                    }}
+                                                    data-attr={`feature-flag-type-${option.value}`}
+                                                >
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            {option.icon}
+                                                            <span className="font-medium flex-1">{option.label}</span>
+                                                            {isSelected && (
+                                                                <IconCheckCircle className="text-accent text-base" />
+                                                            )}
+                                                        </div>
+                                                        <span className="text-xs text-muted">{option.description}</span>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
                                     <div className="text-secondary text-xs mt-1">
                                         {featureFlag.is_remote_configuration ? (
                                             <>
@@ -574,120 +779,173 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center justify-between">
                                             <Label>Variants</Label>
-                                            <Button
-                                                size="small"
-                                                icon={<IconBalance />}
-                                                onClick={distributeVariantsEqually}
-                                                tooltip="Distribute rollout percentages equally"
-                                            />
+                                            <div className="flex gap-1">
+                                                {!allExpanded && variants.length > 1 && (
+                                                    <Button
+                                                        size="small"
+                                                        icon={<IconExpand />}
+                                                        onClick={() => setOpenVariants(allVariantKeys)}
+                                                        tooltip="Expand all variants"
+                                                    >
+                                                        Expand all
+                                                    </Button>
+                                                )}
+                                                {anyExpanded && (
+                                                    <Button
+                                                        size="small"
+                                                        icon={<IconCollapse />}
+                                                        onClick={() => setOpenVariants([])}
+                                                        tooltip="Collapse all variants"
+                                                    >
+                                                        Collapse all
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    size="small"
+                                                    icon={<IconBalance />}
+                                                    onClick={distributeVariantsEqually}
+                                                    tooltip="Distribute rollout percentages equally"
+                                                />
+                                            </div>
                                         </div>
 
-                                        <Collapse
-                                            multiple
-                                            activeKeys={openVariants}
-                                            onChange={setOpenVariants}
-                                            panels={variants.map((variant, index) => ({
-                                                key: `variant-${index}`,
-                                                header: (
-                                                    <div className="flex gap-2 items-center">
-                                                        <Lettermark
-                                                            name={alphabet[index] ?? String(index + 1)}
-                                                            color={LettermarkColor.Gray}
-                                                            size="small"
-                                                        />
-                                                        <span className="text-sm font-medium">
-                                                            {variant.key || `Variant ${index + 1}`}
-                                                        </span>
-                                                        <span className="text-xs text-muted">
-                                                            ({variant.rollout_percentage || 0}%)
-                                                        </span>
-                                                    </div>
-                                                ),
-                                                content: (
-                                                    <div className="flex flex-col gap-2">
-                                                        <Label>Variant key</Label>
-                                                        <Input
-                                                            placeholder="Enter a variant key - e.g. control, test, variant_1"
-                                                            value={variant.key}
-                                                            onChange={(value) => updateVariant(index, 'key', value)}
-                                                            status={variantErrors[index]?.key ? 'danger' : undefined}
-                                                            data-attr={`feature-flag-variant-key-${index}`}
-                                                        />
-                                                        {variantErrors[index]?.key && (
-                                                            <span className="text-danger text-xs">
-                                                                {variantErrors[index].key}
-                                                            </span>
-                                                        )}
+                                        <DndContext
+                                            sensors={sensors}
+                                            onDragStart={handleDragStart}
+                                            onDragEnd={handleDragEnd}
+                                        >
+                                            <SortableContext
+                                                items={variants.map((_, index) => `variant-${index}`)}
+                                                strategy={verticalListSortingStrategy}
+                                            >
+                                                <Collapse
+                                                    multiple
+                                                    activeKeys={openVariants}
+                                                    onChange={setOpenVariants}
+                                                    className="mb-3 [&_.CollapsePanel:not(:last-child)]:border-b [&_.CollapsePanel:not(:last-child)]:border-border-secondary"
+                                                    panels={variants.map((variant, index) => ({
+                                                        key: `variant-${index}`,
+                                                        className: '!pl-[2.5rem] dark:bg-surface-secondary',
+                                                        header: (
+                                                            <SortableVariantHeader
+                                                                variant={variant}
+                                                                index={index}
+                                                                variants={variants}
+                                                                alphabet={alphabet}
+                                                                moveVariantUp={moveVariantUp}
+                                                                moveVariantDown={moveVariantDown}
+                                                            />
+                                                        ),
+                                                        content: (
+                                                            <div className="flex flex-col gap-2">
+                                                                <Label>Variant key</Label>
+                                                                <Input
+                                                                    placeholder="Enter a variant key - e.g. control, test, variant_1"
+                                                                    value={variant.key}
+                                                                    onChange={(value) =>
+                                                                        updateVariant(index, 'key', value)
+                                                                    }
+                                                                    status={
+                                                                        variantErrors[index]?.key ? 'danger' : undefined
+                                                                    }
+                                                                    data-attr={`feature-flag-variant-key-${index}`}
+                                                                />
+                                                                {variantErrors[index]?.key && (
+                                                                    <span className="Field--error text-danger text-xs">
+                                                                        {variantErrors[index].key}
+                                                                    </span>
+                                                                )}
 
-                                                        <Label>Rollout percentage</Label>
-                                                        <Input
-                                                            type="number"
-                                                            min={0}
-                                                            max={100}
-                                                            value={variant.rollout_percentage || 0}
-                                                            onChange={(value) =>
-                                                                updateVariant(
-                                                                    index,
-                                                                    'rollout_percentage',
-                                                                    parseInt(value?.toString() || '0')
-                                                                )
-                                                            }
-                                                            suffix={<span>%</span>}
-                                                            data-attr={`feature-flag-variant-rollout-${index}`}
-                                                        />
+                                                                <Label>Rollout percentage</Label>
+                                                                <PercentageInput
+                                                                    value={variant.rollout_percentage}
+                                                                    onChange={(value) =>
+                                                                        updateVariant(
+                                                                            index,
+                                                                            'rollout_percentage',
+                                                                            value
+                                                                        )
+                                                                    }
+                                                                    data-attr={`feature-flag-variant-rollout-${index}`}
+                                                                />
 
-                                                        <Label>Description</Label>
-                                                        <TextArea
-                                                            placeholder="Enter an optional description for the variant"
-                                                            value={variant.name || ''}
-                                                            onChange={(value) => updateVariant(index, 'name', value)}
-                                                            data-attr={`feature-flag-variant-description-${index}`}
-                                                        />
+                                                                <Label>Description</Label>
+                                                                <TextArea
+                                                                    placeholder="Enter an optional description for the variant"
+                                                                    value={variant.name || ''}
+                                                                    onChange={(value) =>
+                                                                        updateVariant(index, 'name', value)
+                                                                    }
+                                                                    data-attr={`feature-flag-variant-description-${index}`}
+                                                                />
 
-                                                        <Label info="Optionally return JSON data when this variant matches.">
-                                                            Payload
-                                                        </Label>
-                                                        <JSONEditorInput
-                                                            onChange={(value) => updateVariantPayload(index, value)}
-                                                            value={featureFlag.filters?.payloads?.[variant.key]}
-                                                            placeholder='{"key": "value"}'
-                                                        />
+                                                                <Label info="Optionally return JSON data when this variant matches.">
+                                                                    Payload
+                                                                </Label>
+                                                                <JSONEditorInput
+                                                                    onChange={(value) =>
+                                                                        updateVariantPayload(index, value)
+                                                                    }
+                                                                    value={featureFlag.filters?.payloads?.[index]}
+                                                                    placeholder='{"key": "value"}'
+                                                                />
 
-                                                        {variants.length > 1 && <Divider />}
-                                                        {variants.length > 1 && (
-                                                            <Button
-                                                                type="secondary"
-                                                                status="danger"
+                                                                {variants.length > 1 && <Divider />}
+                                                                {variants.length > 1 && (
+                                                                    <Button
+                                                                        type="secondary"
+                                                                        status="danger"
+                                                                        size="small"
+                                                                        icon={<IconTrash />}
+                                                                        onClick={() => {
+                                                                            const variantKey =
+                                                                                variant.key || `Variant ${index + 1}`
+                                                                            const hasPayload =
+                                                                                !!featureFlag.filters?.payloads?.[index]
+                                                                            Dialog.open({
+                                                                                title: `Remove variant "${variantKey}"?`,
+                                                                                description: hasPayload
+                                                                                    ? 'This variant has a payload configured. Both the variant and its payload will be deleted.'
+                                                                                    : 'This action cannot be undone.',
+                                                                                primaryButton: {
+                                                                                    children: 'Remove variant',
+                                                                                    status: 'danger',
+                                                                                    onClick: () => removeVariant(index),
+                                                                                },
+                                                                                secondaryButton: {
+                                                                                    children: 'Cancel',
+                                                                                },
+                                                                            })
+                                                                        }}
+                                                                    >
+                                                                        Remove variant
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        ),
+                                                    }))}
+                                                />
+                                            </SortableContext>
+                                            <DragOverlay>
+                                                {activeId ? (
+                                                    <div className="bg-bg-light border rounded p-3 shadow-lg opacity-95">
+                                                        <div className="flex gap-2 items-center">
+                                                            <Lettermark
+                                                                name={alphabet[activeVariantIndex] ?? '?'}
+                                                                color={LettermarkColor.Gray}
                                                                 size="small"
-                                                                icon={<IconTrash />}
-                                                                onClick={() => {
-                                                                    const variantKey =
-                                                                        variant.key || `Variant ${index + 1}`
-                                                                    const hasPayload =
-                                                                        !!featureFlag.filters?.payloads?.[variant.key]
-                                                                    Dialog.open({
-                                                                        title: `Remove variant "${variantKey}"?`,
-                                                                        description: hasPayload
-                                                                            ? 'This variant has a payload configured. Both the variant and its payload will be deleted.'
-                                                                            : 'This action cannot be undone.',
-                                                                        primaryButton: {
-                                                                            children: 'Remove variant',
-                                                                            status: 'danger',
-                                                                            onClick: () => removeVariant(index),
-                                                                        },
-                                                                        secondaryButton: {
-                                                                            children: 'Cancel',
-                                                                        },
-                                                                    })
-                                                                }}
-                                                            >
-                                                                Remove variant
-                                                            </Button>
-                                                        )}
+                                                            />
+                                                            <span className="text-sm font-medium">
+                                                                {getActiveVariant()?.key || 'Variant'}
+                                                            </span>
+                                                            <span className="text-xs text-muted tabular-nums">
+                                                                ({getActiveVariant()?.rollout_percentage || 0}%)
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                ),
-                                            }))}
-                                        />
+                                                ) : null}
+                                            </DragOverlay>
+                                        </DndContext>
 
                                         <div>
                                             <Button
@@ -710,13 +968,56 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                         </Label>
                                         <div className="text-secondary text-xs mb-1">
                                             Remote config flags always return the payload. Access it via{' '}
-                                            <code className="text-xs">getFeatureFlagPayload</code>.
+                                            <code className="text-xs">
+                                                {featureFlag.has_encrypted_payloads
+                                                    ? 'getRemoteConfigPayload'
+                                                    : 'getFeatureFlagPayload'}
+                                            </code>
+                                            . Using standard SDK methods such as{' '}
+                                            <code className="text-xs">getFeatureFlag</code> or{' '}
+                                            <code className="text-xs">isFeatureEnabled</code> will always return{' '}
+                                            <code className="text-xs">true</code>.
                                         </div>
-                                        <Group name={['filters', 'payloads']}>
-                                            <Field name="true">
-                                                <JSONEditorInput placeholder='Examples: "A string", 2500, {"key": "value"}' />
-                                            </Field>
-                                        </Group>
+                                        <Field name="has_encrypted_payloads">
+                                            {({ value, onChange }) => (
+                                                <Checkbox
+                                                    id="flag-payload-encrypted-checkbox"
+                                                    label="Encrypt remote configuration payload"
+                                                    onChange={() => onChange(!value)}
+                                                    checked={value}
+                                                    data-attr="feature-flag-payload-encrypted-checkbox"
+                                                    disabledReason={
+                                                        hasEncryptedPayloadBeenSaved &&
+                                                        'An encrypted payload has already been saved for this flag. Reset the payload or create a new flag to create an unencrypted configuration payload.'
+                                                    }
+                                                />
+                                            )}
+                                        </Field>
+                                        <div className="flex gap-2 min-w-0">
+                                            <Group name={['filters', 'payloads']}>
+                                                <Field name="true" className="grow min-w-0">
+                                                    <JSONEditorInput
+                                                        readOnly={
+                                                            featureFlag.has_encrypted_payloads &&
+                                                            Boolean(featureFlag.filters?.payloads?.['true'])
+                                                        }
+                                                        placeholder='Examples: "A string", 2500, {"key": "value"}'
+                                                    />
+                                                </Field>
+                                            </Group>
+                                            {featureFlag.has_encrypted_payloads && (
+                                                <Button
+                                                    className="shrink-0"
+                                                    icon={<IconTrash />}
+                                                    type="secondary"
+                                                    size="small"
+                                                    status="danger"
+                                                    onClick={confirmEncryptedPayloadReset}
+                                                >
+                                                    Reset
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                                 {!multivariateEnabled && !featureFlag.is_remote_configuration && (
@@ -759,9 +1060,30 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                 <div className="rounded border p-3 bg-bg-light">
                                     <FeatureFlagReleaseConditionsCollapsible
                                         id={String(props.id)}
+                                        flagId={props.id}
                                         filters={featureFlag.filters}
                                         onChange={setFeatureFlagFilters}
                                         variants={nonEmptyVariants}
+                                        isDisabled={!featureFlag.active}
+                                        bucketingIdentifier={featureFlag.bucketing_identifier}
+                                        onBucketingIdentifierChange={(value: FeatureFlagBucketingIdentifier | null) => {
+                                            // Always go through setFeatureFlag so this caller and
+                                            // FeatureFlagReleaseConditions use the same shape — listeners on
+                                            // setBucketingIdentifier (variant reset, telemetry, autosave) won't
+                                            // silently fire on one path and not the other. Switching to device
+                                            // bucketing also disables persist across auth, since the two are
+                                            // incompatible.
+                                            const ensureContinuity =
+                                                value === FeatureFlagBucketingIdentifier.DEVICE_ID
+                                                    ? false
+                                                    : featureFlag.ensure_experience_continuity
+                                            setFeatureFlag({
+                                                ...featureFlag,
+                                                bucketing_identifier: value,
+                                                ensure_experience_continuity: ensureContinuity,
+                                            })
+                                        }}
+                                        evaluationRuntime={featureFlag.evaluation_runtime}
                                     />
                                 </div>
                             )}

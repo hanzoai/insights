@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { Button, SegmentedButton, Tag } from '@hanzo/elements'
+import { Button, SegmentedButton } from '@hanzo/elements'
 
-import { SegmentedSelect } from 'lib/elements/SegmentedSelect'
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { IconRecordingClip } from 'lib/elements/icons'
-import { colonDelimitedDuration } from 'lib/utils'
+import { SegmentedSelect } from 'lib/elements/SegmentedSelect'
 import { cn } from 'lib/utils/css-classes'
+import { colonDelimitedDuration } from 'lib/utils/durations'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 import { ExporterFormat } from '~/types'
 
 interface ClipTimes {
@@ -141,14 +141,9 @@ function ClipRecording_({ current, className }: { current: string; className?: s
 
     const tooltipContent = useMemo(
         () => (
-            <div className="flex items-center gap-2">
-                <span>
-                    Create clip around {current} <KeyboardShortcut x />
-                </span>
-                <Tag type="warning" size="small">
-                    BETA
-                </Tag>
-            </div>
+            <span>
+                Create clip around {current} <KeyboardShortcut x />
+            </span>
         ),
         [current]
     )

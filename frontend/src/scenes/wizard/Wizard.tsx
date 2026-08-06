@@ -1,12 +1,17 @@
 import { useActions, useValues } from 'kea'
 
-import { HeartMascot, SurprisedMascot } from 'lib/components/mascots'
+import * as shockedPng from '@hanzo/brand/hoggies/png/shocked'
+
+import { pngHoggie } from 'lib/brand/hoggies'
+import { HeartHog } from 'lib/components/mascots'
 import { Button } from 'lib/elements/Button'
 import { Select } from 'lib/elements/Select'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { wizardLogic } from './wizardLogic'
+
+const MascotShocked = pngHoggie(shockedPng)
 
 export const scene: SceneExport = {
     component: Wizard,
@@ -66,7 +71,7 @@ export function Wizard(): JSX.Element {
                     <>
                         <h1 className="text-3xl font-bold">Success!</h1>
                         <div className="max-w-60 mb-12">
-                            <HeartMascot className="w-48 h-48" />
+                            <HeartHog className="w-48 h-48" />
                         </div>
                         <p className="text-lg">You're all set! You can return to the Insights setup wizard.</p>
                     </>
@@ -74,7 +79,7 @@ export function Wizard(): JSX.Element {
                 {view === 'invalid' && (
                     <>
                         <h1 className="text-xl font-bold">Something went wrong!</h1>
-                        <SurprisedMascot className="h-48 w-48" />
+                        <MascotShocked className="h-48 w-48" />
                         <p className="text-lg">
                             There was a problem authenticating the setup wizard. Please try again later.
                         </p>

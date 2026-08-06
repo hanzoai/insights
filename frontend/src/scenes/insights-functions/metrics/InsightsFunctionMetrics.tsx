@@ -1,14 +1,22 @@
 import { useValues } from 'kea'
 
 import { getColorVar } from 'lib/colors'
-import { AppMetricSummary } from 'lib/components/AppMetrics/AppMetricSummary'
 import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'
-import { AppMetricsTrends } from 'lib/components/AppMetrics/AppMetricsTrends'
 import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
+import { AppMetricsTrends } from 'lib/components/AppMetrics/AppMetricsTrends'
+import { AppMetricSummary } from 'lib/components/AppMetrics/AppMetricSummary'
 
-const CUSTOMFUNCTION_METRIC_KEYS = ['succeeded', 'failed', 'filtered', 'disabled_permanently', 'quota_limited'] as const
+const HOGFUNCTION_METRIC_KEYS = [
+    'succeeded',
+    'failed',
+    'filtered',
+    'dropped',
+    'budget_skipped',
+    'disabled_permanently',
+    'quota_limited',
+] as const
 
-export const CUSTOMFUNCTION_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
+export const HOGFUNCTION_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
     succeeded: {
         name: 'Success',
         description: 'Total number of events processed successfully',
@@ -23,6 +31,16 @@ export const CUSTOMFUNCTION_METRICS_INFO: Record<string, { name: string; descrip
         name: 'Filtered',
         description: 'Total number of events that were filtered out',
         color: getColorVar('muted'),
+    },
+    dropped: {
+        name: 'Dropped',
+        description: 'Total number of events or log records dropped by the transformation',
+        color: getColorVar('muted'),
+    },
+    budget_skipped: {
+        name: 'Budget skipped',
+        description: 'Total number of log records passed through untransformed because the time budget ran out',
+        color: getColorVar('warning'),
     },
     disabled_permanently: {
         name: 'Disabled',
@@ -39,13 +57,13 @@ export const CUSTOMFUNCTION_METRICS_INFO: Record<string, { name: string; descrip
 
 export function InsightsFunctionMetrics({ id }: { id: string }): JSX.Element {
     const logic = appMetricsLogic({
-        logicKey: `insights-function-metrics-${id}`,
+        logicKey: `script-function-metrics-${id}`,
         loadOnMount: true,
         loadOnChanges: true,
         forceParams: {
             appSource: 'insights_function',
             appSourceId: id,
-            metricName: [...CUSTOMFUNCTION_METRIC_KEYS],
+            metricName: [...HOGFUNCTION_METRIC_KEYS],
             breakdownBy: 'metric_name',
         },
     })
@@ -55,19 +73,19 @@ export function InsightsFunctionMetrics({ id }: { id: string }): JSX.Element {
     return (
         <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2 flex-wrap justify-end">
-                <AppMetricsFilters logicKey={`insights-function-metrics-${id}`} />
+                <AppMetricsFilters logicKey={`script-function-metrics-${id}`} />
             </div>
 
             <div className="flex flex-row gap-2 flex-wrap justify-center">
-                {CUSTOMFUNCTION_METRIC_KEYS.map((key) => (
+                {HOGFUNCTION_METRIC_KEYS.map((key) => (
                     <AppMetricSummary
                         key={key}
-                        name={CUSTOMFUNCTION_METRICS_INFO[key].name}
-                        description={CUSTOMFUNCTION_METRICS_INFO[key].description}
+                        name={HOGFUNCTION_METRICS_INFO[key].name}
+                        description={HOGFUNCTION_METRICS_INFO[key].description}
                         loading={appMetricsTrendsLoading}
                         timeSeries={getSingleTrendSeries(key)}
                         previousPeriodTimeSeries={getSingleTrendSeries(key, true)}
-                        color={CUSTOMFUNCTION_METRICS_INFO[key].color}
+                        color={HOGFUNCTION_METRICS_INFO[key].color}
                         colorIfZero={getColorVar('muted')}
                         hideIfZero={!['succeeded', 'failed', 'filtered'].includes(key)}
                     />

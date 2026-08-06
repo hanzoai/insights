@@ -6,7 +6,6 @@ from insights.schema import (
     CachedInsightsQLQueryResponse,
     DashboardFilter,
     DateRange,
-    InsightsQLASTQuery,
     InsightsQLFilters,
     InsightsQLQuery,
     InsightsQLQueryResponse,
@@ -14,21 +13,29 @@ from insights.schema import (
 
 from insights.insightsql import ast
 from insights.insightsql.constants import InsightsQLGlobalSettings
+from insights.insightsql.direct_connection import INVALID_CONNECTION_ID_ERROR
+from insights.insightsql.errors import ExposedInsightsQLError
 from insights.insightsql.filters import replace_filters
-from insights.insightsql.parser import parse_select
+from insights.insightsql.metadata import get_table_names
+from insights.insightsql.parser import CacheOrigin, parse_select
 from insights.insightsql.placeholders import find_placeholders, replace_placeholders
 from insights.insightsql.query import execute_insightsql_query
-from insights.insightsql.utils import deserialize_hx_ast
+from insights.insightsql.user_query_validator import validate_user_query
 from insights.insightsql.variables import replace_variables
 
 from insights import settings as app_settings
 from insights.caching.utils import ThresholdMode, staleness_threshold_map
+from insights.datastore.query_tagging import tag_contains_user_insightsql
 from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
 
+from products.warehouse_sources.backend.facade.models import get_direct_external_data_source_for_connection
+
+_INFORMATION_SCHEMA_PREFIX = "system.information_schema."
+
 
 class InsightsQLQueryRunner(AnalyticsQueryRunner[InsightsQLQueryResponse]):
-    query: InsightsQLQuery | InsightsQLASTQuery
+    query: InsightsQLQuery
     cached_response: CachedInsightsQLQueryResponse
     settings: Optional[InsightsQLGlobalSettings]
 
@@ -38,29 +45,39 @@ class InsightsQLQueryRunner(AnalyticsQueryRunner[InsightsQLQueryResponse]):
         settings: Optional[InsightsQLGlobalSettings] = None,
         **kwargs,
     ):
-        self.settings = settings or InsightsQLGlobalSettings(allow_experimental_analyzer=True)
+        self.settings = settings or InsightsQLGlobalSettings()
         super().__init__(*args, **kwargs)
 
     # Treat SQL query caching like day insight
     def cache_target_age(self, last_refresh: Optional[datetime], lazy: bool = False) -> Optional[datetime]:
         if last_refresh is None:
             return None
-
-        override = self._get_cache_age_override(last_refresh)
-        if override is not None:
-            return override
-
         return last_refresh + staleness_threshold_map[ThresholdMode.LAZY if lazy else ThresholdMode.DEFAULT]["day"]
+
+    def requires_fresh_calculation(self) -> bool:
+        # system.information_schema.* mirrors mutable data-catalog state (metric approval, relationship
+        # acceptance, source certification). A cached row keeps reporting the pre-change status after a
+        # catalog write, so recompute these queries rather than trust the query cache. Cheap to detect:
+        # the schema metadata itself is fast to compute. External-connection queries never touch it.
+        if self.query.connectionId:
+            return False
+        try:
+            table_names = get_table_names(parse_select(self.query.query))
+        except Exception:
+            return False
+        return any(name.lower().startswith(_INFORMATION_SCHEMA_PREFIX) for name in table_names)
 
     def to_query(self) -> ast.SelectQuery | ast.SelectSetQuery:
         values: Optional[dict[str, ast.Expr]] = (
             {key: ast.Constant(value=value) for key, value in self.query.values.items()} if self.query.values else None
         )
         with self.timings.measure("parse_select"):
-            if isinstance(self.query, InsightsQLQuery):
-                parsed_select = parse_select(self.query.query, timings=self.timings, placeholders=values)
-            elif isinstance(self.query, InsightsQLASTQuery):
-                parsed_select = cast(ast.SelectQuery, deserialize_hx_ast(self.query.query))
+            parsed_select = parse_select(
+                self.query.query,
+                timings=self.timings,
+                placeholders=values,
+                cache_origin=CacheOrigin.USER,
+            )
 
         finder = find_placeholders(parsed_select)
         with self.timings.measure("filters"):
@@ -75,7 +92,7 @@ class InsightsQLQueryRunner(AnalyticsQueryRunner[InsightsQLQueryResponse]):
                 var_values: dict[str, Any] = {"variables": var_dict, **values} if values else {"variables": var_dict}
                 if self.query.variables:
                     for var in list(self.query.variables.values()):
-                        var_values["variables"][var.code_name] = var.value
+                        var_dict[var.code_name] = var.value
                     parsed_select = cast(ast.SelectQuery, replace_placeholders(parsed_select, var_values))
 
         return parsed_select
@@ -84,15 +101,7 @@ class InsightsQLQueryRunner(AnalyticsQueryRunner[InsightsQLQueryResponse]):
         return self.to_query()
 
     def _calculate(self) -> InsightsQLQueryResponse:
-        query = self.to_query()
-        paginator = None
-        if isinstance(query, ast.SelectQuery) and not query.limit:
-            paginator = InsightsQLHasMorePaginator.from_limit_context(limit_context=self.limit_context)
-        func = cast(
-            Callable[..., InsightsQLQueryResponse],
-            execute_insightsql_query if paginator is None else paginator.execute_insightsql_query,
-        )
-
+        tag_contains_user_insightsql()
         if (
             self.is_query_service
             and app_settings.API_QUERIES_LEGACY_TEAM_LIST
@@ -104,14 +113,55 @@ class InsightsQLQueryRunner(AnalyticsQueryRunner[InsightsQLQueryResponse]):
             # p95 duration of InsightsQL query is 2.78sec
             self.settings.max_execution_time = 10
 
+        if self.query.connectionId:
+            source = get_direct_external_data_source_for_connection(
+                team_id=self.team.pk, connection_id=self.query.connectionId
+            )
+            if source is None:
+                raise ExposedInsightsQLError(INVALID_CONNECTION_ID_ERROR)
+
+        if self.query.sendRawQuery and self.query.connectionId:
+            return execute_insightsql_query(
+                query_type="InsightsQLQuery",
+                query=self.query.query,
+                filters=self.query.filters,
+                modifiers=self.query.modifiers or self.modifiers,
+                team=self.team,
+                user=self.user,
+                user_access_control=self.user_access_control,
+                timings=self.timings,
+                variables=self.query.variables,
+                connection_id=self.query.connectionId,
+                limit_context=self.limit_context,
+                workload=self.workload,
+                settings=self.settings,
+                send_raw_query=True,
+            )
+
+        query = self.to_query()
+
+        if self.is_query_service:
+            validate_user_query(query, team=self.team)
+
+        paginator = None
+        if isinstance(query, ast.SelectQuery) and not query.limit:
+            paginator = InsightsQLHasMorePaginator.from_limit_context(limit_context=self.limit_context)
+        func = cast(
+            Callable[..., InsightsQLQueryResponse],
+            execute_insightsql_query if paginator is None else paginator.execute_insightsql_query,
+        )
+
         response = func(
             query_type="InsightsQLQuery",
             query=query,
             filters=self.query.filters,
             modifiers=self.query.modifiers or self.modifiers,
             team=self.team,
+            user=self.user,
+            user_access_control=self.user_access_control,
             timings=self.timings,
             variables=self.query.variables,
+            connection_id=self.query.connectionId,
             limit_context=self.limit_context,
             workload=self.workload,
             settings=self.settings,
@@ -128,6 +178,11 @@ class InsightsQLQueryRunner(AnalyticsQueryRunner[InsightsQLQueryResponse]):
                 self.query.filters.dateRange = DateRange()
             self.query.filters.dateRange.date_to = dashboard_filter.date_to
             self.query.filters.dateRange.date_from = dashboard_filter.date_from
+            # The date range is one unit, so never pair the dashboard's bounds with the insight's own
+            # explicitDate (matching apply_dashboard_filters.py; the base QueryRunner still keeps the
+            # insight's flag when the dashboard's is None). Coerced to bool to keep the serialized
+            # value at false rather than null.
+            self.query.filters.dateRange.explicitDate = bool(dashboard_filter.explicitDate)
 
         if dashboard_filter.properties:
             self.query.filters.properties = (self.query.filters.properties or []) + dashboard_filter.properties

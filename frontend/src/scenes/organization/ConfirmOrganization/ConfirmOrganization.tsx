@@ -11,6 +11,7 @@ import { Button } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
 import { Field } from 'lib/elements/Field'
 import { Input } from 'lib/elements/Input/Input'
+import { OtherRegionHint } from 'scenes/authentication/shared/OtherRegionHint'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -26,8 +27,9 @@ export function ConfirmOrganization(): JSX.Element {
     const { setShowNewOrgWarning } = useActions(confirmOrganizationLogic)
 
     return (
-        <BridgePage view="org-creation-confirmation" mascot>
+        <BridgePage view="org-creation-confirmation">
             <h2>Create a new organization</h2>
+            <OtherRegionHint />
             <div className="flex-1">
                 <p className="text-center">
                     <strong>
@@ -77,7 +79,7 @@ export function ConfirmOrganization(): JSX.Element {
                     label="Organization name"
                     help="You can always rename your organization later"
                 >
-                    <Input className="ph-ignore-input" placeholder="Acme Inc" />
+                    <Input className="ph-ignore-input" placeholder="Hogflix Movies" />
                 </Field>
 
                 <SignupRoleSelect />

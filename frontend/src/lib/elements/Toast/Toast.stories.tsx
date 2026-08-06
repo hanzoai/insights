@@ -1,11 +1,18 @@
 import { Meta, StoryObj } from '@storybook/react'
+import { useMountedLogic, useValues } from 'kea'
 import { useEffect } from 'react'
 import { Slide, ToastContainer } from 'react-toastify'
 
+import { STATUS_PAGE_BASE } from 'lib/components/HelpMenu/incidentStatusLogic'
+import { incidentStatusLogic } from 'lib/components/HelpMenu/incidentStatusLogic'
+
+import { useStorybookMocks } from '~/mocks/browser'
+import * as statusPageCritical from '~/mocks/fixtures/_status_page_critical.json'
+
 import { ToastCloseButton, ToastContent, ToastContentProps, toast } from './Toast'
 
-const meta: Meta<typeof ToastContent> = {
-    title: 'Elements/Toast',
+const meta: Meta<ToastContentProps> = {
+    title: 'Lemon UI/Lemon Toast',
     component: ToastContent,
     parameters: {
         testOptions: {
@@ -60,8 +67,6 @@ export const ToastTypes: Story = {
                 position="top-left" // different from app
                 autoClose={false} // different from app
                 transition={Slide}
-                closeOnClick={false}
-                draggable={false}
                 closeButton={<ToastCloseButton />}
                 theme={isDarkModeOn ? 'dark' : 'light'}
             />
@@ -76,7 +81,7 @@ export const BillingError: Story = {
             {
                 type: 'error',
                 message:
-                    'Load experiment failed: This feature is part of the premium Insights offering. To use it, subscribe to Insights Cloud with a generous free tier: https://insights.hanzo.ai/organization/billing',
+                    'Load experiment failed: This feature is part of the premium Insights offering. To use it, subscribe to Insights Cloud with a generous free tier: https://app.hanzo.ai/organization/billing',
             },
         ],
     },
@@ -123,5 +128,49 @@ export const WithProgress: Story = {
                 progress: 0.4,
             } as ToastContentProps,
         ],
+    },
+}
+
+export const ErrorWithIncidentNote: Story = {
+    args: {
+        toasts: [
+            {
+                type: 'error',
+                message: 'An error toast during an incident',
+            },
+        ],
+    },
+    render: (_args, { globals }) => {
+        const isDarkModeOn = globals.theme === 'dark'
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useStorybookMocks({
+            get: {
+                [`${STATUS_PAGE_BASE}/api/v1/summary`]: statusPageCritical,
+            },
+        })
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useMountedLogic(incidentStatusLogic)
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { status } = useValues(incidentStatusLogic)
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useEffect(() => {
+            if (status !== 'operational') {
+                toast.dismiss()
+                toast.error('An error toast during an incident')
+            }
+        }, [status, isDarkModeOn]) // oxlint-disable-line react-hooks/exhaustive-deps
+
+        return (
+            <ToastContainer
+                position="top-left"
+                autoClose={false}
+                transition={Slide}
+                closeButton={<ToastCloseButton />}
+                theme={isDarkModeOn ? 'dark' : 'light'}
+            />
+        )
     },
 }

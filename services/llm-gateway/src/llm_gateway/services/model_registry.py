@@ -4,9 +4,25 @@ import os
 from dataclasses import dataclass
 from typing import ClassVar, Final
 
+from llm_gateway.cloudflare import CLOUDFLARE_ALLOWED_MODELS, is_cloudflare_configured
 from llm_gateway.config import get_settings
+from llm_gateway.modal import (
+    MODAL_ALLOWED_MODELS,
+    MODAL_EXCLUSIVE_MODELS,
+    is_modal_configured,
+    is_modal_model_configured,
+)
 from llm_gateway.products.config import get_product_config
+from llm_gateway.rate_limiting.cost_refresh import COST_ALIASES
 from llm_gateway.rate_limiting.model_cost_service import ModelCost, ModelCostService
+
+# Cloudflare Workers AI models are served via the `@cf/` path (CLOUDFLARE_ALLOWED_MODELS), not
+# through litellm's cost map — so the litellm iteration in get_available_models never surfaces them.
+# Advertise them explicitly on /v1/models when CF creds are configured, else clients that validate a
+# requested model against the listing (e.g. the agent's claude runtime) can't select an `@cf/` model
+# and silently fall back to their default.
+_CLOUDFLARE_PROVIDER: Final[str] = "cloudflare"
+_CLOUDFLARE_DEFAULT_CONTEXT_WINDOW: Final[int] = 128_000
 
 
 @dataclass(frozen=True)
@@ -18,15 +34,19 @@ class ModelInfo:
     supports_vision: bool = False
 
 
-# Map LLM provider names to (settings_attr, env_var) tuples
-# Settings use LLM_GATEWAY_ prefix, but llm also checks unprefixed env vars
+# Map LiteLLM provider names to (settings_attr, env_var) tuples
+# Settings use LLM_GATEWAY_ prefix, but litellm also checks unprefixed env vars
 _PROVIDER_TO_API_KEY: Final[dict[str, tuple[str, str]]] = {
     "openai": ("openai_api_key", "OPENAI_API_KEY"),
     "anthropic": ("anthropic_api_key", "ANTHROPIC_API_KEY"),
-    "vertex_ai": ("gemini_api_key", "GEMINI_API_KEY"),
-    "vertex_ai-language-models": ("gemini_api_key", "GEMINI_API_KEY"),
-    "gemini": ("gemini_api_key", "GEMINI_API_KEY"),
+    "openrouter": ("openrouter_api_key", "OPENROUTER_API_KEY"),
+    "fireworks_ai": ("fireworks_api_key", "FIREWORKS_API_KEY"),
 }
+
+
+def _model_matches_allowlist(model_id: str, allowed_models: frozenset[str]) -> bool:
+    """Check if model matches allowlist using exact matching for /models endpoint listing."""
+    return model_id.lower() in allowed_models
 
 
 def _get_configured_providers() -> frozenset[str]:
@@ -39,19 +59,32 @@ def _get_configured_providers() -> frozenset[str]:
     return frozenset(configured)
 
 
-def _is_chat_model(cost_data: ModelCost) -> bool:
-    """Check if a model is a chat model (not embedding, image generation, etc)."""
+def _cloudflare_configured() -> bool:
+    """Whether the gateway can reach Cloudflare Workers AI — needs both an API key and account id.
+
+    Kept separate from `_get_configured_providers` (litellm-provider keys) on purpose: CF models are
+    served via the `@cf/` path, not litellm, so we only ever advertise the vetted
+    `CLOUDFLARE_ALLOWED_MODELS` — never the broader set of `cloudflare/...` ids litellm happens to
+    price but the gateway won't route.
+    """
+    return is_cloudflare_configured(get_settings())
+
+
+def _glm_backend_configured(model_id: str) -> bool:
+    """A `@cf/` model is servable when Cloudflare or its Modal equivalent is configured."""
+    if _cloudflare_configured():
+        return True
+    return model_id in MODAL_ALLOWED_MODELS and is_modal_configured(get_settings())
+
+
+def _is_text_generation_model(cost_data: ModelCost) -> bool:
+    """Check if a model supports text generation (chat/completions/responses)."""
     mode = cost_data.get("mode", "")
-    return mode in ("chat", "completion", "")
-
-
-def _model_matches_allowlist(model_id: str, allowed_models: frozenset[str]) -> bool:
-    """Check if model matches allowlist using exact matching for /models endpoint listing."""
-    return model_id.lower() in allowed_models
+    return mode in ("chat", "completion", "responses", "")
 
 
 class ModelRegistryService:
-    """Singleton service for model discovery using LLM data."""
+    """Singleton service for model discovery using LiteLLM data."""
 
     _instance: ClassVar[ModelRegistryService | None] = None
 
@@ -67,13 +100,13 @@ class ModelRegistryService:
         cls._instance = None
 
     def get_model(self, model_id: str) -> ModelInfo | None:
-        """Get model info from LLM's cost data."""
+        """Get model info from LiteLLM's cost data."""
         cost_data = ModelCostService.get_instance().get_costs(model_id)
         if cost_data is None:
             return None
         return ModelInfo(
             id=model_id,
-            provider=cost_data.get("llm_provider", "unknown"),
+            provider=cost_data.get("litellm_provider", "unknown"),
             context_window=cost_data.get("max_input_tokens") or 0,
             supports_vision=bool(cost_data.get("supports_vision", False)),
             supports_streaming=True,
@@ -85,14 +118,41 @@ class ModelRegistryService:
         configured_providers = _get_configured_providers()
         allowed_models = config.allowed_models if config else None
 
-        # Fetch all chat models from LLM, filtered by configured providers
-        all_llm_models = ModelCostService.get_instance().get_all_models()
+        all_litellm_models = ModelCostService.get_instance().get_all_models()
         models = []
-        for model_id, cost_data in all_llm_models.items():
-            provider = cost_data.get("llm_provider", "")
+        for model_id, cost_data in all_litellm_models.items():
+            if model_id in COST_ALIASES:
+                continue
+            provider = cost_data.get("litellm_provider", "")
             if provider not in configured_providers:
                 continue
-            if not _is_chat_model(cost_data):
+            if not _is_text_generation_model(cost_data):
+                continue
+            if allowed_models is not None and not _model_matches_allowlist(model_id, allowed_models):
+                continue
+            model = self.get_model(model_id)
+            if model is not None:
+                models.append(model)
+
+        # Append `@cf/` models with a configured backend (module header explains why they're not in
+        # the litellm loop above). Always advertised as provider "cloudflare" — clients key model
+        # handling off the `@cf/` id/owner, and the Modal ramp must not change what they see.
+        for model_id in CLOUDFLARE_ALLOWED_MODELS:
+            if not _glm_backend_configured(model_id):
+                continue
+            if allowed_models is not None and not _model_matches_allowlist(model_id, allowed_models):
+                continue
+            models.append(
+                ModelInfo(
+                    id=model_id,
+                    provider=_CLOUDFLARE_PROVIDER,
+                    context_window=_CLOUDFLARE_DEFAULT_CONTEXT_WINDOW,
+                    supports_streaming=True,
+                    supports_vision=False,
+                )
+            )
+        for model_id in MODAL_EXCLUSIVE_MODELS:
+            if not is_modal_model_configured(model_id, get_settings()):
                 continue
             if allowed_models is not None and not _model_matches_allowlist(model_id, allowed_models):
                 continue
@@ -109,6 +169,14 @@ class ModelRegistryService:
         if config is not None and config.allowed_models is not None:
             if not _model_matches_allowlist(model_id, config.allowed_models):
                 return False
+
+        # `@cf/`-served models aren't in litellm's cost map (so get_model returns None) — gate them
+        # on the CF allowlist + a configured backend (Cloudflare or Modal) instead.
+        if _model_matches_allowlist(model_id, CLOUDFLARE_ALLOWED_MODELS):
+            return _glm_backend_configured(model_id)
+
+        if _model_matches_allowlist(model_id, MODAL_ALLOWED_MODELS):
+            return is_modal_model_configured(model_id, get_settings())
 
         model = self.get_model(model_id)
         if model is None:

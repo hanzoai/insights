@@ -3,10 +3,10 @@ import { useValues } from 'kea'
 import { Banner } from '@hanzo/elements'
 
 import { workflowLogic } from '../../../workflowLogic'
-import { insightsFlowEditorLogic } from '../../insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from '../../hogFlowEditorLogic'
 
 export function StepSchemaErrors(): JSX.Element | null {
-    const { selectedNode } = useValues(insightsFlowEditorLogic)
+    const { selectedNode } = useValues(hogFlowEditorLogic)
     const { actionValidationErrorsById } = useValues(workflowLogic)
     const validationResult = actionValidationErrorsById[selectedNode?.id ?? '']
 
@@ -15,8 +15,8 @@ export function StepSchemaErrors(): JSX.Element | null {
     }
 
     return (
-        <div className="flex flex-col gap-1">
-            {Object.values(validationResult.schema.errors).map(({ path, message }) => (
+        <div className="flex flex-col gap-1 mb-2">
+            {validationResult.schema.issues.map(({ path, message }) => (
                 <Banner type="error" key={path.join('.')}>
                     {path.join('.')}: {message}
                 </Banner>

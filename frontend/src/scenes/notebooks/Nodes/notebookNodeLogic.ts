@@ -1,4 +1,5 @@
 import {
+    MakeLogicType,
     BuiltLogic,
     actions,
     afterMount,
@@ -12,17 +13,26 @@ import {
     reducers,
     selectors,
 } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { MenuItems } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { JSONContent, RichContentNode } from 'lib/components/RichContentEditor/types'
-import { hashCodeForString } from 'lib/utils'
+import { hashCodeForString } from 'lib/utils/strings'
+import { sqlEditorLogic } from 'scenes/data-warehouse/editor/sqlEditorLogic'
+import { SQLEditorMode } from 'scenes/data-warehouse/editor/sqlEditorModes'
 
 import { isInsightsQLQuery, isNodeWithSource } from '~/queries/utils'
 
-import { notebookLogicType } from '../Notebook/notebookLogicType'
+import type { CommentType } from '../../../types'
+import {
+    convertNotebookContentToMarkdown,
+    insertMarkdownNotebookBlockAfterNode,
+    isMarkdownNotebookContent,
+} from '../Notebook/markdownNotebookV2'
+import type { NotebookKernelInfo } from '../Notebook/notebookKernelInfoLogic'
+import type { notebookLogicType } from '../Notebook/notebookLogic'
 import {
     CustomNotebookNodeAttributes,
     NotebookNodeAction,
@@ -33,20 +43,24 @@ import {
     NotebookNodeSettingsPlacement,
     NotebookNodeType,
 } from '../types'
+import type { NotebookType } from '../types'
+import { getNotebookSqlEditorTabId } from './components/NotebookSQLEditor'
 import { NotebookNodeMessages, NotebookNodeMessagesListeners } from './messaging/notebook-node-messages'
 import {
     type DuckSqlNodeSummary,
-    type InsightsqlSqlNodeSummary,
+    type HogqlSqlNodeSummary,
     type NotebookDependencyGraph,
     type NotebookDependencyNode,
     type NotebookDependencyUsage,
-    extractInsightsqlPlaceholders,
+    collectDependencyNodeIds,
+    extractHogqlPlaceholders,
     getUniqueDuckSqlReturnVariable,
-    getUniqueInsightsqlReturnVariable,
+    getUniqueHogqlReturnVariable,
+    getUniqueSqlV2ReturnVariable,
     resolveDuckSqlReturnVariable,
-    resolveInsightsqlReturnVariable,
+    resolveHogqlReturnVariable,
 } from './notebookNodeContent'
-import type { notebookNodeLogicType } from './notebookNodeLogicType'
+import type { PythonNodeSummary, SqlV2NodeSummary } from './notebookNodeContent'
 import {
     NotebookDataframeResult,
     PythonExecutionResult,
@@ -58,10 +72,11 @@ import {
     buildPythonExecutionRunning,
     mergeExecutionVariables,
 } from './pythonExecution'
+import { buildNotebookNodeClipboardHTML } from './utils'
 
 export type PythonRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
 export type DuckSqlRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
-export type InsightsqlSqlRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
+export type HogqlSqlRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
 
 type RunPythonCellParams = {
     notebookId: string
@@ -82,14 +97,14 @@ type RunDuckSqlCellParams = {
     executionSandboxId: string | null
 }
 
-type RunInsightsqlSqlCellParams = {
+type RunHogqlSqlCellParams = {
     notebookId: string
     code: string
     placeholders: string[]
     returnVariable: string
     pageSize: number
     updateAttributes: (attributes: Partial<NotebookNodeAttributes<any>>) => void
-    setInsightsqlSqlRunLoading: (loading: boolean) => void
+    setHogqlSqlRunLoading: (loading: boolean) => void
     executionSandboxId: string | null
 }
 
@@ -98,6 +113,9 @@ const isSqlQueryNode = (nodeAttributes: NotebookNodeAttributes<any>): boolean =>
     if (!query) {
         return false
     }
+    if (isInsightsQLQuery(query)) {
+        return true
+    }
     if (isNodeWithSource(query)) {
         return isInsightsQLQuery(query.source)
     }
@@ -105,6 +123,10 @@ const isSqlQueryNode = (nodeAttributes: NotebookNodeAttributes<any>): boolean =>
 }
 
 const DEFAULT_DATAFRAME_PAGE_SIZE = 10
+
+const getMountedNotebookSqlEditorCode = (nodeId: string | null | undefined, suffix: string): string | null =>
+    sqlEditorLogic.findMounted({ tabId: getNotebookSqlEditorTabId(nodeId, suffix), mode: SQLEditorMode.Embedded })
+        ?.values.queryInput ?? null
 
 const buildDuckSqlCode = (code: string, returnVariable: string, pageSize: number): string => {
     const resolvedReturnVariable = resolveDuckSqlReturnVariable(returnVariable)
@@ -119,25 +141,25 @@ const buildDuckSqlCode = (code: string, returnVariable: string, pageSize: number
     )
 }
 
-type InsightsqlExecuteResponse = {
+type HogqlExecuteResponse = {
     results?: any[]
     columns?: string[]
     error?: string
 }
 
-const buildInsightsqlSqlAssignmentCode = (code: string, returnVariable: string): string => {
-    const resolvedReturnVariable = resolveInsightsqlReturnVariable(returnVariable)
+const buildHogqlSqlAssignmentCode = (code: string, returnVariable: string): string => {
+    const resolvedReturnVariable = resolveHogqlReturnVariable(returnVariable)
     const sqlLiteral = JSON.stringify(code ?? '')
     return `${resolvedReturnVariable} = insightsql_execute(${sqlLiteral})`
 }
 
-const buildInsightsqlSqlExecutionCode = (
+const buildHogqlSqlExecutionCode = (
     code: string,
     returnVariable: string,
     pageSize: number,
     placeholders: string[]
 ): string => {
-    const resolvedReturnVariable = resolveInsightsqlReturnVariable(returnVariable)
+    const resolvedReturnVariable = resolveHogqlReturnVariable(returnVariable)
     const sqlLiteral = JSON.stringify(code ?? '')
     const placeholdersLiteral = JSON.stringify(placeholders)
     const previewPageSize = Math.max(1, pageSize || DEFAULT_DATAFRAME_PAGE_SIZE)
@@ -148,8 +170,8 @@ const buildInsightsqlSqlExecutionCode = (
     )
 }
 
-const buildInsightsqlDataframeResult = (
-    response: InsightsqlExecuteResponse,
+const buildHogqlDataframeResult = (
+    response: HogqlExecuteResponse,
     pageSize: number
 ): NotebookDataframeResult | null => {
     const columns = Array.isArray(response.columns) ? response.columns : []
@@ -186,21 +208,21 @@ const buildInsightsqlDataframeResult = (
     }
 }
 
-const buildInsightsqlExecutionResult = ({
+const buildHogqlExecutionResult = ({
     response,
     exportedGlobals,
     returnVariable,
     query,
     pageSize,
 }: {
-    response: InsightsqlExecuteResponse
+    response: HogqlExecuteResponse
     exportedGlobals: { name: string; type: string }[]
     returnVariable: string
     query: string
     pageSize: number
 }): PythonExecutionResult => {
     const isError = Boolean(response.error)
-    const dataframeResult = isError ? null : buildInsightsqlDataframeResult(response, pageSize)
+    const dataframeResult = isError ? null : buildHogqlDataframeResult(response, pageSize)
     const variableResponse: PythonKernelVariableResponse = isError
         ? {
               status: 'error',
@@ -228,45 +250,6 @@ const buildInsightsqlExecutionResult = ({
 }
 
 type DependencyRunDirection = 'upstream' | 'downstream'
-
-const collectDependencyNodeIds = (
-    dependencyGraph: NotebookDependencyGraph,
-    startNodeId: string,
-    direction: DependencyRunDirection
-): Set<string> => {
-    const visited = new Set<string>()
-    if (!startNodeId || !dependencyGraph.nodesById[startNodeId]) {
-        return visited
-    }
-
-    const stack = [startNodeId]
-
-    while (stack.length > 0) {
-        const currentId = stack.pop()
-        if (!currentId || visited.has(currentId)) {
-            continue
-        }
-        visited.add(currentId)
-
-        if (direction === 'upstream') {
-            const sources = Object.values(dependencyGraph.upstreamSourcesByNode[currentId] ?? {})
-            sources.forEach((source) => {
-                if (source.nodeId && !visited.has(source.nodeId)) {
-                    stack.push(source.nodeId)
-                }
-            })
-        } else {
-            const downstreamGroups = Object.values(dependencyGraph.downstreamUsageByNode[currentId] ?? {})
-            downstreamGroups.flat().forEach((usage) => {
-                if (usage.nodeId && !visited.has(usage.nodeId)) {
-                    stack.push(usage.nodeId)
-                }
-            })
-        }
-    }
-
-    return visited
-}
 
 const getDependencyNodesForRun = (
     dependencyGraph: NotebookDependencyGraph,
@@ -348,7 +331,7 @@ const isDuckSqlExecutionFresh = (
     )
 }
 
-const isInsightsqlSqlExecutionFresh = (
+const isHogqlSqlExecutionFresh = (
     nodeLogic: BuiltLogic<notebookNodeLogicType>,
     code: string,
     returnVariable: string
@@ -382,7 +365,7 @@ const setDependencyNodeQueued = (
         return
     }
     if (nodeType === NotebookNodeType.InsightsQLSQL) {
-        nodeLogic.actions.setInsightsqlSqlRunQueued(queued)
+        nodeLogic.actions.setHogqlSqlRunQueued(queued)
     }
 }
 
@@ -397,9 +380,9 @@ const runDependencyNodes = async ({
 }: {
     entries: { node: NotebookDependencyNode; nodeLogic: BuiltLogic<notebookNodeLogicType> }[]
     notebookId: string
-    mode: PythonRunMode | DuckSqlRunMode | InsightsqlSqlRunMode
+    mode: PythonRunMode | DuckSqlRunMode | HogqlSqlRunMode
     duckSqlNodeSummaries: DuckSqlNodeSummary[]
-    insightsqlSqlNodeSummaries: InsightsqlSqlNodeSummary[]
+    insightsqlSqlNodeSummaries: HogqlSqlNodeSummary[]
     currentNodeId: string
     skipDataframeVariableUpdateForNodeId?: string
 }): Promise<void> => {
@@ -447,7 +430,11 @@ const runDependencyNodes = async ({
                     returnVariable?: string
                     duckExecutionSandboxId?: string | null
                 }
-                const nodeCode = nodeAttributes.code ?? node.code ?? ''
+                const mountedEditorCode = getMountedNotebookSqlEditorCode(node.nodeId, 'duck')
+                const nodeCode = mountedEditorCode ?? nodeAttributes.code ?? node.code ?? ''
+                if (mountedEditorCode !== null && mountedEditorCode !== nodeAttributes.code) {
+                    nodeLogic.actions.updateAttributes({ code: mountedEditorCode })
+                }
                 const nodeReturnVariable = getUniqueDuckSqlReturnVariable(
                     duckSqlNodeSummaries,
                     node.nodeId,
@@ -497,30 +484,34 @@ const runDependencyNodes = async ({
                     returnVariable?: string
                     insightsqlExecutionSandboxId?: string | null
                 }
-                const nodeCode = nodeAttributes.code ?? node.code ?? ''
-                const nodeReturnVariable = getUniqueInsightsqlReturnVariable(
+                const mountedEditorCode = getMountedNotebookSqlEditorCode(node.nodeId, 'insightsql')
+                const nodeCode = mountedEditorCode ?? nodeAttributes.code ?? node.code ?? ''
+                if (mountedEditorCode !== null && mountedEditorCode !== nodeAttributes.code) {
+                    nodeLogic.actions.updateAttributes({ code: mountedEditorCode })
+                }
+                const nodeReturnVariable = getUniqueHogqlReturnVariable(
                     insightsqlSqlNodeSummaries,
                     node.nodeId,
                     nodeAttributes.returnVariable ?? node.returnVariable ?? 'insightsql_df'
                 )
-                const placeholders = extractInsightsqlPlaceholders(nodeCode)
+                const placeholders = extractHogqlPlaceholders(nodeCode)
                 const executionSandboxId =
                     nodeLogic.values.kernelInfo?.sandbox_id ?? nodeAttributes.insightsqlExecutionSandboxId ?? null
                 if (
                     mode === 'auto' &&
                     node.nodeId !== currentNodeId &&
-                    isInsightsqlSqlExecutionFresh(nodeLogic, nodeCode, nodeReturnVariable)
+                    isHogqlSqlExecutionFresh(nodeLogic, nodeCode, nodeReturnVariable)
                 ) {
                     continue
                 }
-                const { executed, execution } = await runInsightsqlSqlCell({
+                const { executed, execution } = await runHogqlSqlCell({
                     notebookId,
                     code: nodeCode,
                     placeholders,
                     returnVariable: nodeReturnVariable,
                     pageSize: nodeLogic.values.dataframePageSize,
                     updateAttributes: nodeLogic.actions.updateAttributes,
-                    setInsightsqlSqlRunLoading: nodeLogic.actions.setInsightsqlSqlRunLoading,
+                    setHogqlSqlRunLoading: nodeLogic.actions.setHogqlSqlRunLoading,
                     executionSandboxId,
                 })
 
@@ -725,23 +716,23 @@ const runDuckSqlCell = async ({
     }
 }
 
-const runInsightsqlSqlCell = async ({
+const runHogqlSqlCell = async ({
     notebookId,
     code,
     placeholders,
     returnVariable,
     pageSize,
     updateAttributes,
-    setInsightsqlSqlRunLoading,
+    setHogqlSqlRunLoading,
     executionSandboxId,
-}: RunInsightsqlSqlCellParams): Promise<{ executed: boolean; execution: PythonExecutionResult | null }> => {
-    setInsightsqlSqlRunLoading(true)
-    const resolvedReturnVariable = resolveInsightsqlReturnVariable(returnVariable)
+}: RunHogqlSqlCellParams): Promise<{ executed: boolean; execution: PythonExecutionResult | null }> => {
+    setHogqlSqlRunLoading(true)
+    const resolvedReturnVariable = resolveHogqlReturnVariable(returnVariable)
     const placeholderNames = placeholders.filter((placeholder) => placeholder.trim().length > 0)
     const shouldExecuteInKernel = placeholderNames.length > 0
     const executionCode = shouldExecuteInKernel
-        ? buildInsightsqlSqlExecutionCode(code, returnVariable, pageSize, placeholderNames)
-        : buildInsightsqlSqlAssignmentCode(code, returnVariable)
+        ? buildHogqlSqlExecutionCode(code, returnVariable, pageSize, placeholderNames)
+        : buildHogqlSqlAssignmentCode(code, returnVariable)
     let runtimeSandboxId = executionSandboxId
     try {
         let executionResult: PythonExecutionResult | null = null
@@ -784,7 +775,7 @@ const runInsightsqlSqlCell = async ({
         const queryResponse = await api.notebooks.insightsqlExecute(notebookId, {
             query: code,
         })
-        executionResult = buildInsightsqlExecutionResult({
+        executionResult = buildHogqlExecutionResult({
             response: queryResponse,
             exportedGlobals,
             returnVariable: resolvedReturnVariable,
@@ -814,7 +805,7 @@ const runInsightsqlSqlCell = async ({
         })
         return { executed: false, execution: executionResult }
     } finally {
-        setInsightsqlSqlRunLoading(false)
+        setHogqlSqlRunLoading(false)
     }
 }
 
@@ -875,7 +866,6 @@ const parseDataframePreview = (preview?: string | null): NotebookDataframeResult
 export type NotebookNodeLogicProps = {
     nodeType: NotebookNodeType
     notebookLogic: BuiltLogic<notebookLogicType>
-    getPos?: () => number | undefined
     resizeable?: boolean | ((attributes: CustomNotebookNodeAttributes) => boolean)
     Settings?: NotebookNodeSettings
     messageListeners?: NotebookNodeMessagesListeners
@@ -883,6 +873,286 @@ export type NotebookNodeLogicProps = {
     titlePlaceholder: string
     settingsPlacement?: NotebookNodeSettingsPlacement
 } & NotebookNodeAttributeProperties<any>
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface notebookNodeLogicValues {
+    comments: CommentType[] | null // props.notebookLogic
+    dependencyGraph: NotebookDependencyGraph // props.notebookLogic
+    duckSqlNodeSummaries: DuckSqlNodeSummary[] // props.notebookLogic
+    insightsqlSqlNodeSummaries: HogqlSqlNodeSummary[] // props.notebookLogic
+    isEditable: boolean // props.notebookLogic
+    kernelInfo: NotebookKernelInfo | null // props.notebookLogic
+    notebook: NotebookType | null // props.notebookLogic
+    pythonNodeSummaries: PythonNodeSummary[] // props.notebookLogic
+    sqlV2NodeSummaries: SqlV2NodeSummary[] // props.notebookLogic
+    Settings: NotebookNodeSettings | null
+    actions: NotebookNodeAction[]
+    children: NotebookNodeResource[]
+    customMenuItems: MenuItems | null
+    dataframeError: string | null
+    dataframeLoading: boolean
+    dataframePage: number
+    dataframePageSize: number
+    dataframeResult: NotebookDataframeResult | null
+    dataframeRowCount: number
+    dataframeVariableName: string | null
+    displayedGlobals: {
+        insightsqlQuery?: string
+        name: string
+        type: string
+    }[]
+    duckSqlNodeIndex: number
+    duckSqlReturnVariable: string
+    duckSqlReturnVariableUsage: NotebookDependencyUsage[]
+    duckSqlRunLoading: boolean
+    duckSqlRunQueued: boolean
+    duckSqlTablesUsed: string[]
+    duckSqlUpstreamTableSources: Record<string, NotebookDependencyUsage>
+    expanded: boolean
+    exportedGlobals: {
+        name: string
+        type: string
+    }[]
+    insightsqlReturnVariableUsage: NotebookDependencyUsage[]
+    insightsqlSqlNodeIndex: number
+    insightsqlSqlReturnVariable: string
+    insightsqlSqlRunLoading: boolean
+    insightsqlSqlRunQueued: boolean
+    isEditingTitle: boolean
+    messageListeners: NotebookNodeMessagesListeners
+    nextNode: RichContentNode | null
+    nodeAttributes: NotebookNodeAttributes<any>
+    nodeId: string
+    nodeType: NotebookNodeType
+    notebookLogic: BuiltLogic<notebookLogicType>
+    previousNode: RichContentNode | null
+    pythonExecution: PythonExecutionResult | null
+    pythonNodeIndex: number
+    pythonRunLoading: boolean
+    pythonRunQueued: boolean
+    ref: HTMLElement | null
+    resizeable: boolean
+    sendMessage: <T extends keyof NotebookNodeMessages>(message: T, payload: NotebookNodeMessages[T]) => boolean
+    settingsDisabledReason: string | null
+    settingsPlacement: NotebookNodeSettingsPlacement
+    sourceComment: CommentType | null | undefined
+    sqlV2ReturnVariable: string
+    sqlV2ReturnVariableUsage: NotebookDependencyUsage[]
+    title: any
+    titlePlaceholder: string
+    usageByVariable: Record<string, NotebookDependencyUsage[]>
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface notebookNodeLogicActions {
+    copyToClipboard: () => {
+        value: true
+    }
+    deleteNode: () => {
+        value: true
+    }
+    initializeNode: () => {
+        value: true
+    }
+    insertAfter: (content: JSONContent) => {
+        content: JSONContent
+    }
+    loadDataframePage: (payload: { pageSize?: number; variableName: string }) => {
+        pageSize?: number | undefined
+        variableName: string
+    }
+    navigateToNode: (nodeId: string) => {
+        nodeId: string
+    }
+    resetDataframeResults: () => {
+        value: true
+    }
+    runDuckSqlNode: () => {
+        value: true
+    }
+    runDuckSqlNodeWithMode: (payload: { mode: DuckSqlRunMode }) => {
+        mode: DuckSqlRunMode
+    }
+    runHogqlSqlNode: () => {
+        value: true
+    }
+    runHogqlSqlNodeWithMode: (payload: { mode: HogqlSqlRunMode }) => {
+        mode: HogqlSqlRunMode
+    }
+    runPythonNode: (payload: { code: string }) => {
+        code: string
+    }
+    runPythonNodeWithMode: (payload: { mode: PythonRunMode }) => {
+        mode: PythonRunMode
+    }
+    selectNode: (scroll?: boolean) => {
+        scroll: boolean | undefined
+    }
+    setActions: (actions: (NotebookNodeAction | undefined)[]) => {
+        actions: (NotebookNodeAction | undefined)[]
+    }
+    setDataframeError: (error: string | null) => {
+        error: string | null
+    }
+    setDataframeLoading: (loading: boolean) => {
+        loading: boolean
+    }
+    setDataframePage: (page: number) => {
+        page: number
+    }
+    setDataframePageSize: (pageSize: number) => {
+        pageSize: number
+    }
+    setDataframeResult: (result: NotebookDataframeResult | null) => {
+        result: NotebookDataframeResult | null
+    }
+    setDataframeVariableName: (
+        variableName: string | null,
+        initialResult?: NotebookDataframeResult | null
+    ) => {
+        initialResult: NotebookDataframeResult | null | undefined
+        variableName: string | null
+    }
+    setDuckSqlRunLoading: (loading: boolean) => {
+        loading: boolean
+    }
+    setDuckSqlRunQueued: (queued: boolean) => {
+        queued: boolean
+    }
+    setExpanded: (expanded: boolean) => {
+        expanded: boolean
+    }
+    setHogqlSqlRunLoading: (loading: boolean) => {
+        loading: boolean
+    }
+    setHogqlSqlRunQueued: (queued: boolean) => {
+        queued: boolean
+    }
+    setMenuItems: (menuItems: MenuItems | null) => {
+        menuItems: MenuItems | null
+    }
+    setMessageListeners: (listeners: NotebookNodeMessagesListeners) => {
+        listeners: NotebookNodeMessagesListeners
+    }
+    setNextNode: (node: RichContentNode | null) => {
+        node: RichContentNode | null
+    }
+    setPreviousNode: (node: RichContentNode | null) => {
+        node: RichContentNode | null
+    }
+    setPythonRunLoading: (loading: boolean) => {
+        loading: boolean
+    }
+    setPythonRunQueued: (queued: boolean) => {
+        queued: boolean
+    }
+    setRef: (ref: HTMLElement | null) => {
+        ref: HTMLElement | null
+    }
+    setResizeable: (resizeable: boolean) => {
+        resizeable: boolean
+    }
+    setSettingsDisabledReason: (settingsDisabledReason: string | null) => {
+        settingsDisabledReason: string | null
+    }
+    setTitlePlaceholder: (titlePlaceholder: string) => {
+        titlePlaceholder: string
+    }
+    toggleEditing: (visible?: boolean) => {
+        visible: boolean | undefined
+    }
+    toggleEditingTitle: (editing?: boolean) => {
+        editing: boolean | undefined
+    }
+    updateAttributes: (attributes: Partial<NotebookNodeAttributes<any>>) => {
+        attributes: Partial<any>
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface notebookNodeLogicMeta {
+    key: any
+    __keaTypeGenInternalSelectorTypes: {
+        notebookLogic: (notebookLogic: BuiltLogic<notebookLogicType>) => BuiltLogic<notebookLogicType>
+        nodeAttributes: (attributes: any) => NotebookNodeAttributes<any>
+        nodeId: (attributes: any) => string
+        nodeType: (nodeType: NotebookNodeType) => NotebookNodeType
+        Settings: (arg: any) => NotebookNodeSettings | null
+        settingsPlacement: (arg: any) => NotebookNodeSettingsPlacement
+        title: (titlePlaceholder: string, nodeAttributes: any) => any
+        children: (nodeAttributes: any) => NotebookNodeResource[]
+        exportedGlobals: (nodeAttributes: any) => {
+            name: string
+            type: string
+        }[]
+        pythonExecution: (nodeAttributes: any) => PythonExecutionResult | null
+        displayedGlobals: (
+            exportedGlobals: {
+                name: string
+                type: string
+            }[],
+            pythonExecution: PythonExecutionResult | null
+        ) => {
+            insightsqlQuery?: string
+            name: string
+            type: string
+        }[]
+        pythonNodeIndex: (pythonNodeSummaries: PythonNodeSummary[], nodeId: string) => number
+        duckSqlNodeIndex: (duckSqlNodeSummaries: DuckSqlNodeSummary[], nodeId: string) => number
+        duckSqlReturnVariable: (
+            duckSqlNodeSummaries: DuckSqlNodeSummary[],
+            nodeId: string,
+            nodeAttributes: any
+        ) => string
+        insightsqlSqlNodeIndex: (insightsqlSqlNodeSummaries: HogqlSqlNodeSummary[], nodeId: string) => number
+        insightsqlSqlReturnVariable: (
+            insightsqlSqlNodeSummaries: HogqlSqlNodeSummary[],
+            nodeId: string,
+            nodeAttributes: any
+        ) => string
+        dataframeRowCount: (dataframeResult: NotebookDataframeResult | null) => number
+        duckSqlTablesUsed: (dependencyGraph: NotebookDependencyGraph, nodeId: string) => string[]
+        duckSqlUpstreamTableSources: (
+            dependencyGraph: NotebookDependencyGraph,
+            nodeId: string
+        ) => Record<string, NotebookDependencyUsage>
+        duckSqlReturnVariableUsage: (
+            dependencyGraph: NotebookDependencyGraph,
+            nodeId: string,
+            duckSqlReturnVariable: string
+        ) => NotebookDependencyUsage[]
+        insightsqlReturnVariableUsage: (
+            dependencyGraph: NotebookDependencyGraph,
+            nodeId: string,
+            insightsqlSqlReturnVariable: string
+        ) => NotebookDependencyUsage[]
+        sqlV2ReturnVariable: (sqlV2NodeSummaries: SqlV2NodeSummary[], nodeId: string, nodeAttributes: any) => string
+        sqlV2ReturnVariableUsage: (
+            dependencyGraph: NotebookDependencyGraph,
+            nodeId: string,
+            sqlV2ReturnVariable: string
+        ) => NotebookDependencyUsage[]
+        usageByVariable: (
+            dependencyGraph: NotebookDependencyGraph,
+            exportedGlobals: {
+                name: string
+                type: string
+            }[],
+            nodeId: string
+        ) => Record<string, NotebookDependencyUsage[]>
+        sendMessage: (
+            messageListeners: NotebookNodeMessagesListeners
+        ) => <T extends keyof NotebookNodeMessages>(message: T, payload: NotebookNodeMessages[T]) => boolean
+        sourceComment: (comments: CommentType[] | null, nodeId: string) => CommentType | null | undefined
+    }
+}
+
+export type notebookNodeLogicType = MakeLogicType<
+    notebookNodeLogicValues,
+    notebookNodeLogicActions,
+    NotebookNodeLogicProps,
+    notebookNodeLogicMeta
+>
 
 export const notebookNodeLogic = kea<notebookNodeLogicType>([
     props({} as NotebookNodeLogicProps),
@@ -893,23 +1163,20 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         setResizeable: (resizeable: boolean) => ({ resizeable }),
         setActions: (actions: (NotebookNodeAction | undefined)[]) => ({ actions }),
         setMenuItems: (menuItems: MenuItems | null) => ({ menuItems }),
+        setSettingsDisabledReason: (settingsDisabledReason: string | null) => ({ settingsDisabledReason }),
         insertAfter: (content: JSONContent) => ({ content }),
-        insertAfterLastNodeOfType: (nodeType: string, content: JSONContent) => ({ content, nodeType }),
         updateAttributes: (attributes: Partial<NotebookNodeAttributes<any>>) => ({ attributes }),
-        insertOrSelectNextLine: true,
         setPreviousNode: (node: RichContentNode | null) => ({ node }),
         setNextNode: (node: RichContentNode | null) => ({ node }),
         deleteNode: true,
         selectNode: (scroll?: boolean) => ({ scroll }),
         toggleEditing: (visible?: boolean) => ({ visible }),
-        scrollIntoView: true,
         initializeNode: true,
         setMessageListeners: (listeners: NotebookNodeMessagesListeners) => ({ listeners }),
         setTitlePlaceholder: (titlePlaceholder: string) => ({ titlePlaceholder }),
         setRef: (ref: HTMLElement | null) => ({ ref }),
         toggleEditingTitle: (editing?: boolean) => ({ editing }),
         copyToClipboard: true,
-        convertToBacklink: (href: string) => ({ href }),
         navigateToNode: (nodeId: string) => ({ nodeId }),
         runPythonNode: (payload: { code: string }) => payload,
         runPythonNodeWithMode: (payload: { mode: PythonRunMode }) => payload,
@@ -919,10 +1186,10 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         runDuckSqlNodeWithMode: (payload: { mode: DuckSqlRunMode }) => payload,
         setDuckSqlRunLoading: (loading: boolean) => ({ loading }),
         setDuckSqlRunQueued: (queued: boolean) => ({ queued }),
-        runInsightsqlSqlNode: true,
-        runInsightsqlSqlNodeWithMode: (payload: { mode: InsightsqlSqlRunMode }) => payload,
-        setInsightsqlSqlRunLoading: (loading: boolean) => ({ loading }),
-        setInsightsqlSqlRunQueued: (queued: boolean) => ({ queued }),
+        runHogqlSqlNode: true,
+        runHogqlSqlNodeWithMode: (payload: { mode: HogqlSqlRunMode }) => payload,
+        setHogqlSqlRunLoading: (loading: boolean) => ({ loading }),
+        setHogqlSqlRunQueued: (queued: boolean) => ({ queued }),
         setDataframeVariableName: (variableName: string | null, initialResult?: NotebookDataframeResult | null) => ({
             variableName,
             initialResult,
@@ -937,16 +1204,15 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
     }),
 
     connect((props: NotebookNodeLogicProps) => ({
-        actions: [props.notebookLogic, ['onUpdateEditor', 'setTextSelection']],
         values: [
             props.notebookLogic,
             [
-                'editor',
                 'isEditable',
                 'comments',
                 'pythonNodeSummaries',
                 'duckSqlNodeSummaries',
                 'insightsqlSqlNodeSummaries',
+                'sqlV2NodeSummaries',
                 'dependencyGraph',
                 'notebook',
                 'kernelInfo',
@@ -997,6 +1263,12 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 setMenuItems: (_, { menuItems }) => menuItems,
             },
         ],
+        settingsDisabledReason: [
+            null as string | null,
+            {
+                setSettingsDisabledReason: (_, { settingsDisabledReason }) => settingsDisabledReason,
+            },
+        ],
         messageListeners: [
             props.messageListeners as NotebookNodeMessagesListeners,
             {
@@ -1042,13 +1314,13 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         insightsqlSqlRunLoading: [
             false,
             {
-                setInsightsqlSqlRunLoading: (_, { loading }) => loading,
+                setHogqlSqlRunLoading: (_, { loading }) => loading,
             },
         ],
         insightsqlSqlRunQueued: [
             false,
             {
-                setInsightsqlSqlRunQueued: (_, { queued }) => queued,
+                setHogqlSqlRunQueued: (_, { queued }) => queued,
             },
         ],
         dataframeVariableName: [
@@ -1095,13 +1367,16 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
     })),
 
     selectors({
-        notebookLogic: [(_, p) => [p.notebookLogic], (notebookLogic): BuiltLogic<notebookLogicType> => notebookLogic],
+        notebookLogic: [
+            (_, p) => [p.notebookLogic],
+            (notebookLogic: BuiltLogic<notebookLogicType>): BuiltLogic<notebookLogicType> => notebookLogic,
+        ],
         nodeAttributes: [(_, p) => [p.attributes], (nodeAttributes): NotebookNodeAttributes<any> => nodeAttributes],
         nodeId: [
             (_, p) => [p.attributes],
             (nodeAttributes: NotebookNodeAttributes<any>): string => nodeAttributes.nodeId,
         ],
-        nodeType: [(_, p) => [p.nodeType], (nodeType) => nodeType],
+        nodeType: [(_, p) => [p.nodeType], (nodeType: NotebookNodeType) => nodeType],
         Settings: [() => [(_, props) => props], (props): NotebookNodeSettings | null => props.Settings ?? null],
         settingsPlacement: [
             () => [(_, props) => props],
@@ -1110,7 +1385,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
 
         title: [
             (s) => [s.titlePlaceholder, s.nodeAttributes],
-            (titlePlaceholder, nodeAttributes) => nodeAttributes.title || titlePlaceholder,
+            (titlePlaceholder: string, nodeAttributes) => nodeAttributes.title || titlePlaceholder,
         ],
         // TODO: Fix the typing of nodeAttributes
         children: [(s) => [s.nodeAttributes], (nodeAttributes): NotebookNodeResource[] => nodeAttributes.children],
@@ -1125,7 +1400,13 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         ],
         displayedGlobals: [
             (s) => [s.exportedGlobals, s.pythonExecution],
-            (exportedGlobals, pythonExecution): { name: string; type: string; insightsqlQuery?: string }[] => {
+            (
+                exportedGlobals: {
+                    name: string
+                    type: string
+                }[],
+                pythonExecution: PythonExecutionResult | null
+            ): { name: string; type: string; insightsqlQuery?: string }[] => {
                 if (!pythonExecution?.variables?.length) {
                     return exportedGlobals
                 }
@@ -1146,50 +1427,85 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
 
         pythonNodeIndex: [
             (s) => [s.pythonNodeSummaries, s.nodeId],
-            (pythonNodeSummaries, nodeId) => pythonNodeSummaries.findIndex((node) => node.nodeId === nodeId),
+            (pythonNodeSummaries: PythonNodeSummary[], nodeId: string) =>
+                pythonNodeSummaries.findIndex((node) => node.nodeId === nodeId),
         ],
         duckSqlNodeIndex: [
             (s) => [s.duckSqlNodeSummaries, s.nodeId],
-            (duckSqlNodeSummaries, nodeId) => duckSqlNodeSummaries.findIndex((node) => node.nodeId === nodeId),
+            (duckSqlNodeSummaries: DuckSqlNodeSummary[], nodeId: string) =>
+                duckSqlNodeSummaries.findIndex((node) => node.nodeId === nodeId),
         ],
         duckSqlReturnVariable: [
             (s) => [s.duckSqlNodeSummaries, s.nodeId, s.nodeAttributes],
-            (duckSqlNodeSummaries, nodeId, nodeAttributes): string =>
+            (duckSqlNodeSummaries: DuckSqlNodeSummary[], nodeId: string, nodeAttributes): string =>
                 getUniqueDuckSqlReturnVariable(duckSqlNodeSummaries, nodeId, nodeAttributes.returnVariable ?? ''),
         ],
         insightsqlSqlNodeIndex: [
             (s) => [s.insightsqlSqlNodeSummaries, s.nodeId],
-            (insightsqlSqlNodeSummaries, nodeId) => insightsqlSqlNodeSummaries.findIndex((node) => node.nodeId === nodeId),
+            (insightsqlSqlNodeSummaries: HogqlSqlNodeSummary[], nodeId: string) =>
+                insightsqlSqlNodeSummaries.findIndex((node) => node.nodeId === nodeId),
         ],
         insightsqlSqlReturnVariable: [
             (s) => [s.insightsqlSqlNodeSummaries, s.nodeId, s.nodeAttributes],
-            (insightsqlSqlNodeSummaries, nodeId, nodeAttributes): string =>
-                getUniqueInsightsqlReturnVariable(insightsqlSqlNodeSummaries, nodeId, nodeAttributes.returnVariable ?? ''),
+            (insightsqlSqlNodeSummaries: HogqlSqlNodeSummary[], nodeId: string, nodeAttributes): string =>
+                getUniqueHogqlReturnVariable(insightsqlSqlNodeSummaries, nodeId, nodeAttributes.returnVariable ?? ''),
         ],
-        dataframeRowCount: [(s) => [s.dataframeResult], (dataframeResult): number => dataframeResult?.rowCount ?? 0],
+        dataframeRowCount: [
+            (s) => [s.dataframeResult],
+            (dataframeResult: NotebookDataframeResult | null): number => dataframeResult?.rowCount ?? 0,
+        ],
         duckSqlTablesUsed: [
             (s) => [s.dependencyGraph, s.nodeId],
-            (dependencyGraph, nodeId): string[] => dependencyGraph.nodesById[nodeId]?.uses ?? [],
+            (dependencyGraph: NotebookDependencyGraph, nodeId: string): string[] =>
+                dependencyGraph.nodesById[nodeId]?.uses ?? [],
         ],
         duckSqlUpstreamTableSources: [
             (s) => [s.dependencyGraph, s.nodeId],
-            (dependencyGraph, nodeId): Record<string, NotebookDependencyUsage> =>
+            (dependencyGraph: NotebookDependencyGraph, nodeId: string): Record<string, NotebookDependencyUsage> =>
                 dependencyGraph.upstreamSourcesByNode[nodeId] ?? {},
         ],
         duckSqlReturnVariableUsage: [
             (s) => [s.dependencyGraph, s.nodeId, s.duckSqlReturnVariable],
-            (dependencyGraph, nodeId, duckSqlReturnVariable): NotebookDependencyUsage[] =>
+            (
+                dependencyGraph: NotebookDependencyGraph,
+                nodeId: string,
+                duckSqlReturnVariable: string
+            ): NotebookDependencyUsage[] =>
                 dependencyGraph.downstreamUsageByNode[nodeId]?.[duckSqlReturnVariable] ?? [],
         ],
         insightsqlReturnVariableUsage: [
             (s) => [s.dependencyGraph, s.nodeId, s.insightsqlSqlReturnVariable],
-            (dependencyGraph, nodeId, insightsqlSqlReturnVariable): NotebookDependencyUsage[] =>
+            (
+                dependencyGraph: NotebookDependencyGraph,
+                nodeId: string,
+                insightsqlSqlReturnVariable: string
+            ): NotebookDependencyUsage[] =>
                 dependencyGraph.downstreamUsageByNode[nodeId]?.[insightsqlSqlReturnVariable] ?? [],
+        ],
+        sqlV2ReturnVariable: [
+            (s) => [s.sqlV2NodeSummaries, s.nodeId, s.nodeAttributes],
+            (sqlV2NodeSummaries: SqlV2NodeSummary[], nodeId: string, nodeAttributes): string =>
+                getUniqueSqlV2ReturnVariable(sqlV2NodeSummaries, nodeId, nodeAttributes.returnVariable ?? ''),
+        ],
+        sqlV2ReturnVariableUsage: [
+            (s) => [s.dependencyGraph, s.nodeId, s.sqlV2ReturnVariable],
+            (
+                dependencyGraph: NotebookDependencyGraph,
+                nodeId: string,
+                sqlV2ReturnVariable: string
+            ): NotebookDependencyUsage[] => dependencyGraph.downstreamUsageByNode[nodeId]?.[sqlV2ReturnVariable] ?? [],
         ],
 
         usageByVariable: [
             (s) => [s.dependencyGraph, s.exportedGlobals, s.nodeId],
-            (dependencyGraph, exportedGlobals, nodeId): Record<string, NotebookDependencyUsage[]> => {
+            (
+                dependencyGraph: NotebookDependencyGraph,
+                exportedGlobals: {
+                    name: string
+                    type: string
+                }[],
+                nodeId: string
+            ): Record<string, NotebookDependencyUsage[]> => {
                 const usageMap: Record<string, NotebookDependencyUsage[]> = {}
 
                 exportedGlobals.forEach(({ name }) => {
@@ -1203,7 +1519,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
 
         sendMessage: [
             (s) => [s.messageListeners],
-            (messageListeners) => {
+            (messageListeners: NotebookNodeMessagesListeners) => {
                 return <T extends keyof NotebookNodeMessages>(
                     message: T,
                     payload: NotebookNodeMessages[T]
@@ -1220,7 +1536,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
 
         sourceComment: [
             (s) => [s.comments, s.nodeId],
-            (comments, nodeId) =>
+            (comments: CommentType[] | null, nodeId: string) =>
                 comments &&
                 comments.find(
                     (comment) => comment.item_context?.type === 'node' && comment.item_context?.id === nodeId
@@ -1229,54 +1545,9 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
     }),
 
     listeners(({ actions, values, props }) => ({
-        onUpdateEditor: async () => {
-            if (!props.getPos) {
-                return
-            }
-            const editor = values.notebookLogic.values.editor
-            const pos = props.getPos()
-            if (editor && pos) {
-                const { previous, next } = editor.getAdjacentNodes(pos)
-                actions.setPreviousNode(previous)
-                actions.setNextNode(next)
-            }
-        },
-
-        insertAfter: ({ content }) => {
-            const pos = props.getPos?.()
-            if (!pos) {
-                return
-            }
-            const logic = values.notebookLogic
-            logic.values.editor?.insertContentAfterNode(pos, content)
-        },
-
         deleteNode: () => {
-            const pos = props.getPos?.()
-            if (!pos) {
-                // TODO: somehow make this delete from the parent
-                return
-            }
-
-            const logic = values.notebookLogic
-            logic.values.editor?.deleteRange({ from: pos, to: pos + 1 }).run()
             if (values.notebookLogic.values.editingNodeIds[values.nodeId]) {
                 values.notebookLogic.actions.setEditingNodeEditing(values.nodeId, false)
-            }
-        },
-
-        selectNode: ({ scroll }) => {
-            const pos = props.getPos?.()
-            if (!pos) {
-                return
-            }
-            const editor = values.notebookLogic.values.editor
-
-            if (editor) {
-                editor.setSelection(pos)
-                if (scroll ?? true) {
-                    editor.scrollToSelection()
-                }
             }
         },
 
@@ -1285,34 +1556,20 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             targetLogic?.actions.selectNode()
         },
 
-        scrollIntoView: () => {
-            const pos = props.getPos?.()
-            if (!pos) {
+        insertAfter: ({ content }) => {
+            const notebookLogic = values.notebookLogic
+            if (!isMarkdownNotebookContent(notebookLogic.values.content)) {
                 return
             }
-            values.editor?.scrollToPosition(pos)
-        },
-
-        insertAfterLastNodeOfType: ({ nodeType, content }) => {
-            const insertionPosition = props.getPos?.()
-            if (!insertionPosition) {
+            // The converter serializes the children of a doc, so a single leaf node must be
+            // wrapped in an array to be serialized itself.
+            const insertedMarkdown = convertNotebookContentToMarkdown(content.type === 'doc' ? content : [content])
+            if (!insertedMarkdown.trim()) {
                 return
             }
-            values.notebookLogic.actions.insertAfterLastNodeOfType(nodeType, content, insertionPosition)
-        },
-        insertOrSelectNextLine: () => {
-            const pos = props.getPos?.()
-            if (!pos || !values.isEditable) {
-                return
-            }
-
-            if (!values.nextNode || !values.nextNode.isTextblock) {
-                actions.insertAfter({
-                    type: 'paragraph',
-                })
-            } else {
-                actions.setTextSelection(pos + 1)
-            }
+            notebookLogic.actions.setLocalContent(
+                insertMarkdownNotebookBlockAfterNode(notebookLogic.values.content, values.nodeId, insertedMarkdown)
+            )
         },
 
         setExpanded: ({ expanded }) => {
@@ -1403,12 +1660,12 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                     typeof values.nodeAttributes.returnVariable === 'string'
                         ? values.nodeAttributes.returnVariable
                         : 'insightsql_df'
-                const uniqueReturnVariable = getUniqueInsightsqlReturnVariable(
+                const uniqueReturnVariable = getUniqueHogqlReturnVariable(
                     values.insightsqlSqlNodeSummaries,
                     values.nodeId,
                     currentReturnVariable
                 )
-                if (uniqueReturnVariable !== resolveInsightsqlReturnVariable(currentReturnVariable)) {
+                if (uniqueReturnVariable !== resolveHogqlReturnVariable(currentReturnVariable)) {
                     actions.updateAttributes({ returnVariable: uniqueReturnVariable })
                 }
                 const cachedExecution = values.nodeAttributes.insightsqlExecution
@@ -1426,49 +1683,10 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         },
 
         copyToClipboard: async () => {
-            const { nodeAttributes } = values
-
-            const htmlAttributesString = Object.entries(nodeAttributes)
-                .map(([key, value]) => {
-                    if (key === 'nodeId' || key.startsWith('__')) {
-                        return ''
-                    }
-
-                    if (value === null || value === undefined) {
-                        return ''
-                    }
-
-                    if (key === 'title') {
-                        return `title='${JSON.stringify(value)}'`
-                    }
-
-                    return `${key}='${btoa(JSON.stringify(value))}'`
-                })
-                .filter((x) => !!x)
-                .join(' ')
-
-            const html = `<${props.nodeType} ${htmlAttributesString} data-pm-slice="0 0 []"></${props.nodeType}>`
-
+            const html = buildNotebookNodeClipboardHTML(props.nodeType, values.nodeAttributes)
             const type = 'text/html'
             const blob = new Blob([html], { type })
-            const data = [new ClipboardItem({ [type]: blob })]
-
-            await window.navigator.clipboard.write(data)
-        },
-        convertToBacklink: ({ href }) => {
-            const pos = props.getPos?.()
-            const editor = values.notebookLogic.values.editor
-            if (!pos || !editor) {
-                return
-            }
-
-            editor.insertContentAfterNode(pos, {
-                type: NotebookNodeType.Backlink,
-                attrs: {
-                    href,
-                },
-            })
-            actions.deleteNode()
+            await window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })])
         },
         runPythonNode: async ({ code }) => {
             if (props.nodeType !== NotebookNodeType.Python) {
@@ -1506,10 +1724,15 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             if (!notebook) {
                 return
             }
-            const { code = '', returnVariable = 'duck_df' } = values.nodeAttributes as {
+            const { code: attributesCode = '', returnVariable = 'duck_df' } = values.nodeAttributes as {
                 code?: string
                 returnVariable?: string
                 duckExecutionSandboxId?: string | null
+            }
+            const mountedEditorCode = getMountedNotebookSqlEditorCode(values.nodeId, 'duck')
+            const code = mountedEditorCode ?? attributesCode
+            if (mountedEditorCode !== null && mountedEditorCode !== attributesCode) {
+                actions.updateAttributes({ code: mountedEditorCode })
             }
             const executionSandboxId =
                 values.kernelInfo?.sandbox_id ?? values.nodeAttributes.duckExecutionSandboxId ?? null
@@ -1570,7 +1793,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             })
         },
 
-        runInsightsqlSqlNode: async () => {
+        runHogqlSqlNode: async () => {
             if (props.nodeType !== NotebookNodeType.InsightsQLSQL) {
                 return
             }
@@ -1578,27 +1801,32 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             if (!notebook) {
                 return
             }
-            const { code = '', returnVariable = 'insightsql_df' } = values.nodeAttributes as {
+            const { code: attributesCode = '', returnVariable = 'insightsql_df' } = values.nodeAttributes as {
                 code?: string
                 returnVariable?: string
                 insightsqlExecutionSandboxId?: string | null
             }
+            const mountedEditorCode = getMountedNotebookSqlEditorCode(values.nodeId, 'insightsql')
+            const code = mountedEditorCode ?? attributesCode
+            if (mountedEditorCode !== null && mountedEditorCode !== attributesCode) {
+                actions.updateAttributes({ code: mountedEditorCode })
+            }
             const executionSandboxId =
                 values.kernelInfo?.sandbox_id ?? values.nodeAttributes.insightsqlExecutionSandboxId ?? null
-            const resolvedReturnVariable = getUniqueInsightsqlReturnVariable(
+            const resolvedReturnVariable = getUniqueHogqlReturnVariable(
                 values.insightsqlSqlNodeSummaries,
                 values.nodeId,
                 returnVariable
             )
-            const placeholders = extractInsightsqlPlaceholders(code)
-            const { executed, execution } = await runInsightsqlSqlCell({
+            const placeholders = extractHogqlPlaceholders(code)
+            const { executed, execution } = await runHogqlSqlCell({
                 notebookId: notebook.short_id,
                 code,
                 placeholders,
                 returnVariable: resolvedReturnVariable,
                 pageSize: values.dataframePageSize,
                 updateAttributes: actions.updateAttributes,
-                setInsightsqlSqlRunLoading: actions.setInsightsqlSqlRunLoading,
+                setHogqlSqlRunLoading: actions.setHogqlSqlRunLoading,
                 executionSandboxId,
             })
             if (!executed || execution?.status !== 'ok') {
@@ -1608,7 +1836,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             const previewResult = parseDataframePreview(execution?.result)
             actions.setDataframeVariableName(values.insightsqlSqlReturnVariable, previewResult)
         },
-        runInsightsqlSqlNodeWithMode: async ({ mode }) => {
+        runHogqlSqlNodeWithMode: async ({ mode }) => {
             if (props.nodeType !== NotebookNodeType.InsightsQLSQL) {
                 return
             }
@@ -1618,7 +1846,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             }
 
             if (mode === 'cell') {
-                await actions.runInsightsqlSqlNode()
+                await actions.runHogqlSqlNode()
                 return
             }
 
@@ -1630,7 +1858,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 notebookLogic: values.notebookLogic,
             })
             if (nodesToRunWithLogic.length === 0) {
-                await actions.runInsightsqlSqlNode()
+                await actions.runHogqlSqlNode()
                 return
             }
 
@@ -1712,7 +1940,9 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 nodeLogic &&
                 !isDuckSqlExecutionFresh(
                     nodeLogic,
-                    (values.nodeAttributes as { code?: string }).code ?? '',
+                    getMountedNotebookSqlEditorCode(values.nodeId, 'duck') ??
+                        (values.nodeAttributes as { code?: string }).code ??
+                        '',
                     values.duckSqlReturnVariable
                 )
             ) {
@@ -1737,9 +1967,11 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             if (
                 props.nodeType === NotebookNodeType.InsightsQLSQL &&
                 nodeLogic &&
-                !isInsightsqlSqlExecutionFresh(
+                !isHogqlSqlExecutionFresh(
                     nodeLogic,
-                    (values.nodeAttributes as { code?: string }).code ?? '',
+                    getMountedNotebookSqlEditorCode(values.nodeId, 'insightsql') ??
+                        (values.nodeAttributes as { code?: string }).code ??
+                        '',
                     values.insightsqlSqlReturnVariable
                 )
             ) {

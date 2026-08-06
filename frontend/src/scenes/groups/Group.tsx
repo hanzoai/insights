@@ -1,18 +1,19 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
+import { IconRefresh } from '@hanzo/icons'
+import { Button } from '@hanzo/elements'
+import { useFeatureFlagVariantKey } from '@hanzo/react'
+
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { NotFound } from 'lib/components/NotFound'
 import { PropertiesTable } from 'lib/components/PropertiesTable'
-import { isEventFilter } from 'lib/components/UniversalFilters/utils'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Banner } from 'lib/elements/Banner'
 import { Tabs } from 'lib/elements/Tabs'
-import { toast } from 'lib/elements/Toast'
 import { Link } from 'lib/elements/Link'
 import { Spinner, SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { capitalizeFirstLetter } from 'lib/utils'
 import { GroupLogicProps, groupLogic } from 'scenes/groups/groupLogic'
 import { NotebookSelectButton } from 'scenes/notebooks/NotebookSelectButton/NotebookSelectButton'
 import { NotebookNodeType } from 'scenes/notebooks/types'
@@ -20,14 +21,13 @@ import { groupDisplayId } from 'scenes/persons/GroupActorDisplay'
 import { RelatedFeatureFlags } from 'scenes/persons/RelatedFeatureFlags'
 import { SceneExport } from 'scenes/sceneTypes'
 import { SessionRecordingsPlaylist } from 'scenes/session-recordings/playlist/SessionRecordingsPlaylist'
-import { filtersFromUniversalFilterGroups } from 'scenes/session-recordings/utils'
+import { DEFAULT_RECORDING_FILTERS } from 'scenes/session-recordings/playlist/sessionRecordingsPlaylistLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { groupsModel } from '~/models/groupsModel'
 import { Query } from '~/queries/Query/Query'
 import type { ActionFilter } from '~/types'
 import {
@@ -40,12 +40,14 @@ import {
     PropertyOperator,
 } from '~/types'
 
+import { FeedbackButton } from 'products/customer_analytics/frontend/components/FeedbackButton'
 import { GroupProfileCanvas } from 'products/customer_analytics/frontend/components/GroupProfileCanvas'
 
-import { GroupOverview } from './GroupOverview'
-import { RelatedGroups } from './RelatedGroups'
+import { GroupDashboardCard } from './cards/GroupDashboardCard'
 import { GroupNotebookCard } from './cards/GroupNotebookCard'
 import { GroupCaption } from './components/GroupCaption'
+import { GroupOverview } from './GroupOverview'
+import { RelatedGroups } from './RelatedGroups'
 
 export const scene: SceneExport<GroupLogicProps> = {
     component: Group,
@@ -56,47 +58,55 @@ export const scene: SceneExport<GroupLogicProps> = {
     }),
 }
 
-export function Group({ tabId }: { tabId?: string }): JSX.Element {
-    if (!tabId) {
-        throw new Error('GroupScene rendered with no tabId')
-    }
+export function Group(): JSX.Element {
     const mountedGroupLogic = useMountedLogic(groupLogic)
-    const { logicProps, groupData, groupDataLoading, groupTypeName, groupType, groupTab, groupEventsQuery } =
-        useValues(mountedGroupLogic)
+    const {
+        logicProps,
+        groupData,
+        groupDataLoading,
+        groupTypeName,
+        groupType,
+        groupTab,
+        groupEventsQuery,
+        groupEventsQueryIsDirty,
+        backTo,
+        backNavigation,
+    } = useValues(mountedGroupLogic)
     const { groupKey, groupTypeIndex } = logicProps
-    const { setGroupEventsQuery, editProperty, deleteProperty } = useActions(mountedGroupLogic)
+    const { setGroupEventsQuery, resetGroupEventsQuery, editProperty, deleteProperty } = useActions(mountedGroupLogic)
     const { currentTeam } = useValues(teamLogic)
     const { featureFlags } = useValues(featureFlagLogic)
-    const { aggregationLabel } = useValues(groupsModel)
+    const groupProfileVariant = useFeatureFlagVariantKey(FEATURE_FLAGS.GROUP_PROFILE_EXPERIMENT)
+    const isProfileEnabled = groupProfileVariant === 'test'
+    const showProfile = featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS] || isProfileEnabled
 
     if (!groupData || !groupType) {
         return groupDataLoading ? <SpinnerOverlay sceneLevel /> : <NotFound object="group" />
     }
 
-    const activeTab = groupTab ?? (featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS] ? 'profile' : 'overview')
+    const activeTab = groupTab ?? (showProfile ? 'profile' : 'overview')
 
     return (
         <SceneContent>
             <SceneTitleSection
                 name={groupDisplayId(groupData.group_key, groupData.group_properties)}
                 resourceType={{ type: 'group' }}
-                forceBackTo={{
-                    name: capitalizeFirstLetter(aggregationLabel(groupTypeIndex).plural),
-                    key: 'groups',
-                    path: urls.groups(groupTypeIndex),
-                }}
+                forceBackTo={backTo}
                 actions={
-                    <NotebookSelectButton
-                        size="small"
-                        type="secondary"
-                        resource={{
-                            type: NotebookNodeType.Group,
-                            attrs: {
-                                id: groupKey,
-                                groupTypeIndex: groupTypeIndex,
-                            },
-                        }}
-                    />
+                    <>
+                        <FeedbackButton id="customer-analytics-group-profile-feedback-button" />
+                        <NotebookSelectButton
+                            size="small"
+                            type="secondary"
+                            resource={{
+                                type: NotebookNodeType.Group,
+                                attrs: {
+                                    id: groupKey,
+                                    groupTypeIndex: groupTypeIndex,
+                                },
+                            }}
+                        />
+                    </>
                 }
             />
             <GroupCaption groupData={groupData} groupTypeName={groupTypeName} />
@@ -104,27 +114,26 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
             <Tabs
                 sceneInset
                 activeKey={activeTab}
-                onChange={(tab) => router.actions.push(urls.group(String(groupTypeIndex), groupKey, true, tab))}
+                onChange={(tab) =>
+                    router.actions.push(
+                        urls.group(String(groupTypeIndex), groupKey, true, tab),
+                        backNavigation ? { backUrl: backNavigation.url, backName: backNavigation.name } : undefined
+                    )
+                }
                 tabs={[
-                    ...(featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS]
+                    ...(showProfile
                         ? [
                               {
                                   key: GroupsTabType.PROFILE,
                                   label: <span data-attr="groups-profile-tab">Profile</span>,
-                                  content: (
-                                      <GroupProfileCanvas
-                                          group={groupData}
-                                          tabId={tabId}
-                                          attachTo={mountedGroupLogic}
-                                      />
-                                  ),
+                                  content: <GroupProfileCanvas group={groupData} attachTo={mountedGroupLogic} />,
                               },
                           ]
                         : []),
                     {
                         key: GroupsTabType.OVERVIEW,
                         label: <span data-attr="groups-overview-tab">Overview</span>,
-                        content: <GroupOverview groupData={groupData} />,
+                        content: showProfile ? <GroupDashboardCard /> : <GroupOverview groupData={groupData} />,
                     },
                     ...(featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS] && groupData.notebook
                         ? [
@@ -146,6 +155,7 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                 onEdit={editProperty}
                                 onDelete={deleteProperty}
                                 searchable
+                                collapsible
                             />
                         ),
                     },
@@ -156,7 +166,22 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                             <Query
                                 query={groupEventsQuery}
                                 setQuery={setGroupEventsQuery}
-                                context={{ refresh: 'force_blocking' }}
+                                context={{
+                                    refresh: 'force_blocking',
+                                    customActions: (
+                                        <Button
+                                            key="reset-group-events-filters"
+                                            type="secondary"
+                                            size="small"
+                                            icon={<IconRefresh />}
+                                            onClick={() => resetGroupEventsQuery()}
+                                            disabledReason={groupEventsQueryIsDirty ? undefined : 'No active filters'}
+                                            data-attr="group-events-reset-filters"
+                                        >
+                                            Reset all filters
+                                        </Button>
+                                    ),
+                                }}
                             />
                         ) : (
                             <Spinner />
@@ -182,6 +207,7 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                             logicKey={`groups-recordings-${groupKey}-${groupTypeIndex}`}
                                             updateSearchParams
                                             filters={{
+                                                ...DEFAULT_RECORDING_FILTERS,
                                                 duration: [
                                                     {
                                                         type: PropertyFilterType.Recording,
@@ -190,42 +216,21 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                                         operator: PropertyOperator.GreaterThan,
                                                     },
                                                 ],
-                                                filter_group: {
-                                                    type: FilterLogicalOperator.And,
-                                                    values: [
-                                                        {
-                                                            type: FilterLogicalOperator.And,
-                                                            values: [
-                                                                {
-                                                                    type: 'events',
-                                                                    name: 'All events',
-                                                                    properties: [
-                                                                        {
-                                                                            key: `$group_${groupTypeIndex} = '${groupKey}'`,
-                                                                            type: 'insightsql',
-                                                                        },
-                                                                    ],
-                                                                } as ActionFilter,
-                                                            ],
-                                                        },
-                                                    ],
-                                                },
                                             }}
-                                            onFiltersChange={(filters) => {
-                                                const eventFilters =
-                                                    filtersFromUniversalFilterGroups(filters).filter(isEventFilter)
-
-                                                const stillHasGroupFilter = eventFilters?.some((event) => {
-                                                    return event.properties?.some(
-                                                        (prop: Record<string, any>) =>
-                                                            prop.key === `$group_${groupTypeIndex} = '${groupKey}'`
-                                                    )
-                                                })
-                                                if (!stillHasGroupFilter) {
-                                                    toast.warning(
-                                                        'Group filter removed. Please add it back to see recordings for this group.'
-                                                    )
-                                                }
+                                            pinnedFilters={{
+                                                type: FilterLogicalOperator.And,
+                                                values: [
+                                                    {
+                                                        type: 'events',
+                                                        name: 'All events',
+                                                        properties: [
+                                                            {
+                                                                key: `$group_${groupTypeIndex} = '${groupKey}'`,
+                                                                type: 'insightsql',
+                                                            },
+                                                        ],
+                                                    } as ActionFilter,
+                                                ],
                                             }}
                                         />
                                     </div>
@@ -240,7 +245,7 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                 Related people & groups
                             </div>
                         ),
-                        tooltip: `Users and groups that have shared events with this ${groupTypeName} in the last 90 days.`,
+                        tooltip: `People and groups that have shared events with this ${groupTypeName} in the last 90 days.`,
                         content: <RelatedGroups id={groupKey} groupTypeIndex={groupTypeIndex} />,
                     },
                     {

@@ -1,1 +1,1 @@
-0005_signalreportartefact_report_idx
+0083_signalscoutconfig_auto_pause_exempt

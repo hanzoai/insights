@@ -90,7 +90,7 @@ class TestBuildSyncApplyUrl(BaseTest):
     def test_basic_url(self) -> None:
         url = build_sync_apply_url(
             url_sync_ux="https://dns.provider.example/sync",
-            provider_id="insights.com",
+            provider_id="hanzo.ai",
             service_id="reverse-proxy-us",
             domain="example.com",
             variables={"target": "abc123.proxy.hanzo.ai"},
@@ -105,7 +105,7 @@ class TestBuildSyncApplyUrl(BaseTest):
     def test_url_without_host(self) -> None:
         url = build_sync_apply_url(
             url_sync_ux="https://dns.provider.example/sync",
-            provider_id="insights.com",
+            provider_id="hanzo.ai",
             service_id="email-verification-us",
             domain="example.com",
             variables={"verifyToken": "abc123"},
@@ -118,12 +118,12 @@ class TestBuildSyncApplyUrl(BaseTest):
     def test_url_with_redirect(self) -> None:
         url = build_sync_apply_url(
             url_sync_ux="https://dns.provider.example/sync",
-            provider_id="insights.com",
+            provider_id="hanzo.ai",
             service_id="reverse-proxy-us",
             domain="example.com",
             variables={"target": "abc.proxy.hanzo.ai"},
             host="ph",
-            redirect_uri="https://insights.hanzo.ai/settings?domain_connect=proxy",
+            redirect_uri="https://us.hanzo.ai/settings?domain_connect=proxy",
         )
 
         self.assertIn("redirect_uri=", url)
@@ -133,7 +133,7 @@ class TestBuildSyncApplyUrl(BaseTest):
 
         url = build_sync_apply_url(
             url_sync_ux="https://dns.provider.example/sync",
-            provider_id="insights.com",
+            provider_id="hanzo.ai",
             service_id="reverse-proxy-us",
             domain="example.com",
             variables={"target": "abc.proxy.hanzo.ai"},
@@ -148,7 +148,7 @@ class TestBuildSyncApplyUrl(BaseTest):
     def test_url_without_signing_key_has_no_sig(self) -> None:
         url = build_sync_apply_url(
             url_sync_ux="https://dns.provider.example/sync",
-            provider_id="insights.com",
+            provider_id="hanzo.ai",
             service_id="reverse-proxy-us",
             domain="example.com",
             variables={"target": "abc.proxy.hanzo.ai"},
@@ -309,8 +309,8 @@ class TestTemplateResolverAlignment(BaseTest):
 
     @parameterized.expand(
         [
-            ("insights.com.reverse-proxy-us.json", "US"),
-            ("insights.com.reverse-proxy-eu.json", "EU"),
+            ("hanzo.ai.reverse-proxy-us.json", "US"),
+            ("hanzo.ai.reverse-proxy-eu.json", "EU"),
         ]
     )
     @patch("insights.models.ProxyRecord")
@@ -335,8 +335,8 @@ class TestTemplateResolverAlignment(BaseTest):
 
     @parameterized.expand(
         [
-            ("insights.com.email-verification-us.json", "US"),
-            ("insights.com.email-verification-eu.json", "EU"),
+            ("hanzo.ai.email-verification-us.json", "US"),
+            ("hanzo.ai.email-verification-eu.json", "EU"),
         ]
     )
     @patch("insights.models.integration.EmailIntegration")

@@ -11,7 +11,8 @@ from django.db.models import Q
 import structlog
 
 from insights.insightsql_queries.query_metadata import InsightQueryMetadata
-from insights.models import Insight
+
+from products.product_analytics.backend.models.insight import Insight
 
 logger = structlog.get_logger(__name__)
 

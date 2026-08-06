@@ -7,7 +7,7 @@ use std::time::Duration;
 use async_trait::async_trait;
 use axum_test_helper::TestClient;
 use capture::{
-    config::CaptureMode,
+    config::{AiRouting, CaptureMode},
     prometheus::setup_metrics_recorder,
     quota_limiters::CaptureQuotaLimiter,
     router::router,
@@ -18,7 +18,6 @@ use capture::{
 };
 use common_redis::MockRedisClient;
 use common_types::TeamId;
-use health::HealthRegistry;
 use limiters::token_dropper::TokenDropper;
 use metrics_exporter_prometheus::PrometheusHandle;
 use once_cell::sync::Lazy;

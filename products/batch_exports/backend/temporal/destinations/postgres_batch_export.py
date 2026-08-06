@@ -6,6 +6,7 @@ import random
 import typing
 import asyncio
 import datetime as dt
+import tempfile
 import contextlib
 import dataclasses
 import collections.abc
@@ -17,25 +18,33 @@ import pyarrow as pa
 from psycopg import sql
 from psycopg.errors import SerializationFailure
 from structlog.contextvars import bind_contextvars
-from temporalio import activity, workflow
+from temporalio import activity, exceptions, workflow
 from temporalio.common import RetryPolicy
 
-from insights.batch_exports.service import (
+from insights.models.integration import (
+    MISSING_CERT_PATH,
+    TLS,
+    Authority,
+    Credentials,
+    Integration,
+    PostgreSQLIntegration,
+)
+from insights.temporal.common.base import InsightsWorkflow
+from insights.temporal.common.heartbeat import Heartbeater
+from insights.temporal.common.logger import get_logger, get_write_only_logger
+
+from products.batch_exports.backend.service import (
     BatchExportField,
     BatchExportInsertInputs,
     BatchExportModel,
     BatchExportSchema,
     PostgresBatchExportInputs,
 )
-from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.heartbeat import Heartbeater
-from insights.temporal.common.logger import get_logger, get_write_only_logger
-
 from products.batch_exports.backend.temporal.batch_exports import (
-    OverBillingLimitError,
     StartBatchExportRunInputs,
     default_fields,
     get_data_interval,
+    is_over_billing_limit_error,
     start_batch_export_run,
 )
 from products.batch_exports.backend.temporal.destinations.utils import get_query_timeout
@@ -81,12 +90,18 @@ NON_RETRYABLE_ERROR_TYPES = (
     "UniqueViolation",
     # Something changed in the target table's schema that we were not expecting.
     "UndefinedColumn",
+    # Only if raised by the copy method, would indicate missing USAGE permissions on the schema.
+    # Otherwise we should create the table and not see this.
+    "UndefinedTable",
     # A VARCHAR column is too small.
     "StringDataRightTruncation",
     # Raised by PostgreSQL client. Self explanatory.
     "DiskFull",
     # Raised by our PostgreSQL client when failing to connect after several attempts.
     "PostgreSQLConnectionError",
+    # The integration backing this export was deleted. Retrying can never recover it,
+    # so fail fast and let the user reconnect the destination.
+    "PostgreSQLIntegrationNotFoundError",
     # Raised when merging without a primary key.
     "MissingPrimaryKeyError",
     # Raised when the database doesn't support a particular feature we use.
@@ -115,6 +130,9 @@ NON_RETRYABLE_ERROR_TYPES = (
     # Raised when a PostgreSQL stored procedure or function fails.
     # We don't (at the moment) create or run any ourselves, so it must be something set up by the user.
     "SqlRoutineException",
+    # The inputs are missing required connection details (e.g. credentials or host).
+    # This usually means the backing integration is misconfigured or absent, so retrying won't help.
+    "PostgreSQLMissingRequiredInputsError",
 )
 
 
@@ -141,18 +159,60 @@ class PostgreSQLTransactionError(Exception):
         super().__init__(f"A transaction failed to complete after {max_attempts} attempts: {err_msg}")
 
 
+class PostgreSQLMissingRequiredInputsError(Exception):
+    """Raised when the export is missing required connection inputs (credentials or host/port).
+
+    This usually means the backing integration is misconfigured or absent, so retrying won't recover it.
+    """
+
+    def __init__(self, err_msg: str):
+        super().__init__(f"The export is missing required connection inputs: {err_msg}")
+
+
+class _PostgreSQLClientInputsProtocol(typing.Protocol):
+    def credentials(self) -> Credentials: ...
+
+    def authority(self) -> Authority: ...
+
+    def tls(self) -> TLS: ...
+
+
 @dataclasses.dataclass(kw_only=True)
 class PostgresInsertInputs(BatchExportInsertInputs):
     """Inputs for Postgres."""
 
-    user: str
-    password: str
-    host: str
-    port: int = 5432
     database: str
-    schema: str = "public"
     table_name: str
-    has_self_signed_cert: bool = False
+    schema: str = "public"
+    host: str | None = None
+    port: int | None = None
+    user: str | None = None
+    password: str | None = None
+    has_self_signed_cert: bool | None = None
+    integration_id: int | None = None
+
+    def credentials(self) -> Credentials:
+        user = self.user
+        password = self.password
+
+        if user is None or password is None:
+            raise ValueError("Missing required inputs")
+
+        return Credentials(user, password)
+
+    def authority(self) -> Authority:
+        host = self.host
+        port = self.port
+
+        if host is None or port is None:
+            raise ValueError("Missing required inputs")
+
+        return Authority(host, port)
+
+    def tls(self) -> TLS:
+        return TLS(
+            ssl_mode="prefer" if settings.TEST else "require",
+        )
 
 
 async def run_in_retryable_transaction(
@@ -186,15 +246,6 @@ async def run_in_retryable_transaction(
             await asyncio.sleep(sleep_seconds)
 
 
-class _PostgreSQLClientInputsProtocol(typing.Protocol):
-    user: str
-    password: str
-    host: str
-    port: int
-    database: str
-    has_self_signed_cert: bool
-
-
 class PostgreSQLClient:
     """PostgreSQL connection client used in batch exports."""
 
@@ -205,7 +256,8 @@ class PostgreSQLClient:
         host: str,
         port: int,
         database: str,
-        has_self_signed_cert: bool,
+        ssl_mode: typing.Literal["prefer", "require", "verify-ca", "verify-full"],
+        ssl_root_cert: str | typing.Literal["system"] = MISSING_CERT_PATH,
         connection_timeout: int = 30,
     ):
         self.user = user
@@ -213,7 +265,8 @@ class PostgreSQLClient:
         self.database = database
         self.host = host
         self.port = port
-        self.has_self_signed_cert = has_self_signed_cert
+        self.ssl_mode = ssl_mode
+        self.ssl_root_cert = ssl_root_cert
         self.connection_timeout = connection_timeout
 
         self.logger = LOGGER.bind(host=host, port=port, database=database, user=user)
@@ -221,15 +274,25 @@ class PostgreSQLClient:
         self._connection: None | psycopg.AsyncConnection = None
 
     @classmethod
-    def from_inputs(cls, inputs: _PostgreSQLClientInputsProtocol) -> typing.Self:
-        """Initialize `PostgreSQLClient` from `PostgresInsertInputs`."""
+    def from_inputs(cls, inputs: _PostgreSQLClientInputsProtocol, /, database: str) -> typing.Self:
+        """Initialize from any implementation of `_PostgreSQLClientInputsProtocol`.
+
+        This could be either inputs directly passed to the workflow or an `Integration` model.
+
+        Additionally, the database that we are meant to connect to needs to be specified.
+        """
+        creds = inputs.credentials()
+        authority = inputs.authority()
+        tls = inputs.tls()
+
         return cls(
-            user=inputs.user,
-            password=inputs.password,
-            database=inputs.database,
-            host=inputs.host,
-            port=inputs.port,
-            has_self_signed_cert=inputs.has_self_signed_cert,
+            user=creds.user,
+            password=creds.password,
+            database=database,
+            host=authority.host,
+            port=authority.port,
+            ssl_mode=tls.ssl_mode,
+            ssl_root_cert=tls.ssl_root_cert,
         )
 
     @property
@@ -243,15 +306,10 @@ class PostgreSQLClient:
     async def connect(
         self,
     ) -> typing.AsyncIterator[typing.Self]:
-        """Manage a PostgreSQL connection.
+        """Context manager for a PostgreSQL connection, backed by `psycopg`.
 
-        By using a context manager Pyscopg will take care of closing the connection.
+        Connection parameters are set when initializing a client.
         """
-        kwargs: dict[str, typing.Any] = {}
-        if self.has_self_signed_cert:
-            # Disable certificate verification for self-signed certificates.
-            kwargs["sslrootcert"] = None
-
         max_attempts = 5
         connect: typing.Callable[..., typing.Awaitable[psycopg.AsyncConnection]] = (
             make_retryable_with_exponential_backoff(
@@ -262,16 +320,17 @@ class PostgreSQLClient:
         )
 
         try:
-            connection: psycopg.AsyncConnection = await connect(
-                user=self.user,
-                password=self.password,
-                dbname=self.database,
-                host=self.host,
-                port=self.port,
-                connect_timeout=self.connection_timeout,
-                sslmode="prefer" if settings.TEST else "require",
-                **kwargs,
-            )
+            async with self._ensure_ssl_root_cert_file() as ssl_root_cert:
+                connection: psycopg.AsyncConnection = await connect(
+                    user=self.user,
+                    password=self.password,
+                    dbname=self.database,
+                    host=self.host,
+                    port=self.port,
+                    sslmode=self.ssl_mode,
+                    sslrootcert=ssl_root_cert,
+                    connect_timeout=self.connection_timeout,
+                )
         except psycopg.errors.ConnectionTimeout as err:
             raise PostgreSQLConnectionError(
                 f"Timed-out while trying to connect for {max_attempts} attempts. Is the "
@@ -288,6 +347,18 @@ class PostgreSQLClient:
         async with connection as connection:
             self._connection = connection
             yield self
+
+    @contextlib.asynccontextmanager
+    async def _ensure_ssl_root_cert_file(self):
+        if self.ssl_root_cert in ("system", MISSING_CERT_PATH):
+            yield self.ssl_root_cert
+            return
+
+        with tempfile.NamedTemporaryFile(mode="w+", suffix=".crt", delete_on_close=False) as fp:
+            await asyncio.to_thread(fp.write, self.ssl_root_cert)
+            fp.close()
+
+            yield fp.name
 
     async def acreate_table(
         self,
@@ -401,7 +472,7 @@ class PostgreSQLClient:
         delete: bool = True,
         create: bool = True,
         log_statements: bool = False,
-    ) -> collections.abc.AsyncGenerator[str, None]:
+    ) -> collections.abc.AsyncGenerator[str]:
         """Manage a table in PostgreSQL by ensure it exists while in context.
 
         Managing a table implies two operations: creation of a table, which happens upon entering the
@@ -784,6 +855,26 @@ def _get_merge_settings(
     return MergeSettings(requires_merge, merge_key, update_key, primary_key)
 
 
+class PostgreSQLIntegrationNotFoundError(Exception):
+    """Error raised when the PostgreSQL integration is not found."""
+
+    pass
+
+
+async def _get_postgresql_integration(
+    inputs: PostgresInsertInputs,
+) -> PostgreSQLIntegration | None:
+    """Get the PostgreSQL integration."""
+    if inputs.integration_id is None:
+        return None
+
+    try:
+        integration = await Integration.objects.aget(id=inputs.integration_id, team_id=inputs.team_id)
+    except Integration.DoesNotExist:
+        raise PostgreSQLIntegrationNotFoundError(f"PostgreSQL integration with id '{inputs.integration_id}' not found")
+    return PostgreSQLIntegration(integration)
+
+
 @activity.defn
 @handle_non_retryable_errors(NON_RETRYABLE_ERROR_TYPES)
 async def insert_into_postgres_activity_from_stage(inputs: PostgresInsertInputs) -> BatchExportResult:
@@ -794,6 +885,7 @@ async def insert_into_postgres_activity_from_stage(inputs: PostgresInsertInputs)
         data_interval_start=inputs.data_interval_start,
         data_interval_end=inputs.data_interval_end,
         batch_export_id=inputs.batch_export_id,
+        integration_id=inputs.integration_id,
     )
     external_logger = EXTERNAL_LOGGER.bind()
 
@@ -853,7 +945,15 @@ async def insert_into_postgres_activity_from_stage(inputs: PostgresInsertInputs)
             else inputs.table_name
         )[:63]
 
-        async with PostgreSQLClient.from_inputs(inputs).connect() as pg_client:
+        client_inputs = await _get_postgresql_integration(inputs) or inputs
+        try:
+            pg_client = PostgreSQLClient.from_inputs(client_inputs, database=inputs.database)
+        except ValueError as err:
+            # Missing credentials/host usually means a misconfigured or absent integration, which retrying
+            # can't recover. Surface it as a non-retryable error so the export fails fast instead of breaching SLA.
+            raise PostgreSQLMissingRequiredInputsError(str(err)) from err
+
+        async with pg_client.connect() as pg_client:
             table_exists = False
             try:
                 columns = await pg_client.aget_table_columns(inputs.schema, inputs.table_name)
@@ -922,7 +1022,20 @@ async def insert_into_postgres_activity_from_stage(inputs: PostgresInsertInputs)
                         producer_task=producer_task,
                         transformer=transformer,
                         json_columns=(),
+                        records_total=inputs.records_total,
                     )
+                except psycopg.errors.UndefinedTable:
+                    # Table was not found in the search path despite guaranteed to exist
+                    # at this point likely points to missing USAGE permissions on the schema.
+                    external_logger.exception(
+                        "The table '%s.%s' could not be found, even after we explicitly created it."
+                        " This likely points to missing privileges on the schema (particularly 'USAGE')."
+                        " Review the required privileges as described in the docs (https://hanzo.ai/docs/cdp/batch-exports/postgres) and retry.",
+                        inputs.schema,
+                        inputs.table_name,
+                    )
+                    raise
+
                 finally:
                     if merge_settings.requires_merge:
                         merge_query_timeout = get_query_timeout(
@@ -966,7 +1079,9 @@ class PostgresBatchExportWorkflow(InsightsWorkflow):
         """Workflow implementation to export data to Postgres."""
         is_backfill = inputs.get_is_backfill()
         is_earliest_backfill = inputs.get_is_earliest_backfill()
-        data_interval_start, data_interval_end = get_data_interval(inputs.interval, inputs.data_interval_end)
+        data_interval_start, data_interval_end = get_data_interval(
+            inputs.interval, inputs.data_interval_end, inputs.timezone
+        )
         should_backfill_from_beginning = is_backfill and is_earliest_backfill
 
         start_batch_export_run_inputs = StartBatchExportRunInputs(
@@ -990,8 +1105,10 @@ class PostgresBatchExportWorkflow(InsightsWorkflow):
                     non_retryable_error_types=["NotNullViolation", "IntegrityError", "OverBillingLimitError"],
                 ),
             )
-        except OverBillingLimitError:
-            return
+        except exceptions.ActivityError as e:
+            if is_over_billing_limit_error(e):
+                return
+            raise
 
         insert_inputs = PostgresInsertInputs(
             team_id=inputs.team_id,
@@ -1014,6 +1131,7 @@ class PostgresBatchExportWorkflow(InsightsWorkflow):
             batch_export_schema=inputs.batch_export_schema,
             batch_export_id=inputs.batch_export_id,
             destination_default_fields=postgres_default_fields(),
+            integration_id=inputs.integration_id,
         )
 
         await execute_batch_export_using_internal_stage(

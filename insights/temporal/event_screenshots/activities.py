@@ -4,7 +4,7 @@ from django.db import connection
 
 from temporalio import activity
 
-from insights.models import ExportedAsset, ObjectMediaPreview
+from insights.models import ObjectMediaPreview
 from insights.sync import database_sync_to_async
 from insights.tasks.exporter import export_asset_direct
 from insights.temporal.common.datastore import get_client as get_ch_client
@@ -17,6 +17,8 @@ from insights.temporal.event_screenshots.types import (
     TakeEventScreenshotInput,
     TakeEventScreenshotResult,
 )
+
+from products.exports.backend.models.exported_asset import ExportedAsset
 
 LOGGER = get_write_only_logger()
 

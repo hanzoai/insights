@@ -1,9 +1,9 @@
 import { IconChevronDown } from '@hanzo/icons'
 import { Button, Dropdown, Input } from '@hanzo/elements'
 
-import { fullName } from 'lib/utils'
+import { fullName } from 'lib/utils/strings'
 
-import { APIScopeObject, OrganizationMemberType, RoleType } from '~/types'
+import { AccessControlLevel, APIScopeObject, OrganizationMemberType, RoleType } from '~/types'
 
 import { MultiSelectFilterDropdown } from './MultiselectFilterDropdown'
 import { AccessControlFilters as AccessControlFiltersType, AccessControlsTab } from './types'
@@ -17,7 +17,7 @@ export interface AccessControlFiltersProps {
     roles: RoleType[]
     members: OrganizationMemberType[]
     resources: { key: APIScopeObject; label: string }[]
-    ruleOptions: { key: string; label: string }[]
+    ruleOptions: { key: AccessControlLevel; label: string }[]
     canUseRoles: boolean
 }
 
@@ -51,7 +51,7 @@ export function AccessControlFilters(props: AccessControlFiltersProps): JSX.Elem
                     />
                 )}
 
-                <FeaturesFilter
+                <ToolsFilter
                     selectedResourceKeys={props.filters.resourceKeys}
                     setSelectedResourceKeys={(values) => props.setFilters({ resourceKeys: values })}
                     resources={props.resources.filter((resource) => resource.key !== 'project')}
@@ -59,7 +59,7 @@ export function AccessControlFilters(props: AccessControlFiltersProps): JSX.Elem
 
                 <AccessLevelFilter
                     selectedRuleLevels={props.filters.ruleLevels}
-                    setSelectedRuleLevels={(values) => props.setFilters({ ruleLevels: values })}
+                    setSelectedRuleLevels={(values) => props.setFilters({ ruleLevels: values as AccessControlLevel[] })}
                     ruleOptions={props.ruleOptions}
                 />
             </div>
@@ -119,7 +119,7 @@ function MembersFilter(props: {
                     setValues={props.setSelectedMemberIds}
                     options={props.members.map((member) => ({
                         key: member.id,
-                        label: fullName(member.user),
+                        label: fullName(member.user) || member.user.email,
                     }))}
                 />
             }
@@ -131,7 +131,7 @@ function MembersFilter(props: {
     )
 }
 
-function FeaturesFilter(props: {
+function ToolsFilter(props: {
     selectedResourceKeys: APIScopeObject[]
     setSelectedResourceKeys: (values: APIScopeObject[]) => void
     resources: { key: APIScopeObject; label: string }[]
@@ -142,8 +142,8 @@ function FeaturesFilter(props: {
             placement="bottom-start"
             overlay={
                 <MultiSelectFilterDropdown
-                    title="Feature"
-                    placeholder="Filter by features…"
+                    title="Tool"
+                    placeholder="Filter by tools…"
                     values={props.selectedResourceKeys}
                     setValues={(values) => props.setSelectedResourceKeys(values as APIScopeObject[])}
                     options={props.resources.map((r) => ({ key: r.key, label: r.label }))}
@@ -151,16 +151,16 @@ function FeaturesFilter(props: {
             }
         >
             <Button type="secondary" size="small" sideIcon={<IconChevronDown />}>
-                Feature{props.selectedResourceKeys.length ? ` (${props.selectedResourceKeys.length})` : ''}
+                Tool{props.selectedResourceKeys.length ? ` (${props.selectedResourceKeys.length})` : ''}
             </Button>
         </Dropdown>
     )
 }
 
 function AccessLevelFilter(props: {
-    selectedRuleLevels: string[]
-    setSelectedRuleLevels: (values: string[]) => void
-    ruleOptions: { key: string; label: string }[]
+    selectedRuleLevels: AccessControlLevel[]
+    setSelectedRuleLevels: (values: AccessControlLevel[]) => void
+    ruleOptions: { key: AccessControlLevel; label: string }[]
 }): JSX.Element {
     return (
         <Dropdown

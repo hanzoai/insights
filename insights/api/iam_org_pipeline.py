@@ -1,31 +1,30 @@
-"""
-Hanzo IAM Organization Pipeline for Insights Social Auth.
+"""Scope an SSO login to its Hanzo IAM organization.
 
-This pipeline function runs during OIDC/SSO login and ensures the user
-is assigned to the correct Insights Organization based on their IAM org claim.
+Hanzo IAM (hanzo.id) is the single federated login, and it carries the tenant in
+the `owner` claim of userinfo -- the org slug, e.g. "hanzo". This pipeline step
+turns that claim into an Insights Organization, Team and Membership so a user
+lands in their own tenant and nobody else's.
 
-IAM (hanzo.id) provides the `owner` claim in userinfo which contains
-the organization slug (e.g., "hanzo", "lux", "zoo").
+Invariants, all of which are the difference between a login and a tenancy bug:
 
-Security invariants (RED H2/M2/M3/M7):
   - Organizations are matched by SLUG ONLY. `slug` is the unique, immutable
     tenant key (LowercaseSlugField(unique=True)); `name` is user-editable and
-    NON-unique, so matching by name would let one tenant merge into or take over
-    another by renaming (cross-tenant org takeover). We never match by name.
-  - Provisioning is ATOMIC and race-safe (unique-constraint + IntegrityError
-    re-fetch), so two concurrent first-logins can never mint two orgs for one
-    slug.
-  - Login FAILS CLOSED: a login whose IAM org claim is absent/unresolvable, or
-    for which we cannot correctly scope the user, is DENIED (AuthFailed) — never
-    silently allowed into a self-created or wrong org.
-  - Membership level is derived from the IAM role claim and DEFAULTS TO MEMBER.
-    Being the first user in an org does NOT grant ownership.
+    non-unique, so matching on it would let one tenant merge into or take over
+    another simply by renaming itself.
+  - Provisioning is atomic and race-safe, so two concurrent first logins cannot
+    mint two organizations for one slug.
+  - Login fails CLOSED. A login whose org claim is absent or unresolvable is
+    denied, never allowed through into a self-created or arbitrary org: an
+    authenticated user in the wrong tenant is worse than a failed login.
+  - Membership level is derived from the IAM role claim and defaults to MEMBER.
+    Being the first user in an organization grants nothing.
 """
 
 from typing import Any, Optional, Union
 
-import structlog
 from django.db import IntegrityError, transaction
+
+import structlog
 from social_core.exceptions import AuthFailed
 from social_django.strategy import DjangoStrategy
 
@@ -33,34 +32,28 @@ from insights.models import Organization, OrganizationMembership, Team, User
 
 logger = structlog.get_logger(__name__)
 
+# IAM's own tenants, which are not customer organizations.
+RESERVED_IAM_ORGS = ("built-in", "admin")
+
 
 def _normalize_slug(org_slug: str) -> str:
-    """The tenant key. IAM emits lowercase org names; LowercaseSlugField
-    lowercases on save, so we normalize identically here for lookup parity."""
+    """IAM emits lowercase org names and LowercaseSlugField lowercases on save,
+    so lookups have to normalize identically or they miss an existing tenant."""
     return org_slug.strip().lower()
 
 
-def _extract_iam_org_slug(response: dict, kwargs: dict) -> Optional[str]:
-    """Extract the IAM organization slug from the OIDC response.
-
-    IAM puts the org in the `owner` field. We also check common
-    alternatives for other OIDC providers.
-    """
+def _extract_iam_org_slug(response: dict) -> Optional[str]:
+    """Read the tenant claim. IAM puts it in `owner`; the alternatives are what
+    other OIDC providers call the same thing."""
     org = response.get("owner") or response.get("org") or response.get("organization")
 
-    # Skip the IAM built-in / platform-admin orgs -- they are not tenants.
-    if org and org.lower() in ("built-in", "admin"):
+    if org and org.lower() in RESERVED_IAM_ORGS:
         return None
 
     return org or None
 
 
 def _ensure_organization(org_slug: str) -> Organization:
-    """Find or create the Insights Organization for an IAM org slug.
-
-    SLUG-ONLY, atomic, race-safe. Never falls back to a name match (H2) and
-    never rewrites an existing org's slug (which would hijack another tenant).
-    """
     slug = _normalize_slug(org_slug)
     org_name = org_slug.replace("-", " ").replace("_", " ").title()
 
@@ -68,12 +61,11 @@ def _ensure_organization(org_slug: str) -> Organization:
     if org:
         return org
 
-    # Create under the deterministic IAM slug. Organization.objects.create
-    # auto-generates a slug from the name, so we pin it to the IAM slug in the
-    # SAME transaction. The unique constraint on slug makes this race-safe: a
-    # concurrent login that wins the slug makes our pin raise IntegrityError,
-    # which we resolve by re-fetching the winner (never a second org, never a
-    # name match).
+    # Organization.objects.create derives a slug from the name, so the IAM slug
+    # is pinned in the same transaction. The unique constraint makes that
+    # race-safe: a concurrent login that wins the slug makes this pin raise
+    # IntegrityError, which resolves by re-fetching the winner -- never a second
+    # organization, and never a fallback to matching on name.
     try:
         with transaction.atomic():
             org = Organization.objects.create(name=org_name)
@@ -91,12 +83,13 @@ def _ensure_organization(org_slug: str) -> Organization:
         existing = Organization.objects.filter(slug=slug).first()
         if existing:
             return existing
-        # Slug is taken but not readable back -> refuse to guess. Fail closed.
+        # The slug is taken but unreadable, so which tenant this user belongs to
+        # is unknown. Guessing is the one thing that must not happen here.
         raise AuthFailed("hanzo-iam", f"Could not resolve organization for slug '{slug}'")
 
 
 def _ensure_default_team(org: Organization) -> Team:
-    """Ensure the organization has at least one team (project) for ingestion."""
+    """Every organization needs at least one team before it can ingest anything."""
     team = Team.objects.filter(organization=org).first()
     if team:
         return team
@@ -116,11 +109,7 @@ def _ensure_default_team(org: Organization) -> Team:
 
 
 def _membership_level(response: dict) -> int:
-    """Derive the org membership level from the IAM role claim. Default MEMBER.
-
-    Being the first user in an org grants NOTHING extra (M3). Only an explicit
-    IAM owner/admin signal elevates the user.
-    """
+    """Only an explicit owner/admin signal from IAM elevates a user."""
     raw_roles = response.get("roles") or []
     role_names = set()
     if isinstance(raw_roles, list):
@@ -137,11 +126,8 @@ def _membership_level(response: dict) -> int:
 
 
 def _ensure_membership(user: User, org: Organization, level: int) -> None:
-    """Ensure the user is a member of the organization at the given level.
-
-    Idempotent: an existing membership is left as-is (level changes are an
-    explicit admin action, not a per-login side effect).
-    """
+    """Idempotent: an existing membership is left alone, because a level change
+    is an explicit administrative act rather than a side effect of logging in."""
     existing = OrganizationMembership.objects.filter(user=user, organization=org).first()
     if existing:
         return
@@ -169,22 +155,14 @@ def iam_org_assign(
     *args: Any,
     **kwargs: Any,
 ) -> Optional[dict]:
-    """Social auth pipeline: scope the user to their IAM org in Insights.
-
-    FAILS CLOSED: a login with no resolvable IAM org, or which cannot be
-    correctly scoped, is DENIED (AuthFailed) rather than allowed into a
-    self-created or wrong org.
-    """
     if not user:
         return None
 
     if not response:
         response = {}
 
-    org_slug = _extract_iam_org_slug(response, kwargs)
+    org_slug = _extract_iam_org_slug(response)
     if not org_slug:
-        # RED M2: no IAM tenant claim -> deny. Never fall through to
-        # self-service org creation or leave the user org-less-but-authed.
         logger.warning("iam_org_pipeline_no_org_slug_denied", user_id=str(user.uuid))
         raise AuthFailed(
             backend,
@@ -204,8 +182,8 @@ def iam_org_assign(
     except AuthFailed:
         raise
     except Exception:
-        # RED M2/M7: fail CLOSED. If we cannot correctly + safely scope the
-        # user to their tenant, deny the login rather than risk mis-scoping.
+        # If the user cannot be scoped to their tenant correctly, deny. The
+        # alternative is an authenticated session pointing at the wrong data.
         logger.error(
             "iam_org_pipeline_error_denied",
             user_id=str(user.uuid),

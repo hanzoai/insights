@@ -23,8 +23,7 @@
         animation: TableLoader__swooping 1.5s linear infinite;
     }
 
-    &.TableLoader--enter-active,
-    &.TableLoader--enter-done {
+    &.TableLoader--active {
         height: 0.125rem;
     }
 }

@@ -5,9 +5,8 @@ import { useEffect, useState } from 'react'
 
 import { IconCopy, IconDrag, IconPlus } from '@hanzo/icons'
 
-import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { NODE_HEIGHT, NODE_WIDTH } from '../react_flow_utils/constants'
-import type { InsightsFlowActionNode } from '../types'
 import { StepView } from './components/StepView'
 import { InsightsFlowStepNodeProps } from './types'
 
@@ -20,9 +19,9 @@ export const REACT_FLOW_NODE_TYPES: Record<ReactFlowNodeType, React.ComponentTyp
 
 function DropzoneNode({ id }: InsightsFlowStepNodeProps): JSX.Element {
     const [isHighlighted, setIsHighlighted] = useState(false)
-    const { isCopyingNode, isMovingNode } = useValues(insightsFlowEditorLogic)
+    const { isCopyingNode, isMovingNode } = useValues(hogFlowEditorLogic)
     const { setHighlightedDropzoneNodeId, copyNodeToHighlightedDropzone, moveNodeToHighlightedDropzone } =
-        useActions(insightsFlowEditorLogic)
+        useActions(hogFlowEditorLogic)
 
     useEffect(() => {
         setHighlightedDropzoneNodeId(isHighlighted ? id : null)
@@ -69,7 +68,7 @@ function DropzoneNode({ id }: InsightsFlowStepNodeProps): JSX.Element {
 function InsightsFlowActionNode(props: InsightsFlowStepNodeProps): JSX.Element | null {
     const updateNodeInternals = useUpdateNodeInternals()
 
-    const { nodesById, isCopyingNode, isMovingNode, nodeToBeAdded, movingNodeId } = useValues(insightsFlowEditorLogic)
+    const { nodesById } = useValues(hogFlowEditorLogic)
 
     useEffect(() => {
         updateNodeInternals(props.id)
@@ -77,17 +76,8 @@ function InsightsFlowActionNode(props: InsightsFlowStepNodeProps): JSX.Element |
 
     const node = nodesById[props.id]
 
-    const shouldWiggleCopyingNode =
-        isCopyingNode && nodeToBeAdded && 'id' in nodeToBeAdded && (nodeToBeAdded as InsightsFlowActionNode).id === props.id
-    const shouldWiggleMovingNode = isMovingNode && movingNodeId === props.id
-
     return (
-        <div
-            className={clsx(
-                'transition-all hover:translate-y-[-2px]',
-                (shouldWiggleCopyingNode || shouldWiggleMovingNode) && 'animate-bounce'
-            )}
-        >
+        <div className="transition-all hover:translate-y-[-2px]">
             {node?.handles?.map((handle) => (
                 // isConnectable={false} prevents edges from being manually added
                 <Handle key={handle.id} className="opacity-0" {...handle} isConnectable={false} />

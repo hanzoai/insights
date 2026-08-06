@@ -2,18 +2,13 @@ import './Modal.scss'
 
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
-// react-modal's default export is aliased because this file exports its own
-// Modal: the debrand renamed LemonModal onto that name, so the unaliased import
-// collided with it and `<Modal>` below resolved to this file's own component --
-// a component rendering itself.
-import ReactModal from 'react-modal'
+import Modal from 'react-modal'
 
 import { IconX } from '@hanzo/icons'
 
-import { Button } from 'lib/elements/Button'
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
-
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
+import { Button } from 'lib/elements/Button'
 
 import { Tooltip } from '../Tooltip'
 
@@ -108,39 +103,43 @@ export function Modal({
 
     const modalContent = (
         <div ref={nodeRef} className="Modal__container" data-attr={dataAttr}>
-            {closable && !hideCloseButton && (
-                // The key causes the div to be re-rendered, which restarts the animation,
-                // providing immediate visual feedback on click
-                <div
-                    key={ignoredOverlayClickCount}
-                    className={clsx('Modal__close', ignoredOverlayClickCount > 0 && 'Modal__close--highlighted')}
-                >
-                    <Tooltip
-                        visible={!!ignoredOverlayClickCount || undefined}
-                        title={
-                            ignoredOverlayClickCount ? (
-                                <>
-                                    You have unsaved input that will be discarded.
-                                    <br />
-                                    Use the <IconX /> button to close explicitly.
-                                </>
-                            ) : (
-                                <>
-                                    Close <KeyboardShortcut escape />
-                                </>
-                            )
-                        }
+            {closable &&
+                !hideCloseButton && (
+                    // The key causes the div to be re-rendered, which restarts the animation,
+                    // providing immediate visual feedback on click
+                    <div
+                        key={ignoredOverlayClickCount}
+                        className={clsx(
+                            'Modal__close',
+                            ignoredOverlayClickCount > 0 && 'Modal__close--highlighted'
+                        )}
                     >
-                        <Button
-                            icon={<IconX />}
-                            size="small"
-                            onClick={onClose}
-                            aria-label="close"
-                            onMouseEnter={() => setIgnoredOverlayClickCount(0)}
-                        />
-                    </Tooltip>
-                </div>
-            )}
+                        <Tooltip
+                            visible={!!ignoredOverlayClickCount || undefined}
+                            title={
+                                ignoredOverlayClickCount ? (
+                                    <>
+                                        You have unsaved input that will be discarded.
+                                        <br />
+                                        Use the <IconX /> button to close explicitly.
+                                    </>
+                                ) : (
+                                    <>
+                                        Close <KeyboardShortcut escape />
+                                    </>
+                                )
+                            }
+                        >
+                            <Button
+                                icon={<IconX />}
+                                size="small"
+                                onClick={onClose}
+                                aria-label="close"
+                                onMouseEnter={() => setIgnoredOverlayClickCount(0)}
+                            />
+                        </Tooltip>
+                    </div>
+                )}
 
             <div className="Modal__layout">
                 {simple ? (
@@ -179,7 +178,7 @@ export function Modal({
         </div>
     ) : (
         // eslint-disable-next-line react/forbid-elements
-        <ReactModal
+        <Modal
             isOpen={isOpen}
             onRequestClose={(e) => {
                 if (hasUnsavedInput && e.type === 'click') {
@@ -206,13 +205,18 @@ export function Modal({
                     maxWidth,
                 },
             }}
-            appElement={document.getElementById('root') as HTMLElement}
+            // Aria-hide the app behind the modal only when the app root exists. Without it
+            // (jsdom tests, embedded contexts) there is nothing to hide that doesn't also
+            // contain the modal portal itself — hiding `document.body` would remove the modal
+            // from the accessibility tree too.
+            appElement={document.getElementById('root') ?? document.body}
+            ariaHideApp={document.getElementById('root') !== null}
             contentRef={contentRef}
             overlayRef={overlayRef}
             parentSelector={floatingContainer ? () => floatingContainer : undefined}
         >
             {modalContent}
-        </ReactModal>
+        </Modal>
     )
 }
 

@@ -7,9 +7,9 @@ import { Button, Tag, TextArea } from '@hanzo/elements'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { NotebookNodeProps, NotebookNodeType } from 'scenes/notebooks/types'
 
-import { tasksLogic } from 'products/tasks/frontend/logics/tasksLogic'
-import { tasksLogicType } from 'products/tasks/frontend/logics/tasksLogicType'
-import { OriginProduct, TaskUpsertProps } from 'products/tasks/frontend/types'
+import { tasksLogic } from 'products/insights_ai/frontend/logics/tasksLogic'
+import type { tasksLogicType } from 'products/insights_ai/frontend/logics/tasksLogic'
+import { OriginProduct, TaskUpsertProps } from 'products/insights_ai/frontend/types/taskTypes'
 
 import { notebookNodeLogic } from './notebookNodeLogic'
 

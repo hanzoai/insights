@@ -5,8 +5,9 @@ import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { Divider } from 'lib/elements/Divider'
 import { Row } from 'lib/elements/Row'
 import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
-import { IconHandClick } from 'lib/elements/icons'
-import { humanFriendlyDuration, humanFriendlyNumber, percentage } from 'lib/utils'
+import { humanFriendlyDuration } from 'lib/utils/durations'
+import { humanFriendlyNumber, percentage } from 'lib/utils/numbers'
+import { ClickToInspectActors } from 'scenes/insights/InsightTooltip/InsightTooltip'
 import { useInsightTooltip } from 'scenes/insights/useInsightTooltip'
 import { formatBreakdownLabel } from 'scenes/insights/utils'
 import { getActionFilterFromFunnelStep } from 'scenes/insights/views/Funnels/funnelStepTableUtils'
@@ -60,15 +61,18 @@ function FunnelTooltipContent({
                         <td>{humanFriendlyNumber(series.count)}</td>
                     </tr>
                     {stepIndex > 0 && (
-                        <tr>
-                            <td>Dropped off</td>
-                            <td>{humanFriendlyNumber(series.droppedOffFromPrevious || 0)}</td>
-                        </tr>
+                        <>
+                            <tr>
+                                <td>Dropped off</td>
+                                <td>{humanFriendlyNumber(series.droppedOffFromPrevious || 0)}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Conversion so far</td>
+                                <td>{percentage(series.conversionRates.total || 0, 2, true)}</td>
+                            </tr>
+                        </>
                     )}
-                    <tr>
-                        <td>Conversion so far</td>
-                        <td>{percentage(series.conversionRates.total || 0, 2, true)}</td>
-                    </tr>
                     {stepIndex > 0 && (
                         <tr>
                             <td>Conversion from previous</td>
@@ -90,10 +94,10 @@ function FunnelTooltipContent({
                 </tbody>
             </table>
             {hasSessionData && (
-                <div className="table-subtext table-subtext-click-to-inspect">
-                    <IconHandClick className="mr-1 mb-0.5" />
-                    Click to view persons dropping off
-                </div>
+                <>
+                    <Divider className="my-2" />
+                    <ClickToInspectActors groupTypeLabel="persons" />
+                </>
             )}
         </div>
     )

@@ -1,19 +1,19 @@
 import { DateTime } from 'luxon'
 
-import { isIQLDate, isIQLDateTime } from '../objects'
-import { IQLDate, IQLDateTime } from '../types'
+import { isHogDate, isHogDateTime } from '../objects'
+import { HogDate, HogDateTime } from '../types'
 
-export function toIQLDate(year: number, month: number, day: number): IQLDate {
+export function toHogDate(year: number, month: number, day: number): HogDate {
     return {
-        __iqlDate__: true,
+        __hogDate__: true,
         year: year,
         month: month,
         day: day,
     }
 }
 
-export function toIQLDateTime(timestamp: number | IQLDate, zone?: string): IQLDateTime {
-    if (isIQLDate(timestamp)) {
+export function toHogDateTime(timestamp: number | HogDate, zone?: string): HogDateTime {
+    if (isHogDate(timestamp)) {
         const dateTime = DateTime.fromObject(
             {
                 year: timestamp.year,
@@ -23,13 +23,13 @@ export function toIQLDateTime(timestamp: number | IQLDate, zone?: string): IQLDa
             { zone: zone || 'UTC' }
         )
         return {
-            __iqlDateTime__: true,
+            __hogDateTime__: true,
             dt: dateTime.toSeconds(),
             zone: dateTime.zoneName || 'UTC',
         }
     }
     return {
-        __iqlDateTime__: true,
+        __hogDateTime__: true,
         dt: timestamp,
         zone: zone || 'UTC',
     }
@@ -37,53 +37,53 @@ export function toIQLDateTime(timestamp: number | IQLDate, zone?: string): IQLDa
 
 // EXPORTED STL functions
 
-export function now(zone?: string): IQLDateTime {
-    return toIQLDateTime(Date.now() / 1000, zone)
+export function now(zone?: string): HogDateTime {
+    return toHogDateTime(Date.now() / 1000, zone)
 }
 
-export function toUnixTimestamp(input: IQLDateTime | IQLDate | string, zone?: string): number {
-    if (isIQLDateTime(input)) {
+export function toUnixTimestamp(input: HogDateTime | HogDate | string, zone?: string): number {
+    if (isHogDateTime(input)) {
         return input.dt
     }
-    if (isIQLDate(input)) {
-        return toIQLDateTime(input).dt
+    if (isHogDate(input)) {
+        return toHogDateTime(input).dt
     }
     return DateTime.fromISO(input, { zone: zone || 'UTC' }).toSeconds()
 }
 
-export function fromUnixTimestamp(input: number): IQLDateTime {
-    return toIQLDateTime(input)
+export function fromUnixTimestamp(input: number): HogDateTime {
+    return toHogDateTime(input)
 }
 
-export function toUnixTimestampMilli(input: IQLDateTime | IQLDate | string, zone?: string): number {
+export function toUnixTimestampMilli(input: HogDateTime | HogDate | string, zone?: string): number {
     return toUnixTimestamp(input, zone) * 1000
 }
 
-export function fromUnixTimestampMilli(input: number): IQLDateTime {
-    return toIQLDateTime(input / 1000)
+export function fromUnixTimestampMilli(input: number): HogDateTime {
+    return toHogDateTime(input / 1000)
 }
 
-export function toTimeZone(input: IQLDateTime, zone: string): IQLDateTime | IQLDate {
-    if (!isIQLDateTime(input)) {
+export function toTimeZone(input: HogDateTime, zone: string): HogDateTime | HogDate {
+    if (!isHogDateTime(input)) {
         throw new Error('Expected a DateTime')
     }
     return { ...input, zone }
 }
 
-export function toDate(input: string | number): IQLDate {
+export function toDate(input: string | number): HogDate {
     const dt = typeof input === 'number' ? DateTime.fromSeconds(input) : DateTime.fromISO(input)
     return {
-        __iqlDate__: true,
+        __hogDate__: true,
         year: dt.year,
         month: dt.month,
         day: dt.day,
     }
 }
 
-export function toDateTime(input: string | number, zone?: string): IQLDateTime {
+export function toDateTime(input: string | number, zone?: string): HogDateTime {
     const dt = typeof input === 'number' ? input : DateTime.fromISO(input, { zone: zone || 'UTC' }).toSeconds()
     return {
-        __iqlDateTime__: true,
+        __hogDateTime__: true,
         dt: dt,
         zone: zone || 'UTC',
     }
@@ -130,7 +130,7 @@ const tokenTranslations: Record<string, string> = {
     '%': '%',
 }
 export function formatDateTime(input: any, format: string, zone?: string): string {
-    if (!isIQLDateTime(input)) {
+    if (!isHogDateTime(input)) {
         throw new Error('Expected a DateTime')
     }
     if (!format) {

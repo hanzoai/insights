@@ -1,7 +1,7 @@
 import { MOCK_DEFAULT_USER } from 'lib/api.mock'
 
 import { expectLogic } from 'kea-test-utils'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast'
 import { userLogic } from 'scenes/userLogic'
@@ -12,7 +12,7 @@ import { initKeaTests } from '~/test/init'
 import { featurePreviewsLogic } from './featurePreviewsLogic'
 
 // Mock insights-js
-jest.mock('@hanzo/insights')
+jest.mock('insights-js')
 // Mock toast
 jest.mock('lib/elements/Toast')
 
@@ -28,7 +28,7 @@ describe('featurePreviewsLogic - submitEarlyAccessFeatureFeedback', () => {
 
         useMocks({
             post: {
-                'https://insightshelp.zendesk.com/api/v2/requests.json': [200, {}],
+                'https://insightshelp.zendesk.com/api/v2/requests.json': [200, { request: { id: 123 } }],
             },
         })
         initKeaTests()
@@ -48,6 +48,34 @@ describe('featurePreviewsLogic - submitEarlyAccessFeatureFeedback', () => {
         await expectLogic(logic)
             .toMatchValues({ activeFeedbackFlagKeyLoading: false })
             .toDispatchActions(['submitEarlyAccessFeatureFeedbackSuccess'])
+    })
+})
+
+describe('featurePreviewsLogic - submitEarlyAccessFeatureFeedback failure', () => {
+    let logic: ReturnType<typeof featurePreviewsLogic.build>
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        useMocks({
+            post: {
+                // Zendesk rejects the ticket; with no beacon fallback the support submit reports failure
+                'https://insightshelp.zendesk.com/api/v2/requests.json': [500, {}],
+            },
+        })
+        ;(navigator as any).sendBeacon = jest.fn(() => false)
+        initKeaTests()
+        logic = featurePreviewsLogic()
+        logic.mount()
+        userLogic.actions.loadUserSuccess(MOCK_DEFAULT_USER)
+    })
+
+    test('keeps the feedback panel open so the text survives for a retry', async () => {
+        logic.actions.beginEarlyAccessFeatureFeedback('test')
+        await logic.asyncActions.submitEarlyAccessFeatureFeedback('important feedback')
+
+        // The submit failed, so activeFeedbackFlagKey stays set — the panel (and the component's
+        // local draft) survive. On success it would be cleared to null, closing the panel.
+        await expectLogic(logic).toMatchValues({ activeFeedbackFlagKey: 'test', activeFeedbackFlagKeyLoading: false })
     })
 })
 
@@ -92,6 +120,139 @@ describe('featurePreviewsLogic - updateEarlyAccessFeatureEnrollment', () => {
         // Test alpha stage
         logic.actions.updateEarlyAccessFeatureEnrollment('alpha-flag', true, 'alpha')
         expect(mockUpdateEnrollment).toHaveBeenCalledWith('alpha-flag', true, 'alpha')
+    })
+})
+
+describe('featurePreviewsLogic - conceptEnrollments reducer', () => {
+    let logic: ReturnType<typeof featurePreviewsLogic.build>
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        ;(insights as any).updateEarlyAccessFeatureEnrollment = jest.fn()
+
+        useMocks({
+            post: {
+                'https://insightshelp.zendesk.com/api/v2/requests.json': [200, {}],
+            },
+        })
+        initKeaTests()
+        logic = featurePreviewsLogic()
+        logic.mount()
+        userLogic.actions.loadUserSuccess(MOCK_DEFAULT_USER)
+    })
+
+    test.each([
+        ['concept', true, { 'concept-flag': true }],
+        ['beta', true, {}],
+        ['concept', false, { 'concept-flag': false }],
+    ])('stage=%s enabled=%s → conceptEnrollments=%j', async (stage, enabled, expected) => {
+        logic.actions.updateEarlyAccessFeatureEnrollment('concept-flag', enabled, stage)
+        await expectLogic(logic).toMatchValues({ conceptEnrollments: expected })
+    })
+
+    test('tracks multiple concept enrollments', async () => {
+        logic.actions.updateEarlyAccessFeatureEnrollment('concept-a', true, 'concept')
+        logic.actions.updateEarlyAccessFeatureEnrollment('concept-b', true, 'concept')
+
+        await expectLogic(logic).toMatchValues({
+            conceptEnrollments: { 'concept-a': true, 'concept-b': true },
+        })
+    })
+})
+
+describe('featurePreviewsLogic - submitConceptSurvey', () => {
+    let logic: ReturnType<typeof featurePreviewsLogic.build>
+    const mockCapture = jest.fn()
+    const mockUpdateEnrollment = jest.fn()
+    let originalImpersonatedSession: boolean | undefined
+
+    afterEach(() => {
+        window.IMPERSONATED_SESSION = originalImpersonatedSession
+    })
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        originalImpersonatedSession = window.IMPERSONATED_SESSION
+        ;(insights as any).capture = mockCapture
+        ;(insights as any).updateEarlyAccessFeatureEnrollment = mockUpdateEnrollment
+
+        useMocks({
+            post: {
+                'https://insightshelp.zendesk.com/api/v2/requests.json': [200, {}],
+            },
+        })
+        initKeaTests()
+        logic = featurePreviewsLogic()
+        logic.mount()
+        userLogic.actions.loadUserSuccess(MOCK_DEFAULT_USER)
+    })
+
+    test('captures the survey response, records enrollment, and marks the flag submitted', async () => {
+        logic.actions.loadEarlyAccessFeaturesSuccess([
+            {
+                flagKey: 'concept-flag',
+                stage: 'concept',
+                payload: { survey_id: 'survey-123', survey_question_id: 'question-456' },
+            } as any,
+        ])
+
+        logic.actions.submitConceptSurvey('concept-flag', 'test@example.com')
+
+        expect(mockCapture).toHaveBeenCalledWith('survey sent', {
+            $survey_id: 'survey-123',
+            $survey_response: 'test@example.com',
+            '$survey_response_question-456': 'test@example.com',
+        })
+        expect(mockUpdateEnrollment).toHaveBeenCalledWith('concept-flag', true, 'concept')
+        await expectLogic(logic)
+            .toDispatchActions(['conceptSurveySubmitted'])
+            .toMatchValues({ conceptSurveySubmissions: { 'concept-flag': true } })
+    })
+
+    test('captures without a per-question key when the payload has no question id', () => {
+        logic.actions.loadEarlyAccessFeaturesSuccess([
+            { flagKey: 'concept-flag', stage: 'concept', payload: { survey_id: 'survey-123' } } as any,
+        ])
+
+        logic.actions.submitConceptSurvey('concept-flag', 'test@example.com')
+
+        expect(mockCapture).toHaveBeenCalledWith('survey sent', {
+            $survey_id: 'survey-123',
+            $survey_response: 'test@example.com',
+        })
+    })
+
+    test('shows an error and does not mark submitted when the feature has no linked survey', async () => {
+        logic.actions.loadEarlyAccessFeaturesSuccess([
+            { flagKey: 'concept-flag', stage: 'concept', payload: {} } as any,
+        ])
+
+        logic.actions.submitConceptSurvey('concept-flag', 'test@example.com')
+
+        expect(mockCapture).not.toHaveBeenCalled()
+        expect(mockUpdateEnrollment).not.toHaveBeenCalled()
+        expect(toast.error).toHaveBeenCalledWith(
+            "This feature isn't accepting sign-ups yet. Please try again later."
+        )
+        await expectLogic(logic).toMatchValues({ conceptSurveySubmissions: {} })
+    })
+
+    test('does not capture anything during an impersonated session', async () => {
+        window.IMPERSONATED_SESSION = true
+        logic.actions.loadEarlyAccessFeaturesSuccess([
+            {
+                flagKey: 'concept-flag',
+                stage: 'concept',
+                payload: { survey_id: 'survey-123' },
+            } as any,
+        ])
+
+        logic.actions.submitConceptSurvey('concept-flag', 'test@example.com')
+
+        expect(mockCapture).not.toHaveBeenCalled()
+        expect(mockUpdateEnrollment).not.toHaveBeenCalled()
+        expect(toast.error).toHaveBeenCalledWith('Cannot sign up for a waitlist while impersonating a user')
+        await expectLogic(logic).toMatchValues({ conceptSurveySubmissions: {} })
     })
 })
 

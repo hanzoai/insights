@@ -1,4 +1,4 @@
-import { RetryError } from '@hanzo/plugin-scaffold'
+import { RetryError } from '~/plugin-scaffold'
 
 import { onEvent } from './index'
 

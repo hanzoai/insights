@@ -1,6 +1,35 @@
 import { useEffect, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
+import { InsightsFlow } from '../types'
+
+type InsightsFlowEdge = InsightsFlow['edges'][number]
+
+/**
+ * Check whether removing a branch edge at the given condition index would
+ * orphan its target node (i.e. the target has no other incoming edges).
+ * Returns a disabledReason string when removal should be blocked, or
+ * undefined when removal is safe.
+ */
+export function getBranchRemovalDisabledReason(
+    branchEdges: InsightsFlowEdge[],
+    conditionIndex: number,
+    edgesByActionId: Record<string, InsightsFlowEdge[]>
+): string | undefined {
+    const branchEdge = branchEdges.find((e) => e.index === conditionIndex)
+    if (!branchEdge) {
+        return undefined
+    }
+    const targetEdges = edgesByActionId[branchEdge.to] ?? []
+    const hasOtherIncomingEdges = targetEdges.some((e) => e.to === branchEdge.to && e !== branchEdge)
+    return hasOtherIncomingEdges ? undefined : 'Clean up branching steps first'
+}
+
+/** Filter out a branch edge by its index property and reindex the remaining edges. */
+export function removeBranchEdge(branchEdges: InsightsFlowEdge[], conditionIndex: number): InsightsFlowEdge[] {
+    return branchEdges.filter((e) => e.index !== conditionIndex).map((edge, i) => ({ ...edge, index: i }))
+}
+
 export function updateOptionalName<T>(obj: T & { name?: string }, name: string | undefined): T & { name?: string } {
     const updated = { ...obj }
     if (name) {
@@ -32,12 +61,12 @@ export function useDebouncedNameInputs<T extends { name?: string }>(
     localNames: (string | undefined)[]
     handleNameChange: (index: number, value: string | undefined) => void
 } {
-    const [localNames, setLocalNames] = useState<(string | undefined)[]>(items.map((item) => item.name))
+    const [localNames, setLocalNames] = useState<(string | undefined)[]>((items ?? []).map((item) => item.name))
 
     // Update local state when items change from external sources
     useEffect(() => {
-        setLocalNames(items.map((item) => item.name))
-    }, [items.length, items]) // Only update when number of items changes
+        setLocalNames((items ?? []).map((item) => item.name))
+    }, [items?.length, items]) // Only update when number of items changes
 
     // Debounced function to update items
     const debouncedUpdate = useDebouncedCallback((index: number, value: string | undefined) => {

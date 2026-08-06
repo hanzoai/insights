@@ -2,7 +2,8 @@ from django.test import TestCase
 
 from insights.cdp.templates.insights_function_template import sync_template_to_db
 from insights.cdp.templates.slack.template_slack import template as slack_template
-from insights.models.insights_function_template import InsightsFunctionTemplate
+
+from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 
 
 class TestInsightsFunctionTemplate(TestCase):
@@ -50,7 +51,7 @@ class TestInsightsFunctionTemplate(TestCase):
             description="Template description",
             status="alpha",
             code="return event",
-            code_language="fn",
+            code_language="script",
             inputs_schema=[],
         )
 
@@ -83,7 +84,7 @@ class TestInsightsFunctionTemplate(TestCase):
             type="destination",
             free=True,
             category=["Testing"],
-            code_language="fn",
+            code_language="script",
         )
 
         # Create the template in the database
@@ -100,7 +101,7 @@ class TestInsightsFunctionTemplate(TestCase):
             type="destination",
             free=True,
             category=["Testing", "Updated"],  # Changed
-            code_language="fn",
+            code_language="script",
         )
 
         # Update the template
@@ -132,7 +133,7 @@ class TestInsightsFunctionTemplate(TestCase):
             type="transformation",
             status="stable",
             code="return event",
-            code_language="fn",
+            code_language="script",
             inputs_schema=[],
         )
         original_sha = template._generate_sha_from_content()

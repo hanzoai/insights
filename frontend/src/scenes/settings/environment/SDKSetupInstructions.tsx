@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { Button, Modal, Select, SelectOptions, Skeleton } from '@hanzo/elements'
+import { Button, Modal, Select, SelectSection, Skeleton } from '@hanzo/elements'
 import {
     APIInstallation,
     AndroidInstallation,
@@ -15,10 +15,7 @@ import {
     FramerInstallation,
     GoInstallation,
     GoogleTagManagerInstallation,
-    HTMLSnippetInstallation,
     IOSInstallation,
-    JSEventCapture,
-    JSWebInstallation,
     LaravelInstallation,
     NextJSInstallation,
     NodeEventCapture,
@@ -29,34 +26,37 @@ import {
     PythonInstallation,
     ReactInstallation,
     ReactNativeInstallation,
+    ReactRouterInstallation,
     RemixInstallation,
     RubyInstallation,
     RubyOnRailsInstallation,
     SvelteInstallation,
     TanStackInstallation,
     VueInstallation,
+    WebInstallation,
     WebflowInstallation,
 } from '@hanzo/shared-onboarding/product-analytics'
 import type { StepDefinition } from '@hanzo/shared-onboarding/steps'
 
-import { JSSnippet } from 'lib/components/JSSnippet'
 import { Link } from 'lib/elements/Link'
-import { OnboardingDocsContentWrapper } from 'scenes/onboarding/OnboardingDocsContentWrapper'
-import SetupWizardBanner from 'scenes/onboarding/sdks/sdk-install-instructions/components/SetupWizardBanner'
+import { JS_WEB_SNIPPETS } from 'scenes/onboarding/shared/jsWebSnippets'
+import { OnboardingDocsContentWrapper } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
+import SetupWizardBanner from 'scenes/onboarding/shared/SetupWizardBanner'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { SDKKey } from '~/types'
-
-const JS_WEB_SNIPPETS = { JSEventCapture }
 const NODE_SNIPPETS = { NodeEventCapture }
 const PYTHON_SNIPPETS = { PythonEventCapture }
 
-const filterToFirstRequiredStep = (steps: StepDefinition[]): StepDefinition[] => {
+export const filterToFirstRequiredStep = (steps: StepDefinition[]): StepDefinition[] => {
     const first = steps.find((s) => s.badge === 'required')
     return first ? [first] : steps.slice(0, 1)
 }
 
-const filterRequiredSteps = (steps: StepDefinition[]): StepDefinition[] => steps.filter((s) => s.badge === 'required')
+export const filterRequiredSteps = (steps: StepDefinition[]): StepDefinition[] =>
+    steps.filter((s) => s.badge === 'required')
+
+export type SDKCategory = 'web' | 'mobile' | 'server' | 'integration'
 
 interface SDKConfig {
     Installation: React.ComponentType<{ modifySteps?: (steps: StepDefinition[]) => StepDefinition[] }>
@@ -64,21 +64,19 @@ interface SDKConfig {
     wizardIntegrationName?: string
     docsLink: string
     name: string
+    category: SDKCategory
+    popular?: boolean
 }
 
-const SDK_CONFIGS: Record<string, SDKConfig> = {
+export const SDK_CONFIGS: { [key in SDKKey]?: SDKConfig } = {
     // Popular
-    [SDKKey.HTML_SNIPPET]: {
-        Installation: HTMLSnippetInstallation,
-        snippets: JS_WEB_SNIPPETS,
-        name: 'HTML snippet',
-        docsLink: 'https://hanzo.ai/docs/libraries/js',
-    },
     [SDKKey.JS_WEB]: {
-        Installation: JSWebInstallation,
+        Installation: WebInstallation,
         snippets: JS_WEB_SNIPPETS,
-        name: 'JavaScript web',
+        name: 'Web',
         docsLink: 'https://hanzo.ai/docs/libraries/js',
+        category: 'web',
+        popular: true,
     },
     [SDKKey.REACT]: {
         Installation: ReactInstallation,
@@ -86,6 +84,8 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         wizardIntegrationName: 'React',
         name: 'React',
         docsLink: 'https://hanzo.ai/docs/libraries/react',
+        category: 'web',
+        popular: true,
     },
     [SDKKey.NEXT_JS]: {
         Installation: NextJSInstallation,
@@ -93,24 +93,32 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         wizardIntegrationName: 'Next.js',
         name: 'Next.js',
         docsLink: 'https://hanzo.ai/docs/libraries/next-js',
+        category: 'web',
+        popular: true,
     },
     [SDKKey.NODE_JS]: {
         Installation: NodeJSInstallation,
         snippets: NODE_SNIPPETS,
         name: 'Node.js',
         docsLink: 'https://hanzo.ai/docs/libraries/node',
+        category: 'server',
+        popular: true,
     },
     [SDKKey.PYTHON]: {
         Installation: PythonInstallation,
         snippets: PYTHON_SNIPPETS,
         name: 'Python',
         docsLink: 'https://hanzo.ai/docs/libraries/python',
+        category: 'server',
+        popular: true,
     },
     [SDKKey.REACT_NATIVE]: {
         Installation: ReactNativeInstallation,
         wizardIntegrationName: 'React Native',
         name: 'React Native',
         docsLink: 'https://hanzo.ai/docs/libraries/react-native',
+        category: 'mobile',
+        popular: true,
     },
 
     // Web
@@ -119,6 +127,7 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         snippets: JS_WEB_SNIPPETS,
         name: 'Angular',
         docsLink: 'https://hanzo.ai/docs/libraries/angular',
+        category: 'web',
     },
     [SDKKey.ASTRO]: {
         Installation: AstroInstallation,
@@ -126,30 +135,42 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         wizardIntegrationName: 'Astro',
         name: 'Astro',
         docsLink: 'https://hanzo.ai/docs/libraries/astro',
+        category: 'web',
     },
     [SDKKey.BUBBLE]: {
         Installation: BubbleInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Bubble',
         docsLink: 'https://hanzo.ai/docs/libraries/bubble',
+        category: 'web',
     },
     [SDKKey.FRAMER]: {
         Installation: FramerInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Framer',
         docsLink: 'https://hanzo.ai/docs/libraries/framer',
+        category: 'web',
     },
     [SDKKey.NUXT_JS]: {
         Installation: NuxtInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Nuxt.js',
         docsLink: 'https://hanzo.ai/docs/libraries/nuxt-js',
+        category: 'web',
+    },
+    [SDKKey.REACT_ROUTER]: {
+        Installation: ReactRouterInstallation,
+        snippets: JS_WEB_SNIPPETS,
+        name: 'React Router',
+        docsLink: 'https://hanzo.ai/docs/libraries/react-router',
+        category: 'web',
     },
     [SDKKey.REMIX]: {
         Installation: RemixInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Remix',
         docsLink: 'https://hanzo.ai/docs/libraries/remix',
+        category: 'web',
     },
     [SDKKey.SVELTE]: {
         Installation: SvelteInstallation,
@@ -157,24 +178,28 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         wizardIntegrationName: 'Svelte',
         name: 'Svelte',
         docsLink: 'https://hanzo.ai/docs/libraries/svelte',
+        category: 'web',
     },
     [SDKKey.TANSTACK_START]: {
         Installation: TanStackInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'TanStack Start',
         docsLink: 'https://hanzo.ai/docs/libraries/react',
+        category: 'web',
     },
     [SDKKey.VUE_JS]: {
         Installation: VueInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Vue.js',
         docsLink: 'https://hanzo.ai/docs/libraries/vue-js',
+        category: 'web',
     },
     [SDKKey.WEBFLOW]: {
         Installation: WebflowInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Webflow',
         docsLink: 'https://hanzo.ai/docs/libraries/webflow',
+        category: 'web',
     },
 
     // Mobile
@@ -182,16 +207,19 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         Installation: AndroidInstallation,
         name: 'Android',
         docsLink: 'https://hanzo.ai/docs/libraries/android',
+        category: 'mobile',
     },
     [SDKKey.FLUTTER]: {
         Installation: FlutterInstallation,
         name: 'Flutter',
         docsLink: 'https://hanzo.ai/docs/libraries/flutter',
+        category: 'mobile',
     },
     [SDKKey.IOS]: {
         Installation: IOSInstallation,
         name: 'iOS',
         docsLink: 'https://hanzo.ai/docs/libraries/ios',
+        category: 'mobile',
     },
 
     // Server
@@ -201,36 +229,43 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         wizardIntegrationName: 'Django',
         name: 'Django',
         docsLink: 'https://hanzo.ai/docs/libraries/django',
+        category: 'server',
     },
     [SDKKey.ELIXIR]: {
         Installation: ElixirInstallation,
         name: 'Elixir',
         docsLink: 'https://hanzo.ai/docs/libraries/elixir',
+        category: 'server',
     },
     [SDKKey.GO]: {
         Installation: GoInstallation,
         name: 'Go',
         docsLink: 'https://hanzo.ai/docs/libraries/go',
+        category: 'server',
     },
     [SDKKey.LARAVEL]: {
         Installation: LaravelInstallation,
         name: 'Laravel',
         docsLink: 'https://hanzo.ai/docs/libraries/laravel',
+        category: 'server',
     },
     [SDKKey.PHP]: {
         Installation: PHPInstallation,
         name: 'PHP',
         docsLink: 'https://hanzo.ai/docs/libraries/php',
+        category: 'server',
     },
     [SDKKey.RUBY]: {
         Installation: RubyInstallation,
         name: 'Ruby',
         docsLink: 'https://hanzo.ai/docs/libraries/ruby',
+        category: 'server',
     },
     [SDKKey.RUBY_ON_RAILS]: {
         Installation: RubyOnRailsInstallation,
         name: 'Ruby on Rails',
         docsLink: 'https://hanzo.ai/docs/libraries/rails',
+        category: 'server',
     },
 
     // Integrations
@@ -238,81 +273,61 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         Installation: APIInstallation,
         name: 'API',
         docsLink: 'https://hanzo.ai/docs/api',
+        category: 'integration',
     },
     [SDKKey.DOCUSAURUS]: {
         Installation: DocusaurusInstallation,
         name: 'Docusaurus',
         docsLink: 'https://hanzo.ai/docs/libraries/docusaurus',
+        category: 'integration',
     },
     [SDKKey.GOOGLE_TAG_MANAGER]: {
         Installation: GoogleTagManagerInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Google Tag Manager',
         docsLink: 'https://hanzo.ai/docs/libraries/google-tag-manager',
+        category: 'integration',
     },
 }
 
-const SDK_SELECT_OPTIONS: SelectOptions<string> = [
-    {
-        title: 'Popular',
-        options: [
-            { value: SDKKey.HTML_SNIPPET, label: 'HTML snippet' },
-            { value: SDKKey.JS_WEB, label: 'JavaScript web' },
-            { value: SDKKey.REACT, label: 'React' },
-            { value: SDKKey.NEXT_JS, label: 'Next.js' },
-            { value: SDKKey.PYTHON, label: 'Python' },
-            { value: SDKKey.NODE_JS, label: 'Node.js' },
-            { value: SDKKey.REACT_NATIVE, label: 'React Native' },
-        ],
-    },
-    {
-        title: 'Web',
-        options: [
-            { value: SDKKey.ANGULAR, label: 'Angular' },
-            { value: SDKKey.ASTRO, label: 'Astro' },
-            { value: SDKKey.BUBBLE, label: 'Bubble' },
-            { value: SDKKey.FRAMER, label: 'Framer' },
-            { value: SDKKey.NUXT_JS, label: 'Nuxt.js' },
-            { value: SDKKey.REMIX, label: 'Remix' },
-            { value: SDKKey.SVELTE, label: 'Svelte' },
-            { value: SDKKey.TANSTACK_START, label: 'TanStack Start' },
-            { value: SDKKey.VUE_JS, label: 'Vue.js' },
-            { value: SDKKey.WEBFLOW, label: 'Webflow' },
-        ],
-    },
-    {
-        title: 'Mobile',
-        options: [
-            { value: SDKKey.ANDROID, label: 'Android' },
-            { value: SDKKey.FLUTTER, label: 'Flutter' },
-            { value: SDKKey.IOS, label: 'iOS' },
-        ],
-    },
-    {
-        title: 'Server',
-        options: [
-            { value: SDKKey.DJANGO, label: 'Django' },
-            { value: SDKKey.ELIXIR, label: 'Elixir' },
-            { value: SDKKey.GO, label: 'Go' },
-            { value: SDKKey.LARAVEL, label: 'Laravel' },
-            { value: SDKKey.PHP, label: 'PHP' },
-            { value: SDKKey.RUBY, label: 'Ruby' },
-            { value: SDKKey.RUBY_ON_RAILS, label: 'Ruby on Rails' },
-        ],
-    },
-    {
-        title: 'Integrations',
-        options: [
-            { value: SDKKey.API, label: 'API' },
-            { value: SDKKey.DOCUSAURUS, label: 'Docusaurus' },
-            { value: SDKKey.GOOGLE_TAG_MANAGER, label: 'Google Tag Manager' },
-        ],
-    },
-]
+const CATEGORY_TITLES: Record<SDKCategory, string> = {
+    web: 'Web',
+    mobile: 'Mobile',
+    server: 'Server',
+    integration: 'Integrations',
+}
+
+export function buildSDKSelectOptions(categories?: SDKCategory[]): SelectSection<SDKKey>[] {
+    const entries = Object.entries(SDK_CONFIGS) as [SDKKey, SDKConfig][]
+    const filtered = categories ? entries.filter(([_, c]) => categories.includes(c.category)) : entries
+
+    const groups: SelectSection<SDKKey>[] = []
+
+    const popular = filtered.filter(([_, c]) => c.popular)
+    if (popular.length > 0) {
+        groups.push({ title: 'Popular', options: popular.map(([k, c]) => ({ value: k, label: c.name })) })
+    }
+
+    for (const cat of ['web', 'mobile', 'server', 'integration'] as const) {
+        if (categories && !categories.includes(cat)) {
+            continue
+        }
+        const items = filtered.filter(([_, c]) => c.category === cat && !c.popular)
+        if (items.length > 0) {
+            groups.push({ title: CATEGORY_TITLES[cat], options: items.map(([k, c]) => ({ value: k, label: c.name })) })
+        }
+    }
+
+    return groups
+}
+
+// Derived purely from the static SDK_CONFIGS, so compute once at module scope rather than rebuilding
+// a fresh options array (new identity) on every render.
+const ALL_SDK_SELECT_OPTIONS = buildSDKSelectOptions()
 
 export function SDKSetupInstructions(): JSX.Element {
     const { currentTeam, currentTeamLoading } = useValues(teamLogic)
-    const [selectedSDK, setSelectedSDK] = useState<string>(SDKKey.HTML_SNIPPET)
+    const [selectedSDK, setSelectedSDK] = useState<SDKKey>(SDKKey.JS_WEB)
     const [showFullSetup, setShowFullSetup] = useState(false)
 
     const config = useMemo(() => SDK_CONFIGS[selectedSDK], [selectedSDK])
@@ -330,8 +345,8 @@ export function SDKSetupInstructions(): JSX.Element {
         return <></>
     }
 
-    const { Installation, snippets, wizardIntegrationName, docsLink, name } = config
-    const isHTMLSnippet = selectedSDK === SDKKey.HTML_SNIPPET
+    const { Installation, snippets, wizardIntegrationName, docsLink, name, category } = config
+    const isClientSideSDK = category === 'web' || category === 'mobile'
 
     return (
         <div className="space-y-4 max-w-200">
@@ -341,16 +356,12 @@ export function SDKSetupInstructions(): JSX.Element {
                     setSelectedSDK(value)
                     setShowFullSetup(false)
                 }}
-                options={SDK_SELECT_OPTIONS}
+                options={ALL_SDK_SELECT_OPTIONS}
                 className="max-w-80"
             />
-            {isHTMLSnippet ? (
-                <JSSnippet />
-            ) : (
-                <OnboardingDocsContentWrapper snippets={snippets} minimal>
-                    <Installation modifySteps={filterToFirstRequiredStep} />
-                </OnboardingDocsContentWrapper>
-            )}
+            <OnboardingDocsContentWrapper snippets={snippets} minimal useReverseProxy={isClientSideSDK}>
+                <Installation modifySteps={filterToFirstRequiredStep} />
+            </OnboardingDocsContentWrapper>
             <div className="flex items-center gap-2">
                 <Button type="secondary" size="small" onClick={() => setShowFullSetup(true)}>
                     View full setup instructions
@@ -366,7 +377,7 @@ export function SDKSetupInstructions(): JSX.Element {
                 width={640}
             >
                 {wizardIntegrationName && <SetupWizardBanner integrationName={wizardIntegrationName} />}
-                <OnboardingDocsContentWrapper snippets={snippets}>
+                <OnboardingDocsContentWrapper snippets={snippets} useReverseProxy={isClientSideSDK}>
                     <Installation modifySteps={filterRequiredSteps} />
                 </OnboardingDocsContentWrapper>
                 <div className="mt-4">

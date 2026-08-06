@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getFlutterSteps as getFlutterStepsPA } from '../product-analytics/flutter'
 import { StepDefinition } from '../steps'
@@ -16,7 +16,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 <CalloutBox type="fyi" title="Client-side configuration only">
                     <Markdown>
                         {dedent`
-                            This configuration is client-side only. Support for remote configuration in the [error tracking settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture) will be added in a future release.
+                            This configuration is client-side only. Support for remote configuration in the [error tracking settings](https://app.hanzo.ai/settings/project-error-tracking#exception-autocapture) will be added in a future release.
                         `}
                     </Markdown>
                 </CalloutBox>
@@ -31,11 +31,12 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             language: 'dart',
                             file: 'Dart',
                             code: dedent`
-                              final config = InsightsConfig('<ph_project_api_key>');
+                              final config = InsightsConfig('<ph_project_token>');
                               // Enable exception autocapture
                               config.errorTrackingConfig.captureFlutterErrors = true;
                               config.errorTrackingConfig.capturePlatformDispatcherErrors = true;
                               config.errorTrackingConfig.captureIsolateErrors = true;
+                              // Requires SDK version 5.22.0 or higher
                               config.errorTrackingConfig.captureNativeExceptions = true;
                               config.errorTrackingConfig.captureSilentFlutterErrors = false;
                               await Insights().setup(config);
@@ -52,7 +53,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                         | \`captureFlutterErrors\` | Captures Flutter framework errors (\`FlutterError.onError\`) |
                         | \`capturePlatformDispatcherErrors\` | Captures Dart runtime errors (\`PlatformDispatcher.onError\`). Web not supported. |
                         | \`captureIsolateErrors\` | Captures errors from main isolate. Web not supported. |
-                        | \`captureNativeExceptions\` | Captures native exceptions (Java/Kotlin exceptions). Android only. |
+                        | \`captureNativeExceptions\` | Captures native exceptions. Android (Java/Kotlin) and Apple platforms (iOS, macOS, tvOS). |
                         | \`captureSilentFlutterErrors\` | Captures Flutter errors that are marked as silent. Default: false. |
                     `}
                 </Markdown>
@@ -118,7 +119,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             language: 'dart',
                             file: 'Dart',
                             code: dedent`
-                              final config = InsightsConfig('<ph_project_api_key>');
+                              final config = InsightsConfig('<ph_project_token>');
                               // Configure error tracking
                               config.errorTrackingConfig.inAppIncludes.add('package:your_app');
                               config.errorTrackingConfig.inAppExcludes.add('package:third_party_lib');
@@ -154,7 +155,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
@@ -164,31 +165,25 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
         title: 'Future features',
         badge: 'optional',
         content: (
-          <Markdown>
-                  {dedent`
+            <Markdown>
+                {dedent`
                       We currently don't support the following features:
 
                       - No de-obfuscating stacktraces from obfuscated builds ([\\--obfuscate](https://docs.flutter.dev/deployment/obfuscate) and [\\--split-debug-info](https://docs.flutter.dev/deployment/obfuscate)) for Dart code
-                      - No de-obfuscating stacktraces when [isMinifyEnabled](https://developer.android.com/topic/performance/app-optimization/enable-app-optimization) is enabled for Java/Kotlin code
-                      - No [Source code context](/docs/error-tracking/stack-traces.md) associated with an exception
-                      - No native iOS exception capture
+                      - No [Source code context](https://hanzo.ai/docs/error-tracking/stack-traces) associated with an exception (native Android Java/Kotlin errors and Flutter web only)
                       - No native C/C++ exception capture on Android (Java/Kotlin only)
                       - No background isolate error capture
+
+                      For symbolicated stack traces on native platforms, see the [Flutter debug symbols guide](https://hanzo.ai/docs/error-tracking/upload-source-maps/flutter).
 
                       These features will be added in future releases. We recommend you stay 
                       up to date with the latest version of the Insights Flutter SDK.
                   `}
-              </Markdown>
+            </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        exceptionAutocaptureStep,
-        manualCaptureStep,
-        verifyStep,
-        futureFeaturesStep,
-    ]
+    return [...installSteps, exceptionAutocaptureStep, manualCaptureStep, verifyStep, futureFeaturesStep]
 }
 
 export const FlutterInstallation = createInstallation(getFlutterSteps)

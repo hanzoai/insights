@@ -1,12 +1,14 @@
 import './PropertyFilters.scss'
 
 import { BindLogic, useActions, useValues } from 'kea'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import { TaxonomicPropertyFilter } from 'lib/components/PropertyFilters/components/TaxonomicPropertyFilter'
 import {
     AllowedProperties,
+    ExcludedOperators,
     ExcludedProperties,
+    SelectingKeyOnly,
     TaxonomicFilterGroupType,
     TaxonomicFilterProps,
 } from 'lib/components/TaxonomicFilter/types'
@@ -40,6 +42,7 @@ export interface PropertyFiltersProps {
     addText?: string | null
     editable?: boolean
     buttonText?: string
+    buttonClassName?: string
     buttonSize?: 'xsmall' | 'small' | 'medium'
     hasRowOperator?: boolean
     sendAllKeyUpdates?: boolean
@@ -50,11 +53,18 @@ export interface PropertyFiltersProps {
     excludedProperties?: ExcludedProperties
     allowRelativeDateOptions?: boolean
     disabledReason?: string
-    exactMatchFeatureFlagCohortOperators?: boolean
+    excludedOperators?: ExcludedOperators
+    selectingKeyOnly?: SelectingKeyOnly
     hideBehavioralCohorts?: boolean
     addFilterDocLink?: string
     operatorAllowlist?: OperatorValueSelectProps['operatorAllowlist']
-    insightsQLGlobals?: Record<string, any>
+    hogQLGlobals?: Record<string, any>
+    /**
+     * `'input'` renders the replay-style input-box add-filter trigger; `'button'`
+     * (the default) renders a button. Only has an effect on the rebuild menu
+     * (`TAXONOMIC_FILTER_MENU_REBUILD`).
+     */
+    triggerVariant?: 'button' | 'input'
 }
 
 export function PropertyFilters({
@@ -75,6 +85,7 @@ export function PropertyFilters({
     propertyGroupType = null,
     addText = null,
     buttonText = 'Filter',
+    buttonClassName = '',
     editable = true,
     buttonSize,
     hasRowOperator = true,
@@ -86,20 +97,18 @@ export function PropertyFilters({
     excludedProperties,
     allowRelativeDateOptions,
     disabledReason = undefined,
-    exactMatchFeatureFlagCohortOperators = false,
+    excludedOperators,
+    selectingKeyOnly,
     hideBehavioralCohorts,
     addFilterDocLink,
     operatorAllowlist,
-    insightsQLGlobals,
+    hogQLGlobals,
+    triggerVariant = 'button',
 }: PropertyFiltersProps): JSX.Element {
     const logicProps = { propertyFilters, onChange, pageKey, sendAllKeyUpdates }
     const { filters, filtersWithNew, filterIds, filterIdsWithNew } = useValues(propertyFilterLogic(logicProps))
-    const { remove, setFilters, setFilter } = useActions(propertyFilterLogic(logicProps))
+    const { remove, setFilter } = useActions(propertyFilterLogic(logicProps))
     const [allowOpenOnInsert, setAllowOpenOnInsert] = useState<boolean>(false)
-
-    useEffect(() => {
-        setFilters(propertyFilters ?? [])
-    }, [propertyFilters, setFilters])
 
     const displayedFilters = allowNew && editable ? filtersWithNew : filters
     const displayedFilterIds = allowNew && editable ? filterIdsWithNew : filterIds
@@ -131,6 +140,7 @@ export function PropertyFilters({
                                     showConditionBadge={showConditionBadge}
                                     disablePopover={disablePopover || orFiltering}
                                     label={buttonText}
+                                    labelClassName={buttonClassName}
                                     size={buttonSize}
                                     onRemove={remove}
                                     orFiltering={orFiltering}
@@ -156,13 +166,15 @@ export function PropertyFilters({
                                             excludedProperties={excludedProperties}
                                             taxonomicFilterOptionsFromProp={taxonomicFilterOptionsFromProp}
                                             allowRelativeDateOptions={allowRelativeDateOptions}
-                                            exactMatchFeatureFlagCohortOperators={exactMatchFeatureFlagCohortOperators}
+                                            excludedOperators={excludedOperators}
+                                            selectingKeyOnly={selectingKeyOnly}
                                             hideBehavioralCohorts={hideBehavioralCohorts}
                                             size={buttonSize}
                                             addFilterDocLink={addFilterDocLink}
                                             editable={editable}
                                             operatorAllowlist={operatorAllowlist}
-                                            insightsQLGlobals={insightsQLGlobals}
+                                            hogQLGlobals={hogQLGlobals}
+                                            triggerVariant={triggerVariant}
                                         />
                                     )}
                                     errorMessage={errorMessages && errorMessages[index]}

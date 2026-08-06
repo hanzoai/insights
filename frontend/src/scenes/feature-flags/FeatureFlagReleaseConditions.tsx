@@ -2,11 +2,9 @@ import './FeatureFlag.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { router } from 'kea-router'
-import { Fragment } from 'react'
 
-import { IconCopy, IconFlag, IconPlus, IconTrash } from '@hanzo/icons'
-import { Input, Label, Select, Snack, Link, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconFlag, IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
+import { Label, Select, Snack, Link, Tooltip } from '@hanzo/elements'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { EditableField } from 'lib/components/EditableField/EditableField'
@@ -15,19 +13,23 @@ import { isPropertyFilterWithOperator } from 'lib/components/PropertyFilters/uti
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { INSTANTLY_AVAILABLE_PROPERTIES } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { GroupsIntroductionOption } from 'lib/introductions/GroupsIntroductionOption'
 import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
+import { GroupsIntroductionOption } from 'lib/introductions/GroupsIntroductionOption'
+import { IconArrowDown, IconArrowUp, IconErrorOutline, IconOpenInNew, IconSubArrowRight } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
 import { Divider } from 'lib/elements/Divider'
 import { Field } from 'lib/elements/Field'
 import { Radio } from 'lib/elements/Radio'
 import { Slider } from 'lib/elements/Slider'
 import { Tag } from 'lib/elements/Tag/Tag'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
-import { IconArrowDown, IconArrowUp, IconErrorOutline, IconOpenInNew, IconSubArrowRight } from 'lib/elements/icons'
-import { capitalizeFirstLetter, clamp, dateFilterToText, dateStringToComponents, humanFriendlyNumber } from 'lib/utils'
+import { dateFilterToText, dateStringToComponents } from 'lib/utils/dateFilters'
+import { clamp } from 'lib/utils/numbers'
+import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
 import { FeatureFlagConditionWarning } from 'scenes/feature-flags/FeatureFlagConditionWarning'
+import { PercentageInput } from 'scenes/feature-flags/PercentageInput'
 import { urls } from 'scenes/urls'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
@@ -41,13 +43,24 @@ import {
     PropertyOperator,
 } from '~/types'
 
+import { resolveAggregationGroupTypeIndex } from './aggregation'
+import { MATCHING_ESTIMATE_TOOLTIP } from './constants'
 import { featureFlagLogic } from './featureFlagLogic'
 import {
     FeatureFlagReleaseConditionsLogicProps,
     featureFlagReleaseConditionsLogic,
+    isDistinctIdFilter,
+    withResolvedFlagLabels,
 } from './featureFlagReleaseConditionsLogic'
+import { getPropertySelectErrorMessages } from './propertySelectErrorMessages'
 
-function PropertyValueComponent({ property }: { property: AnyPropertyFilter }): JSX.Element {
+function PropertyValueComponent({
+    property,
+    getDistinctIdName,
+}: {
+    property: AnyPropertyFilter
+    getDistinctIdName: (distinctId: string) => string
+}): JSX.Element {
     if (property.type === PropertyFilterType.Cohort) {
         return (
             <Button type="secondary" size="xsmall" to={urls.cohort(property.value)} sideIcon={<IconOpenInNew />}>
@@ -60,12 +73,13 @@ function PropertyValueComponent({ property }: { property: AnyPropertyFilter }): 
         return <></>
     }
     const propertyValues = Array.isArray(property.value) ? property.value : [property.value]
+    const isDistinctId = isDistinctIdFilter(property)
 
     return (
         <>
             {propertyValues.map((val, idx) => (
                 <Snack key={idx}>
-                    {String(val)}
+                    {isDistinctId ? getDistinctIdName(String(val)) : String(val)}
                     <span>
                         {isPropertyFilterWithOperator(property) &&
                         ['is_date_before', 'is_date_after'].includes(property.operator) &&
@@ -90,7 +104,6 @@ function PropertyValueComponent({ property }: { property: AnyPropertyFilter }): 
 export function FeatureFlagReleaseConditions({
     id,
     readOnly,
-    isSuper,
     excludeTitle,
     filters,
     onChange,
@@ -99,17 +112,17 @@ export function FeatureFlagReleaseConditions({
     showTrashIconWithOneCondition = false,
     removedLastConditionCallback,
     evaluationRuntime,
+    isDisabled,
 }: FeatureFlagReleaseConditionsLogicProps & {
     hideMatchOptions?: boolean
-    isSuper?: boolean
     excludeTitle?: boolean
     showTrashIconWithOneCondition?: boolean
     removedLastConditionCallback?: () => void
+    isDisabled?: boolean
 }): JSX.Element {
     const releaseConditionsLogic = featureFlagReleaseConditionsLogic({
         id,
         readOnly,
-        isSuper,
         excludeTitle,
         filters,
         onChange,
@@ -117,13 +130,14 @@ export function FeatureFlagReleaseConditions({
     const {
         taxonomicGroupTypes,
         propertySelectErrors,
-        computeBlastRadiusPercentage,
-        affectedUsers,
-        totalUsers,
+        affectedCounts,
+        totalCounts,
+        blastRadiusErrors,
         filtersTaxonomicOptions,
         aggregationTargetName,
         properties,
         filterGroups,
+        getDistinctIdName,
     } = useValues(releaseConditionsLogic)
 
     const {
@@ -134,16 +148,16 @@ export function FeatureFlagReleaseConditions({
         addConditionSet,
         moveConditionSetUp,
         moveConditionSetDown,
+        calculateBlastRadiusForCondition,
     } = useActions(releaseConditionsLogic)
 
     const { showGroupsOptions, groupTypes, aggregationLabel } = useValues(groupsModel)
-    const { earlyAccessFeaturesList, hasEarlyAccessFeatures, featureFlagKey, nonEmptyVariants, featureFlag } =
-        useValues(featureFlagLogic)
-    const { setBucketingIdentifier } = useActions(featureFlagLogic)
+    const { hasEarlyAccessFeatures, featureFlagKey, nonEmptyVariants, featureFlag } = useValues(featureFlagLogic)
+    const { setBucketingIdentifier, setFeatureFlag } = useActions(featureFlagLogic)
 
     const { groupsAccessStatus } = useValues(groupsAccessLogic)
 
-    const showBucketingIdentifierUI = useFeatureFlag('FLAG_BUCKETING_IDENTIFIER')
+    const realtimeCohortFlagTargeting = useFeatureFlag('REALTIME_COHORT_FLAG_TARGETING')
 
     const featureFlagVariants = nonEmptyFeatureFlagVariants || nonEmptyVariants
 
@@ -175,6 +189,8 @@ export function FeatureFlagReleaseConditions({
         )
 
     const renderReleaseConditionGroup = (group: FeatureFlagGroupType, index: number): JSX.Element => {
+        const rolloutValue = group.rollout_percentage ?? 100
+
         return (
             <div className="w-full" key={group.sort_key}>
                 {index > 0 && <div className="condition-set-separator my-1 py-0">OR</div>}
@@ -187,17 +203,21 @@ export function FeatureFlagReleaseConditions({
                                     <>
                                         {readOnly ? (
                                             <>
-                                                Match <b>{aggregationTargetName}</b> against <b>all</b> criteria
+                                                Match <b>{aggregationTargetName(group.aggregation_group_type_index)}</b>{' '}
+                                                against <b>all</b> criteria
                                             </>
                                         ) : (
                                             <>
-                                                Matching <b>{aggregationTargetName}</b> against the criteria
+                                                Matching{' '}
+                                                <b>{aggregationTargetName(group.aggregation_group_type_index)}</b>{' '}
+                                                against the criteria
                                             </>
                                         )}
                                     </>
                                 ) : (
                                     <>
-                                        Condition set will match <b>all {aggregationTargetName}</b>
+                                        Condition set will match{' '}
+                                        <b>all {aggregationTargetName(group.aggregation_group_type_index)}</b>
                                     </>
                                 )}
                             </div>
@@ -299,12 +319,17 @@ export function FeatureFlagReleaseConditions({
                                     )}
                                     {property?.type !== PropertyFilterType.Cohort &&
                                         property?.type !== PropertyFilterType.Flag &&
-                                        getFilterLabel(
-                                            property.key,
-                                            property.type === PropertyFilterType.Person
-                                                ? TaxonomicFilterGroupType.PersonProperties
-                                                : TaxonomicFilterGroupType.EventProperties
-                                        )}
+                                        (() => {
+                                            const propertyLabel = getFilterLabel(
+                                                property.key,
+                                                property.type === PropertyFilterType.Person
+                                                    ? TaxonomicFilterGroupType.PersonProperties
+                                                    : TaxonomicFilterGroupType.EventProperties
+                                            )
+                                            return propertyLabel && propertyLabel !== property.key ? (
+                                                <span className="text-muted">{propertyLabel}</span>
+                                            ) : null
+                                        })()}
                                     {property.type === PropertyFilterType.Flag &&
                                         (() => {
                                             const flagId = property.key || ''
@@ -332,7 +357,7 @@ export function FeatureFlagReleaseConditions({
                                         <span>{allOperatorsToHumanName(property.operator)} </span>
                                     ) : null}
 
-                                    <PropertyValueComponent property={property} />
+                                    <PropertyValueComponent property={property} getDistinctIdName={getDistinctIdName} />
                                 </div>
                             ))}
                         </>
@@ -343,7 +368,7 @@ export function FeatureFlagReleaseConditions({
                                 pageKey={`feature-flag-${id}-${group.sort_key}-${filterGroups.length}-${
                                     filters.aggregation_group_type_index ?? ''
                                 }`}
-                                propertyFilters={group?.properties}
+                                propertyFilters={withResolvedFlagLabels(group?.properties, getFlagKey)}
                                 logicalRowDivider
                                 addText="Add condition"
                                 onChange={(properties) => updateConditionSet(index, undefined, properties)}
@@ -354,27 +379,13 @@ export function FeatureFlagReleaseConditions({
                                 allowRelativeDateOptions
                                 excludedProperties={
                                     featureFlagKey
-                                        ? { [TaxonomicFilterGroupType.FeatureFlags]: [featureFlagKey] }
+                                        ? {
+                                              [TaxonomicFilterGroupType.FeatureFlags]: [featureFlagKey],
+                                          }
                                         : undefined
                                 }
-                                errorMessages={
-                                    propertySelectErrors?.[index]?.properties?.some((message) => !!message.value)
-                                        ? propertySelectErrors[index].properties?.map((message, index) => {
-                                              return message.value ? (
-                                                  <div
-                                                      key={index}
-                                                      className="text-danger flex items-center gap-1 text-sm Field--error"
-                                                  >
-                                                      <IconErrorOutline className="text-xl" /> {message.value}
-                                                  </div>
-                                              ) : (
-                                                  <Fragment key={index} />
-                                              )
-                                          })
-                                        : null
-                                }
-                                exactMatchFeatureFlagCohortOperators={true}
-                                hideBehavioralCohorts={true}
+                                errorMessages={getPropertySelectErrorMessages(propertySelectErrors, index)}
+                                hideBehavioralCohorts={!realtimeCohortFlagTargeting}
                             />
                         </div>
                     )}
@@ -395,10 +406,15 @@ export function FeatureFlagReleaseConditions({
                         >
                             <div className="text-sm ">
                                 Rolled out to{' '}
-                                {group.rollout_percentage != null ? <b>{group.rollout_percentage}</b> : <b>100</b>}
+                                {group.rollout_percentage != null ? (
+                                    <b className="tabular-nums">{group.rollout_percentage}</b>
+                                ) : (
+                                    <b className="tabular-nums">100</b>
+                                )}
                                 <b>%</b>
                                 <span> of </span>
-                                <b>{aggregationTargetName}</b> <span>in this set.</span>
+                                <b>{aggregationTargetName(group.aggregation_group_type_index)}</b>{' '}
+                                <span>in this set.</span>
                             </div>
                         </Tag>
                     ) : (
@@ -406,7 +422,7 @@ export function FeatureFlagReleaseConditions({
                             <div className="flex flex-wrap items-center gap-1">
                                 Roll out to{' '}
                                 <Slider
-                                    value={group.rollout_percentage !== null ? group.rollout_percentage : 100}
+                                    value={rolloutValue}
                                     onChange={(value) => {
                                         updateConditionSet(index, value)
                                     }}
@@ -416,18 +432,11 @@ export function FeatureFlagReleaseConditions({
                                     className="ml-1.5 w-20"
                                 />
                                 <Field.Pure error={propertySelectErrors?.[index]?.rollout_percentage} inline>
-                                    <Input
+                                    <PercentageInput
                                         data-attr="rollout-percentage"
-                                        type="number"
                                         className="ml-2 mr-1.5 max-w-30"
-                                        onChange={(value): void => {
-                                            updateConditionSet(index, value === undefined ? 0 : value)
-                                        }}
-                                        value={group.rollout_percentage !== null ? group.rollout_percentage : 100}
-                                        min={0}
-                                        max={100}
-                                        step="any"
-                                        suffix={<span>%</span>}
+                                        value={rolloutValue}
+                                        onChange={(value) => updateConditionSet(index, value)}
                                     />
                                 </Field.Pure>{' '}
                                 <div
@@ -435,43 +444,71 @@ export function FeatureFlagReleaseConditions({
                                         propertySelectErrors?.[index]?.rollout_percentage ? 'basis-full h-0' : ''
                                     )}
                                 />
-                                of <b>{aggregationTargetName}</b> in this set. Will match approximately{' '}
-                                {group.sort_key && affectedUsers[group.sort_key] !== undefined ? (
-                                    <b>
-                                        {`${
-                                            Math.max(
-                                                computeBlastRadiusPercentage(
-                                                    Number.isNaN(group.rollout_percentage)
-                                                        ? 0
-                                                        : group.rollout_percentage,
-                                                    group.sort_key
-                                                ).toPrecision(2) * 1,
-                                                0
-                                            )
-                                            // Multiplying by 1 removes trailing zeros after the decimal
-                                            // point added by toPrecision
-                                        }% `}
-                                    </b>
-                                ) : (
-                                    <Spinner className="mr-1" />
-                                )}{' '}
+                                of <b>{aggregationTargetName(group.aggregation_group_type_index)}</b> in this set.
                                 {(() => {
-                                    const affectedUserCount = group.sort_key ? affectedUsers[group.sort_key] : undefined
-                                    if (
-                                        affectedUserCount !== undefined &&
-                                        affectedUserCount >= 0 &&
-                                        totalUsers !== null
-                                    ) {
-                                        const rolloutPct = Number.isNaN(group.rollout_percentage)
-                                            ? 0
-                                            : (group.rollout_percentage ?? 100)
-                                        return `(${humanFriendlyNumber(
-                                            Math.floor((affectedUserCount * clamp(rolloutPct, 0, 100)) / 100)
-                                        )} / ${humanFriendlyNumber(totalUsers)})`
+                                    const targetIndex = group.aggregation_group_type_index
+                                    const resolvedGroupTypeIndex = resolveAggregationGroupTypeIndex(
+                                        targetIndex,
+                                        filters.aggregation_group_type_index
+                                    )
+                                    const pluralName = aggregationTargetName(targetIndex)
+                                    const singularName = aggregationLabel(resolvedGroupTypeIndex, true).singular
+                                    const sortKey = group.sort_key
+                                    const affected = sortKey ? affectedCounts[sortKey] : undefined
+                                    const total = sortKey ? totalCounts[sortKey] : undefined
+                                    if (sortKey && blastRadiusErrors[sortKey]) {
+                                        return (
+                                            <div
+                                                role="status"
+                                                className="basis-full flex items-center gap-2 mt-1 text-secondary"
+                                            >
+                                                <IconErrorOutline className="text-danger text-base shrink-0" />
+                                                <span>Couldn't estimate how many {pluralName} match.</span>
+                                                <Button
+                                                    type="secondary"
+                                                    size="xsmall"
+                                                    onClick={() =>
+                                                        calculateBlastRadiusForCondition(
+                                                            sortKey,
+                                                            group.properties,
+                                                            resolvedGroupTypeIndex
+                                                        )
+                                                    }
+                                                >
+                                                    Retry
+                                                </Button>
+                                            </div>
+                                        )
                                     }
-                                    return ''
-                                })()}{' '}
-                                <span>of total {aggregationTargetName}.</span>
+                                    if (affected === undefined || affected < 0 || total === undefined) {
+                                        return (
+                                            <div className="basis-full flex items-center mt-1">
+                                                <Spinner />
+                                            </div>
+                                        )
+                                    }
+                                    const rolloutPct = Number.isNaN(group.rollout_percentage)
+                                        ? 0
+                                        : (group.rollout_percentage ?? 100)
+                                    const receivingFlag = Math.floor((affected * clamp(rolloutPct, 0, 100)) / 100)
+                                    return (
+                                        <div className="basis-full flex flex-col mt-1 text-secondary tabular-nums">
+                                            <span>
+                                                Filters match: <b>~{pluralize(affected, singularName, pluralName)}</b>
+                                                {filters.aggregation_group_type_index == null && (
+                                                    <Tooltip title={MATCHING_ESTIMATE_TOOLTIP} interactive>
+                                                        <IconInfo className="text-muted text-xs ml-0.5" />
+                                                    </Tooltip>
+                                                )}
+                                            </span>
+                                            <span>
+                                                Rollout will be to{' '}
+                                                <b>~{pluralize(receivingFlag, singularName, pluralName)}</b> -{' '}
+                                                <b>{rolloutPct}%</b>
+                                            </span>
+                                        </div>
+                                    )
+                                })()}
                             </div>
                         </div>
                     )}
@@ -480,7 +517,7 @@ export function FeatureFlagReleaseConditions({
                             <Divider className="my-3" />
                             {readOnly ? (
                                 <div>
-                                    All <b>{aggregationTargetName}</b> in this set{' '}
+                                    All <b>{aggregationTargetName(group.aggregation_group_type_index)}</b> in this set{' '}
                                     {group.variant ? (
                                         <>
                                             {' '}
@@ -493,8 +530,9 @@ export function FeatureFlagReleaseConditions({
                             ) : (
                                 <div className="feature-flag-form-row">
                                     <div className="centered">
-                                        <b>Optional override:</b> Set variant for all <b>{aggregationTargetName}</b> in
-                                        this set to{' '}
+                                        <b>Optional override:</b> Set variant for all{' '}
+                                        <b>{aggregationTargetName(group.aggregation_group_type_index)}</b> in this set
+                                        to{' '}
                                         <Select
                                             placeholder="Select variant"
                                             allowClear={true}
@@ -517,87 +555,28 @@ export function FeatureFlagReleaseConditions({
         )
     }
 
-    const renderSuperReleaseConditionGroup = (group: FeatureFlagGroupType, index: number): JSX.Element => {
-        if (!readOnly) {
-            return <></>
-        }
-
-        // TODO: EarlyAccessFeatureType is not the correct type for featureFlag.features, hence bypassing TS check
-        const hasMatchingEarlyAccessFeature = earlyAccessFeaturesList?.find((f: any) => f.flagKey === featureFlagKey)
-
-        return (
-            <div className="w-full" key={group.sort_key}>
-                {index > 0 && <div className="condition-set-separator my-1 py-0">OR</div>}
-                <div className="mb-4 rounded p-4 bg-surface-primary">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <div>
-                                {group.properties?.length ? (
-                                    <>
-                                        Match <b>{aggregationTargetName}</b> against value set on{' '}
-                                        <Snack>{'$feature_enrollment/' + featureFlagKey}</Snack>
-                                    </>
-                                ) : (
-                                    <>
-                                        Condition set will match <b>all {aggregationTargetName}</b>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    <Divider className="my-3" />
-
-                    {(group.properties?.length || 0) > 0 && (
-                        <>
-                            <div className="feature-flag-property-display">
-                                <Button icon={<IconSubArrowRight className="arrow-right" />} size="small" />
-                                <span>
-                                    If null, default to <b>Release conditions</b>
-                                </span>
-                            </div>
-                            <Divider className="my-3" />
-                        </>
-                    )}
-                    <div className="flex items-center justify-between">
-                        <div />
-                        <Button
-                            disabledReason={
-                                !hasMatchingEarlyAccessFeature &&
-                                'The matching Early Access Feature was not found. You can create it in the Early Access Management tab.'
-                            }
-                            aria-label="more"
-                            data-attr="feature-flag-feature-list-button"
-                            size="small"
-                            onClick={() =>
-                                hasEarlyAccessFeatures &&
-                                router.actions.push(urls.earlyAccessFeature(earlyAccessFeaturesList[0].id))
-                            }
-                        >
-                            {hasMatchingEarlyAccessFeature ? 'View Early Access Feature' : 'No Early Access Feature'}
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     return (
         <SceneSection
-            title={excludeTitle ? null : isSuper ? 'Super release conditions' : 'Release conditions'}
+            title={excludeTitle ? null : 'Release conditions'}
             data-attr="feature-flag-release-conditions"
             description={
                 !readOnly &&
                 !excludeTitle && (
-                    <>
-                        <div className="text-secondary mb-2">
-                            Specify {aggregationTargetName} for flag release. Condition sets are evaluated top to bottom
-                            - the first matching set is used. A condition matches when all property filters pass AND the
-                            target falls within the rollout percentage.
-                        </div>
-                    </>
+                    // span, not div: SceneSection renders the description inside a <p>
+                    <span className="block text-secondary mb-2">
+                        Specify users for flag release. Condition sets are evaluated top to bottom - the first matching
+                        set is used. A condition matches when all property filters pass AND the target falls within the
+                        rollout percentage.
+                    </span>
                 )
             }
         >
+            {isDisabled && !readOnly && (
+                <Banner type="info" className="mb-3">
+                    This flag is currently <b>disabled</b>. These release conditions won't take effect until you enable
+                    it.
+                </Banner>
+            )}
             {!readOnly &&
                 !filterGroups.every(
                     (group) => filterGroups.filter((g) => g.variant === group.variant && g.variant !== null).length < 2
@@ -607,48 +586,14 @@ export function FeatureFlagReleaseConditions({
                         that matches.
                     </Banner>
                 )}
-            {!readOnly && showGroupsOptions && !hideMatchOptions && !showBucketingIdentifierUI && (
-                <div className="centered flex items-center gap-2">
-                    Match by
-                    <Select
-                        size="small"
-                        dropdownMatchSelectWidth={false}
-                        data-attr="feature-flag-aggregation-filter"
-                        onChange={(value) => {
-                            // MatchByGroupsIntroductionOption
-                            if (value == -2) {
-                                return
-                            }
-
-                            const groupTypeIndex = value !== -1 ? value : null
-                            setAggregationGroupTypeIndex(groupTypeIndex)
-                        }}
-                        value={filters.aggregation_group_type_index != null ? filters.aggregation_group_type_index : -1}
-                        options={[
-                            { value: -1, label: 'Users' },
-                            ...Array.from(groupTypes.values()).map((groupType) => ({
-                                value: groupType.group_type_index,
-                                label: capitalizeFirstLetter(aggregationLabel(groupType.group_type_index).plural),
-                                disabledReason: hasEarlyAccessFeatures
-                                    ? 'This feature flag cannot be group-based, because it is linked to an early access feature.'
-                                    : null,
-                            })),
-                            ...(includeGroupsIntroductionOption()
-                                ? [
-                                      {
-                                          value: -2,
-                                          label: 'MatchByGroupsIntroductionOption',
-                                          labelInMenu: matchByGroupsIntroductionOption,
-                                      },
-                                  ]
-                                : []),
-                        ]}
-                    />
-                </div>
-            )}
-            {!readOnly && showGroupsOptions && !hideMatchOptions && showBucketingIdentifierUI && (
+            {!readOnly && showGroupsOptions && !hideMatchOptions && (
                 <div className="mb-4">
-                    <Label className="mb-2">Match by</Label>
+                    <Label
+                        className="mb-2"
+                        info="Changing match criteria may remove existing variants or payloads."
+                    >
+                        Match by
+                    </Label>
                     <Radio
                         data-attr="feature-flag-aggregation-filter"
                         value={
@@ -659,19 +604,59 @@ export function FeatureFlagReleaseConditions({
                                   : 'user'
                         }
                         onChange={(value) => {
-                            if (value === 'user') {
-                                setAggregationGroupTypeIndex(null)
-                                setBucketingIdentifier(FeatureFlagBucketingIdentifier.DISTINCT_ID)
-                            } else if (value === 'device') {
-                                setAggregationGroupTypeIndex(null)
-                                setBucketingIdentifier(FeatureFlagBucketingIdentifier.DEVICE_ID)
-                            } else if (value === 'group') {
-                                // Default to first group type when selecting Group
-                                const firstGroupType = Array.from(groupTypes.values())[0]
-                                if (firstGroupType) {
-                                    setAggregationGroupTypeIndex(firstGroupType.group_type_index)
+                            const currentValue =
+                                filters.aggregation_group_type_index != null
+                                    ? 'group'
+                                    : featureFlag.bucketing_identifier === FeatureFlagBucketingIdentifier.DEVICE_ID
+                                      ? 'device'
+                                      : 'user'
+
+                            const applyChange = (targetValue: string): void => {
+                                if (targetValue === 'user') {
+                                    setAggregationGroupTypeIndex(null)
+                                    setBucketingIdentifier(FeatureFlagBucketingIdentifier.DISTINCT_ID)
+                                } else if (targetValue === 'device') {
+                                    setAggregationGroupTypeIndex(null)
+                                    // Atomically switch to device bucketing and disable persist across auth —
+                                    // these are incompatible, so applying both in one setFeatureFlag avoids any
+                                    // window where the closure-captured featureFlag could overwrite the new
+                                    // bucketing identifier.
+                                    setFeatureFlag({
+                                        ...featureFlag,
+                                        bucketing_identifier: FeatureFlagBucketingIdentifier.DEVICE_ID,
+                                        ensure_experience_continuity: false,
+                                    })
+                                } else if (targetValue === 'group') {
+                                    // Default to first group type when selecting Group
+                                    const firstGroupType = Array.from(groupTypes.values())[0]
+                                    if (firstGroupType) {
+                                        setAggregationGroupTypeIndex(firstGroupType.group_type_index)
+                                    }
+                                    setBucketingIdentifier(null)
                                 }
-                                setBucketingIdentifier(null)
+                            }
+
+                            // Only confirm when changing bucketing on an existing flag
+                            const isExistingFlag = id !== 'new'
+                            const isChangingValue = value !== currentValue
+                            if (isExistingFlag && isChangingValue) {
+                                Dialog.open({
+                                    title: 'Change bucketing option?',
+                                    description:
+                                        'Changing the bucketing option will cause users to re-evaluate the flag and may cause changes in the evaluation results. Are you sure you want to continue?',
+                                    primaryButton: {
+                                        children: 'Continue',
+                                        onClick: () => applyChange(value),
+                                        size: 'small',
+                                    },
+                                    secondaryButton: {
+                                        children: 'Cancel',
+                                        type: 'tertiary',
+                                        size: 'small',
+                                    },
+                                })
+                            } else {
+                                applyChange(value)
                             }
                         }}
                         options={[
@@ -682,9 +667,25 @@ export function FeatureFlagReleaseConditions({
                             },
                             {
                                 value: 'device',
-                                label: 'Device',
-                                description:
-                                    'Stable assignment per device. Good fit for experiments on anonymous users.',
+                                label: (
+                                    <span>
+                                        Device{' '}
+                                        <Tag type="warning" size="small">
+                                            BETA
+                                        </Tag>
+                                    </span>
+                                ),
+                                description: (
+                                    <span>
+                                        Stable assignment per device. Good fit for experiments on anonymous users.{' '}
+                                        <Link
+                                            to="https://hanzo.ai/docs/feature-flags/device-bucketing"
+                                            target="_blank"
+                                        >
+                                            Learn more
+                                        </Link>
+                                    </span>
+                                ),
                             },
                             {
                                 value: 'group',
@@ -739,11 +740,7 @@ export function FeatureFlagReleaseConditions({
             )}
             <div className="FeatureConditionCard max-w-prose">
                 {filterGroups.map((group, index) => (
-                    <div key={group.sort_key || index}>
-                        {isSuper
-                            ? renderSuperReleaseConditionGroup(group, index)
-                            : renderReleaseConditionGroup(group, index)}
-                    </div>
+                    <div key={group.sort_key || index}>{renderReleaseConditionGroup(group, index)}</div>
                 ))}
             </div>
             {!readOnly && (

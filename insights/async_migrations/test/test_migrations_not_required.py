@@ -1,11 +1,10 @@
-import pytest
-
 from insights.async_migrations.setup import ALL_ASYNC_MIGRATIONS
 from insights.async_migrations.test.util import AsyncMigrationBaseTest
 from insights.datastore.client import sync_execute
 from insights.models.person.sql import COMMENT_DISTINCT_ID_COLUMN_SQL
 
-pytestmark = pytest.mark.async_migrations
+# No pytest.mark.async_migrations here on purpose: the Core shards filter uses
+# -m "not async_migrations", so this guard must run there. Do not re-add the marker.
 
 
 # Async migrations are data migrations aimed at getting users from an old schema to a new schema

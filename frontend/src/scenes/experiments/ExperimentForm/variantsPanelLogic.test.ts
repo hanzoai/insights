@@ -1,7 +1,10 @@
+import { MOCK_TEAM_ID } from 'lib/api.mock'
+
 import { expectLogic, partial } from 'kea-test-utils'
 
 import { featureFlagsLogic } from 'scenes/feature-flags/featureFlagsLogic'
 
+import { resumeKeaLoadersErrors, silenceKeaLoadersErrors } from '~/initKea'
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 import type { Experiment } from '~/types'
@@ -69,11 +72,11 @@ describe('variantsPanelLogic', () => {
         },
     ]
 
-    beforeEach(() => {
+    beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/@current/feature_flags/': (req) => {
-                    const url = new URL(req.url)
+                [`/api/projects/${MOCK_TEAM_ID}/feature_flags/`]: ({ request }) => {
+                    const url = new URL(request.url)
                     const search = url.searchParams.get('search')
 
                     if (search) {
@@ -85,7 +88,7 @@ describe('variantsPanelLogic', () => {
 
                     return [200, { results: mockFeatureFlags, count: mockFeatureFlags.length }]
                 },
-                '/api/projects/@current/experiments': () => [
+                [`/api/projects/${MOCK_TEAM_ID}/experiments`]: () => [
                     200,
                     {
                         results: [
@@ -105,6 +108,11 @@ describe('variantsPanelLogic', () => {
 
         experimentsLogic.mount()
         experimentsLogic.actions.loadExperiments()
+
+        // Let the mount-time loads settle: afterEach unmounts these logics, and an
+        // in-flight loader settling after unmount errors with "[KEA] Can not find path"
+        await expectLogic(featureFlagsLogic).toFinishAllListeners()
+        await expectLogic(experimentsLogic).toFinishAllListeners()
 
         logic = variantsPanelLogic({ experiment: mockExperiment, disabled: false })
         logic.mount()
@@ -188,6 +196,53 @@ describe('variantsPanelLogic', () => {
                 })
         })
 
+        it('returns existingFlag when key matches a known feature flag', async () => {
+            // Wait for connected logics to load so unavailableFeatureFlagKeys is populated
+            await expectLogic(featureFlagsLogic).toDispatchActions(['loadFeatureFlagsSuccess'])
+            await expectLogic(experimentsLogic).toDispatchActions(['loadExperimentsSuccess'])
+
+            await expectLogic(logic, () => {
+                logic.actions.validateFeatureFlagKey('existing-flag-1')
+            })
+                .toDispatchActions(['validateFeatureFlagKey', 'validateFeatureFlagKeySuccess'])
+                .toMatchValues({
+                    featureFlagKeyValidation: partial({
+                        valid: false,
+                        error: 'A feature flag with this key already exists.',
+                        existingFlag: partial({ id: 1, key: 'existing-flag-1' }),
+                    }),
+                })
+        })
+
+        it('returns existingFlag via API fallback when key is not in local Set', async () => {
+            // Unlike the test above, we don't wait for loadFeatureFlagsSuccess,
+            // so unavailableFeatureFlagKeys is empty and the API path is used
+            await expectLogic(logic, () => {
+                logic.actions.validateFeatureFlagKey('existing-flag-2')
+            })
+                .toDispatchActions(['validateFeatureFlagKey', 'validateFeatureFlagKeySuccess'])
+                .toMatchValues({
+                    featureFlagKeyValidation: partial({
+                        valid: false,
+                        existingFlag: partial({ id: 2, key: 'existing-flag-2' }),
+                    }),
+                })
+        })
+
+        it('does not return existingFlag when validation error is not about duplicate keys', async () => {
+            await expectLogic(logic, () => {
+                logic.actions.validateFeatureFlagKey('')
+            })
+                .toDispatchActions(['validateFeatureFlagKey', 'validateFeatureFlagKeySuccess'])
+                .toMatchValues({
+                    featureFlagKeyValidation: partial({
+                        valid: false,
+                    }),
+                })
+
+            expect(logic.values.featureFlagKeyValidation?.existingFlag).toBeUndefined()
+        })
+
         it('debounces validation calls', async () => {
             const spy = jest.spyOn(logic.actions, 'validateFeatureFlagKey')
 
@@ -236,10 +291,14 @@ describe('variantsPanelLogic', () => {
     })
 
     describe('error handling', () => {
+        // Deliberate loader failure — kea-loaders would log it
+        beforeEach(silenceKeaLoadersErrors)
+        afterEach(resumeKeaLoadersErrors)
+
         it('handles validation errors gracefully', async () => {
             useMocks({
                 get: {
-                    '/api/projects/@current/feature_flags/': () => [500, { error: 'Server error' }],
+                    [`/api/projects/${MOCK_TEAM_ID}/feature_flags/`]: () => [500, { error: 'Server error' }],
                 },
             })
 

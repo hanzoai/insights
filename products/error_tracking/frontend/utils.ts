@@ -1,14 +1,21 @@
-import equal from 'fast-deep-equal'
+import { deepEqual as equal } from 'fast-equals'
 import { LogicWrapper } from 'kea'
 import { routerType } from 'kea-router/lib/routerType'
 import { MouseEvent } from 'react'
 
 import { ErrorTrackingException } from 'lib/components/Errors/types'
 import { Dayjs, dayjs } from 'lib/dayjs'
-import { componentsToDayJs, dateStringToComponents, isStringDateRegex } from 'lib/utils'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
+import { componentsToDayJs, dateStringToComponents, dateStringToDayJs, isStringDateRegex } from 'lib/utils/dateFilters'
 import { Params } from 'scenes/sceneTypes'
 
 import { DateRange, ErrorTrackingIssue } from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
+
+/** Reason error tracking write actions are disabled, or null when the user has editor access. */
+export function errorTrackingEditAccessDisabledReason(): string | null {
+    return getAccessControlDisabledReason(AccessControlResourceType.ErrorTracking, AccessControlLevel.Editor)
+}
 
 export const ERROR_TRACKING_LOGIC_KEY = 'errorTracking'
 export const ERROR_TRACKING_LISTING_RESOLUTION = 20
@@ -102,6 +109,21 @@ const customOptions: Record<string, string> = {
     mStart: 'Month',
     yStart: 'Year',
     all: 'All',
+}
+
+export function dateRangeToIsoBounds(dateRange: DateRange | undefined): {
+    dateFrom: string | undefined
+    dateTo: string | undefined
+} {
+    if (!dateRange?.date_from) {
+        return { dateFrom: undefined, dateTo: undefined }
+    }
+    const from = dateStringToDayJs(dateRange.date_from)
+    const to = dateStringToDayJs(dateRange.date_to ?? new Date().toISOString())
+    if (!from || !to) {
+        return { dateFrom: undefined, dateTo: undefined }
+    }
+    return { dateFrom: from.toISOString(), dateTo: to.toISOString() }
 }
 
 export function generateDateRangeLabel(dateRange: DateRange): string | undefined {

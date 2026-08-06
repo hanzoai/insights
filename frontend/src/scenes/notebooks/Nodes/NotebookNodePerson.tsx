@@ -7,13 +7,14 @@ import { Tooltip } from '@hanzo/elements'
 import { NotFound } from 'lib/components/NotFound'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { TZLabel } from 'lib/components/TZLabel'
+import { dayjs } from 'lib/dayjs'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
-import { compactNumber } from 'lib/utils'
-import { formatCurrency } from 'lib/utils/geography/currency'
+import { formatCurrency } from 'lib/utils/currency'
+import { compactNumber } from 'lib/utils/numbers'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
-import { PersonIcon } from 'scenes/persons/PersonDisplay'
 import { asDisplay } from 'scenes/persons/person-utils'
+import { PersonIcon } from 'scenes/persons/PersonDisplay'
 import { personLogic } from 'scenes/persons/personLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -24,7 +25,6 @@ import { PersonType } from '~/types'
 import { NotebookNodeProps, NotebookNodeType } from '../types'
 import { DataSourceIcon } from './components/DataSourceIcon'
 import { notebookNodeLogic } from './notebookNodeLogic'
-import { OPTIONAL_PROJECT_NON_CAPTURE_GROUP } from './utils'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodePersonAttributes>): JSX.Element => {
     const { id, distinctId } = attributes
@@ -138,6 +138,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodePersonAttribute
 
 function PersonInfo(): JSX.Element | null {
     const { person } = useValues(personLogic)
+    const { currentTeam } = useValues(teamLogic)
 
     if (!person) {
         return null
@@ -146,7 +147,7 @@ function PersonInfo(): JSX.Element | null {
     return (
         <div className="flex flex-col">
             <FirstSeen person={person} />
-            <LastSeen />
+            {currentTeam?.extra_settings?.person_last_seen_at_enabled === true && <LastSeen />}
             <MRR />
             <LifetimeValue />
             <SessionCount />
@@ -164,15 +165,28 @@ function FirstSeen({ person }: { person: PersonType }): JSX.Element {
     )
 }
 
+// `last_seen_at` is floored to the hour, so for a person whose first and last activity
+// fall in the same hour it can resolve to *before* `created_at`. Clamp to `created_at` so
+// "Last seen" never appears earlier than "First seen" — the real last activity is within
+// the rounding hour of first seen anyway.
+function clampLastSeenToFirstSeen(lastSeenAt: string, createdAt?: string): dayjs.Dayjs {
+    const lastSeen = dayjs(lastSeenAt)
+    if (!createdAt) {
+        return lastSeen
+    }
+    const firstSeen = dayjs(createdAt)
+    return lastSeen.isBefore(firstSeen) ? firstSeen : lastSeen
+}
+
 function LastSeen(): JSX.Element {
-    const { info, infoLoading } = useValues(personLogic)
+    const { person, personLoading } = useValues(personLogic)
     return (
         <div className="flex items-center gap-1">
             <span className="text-secondary">Last seen:</span>{' '}
-            {infoLoading ? (
+            {personLoading ? (
                 <Skeleton className="h-4 w-24" />
-            ) : info?.lastSeen ? (
-                <TZLabel time={info.lastSeen} />
+            ) : person?.last_seen_at ? (
+                <TZLabel time={clampLastSeenToFirstSeen(person.last_seen_at, person.created_at)} />
             ) : (
                 'unknown'
             )}
@@ -213,19 +227,15 @@ function EventCount(): JSX.Element {
 }
 
 function MRR(): JSX.Element | null {
-    const { revenueData, revenueDataLoading, isRevenueAnalyticsEnabled } = useValues(personLogic)
+    const { revenueData, revenueDataLoading } = useValues(personLogic)
     const { baseCurrency } = useValues(teamLogic)
-
-    if (!isRevenueAnalyticsEnabled) {
-        return null
-    }
 
     return (
         <div className="flex items-center gap-1">
             <span className="text-secondary">MRR:</span>{' '}
             {revenueDataLoading ? (
                 <Skeleton className="h-4 w-24" />
-            ) : revenueData?.mrr ? (
+            ) : revenueData?.mrr != null ? (
                 <div className="flex gap-2 items-center">
                     {formatCurrency(revenueData.mrr, baseCurrency)}
                     <DataSourceIcon source="revenue-analytics" />
@@ -238,19 +248,15 @@ function MRR(): JSX.Element | null {
 }
 
 function LifetimeValue(): JSX.Element | null {
-    const { revenueData, revenueDataLoading, isRevenueAnalyticsEnabled } = useValues(personLogic)
+    const { revenueData, revenueDataLoading } = useValues(personLogic)
     const { baseCurrency } = useValues(teamLogic)
-
-    if (!isRevenueAnalyticsEnabled) {
-        return null
-    }
 
     return (
         <div className="flex items-center gap-1">
             <span className="text-secondary">Lifetime value:</span>{' '}
             {revenueDataLoading ? (
                 <Skeleton className="h-4 w-24" />
-            ) : revenueData?.lifetimeValue ? (
+            ) : revenueData?.lifetimeValue != null ? (
                 <div className="flex gap-2 items-center">
                     {formatCurrency(revenueData.lifetimeValue, baseCurrency)}
                     <DataSourceIcon source="revenue-analytics" />
@@ -284,12 +290,6 @@ export const NotebookNodePerson = createInsightsWidgetNode<NotebookNodePersonAtt
     attributes: {
         id: {},
         distinctId: {},
-    },
-    pasteOptions: {
-        find: OPTIONAL_PROJECT_NON_CAPTURE_GROUP + urls.personByUUID('(.+)', false),
-        getAttributes: async (match) => {
-            return { distinctId: undefined, id: match[1] }
-        },
     },
     serializedText: (attrs) => {
         const personTitle = attrs?.title || ''

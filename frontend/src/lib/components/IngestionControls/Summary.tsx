@@ -3,7 +3,7 @@ import { match } from 'ts-pattern'
 import { IconCheck, IconCircleDashed } from '@hanzo/icons'
 import { Banner, Link } from '@hanzo/elements'
 
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 
 import { Trigger, TriggerType } from './types'
 

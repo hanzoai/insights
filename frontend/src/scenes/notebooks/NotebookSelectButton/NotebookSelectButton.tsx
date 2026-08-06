@@ -7,10 +7,10 @@ import { Divider, Dropdown, Tag, ProfilePicture } from '@hanzo/elements'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { dayjs } from 'lib/dayjs'
+import { IconWithCount } from 'lib/elements/icons'
 import { Button, ButtonProps } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input/Input'
 import { PopoverProps } from 'lib/elements/Popover'
-import { IconWithCount } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Label } from 'lib/ui/Label/Label'
 import { useNotebookNode } from 'scenes/notebooks/Nodes/NotebookNodeContext'
@@ -22,8 +22,8 @@ import {
 import { notebooksModel, openNotebook } from '~/models/notebooksModel'
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
-import { notebookNodeLogicType } from '../Nodes/notebookNodeLogicType'
-import { notebookLogicType } from '../Notebook/notebookLogicType'
+import type { notebookNodeLogicType } from '../Nodes/notebookNodeLogic'
+import type { notebookLogicType } from '../Notebook/notebookLogic'
 import { NotebookListItemType, NotebookTarget } from '../types'
 import { NOTEBOOK_DROPDOWN_LIMIT } from './notebookSelectButtonLogic'
 
@@ -145,8 +145,7 @@ export function NotebookSelectList(props: NotebookSelectProps): JSX.Element {
     const { createNotebook } = useActions(notebooksModel)
 
     const openAndAddToNotebook = (notebookShortId: string, exists: boolean): void => {
-        const position = props.resource ? 'end' : 'start'
-        void openNotebook(notebookShortId, NotebookTarget.Popover, position, (theNotebookLogic) => {
+        void openNotebook(notebookShortId, NotebookTarget.Popover, (theNotebookLogic) => {
             if (!exists && props.resource) {
                 theNotebookLogic.actions.insertAfterLastNode([props.resource])
             }

@@ -5,16 +5,131 @@ from pydantic import BaseModel, field_validator
 from pydantic_settings import BaseSettings
 
 
-class ProductCostLimit(BaseModel):
+class ProductCostLimit(BaseModel, frozen=True):
     limit_usd: float
     window_seconds: int
 
 
+class UserCostLimit(BaseModel, frozen=True):
+    burst_limit_usd: float
+    burst_window_seconds: int
+    sustained_limit_usd: float
+    sustained_window_seconds: int
+
+
+DEFAULT_USER_COST_LIMIT = UserCostLimit(
+    burst_limit_usd=100.0,
+    burst_window_seconds=86400,
+    sustained_limit_usd=1000.0,
+    sustained_window_seconds=2592000,
+)
+
 DEFAULT_PRODUCT_COST_LIMITS: dict[str, "ProductCostLimit"] = {
     "llm_gateway": ProductCostLimit(limit_usd=1000.0, window_seconds=86400),
-    "wizard": ProductCostLimit(limit_usd=2000.0, window_seconds=86400),
-    "twig": ProductCostLimit(limit_usd=1000.0, window_seconds=3600),
+    "ci": ProductCostLimit(limit_usd=1000.0, window_seconds=2592000),  # $1000 / 30 days
+    "wizard": ProductCostLimit(limit_usd=10000.0, window_seconds=86400),
+    "insights_code": ProductCostLimit(limit_usd=5000.0, window_seconds=3600),
+    "background_agents": ProductCostLimit(limit_usd=1000.0, window_seconds=3600),
+    "onboarding": ProductCostLimit(limit_usd=1000.0, window_seconds=3600),
+    "django": ProductCostLimit(limit_usd=5000.0, window_seconds=86400),
+    "custom_image_scans": ProductCostLimit(limit_usd=1000.0, window_seconds=86400),
+    "signals": ProductCostLimit(limit_usd=25000.0, window_seconds=86400),
+    "insights_ai": ProductCostLimit(limit_usd=5000.0, window_seconds=86400),
+    "changelog_bot": ProductCostLimit(limit_usd=500.0, window_seconds=86400),
 }
+
+DEFAULT_USER_COST_LIMITS: dict[str, "UserCostLimit"] = {
+    "wizard": UserCostLimit(
+        burst_limit_usd=100.0,
+        burst_window_seconds=2592000,  # 30 days
+        sustained_limit_usd=100.0,
+        sustained_window_seconds=2592000,  # 30 days
+    ),
+    "insights_code": UserCostLimit(
+        burst_limit_usd=500.0,
+        burst_window_seconds=86400,
+        sustained_limit_usd=3000.0,
+        sustained_window_seconds=2592000,
+    ),
+    "background_agents": UserCostLimit(
+        burst_limit_usd=500.0,
+        burst_window_seconds=604800,
+        sustained_limit_usd=1000.0,
+        sustained_window_seconds=2592000,
+    ),
+    "signals": UserCostLimit(
+        burst_limit_usd=2500.0,
+        burst_window_seconds=604800,
+        sustained_limit_usd=10000.0,
+        sustained_window_seconds=2592000,
+    ),
+    # Nobody is billed for onboarding (credit_bucket=None), so this bounds blast radius rather than
+    # spend: the route's server-credential marker proves a token was minted server-side, not that it
+    # belongs to a wizard run, and INTERNAL_SCOPES in insights/temporal/oauth.py grants that marker to
+    # every task run. Sized to stay clear of real onboarding rather than to be tight, since cutting a
+    # user off mid-setup is worse than the unbilled spend: half of DEFAULT_USER_COST_LIMIT, and well
+    # under the comparable agentic product (background_agents, $500/week burst). Staff bypass this
+    # entirely via is_usage_unlimited, so internal runs are never capped by it.
+    "onboarding": UserCostLimit(
+        burst_limit_usd=50.0,
+        burst_window_seconds=86400,
+        sustained_limit_usd=500.0,
+        sustained_window_seconds=2592000,
+    ),
+}
+
+FREE_PLAN_COST_LIMIT = UserCostLimit(
+    burst_limit_usd=20.0,
+    burst_window_seconds=86400,
+    sustained_limit_usd=20.0,
+    sustained_window_seconds=2592000,
+)
+
+ORG_BILLED_USER_COST_LIMIT = UserCostLimit(
+    burst_limit_usd=float("inf"),
+    burst_window_seconds=86400,
+    sustained_limit_usd=float("inf"),
+    sustained_window_seconds=2592000,
+)
+
+
+_COST_LIMIT_KEY_ALIASES: dict[str, str] = {
+    "array": "insights_code",
+    "twig": "insights_code",
+    "slack-twig": "slack-insights-code",
+}
+
+
+def _normalize_cost_key(key: str) -> str:
+    return _COST_LIMIT_KEY_ALIASES.get(key, key)
+
+
+def _parse_model_dict(
+    v: str | dict | None,
+    model_cls: type[BaseModel],
+    default: dict,
+    field_name: str,
+) -> dict:
+    if v is None or v == "":
+        return default
+    if isinstance(v, dict):
+        result = {}
+        for key, config in v.items():
+            normalized = _normalize_cost_key(key)
+            if isinstance(config, model_cls):
+                result[normalized] = config
+            elif isinstance(config, dict):
+                result[normalized] = model_cls(**config)
+            else:
+                raise ValueError(f"Invalid config for {key}")
+        return result
+    try:
+        parsed = json.loads(v)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in {field_name}: {e}") from e
+    if not isinstance(parsed, dict):
+        raise ValueError(f"{field_name} must be a JSON object")
+    return {_normalize_cost_key(key): model_cls(**config) for key, config in parsed.items()}
 
 
 class Settings(BaseSettings):
@@ -39,52 +154,136 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["*"]
 
     anthropic_api_key: str | None = None
+    bedrock_region_name: str | None = None
     openai_api_key: str | None = None
     openai_api_base_url: str | None = None  # Used for regional endpoints
-    gemini_api_key: str | None = None
+    # OpenAI organization ID. When set, forwarded to OpenAI on every request so
+    # traffic is attributed to the HIPAA-covered organization. Omitted when unset.
+    openai_organization: str | None = None
+    openrouter_api_key: str | None = None
+    fireworks_api_key: str | None = None
+    cloudflare_api_key: str | None = None
+    cloudflare_account_id: str | None = None
+    baseten_api_base: str | None = None
+    baseten_api_key: str | None = None
 
-    # Project token for LLM analytics events
+    # Modal-hosted GLM inference (OpenAI-compatible vLLM endpoint); auth is a proxy-token pair
+    # sent as Modal-Key/Modal-Secret headers. All three must be set for Modal routing.
+    modal_api_base: str | None = None
+    modal_kimi_api_base: str | None = None
+    modal_key: str | None = None
+    modal_secret: str | None = None
+
+    # User-sticky fraction (0..1) of GLM traffic served by Modal; per-product entries override the
+    # global value. The tasks-glm-modal-inference flag ORs with this.
+    glm_modal_traffic_fraction: float = 0.0
+    glm_modal_product_traffic_fractions: dict[str, float] = {}
+
+    # Project token for AI observability events
     insights_project_token: str | None = None
     insights_host: str = "https://us.i.hanzo.ai"
+
+    # Optional secondary capture target — mirrors every $ai_generation after the primary,
+    # so the EU deployment lands EU events on EU Insights (team_id=1) for regional billing.
+    insights_secondary_project_token: str | None = None
+    insights_secondary_host: str | None = None
 
     metrics_enabled: bool = True
 
     # ~600 bytes per entry (key + AuthenticatedUser + LRU overhead), 10000 entries ≈ 6 MB
     auth_cache_max_size: int = 10000
-    auth_cache_ttl: int = 900  # 15 minutes
+    auth_cache_ttl: int = 900  # 15 minutes — used for personal API keys
+    auth_cache_ttl_oauth: int = 300  # 5 minutes — OAuth tokens can be revoked on refresh, keep short
 
     team_rate_limit_multipliers: dict[int, int] = {}
 
+    # Additional elevated cap for Insights staff, keyed on the authenticated
+    # user's is_staff flag rather than team id, so it survives impersonation.
+    # Combined with the team multiplier by taking the larger of the two.
+    staff_rate_limit_multiplier: int = 10
+
+    # When true, Insights staff (authenticated is_staff) bypass the per-user
+    # burst/sustained cost caps entirely, on every product. Spend is still
+    # recorded for observability — only enforcement and the reported usage
+    # status treat staff as unlimited. Set false to fall back to the
+    # elevated-but-finite `staff_rate_limit_multiplier` cap.
+    staff_unlimited_usage: bool = True
+
     product_cost_limits: dict[str, ProductCostLimit] = DEFAULT_PRODUCT_COST_LIMITS
 
-    default_user_cost_limit_usd: float = 500.0
-    default_user_cost_window_seconds: int = 3600
+    user_cost_limits: dict[str, UserCostLimit] = DEFAULT_USER_COST_LIMITS
     user_cost_limits_disabled: bool = False
 
+    # TODO: flip on when Code migrates all users to usage-based billing
+    insights_code_model_gate_enabled: bool = False
+    insights_code_free_tier_models: list[str] = ["@cf/zai-org/glm-5.2"]
+
     default_fallback_cost_usd: float = 0.01
+
+    insights_api_base_url: str = "https://us.hanzo.ai"
+    plan_cache_ttl: int = 900  # 15 minutes
+    # Billing recomputes quota at most hourly, so we tolerate slight overage rather than
+    # a Django roundtrip on every billable request.
+    quota_cache_ttl: int = 300  # 5 minutes
+    billing_period_days: int = 30
+
+    # Anthropic → Bedrock circuit breaker. When the trailing failure rate crosses `failure_threshold`
+    # (over ≥ `min_requests` in the window), the breaker opens: opted-in requests route straight to
+    # Bedrock with probability `bypass_probability`, the rest stay as probe traffic to detect recovery.
+    anthropic_circuit_breaker_enabled: bool = True
+    anthropic_circuit_breaker_failure_threshold: float = 0.25
+    anthropic_circuit_breaker_window_seconds: int = 300
+    anthropic_circuit_breaker_bypass_probability: float = 0.9
+    anthropic_circuit_breaker_min_requests: int = 20
 
     @field_validator("product_cost_limits", mode="before")
     @classmethod
     def parse_product_cost_limits(cls, v: str | dict | None) -> dict[str, ProductCostLimit]:
+        return _parse_model_dict(v, ProductCostLimit, DEFAULT_PRODUCT_COST_LIMITS, "product_cost_limits")
+
+    @field_validator("user_cost_limits", mode="before")
+    @classmethod
+    def parse_user_cost_limits(cls, v: str | dict | None) -> dict[str, UserCostLimit]:
+        return _parse_model_dict(v, UserCostLimit, DEFAULT_USER_COST_LIMITS, "user_cost_limits")
+
+    @field_validator("glm_modal_traffic_fraction")
+    @classmethod
+    def validate_glm_modal_traffic_fraction(cls, v: float) -> float:
+        if not 0.0 <= v <= 1.0:
+            raise ValueError(f"glm_modal_traffic_fraction must be between 0 and 1, got {v}")
+        return v
+
+    @field_validator("glm_modal_product_traffic_fractions", mode="before")
+    @classmethod
+    def parse_glm_modal_product_traffic_fractions(cls, v: str | dict[str, float] | None) -> dict[str, float]:
         if v is None or v == "":
-            return DEFAULT_PRODUCT_COST_LIMITS
-        if isinstance(v, dict):
-            result = {}
-            for product, config in v.items():
-                if isinstance(config, ProductCostLimit):
-                    result[product] = config
-                elif isinstance(config, dict):
-                    result[product] = ProductCostLimit(**config)
-                else:
-                    raise ValueError(f"Invalid config for product {product}")
-            return result
-        try:
-            parsed = json.loads(v)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON in product_cost_limits: {e}") from e
-        if not isinstance(parsed, dict):
-            raise ValueError("product_cost_limits must be a JSON object")
-        return {product: ProductCostLimit(**config) for product, config in parsed.items()}
+            return {}
+        if isinstance(v, str):
+            try:
+                v = json.loads(v)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON in glm_modal_product_traffic_fractions: {e}") from e
+        if not isinstance(v, dict):
+            raise ValueError("glm_modal_product_traffic_fractions must be a JSON object")
+        result: dict[str, float] = {}
+        for product, fraction in v.items():
+            try:
+                value = float(fraction)
+            except (TypeError, ValueError) as e:
+                raise ValueError(f"glm_modal_product_traffic_fractions values must be numbers: {e}") from e
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(
+                    f"glm_modal_product_traffic_fractions values must be between 0 and 1, got {value} for {product}"
+                )
+            result[_normalize_cost_key(str(product))] = value
+        return result
+
+    @field_validator("staff_rate_limit_multiplier")
+    @classmethod
+    def validate_staff_rate_limit_multiplier(cls, v: int) -> int:
+        if v < 1:
+            raise ValueError(f"staff_rate_limit_multiplier must be >= 1, got {v}")
+        return v
 
     @field_validator("team_rate_limit_multipliers", mode="before")
     @classmethod

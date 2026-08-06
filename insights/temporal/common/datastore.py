@@ -17,13 +17,13 @@ from django.conf import settings
 
 import aiohttp
 import pyarrow as pa
-import requests
 from structlog import get_logger
 from temporalio import activity
 
 import insights.temporal.common.asyncpa as asyncpa
 from insights.datastore import query_tagging
 from insights.datastore.query_tagging import QueryTags, TemporalTags, get_query_tags
+from insights.security.outbound_proxy import internal_requests_session
 
 LOGGER = get_logger(__name__)
 
@@ -138,7 +138,11 @@ class DatastoreError(Exception):
 
 
 class DatastoreAllReplicasAreStaleError(DatastoreError):
-    """Exception raised when all replicas are stale."""
+    """Exception raised when all replicas are stale.
+
+    This can happen when using max_replica_delay_for_distributed_queries
+    and fallback_to_stale_replicas_for_distributed_queries=0.
+    """
 
     def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
         super().__init__(error_message, query, query_id)
@@ -154,6 +158,13 @@ class DatastoreClientTimeoutError(DatastoreError):
         super().__init__(f"Timed-out waiting for response running query '{query_id}'", query, query_id)
 
 
+class DatastoreQueryTimeoutError(DatastoreError):
+    """Exception raised when a query exceeds the server-side max execution time."""
+
+    def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
+        super().__init__(error_message, query, query_id)
+
+
 class DatastoreQueryNotFound(DatastoreError):
     """Exception raised when a query with a given ID is not found."""
 
@@ -163,6 +174,27 @@ class DatastoreQueryNotFound(DatastoreError):
 
 class DatastoreMemoryLimitExceededError(DatastoreError):
     """Exception raised when a query exceeds the memory limit."""
+
+    def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
+        super().__init__(error_message, query, query_id)
+
+
+class DatastoreTooManyBytesError(DatastoreError):
+    """Exception raised when a query exceeds the limit on bytes read."""
+
+    def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
+        super().__init__(error_message, query, query_id)
+
+
+class DatastoreTooManyRowsOrBytesError(DatastoreError):
+    """Exception raised when a query's result exceeds max_result_rows/max_result_bytes."""
+
+    def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
+        super().__init__(error_message, query, query_id)
+
+
+class DatastoreTooManySimultaneousQueriesError(DatastoreError):
+    """Exception raised when Datastore has too many simultaneous queries running."""
 
     def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
         super().__init__(error_message, query, query_id)
@@ -276,6 +308,8 @@ class DatastoreClient:
         if database:
             self.params["database"] = database
 
+        self.params["max_query_size"] = "1048576"  # 1MB
+
         self.params.update(kwargs)
 
     @classmethod
@@ -327,10 +361,15 @@ class DatastoreClient:
         has_format_placeholders = re.search(r"(?<!{){[^{}]*}(?!})|{{[^{}]*}}", query)
 
         format_parameters = {k: encode_datastore_data(v).decode("utf-8") for k, v in query_parameters.items()}
-        query = query % format_parameters
 
         if has_format_placeholders:
+            # Escape any curly brackets `{` or `}` in the format parameters so they are not parsed
+            # as format placeholders
+            escaped_parameters = {k: v.replace("{", "{{").replace("}", "}}") for k, v in format_parameters.items()}
+            query = query % escaped_parameters
             query = KeywordOnlyFormatter().format(query, **format_parameters)
+        else:
+            query = query % format_parameters
 
         return query
 
@@ -346,43 +385,32 @@ class DatastoreClient:
             request_data = None
         return request_data
 
-    async def acheck_response(self, response, query) -> None:
-        """Asynchronously check the HTTP response received from Datastore.
+    @staticmethod
+    def raise_datastore_error(error_message: str, query: str | None = None) -> typing.NoReturn:
+        """Raise the appropriate DatastoreError subclass based on the error message."""
+        ERROR_CODE_TO_EXCEPTION: dict[str, type[DatastoreError]] = {
+            "ALL_REPLICAS_ARE_STALE": DatastoreAllReplicasAreStaleError,
+            "MEMORY_LIMIT_EXCEEDED": DatastoreMemoryLimitExceededError,
+            "TOO_MANY_ROWS_OR_BYTES": DatastoreTooManyRowsOrBytesError,
+            "TOO_MANY_BYTES": DatastoreTooManyBytesError,
+            "TOO_MANY_SIMULTANEOUS_QUERIES": DatastoreTooManySimultaneousQueriesError,
+            "TIMEOUT_EXCEEDED": DatastoreQueryTimeoutError,
+        }
+        for error_code, exc_class in ERROR_CODE_TO_EXCEPTION.items():
+            if error_code in error_message:
+                raise exc_class(error_message, query=query)
+        raise DatastoreError(error_message, query=query)
 
-        Raises:
-            DatastoreAllReplicasAreStaleError: If status code is not 200 and error message contains
-                "ALL_REPLICAS_ARE_STALE". This can happen when using max_replica_delay_for_distributed_queries
-                and fallback_to_stale_replicas_for_distributed_queries=0
-            DatastoreMemoryLimitExceededError: If the status code is not 200 and error message contains
-                "MEMORY_LIMIT_EXCEEDED".
-            DatastoreError: If the status code is not 200.
-        """
+    async def acheck_response(self, response, query) -> None:
+        """Asynchronously check the HTTP response received from Datastore."""
         if response.status != 200:
             error_message = await response.text()
-            if "ALL_REPLICAS_ARE_STALE" in error_message:
-                raise DatastoreAllReplicasAreStaleError(error_message, query=query)
-            if "MEMORY_LIMIT_EXCEEDED" in error_message:
-                raise DatastoreMemoryLimitExceededError(error_message, query=query)
-            raise DatastoreError(error_message, query=query)
+            self.raise_datastore_error(error_message, query=query)
 
     def check_response(self, response, query) -> None:
-        """Check the HTTP response received from Datastore.
-
-        Raises:
-            DatastoreAllReplicasAreStaleError: If status code is not 200 and error message contains
-                "ALL_REPLICAS_ARE_STALE". This can happen when using max_replica_delay_for_distributed_queries
-                and fallback_to_stale_replicas_for_distributed_queries=0
-            DatastoreMemoryLimitExceededError: If the status code is not 200 and error message contains
-                "MEMORY_LIMIT_EXCEEDED".
-            DatastoreError: If the status code is not 200.
-        """
+        """Check the HTTP response received from Datastore."""
         if response.status_code != 200:
-            error_message = response.text
-            if "ALL_REPLICAS_ARE_STALE" in error_message:
-                raise DatastoreAllReplicasAreStaleError(error_message, query=query)
-            if "MEMORY_LIMIT_EXCEEDED" in error_message:
-                raise DatastoreMemoryLimitExceededError(error_message, query=query)
-            raise DatastoreError(error_message, query=query)
+            self.raise_datastore_error(response.text, query=query)
 
     @contextlib.asynccontextmanager
     async def aget_query(
@@ -430,7 +458,13 @@ class DatastoreClient:
 
     @contextlib.asynccontextmanager
     async def apost_query(
-        self, query, *data, query_parameters, query_id, timeout: float | None = None
+        self,
+        query,
+        *data,
+        query_parameters,
+        query_id,
+        timeout: float | None = None,
+        settings: dict[str, str] | None = None,
     ) -> collections.abc.AsyncIterator[aiohttp.ClientResponse]:
         """POST a query to the Datastore HTTP interface.
 
@@ -444,6 +478,7 @@ class DatastoreClient:
             *data: Iterable of values to include in the body of the request. For example, the tuples of VALUES for an INSERT query.
             query_parameters: Parameters to be formatted in the query.
             query_id: A query ID to pass to Datastore.
+            settings: Extra Datastore HTTP-interface settings to include as query-string parameters.
 
         Returns:
             The response received from the Datastore HTTP interface.
@@ -452,6 +487,8 @@ class DatastoreClient:
             raise DatastoreClientNotConnected()
 
         params = {**self.params}
+        if settings is not None:
+            params.update(settings)
         if query_id is not None:
             params["query_id"] = query_id
 
@@ -495,7 +532,14 @@ class DatastoreClient:
             raise DatastoreClientTimeoutError(query, query_id)
 
     @contextlib.contextmanager
-    def post_query(self, query, *data, query_parameters, query_id) -> collections.abc.Iterator:
+    def post_query(
+        self,
+        query,
+        *data,
+        query_parameters,
+        query_id,
+        timeout: float | tuple[float, float] | None = None,
+    ) -> collections.abc.Iterator:
         """POST a query to the Datastore HTTP interface.
 
         The context manager protocol is used to control when to release the response.
@@ -508,11 +552,18 @@ class DatastoreClient:
             *data: Iterable of values to include in the body of the request. For example, the tuples of VALUES for an INSERT query.
             query_parameters: Parameters to be formatted in the query.
             query_id: A query ID to pass to Datastore.
+            timeout: Optional requests-style timeout — a (connect, read) tuple or a single
+                float for both. The read timeout applies to every blocking socket read,
+                including body reads while streaming the response, so a half-open connection
+                raises instead of blocking the calling thread until TCP gives up. None (the
+                default) preserves the historical unbounded behavior.
 
         Returns:
             The response received from the Datastore HTTP interface.
         """
         params = {**self.params}
+        # PyArrow reads response.raw directly in stream_query_as_arrow, so keep the HTTP body uncompressed.
+        params["enable_http_compression"] = "0"
         if query_id is not None:
             params["query_id"] = query_id
 
@@ -531,7 +582,7 @@ class DatastoreClient:
                     params[f"param_{key}"] = str(value)
         add_log_comment_param(params)
 
-        with requests.Session() as s:
+        with internal_requests_session() as s:
             response = s.post(
                 url=self.url,
                 params=params,
@@ -539,6 +590,7 @@ class DatastoreClient:
                 data=request_data,
                 stream=True,
                 verify=False,
+                timeout=timeout,
             )
             self.check_response(response, query)
             yield response
@@ -554,6 +606,51 @@ class DatastoreClient:
             query, *data, query_parameters=query_parameters, query_id=query_id, timeout=timeout
         ):
             return None
+
+    async def execute_query_with_summary(
+        self,
+        query,
+        *data,
+        query_parameters=None,
+        query_id: str | None = None,
+        timeout: float | None = None,
+        settings: dict[str, str] | None = None,
+    ) -> dict[str, typing.Any] | None:
+        """Execute the given query and return Datastore's query summary, if available.
+
+        Datastore reports an `X-Datastore-Summary` response header (a JSON object with
+        counters like `written_rows`, `read_rows`, `written_bytes`). We set
+        `wait_end_of_query=1` so the summary reflects the completed query and is sent as a
+        regular response header (rather than a trailer). Returns the parsed summary, or
+        `None` if the header is absent or cannot be parsed.
+
+        `wait_end_of_query` is an HTTP-interface URL parameter (not a SQL setting); it makes
+        Datastore buffer the whole response server-side until the query finishes. Only use
+        this for queries whose client-bound response is small — e.g. `INSERT INTO FUNCTION
+        s3(...)`, whose response body is empty (rows go to S3, counts come back in the
+        header) — so the buffering is negligible regardless of `http_response_buffer_size`.
+
+        Arguments:
+            settings: Extra Datastore settings to apply to this query, sent as
+                query-string parameters.
+        """
+        async with self.apost_query(
+            query,
+            *data,
+            query_parameters=query_parameters,
+            query_id=query_id,
+            timeout=timeout,
+            settings={**(settings or {}), "wait_end_of_query": "1"},
+        ) as response:
+            summary = response.headers.get("X-Datastore-Summary")
+            if not summary:
+                self.logger.warning("No 'X-Datastore-Summary' header found in response")
+                return None
+            try:
+                return json.loads(summary)
+            except json.JSONDecodeError:
+                self.logger.warning("Could not JSON decode 'X-Datastore-Summary' header", exc_info=True)
+                return None
 
     async def read_query(self, query, query_parameters=None, query_id: str | None = None) -> bytes:
         """Execute the given readonly query in Datastore and read the response in full.
@@ -633,7 +730,7 @@ class DatastoreClient:
             results = await self.read_query_as_jsonl(
                 query,
                 query_parameters={"query_id": query_id, "cluster_name": settings.DATASTORE_CLUSTER},
-                query_id=f"{query_id}-CHECK-QUERY-LOG",
+                query_id=f"{query_id}-CHECK-QUERY-LOG-{uuid.uuid4()}",
             )
         except DatastoreError as e:
             error_message = f"Error checking for query '{query_id}' in query log: {str(e)}"
@@ -675,6 +772,45 @@ class DatastoreClient:
             return DatastoreQueryStatus.RUNNING
         else:
             raise DatastoreQueryNotFound(query_id)
+
+    async def aget_written_rows_from_query_log(self, query_id: str) -> int | None:
+        """Fetch the number of rows a completed query wrote, from the query log.
+
+        Reads `written_rows` from the initiating query's `QueryFinish` entry in
+        `system.query_log`. Best-effort: returns None if the query isn't found (e.g. not yet
+        flushed) or the value can't be parsed.
+        """
+        query = """
+                SELECT written_rows
+                FROM clusterAllReplicas({{cluster_name:String}}, system.query_log)
+                WHERE query_id = {{query_id:String}}
+                    AND type = 'QueryFinish'
+                    AND is_initial_query = 1
+                    AND event_date >= yesterday() AND event_time >= now() - interval 24 hour
+                ORDER BY event_time DESC
+                LIMIT 1
+                FORMAT JSONEachRow
+                """
+
+        try:
+            results = await self.read_query_as_jsonl(
+                query,
+                query_parameters={"query_id": query_id, "cluster_name": settings.DATASTORE_CLUSTER},
+                query_id=f"{query_id}-GET-WRITTEN-ROWS",
+            )
+        except DatastoreError:
+            self.logger.warning("Failed to fetch written rows from query log", query_id=query_id, exc_info=True)
+            return None
+
+        if not results:
+            self.logger.warning("Failed to fetch written rows from query log: no results found", query_id=query_id)
+            return None
+
+        try:
+            return int(results[0]["written_rows"])
+        except (KeyError, TypeError, ValueError):
+            self.logger.warning("Failed to read written rows from query log", query_id=query_id, exc_info=True)
+            return None
 
     async def acheck_query_in_process_list(self, query_id: str) -> bool:
         """Check if a query is running in the Datastore process list.
@@ -732,7 +868,7 @@ class DatastoreClient:
         query_parameters=None,
         query_id: str | None = None,
         line_separator=b"\n",
-    ) -> typing.AsyncGenerator[dict[typing.Any, typing.Any], None]:
+    ) -> typing.AsyncGenerator[dict[typing.Any, typing.Any]]:
         """Execute the given query in Datastore and stream back the response as one JSON per line.
 
         This method makes sense when running with FORMAT JSONEachRow, although we currently do not enforce this.
@@ -755,7 +891,7 @@ class DatastoreClient:
         *data,
         query_parameters=None,
         query_id: str | None = None,
-    ) -> typing.Generator[pa.RecordBatch, None, None]:
+    ) -> typing.Generator[pa.RecordBatch]:
         """Execute the given query in Datastore and stream back the response as Arrow record batches.
 
         This method makes sense when running with FORMAT ArrowStreaming, although we currently do not enforce this.
@@ -771,13 +907,16 @@ class DatastoreClient:
         *data,
         query_parameters=None,
         query_id: str | None = None,
-    ) -> typing.AsyncGenerator[pa.RecordBatch, None]:
+        on_schema: collections.abc.Callable[[pa.Schema], None] | None = None,
+    ) -> typing.AsyncGenerator[pa.RecordBatch]:
         """Execute the given query in Datastore and stream back the response as Arrow record batches.
 
         This method makes sense when running with FORMAT ArrowStream, although we currently do not enforce this.
         """
         async with self.apost_query(query, *data, query_parameters=query_parameters, query_id=query_id) as response:
             reader = asyncpa.AsyncRecordBatchReader(ChunkBytesAsyncStreamIterator(response.content))
+            if on_schema is not None:
+                on_schema(await reader.get_schema())
             async for batch in reader:
                 yield batch
 
@@ -829,7 +968,8 @@ class DatastoreClient:
             return sock
 
         self.connector = aiohttp.TCPConnector(ssl=self.ssl, socket_factory=socket_factory)
-        self.session = aiohttp.ClientSession(connector=self.connector, timeout=self.timeout)
+        # nosemgrep: aiohttp-missing-trust-env (internal Datastore connection, must bypass HTTP proxy)
+        self.session = aiohttp.ClientSession(connector=self.connector, timeout=self.timeout, trust_env=False)
         return self
 
     async def __aexit__(self, exc_type, exc_value, tb):

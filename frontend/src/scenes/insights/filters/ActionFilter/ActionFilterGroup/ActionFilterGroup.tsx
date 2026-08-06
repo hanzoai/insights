@@ -2,15 +2,16 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
-import { IconPlusSmall, IconTrash, IconUndo } from '@hanzo/icons'
-import { Button, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconEllipsis, IconPencil, IconPlusSmall, IconTrash, IconUndo } from '@hanzo/icons'
+import { Button, Menu, Tooltip } from '@hanzo/elements'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SeriesGlyph, SeriesLetter } from 'lib/components/SeriesGlyph'
 import {
+    DefinitionPopoverRenderer,
     TaxonomicFilterGroupType,
     isQuickFilterItem,
     quickFilterToPropertyFilters,
@@ -20,9 +21,8 @@ import {
     TaxonomicPopoverProps,
     TaxonomicStringPopover,
 } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { Dropdown } from 'lib/elements/Dropdown'
 import { SortableDragIcon } from 'lib/elements/icons'
+import { Dropdown } from 'lib/elements/Dropdown'
 import { teamLogic } from 'scenes/teamLogic'
 import { MathCategory, mathsLogic } from 'scenes/trends/mathsLogic'
 
@@ -34,6 +34,7 @@ import {
     MathSelector,
     taxonomicFilterGroupTypeToEntityType,
 } from '../ActionFilterRow/ActionFilterRow'
+import { getDefaultMathInsightsQLExpression } from '../ActionFilterRow/mathUtils'
 import { LocalFilter, entityFilterLogic } from '../entityFilterLogic'
 import { actionFilterGroupLogic } from './actionFilterGroupLogic'
 import { nestedFilterLogic } from './nestedFilterLogic'
@@ -58,6 +59,7 @@ interface ActionFilterGroupProps {
     groupTitle?: string
     trendsDisplayCategory?: any
     insightType?: InsightType
+    definitionPopoverRenderer?: DefinitionPopoverRenderer
 }
 
 export function ActionFilterGroup({
@@ -79,21 +81,22 @@ export function ActionFilterGroup({
     groupTitle,
     trendsDisplayCategory,
     insightType,
+    definitionPopoverRenderer,
 }: ActionFilterGroupProps): JSX.Element {
-    const showQuickFilters = useFeatureFlag('TAXONOMIC_QUICK_FILTERS', 'test')
-    const effectiveActionsTaxonomicGroupTypes = (
-        showQuickFilters
-            ? [TaxonomicFilterGroupType.SuggestedFilters, ...actionsTaxonomicGroupTypes]
-            : actionsTaxonomicGroupTypes
-    ).filter((groupType) => groupType !== TaxonomicFilterGroupType.DataWarehouse)
+    const effectiveActionsTaxonomicGroupTypes = [
+        TaxonomicFilterGroupType.SuggestedFilters,
+        ...actionsTaxonomicGroupTypes,
+    ].filter((groupType) => groupType !== TaxonomicFilterGroupType.DataWarehouse)
 
     const { currentTeamId } = useValues(teamLogic)
-    const { removeLocalFilter, splitLocalFilter } = useActions(entityFilterLogic({ typeKey }))
+    const { removeLocalFilter, splitLocalFilter, duplicateFilter, showModal, selectFilter } = useActions(
+        entityFilterLogic({ typeKey })
+    )
     const { mathDefinitions } = useValues(mathsLogic)
     const { setNodeRef, attributes, transform, transition, listeners, isDragging } = useSortable({ id: filter.uuid })
 
     const groupLogic = actionFilterGroupLogic({ filterUuid: filter.uuid, typeKey, groupIndex: index })
-    const { nestedFilters, operator, isInsightsQLDropdownVisible } = useValues(groupLogic)
+    const { nestedFilters, operator, isInsightsQLDropdownVisible, groupFilter } = useValues(groupLogic)
     const {
         addNestedFilter,
         updateNestedFilterProperties,
@@ -102,6 +105,23 @@ export function ActionFilterGroup({
         setMathInsightsQL,
         setInsightsQLDropdownVisible,
     } = useActions(groupLogic)
+    const defaultMathInsightsQLExpression = getDefaultMathInsightsQLExpression(insightType)
+
+    const mathCategory = mathDefinitions[filter.math || BaseMathType.TotalCount]?.category
+    const hasSecondaryMathDropdown =
+        mathCategory === MathCategory.PropertyValue || mathCategory === MathCategory.InsightsQLExpression
+    const showMath = mathAvailability !== MathAvailability.None && mathAvailability !== MathAvailability.FunnelsOnly
+
+    const mathSelectorProps = {
+        size: 'small' as const,
+        math: filter.math,
+        mathGroupTypeIndex: filter.math_group_type_index,
+        index,
+        onMathSelect: (_: number, math: any) => setMath(math, defaultMathInsightsQLExpression),
+        disabled: disabled || readOnly,
+        mathAvailability,
+        trendsDisplayCategory,
+    }
 
     return (
         <li
@@ -115,177 +135,213 @@ export function ActionFilterGroup({
                 transition,
             }}
         >
-            <div
-                className={clsx('flex flex-col overflow-hidden', {
-                    'border border-primary rounded hover:border-secondary': insightType === InsightType.TRENDS,
-                })}
-            >
-                {/* Header: series indicator, math controls, action buttons */}
+            <div className="flex flex-col overflow-hidden min-w-0 border border-primary rounded hover:border-secondary">
+                {/* Header */}
                 <div
                     className={clsx(
-                        'ActionFilterGroup--header flex flex-wrap items-center justify-between gap-2 px-4 border-b border-primary',
-                        insightType === InsightType.FUNNELS ? 'py-4' : 'py-3'
+                        'ActionFilterGroup--header flex flex-col gap-y-1.5 px-2.5 py-2 @min-[500px]/editor-panel:px-4 border-b border-primary'
                     )}
                 >
-                    <div className="flex flex-wrap items-center gap-0 min-w-0">
-                        {sortable && filterCount > 1 && (
-                            <span className="ActionFilterRowDragHandle" {...listeners}>
-                                <SortableDragIcon />
-                            </span>
-                        )}
-                        {showSeriesIndicator && (
-                            <div className="shrink-0 mr-2">
-                                {seriesIndicatorType === 'numeric' ? (
-                                    <SeriesGlyph style={{ borderColor: 'var(--color-border-primary)' }}>
-                                        {index + 1}
-                                    </SeriesGlyph>
-                                ) : (
-                                    <SeriesLetter seriesIndex={index} hasBreakdown={hasBreakdown} />
+                    {/* Row 1: letter + title + inline math (when small) | menu button */}
+                    <div className="flex items-center gap-x-2 min-w-0">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 min-w-0 flex-1">
+                            <div className="flex items-center gap-x-2 flex-1 min-w-[45%]">
+                                {sortable && filterCount > 1 && (
+                                    <span className="ActionFilterRowDragHandle" {...listeners}>
+                                        <SortableDragIcon />
+                                    </span>
+                                )}
+                                {showSeriesIndicator && (
+                                    <div className="shrink-0">
+                                        {seriesIndicatorType === 'numeric' ? (
+                                            <SeriesGlyph style={{ borderColor: 'var(--color-border-primary)' }}>
+                                                {index + 1}
+                                            </SeriesGlyph>
+                                        ) : (
+                                            <SeriesLetter seriesIndex={index} hasBreakdown={hasBreakdown} />
+                                        )}
+                                    </div>
+                                )}
+                                {groupTitle && (
+                                    <span className="font-medium text-secondary truncate min-w-0">{groupTitle}</span>
                                 )}
                             </div>
-                        )}
 
-                        {groupTitle && (
-                            <span className="font-medium text-secondary whitespace-nowrap">{groupTitle}</span>
-                        )}
+                            {showMath && !hasSecondaryMathDropdown && <MathSelector {...mathSelectorProps} />}
+                        </div>
 
-                        {mathAvailability !== MathAvailability.None &&
-                            mathAvailability !== MathAvailability.FunnelsOnly && (
-                                <div className="flex flex-wrap items-center gap-2 min-w-0">
-                                    <span className="font-medium text-secondary whitespace-nowrap">Math:</span>
-                                    <MathSelector
-                                        size="small"
-                                        math={filter.math}
-                                        mathGroupTypeIndex={filter.math_group_type_index}
-                                        index={index}
-                                        onMathSelect={(_, math) => setMath(math)}
-                                        disabled={disabled || readOnly}
-                                        mathAvailability={mathAvailability}
-                                        trendsDisplayCategory={trendsDisplayCategory}
+                        {!readOnly && (
+                            <div className="flex shrink-0 self-start pt-0.75">
+                                <Menu
+                                    placement="bottom-end"
+                                    items={[
+                                        {
+                                            items: [
+                                                {
+                                                    label: 'Split events',
+                                                    size: 'medium',
+                                                    icon: <IconUndo />,
+                                                    onClick: () => {
+                                                        splitLocalFilter(index)
+                                                        insights.capture('split_events', {
+                                                            insight_type: insightType,
+                                                            team_id: currentTeamId,
+                                                        })
+                                                    },
+                                                    'data-attr': `group-filter-split-${index}`,
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            items: [
+                                                {
+                                                    label: 'Rename',
+                                                    size: 'medium',
+                                                    icon: <IconPencil />,
+                                                    onClick: () => {
+                                                        selectFilter(groupFilter ?? null)
+                                                        showModal()
+                                                    },
+                                                    'data-attr': `group-filter-rename-${index}`,
+                                                },
+                                                {
+                                                    label: 'Duplicate',
+                                                    size: 'medium',
+                                                    icon: <IconCopy />,
+                                                    onClick: () => {
+                                                        if (groupFilter) {
+                                                            duplicateFilter(groupFilter)
+                                                        }
+                                                    },
+                                                    'data-attr': `group-filter-duplicate-${index}`,
+                                                },
+                                                {
+                                                    label: 'Delete',
+                                                    size: 'medium',
+                                                    status: 'danger',
+                                                    icon: <IconTrash />,
+                                                    onClick: () => removeLocalFilter({ index }),
+                                                    'data-attr': `group-filter-delete-${index}`,
+                                                },
+                                            ],
+                                        },
+                                    ]}
+                                >
+                                    <Button
+                                        noPadding
+                                        size="medium"
+                                        icon={<IconEllipsis />}
+                                        aria-label="Show more actions"
+                                        data-attr={`group-filter-menu-${index}`}
                                     />
-                                    {(mathDefinitions as Record<string, any>)[filter.math || BaseMathType.TotalCount]
-                                        ?.category === MathCategory.PropertyValue && (
-                                        <TaxonomicStringPopover
-                                            size="small"
-                                            groupType={
-                                                filter.math_property_type ||
-                                                TaxonomicFilterGroupType.NumericalEventProperties
-                                            }
-                                            groupTypes={[
-                                                TaxonomicFilterGroupType.DataWarehouseProperties,
-                                                TaxonomicFilterGroupType.NumericalEventProperties,
-                                                TaxonomicFilterGroupType.SessionProperties,
-                                                TaxonomicFilterGroupType.PersonProperties,
-                                                TaxonomicFilterGroupType.DataWarehousePersonProperties,
-                                            ]}
-                                            value={filter.math_property}
-                                            onChange={setMathProperty}
-                                            eventNames={nestedFilters.map((v) => v.name).filter(Boolean) as string[]}
-                                            data-attr="math-property-select"
-                                            showNumericalPropsOnly={showNumericalPropsOnly}
-                                            renderValue={(currentValue) => (
-                                                <Tooltip
-                                                    title={
-                                                        currentValue === '$session_duration' ? (
-                                                            <>
-                                                                Calculate{' '}
-                                                                {(mathDefinitions as Record<string, any>)[
-                                                                    filter.math ?? ''
-                                                                ].name.toLowerCase()}{' '}
-                                                                of the session duration. This is based on the{' '}
-                                                                <code>$session_id</code> property associated with
-                                                                events. The duration is derived from the time difference
-                                                                between the first and last event for each distinct{' '}
-                                                                <code>$session_id</code>.
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                Calculate{' '}
-                                                                {(mathDefinitions as Record<string, any>)[
-                                                                    filter.math ?? ''
-                                                                ].name.toLowerCase()}{' '}
-                                                                from property <code>{currentValue}</code>. Note that
-                                                                only event occurrences where <code>{currentValue}</code>{' '}
-                                                                is set with a numeric value will be taken into account.
-                                                            </>
-                                                        )
-                                                    }
-                                                    placement="right"
-                                                >
-                                                    <PropertyKeyInfo
-                                                        value={currentValue}
-                                                        disablePopover
-                                                        type={TaxonomicFilterGroupType.EventProperties}
-                                                    />
-                                                </Tooltip>
-                                            )}
-                                        />
-                                    )}
-                                    {/* InsightsQL expression selector */}
-                                    {(mathDefinitions as Record<string, any>)[filter.math || BaseMathType.TotalCount]
-                                        ?.category === MathCategory.InsightsQLExpression && (
-                                        <Dropdown
-                                            visible={isInsightsQLDropdownVisible}
-                                            closeOnClickInside={false}
-                                            onClickOutside={() => setInsightsQLDropdownVisible(false)}
-                                            overlay={
-                                                // eslint-disable-next-line react/forbid-dom-props
-                                                <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
-                                                    <InsightsQLEditor
-                                                        value={filter.math_insightsql || 'count()'}
-                                                        onChange={(currentValue) => {
-                                                            setMathInsightsQL(currentValue)
-                                                            setInsightsQLDropdownVisible(false)
-                                                        }}
-                                                    />
-                                                </div>
-                                            }
-                                        >
-                                            <Button
-                                                fullWidth
-                                                type="secondary"
-                                                size="small"
-                                                data-attr={`math-insightsql-select-${index}`}
-                                                onClick={() => setInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)}
-                                            >
-                                                <code>{filter.math_insightsql || 'count()'}</code>
-                                            </Button>
-                                        </Dropdown>
-                                    )}
-                                </div>
-                            )}
+                                </Menu>
+                            </div>
+                        )}
                     </div>
 
-                    {!readOnly && (
-                        <div className="flex shrink-0 gap-1">
-                            <Tooltip title="Remove group">
-                                <Button
-                                    size="small"
-                                    icon={<IconTrash />}
-                                    onClick={() => removeLocalFilter({ index })}
-                                    data-attr={`group-filter-delete-${index}`}
-                                />
-                            </Tooltip>
-                            <Tooltip title="Split events">
-                                <Button
-                                    size="small"
-                                    icon={<IconUndo />}
-                                    onClick={() => {
-                                        splitLocalFilter(index)
-                                        insights.capture('split_events', {
-                                            insight_type: insightType,
-                                            team_id: currentTeamId,
-                                        })
-                                    }}
-                                    data-attr={`group-filter-split-${index}`}
-                                />
-                            </Tooltip>
+                    {/* Row 2: math + secondary dropdown — full width */}
+                    {showMath && hasSecondaryMathDropdown && (
+                        <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                                <MathSelector {...mathSelectorProps} fullWidth truncateText={{ maxWidthClass: '' }} />
+                            </div>
+                            {mathCategory === MathCategory.PropertyValue && (
+                                <div className="flex-1 min-w-0 overflow-hidden">
+                                    <TaxonomicStringPopover
+                                        fullWidth
+                                        truncate
+                                        size="small"
+                                        groupType={
+                                            filter.math_property_type ||
+                                            TaxonomicFilterGroupType.NumericalEventProperties
+                                        }
+                                        groupTypes={[
+                                            TaxonomicFilterGroupType.DataWarehouseProperties,
+                                            TaxonomicFilterGroupType.NumericalEventProperties,
+                                            TaxonomicFilterGroupType.SessionProperties,
+                                            TaxonomicFilterGroupType.PersonProperties,
+                                            TaxonomicFilterGroupType.DataWarehousePersonProperties,
+                                        ]}
+                                        value={filter.math_property}
+                                        onChange={setMathProperty}
+                                        eventNames={nestedFilters.map((v) => v.name).filter(Boolean) as string[]}
+                                        data-attr="math-property-select"
+                                        showNumericalPropsOnly={showNumericalPropsOnly}
+                                        renderValue={(currentValue) => (
+                                            <Tooltip
+                                                title={
+                                                    currentValue === '$session_duration' ? (
+                                                        <>
+                                                            Calculate{' '}
+                                                            {mathDefinitions[filter.math ?? '']?.name.toLowerCase()} of
+                                                            the session duration. This is based on the{' '}
+                                                            <code>$session_id</code> property associated with events.
+                                                            The duration is derived from the time difference between the
+                                                            first and last event for each distinct{' '}
+                                                            <code>$session_id</code>.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            Calculate{' '}
+                                                            {mathDefinitions[filter.math ?? '']?.name.toLowerCase()}{' '}
+                                                            from property <code>{currentValue}</code>. Note that only
+                                                            event occurrences where <code>{currentValue}</code> is set
+                                                            with a numeric value will be taken into account.
+                                                        </>
+                                                    )
+                                                }
+                                                placement="right"
+                                            >
+                                                <PropertyKeyInfo
+                                                    value={currentValue}
+                                                    disablePopover
+                                                    type={TaxonomicFilterGroupType.EventProperties}
+                                                />
+                                            </Tooltip>
+                                        )}
+                                    />
+                                </div>
+                            )}
+                            {mathCategory === MathCategory.InsightsQLExpression && (
+                                <div className="min-w-0 flex-1">
+                                    <Dropdown
+                                        visible={isInsightsQLDropdownVisible}
+                                        closeOnClickInside={false}
+                                        onClickOutside={() => setInsightsQLDropdownVisible(false)}
+                                        overlay={
+                                            // eslint-disable-next-line react/forbid-dom-props
+                                            <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
+                                                <InsightsQLEditor
+                                                    value={filter.math_insightsql || defaultMathInsightsQLExpression}
+                                                    onChange={(currentValue) => {
+                                                        setMathInsightsQL(currentValue)
+                                                        setInsightsQLDropdownVisible(false)
+                                                    }}
+                                                />
+                                            </div>
+                                        }
+                                    >
+                                        <Button
+                                            fullWidth
+                                            type="secondary"
+                                            size="small"
+                                            truncate
+                                            data-attr={`math-insightsql-select-${index}`}
+                                            onClick={() => setInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)}
+                                        >
+                                            <code className="truncate">
+                                                {filter.math_insightsql || defaultMathInsightsQLExpression}
+                                            </code>
+                                        </Button>
+                                    </Dropdown>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
 
                 {/* Events list */}
-                <ul className="ActionFilterGroup--events-list flex flex-col px-4 py-2.5">
+                <ul className="ActionFilterGroup--events-list flex flex-col px-4 py-2.5 bg-primary [&_.ActionFilterRow]:!border-0 [&_.ActionFilterRow]:!rounded-none [&_.ActionFilterRow]:!p-0">
                     {nestedFilters.map((eventFilter, eventIndex) => {
                         const nestedLogicInstance = nestedFilterLogic({
                             groupFilterUuid: filter.uuid,
@@ -317,6 +373,7 @@ export function ActionFilterGroup({
                                     showNumericalPropsOnly={showNumericalPropsOnly}
                                     dataWarehousePopoverFields={dataWarehousePopoverFields}
                                     excludedProperties={excludedProperties}
+                                    definitionPopoverRenderer={definitionPopoverRenderer}
                                 />
                                 {eventIndex < nestedFilters.length - 1 && (
                                     <div className="flex items-center gap-3 mx-0.5 my-2.5">
@@ -334,13 +391,14 @@ export function ActionFilterGroup({
 
                 {/* Add event button */}
                 {!readOnly && nestedFilters.length < 10 && (
-                    <div className="ActionFilterGroup--footer px-4 py-2.5">
+                    <div className="ActionFilterGroup--footer px-4 py-2.5 bg-primary">
                         <TaxonomicPopover
                             data-attr={`add-group-event-${index}`}
                             groupType={TaxonomicFilterGroupType.Events}
                             value={null}
                             icon={<IconPlusSmall />}
                             sideIcon={null}
+                            enableKeywordShortcuts
                             onChange={(value, groupType, item) => {
                                 if (isQuickFilterItem(item)) {
                                     if (item.eventName) {

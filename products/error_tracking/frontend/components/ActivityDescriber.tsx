@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 
 import { Link } from '@hanzo/elements'
 
-import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
     ActivityChange,
     ActivityLogItem,
@@ -13,7 +12,8 @@ import {
     defaultDescriber,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
-import { objectsEqual } from 'lib/utils'
+import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
+import { objectsEqual } from 'lib/utils/objects'
 import { urls } from 'scenes/urls'
 
 import { ErrorTrackingIssue, ErrorTrackingRelationalIssue } from '~/queries/schema/schema-general'

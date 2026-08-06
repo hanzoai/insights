@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { ProcessedPluginEvent } from '@hanzo/plugin-scaffold'
+import { ProcessedPluginEvent } from '~/plugin-scaffold'
 
 import { LegacyDestinationPluginMeta } from '../../types'
 
@@ -87,7 +86,7 @@ export const onEvent = async (
             let errorText = ''
             try {
                 errorText = await exportContactsResponse.text()
-            } catch (e) {
+            } catch {
                 // noop
             } finally {
                 logger.error(`Unable to export ${contacts.length} contacts to Sendgrid: ${errorText}`)

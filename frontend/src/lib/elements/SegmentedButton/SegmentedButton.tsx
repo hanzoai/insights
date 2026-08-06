@@ -3,8 +3,8 @@ import './SegmentedButton.scss'
 import clsx from 'clsx'
 import React from 'react'
 
-import { Button, ButtonProps } from '../Button'
 import { useSliderPositioning } from '../hooks'
+import { Button, ButtonProps } from '../Button'
 
 // Expects at least one of label or icon to be provided
 export type SegmentedButtonOption<T extends React.Key> = { value: T } & (
@@ -29,8 +29,8 @@ export interface SegmentedButtonProps<T extends React.Key> {
 }
 
 interface SegmentedButtonCSSProperties extends React.CSSProperties {
-    '--segmented-button-slider-width': `${number}px`
-    '--segmented-button-slider-offset': `${number}px`
+    '--lemon-segmented-button-slider-width': `${number}px`
+    '--lemon-segmented-button-slider-offset': `${number}px`
 }
 
 /** Button-radio hybrid. Single choice. */
@@ -59,8 +59,8 @@ export function SegmentedButton<T extends React.Key>({
             // eslint-disable-next-line react/forbid-dom-props
             style={
                 {
-                    '--segmented-button-slider-width': `${sliderWidth}px`,
-                    '--segmented-button-slider-offset': `${sliderOffset}px`,
+                    '--lemon-segmented-button-slider-width': `${sliderWidth}px`,
+                    '--lemon-segmented-button-slider-offset': `${sliderOffset}px`,
                 } as SegmentedButtonCSSProperties
             }
             ref={containerRef}

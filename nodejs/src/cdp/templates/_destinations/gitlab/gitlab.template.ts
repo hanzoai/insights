@@ -9,16 +9,20 @@ export const template: InsightsFunctionTemplate = {
     description: 'Creates an issue in a GitLab project',
     icon_url: '/static/services/gitlab.png',
     category: ['Error tracking'],
-    code_language: 'fn',
-    code: `let insights_issue_url := f'{project.url}/error_tracking/{inputs.insights_issue_id}'
+    code_language: 'script',
+    code: `let insights_issue_url := inputs.insights_issue_url
+if (empty(insights_issue_url)) {
+    insights_issue_url := f'{project.url}/error_tracking/{inputs.insights_issue_id}'
+}
 let payload := {
     'method': 'POST',
     'headers': {
         'PRIVATE-TOKEN': inputs.gitlab_project.access_token,
+        'Content-Type': 'application/json'
     },
     'body': {
         'title': inputs.title,
-        'body': f'{inputs.description}\n\n[View in Insights]({insights_issue_url})'
+        'description': f'{inputs.description}\n\n[View in Insights]({insights_issue_url})'
     }
 }
 
@@ -62,6 +66,16 @@ if (res.status < 200 or res.status >= 300) {
             hidden: true,
             required: true,
             default: '{event.properties.$exception_issue_id}',
+        },
+        {
+            key: 'insights_issue_url',
+            type: 'string',
+            label: 'Insights issue URL',
+            description:
+                'Link back to the Insights issue. When empty, a link is built from the Insights issue ID instead.',
+            secret: false,
+            hidden: true,
+            required: false,
         },
     ],
 }

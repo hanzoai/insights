@@ -1,0 +1,202 @@
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
+
+from django.db import models
+
+from insights.helpers.tiktoken_encoding import TEXT_EMBEDDING_3_TOKEN_COUNT_PROXY_MODEL, get_tiktoken_encoding_for_model
+from insights.models.utils import UUIDModel
+
+if TYPE_CHECKING:
+    from insights.kafka_client.client import ProduceResult
+
+EMBEDDING_MODEL_TOKEN_LIMIT = 8192
+
+# How long a standing question waits between askings.
+INTERVALS = {
+    "hourly": timedelta(hours=1),
+    "daily": timedelta(days=1),
+    "weekly": timedelta(weeks=1),
+}
+
+
+class AgentMemory(UUIDModel):
+    team = models.ForeignKey(
+        "insights.Team",
+        on_delete=models.CASCADE,
+        related_name="agent_memories",
+    )
+    user = models.ForeignKey(
+        "insights.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="agent_memories",
+    )
+    contents = models.TextField(blank=True, default="")
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["team", "id"]),
+        ]
+
+    def embed(self, model_name: str) -> "ProduceResult":
+        enc = get_tiktoken_encoding_for_model(TEXT_EMBEDDING_3_TOKEN_COUNT_PROXY_MODEL)
+        token_count = len(enc.encode(self.contents))
+        if token_count > EMBEDDING_MODEL_TOKEN_LIMIT:
+            raise ValueError(
+                f"Memory content exceeds {EMBEDDING_MODEL_TOKEN_LIMIT} token limit for embedding model (got {token_count} tokens)"
+            )
+
+        from insights.api.embedding_worker import emit_embedding_request
+
+        embedding_metadata = {**self.metadata}
+        if self.user_id is not None:
+            embedding_metadata["user_id"] = str(self.user_id)
+
+        return emit_embedding_request(
+            content=self.contents,
+            team_id=self.team_id,
+            product="insights-ai",
+            document_type="memory",
+            rendering="plaintext",
+            document_id=str(self.id),
+            models=[model_name],
+            timestamp=self.created_at,
+            metadata=embedding_metadata,
+        )
+
+
+class Conversation(UUIDModel):
+    """One assistant thread, owned by the user who opened it.
+
+    Scoped by BOTH team and user. The team is the tenant boundary the rest of the
+    API enforces; the user is the second half, because a thread is private to its
+    author rather than shared across a project the way a dashboard is. Reading
+    either one off the row means a query can never widen past both.
+    """
+
+    class Status(models.TextChoices):
+        IDLE = "idle"
+        IN_PROGRESS = "in_progress"
+        CANCELING = "canceling"
+
+    class Type(models.TextChoices):
+        ASSISTANT = "assistant"
+
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE, related_name="assistant_conversations")
+    user = models.ForeignKey("insights.User", on_delete=models.CASCADE, related_name="assistant_conversations")
+    title = models.CharField(max_length=200, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.IDLE)
+    type = models.CharField(max_length=20, choices=Type.choices, default=Type.ASSISTANT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        indexes = [models.Index(fields=["team", "user", "-updated_at"])]
+
+
+class ConversationMessage(UUIDModel):
+    """A single turn, stored in the shape the client already reads.
+
+    `type` holds the wire value ("human", "ai", "ai/failure") rather than a private
+    enum that would need translating on the way out. One representation, so a
+    replayed thread and a streamed one cannot drift.
+    """
+
+    class Source(models.TextChoices):
+        MODEL = "model"
+        CLIENT = "client"
+
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
+    type = models.CharField(max_length=20)
+    # Who wrote this. An assistant-typed message is not proof the model said it:
+    # the client can append one directly, and replaying those back as the model's
+    # own words would let a caller put words in its mouth and pay to have them
+    # re-read on every later turn. Only MODEL-sourced replies are replayed.
+    source = models.CharField(max_length=10, choices=Source.choices, default=Source.MODEL)
+    content = models.TextField(blank=True, default="")
+    # Correlates a turn with the client's provisional bubble, so a reconnect
+    # replaces that bubble instead of appending a duplicate.
+    trace_id = models.CharField(max_length=64, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        indexes = [models.Index(fields=["conversation", "created_at"])]
+
+
+class Question(UUIDModel):
+    """A standing question, asked on a cadence with nobody watching.
+
+    The unattended half of the assistant. A conversation is driven by a person
+    who is present for the answer; this is asked on a timer and delivered by
+    email, so the definition has to say for itself what to ask, how often, and
+    whether it is still wanted.
+
+    `last_run_at` is when a run was last STARTED, not when one last succeeded —
+    it is what makes the next one due, so a failing question backs off to its
+    cadence rather than being retried on every scheduler tick.
+    """
+
+    class Interval(models.TextChoices):
+        HOURLY = "hourly"
+        DAILY = "daily"
+        WEEKLY = "weekly"
+
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE, related_name="assistant_questions")
+    created_by = models.ForeignKey(
+        "insights.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assistant_questions",
+    )
+    name = models.CharField(max_length=200)
+    prompt = models.TextField()
+    enabled = models.BooleanField(default=True)
+    interval = models.CharField(max_length=10, choices=Interval.choices, default=Interval.DAILY)
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["team", "-created_at"])]
+
+    def due_at(self) -> "datetime | None":
+        """When this becomes askable again. None while it never has been."""
+        if self.last_run_at is None:
+            return None
+        return self.last_run_at + INTERVALS[self.interval]
+
+
+class Run(UUIDModel):
+    """One unattended asking, and what came back.
+
+    Written before the model is called and settled after, so a run that dies
+    mid-flight leaves a row saying so rather than no trace at all. A RUNNING row
+    is also the claim that stops a second run starting — see `runner.claim`.
+    """
+
+    class Status(models.TextChoices):
+        RUNNING = "running"
+        DONE = "done"
+        FAILED = "failed"
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="runs")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.RUNNING)
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    answer = models.TextField(blank=True, default="")
+    error = models.TextField(blank=True, default="")
+
+    class Meta:
+        ordering = ["-started_at"]
+        indexes = [
+            models.Index(fields=["question", "-started_at"]),
+            models.Index(fields=["status", "started_at"]),
+        ]

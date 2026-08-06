@@ -9,7 +9,7 @@ import { Button, PopoverReferenceContext } from '@hanzo/elements'
 
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { IconWithCount } from 'lib/elements/icons'
-import { midEllipsis } from 'lib/utils'
+import { midEllipsis } from 'lib/utils/strings'
 
 import { cohortsModel } from '~/models/cohortsModel'
 import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'

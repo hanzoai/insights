@@ -1,13 +1,22 @@
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
+import { EventType } from 'insights-js/rrweb-types'
 
-import { EventType } from '@hanzo/rrweb-types'
+import { ReplayTelemetry } from '@hanzo/replay-shared'
+import {
+    ProcessingCache,
+    SnapshotSourceType,
+    ViewportResolution,
+    clearThrottle,
+    keyForSource,
+    processAllSnapshots,
+} from '@hanzo/replay-shared'
 
-import { RecordingSnapshot, SessionRecordingSnapshotSource, SnapshotSourceType } from '~/types'
+import { RecordingSnapshot, SessionRecordingSnapshotSource } from '~/types'
 
-import { ViewportResolution } from './patch-meta-event'
-import { ProcessingCache, processAllSnapshots } from './process-all-snapshots'
-import { keyForSource } from './source-key'
-import { clearThrottle } from './throttle-capturing'
+const insightsTelemetry: ReplayTelemetry = {
+    capture: (event, properties) => insights.capture(event, properties),
+    captureException: (error, properties) => insights.captureException(error, properties),
+}
 
 describe('processAllSnapshots - inline meta patching', () => {
     const DEFAULT_VIEWPORT: ViewportResolution = {
@@ -181,7 +190,8 @@ describe('processAllSnapshots - inline meta patching', () => {
             snapshotsBySource,
             processingCache,
             mockViewportForTimestampNoData,
-            '12345'
+            '12345',
+            insightsTelemetry
         )
 
         expect(insights.captureException).toHaveBeenCalledWith(
@@ -213,7 +223,8 @@ describe('processAllSnapshots - inline meta patching', () => {
             createSnapshotsBySource(source, snapshots),
             { snapshots: {} },
             mockViewportForTimestampNoData,
-            '12345'
+            '12345',
+            insightsTelemetry
         )
         expect(insights.captureException).toHaveBeenCalledTimes(1)
         await processAllSnapshots(
@@ -221,7 +232,8 @@ describe('processAllSnapshots - inline meta patching', () => {
             createSnapshotsBySource(source, snapshots),
             { snapshots: {} },
             mockViewportForTimestampNoData,
-            '12345'
+            '12345',
+            insightsTelemetry
         )
         expect(insights.captureException).toHaveBeenCalledTimes(1)
         await processAllSnapshots(
@@ -229,7 +241,8 @@ describe('processAllSnapshots - inline meta patching', () => {
             createSnapshotsBySource(source, snapshots),
             { snapshots: {} },
             mockViewportForTimestampNoData,
-            '54321'
+            '54321',
+            insightsTelemetry
         )
         expect(insights.captureException).toHaveBeenCalledTimes(2)
     })

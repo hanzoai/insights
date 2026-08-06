@@ -2,22 +2,22 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { ActivitySceneTabs } from 'scenes/activity/ActivitySceneTabs'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { Query } from '~/queries/Query/Query'
 import { QueryFeature } from '~/queries/nodes/DataTable/queryFeatures'
+import { Query } from '~/queries/Query/Query'
 import { DataTableNode, ProductKey } from '~/queries/schema/schema-general'
 import { ActivityTab } from '~/types'
 
 import { createSessionsRowTransformer, getSessionsColumns } from './sessionsColumns'
 import { sessionsSceneLogic } from './sessionsSceneLogic'
 
-export function SessionsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
-    const { query } = useValues(sessionsSceneLogic)
-    const { setQuery } = useActions(sessionsSceneLogic)
+export function SessionsScene(): JSX.Element {
+    const { query } = useValues(sessionsSceneLogic())
+    const { setQuery } = useActions(sessionsSceneLogic())
 
     // Create the row transformer based on the current query
     const dataTableRowsTransformer = useMemo(() => createSessionsRowTransformer(query as DataTableNode), [query])
@@ -33,8 +33,8 @@ export function SessionsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                 }}
             />
             <Query
-                attachTo={sessionsSceneLogic({ tabId })}
-                uniqueKey={`sessions-scene-${tabId}`}
+                attachTo={sessionsSceneLogic()}
+                uniqueKey="sessions-scene"
                 query={query}
                 setQuery={setQuery}
                 context={{

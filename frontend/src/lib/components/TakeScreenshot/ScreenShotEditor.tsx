@@ -1,14 +1,15 @@
 import { useActions, useValues } from 'kea'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import * as director from '@hanzo/brand/hoggies/png/director'
 import { IconPencil, IconUndo } from '@hanzo/icons'
 import { Button, ColorPicker, Input, Modal, Select } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { getSeriesColorPalette } from 'lib/colors'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
-import { downloadFile } from 'lib/utils'
+import { downloadFile } from 'lib/utils/dom'
 
-import { FilmCameraMascot } from '../mascots'
 import {
     type DrawingItem,
     type HistoryItem,
@@ -16,6 +17,8 @@ import {
     type TextItem,
     takeScreenshotLogic,
 } from './takeScreenshotLogic'
+
+const MascotDirector = pngHoggie(director)
 
 export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): JSX.Element {
     const {
@@ -369,7 +372,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
             <>
                 <Modal isOpen={isOpen} onClose={handleClose} width="auto" maxWidth="100%">
                     <div className="flex flex-col items-center justify-center py-10">
-                        <FilmCameraMascot className="h-32 w-32" />
+                        <MascotDirector className="h-32 w-32" />
                         <div className="mt-2">
                             <Spinner className="mr-4" />
                             Taking a screenshot...

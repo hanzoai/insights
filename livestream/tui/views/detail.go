@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/hanzoai/insights/livestream/tui/sse"
+	"github.com/insights/insights/livestream/tui/sse"
 )
 
 type DetailView struct {

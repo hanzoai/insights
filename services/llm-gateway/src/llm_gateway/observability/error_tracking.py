@@ -19,7 +19,7 @@ def _ensure_initialized() -> bool:
     if not settings.insights_project_token:
         return False
 
-    hanzo_insights.api_key = settings.insights_project_token
+    hanzo_insights.api_key = settings.insights_project_token  # ty: ignore[invalid-assignment]
     _initialized = True
     return True
 

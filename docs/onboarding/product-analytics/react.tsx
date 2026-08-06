@@ -1,6 +1,7 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
+import { SDK_DEFAULTS_DATE } from './_snippets/sdkDefaults'
 
 export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, CalloutBox, dedent, snippets } = ctx
@@ -13,7 +14,10 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install [`insights-js`](https://github.com/hanzoai/insights-js) and `@hanzo/react` using your package manager:</Markdown>
+                    <Markdown>
+                        Install [`insights-js`](https://github.com/insights/insights-js) and `@hanzo/react` using your
+                        package manager:
+                    </Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -48,8 +52,8 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Add your Insights API key and host to your environment variables. For Vite-based React apps, use
-                        the `VITE_PUBLIC_` prefix:
+                        Add your Insights project token and host to your environment variables. For Vite-based React
+                        apps, use the `VITE_` prefix to expose them to the client:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -57,8 +61,8 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'bash',
                                 file: '.env',
                                 code: dedent`
-                                    VITE_PUBLIC_INSIGHTS_KEY=<ph_project_api_key>
-                                    VITE_PUBLIC_INSIGHTS_HOST=<ph_client_api_host>
+                                    VITE_INSIGHTS_PROJECT_TOKEN=<ph_project_token>
+                                    VITE_INSIGHTS_HOST=<ph_client_api_host>
                                 `,
                             },
                         ]}
@@ -88,13 +92,13 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                     import { InsightsProvider } from '@hanzo/react'
 
                                     const options = {
-                                      api_host: import.meta.env.VITE_PUBLIC_INSIGHTS_HOST,
-                                      defaults: '2026-01-30',
+                                      api_host: import.meta.env.VITE_INSIGHTS_HOST,
+                                      defaults: '${SDK_DEFAULTS_DATE}',
                                     } as const
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_INSIGHTS_KEY} options={options}>
+                                        <InsightsProvider apiKey={import.meta.env.VITE_INSIGHTS_PROJECT_TOKEN} options={options}>
                                           <App />
                                         </InsightsProvider>
                                       </StrictMode>
@@ -150,7 +154,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'tsx',
                                 file: 'utils/analytics.ts',
                                 code: dedent`
-                                    import insights from '@hanzo/insights'
+                                    import insights from 'insights-js'
 
                                     export function trackPurchase(amount: number) {
                                         insights.capture('purchase_completed', { amount })

@@ -1,7 +1,7 @@
 import { IconFilter, IconList, IconSort } from '@hanzo/icons'
 
 import { Tag } from 'lib/elements/Tag/Tag'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 
 import { MaxErrorTrackingSearchResponse } from '~/queries/schema/schema-assistant-error-tracking'
 

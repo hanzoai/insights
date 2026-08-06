@@ -1,4 +1,4 @@
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useEffect, useMemo, useState } from 'react'
 
 import api from 'lib/api'

@@ -1,25 +1,32 @@
-// @ts-nocheck
 import { DateTime } from 'luxon'
-import { Summary } from 'prom-client'
+import { Counter, Summary } from 'prom-client'
 
-import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult } from '~/cdp/types'
-import { filterFunctionInstrumented } from '~/cdp/utils/insights-function-filtering'
-import { InsightsFlow, InsightsFlowAction } from '~/schema/insightsflow'
+import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult, InsightsFunctionFilterGlobals } from '~/cdp/types'
+import { execHog } from '~/cdp/utils/script-exec'
+import { filterFunctionInstrumented } from '~/cdp/utils/script-function-filtering'
+import { logger } from '~/common/utils/logger'
+import { captureException } from '~/common/utils/insights'
 
-export const findActionById = (insightsFlow: InsightsFlow, id: string): InsightsFlowAction => {
-    const action = insightsFlow.actions.find((action) => action.id === id)
+// The run's position (or the edge it needs next) no longer exists in the flow's graph - the
+// workflow was edited underneath an in-flight run. This is a user action, not a defect: the
+// executor catches it and finishes the run as a graceful exit instead of a failure.
+export class WorkflowChangedError extends Error {}
+
+export const findActionById = (hogFlow: InsightsFlow, id: string): InsightsFlowAction => {
+    const action = hogFlow.actions.find((action) => action.id === id)
     if (!action) {
-        throw new Error(`Action ${id} not found`)
+        throw new WorkflowChangedError(`Action ${id} not found`)
     }
 
     return action
 }
 
 export const findActionByType = <T extends InsightsFlowAction['type']>(
-    insightsFlow: InsightsFlow,
+    hogFlow: InsightsFlow,
     type: T
 ): Extract<InsightsFlowAction, { type: T }> | undefined => {
-    const action = insightsFlow.actions.find((action) => action.type === type)
+    const action = hogFlow.actions.find((action) => action.type === type)
     if (!action) {
         return undefined
     }
@@ -27,8 +34,8 @@ export const findActionByType = <T extends InsightsFlowAction['type']>(
     return action as Extract<InsightsFlowAction, { type: T }>
 }
 
-export const findNextAction = (insightsFlow: InsightsFlow, currentActionId: string, edgeIndex?: number): InsightsFlowAction => {
-    const edges = insightsFlow.edges.filter((edge) => edge.from === currentActionId)
+export const findNextAction = (hogFlow: InsightsFlow, currentActionId: string, edgeIndex?: number): InsightsFlowAction => {
+    const edges = hogFlow.edges.filter((edge) => edge.from === currentActionId)
 
     let nextActionId: string | undefined
 
@@ -39,16 +46,16 @@ export const findNextAction = (insightsFlow: InsightsFlow, currentActionId: stri
     }
 
     if (!nextActionId) {
-        throw new Error(`No next action found for action ${currentActionId}`)
+        throw new WorkflowChangedError(`No next action found for action ${currentActionId}`)
     }
 
-    return findActionById(insightsFlow, nextActionId)
+    return findActionById(hogFlow, nextActionId)
 }
 
 export function ensureCurrentAction(invocation: CyclotronJobInvocationInsightsFlow): InsightsFlowAction {
     // If we don't have a current action then we need to set it to the trigger action
     if (!invocation.state.currentAction) {
-        const triggerAction = invocation.insightsFlow.actions.find((action) => action.type === 'trigger')
+        const triggerAction = invocation.hogFlow.actions.find((action) => action.type === 'trigger')
         if (!triggerAction) {
             throw new Error('No trigger action found')
         }
@@ -72,7 +79,7 @@ export function ensureCurrentAction(invocation: CyclotronJobInvocationInsightsFl
         return nextAction
     }
 
-    return findActionById(invocation.insightsFlow, invocation.state.currentAction.id)
+    return findActionById(invocation.hogFlow, invocation.state.currentAction.id)
 }
 
 export function findContinueAction(invocation: CyclotronJobInvocationInsightsFlow): InsightsFlowAction {
@@ -81,7 +88,7 @@ export function findContinueAction(invocation: CyclotronJobInvocationInsightsFlo
         throw new Error('Cannot find continue action without a current action')
     }
 
-    return findNextAction(invocation.insightsFlow, currentActionId)
+    return findNextAction(invocation.hogFlow, currentActionId)
 }
 
 export async function shouldSkipAction(
@@ -93,7 +100,7 @@ export async function shouldSkipAction(
     }
 
     const filterResults = await filterFunctionInstrumented({
-        fn: invocation.insightsFlow,
+        fn: invocation.hogFlow,
         filters: action.filters,
         filterGlobals: invocation.filterGlobals,
     })
@@ -104,6 +111,104 @@ export async function shouldSkipAction(
 // Special format which the frontend understands and can render as a link
 export const actionIdForLogging = (action: Pick<InsightsFlowAction, 'id'>): string => {
     return `[Action:${action.id}]`
+}
+
+// A wait condition that targets nothing compiles to always-true bytecode (Python's filter compiler
+// returns `Constant(true)` for an empty filter), which would match on entry and wake the job on every
+// event. We detect that structurally — the same way the compiler decides: a filter is empty when it
+// has no properties, no events, no actions, and no test-account filtering. Checking the structure
+// rather than the compiled bytecode is robust to bytecode/version changes (no need to enumerate the
+// always-true forms) and keeps a real condition expressed through any of those fields evaluable.
+export function isEvaluableCondition(condition?: {
+    filters?: {
+        properties?: unknown[]
+        events?: unknown[]
+        actions?: unknown[]
+        filter_test_accounts?: boolean
+    }
+}): boolean {
+    const filters = condition?.filters
+    if (!filters) {
+        return false
+    }
+    return (
+        (filters.properties?.length ?? 0) > 0 ||
+        (filters.events?.length ?? 0) > 0 ||
+        (filters.actions?.length ?? 0) > 0 ||
+        Boolean(filters.filter_test_accounts)
+    )
+}
+
+const counterHogflowFilterBytecodeError = new Counter({
+    name: 'cdp_hogflow_matcher_bytecode_error',
+    help: 'A wait_until_condition or conversion-goal filter threw during evaluation. Filter is treated as non-matching, so the workflow falls through to its timeout branch.',
+})
+
+// Logged as separate fields on a bytecode error so it's filterable by flow/action.
+// actionId is absent for a conversion goal (not an action).
+export type InsightsFlowBytecodeContext = { hogFlowId: string; actionId?: string }
+
+// An "events to wait for" / conversion entry that targets neither events nor actions compiles to
+// always-true bytecode (the UI can leave an empty entry behind when the last event is removed), so
+// it would match every incoming event. Action-based entries (events empty, actions set) are real
+// and must be kept. Shared by the wait_until_condition and conversion evaluators so the rule lives
+// in one place.
+export function hasEventOrActionTarget(eventConfig: {
+    filters?: { events?: unknown[]; actions?: unknown[] }
+}): boolean {
+    return Boolean(eventConfig.filters?.events?.length || eventConfig.filters?.actions?.length)
+}
+
+// Evaluates a compiled filter against the event. InsightsFlowSerializer compiles bytecode for
+// every events[].filters at save time, so missing/empty bytecode means a malformed row:
+// we fail closed (return false) rather than falling back to event-name-only matching, which
+// would silently bypass property filters.
+export async function runFilterBytecode(
+    bytecode: unknown,
+    filterGlobals: InsightsFunctionFilterGlobals,
+    context: InsightsFlowBytecodeContext
+): Promise<boolean> {
+    if (!Array.isArray(bytecode) || bytecode.length === 0) {
+        return false
+    }
+    try {
+        const result = await execHog(bytecode, { globals: filterGlobals })
+        return result.execResult?.result === true
+    } catch (err) {
+        // A broken filter silently never matches and the workflow falls through to its
+        // timeout branch, which is usually the wrong outcome. Surface loudly so we notice.
+        logger.error('🔴', 'Bytecode evaluation error', { ...context, err })
+        captureException(err, { extra: { ...context } })
+        counterHogflowFilterBytecodeError.inc()
+        return false
+    }
+}
+
+// `events` and the property-based `condition` are OR'd: a step can wait on either,
+// and either matching wakes the job. The condition is evaluated on every incoming
+// event, which is what makes property-based waits event-driven rather than polled.
+// Used by the subscription matcher in production and by the test-invocation endpoint
+// to simulate a matcher wake against a supplied event.
+export async function matchesWaitUntilCondition(
+    action: Extract<InsightsFlowAction, { type: 'wait_until_condition' }>,
+    filterGlobals: InsightsFunctionFilterGlobals,
+    context: InsightsFlowBytecodeContext
+): Promise<boolean> {
+    for (const eventConfig of action.config.events ?? []) {
+        if (!hasEventOrActionTarget(eventConfig)) {
+            continue
+        }
+        if (await runFilterBytecode(eventConfig.filters?.bytecode, filterGlobals, context)) {
+            return true
+        }
+    }
+    // An empty condition compiles to always-true bytecode, which would wake the job on the next
+    // event of any kind. Only evaluate the condition when it has a real compiled filter;
+    // otherwise the wait relies on its `events` / the step timeout.
+    if (!isEvaluableCondition(action.config.condition)) {
+        return false
+    }
+    return runFilterBytecode(action.config.condition?.filters?.bytecode, filterGlobals, context)
 }
 
 const DELAY_ACTION_TYPES: InsightsFlowAction['type'][] = ['delay', 'wait_until_condition', 'wait_until_time_window']
@@ -128,7 +233,7 @@ export function trackE2eLag(result: CyclotronJobInvocationResult<CyclotronJobInv
 
     const capturedAt = result.invocation.state.event?.captured_at
     // We're ignoring insightsflows with delay actions for now because they're hard to track accurately (may or may not have run)
-    const hasDelay = hasDelayActions(result.invocation.insightsFlow.actions)
+    const hasDelay = hasDelayActions(result.invocation.hogFlow.actions)
 
     if (capturedAt && !hasDelay) {
         const e2eLagMs = Date.now() - new Date(capturedAt).getTime()

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from insights.schema import RecordingsQuery
 
@@ -24,7 +24,7 @@ class PersonsIdCompareOperation(SessionRecordingsListingBaseQuery):
             return ast.CompareOperation(
                 # this hits the distributed events table from the distributed session_replay_events table
                 # so we should use GlobalIn
-                # see https://clickhouse.com/docs/en/sql-reference/operators/in#distributed-subqueries
+                # see https://datastore.com/docs/en/sql-reference/operators/in#distributed-subqueries
                 op=ast.CompareOperationOp.GlobalIn,
                 left=ast.Field(chain=["session_id"]),
                 right=q,
@@ -40,14 +40,14 @@ class PersonsIdCompareOperation(SessionRecordingsListingBaseQuery):
         if not self._query.person_uuid:
             return None
 
-        # anchor to python now so that tests can freeze time
-        now = datetime.utcnow()
+        # anchor to python now so that tests can freeze time; keep naive to match InsightsQL placeholder serialization
+        now = datetime.now(UTC).replace(tzinfo=None)
 
         if poe_is_active(self._team):
             return parse_select(
                 """
                 select
-                    distinct `$session_id`
+                    distinct properties.$session_id
                 from
                     events
                 where
@@ -55,7 +55,7 @@ class PersonsIdCompareOperation(SessionRecordingsListingBaseQuery):
                     and timestamp <= {now}
                     and timestamp >= {date_from}
                     and timestamp <= {date_to}
-                    and notEmpty(`$session_id`)
+                    and notEmpty(properties.$session_id)
                 """,
                 {
                     "person_id": ast.Constant(value=self._query.person_uuid),

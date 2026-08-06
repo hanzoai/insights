@@ -19,10 +19,10 @@ import { groupsModel } from '~/models/groupsModel'
 import { extractDisplayLabel } from '~/queries/nodes/DataTable/utils'
 import { BreakdownType, GroupTypeIndex } from '~/types'
 
-import { BreakdownTagMenu } from './BreakdownTagMenu'
-import { TaxonomicBreakdownPopover } from './TaxonomicBreakdownPopover'
 import { breakdownTagLogic } from './breakdownTagLogic'
+import { BreakdownTagMenu } from './BreakdownTagMenu'
 import { isAllCohort, isCohort } from './taxonomicBreakdownFilterUtils'
+import { TaxonomicBreakdownPopover } from './TaxonomicBreakdownPopover'
 
 type EditableBreakdownTagProps = {
     breakdown: string | number
@@ -61,7 +61,7 @@ export function EditableBreakdownTag({
                 {!isMultipleBreakdownsEnabled || isHistogramable || isNormalizeable ? (
                     <div className="max-w-full">
                         {/* :TRICKY: we don't want the close button to be active when the edit popover is open.
-                         * Therefore we're wrapping the tag a context provider to override the parent context. */}
+                         * Therefore we're wrapping the lemon tag a context provider to override the parent context. */}
                         <PopoverReferenceContext.Provider value={null}>
                             <BreakdownTag
                                 breakdown={breakdown}
@@ -102,7 +102,7 @@ export function EditableBreakdownTag({
     )
 }
 
-type BreakdownTagProps = {
+export type BreakdownTagProps = {
     breakdown: string | number
     breakdownType: BreakdownType | null | undefined
     disablePropertyInfo?: boolean
@@ -150,6 +150,7 @@ export function BreakdownTag({
             className={clsx('BreakdownTag', `BreakdownTag--${size}`, {
                 'BreakdownTag--clickable': clickable,
             })}
+            data-attr="breakdown-tag"
             type={ButtonComponent === 'button' ? 'button' : undefined}
             title={String(propertyName)}
             onClick={onClick}
@@ -176,6 +177,7 @@ export function BreakdownTag({
                     }}
                     dropdown={popover}
                     className="p-0.5"
+                    data-attr="breakdown-tag-options"
                 />
             )}
 
@@ -188,6 +190,7 @@ export function BreakdownTag({
                         onClose()
                     }}
                     className="p-0.5"
+                    data-attr="breakdown-tag-close"
                 />
             )}
         </ButtonComponent>

@@ -5,9 +5,9 @@ import { Button, Link } from '@hanzo/elements'
 
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { Table, TableColumns } from 'lib/elements/Table'
 import { IconOpenInNew } from 'lib/elements/icons'
-import { pluralize } from 'lib/utils'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { pluralize } from 'lib/utils/strings'
 import { EnvironmentConfigOption, preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { InstanceSetting } from '~/types'

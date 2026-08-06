@@ -1,12 +1,11 @@
-import { FEATURE_FLAGS } from 'lib/constants'
 import { urls } from 'scenes/urls'
 
-import { FileSystemIconType, ProductKey } from '~/queries/schema/schema-general'
+import { ProductItemCategory, ProductKey } from '~/queries/schema/schema-general'
 
 import { FileSystemIconColor, ProductManifest } from '../../frontend/src/types'
 
 export const manifest: ProductManifest = {
-    name: 'Conversations',
+    name: 'Support',
     scenes: {
         SupportTickets: {
             name: 'Ticket list',
@@ -26,11 +25,20 @@ export const manifest: ProductManifest = {
             projectBased: true,
             layout: 'app-container',
         },
+        // The user's own tickets with Insights support — unrelated to the Support product's
+        // agent inbox above, which shows tickets from *their* customers
+        MyTickets: {
+            name: 'Your tickets',
+            import: () => import('./frontend/scenes/myTickets/MyTicketsScene'),
+            projectBased: true,
+            layout: 'app-container',
+        },
     },
     routes: {
         '/support/tickets': ['SupportTickets', 'supportTickets'],
         '/support/tickets/:ticketId': ['SupportTicketDetail', 'supportTicketDetail'],
         '/support/settings': ['SupportSettings', 'supportSettings'],
+        '/my-tickets': ['MyTickets', 'myTickets'],
     },
     redirects: {
         '/support': '/support/tickets',
@@ -40,6 +48,7 @@ export const manifest: ProductManifest = {
         supportTickets: (): string => '/support/tickets',
         supportTicketDetail: (ticketId: string | number): string => `/support/tickets/${ticketId}`,
         supportSettings: (): string => '/support/settings',
+        myTickets: (): string => '/my-tickets',
     },
     fileSystemTypes: {},
     treeItemsNew: [],
@@ -47,26 +56,13 @@ export const manifest: ProductManifest = {
         {
             path: 'Support',
             intents: [ProductKey.CONVERSATIONS],
-            category: 'Behavior',
+            category: ProductItemCategory.BEHAVIOR,
             href: urls.supportTickets(),
             type: 'conversations',
-            flag: FEATURE_FLAGS.PRODUCT_SUPPORT,
-            tags: ['alpha'],
             iconType: 'conversations',
             iconColor: ['var(--color-product-support-light)'] as FileSystemIconColor,
             sceneKey: 'SupportTickets',
         },
     ],
-    treeItemsMetadata: [
-        {
-            path: 'Support',
-            category: 'Behavior',
-            iconType: 'conversations' as FileSystemIconType,
-            iconColor: ['var(--color-product-support-light)'] as FileSystemIconColor,
-            href: urls.supportTickets(),
-            sceneKey: 'SupportTickets',
-            flag: FEATURE_FLAGS.PRODUCT_SUPPORT,
-            tags: ['alpha'],
-        },
-    ],
+    treeItemsMetadata: [],
 }

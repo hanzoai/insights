@@ -10,7 +10,7 @@ export const template: InsightsFunctionTemplate = {
         'Capture an event using a 1x1 tracking pixel. Useful for embedding tracking where Insights SDKs are not available such as emails.',
     icon_url: '/static/services/webhook.svg',
     category: ['Email', 'Tracking'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if(inputs.debug) {
   print('Incoming request:', request.query)
@@ -27,8 +27,9 @@ if(not empty(inputs.distinct_id) and not empty(inputs.event)) {
 return {
   'httpResponse': {
     'status': 200,
-    'body': base64Decode('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='),
+    'body': 'R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==',
     'contentType': 'image/gif',
+    'isBase64Encoded': true
   }
 }
 `,

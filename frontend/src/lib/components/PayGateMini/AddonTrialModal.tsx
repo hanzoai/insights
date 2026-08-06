@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 
 import { Button, Modal, Link } from '@hanzo/elements'
 
-import { BigLeaguesMascot } from 'lib/components/mascots'
+import { BigLeaguesHog } from 'lib/components/mascots'
 import { BillingAddonFeaturesList } from 'scenes/billing/BillingAddonFeaturesList'
 import { BillingProductAddonActions } from 'scenes/billing/BillingProductAddonActions'
 import { billingProductLogic } from 'scenes/billing/billingProductLogic'
@@ -31,7 +31,7 @@ export function AddonTrialModal({ product, isOpen, onClose }: AddonTrialModalPro
             <div className="flex flex-col">
                 <div className="bg-surface-secondary rounded p-6 flex flex-col">
                     <div className="hidden sm:flex [@media(max-height:850px)]:hidden justify-center my-2">
-                        <BigLeaguesMascot className="h-auto w-auto max-w-full max-h-[250px]" />
+                        <BigLeaguesHog className="h-auto w-auto max-w-full max-h-[250px]" />
                     </div>
                     <BillingAddonFeaturesList
                         addonFeatures={addonFeatures?.filter((f: any) => !f.entitlement_only) || []}

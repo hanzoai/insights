@@ -7,11 +7,11 @@ from dateutil.relativedelta import relativedelta
 
 from insights.datastore.client import sync_execute
 from insights.datastore.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
-from insights.models import Person
 from insights.models.group.util import create_group
 from insights.session_recordings.queries.test.listing_recordings.test_utils import assert_query_matches_session_ids
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 from insights.session_recordings.sql.session_replay_event_sql import TRUNCATE_SESSION_REPLAY_EVENTS_TABLE_SQL
+from insights.test.persons import create_person
 from insights.test.test_utils import create_group_type_mapping_without_created_at
 
 
@@ -37,7 +37,7 @@ class TestSessionRecordingsListByGroupProperties(DatastoreTestMixin, APIBaseTest
     @snapshot_datastore_queries
     def test_filter_with_group_properties(self) -> None:
         # there is one person
-        Person.objects.create(team_id=self.team.pk, distinct_ids=["p1"], properties={"$browser": "test"})
+        create_person(team_id=self.team.pk, distinct_ids=["p1"], properties={"$browser": "test"})
 
         # there are two groups
         create_group_type_mapping_without_created_at(

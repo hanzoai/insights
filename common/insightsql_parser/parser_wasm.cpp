@@ -28,7 +28,7 @@ class InsightsQLErrorListener : public antlr4::BaseErrorListener {
   explicit InsightsQLErrorListener(string input) : input(std::move(input)) {}
 
   void syntaxError(
-      antlr4::Recognizer* /* recognizer */,
+      antlr4::Recognizer* recognizer,
       antlr4::Token* /* offendingSymbol */,
       size_t line,
       size_t charPositionInLine,
@@ -38,6 +38,22 @@ class InsightsQLErrorListener : public antlr4::BaseErrorListener {
     size_t start = getPosition(line, charPositionInLine);
     if (start == string::npos) {
       start = 0;
+    }
+    // A character outside the InsightsQL token set lexes as UNEXPECTED_CHARACTER
+    // and dooms the parse. The default message quotes the raw character,
+    // which is unactionable when it is invisible — report the code point
+    // instead and point at the character itself.
+    if (auto* parser = dynamic_cast<antlr4::Parser*>(recognizer)) {
+      if (auto* tokens = dynamic_cast<antlr4::BufferedTokenStream*>(parser->getTokenStream())) {
+        tokens->fill();
+        for (antlr4::Token* token : tokens->getTokens()) {
+          if (token->getType() == InsightsQLLexer::UNEXPECTED_CHARACTER) {
+            throw SyntaxError(
+                describe_unexpected_character(token->getText()), token->getStartIndex(), input.size()
+            );
+          }
+        }
+      }
     }
     throw SyntaxError(msg, start, input.size());
   }
@@ -94,6 +110,8 @@ struct ParserContext {
     parser->removeErrorListeners();
     error_listener = std::make_unique<InsightsQLErrorListener>(input);
     parser->addErrorListener(error_listener.get());
+    // Reject pathologically deep bracket nesting before ANTLR runs (see guardNestingDepth).
+    guardNestingDepth(stream.get());
   }
 
   // Prevent copying (would cause double-free)
@@ -181,7 +199,7 @@ string parse_select(const string& input, bool is_internal = false) {
 }
 
 /**
- * Parse a Hog template string and return JSON AST.
+ * Parse a Script template string and return JSON AST.
  */
 string parse_full_template_string(const string& input, bool is_internal = false) {
   try {
@@ -204,7 +222,7 @@ string parse_full_template_string(const string& input, bool is_internal = false)
 }
 
 /**
- * Parse a Hog program and return JSON AST.
+ * Parse a Script program and return JSON AST.
  */
 string parse_program(const string& input, bool is_internal = false) {
   try {

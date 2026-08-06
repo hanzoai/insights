@@ -1,11 +1,13 @@
 import { useValues } from 'kea'
 
+import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { IconDownload } from '@hanzo/icons'
 import { Button, Table, Tooltip } from '@hanzo/elements'
 
-import { DetectiveMascot } from 'lib/components/mascots'
-import { humanFriendlyDetailedTime } from 'lib/utils'
+import { pngHoggie } from 'lib/brand/hoggies'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
+import { ExportedAsset, advancedActivityLogsLogic } from './advancedActivityLogsLogic'
 import {
     downloadExport,
     getFilterSummary,
@@ -13,7 +15,8 @@ import {
     getHumanReadableFormat,
     getStatusTag,
 } from './ExportsListHelpers'
-import { ExportedAsset, advancedActivityLogsLogic } from './advancedActivityLogsLogic'
+
+const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
 
 export function ExportsList(): JSX.Element {
     const { exports, exportsLoading } = useValues(advancedActivityLogsLogic)
@@ -102,7 +105,7 @@ const ExportsEmptyState = (): JSX.Element => (
         data-attr="exports-empty-state"
         className="flex flex-col border rounded px-4 py-8 items-center text-center mx-auto"
     >
-        <DetectiveMascot width="100" height="100" className="mb-4" />
+        <MascotMagnifyingGlass width="100" height="100" className="mb-4" />
         <h2 className="text-xl leading-tight">No exports found</h2>
         <p className="text-sm text-balance text-tertiary">
             Exports will appear here when you create them from the Logs tab. Start by applying filters and then click

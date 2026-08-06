@@ -8,12 +8,16 @@ from unittest.mock import MagicMock, patch
 
 from insights.datastore.query_tagging import QueryTags
 from insights.temporal.common.datastore import (
+    DatastoreAllReplicasAreStaleError,
     DatastoreCheckQueryStatusError,
     DatastoreClient,
     DatastoreError,
     DatastoreMemoryLimitExceededError,
     DatastoreQueryNotFound,
     DatastoreQueryStatus,
+    DatastoreQueryTimeoutError,
+    DatastoreTooManyBytesError,
+    DatastoreTooManySimultaneousQueriesError,
     add_log_comment_param,
     encode_datastore_data,
 )
@@ -34,6 +38,12 @@ async def _wait_for_query_status(
     """
     elapsed_time = 0.0
     while elapsed_time < max_wait_time:
+        # Force query_log to materialize before reading (its async flush lags under CI load).
+        # A transient flush failure is a retryable poll miss, so keep it out of the read's error handling.
+        try:
+            await client.execute_query("SYSTEM FLUSH LOGS")
+        except DatastoreError:
+            pass
         try:
             status = await client.acheck_query_in_query_log(query_id, raise_on_error=raise_on_error)
             if status == expected_status:
@@ -142,20 +152,65 @@ def test_add_log_comment_param(params, qt, want):
     assert params == want
 
 
-def test_datastore_memory_limit_exceeded_error(datastore_client):
-    """Simulate a Datastore memory limit exceeded error and verify that the correct error is raised."""
-    with patch(
-        "insights.temporal.common.datastore.requests.Session.post",
-        return_value=(
-            MagicMock(
-                status_code=500,
-                text="Code: 241. DB::Exception: (total) memory limit exceeded: would use 99.97 GiB (attempt to allocate chunk of 12.26 MiB bytes), current RSS: 111.22 GiB, maximum: 111.19 GiB. OvercommitTracker decision: Query was selected to stop by OvercommitTracker: While executing MergeSortingTransform. (MEMORY_LIMIT_EXCEEDED) (version 25.8.12.129 (official build))",
-            )
+def _mock_internal_session_post(return_value):
+    """Return a patch context manager that mocks internal_requests_session().post()."""
+    mock_session = MagicMock()
+    mock_session.post.return_value = return_value
+    mock_session.__enter__ = MagicMock(return_value=mock_session)
+    mock_session.__exit__ = MagicMock(return_value=False)
+    mock_factory = MagicMock(return_value=mock_session)
+    return patch("insights.temporal.common.datastore.internal_requests_session", mock_factory)
+
+
+@pytest.mark.parametrize(
+    "error_text,expected_exception",
+    [
+        (
+            "Code: 241. DB::Exception: (total) memory limit exceeded: would use 99.97 GiB (attempt to allocate chunk of 12.26 MiB bytes), current RSS: 111.22 GiB, maximum: 111.19 GiB. OvercommitTracker decision: Query was selected to stop by OvercommitTracker: While executing MergeSortingTransform. (MEMORY_LIMIT_EXCEEDED) (version x.x.x.x (official build))",
+            DatastoreMemoryLimitExceededError,
         ),
-    ):
-        with pytest.raises(DatastoreMemoryLimitExceededError):
+        (
+            "Code: 307. DB::Exception: Limit for rows or bytes to read exceeded, max bytes: 50.00 TiB, current bytes: 50.00 TiB: While executing MergeTreeSelect(pool: ReadPool, algorithm: Thread). (TOO_MANY_BYTES) (version x.x.x.x (official build))",
+            DatastoreTooManyBytesError,
+        ),
+        (
+            "Code: 202. DB::Exception: Received from dummy-ch-node.internal. DB::Exception: Too many simultaneous queries for all users. Current: 100, maximum: 100. (TOO_MANY_SIMULTANEOUS_QUERIES) (version x.x.x.x (official build))",
+            DatastoreTooManySimultaneousQueriesError,
+        ),
+        (
+            "Code: 159. DB::Exception: Estimated query execution time (300.5 seconds) is too long. Maximum: 300. (TIMEOUT_EXCEEDED) (version x.x.x.x (official build))",
+            DatastoreQueryTimeoutError,
+        ),
+        (
+            "Code: 279. DB::Exception: All replicas are stale: While executing Remote. (ALL_REPLICAS_ARE_STALE) (version x.x.x.x (official build))",
+            DatastoreAllReplicasAreStaleError,
+        ),
+    ],
+    ids=[
+        "MEMORY_LIMIT_EXCEEDED",
+        "TOO_MANY_BYTES",
+        "TOO_MANY_SIMULTANEOUS_QUERIES",
+        "TIMEOUT_EXCEEDED",
+        "ALL_REPLICAS_ARE_STALE",
+    ],
+)
+def test_datastore_error_code_maps_to_exception(datastore_client, error_text, expected_exception):
+    """Server-side Datastore error codes map to the matching client exception class."""
+    mock_response = MagicMock(status_code=500, text=error_text)
+    with _mock_internal_session_post(mock_response):
+        with pytest.raises(expected_exception):
             with datastore_client.post_query("SELECT 1", query_parameters={}, query_id=None):
                 pass
+
+
+def test_post_query_disables_http_compression(datastore_client):
+    mock_response = MagicMock(status_code=200)
+    with _mock_internal_session_post(mock_response) as mock_factory:
+        with datastore_client.post_query("SELECT 1", query_parameters={}, query_id=None):
+            pass
+
+    call_kwargs = mock_factory.return_value.post.call_args.kwargs
+    assert call_kwargs["params"]["enable_http_compression"] == "0"
 
 
 @pytest.mark.parametrize(
@@ -180,6 +235,31 @@ def test_datastore_memory_limit_exceeded_error(datastore_client):
             "select * from events where event = %(event)s and event != {another}",
             {"event": "index_{something}", "another": "event"},
             "select * from events where event = 'index_{something}' and event != 'event'",
+        ),
+        # a value containing an unbalanced brace used to crash the format pass
+        (
+            "select * from events where event = %(event)s and event != {another}",
+            {"event": "brace {", "another": "event"},
+            "select * from events where event = 'brace {' and event != 'event'",
+        ),
+        # a JSON string value used to be mangled by the format pass
+        (
+            "select * from events where properties = %(props)s and event != {another}",
+            {"props": '{"a": 1}', "another": "event"},
+            "select * from events where properties = '{\"a\": 1}' and event != 'event'",
+        ),
+        # a value matching another parameter's name must not be substituted again
+        (
+            "select * from events where event = %(event)s and event != {another}",
+            {"event": "literal {another}", "another": "event"},
+            "select * from events where event = 'literal {another}' and event != 'event'",
+        ),
+        # the INSERT INTO FUNCTION s3(...) shape used by batch exports: intentional escapes
+        # collapse while a value containing '%' and braces survives verbatim
+        (
+            "INSERT INTO FUNCTION s3('bucket/export_{{_partition_id}}.arrow') SELECT %(v)s SETTINGS log_comment={log_comment}",
+            {"v": '100%-{"a": 1}', "log_comment": "comment"},
+            "INSERT INTO FUNCTION s3('bucket/export_{_partition_id}.arrow') SELECT '100%-{\"a\": 1}' SETTINGS log_comment='comment'",
         ),
     ],
 )
@@ -295,6 +375,26 @@ async def test_acheck_query_in_query_log_error(datastore_client, django_db_setup
         query_id = f"test-error-query-{uuid.uuid4()}"
         with pytest.raises(DatastoreCheckQueryStatusError):
             await datastore_client.acheck_query_in_query_log(query_id)
+
+
+async def test_acheck_query_in_query_log_uses_unique_check_query_ids(datastore_client: DatastoreClient) -> None:
+    query_id = f"test-check-query-id-{uuid.uuid4()}"
+    check_query_ids: list[str] = []
+
+    async def mock_read_query_as_jsonl(
+        _query: str, query_parameters: dict[str, object] | None = None, query_id: str | None = None
+    ) -> list[dict[str, str]]:
+        assert query_id is not None
+        check_query_ids.append(query_id)
+        return [{"type": "QueryFinish", "exception": ""}]
+
+    with patch.object(datastore_client, "read_query_as_jsonl", side_effect=mock_read_query_as_jsonl):
+        await datastore_client.acheck_query_in_query_log(query_id)
+        await datastore_client.acheck_query_in_query_log(query_id)
+
+    assert len(check_query_ids) == 2
+    assert check_query_ids[0] != check_query_ids[1]
+    assert all(value.startswith(f"{query_id}-CHECK-QUERY-LOG-") for value in check_query_ids)
 
 
 async def test_acheck_query_found(datastore_client, django_db_setup):

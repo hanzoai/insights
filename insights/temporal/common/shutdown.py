@@ -16,7 +16,13 @@ class WorkerShuttingDownError(Exception):
     """
 
     def __init__(
-        self, activity_id: str, activity_type: str, task_queue: str, attempt: int, workflow_id: str, workflow_type: str
+        self,
+        activity_id: str,
+        activity_type: str,
+        task_queue: str,
+        attempt: int,
+        workflow_id: str | None,
+        workflow_type: str | None,
     ):
         self.activity_id = activity_id
         self.activity_type = activity_type
@@ -183,5 +189,3 @@ class ShutdownMonitor:
         if self.is_worker_shutdown():
             self.logger.debug("Worker is shutting down.")
             raise WorkerShuttingDownError.from_activity_context()
-
-        self.logger.debug("Worker is not shutting down.")

@@ -1,13 +1,24 @@
-import { useActions } from 'kea'
-import React from 'react'
+import { useActions, useValues } from 'kea'
+import React, { useState } from 'react'
 
-import { IconCode, IconFlask, IconPeople, IconSparkles, IconTestTube, IconToggle, IconWrench } from '@hanzo/icons'
+import {
+    IconArrowLeft,
+    IconCode,
+    IconFlask,
+    IconPeople,
+    IconSparkles,
+    IconTestTube,
+    IconToggle,
+    IconWrench,
+} from '@hanzo/icons'
 
+import { FEATURE_FLAGS } from 'lib/constants'
 import { Button } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
+import { featureFlagLogic as enabledFeaturesLogic } from 'lib/logic/featureFlagLogic'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { getToolDefinition } from 'scenes/max/max-constants'
-import { maxLogic } from 'scenes/max/maxLogic'
+import { SIDE_PANEL_PANEL_ID, maxLogic } from 'scenes/max/maxLogic'
 import { createSuggestionGroup } from 'scenes/max/utils'
 import { urls } from 'scenes/urls'
 
@@ -15,43 +26,41 @@ import { sidePanelLogic } from '~/layout/navigation-3000/sidepanel/sidePanelLogi
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 import { SidePanelTab } from '~/types'
 
-type FeatureFlagTemplate = 'simple' | 'targeted' | 'multivariate' | 'targeted-multivariate'
+import { INTENT_KEYS, INTENT_METADATA, TemplateKey } from 'products/feature_flags/frontend/featureFlagTemplateConstants'
 
-interface TemplateMetadata {
+interface DropdownTemplateMetadata {
     name: string
     description: string
     icon: React.ComponentType
-    url: string
 }
 
-const TEMPLATE_METADATA: Record<FeatureFlagTemplate, TemplateMetadata> = {
+// Remote config has its own dedicated menu item below, so the preset dropdown excludes it.
+type PresetTemplateKey = Exclude<TemplateKey, 'remote-config'>
+
+const TEMPLATE_METADATA: Record<PresetTemplateKey, DropdownTemplateMetadata> = {
     simple: {
         name: 'Simple flag',
         description: 'On/off for all users',
         icon: IconToggle,
-        url: urls.featureFlagNew({ template: 'simple' }),
     },
     targeted: {
         name: 'Targeted release',
         description: 'Release to specific users',
         icon: IconPeople,
-        url: urls.featureFlagNew({ template: 'targeted' }),
     },
     multivariate: {
         name: 'Multivariate',
         description: 'Multiple variants',
         icon: IconTestTube,
-        url: urls.featureFlagNew({ template: 'multivariate' }),
     },
     'targeted-multivariate': {
         name: 'Targeted multivariate',
         description: 'Variants for specific users',
         icon: IconFlask,
-        url: urls.featureFlagNew({ template: 'targeted-multivariate' }),
     },
 }
 
-const TEMPLATES: FeatureFlagTemplate[] = ['simple', 'targeted', 'multivariate', 'targeted-multivariate']
+const TEMPLATES: PresetTemplateKey[] = ['simple', 'targeted', 'multivariate', 'targeted-multivariate']
 
 const AI_TOOL_DEFINITION = getToolDefinition('create_feature_flag')!
 const AI_SUGGESTIONS = [
@@ -61,9 +70,58 @@ const AI_SUGGESTIONS = [
     'Create a beta testing flag for…',
 ]
 
+function IntentSubmenu({ template, onBack }: { template: PresetTemplateKey; onBack: () => void }): JSX.Element {
+    const metadata = TEMPLATE_METADATA[template]
+
+    return (
+        <>
+            <Button icon={<IconArrowLeft />} onClick={onBack} fullWidth size="small">
+                <span className="text-xs text-secondary">{metadata.name}</span>
+            </Button>
+            <Divider className="my-1" />
+            {INTENT_KEYS.map((intentKey) => {
+                const intentMeta = INTENT_METADATA[intentKey]
+                return (
+                    <Button
+                        key={intentKey}
+                        icon={<intentMeta.icon />}
+                        to={urls.featureFlagNew({ template, intent: intentKey })}
+                        data-attr="new-feature-flag-menu-intent"
+                        data-attr-intent={intentKey}
+                        fullWidth
+                    >
+                        <div className="flex flex-col text-sm py-1">
+                            <strong>{intentMeta.name}</strong>
+                            <span className="text-xs font-sans font-normal">{intentMeta.description}</span>
+                        </div>
+                    </Button>
+                )
+            })}
+            <Divider className="my-1" />
+            <Button
+                to={urls.featureFlagNew({ template })}
+                data-attr="new-feature-flag-menu-skip-intent"
+                fullWidth
+                size="small"
+            >
+                <span className="text-xs text-secondary">Skip — no evaluation warnings</span>
+            </Button>
+        </>
+    )
+}
+
 export function OverlayForNewFeatureFlagMenu(): JSX.Element {
-    const { setActiveGroup } = useActions(maxLogic({ tabId: 'sidepanel' }))
+    const { featureFlags } = useValues(enabledFeaturesLogic)
+    const { setActiveGroup } = useActions(maxLogic({ panelId: SIDE_PANEL_PANEL_ID }))
     const { openSidePanel } = useActions(sidePanelLogic)
+
+    const intentsEnabled = !!featureFlags[FEATURE_FLAGS.FEATURE_FLAG_CREATION_INTENTS]
+    // useState is intentional — this is an ephemeral popover overlay that unmounts on close
+    const [selectedTemplate, setSelectedTemplate] = useState<PresetTemplateKey | null>(null)
+
+    if (intentsEnabled && selectedTemplate) {
+        return <IntentSubmenu template={selectedTemplate} onBack={() => setSelectedTemplate(null)} />
+    }
 
     return (
         <>
@@ -73,7 +131,9 @@ export function OverlayForNewFeatureFlagMenu(): JSX.Element {
                     <Button
                         key={template}
                         icon={<metadata.icon />}
-                        to={metadata.url}
+                        {...(intentsEnabled
+                            ? { onClick: () => setSelectedTemplate(template) }
+                            : { to: urls.featureFlagNew({ template }) })}
                         data-attr="new-feature-flag-menu-item"
                         data-attr-template={template}
                         fullWidth
@@ -124,7 +184,6 @@ export function OverlayForNewFeatureFlagMenu(): JSX.Element {
                 data-attr="new-feature-flag-ai-menu-item"
                 data-attr-flag-type="ai"
                 onClick={() => {
-                    // Show the suggestions from the feature flag tool
                     setActiveGroup(
                         createSuggestionGroup(AI_TOOL_DEFINITION.name, React.createElement(IconWrench), AI_SUGGESTIONS)
                     )

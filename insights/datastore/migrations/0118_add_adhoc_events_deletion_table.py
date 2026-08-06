@@ -4,6 +4,6 @@ from insights.datastore.client.migration_tools import NodeRole, run_sql_with_exc
 operations = [
     run_sql_with_exceptions(
         ADHOC_EVENTS_DELETION_TABLE_SQL(on_cluster=False),
-        node_roles=[NodeRole.DATA, NodeRole.COORDINATOR],
+        node_roles=[NodeRole.DATA],
     ),
 ]

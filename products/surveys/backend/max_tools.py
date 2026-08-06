@@ -23,9 +23,10 @@ from insights.schema import (
 
 from insights.constants import DEFAULT_SURVEY_APPEARANCE
 from insights.exceptions_capture import capture_exception
-from insights.models import Survey, Team
+from insights.models import Team
 
 from products.insights_ai.backend.max_tool import MaxTool
+from products.surveys.backend.models import Survey
 from products.surveys.backend.summarization.fetch import fetch_responses
 
 

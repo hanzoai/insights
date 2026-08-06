@@ -1,16 +1,20 @@
+import sys
+import time
 import types
 import logging
 import threading
 import traceback
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
+from enum import StrEnum
 from functools import lru_cache
 from time import perf_counter
-from typing import Any, Optional, Union
+from typing import Any, Optional, TypedDict, Union
 
 from django.conf import settings as app_settings
 
 import sqlparse
+import structlog
 from datastore_driver import Client as SyncClient
 from opentelemetry import trace
 from prometheus_client import Counter
@@ -22,18 +26,20 @@ from insights.datastore.client.connection import (
     get_default_datastore_workload_type,
 )
 from insights.datastore.client.escape import substitute_params
+from insights.datastore.client.limit import get_llm_analytics_rate_limiter
 from insights.datastore.client.tracing import trace_datastore_query_decorator
 from insights.datastore.query_tagging import (
-    AccessMethod,
     Feature,
     Product,
     QueryTags,
+    add_fallback_query_tags,
+    get_caller_source,
     get_query_tag_value,
     get_query_tags,
+    is_api_key_access_method,
 )
 from insights.errors import datastore_error_type, wrap_datastore_query_error
-from insights.settings import DATASTORE_PER_TEAM_QUERY_SETTINGS, TEST
-from insights.temporal.common.datastore import update_query_tags_with_temporal_info
+from insights.settings import DATASTORE_PER_TEAM_QUERY_SETTINGS, DEBUG, TEST
 from insights.utils import generate_short_id, patchable
 
 QUERY_STARTED_COUNTER = Counter(
@@ -74,16 +80,143 @@ DATASTORE_SUPPORTED_JOIN_ALGORITHMS = [
 is_invalid_algorithm = lambda algo: algo not in DATASTORE_SUPPORTED_JOIN_ALGORITHMS
 
 
+class UntaggedQueryError(Exception):
+    """Raised in DEBUG mode when a Datastore query is executed without product or feature tags."""
+
+
+class KillSwitchLevel(StrEnum):
+    OFF = "off"
+    LIGHT = "light"
+    FULL = "full"
+
+
+_KILL_SWITCH_EXEMPT_USERS = frozenset(
+    {
+        DatastoreUser.BATCH_EXPORT,
+        DatastoreUser.MIGRATIONS,
+        DatastoreUser.OPS,
+        DatastoreUser.BILLING,
+    }
+)
+
+_KILL_SWITCH_SETTINGS: dict[KillSwitchLevel, dict[str, int]] = {
+    KillSwitchLevel.LIGHT: {
+        "max_execution_time": 30,
+        "max_threads": 45,
+        "max_bytes_to_read": 5_000_000_000_000,  # 5TB
+    },
+    KillSwitchLevel.FULL: {
+        "max_execution_time": 15,
+        "max_memory_usage": 30_000_000_000,  # 30GB
+        "max_threads": 30,
+        "max_bytes_to_read": 1_000_000_000_000,  # 1TB
+    },
+}
+
+_KILL_SWITCH_SEVERITY: dict[KillSwitchLevel, int] = {
+    KillSwitchLevel.OFF: 0,
+    KillSwitchLevel.LIGHT: 1,
+    KillSwitchLevel.FULL: 2,
+}
+
+
+def get_kill_switch_level() -> KillSwitchLevel:
+    return _get_kill_switch_level(round(time.time() / 60))
+
+
+def get_team_kill_switch_level(team_id: int) -> KillSwitchLevel:
+    """
+    Per-team kill switch override.
+
+    Returns FULL or LIGHT if `team_id` is in the corresponding admin-managed list,
+    else OFF. This is independent of the global `DATASTORE_KILL_SWITCH` — callers
+    that want the combined effect should take the more severe of the two levels.
+    """
+    full_teams, light_teams = _get_kill_switch_team_sets(round(time.time() / 60))
+    if team_id in full_teams:
+        return KillSwitchLevel.FULL
+    if team_id in light_teams:
+        return KillSwitchLevel.LIGHT
+    return KillSwitchLevel.OFF
+
+
+def get_hedged_app_queries_enabled() -> bool:
+    return _get_hedged_app_queries_enabled(round(time.time() / 60))
+
+
+@lru_cache(maxsize=1)
+def _get_hedged_app_queries_enabled(_ttl: int) -> bool:
+    from insights.models.instance_setting import get_instance_setting
+
+    try:
+        return get_instance_setting("DATASTORE_HEDGED_APP_QUERIES")
+    except Exception:
+        return False
+
+
+@lru_cache(maxsize=1)
+def _get_kill_switch_level(_ttl: int) -> KillSwitchLevel:
+    from insights.models.instance_setting import get_instance_setting
+
+    try:
+        value = get_instance_setting("DATASTORE_KILL_SWITCH")
+        return KillSwitchLevel(value)
+    except Exception:
+        # insights_instancesetting may not exist yet during initial Postgres migrations
+        return KillSwitchLevel.OFF
+
+
+@lru_cache(maxsize=1)
+def _get_kill_switch_team_sets(_ttl: int) -> tuple[frozenset[int], frozenset[int]]:
+    from insights.models.instance_setting import get_instance_setting
+
+    try:
+        raw = get_instance_setting("DATASTORE_KILL_SWITCH_FULL_TEAMS")
+        full_teams = frozenset(raw if isinstance(raw, list) else [])
+    except Exception:
+        # During an incident, silently falling back to "no override" would hide why the
+        # per-team kill switch isn't taking effect. Log so operators can see the failure.
+        logger.exception("Failed to read DATASTORE_KILL_SWITCH_FULL_TEAMS; per-team kill switch disabled for full")
+        full_teams = frozenset()
+    try:
+        raw = get_instance_setting("DATASTORE_KILL_SWITCH_LIGHT_TEAMS")
+        light_teams = frozenset(raw if isinstance(raw, list) else [])
+    except Exception:
+        logger.exception("Failed to read DATASTORE_KILL_SWITCH_LIGHT_TEAMS; per-team kill switch disabled for light")
+        light_teams = frozenset()
+    return full_teams, light_teams
+
+
+def resolve_kill_switch_level(team_id: Optional[int]) -> KillSwitchLevel:
+    """
+    Effective kill switch level: the more severe of the global level and any
+    per-team override. If `team_id` is None, returns the global level unchanged.
+
+    Examples:
+        - global=light, team=full -> full
+        - global=full,  team=light -> full
+        - global=off,   team=light -> light
+        - global=light, team=off   -> light
+    """
+    level = get_kill_switch_level()
+    if team_id is None:
+        return level
+    team_level = get_team_kill_switch_level(team_id)
+    if _KILL_SWITCH_SEVERITY[team_level] > _KILL_SWITCH_SEVERITY[level]:
+        return team_level
+    return level
+
+
 @lru_cache(maxsize=1)
 def default_settings() -> dict:
-    # https://clickhouse.com/blog/datastore-fully-supports-joins-how-to-choose-the-right-algorithm-part5
+    # https://datastore.com/blog/datastore-fully-supports-joins-how-to-choose-the-right-algorithm-part5
     # We default to three memory bound join operations, in decreasing order of speed
     # The merge algorithms are not memory bound, and can be selectively used in places where it makes sense
     return {
         "join_algorithm": "direct,parallel_hash,hash",
         "distributed_replica_max_ignored_errors": 1000,
         # max_query_size can't be set in a query, because it determines the size of the buffer used to parse the query
-        # https://clickhouse.com/docs/en/operations/settings/settings#max_query_size
+        # https://datastore.com/docs/en/operations/settings/settings#max_query_size
         "max_query_size": 1048576,
     }
 
@@ -109,7 +242,35 @@ def validated_client_query_id() -> Optional[str]:
     return f"{client_query_team_id}_{client_query_id}_{random_id}"
 
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
+logger.setLevel(logging.INFO)
+
+
+class DatastoreExternalTable(TypedDict):
+    """A query-scoped external data table sent to Datastore alongside the query (the
+    datastore_driver `external_tables` format). `structure` is `(column, Datastore type)` pairs and
+    `data` is row dicts keyed by column name."""
+
+    name: str
+    structure: list[tuple[str, str]]
+    data: list[dict[str, Any]]
+
+
+@contextmanager
+def _llm_analytics_concurrency_slot(ch_user: DatastoreUser, team_id: Optional[int]) -> Iterator[None]:
+    """Hold one of AI observability's Datastore slots, and nothing for every other user.
+
+    Acquired here rather than at the call sites because the ch_user routing above is tag-based and
+    so applies to every query this product issues, including ones that reach Datastore through
+    shared helpers like query_ai_events and TraceQueryRunner. A budget that call sites had to opt
+    into would cover only some of them, and would silently miss whatever gets added next.
+    """
+    if ch_user != DatastoreUser.LLM_ANALYTICS:
+        yield
+        return
+
+    with get_llm_analytics_rate_limiter().run(team_id=team_id):
+        yield
 
 
 @patchable
@@ -126,6 +287,7 @@ def sync_execute(
     readonly=False,
     sync_client: Optional[SyncClient] = None,
     ch_user: DatastoreUser = DatastoreUser.DEFAULT,
+    external_tables: Optional[list[DatastoreExternalTable]] = None,
 ):
     """
     Executes a synchronous query on the Datastore database based on predefined workloads and tags.
@@ -161,6 +323,8 @@ def sync_execute(
     sync_client (Optional[SyncClient]): A specific Datastore client to use for the query.
     ch_user (DatastoreUser): The user context for the query execution. Defaults to
         DatastoreUser.DEFAULT.
+    external_tables (Optional[list[DatastoreExternalTable]]): Query-scoped external data tables
+        sent alongside the query instead of inlined.
 
     Returns:
     Union[List[Tuple], int, None]: The result of the query. For select queries, it returns a list of
@@ -172,7 +336,7 @@ def sync_execute(
     if not workload:
         workload = Workload.DEFAULT
         # TODO replace this by assert, sorry, no messing with Datastore should be possible
-        logging.warning(f"workload is None", traceback.format_stack())
+        logger.warning("workload is None", stacktrace=traceback.format_stack())
     if TEST and flush:
         try:
             from insights.test.base import flush_persons_and_events
@@ -181,20 +345,27 @@ def sync_execute(
         except ModuleNotFoundError:  # when we run plugin server tests it tries to run above, ignore
             pass
     tags = get_query_tags()
-    is_personal_api_key = tags.access_method == AccessMethod.PERSONAL_API_KEY
+    # Any programmatic key auth — personal API key, project secret API key, or legacy team secret
+    # token — routes to the offline cluster as the API Datastore user. User-facing session/OAuth
+    # traffic stays on the online cluster. See is_api_key_access_method for the exact set.
+    is_api_key_auth = is_api_key_access_method(tags.access_method)
 
     # When someone uses an API key, always put their query to the offline cluster
     # Execute all celery tasks not directly set to be online on the offline cluster
-    if workload == Workload.DEFAULT and (is_personal_api_key or tags.kind == "celery"):
+    if workload == Workload.DEFAULT and (is_api_key_auth or tags.kind == "celery"):
         workload = Workload.OFFLINE
 
-    # Make sure we always have process_query_task on the online cluster
+    # Make sure we always have process_query_task on the online cluster.
+    # Workload.LOGS is exempt: it pins queries to the dedicated logs cluster, which is the
+    # only place the logs tables exist, so overriding it would send the query to a cluster
+    # that cannot answer it.
     tags_id: str = tags.id or ""
     if tags_id == "insights.tasks.tasks.process_query_task":
-        workload = Workload.ONLINE
-        ch_user = DatastoreUser.API if is_personal_api_key else DatastoreUser.APP
+        if workload != Workload.LOGS:
+            workload = Workload.ONLINE
+        ch_user = DatastoreUser.API if is_api_key_auth else DatastoreUser.APP
 
-    if tags.workload == Workload.ENDPOINTS:
+    if tags.workload == Workload.ENDPOINTS and workload != Workload.LOGS:
         workload = Workload.ENDPOINTS
 
     if workload == Workload.DEFAULT:
@@ -212,10 +383,17 @@ def sync_execute(
         **DATASTORE_PER_TEAM_QUERY_SETTINGS.get(str(team_id), {}),
         **(settings or {}),
     }
+
+    kill_switch_level = KillSwitchLevel.OFF if TEST else resolve_kill_switch_level(team_id)
+    if kill_switch_level != KillSwitchLevel.OFF and ch_user not in _KILL_SWITCH_EXEMPT_USERS:
+        overrides = _KILL_SWITCH_SETTINGS[kill_switch_level]
+        core_settings.update({k: min(core_settings.get(k, v), v) for k, v in overrides.items()})
+        tags.kill_switch = kill_switch_level.value
+
     tags.query_settings = core_settings
     query_type = tags.query_type or "Other"
     if ch_user == DatastoreUser.DEFAULT:
-        if is_personal_api_key:
+        if is_api_key_auth:
             ch_user = DatastoreUser.API
         elif tags.kind == "request" and "api/" in tags_id and "capture" not in tags_id:
             # process requests made to API from the PH app
@@ -223,17 +401,47 @@ def sync_execute(
         elif tags.feature == Feature.CACHE_WARMUP:
             ch_user = DatastoreUser.CACHE_WARMUP
 
-    # update tags if inside temporal (should not)
-    update_query_tags_with_temporal_info()
+    # update tags if inside temporal (should not). Only meaningful inside a Temporal activity,
+    # and being in one implies temporalio is imported — so the gate keeps the helper's module
+    # (aiohttp + pyarrow at module scope) off every other process's startup path.
+    if "temporalio" in sys.modules:
+        from insights.temporal.common.datastore import update_query_tags_with_temporal_info  # noqa: PLC0415
+
+        update_query_tags_with_temporal_info()
+
+    add_fallback_query_tags(tags)
 
     if tags.product == Product.MAX_AI or tags.service_name == "temporal-worker-max-ai":
         ch_user = DatastoreUser.MAX_AI
     elif tags.product == Product.ENDPOINTS:
         ch_user = DatastoreUser.ENDPOINTS
+    elif tags.product == Product.BILLING:
+        ch_user = DatastoreUser.BILLING
+    elif tags.product == Product.LLM_ANALYTICS and tags.kind == "temporal" and ch_user == DatastoreUser.DEFAULT:
+        # Temporal only, because the interactive AI observability API shares this product tag and
+        # belongs on APP rather than behind a batch concurrency budget. Callers that named a user
+        # keep it, so InsightsQL's own metadata lookups don't spend the budget meant for real queries.
+        ch_user = DatastoreUser.LLM_ANALYTICS
 
-    if (
+    # To humans and bots reading this, you might be tempted to add a catch-all tag to avoid
+    # hitting this error. Please don't do this. This error is to let us know about queries
+    # that are untagged. It's much better for it to throw in local dev, so that we know
+    # to tag it correctly, than it is to add an incorrect tag to avoid throwing.
+    # See `tag_queries` and `tags_context` in insights/datastore/query_tagging.py for how to
+    # attach tags.
+    # Please add whichever tags are relevant, in particular use helper functions like
+    # `get_request_analytics_properties` in insights/event_usage.py for anything that was an
+    # http request.
+    if DEBUG and not TEST and (tags.product is None or tags.feature is None):
+        missing = [name for name, value in (("product", tags.product), ("feature", tags.feature)) if value is None]
+        raise UntaggedQueryError(
+            f"sync_execute called with missing query tags: {', '.join(missing)}. "
+            "Wrap the call site in `with tags_context(product=..., feature=...):` or call "
+            "`tag_queries(product=..., feature=...)` from insights.datastore.query_tagging."
+        )
+    elif (
         not TEST
-        and ch_user == DatastoreUser.APP
+        and ch_user in (DatastoreUser.APP, DatastoreUser.DEFAULT)
         and (tags.team_id is None or tags.product is None or tags.kind is None or tags.query_type is None)
     ):
         missing = []
@@ -247,14 +455,19 @@ def sync_execute(
             missing.append("query_type")
 
         logger.warning(
-            "sync_execute called with missing query tags: %s\n%s",
-            ", ".join(missing),
-            "".join(traceback.format_stack()),
+            "sync_execute called with missing query tags",
+            tags=",".join(missing),
+            stacktrace="".join(traceback.format_stack()),
         )
+
+    source_file, source_line = get_caller_source()
+    query_log_tags = tags.model_copy(deep=True)
+    query_log_tags.source_file = source_file
+    query_log_tags.source_line = source_line
 
     settings = {
         **core_settings,
-        "log_comment": tags.to_json(),
+        "log_comment": query_log_tags.to_json(),
     }
     if workload == Workload.OFFLINE:
         # disabling hedged requests for offline queries reduces the likelihood of these queries bleeding over into the
@@ -263,7 +476,10 @@ def sync_execute(
         # these disruptions
         settings["use_hedged_requests"] = "0"
     elif workload == Workload.ONLINE and ch_user == DatastoreUser.APP:
-        settings["use_hedged_requests"] = "1"
+        if kill_switch_level != KillSwitchLevel.OFF:
+            settings["use_hedged_requests"] = "0"
+        else:
+            settings["use_hedged_requests"] = "1" if get_hedged_app_queries_enabled() else "0"
     start_time = perf_counter()
 
     try:
@@ -272,13 +488,17 @@ def sync_execute(
             access_method=tags.access_method or "other",
             chargeable=str(tags.chargeable or "0"),
         ).inc()
-        with sync_client or get_client_from_pool(workload, team_id, readonly, ch_user) as client:
+        with (
+            _llm_analytics_concurrency_slot(ch_user, team_id),
+            sync_client or get_client_from_pool(workload, team_id, readonly, ch_user) as client,
+        ):
             result = client.execute(
                 prepared_sql,
                 params=prepared_args,
                 settings=settings,
                 with_column_types=with_column_types,
                 query_id=query_id,
+                external_tables=external_tables,
             )
             if (
                 "INSERT INTO" in prepared_sql

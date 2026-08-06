@@ -16,7 +16,7 @@ services/mcp/
 │   ├── tools/                # Tool definitions and handlers
 │   ├── resources/            # MCP resources (skills, UI apps)
 │   │   ├── ui-apps.ts        # Registers UI apps with MCP server
-│   │   └── ui-apps-constants.ts  # URI constants for each UI app
+│   │   └── ui-apps.generated.ts  # URI constants for each UI app
 │   ├── ui-apps/
 │   │   ├── apps/             # UI apps (auto-discovered, one folder per app)
 │   │   │   ├── query-results/    # For query-run & insight-query tools
@@ -27,18 +27,18 @@ services/mcp/
 │   │   ├── hooks/            # Shared React hooks (useToolResult)
 │   │   └── styles/           # Base CSS with CSS variables
 │   └── schema/               # Zod schemas for API types
-├── ui-apps-dist/             # Built UI apps (generated, gitignored)
+├── public/ui-apps/           # Built UI app static assets (generated, gitignored)
 ├── dist/                     # npm package output (generated)
 ├── vite.ui-apps.config.ts    # Vite config for UI apps
 ├── tsup.config.ts            # tsup config for npm package
-└── wrangler.jsonc            # Cloudflare Worker config
+└── wrangler.jsonc            # Cloudflare edge-proxy worker config
 ```
 
 ## Local Development
 
-### 1. Start via mprocs (Recommended)
+### 1. Start via phrocs (Recommended)
 
-The MCP server is already configured in our mprocs setup. From the repo root:
+The MCP server is already configured in our phrocs setup. From the repo root:
 
 ```bash
 # Start the full stack (includes MCP server)
@@ -58,7 +58,7 @@ If you need to run the MCP server standalone:
 cd services/mcp
 
 # Copy env file if needed
-cp .dev.vars.example .dev.vars
+cp .env.example .env
 
 # Install dependencies
 pnpm install
@@ -66,7 +66,7 @@ pnpm install
 # Build UI apps (required before running)
 pnpm run build:ui-apps
 
-# Start the server
+# Start the server (needs a local Redis on port 6379 for session state)
 pnpm run dev
 ```
 
@@ -125,15 +125,15 @@ The UI should render inline showing charts or tables with a "View in Insights" l
 
 ### Hot Reload for UI Changes
 
-**Option 1: Using mprocs (Recommended)**
+**Option 1: Using phrocs (Recommended)**
 
-In mprocs, start both `mcp-ui-apps` and `mcp`:
+In phrocs, start both `mcp-ui-apps` and `mcp`:
 
 1. Press `a` to see all processes
 2. Navigate to `mcp-ui-apps` and press `s` to start (builds UI apps and watches for changes)
-3. Navigate to `mcp` and press `s` to start (runs wrangler dev server)
+3. Navigate to `mcp` and press `s` to start (runs the Hono dev server)
 
-The `mcp-ui-apps` process runs vite in watch mode. Changes to `src/ui-apps/` trigger rebuilds, and wrangler automatically reloads when `ui-apps-dist/` changes.
+The `mcp-ui-apps` process runs vite in watch mode. Changes to `src/ui-apps/` trigger rebuilds, and the server picks up the new bundles from `public/ui-apps/` on the next request.
 
 **Option 2: Manual terminals**
 
@@ -201,7 +201,6 @@ The visualization system is designed to be extractable to a standalone `@hanzo/q
 
 - **LineChart** - SVG line chart
 - **BarChart** - SVG vertical bar chart
-- **HorizontalBarChart** - SVG horizontal bar chart (for funnels)
 - **BigNumber** - Large number display
 - **DataTable** - HTML table with pagination
 
@@ -225,163 +224,126 @@ Default values are provided for light/dark mode via `prefers-color-scheme`.
 
 ### Adding UI to an Existing Tool
 
-To add UI visualization to a tool using an existing UI app:
+Use `withUiApp(appKey, config)` to wrap a tool definition with UI app metadata,
+`WithInsightsUrl<T>` for result types, and `withInsightsUrl(context, data, path)` to add the URL at runtime:
 
-1. Import the resource URI constant:
+```typescript
+import { withUiApp } from '@/resources/ui-apps'
+import { withInsightsUrl, type WithInsightsUrl } from '@/tools/tool-utils'
+import type { Context, ToolBase } from '@/tools/types'
 
-   ```typescript
-   import { QUERY_RESULTS_RESOURCE_URI } from '@/resources/ui-apps-constants'
+type Result = WithInsightsUrl<{ results: MyData[] }>
+
+export default (): ToolBase<typeof schema, Result> =>
+  withUiApp('my-app', {
+    name: 'my-tool',
+    schema,
+    handler: async (context, params) => {
+      const data = await fetchData(context, params)
+      return withInsightsUrl(context, { results: data }, '/my-feature')
+    },
+  })
+```
+
+`withUiApp` accepts the full tool config and injects `_meta` — you never construct `_meta` manually.
+The `appKey` parameter is type-checked against the generated `UiAppKey` union (invalid keys are compile-time errors).
+Valid keys are defined in `products/*/mcp/tools.yaml` under `ui_apps`.
+
+### Adding a New UI App (Generated)
+
+Most UI apps (detail and list views) are auto-generated from YAML.
+Add a `ui_apps` section to your product's `mcp/tools.yaml`.
+Most fields are derived by convention — you only specify what differs.
+
+**Detail app** — only `view_prop` is required (the prop name your view component accepts):
+
+```yaml
+ui_apps:
+  my-entity:
+    type: detail
+    view_prop: data
+```
+
+**List app** — only `detail_tool` is required (the tool to call when clicking an item):
+
+```yaml
+ui_apps:
+  my-entity-list:
+    type: list
+    detail_tool: my-entity-get
+```
+
+Convention defaults (derived from the app key and product directory):
+
+- `app_name` → `"Insights My Entity"` / `"Insights My Entity List"`
+- `component_import` → `products/{product}/mcp/apps`
+- `data_type` → `MyEntityData`, `view_component` → `MyEntityView`
+- `list_data_type` → `MyEntityListData`, `item_data_type` → `MyEntityData`
+- `click_prop` → `onMyEntityClick`, `detail_args` → `{ id: item.id }`
+- `item_name_field` → `name`, `entity_label` → `my entity`
+
+Override any field explicitly when the convention doesn't match
+(e.g. `click_prop: onEntityClick`, `detail_args: "{ entityId: item.id }"`).
+`detail_args` must match the target tool's actual parameter names —
+mismatching them (e.g. passing `flagId` to a tool that expects `id`) silently
+drops the argument instead of failing.
+
+**Link tools to apps** with `ui_app`:
+
+```yaml
+tools:
+  my-entity-get:
+    ui_app: my-entity # references the key in ui_apps above
+```
+
+Then regenerate and build:
+
+```bash
+pnpm run generate:ui-apps   # generates entry points + registry
+pnpm run build               # builds all apps
+```
+
+### Adding a New UI App (Custom / Manual)
+
+For apps that need fully custom logic (like `debug.tsx` or `query-results.tsx`):
+
+1. **Add a `type: custom` entry** in the YAML to register the URI and app name. If the app has a reusable view component, add `render_ui` so the umbrella tool can render it too:
+
+   ```yaml
+   ui_apps:
+     my-custom-app:
+       type: custom
+       app_name: My Custom App
+       description: Custom visualization for X
+       render_ui:
+         component_import: ../components/MyCustomView
+         view_component: MyCustomView
+         view_prop: data
    ```
 
-2. Add `_meta.ui` to the tool definition:
+2. **Create the entry point** manually at `src/ui-apps/apps/my-custom-app.tsx`.
+   This file will NOT be overwritten by the generator.
 
-   ```typescript
-   const tool = (): ToolBase<typeof schema> => ({
-     name: 'my-tool',
-     schema,
-     handler: myHandler,
-     _meta: {
-       ui: { resourceUri: QUERY_RESULTS_RESOURCE_URI },
-     },
-   })
-   ```
-
-3. Return data that the UI app expects (check the UI app's `main.tsx` for expected shape):
-
-   ```typescript
-   return {
-       query: params.query,
-       results: queryResult.data.results,
-       _insightsUrl: buildUrl(context, params.query)
-   }
-   ```
-
-### Adding a New UI App
-
-When you need a completely new visualization (not just adding a tool to an existing UI app):
-
-1. **Create the UI app folder** in `src/ui-apps/apps/`:
+3. **Regenerate** to pick up the registry entry:
 
    ```bash
-   mkdir -p src/ui-apps/apps/my-new-app
-   ```
-
-   Create `src/ui-apps/apps/my-new-app/index.html`:
-
-   ```html
-   <!DOCTYPE html>
-   <html lang="en">
-     <head>
-       <meta charset="UTF-8" />
-       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-       <title>My New App</title>
-     </head>
-     <body>
-       <div id="root"></div>
-       <script type="module" src="./main.tsx"></script>
-     </body>
-   </html>
-   ```
-
-   Create `src/ui-apps/apps/my-new-app/main.tsx`:
-
-   ```typescript
-   import { createRoot } from 'react-dom/client'
-   import { useToolResult } from '../../hooks/useToolResult'
-   import '../../styles/base.css'
-
-   function MyApp(): JSX.Element {
-       const { data, isConnected, error } = useToolResult({
-           appName: 'My New App',
-       })
-
-       if (error) return <div className="error">{error.message}</div>
-       if (!isConnected) return <div className="loading">Connecting...</div>
-       if (!data) return <div className="loading">Waiting for data</div>
-
-       // Render your visualization based on data
-       return <div>{JSON.stringify(data)}</div>
-   }
-
-   const container = document.getElementById('root')
-   if (container) {
-       createRoot(container).render(<MyApp />)
-   }
-   ```
-
-   The app is auto-discovered by the build script - no vite config changes needed.
-
-2. **Add URI constant** (`src/resources/ui-apps-constants.ts`):
-
-   ```typescript
-   /**
-    * My new app visualization.
-    * Used by: my-tool-name
-    */
-   export const MY_NEW_APP_RESOURCE_URI = 'ui://insights/my-new-app.html'
-   ```
-
-3. **Register the resource** (`src/resources/ui-apps.ts`):
-
-   ```typescript
-   import myNewAppHtml from '../../ui-apps-dist/src/ui-apps/apps/my-new-app/index.html'
-   import { MY_NEW_APP_RESOURCE_URI } from './ui-apps-constants'
-
-   export async function registerUiAppResources(server: McpServer): Promise<void> {
-     registerQueryResultsApp(server)
-     registerMyNewApp(server) // Add this
-   }
-
-   function registerMyNewApp(server: McpServer): void {
-     server.registerResource(
-       'My New App',
-       MY_NEW_APP_RESOURCE_URI,
-       {
-         mimeType: RESOURCE_MIME_TYPE,
-         description: 'Description of what this visualizes',
-       },
-       async (uri) => ({
-         contents: [
-           {
-             uri: uri.toString(),
-             mimeType: RESOURCE_MIME_TYPE,
-             text: myNewAppHtml,
-           },
-         ],
-       })
-     )
-   }
+   pnpm run generate:ui-apps
    ```
 
 4. **Reference from your tool**:
 
    ```typescript
-   import { MY_NEW_APP_RESOURCE_URI } from '@/resources/ui-apps-constants'
-
-   const tool = (): ToolBase<typeof schema> => ({
-     name: 'my-tool',
-     schema,
-     handler: myHandler,
-     _meta: {
-       ui: { resourceUri: MY_NEW_APP_RESOURCE_URI },
-     },
-   })
-   ```
-
-5. **Build and test**:
-
-   ```bash
-   pnpm run build
+   export default () => withUiApp('my-custom-app', { name: 'my-tool', schema, handler })
    ```
 
 ## Deployment
 
-The MCP server is deployed to Cloudflare Workers. Deployment is handled by CI/CD:
+The MCP server ships as the `insights-mcp` Docker image to Insights's US and EU Kubernetes clusters:
 
-- **CI** (`.github/workflows/ci-mcp.yml`): Runs tests on PRs and main
-- **Publish** (`.github/workflows/mcp-publish.yml`): Publishes to npm on version bump
+- **CI** (`.github/workflows/ci-mcp.yml`): Runs tests on PRs and master
+- **CD** (`.github/workflows/cd-mcp-image.yml`): Builds and pushes the image on master, then dispatches a deploy to the charts repo
 
-To deploy manually to Cloudflare:
+The Cloudflare edge-proxy worker in front of it (`mcp.hanzo.ai`, see [ARCHITECTURE.md](ARCHITECTURE.md)) is deployed separately:
 
 ```bash
 pnpm run deploy
@@ -393,7 +355,7 @@ pnpm run deploy
 
 The HTML import only works with wrangler's Text rule. If you see this error during `tsup` build, ensure:
 
-- Tools import from `@/resources/ui-apps-constants` (not `ui-apps.ts`)
+- Tools import `withUiApp` from `@/resources/ui-apps.generated` (not `ui-apps.ts`)
 - The HTML import is only in `src/resources/ui-apps.ts`
 
 ### UI not rendering in Claude Desktop

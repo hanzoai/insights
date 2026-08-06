@@ -6,7 +6,6 @@ from asgiref.sync import sync_to_async
 from parameterized import parameterized_class
 
 from insights.models import PropertyDefinition
-from insights.models.event_property import EventProperty
 from insights.temporal.cleanup_property_definitions.activities import (
     delete_property_definitions_from_datastore,
     delete_property_definitions_from_postgres,
@@ -21,6 +20,8 @@ from insights.temporal.tests.cleanup_property_definitions.conftest import (
     get_ch_property_definitions,
     insert_property_definition_to_ch,
 )
+
+from products.event_definitions.backend.models.event_property import EventProperty
 
 
 def create_property_definition(team, name: str, property_type: int) -> PropertyDefinition:

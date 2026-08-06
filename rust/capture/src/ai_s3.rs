@@ -1,9 +1,18 @@
 use async_trait::async_trait;
 use bytes::{BufMut, Bytes, BytesMut};
-use common_types::TeamId;
 use rand::Rng;
+use sha2::{Digest, Sha256};
 
 use crate::s3_client::{S3Client, S3Error};
+
+/// Hash a token for use in S3 keys.
+/// This prevents path traversal attacks from malicious tokens containing "../" or "/".
+/// Returns first 16 hex characters (64 bits) which is sufficient for this use case.
+fn hash_token(token: &str) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(token.as_bytes());
+    format!("{:x}", hasher.finalize())[..16].to_string()
+}
 
 /// A blob to upload with its metadata.
 pub struct BlobData {
@@ -40,7 +49,7 @@ pub trait BlobStorage: Send + Sync {
     /// Each range extracts a complete single-part multipart document.
     async fn upload_blobs(
         &self,
-        team_id: TeamId,
+        token: &str,
         event_uuid: &str,
         blobs: Vec<BlobData>,
     ) -> Result<UploadedBlobs, S3Error>;
@@ -204,14 +213,11 @@ impl BlobStorage for AiBlobStorage {
     /// Upload multiple blobs as a multipart/mixed document.
     /// Each blob becomes a standalone part that can be extracted via byte range.
     ///
-    /// `team_id` — the SERVER-authoritative tenant resolved from the token
-    /// (`team::TeamResolver`) — is the S3 partition key. It replaces the old
-    /// `hash(public token)` partition: the public token is caller-chosen, so a
-    /// forger could aim writes at any partition; the team id cannot be forged and,
-    /// being an integer, is also inherently free of `../` / `/` path-traversal.
+    /// `token` is used as the partition key in the S3 path.
+    /// TODO: Replace with team_id once secret key signing is implemented.
     async fn upload_blobs(
         &self,
-        team_id: TeamId,
+        token: &str,
         event_uuid: &str,
         blobs: Vec<BlobData>,
     ) -> Result<UploadedBlobs, S3Error> {
@@ -225,9 +231,10 @@ impl BlobStorage for AiBlobStorage {
 
         let doc = build_multipart_document(event_uuid, blobs);
 
-        // Partition by the validated team id (server-authoritative, integer ⇒
-        // traversal-safe). One team's AI blobs can never land under another's.
-        let key = format!("{}{}/{}", self.prefix, team_id, event_uuid);
+        // Upload with multipart/mixed content type
+        // Hash the token to prevent path traversal attacks from malicious input
+        let token_hash = hash_token(token);
+        let key = format!("{}{}/{}", self.prefix, token_hash, event_uuid);
         let content_type = format!("multipart/mixed; boundary={}", doc.boundary);
         self.s3_client
             .put_object(&key, doc.data, &content_type)
@@ -260,7 +267,7 @@ impl MockBlobStorage {
 impl BlobStorage for MockBlobStorage {
     async fn upload_blobs(
         &self,
-        team_id: TeamId,
+        token: &str,
         event_uuid: &str,
         blobs: Vec<BlobData>,
     ) -> Result<UploadedBlobs, S3Error> {
@@ -275,7 +282,8 @@ impl BlobStorage for MockBlobStorage {
         // Build document to get correct byte ranges (data is discarded for mock)
         let doc = build_multipart_document(event_uuid, blobs);
 
-        let key = format!("{}{}/{}", self.prefix, team_id, event_uuid);
+        let token_hash = hash_token(token);
+        let key = format!("{}{}/{}", self.prefix, token_hash, event_uuid);
         let base_url = format!("s3://{}/{}", self.bucket, key);
 
         Ok(UploadedBlobs {
@@ -354,37 +362,38 @@ mod tests {
     fn test_s3_url_format() {
         let bucket = "capture";
         let prefix = "llma/";
-        let team_id: TeamId = 42;
+        let token = "phc_test_token";
         let event_uuid = "550e8400-e29b-41d4-a716-446655440000";
 
-        let key = format!("{prefix}{team_id}/{event_uuid}");
+        let token_hash = hash_token(token);
+        let key = format!("{prefix}{token_hash}/{event_uuid}");
         let url = format!("s3://{bucket}/{key}");
 
-        // Partitioned by the validated team id — not the caller-chosen token.
+        // Token is hashed (first 16 chars) to prevent path traversal attacks
+        assert_eq!(token_hash, "0f25663a3e84ea94");
         assert_eq!(
             url,
-            "s3://capture/llma/42/550e8400-e29b-41d4-a716-446655440000"
+            "s3://capture/llma/0f25663a3e84ea94/550e8400-e29b-41d4-a716-446655440000"
         );
     }
 
-    #[tokio::test]
-    async fn test_blobs_partitioned_by_team_id() {
-        // Cross-tenant isolation invariant: distinct teams get distinct key
-        // prefixes, so one team's AI blobs can never collide with another's.
-        let store = MockBlobStorage::new("capture".to_string(), "llma/".to_string());
-        let blob = || {
-            vec![BlobData {
-                property_name: "$ai_input".to_string(),
-                content_type: Some("application/json".to_string()),
-                content_encoding: None,
-                data: Bytes::from_static(b"{}"),
-            }]
-        };
-        let a = store.upload_blobs(1, "evt", blob()).await.unwrap();
-        let b = store.upload_blobs(2, "evt", blob()).await.unwrap();
-        assert_eq!(a.base_url, "s3://capture/llma/1/evt");
-        assert_eq!(b.base_url, "s3://capture/llma/2/evt");
-        assert_ne!(a.base_url, b.base_url);
+    #[test]
+    fn test_hash_token_prevents_path_traversal() {
+        // Malicious tokens with path traversal attempts should be safely hashed
+        let malicious_tokens = [
+            "../../../etc/passwd",
+            "phc_test/../other_customer",
+            "token/with/slashes",
+            "token\0with\0nulls",
+        ];
+
+        for token in malicious_tokens {
+            let hashed = hash_token(token);
+            // Hash should be 16 hex characters (first 64 bits of SHA-256)
+            assert_eq!(hashed.len(), 16);
+            // Hash should only contain hex characters (safe for S3 keys)
+            assert!(hashed.chars().all(|c| c.is_ascii_hexdigit()));
+        }
     }
 
     #[test]

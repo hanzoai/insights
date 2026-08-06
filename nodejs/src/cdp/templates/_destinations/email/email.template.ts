@@ -16,7 +16,7 @@ export const template: InsightsFunctionTemplate = {
         throw Error(f'Email failed to send: {res.error}')
     }
     `,
-    code_language: 'fn',
+    code_language: 'script',
 
     inputs_schema: [
         {
@@ -30,11 +30,10 @@ export const template: InsightsFunctionTemplate = {
                     email: '{{ person.properties.email }}',
                     name: '',
                 },
-                from: {
-                    email: '',
-                    name: '',
-                },
+                from: {},
                 replyTo: '',
+                cc: '',
+                bcc: '',
                 subject: '',
                 preheader: '',
                 text: 'Hello from Insights!',

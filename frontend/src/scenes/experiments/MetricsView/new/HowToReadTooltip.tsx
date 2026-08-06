@@ -3,8 +3,8 @@ import { useValues } from 'kea'
 import { IconTrending } from '@hanzo/icons'
 import { Divider, Tooltip } from '@hanzo/elements'
 
-import { Link } from 'lib/elements/Link'
 import { IconTrendingDown } from 'lib/elements/icons'
+import { Link } from 'lib/elements/Link'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { ExperimentStatsMethod } from '~/types'
@@ -82,15 +82,20 @@ export function HowToReadTooltip(): JSX.Element {
                             className="rounded border object-contain mb-2"
                             alt="How to read metrics"
                         />
-                        <p className="text-sm mb-0">
-                            <Link to="https://hanzo.ai/docs/experiments/analyzing-results">
-                                Learn more about analyzing results
-                            </Link>
+                        <p className="mb-0">
+                            Insights uses its own statistical methods. Results may differ from other tools.
                         </p>
                     </div>
                 }
             >
-                <span className="text-xs text-secondary cursor-help">How to read</span>
+                <Link
+                    to="https://hanzo.ai/docs/experiments/analyzing-results"
+                    target="_blank"
+                    className="text-xs text-secondary cursor-help"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    How to read
+                </Link>
             </Tooltip>
         </>
     )

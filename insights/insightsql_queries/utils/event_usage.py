@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from insights.exceptions_capture import capture_exception
-from insights.kafka_client.client import KafkaProducer
+from insights.kafka_client.routing import get_producer
 from insights.kafka_client.topics import KAFKA_APP_METRICS2
 from insights.models.event.util import format_datastore_timestamp
 from insights.utils import cast_timestamp_or_now
@@ -34,7 +34,7 @@ def log_event_usage(
         "count": 1,
         "timestamp": format_datastore_timestamp(cast_timestamp_or_now(None)),
     }
-    KafkaProducer().produce(topic=KAFKA_APP_METRICS2, data=payload)
+    get_producer(topic=KAFKA_APP_METRICS2).produce(topic=KAFKA_APP_METRICS2, data=payload)
 
 
 def log_event_usage_from_query_metadata(

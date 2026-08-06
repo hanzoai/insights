@@ -1,8 +1,8 @@
-import { SceneIcon } from 'lib/components/SceneDashboardChoice/SceneIcon'
 import {
     DashboardCompatibleScenes,
     sceneDescription,
 } from 'lib/components/SceneDashboardChoice/sceneDashboardChoiceModalLogic'
+import { SceneIcon } from 'lib/components/SceneDashboardChoice/SceneIcon'
 import { Button } from 'lib/elements/Button'
 import { Scene } from 'scenes/sceneTypes'
 

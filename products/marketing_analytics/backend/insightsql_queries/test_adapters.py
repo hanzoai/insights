@@ -1,7 +1,9 @@
-from dataclasses import dataclass
+import time
+from collections.abc import Callable
+from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
-from typing import Union
+from typing import ClassVar, Union, cast
 
 import pytest
 from insights.test.base import BaseTest, DatastoreTestMixin
@@ -10,7 +12,7 @@ from unittest.mock import Mock, patch
 import structlog
 from parameterized import parameterized
 
-from insights.schema import DateRange, SourceMap
+from insights.schema import DateRange, MarketingAnalyticsDrillDownLevel, SourceMap
 
 from insights.insightsql import ast
 from insights.insightsql.query import execute_insightsql_query
@@ -19,17 +21,18 @@ from insights.insightsql.test.utils import pretty_print_in_tests
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 from insights.models.team.team import DEFAULT_CURRENCY
 
-from products.data_warehouse.backend.models import DataWarehouseTable, ExternalDataSource
-from products.data_warehouse.backend.models.credential import DataWarehouseCredential
-from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
 from products.marketing_analytics.backend.insightsql_queries.adapters.base import (
     BingAdsConfig,
     ExternalConfig,
     GoogleAdsConfig,
+    HierarchicalNativeAdsConfig,
     LinkedinAdsConfig,
+    MarketingSourceAdapter,
     MetaAdsConfig,
+    PinterestAdsConfig,
     QueryContext,
     RedditAdsConfig,
+    SnapchatAdsConfig,
     TikTokAdsConfig,
 )
 from products.marketing_analytics.backend.insightsql_queries.adapters.bigquery import BigQueryAdapter
@@ -37,6 +40,7 @@ from products.marketing_analytics.backend.insightsql_queries.adapters.bing_ads i
 from products.marketing_analytics.backend.insightsql_queries.adapters.google_ads import GoogleAdsAdapter
 from products.marketing_analytics.backend.insightsql_queries.adapters.linkedin_ads import LinkedinAdsAdapter
 from products.marketing_analytics.backend.insightsql_queries.adapters.meta_ads import MetaAdsAdapter
+from products.marketing_analytics.backend.insightsql_queries.adapters.pinterest_ads import PinterestAdsAdapter
 from products.marketing_analytics.backend.insightsql_queries.adapters.reddit_ads import RedditAdsAdapter
 from products.marketing_analytics.backend.insightsql_queries.adapters.self_managed import (
     AWSAdapter,
@@ -44,7 +48,14 @@ from products.marketing_analytics.backend.insightsql_queries.adapters.self_manag
     CloudflareR2Adapter,
     GoogleCloudAdapter,
 )
+from products.marketing_analytics.backend.insightsql_queries.adapters.snapchat_ads import SnapchatAdsAdapter
 from products.marketing_analytics.backend.insightsql_queries.adapters.tiktok_ads import TikTokAdsAdapter
+from products.warehouse_sources.backend.facade.models import (
+    DataWarehouseCredential,
+    DataWarehouseTable,
+    ExternalDataSource,
+)
+from products.warehouse_sources.backend.facade.testing import create_data_warehouse_table_from_csv
 
 # Test Constants
 TEST_DATE_FROM = "2024-01-01"
@@ -76,7 +87,7 @@ class TableInfo:
     credential: DataWarehouseCredential
     platform: str
     source_type: str
-    cleanup_fn: callable
+    cleanup_fn: Callable[[], None]
 
 
 @dataclass
@@ -94,6 +105,7 @@ class DataConfig:
 class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
     maxDiff = None
     CLASS_DATA_LEVEL_SETUP = False
+    test_data_configs: ClassVar[dict[str, DataConfig]]
 
     @classmethod
     def setUpClass(cls):
@@ -160,47 +172,23 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
                 },
             ),
             "linkedin_campaigns": DataConfig(
-                csv_filename="test/linkedin_ads/campaigns.csv",
-                table_name="linkedin_campaigns_table",
+                csv_filename="test/linkedin_ads/campaign_groups.csv",
+                table_name="linkedin_campaign_groups_table",
                 platform="LinkedIn Ads",
                 source_type="LinkedinAds",
                 bucket_suffix="linkedin_campaigns",
                 column_schema={
                     "id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                     "name": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "type": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "locale": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "status": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                     "account": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "version": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "cost_type": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "unit_cost": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "account_id": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "schema_valid": True},
+                    "status": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "total_budget": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                     "created_time": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "daily_budget": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "run_schedule": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "campaign_group": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "campaign_group_id": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "schema_valid": True},
-                    "last_modified_time": {
-                        "insightsql": "StringDatabaseField",
-                        "datastore": "String",
-                        "schema_valid": True,
-                    },
-                    "targeting_criteria": {
-                        "insightsql": "StringDatabaseField",
-                        "datastore": "String",
-                        "schema_valid": True,
-                    },
-                    "change_audit_stamps": {
-                        "insightsql": "StringDatabaseField",
-                        "datastore": "String",
-                        "schema_valid": True,
-                    },
                 },
             ),
             "linkedin_stats": DataConfig(
-                csv_filename="test/linkedin_ads/campaign_stats.csv",
-                table_name="linkedin_campaign_stats_table",
+                csv_filename="test/linkedin_ads/campaign_group_stats.csv",
+                table_name="linkedin_campaign_group_stats_table",
                 platform="LinkedIn Ads",
                 source_type="LinkedinAds",
                 bucket_suffix="linkedin_stats",
@@ -210,8 +198,13 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
                     "date_end": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                     "date_range": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                     "date_start": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
-                    "campaign_id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "campaign_group_id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                     "cost_in_usd": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
+                    "cost_in_local_currency": {
+                        "insightsql": "FloatDatabaseField",
+                        "datastore": "Float64",
+                        "schema_valid": True,
+                    },
                     "impressions": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
                     "video_views": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
                     "pivot_values": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
@@ -714,13 +707,132 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
                     "conversion_rate": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
                 },
             ),
+            "pinterest_campaigns": DataConfig(
+                csv_filename="test/pinterest_ads/campaigns.csv",
+                table_name="pinterestads_campaigns",
+                platform="Pinterest Ads",
+                source_type="PinterestAds",
+                bucket_suffix="pinterest_campaigns",
+                column_schema={
+                    "id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "name": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "status": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "objective_type": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "daily_spend_cap": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
+                    "lifetime_spend_cap": {
+                        "insightsql": "FloatDatabaseField",
+                        "datastore": "Float64",
+                        "schema_valid": True,
+                    },
+                    "start_time": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "end_time": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "tracking_urls": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "order_line_id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "campaign_format": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "ad_account_id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "created_time": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "updated_time": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                },
+            ),
+            "pinterest_campaign_analytics": DataConfig(
+                csv_filename="test/pinterest_ads/campaign_analytics.csv",
+                table_name="pinterestads_campaign_analytics",
+                platform="Pinterest Ads",
+                source_type="PinterestAds",
+                bucket_suffix="pinterest_campaign_analytics",
+                column_schema={
+                    "campaign_id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "date": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "spend_in_dollar": {
+                        "insightsql": "FloatDatabaseField",
+                        "datastore": "Float64",
+                        "schema_valid": True,
+                    },
+                    "spend_in_micro_dollar": {
+                        "insightsql": "FloatDatabaseField",
+                        "datastore": "Float64",
+                        "schema_valid": True,
+                    },
+                    "paid_impression": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "impression_1": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "schema_valid": True},
+                    "total_impression": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "clickthrough_1": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "schema_valid": True},
+                    "total_clickthrough": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "outbound_click_1": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "total_engagement": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "engagement_rate": {
+                        "insightsql": "FloatDatabaseField",
+                        "datastore": "Float64",
+                        "schema_valid": True,
+                    },
+                    "ctr": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
+                    "ectr": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
+                    "cpc_in_micro_dollar": {
+                        "insightsql": "FloatDatabaseField",
+                        "datastore": "Float64",
+                        "schema_valid": True,
+                    },
+                    "ecpc_in_dollar": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
+                    "cpm_in_dollar": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
+                    "total_conversions": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "total_checkout": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "schema_valid": True},
+                    "total_checkout_value_in_micro_dollar": {
+                        "insightsql": "FloatDatabaseField",
+                        "datastore": "Float64",
+                        "schema_valid": True,
+                    },
+                    "checkout_roas": {"insightsql": "FloatDatabaseField", "datastore": "Float64", "schema_valid": True},
+                    "total_signup": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "schema_valid": True},
+                    "total_lead": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "schema_valid": True},
+                    "total_page_visit": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "total_video_3sec_views": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "total_video_mrc_views": {
+                        "insightsql": "IntegerDatabaseField",
+                        "datastore": "Int64",
+                        "schema_valid": True,
+                    },
+                    "currency": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                },
+            ),
         }
 
     def setUp(self):
         super().setUp()
         self.context = self._create_test_context()
         self.test_tables: dict[str, TableInfo] = {}
-        self._cleanup_functions: list[callable] = []
+        self._cleanup_functions: list[Callable[[], None]] = []
 
     def tearDown(self):
         for cleanup_fn in self._cleanup_functions:
@@ -782,7 +894,8 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         self.test_tables[table_key] = table_info
         self._cleanup_functions.append(cleanup_fn)
 
-        logger.info("created_table", table_name=config.table_name, row_count=len(csv_df))
+        row_count = 0 if csv_df is None else len(csv_df)
+        logger.info("created_table", table_name=config.table_name, row_count=row_count)
         return table_info
 
     def _create_mock_table(self, name: str, source_type: str) -> Mock:
@@ -829,6 +942,7 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
 
         assert result is not None, "Query execution should not return None"
         assert result.results is not None, "Query results should not be None"
+        assert result.columns is not None, "Query columns should not be None"
         assert len(result.columns) == EXPECTED_COLUMN_COUNT, f"Should have {EXPECTED_COLUMN_COUNT} columns"
 
         return result.results
@@ -959,8 +1073,8 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         assert isinstance(result.errors, list), "GoogleCloudAdapter should return list of errors"
 
     def test_linkedin_ads_adapter_validation_consistency(self):
-        campaign_table = self._create_mock_table("linkedin_campaigns_table", "linkedin_ads")
-        stats_table = self._create_mock_table("linkedin_campaign_stats_table", "linkedin_ads")
+        campaign_table = self._create_mock_table("linkedin_campaign_groups_table", "linkedin_ads")
+        stats_table = self._create_mock_table("linkedin_campaign_group_stats_table", "linkedin_ads")
 
         config = LinkedinAdsConfig(
             campaign_table=campaign_table,
@@ -1009,6 +1123,453 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         assert result.is_valid, "MetaAdsAdapter validation should succeed"
         assert isinstance(result.errors, list), "MetaAdsAdapter should return list of errors"
 
+    @parameterized.expand(
+        [
+            # (level, has_adset_tables, has_ad_tables, expected_supports)
+            ("CHANNEL_no_extra", MarketingAnalyticsDrillDownLevel.CHANNEL, False, False, True),
+            ("CHANNEL_with_adset", MarketingAnalyticsDrillDownLevel.CHANNEL, True, False, True),
+            ("CAMPAIGN_no_extra", MarketingAnalyticsDrillDownLevel.CAMPAIGN, False, False, True),
+            ("MEDIUM_no_extra", MarketingAnalyticsDrillDownLevel.MEDIUM, False, False, True),
+            ("AD_GROUP_no_adset", MarketingAnalyticsDrillDownLevel.AD_GROUP, False, False, False),
+            ("AD_GROUP_with_adset", MarketingAnalyticsDrillDownLevel.AD_GROUP, True, False, True),
+            ("AD_GROUP_with_adset_and_ad", MarketingAnalyticsDrillDownLevel.AD_GROUP, True, True, True),
+            ("AD_no_ad_tables", MarketingAnalyticsDrillDownLevel.AD, False, False, False),
+            ("AD_with_only_adset", MarketingAnalyticsDrillDownLevel.AD, True, False, False),
+            ("AD_with_ad_tables", MarketingAnalyticsDrillDownLevel.AD, False, True, True),
+            ("AD_full_hierarchy", MarketingAnalyticsDrillDownLevel.AD, True, True, True),
+        ]
+    )
+    def test_meta_ads_supports_level(self, _name, level, has_adset_tables, has_ad_tables, expected):
+        """`supports_level` gates whether the adapter emits a query at the given level.
+        Without the adset/ad warehouse tables, AD_GROUP/AD must return False so the
+        factory skips this adapter and the union falls back to other sources or empty.
+        """
+        campaign_table = self._create_mock_table("metaads_campaigns", "MetaAds")
+        stats_table = self._create_mock_table("metaads_campaign_stats", "MetaAds")
+        adset_table = self._create_mock_table("metaads_adsets", "MetaAds") if has_adset_tables else None
+        adset_stats_table = self._create_mock_table("metaads_adset_stats", "MetaAds") if has_adset_tables else None
+        ad_table = self._create_mock_table("metaads_ads", "MetaAds") if has_ad_tables else None
+        ad_stats_table = self._create_mock_table("metaads_ad_stats", "MetaAds") if has_ad_tables else None
+
+        config = MetaAdsConfig(
+            campaign_table=campaign_table,
+            stats_table=stats_table,
+            adset_table=adset_table,
+            adset_stats_table=adset_stats_table,
+            ad_table=ad_table,
+            ad_stats_table=ad_stats_table,
+            source_type="MetaAds",
+            source_id="test_supports_level",
+        )
+
+        adapter = MetaAdsAdapter(config=config, context=self.context)
+        assert adapter.supports_level(level) == expected
+
+    def _build_meta_adapter_at_level(self, level: MarketingAnalyticsDrillDownLevel) -> MetaAdsAdapter:
+        """Helper for hierarchy field tests — wires up a Meta adapter with all six tables
+        and a context locked to `level`."""
+        config = MetaAdsConfig(
+            campaign_table=self._create_mock_table("metaads_campaigns", "MetaAds"),
+            stats_table=self._create_mock_table("metaads_campaign_stats", "MetaAds"),
+            adset_table=self._create_mock_table("metaads_adsets", "MetaAds"),
+            adset_stats_table=self._create_mock_table("metaads_adset_stats", "MetaAds"),
+            ad_table=self._create_mock_table("metaads_ads", "MetaAds"),
+            ad_stats_table=self._create_mock_table("metaads_ad_stats", "MetaAds"),
+            source_type="MetaAds",
+            source_id="orphan_test",
+        )
+        context = replace(self.context, drill_down_level=level)
+        return MetaAdsAdapter(config=config, context=context)
+
+    @parameterized.expand(
+        [
+            ("ad_group", MarketingAnalyticsDrillDownLevel.AD_GROUP),
+            ("ad", MarketingAnalyticsDrillDownLevel.AD),
+        ]
+    )
+    @pytest.mark.usefixtures("unittest_snapshot")
+    def test_meta_ads_query_at_hierarchy_levels(self, _name, level):
+        """Snapshot of the Meta query AST at AD_GROUP / AD. Captures the FROM chain
+        (entity → stats → adsets → campaigns), 13-column SELECT with hierarchy fields,
+        GROUP BY covering every non-aggregate column, and the orphan-fallback coalesce
+        on LEFT JOINed parents. Any regression in any of these surfaces as a snapshot diff.
+        """
+        adapter = self._build_meta_adapter_at_level(level)
+        query = adapter.build_query()
+        assert query is not None
+        assert pretty_print_in_tests(query.to_insightsql(), self.team.pk) == self.snapshot
+
+    @parameterized.expand(
+        [
+            # (level, getter_name, expected_to_use_coalesce)
+            # At AD_GROUP, adsets is the FROM table — never NULL → no coalesce needed.
+            ("AD_GROUP_ad_group_name", MarketingAnalyticsDrillDownLevel.AD_GROUP, "_get_ad_group_name_field", False),
+            ("AD_GROUP_ad_group_id", MarketingAnalyticsDrillDownLevel.AD_GROUP, "_get_ad_group_id_field", False),
+            # At AD_GROUP, campaigns is LEFT JOINed → coalesce to surface orphans.
+            ("AD_GROUP_campaign_name", MarketingAnalyticsDrillDownLevel.AD_GROUP, "_get_campaign_name_field", True),
+            ("AD_GROUP_campaign_id", MarketingAnalyticsDrillDownLevel.AD_GROUP, "_get_campaign_id_field", True),
+            # At AD, adsets and campaigns are both LEFT JOINed → coalesce both.
+            ("AD_ad_group_name", MarketingAnalyticsDrillDownLevel.AD, "_get_ad_group_name_field", True),
+            ("AD_ad_group_id", MarketingAnalyticsDrillDownLevel.AD, "_get_ad_group_id_field", True),
+            ("AD_campaign_name", MarketingAnalyticsDrillDownLevel.AD, "_get_campaign_name_field", True),
+            ("AD_campaign_id", MarketingAnalyticsDrillDownLevel.AD, "_get_campaign_id_field", True),
+            # ads at AD level is the FROM table — never NULL → no coalesce.
+            ("AD_ad_name", MarketingAnalyticsDrillDownLevel.AD, "_get_ad_name_field", False),
+            ("AD_ad_id", MarketingAnalyticsDrillDownLevel.AD, "_get_ad_id_field", False),
+        ]
+    )
+    def test_meta_ads_orphan_fallback_for_left_joined_tables(self, _name, level, getter_name, expected_coalesce):
+        """Hierarchy fields read from LEFT JOINed parent tables can produce NULL when
+        the parent entity has been deleted (orphan ad pointing to a removed adset, or
+        ad-group pointing to a removed campaign). Without a coalesce, all orphans
+        collapse into a single unlabelled NULL row in the GROUP BY. We wrap those
+        fields with `coalesce(toString(...), 'Unknown ...')` so orphans surface as
+        one explicit row instead of silently disappearing.
+
+        Fields read from the FROM table at the level (adsets at AD_GROUP, ads at AD)
+        can never be NULL and must NOT have the coalesce wrapper.
+        """
+        adapter = self._build_meta_adapter_at_level(level)
+        expr = getattr(adapter, getter_name)()
+
+        is_coalesce = isinstance(expr, ast.Call) and expr.name == "coalesce"
+        assert is_coalesce == expected_coalesce, (
+            f"At {level}, {getter_name}() {'should' if expected_coalesce else 'should NOT'} "
+            f"be wrapped with coalesce — got {ast.dump(expr) if hasattr(ast, 'dump') else expr}"
+        )
+
+    @parameterized.expand(
+        [
+            # (level, expected_match_key_is_empty)
+            # Levels with excludes_conversion_goals=True: AD_GROUP / AD only.
+            ("CHANNEL", MarketingAnalyticsDrillDownLevel.CHANNEL, False),
+            ("SOURCE", MarketingAnalyticsDrillDownLevel.SOURCE, False),
+            ("CAMPAIGN", MarketingAnalyticsDrillDownLevel.CAMPAIGN, False),
+            ("MEDIUM", MarketingAnalyticsDrillDownLevel.MEDIUM, False),
+            ("CONTENT", MarketingAnalyticsDrillDownLevel.CONTENT, False),
+            ("TERM", MarketingAnalyticsDrillDownLevel.TERM, False),
+            ("AD_GROUP", MarketingAnalyticsDrillDownLevel.AD_GROUP, True),
+            ("AD", MarketingAnalyticsDrillDownLevel.AD, True),
+        ]
+    )
+    def test_match_key_empty_at_excludes_conversion_goals_levels(self, _name, level, expected_empty):
+        """match_key is the join key against unified_conversion_goals. At drill-down levels
+        where that join is skipped (excludes_conversion_goals=True), the match key is unused
+        — emitting it as `''` rather than the campaign name avoids a confusing duplicate
+        column and saves wire bytes. The check lives in MarketingSourceAdapter base, so this
+        test covers the cross-cutting behavior without binding it to a specific adapter."""
+        adapter = self._build_meta_adapter_at_level(level)
+        match_key = adapter._get_match_key_expr()
+        is_empty_constant = isinstance(match_key, ast.Constant) and match_key.value == ""
+        assert is_empty_constant == expected_empty, (
+            f"At {level}, _get_match_key_expr() expected to be {'empty Constant' if expected_empty else 'a real expression'}, "
+            f"got {match_key!r}"
+        )
+
+    # Table-name suffixes match what the warehouse import pipelines produce; the
+    # `levels` tuple marks which drill-down levels the source supports.
+    _ALL_AD_LEVELS = (MarketingAnalyticsDrillDownLevel.AD_GROUP, MarketingAnalyticsDrillDownLevel.AD)
+    _NATIVE_HIERARCHY_FIXTURES: ClassVar[list] = [
+        (
+            "google",
+            GoogleAdsAdapter,
+            GoogleAdsConfig,
+            "GoogleAds",
+            {
+                "campaign": "googleads_campaign",
+                "stats": "googleads_campaign_stats",
+                "adset": "googleads_ad_group",
+                "adset_stats": "googleads_ad_group_stats",
+                "ad": "googleads_ad",
+                "ad_stats": "googleads_ad_stats",
+            },
+            _ALL_AD_LEVELS,
+        ),
+        (
+            "google_no_adset",
+            GoogleAdsAdapter,
+            GoogleAdsConfig,
+            "GoogleAds",
+            {
+                "campaign": "googleads_campaign",
+                "stats": "googleads_campaign_stats",
+                "ad": "googleads_ad",
+                "ad_stats": "googleads_ad_stats",
+            },
+            (MarketingAnalyticsDrillDownLevel.AD,),
+        ),
+        (
+            "tiktok",
+            TikTokAdsAdapter,
+            TikTokAdsConfig,
+            "TikTokAds",
+            {
+                "campaign": "tiktokads_campaigns",
+                "stats": "tiktokads_campaign_report",
+                "adset": "tiktokads_ad_groups",
+                "adset_stats": "tiktokads_ad_group_report",
+                "ad": "tiktokads_ads",
+                "ad_stats": "tiktokads_ad_report",
+            },
+            _ALL_AD_LEVELS,
+        ),
+        (
+            "reddit",
+            RedditAdsAdapter,
+            RedditAdsConfig,
+            "RedditAds",
+            {
+                "campaign": "redditads_campaigns",
+                "stats": "redditads_campaign_report",
+                "adset": "redditads_ad_groups",
+                "adset_stats": "redditads_ad_group_report",
+                "ad": "redditads_ads",
+                "ad_stats": "redditads_ad_report",
+            },
+            _ALL_AD_LEVELS,
+        ),
+        (
+            "pinterest",
+            PinterestAdsAdapter,
+            PinterestAdsConfig,
+            "PinterestAds",
+            {
+                "campaign": "pinterestads_campaigns",
+                "stats": "pinterestads_campaign_analytics",
+                "adset": "pinterestads_ad_groups",
+                "adset_stats": "pinterestads_ad_group_analytics",
+                "ad": "pinterestads_ads",
+                "ad_stats": "pinterestads_ad_analytics",
+            },
+            _ALL_AD_LEVELS,
+        ),
+        (
+            "snapchat",
+            SnapchatAdsAdapter,
+            SnapchatAdsConfig,
+            "SnapchatAds",
+            {
+                "campaign": "snapchatads_campaigns",
+                "stats": "snapchatads_campaign_stats_daily",
+                "adset": "snapchatads_ad_squads",
+                "adset_stats": "snapchatads_ad_squad_stats_daily",
+                "ad": "snapchatads_ads",
+                "ad_stats": "snapchatads_ad_stats_daily",
+            },
+            _ALL_AD_LEVELS,
+        ),
+        (
+            # LinkedIn's `campaigns` resource is conceptually an ad group; `creatives` an ad.
+            "linkedin",
+            LinkedinAdsAdapter,
+            LinkedinAdsConfig,
+            "LinkedinAds",
+            {
+                "campaign": "linkedinads_campaign_groups",
+                "stats": "linkedinads_campaign_group_stats",
+                "adset": "linkedinads_campaigns",
+                "adset_stats": "linkedinads_campaign_stats",
+                "ad": "linkedinads_creatives",
+                "ad_stats": "linkedinads_creative_stats",
+            },
+            _ALL_AD_LEVELS,
+        ),
+        (
+            # Bing: entity and stats slots share one table (unified-report mode).
+            "bing",
+            BingAdsAdapter,
+            BingAdsConfig,
+            "BingAds",
+            {
+                "campaign": "bingads_campaigns",
+                "stats": "bingads_campaign_performance_report",
+                "adset": "bingads_ad_group_performance_report",
+                "adset_stats": "bingads_ad_group_performance_report",
+                "ad": "bingads_ad_performance_report",
+                "ad_stats": "bingads_ad_performance_report",
+            },
+            _ALL_AD_LEVELS,
+        ),
+    ]
+
+    def _build_hierarchical_adapter_at_level(
+        self,
+        adapter_class: type[MarketingSourceAdapter],
+        config_class: type[HierarchicalNativeAdsConfig],
+        source_type: str,
+        table_names: dict[str, str],
+        level: MarketingAnalyticsDrillDownLevel,
+    ) -> MarketingSourceAdapter:
+        config = config_class(
+            campaign_table=self._create_mock_table(table_names["campaign"], source_type),
+            stats_table=self._create_mock_table(table_names["stats"], source_type),
+            adset_table=self._create_mock_table(table_names["adset"], source_type) if "adset" in table_names else None,
+            adset_stats_table=self._create_mock_table(table_names["adset_stats"], source_type)
+            if "adset_stats" in table_names
+            else None,
+            ad_table=self._create_mock_table(table_names["ad"], source_type) if "ad" in table_names else None,
+            ad_stats_table=self._create_mock_table(table_names["ad_stats"], source_type)
+            if "ad_stats" in table_names
+            else None,
+            source_type=source_type,
+            source_id=f"{source_type}_hierarchy_test",
+        )
+        context = replace(self.context, drill_down_level=level)
+        return adapter_class(config=config, context=context)
+
+    @parameterized.expand(
+        [
+            (f"{name}_{level.value}", adapter_class, config_class, source_type, table_names, level)
+            for (name, adapter_class, config_class, source_type, table_names, levels) in _NATIVE_HIERARCHY_FIXTURES
+            for level in levels
+        ]
+    )
+    @pytest.mark.usefixtures("unittest_snapshot")
+    def test_native_adapter_query_at_hierarchy_levels(
+        self, _name, adapter_class, config_class, source_type, table_names, level
+    ):
+        """Snapshot the AST emitted at AD_GROUP / AD for every hierarchical native adapter.
+        Captures FROM chain (entity → stats → parent joins), 13-column SELECT with hierarchy
+        fields, GROUP BY covering every non-aggregate column, and orphan-fallback coalesce on
+        LEFT JOINed parents — any regression surfaces as a snapshot diff."""
+        adapter = self._build_hierarchical_adapter_at_level(
+            adapter_class, config_class, source_type, table_names, level
+        )
+        query = adapter.build_query()
+        assert query is not None
+        assert pretty_print_in_tests(query.to_insightsql(), self.team.pk) == self.snapshot
+
+    def test_partial_hierarchy_supports_ad_but_not_ad_group(self):
+        adapter = self._build_hierarchical_adapter_at_level(
+            GoogleAdsAdapter,
+            GoogleAdsConfig,
+            "GoogleAds",
+            {
+                "campaign": "googleads_campaign",
+                "stats": "googleads_campaign_stats",
+                "ad": "googleads_ad",
+                "ad_stats": "googleads_ad_stats",
+            },
+            MarketingAnalyticsDrillDownLevel.AD,
+        )
+        assert adapter.supports_level(MarketingAnalyticsDrillDownLevel.CAMPAIGN)
+        assert adapter.supports_level(MarketingAnalyticsDrillDownLevel.AD)
+        assert not adapter.supports_level(MarketingAnalyticsDrillDownLevel.AD_GROUP)
+
+    @parameterized.expand(
+        [
+            # (name, ad_table_columns, expected fallback columns in priority order)
+            (
+                "all_columns_present",
+                [
+                    "ad_group_ad_ad_id",
+                    "ad_group_ad_ad_name",
+                    "ad_group_ad_ad_expanded_text_ad_headline_part1",
+                    "ad_group_ad_ad_text_ad_headline",
+                    "ad_group_ad_ad_image_ad_name",
+                ],
+                [
+                    "ad_group_ad_ad_name",
+                    "ad_group_ad_ad_expanded_text_ad_headline_part1",
+                    "ad_group_ad_ad_text_ad_headline",
+                    "ad_group_ad_ad_image_ad_name",
+                ],
+            ),
+            # Legacy sync missing the optional headline columns — only the
+            # always-present id and whatever exists should be coalesced.
+            (
+                "only_name_and_id",
+                ["ad_group_ad_ad_id", "ad_group_ad_ad_name"],
+                ["ad_group_ad_ad_name"],
+            ),
+        ]
+    )
+    def test_google_ad_name_falls_back_when_ad_name_empty(self, _name, ad_columns, expected_label_columns):
+        # Google leaves `ad.name` empty for search/text/responsive ads, so the
+        # Ad column coalesces across the type-specific headline columns and
+        # finally the ad id — never rendering blank.
+        ad_table = self._create_mock_table("googleads_ad", "GoogleAds")
+        ad_table.columns = {col: {"datastore": "Nullable(String)"} for col in ad_columns}
+        config = GoogleAdsConfig(
+            campaign_table=self._create_mock_table("googleads_campaign", "GoogleAds"),
+            stats_table=self._create_mock_table("googleads_campaign_stats", "GoogleAds"),
+            ad_table=ad_table,
+            ad_stats_table=self._create_mock_table("googleads_ad_stats", "GoogleAds"),
+            source_type="GoogleAds",
+            source_id="google_ad_name_test",
+        )
+        context = replace(self.context, drill_down_level=MarketingAnalyticsDrillDownLevel.AD)
+        adapter = GoogleAdsAdapter(config=config, context=context)
+
+        name_insightsql = adapter._get_ad_name_field().to_insightsql()
+
+        # Coalesces, in declared priority order, every label column that exists.
+        assert "coalesce(" in name_insightsql
+        for column in expected_label_columns:
+            assert column in name_insightsql, f"expected {column} in fallback: {name_insightsql}"
+        # The ad id is always the last-resort fallback so the column is never blank.
+        assert name_insightsql.rstrip().endswith("toString(googleads_ad.ad_group_ad_ad_id))")
+
+    def test_google_ad_name_extracts_responsive_search_ad_headline(self):
+        # RSA headlines live in a double-encoded JSON column; the first
+        # headline's `text` is pulled out via two nested JSONExtractString
+        # calls and joins the fallback chain ahead of the ad id.
+        ad_table = self._create_mock_table("googleads_ad", "GoogleAds")
+        ad_table.columns = {
+            "ad_group_ad_ad_id": {"datastore": "Nullable(String)"},
+            "ad_group_ad_ad_responsive_search_ad_headlines": {"datastore": "Nullable(String)"},
+        }
+        config = GoogleAdsConfig(
+            campaign_table=self._create_mock_table("googleads_campaign", "GoogleAds"),
+            stats_table=self._create_mock_table("googleads_campaign_stats", "GoogleAds"),
+            ad_table=ad_table,
+            ad_stats_table=self._create_mock_table("googleads_ad_stats", "GoogleAds"),
+            source_type="GoogleAds",
+            source_id="google_ad_name_rsa_test",
+        )
+        context = replace(self.context, drill_down_level=MarketingAnalyticsDrillDownLevel.AD)
+        adapter = GoogleAdsAdapter(config=config, context=context)
+
+        name_insightsql = adapter._get_ad_name_field().to_insightsql()
+
+        assert (
+            "JSONExtractString(JSONExtractString("
+            "googleads_ad.ad_group_ad_ad_responsive_search_ad_headlines, 1), 'text')" in name_insightsql
+        )
+        assert name_insightsql.rstrip().endswith("toString(googleads_ad.ad_group_ad_ad_id))")
+
+    def _build_google_ad_level_adapter(
+        self, ad_columns: list[str], level: MarketingAnalyticsDrillDownLevel
+    ) -> GoogleAdsAdapter:
+        ad_table = self._create_mock_table("googleads_ad", "GoogleAds")
+        ad_table.columns = {col: {"datastore": "Nullable(String)"} for col in ad_columns}
+        config = GoogleAdsConfig(
+            campaign_table=self._create_mock_table("googleads_campaign", "GoogleAds"),
+            stats_table=self._create_mock_table("googleads_campaign_stats", "GoogleAds"),
+            ad_table=ad_table,
+            ad_stats_table=self._create_mock_table("googleads_ad_stats", "GoogleAds"),
+            source_type="GoogleAds",
+            source_id="google_ad_name_test",
+        )
+        return GoogleAdsAdapter(config=config, context=replace(self.context, drill_down_level=level))
+
+    @parameterized.expand(
+        [
+            # At AD level with only the id column present, the coalesce
+            # collapses to a bare toString — no one-argument coalesce wrapper.
+            ("at_ad_level", MarketingAnalyticsDrillDownLevel.AD, "toString(googleads_ad.ad_group_ad_ad_id)"),
+            # Below the AD drill-down, the ad-name field must be NULL, mirroring
+            # the base adapter contract for hierarchy fields.
+            ("below_ad_level", MarketingAnalyticsDrillDownLevel.CAMPAIGN, None),
+        ]
+    )
+    def test_google_ad_name_with_only_id_column(self, _name, level, expected_insightsql):
+        field = self._build_google_ad_level_adapter(["ad_group_ad_ad_id"], level)._get_ad_name_field()
+        if expected_insightsql is None:
+            assert isinstance(field, ast.Constant) and field.value is None
+        else:
+            assert field.to_insightsql() == expected_insightsql
+
     def test_tiktok_ads_adapter_validation_consistency(self):
         campaign_table = self._create_mock_table("tiktokads_campaigns", "TikTokAds")
         stats_table = self._create_mock_table("tiktokads_campaign_report", "TikTokAds")
@@ -1042,6 +1603,70 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
 
         assert result.is_valid, "BingAdsAdapter validation should succeed"
         assert isinstance(result.errors, list), "BingAdsAdapter should return list of errors"
+
+    def test_bing_ads_returns_zero_when_revenue_column_missing(self):
+        campaign_table = self._create_mock_table("bingads_campaigns", "BingAds")
+        stats_table = self._create_mock_table("bingads_campaign_performance_report", "BingAds")
+        stats_table.columns = {col: {"valid": True} for col in ("impressions", "clicks", "spend", "conversions")}
+
+        config = BingAdsConfig(
+            campaign_table=campaign_table,
+            stats_table=stats_table,
+            source_type="BingAds",
+            source_id="test_missing_revenue",
+        )
+        adapter = BingAdsAdapter(config=config, context=self.context)
+        expr = adapter._get_reported_conversion_value_field()
+
+        assert isinstance(expr, ast.Call)
+        assert expr.name == "toFloat"
+        assert isinstance(expr.args[0], ast.Constant)
+        assert expr.args[0].value == 0
+        assert adapter.build_query() is not None, "BingAdsAdapter should build a query without the revenue column"
+
+    @parameterized.expand(
+        [
+            ("total_impression", "_get_impressions_field"),
+            ("total_clickthrough", "_get_clicks_field"),
+            ("spend_in_dollar", "_get_cost_field"),
+        ]
+    )
+    def test_pinterest_ads_returns_zero_when_stats_column_missing(self, missing_column, field_method):
+        campaign_table = self._create_mock_table("pinterestads_campaigns", "PinterestAds")
+        stats_table = self._create_mock_table("pinterestads_campaign_analytics", "PinterestAds")
+        all_columns = ("total_impression", "total_clickthrough", "spend_in_dollar")
+        stats_table.columns = {col: {"valid": True} for col in all_columns if col != missing_column}
+
+        config = PinterestAdsConfig(
+            campaign_table=campaign_table,
+            stats_table=stats_table,
+            source_type="PinterestAds",
+            source_id="test_missing_column",
+        )
+        adapter = PinterestAdsAdapter(config=config, context=self.context)
+        expr = getattr(adapter, field_method)()
+
+        assert isinstance(expr, ast.Call)
+        assert expr.name == "toFloat"
+        assert isinstance(expr.args[0], ast.Constant)
+        assert expr.args[0].value == 0
+
+    def test_pinterest_ads_adapter_validation_consistency(self):
+        campaign_table = self._create_mock_table("pinterestads_campaigns", "PinterestAds")
+        stats_table = self._create_mock_table("pinterestads_campaign_analytics", "PinterestAds")
+
+        config = PinterestAdsConfig(
+            campaign_table=campaign_table,
+            stats_table=stats_table,
+            source_type="PinterestAds",
+            source_id="test_consistency",
+        )
+
+        adapter = PinterestAdsAdapter(config=config, context=self.context)
+        result = adapter.validate()
+
+        assert result.is_valid, "PinterestAdsAdapter validation should succeed"
+        assert isinstance(result.errors, list), "PinterestAdsAdapter should return list of errors"
 
     # ================================================================
     # QUERY GENERATION TESTS
@@ -1178,6 +1803,7 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
     def test_bing_ads_native_query_generation(self):
         campaign_table = self._create_mock_table("bing_campaigns", "BingAds")
         stats_table = self._create_mock_table("bing_campaign_performance_report", "BingAds")
+        stats_table.columns = {"revenue": {"valid": True}}
 
         config = BingAdsConfig(
             campaign_table=campaign_table,
@@ -1191,6 +1817,29 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
 
         assert query is not None, "BingAdsAdapter should generate a query"
         self._validate_query_structure(query, "BingAdsAdapter")
+        assert self._execute_and_snapshot(query) == self.snapshot
+
+    def test_pinterest_ads_native_query_generation(self):
+        campaign_table = self._create_mock_table("pinterest_campaigns", "PinterestAds")
+        stats_table = self._create_mock_table("pinterest_campaign_analytics", "PinterestAds")
+        stats_table.columns = {
+            "total_impression": {"valid": True},
+            "total_clickthrough": {"valid": True},
+            "spend_in_dollar": {"valid": True},
+        }
+
+        config = PinterestAdsConfig(
+            campaign_table=campaign_table,
+            stats_table=stats_table,
+            source_type="PinterestAds",
+            source_id="pinterest_ads",
+        )
+
+        adapter = PinterestAdsAdapter(config=config, context=self.context)
+        query = adapter.build_query()
+
+        assert query is not None, "PinterestAdsAdapter should generate a query"
+        self._validate_query_structure(query, "PinterestAdsAdapter")
         assert self._execute_and_snapshot(query) == self.snapshot
 
     def test_tiktok_ads_query_generation(self):
@@ -1221,8 +1870,8 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         assert self._execute_and_snapshot(query) == self.snapshot
 
     def test_linkedin_ads_query_generation(self):
-        campaign_table = self._create_mock_table("linkedin_campaigns", "LinkedinAds")
-        stats_table = self._create_mock_table("linkedin_stats", "LinkedinAds")
+        campaign_table = self._create_mock_table("linkedin_campaign_groups", "LinkedinAds")
+        stats_table = self._create_mock_table("linkedin_campaign_group_stats", "LinkedinAds")
 
         config = LinkedinAdsConfig(
             campaign_table=campaign_table,
@@ -1476,7 +2125,7 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         total_impressions = sum(int(row[4] or 0) for row in results)
         total_clicks = sum(int(row[5] or 0) for row in results)
 
-        assert len(results) == 5, "Expected 5 campaigns from LinkedIn Ads JOIN"
+        assert len(results) == 3, "Expected 3 campaign groups from LinkedIn Ads JOIN"
         assert abs(total_cost - 1600.00) < 0.01, f"Expected cost $1600.00, got ${total_cost}"
         assert total_impressions == 485, f"Expected 485 impressions, got {total_impressions}"
         assert total_clicks == 26, f"Expected 26 clicks, got {total_clicks}"
@@ -1510,13 +2159,60 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         total_impressions = sum(int(row[4] or 0) for row in results)
         total_clicks = sum(int(row[5] or 0) for row in results)
 
+        total_conversion_value = sum(float(row[8] or 0) for row in results)
+
         assert len(results) == 10, "Expected 10 campaigns from Reddit Ads JOIN"
         assert abs(total_cost - 90.6) < 0.01, f"Expected cost $90.6, got ${total_cost}"
         assert total_impressions == 14299, f"Expected 14299 impressions, got {total_impressions}"
         assert total_clicks == 454, f"Expected 454 clicks, got {total_clicks}"
+        # Conversion values in CSV are in cents: signup=(10000+15000+12000)=37000, purchase=(50000+75000+60000)=185000
+        # After dividing by 100: $370 + $1850 = $2220
+        assert abs(total_conversion_value - 2220.0) < 0.01, (
+            f"Expected conversion value $2220.0, got ${total_conversion_value}"
+        )
 
         sources = [row[3] for row in results]
         assert all(source == "reddit" for source in sources), "All sources should be 'reddit'"
+
+    def test_pinterest_ads_adapter_with_real_data(self):
+        campaign_info = self._setup_csv_table("pinterest_campaigns")
+        stats_info = self._setup_csv_table("pinterest_campaign_analytics")
+
+        config = PinterestAdsConfig(
+            campaign_table=campaign_info.table,
+            stats_table=stats_info.table,
+            source_type="PinterestAds",
+            source_id="pinterest_ads",
+        )
+
+        adapter = PinterestAdsAdapter(config=config, context=self.context)
+
+        validation_result = adapter.validate()
+        assert validation_result.is_valid, f"Validation failed: {validation_result.errors}"
+
+        query = adapter.build_query()
+        assert query is not None, "PinterestAdsAdapter should generate a query"
+        results = self._execute_query_and_validate(query)
+
+        # Column indices: match_key=0, campaign=1, id=2, source=3, impressions=4,
+        # clicks=5, cost=6, reported_conversion=7, reported_conversion_value=8
+        total_cost = sum(float(row[6] or 0) for row in results)
+        total_impressions = sum(int(row[4] or 0) for row in results)
+        total_clicks = sum(int(row[5] or 0) for row in results)
+        total_conversions = sum(float(row[7] or 0) for row in results)
+        total_conversion_value = sum(float(row[8] or 0) for row in results)
+
+        assert len(results) == 10, "Expected 10 campaigns from Pinterest Ads JOIN"
+        assert abs(total_cost - 468.0) < 0.01, f"Expected cost $468.0, got ${total_cost}"
+        assert total_impressions == 94950, f"Expected 94950 impressions, got {total_impressions}"
+        assert total_clicks == 1614, f"Expected 1614 clicks, got {total_clicks}"
+        assert abs(total_conversions - 174) < 0.01, f"Expected 174 conversions, got {total_conversions}"
+        assert abs(total_conversion_value - 2548.0) < 0.01, (
+            f"Expected conversion value $2548.0, got ${total_conversion_value}"
+        )
+
+        sources = [row[3] for row in results]
+        assert all(source == "pinterest" for source in sources), "All sources should be 'pinterest'"
 
     def test_multi_adapter_union_with_real_data(self):
         bigquery_info = self._setup_csv_table("bigquery")
@@ -1563,6 +2259,8 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
 
         facebook_query = facebook_adapter.build_query()
         tiktok_query = tiktok_adapter.build_query()
+        assert facebook_query is not None
+        assert tiktok_query is not None
 
         union_query = ast.SelectSetQuery.create_from_queries([facebook_query, tiktok_query], "UNION ALL")
         results = self._execute_query_and_validate(union_query)
@@ -1605,7 +2303,7 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
 
         config = ExternalConfig(
             table=table,
-            source_map=None,
+            source_map=None,  # type: ignore[arg-type]
             source_type="BigQuery",
             source_id="validation_error",
             schema_name="marketing_schema",
@@ -1632,7 +2330,7 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
             with pytest.raises(AssertionError, match="CSV file must exist"):
                 self._setup_csv_table("nonexistent_table")
         finally:
-            self.test_data_configs = old_configs
+            type(self).test_data_configs = old_configs
 
     # ================================================================
     # PERFORMANCE TESTS
@@ -1651,8 +2349,6 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         )
 
         adapter = BigQueryAdapter(config=config, context=self.context)
-
-        import time
 
         start_time = time.time()
         query = adapter.build_query()
@@ -1871,8 +2567,6 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
         ]
     )
     def test_is_simple_column_name(self, _name: str, value: str, expected: bool) -> None:
-        from products.marketing_analytics.backend.insightsql_queries.adapters.base import MarketingSourceAdapter
-
         assert MarketingSourceAdapter._is_simple_column_name(value) == expected
 
     def test_bigquery_build_query_with_nested_expressions(self):
@@ -1938,11 +2632,14 @@ class TestMarketingAnalyticsAdapters(DatastoreTestMixin, BaseTest):
     # ================================================================
 
     @parameterized.expand(
-        [
-            ("simple_column", "campaign_name", ast.Field),
-            ("constant_source", "const:linkedin", ast.Constant),
-            ("constant_currency", "const:USD", ast.Constant),
-        ]
+        cast(
+            list[tuple[str, str, type[ast.Expr]]],
+            [
+                ("simple_column", "campaign_name", ast.Field),
+                ("constant_source", "const:linkedin", ast.Constant),
+                ("constant_currency", "const:USD", ast.Constant),
+            ],
+        )
     )
     def test_resolve_field_or_constant(self, _name, field_value, expected_type):
         table = self._create_mock_table("test_table", "aws")

@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import { PropertyMatchType } from '@hanzo/insights'
+import { PropertyMatchType } from 'insights-js'
 import { useMemo } from 'react'
 
 import { IconX } from '@hanzo/icons'
-import { Button, Card, Checkbox, Collapse } from '@hanzo/elements'
+import { Card, Checkbox, Collapse } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -71,6 +71,26 @@ export function convertArrayToPropertyFilters(
     return propertyFilters
 }
 
+export function getEventPropertyFilterCount(propertyFilters?: SurveyEventsWithProperties['propertyFilters']): number {
+    return propertyFilters ? Object.keys(propertyFilters).length : 0
+}
+
+export function useExcludedObjectProperties(): Record<TaxonomicFilterGroupType.EventProperties, string[]> {
+    const { propertyDefinitionsByType } = useValues(propertyDefinitionsModel)
+
+    return useMemo(() => {
+        const eventProperties = propertyDefinitionsByType('event')
+        const objectProperties = eventProperties.filter((prop) => {
+            // Exclude StringArray (arrays/objects) and undefined property types. Only primitive types are supported for
+            // comparison purposes in the JS SDK.
+            return !prop.property_type || prop.property_type === PropertyType.StringArray
+        })
+        return {
+            [TaxonomicFilterGroupType.EventProperties]: objectProperties.map((prop) => prop.name),
+        }
+    }, [propertyDefinitionsByType])
+}
+
 interface SurveyEventSelectorProps {
     conditionField: 'events' | 'cancelEvents'
     label: string
@@ -92,19 +112,7 @@ function SurveyEventSelector({
 }: SurveyEventSelectorProps): JSX.Element {
     const { survey, surveyRepeatedActivationAvailable } = useValues(surveyLogic)
     const { setSurveyValue } = useActions(surveyLogic)
-    const { propertyDefinitionsByType } = useValues(propertyDefinitionsModel)
-
-    const excludedObjectProperties = useMemo(() => {
-        const eventProperties = propertyDefinitionsByType('event')
-        const objectProperties = eventProperties.filter((prop) => {
-            // Exclude StringArray (arrays/objects) and undefined property types. Only primitive types are supported for
-            // comparison purposes in the JS SDK.
-            return !prop.property_type || prop.property_type === PropertyType.StringArray
-        })
-        return {
-            [TaxonomicFilterGroupType.EventProperties]: objectProperties.map((prop) => prop.name),
-        }
-    }, [propertyDefinitionsByType])
+    const excludedObjectProperties = useExcludedObjectProperties()
 
     const events: SurveyEventsWithProperties[] = survey.conditions?.[conditionField]?.values || []
 
@@ -152,45 +160,40 @@ function SurveyEventSelector({
                 ) : (
                     <div className="space-y-2">
                         {events.map((event, index) => {
-                            const hasPropertyFilters =
-                                event.propertyFilters && Object.keys(event.propertyFilters).length > 0
+                            const propertyFilterCount = getEventPropertyFilterCount(event.propertyFilters)
+                            const hasPropertyFilters = propertyFilterCount > 0
+                            const panelKey = `${conditionField}-event-${index}`
 
                             return (
                                 <Collapse
                                     key={`${conditionField}-${event.name}-${index}`}
+                                    defaultActiveKey={panelKey}
                                     panels={[
                                         {
-                                            key: `${conditionField}-event-${index}`,
-                                            header: (
-                                                <div className="flex items-center justify-between flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-semibold text-sm">{event.name}</span>
-                                                        {hasPropertyFilters && (
-                                                            <span className="text-xs text-muted bg-border px-1.5 py-0.5 rounded">
-                                                                {Object.keys(event.propertyFilters!).length} filter
-                                                                {Object.keys(event.propertyFilters!).length !== 1
-                                                                    ? 's'
-                                                                    : ''}
-                                                            </span>
-                                                        )}
+                                            key: panelKey,
+                                            // sideAction keeps the remove button a sibling of the header <button> - a
+                                            // button can't nest inside a button
+                                            header: {
+                                                children: (
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <span className="font-semibold text-sm truncate">
+                                                            {event.name}
+                                                        </span>
+                                                        <span className="text-xs text-muted bg-border px-1.5 py-0.5 rounded shrink-0">
+                                                            {hasPropertyFilters
+                                                                ? `${propertyFilterCount} filter${propertyFilterCount !== 1 ? 's' : ''}`
+                                                                : 'No filters'}
+                                                        </span>
                                                     </div>
-                                                    <Button
-                                                        size="xsmall"
-                                                        icon={<IconX />}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            removeEventAtIndex(index)
-                                                        }}
-                                                        type="tertiary"
-                                                        status="alt"
-                                                    />
-                                                </div>
-                                            ),
+                                                ),
+                                                sideAction: {
+                                                    icon: <IconX />,
+                                                    onClick: () => removeEventAtIndex(index),
+                                                    tooltip: 'Remove event',
+                                                },
+                                            },
                                             content: (
-                                                <div>
-                                                    <div className="text-xs font-medium text-muted-alt mb-2 uppercase tracking-wide">
-                                                        Property Filters
-                                                    </div>
+                                                <div className="space-y-2">
                                                     <PropertyFilters
                                                         propertyFilters={convertPropertyFiltersToArray(
                                                             event.propertyFilters
@@ -210,11 +213,9 @@ function SurveyEventSelector({
                                                         buttonSize="small"
                                                         operatorAllowlist={SUPPORTED_OPERATORS}
                                                     />
-                                                    <span className="text-xs text-muted">
-                                                        Only primitive types (strings, numbers, booleans) are supported
-                                                        for property filters. Array and object properties are not
-                                                        supported and will not be shown.
-                                                    </span>
+                                                    <p className="text-xs text-muted m-0">
+                                                        Array and object properties aren't supported here.
+                                                    </p>
                                                 </div>
                                             ),
                                         },
@@ -227,7 +228,7 @@ function SurveyEventSelector({
 
                 {showRepeatedActivation && surveyRepeatedActivationAvailable && (
                     <Checkbox
-                        label="Display the survey every time events occur, instead of only once per user"
+                        label="Show every time these events fire (otherwise: once per user)"
                         checked={survey.conditions?.events?.repeatedActivation || false}
                         onChange={(checked) => {
                             setSurveyValue('conditions', {
@@ -256,9 +257,9 @@ export function SurveyEventTrigger(): JSX.Element {
         <SurveyEventSelector
             conditionField="events"
             label="User sends events"
-            info="It only triggers when the event is captured in the current user session and using the Insights SDK. Filtering by event properties requires insights-js >= v1.268.0 or insights-react-native >= v4.15.0. Not supported for other SDKs."
+            info="Triggers fire when the event is captured in the current user session via a Insights SDK. Property filtering requires insights-js 1.268+ or insights-react-native 4.15+."
             emptyTitle="No events selected"
-            emptyDescription="Add events to trigger this survey when those events are captured in the current user session"
+            emptyDescription="Pick events that should trigger this survey."
             showRepeatedActivation
         />
     )
@@ -272,9 +273,9 @@ export function SurveyCancelEventTrigger(): JSX.Element {
         <SurveyEventSelector
             conditionField="cancelEvents"
             label="Cancel survey on events"
-            info="It only triggers when the event is captured in the current user session and using the Insights SDK. Requires insights-js SDK at least v1.299.0, and it's supported only for web surveys."
+            info="Triggers fire when the event is captured in the current user session via a Insights SDK. Requires insights-js 1.299+. Web surveys only."
             emptyTitle={`During your ${delaySeconds} second delay...`}
-            emptyDescription="If any of these events fire, the survey will be cancelled. Useful for not interrupting users who complete an action successfully."
+            emptyDescription="If any of these events fire, the survey is cancelled — useful when the user has already completed the action."
             addButtonText="Add cancel event"
         />
     )

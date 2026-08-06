@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -19,7 +19,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'yaml',
                                 file: 'pubspec.yaml',
                                 code: dedent`
-                                    insights_flutter: ^5.0.0
+                                    insights_flutter: ^5.24.0
                                 `,
                             },
                         ]}
@@ -66,7 +66,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'android/app/build.gradle',
                                 code: dedent`
                                     defaultConfig {
-                                        minSdkVersion 21
+                                        minSdkVersion 23
                                         // rest of your config
                                     }
                                 `,
@@ -120,7 +120,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://us.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                     <Markdown>
@@ -151,7 +151,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     Future<void> main() async {
                                       WidgetsFlutterBinding.ensureInitialized();
 
-                                      final config = InsightsConfig('<ph_project_api_key>');
+                                      final config = InsightsConfig('<ph_project_token>');
                                       config.host = '<ph_client_api_host>';
                                       config.debug = true;
                                       config.captureApplicationLifecycleEvents = true;

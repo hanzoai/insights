@@ -9,7 +9,7 @@ import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { dayjs } from 'lib/dayjs'
 import { Button, ButtonProps } from 'lib/elements/Button'
-import { range } from 'lib/utils'
+import { range } from 'lib/utils/arrays'
 import { teamLogic } from 'scenes/teamLogic'
 
 export interface CalendarProps {
@@ -19,10 +19,10 @@ export interface CalendarProps {
     leftmostMonth?: dayjs.Dayjs
     /** Called if the user changed the month in the calendar */
     onLeftmostMonthChanged?: (date: dayjs.Dayjs) => void
-    /** Use custom Button properties for each date */
-    getButtonProps?: (opts: GetButtonPropsOpts) => ButtonProps
-    /** Use custom Button properties for each date */
-    getButtonTimeProps?: (opts: GetButtonTimePropsOpts) => ButtonProps
+    /** Describe the selection state of each date; the calendar owns the resulting styling */
+    getDateState?: (opts: GetDateStateOpts) => CalendarDateState
+    /** Describe the selection state of each time cell; the calendar owns the resulting styling */
+    getTimeState?: (opts: GetTimeStateOpts) => CalendarTimeState
     /** Number of months */
     months?: number
     /** 0 or unset for Sunday, 1 for Monday. */
@@ -33,15 +33,98 @@ export interface CalendarProps {
     use24HourFormat?: boolean
 }
 
-export interface GetButtonPropsOpts {
+export interface GetDateStateOpts {
     date: dayjs.Dayjs
-    props: ButtonProps
     dayIndex: number
     weekIndex: number
 }
-export interface GetButtonTimePropsOpts {
+
+/**
+ * A decoupled description of how a single date should render, mirroring Quill's calendar vocabulary.
+ * `selected` takes precedence: when set, the range flags (`isStart`/`isEnd`/`isBetween`) are ignored.
+ */
+export interface CalendarDateState {
+    /** Disable the date and explain why on hover */
+    disabledReason?: string
+    /** Render as a selected single date; wins over the range flags below */
+    selected?: boolean
+    /** Render as the start boundary of a range */
+    isStart?: boolean
+    /** Render as the end boundary of a range */
+    isEnd?: boolean
+    /** Render as a date sitting between the range boundaries */
+    isBetween?: boolean
+}
+
+export interface GetTimeStateOpts {
     unit: 'h' | 'm' | 'a'
     value: number | string
+}
+
+/** A decoupled description of how a single time cell should render. */
+export interface CalendarTimeState {
+    active?: boolean
+    disabledReason?: string
+    onClick?: () => void
+}
+
+export function timeDataAttr({ unit, value }: GetTimeStateOpts): string {
+    return `${value}-${unit}`
+}
+
+function timeStateToButtonProps(state: CalendarTimeState, opts: GetTimeStateOpts): ButtonProps {
+    return {
+        active: state.active,
+        disabledReason: state.disabledReason,
+        onClick: state.onClick,
+        className: 'rounded-none',
+        'data-attr': timeDataAttr(opts),
+    }
+}
+
+function dateStateToButtonProps(
+    state: CalendarDateState,
+    defaultProps: ButtonProps,
+    dayIndex: number
+): ButtonProps {
+    const props: ButtonProps = { ...defaultProps, disabledReason: state.disabledReason }
+    const isFirstDayOfWeek = dayIndex === 0
+    const isLastDayOfWeek = dayIndex === 6
+
+    if (state.selected) {
+        return { ...props, status: 'default', type: 'primary' }
+    }
+
+    if (state.isStart || state.isEnd) {
+        return {
+            ...props,
+            className:
+                state.isStart && state.isEnd
+                    ? props.className
+                    : clsx(
+                          props.className,
+                          {
+                              'rounded-r-none': state.isStart && !isLastDayOfWeek,
+                              'rounded-l-none': state.isEnd && !isFirstDayOfWeek,
+                          },
+                          'Calendar__range--boundary'
+                      ),
+            type: 'primary',
+        }
+    }
+
+    if (state.isBetween) {
+        return {
+            ...props,
+            className: clsx(
+                props.className,
+                isFirstDayOfWeek ? 'rounded-r-none' : isLastDayOfWeek ? 'rounded-l-none' : 'rounded-none'
+            ),
+            active: true,
+        }
+    }
+
+    return props
 }
 
 const dayLabels = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa']
@@ -65,6 +148,11 @@ export const Calendar = forwardRef(function Calendar(
         }
     }, [props.leftmostMonth]) // oxlint-disable-line react-hooks/exhaustive-deps
 
+    const timeButtonProps = (opts: GetTimeStateOpts): ButtonProps | undefined => {
+        const timeState = props.getTimeState?.(opts)
+        return timeState ? timeStateToButtonProps(timeState, opts) : undefined
+    }
+
     return (
         <div
             ref={ref}
@@ -72,7 +160,7 @@ export const Calendar = forwardRef(function Calendar(
                 'Calendar relative flex items-start gap-4 tabular-nums',
                 `Calendar--${granularity}`
             )}
-            data-attr="calendar"
+            data-attr="lemon-calendar"
         >
             {range(0, months).map((month) => {
                 const startOfMonth = leftmostMonth.add(month, 'month').startOf('month')
@@ -86,14 +174,14 @@ export const Calendar = forwardRef(function Calendar(
                 const showRightMonth = month + 1 === months
 
                 return (
-                    <table className="Calendar__month" key={month} data-attr="calendar-month">
+                    <table className="Calendar__month" key={month} data-attr="lemon-calendar-month">
                         <thead>
                             <tr className="Calendar__month-header">
                                 <th className="relative">
                                     {showLeftMonth && (
                                         <Button
                                             fullWidth
-                                            data-attr="calendar-month-previous"
+                                            data-attr="lemon-calendar-month-previous"
                                             className="absolute-left"
                                             onClick={() => {
                                                 const newDate = leftmostMonth.subtract(1, 'month')
@@ -106,7 +194,7 @@ export const Calendar = forwardRef(function Calendar(
                                 </th>
                                 <th
                                     className="relative font-title font-semibold text-secondary uppercase cursor-default text-center"
-                                    data-attr={`calendar-month-title-${month}`}
+                                    data-attr={`lemon-calendar-month-title-${month}`}
                                     colSpan={5}
                                 >
                                     {startOfMonth.format('MMMM')} {startOfMonth.year()}
@@ -115,7 +203,7 @@ export const Calendar = forwardRef(function Calendar(
                                     {showRightMonth && (
                                         <Button
                                             fullWidth
-                                            data-attr="calendar-month-next"
+                                            data-attr="lemon-calendar-month-next"
                                             className="absolute-right"
                                             onClick={() => {
                                                 const newDate = leftmostMonth.add(1, 'month')
@@ -137,7 +225,7 @@ export const Calendar = forwardRef(function Calendar(
                         </thead>
                         <tbody>
                             {range(0, weeks).map((week) => (
-                                <tr key={week} data-attr="calendar-week">
+                                <tr key={week} data-attr="lemon-calendar-week">
                                     {range(0, 7).map((day) => {
                                         const date = firstDay.add(week * 7 + day, 'day')
                                         const defaultProps: ButtonProps = {
@@ -147,19 +235,20 @@ export const Calendar = forwardRef(function Calendar(
                                             }),
                                         }
 
-                                        const buttonProps =
-                                            props.getButtonProps?.({
-                                                dayIndex: day,
-                                                weekIndex: week,
-                                                date,
-                                                props: defaultProps,
-                                            }) ?? defaultProps
+                                        const dateState = props.getDateState?.({
+                                            dayIndex: day,
+                                            weekIndex: week,
+                                            date,
+                                        })
+                                        const buttonProps = dateState
+                                            ? dateStateToButtonProps(dateState, defaultProps, day)
+                                            : defaultProps
                                         return (
                                             <td key={day}>
                                                 <Button
                                                     fullWidth
                                                     center
-                                                    data-attr="calendar-day"
+                                                    data-attr="lemon-calendar-day"
                                                     onClick={() => props.onDateClick?.(date)}
                                                     {...buttonProps}
                                                 >
@@ -178,10 +267,7 @@ export const Calendar = forwardRef(function Calendar(
                 <div className="Calendar__time absolute top-0 bottom-0 right-0 flex divide-x border-l">
                     <ScrollableShadows direction="vertical">
                         {(use24HourFormat ? range(0, 24) : [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).map((hour) => {
-                            const buttonProps = props.getButtonTimeProps?.({
-                                unit: 'h',
-                                value: hour,
-                            })
+                            const buttonProps = timeButtonProps({ unit: 'h', value: hour })
 
                             return (
                                 <Button fullWidth key={hour} {...buttonProps}>
@@ -194,10 +280,7 @@ export const Calendar = forwardRef(function Calendar(
                     {granularity === 'minute' && (
                         <ScrollableShadows direction="vertical">
                             {range(0, 60).map((minute) => {
-                                const buttonProps = props.getButtonTimeProps?.({
-                                    unit: 'm',
-                                    value: minute,
-                                })
+                                const buttonProps = timeButtonProps({ unit: 'm', value: minute })
                                 return (
                                     <Button fullWidth key={minute} {...buttonProps}>
                                         <span className="w-full text-center px-2">
@@ -211,10 +294,10 @@ export const Calendar = forwardRef(function Calendar(
                     )}
                     {!use24HourFormat && (
                         <div>
-                            <Button fullWidth {...props.getButtonTimeProps?.({ unit: 'a', value: 'am' })}>
+                            <Button fullWidth {...timeButtonProps({ unit: 'a', value: 'am' })}>
                                 <span className="w-full text-center">AM</span>
                             </Button>
-                            <Button fullWidth {...props.getButtonTimeProps?.({ unit: 'a', value: 'pm' })}>
+                            <Button fullWidth {...timeButtonProps({ unit: 'a', value: 'pm' })}>
                                 <span className="w-full text-center">PM</span>
                             </Button>
                         </div>

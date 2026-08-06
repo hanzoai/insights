@@ -4,16 +4,16 @@
 
 
 <!-- Favicons & OS-theme configurations -->
-<link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png?v=2023-07-07">
-<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png?v=2023-07-07">
-<link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png?v=2023-07-07">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png?v=2026-07-07">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png?v=2026-07-07">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png?v=2026-07-07">
 {% if not debug %}
-    <link rel="shortcut icon" href="/static/icons/favicon.ico?v=2023-07-07">
+    <link rel="shortcut icon" href="/static/icons/favicon.ico?v=2026-07-07">
 {% else %}
-    <link rel="shortcut icon" href="/static/icons/favicon-dev.ico?v=2023-07-07">
+    <link rel="shortcut icon" href="/static/icons/favicon-dev.ico?v=2026-07-07">
 {% endif %}
-<link rel="mask-icon" href="/static/icons/safari-pinned-tab.svg?v=2023-07-07" color="#000000">
-<link rel="manifest" href="/static/site.webmanifest?v=2023-07-07">
+<link rel="mask-icon" href="/static/icons/safari-pinned-tab.svg?v=2026-07-07" color="#F54E00">
+<link rel="manifest" href="/static/site.webmanifest?v=2026-07-07">
 <meta name="apple-mobile-web-app-title" content="Insights">
 <meta name="application-name" content="Insights">
 
@@ -29,6 +29,10 @@
         window.INSIGHTS_USER_IDENTITY_WITH_FLAGS = JSON.parse("{{ insights_bootstrap | escapejs }}")
         window.IMPERSONATED_SESSION = {{is_impersonated_session | yesno:"true,false"}};
         window.INSIGHTS_JS_UUID_VERSION = "{{insights_js_uuid_version}}";
+        {% if js_insights_identity_distinct_id %}
+            window.JS_INSIGHTS_IDENTITY_DISTINCT_ID = "{{ js_insights_identity_distinct_id|escapejs }}";
+            window.JS_INSIGHTS_IDENTITY_HASH = "{{ js_insights_identity_hash|escapejs }}";
+        {% endif %}
     </script>
 {% endif %}
 {% if stripe_public_key %}
@@ -41,7 +45,7 @@
     window.INSIGHTS_APP_CONTEXT = JSON.parse("{{ insights_app_context | escapejs }}");
     {# Inject the expected location of JS bundle, #}
     {# use to allow the location of the bundle to be set at runtime, #}
-    {# e.g. for Hanzo Insights Cloud we serve the frontend JS from a CDN #}
+    {# e.g. for Insights Cloud we serve the frontend JS from a CDN #}
     {# nosemgrep: generic.html-templates.security.var-in-script-tag.var-in-script-tag #}
     window.JS_URL = "{{ js_url|default:"" }}";
     {# nosemgrep: generic.html-templates.security.var-in-script-tag.var-in-script-tag (yesno filter produces literal strings) #}

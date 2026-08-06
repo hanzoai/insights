@@ -2,9 +2,9 @@ import { useActions } from 'kea'
 
 import { IconCopy } from '@hanzo/icons'
 
+import { IconLink } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
-import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { ParsedLogMessage } from 'products/logs/frontend/types'

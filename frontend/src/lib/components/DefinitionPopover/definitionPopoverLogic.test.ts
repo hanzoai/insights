@@ -1,3 +1,5 @@
+import { MOCK_TEAM_ID } from 'lib/api.mock'
+
 import { expectLogic } from 'kea-test-utils'
 
 import api from 'lib/api'
@@ -21,31 +23,53 @@ import {
 } from '~/test/mocks'
 import { ActionType, CohortType, PersonProperty, PropertyDefinition } from '~/types'
 
+import { DataWarehouseTableForInsight } from 'products/data_warehouse/frontend/types'
+
 describe('definitionPopoverLogic', () => {
     let logic: ReturnType<typeof definitionPopoverLogic.build>
+    const mockDataWarehouseTable: DataWarehouseTableForInsight = {
+        id: 'warehouse-table-id',
+        name: 'warehouse_table',
+        type: 'data_warehouse',
+        format: 'Parquet',
+        url_pattern: '',
+        fields: {
+            id: { name: 'id', insightsql_value: 'id', type: 'integer', schema_valid: true },
+            distinct_id: { name: 'distinct_id', insightsql_value: 'distinct_id', type: 'string', schema_valid: true },
+            created_at: { name: 'created_at', insightsql_value: 'created_at', type: 'datetime', schema_valid: true },
+            user_uuid: { name: 'user_uuid', insightsql_value: 'user_uuid', type: 'string', schema_valid: true },
+            event_timestamp: {
+                name: 'event_timestamp',
+                insightsql_value: 'event_timestamp',
+                type: 'datetime',
+                schema_valid: true,
+            },
+            row_uuid: { name: 'row_uuid', insightsql_value: 'row_uuid', type: 'string', schema_valid: true },
+        },
+    }
 
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/@current/event_definitions/': {
+                [`/api/projects/${MOCK_TEAM_ID}/event_definitions/`]: {
                     results: mockEventDefinitions,
                     count: mockEventDefinitions.length,
                 },
-                '/api/projects/@current/property_definitions/': {
+                [`/api/projects/${MOCK_TEAM_ID}/property_definitions/`]: {
                     results: [mockEventPropertyDefinition],
                     count: 1,
                 },
-                '/api/projects/@current/actions/': {
+                [`/api/projects/${MOCK_TEAM_ID}/actions/`]: {
                     results: [mockActionDefinition],
                     count: 1,
                 },
-                '/api/projects/@current/cohorts/': {
+                [`/api/projects/${MOCK_TEAM_ID}/cohorts/`]: {
                     results: [mockCohort],
                     count: 1,
                 },
             },
             patch: {
-                '/api/projects/@current/:object/:id/': {},
+                [`/api/projects/${MOCK_TEAM_ID}/:object/:id/`]: {},
             },
         })
 
@@ -123,19 +147,19 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.Actions,
                     definition: mockActionDefinition as ActionType,
-                    url: `api/projects/@current/actions/${mockActionDefinition.id}`,
+                    url: `api/projects/${MOCK_TEAM_ID}/actions/${mockActionDefinition.id}`,
                     dispatchActions: [actionsModel, ['updateAction']],
                 },
                 {
                     type: TaxonomicFilterGroupType.CustomEvents,
                     definition: mockEventDefinitions[0],
-                    url: `api/projects/@current/event_definitions/${mockEventDefinitions[0].id}`,
+                    url: `api/projects/${MOCK_TEAM_ID}/event_definitions/${mockEventDefinitions[0].id}`,
                     dispatchActions: [],
                 },
                 {
                     type: TaxonomicFilterGroupType.Events,
                     definition: mockEventDefinitions[1],
-                    url: `api/projects/@current/event_definitions/${mockEventDefinitions[1].id}`,
+                    url: `api/projects/${MOCK_TEAM_ID}/event_definitions/${mockEventDefinitions[1].id}`,
                     dispatchActions: [],
                 },
                 {
@@ -146,7 +170,7 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.EventProperties,
                     definition: mockEventPropertyDefinition as PropertyDefinition,
-                    url: `api/projects/@current/property_definitions/${mockEventPropertyDefinition.id}`,
+                    url: `api/projects/${MOCK_TEAM_ID}/property_definitions/${mockEventPropertyDefinition.id}`,
                     dispatchActions: [propertyDefinitionsModel, ['updatePropertyDefinitions']],
                 },
                 {
@@ -162,7 +186,7 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.Cohorts,
                     definition: mockCohort,
-                    url: `api/projects/@current/cohorts/${mockCohort.id}`,
+                    url: `api/projects/${MOCK_TEAM_ID}/cohorts/${mockCohort.id}`,
                     dispatchActions: [cohortsModel, ['updateCohort']],
                 },
                 {
@@ -200,6 +224,29 @@ describe('definitionPopoverLogic', () => {
                     }
                 })
             })
+
+            it('saves a name-only property against the id recovered from the model', async () => {
+                // A pinned/default property arrives as { name } with no id; Save used to PATCH
+                // /property_definitions/undefined. resolvedDefinition hydrates the recovered id.
+                propertyDefinitionsModel.actions.updatePropertyDefinitions({
+                    [`event/${mockEventPropertyDefinition.name}`]: mockEventPropertyDefinition as PropertyDefinition,
+                })
+
+                logic = definitionPopoverLogic({ type: TaxonomicFilterGroupType.EventProperties })
+                logic.mount()
+
+                await expectLogic(logic, async () => {
+                    logic.actions.setDefinition({ name: mockEventPropertyDefinition.name })
+                    logic.actions.setPopoverState(DefinitionPopoverState.Edit)
+                    logic.actions.setLocalDefinition({ description: 'edited' })
+                    logic.actions.handleSave({})
+                }).toDispatchActions(['handleSaveSuccess'])
+
+                expect(api.update).toHaveBeenCalledWith(
+                    `api/projects/${MOCK_TEAM_ID}/property_definitions/${mockEventPropertyDefinition.id}`,
+                    expect.objectContaining({ description: 'edited' })
+                )
+            })
         })
 
         it('add tags', async () => {
@@ -216,6 +263,32 @@ describe('definitionPopoverLogic', () => {
     })
 
     describe('view mode', () => {
+        it('hydrates data warehouse fields from the selected filter before applying defaults', async () => {
+            logic = definitionPopoverLogic({
+                type: TaxonomicFilterGroupType.DataWarehouse,
+                selectedItemMeta: {
+                    id: 'warehouse_table',
+                    table_name: 'warehouse_table',
+                    distinct_id_field: 'user_uuid',
+                    timestamp_field: 'event_timestamp',
+                    id_field: 'row_uuid',
+                },
+            })
+            logic.mount()
+
+            await expectLogic(logic, () => {
+                logic.actions.setDefinition(mockDataWarehouseTable)
+            })
+                .toDispatchActions(['setDefinitionSuccess'])
+                .toMatchValues({
+                    localDefinition: expect.objectContaining({
+                        distinct_id_field: 'user_uuid',
+                        timestamp_field: 'event_timestamp',
+                        id_field: 'row_uuid',
+                    }),
+                })
+        })
+
         it('change context', async () => {
             logic = definitionPopoverLogic({
                 type: TaxonomicFilterGroupType.Events,
@@ -302,6 +375,40 @@ describe('definitionPopoverLogic', () => {
                     }
                     await expectChain
                 })
+            })
+        })
+
+        describe('recovers a missing property id from the definitions model', () => {
+            // Pinned/default property items (e.g. seeded $current_url, email) are stored
+            // as { name } with no id, so viewFullDetailUrl used to build
+            // /data-management/properties/undefined. It must recover the saved id from
+            // propertyDefinitionsModel so the View link resolves to the real property.
+            // Per-type mapping lives in resolvePropertyDefinitionId (tested in utils.test);
+            // this asserts the selector wires the recovered id into the URL and guards it.
+            it('resolves the View URL for a name-only property from the model', async () => {
+                propertyDefinitionsModel.actions.updatePropertyDefinitions({
+                    [`event/${mockEventPropertyDefinition.name}`]: mockEventPropertyDefinition as PropertyDefinition,
+                })
+
+                logic = definitionPopoverLogic({ type: TaxonomicFilterGroupType.EventProperties })
+                logic.mount()
+
+                await expectLogic(logic, () => {
+                    logic.actions.setDefinition({ name: mockEventPropertyDefinition.name })
+                })
+                    .toDispatchActions(['setDefinitionSuccess'])
+                    .toMatchValues({ viewFullDetailUrl: urls.propertyDefinition(mockEventPropertyDefinition.id) })
+            })
+
+            it('stays undefined when the property id cannot be resolved', async () => {
+                logic = definitionPopoverLogic({ type: TaxonomicFilterGroupType.EventProperties })
+                logic.mount()
+
+                await expectLogic(logic, () => {
+                    logic.actions.setDefinition({ name: 'property-with-no-saved-definition' })
+                })
+                    .toDispatchActions(['setDefinitionSuccess'])
+                    .toMatchValues({ viewFullDetailUrl: undefined })
             })
         })
     })

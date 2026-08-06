@@ -1,11 +1,11 @@
-<clickhouse>
+<datastore>
     <tcp_port>9000</tcp_port>
 
     <remote_servers>
         <insights>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
@@ -13,7 +13,7 @@
         <insights_single_shard>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
@@ -21,7 +21,7 @@
         <insights_migrations>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
@@ -29,7 +29,7 @@
         <insights_writable>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
@@ -37,11 +37,44 @@
         <insights_primary_replica>
             <shard>
                 <replica>
-                    <host>clickhouse</host>
+                    <host>datastore</host>
                     <port>9000</port>
                 </replica>
             </shard>
         </insights_primary_replica>
+
+        <ai_events>
+            <shard>
+                <replica>
+                    <host>datastore</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </ai_events>
+        <aux>
+            <shard>
+                <replica>
+                    <host>datastore</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </aux>
+        <ops>
+            <shard>
+                <replica>
+                    <host>datastore</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </ops>
+        <sessions>
+            <shard>
+                <replica>
+                    <host>datastore</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </sessions>
     </remote_servers>
 
     <named_collections>
@@ -51,6 +84,24 @@
         <warpstream_ingestion>
             <kafka_broker_list from_env="KAFKA_HOSTS"/>
         </warpstream_ingestion>
+        <warpstream_calculated_events>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </warpstream_calculated_events>
+        <warpstream_replay>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </warpstream_replay>
+        <warpstream_shared>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </warpstream_shared>
+        <warpstream_cyclotron>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </warpstream_cyclotron>
+        <warpstream_logs>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </warpstream_logs>
+        <warpstream_traces>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </warpstream_traces>
     </named_collections>
 
     <macros>
@@ -59,4 +110,4 @@
         <hostClusterType>online</hostClusterType>
         <hostClusterRole>data</hostClusterRole>
     </macros>
-</clickhouse>
+</datastore>

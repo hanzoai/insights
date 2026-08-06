@@ -1,14 +1,13 @@
-import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
+import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import { TagType, PaginationManual } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
-import { FEATURE_FLAGS } from 'lib/constants'
 import { toast } from 'lib/elements/Toast/Toast'
-import { FeatureFlagsSet, featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { objectsEqual, toParams } from 'lib/utils'
+import { objectsEqual } from 'lib/utils/objects'
+import { parseNumericArrayFilter, toParams } from 'lib/utils/url'
 import { FLAGS_PER_PAGE, type FeatureFlagsResult, featureFlagsLogic } from 'scenes/feature-flags/featureFlagsLogic'
 import { projectLogic } from 'scenes/projectLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -20,13 +19,15 @@ import {
     ActivityScope,
     Breadcrumb,
     Experiment,
-    ExperimentProgressStatus,
+    ExperimentStatus,
     ExperimentVelocityStats,
     ExperimentsTabs,
     FeatureFlagType,
 } from '~/types'
 
-import type { experimentsLogicType } from './experimentsLogicType'
+import type { AvailableFeature, UserType } from '../../types'
+import type { TeamPublicType, TeamType } from '../../types'
+import { getFlagVariants } from './utils'
 
 export const EXPERIMENTS_PER_PAGE = 100
 
@@ -37,8 +38,8 @@ export interface ExperimentsResult extends CountedPaginatedResponse<Experiment> 
 
 export interface ExperimentsFilters {
     search?: string
-    status?: ExperimentProgressStatus | 'all'
-    created_by_id?: number
+    status?: ExperimentStatus | 'all'
+    created_by_id?: number[]
     archived?: boolean
     page?: number
     order?: string
@@ -46,7 +47,7 @@ export interface ExperimentsFilters {
 
 export interface FeatureFlagModalFilters {
     active?: string
-    created_by_id?: number
+    created_by_id?: number[]
     search?: string
     order?: string
     page?: number
@@ -71,29 +72,24 @@ const DEFAULT_MODAL_FILTERS: FeatureFlagModalFilters = {
     evaluation_runtime: undefined,
 }
 
-export function getExperimentStatus(experiment: Experiment): ExperimentProgressStatus {
-    if (!experiment.start_date) {
-        return ExperimentProgressStatus.Draft
-    } else if (!experiment.end_date) {
-        // When the feature flag is disabled, we show "Paused" to the user for better UX.
-        // This is just a virtual status, the backend still considers the experiment "running".
-        if (experiment.feature_flag && !experiment.feature_flag.active) {
-            return ExperimentProgressStatus.Paused
-        }
-        return ExperimentProgressStatus.Running
-    }
-    return ExperimentProgressStatus.Complete
-}
+export {
+    getExperimentStatus,
+    hasEnded,
+    isExperimentExposureFrozen,
+    isExperimentPaused,
+    isLaunched,
+} from './experimentStatus'
 
 export function isSingleVariantShipped(experiment: Experiment): boolean {
     const filters = experiment.feature_flag?.filters
 
     return (
         !!filters &&
+        experiment.feature_flag?.active !== false &&
         Array.isArray(filters.groups?.[0]?.properties) &&
         filters.groups?.[0]?.properties?.length === 0 &&
         filters.groups?.[0]?.rollout_percentage === 100 &&
-        (filters.multivariate?.variants?.some(({ rollout_percentage }) => rollout_percentage === 100) || false)
+        getFlagVariants(experiment.feature_flag).some(({ rollout_percentage }) => rollout_percentage === 100)
     )
 }
 
@@ -102,24 +98,439 @@ export function getShippedVariantKey(experiment: Experiment): string | null {
         return null
     }
     return (
-        experiment.feature_flag?.filters.multivariate?.variants?.find(
-            ({ rollout_percentage }) => rollout_percentage === 100
-        )?.key || null
+        getFlagVariants(experiment.feature_flag).find(({ rollout_percentage }) => rollout_percentage === 100)?.key ||
+        null
     )
 }
 
-export function getExperimentStatusColor(status: ExperimentProgressStatus): TagType {
+export function getExperimentStatusLabel(status: ExperimentStatus): string {
     switch (status) {
-        case ExperimentProgressStatus.Draft:
+        case ExperimentStatus.Draft:
+            return 'Draft'
+        case ExperimentStatus.Running:
+            return 'Running'
+        case ExperimentStatus.Paused:
+            return 'Paused'
+        case ExperimentStatus.ExposureFrozen:
+            return 'Exposure frozen'
+        case ExperimentStatus.Stopped:
+            return 'Complete'
+    }
+}
+
+export function getExperimentStatusColor(status: ExperimentStatus): TagType {
+    switch (status) {
+        case ExperimentStatus.Draft:
             return 'default'
-        case ExperimentProgressStatus.Running:
+        case ExperimentStatus.Running:
             return 'success'
-        case ExperimentProgressStatus.Paused:
+        case ExperimentStatus.Paused:
             return 'warning'
-        case ExperimentProgressStatus.Complete:
+        case ExperimentStatus.ExposureFrozen:
+            return 'highlight'
+        case ExperimentStatus.Stopped:
             return 'completion'
     }
 }
+
+function normalizeExperimentFilterStatus(status: string | undefined): ExperimentStatus | 'all' {
+    if (!status) {
+        return 'all'
+    }
+
+    const normalizedStatus = status.toLowerCase()
+
+    if (normalizedStatus === 'complete') {
+        return ExperimentStatus.Stopped
+    }
+
+    if (Object.values(ExperimentStatus).includes(normalizedStatus as ExperimentStatus)) {
+        return normalizedStatus as ExperimentStatus
+    }
+
+    return 'all'
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface experimentsLogicValues {
+    featureFlags: FeatureFlagsResult // featureFlagsLogic
+    currentProjectId: number | null // projectLogic
+    location: {
+        pathname: string
+        search: string
+        hash: string
+    } // router
+    currentTeam: TeamPublicType | TeamType | null // teamLogic
+    hasAvailableFeature: (feature: AvailableFeature, currentUsage?: number | undefined) => boolean // userLogic
+    user: UserType | null // userLogic
+    breadcrumbs: Breadcrumb[]
+    count: number
+    experiments: ExperimentsResult
+    experimentsLoading: boolean
+    experimentsStats: ExperimentVelocityStats
+    experimentsStatsLoading: boolean
+    featureFlagModalFeatureFlags: {
+        count: number
+        results: FeatureFlagType[]
+    }
+    featureFlagModalFeatureFlagsLoading: boolean
+    featureFlagModalFilters: FeatureFlagModalFilters
+    featureFlagModalPageFromURL: number
+    featureFlagModalPagination: PaginationManual
+    featureFlagModalParamsFromFilters: Record<string, any>
+    filters: ExperimentsFilters
+    hasLoadedExperiments: boolean
+    pagination: PaginationManual
+    paramsFromFilters: {
+        archived?: boolean | undefined
+        created_by_id?: number[] | undefined
+        limit: number
+        offset: number
+        order?: string | undefined
+        page?: number | undefined
+        search?: string | undefined
+        status?: ExperimentStatus | 'all' | undefined
+    }
+    shouldShowEmptyState: boolean
+    sidePanelContext: SidePanelSceneContext
+    tab: ExperimentsTabs
+    unavailableFeatureFlagKeys: Set<string>
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface experimentsLogicActions {
+    loadCurrentTeamSuccess: (
+        currentTeam: TeamPublicType | null,
+        payload?: any
+    ) => {
+        currentTeam: TeamPublicType | null
+        payload?: any
+    } // teamLogic
+    updateCurrentTeamSuccess: (
+        currentTeam: TeamPublicType | TeamType,
+        payload?: Partial<TeamType> | undefined
+    ) => {
+        currentTeam: TeamPublicType | TeamType
+        payload?: Partial<TeamType>
+    } // teamLogic
+    addToExperiments: (experiment: Experiment) => Experiment
+    addToExperimentsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    addToExperimentsSuccess: (
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        },
+        payload?: Experiment
+    ) => {
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        }
+        payload?: Experiment
+    }
+    archiveExperiment: ({ id, disableFeatureFlag }: { disableFeatureFlag: boolean; id: number }) => {
+        id: number
+        disableFeatureFlag: boolean
+    }
+    archiveExperimentFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    archiveExperimentSuccess: (
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        },
+        payload?: {
+            id: number
+            disableFeatureFlag: boolean
+        }
+    ) => {
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        }
+        payload?: {
+            id: number
+            disableFeatureFlag: boolean
+        }
+    }
+    copyExperimentToProject: (payload: {
+        featureFlagKey?: string
+        id: number
+        name?: string
+        onSuccess?: () => void
+        targetProjectId: number
+        targetTeamId: number
+    }) => {
+        id: number
+        targetProjectId: number
+        targetTeamId: number
+        featureFlagKey?: string
+        name?: string
+        onSuccess?: () => void
+    }
+    copyExperimentToProjectFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    copyExperimentToProjectSuccess: (
+        experiments: ExperimentsResult,
+        payload?: {
+            id: number
+            targetProjectId: number
+            targetTeamId: number
+            featureFlagKey?: string
+            name?: string
+            onSuccess?: () => void
+        }
+    ) => {
+        experiments: ExperimentsResult
+        payload?: {
+            id: number
+            targetProjectId: number
+            targetTeamId: number
+            featureFlagKey?: string
+            name?: string
+            onSuccess?: () => void
+        }
+    }
+    duplicateExperiment: (payload: { featureFlagKey?: string; id: number; name?: string }) => {
+        id: number
+        featureFlagKey?: string
+        name?: string
+    }
+    duplicateExperimentFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    duplicateExperimentSuccess: (
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: any[]
+        },
+        payload?: {
+            id: number
+            featureFlagKey?: string
+            name?: string
+        }
+    ) => {
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: any[]
+        }
+        payload?: {
+            id: number
+            featureFlagKey?: string
+            name?: string
+        }
+    }
+    loadExperiments: (_: void) => void
+    loadExperimentsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadExperimentsStats: () => any
+    loadExperimentsStatsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadExperimentsStatsSuccess: (
+        experimentsStats: ExperimentVelocityStats,
+        payload?: any
+    ) => {
+        experimentsStats: ExperimentVelocityStats
+        payload?: any
+    }
+    loadExperimentsSuccess: (
+        experiments: ExperimentsResult,
+        payload?: void
+    ) => {
+        experiments: ExperimentsResult
+        payload?: void
+    }
+    loadFeatureFlagModalFeatureFlags: (_: void) => void
+    loadFeatureFlagModalFeatureFlagsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadFeatureFlagModalFeatureFlagsSuccess: (
+        featureFlagModalFeatureFlags: {
+            count: number
+            results: FeatureFlagType[]
+        },
+        payload?: void
+    ) => {
+        featureFlagModalFeatureFlags: {
+            count: number
+            results: FeatureFlagType[]
+        }
+        payload?: void
+    }
+    openFeatureFlagModal: () => {
+        value: true
+    }
+    resetFeatureFlagModalFilters: () => {
+        value: true
+    }
+    setExperimentsFilters: (
+        filters: Partial<ExperimentsFilters>,
+        replace?: boolean
+    ) => {
+        filters: Partial<ExperimentsFilters>
+        replace: boolean | undefined
+    }
+    setExperimentsTab: (tabKey: ExperimentsTabs) => {
+        tabKey: ExperimentsTabs
+    }
+    setFeatureFlagModalFilters: (
+        filters: Partial<FeatureFlagModalFilters>,
+        replace?: boolean
+    ) => {
+        filters: Partial<FeatureFlagModalFilters>
+        replace: boolean | undefined
+    }
+    unarchiveExperiment: (id: number) => number
+    unarchiveExperimentFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    unarchiveExperimentSuccess: (
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        },
+        payload?: number
+    ) => {
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        }
+        payload?: number
+    }
+    updateExperiments: (experiment: Experiment) => Experiment
+    updateExperimentsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    updateExperimentsSuccess: (
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        },
+        payload?: Experiment
+    ) => {
+        experiments: {
+            count: number
+            filters?: ExperimentsFilters | null | undefined
+            next?: string | null | undefined
+            previous?: string | null | undefined
+            results: Experiment[]
+        }
+        payload?: Experiment
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface experimentsLogicMeta {
+    __keaTypeGenInternalSelectorTypes: {
+        count: (experiments: ExperimentsResult) => number
+        paramsFromFilters: (filters: ExperimentsFilters) => {
+            archived?: boolean | undefined
+            created_by_id?: number[] | undefined
+            limit: number
+            offset: number
+            order?: string | undefined
+            page?: number | undefined
+            search?: string | undefined
+            status?: ExperimentStatus | 'all' | undefined
+        }
+        featureFlagModalParamsFromFilters: (
+            featureFlagModalFilters: FeatureFlagModalFilters,
+            currentTeam: TeamPublicType | TeamType | null
+        ) => Record<string, any>
+        featureFlagModalPageFromURL: (searchParams: Record<string, any>) => number
+        featureFlagModalPagination: (
+            featureFlagModalFilters: FeatureFlagModalFilters,
+            featureFlagModalFeatureFlags: {
+                count: number
+                results: FeatureFlagType[]
+            },
+            featureFlagModalPageFromURL: number
+        ) => PaginationManual
+        shouldShowEmptyState: (
+            experimentsLoading: boolean,
+            experiments: ExperimentsResult,
+            filters: ExperimentsFilters
+        ) => boolean
+        pagination: (filters: ExperimentsFilters, count: number) => PaginationManual
+        unavailableFeatureFlagKeys: (featureFlags: FeatureFlagsResult, experiments: ExperimentsResult) => Set<string>
+    }
+}
+
+export type experimentsLogicType = MakeLogicType<
+    experimentsLogicValues,
+    experimentsLogicActions,
+    Record<string, any>,
+    experimentsLogicMeta
+>
 
 export const experimentsLogic = kea<experimentsLogicType>([
     path(['scenes', 'experiments', 'experimentsLogic']),
@@ -129,8 +540,6 @@ export const experimentsLogic = kea<experimentsLogicType>([
             ['currentProjectId'],
             userLogic,
             ['user', 'hasAvailableFeature'],
-            featureFlagLogic,
-            ['featureFlags'],
             featureFlagsLogic,
             ['featureFlags'],
             router,
@@ -180,24 +589,21 @@ export const experimentsLogic = kea<experimentsLogicType>([
                 setExperimentsTab: (state, { tabKey }) => tabKey ?? state,
             },
         ],
-        // kea-loaders keeps the previous value on failure, and the previous value here is the empty
-        // default -- so without this the scene cannot tell "this project has no experiments" from
-        // "the request never succeeded", and renders the create-your-first prompt either way.
-        experimentsLoadFailed: [
+        hasLoadedExperiments: [
             false,
             {
-                loadExperiments: () => false,
-                loadExperimentsSuccess: () => false,
+                loadExperimentsSuccess: () => true,
                 loadExperimentsFailure: () => true,
             },
         ],
     }),
     listeners(({ actions, values }) => ({
         setExperimentsFilters: async (_, breakpoint) => {
-            /**
-             * this debounces the search input. Yeah, I know.
-             */
-            await breakpoint(300)
+            // Only debounce after the first load — the debounce is for search input,
+            // but the initial load from urlToAction should fire immediately.
+            if (values.hasLoadedExperiments || values.experimentsLoading) {
+                await breakpoint(300)
+            }
             actions.loadExperiments()
         },
         setFeatureFlagModalFilters: async (_, breakpoint) => {
@@ -225,17 +631,21 @@ export const experimentsLogic = kea<experimentsLogicType>([
         experiments: [
             { results: [], count: 0, filters: DEFAULT_FILTERS, offset: 0 } as ExperimentsResult,
             {
-                loadExperiments: async () => {
+                loadExperiments: async (_: void, breakpoint) => {
                     const response = await api.get(
                         `api/projects/${values.currentProjectId}/experiments?${toParams(values.paramsFromFilters)}`
                     )
+                    // Discard stale responses that resolve after a newer search has fired
+                    breakpoint()
                     return {
                         ...response,
                         offset: values.paramsFromFilters.offset,
                     }
                 },
-                archiveExperiment: async (id: number) => {
-                    await api.update(`api/projects/${values.currentProjectId}/experiments/${id}`, { archived: true })
+                archiveExperiment: async ({ id, disableFeatureFlag }: { id: number; disableFeatureFlag: boolean }) => {
+                    await api.create(`api/projects/${values.currentProjectId}/experiments/${id}/archive`, {
+                        disable_feature_flag: disableFeatureFlag,
+                    })
                     toast.info('Experiment archived')
                     return {
                         ...values.experiments,
@@ -243,8 +653,23 @@ export const experimentsLogic = kea<experimentsLogicType>([
                         count: values.experiments.count - 1,
                     }
                 },
-                duplicateExperiment: async (payload: { id: number; featureFlagKey?: string }) => {
-                    const data = payload.featureFlagKey ? { feature_flag_key: payload.featureFlagKey } : {}
+                unarchiveExperiment: async (id: number) => {
+                    await api.create(`api/projects/${values.currentProjectId}/experiments/${id}/unarchive`)
+                    toast.info('Experiment unarchived')
+                    return {
+                        ...values.experiments,
+                        results: values.experiments.results.filter((experiment) => experiment.id !== id),
+                        count: values.experiments.count - 1,
+                    }
+                },
+                duplicateExperiment: async (payload: { id: number; featureFlagKey?: string; name?: string }) => {
+                    const data: Record<string, string> = {}
+                    if (payload.featureFlagKey) {
+                        data.feature_flag_key = payload.featureFlagKey
+                    }
+                    if (payload.name) {
+                        data.name = payload.name
+                    }
                     const duplicatedExperiment = await api.create(
                         `api/projects/${values.currentProjectId}/experiments/${payload.id}/duplicate`,
                         data
@@ -258,6 +683,39 @@ export const experimentsLogic = kea<experimentsLogicType>([
                         results: [duplicatedExperiment, ...values.experiments.results],
                         count: values.experiments.count + 1,
                     }
+                },
+                copyExperimentToProject: async (payload: {
+                    id: number
+                    targetProjectId: number
+                    targetTeamId: number
+                    featureFlagKey?: string
+                    name?: string
+                    onSuccess?: () => void
+                }) => {
+                    const data: Record<string, any> = { target_team_id: payload.targetTeamId }
+                    if (payload.featureFlagKey) {
+                        data.feature_flag_key = payload.featureFlagKey
+                    }
+                    if (payload.name) {
+                        data.name = payload.name
+                    }
+                    const newExperiment = await api.create(
+                        `api/projects/${values.currentProjectId}/experiments/${payload.id}/copy_to_project`,
+                        data
+                    )
+                    toast.success('Experiment copied to project', {
+                        button: {
+                            label: 'Go to experiment',
+                            action: () => {
+                                window.location.href = urls.project(
+                                    payload.targetProjectId,
+                                    urls.experiment(newExperiment.id)
+                                )
+                            },
+                        },
+                    })
+                    payload.onSuccess?.()
+                    return values.experiments
                 },
                 addToExperiments: (experiment: Experiment) => {
                     return {
@@ -278,12 +736,15 @@ export const experimentsLogic = kea<experimentsLogicType>([
         featureFlagModalFeatureFlags: [
             { results: [], count: 0 } as { results: FeatureFlagType[]; count: number },
             {
-                loadFeatureFlagModalFeatureFlags: async () => {
+                loadFeatureFlagModalFeatureFlags: async (_: void, breakpoint) => {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/experiments/eligible_feature_flags/?${toParams({
+                        `api/projects/${values.currentProjectId}/feature_flags/?${toParams({
                             ...values.featureFlagModalParamsFromFilters,
+                            eligible_for_experiment: true,
                         })}`
                     )
+                    // Discard stale responses that resolve after a newer search has fired
+                    breakpoint()
                     return response
                 },
             },
@@ -305,7 +766,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
         ],
     })),
     selectors(() => ({
-        count: [(selectors) => [selectors.experiments], (experiments) => experiments.count],
+        count: [(selectors) => [selectors.experiments], (experiments: ExperimentsResult) => experiments.count],
         paramsFromFilters: [
             (s) => [s.filters],
             (filters: ExperimentsFilters) => ({
@@ -316,16 +777,19 @@ export const experimentsLogic = kea<experimentsLogicType>([
         ],
         featureFlagModalParamsFromFilters: [
             (s) => [s.featureFlagModalFilters, s.currentTeam],
-            (filters: FeatureFlagModalFilters, currentTeam) => {
+            (
+                filters: FeatureFlagModalFilters,
+                currentTeam: null | import('~/types').TeamPublicType | import('~/types').TeamType
+            ) => {
                 const params: Record<string, any> = {
                     ...filters,
                     limit: FLAGS_PER_PAGE,
                     offset: filters.page ? (filters.page - 1) * FLAGS_PER_PAGE : 0,
                 }
 
-                // Add evaluation tags filter if required by team
+                // Add evaluation contexts filter if required by team
                 if (currentTeam?.require_evaluation_contexts) {
-                    params.has_evaluation_tags = true
+                    params.has_evaluation_contexts = true
                 }
 
                 return params
@@ -333,13 +797,20 @@ export const experimentsLogic = kea<experimentsLogicType>([
         ],
         featureFlagModalPageFromURL: [
             () => [router.selectors.searchParams],
-            (searchParams) => {
+            (searchParams: Record<string, any>) => {
                 return parseInt(searchParams['ff_page']) || 1
             },
         ],
         featureFlagModalPagination: [
             (s) => [s.featureFlagModalFilters, s.featureFlagModalFeatureFlags, s.featureFlagModalPageFromURL],
-            (filters, featureFlags, urlPage): PaginationManual => {
+            (
+                filters: FeatureFlagModalFilters,
+                featureFlags: {
+                    count: number
+                    results: FeatureFlagType[]
+                },
+                urlPage: number
+            ): PaginationManual => {
                 const currentPage = Math.max(filters.page || 1, urlPage)
 
                 const hasNextPage = featureFlags.count > currentPage * FLAGS_PER_PAGE
@@ -369,19 +840,18 @@ export const experimentsLogic = kea<experimentsLogicType>([
             },
         ],
         shouldShowEmptyState: [
-            (s) => [s.experimentsLoading, s.experimentsLoadFailed, s.experiments, s.filters],
-            (experimentsLoading, experimentsLoadFailed, experiments, filters): boolean => {
+            (s) => [s.experimentsLoading, s.experiments, s.filters],
+            (experimentsLoading: boolean, experiments: ExperimentsResult, filters: ExperimentsFilters): boolean => {
                 return (
                     !experimentsLoading &&
-                    !experimentsLoadFailed &&
-                    experiments.results.length === 0 &&
+                    (experiments.results?.length ?? 0) === 0 &&
                     objectsEqual(filters, DEFAULT_FILTERS)
                 )
             },
         ],
         pagination: [
             (s) => [s.filters, s.count],
-            (filters, count): PaginationManual => {
+            (filters: ExperimentsFilters, count: number): PaginationManual => {
                 return {
                     controlled: true,
                     pageSize: EXPERIMENTS_PER_PAGE,
@@ -389,10 +859,6 @@ export const experimentsLogic = kea<experimentsLogicType>([
                     entryCount: count,
                 }
             },
-        ],
-        webExperimentsAvailable: [
-            () => [featureFlagLogic.selectors.featureFlags],
-            (featureFlags: FeatureFlagsSet) => featureFlags[FEATURE_FLAGS.WEB_EXPERIMENTS],
         ],
         // TRICKY: we do not load all feature flags here, just the latest ones.
         unavailableFeatureFlagKeys: [
@@ -424,14 +890,12 @@ export const experimentsLogic = kea<experimentsLogicType>([
         ],
     }),
     afterMount(({ actions, values }) => {
-        actions.loadExperiments()
         actions.loadExperimentsStats()
-        // Sync modal page with URL on mount
+        // Sync modal page with URL on mount. Eligible flags themselves are loaded lazily when the
+        // "link existing flag" modal opens (openFeatureFlagModal listener), not on every list mount.
         const urlPage = values.featureFlagModalPageFromURL
         if (urlPage !== 1) {
             actions.setFeatureFlagModalFilters({ page: urlPage })
-        } else {
-            actions.loadFeatureFlagModalFeatureFlags()
         }
     }),
     actionToUrl(({ values }) => {
@@ -445,12 +909,18 @@ export const experimentsLogic = kea<experimentsLogicType>([
                   },
               ]
             | void => {
-            const searchParams: Record<string, string | number | boolean> = {
+            const searchParams: Record<string, string | number | boolean | number[]> = {
                 ...values.filters,
             }
 
             if (values.tab !== ExperimentsTabs.All) {
                 searchParams['tab'] = values.tab
+            }
+
+            // Preserve the activity deep-link param only when on the history tab
+            const currentActivity = router.values.searchParams['activity']
+            if (currentActivity && values.tab === ExperimentsTabs.History) {
+                searchParams['activity'] = currentActivity
             }
 
             return [router.values.location.pathname, searchParams, router.values.hashParams, { replace: true }]
@@ -466,7 +936,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                   },
               ]
             | void => {
-            const searchParams: Record<string, string | number | boolean> = {
+            const searchParams: Record<string, string | number | boolean | number[]> = {
                 ...values.filters,
             }
 
@@ -505,11 +975,11 @@ export const experimentsLogic = kea<experimentsLogicType>([
             const { page, search, status, created_by_id, order, archived } = searchParams
             const pageFiltersFromUrl: Partial<ExperimentsFilters> = {
                 search,
-                created_by_id,
+                created_by_id: parseNumericArrayFilter(created_by_id),
                 order,
             }
 
-            pageFiltersFromUrl.status = status || 'all'
+            pageFiltersFromUrl.status = normalizeExperimentFilterStatus(status)
             pageFiltersFromUrl.page = page !== undefined ? parseInt(page) : 1
             pageFiltersFromUrl.archived = String(archived) === 'true'
 

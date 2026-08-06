@@ -57,7 +57,7 @@ ROUNDING_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 
 # Keep in sync with the hanzo.ai repository: contents/docs/sql/datastore-functions.mdx
 RANDOM_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
-    "rand": InsightsQLFunctionMeta("rand", 0, 0),
+    "rand": InsightsQLFunctionMeta("rand", 0, 0, case_sensitive=False),
 }
 
 # Combined mathematical functions

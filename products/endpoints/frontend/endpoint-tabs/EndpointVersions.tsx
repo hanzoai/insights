@@ -5,8 +5,9 @@ import { Button, Table, Tag } from '@hanzo/elements'
 import type { TableColumns } from '@hanzo/elements'
 
 import { More } from 'lib/elements/Button/More'
+import { atColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { urls } from 'scenes/urls'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
@@ -14,10 +15,6 @@ import type { EndpointVersionType } from '~/types'
 
 import { endpointLogic } from '../endpointLogic'
 import { EndpointTab, endpointSceneLogic } from '../endpointSceneLogic'
-
-interface EndpointVersionsProps {
-    tabId: string
-}
 
 function getStatusTagType(status: string | undefined): 'success' | 'danger' | 'warning' | 'default' {
     if (!status) {
@@ -35,10 +32,10 @@ function getStatusTagType(status: string | undefined): 'success' | 'danger' | 'w
     }
 }
 
-export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element {
-    const { endpoint, versions, versionsLoading } = useValues(endpointLogic({ tabId }))
-    const { updateEndpoint } = useActions(endpointLogic({ tabId }))
-    const { viewingVersion } = useValues(endpointSceneLogic({ tabId }))
+export function EndpointVersions(): JSX.Element {
+    const { endpoint, versions, versionsLoading } = useValues(endpointLogic)
+    const { updateEndpoint } = useActions(endpointLogic)
+    const { viewingVersion } = useValues(endpointSceneLogic)
 
     if (!endpoint) {
         return <></>
@@ -110,8 +107,20 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
                 )
             },
         },
-        createdAtColumn<EndpointVersionType>() as any,
-        createdByColumn<EndpointVersionType>() as any,
+        atColumn<EndpointVersionType>('version_created_at', 'Created') as any,
+        {
+            title: 'Created by',
+            dataIndex: 'version_created_by',
+            render: function RenderCreatedBy(_, record) {
+                return (
+                    <div className="flex flex-row items-center flex-nowrap">
+                        {record.version_created_by && (
+                            <ProfilePicture user={record.version_created_by} size="md" showName />
+                        )}
+                    </div>
+                )
+            },
+        },
         {
             key: 'actions',
             width: 0,

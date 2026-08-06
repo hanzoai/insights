@@ -11,14 +11,14 @@
 .Table {
     --row-base-height: auto;
     --row-horizontal-padding: 0.5rem;
-    --table-background-color: var(--color-bg-surface-primary);
+    --lemon-table-background-color: var(--color-bg-surface-primary);
 
     position: relative;
     flex: 1;
     width: 100%;
     overflow: hidden;
     font-size: 13px;
-    background: var(--table-background-color) !important;
+    background: var(--lemon-table-background-color) !important;
     border: 1px solid var(--color-border-primary);
     border-radius: var(--radius);
 
@@ -26,7 +26,7 @@
     .Insight &,
     .InsightCard__viz & {
         // Special override for scenes where the table is primarily next to insights
-        --table-background-color: var(--color-bg-surface-primary);
+        --lemon-table-background-color: var(--color-bg-surface-primary);
     }
 
     .WebAnalyticsDashboard &,
@@ -124,7 +124,17 @@
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.03125rem;
-        background: var(--table-background-color);
+        background: var(--lemon-table-background-color);
+
+        > tr.Table__loader-row > th.Table__loader-host {
+            position: relative;
+            height: 0;
+            padding: 0 !important;
+            overflow: visible;
+            line-height: 0;
+            border: none !important;
+            box-shadow: none !important;
+        }
 
         > tr {
             > th {
@@ -258,7 +268,7 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
-    background: var(--table-background-color);
+    background: var(--lemon-table-background-color);
     opacity: 0;
     transition: opacity 200ms ease;
 
@@ -272,11 +282,7 @@
     cursor: default;
 
     .Table__header-content {
-        color: var(--color-text-secondary);
-
-        .reduce-visual-noise & {
-            color: var(--color-text-tertiary) !important;
-        }
+        color: var(--color-text-tertiary);
     }
 
     &.Table__header--actionable {
@@ -298,17 +304,13 @@
     }
 
     .sorting-indicator {
-        .reduce-visual-noise & {
-            color: var(--color-text-tertiary) !important;
-            opacity: 0.5;
-        }
+        color: var(--color-text-tertiary);
+        opacity: 0.5;
     }
 
     &:hover {
         .sorting-indicator {
-            .reduce-visual-noise & {
-                opacity: 1;
-            }
+            opacity: 1;
         }
     }
 }
@@ -331,7 +333,7 @@
 
 // NOTE: this is outside of the storybook check for 3000 selective styling
 .Table__cell--sticky {
-    background: var(--table-background-color);
+    background: var(--lemon-table-background-color);
 
     .Table__row--status-highlighted &::before {
         background: var(--color-accent-highlight-secondary);
@@ -339,12 +341,12 @@
 }
 
 .Table__header--sticky {
-    background: var(--table-background-color);
+    background: var(--lemon-table-background-color);
 }
 
 .Table__cell--pinned,
 .Table__header--pinned {
-    background: var(--table-background-color);
+    background: var(--lemon-table-background-color);
 }
 
 // Stickiness is disabled in snapshots due to flakiness
@@ -355,7 +357,7 @@ body:not(.storybook-test-runner) {
     .Table__cell--pinned {
         position: sticky !important; // Important to override .Table--with-ribbon's rule, which has more specificity
         left: 0;
-        z-index: 1;
+        z-index: 6; // Higher than the scrollable shadow
         overflow: visible !important;
 
         // Replicate .scrollable style for sticky cells
@@ -370,7 +372,7 @@ body:not(.storybook-test-runner) {
         }
     }
 
-    .ScrollableShadows--left {
+    .ScrollableShadows[data-overflow-x-start] {
         .Table__cell--sticky::before,
         .Table__header--sticky::before,
         .Table__cell--pinned::before,

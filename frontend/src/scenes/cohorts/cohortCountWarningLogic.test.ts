@@ -1,5 +1,6 @@
 import { BuiltLogic } from 'kea'
 
+import { toPaginatedResponse } from '~/mocks/handlers'
 import { useMocks } from '~/mocks/jest'
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { ActorsQuery, DataTableNode, NodeKind } from '~/queries/schema/schema-general'
@@ -8,7 +9,7 @@ import { mockCohort } from '~/test/mocks'
 import { CohortType, FilterLogicalOperator, PropertyFilterType, PropertyOperator } from '~/types'
 
 import { CohortCountWarningLogicProps, cohortCountWarningLogic } from './cohortCountWarningLogic'
-import type { cohortCountWarningLogicType } from './cohortCountWarningLogicType'
+import type { cohortCountWarningLogicType } from './cohortCountWarningLogic'
 
 const createMockQuery = (cohortId: number, overrides: Partial<ActorsQuery> = {}): DataTableNode => ({
     kind: NodeKind.DataTableNode,
@@ -42,8 +43,8 @@ describe('cohortCountWarningLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/cohorts': [mockCohort],
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/api/projects/:team_id/cohorts/': toPaginatedResponse([mockCohort]),
+                '/api/projects/:team_id/cohorts/:id/': mockCohort,
             },
         })
         initKeaTests()

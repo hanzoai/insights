@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Update contacts in Brevo",
     icon_url="/static/services/brevo.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')

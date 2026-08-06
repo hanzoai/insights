@@ -1,29 +1,36 @@
-import { useActions, useMountedLogic, useValues } from 'kea'
+import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { Collapse, Divider, Input, Select, Tag, Link, Tooltip } from '@hanzo/elements'
+import { Checkbox, Divider, Input, Select, Tag, Link, Tooltip } from '@hanzo/elements'
 
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
+import { MailHog } from 'lib/components/mascots'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { MailMascot } from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { updatedAtColumn } from 'lib/elements/Table/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
-import { capitalizeFirstLetter } from 'lib/utils'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
-import { WorkflowsSceneProps } from '../WorkflowsScene'
-import { NewWorkflowModal } from './NewWorkflowModal'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
+
 import { getInsightsFlowStep } from './insightsflows/steps/InsightsFlowSteps'
 import { InsightsFlow } from './insightsflows/types'
 import { newWorkflowLogic } from './newWorkflowLogic'
 import { workflowLogic } from './workflowLogic'
-import { workflowsLogic } from './workflowsLogic'
+import { WorkflowStatusFilter, workflowsLogic } from './workflowsLogic'
+
+const STATUS_CONFIG: Record<string, { label: string; type: 'success' | 'default' | 'muted' }> = {
+    active: { label: 'Active', type: 'success' },
+    draft: { label: 'Draft', type: 'default' },
+    archived: { label: 'Archived', type: 'muted' },
+}
 
 function WorkflowTypeTag({ workflow }: { workflow: InsightsFlow }): JSX.Element {
     const hasMessagingAction = useMemo(() => {
@@ -85,9 +92,18 @@ function WorkflowActionsSummary({ workflow }: { workflow: InsightsFlow }): JSX.E
     )
 }
 
-export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
-    useMountedLogic(workflowsLogic)
-    const { filteredWorkflows, archivedWorkflows, workflowsLoading, filters } = useValues(workflowsLogic)
+export function WorkflowsTable(): JSX.Element {
+    const logic = workflowsLogic()
+    const {
+        workflowsLoading,
+        workflows,
+        pagination,
+        hasLoadedWorkflows,
+        filters,
+        selectedArchivedWorkflowIds,
+        allArchivedSelected,
+        selectedArchivedCount,
+    } = useValues(logic)
     const {
         loadWorkflows,
         toggleWorkflowStatus,
@@ -95,16 +111,20 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
         archiveWorkflow,
         restoreWorkflow,
         deleteWorkflow,
-        setSearchTerm,
-        setCreatedBy,
-        setStatus,
-    } = useActions(workflowsLogic)
+        deleteSelectedWorkflows,
+        setFilters,
+        toggleArchivedWorkflowSelection,
+        selectAllArchivedWorkflows,
+        clearArchivedWorkflowSelection,
+    } = useActions(logic)
     const { showNewWorkflowModal } = useActions(newWorkflowLogic)
 
     useOnMountEffect(() => {
         // Tricky: unmount the new workflow logic when leaving the new workflow scene
         // We can't just reset state within the logic's unmount as that would trigger when switching tabs
-        const newWorkflowLogic = workflowLogic.findMounted({ id: 'new', tabId: props.tabId })
+        const newWorkflowLogic = workflowLogic.findMounted({
+            id: 'new',
+        })
         newWorkflowLogic?.unmount()
 
         // Since logic isn't getting unmounted when navigating away from this scene, we need to reload workflows
@@ -112,7 +132,32 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
         loadWorkflows()
     })
 
+    const isArchived = filters.status === 'archived'
+
     const columns: TableColumns<InsightsFlow> = [
+        ...(isArchived
+            ? [
+                  {
+                      title: (
+                          <Checkbox
+                              checked={allArchivedSelected ? true : selectedArchivedCount > 0 ? 'indeterminate' : false}
+                              onChange={(checked: boolean) =>
+                                  checked
+                                      ? selectAllArchivedWorkflows(workflows.results.map((w) => w.id))
+                                      : clearArchivedWorkflowSelection()
+                              }
+                          />
+                      ),
+                      width: 0,
+                      render: (_: any, item: InsightsFlow) => (
+                          <Checkbox
+                              checked={selectedArchivedWorkflowIds.has(item.id)}
+                              onChange={() => toggleArchivedWorkflowSelection(item.id)}
+                          />
+                      ),
+                  },
+              ]
+            : []),
         {
             title: 'Name',
             key: 'name',
@@ -131,7 +176,6 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                 )
             },
         },
-
         {
             title: 'Type',
             width: 0,
@@ -139,7 +183,6 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                 return <WorkflowTypeTag workflow={item} />
             },
         },
-
         {
             title: 'Trigger',
             width: 0,
@@ -186,7 +229,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                         <AppMetricsSparkline
                             logicKey={id}
                             forceParams={{
-                                appSource: 'insights_flow',
+                                appSource: 'hog_flow',
                                 appSourceId: id,
                                 metricKind: ['success', 'failure'],
                                 breakdownBy: 'metric_kind',
@@ -198,18 +241,12 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                 )
             },
         },
-
         {
             title: 'Status',
             width: 0,
-            key: 'status',
-            sorter: (a, b) => a.status.localeCompare(b.status),
             render: (_, item) => {
-                return (
-                    <Tag type={item.status === 'active' ? 'success' : 'default'}>
-                        {capitalizeFirstLetter(item.status)}
-                    </Tag>
-                )
+                const config = STATUS_CONFIG[item.status] || STATUS_CONFIG.draft
+                return <Tag type={config.type}>{config.label}</Tag>
             },
         },
         {
@@ -220,19 +257,25 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                         overlay={
                             <>
                                 {workflow.status !== 'archived' && (
-                                    <Button
-                                        data-attr="workflow-edit"
-                                        fullWidth
-                                        status={workflow.status === 'draft' ? 'default' : 'danger'}
-                                        onClick={() => toggleWorkflowStatus(workflow)}
-                                        tooltip={
-                                            workflow.status === 'draft'
-                                                ? 'Enables the workflow to start sending messages'
-                                                : 'Disables the workflow from sending any new messages. In-progress workflows will end immediately.'
-                                        }
+                                    <AccessControlAction
+                                        resourceType={AccessControlResourceType.Workflow}
+                                        minAccessLevel={AccessControlLevel.Editor}
+                                        userAccessLevel={workflow.user_access_level}
                                     >
-                                        {workflow.status === 'draft' ? 'Enable' : 'Disable'}
-                                    </Button>
+                                        <Button
+                                            data-attr="workflow-edit"
+                                            fullWidth
+                                            status={workflow.status === 'draft' ? 'default' : 'danger'}
+                                            onClick={() => toggleWorkflowStatus(workflow)}
+                                            tooltip={
+                                                workflow.status === 'draft'
+                                                    ? 'Enables the workflow to start sending messages'
+                                                    : 'Disables the workflow from sending any new messages. In-progress workflows will end immediately.'
+                                            }
+                                        >
+                                            {workflow.status === 'draft' ? 'Enable' : 'Disable'}
+                                        </Button>
+                                    </AccessControlAction>
                                 )}
                                 <Button
                                     data-attr="workflow-duplicate"
@@ -242,27 +285,39 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                                     Duplicate
                                 </Button>
                                 <Divider />
-                                <Button
-                                    data-attr="workflow-archive-restore"
-                                    fullWidth
-                                    status={workflow.status === 'archived' ? 'default' : 'danger'}
-                                    onClick={() => {
-                                        workflow.status === 'archived'
-                                            ? restoreWorkflow(workflow)
-                                            : archiveWorkflow(workflow)
-                                    }}
+                                <AccessControlAction
+                                    resourceType={AccessControlResourceType.Workflow}
+                                    minAccessLevel={AccessControlLevel.Editor}
+                                    userAccessLevel={workflow.user_access_level}
                                 >
-                                    {workflow.status === 'archived' ? 'Restore' : 'Archive'}
-                                </Button>
-                                {workflow.status === 'archived' && (
                                     <Button
-                                        data-attr="workflow-delete"
+                                        data-attr="workflow-archive-restore"
                                         fullWidth
-                                        status="danger"
-                                        onClick={() => deleteWorkflow(workflow)}
+                                        status={workflow.status === 'archived' ? 'default' : 'danger'}
+                                        onClick={() => {
+                                            workflow.status === 'archived'
+                                                ? restoreWorkflow(workflow)
+                                                : archiveWorkflow(workflow)
+                                        }}
                                     >
-                                        Delete
+                                        {workflow.status === 'archived' ? 'Restore' : 'Archive'}
                                     </Button>
+                                </AccessControlAction>
+                                {workflow.status === 'archived' && (
+                                    <AccessControlAction
+                                        resourceType={AccessControlResourceType.Workflow}
+                                        minAccessLevel={AccessControlLevel.Editor}
+                                        userAccessLevel={workflow.user_access_level}
+                                    >
+                                        <Button
+                                            data-attr="workflow-delete"
+                                            fullWidth
+                                            status="danger"
+                                            onClick={() => deleteWorkflow(workflow)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </AccessControlAction>
                                 )}
                             </>
                         }
@@ -273,7 +328,14 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
     ]
 
     const showProductIntroduction =
-        !workflowsLoading && filteredWorkflows.length === 0 && !filters.search && !filters.createdBy && !filters.status
+        hasLoadedWorkflows &&
+        !workflowsLoading &&
+        workflows.results.length === 0 &&
+        !filters.search &&
+        !filters.createdBy &&
+        filters.status === 'all' &&
+        // An empty page is not an empty project, so never offer onboarding while paging
+        filters.page === 1
 
     return (
         <div className="workflows-section" data-attr="workflows-table" data-loading={workflowsLoading}>
@@ -286,70 +348,74 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                     action={() => {
                         showNewWorkflowModal()
                     }}
-                    customInsights={MailMascot}
+                    customHog={MailHog}
                     isEmpty
+                    mcpSurfaceKey="workflows.create"
                 />
             )}
             {!showProductIntroduction && (
-                <div className="flex justify-between gap-2 flex-wrap mb-4">
-                    <Input
-                        type="search"
-                        placeholder="Search for workflows"
-                        onChange={setSearchTerm}
-                        value={filters.search}
-                    />
-                    <div className="flex items-center gap-2 flex-wrap">
+                <>
+                    <div className="flex justify-between gap-2 flex-wrap mb-4">
+                        <Input
+                            type="search"
+                            placeholder="Search for workflows"
+                            onChange={(search) => setFilters({ search })}
+                            value={filters.search}
+                        />
                         <div className="flex items-center gap-2">
-                            <span>Status:</span>
+                            <span>
+                                <b>Status</b>
+                            </span>
                             <Select
-                                value={filters.status || 'all'}
-                                onChange={(value) => setStatus(value === 'all' ? null : value)}
-                                options={[
-                                    { value: 'all', label: 'All statuses' },
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'draft', label: 'Draft' },
-                                    { value: 'archived', label: 'Archived' },
-                                ]}
+                                dropdownMatchSelectWidth={false}
                                 size="small"
+                                onChange={(value) => setFilters({ status: value as WorkflowStatusFilter })}
+                                options={[
+                                    { label: 'All', value: 'all' },
+                                    { label: 'Active', value: 'active' },
+                                    { label: 'Draft', value: 'draft' },
+                                    { label: 'Archived', value: 'archived' },
+                                ]}
+                                value={filters.status}
                             />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span>Created by:</span>
+                            <span className="ml-1">
+                                <b>Created by</b>
+                            </span>
                             <MemberSelect
                                 value={filters.createdBy}
-                                onChange={(user) => setCreatedBy(user?.uuid || null)}
+                                onChange={(user) => setFilters({ createdBy: user?.uuid || null })}
                             />
                         </div>
                     </div>
-                </div>
+
+                    {isArchived && selectedArchivedCount > 0 && (
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-muted text-sm">
+                                {selectedArchivedCount} workflow{selectedArchivedCount !== 1 ? 's' : ''} selected
+                            </span>
+                            <Button
+                                type="secondary"
+                                status="danger"
+                                size="small"
+                                onClick={deleteSelectedWorkflows}
+                            >
+                                Delete selected
+                            </Button>
+                        </div>
+                    )}
+
+                    <Table
+                        dataSource={workflows.results}
+                        loading={workflowsLoading}
+                        rowKey="id"
+                        columns={columns}
+                        defaultSorting={{ columnKey: 'updatedAt', order: 1 }}
+                        pagination={pagination}
+                        nouns={['workflow', 'workflows']}
+                        emptyState="No workflows matching filters"
+                    />
+                </>
             )}
-            <Table
-                dataSource={filteredWorkflows}
-                loading={workflowsLoading}
-                columns={columns}
-                defaultSorting={{ columnKey: 'status', order: 1 }}
-            />
-            {archivedWorkflows.length > 0 && (
-                <Collapse
-                    className="mt-4"
-                    panels={[
-                        {
-                            header: 'Archived workflows',
-                            key: 'archived_workflows',
-                            className: 'p-1',
-                            content: (
-                                <Table
-                                    dataSource={archivedWorkflows}
-                                    loading={workflowsLoading}
-                                    columns={columns}
-                                    defaultSorting={{ columnKey: 'updatedAt', order: 1 }}
-                                />
-                            ),
-                        },
-                    ]}
-                />
-            )}
-            <NewWorkflowModal />
         </div>
     )
 }

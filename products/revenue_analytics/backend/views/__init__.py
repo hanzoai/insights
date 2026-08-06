@@ -1,9 +1,9 @@
 from abc import ABC
 from typing import ClassVar, Optional
 
-from insights.schema import DatabaseSchemaManagedViewTableKind
-
 from insights.insightsql.database.models import SavedQuery
+
+from insights.schema_enums import DatabaseSchemaManagedViewTableKind
 
 
 class RevenueAnalyticsBaseView(SavedQuery, ABC):

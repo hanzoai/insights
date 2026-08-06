@@ -6,17 +6,20 @@ import {
     Controls,
     EdgeTypes,
     NodeTypes,
+    Panel,
     ReactFlow,
     ReactFlowProvider,
     useReactFlow,
 } from '@xyflow/react'
 import { BindLogic, useActions, useValues } from 'kea'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+
+import { IconInfo } from '@hanzo/icons'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 
 import { workflowLogic } from '../workflowLogic'
-import { insightsFlowEditorLogic } from './insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from './hogFlowEditorLogic'
 import { InsightsFlowEditorPanel } from './panel/InsightsFlowEditorPanel'
 import { REACT_FLOW_EDGE_TYPES } from './react_flow_utils/SmartEdge'
 import { REACT_FLOW_NODE_TYPES } from './steps/Nodes'
@@ -26,7 +29,7 @@ import { InsightsFlowActionEdge, InsightsFlowActionNode } from './types'
 function InsightsFlowEditorContent(): JSX.Element {
     const { isDarkModeOn } = useValues(themeLogic)
 
-    const { nodes, edges, dropzoneNodes } = useValues(insightsFlowEditorLogic)
+    const { nodes, edges, dropzoneNodes, isMovingNode, isCopyingNode } = useValues(hogFlowEditorLogic)
     const {
         onEdgesChange,
         onNodesChange,
@@ -38,7 +41,7 @@ function InsightsFlowEditorContent(): JSX.Element {
         onDrop,
         setReactFlowWrapper,
         handlePaneClick,
-    } = useActions(insightsFlowEditorLogic)
+    } = useActions(hogFlowEditorLogic)
 
     const reactFlowWrapper = useRef<HTMLDivElement>(null)
     const reactFlowInstance = useReactFlow()
@@ -51,12 +54,19 @@ function InsightsFlowEditorContent(): JSX.Element {
         setReactFlowWrapper(reactFlowWrapper)
     }, [setReactFlowWrapper])
 
+    // ReactFlow diffs its nodes prop by reference: an inline spread would hand it a fresh array
+    // every render, making every render look like a graph change.
+    const nodesWithDropzones = useMemo(
+        () => [...nodes, ...(dropzoneNodes as unknown as InsightsFlowActionNode[])],
+        [nodes, dropzoneNodes]
+    )
+
     return (
         <div ref={reactFlowWrapper} className="flex flex-col grow w-full" data-attr="workflow-editor">
             <ReactFlow<InsightsFlowActionNode, InsightsFlowActionEdge>
                 className="grow"
                 fitView
-                nodes={[...nodes, ...(dropzoneNodes as unknown as InsightsFlowActionNode[])]}
+                nodes={nodesWithDropzones}
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
@@ -73,6 +83,17 @@ function InsightsFlowEditorContent(): JSX.Element {
             >
                 <Background gap={36} variant={BackgroundVariant.Dots} />
 
+                {(isMovingNode || isCopyingNode) && (
+                    <Panel position="bottom-left">
+                        {/* Offset right of the zoom controls so the hint sits beside them */}
+                        <div className="flex items-center gap-1.5 ml-12 px-3 py-1.5 rounded border shadow-sm bg-surface-primary text-sm">
+                            <IconInfo className="text-base text-muted shrink-0" />
+                            <span>Click a highlighted spot to {isMovingNode ? 'move' : 'copy'} this step</span>
+                            <span className="text-muted">· press Esc to cancel</span>
+                        </div>
+                    </Panel>
+                )}
+
                 <Controls showInteractive={false} />
 
                 <InsightsFlowEditorPanel />
@@ -85,7 +106,7 @@ export function InsightsFlowEditor(): JSX.Element {
     const { logicProps } = useValues(workflowLogic)
     return (
         <ReactFlowProvider>
-            <BindLogic logic={insightsFlowEditorLogic} props={logicProps}>
+            <BindLogic logic={hogFlowEditorLogic} props={logicProps}>
                 <InsightsFlowEditorContent />
             </BindLogic>
         </ReactFlowProvider>

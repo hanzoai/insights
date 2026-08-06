@@ -1,6 +1,4 @@
-use insights_cli::cmd;
-use rayon::ThreadPoolBuilder;
-use tracing::info;
+use insights_cli::{cmd, invocation_context::init_insights_telemetry};
 
 fn main() {
     let subscriber = tracing_subscriber::fmt()
@@ -12,16 +10,17 @@ fn main() {
         )
         .finish();
 
-    // Init the rayon thread pool
-    ThreadPoolBuilder::new()
-        .num_threads(10)
-        .build_global()
-        .expect("We successfully install a global thread pool");
-
     tracing::subscriber::set_global_default(subscriber).expect("Failed to set tracing subscriber");
+    init_insights_telemetry();
 
-    match cmd::Cli::run() {
-        Ok(_) => info!("All done, happy querying!"),
+    let result = cmd::Cli::run();
+    insights_rs::flush();
+
+    match result {
+        // A child process (the `api` proxy) failed: telemetry is flushed above,
+        // so exiting with the child's code here no longer loses events.
+        Ok(Some(code)) if code != 0 => std::process::exit(code),
+        Ok(_) => {}
         Err(e) => {
             match e.exception_id {
                 Some(id) => {

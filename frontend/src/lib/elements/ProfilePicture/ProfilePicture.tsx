@@ -4,16 +4,20 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import React from 'react'
 
-import { fullName } from 'lib/utils'
+import { fullName } from 'lib/utils/strings'
 import { userLogic } from 'scenes/userLogic'
 
-import { UserBasicType } from '~/types'
+import { MascotConfig, MinimalMascotConfig, UserBasicType } from '~/types'
 
-import { Lettermark, LettermarkColor } from '../Lettermark/Lettermark'
 import { IconRobot } from '../icons'
+import { Lettermark, LettermarkColor } from '../Lettermark/Lettermark'
 
 export interface ProfilePictureProps {
-    user?: Pick<Partial<UserBasicType>, 'first_name' | 'email' | 'last_name'> | null
+    user?:
+        | (Pick<Partial<UserBasicType>, 'first_name' | 'email' | 'last_name'> & {
+              mascot_config?: MinimalMascotConfig | MascotConfig
+          })
+        | null
     name?: string
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
     showName?: boolean

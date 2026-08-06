@@ -2,10 +2,11 @@ import './Toolbar.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { Insights } from '~/lib/insights-browser'
-import { useEffect, useRef, useState } from 'react'
+import { Insights } from 'insights-js'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 
 import {
+    IconApp,
     IconBolt,
     IconCamera,
     IconCheck,
@@ -14,7 +15,9 @@ import {
     IconEye,
     IconFlask,
     IconHide,
+    IconLeave,
     IconLive,
+    IconMessage,
     IconNight,
     IconPieChart,
     IconQuestion,
@@ -27,32 +30,86 @@ import {
 } from '@hanzo/icons'
 import { Badge, Spinner } from '@hanzo/elements'
 
-import { AnimatedLogomark } from 'lib/brand/Logomark'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
+import { IconFlare, IconMenu } from 'lib/elements/icons'
 import { Menu, MenuItem, MenuItems } from 'lib/elements/Menu'
 import { Link } from 'lib/elements/Link'
-import { IconMenu } from 'lib/elements/icons'
-import { inStorybook, inStorybookTestRunner } from 'lib/utils'
+import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
+import { retryImport } from 'lib/utils/retryImport'
 
-import { ActionsToolbarMenu } from '~/toolbar/actions/ActionsToolbarMenu'
+import { AnimatedLogomark } from '~/toolbar/bar/AnimatedLogomark'
+import { AuthConfirmModal } from '~/toolbar/bar/AuthConfirmModal'
 import { PII_MASKING_PRESET_COLORS } from '~/toolbar/bar/piiMaskingStyles'
 import { toolbarLogic } from '~/toolbar/bar/toolbarLogic'
-import { EventDebugMenu } from '~/toolbar/debug/EventDebugMenu'
-import { ExperimentsToolbarMenu } from '~/toolbar/experiments/ExperimentsToolbarMenu'
-import { FlagsToolbarMenu } from '~/toolbar/flags/FlagsToolbarMenu'
-import { ProductToursSidebar } from '~/toolbar/product-tours/ProductToursSidebar'
-import { ProductToursToolbarMenu } from '~/toolbar/product-tours/ProductToursToolbarMenu'
+import { UiHostConfigModal } from '~/toolbar/bar/UiHostConfigModal'
+import { fieldNotesLogic } from '~/toolbar/field-notes/fieldNotesLogic'
 import { productToursLogic } from '~/toolbar/product-tours/productToursLogic'
-import { ScreenshotUploadModal } from '~/toolbar/screenshot-upload/ScreenshotUploadModal'
 import { screenshotUploadLogic } from '~/toolbar/screenshot-upload/screenshotUploadLogic'
-import { HeatmapToolbarMenu } from '~/toolbar/stats/HeatmapToolbarMenu'
+import { ScreenshotUploadModal } from '~/toolbar/screenshot-upload/ScreenshotUploadModal'
+import { surveysToolbarLogic } from '~/toolbar/surveys/surveysToolbarLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 import { useToolbarFeatureFlag } from '~/toolbar/toolbarInsightsJS'
-import { WebVitalsToolbarMenu } from '~/toolbar/web-vitals/WebVitalsToolbarMenu'
 
 import { ToolbarButton } from './ToolbarButton'
 
-const HELP_URL = 'https://hanzo.ai/docs/user-guides/toolbar?utm_medium=in-product&utm_campaign=toolbar-help-button'
+// Each feature menu is a lazy split point: its component graph (and per-tab logics only it
+// mounts, like the event debugger's 200KB+ taxonomy) is fetched when the tab first opens, not
+// on toolbar boot. Styles are unaffected — the shadow root loads the entry stylesheet, and
+// bin/check-toolbar-size.mjs fails the build if a lazy chunk holds CSS the entry doesn't.
+const ActionsToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/actions/ActionsToolbarMenu')).then((m) => ({
+        default: m.ActionsToolbarMenu,
+    }))
+)
+const EventDebugMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/debug/EventDebugMenu')).then((m) => ({ default: m.EventDebugMenu }))
+)
+const ExperimentsToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/experiments/ExperimentsToolbarMenu')).then((m) => ({
+        default: m.ExperimentsToolbarMenu,
+    }))
+)
+const FieldNotesOverlay = lazy(() =>
+    retryImport(() => import('~/toolbar/field-notes/FieldNotesOverlay')).then((m) => ({
+        default: m.FieldNotesOverlay,
+    }))
+)
+const FieldNotesToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/field-notes/FieldNotesToolbarMenu')).then((m) => ({
+        default: m.FieldNotesToolbarMenu,
+    }))
+)
+const FlagsToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/flags/FlagsToolbarMenu')).then((m) => ({ default: m.FlagsToolbarMenu }))
+)
+const ProductToursSidebar = lazy(() =>
+    retryImport(() => import('~/toolbar/product-tours/ProductToursSidebar')).then((m) => ({
+        default: m.ProductToursSidebar,
+    }))
+)
+const ProductToursToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/product-tours/ProductToursToolbarMenu')).then((m) => ({
+        default: m.ProductToursToolbarMenu,
+    }))
+)
+const HeatmapToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/stats/HeatmapToolbarMenu')).then((m) => ({ default: m.HeatmapToolbarMenu }))
+)
+const SurveySidebar = lazy(() =>
+    retryImport(() => import('~/toolbar/surveys/SurveySidebar')).then((m) => ({ default: m.SurveySidebar }))
+)
+const SurveysToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/surveys/SurveysToolbarMenu')).then((m) => ({
+        default: m.SurveysToolbarMenu,
+    }))
+)
+const WebVitalsToolbarMenu = lazy(() =>
+    retryImport(() => import('~/toolbar/web-vitals/WebVitalsToolbarMenu')).then((m) => ({
+        default: m.WebVitalsToolbarMenu,
+    }))
+)
+
+const HELP_URL = 'https://hanzo.ai/docs/toolbar?utm_medium=in-product&utm_campaign=toolbar-help-button'
 
 function EnabledStatusItem({ label, value }: { label: string; value: boolean }): JSX.Element {
     return (
@@ -202,6 +259,8 @@ function piiMaskingMenuItem(
 
 function MoreMenu(): JSX.Element {
     const {
+        mascotModeEnabled,
+        mascotModeAvailable,
         theme,
         insights,
         piiMaskingEnabled,
@@ -209,11 +268,15 @@ function MoreMenu(): JSX.Element {
         piiWarning,
     } = useValues(toolbarLogic)
     const {
+        setMascotModeEnabled,
         toggleTheme,
         togglePiiMasking,
         setPiiMaskingColor,
         startGracefulExit,
+        openMascotOptions,
     } = useActions(toolbarLogic)
+    const { isAuthenticated } = useValues(toolbarConfigLogic)
+    const { logout } = useActions(toolbarConfigLogic)
     const { isTakingScreenshot } = useValues(screenshotUploadLogic)
     const { takeScreenshot } = useActions(screenshotUploadLogic)
 
@@ -240,6 +303,25 @@ function MoreMenu(): JSX.Element {
                 fallbackPlacements={['bottom-end']}
                 items={
                     [
+                        {
+                            icon: <>🦔</>,
+                            label: mascotModeEnabled ? 'Disable mascot mode' : 'Mascot mode',
+                            disabledReason: !mascotModeAvailable
+                                ? "Mascot mode is disabled. Mascot mode uses `new Function` directives to render WebGL, and that requires 'unsafe-eval' in your Content Security Policy's script-src directive"
+                                : undefined,
+                            onClick: () => {
+                                setMascotModeEnabled(!mascotModeEnabled)
+                            },
+                        },
+                        mascotModeEnabled && mascotModeAvailable
+                            ? {
+                                  icon: <IconFlare />,
+                                  label: 'Mascot options',
+                                  onClick: () => {
+                                      openMascotOptions()
+                                  },
+                              }
+                            : undefined,
                         {
                             icon: currentlyLightMode ? <IconNight /> : <IconDay />,
                             label: `Switch to ${currentlyLightMode ? 'dark' : 'light'} mode`,
@@ -268,6 +350,7 @@ function MoreMenu(): JSX.Element {
                                 window.open(HELP_URL, '_blank')?.focus()
                             },
                         },
+                        isAuthenticated ? { icon: <IconLeave />, label: 'Sign out', onClick: logout } : undefined,
                         { icon: <IconX />, label: 'Close toolbar', onClick: startGracefulExit },
                     ].filter(Boolean) as MenuItems
                 }
@@ -286,11 +369,14 @@ export function ToolbarInfoMenu(): JSX.Element | null {
 
     const { isAuthenticated } = useValues(toolbarConfigLogic)
 
-    const showExperimentsFlag = useToolbarFeatureFlag('web-experiments')
-    const showExperiments = inStorybook() || inStorybookTestRunner() || showExperimentsFlag
-
     const productToursFlag = useToolbarFeatureFlag('product-tours-2025')
     const showProductTours = inStorybook() || inStorybookTestRunner() || productToursFlag
+
+    const surveysFlag = useToolbarFeatureFlag('surveys-toolbar')
+    const showSurveys = surveysFlag
+
+    const fieldNotesFlag = useToolbarFeatureFlag('field-notes')
+    const showFieldNotes = inStorybook() || inStorybookTestRunner() || fieldNotesFlag
 
     const content = minimized ? null : visibleMenu === 'flags' ? (
         <FlagsToolbarMenu />
@@ -302,10 +388,14 @@ export function ToolbarInfoMenu(): JSX.Element | null {
         <EventDebugMenu />
     ) : visibleMenu === 'web-vitals' ? (
         <WebVitalsToolbarMenu />
-    ) : visibleMenu === 'experiments' && showExperiments ? (
+    ) : visibleMenu === 'experiments' ? (
         <ExperimentsToolbarMenu />
     ) : visibleMenu === 'product-tours' && showProductTours ? (
         <ProductToursToolbarMenu />
+    ) : visibleMenu === 'field-notes' && showFieldNotes ? (
+        <FieldNotesToolbarMenu />
+    ) : visibleMenu === 'surveys' && showSurveys ? (
+        <SurveysToolbarMenu />
     ) : null
 
     useEffect(() => {
@@ -339,7 +429,15 @@ export function ToolbarInfoMenu(): JSX.Element | null {
                     maxHeight: menuProperties.maxHeight,
                 }}
             >
-                {content}
+                <Suspense
+                    fallback={
+                        <div className="flex items-center justify-center p-4">
+                            <Spinner />
+                        </div>
+                    }
+                >
+                    {content}
+                </Suspense>
             </div>
         </div>
     )
@@ -347,19 +445,26 @@ export function ToolbarInfoMenu(): JSX.Element | null {
 
 export function Toolbar(): JSX.Element | null {
     const ref = useRef<HTMLDivElement | null>(null)
-    const { minimized, position, isDragging, isEmbeddedInApp, isExiting, isLoading } =
+    const { minimized, position, isDragging, mascotMode, isEmbeddedInApp, isExiting, isLoading } =
         useValues(toolbarLogic)
     const { setVisibleMenu, toggleMinimized, onMouseOrTouchDown, setElement, setIsBlurred, completeGracefulExit } =
         useActions(toolbarLogic)
-    const { isAuthenticated, userIntent } = useValues(toolbarConfigLogic)
-    const { authenticate } = useActions(toolbarConfigLogic)
+    const { isAuthenticated, userIntent, authStatus, uiHostConfigModalVisible, authConfirmModalVisible } =
+        useValues(toolbarConfigLogic)
+    const { authenticate, openUiHostConfigModal, closeUiHostConfigModal, closeAuthConfirmModal } =
+        useActions(toolbarConfigLogic)
     const { selectedTourId, isPreviewing } = useValues(productToursLogic)
-
-    const showExperimentsFlag = useToolbarFeatureFlag('web-experiments')
-    const showExperiments = inStorybook() || inStorybookTestRunner() || showExperimentsFlag
+    const { isCreating: isSurveyCreating } = useValues(surveysToolbarLogic)
 
     const productToursFlag = useToolbarFeatureFlag('product-tours-2025')
     const showProductTours = inStorybook() || inStorybookTestRunner() || productToursFlag
+
+    const surveysFlag = useToolbarFeatureFlag('surveys-toolbar')
+    const showSurveys = surveysFlag
+
+    const fieldNotesFlag = useToolbarFeatureFlag('field-notes')
+    const showFieldNotes = inStorybook() || inStorybookTestRunner() || fieldNotesFlag
+    const { hasOpenedFieldNotes } = useValues(fieldNotesLogic)
 
     useEffect(() => {
         setElement(ref.current)
@@ -395,19 +500,30 @@ export function Toolbar(): JSX.Element | null {
         return null
     }
 
-    const showSidebar = selectedTourId !== null && !isPreviewing
+    const showToursSidebar = selectedTourId !== null && !isPreviewing
 
     return (
         <>
-            {showSidebar && <ProductToursSidebar />}
+            <Suspense fallback={null}>
+                {showToursSidebar && <ProductToursSidebar />}
+                {showFieldNotes && <FieldNotesOverlay />}
+                {isSurveyCreating && <SurveySidebar />}
+            </Suspense>
             <ToolbarInfoMenu />
             <div
                 ref={ref}
                 className={clsx('Toolbar', {
                     'Toolbar--minimized': minimized,
+                    'Toolbar--mascot-mode': mascotMode,
                     'Toolbar--dragging': isDragging,
-                    'Toolbar--extra-buttons-1': (showExperiments ? 1 : 0) + (showProductTours ? 1 : 0) === 1,
-                    'Toolbar--extra-buttons-2': (showExperiments ? 1 : 0) + (showProductTours ? 1 : 0) === 2,
+                    'Toolbar--extra-buttons-1':
+                        1 + (showProductTours ? 1 : 0) + (showFieldNotes ? 1 : 0) + (showSurveys ? 1 : 0) === 1,
+                    'Toolbar--extra-buttons-2':
+                        1 + (showProductTours ? 1 : 0) + (showFieldNotes ? 1 : 0) + (showSurveys ? 1 : 0) === 2,
+                    'Toolbar--extra-buttons-3':
+                        1 + (showProductTours ? 1 : 0) + (showFieldNotes ? 1 : 0) + (showSurveys ? 1 : 0) === 3,
+                    'Toolbar--extra-buttons-4':
+                        1 + (showProductTours ? 1 : 0) + (showFieldNotes ? 1 : 0) + (showSurveys ? 1 : 0) === 4,
                 })}
                 onMouseDown={(e) => onMouseOrTouchDown(e.nativeEvent)}
                 onTouchStart={(e) => onMouseOrTouchDown(e.nativeEvent)}
@@ -426,7 +542,7 @@ export function Toolbar(): JSX.Element | null {
                     titleMinimized={isAuthenticated ? 'Expand the toolbar' : 'Authenticate the Insights Toolbar'}
                 >
                     <AnimatedLogomark
-                        animate={isLoading}
+                        animate={isLoading || authStatus === 'checking' || authStatus === 'authenticating'}
                         animateOnce={isExiting ? completeGracefulExit : undefined}
                         className="Toolbar__logomark"
                     />
@@ -436,9 +552,27 @@ export function Toolbar(): JSX.Element | null {
                         <ToolbarButton menuId="inspect">
                             <IconSearch />
                         </ToolbarButton>
-                        <ToolbarButton menuId="heatmap">
-                            <IconCursorClick />
-                        </ToolbarButton>
+                        {/* When the field notes flag is on, field notes takes the heatmap slot + cursor icon */}
+                        {showFieldNotes ? (
+                            <ToolbarButton menuId="field-notes" title="Field notes">
+                                {/* Inline font-size because the wrapper breaks the `button > svg` size rule */}
+                                {/* eslint-disable-next-line react/forbid-dom-props */}
+                                <span className="relative flex" style={{ fontSize: '1.5rem' }}>
+                                    <IconCursorClick />
+                                    {!hasOpenedFieldNotes && (
+                                        <span
+                                            className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+                                            // eslint-disable-next-line react/forbid-dom-props
+                                            style={{ backgroundColor: 'var(--primary-3000)' }}
+                                        />
+                                    )}
+                                </span>
+                            </ToolbarButton>
+                        ) : (
+                            <ToolbarButton menuId="heatmap">
+                                <IconCursorClick />
+                            </ToolbarButton>
+                        )}
                         <ToolbarButton menuId="actions">
                             <IconBolt />
                         </ToolbarButton>
@@ -451,22 +585,49 @@ export function Toolbar(): JSX.Element | null {
                         <ToolbarButton menuId="web-vitals" title="Web vitals">
                             <IconPieChart />
                         </ToolbarButton>
-                        {showExperiments && (
-                            <ToolbarButton menuId="experiments" title="Experiments">
-                                <IconFlask />
-                            </ToolbarButton>
-                        )}
+                        <ToolbarButton menuId="experiments" title="Experiments">
+                            <IconFlask />
+                        </ToolbarButton>
                         {showProductTours && (
                             <ToolbarButton menuId="product-tours" title="Product tours">
                                 <IconSpotlight />
                             </ToolbarButton>
                         )}
+                        {/* Heatmaps moves here and takes the app icon when field notes is enabled */}
+                        {showFieldNotes && (
+                            <ToolbarButton menuId="heatmap" title="Heatmaps">
+                                <IconApp />
+                            </ToolbarButton>
+                        )}
+                        {showSurveys && (
+                            <ToolbarButton menuId="surveys" title="Surveys">
+                                <IconMessage />
+                            </ToolbarButton>
+                        )}
                     </>
+                ) : authStatus === 'checking' || authStatus === 'authenticating' ? (
+                    <ToolbarButton flex>
+                        <span className="flex items-center gap-1">
+                            <Spinner /> {authStatus === 'authenticating' ? 'Authenticating…' : 'Checking…'}
+                        </span>
+                    </ToolbarButton>
+                ) : authStatus === 'error' ? (
+                    <ToolbarButton
+                        flex
+                        onClick={openUiHostConfigModal}
+                        title="Insights app unreachable — click for help"
+                    >
+                        <span className="flex items-center gap-1">
+                            Authenticate <IconWarning className="text-warning" />
+                        </span>
+                    </ToolbarButton>
                 ) : (
                     <ToolbarButton flex onClick={authenticate}>
                         Authenticate
                     </ToolbarButton>
                 )}
+                <UiHostConfigModal visible={uiHostConfigModalVisible} onClose={closeUiHostConfigModal} />
+                <AuthConfirmModal visible={authConfirmModalVisible} onClose={closeAuthConfirmModal} />
 
                 <MoreMenu />
             </div>

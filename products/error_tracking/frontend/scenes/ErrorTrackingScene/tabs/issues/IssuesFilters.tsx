@@ -1,26 +1,36 @@
-import { Divider } from '@hanzo/elements'
-
-import { QuickFiltersSection } from 'lib/components/QuickFilters/QuickFiltersSection'
-
-import { QuickFilterContext } from '~/queries/schema/schema-general'
+import { Separator } from 'lib/ui/quill'
 
 import { ErrorFilters } from 'products/error_tracking/frontend/components/IssueFilters'
+import { ErrorTrackingQuickFilters } from 'products/error_tracking/frontend/components/IssueFilters/QuickFilters'
+import {
+    IssueSortButton,
+    ReloadIssuesButton,
+} from 'products/error_tracking/frontend/components/IssueQueryOptions/IssueQueryOptions'
 
 export function IssuesFilters(): JSX.Element {
     return (
         <ErrorFilters.Root>
-            <div className="flex gap-2 flex-wrap">
-                <ErrorFilters.DateRange />
-                <ErrorFilters.Status />
-                <ErrorFilters.Assignee />
-                <Divider vertical />
-                <QuickFiltersSection context={QuickFilterContext.ErrorTrackingIssueFilters} />
-            </div>
-            <div className="flex gap-2 items-start">
-                <div className="flex-1">
-                    <ErrorFilters.FilterGroup />
+            <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
+                        <ReloadIssuesButton />
+                        <ErrorFilters.DateRange />
+                    </div>
+                    <ErrorFilters.Status />
+                    <ErrorFilters.Assignee />
+                    <Separator orientation="vertical" className="h-6" />
+                    <ErrorTrackingQuickFilters />
+                    <div className="ml-auto shrink-0">
+                        <ErrorFilters.InternalAccounts />
+                    </div>
                 </div>
-                <ErrorFilters.InternalAccounts />
+                <div className="flex w-full flex-wrap items-center gap-2">
+                    <ErrorFilters.Search />
+                    <ErrorFilters.FilterGroup activeFiltersInline />
+                    <div className="ml-auto shrink-0">
+                        <IssueSortButton />
+                    </div>
+                </div>
             </div>
         </ErrorFilters.Root>
     )

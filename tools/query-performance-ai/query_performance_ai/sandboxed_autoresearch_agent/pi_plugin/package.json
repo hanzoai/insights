@@ -1,0 +1,20 @@
+{
+    "name": "pi-datastore-autoresearch",
+    "version": "0.1.0",
+    "description": "Reusable Datastore query optimization orchestration for pi-autoresearch.",
+    "keywords": [
+        "autoresearch",
+        "datastore",
+        "pi-package"
+    ],
+    "license": "MIT",
+    "type": "module",
+    "pi": {
+        "skills": [
+            "./skills"
+        ],
+        "prompts": [
+            "./prompts"
+        ]
+    }
+}

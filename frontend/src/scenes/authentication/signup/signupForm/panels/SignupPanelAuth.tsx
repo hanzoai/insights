@@ -5,8 +5,8 @@ import { Banner, Button, Input } from '@hanzo/elements'
 
 import PasswordStrength from 'lib/components/PasswordStrength'
 import passkeyLogo from 'lib/components/SocialLoginButton/passkey.svg'
-import { Field } from 'lib/elements/Field'
 import { IconKey } from 'lib/elements/icons'
+import { Field } from 'lib/elements/Field'
 
 import { signupLogic } from '../signupLogic'
 
@@ -19,7 +19,6 @@ export function SignupPanelAuth(): JSX.Element | null {
         passkeyRegistered,
         isPasskeyRegistering,
         passkeyError,
-        passkeySignupEnabled,
     } = useValues(signupLogic)
 
     return (
@@ -35,39 +34,33 @@ export function SignupPanelAuth(): JSX.Element | null {
                 </Banner>
             )}
 
-            {passkeySignupEnabled && (
-                <>
-                    {passkeyRegistered ? (
-                        <div className="border border-success-lighter rounded-lg p-4 bg-success-highlight text-center">
-                            <img src={passkeyLogo} alt="Passkey" className="w-8 h-8 mx-auto mb-2" />
-                            <p className="font-semibold text-success mb-1">Passkey registered successfully!</p>
-                            <p className="text-secondary text-sm">
-                                You can use this passkey to sign in to your account.
-                            </p>
-                        </div>
-                    ) : (
-                        <Button
-                            fullWidth
-                            type="secondary"
-                            center
-                            size="large"
-                            icon={<img src={passkeyLogo} alt="Passkey" className="object-contain w-7 h-7" />}
-                            onClick={registerPasskey}
-                            loading={isPasskeyRegistering}
-                            disabled={isPasskeyRegistering}
-                            data-attr="signup-passkey"
-                        >
-                            Sign up with passkey
-                        </Button>
-                    )}
-
-                    <div className="flex items-center gap-3 my-4">
-                        <div className="flex-1 border-t border-border" />
-                        <span className="text-secondary text-sm">or use a password</span>
-                        <div className="flex-1 border-t border-border" />
-                    </div>
-                </>
+            {passkeyRegistered ? (
+                <div className="border border-success-lighter rounded-lg p-4 bg-success-highlight text-center">
+                    <img src={passkeyLogo} alt="Passkey" className="w-8 h-8 mx-auto mb-2" />
+                    <p className="font-semibold text-success mb-1">Passkey registered successfully!</p>
+                    <p className="text-secondary text-sm">You can use this passkey to sign in to your account.</p>
+                </div>
+            ) : (
+                <Button
+                    fullWidth
+                    type="secondary"
+                    center
+                    size="large"
+                    icon={<img src={passkeyLogo} alt="Passkey" className="object-contain w-7 h-7" />}
+                    onClick={registerPasskey}
+                    loading={isPasskeyRegistering}
+                    disabled={isPasskeyRegistering}
+                    data-attr="signup-passkey"
+                >
+                    Sign up with passkey
+                </Button>
             )}
+
+            <div className="flex items-center gap-3 my-4">
+                <div className="flex-1 border-t border-border" />
+                <span className="text-secondary text-sm">or use a password</span>
+                <div className="flex-1 border-t border-border" />
+            </div>
 
             <Form logic={signupLogic} formKey="signupPanelAuth" className="deprecated-space-y-4" enableFormOnSubmit>
                 <Field

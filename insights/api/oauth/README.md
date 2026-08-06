@@ -86,5 +86,5 @@ pytest insights/api/oauth/test_views.py -v
 Run a specific test:
 
 ```bash
-pytest insights/api/oauth/test_views.py::TestOAuthAPI::test_name -v
+pytest insights/api/oauth/test_views.py::TestOAuthAPI::test_authorize_missing_client_id -v
 ```

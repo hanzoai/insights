@@ -33,7 +33,7 @@ def get_site_config_from_schema(config_schema: Optional[list[dict]], config: Opt
 
 
 def get_transpiled_site_source(id: int, token: str) -> Optional[WebJsSource]:
-    from insights.models import PluginConfig, PluginSourceFile
+    from products.cdp.backend.models.plugin import PluginConfig, PluginSourceFile
 
     response = (
         # nosemgrep: idor-lookup-without-team (token-based auth; web_token acts as secret access key)
@@ -61,7 +61,7 @@ def get_transpiled_site_source(id: int, token: str) -> Optional[WebJsSource]:
 
 
 def get_site_apps_for_team(team_id: int) -> list[WebJsSource]:
-    from insights.models import PluginConfig, PluginSourceFile
+    from products.cdp.backend.models.plugin import PluginConfig, PluginSourceFile
 
     rows = (
         PluginConfig.objects.filter(
@@ -89,7 +89,7 @@ def get_site_apps_for_team(team_id: int) -> list[WebJsSource]:
 
 
 def get_decide_site_apps(team: "Team", using_database: str = "default") -> list[dict]:
-    from insights.models import PluginConfig, PluginSourceFile
+    from products.cdp.backend.models.plugin import PluginConfig, PluginSourceFile
 
     sources = (
         PluginConfig.objects.db_manager(using_database)
@@ -119,7 +119,7 @@ def get_decide_site_apps(team: "Team", using_database: str = "default") -> list[
 
 
 def get_decide_site_functions(team: "Team", using_database: str = "default") -> list[dict]:
-    from insights.models import InsightsFunction
+    from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
     sources = (
         InsightsFunction.objects.db_manager(using_database)

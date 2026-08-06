@@ -5,6 +5,12 @@ import { flagsToolbarLogic } from '~/toolbar/flags/flagsToolbarLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 import { CombinedFeatureFlagAndValueType } from '~/types'
 
+// The toolbar logger mirrors intentional error/auth paths to the console (its job on
+// customer pages); tests exercise those paths on purpose, so stub the boundary.
+jest.mock('~/toolbar/toolbarLogger', () => ({
+    toolbarLogger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+}))
+
 const featureFlags = [
     { feature_flag: { key: 'flag 1' } },
     { feature_flag: { key: 'flag 2' } },
@@ -24,7 +30,14 @@ const featureFlagsWithExtraInfo = [
 
 describe('toolbar featureFlagsLogic', () => {
     let logic: ReturnType<typeof flagsToolbarLogic.build>
+    let consoleErrorSpy: jest.SpyInstance
+    let consoleWarnSpy: jest.SpyInstance
+
     beforeEach(() => {
+        // The token-expiry test exercises auth failure paths that toolbarLogger
+        // reports to the console by design
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+        consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation()
         global.fetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,
@@ -36,10 +49,22 @@ describe('toolbar featureFlagsLogic', () => {
 
     beforeEach(() => {
         initKeaTests()
-        toolbarConfigLogic.build({ apiURL: 'http://localhost' }).mount()
+        toolbarConfigLogic
+            .build({
+                apiURL: 'http://localhost',
+                accessToken: 'test-token',
+                refreshToken: 'test-refresh',
+                clientId: 'test-client',
+            })
+            .mount()
         logic = flagsToolbarLogic()
         logic.mount()
         logic.actions.getUserFlags()
+    })
+
+    afterEach(() => {
+        consoleErrorSpy.mockRestore()
+        consoleWarnSpy.mockRestore()
     })
 
     it('has expected defaults', () => {
@@ -94,13 +119,16 @@ describe('toolbar featureFlagsLogic', () => {
     })
 
     it('expires the token if request failed', async () => {
-        global.fetch = jest.fn(() =>
-            Promise.resolve({
+        global.fetch = jest.fn((url: RequestInfo | URL) => {
+            if (typeof url === 'string' && url.includes('toolbar_oauth_refresh')) {
+                return Promise.resolve({ ok: false, status: 400, json: () => Promise.resolve({}) } as any as Response)
+            }
+            return Promise.resolve({
                 ok: false,
                 status: 401,
                 json: () => Promise.resolve(featureFlags),
             } as any as Response)
-        )
+        })
         await expectLogic(logic, () => {
             logic.actions.getUserFlags()
         }).toDispatchActions([toolbarConfigLogic.actionTypes.tokenExpired])

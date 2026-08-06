@@ -11,7 +11,7 @@ EXAMPLE_RESPONSE = {
         "id": "1234",
         "name": "Insights",
         "legalName": "Insights Inc.",
-        "domain": "insights.com",
+        "domain": "hanzo.ai",
     },
 }
 
@@ -59,14 +59,14 @@ class TestTemplateClearbit(BaseInsightsFunctionTemplateTest):
         )
 
         assert self.get_mock_print_calls() == [("Clearbit data found - sending event to Insights",)]
-        assert self.get_mock_analytics_capture_calls() == [
+        assert self.get_mock_insights_capture_calls() == [
             (
                 {
                     "event": "$set",
                     "distinct_id": "distinct-id",
                     "properties": {
                         "$lib": "insights_function",
-                        "$insights_function_source": "https://insights.hanzo.ai/insights_functions/1234",
+                        "$insights_function_source": "https://us.hanzo.ai/insights_functions/1234",
                         "$set_once": {
                             "person": {
                                 "id": "1234",
@@ -81,7 +81,7 @@ class TestTemplateClearbit(BaseInsightsFunctionTemplateTest):
                                 "id": "1234",
                                 "name": "Insights",
                                 "legalName": "Insights Inc.",
-                                "domain": "insights.com",
+                                "domain": "hanzo.ai",
                             },
                             "clearbit_enriched": True,
                         },

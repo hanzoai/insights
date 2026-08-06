@@ -2,15 +2,19 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Banner, Skeleton, Link } from '@hanzo/elements'
+import { IconGear, IconSparkles } from '@hanzo/icons'
+import { Banner, Button, Skeleton, Tabs, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { externalDataSourcesLogic } from 'scenes/data-warehouse/externalDataSourcesLogic'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { MaxTool } from 'scenes/max/MaxTool'
+import { useMaxTool } from 'scenes/max/useMaxTool'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { urls } from 'scenes/urls'
 import { QueryTile } from 'scenes/web-analytics/common'
 import { NonIntegratedConversionsTable } from 'scenes/web-analytics/tabs/marketing-analytics/frontend/components/NonIntegratedConversionsTable/NonIntegratedConversionsTable'
+import { UtmAuditTab } from 'scenes/web-analytics/tabs/marketing-analytics/frontend/components/UtmAuditTab/UtmAuditTab'
 import { WebQuery } from 'scenes/web-analytics/tiles/WebAnalyticsTile'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -18,16 +22,24 @@ import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { dataNodeCollectionLogic } from '~/queries/nodes/DataNode/dataNodeCollectionLogic'
 import { ProductKey } from '~/queries/schema/schema-general'
 
+import { sourcesDataLogic } from 'products/data_warehouse/frontend/shared/logics/sourcesDataLogic'
+import { useAttachedContext } from 'products/insights_ai/frontend/api/logics'
+
+import { LegacyOAuthReconnectBanner } from '../web-analytics/tabs/marketing-analytics/frontend/components/LegacyOAuthReconnectBanner'
 import { MarketingAnalyticsFilters } from '../web-analytics/tabs/marketing-analytics/frontend/components/MarketingAnalyticsFilters/MarketingAnalyticsFilters'
 import { MarketingAnalyticsSourceStatusBanner } from '../web-analytics/tabs/marketing-analytics/frontend/components/MarketingAnalyticsSourceStatusBanner'
-import { marketingAnalyticsLogic } from '../web-analytics/tabs/marketing-analytics/frontend/logic/marketingAnalyticsLogic'
+import {
+    MarketingAnalyticsTab,
+    marketingAnalyticsLogic,
+} from '../web-analytics/tabs/marketing-analytics/frontend/logic/marketingAnalyticsLogic'
 import { marketingAnalyticsSettingsLogic } from '../web-analytics/tabs/marketing-analytics/frontend/logic/marketingAnalyticsSettingsLogic'
 import {
     MARKETING_ANALYTICS_DATA_COLLECTION_NODE_ID,
     marketingAnalyticsTilesLogic,
 } from '../web-analytics/tabs/marketing-analytics/frontend/logic/marketingAnalyticsTilesLogic'
-import { Onboarding } from './Onboarding/Onboarding'
+import { NewMarketingAnalyticsDashboard } from './NewMarketingAnalyticsDashboard'
 import { marketingOnboardingLogic } from './Onboarding/marketingOnboardingLogic'
+import { Onboarding } from './Onboarding/Onboarding'
 
 export const scene: SceneExport = {
     component: MarketingAnalyticsScene,
@@ -44,7 +56,7 @@ const QueryTileItem = ({ tile }: { tile: QueryTile }): JSX.Element => {
                 'col-span-1 row-span-1 flex flex-col',
                 layout.colSpanClassName ?? 'md:col-span-6',
                 layout.rowSpanClassName ?? 'md:row-span-1',
-                layout.orderWhenLargeClassName ?? 'xxl:order-12',
+                layout.orderWhenLargeClassName ?? '2xl:order-12',
                 layout.className
             )}
         >
@@ -67,27 +79,62 @@ const QueryTileItem = ({ tile }: { tile: QueryTile }): JSX.Element => {
     )
 }
 
+// Loading placeholder that mirrors the real dashboard layout — an overview metric row, a chart card,
+// and a table card — instead of a single thin bar, so the page doesn't visibly reflow when data lands.
+const MarketingAnalyticsDashboardSkeleton = (): JSX.Element => (
+    <div className="mt-4 flex flex-col gap-y-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="flex flex-col gap-2 p-4 border rounded">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-8 w-24" />
+                </div>
+            ))}
+        </div>
+        <div className="flex flex-col gap-3">
+            <Skeleton className="h-6 w-40" />
+            <div className="border rounded p-4">
+                <Skeleton className="h-64 w-full" />
+            </div>
+        </div>
+        <div className="flex flex-col gap-3">
+            <Skeleton className="h-6 w-40" />
+            <div className="border rounded p-4 flex flex-col gap-3">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton.Row repeat={5} fade className="h-10" />
+            </div>
+        </div>
+    </div>
+)
+
 const MarketingAnalyticsDashboard = (): JSX.Element => {
     const { featureFlags } = useValues(featureFlagLogic)
     const { hasSources, hasNoConfiguredSources, loading } = useValues(marketingAnalyticsLogic)
-    const { loadSources } = useActions(externalDataSourcesLogic)
+    const { loadSources } = useActions(sourcesDataLogic)
     const { conversion_goals } = useValues(marketingAnalyticsSettingsLogic)
     const { tiles: marketingTiles } = useValues(marketingAnalyticsTilesLogic)
-    const { showOnboarding } = useValues(marketingOnboardingLogic)
+    const { showOnboarding, currentStep } = useValues(marketingOnboardingLogic)
     const { completeOnboarding, resetOnboarding } = useActions(marketingOnboardingLogic)
 
     // Reload sources on every navigation to this scene so newly configured
     // data warehouse sources are picked up without a full page refresh
     useEffect(() => {
-        loadSources(null)
+        loadSources()
     }, [loadSources])
 
-    // Auto-complete onboarding if user already has sources and conversion goals configured
+    // Auto-complete onboarding if user already has sources and conversion goals configured,
+    // but only when not actively on the conversion-goals step (let the user click "Continue")
     useEffect(() => {
-        if (!loading && hasSources && conversion_goals.length > 0 && showOnboarding) {
+        if (
+            !loading &&
+            hasSources &&
+            conversion_goals.length > 0 &&
+            showOnboarding &&
+            currentStep !== 'conversion-goals'
+        ) {
             completeOnboarding()
         }
-    }, [loading, hasSources, conversion_goals, showOnboarding, completeOnboarding])
+    }, [loading, hasSources, conversion_goals, showOnboarding, currentStep, completeOnboarding])
 
     // Reset onboarding if user truly has no configured sources (handles session/project changes).
     // Uses hasNoConfiguredSources which guards against premature evaluation while tables are loading.
@@ -98,7 +145,14 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
     }, [loading, hasSources, showOnboarding, resetOnboarding]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     const feedbackBanner = (
-        <Banner type="info" action={{ children: 'Send feedback', id: 'marketing-analytics-feedback-button' }}>
+        <Banner
+            type="info"
+            action={{
+                children: 'Send feedback',
+                id: 'marketing-analytics-feedback-button',
+            }}
+            className="mt-4"
+        >
             Marketing analytics is in beta. Please let us know what you'd like to see here and/or report any issues
             directly to us!
         </Banner>
@@ -110,7 +164,7 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
                 {feedbackBanner}
                 <Banner type="info">
                     You can enable marketing analytics in the feature preview settings{' '}
-                    <Link to="https://insights.hanzo.ai/settings/user-feature-previews#marketing-analytics">here</Link>.
+                    <Link to="https://app.hanzo.ai/settings/user-feature-previews#marketing-analytics">here</Link>.
                 </Banner>
             </>
         )
@@ -120,7 +174,7 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
         return (
             <>
                 {feedbackBanner}
-                <Skeleton />
+                <MarketingAnalyticsDashboardSkeleton />
             </>
         )
     }
@@ -138,8 +192,9 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
     return (
         <>
             {feedbackBanner}
+            <LegacyOAuthReconnectBanner />
             <MarketingAnalyticsSourceStatusBanner />
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xxl:grid-cols-3 gap-x-4 gap-y-12">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-x-4 gap-y-12">
                 {marketingTiles?.map((tile, i) => (
                     <QueryTileItem key={i} tile={tile} />
                 ))}
@@ -149,20 +204,169 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
     )
 }
 
+const MarketingAnalyticsContent = (): JSX.Element => {
+    const { featureFlags } = useValues(featureFlagLogic)
+    const { activeTab } = useValues(marketingAnalyticsLogic)
+    const { setActiveTab } = useActions(marketingAnalyticsLogic)
+
+    // The redesigned dashboard replaces the current one under the same "Dashboard" tab when its flag is
+    // on, so the eventual cutover is just flipping the flag — no tab rename, no extra tab key to strand.
+    const dashboard = featureFlags[FEATURE_FLAGS.MARKETING_ANALYTICS_NEW_DASHBOARD] ? (
+        <NewMarketingAnalyticsDashboard />
+    ) : (
+        <>
+            <MarketingAnalyticsFilters tabs={<></>} />
+            <MarketingAnalyticsDashboard />
+        </>
+    )
+
+    const tabs = [
+        { key: MarketingAnalyticsTab.DASHBOARD, label: 'Dashboard', content: dashboard },
+        ...(featureFlags[FEATURE_FLAGS.MARKETING_ANALYTICS_UTM_AUDIT]
+            ? [
+                  {
+                      key: MarketingAnalyticsTab.INTEGRATION_HEALTH,
+                      label: 'Integration health',
+                      content: <UtmAuditTab />,
+                  },
+              ]
+            : []),
+    ]
+
+    // Only surface the tab bar once a secondary tab is enabled; otherwise show the dashboard directly.
+    if (tabs.length === 1) {
+        return dashboard
+    }
+
+    return (
+        <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as MarketingAnalyticsTab)} tabs={tabs} />
+    )
+}
+
+const TAB_DESCRIPTIONS: Record<string, string> = {
+    [MarketingAnalyticsTab.DASHBOARD]:
+        'Analyze your marketing performance across integrations: spend, impressions, conversions, ROAS, and more metrics.',
+    [MarketingAnalyticsTab.INTEGRATION_HEALTH]:
+        'Check that your ad platform campaigns are properly linked to UTM tracking in Insights.',
+}
+
+const MarketingAnalyticsAIToolWrapper = ({ children }: { children: React.ReactNode }): JSX.Element => {
+    const { dateFilter, integrationFilter, compareFilter } = useValues(marketingAnalyticsLogic)
+    const { conversion_goals, marketingAnalyticsConfig } = useValues(marketingAnalyticsSettingsLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
+    const aiEnabled = !!featureFlags[FEATURE_FLAGS.MARKETING_ANALYTICS_AI]
+
+    // Shared context for every Marketing analytics Max tool — consumed by
+    // MARKETING_CONTEXT_PROMPT in products/marketing_analytics/backend/max_tools.py.
+    const maxContext = {
+        current_filters: { integrationFilter, compareFilter },
+        current_date_range: { date_from: dateFilter.dateFrom, date_to: dateFilter.dateTo },
+        custom_source_mappings_count: Object.keys(marketingAnalyticsConfig?.custom_source_mappings || {}).length,
+        campaign_name_mappings_count: Object.keys(marketingAnalyticsConfig?.campaign_name_mappings || {}).length,
+        existing_goal_count: (conversion_goals || []).length,
+    }
+
+    // Register the follow-up tools so Max can actually call them when the
+    // diagnostic recommends them. Only `marketing_diagnose_setup` gets the
+    // visible MaxTool button below — the rest are data tools with no UI anchor.
+    useMaxTool({ identifier: 'marketing_explain_conversion_goal', context: maxContext, active: aiEnabled })
+    useMaxTool({ identifier: 'marketing_list_conversion_goals', context: maxContext, active: aiEnabled })
+    useMaxTool({ identifier: 'marketing_list_data_sources', context: maxContext, active: aiEnabled })
+    useMaxTool({ identifier: 'marketing_audit_utm', context: maxContext, active: aiEnabled })
+    useMaxTool({ identifier: 'marketing_suggest_conversion_goals', context: maxContext, active: aiEnabled })
+    useMaxTool({ identifier: 'marketing_suggest_utm_mappings', context: maxContext, active: aiEnabled })
+
+    useAttachedContext(
+        [
+            {
+                type: 'marketing_analytics_filters',
+                value: JSON.stringify({ integrationFilter, compareFilter }),
+                label: 'Current filters',
+            },
+            {
+                type: 'marketing_analytics_date_range',
+                value: JSON.stringify({ date_from: dateFilter.dateFrom, date_to: dateFilter.dateTo }),
+                label: 'Date range',
+            },
+            {
+                type: 'marketing_analytics_config_counts',
+                value: JSON.stringify({
+                    custom_source_mappings_count: Object.keys(marketingAnalyticsConfig?.custom_source_mappings || {})
+                        .length,
+                    campaign_name_mappings_count: Object.keys(marketingAnalyticsConfig?.campaign_name_mappings || {})
+                        .length,
+                    existing_goal_count: (conversion_goals || []).length,
+                }),
+                label: 'Marketing config counts',
+            },
+        ],
+        { active: aiEnabled }
+    )
+
+    return (
+        <MaxTool
+            identifier="marketing_diagnose_setup"
+            active={aiEnabled}
+            context={maxContext}
+            contextDescription={{
+                text: 'Marketing analytics setup',
+                icon: <IconSparkles />,
+            }}
+            initialMaxPrompt="Diagnose my marketing analytics setup"
+            suggestions={[
+                'Diagnose my marketing analytics setup',
+                'Why are events showing as non-integrated?',
+                'Suggest custom_source_mappings for unmatched UTM values',
+                'Which custom events would make good conversion goals?',
+                'List my conversion goals and their last-30d performance',
+            ]}
+        >
+            <>{children}</>
+        </MaxTool>
+    )
+}
+
 export function MarketingAnalyticsScene(): JSX.Element {
+    const { activeTab } = useValues(marketingAnalyticsLogic)
+
     return (
         <BindLogic logic={marketingAnalyticsLogic} props={{}}>
             <BindLogic logic={dataNodeCollectionLogic} props={{ key: MARKETING_ANALYTICS_DATA_COLLECTION_NODE_ID }}>
                 <SceneContent className="MarketingAnalyticsDashboard">
                     <SceneTitleSection
                         name={sceneConfigurations[Scene.MarketingAnalytics]?.name || 'Marketing analytics'}
-                        description={sceneConfigurations[Scene.MarketingAnalytics]?.description}
+                        description={
+                            TAB_DESCRIPTIONS[activeTab] || sceneConfigurations[Scene.MarketingAnalytics]?.description
+                        }
                         resourceType={{
                             type: sceneConfigurations[Scene.MarketingAnalytics]?.iconType || 'marketing_analytics',
                         }}
+                        actions={
+                            <>
+                                <Button
+                                    to="https://hanzo.ai/docs/web-analytics/marketing-analytics"
+                                    type="secondary"
+                                    targetBlank
+                                    size="small"
+                                    data-attr="marketing-analytics-docs-button"
+                                >
+                                    Documentation
+                                </Button>
+                                <Button
+                                    type="secondary"
+                                    size="small"
+                                    icon={<IconGear />}
+                                    to={urls.settings('environment-marketing-analytics', 'marketing-settings')}
+                                    data-attr="marketing-analytics-settings-button"
+                                >
+                                    Settings
+                                </Button>
+                            </>
+                        }
                     />
-                    <MarketingAnalyticsFilters tabs={<></>} />
-                    <MarketingAnalyticsDashboard />
+                    <MarketingAnalyticsAIToolWrapper>
+                        <MarketingAnalyticsContent />
+                    </MarketingAnalyticsAIToolWrapper>
                 </SceneContent>
             </BindLogic>
         </BindLogic>

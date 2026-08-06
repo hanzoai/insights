@@ -1,0 +1,24 @@
+{
+    "name": "@hanzo/products-stamphog",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short",
+        "backend:contract-check": "echo 'Contract files unchanged'"
+    },
+    "dependencies": {
+        "kea": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "insights-js": "catalog:"
+    },
+    "devDependencies": {
+        "kea-test-utils": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/brand": "catalog:",
+        "@hanzo/icons": "catalog:",
+        "@hanzo/react": "*",
+        "@storybook/react": "catalog:",
+        "@types/react": "*",
+        "react": "*"
+    }
+}

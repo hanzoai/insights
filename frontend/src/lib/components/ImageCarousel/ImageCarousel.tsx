@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { IconChevronLeft, IconChevronRight, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Spinner } from '@hanzo/elements'
 
-interface ImageCarouselProps {
+export interface ImageCarouselProps {
     imageUrls: string[]
     loading?: boolean
     onDelete?: (url: string) => void

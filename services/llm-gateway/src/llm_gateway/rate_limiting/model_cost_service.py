@@ -3,10 +3,13 @@ from __future__ import annotations
 import time
 from typing import Final, TypedDict, cast
 
-import llm
+import litellm
 import structlog
-from llm import model_cost_map_url
-from llm.llm_core_utils.get_model_cost_map import get_model_cost_map
+from litellm import model_cost_map_url
+from litellm.litellm_core_utils.get_model_cost_map import get_model_cost_map
+
+from llm_gateway.rate_limiting.cost_refresh import set_litellm_model_cost
+from llm_gateway.rate_limiting.model_cost_overrides import apply_model_cost_overrides
 
 logger = structlog.get_logger(__name__)
 
@@ -27,7 +30,7 @@ DEFAULT_LIMITS: Final[ModelLimits] = {"input_tph": 2_000_000, "output_tph": 400_
 
 
 class ModelCost(TypedDict, total=False):
-    """Model cost and capability information from llm."""
+    """Model cost and capability information from litellm."""
 
     input_cost_per_token: float
     """Cost in USD per input token."""
@@ -39,12 +42,18 @@ class ModelCost(TypedDict, total=False):
     """Maximum output tokens the model can generate."""
     max_tokens: int
     """Legacy field: defaults to max_output_tokens if set, otherwise max_input_tokens."""
-    llm_provider: str
-    """Provider identifier (e.g., "anthropic", "openai", "vertex_ai")."""
+    litellm_provider: str
+    """Provider identifier (e.g., "anthropic", "openai")."""
     supports_vision: bool
     """Whether the model supports image/vision input."""
     mode: str
     """Model mode (e.g., "chat", "completion", "embedding")."""
+    cache_read_input_token_cost: float
+    """Cost in USD per cached input token read."""
+    cache_creation_input_token_cost: float
+    """Cost in USD per input token written to the cache."""
+    supports_prompt_caching: bool
+    """Whether the model supports prompt caching."""
 
 
 class ModelCostService:
@@ -68,12 +77,17 @@ class ModelCostService:
         cls._instance = None
 
     def _should_refresh(self) -> bool:
+        if self._last_refresh == 0:
+            return True
         return time.monotonic() - self._last_refresh > CACHE_TTL_SECONDS
 
     def _refresh_cache(self) -> None:
         try:
             model_cost = get_model_cost_map(url=model_cost_map_url)
-            llm.model_cost = model_cost
+            apply_model_cost_overrides(model_cost)
+            set_litellm_model_cost(model_cost)
+            # Keep provider sets in sync — see cost_refresh.py.
+            litellm.add_known_models(model_cost)
             self._costs = cast(dict[str, ModelCost], model_cost)
             new_limits: dict[str, ModelLimits] = {}
             for model, cost in self._costs.items():

@@ -1,12 +1,13 @@
 import { memo } from 'react'
-import { useMDXComponents } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+
+import { useMDXComponents } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 export const FlagPayloadSnippet = memo(({ language = 'javascript' }: { language?: string }): JSX.Element => {
     const { CodeBlock, dedent } = useMDXComponents()
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
+            const matchedFlagPayload = insights.getFeatureFlagResult('flag-key')?.payload
         `,
         react: dedent`
             import { useFeatureFlagPayload, useFeatureFlagEnabled } from '@hanzo/react'

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { isValidElement, ReactNode } from 'react'
 
 import { IconRewindPlay } from '@hanzo/icons'
 import { Button, ButtonProps, Tooltip } from '@hanzo/elements'
@@ -42,6 +42,7 @@ export default function ViewRecordingsPlaylistButton({
             sideIcon={<IconRewindPlay />}
             disabled={disabled}
             disabledReason={disabledReason}
+            disabledReasonInteractive={isValidElement(disabledReason)}
             {...buttonProps}
         >
             {label}

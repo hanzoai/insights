@@ -1,15 +1,10 @@
 import { useActions, useValues } from 'kea'
-import { P, match } from 'ts-pattern'
 
+import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
 import { CollapsibleExceptionList } from 'lib/components/Errors/ExceptionList/CollapsibleExceptionList'
 import { LoadingExceptionList } from 'lib/components/Errors/ExceptionList/LoadingExceptionList'
-import { RawExceptionList } from 'lib/components/Errors/ExceptionList/RawExceptionList'
-import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
-import insights from 'lib/insights-typed'
 import { TabsPrimitiveContent, TabsPrimitiveContentProps } from 'lib/ui/TabsPrimitive/TabsPrimitive'
 import { cn } from 'lib/utils/css-classes'
-
-import { useCallbackOnce } from 'products/error_tracking/frontend/hooks/use-callback-once'
 
 import { ExceptionAttributesPreview } from '../../../ExceptionAttributesPreview'
 import { ReleasePreviewPill } from '../../../ReleasesPreview/ReleasePreviewPill'
@@ -42,20 +37,19 @@ export function StackTraceTab({ className, renderActions, ...props }: StackTrace
     )
 }
 
-function StacktraceIssueDisplay({ className }: { className?: string }): JSX.Element | null {
-    const { showAsText, loading, showAllFrames, issueId } = useValues(exceptionCardLogic)
-    const { setShowAllFrames } = useActions(exceptionCardLogic)
-    const commonProps = { showAllFrames, setShowAllFrames, className }
+function StacktraceIssueDisplay({ className }: { className?: string }): JSX.Element {
+    const { loading, expandedFrameRawIds } = useValues(exceptionCardLogic)
+    const { setFrameExpanded } = useActions(exceptionCardLogic)
 
-    const handleFirstFrameOpen = useCallbackOnce(() => {
-        insights.capture('error_tracking_stacktrace_explored', { issue_id: issueId })
-    }, [issueId])
+    if (loading) {
+        return <LoadingExceptionList className={className} />
+    }
 
-    return match([loading, showAsText])
-        .with([true, P.any], () => <LoadingExceptionList {...commonProps} />)
-        .with([false, true], () => <RawExceptionList {...commonProps} />)
-        .with([false, false], () => (
-            <CollapsibleExceptionList {...commonProps} onFrameOpenChange={handleFirstFrameOpen} />
-        ))
-        .otherwise(() => null)
+    return (
+        <CollapsibleExceptionList
+            className={className}
+            expandedFrameRawIds={expandedFrameRawIds}
+            onFrameExpandedChange={setFrameExpanded}
+        />
+    )
 }

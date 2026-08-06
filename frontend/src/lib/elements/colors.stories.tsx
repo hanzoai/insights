@@ -5,7 +5,7 @@ import { Table } from './Table'
 import { Popover } from './Popover/Popover'
 
 const meta: Meta = {
-    title: 'Elements/Colors',
+    title: 'Lemon UI/Colors',
     parameters: {
         docs: {
             description: {

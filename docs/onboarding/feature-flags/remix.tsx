@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getRemixSteps as getRemixStepsPA } from '../product-analytics/remix'
 import { StepDefinition } from '../steps'
@@ -31,8 +31,8 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Use `insights-node` to evaluate feature flags on the server. Initialize Insights in your API
-                        route or loader:
+                        Use `insights-node` to evaluate feature flags on the server. Initialize Insights in your API route
+                        or loader:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -42,7 +42,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 code: dedent`
                                     import { Insights } from 'insights-node'
 
-                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
+                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN!, {
                                         host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                     })
                                 `,

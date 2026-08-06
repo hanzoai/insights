@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getSvelteSteps as getSvelteStepsPA } from '../product-analytics/svelte'
 import { StepDefinition } from '../steps'
@@ -42,7 +42,7 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 code: dedent`
                                     import { Insights } from 'insights-node'
 
-                                    const insights = new Insights('<ph_project_api_key>', {
+                                    const insights = new Insights('<ph_project_token>', {
                                         host: '<ph_client_api_host>'
                                     })
                                 `,

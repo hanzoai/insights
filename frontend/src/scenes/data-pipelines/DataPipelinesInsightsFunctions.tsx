@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { humanizeInsightsFunctionType } from 'scenes/insights-functions/insights-function-utils'
-import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
+import { humanizeInsightsFunctionType } from 'scenes/insights-functions/script-function-utils'
 import { InsightsFunctionList } from 'scenes/insights-functions/list/InsightsFunctionsList'
 import { insightsFunctionsListLogic } from 'scenes/insights-functions/list/insightsFunctionsListLogic'
+import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
@@ -13,8 +13,8 @@ import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { ProductKey } from '~/queries/schema/schema-general'
 import { InsightsFunctionTypeType } from '~/types'
 
-import { nonInsightsFunctionTemplatesLogic } from './utils/nonInsightsFunctionTemplatesLogic'
 import { nonInsightsFunctionsLogic } from './utils/nonInsightsFunctionsLogic'
+import { nonInsightsFunctionTemplatesLogic } from './utils/nonInsightsFunctionTemplatesLogic'
 
 export type DataPipelinesInsightsFunctionsProps = {
     kind: InsightsFunctionTypeType
@@ -34,7 +34,7 @@ export const MAPPING: Partial<Record<InsightsFunctionTypeType, { key: ProductKey
     },
     site_app: {
         key: ProductKey.SITE_APPS,
-        description: 'Site apps allow you to add custom functionality to your website using Insights.',
+        description: 'Web scripts allow you to add custom tags and functionality to your website using Insights.',
     },
 }
 

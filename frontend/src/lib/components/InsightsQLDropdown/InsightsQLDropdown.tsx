@@ -8,22 +8,24 @@ import { NodeKind } from '~/queries/schema/schema-general'
 import { InsightsQLEditor } from '../InsightsQLEditor/InsightsQLEditor'
 
 export const InsightsQLDropdown = ({
-    insightsQLValue,
+    hogQLValue,
     onInsightsQLValueChange,
     tableName,
-    insightsQLEditorPlaceholder,
+    hogQLEditorPlaceholder,
     className = '',
+    size,
 }: {
-    insightsQLValue: string
+    hogQLValue: string
     tableName: string
     className?: string
-    insightsQLEditorPlaceholder?: string
-    onInsightsQLValueChange: (insightsQLValue: string) => void
+    hogQLEditorPlaceholder?: string
+    size?: 'small' | 'medium'
+    onInsightsQLValueChange: (hogQLValue: string) => void
 }): JSX.Element => {
     const [isInsightsQLDropdownVisible, setIsInsightsQLDropdownVisible] = useState(false)
 
     return (
-        <div className={clsx('flex-auto overflow-hidden', className)}>
+        <div className={clsx('flex-auto min-w-0', className)}>
             <Dropdown
                 visible={isInsightsQLDropdownVisible}
                 closeOnClickInside={false}
@@ -32,13 +34,13 @@ export const InsightsQLDropdown = ({
                     // eslint-disable-next-line react/forbid-dom-props
                     <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
                         <InsightsQLEditor
-                            value={insightsQLValue}
+                            value={hogQLValue}
                             metadataSource={{ kind: NodeKind.InsightsQLQuery, query: `SELECT * FROM ${tableName}` }}
                             onChange={(currentValue) => {
                                 onInsightsQLValueChange(currentValue)
                                 setIsInsightsQLDropdownVisible(false)
                             }}
-                            placeholder={insightsQLEditorPlaceholder}
+                            placeholder={hogQLEditorPlaceholder}
                         />
                     </div>
                 }
@@ -46,9 +48,10 @@ export const InsightsQLDropdown = ({
                 <Button
                     fullWidth
                     type="secondary"
+                    size={size}
                     onClick={() => setIsInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)}
                 >
-                    <code>{insightsQLValue}</code>
+                    <code>{hogQLValue}</code>
                 </Button>
             </Dropdown>
         </div>

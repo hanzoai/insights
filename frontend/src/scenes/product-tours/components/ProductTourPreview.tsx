@@ -1,4 +1,4 @@
-import { renderProductTourPreview } from '@hanzo/insights/dist/product-tours-preview'
+import { renderProductTourPreview } from 'insights-js/dist/product-tours-preview'
 import { useEffect, useRef } from 'react'
 
 import { ProductTourAppearance, ProductTourStep } from '~/types'

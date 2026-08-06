@@ -7,38 +7,45 @@ mod test_utils;
 use test_utils::{setup_tracing, DEFAULT_CONFIG};
 
 use capture::server::serve;
+use capture::setup;
 use tokio::net::TcpListener;
-use tokio::sync::Notify;
-
-use std::sync::Arc;
+use tokio_util::sync::CancellationToken;
 
 async fn start_server_with_header_timeout(
     timeout_ms: Option<u64>,
-) -> (std::net::SocketAddr, Arc<Notify>) {
+) -> (std::net::SocketAddr, CancellationToken) {
     let mut config = DEFAULT_CONFIG.clone();
     config.http1_header_read_timeout_ms = timeout_ms;
 
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
-    let notify = Arc::new(Notify::new());
-    let shutdown = notify.clone();
 
-    tokio::spawn(
-        async move { serve(config, listener, async move { notify.notified().await }).await },
-    );
+    let shutdown_token = CancellationToken::new();
+
+    let mut manager = lifecycle::Manager::builder("capture-test")
+        .with_trap_signals(false)
+        .with_prestop_check(false)
+        .with_shutdown_token(shutdown_token.clone())
+        .build();
+
+    let handles = setup::register_components(&mut manager, &config);
+    let _monitor = manager.monitor_background();
+    let components = setup::build_components(config, std::env::vars().collect(), handles).await;
+
+    tokio::spawn(async move { serve(listener, components).await });
 
     // Give server time to start
-    tokio::time::sleep(Duration::from_millis(50)).await;
+    tokio::time::sleep(Duration::from_millis(20)).await;
 
-    (addr, shutdown)
+    (addr, shutdown_token)
 }
 
 #[tokio::test]
 async fn test_header_read_timeout_closes_connection() {
     setup_tracing();
 
-    // Start server with 500ms header read timeout
-    let (addr, _shutdown) = start_server_with_header_timeout(Some(500)).await;
+    // Start server with a 70ms header read timeout
+    let (addr, _shutdown) = start_server_with_header_timeout(Some(70)).await;
 
     // Connect and send partial headers (slow loris style)
     let mut stream = TcpStream::connect(addr).await.unwrap();
@@ -48,7 +55,7 @@ async fn test_header_read_timeout_closes_connection() {
     // Don't send the final \r\n to complete headers - this simulates slow loris
 
     // Wait for longer than the timeout
-    tokio::time::sleep(Duration::from_millis(700)).await;
+    tokio::time::sleep(Duration::from_millis(150)).await;
 
     // Try to read - connection should be closed by server due to timeout
     let mut buf = [0u8; 1024];
@@ -77,8 +84,8 @@ async fn test_header_read_timeout_closes_connection() {
 async fn test_complete_headers_within_timeout_succeeds() {
     setup_tracing();
 
-    // Start server with 2 second header read timeout
-    let (addr, _shutdown) = start_server_with_header_timeout(Some(2000)).await;
+    // Start server with a generous header read timeout
+    let (addr, _shutdown) = start_server_with_header_timeout(Some(300)).await;
 
     // Connect and send complete headers quickly
     let mut stream = TcpStream::connect(addr).await.unwrap();
@@ -125,8 +132,8 @@ async fn test_disabled_header_timeout_allows_slow_headers() {
     // Send partial headers
     stream.write_all(b"GET / HTTP/1.1\r\n").await.unwrap();
 
-    // Wait 500ms (would have timed out if enabled with 500ms timeout)
-    tokio::time::sleep(Duration::from_millis(500)).await;
+    // Wait well past what a 70ms timeout would allow (it is disabled here)
+    tokio::time::sleep(Duration::from_millis(150)).await;
 
     // Now complete the headers
     stream.write_all(b"Host: localhost\r\n\r\n").await.unwrap();

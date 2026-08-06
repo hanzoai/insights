@@ -7,20 +7,51 @@ import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicStringPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 import { PROPERTY_MATH_DEFINITIONS } from 'scenes/trends/mathsLogic'
 
+import { DatabaseSchemaField, RetentionFilter } from '~/queries/schema/schema-general'
 import { PropertyMathType } from '~/types'
+
+const aggregationTypeToTaxonomicType = {
+    event: TaxonomicFilterGroupType.EventProperties,
+    person: TaxonomicFilterGroupType.PersonProperties,
+    data_warehouse: TaxonomicFilterGroupType.DataWarehouseProperties,
+} satisfies Record<NonNullable<RetentionFilter['aggregationPropertyType']>, TaxonomicFilterGroupType>
+
+const taxonomicTypeToAggregationTypeMap = Object.fromEntries(
+    Object.entries(aggregationTypeToTaxonomicType).map(([aggregationType, taxonomicType]) => [
+        taxonomicType,
+        aggregationType,
+    ])
+) as Record<TaxonomicFilterGroupType, RetentionFilter['aggregationPropertyType']>
 
 export function RetentionAggregationSelector(): JSX.Element {
     const { insightProps } = useValues(insightLogic)
     const { retentionFilter } = useValues(insightVizDataLogic(insightProps))
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
+    const { dataWarehouseTablesMap } = useValues(databaseTableListLogic)
 
     const aggregationType = retentionFilter?.aggregationType || 'count'
     const aggregationProperty = retentionFilter?.aggregationProperty
+    const aggregationPropertyType = retentionFilter?.aggregationPropertyType || 'event'
     const isPropertyValueAggregation = aggregationType === 'sum' || aggregationType === 'avg'
+
+    const returningEntity = retentionFilter?.returningEntity
+    const isReturningDwh = returningEntity?.type === 'data_warehouse'
+    const dwhTableName = returningEntity
+        ? (returningEntity.table_name ?? (returningEntity.id as string | undefined))
+        : null
+    const schemaColumns: DatabaseSchemaField[] = dwhTableName
+        ? Object.values(dataWarehouseTablesMap[dwhTableName]?.fields ?? {})
+        : []
+
+    const propertyGroupType = aggregationTypeToTaxonomicType[aggregationPropertyType]
+    const groupTypes = isReturningDwh
+        ? [TaxonomicFilterGroupType.DataWarehouseProperties]
+        : [TaxonomicFilterGroupType.EventProperties, TaxonomicFilterGroupType.PersonProperties]
 
     // Local state to track which property math type to show in the dropdown label
     // This mirrors the behavior in Trends where the "Property value" option remembers the last selected math type
@@ -86,7 +117,7 @@ export function RetentionAggregationSelector(): JSX.Element {
     ]
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-start gap-2">
             <Select
                 value={aggregationType === 'count' ? 'count' : propertyMathTypeShown}
                 onChange={(val) => {
@@ -107,12 +138,21 @@ export function RetentionAggregationSelector(): JSX.Element {
 
             {isPropertyValueAggregation && (
                 <TaxonomicStringPopover
-                    groupType={TaxonomicFilterGroupType.NumericalEventProperties}
-                    groupTypes={[TaxonomicFilterGroupType.NumericalEventProperties]}
-                    value={aggregationProperty}
-                    onChange={(val) => updateInsightFilter({ aggregationProperty: val })}
+                    groupType={propertyGroupType}
+                    groupTypes={groupTypes}
+                    schemaColumns={schemaColumns}
+                    showNumericalPropsOnly={true}
+                    value={aggregationProperty || ''}
+                    onChange={(val, groupType) => {
+                        const aggregationType = taxonomicTypeToAggregationTypeMap[groupType]
+                        updateInsightFilter({
+                            aggregationProperty: val,
+                            aggregationPropertyType: aggregationType,
+                        })
+                    }}
                     placeholder="Select property"
                     data-attr="retention-aggregation-property-selector"
+                    selectingKeyOnly
                     renderValue={(currentValue) => (
                         <Tooltip
                             title={
@@ -121,19 +161,20 @@ export function RetentionAggregationSelector(): JSX.Element {
                                     {aggregationType === 'sum'
                                         ? PROPERTY_MATH_DEFINITIONS[PropertyMathType.Sum].name.toLowerCase()
                                         : PROPERTY_MATH_DEFINITIONS[PropertyMathType.Average].name.toLowerCase()}{' '}
-                                    from property <code>{currentValue}</code>.
-                                    <br />
-                                    Note that only events where <code>{currentValue}</code> is set with a numeric value
-                                    will be taken into account.
+                                    from {aggregationPropertyType.replace('_', ' ')} property{' '}
+                                    <code>{currentValue}</code>.
+                                    {aggregationPropertyType === 'event' && (
+                                        <>
+                                            <br />
+                                            Note that only events where <code>{currentValue}</code> is set with a
+                                            numeric value will be taken into account.
+                                        </>
+                                    )}
                                 </>
                             }
                             placement="right"
                         >
-                            <PropertyKeyInfo
-                                value={currentValue}
-                                disablePopover
-                                type={TaxonomicFilterGroupType.EventProperties}
-                            />
+                            <PropertyKeyInfo value={currentValue} disablePopover type={propertyGroupType} />
                         </Tooltip>
                     )}
                 />

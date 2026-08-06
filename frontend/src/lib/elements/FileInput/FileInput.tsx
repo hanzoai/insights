@@ -79,6 +79,7 @@ export const FileInput = ({
             setFiles(localFiles)
             onChange?.(localFiles)
         }
+        e.target.value = ''
     }
 
     const handleDrag = (e: DragEvent): void => {

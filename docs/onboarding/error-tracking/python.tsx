@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getPythonSteps as getPythonStepsPA } from '../product-analytics/python'
 import { StepDefinition } from '../steps'
@@ -38,16 +38,16 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             file: 'Python',
                             code: dedent`
                                 from insights import Insights
-                                insights = Insights("<ph_project_api_key>", enable_exception_autocapture=True, ...)
+                                insights = Insights("<ph_project_token>", enable_exception_autocapture=True, ...)
                             `,
                         },
                     ]}
                 />
                 <Markdown>
                     {dedent`
-                        We recommend setting up and using [contexts](/docs/libraries/python#contexts) so that exceptions automatically include distinct IDs, session IDs, and other properties you can set up with tags.
+                        We recommend setting up and using [contexts](https://hanzo.ai/docs/libraries/python#contexts) so that exceptions automatically include distinct IDs, session IDs, and other properties you can set up with tags.
 
-                        You can also enable [code variables capture](/docs/error-tracking/code-variables/python) to automatically capture the state of local variables when exceptions occur, giving you a debugger-like view of your application.
+                        You can also enable [code variables capture](https://hanzo.ai/docs/error-tracking/code-variables/python) to automatically capture the state of local variables when exceptions occur, giving you a debugger-like view of your application.
                     `}
                 </Markdown>
             </>
@@ -77,7 +77,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 />
                 <Markdown>
                     {dedent`
-                        You can find a full example of all of this in our [Python (and Flask) error tracking tutorial](/tutorials/python-error-tracking).
+                        You can find a full example of all of this in our [Python (and Flask) error tracking tutorial](https://hanzo.ai/tutorials/python-error-tracking).
                     `}
                 </Markdown>
             </>
@@ -93,7 +93,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
@@ -119,7 +119,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         <Tab.Panel>
                             <Markdown>
                                 {dedent`
-                                    The Python SDK provides a Django middleware that automatically wraps all requests with a [context](/docs/libraries/python#contexts). Add the middleware to your Django settings:
+                                    The Python SDK provides a Django middleware that automatically wraps all requests with a [context](https://hanzo.ai/docs/libraries/python#contexts). Add the middleware to your Django settings:
                                 `}
                             </Markdown>
                             <CodeBlock
@@ -139,7 +139,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             />
                             <Markdown>
                                 {dedent`
-                                    By default, the middleware captures exceptions and sends them to Insights. Disable with \`INSIGHTS_MW_CAPTURE_EXCEPTIONS = False\`. Use \`INSIGHTS_MW_EXTRA_TAGS\`, \`INSIGHTS_MW_REQUEST_FILTER\`, and \`INSIGHTS_MW_TAG_MAP\` to customize. See the [Django integration docs](/docs/libraries/django) for full configuration.
+                                    By default, the middleware captures exceptions and sends them to Insights. Disable with \`INSIGHTS_MW_CAPTURE_EXCEPTIONS = False\`. Use \`INSIGHTS_MW_EXTRA_TAGS\`, \`INSIGHTS_MW_REQUEST_FILTER\`, and \`INSIGHTS_MW_TAG_MAP\` to customize. See the [Django integration docs](https://hanzo.ai/docs/libraries/django) for full configuration.
                                 `}
                             </Markdown>
                         </Tab.Panel>
@@ -152,7 +152,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         code: dedent`
                                             from flask import Flask, jsonify
                                             from insights import Insights
-                                            insights = Insights('<ph_project_api_key>', host='https://us.i.hanzo.ai')
+                                            insights = Insights('<ph_project_token>', host='https://us.i.hanzo.ai')
                                             @app.errorhandler(Exception)
                                             def handle_exception(e):
                                                 event_id = insights.capture_exception(e)
@@ -173,7 +173,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         code: dedent`
                                             from fastapi.responses import JSONResponse
                                             from insights import Insights
-                                            insights = Insights('<ph_project_api_key>', host='https://us.i.hanzo.ai')
+                                            insights = Insights('<ph_project_token>', host='https://us.i.hanzo.ai')
                                             @app.exception_handler(Exception)
                                             async def http_exception_handler(request, exc):
                                                 insights.capture_exception(exc)
@@ -189,14 +189,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
         ),
     }
 
-    return [
-        ...installSteps,
-        verifyInitStep,
-        exceptionAutocaptureStep,
-        manualCaptureStep,
-        verifyStep,
-        frameworkStep,
-    ]
+    return [...installSteps, verifyInitStep, exceptionAutocaptureStep, manualCaptureStep, verifyStep, frameworkStep]
 }
 
 export const PythonInstallation = createInstallation(getPythonSteps)

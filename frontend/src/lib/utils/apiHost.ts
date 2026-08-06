@@ -1,30 +1,43 @@
+import { getBackendHost } from 'lib/oauth/oauthClient'
+
+import { inStorybook, inStorybookTestRunner } from './dom'
 import { getAppContext } from './getAppContext'
 
-export function apiHostOrigin(): string {
-    // ONE endpoint. Upstream shipped a us/eu region split; the debrand rewrote
-    // both hosts but not the branching, so
-    // this ended up testing the SAME origin twice — the second arm was dead code
-    // and neither host exists in our stack. The snippet it generated told every
-    // customer to POST to us.i.hanzo.ai, which resolves nowhere.
-    //
-    // Hanzo has one API front door for every property and every region.
-    if (window.location.origin === 'https://insights.hanzo.ai') {
-        return 'https://api.hanzo.ai'
+/**
+ * Resolve a backend-served asset path (e.g. `/uploaded_media/<id>`) to a full URL. These resources
+ * live on the backend, not the SPA bundle's origin — so in OAuth mode, where the app runs against a
+ * remote region, prefix that region's host. Same-origin (session) mode returns the path unchanged.
+ * Already-absolute URLs and `data:` URIs pass through untouched.
+ */
+export function backendAssetUrl(path: string): string {
+    if (/^(https?:|data:)/.test(path)) {
+        return path
     }
-    return window.location.origin
+    const backendHost = getBackendHost()
+    return backendHost ? `${backendHost}${path}` : path
+}
+
+export function apiHostOrigin(): string {
+    const appOrigin = window.location.origin
+    if (appOrigin === 'https://us.hanzo.ai') {
+        return 'https://us.i.hanzo.ai'
+    } else if (appOrigin === 'https://eu.hanzo.ai') {
+        return 'https://eu.i.hanzo.ai'
+    }
+    return appOrigin
 }
 
 export function liveEventsHostOrigin(): string | null {
     const appOrigin = window.location.origin
     const appContext = getAppContext()
 
-    if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://live.insights.hanzo.ai'
-    } else if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://live.insights.hanzo.ai'
+    if (appOrigin === 'https://us.hanzo.ai') {
+        return 'https://live.us.hanzo.ai'
+    } else if (appOrigin === 'https://eu.hanzo.ai') {
+        return 'https://live.eu.hanzo.ai'
     } else if (appOrigin === 'https://app.dev.insights.dev') {
         return 'https://live.dev.insights.dev'
-    } else if (process.env.STORYBOOK) {
+    } else if (inStorybook() || inStorybookTestRunner()) {
         return 'http://localhost:6006'
     }
 
@@ -34,12 +47,12 @@ export function liveEventsHostOrigin(): string | null {
 export function publicWebhooksHostOrigin(): string | null {
     const appOrigin = window.location.origin
 
-    if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://webhooks.insights.hanzo.ai'
-    } else if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://webhooks.insights.hanzo.ai'
+    if (appOrigin === 'https://us.hanzo.ai') {
+        return 'https://webhooks.us.hanzo.ai'
+    } else if (appOrigin === 'https://eu.hanzo.ai') {
+        return 'https://webhooks.eu.hanzo.ai'
     } else if (appOrigin === 'https://app.dev.insights.dev') {
-        return 'https://webhooks.dev.insights.dev'
+        return 'https://app.dev.insights.dev'
     }
 
     return appOrigin

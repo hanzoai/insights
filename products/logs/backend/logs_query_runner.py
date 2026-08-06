@@ -6,18 +6,20 @@ from zoneinfo import ZoneInfo
 
 from insights.schema import (
     CachedLogsQueryResponse,
-    InsightsQLFilters,
+    FilterLogicalOperator,
     IntervalType,
     LogPropertyFilter,
     LogPropertyFilterType,
     LogsQuery,
     LogsQueryResponse,
+    PropertyGroupFilterValue,
     PropertyGroupsMode,
     PropertyOperator,
 )
 
 from insights.insightsql import ast
 from insights.insightsql.constants import InsightsQLGlobalSettings, LimitContext
+from insights.insightsql.errors import ExposedInsightsQLError, QueryError
 from insights.insightsql.parser import parse_expr, parse_order_expr, parse_select
 from insights.insightsql.property import get_lowercase_index_hint, operator_is_negative, property_to_expr
 
@@ -26,9 +28,86 @@ from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePag
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner, QueryRunner
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 from insights.models.filters.mixins.utils import cached_property
+from insights.models.person.person import MAX_LIMIT_DISTINCT_IDS, get_distinct_ids_for_subquery
+from insights.models.person.util import get_person_by_pk_or_uuid
+from insights.personinsights_client.caller_tag import personinsights_caller_tag
+
+from products.logs.backend.column_expressions import canonical_key, column_to_expr
+from products.logs.backend.models import (
+    DEFAULT_LOGS_DISTINCT_ID_ATTRIBUTE_KEYS,
+    DISTINCT_ID_ATTRIBUTE_KEY_CONVENTIONS,
+    TeamLogsConfig,
+)
 
 if TYPE_CHECKING:
-    from insights.models import User
+    from insights.models import Team, User
+
+
+# Bounds the per-request fan-out of user-supplied InsightsQL expressions. Per-expression cost is already
+# bounded by the query's max_execution_time / max_memory_usage; this just caps how many run at once.
+# Enforced in the runner so every LogsQuery entry point (interactive query endpoint and the
+# server-side CSV export worker) is bounded, not just the interactive one.
+MAX_CUSTOM_COLUMNS = 50
+
+
+LIVE_LOGS_CHECKPOINT_QUERY = parse_select(
+    """
+    SELECT min(partition_checkpoint) FROM (
+        SELECT _topic, _partition, max(max_observed_timestamp) AS partition_checkpoint
+        FROM logs_kafka_metrics
+        GROUP BY _topic, _partition
+    )
+"""
+)
+
+
+def ilike_pattern(search: str | None) -> str:
+    # Escape ILIKE wildcards so a search for "%" matches a literal percent sign, not every row.
+    escaped = (search or "").replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"
+
+
+def _trace_id_normalise_to_base64(value: str) -> str:
+    """Accept either hex or base64 encoded trace_id/span_id values.
+
+    The `trace_id` and `span_id` columns store base64-encoded bytes. Hex input (32-char for
+    trace_id, 16-char for span_id) is the form users normally see in trace UIs, so we accept
+    it and convert. Values that aren't valid hex are passed through as-is (assumed base64).
+    """
+    try:
+        int(value, 16)
+        return base64.b64encode(bytes.fromhex(value)).decode()
+    except ValueError:
+        return value
+
+
+def _normalise_trace_id_filter(log_filter: LogPropertyFilter) -> None:
+    """In-place: normalize trace_id/span_id filter values to base64 to match column storage."""
+    if isinstance(log_filter.value, list):
+        log_filter.value = [_trace_id_normalise_to_base64(str(v)) for v in log_filter.value]
+    elif log_filter.value is not None:
+        log_filter.value = _trace_id_normalise_to_base64(str(log_filter.value))
+
+
+def _severity_level_to_expr(log_filter: LogPropertyFilter) -> ast.Expr:
+    """Translate a `severity_level` log property filter to a InsightsQL expression on `severity_text`.
+
+    Only equality operators (Exact/IsNot) are exposed in the UI.
+    """
+    values: list[str]
+    if isinstance(log_filter.value, list):
+        values = [str(v) for v in log_filter.value]
+    elif log_filter.value is None:
+        values = []
+    else:
+        values = [str(log_filter.value)]
+
+    op = ast.CompareOperationOp.NotIn if log_filter.operator == PropertyOperator.IS_NOT else ast.CompareOperationOp.In
+    return ast.CompareOperation(
+        op=op,
+        left=ast.Field(chain=["severity_text"]),
+        right=ast.Tuple(exprs=[ast.Constant(value=v) for v in values]),
+    )
 
 
 def _generate_resource_attribute_filters(
@@ -63,6 +142,8 @@ def _generate_resource_attribute_filters(
             filter.operator = {
                 PropertyOperator.IS_NOT: PropertyOperator.EXACT,
                 PropertyOperator.NOT_ICONTAINS: PropertyOperator.ICONTAINS,
+                PropertyOperator.NOT_STARTS_WITH: PropertyOperator.STARTS_WITH,
+                PropertyOperator.NOT_ENDS_WITH: PropertyOperator.ENDS_WITH,
                 PropertyOperator.NOT_REGEX: PropertyOperator.REGEX,
                 PropertyOperator.IS_NOT_SET: PropertyOperator.IS_SET,
                 PropertyOperator.NOT_BETWEEN: PropertyOperator.BETWEEN,
@@ -93,11 +174,16 @@ def _generate_resource_attribute_filters(
         converted_exprs.append(converted_expr)
 
     IN_ = "NOT IN" if is_negative_filter else "IN"
+    # For positive filters we want resources that match ALL filters (arrayAll), then keep them via IN.
+    # For negative filters we want to exclude resources that match ANY of the inverted filters
+    # (arrayExists), then drop them via NOT IN — otherwise multiple negatives would only exclude
+    # resources that match every one of them, instead of any one of them.
+    array_fn = "arrayExists" if is_negative_filter else "arrayAll"
 
     # this query fetches all resource fingerprints that match at least one resource attribute filter
-    # then does a secondary filter for those that match every filter
+    # then does a secondary filter for those that match every filter (positive) or any filter (negative)
     # this sounds over complicated but it's because each row in the table is a single attribute - so we need to first group
-    # them to collapse the rows into a single row per resource fingerprint, _then_ check every filter is met
+    # them to collapse the rows into a single row per resource fingerprint, _then_ check the per-filter match counts
     return parse_expr(
         f"""
         (resource_fingerprint) {IN_}
@@ -110,7 +196,7 @@ def _generate_resource_attribute_filters(
                 AND time_bucket <= toStartOfInterval({{date_to}},toIntervalMinute(10))
                 AND {{resource_attribute_filters}} AND {{existing_filters}}
             GROUP BY resource_fingerprint
-            HAVING arrayAll(x -> x > 0, sumForEach({{ops}}))
+            HAVING {array_fn}(x -> x > 0, sumForEach({{ops}}))
         )
     """,
         placeholders={
@@ -122,48 +208,96 @@ def _generate_resource_attribute_filters(
     )
 
 
-class LogsQueryRunnerMixin(QueryRunner):
-    @cached_property
-    def settings(self):
-        return InsightsQLGlobalSettings(
-            max_bytes_to_read=None,
-            read_overflow_mode=None,
-        )
+def _get_property_type(value) -> str:
+    try:
+        float(value)
+        return "float"
+    except ValueError:
+        pass
+    # todo: datetime?
+    return "str"
 
-    def __init__(self, query, *args, **kwargs):
-        super().__init__(query, *args, **kwargs)
 
-        self.paginator = InsightsQLHasMorePaginator.from_limit_context(
-            limit_context=LimitContext.QUERY,
-            limit=self.query.limit if self.query.limit else None,
-            offset=self.query.offset,
-        )
+def _map_attribute_filter_type(property_filter: LogPropertyFilter) -> LogPropertyFilter:
+    """Suffix a log attribute filter's key with its detected value type so it targets the
+    right typed attributes map (attributes_map_str / attributes_map_float).
 
-        self.modifiers.convertToProjectTimezone = False
-        self.modifiers.propertyGroupsMode = PropertyGroupsMode.OPTIMIZED
+    Values that all convert cleanly to float use the __float map; anything else sticks to
+    __str. Datetime is left out until there's a decent UI for datetime filtering. Returns
+    a copy; filters without a value are returned unchanged.
+    """
+    if not property_filter.value:
+        return property_filter
 
-        def get_property_type(value):
-            try:
-                value = float(value)
-                return "float"
-            except ValueError:
-                pass
-            # todo: datetime?
-            return "str"
+    property_type = "str"
+    if isinstance(property_filter.value, list):
+        property_types = {_get_property_type(v) for v in property_filter.value}
+        # only use the detected type if all given values have the same type
+        # e.g. if values are '1', '2', we can use float, if values are '1', 'a', stick to str
+        if len(property_types) == 1:
+            property_type = property_types.pop()
+    else:
+        property_type = _get_property_type(property_filter.value)
+
+    mapped = property_filter.copy(deep=True)
+    mapped.key = f"{mapped.key}__{property_type}"
+    return mapped
+
+
+def _validated_attribute_group(group: PropertyGroupFilterValue) -> PropertyGroupFilterValue:
+    if not group.values:
+        raise QueryError("Nested filter groups in logs queries must contain at least one filter")
+    for leaf in group.values:
+        if not isinstance(leaf, LogPropertyFilter) or leaf.type != LogPropertyFilterType.LOG_ATTRIBUTE:
+            raise QueryError("Nested filter groups in logs queries support only log_attribute filters")
+    return group
+
+
+class LogsFilterBuilder:
+    """Builds InsightsQL WHERE clause AST from LogsQuery filter fields.
+
+    Standalone — no QueryRunner dependency.
+    """
+
+    def __init__(
+        self,
+        query: LogsQuery,
+        team: "Team",
+        query_date_range: QueryDateRange,
+        exclude_facet_field: str | None = None,
+        exclude_resource_attribute: str | None = None,
+    ):
+        self.query = query
+        self.team = team
+        self.query_date_range = query_date_range
+        # When set (e.g. "severity_text" or "service_name"), that facet's own filter is omitted
+        # from the WHERE clause so facet counts reflect every *other* active filter — the standard
+        # faceted-search behaviour where selecting a value doesn't zero out its siblings.
+        self.exclude_facet_field = exclude_facet_field
+        # The resource-attribute equivalent: when faceting on a resource attribute key, omit that
+        # key's own log_resource_attribute filter so the facet doesn't zero out its own siblings.
+        self.exclude_resource_attribute = exclude_resource_attribute
 
         self.resource_attribute_filters: list[LogPropertyFilter] = []
         self.resource_attribute_negative_filters: list[LogPropertyFilter] = []
         self.log_filters: list[LogPropertyFilter] = []
         self.attribute_filters: list[LogPropertyFilter] = []
+        # Nested groups inside a property group — used to OR one value across several
+        # attribute keys (e.g. matching a person's distinct_id against every configured
+        # `logs_distinct_id_attribute_keys` entry). Only log_attribute leaves supported.
+        self.attribute_filter_groups: list[PropertyGroupFilterValue] = []
         if self.query.filterGroup and len(self.query.filterGroup.values) > 0:
             for property_group in self.query.filterGroup.values:
+                for nested_group in property_group.values:
+                    if isinstance(nested_group, PropertyGroupFilterValue):
+                        self.attribute_filter_groups.append(_validated_attribute_group(nested_group))
                 self.resource_attribute_filters = cast(
                     list[LogPropertyFilter],
                     [
                         f
                         for f in property_group.values
                         if f.type == LogPropertyFilterType.LOG_RESOURCE_ATTRIBUTE
-                        and not operator_is_negative(f.operator)
+                        and not operator_is_negative(f.operator)  # type: ignore[arg-type, union-attr]
                     ],
                 )
                 self.resource_attribute_negative_filters = cast(
@@ -171,88 +305,47 @@ class LogsQueryRunnerMixin(QueryRunner):
                     [
                         f
                         for f in property_group.values
-                        if f.type == LogPropertyFilterType.LOG_RESOURCE_ATTRIBUTE and operator_is_negative(f.operator)
+                        if f.type == LogPropertyFilterType.LOG_RESOURCE_ATTRIBUTE and operator_is_negative(f.operator)  # type: ignore[arg-type, union-attr]
                     ],
                 )
                 self.log_filters = cast(
-                    list[LogPropertyFilter], [f for f in property_group.values if f.type == LogPropertyFilterType.LOG]
+                    list[LogPropertyFilter],
+                    [f for f in property_group.values if f.type == LogPropertyFilterType.LOG],
                 )
 
-            # dynamically detect type of the given property values
-            # if they all convert cleanly to float, use the __float property mapping instead
-            # we keep multiple attribute maps for different types:
-            # attribute_map_str
-            # attribute_map_float
-            # attribute_map_datetime
-            #
-            # for now we'll just check str and float as we need a decent UI for datetime filtering.
+            # dynamically detect type of the given property values via the typed attribute
+            # maps (attribute_map_str / attribute_map_float) — see _map_attribute_filter_type
             for property_filter in self.query.filterGroup.values[0].values:
                 # we only do the type mapping for log attributes
                 if property_filter.type != LogPropertyFilterType.LOG_ATTRIBUTE:
                     continue
 
                 if isinstance(property_filter, LogPropertyFilter) and property_filter.value:
-                    property_type = "str"
-                    if isinstance(property_filter.value, list):
-                        property_types = {get_property_type(v) for v in property_filter.value}
-                        # only use the detected type if all given values have the same type
-                        # e.g. if values are '1', '2', we can use float, if values are '1', 'a', stick to str
-                        if len(property_types) == 1:
-                            property_type = property_types.pop()
-                    else:
-                        property_type = get_property_type(property_filter.value)
+                    self.attribute_filters.insert(0, _map_attribute_filter_type(property_filter))
 
-                    # defensive copy as we mutate the filter here and don't want to impact other copies
-                    property_filter = property_filter.copy(deep=True)
-                    property_filter.key = f"{property_filter.key}__{property_type}"
-
-                    self.attribute_filters.insert(0, property_filter)
-
-    @cached_property
-    def query_date_range(self) -> QueryDateRange:
-        qdr = QueryDateRange(
-            date_range=self.query.dateRange,
-            team=self.team,
-            interval=IntervalType.MINUTE,
-            interval_count=2,
-            now=dt.datetime.now(),
-        )
-
-        _step = (qdr.date_to() - qdr.date_from()) / 50
-        interval_type = IntervalType.SECOND
-
-        def find_closest(target, arr):
-            if not arr:
-                raise ValueError("Input array cannot be empty")
-            closest_number = min(arr, key=lambda x: (abs(x - target), x))
-
-            return closest_number
-
-        # set the number of intervals to a "round" number of minutes
-        # it's hard to reason about the rate of logs on e.g. 13 minute intervals
-        # the min interval is 1 minute and max interval is 1 day
-        interval_count = find_closest(
-            _step.total_seconds(),
-            [1, 5, 10] + [x * 60 for x in [1, 2, 5, 10, 15, 30, 60, 120, 240, 360, 720, 1440]],
-        )
-
-        if _step >= dt.timedelta(minutes=1):
-            interval_type = IntervalType.MINUTE
-            interval_count //= 60
-
-        return QueryDateRange(
-            date_range=self.query.dateRange,
-            team=self.team,
-            interval=interval_type,
-            interval_count=int(interval_count),
-            now=dt.datetime.now(),
-            timezone_info=ZoneInfo("UTC"),
-        )
+        if self.exclude_resource_attribute is not None:
+            self.resource_attribute_filters = [
+                f for f in self.resource_attribute_filters if f.key != self.exclude_resource_attribute
+            ]
+            self.resource_attribute_negative_filters = [
+                f for f in self.resource_attribute_negative_filters if f.key != self.exclude_resource_attribute
+            ]
 
     def where(self) -> ast.Expr:
         exprs: list[ast.Expr] = []
 
-        if self.query.serviceNames:
+        # add time_bucket to filter so we get part+granule pruning at the primary key level
+        # this is important as it reduces the parts/granules that need to have their skip indexes loaded
+        exprs.append(
+            parse_expr(
+                "toStartOfDay(time_bucket) >= toStartOfDay({date_from}) and toStartOfDay(time_bucket) <= toStartOfDay({date_to})",
+                placeholders={
+                    **self.query_date_range.to_placeholders(),
+                },
+            )
+        )
+
+        if self.query.serviceNames and self.exclude_facet_field != "service_name":
             exprs.append(
                 parse_expr(
                     "service_name IN {serviceNames}",
@@ -276,11 +369,33 @@ class LogsQueryRunnerMixin(QueryRunner):
             if self.attribute_filters:
                 exprs.append(property_to_expr(self.attribute_filters, team=self.team))
 
+            for group in self.attribute_filter_groups:
+                leaf_exprs = [
+                    property_to_expr(_map_attribute_filter_type(cast(LogPropertyFilter, leaf)), team=self.team)
+                    for leaf in group.values
+                ]
+                if len(leaf_exprs) == 1:
+                    exprs.append(leaf_exprs[0])
+                elif group.type == FilterLogicalOperator.OR_:
+                    exprs.append(ast.Or(exprs=leaf_exprs))
+                else:
+                    exprs.append(ast.And(exprs=leaf_exprs))
+
             if self.log_filters:
                 for log_filter in self.log_filters:
+                    if log_filter.key == "severity_level":
+                        if self.exclude_facet_field != "severity_text":
+                            exprs.append(_severity_level_to_expr(log_filter))
+                        continue
+                    if log_filter.key in ("trace_id", "span_id"):
+                        log_filter = log_filter.copy(deep=True)
+                        _normalise_trace_id_filter(log_filter)
                     if log_filter.key == "message":
                         exprs.append(get_lowercase_index_hint(log_filter, team=self.team))
                     exprs.append(property_to_expr(log_filter, team=self.team))
+
+        if self.query.personId:
+            exprs.append(self._person_scope_expr())
 
         exprs.append(ast.Placeholder(expr=ast.Field(chain=["filters"])))
 
@@ -294,7 +409,7 @@ class LogsQueryRunnerMixin(QueryRunner):
             exprs.append(get_lowercase_index_hint(search_filter, team=self.team))
             exprs.append(property_to_expr(search_filter, team=self.team))
 
-        if self.query.severityLevels:
+        if self.query.severityLevels and self.exclude_facet_field != "severity_text":
             exprs.append(
                 parse_expr(
                     "severity_text IN {severityLevels}",
@@ -307,10 +422,16 @@ class LogsQueryRunnerMixin(QueryRunner):
             )
 
         if self.query.liveLogsCheckpoint:
+            try:
+                checkpoint = dt.datetime.fromisoformat(self.query.liveLogsCheckpoint)
+            except ValueError as e:
+                raise ValueError(f"Invalid liveLogsCheckpoint format: {e}")
+            if checkpoint.tzinfo is None:
+                checkpoint = checkpoint.replace(tzinfo=ZoneInfo("UTC"))
             exprs.append(
                 parse_expr(
                     "observed_timestamp >= {liveLogsCheckpoint}",
-                    placeholders={"liveLogsCheckpoint": ast.Constant(value=self.query.liveLogsCheckpoint)},
+                    placeholders={"liveLogsCheckpoint": ast.Constant(value=checkpoint)},
                 )
             )
 
@@ -356,6 +477,64 @@ class LogsQueryRunnerMixin(QueryRunner):
 
         return ast.And(exprs=exprs)
 
+    def _person_scope_expr(self) -> ast.Expr:
+        # Expand personId server-side: person pages cap how many distinct ids they load
+        # (groupArray(101) / list serializer), so a client-built distinct-ids filter would
+        # silently drop ids on persons with many of them.
+        with personinsights_caller_tag("persons/logs-query"):
+            person = get_person_by_pk_or_uuid(
+                self.team.pk, str(self.query.personId), distinct_id_limit=MAX_LIMIT_DISTINCT_IDS
+            )
+        distinct_ids = get_distinct_ids_for_subquery(person, self.team)
+        if not distinct_ids:
+            # Unknown person (or another team's person): match nothing. property_to_expr
+            # treats an empty value list as always-true, which would return every log.
+            return ast.Constant(value=False)
+        config = TeamLogsConfig.objects.filter(team=self.team).first()
+        configured_keys = (
+            config.logs_distinct_id_attribute_keys if config else None
+        ) or DEFAULT_LOGS_DISTINCT_ID_ATTRIBUTE_KEYS
+        # Also scope on the built-in convention keys the logs UI renders as clickable person
+        # links (isDistinctIdKey in products/logs/frontend/utils.tsx), so a log the UI shows as
+        # belonging to a person appears on their Logs tab even when the team hasn't configured
+        # that key. Deduped, configured keys first.
+        attribute_keys = list(dict.fromkeys([*configured_keys, *DISTINCT_ID_ATTRIBUTE_KEY_CONVENTIONS]))
+        distinct_id_values = list(distinct_ids)
+        key_exprs: list[ast.Expr] = []
+        for attribute_key in attribute_keys:
+            # Log attribute: force the __str map. attributes_map_str holds every attribute value
+            # (stringified), while attributes_map_float only exists for numeric values — all-numeric
+            # distinct ids must not route there via the usual value-type detection.
+            key_exprs.append(
+                property_to_expr(
+                    LogPropertyFilter(
+                        key=f"{attribute_key}__str",
+                        operator=PropertyOperator.EXACT,
+                        type=LogPropertyFilterType.LOG_ATTRIBUTE,
+                        value=distinct_id_values,
+                    ),
+                    team=self.team,
+                )
+            )
+            # Resource attribute: the logs UI links these keys under resource_attributes too
+            # (LogAttributes.tsx renders the person link regardless of attribute vs
+            # resource_attribute), so scope on both. resource_attributes is a plain string map on
+            # the row — no typed __str/__float split — so match the key directly.
+            key_exprs.append(
+                property_to_expr(
+                    LogPropertyFilter(
+                        key=attribute_key,
+                        operator=PropertyOperator.EXACT,
+                        type=LogPropertyFilterType.LOG_RESOURCE_ATTRIBUTE,
+                        value=distinct_id_values,
+                    ),
+                    team=self.team,
+                )
+            )
+        # A log links to the person when any of these attribute keys — in either the log
+        # attributes or the resource attributes — holds one of their distinct ids.
+        return key_exprs[0] if len(key_exprs) == 1 else ast.Or(exprs=key_exprs)
+
     def resource_filter(self, *, existing_filters):
         negative_resource_filter = ast.Constant(value=True)
         # generate a query which excludes all the resources which match a negative filter
@@ -388,19 +567,122 @@ class LogsQueryRunnerMixin(QueryRunner):
         return ast.Constant(value=1)
 
 
+class LogsQueryRunnerMixin(QueryRunner):
+    # Target bucket count for the adaptive interval picker in `query_date_range`.
+    # Subclasses can override per-instance to request a different resolution.
+    BUCKET_TARGET: int = 50
+
+    @cached_property
+    def settings(self):
+        return InsightsQLGlobalSettings(
+            max_bytes_to_read=None,
+            read_overflow_mode=None,
+        )
+
+    def __init__(self, query, *args, **kwargs):
+        super().__init__(query, *args, **kwargs)
+
+        self.paginator = InsightsQLHasMorePaginator.from_limit_context(
+            limit_context=LimitContext.QUERY,
+            limit=self.query.limit if self.query.limit else None,
+            offset=self.query.offset,
+        )
+
+        self.modifiers.convertToProjectTimezone = False
+        self.modifiers.propertyGroupsMode = PropertyGroupsMode.OPTIMIZED
+
+    @cached_property
+    def _filter_builder(self) -> LogsFilterBuilder:
+        return LogsFilterBuilder(self.query, self.team, self.query_date_range)
+
+    @cached_property
+    def query_date_range(self) -> QueryDateRange:
+        qdr = QueryDateRange(
+            date_range=self.query.dateRange,
+            team=self.team,
+            interval=IntervalType.MINUTE,
+            interval_count=2,
+            now=dt.datetime.now(),
+        )
+
+        _step = (qdr.date_to() - qdr.date_from()) / self.BUCKET_TARGET
+        interval_type = IntervalType.SECOND
+
+        def find_closest(target, arr):
+            if not arr:
+                raise ValueError("Input array cannot be empty")
+            closest_number = min(arr, key=lambda x: (abs(x - target), x))
+
+            return closest_number
+
+        # set the number of intervals to a "round" number of minutes
+        # it's hard to reason about the rate of logs on e.g. 13 minute intervals
+        # the min interval is 1 minute and max interval is 1 day
+        interval_count = find_closest(
+            _step.total_seconds(),
+            [1, 5, 10] + [x * 60 for x in [1, 2, 5, 10, 15, 30, 60, 120, 240, 360, 720, 1440]],
+        )
+
+        if _step >= dt.timedelta(minutes=1):
+            interval_type = IntervalType.MINUTE
+            interval_count //= 60
+
+        return QueryDateRange(
+            date_range=self.query.dateRange,
+            team=self.team,
+            interval=interval_type,
+            interval_count=int(interval_count),
+            now=dt.datetime.now(),
+            timezone_info=ZoneInfo("UTC"),
+            exact_timerange=True,
+        )
+
+    def where(self) -> ast.Expr:
+        return self._filter_builder.where()
+
+    def resource_filter(self, *, existing_filters):
+        return self._filter_builder.resource_filter(existing_filters=existing_filters)
+
+
+# Number of fixed SELECT columns in to_query; custom columns are appended after these,
+# so _calculate maps result[_FIXED_COLUMN_COUNT:] onto the custom column aliases.
+_FIXED_COLUMN_COUNT = 15
+
+
 class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMixin):
     query: LogsQuery
     cached_response: CachedLogsQueryResponse
     paginator: InsightsQLHasMorePaginator
 
     def validate_query_runner_access(self, user: "User") -> bool:
-        # LogsQuery is registered in get_query_runner solely for server-side CSV export
-        # (via ExportedAsset + Celery, which runs without a user context and skips this check).
-        # Block all user-initiated queries via the generic /api/projects/:id/query/ endpoint
+        # LogsQuery is registered in get_query_runner solely for server-side CSV export.
+        # The export runs via ExportedAsset + Celery and attributes the read to the export
+        # owner (LimitContext.EXPORT), which must be allowed through. Block everything else —
+        # i.e. user-initiated queries via the generic /api/projects/:id/query/ endpoint —
         # until the LogsQuery schema is stable and ready to be a public API.
+        if self.limit_context == LimitContext.EXPORT:
+            return True
+
         from insights.rbac.user_access_control import UserAccessControlError
 
         raise UserAccessControlError("logs", "viewer")
+
+    @cached_property
+    def _custom_column_aliases(self) -> list[str]:
+        return [canonical_key(text) for text in self.query.customColumns or []]
+
+    def _custom_column_selects(self) -> list[ast.Expr]:
+        custom_columns = self.query.customColumns or []
+        if len(custom_columns) > MAX_CUSTOM_COLUMNS:
+            raise QueryError(f"Too many custom columns: {len(custom_columns)} (max {MAX_CUSTOM_COLUMNS})")
+        selects: list[ast.Expr] = []
+        for text, alias in zip(custom_columns, self._custom_column_aliases):
+            try:
+                expr = column_to_expr(text)
+            except (ValueError, ExposedInsightsQLError) as e:
+                raise QueryError(f"Invalid custom column {text!r}: {e}")
+            selects.append(ast.Alias(alias=alias, expr=expr))
+        return selects
 
     def _calculate(self) -> LogsQueryResponse:
         response = self.paginator.execute_insightsql_query(
@@ -411,13 +693,14 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
             workload=Workload.LOGS,
             timings=self.timings,
             limit_context=self.limit_context,
-            filters=InsightsQLFilters(dateRange=self.query.dateRange),
+            filters=self.query_date_range.to_insightsql_filters(),
             settings=self.settings,
         )
         results = []
         for result in response.results:
             results.append(
                 {
+                    **dict(zip(self._custom_column_aliases, result[_FIXED_COLUMN_COUNT:])),
                     "uuid": result[0],
                     "trace_id": result[1],
                     "span_id": result[2],
@@ -432,11 +715,18 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
                     "resource_fingerprint": str(result[11]),
                     "instrumentation_scope": result[12],
                     "event_name": result[13],
-                    "live_logs_checkpoint": result[14],
+                    # Datastore returns naive datetimes; tag as UTC like timestamp/observed_timestamp
+                    # so the schema's AwareDatetime serializes with an offset rather than as a naive
+                    # string the frontend would misparse in non-UTC timezones.
+                    "live_logs_checkpoint": result[14].replace(tzinfo=ZoneInfo("UTC")) if result[14] else None,
                 }
             )
 
-        return LogsQueryResponse(results=results, **self.paginator.response_params())
+        return LogsQueryResponse(
+            results=results,
+            columns=self._custom_column_aliases or None,
+            **self.paginator.response_params(),
+        )
 
     def run(self, *args, **kwargs) -> LogsQueryResponse | CachedLogsQueryResponse:
         response = super().run(*args, **kwargs)
@@ -454,26 +744,36 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
                 hex(tryBase64Decode(trace_id)),
                 hex(tryBase64Decode(span_id)),
                 body,
-                attributes,
+                {attributes},
                 timestamp,
                 observed_timestamp,
                 severity_text,
                 severity_number,
                 severity_text as level,
-                resource_attributes,
+                {resource_attributes},
                 resource_fingerprint,
                 instrumentation_scope,
                 event_name,
-                (select min(max_observed_timestamp) from logs_kafka_metrics) as live_logs_checkpoint
+                {live_logs_checkpoint} as live_logs_checkpoint
             FROM logs
             WHERE {where}
         """,
                 placeholders={
                     "where": self.where(),
+                    "live_logs_checkpoint": LIVE_LOGS_CHECKPOINT_QUERY,
+                    # Attribute maps dominate payload size. When excluded we still SELECT a column
+                    # (an empty map) so the positional result mapping in _calculate stays stable. The
+                    # placeholder must stay unaliased — aliasing it to `attributes`/`resource_attributes`
+                    # would shadow the physical field a WHERE-clause attribute filter needs to resolve.
+                    "attributes": parse_expr("map()" if self.query.excludeAttributes else "attributes"),
+                    "resource_attributes": parse_expr(
+                        "map()" if self.query.excludeAttributes else "resource_attributes"
+                    ),
                 },
             )
         )
         assert isinstance(query, ast.SelectQuery)
+        query.select.extend(self._custom_column_selects())
         query.order_by = [
             parse_order_expr(f"timestamp {order_dir}"),
             parse_order_expr(f"uuid {order_dir}"),
@@ -490,7 +790,6 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
             allow_experimental_object_type=False,
             allow_experimental_join_condition=False,
             transform_null_in=False,
-            allow_experimental_analyzer=True,
             max_bytes_to_read=None,
             read_overflow_mode=None,
         )

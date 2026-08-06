@@ -5,8 +5,10 @@ import { Button, Dialog, Input, Select, Table, Tag, toast } from '@hanzo/element
 
 import { CAPABILITIES } from 'lib/capabilities'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { TZLabel } from 'lib/components/TZLabel'
+import { OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { More } from 'lib/elements/Button/More'
 import { TableColumn } from 'lib/elements/Table'
@@ -190,6 +192,10 @@ function ChangeRequestTableActions({
     onApprove: (id: string) => void
     onReject: (id: string, reason: string) => void
 }): JSX.Element {
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Organization,
+        minimumAccessLevel: OrganizationMembershipLevel.Admin,
+    })
     const { showApproveButton, showRejectButton } = getChangeRequestButtonVisibility(changeRequest)
 
     return (
@@ -203,6 +209,7 @@ function ChangeRequestTableActions({
                         <Button
                             fullWidth
                             type="primary"
+                            disabledReason={restrictedReason}
                             onClick={() => {
                                 Dialog.open({
                                     title: 'Approve this change request?',
@@ -235,6 +242,7 @@ function ChangeRequestTableActions({
                         <Button
                             fullWidth
                             status="danger"
+                            disabledReason={restrictedReason}
                             onClick={() => {
                                 Dialog.open({
                                     title: 'Reject this change request?',

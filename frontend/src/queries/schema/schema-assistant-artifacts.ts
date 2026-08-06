@@ -3,11 +3,10 @@ import { AnyAssistantGeneratedQuery } from './schema-assistant-messages'
 import {
     FunnelsQuery,
     InsightsQLQuery,
+    LifecycleQuery,
+    PathsQuery,
     RetentionQuery,
-    RevenueAnalyticsGrossRevenueQuery,
-    RevenueAnalyticsMRRQuery,
-    RevenueAnalyticsMetricsQuery,
-    RevenueAnalyticsTopCustomersQuery,
+    StickinessQuery,
     TrendsQuery,
 } from './schema-general'
 
@@ -24,11 +23,10 @@ export interface VisualizationBlock {
         | TrendsQuery
         | FunnelsQuery
         | RetentionQuery
+        | StickinessQuery
+        | PathsQuery
+        | LifecycleQuery
         | InsightsQLQuery
-        | RevenueAnalyticsGrossRevenueQuery
-        | RevenueAnalyticsMetricsQuery
-        | RevenueAnalyticsMRRQuery
-        | RevenueAnalyticsTopCustomersQuery
     /** Optional title for the visualization */
     title?: string | null
 }

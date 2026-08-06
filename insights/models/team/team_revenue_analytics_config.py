@@ -1,14 +1,18 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models
-
-from insights.schema import RevenueAnalyticsEventItem, RevenueAnalyticsGoal
 
 from insights.models.team import Team
 from insights.models.team.extensions import register_team_extension_signal
 from insights.models.team.team import CURRENCY_CODE_CHOICES, DEFAULT_CURRENCY
 from insights.rbac.decorators import field_access_control
+
+# This model loads at django.setup() in every process; insights.schema (the pydantic models)
+# is runtime-imported in the accessors that materialize typed objects.
+if TYPE_CHECKING:
+    from insights.schema import RevenueAnalyticsEventItem
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +22,14 @@ logger = logging.getLogger(__name__)
 class TeamRevenueAnalyticsConfig(models.Model):
     team = models.OneToOneField(Team, on_delete=models.CASCADE, primary_key=True)
 
-    filter_test_accounts = field_access_control(models.BooleanField(default=False), "revenue_analytics", "editor")
+    filter_test_accounts = field_access_control(models.BooleanField(default=False), "project", "admin")
     notified_first_sync = models.BooleanField(default=False, null=True)
 
     # Because we want to validate the schema for these fields, we'll have mangled DB fields/columns
     # that are then wrapped by schema-validation getters/setters
     _events = field_access_control(models.JSONField(default=list, db_column="events"), "revenue_analytics", "editor")
+
+    # DEPRECATED: revenue analytics goals were removed with the dashboard. Column retained; do not read or write.
     _goals = field_access_control(
         models.JSONField(default=list, db_column="goals", null=True, blank=True), "revenue_analytics", "editor"
     )
@@ -32,11 +38,15 @@ class TeamRevenueAnalyticsConfig(models.Model):
     base_currency = models.CharField(max_length=3, choices=CURRENCY_CODE_CHOICES, default=DEFAULT_CURRENCY)
 
     @property
-    def events(self) -> list[RevenueAnalyticsEventItem]:
+    def events(self) -> list["RevenueAnalyticsEventItem"]:
+        from insights.schema import RevenueAnalyticsEventItem  # noqa: PLC0415
+
         return [RevenueAnalyticsEventItem.model_validate(event) for event in self._events or []]
 
     @events.setter
     def events(self, value: list[dict]) -> None:
+        from insights.schema import RevenueAnalyticsEventItem  # noqa: PLC0415
+
         value = value or []
         try:
             dumped_value = [RevenueAnalyticsEventItem.model_validate(event).model_dump() for event in value]
@@ -49,23 +59,6 @@ class TeamRevenueAnalyticsConfig(models.Model):
         except Exception as e:
             raise ValidationError(f"Invalid events schema: {str(e)}")
 
-    @property
-    def goals(self) -> list[RevenueAnalyticsGoal]:
-        return [RevenueAnalyticsGoal.model_validate(goal) for goal in self._goals or []]
-
-    @goals.setter
-    def goals(self, value: list[dict]) -> None:
-        value = value or []
-        try:
-            dumped_value = sorted(
-                [RevenueAnalyticsGoal.model_validate(goal).model_dump() for goal in value],
-                key=lambda x: x["due_date"],
-            )
-            self._goals = dumped_value
-        except Exception as e:
-            raise ValidationError(f"Invalid goals schema: {str(e)}")
-
-    # `goals` arent included here because they aren't used for computations (yet)
     def to_cache_key_dict(self) -> dict:
         return {
             "base_currency": self.team.base_currency,

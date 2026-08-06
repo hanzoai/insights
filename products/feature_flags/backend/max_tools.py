@@ -7,11 +7,12 @@ from rest_framework.exceptions import ValidationError
 
 from insights.schema import FeatureFlagGroupType
 
-from insights.api.feature_flag import FeatureFlagSerializer
 from insights.exceptions_capture import capture_exception
-from insights.models import FeatureFlag, GroupTypeMapping
+from insights.models import GroupTypeMapping
 from insights.sync import database_sync_to_async
 
+from products.feature_flags.backend.api.feature_flag import FeatureFlagSerializer
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
 from products.insights_ai.backend.max_tool import MaxTool
 
 

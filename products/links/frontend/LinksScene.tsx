@@ -4,16 +4,16 @@ import { router } from 'kea-router'
 import { IconPlus } from '@hanzo/icons'
 import { Banner, Button, Table, TableColumn, Link } from '@hanzo/elements'
 
-import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
+import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
+import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { More } from 'lib/elements/Button/More'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import stringWithWBR from 'lib/utils/stringWithWBR'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -105,7 +105,7 @@ export function LinksScene(): JSX.Element {
                     type: sceneConfigurations[Scene.Links].iconType || 'default_icon_type',
                 }}
                 actions={
-                    <AppShortcut
+                    <Shortcut
                         name="NewLink"
                         keybind={[keyBinds.new]}
                         intent="Create link"
@@ -139,7 +139,7 @@ export function LinksScene(): JSX.Element {
                         >
                             Create link
                         </Button>
-                    </AppShortcut>
+                    </Shortcut>
                 }
             />
 

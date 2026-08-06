@@ -1,5 +1,3 @@
-import { FEATURE_FLAGS } from 'lib/constants'
-
 import {
     DatabaseSchemaDataWarehouseTable,
     MARKETING_INTEGRATION_CONFIGS,
@@ -13,6 +11,7 @@ import {
 import { NativeSource } from './marketingAnalyticsLogic'
 import {
     createMarketingTile,
+    findSchemaByFieldName,
     getEnabledNativeMarketingSources,
     getOrderBy,
     getSortedColumnsByArray,
@@ -23,36 +22,9 @@ import {
 
 describe('marketing analytics utils', () => {
     describe('getEnabledNativeMarketingSources', () => {
-        it.each([
-            ['filters out BingAds when flag is disabled', { [FEATURE_FLAGS.BING_ADS_SOURCE]: false }, 'BingAds', false],
-            ['includes BingAds when flag is enabled', { [FEATURE_FLAGS.BING_ADS_SOURCE]: true }, 'BingAds', true],
-            ['filters out BingAds with empty feature flags', {}, 'BingAds', false],
-            [
-                'filters out SnapchatAds when flag is disabled',
-                { [FEATURE_FLAGS.SNAPCHAT_ADS_SOURCE]: false },
-                'SnapchatAds',
-                false,
-            ],
-            [
-                'includes SnapchatAds when flag is enabled',
-                { [FEATURE_FLAGS.SNAPCHAT_ADS_SOURCE]: true },
-                'SnapchatAds',
-                true,
-            ],
-            ['filters out SnapchatAds with empty feature flags', {}, 'SnapchatAds', false],
-        ])('%s', (_name, featureFlags, source, shouldInclude) => {
-            const result = getEnabledNativeMarketingSources(featureFlags ?? {})
-            expect(result.includes(source as any)).toBe(shouldInclude)
-        })
-
-        it('always includes sources without feature flag requirements', () => {
-            const sourcesWithoutFlags = VALID_NATIVE_MARKETING_SOURCES.filter(
-                (s) => s !== 'BingAds' && s !== 'SnapchatAds'
-            )
+        it('returns every native source when no source is flag-gated', () => {
             const result = getEnabledNativeMarketingSources({})
-            sourcesWithoutFlags.forEach((source) => {
-                expect(result).toContain(source)
-            })
+            expect([...result]).toEqual([...VALID_NATIVE_MARKETING_SOURCES])
         })
     })
 
@@ -334,6 +306,14 @@ describe('marketing analytics utils', () => {
                 'conversion_subscribe_value',
                 'currency',
             ],
+            PinterestAds: [
+                'spend_in_dollar',
+                'total_impression',
+                'total_clickthrough',
+                'total_conversions',
+                'total_checkout_value_in_micro_dollar',
+                'currency',
+            ],
         }
 
         // Minimal fields: only non-conversion columns (cost, impressions, clicks, currency)
@@ -345,6 +325,7 @@ describe('marketing analytics utils', () => {
             TikTokAds: ['spend', 'impressions', 'clicks', 'currency'],
             BingAds: ['spend', 'impressions', 'clicks', 'currency_code'],
             SnapchatAds: ['spend', 'impressions', 'swipes', 'currency'],
+            PinterestAds: ['spend_in_dollar', 'total_impression', 'total_clickthrough', 'currency'],
         }
 
         function makeMockSource(sourceType: NativeMarketingSource, fieldList: string[]): NativeSource {
@@ -416,6 +397,37 @@ describe('marketing analytics utils', () => {
             const source = makeMockSource(sourceType, minimalSourceFields[sourceType])
             const result = createMarketingTile(source, column, 'USD')
             expect(result).toMatchSnapshot()
+        })
+    })
+
+    describe('findSchemaByFieldName', () => {
+        const schemas = [
+            { name: 'campaign', status: 'Completed' },
+            { name: 'campaign_stats', status: 'Completed' },
+        ]
+
+        it.each([
+            ['exact match returns schema', schemas, 'campaign', 'GoogleAds', 'campaign'],
+            [
+                'Google Ads falls back from campaign_overview_stats to campaign_stats',
+                schemas,
+                'campaign_overview_stats',
+                'GoogleAds',
+                'campaign_stats',
+            ],
+            ['non-Google Ads source has no fallback', schemas, 'campaign_overview_stats', 'LinkedinAds', undefined],
+            ['returns undefined when no match and no fallback', schemas, 'nonexistent', 'GoogleAds', undefined],
+            ['returns undefined for undefined schemas', undefined, 'campaign', 'GoogleAds', undefined],
+            [
+                'prefers exact match over fallback',
+                [...schemas, { name: 'campaign_overview_stats', status: 'Running' }],
+                'campaign_overview_stats',
+                'GoogleAds',
+                'campaign_overview_stats',
+            ],
+        ])('%s', (_name, testSchemas, fieldName, sourceType, expectedName) => {
+            const result = findSchemaByFieldName(testSchemas, fieldName, sourceType)
+            expect(result?.name).toBe(expectedName)
         })
     })
 

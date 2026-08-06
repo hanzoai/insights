@@ -1,4 +1,5 @@
 import { useActions, useValues } from 'kea'
+import { useMemo } from 'react'
 
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
@@ -7,42 +8,40 @@ import { Modal } from 'lib/elements/Modal'
 import { Table } from 'lib/elements/Table'
 import { TextArea } from 'lib/elements/TextArea'
 import { Link } from 'lib/elements/Link'
+import { slugify } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
-import { InsightsQLQuery, InsightQueryNode } from '~/queries/schema/schema-general'
+import { EndpointQueryNode, InsightsQLQuery } from '~/queries/schema/schema-general'
 
+import { validateEndpointName } from './common'
 import { endpointLogic } from './endpointLogic'
 import { endpointsLogic } from './endpointsLogic'
 
 export interface EndpointFromInsightModalProps {
-    tabId: string
-    insightQuery: InsightsQLQuery | InsightQueryNode
+    insightQuery: InsightsQLQuery | EndpointQueryNode
     insightShortId?: string
 }
 
-export function EndpointFromInsightModal({
-    tabId,
-    insightQuery,
-    insightShortId,
-}: EndpointFromInsightModalProps): JSX.Element {
-    const { createEndpoint, setEndpointName, setEndpointDescription, closeCreateFromInsightModal } = useActions(
-        endpointLogic({ tabId })
-    )
-    const { endpointName, endpointDescription, createFromInsightModalOpen, duplicateEndpoint } = useValues(
-        endpointLogic({ tabId })
-    )
-    const { endpoints } = useValues(endpointsLogic({ tabId }))
+export function EndpointFromInsightModal({ insightQuery, insightShortId }: EndpointFromInsightModalProps): JSX.Element {
+    const { createEndpoint, setEndpointName, setEndpointDescription, closeCreateFromInsightModal } =
+        useActions(endpointLogic)
+    const { endpointName, endpointDescription, createFromInsightModalOpen, duplicateEndpoint } =
+        useValues(endpointLogic)
+    const { endpoints } = useValues(endpointsLogic)
 
     const endpointsFromThisInsight = insightShortId
         ? endpoints.filter((endpoint) => endpoint.derived_from_insight === insightShortId)
         : []
 
+    const slugifiedName = useMemo(() => (endpointName ? slugify(endpointName) : ''), [endpointName])
+    const nameValidationError = useMemo(() => validateEndpointName(endpointName?.trim() || ''), [endpointName])
+
     const handleSubmit = (): void => {
-        if (!endpointName?.trim()) {
+        if (nameValidationError) {
             return
         }
         createEndpoint({
-            name: endpointName.trim(),
+            name: endpointName!.trim(),
             description: endpointDescription?.trim() || undefined,
             query: insightQuery,
             derived_from_insight: insightShortId,
@@ -96,7 +95,15 @@ export function EndpointFromInsightModal({
                         </div>
                     )}
 
-                    <Field.Pure label="Name">
+                    <Field.Pure
+                        label="Name"
+                        error={endpointName?.trim() ? nameValidationError : undefined}
+                        info={
+                            endpointName && slugifiedName !== endpointName.trim()
+                                ? `Will be saved as: ${slugifiedName}`
+                                : undefined
+                        }
+                    >
                         <Input
                             value={endpointName || ''}
                             onChange={setEndpointName}
@@ -121,11 +128,7 @@ export function EndpointFromInsightModal({
                 <Button type="secondary" onClick={handleClose}>
                     Cancel
                 </Button>
-                <Button
-                    type="primary"
-                    onClick={handleSubmit}
-                    disabledReason={!endpointName?.trim() ? 'Endpoint name is required' : undefined}
-                >
+                <Button type="primary" onClick={handleSubmit} disabledReason={nameValidationError}>
                     Create endpoint
                 </Button>
             </Modal.Footer>

@@ -16,7 +16,7 @@ import { workflowTemplatesLogic } from './workflowTemplatesLogic'
 
 jest.mock('lib/api', () => ({
     ...jest.requireActual('lib/api'),
-    insightsFlowTemplates: {
+    hogFlowTemplates: {
         createInsightsFlowTemplate: jest.fn(),
         updateInsightsFlowTemplate: jest.fn(),
         getInsightsFlowTemplate: jest.fn(),
@@ -30,7 +30,7 @@ jest.mock('lib/elements/Toast', () => ({
     },
 }))
 
-const mockApi = api.insightsFlowTemplates as jest.Mocked<typeof api.insightsFlowTemplates>
+const mockApi = api.hogFlowTemplates as jest.Mocked<typeof api.hogFlowTemplates>
 const mockToast = require('lib/elements/Toast').toast
 
 describe('workflowTemplateLogic', () => {
@@ -180,7 +180,7 @@ describe('workflowTemplateLogic', () => {
             name: 'Test Template',
             type: 'destination',
             code: '',
-            code_language: 'fn',
+            code_language: 'script',
             status: 'stable',
             free: true,
             inputs_schema: [

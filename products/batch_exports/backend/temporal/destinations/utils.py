@@ -1,8 +1,9 @@
 import datetime as dt
 import posixpath
 
-from insights.batch_exports.service import BatchExportModel
 from insights.temporal.common.logger import get_logger
+
+from products.batch_exports.backend.service import BatchExportModel
 
 EXTERNAL_LOGGER = get_logger("EXTERNAL")
 
@@ -39,6 +40,21 @@ def get_key_prefix(
             f"The key prefix '{prefix}' will be used as-is since it contains invalid template variables: {str(e)}"
         )
         return prefix
+
+
+def get_absolute_key_prefix(
+    prefix: str, data_interval_start: str | None, data_interval_end: str, batch_export_model: BatchExportModel | None
+) -> str:
+    """Like `get_key_prefix`, but ensure key is absolute and ends on a slash."""
+    key_prefix = get_key_prefix(prefix, data_interval_start, data_interval_end, batch_export_model)
+
+    # Empty string becomes "/", prefixes without a leading "/" get one,
+    # and for everything else this is a no-op.
+    key_prefix = posixpath.join("/", key_prefix)
+    # Ensures a trailing slash, as all of our object keys join on the prefix,
+    # which means they end up after a slash.
+    key_prefix = posixpath.join(key_prefix, "")
+    return key_prefix
 
 
 def get_manifest_key(

@@ -1,5 +1,9 @@
+// Side-effect: registers the CDP script-function approval-card previews (cdp-functions-partial-update diff)
+// into the shared Insights AI tool registry. Imported here so it's registered whenever the config scene loads.
+import './registerInsightsFunctionToolPreviews'
+
 import clsx from 'clsx'
-import { BindLogic, useValues } from 'kea'
+import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import {
@@ -18,11 +22,14 @@ import { insightsFunctionConfigurationLogic } from 'scenes/insights-functions/co
 import { InsightsFunctionFilters } from 'scenes/insights-functions/filters/InsightsFunctionFilters'
 import { InsightsFunctionMappings } from 'scenes/insights-functions/mapping/InsightsFunctionMappings'
 import { InsightsFunctionEventEstimates } from 'scenes/insights-functions/metrics/InsightsFunctionEventEstimates'
+import { SurveyResponseKeysReference } from 'scenes/surveys/components/SurveyResponseKeysReference'
 
-import { humanizeInsightsFunctionType } from '../insights-function-utils'
+import { useAttachedContext, useToolStreamListener } from 'products/insights_ai/frontend/api/logics'
+import { resolveToolCall } from 'products/insights_ai/frontend/api/tools'
+
+import { humanizeInsightsFunctionType } from '../script-function-utils'
 import { InsightsFunctionStatusIndicator } from '../misc/InsightsFunctionStatusIndicator'
 import { InsightsFunctionStatusTag } from '../misc/InsightsFunctionStatusTag'
-import { InsightsFunctionTest } from './InsightsFunctionTest'
 import { InsightsFunctionCode } from './components/InsightsFunctionCode'
 import {
     InsightsFunctionConfigurationClearChangesButton,
@@ -32,6 +39,7 @@ import { InsightsFunctionInputs } from './components/InsightsFunctionInputs'
 import { InsightsFunctionSourceWebhookInfo } from './components/InsightsFunctionSourceWebhookInfo'
 import { InsightsFunctionSourceWebhookTest } from './components/InsightsFunctionSourceWebhookTest'
 import { InsightsFunctionTemplateOptions } from './components/InsightsFunctionTemplateOptions'
+import { InsightsFunctionTest } from './InsightsFunctionTest'
 
 export interface InsightsFunctionConfigurationProps {
     templateId?: string | null
@@ -49,7 +57,6 @@ export function InsightsFunctionConfiguration({
     const logicProps = { templateId, subTemplateId, id, logicKey }
     const logic = insightsFunctionConfigurationLogic(logicProps)
     const {
-        configuration,
         loading,
         loaded,
         insightsFunction,
@@ -61,18 +68,57 @@ export function InsightsFunctionConfiguration({
         showExpectedVolume,
         canEditSource,
         showTesting,
+        survey,
     } = useValues(logic)
+    const { loadInsightsFunction } = useActions(logic)
+
+    // The section components attach the config blobs (code, inputs, filters) as unkeyed values; only a
+    // keyed item renders its id into the context line, and the agent needs the id for cdp-functions-partial-update.
+    useAttachedContext(
+        insightsFunction?.id
+            ? [
+                  {
+                      type: 'insights_function',
+                      key: insightsFunction.id,
+                      label: `Current ${humanizeInsightsFunctionType(type)}: ${insightsFunction.name}`,
+                  },
+              ]
+            : null
+    )
+
+    // An approved `cdp-functions-partial-update` mutates the function server-side while this form keeps
+    // pre-update state, so the scene (and the approval-card diff for any later proposal, e.g. a revert)
+    // would show stale values. Refetch on completion — `loadInsightsFunctionSuccess` resets the form, which
+    // also discards unsaved manual edits; tool results land in the open scene. A plain tool-stream
+    // listener, not `useMcpToolApplyBack`: the refetch is idempotent, so it must not be dropped by the
+    // apply-back claim gating (claims snapshot the targets mounted at prompt-send and release each turn).
+    useToolStreamListener({
+        tools: ['cdp-functions-partial-update'],
+        onEvent: (event) => {
+            if (event.phase !== 'completed' || !insightsFunction?.id) {
+                return
+            }
+            // A parseable payload targeting a different function is not ours to absorb; an unparseable
+            // one may still be ours, and a same-data refetch is harmless, so reload in that case.
+            const innerInput = resolveToolCall(event.invocation).innerInput
+            const targetId = typeof innerInput?.id === 'string' ? innerInput.id : null
+            if (targetId && targetId !== insightsFunction.id) {
+                return
+            }
+            loadInsightsFunction()
+        },
+    })
 
     if (loading && !loaded) {
         return <SpinnerOverlay />
     }
 
     if (!loaded) {
-        return <NotFound object="Custom function" />
+        return <NotFound object="Script function" />
     }
 
     const templateInfo =
-        insightsFunction?.template?.code_language === 'fn' &&
+        insightsFunction?.template?.code_language === 'script' &&
         insightsFunction?.template &&
         !insightsFunction.template.id.startsWith('template-blank-') ? (
             <Dropdown showArrow overlay={<InsightsFunctionTemplateOptions />}>
@@ -155,16 +201,16 @@ export function InsightsFunctionConfiguration({
                                             disabled={loading}
                                             bordered
                                             fullWidth
-                                            label={
-                                                <span className="flex flex-1">
-                                                    {configuration.enabled ? 'Enabled' : 'Disabled'}
-                                                </span>
-                                            }
+                                            label={type === 'transformation_log' ? 'Enable' : 'Enable destination'}
                                             tooltip={
                                                 <>
-                                                    {value
-                                                        ? 'Enabled. Events will be processed.'
-                                                        : 'Disabled. Events will not be processed.'}
+                                                    {type === 'transformation_log'
+                                                        ? value
+                                                            ? 'Enabled. Log records will be processed.'
+                                                            : 'Disabled. Log records will not be processed.'
+                                                        : value
+                                                          ? 'Enabled. Events will be processed.'
+                                                          : 'Disabled. Events will not be processed.'}
                                                 </>
                                             }
                                         />
@@ -176,6 +222,7 @@ export function InsightsFunctionConfiguration({
 
                             {type === 'source_webhook' && <InsightsFunctionSourceWebhookInfo />}
                             {showFilters && <InsightsFunctionFilters />}
+                            {survey && <SurveyResponseKeysReference questions={survey.questions} />}
                             {showExpectedVolume ? <InsightsFunctionEventEstimates /> : null}
                         </div>
 
@@ -183,9 +230,19 @@ export function InsightsFunctionConfiguration({
                             {mightDropEvents && (
                                 <div>
                                     <Banner type="info">
-                                        <b>Warning:</b> This transformation can filter out events, dropping them
-                                        irreversibly. Make sure to double check your configuration, and use filters to
-                                        limit the events that this transformation is applied to.
+                                        {type === 'transformation_log' ? (
+                                            <>
+                                                <b>Warning:</b> This transformation can drop log records irreversibly
+                                                (any record it returns null for is discarded). Double check your code
+                                                before enabling.
+                                            </>
+                                        ) : (
+                                            <>
+                                                <b>Warning:</b> This transformation can filter out events, dropping them
+                                                irreversibly. Make sure to double check your configuration, and use
+                                                filters to limit the events that this transformation is applied to.
+                                            </>
+                                        )}
                                     </Banner>
                                 </div>
                             )}

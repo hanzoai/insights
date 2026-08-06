@@ -1,5 +1,6 @@
 // NOTE: PostIngestionEvent is our context event - it should never be sent directly to an output, but rather transformed into a lightweight schema
-import { UUIDT } from '../../utils/utils'
+import { UUIDT } from '~/common/utils/utils'
+
 import {
     CyclotronJobInvocation,
     CyclotronJobInvocationInsightsFunction,
@@ -22,7 +23,7 @@ export function createInvocation(
         teamId: insightsFunction.team_id,
         functionId: insightsFunction.id,
         insightsFunction,
-        queue: 'fn',
+        queue: 'script',
         queuePriority: 0,
     }
 }
@@ -66,13 +67,22 @@ export function createInvocationResult<T extends CyclotronJobInvocation>(
     > = {},
     resultParams: Pick<
         Partial<CyclotronJobInvocationResult>,
-        'finished' | 'capturedInsightsEvents' | 'logs' | 'metrics' | 'error' | 'execResult'
+        | 'finished'
+        | 'capturedInsightsEvents'
+        | 'warehouseWebhookPayloads'
+        | 'emailAssets'
+        | 'logs'
+        | 'metrics'
+        | 'error'
+        | 'execResult'
     > = {}
 ): CyclotronJobInvocationResult<T> {
     return {
         // Clone the invocation for the result cleaned
         finished: true,
         capturedInsightsEvents: [],
+        warehouseWebhookPayloads: [],
+        emailAssets: [],
         logs: [],
         metrics: [],
         ...resultParams,

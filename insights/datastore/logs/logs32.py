@@ -3,18 +3,19 @@ from django.conf import settings
 from insights.datastore.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
 
 from .log_attributes import TABLE_NAME as LOG_ATTRIBUTES_TABLE_NAME
+from .log_attributes3 import TABLE_NAME as LOG_ATTRIBUTES3_TABLE_NAME
 
 TABLE_NAME = "logs32"
 
-TTL = (
-    lambda: "TTL timestamp + toIntervalHour(25) TO DISK 's3'" if settings.DATASTORE_LOGS_ENABLE_STORAGE_POLICY else ""
+TTL = lambda: (
+    "TTL timestamp + toIntervalHour(25) TO DISK 's3'" if settings.DATASTORE_LOGS_ENABLE_STORAGE_POLICY else ""
 )
 STORAGE_POLICY = lambda: "tiered" if settings.DATASTORE_LOGS_ENABLE_STORAGE_POLICY else "default"
 
 
 def LOGS32_TABLE_SQL():
     return f"""
-CREATE TABLE IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}
+CREATE TABLE IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
 (
     `time_bucket` DateTime MATERIALIZED toStartOfDay(timestamp) CODEC(DoubleDelta, ZSTD(1)),
     `original_expiry_timestamp` DateTime64(6) CODEC(DoubleDelta, ZSTD(1)),
@@ -44,12 +45,12 @@ CREATE TABLE IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}
 
     -- temporary columns for materialized views, these expire immediately after initially created but
     -- are around for materialized views which pull off from this table
-    `_partition` UInt32 CODEC(DoubleDelta, ZSTD(1)) TTL toDateTime(created_at) + interval 1 second,
-    `_topic` String TTL toDateTime(created_at) + interval 1 second,
-    `_offset` UInt64 CODEC(DoubleDelta, ZSTD(1)) TTL toDateTime(created_at) + interval 1 second,
-    `_bytes_uncompressed` UInt64 CODEC(DoubleDelta, ZSTD(1)) TTL toDateTime(created_at) + interval 1 second,
-    `_bytes_compressed` UInt64 CODEC(DoubleDelta, ZSTD(1)) TTL toDateTime(created_at) + interval 1 second,
-    `_record_count` UInt64 CODEC(DoubleDelta, ZSTD(1)) TTL toDateTime(created_at) + interval 1 second,
+    `_partition` UInt32 CODEC(DoubleDelta, ZSTD(1)),
+    `_topic` String,
+    `_offset` UInt64 CODEC(DoubleDelta, ZSTD(1)),
+    `_bytes_uncompressed` UInt64 CODEC(DoubleDelta, ZSTD(1)),
+    `_bytes_compressed` UInt64 CODEC(DoubleDelta, ZSTD(1)),
+    `_record_count` UInt64 CODEC(DoubleDelta, ZSTD(1)),
 
     INDEX idx_severity_text_set severity_text TYPE set(10) GRANULARITY 1,
     INDEX idx_attributes_str_keys mapKeys(attributes_map_str) TYPE bloom_filter(0.01) GRANULARITY 1,
@@ -86,9 +87,11 @@ ORDER BY (team_id, time_bucket, service_name, resource_fingerprint, severity_tex
 SETTINGS
     storage_policy = '{STORAGE_POLICY()}',
     allow_remote_fs_zero_copy_replication = 1,
+    allow_experimental_reverse_key = 1,
     index_granularity_bytes = 104857600,
     index_granularity = 8192,
-    ttl_only_drop_parts = 1
+    ttl_only_drop_parts = 1,
+    add_minmax_index_for_numeric_columns = 1
 """
 
 
@@ -97,17 +100,30 @@ def LOGS_DISTRIBUTED_TABLE_SQL():
 CREATE TABLE IF NOT EXISTS {database}.logs AS {database}.{table_name} ENGINE = {engine}
 """.format(
         engine=Distributed(
-            data_table=f"{TABLE_NAME}",
+            data_table=TABLE_NAME,
             cluster=settings.DATASTORE_LOGS_CLUSTER,
         ),
-        database=settings.DATASTORE_DATABASE,
+        database=settings.DATASTORE_LOGS_CLUSTER_DATABASE,
+        table_name=TABLE_NAME,
+    )
+
+
+def LOGS_DISTRIBUTED2_TABLE_SQL():
+    return """
+CREATE TABLE IF NOT EXISTS {database}.logs_distributed AS {database}.{table_name} ENGINE = {engine}
+""".format(
+        engine=Distributed(
+            data_table=TABLE_NAME,
+            cluster=settings.DATASTORE_LOGS_CLUSTER,
+        ),
+        database=settings.DATASTORE_LOGS_CLUSTER_DATABASE,
         table_name=TABLE_NAME,
     )
 
 
 def LOG_ATTRIBUTES_MV():
     return f"""
-CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}_to_log_attributes TO {settings.DATASTORE_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
+CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}_to_log_attributes TO {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
 (
     `team_id` Int32,
     `time_bucket` DateTime64(0),
@@ -143,7 +159,7 @@ FROM
         attribute.1 AS attribute_key,
         attribute.2 AS attribute_value,
         sumSimpleState(1) AS attribute_count
-    FROM {settings.DATASTORE_DATABASE}.{TABLE_NAME}
+    FROM {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
     GROUP BY
         team_id,
         time_bucket,
@@ -157,7 +173,7 @@ FROM
 
 def LOG_RESOURCE_ATTRIBUTES_MV():
     return f"""
-CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}_to_resource_attributes TO {settings.DATASTORE_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
+CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}_to_resource_attributes TO {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
 (
     `team_id` Int32,
     `time_bucket` DateTime64(0),
@@ -192,13 +208,120 @@ FROM
         attribute.1 AS attribute_key,
         attribute.2 AS attribute_value,
         sumSimpleState(1) AS attribute_count
-    FROM {settings.DATASTORE_DATABASE}.{TABLE_NAME}
+    FROM {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
     GROUP BY
         team_id,
         time_bucket,
         original_expiry_time_bucket,
         service_name,
         resource_fingerprint,
+        resource_attributes
+)
+"""
+
+
+def LOG_ATTRIBUTES3_MV():
+    return f"""
+CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}_to_log_attributes3 TO {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{LOG_ATTRIBUTES3_TABLE_NAME}
+(
+    `team_id` Int32,
+    `time_bucket` DateTime64(0),
+    `original_expiry_time_bucket` DateTime64(0),
+    `service_name` LowCardinality(String),
+    `resource_fingerprint` UInt64,
+    `attribute_key` LowCardinality(String),
+    `attribute_value` String,
+    `attribute_type` LowCardinality(String),
+    `severity_text` LowCardinality(String),
+    `attribute_count` SimpleAggregateFunction(sum, UInt64)
+)
+AS SELECT
+    team_id,
+    time_bucket,
+    original_expiry_time_bucket,
+    service_name,
+    resource_fingerprint,
+    attribute_key,
+    attribute_value,
+    attribute_type,
+    severity_text,
+    attribute_count
+FROM
+(
+    SELECT
+        team_id AS team_id,
+        toStartOfInterval(timestamp, toIntervalMinute(10)) AS time_bucket,
+        toStartOfInterval(original_expiry_timestamp, toIntervalMinute(10)) AS original_expiry_time_bucket,
+        service_name AS service_name,
+        resource_fingerprint,
+        severity_text AS severity_text,
+        mapFilter((k, v) -> ((length(k) < 256) AND (length(v) < 256)), attributes) AS attributes,
+        arrayJoin(attributes) AS attribute,
+        'log' AS attribute_type,
+        attribute.1 AS attribute_key,
+        attribute.2 AS attribute_value,
+        sumSimpleState(1) AS attribute_count
+    FROM {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
+    GROUP BY
+        team_id,
+        time_bucket,
+        original_expiry_time_bucket,
+        service_name,
+        resource_fingerprint,
+        severity_text,
+        attributes
+)
+"""
+
+
+def LOG_RESOURCE_ATTRIBUTES3_MV():
+    return f"""
+CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}_to_resource_attributes3 TO {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{LOG_ATTRIBUTES3_TABLE_NAME}
+(
+    `team_id` Int32,
+    `time_bucket` DateTime64(0),
+    `original_expiry_time_bucket` DateTime64(0),
+    `service_name` LowCardinality(String),
+    `resource_fingerprint` UInt64,
+    `attribute_key` LowCardinality(String),
+    `attribute_value` String,
+    `attribute_type` LowCardinality(String),
+    `severity_text` LowCardinality(String),
+    `attribute_count` SimpleAggregateFunction(sum, UInt64)
+)
+AS SELECT
+    team_id,
+    time_bucket,
+    original_expiry_time_bucket,
+    service_name,
+    resource_fingerprint,
+    attribute_key,
+    attribute_value,
+    attribute_type,
+    severity_text,
+    attribute_count
+FROM
+(
+    SELECT
+        team_id AS team_id,
+        toStartOfInterval(timestamp, toIntervalMinute(10)) AS time_bucket,
+        toStartOfInterval(original_expiry_timestamp, toIntervalMinute(10)) AS original_expiry_time_bucket,
+        service_name AS service_name,
+        resource_fingerprint,
+        severity_text AS severity_text,
+        arrayJoin(resource_attributes) AS attribute,
+        'resource' AS attribute_type,
+        attribute.1 AS attribute_key,
+        attribute.2 AS attribute_value,
+        sumSimpleState(1) AS attribute_count
+    FROM {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
+    GROUP BY
+        team_id,
+        time_bucket,
+        original_expiry_time_bucket,
+        service_name,
+        resource_fingerprint,
+        severity_text,
         resource_attributes
 )
 """

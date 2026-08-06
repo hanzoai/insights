@@ -16,9 +16,9 @@ from temporalio.common import RetryPolicy
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
 from insights.temporal.tests.utils.models import afetch_batch_export_runs
 
+from products.batch_exports.backend.service import BackfillDetails, BatchExportModel, BatchExportSchema
 from products.batch_exports.backend.temporal.batch_exports import finish_batch_export_run, start_batch_export_run
 from products.batch_exports.backend.temporal.destinations.postgres_batch_export import (
     PostgresBatchExportInputs,
@@ -31,7 +31,10 @@ from products.batch_exports.backend.tests.temporal.destinations.postgres.utils i
     TEST_MODELS,
     assert_datastore_records_in_postgres,
 )
-from products.batch_exports.backend.tests.temporal.utils.workflow import mocked_start_batch_export_run
+from products.batch_exports.backend.tests.temporal.utils.workflow import (
+    WORKFLOW_REAL_TIME_LIMIT_SECONDS,
+    mocked_start_batch_export_run,
+)
 
 pytestmark = [
     pytest.mark.asyncio,
@@ -75,6 +78,8 @@ async def test_postgres_export_workflow(
     elif model is not None:
         batch_export_schema = model
 
+    config = postgres_batch_export.destination.config
+
     workflow_id = str(uuid.uuid4())
     inputs = PostgresBatchExportInputs(
         team_id=ateam.pk,
@@ -83,7 +88,7 @@ async def test_postgres_export_workflow(
         interval=interval,
         batch_export_schema=batch_export_schema,
         batch_export_model=batch_export_model,
-        **postgres_batch_export.destination.config,
+        **config,
     )
 
     sort_key = "event"
@@ -107,13 +112,15 @@ async def test_postgres_export_workflow(
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             with override_settings(BATCH_EXPORT_POSTGRES_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2):
-                await activity_environment.client.execute_workflow(
-                    PostgresBatchExportWorkflow.run,
-                    inputs,
-                    id=workflow_id,
-                    task_queue=settings.BATCH_EXPORTS_TASK_QUEUE,
-                    retry_policy=RetryPolicy(maximum_attempts=1),
-                    execution_timeout=dt.timedelta(seconds=10),
+                await asyncio.wait_for(
+                    activity_environment.client.execute_workflow(
+                        PostgresBatchExportWorkflow.run,
+                        inputs,
+                        id=workflow_id,
+                        task_queue=settings.BATCH_EXPORTS_TASK_QUEUE,
+                        retry_policy=RetryPolicy(maximum_attempts=1),
+                    ),
+                    timeout=WORKFLOW_REAL_TIME_LIMIT_SECONDS,
                 )
 
     runs = await afetch_batch_export_runs(batch_export_id=postgres_batch_export.id)
@@ -142,6 +149,91 @@ async def test_postgres_export_workflow(
         batch_export_model=model,
         exclude_events=exclude_events,
         sort_key=sort_key,
+    )
+
+
+@pytest.mark.parametrize("interval", ["hour"], indirect=True)
+@pytest.mark.parametrize("exclude_events", [None], indirect=True)
+@pytest.mark.parametrize("model", [BatchExportModel(name="events", schema=None)])
+@pytest.mark.parametrize("integration", [True], indirect=True)
+async def test_postgres_export_workflow_with_integration(
+    datastore_client,
+    postgres_config,
+    postgres_connection,
+    postgres_batch_export,
+    interval,
+    exclude_events,
+    ateam,
+    table_name,
+    model: BatchExportModel | None,
+    generate_test_data,
+    data_interval_start,
+    data_interval_end,
+    integration,
+):
+    """Test the workflow resolves destination connection params from an Integration end-to-end.
+
+    The connection params are dropped from the inline config and only reachable via the
+    integration, so a successful export proves the workflow plumbs ``integration_id`` through
+    to the insert activity (which is exercised across models in ``test_activity``).
+    """
+    assert integration is not None
+    config = postgres_batch_export.destination.config.copy()
+    for conn_param in ("host", "port", "user", "password"):
+        # These should be present in the integration, so drop them to confirm
+        config.pop(conn_param)
+
+    workflow_id = str(uuid.uuid4())
+    inputs = PostgresBatchExportInputs(
+        team_id=ateam.pk,
+        batch_export_id=str(postgres_batch_export.id),
+        data_interval_end=data_interval_end.isoformat(),
+        interval=interval,
+        batch_export_model=model,
+        integration_id=integration.id,
+        **config,
+    )
+
+    async with await WorkflowEnvironment.start_time_skipping() as activity_environment:
+        async with Worker(
+            activity_environment.client,
+            task_queue=settings.BATCH_EXPORTS_TASK_QUEUE,
+            workflows=[PostgresBatchExportWorkflow],
+            activities=[
+                start_batch_export_run,
+                insert_into_internal_stage_activity,
+                insert_into_postgres_activity_from_stage,
+                finish_batch_export_run,
+            ],
+            workflow_runner=UnsandboxedWorkflowRunner(),
+        ):
+            with override_settings(BATCH_EXPORT_POSTGRES_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2):
+                await asyncio.wait_for(
+                    activity_environment.client.execute_workflow(
+                        PostgresBatchExportWorkflow.run,
+                        inputs,
+                        id=workflow_id,
+                        task_queue=settings.BATCH_EXPORTS_TASK_QUEUE,
+                        retry_policy=RetryPolicy(maximum_attempts=1),
+                    ),
+                    timeout=WORKFLOW_REAL_TIME_LIMIT_SECONDS,
+                )
+
+    runs = await afetch_batch_export_runs(batch_export_id=postgres_batch_export.id)
+    assert len(runs) == 1
+    assert runs[0].status == "Completed"
+
+    await assert_datastore_records_in_postgres(
+        postgres_connection=postgres_connection,
+        datastore_client=datastore_client,
+        schema_name=postgres_config["schema"],
+        table_name=table_name,
+        team_id=ateam.pk,
+        data_interval_start=data_interval_start,
+        data_interval_end=data_interval_end,
+        batch_export_model=model,
+        exclude_events=exclude_events,
+        sort_key="event",
     )
 
 
@@ -204,13 +296,15 @@ async def test_postgres_export_workflow_without_events(
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             with override_settings(BATCH_EXPORT_POSTGRES_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2):
-                await activity_environment.client.execute_workflow(
-                    PostgresBatchExportWorkflow.run,
-                    inputs,
-                    id=workflow_id,
-                    task_queue=settings.BATCH_EXPORTS_TASK_QUEUE,
-                    retry_policy=RetryPolicy(maximum_attempts=1),
-                    execution_timeout=dt.timedelta(seconds=10),
+                await asyncio.wait_for(
+                    activity_environment.client.execute_workflow(
+                        PostgresBatchExportWorkflow.run,
+                        inputs,
+                        id=workflow_id,
+                        task_queue=settings.BATCH_EXPORTS_TASK_QUEUE,
+                        retry_policy=RetryPolicy(maximum_attempts=1),
+                    ),
+                    timeout=WORKFLOW_REAL_TIME_LIMIT_SECONDS,
                 )
 
     runs = await afetch_batch_export_runs(batch_export_id=postgres_batch_export.id)
@@ -223,9 +317,10 @@ async def test_postgres_export_workflow_without_events(
 
 @pytest.mark.parametrize(
     "data_interval_start",
-    # This is set to 24 hours before the `data_interval_end` to ensure that the data created is outside the batch
-    # interval.
-    [dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0) - dt.timedelta(hours=24)],
+    # This is set to 72 hours before the `data_interval_end` to ensure that the data created is outside the batch
+    # interval. We use 72 hours (instead of 24) so that with 10 randomly sampled persons the probability of none
+    # landing more than 12 hours before the end is negligible ((12/72)^10 ≈ 1 in 60 million).
+    [dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0) - dt.timedelta(hours=72)],
     indirect=True,
 )
 @pytest.mark.parametrize("interval", ["hour"], indirect=True)

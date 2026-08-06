@@ -164,7 +164,7 @@ export function InsightsFunctionIcon({
                             loaded ? 'opacity-100' : 'opacity-0'
                         )}
                         src={src}
-                        alt="Custom function icon"
+                        alt="Script function icon"
                         onLoad={() => setLoaded(true)}
                     />
                     {!loaded && <Skeleton className="absolute w-full h-full" />}

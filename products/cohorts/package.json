@@ -1,12 +1,19 @@
 {
     "name": "@hanzo/products-cohorts",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
     "dependencies": {
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:"
     },
+    "devDependencies": {
+        "@storybook/react": "catalog:",
+        "kea-test-utils": "catalog:"
+    },
     "peerDependencies": {
-        "@hanzo/icons": "*",
+        "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

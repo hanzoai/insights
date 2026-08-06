@@ -128,7 +128,7 @@ services:
         environment:
             - AWS_ACCESS_KEY_ID=object_storage_root_user
             - AWS_SECRET_ACCESS_KEY=object_storage_root_password
-            - CLICKHOUSE_SKIP_USER_SETUP=1
+            - DATASTORE_SKIP_USER_SETUP=1
         ports:
             - '8123:8123'
             - '8443:8443'
@@ -138,11 +138,11 @@ services:
         volumes:
             - ./insights/idl:/idl
             - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./docker/datastore/config.xml:/etc/clickhouse-server/config.xml
-            - ./docker/datastore/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
-            - ./docker/datastore/config.d/dev-memory.xml:/etc/clickhouse-server/config.d/dev-memory.xml
-            - ./docker/datastore/users-dev.xml:/etc/clickhouse-server/users.xml
-            - ./docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/default.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/config.d/dev-memory.xml:/etc/datastore-server/config.d/dev-memory.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
             - ./insights/user_scripts:/var/lib/datastore/user_scripts
         extra_hosts:
             - 'host.docker.internal:host-gateway'

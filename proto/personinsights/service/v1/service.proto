@@ -6,9 +6,9 @@ import "personinsights/types/v1/group.proto";
 import "personinsights/types/v1/cohort.proto";
 import "personinsights/types/v1/feature_flag.proto";
 
-// PersonInsightsService is the public API exposed by the router.
+// PersonHogService is the public API exposed by the router.
 // Clients call this service; the router handles backend selection and routing.
-service PersonInsightsService {
+service PersonHogService {
   // Person lookups by ID
   rpc GetPerson(personinsights.types.v1.GetPersonRequest) returns (personinsights.types.v1.GetPersonResponse);
   rpc GetPersons(personinsights.types.v1.GetPersonsRequest) returns (personinsights.types.v1.PersonsResponse);
@@ -31,15 +31,56 @@ service PersonInsightsService {
 
   // Cohort membership
   rpc CheckCohortMembership(personinsights.types.v1.CheckCohortMembershipRequest) returns (personinsights.types.v1.CohortMembershipResponse);
+  rpc CountCohortMembers(personinsights.types.v1.CountCohortMembersRequest) returns (personinsights.types.v1.CountCohortMembersResponse);
+  rpc DeleteCohortMember(personinsights.types.v1.DeleteCohortMemberRequest) returns (personinsights.types.v1.DeleteCohortMemberResponse);
+  rpc DeleteCohortMembersBulk(personinsights.types.v1.DeleteCohortMembersBulkRequest) returns (personinsights.types.v1.DeleteCohortMembersBulkResponse);
+  rpc InsertCohortMembers(personinsights.types.v1.InsertCohortMembersRequest) returns (personinsights.types.v1.InsertCohortMembersResponse);
+  rpc ListCohortMemberIds(personinsights.types.v1.ListCohortMemberIdsRequest) returns (personinsights.types.v1.ListCohortMemberIdsResponse);
 
   // Groups
   rpc GetGroup(personinsights.types.v1.GetGroupRequest) returns (personinsights.types.v1.GetGroupResponse);
   rpc GetGroups(personinsights.types.v1.GetGroupsRequest) returns (personinsights.types.v1.GroupsResponse);
   rpc GetGroupsBatch(personinsights.types.v1.GetGroupsBatchRequest) returns (personinsights.types.v1.GetGroupsBatchResponse);
+  rpc ListGroups(personinsights.types.v1.ListGroupsRequest) returns (personinsights.types.v1.ListGroupsResponse);
 
   // Group type mappings
   rpc GetGroupTypeMappingsByTeamId(personinsights.types.v1.GetGroupTypeMappingsByTeamIdRequest) returns (personinsights.types.v1.GroupTypeMappingsResponse);
   rpc GetGroupTypeMappingsByTeamIds(personinsights.types.v1.GetGroupTypeMappingsByTeamIdsRequest) returns (personinsights.types.v1.GroupTypeMappingsBatchResponse);
   rpc GetGroupTypeMappingsByProjectId(personinsights.types.v1.GetGroupTypeMappingsByProjectIdRequest) returns (personinsights.types.v1.GroupTypeMappingsResponse);
   rpc GetGroupTypeMappingsByProjectIds(personinsights.types.v1.GetGroupTypeMappingsByProjectIdsRequest) returns (personinsights.types.v1.GroupTypeMappingsBatchResponse);
+  rpc GetGroupTypeMappingByDashboardId(personinsights.types.v1.GetGroupTypeMappingByDashboardIdRequest) returns (personinsights.types.v1.GetGroupTypeMappingByDashboardIdResponse);
+  rpc CountGroupTypeMappings(personinsights.types.v1.CountGroupTypeMappingsRequest) returns (personinsights.types.v1.CountGroupTypeMappingsResponse);
+
+  // Group writes (routed to replica — non-person data)
+  rpc CreateGroup(personinsights.types.v1.CreateGroupRequest) returns (personinsights.types.v1.CreateGroupResponse);
+  rpc UpdateGroup(personinsights.types.v1.UpdateGroupRequest) returns (personinsights.types.v1.UpdateGroupResponse);
+  rpc DeleteGroupsBatchForTeam(personinsights.types.v1.DeleteGroupsBatchForTeamRequest) returns (personinsights.types.v1.DeleteGroupsBatchForTeamResponse);
+
+  // Group type mapping writes (routed to replica — non-person data)
+  rpc UpdateGroupTypeMapping(personinsights.types.v1.UpdateGroupTypeMappingRequest) returns (personinsights.types.v1.UpdateGroupTypeMappingResponse);
+  rpc DeleteGroupTypeMapping(personinsights.types.v1.DeleteGroupTypeMappingRequest) returns (personinsights.types.v1.DeleteGroupTypeMappingResponse);
+  rpc DeleteGroupTypeMappingsBatchForTeam(personinsights.types.v1.DeleteGroupTypeMappingsBatchForTeamRequest) returns (personinsights.types.v1.DeleteGroupTypeMappingsBatchForTeamResponse);
+
+  // Person property updates (routed to leader)
+  rpc UpdatePersonProperties(personinsights.types.v1.UpdatePersonPropertiesRequest) returns (personinsights.types.v1.UpdatePersonPropertiesResponse);
+
+  // Person deletes
+  // WARNING: This is a write operation on person data. It should route to the leader
+  // once personinsights-leader supports deletes. Currently routed through the replica
+  // (which uses the primary Postgres pool) as a temporary measure.
+  // TODO: Migrate routing to leader before personinsights-leader goes live.
+  rpc DeletePersons(personinsights.types.v1.DeletePersonsRequest) returns (personinsights.types.v1.DeletePersonsResponse);
+  // WARNING: Same routing caveat as DeletePersons above.
+  rpc DeletePersonsBatchForTeam(personinsights.types.v1.DeletePersonsBatchForTeamRequest) returns (personinsights.types.v1.DeletePersonsBatchForTeamResponse);
+  // WARNING: Same routing caveat as DeletePersons above.
+  rpc DeletePersonlessDistinctIdsBatchForTeam(personinsights.types.v1.DeletePersonlessDistinctIdsBatchForTeamRequest) returns (personinsights.types.v1.DeletePersonlessDistinctIdsBatchForTeamResponse);
+
+  // Person split
+  // WARNING: Same routing caveat as DeletePersons above — write operation on person data
+  // routed through replica (primary pool) until leader supports transactional writes.
+  rpc SplitPerson(personinsights.types.v1.SplitPersonRequest) returns (personinsights.types.v1.SplitPersonResponse);
+
+  // Undelete repair version resets. Same routing caveat as DeletePersons above.
+  rpc SetPersonDistinctIdVersionFloor(personinsights.types.v1.SetPersonDistinctIdVersionFloorRequest) returns (personinsights.types.v1.SetPersonDistinctIdVersionFloorResponse);
+  rpc SetPersonVersionFloor(personinsights.types.v1.SetPersonVersionFloorRequest) returns (personinsights.types.v1.SetPersonVersionFloorResponse);
 }

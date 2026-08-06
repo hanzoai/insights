@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	geoIPURL = "https://mmdbcdn.insights.hanzo.ai/"
+	geoIPURL = "https://mmdbcdn.insights.net/"
 	shareDir = "./share"
 	mmdbFile = "./share/GeoLite2-City.mmdb"
 	jsonFile = "./share/GeoLite2-City.json"
@@ -62,15 +62,22 @@ func DownloadGeoIP() error {
 
 func installGeoIPDeps() error {
 	logger := GetLogger()
-
 	if _, err := exec.LookPath("brotli"); err == nil {
 		logger.Debug("brotli already installed")
 		return nil
 	}
-
+	if err := RequireRoot("install GeoIP dependencies"); err != nil {
+		return err
+	}
+	if err := exec.Command("apt-get", "update").Run(); err != nil {
+		return fmt.Errorf("failed to update apt cache: %w", err)
+	}
 	logger.Debug("Installing brotli")
 	cmd := exec.Command("apt-get", "install", "-y", "--no-install-recommends", "brotli")
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to install brotli: %w", err)
+	}
+	return nil
 }
 
 func GeoIPExists() bool {

@@ -7,8 +7,8 @@
  *
  * Provides capture() for type-safe events and captureRaw() for flexibility
  */
-import originalInsights from '@hanzo/insights'
-import type { CaptureOptions, CaptureResult, Insights as OriginalInsights, Properties } from '@hanzo/insights'
+import originalInsights from 'insights-js'
+import type { CaptureOptions, CaptureResult, Insights as OriginalInsights, Properties } from 'insights-js'
 
 // Define event schemas with their required and optional fields
 interface EventSchemas {
@@ -526,7 +526,7 @@ interface EventSchemas {
     cBjcAI9O: Record<string, any>
     'cdp destination feedback': Record<string, any>
     'cdp destination search': Record<string, any>
-    'cdp custom function feedback': Record<string, any>
+    'cdp script function feedback': Record<string, any>
     'cdp transformation feedback': Record<string, any>
     'Chase Balistreri': Record<string, any>
     'chat feedback': Record<string, any>
@@ -661,10 +661,27 @@ interface EventSchemas {
     'dashboard refreshed': Record<string, any>
     'dashboard renamed': Record<string, any>
     'dashboard share toggled': Record<string, any>
+    'dashboard subscribe nudge check failed': {
+        dashboard_id?: number
+        step?: string
+        error_name?: string
+        error_status?: number
+        error_message?: string
+    }
+    'dashboard subscribe nudge clicked': {
+        dashboard_id?: number
+        prefilled?: boolean
+        via?: string
+    }
+    'dashboard subscribe nudge shown': {
+        dashboard_id?: number
+        view_count_7d?: number
+    }
     'dashboard subscription created': Record<string, any>
     'dashboard subscription updated': Record<string, any>
     'dashboard updated': Record<string, any>
     'dashboard whitelabel toggled': Record<string, any>
+    'dashboard widget copied to other dashboard': Record<string, any>
     'data_attributes team setting updated': Record<string, any>
     'data pipelines notice clicked': Record<string, any>
     'data pipelines notice dismissed': Record<string, any>
@@ -682,6 +699,7 @@ interface EventSchemas {
     'definition save failed': Record<string, any>
     'definition save succeeded': Record<string, any>
     'delete person': Record<string, any>
+    detached_elements: Record<string, any>
     demo_requested: Record<string, any>
     'demo time': Record<string, any>
     'demo warning dismissed': Record<string, any>
@@ -1237,7 +1255,6 @@ interface EventSchemas {
     "EWjjW6Pc')) OR 407=(SELECT 407 FROM PG_SLEEP(15))--": Record<string, any>
     'exceeded max page limit loading toolbar element stats pages': Record<string, any>
     EXLwcYuf: Record<string, any>
-    'experiment archived': Record<string, any>
     'experimentation call prompt action': Record<string, any>
     'experiment completed': Record<string, any>
     'experiment created': Record<string, any>
@@ -1249,7 +1266,6 @@ interface EventSchemas {
     'experiment feature flag selected': Record<string, any>
     'experiment holdout assigned': Record<string, any>
     'experiment holdout created': Record<string, any>
-    'experiment launched': Record<string, any>
     'experiment load insight failed': Record<string, any>
     'experiment metric timeout': Record<string, any>
     'experiment_recalculation_time team setting updated': Record<string, any>
@@ -1665,6 +1681,8 @@ interface EventSchemas {
     heartbeat_buffer: Record<string, any>
     'heatmaps_opt_in team setting updated': Record<string, any>
     'heatmaps toggled': Record<string, any>
+    'mascot mode disabled': Record<string, any>
+    'mascot mode enabled': Record<string, any>
     'Hei simen': Record<string, any>
     hello: Record<string, any>
     'Hello!': Record<string, any>
@@ -1683,13 +1701,13 @@ interface EventSchemas {
     'hi there': Record<string, any>
     'hJ@#$#####$#': Record<string, any>
     "HnBReouZ') OR 325=(SELECT 325 FROM PG_SLEEP(15))--": Record<string, any>
-    insights_flow_activated: Record<string, any>
-    insights_flow_created: Record<string, any>
-    insights_flow_started: Record<string, any>
-    'custom function created from plugin config api': Record<string, any>
-    'custom function saved': Record<string, any>
+    hog_flow_activated: Record<string, any>
+    hog_flow_created: Record<string, any>
+    hog_flow_started: Record<string, any>
+    'script function created from plugin config api': Record<string, any>
+    'script function saved': Record<string, any>
     insights_function_state_change: Record<string, any>
-    'custom function state changed': Record<string, any>
+    'script function state changed': Record<string, any>
     insightsql_compare: Record<string, any>
     "hOnSbBQb')) OR 874=(SELECT 874 FROM PG_SLEEP(15))--": Record<string, any>
     'hotkey navigation': Record<string, any>
@@ -1839,6 +1857,9 @@ interface EventSchemas {
     "KvRoDk0x' OR 495=(SELECT 495 FROM PG_SLEEP(15))--": Record<string, any>
     '@@kXXAx': Record<string, any>
     "ky0dAr5c'; waitfor delay '0:0:15' -- ": Record<string, any>
+    'langfuse generation': Record<string, any>
+    'langfuse score': Record<string, any>
+    'langfuse trace': Record<string, any>
     'latency test': Record<string, any>
     lBt47uUb: Record<string, any>
     'legacy insight endpoint called': Record<string, any>
@@ -3531,7 +3552,14 @@ interface EventSchemas {
     'subscribed during onboarding': Record<string, any>
     subscribe_to_product_updates: Record<string, any>
     'subscription cancelled': Record<string, any>
-    'subscription created': Record<string, any>
+    'subscription created': {
+        resource_type?: string
+        dashboard_id?: number
+        insight_short_id?: string
+        subscription_id?: number
+        target_type?: string
+        ai_summary_prefilled?: boolean
+    }
     subscription_intent: Record<string, any>
     'subscription updated': Record<string, any>
     'Substack subscribe error': Record<string, any>
@@ -3992,7 +4020,7 @@ export default insights
 export type { EventSchemas, TypedInsights }
 
 // Re-export everything else from insights-js
-export * from '@hanzo/insights'
+export * from 'insights-js'
 
 /**
  * USAGE GUIDE

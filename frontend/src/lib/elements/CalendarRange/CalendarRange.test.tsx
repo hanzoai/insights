@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+
 import { render, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
@@ -25,7 +26,7 @@ describe('CalendarRange', () => {
         expect(toggle).toBeInTheDocument()
         expect(within(container).getByText('Include time?')).toBeInTheDocument()
 
-        userEvent.click(toggle)
+        await userEvent.click(toggle)
         expect(onToggleTime).toHaveBeenCalledWith(true)
     })
 
@@ -59,15 +60,15 @@ describe('CalendarRange', () => {
         const { container } = render(<TestRange />)
 
         // find just one month
-        const calendar = getByDataAttr(container, 'calendar')
+        const calendar = getByDataAttr(container, 'lemon-calendar')
         expect(calendar).toBeTruthy()
 
         // find February 2022
         expect(await within(calendar).findByText('February 2022')).toBeTruthy()
 
         async function clickOn(day: string): Promise<void> {
-            userEvent.click(await within(container).findByText(day))
-            userEvent.click(getByDataAttr(container, 'calendar-range-apply'))
+            await userEvent.click(await within(container).findByText(day))
+            await userEvent.click(getByDataAttr(container, 'lemon-calendar-range-apply'))
         }
 
         // click on 15
@@ -98,7 +99,7 @@ describe('CalendarRange', () => {
         await clickOn('20')
         expect(onChange).toHaveBeenCalledWith([dayjs('2022-02-20'), dayjs('2022-02-28T23:59:59.999Z')])
 
-        userEvent.click(getByDataAttr(container, 'calendar-range-cancel'))
+        await userEvent.click(getByDataAttr(container, 'lemon-calendar-range-cancel'))
         expect(onClose).toHaveBeenCalled()
     })
 })

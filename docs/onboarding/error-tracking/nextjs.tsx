@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getNextJSClientSteps } from '../product-analytics/nextjs'
 import { StepDefinition } from '../steps'
@@ -17,7 +17,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     {dedent`
                         Insights can automatically capture unhandled exceptions in your Next.js app using the JavaScript Web SDK.
 
-                        You can enable exception autocapture for the JavaScript Web SDK in the **Error tracking** section of [your project settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture). 
+                        You can enable exception autocapture for the JavaScript Web SDK in the **Error tracking** section of [your project settings](https://us.hanzo.ai/settings/project-error-tracking#exception-autocapture). 
 
                         It is also possible to manually capture exceptions using the \`captureException\` method:
                     `}
@@ -33,9 +33,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         },
                     ]}
                 />
-
                 Manual capture is very useful if you already use error boundaries to handle errors in your app:
-
                 <Tab.Group tabs={['App router', 'Pages router']}>
                     <Tab.List>
                         <Tab>App router</Tab>
@@ -175,7 +173,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
         content: (
             <Markdown>
                 {dedent`
-                    Check that exception events appear in the [activity feed](https://insights.hanzo.ai/activity/explore).
+                    Check that exception events appear in the [activity feed](https://app.hanzo.ai/activity/explore).
                 `}
             </Markdown>
         ),
@@ -188,7 +186,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        Next.js enables you to both server-side render pages and add server-side functionality. To integrate Insights into your Next.js app on the server-side, you can use the [Node SDK](/docs/libraries/node.md).
+                        Next.js enables you to both server-side render pages and add server-side functionality. To integrate Insights into your Next.js app on the server-side, you can use the [Node SDK](https://hanzo.ai/docs/libraries/node).
 
                         First, install the \`insights-node\` library:
                     `}
@@ -203,7 +201,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 />
                 <Markdown>
                     {dedent`
-                        For the backend, we can create a \`lib/insights-server.js\` file. In it, initialize Insights from \`insights-node\` as a singleton with your project API key and host from [your project settings](https://insights.hanzo.ai/settings/project).
+                        For the backend, we can create a \`lib/insights-server.js\` file. In it, initialize Insights from \`insights-node\` as a singleton with your project token and host from [your project settings](https://app.hanzo.ai/settings/project).
 
                         This looks like this:
                     `}
@@ -219,7 +217,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 export function getInsightsServer() {
                                   if (!insightsInstance) {
                                     insightsInstance = new Insights(
-                                      process.env.NEXT_PUBLIC_INSIGHTS_KEY,
+                                      process.env.NEXT_PUBLIC_INSIGHTS_PROJECT_TOKEN,
                                       {
                                         host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
                                         flushAt: 1,
@@ -270,7 +268,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     You should also see events and exceptions in Insights coming from your server-side code in the activity feed.
 
-                    [Check for server events in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for server events in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
@@ -287,7 +285,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                         Importantly, you need to:
 
-                        1. Set up a \`insights-node\` client in your server-side code. See our doc on [setting up Next.js server-side analytics](/docs/libraries/next-js#server-side-analytics.md) for more.
+                        1. Set up a \`insights-node\` client in your server-side code. See our doc on [setting up Next.js server-side analytics](https://hanzo.ai/docs/libraries/next-js#server-side-analytics) for more.
                         2. Check the request is running in the \`nodejs\` runtime to ensure Insights works. You can call \`insights.debug()\` to get verbose logging.
                         3. Get the \`distinct_id\` from the cookie to connect the error to a specific user.
 
@@ -314,7 +312,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                       const cookieString = Array.isArray(request.headers.cookie)
                                         ? request.headers.cookie.join('; ')
                                         : request.headers.cookie
-                                      const insightsCookieMatch = cookieString.match(/ph_hi_.*?_insights=([^;]+)/)
+                                      const insightsCookieMatch = cookieString.match(/ph_phc_.*?_insights=([^;]+)/)
                                       if (insightsCookieMatch && insightsCookieMatch[1]) {
                                         try {
                                           const decodedCookie = decodeURIComponent(insightsCookieMatch[1])
@@ -334,7 +332,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 />
                 <Markdown>
                     {dedent`
-                        You can find a full example of both this and client-side error tracking in our [Next.js error monitoring tutorial](/tutorials/nextjs-error-monitoring.md).
+                        You can find a full example of both this and client-side error tracking in our [Next.js error monitoring tutorial](https://hanzo.ai/tutorials/nextjs-error-monitoring).
                     `}
                 </Markdown>
             </>

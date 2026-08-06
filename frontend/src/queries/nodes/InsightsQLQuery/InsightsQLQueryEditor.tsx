@@ -18,7 +18,7 @@ import { urls } from 'scenes/urls'
 
 import { InsightsQLQuery } from '~/queries/schema/schema-general'
 
-import { insightsQLQueryEditorLogic } from './insightsQLQueryEditorLogic'
+import { hogQLQueryEditorLogic } from './hogQLQueryEditorLogic'
 
 export interface InsightsQLQueryEditorProps {
     query: InsightsQLQuery
@@ -44,13 +44,14 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
         if (router.values.location.pathname.includes(urls.sqlEditor())) {
             setKey(router.values.location.pathname)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally re-run to reset the editor key when the SQL editor route changes
     }, [router.values.location.pathname])
 
     const [monacoAndEditor, setMonacoAndEditor] = useState(
         null as [Monaco, importedEditor.IStandaloneCodeEditor] | null
     )
     const [monaco, editor] = monacoAndEditor ?? []
-    const insightsQLQueryEditorLogicProps = {
+    const hogQLQueryEditorLogicProps = {
         query: props.query,
         setQuery: props.setQuery,
         onChange: props.onChange,
@@ -59,17 +60,18 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
         monaco,
         queryResponse: props.queryResponse,
     }
-    const logic = insightsQLQueryEditorLogic(insightsQLQueryEditorLogicProps)
+    const logic = hogQLQueryEditorLogic(hogQLQueryEditorLogicProps)
     const { queryInput, prompt, aiAvailable, promptError, promptLoading } = useValues(logic)
-    const { setQueryInput, saveQuery, setPrompt, draftFromPrompt, saveAsView, onUpdateView } = useActions(logic)
+    const { setQueryInput, saveQuery, setPrompt, draftFromPrompt, draftFromMetadataFix, saveAsView, onUpdateView } =
+        useActions(logic)
 
-    const codeEditorKey = `insightsQLQueryEditor/${key}`
+    const codeEditorKey = `hogQLQueryEditor/${key}`
 
     const codeEditorLogicProps: CodeEditorLogicProps = {
         key: codeEditorKey,
         sourceQuery: props.query,
         query: queryInput,
-        language: 'insightsQL',
+        language: 'hogQL',
         metadataFilters: props.query.filters,
     }
 
@@ -137,12 +139,13 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                             queryKey={codeEditorKey}
                             sourceQuery={props.query}
                             className="border rounded-b overflow-hidden h-full"
-                            language="insightsQL"
+                            language="hogQL"
                             value={queryInput}
                             onChange={(v) => {
                                 setQueryInput(v ?? '')
                             }}
                             height="100%"
+                            onFixWithAI={(prompt) => draftFromMetadataFix(prompt)}
                             onMount={(editor, monaco) => {
                                 setMonacoAndEditor([monaco, editor])
                             }}

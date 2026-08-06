@@ -1,4 +1,5 @@
 import { useActions, useValues } from 'kea'
+import { useId } from 'react'
 
 import { Button, ButtonProps, Dropdown, DropdownProps, Input } from '@hanzo/elements'
 
@@ -9,6 +10,8 @@ export type TagSelectProps = {
     value: string[]
     onChange: (value: string[]) => void
     children?: (selectedTags: string[]) => DropdownProps['children']
+    /** Distinguishes the logic instance so multiple selects on one page keep independent open/search state. */
+    logicKey?: string
 }
 
 export function TagSelect({
@@ -16,10 +19,13 @@ export function TagSelect({
     value,
     onChange,
     children,
+    logicKey,
     ...buttonProps
 }: TagSelectProps & Pick<ButtonProps, 'type' | 'size'>): JSX.Element {
-    const { filteredTags, search, showPopover } = useValues(tagSelectLogic)
-    const { setSearch, setShowPopover } = useActions(tagSelectLogic)
+    const fallbackKey = useId()
+    const logic = tagSelectLogic({ logicKey: logicKey ?? fallbackKey })
+    const { filteredTags, search, showPopover } = useValues(logic)
+    const { setSearch, setShowPopover } = useActions(logic)
 
     const _onChange = (newTags: string[]): void => {
         onChange(newTags)

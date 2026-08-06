@@ -11,7 +11,7 @@ import {
     Tooltip,
 } from '@hanzo/elements'
 
-import { midEllipsis } from 'lib/utils'
+import { midEllipsis } from 'lib/utils/strings'
 
 import { ActiveDetailFilter, advancedActivityLogsLogic } from './advancedActivityLogsLogic'
 

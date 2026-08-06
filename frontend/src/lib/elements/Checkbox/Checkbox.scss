@@ -1,5 +1,5 @@
 .Checkbox {
-    --checkbox-height: calc(2.125rem + 3px); // Medium size button height + button shadow height;
+    --lemon-checkbox-height: calc(2.125rem + 3px); // Medium size button height + button shadow height;
 
     display: flex;
     align-items: center;
@@ -103,7 +103,7 @@
         line-height: 1.4;
 
         label {
-            min-height: var(--checkbox-height);
+            min-height: var(--lemon-checkbox-height);
             padding: 0 0.75rem;
             background: var(--color-bg-surface-primary);
             border: 1px solid var(--color-border-primary);

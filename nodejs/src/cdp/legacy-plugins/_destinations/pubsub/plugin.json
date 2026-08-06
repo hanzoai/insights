@@ -1,6 +1,6 @@
 {
     "name": "Pub/Sub Export",
-    "url": "https://github.com/hanzoai/pubsub-plugin",
+    "url": "https://github.com/Insights/pubsub-plugin",
     "description": "Sends events to a Pub/Sub topic on ingestion.",
     "main": "index.ts",
     "insightsVersion": ">= 1.25.0",

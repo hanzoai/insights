@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { IconApps, IconPlus } from '@hanzo/icons'
 import { Button, Input, Select, SelectOptions, Link } from '@hanzo/elements'
 
+import { BulkUpdateTagsButton } from 'lib/components/BulkActions/BulkUpdateTagsButton'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { TZLabel } from 'lib/components/TZLabel'
 import { TagSelect } from 'lib/components/TagSelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
+import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { EVENT_DEFINITIONS_PER_PAGE } from 'lib/constants'
 import { Banner } from 'lib/elements/Banner'
@@ -17,8 +18,9 @@ import { DefinitionHeader, getEventDefinitionIcon } from 'scenes/data-management
 import { EventDefinitionModal } from 'scenes/data-management/events/EventDefinitionModal'
 import { EventDefinitionProperties } from 'scenes/data-management/events/EventDefinitionProperties'
 import { eventDefinitionsTableLogic } from 'scenes/data-management/events/eventDefinitionsTableLogic'
-import { Scene } from 'scenes/sceneTypes'
+import { verifiedFilterFromOption, verifiedFilterValue, verifiedOptions } from 'scenes/data-management/utils'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -40,8 +42,9 @@ const eventTypeOptions: SelectOptions<EventDefinitionType> = [
 ]
 
 export function EventDefinitionsTable(): JSX.Element {
-    const { eventDefinitions, eventDefinitionsLoading, filters } = useValues(eventDefinitionsTableLogic)
-    const { loadEventDefinitions, setFilters } = useActions(eventDefinitionsTableLogic)
+    const { eventDefinitions, eventDefinitionsLoading, filters, showVerifiedFilter } =
+        useValues(eventDefinitionsTableLogic)
+    const { loadEventDefinitions, setFilters, applyBulkTagUpdates } = useActions(eventDefinitionsTableLogic)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
     const columns: TableColumns<EventDefinition> = [
@@ -183,6 +186,23 @@ export function EventDefinitionsTable(): JSX.Element {
                         }}
                         size="small"
                     />
+                    {showVerifiedFilter && (
+                        <>
+                            <span>Status:</span>
+                            <Select
+                                value={verifiedFilterValue(filters.verified)}
+                                options={verifiedOptions}
+                                data-attr="event-verified-filter"
+                                dropdownMatchSelectWidth={false}
+                                onChange={(value) => {
+                                    setFilters({
+                                        verified: verifiedFilterFromOption(value),
+                                    })
+                                }}
+                                size="small"
+                            />
+                        </>
+                    )}
                     <Button
                         type="primary"
                         icon={<IconPlus />}
@@ -234,6 +254,22 @@ export function EventDefinitionsTable(): JSX.Element {
                     },
                     rowExpandable: () => true,
                     noIndent: true,
+                }}
+                bulkSelection={{
+                    getKey: (definition: EventDefinition): string => definition.id,
+                    rowAriaLabel: (definition: EventDefinition) => `Select event ${definition.name}`,
+                    headerAriaLabel: 'Select all events on this page',
+                    noun: ['event', 'events'],
+                    renderActions: (ctx) => (
+                        <BulkUpdateTagsButton
+                            resource="event_definitions"
+                            selectedIds={ctx.selectedKeys}
+                            onSuccess={(result) => {
+                                applyBulkTagUpdates(result.updated)
+                                ctx.clearSelection()
+                            }}
+                        />
+                    ),
                 }}
                 dataSource={eventDefinitions.results}
                 useURLForSorting={false}

@@ -9,6 +9,7 @@ from semantic_version.base import Version
 
 from insights.async_migrations.runner import complete_migration, is_migration_dependency_fulfilled, start_async_migration
 from insights.async_migrations.setup import ALL_ASYNC_MIGRATIONS, setup_async_migrations, setup_model
+from insights.datastore.query_tagging import Feature, Product, tags_context
 from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models.async_migration import (
     AsyncMigration,
@@ -58,17 +59,18 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        setup_async_migrations(ignore_insights_version=True)
-        necessary_migrations = get_necessary_migrations()
+        with tags_context(product=Product.INTERNAL, feature=Feature.MIGRATION):
+            setup_async_migrations(ignore_insights_version=True)
+            necessary_migrations = get_necessary_migrations()
 
-        if options["check"]:
-            handle_check(necessary_migrations)
-        elif options["plan"]:
-            handle_plan(necessary_migrations)
-        elif options["complete_noop_migrations"]:
-            handle_complete_noop_migrations()
-        else:
-            handle_run(necessary_migrations)
+            if options["check"]:
+                handle_check(necessary_migrations)
+            elif options["plan"]:
+                handle_plan(necessary_migrations)
+            elif options["complete_noop_migrations"]:
+                handle_complete_noop_migrations()
+            else:
+                handle_run(necessary_migrations)
 
 
 def handle_check(necessary_migrations: Sequence[AsyncMigration]):

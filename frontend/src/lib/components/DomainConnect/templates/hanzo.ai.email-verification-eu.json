@@ -9,7 +9,7 @@
     "description": "Configures DNS records for Insights email sending (domain verification, DKIM, SPF, MAIL FROM)",
     "variableDescription": "verifyToken: SES domain verification token. dkim1/dkim2/dkim3: DKIM selector tokens. mailFromSub: MAIL FROM subdomain. sesRegion: AWS SES region.",
     "syncPubKeyDomain": "domainconnect.hanzo.ai",
-    "syncRedirectDomain": "insights.hanzo.ai",
+    "syncRedirectDomain": "eu.hanzo.ai",
     "records": [
         { "groupId": "verification", "type": "TXT", "host": "_amazonses", "data": "%verifyToken%", "ttl": 3600 },
         {
@@ -47,6 +47,13 @@
             "type": "SPFM",
             "host": "%mailFromSub%",
             "spfRules": "include:amazonses.com",
+            "ttl": 3600
+        },
+        {
+            "groupId": "dmarc",
+            "type": "TXT",
+            "host": "_dmarc",
+            "data": "v=DMARC1; p=none;",
             "ttl": 3600
         }
     ]

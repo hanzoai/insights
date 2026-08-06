@@ -5,14 +5,15 @@ import { Button, Dialog, Modal, Table } from '@hanzo/elements'
 import { VARIABLE_INSIGHT_COLUMNS } from 'scenes/data-management/variables/insightColumns'
 
 import { VariableType } from '../../types'
-import { VariableForm } from './VariableForm'
 import { variableDataLogic } from './variableDataLogic'
+import { VariableForm } from './VariableForm'
 import { variableModalLogic } from './variableModalLogic'
 
 export const NewVariableModal = (): JSX.Element => {
     const { closeModal, updateVariable, save, openNewVariableModal, changeTypeExistingVariable } =
         useActions(variableModalLogic)
-    const { isModalOpen, variable, modalType, insightsUsingVariable, insightsLoading } = useValues(variableModalLogic)
+    const { isModalOpen, variable, modalType, insightsUsingVariable, insightsLoading, isSaving } =
+        useValues(variableModalLogic)
     const { deleteVariable } = useActions(variableDataLogic)
     const title = modalType === 'new' ? `New ${variable.type} variable` : `Editing ${variable.name}`
 
@@ -55,15 +56,15 @@ export const NewVariableModal = (): JSX.Element => {
                 variable.type !== 'Date' && (
                     <div className="flex flex-1 justify-end gap-2">
                         {modalType === 'existing' && (
-                            <Button type="secondary" status="danger" onClick={handleDelete}>
+                            <Button type="secondary" status="danger" onClick={handleDelete} disabled={isSaving}>
                                 Delete variable
                             </Button>
                         )}
                         <div className="flex-1" />
-                        <Button type="secondary" onClick={closeModal}>
+                        <Button type="secondary" onClick={closeModal} disabled={isSaving}>
                             Close
                         </Button>
-                        <Button type="primary" onClick={() => save()}>
+                        <Button type="primary" onClick={() => save()} loading={isSaving}>
                             Save
                         </Button>
                     </div>

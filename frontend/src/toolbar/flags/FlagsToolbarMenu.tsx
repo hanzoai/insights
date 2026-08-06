@@ -5,6 +5,7 @@ import { IconPerson } from '@hanzo/icons'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input'
 import { Radio } from 'lib/elements/Radio'
@@ -12,12 +13,11 @@ import { Switch } from 'lib/elements/Switch'
 import { TextArea } from 'lib/elements/TextArea'
 import { Link } from 'lib/elements/Link'
 import { Spinner } from 'lib/elements/Spinner'
-import { IconOpenInNew } from 'lib/elements/icons'
-import { urls } from 'scenes/urls'
 
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
 import { flagsToolbarLogic } from '~/toolbar/flags/flagsToolbarLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
+import { urls } from '~/toolbar/urls'
 import { joinWithUiHost } from '~/toolbar/utils'
 
 export const FlagsToolbarMenu = (): JSX.Element => {

@@ -4,13 +4,13 @@ import pytest
 
 from asgiref.sync import async_to_sync
 
-from products.tasks.backend.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
+from products.tasks.backend.exceptions import SandboxNotFoundError
+from products.tasks.backend.logic.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
 from products.tasks.backend.temporal.create_snapshot.activities.get_snapshot_context import SnapshotContext
 from products.tasks.backend.temporal.create_snapshot.activities.setup_repository import (
     SetupRepositoryInput,
     setup_repository,
 )
-from products.tasks.backend.temporal.exceptions import SandboxNotFoundError
 
 
 @pytest.mark.skipif(
@@ -36,7 +36,7 @@ class TestSetupRepositoryActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "hanzoai/insights-js")
+            context = self._create_context(github_integration, "insights/insights-js")
 
             setup_input = SetupRepositoryInput(context=context, sandbox_id=sandbox.id)
             result = async_to_sync(activity_environment.run)(setup_repository, setup_input)
@@ -49,7 +49,7 @@ class TestSetupRepositoryActivity:
 
     @pytest.mark.django_db
     def test_setup_repository_sandbox_not_found(self, activity_environment, github_integration):
-        context = self._create_context(github_integration, "hanzoai/insights-js")
+        context = self._create_context(github_integration, "insights/insights-js")
         setup_input = SetupRepositoryInput(context=context, sandbox_id="non-existent-sandbox-id")
 
         with pytest.raises(SandboxNotFoundError):

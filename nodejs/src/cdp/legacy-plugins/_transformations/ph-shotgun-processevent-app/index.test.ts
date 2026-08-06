@@ -1,4 +1,4 @@
-import { PluginEvent, PluginInput, PluginMeta } from '@hanzo/plugin-scaffold'
+import { PluginEvent, PluginInput, PluginMeta } from '~/plugin-scaffold'
 
 import { processEvent } from './index'
 

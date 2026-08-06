@@ -4,14 +4,13 @@ import { Form } from 'kea-forms'
 import { IconCheck, IconPencil, IconPlus, IconTrash, IconX } from '@hanzo/icons'
 import { Banner, Button, Dialog, Input, Label, toast } from '@hanzo/elements'
 
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Field } from 'lib/elements/Field'
 import { cn } from 'lib/utils/css-classes'
 import { AiRegexHelper, AiRegexHelperButton } from 'scenes/session-recordings/components/AiRegexHelper/AiRegexHelper'
 import { Since } from 'scenes/settings/environment/SessionRecordingSettings'
 
-import { AccessControlLevel, AccessControlResourceType } from '~/types'
-
-import { AccessControlAction } from '../../AccessControlAction'
 import { ingestionControlsLogic } from '../ingestionControlsLogic'
 import { UrlTriggerConfig } from '../types'
 
@@ -47,25 +46,28 @@ export function UrlConfig({
     onEdit: (index: number) => void
     onRemove: (index: number) => void
 }): JSX.Element {
-    const { resourceType, logicKey } = useValues(ingestionControlsLogic)
+    const { logicKey } = useValues(ingestionControlsLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     return (
-        <div className="flex flex-col deprecated-space-y-2 mt-4">
+        <div className="flex flex-col gap-y-2">
             <div className="flex items-center gap-2 justify-between">
                 <Label className="text-base">
                     {title} <Since web={{ version: '1.171.0' }} />
                 </Label>
-                <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <Button
-                        onClick={props.onAdd}
-                        type="secondary"
-                        icon={<IconPlus />}
-                        data-attr={`${logicKey}-add-url`}
-                        size="small"
-                    >
-                        Add
-                    </Button>
-                </AccessControlAction>
+                <Button
+                    onClick={props.onAdd}
+                    type="secondary"
+                    icon={<IconPlus />}
+                    data-attr={`${logicKey}-add-url`}
+                    size="small"
+                    disabledReason={restrictedReason}
+                >
+                    Add
+                </Button>
             </div>
             <p>{description}</p>
 
@@ -118,7 +120,6 @@ export function UrlConfig({
                     onEdit={props.onEdit}
                     onRemove={props.onRemove}
                     checkUrlResult={checkUrlResults[index]}
-                    resourceType={resourceType}
                 />
             ))}
         </div>
@@ -137,7 +138,6 @@ function UrlConfigRow({
     formKey,
     addUrl,
     validationWarning,
-    resourceType,
 }: {
     trigger: UrlTriggerConfig
     index: number
@@ -150,8 +150,12 @@ function UrlConfigRow({
     formKey: string
     addUrl: (urlTriggerConfig: UrlTriggerConfig) => void
     validationWarning: string | null
-    resourceType: AccessControlResourceType
 }): JSX.Element {
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
+
     if (editIndex === index) {
         return (
             <div className="border rounded p-2 bg-surface-primary">
@@ -198,35 +202,38 @@ function UrlConfigRow({
                 )}
             </span>
             <div className="Actions flex deprecated-space-x-1 shrink-0">
-                <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <Button icon={<IconPencil />} onClick={() => onEdit(index)} tooltip="Edit" center>
-                        Edit
-                    </Button>
-                </AccessControlAction>
+                <Button
+                    icon={<IconPencil />}
+                    onClick={() => onEdit(index)}
+                    tooltip="Edit"
+                    center
+                    disabledReason={restrictedReason}
+                >
+                    Edit
+                </Button>
 
-                <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <Button
-                        icon={<IconTrash />}
-                        tooltip="Remove URL"
-                        center
-                        onClick={() => {
-                            Dialog.open({
-                                title: <>Remove URL</>,
-                                description: 'Are you sure you want to remove this URL?',
-                                primaryButton: {
-                                    status: 'danger',
-                                    children: 'Remove',
-                                    onClick: () => onRemove(index),
-                                },
-                                secondaryButton: {
-                                    children: 'Cancel',
-                                },
-                            })
-                        }}
-                    >
-                        Remove
-                    </Button>
-                </AccessControlAction>
+                <Button
+                    icon={<IconTrash />}
+                    tooltip="Remove URL"
+                    center
+                    onClick={() => {
+                        Dialog.open({
+                            title: <>Remove URL</>,
+                            description: 'Are you sure you want to remove this URL?',
+                            primaryButton: {
+                                status: 'danger',
+                                children: 'Remove',
+                                onClick: () => onRemove(index),
+                            },
+                            secondaryButton: {
+                                children: 'Cancel',
+                            },
+                        })
+                    }}
+                    disabledReason={restrictedReason}
+                >
+                    Remove
+                </Button>
             </div>
         </div>
     )

@@ -1,22 +1,40 @@
-import equal from 'fast-deep-equal'
-import { actions, afterMount, connect, isBreakpoint, kea, key, listeners, path, props, reducers, selectors } from 'kea'
+import { deepEqual as equal } from 'fast-equals'
+import {
+    MakeLogicType,
+    actions,
+    afterMount,
+    connect,
+    isBreakpoint,
+    kea,
+    key,
+    listeners,
+    path,
+    props,
+    reducers,
+    selectors,
+} from 'kea'
 import { DeepPartialMap, ValidationErrorType, forms } from 'kea-forms'
+import type { DeepPartial, FieldName } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { beforeUnload, router, urlToAction } from 'kea-router'
 import { CombinedLocation } from 'kea-router/lib/utils'
 import { subscriptions } from 'kea-subscriptions'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { CyclotronJobInputsValidation } from 'lib/components/CyclotronJob/CyclotronJobInputsValidation'
+import {
+    CyclotronJobInputsValidation,
+    CyclotronJobInputsValidationResult,
+} from 'lib/components/CyclotronJob/CyclotronJobInputsValidation'
 import { dayjs } from 'lib/dayjs'
-import { uuid } from 'lib/utils'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
+import { uuid } from 'lib/utils/dom'
 import { addProductIntent } from 'lib/utils/product-intents'
 import { asDisplay } from 'scenes/persons/person-utils'
 import { projectLogic } from 'scenes/projectLogic'
+import { buildSurveyExampleInvocationGlobals } from 'scenes/surveys/utils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
@@ -53,16 +71,21 @@ import {
     InsightsFunctionTemplateType,
     InsightsFunctionType,
     InsightsFunctionTypeType,
-    InsightsWatcherState,
+    HogWatcherState,
     PersonType,
     PropertyFilterType,
     PropertyGroupFilter,
     PropertyGroupFilterValue,
-    TeamType,
+    Survey,
+    SurveyEventName,
+    SurveyEventProperties,
 } from '~/types'
 
+import type { GroupType, GroupTypeIndex, InsightsFunctionMappingTemplateType, ProjectType } from '../../../types'
+import type { TeamPublicType, TeamType } from '../../../types'
+import { performWideEventsQueryInTwoPhases } from '../sampleEventsQuery'
 import { eventToInsightsFunctionContextId } from '../sub-templates/sub-templates'
-import type { insightsFunctionConfigurationLogicType } from './insightsFunctionConfigurationLogicType'
+import { SAMPLE_GLOBALS_CONTEXTS } from './sampleGlobalsContexts'
 
 export interface InsightsFunctionConfigurationLogicProps {
     logicKey?: string
@@ -73,7 +96,7 @@ export interface InsightsFunctionConfigurationLogicProps {
 
 export const EVENT_VOLUME_DAILY_WARNING_THRESHOLD = 1000
 const UNSAVED_CONFIGURATION_TTL = 1000 * 60 * 5
-export const SCRIPT_CODE_SIZE_LIMIT = 100 * 1024 // 100KB to match backend limit
+export const INSIGHTS_CODE_SIZE_LIMIT = 100 * 1024 // 100KB to match backend limit
 
 const VALIDATION_RULES = {
     SITE_DESTINATION_REQUIRES_MAPPINGS: (data: InsightsFunctionConfigurationType) =>
@@ -93,12 +116,12 @@ const NEW_FUNCTION_TEMPLATE: InsightsFunctionTemplateType = {
     name: '',
     description: '',
     inputs_schema: [],
-    code_language: 'fn',
+    code_language: 'script',
     code: "print('Hello, world!');",
     status: 'stable',
 }
 
-export const TYPES_WITH_GLOBALS: InsightsFunctionTypeType[] = ['transformation', 'destination']
+export const TYPES_WITH_GLOBALS: InsightsFunctionTypeType[] = ['transformation', 'transformation_log', 'destination']
 export const TYPES_WITH_REAL_EVENTS: InsightsFunctionTypeType[] = ['destination', 'site_destination', 'transformation']
 export const TYPES_WITH_VOLUME_WARNING: InsightsFunctionTypeType[] = ['destination', 'site_destination']
 
@@ -106,7 +129,24 @@ const TYPE_TO_PRODUCT_KEY: Partial<Record<InsightsFunctionTypeType, ProductKey>>
     destination: ProductKey.PIPELINE_DESTINATIONS,
     site_destination: ProductKey.PIPELINE_DESTINATIONS,
     transformation: ProductKey.PIPELINE_TRANSFORMATIONS,
+    transformation_log: ProductKey.LOGS,
     site_app: ProductKey.SITE_APPS,
+}
+
+// Sample record shown in the log transformation testing UI (no events table to sample from).
+const EXAMPLE_LOG_RECORD: NonNullable<CyclotronJobInvocationGlobals['record']> = {
+    body: 'GET /api/users 200 in 42ms user=jane@example.com',
+    attributes: { 'http.method': 'GET', 'http.status_code': '200' },
+    resource_attributes: { 'service.name': 'api', 'k8s.namespace.name': 'production' },
+    severity_text: 'info',
+    severity_number: 9,
+    service_name: 'api',
+    instrumentation_scope: 'http.server',
+    event_name: null,
+    timestamp: 1780000000000000000,
+    observed_timestamp: 1780000000000000000,
+    trace_id: null,
+    span_id: null,
 }
 
 export function sanitizeInputs(
@@ -138,7 +178,7 @@ export function sanitizeInputs(
 
         sanitizedInputs[inputSchema.key] = {
             value: value,
-            templating: templatingEnabled ? (input?.templating ?? 'fn') : undefined,
+            templating: templatingEnabled ? (input?.templating ?? 'script') : undefined,
         }
     })
 
@@ -205,7 +245,7 @@ export const templateToConfiguration = (template: InsightsFunctionTemplateType):
         inputs_schema: template.inputs_schema,
         filters: template.filters,
         mappings: mappings,
-        fn: template.code,
+        script: template.code,
         icon_url: template.icon_url,
         inputs: getInputs(template.inputs_schema),
         enabled: true,
@@ -295,6 +335,493 @@ export function mightDropEvents(code: string): boolean {
     return false
 }
 
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface insightsFunctionConfigurationLogicValues {
+    groupTypes: Map<GroupTypeIndex, GroupType> // groupsModel
+    currentProject: ProjectType | null // projectLogic
+    currentProjectId: number | null // projectLogic
+    currentTeam: TeamPublicType | TeamType | null // teamLogic
+    hasAvailableFeature: (feature: AvailableFeature, currentUsage?: number | undefined) => boolean // userLogic
+    baseEventsQuery: EventsQuery | null
+    canEditSource: boolean
+    canLoadSampleGlobals: boolean
+    configuration: InsightsFunctionConfigurationType
+    configurationAllErrors: Record<string, any>
+    configurationChanged: boolean
+    configurationErrors: DeepPartialMap<InsightsFunctionConfigurationType, ValidationErrorType>
+    configurationHasErrors: boolean
+    configurationManualErrors: Record<string, any>
+    configurationTouched: boolean
+    configurationTouches: Record<string, boolean>
+    configurationValidationErrors: DeepPartialMap<InsightsFunctionConfigurationType, ValidationErrorType>
+    contextId: InsightsFunctionConfigurationContextId
+    currentHogCode: string
+    currentInputs: CyclotronJobInputSchemaType[]
+    defaultFormState: InsightsFunctionConfigurationType | null
+    eventsDataTableNode: DataTableNode | null
+    exampleInvocationGlobals: CyclotronJobInvocationGlobals
+    filtersContainPersonProperties: boolean
+    hasGroupsAddon: boolean
+    hasHadSubmissionErrors: boolean
+    insightsFunction: InsightsFunctionType | null
+    insightsFunctionLoading: boolean
+    inputFormErrors: Record<string, string> | null
+    inputFormWarnings: Record<string, string>
+    inputsDiff: {
+        newInputs: CyclotronJobInputSchemaType[]
+        oldInputs: CyclotronJobInputSchemaType[]
+    } | null
+    inputsValidation: CyclotronJobInputsValidationResult
+    isConfigurationSubmitting: boolean
+    isConfigurationValid: boolean
+    isLegacyPlugin: boolean | undefined
+    lastEventQuery: EventsQuery | null
+    lastEventSecondQuery: EventsQuery | null
+    loaded: boolean
+    loading: boolean
+    logicProps: InsightsFunctionConfigurationLogicProps
+    mappingTemplates: InsightsFunctionMappingTemplateType[]
+    matchingFilters: PropertyGroupFilter
+    mightDropEvents: boolean
+    newFilters: CyclotronJobFiltersType | null
+    newHogCode: string | null
+    newInputs: CyclotronJobInputSchemaType[] | null
+    oldFilters: CyclotronJobFiltersType | null
+    oldHogCode: string | null
+    oldInputs: CyclotronJobInputSchemaType[] | null
+    sampleGlobals: CyclotronJobInvocationGlobals | null
+    sampleGlobalsError: string | null
+    sampleGlobalsLoading: boolean
+    sampleGlobalsWithInputs: CyclotronJobInvocationGlobalsWithInputs
+    showConfigurationErrors: boolean
+    showEventsList: boolean
+    showExpectedVolume: boolean
+    showFilters: boolean
+    showSource: boolean
+    showTesting: boolean
+    sourceUsesEvents: boolean
+    sparkline: SparklineData | null
+    sparklineLoading: boolean
+    sparklineQuery: TrendsQuery | null
+    survey: Survey | null
+    surveyIdFromFilters: string | null
+    surveyLoading: boolean
+    template: InsightsFunctionTemplateType | null
+    templateHasChanged: boolean | '' | undefined
+    templateId: string | undefined
+    templateLoading: boolean
+    type: InsightsFunctionTypeType
+    unsavedConfiguration: {
+        configuration: InsightsFunctionConfigurationType
+        timestamp: number
+    } | null
+    useMapping: number | true | undefined
+    usesGroups: boolean
+    willChangeEnabledOnSave: boolean
+    willReEnableOnSave: boolean
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface insightsFunctionConfigurationLogicActions {
+    clearFiltersDiff: () => {
+        value: true
+    }
+    clearHogCodeDiff: () => {
+        value: true
+    }
+    clearInputsDiff: () => {
+        value: true
+    }
+    deleteInsightsFunction: () => {
+        value: true
+    }
+    duplicate: () => {
+        value: true
+    }
+    duplicateFromTemplate: () => {
+        value: true
+    }
+    loadInsightsFunction: () => any
+    loadInsightsFunctionFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadInsightsFunctionSuccess: (
+        insightsFunction: InsightsFunctionType | null,
+        payload?: any
+    ) => {
+        insightsFunction: InsightsFunctionType | null
+        payload?: any
+    }
+    loadSampleGlobals: (payload?: { eventId?: string }) => {
+        eventId: string | undefined
+    }
+    loadSampleGlobalsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadSampleGlobalsSuccess: (
+        sampleGlobals: CyclotronJobInvocationGlobals | null,
+        payload?: {
+            eventId: string | undefined
+        }
+    ) => {
+        sampleGlobals: CyclotronJobInvocationGlobals | null
+        payload?: {
+            eventId: string | undefined
+        }
+    }
+    loadSurvey: () => any
+    loadSurveyFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadSurveySuccess: (
+        survey: Survey | null,
+        payload?: any
+    ) => {
+        survey: Survey | null
+        payload?: any
+    }
+    loadTemplate: () => any
+    loadTemplateFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadTemplateSuccess: (
+        template: InsightsFunctionTemplateType | null,
+        payload?: any
+    ) => {
+        template: InsightsFunctionTemplateType | null
+        payload?: any
+    }
+    persistForUnload: () => {
+        value: true
+    }
+    reportAIFiltersAccepted: () => {
+        value: true
+    }
+    reportAIFiltersPromptOpen: () => {
+        value: true
+    }
+    reportAIFiltersPrompted: () => {
+        value: true
+    }
+    reportAIFiltersRejected: () => {
+        value: true
+    }
+    reportAIInsightsFunctionAccepted: () => {
+        value: true
+    }
+    reportAIInsightsFunctionInputsAccepted: () => {
+        value: true
+    }
+    reportAIInsightsFunctionInputsPromptOpen: () => {
+        value: true
+    }
+    reportAIInsightsFunctionInputsPrompted: () => {
+        value: true
+    }
+    reportAIInsightsFunctionInputsRejected: () => {
+        value: true
+    }
+    reportAIInsightsFunctionPromptOpen: () => {
+        value: true
+    }
+    reportAIInsightsFunctionPrompted: () => {
+        value: true
+    }
+    reportAIInsightsFunctionRejected: () => {
+        value: true
+    }
+    resetConfiguration: (values?: InsightsFunctionConfigurationType) => {
+        values?: InsightsFunctionConfigurationType
+    }
+    resetForm: () => {
+        value: true
+    }
+    resetToTemplate: () => {
+        value: true
+    }
+    setConfigurationManualErrors: (errors: Record<string, any>) => {
+        errors: Record<string, any>
+    }
+    setConfigurationValue: (
+        key: FieldName,
+        value: any
+    ) => {
+        name: FieldName
+        value: any
+    }
+    setConfigurationValues: (values: DeepPartial<InsightsFunctionConfigurationType>) => {
+        values: DeepPartial<InsightsFunctionConfigurationType>
+    }
+    setNewFilters: (newFilters: CyclotronJobFiltersType) => {
+        newFilters: CyclotronJobFiltersType
+    }
+    setNewHogCode: (newHogCode: string) => {
+        newHogCode: string
+    }
+    setNewInputs: (newInputs: CyclotronJobInputSchemaType[]) => {
+        newInputs: CyclotronJobInputSchemaType[]
+    }
+    setOldFilters: (oldFilters: CyclotronJobFiltersType) => {
+        oldFilters: CyclotronJobFiltersType
+    }
+    setOldHogCode: (oldHogCode: string) => {
+        oldHogCode: string
+    }
+    setOldInputs: (oldInputs: CyclotronJobInputSchemaType[]) => {
+        oldInputs: CyclotronJobInputSchemaType[]
+    }
+    setSampleGlobals: (sampleGlobals: CyclotronJobInvocationGlobals | null) => {
+        sampleGlobals: CyclotronJobInvocationGlobals | null
+    }
+    setSampleGlobalsError: (error: any) => {
+        error: any
+    }
+    setShowEventsList: (showEventsList: boolean) => {
+        showEventsList: boolean
+    }
+    setShowSource: (showSource: boolean) => {
+        showSource: boolean
+    }
+    setUnsavedConfiguration: (configuration: InsightsFunctionConfigurationType | null) => {
+        configuration: InsightsFunctionConfigurationType | null
+    }
+    sparklineQueryChanged: (sparklineQuery: TrendsQuery) => {
+        sparklineQuery: TrendsQuery
+    }
+    sparklineQueryChangedFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    sparklineQueryChangedSuccess: (
+        sparkline:
+            | {
+                  count: any
+                  data: {
+                      color: string
+                      name: string
+                      values: number[]
+                  }[]
+                  labels: any
+                  warning: string | undefined
+              }
+            | {
+                  count: any
+                  data: {
+                      color: string
+                      name: string
+                      values: number[]
+                  }[]
+                  labels: any
+                  warning?: undefined
+              }
+            | null,
+        payload?: {
+            sparklineQuery: TrendsQuery
+        }
+    ) => {
+        sparkline:
+            | {
+                  count: any
+                  data: {
+                      color: string
+                      name: string
+                      values: number[]
+                  }[]
+                  labels: any
+                  warning: string | undefined
+              }
+            | {
+                  count: any
+                  data: {
+                      color: string
+                      name: string
+                      values: number[]
+                  }[]
+                  labels: any
+                  warning?: undefined
+              }
+            | null
+        payload?: {
+            sparklineQuery: TrendsQuery
+        }
+    }
+    submitConfiguration: () => {
+        value: boolean
+    }
+    submitConfigurationFailure: (
+        error: Error,
+        errors: Record<string, any>
+    ) => {
+        error: Error
+        errors: Record<string, any>
+    }
+    submitConfigurationRequest: (configuration: InsightsFunctionConfigurationType) => {
+        configuration: InsightsFunctionConfigurationType
+    }
+    submitConfigurationSuccess: (configuration: InsightsFunctionConfigurationType) => {
+        configuration: InsightsFunctionConfigurationType
+    }
+    touchConfigurationField: (key: string) => {
+        key: string
+    }
+    upsertInsightsFunction: (configuration: InsightsFunctionConfigurationType) => {
+        configuration: InsightsFunctionConfigurationType
+    }
+    upsertInsightsFunctionFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    upsertInsightsFunctionSuccess: (
+        insightsFunction: InsightsFunctionType,
+        payload?: {
+            configuration: InsightsFunctionConfigurationType
+        }
+    ) => {
+        insightsFunction: InsightsFunctionType
+        payload?: {
+            configuration: InsightsFunctionConfigurationType
+        }
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface insightsFunctionConfigurationLogicMeta {
+    key: string
+    __keaTypeGenInternalSelectorTypes: {
+        logicProps: (arg: any) => InsightsFunctionConfigurationLogicProps
+        surveyIdFromFilters: (configuration: InsightsFunctionConfigurationType) => string | null
+        type: (configuration: InsightsFunctionConfigurationType, insightsFunction: InsightsFunctionType | null) => InsightsFunctionTypeType
+        hasGroupsAddon: (
+            hasAvailableFeature: (feature: AvailableFeature, currentUsage?: number | undefined) => boolean
+        ) => boolean
+        useMapping: (
+            insightsFunction: InsightsFunctionType | null,
+            template: InsightsFunctionTemplateType | null
+        ) => number | true | undefined
+        defaultFormState: (
+            template: InsightsFunctionTemplateType | null,
+            insightsFunction: InsightsFunctionType | null
+        ) => InsightsFunctionConfigurationType | null
+        templateId: (
+            template: InsightsFunctionTemplateType | null,
+            insightsFunction: InsightsFunctionType | null
+        ) => string | undefined
+        loading: (insightsFunctionLoading: boolean, templateLoading: boolean) => boolean
+        loaded: (insightsFunction: InsightsFunctionType | null, template: InsightsFunctionTemplateType | null) => boolean
+        contextId: (configuration: InsightsFunctionConfigurationType) => InsightsFunctionConfigurationContextId
+        inputsValidation: (configuration: InsightsFunctionConfigurationType) => CyclotronJobInputsValidationResult
+        inputFormErrors: (inputsValidation: CyclotronJobInputsValidationResult) => Record<string, string> | null
+        inputFormWarnings: (inputsValidation: CyclotronJobInputsValidationResult) => Record<string, string>
+        willReEnableOnSave: (
+            configuration: InsightsFunctionConfigurationType,
+            insightsFunction: InsightsFunctionType | null
+        ) => boolean
+        willChangeEnabledOnSave: (
+            configuration: InsightsFunctionConfigurationType,
+            insightsFunction: InsightsFunctionType | null
+        ) => boolean
+        exampleInvocationGlobals: (
+            configuration: InsightsFunctionConfigurationType,
+            currentProject: ProjectType | null,
+            groupTypes: Map<GroupTypeIndex, GroupType>,
+            contextId: InsightsFunctionConfigurationContextId,
+            survey: Survey | null
+        ) => CyclotronJobInvocationGlobals
+        sampleGlobalsWithInputs: (
+            sampleGlobals: CyclotronJobInvocationGlobals | null,
+            exampleInvocationGlobals: CyclotronJobInvocationGlobals,
+            configuration: InsightsFunctionConfigurationType
+        ) => CyclotronJobInvocationGlobalsWithInputs
+        matchingFilters: (
+            configuration: InsightsFunctionConfigurationType,
+            useMapping: number | true | undefined
+        ) => PropertyGroupFilter
+        filtersContainPersonProperties: (configuration: InsightsFunctionConfigurationType) => boolean
+        sourceUsesEvents: (configuration: InsightsFunctionConfigurationType, type: InsightsFunctionTypeType) => boolean
+        sparklineQuery: (
+            configuration: InsightsFunctionConfigurationType,
+            matchingFilters: PropertyGroupFilter,
+            sourceUsesEvents: boolean
+        ) => TrendsQuery | null
+        baseEventsQuery: (
+            configuration: InsightsFunctionConfigurationType,
+            matchingFilters: PropertyGroupFilter,
+            groupTypes: Map<GroupTypeIndex, GroupType>,
+            sourceUsesEvents: boolean
+        ) => EventsQuery | null
+        eventsDataTableNode: (baseEventsQuery: EventsQuery | null) => DataTableNode | null
+        lastEventQuery: (baseEventsQuery: EventsQuery | null) => EventsQuery | null
+        lastEventSecondQuery: (lastEventQuery: EventsQuery | null) => EventsQuery | null
+        templateHasChanged: (
+            insightsFunction: InsightsFunctionType | null,
+            configuration: InsightsFunctionConfigurationType
+        ) => boolean | '' | undefined
+        mappingTemplates: (
+            insightsFunction: InsightsFunctionType | null,
+            template: InsightsFunctionTemplateType | null
+        ) => InsightsFunctionMappingTemplateType[]
+        usesGroups: (configuration: InsightsFunctionConfigurationType) => boolean
+        mightDropEvents: (configuration: InsightsFunctionConfigurationType, type: InsightsFunctionTypeType) => boolean
+        currentHogCode: (newHogCode: string | null, configuration: InsightsFunctionConfigurationType) => string
+        currentInputs: (
+            newInputs: CyclotronJobInputSchemaType[] | null,
+            configuration: InsightsFunctionConfigurationType
+        ) => CyclotronJobInputSchemaType[]
+        inputsDiff: (
+            oldInputs: CyclotronJobInputSchemaType[] | null,
+            newInputs: CyclotronJobInputSchemaType[] | null
+        ) => {
+            newInputs: CyclotronJobInputSchemaType[]
+            oldInputs: CyclotronJobInputSchemaType[]
+        } | null
+        canLoadSampleGlobals: (
+            lastEventQuery: EventsQuery | null,
+            contextId: InsightsFunctionConfigurationContextId
+        ) => boolean
+        showFilters: (type: InsightsFunctionTypeType) => boolean
+        showExpectedVolume: (type: InsightsFunctionTypeType, sourceUsesEvents: boolean) => boolean
+        canEditSource: (
+            type: InsightsFunctionTypeType,
+            template: InsightsFunctionTemplateType | null,
+            insightsFunction: InsightsFunctionType | null
+        ) => boolean
+        showTesting: (type: InsightsFunctionTypeType) => boolean
+        isLegacyPlugin: (
+            template: InsightsFunctionTemplateType | null,
+            insightsFunction: InsightsFunctionType | null
+        ) => boolean | undefined
+    }
+}
+
+export type insightsFunctionConfigurationLogicType = MakeLogicType<
+    insightsFunctionConfigurationLogicValues,
+    insightsFunctionConfigurationLogicActions,
+    InsightsFunctionConfigurationLogicProps,
+    insightsFunctionConfigurationLogicMeta
+>
+
 export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurationLogicType>([
     path((id) => ['scenes', 'pipeline', 'insightsFunctionConfigurationLogic', id]),
     props({} as InsightsFunctionConfigurationLogicProps),
@@ -335,9 +862,9 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         setSampleGlobalsError: (error) => ({ error }),
         setSampleGlobals: (sampleGlobals: CyclotronJobInvocationGlobals | null) => ({ sampleGlobals }),
         setShowEventsList: (showEventsList: boolean) => ({ showEventsList }),
-        setOldIQLCode: (oldIQLCode: string) => ({ oldIQLCode }),
-        setNewIQLCode: (newScriptCode: string) => ({ newScriptCode }),
-        clearIQLCodeDiff: true,
+        setOldHogCode: (oldHogCode: string) => ({ oldHogCode }),
+        setNewHogCode: (newHogCode: string) => ({ newHogCode }),
+        clearHogCodeDiff: true,
         reportAIInsightsFunctionPrompted: true,
         reportAIInsightsFunctionAccepted: true,
         reportAIInsightsFunctionRejected: true,
@@ -401,18 +928,18 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 setShowEventsList: (_, { showEventsList }) => showEventsList,
             },
         ],
-        oldIQLCode: [
+        oldHogCode: [
             null as string | null,
             {
-                setOldIQLCode: (_, { oldIQLCode }) => oldIQLCode,
-                clearIQLCodeDiff: () => null,
+                setOldHogCode: (_, { oldHogCode }) => oldHogCode,
+                clearHogCodeDiff: () => null,
             },
         ],
-        newScriptCode: [
+        newHogCode: [
             null as string | null,
             {
-                setNewIQLCode: (_, { newScriptCode }) => newScriptCode,
-                clearIQLCodeDiff: () => null,
+                setNewHogCode: (_, { newHogCode }) => newHogCode,
+                clearHogCodeDiff: () => null,
             },
         ],
         oldFilters: [
@@ -487,7 +1014,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                         ? await api.insightsFunctions.create(configuration)
                         : await api.insightsFunctions.update(props.id!, configuration)
 
-                    insights.capture('custom function saved', {
+                    insights.capture('script function saved', {
                         id: res.id,
                         template_id: res.template?.id,
                         template_name: res.template?.name,
@@ -495,7 +1022,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                         enabled: res.enabled,
                     })
 
-                    // Track product intent when creating a new custom function
+                    // Track product intent when creating a new script function
                     if (isNew) {
                         const productKey = TYPE_TO_PRODUCT_KEY[res.type]
                         if (productKey) {
@@ -506,22 +1033,20 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                         }
                     }
 
-                    // Capture error tracking specific alert event
-                    if (
-                        res.template?.id === 'error-tracking-issue-created' ||
-                        res.template?.id === 'error-tracking-issue-reopened' ||
-                        res.template?.id === 'error-tracking-issue-spiking'
-                    ) {
-                        const triggerEventMap: Record<string, string> = {
-                            'error-tracking-issue-created': '$error_tracking_issue_created',
-                            'error-tracking-issue-reopened': '$error_tracking_issue_reopened',
-                            'error-tracking-issue-spiking': '$error_tracking_issue_spiking',
-                        }
-                        const triggerEvent = triggerEventMap[res.template.id]
-
+                    const errorTrackingTriggerEvent = res.filters?.events
+                        ?.map((event) => event.id)
+                        ?.find((id) =>
+                            [
+                                '$error_tracking_issue_created',
+                                '$error_tracking_issue_reopened',
+                                '$error_tracking_issue_spiking',
+                            ].includes(id)
+                        )
+                    if (isNew && errorTrackingTriggerEvent) {
                         insights.capture('error_tracking_alert_created', {
-                            trigger_event: triggerEvent,
-                            subtemplate_id: res.template.id,
+                            source: 'traditional',
+                            trigger_event: errorTrackingTriggerEvent,
+                            subtemplate_id: res.template?.id,
                             has_custom_filters: res.filters && Object.keys(res.filters).length > 1,
                             enabled: res.enabled,
                         })
@@ -601,6 +1126,21 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
             null as CyclotronJobInvocationGlobals | null,
             {
                 loadSampleGlobals: async ({ eventId }, breakpoint) => {
+                    const sampleGlobalsLoader = SAMPLE_GLOBALS_CONTEXTS[values.contextId]
+                    if (sampleGlobalsLoader) {
+                        try {
+                            const globals = await sampleGlobalsLoader(values.exampleInvocationGlobals)
+                            breakpoint()
+                            return globals
+                        } catch (e: any) {
+                            if (isBreakpoint(e)) {
+                                // Superseded by a newer load — abort without dispatching a result
+                                throw e
+                            }
+                            actions.setSampleGlobalsError(e.message)
+                            return values.exampleInvocationGlobals
+                        }
+                    }
                     if (!values.lastEventQuery) {
                         return values.sampleGlobals
                     }
@@ -608,7 +1148,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                         'No events match these filters in the last 30 days. Showing an example $pageview event instead.'
                     try {
                         await breakpoint(values.sampleGlobals === null ? 10 : 1000)
-                        let response = await performQuery({
+                        let response = await performWideEventsQueryInTwoPhases({
                             ...values.lastEventQuery,
                             properties: eventId
                                 ? [
@@ -620,7 +1160,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                                 : undefined,
                         })
                         if (!response?.results?.[0] && values.lastEventSecondQuery) {
-                            response = await performQuery({
+                            response = await performWideEventsQueryInTwoPhases({
                                 ...values.lastEventSecondQuery,
                                 properties: eventId
                                     ? [
@@ -671,6 +1211,23 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 },
             },
         ],
+
+        survey: [
+            null as Survey | null,
+            {
+                loadSurvey: async () => {
+                    const surveyId = values.surveyIdFromFilters
+                    if (!surveyId) {
+                        return null
+                    }
+                    try {
+                        return await api.surveys.get(surveyId)
+                    } catch {
+                        return null
+                    }
+                },
+            },
+        ],
     })),
     forms(({ values, props, asyncActions }) => ({
         configuration: {
@@ -694,13 +1251,13 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 }
             },
             submit: async (data) => {
-                // Check script code size immediately before submission
-                if (data.fn) {
-                    const fnSize = new Blob([data.fn]).size
-                    if (fnSize > SCRIPT_CODE_SIZE_LIMIT) {
+                // Check HOG code size immediately before submission
+                if (data.script) {
+                    const hogSize = new Blob([data.script]).size
+                    if (hogSize > INSIGHTS_CODE_SIZE_LIMIT) {
                         toast.error(
-                            `Custom code exceeds maximum size of ${
-                                SCRIPT_CODE_SIZE_LIMIT / 1024
+                            `Script code exceeds maximum size of ${
+                                INSIGHTS_CODE_SIZE_LIMIT / 1024
                             }KB. Please simplify your code or contact support to increase the limit.`
                         )
                         return
@@ -715,12 +1272,14 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                     const type = values.type
                     const typeFolder =
                         type === 'site_app'
-                            ? 'Site apps'
+                            ? 'Web scripts'
                             : type === 'transformation'
                               ? 'Transformations'
-                              : type === 'source_webhook'
-                                ? 'Sources'
-                                : 'Destinations'
+                              : type === 'transformation_log'
+                                ? 'Log transformations'
+                                : type === 'source_webhook'
+                                  ? 'Sources'
+                                  : 'Destinations'
                     payload._create_in_folder = `Unfiled/${typeFolder}`
                 }
                 await asyncActions.upsertInsightsFunction(payload as InsightsFunctionConfigurationType)
@@ -729,37 +1288,43 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
     })),
     selectors(() => ({
         logicProps: [() => [(_, props) => props], (props: InsightsFunctionConfigurationLogicProps) => props],
+        surveyIdFromFilters: [
+            (s) => [s.configuration],
+            (configuration: InsightsFunctionConfigurationType): string | null => {
+                for (const event of configuration?.filters?.events ?? []) {
+                    const prop = (event.properties as AnyPropertyFilter[] | undefined)?.find(
+                        (p) => p.key === SurveyEventProperties.SURVEY_ID && 'value' in p && p.value
+                    )
+                    if (prop) {
+                        return String(prop.value)
+                    }
+                }
+                return null
+            },
+        ],
         type: [
             (s) => [s.configuration, s.insightsFunction],
-            (configuration, insightsFunction) => configuration?.type ?? insightsFunction?.type ?? 'loading',
+            (configuration: InsightsFunctionConfigurationType, insightsFunction: InsightsFunctionType | null) =>
+                configuration?.type ?? insightsFunction?.type ?? 'loading',
         ],
         hasGroupsAddon: [
             (s) => [s.hasAvailableFeature],
-            (hasAvailableFeature) => {
+            (hasAvailableFeature: (feature: AvailableFeature, currentUsage?: number | undefined) => boolean) => {
                 return hasAvailableFeature(AvailableFeature.GROUP_ANALYTICS)
-            },
-        ],
-        teamHasCohortFilters: [
-            (s) => [s.currentTeam, s.configuration],
-            (currentTeam: TeamType | null, configuration: InsightsFunctionConfigurationType | null) => {
-                // Only show warning if filter_test_accounts is enabled AND team has cohort filters
-                const hasFilterTestAccountsEnabled = configuration?.filters?.filter_test_accounts === true
-                const teamHasCohorts =
-                    currentTeam?.test_account_filters?.some(
-                        (filter: AnyPropertyFilter) => filter.type === PropertyFilterType.Cohort
-                    ) || false
-
-                return hasFilterTestAccountsEnabled && teamHasCohorts
             },
         ],
         useMapping: [
             (s) => [s.insightsFunction, s.template],
             // If the function has mappings, or the template has mapping templates, we use mappings
-            (insightsFunction, template) => Array.isArray(insightsFunction?.mappings) || template?.mapping_templates?.length,
+            (insightsFunction: InsightsFunctionType | null, template: InsightsFunctionTemplateType | null) =>
+                Array.isArray(insightsFunction?.mappings) || template?.mapping_templates?.length,
         ],
         defaultFormState: [
             (s) => [s.template, s.insightsFunction],
-            (template, insightsFunction): InsightsFunctionConfigurationType | null => {
+            (
+                template: InsightsFunctionTemplateType | null,
+                insightsFunction: InsightsFunctionType | null
+            ): InsightsFunctionConfigurationType | null => {
                 if (template) {
                     return templateToConfiguration(template)
                 }
@@ -769,110 +1334,171 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
 
         templateId: [
             (s) => [s.template, s.insightsFunction],
-            (template, insightsFunction) => template?.id || insightsFunction?.template?.id,
+            (template: InsightsFunctionTemplateType | null, insightsFunction: InsightsFunctionType | null) =>
+                template?.id || insightsFunction?.template?.id,
         ],
 
         loading: [
             (s) => [s.insightsFunctionLoading, s.templateLoading],
-            (insightsFunctionLoading, templateLoading) => insightsFunctionLoading || templateLoading,
+            (insightsFunctionLoading: boolean, templateLoading: boolean) => insightsFunctionLoading || templateLoading,
         ],
-        loaded: [(s) => [s.insightsFunction, s.template], (insightsFunction, template) => !!insightsFunction || !!template],
+        loaded: [
+            (s) => [s.insightsFunction, s.template],
+            (insightsFunction: InsightsFunctionType | null, template: InsightsFunctionTemplateType | null) =>
+                !!insightsFunction || !!template,
+        ],
 
         contextId: [
             (s) => [s.configuration],
-            (configuration): InsightsFunctionConfigurationContextId => {
+            (configuration: InsightsFunctionConfigurationType): InsightsFunctionConfigurationContextId => {
                 return eventToInsightsFunctionContextId(configuration.filters?.events?.[0]?.id)
             },
         ],
 
-        inputFormErrors: [
+        inputsValidation: [
             (s) => [s.configuration],
-            (configuration): Record<string, string> | null => {
-                const result = CyclotronJobInputsValidation.validate(
-                    configuration.inputs ?? {},
-                    configuration.inputs_schema ?? []
-                )
-
-                return result.valid ? null : result.errors
-            },
+            (configuration: InsightsFunctionConfigurationType): CyclotronJobInputsValidationResult =>
+                CyclotronJobInputsValidation.validate(configuration.inputs ?? {}, configuration.inputs_schema ?? []),
+        ],
+        inputFormErrors: [
+            (s) => [s.inputsValidation],
+            (inputsValidation: CyclotronJobInputsValidationResult): Record<string, string> | null =>
+                inputsValidation.valid ? null : inputsValidation.errors,
+        ],
+        inputFormWarnings: [
+            (s) => [s.inputsValidation],
+            (inputsValidation: CyclotronJobInputsValidationResult): Record<string, string> => inputsValidation.warnings,
         ],
         willReEnableOnSave: [
             (s) => [s.configuration, s.insightsFunction],
-            (configuration, insightsFunction) => {
-                const iqlState = insightsFunction?.status?.state ?? 0
-                return configuration?.enabled && iqlState === InsightsWatcherState.disabled
+            (configuration: InsightsFunctionConfigurationType, insightsFunction: InsightsFunctionType | null) => {
+                const hogState = insightsFunction?.status?.state ?? 0
+                return configuration?.enabled && hogState === HogWatcherState.disabled
             },
         ],
 
         willChangeEnabledOnSave: [
             (s) => [s.configuration, s.insightsFunction],
-            (configuration, insightsFunction) => {
+            (configuration: InsightsFunctionConfigurationType, insightsFunction: InsightsFunctionType | null) => {
                 return configuration?.enabled !== (insightsFunction?.enabled ?? false)
             },
         ],
         exampleInvocationGlobals: [
-            (s) => [s.configuration, s.currentProject, s.groupTypes, s.contextId],
-            (configuration, currentProject, groupTypes, contextId): CyclotronJobInvocationGlobals => {
+            (s) => [s.configuration, s.currentProject, s.groupTypes, s.contextId, s.survey],
+            (
+                configuration: InsightsFunctionConfigurationType,
+                currentProject: null | import('~/types').ProjectType,
+                groupTypes: Map<import('~/types').GroupTypeIndex, import('~/types').GroupType>,
+                contextId: InsightsFunctionConfigurationContextId,
+                survey: Survey | null
+            ): CyclotronJobInvocationGlobals => {
+                // Log transformations are seeded with a sample record (no event), so the inline
+                // tester shows something useful to run against instead of an empty object.
+                if (configuration?.type === 'transformation_log') {
+                    return {
+                        project: {
+                            id: currentProject?.id ?? 0,
+                            name: currentProject?.name ?? '',
+                            url: `${window.location.origin}/project/${currentProject?.id}`,
+                        },
+                        record: EXAMPLE_LOG_RECORD,
+                    } as CyclotronJobInvocationGlobals
+                }
                 const currentUrl = window.location.href.split('#')[0]
                 const eventId = uuid()
                 const personId = uuid()
-                const event = {
-                    uuid: eventId,
-                    distinct_id: uuid(),
-                    timestamp: dayjs().toISOString(),
-                    elements_chain: '',
-                    url: `${window.location.origin}/project/${currentProject?.id}/events/`,
-                    ...(contextId === 'error-tracking'
-                        ? {
-                              event: configuration?.filters?.events?.[0].id || '$error_tracking_issue_created',
-                              properties: {
-                                  name: 'Test issue',
-                                  description: 'This is the issue description',
+                const source = {
+                    name: configuration?.name ?? 'Unnamed',
+                    url: currentUrl,
+                }
+                const globals: CyclotronJobInvocationGlobals =
+                    configuration?.filters?.events?.[0]?.id === SurveyEventName.SENT
+                        ? buildSurveyExampleInvocationGlobals({
+                              survey,
+                              projectId: currentProject?.id || 0,
+                              projectName: currentProject?.name || '',
+                              projectUrl: `${window.location.origin}/project/${currentProject?.id}`,
+                              source,
+                              eventUuid: eventId,
+                              distinctId: uuid(),
+                              timestamp: dayjs().toISOString(),
+                              personId,
+                              personName: 'Example person',
+                              personEmail: 'example@hanzo.ai',
+                          })
+                        : {
+                              event: {
+                                  uuid: eventId,
+                                  distinct_id: uuid(),
+                                  timestamp: dayjs().toISOString(),
+                                  elements_chain: '',
+                                  url: `${window.location.origin}/project/${currentProject?.id}/events/`,
+                                  ...(contextId === 'error-tracking'
+                                      ? {
+                                            event:
+                                                configuration?.filters?.events?.[0].id ||
+                                                '$error_tracking_issue_created',
+                                            properties: {
+                                                name: 'Test issue',
+                                                description: 'This is the issue description',
+                                            },
+                                        }
+                                      : contextId === 'health-alerts'
+                                        ? {
+                                              event:
+                                                  configuration?.filters?.events?.[0].id ||
+                                                  '$health_check_issue_firing',
+                                              properties: {
+                                                  kind: 'sdk_outdated',
+                                                  severity: 'warning',
+                                                  issue_id: '00000000-0000-0000-0000-000000000000',
+                                                  title: 'insights-python SDK is outdated',
+                                                  summary: 'insights-python is on 7.0.0, latest is 7.14.0',
+                                                  link: '/health/sdk-health',
+                                                  payload: {
+                                                      sdk_name: 'insights-python',
+                                                      latest_version: '7.14.0',
+                                                  },
+                                              },
+                                          }
+                                        : contextId === 'activity-log'
+                                          ? {
+                                                event: '$activity_log_entry_created',
+                                                properties: {
+                                                    activity: 'created',
+                                                    scope: 'Insight',
+                                                    item_id: 'abcdef',
+                                                },
+                                            }
+                                          : {
+                                                event: '$pageview',
+                                                properties: {
+                                                    $current_url: currentUrl,
+                                                    $browser: 'Chrome',
+                                                    $ip: '89.160.20.129',
+                                                    this_is_an_example_event: true,
+                                                },
+                                            }),
                               },
+                              person:
+                                  contextId !== 'error-tracking'
+                                      ? {
+                                            id: personId,
+                                            properties: {
+                                                email: 'example@hanzo.ai',
+                                            },
+                                            name: 'Example person',
+                                            url: `${window.location.origin}/person/${personId}`,
+                                        }
+                                      : undefined,
+                              groups: {},
+                              project: {
+                                  id: currentProject?.id || 0,
+                                  name: currentProject?.name || '',
+                                  url: `${window.location.origin}/project/${currentProject?.id}`,
+                              },
+                              source,
                           }
-                        : contextId === 'activity-log'
-                          ? {
-                                event: '$activity_log_entry_created',
-                                properties: {
-                                    activity: 'created',
-                                    scope: 'Insight',
-                                    item_id: 'abcdef',
-                                },
-                            }
-                          : {
-                                event: '$pageview',
-                                properties: {
-                                    $current_url: currentUrl,
-                                    $browser: 'Chrome',
-                                    $ip: '89.160.20.129',
-                                    this_is_an_example_event: true,
-                                },
-                            }),
-                }
-                const globals: CyclotronJobInvocationGlobals = {
-                    event,
-                    person:
-                        contextId !== 'error-tracking'
-                            ? {
-                                  id: personId,
-                                  properties: {
-                                      email: 'example@hanzo.ai',
-                                  },
-                                  name: 'Example person',
-                                  url: `${window.location.origin}/person/${personId}`,
-                              }
-                            : undefined,
-                    groups: {},
-                    project: {
-                        id: currentProject?.id || 0,
-                        name: currentProject?.name || '',
-                        url: `${window.location.origin}/project/${currentProject?.id}`,
-                    },
-                    source: {
-                        name: configuration?.name ?? 'Unnamed',
-                        url: currentUrl,
-                    },
-                }
 
                 if (contextId !== 'error-tracking') {
                     groupTypes.forEach((groupType) => {
@@ -894,7 +1520,11 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         ],
         sampleGlobalsWithInputs: [
             (s) => [s.sampleGlobals, s.exampleInvocationGlobals, s.configuration],
-            (sampleGlobals, exampleInvocationGlobals, configuration): CyclotronJobInvocationGlobalsWithInputs => {
+            (
+                sampleGlobals: CyclotronJobInvocationGlobals | null,
+                exampleInvocationGlobals: CyclotronJobInvocationGlobals,
+                configuration: InsightsFunctionConfigurationType
+            ): CyclotronJobInvocationGlobalsWithInputs => {
                 const inputs: Record<string, any> = {}
                 for (const input of configuration?.inputs_schema || []) {
                     inputs[input.key] = input.type
@@ -911,15 +1541,43 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                     }
                 }
 
+                const baseGlobals = sampleGlobals ?? exampleInvocationGlobals
+
+                // Transformations only receive `project` and `event` at runtime
+                // (see HogTransformerService.createInvocationGlobals). Hide `person`,
+                // `groups`, `source`, etc. so input templates can't reference them
+                // and trigger a "Global variable not found" failure in production.
+                if (configuration.type === 'transformation') {
+                    return {
+                        project: baseGlobals.project,
+                        event: baseGlobals.event,
+                        inputs,
+                    }
+                }
+
+                // Log transformations receive `project` and `record` at runtime (see
+                // buildLogRecordGlobals). There is no event table to sample from, so show a
+                // representative record the user can edit.
+                if (configuration.type === 'transformation_log') {
+                    return {
+                        project: baseGlobals.project,
+                        record: EXAMPLE_LOG_RECORD,
+                        inputs,
+                    }
+                }
+
                 return {
-                    ...(sampleGlobals ?? exampleInvocationGlobals),
+                    ...baseGlobals,
                     inputs,
                 }
             },
         ],
         matchingFilters: [
             (s) => [s.configuration, s.useMapping],
-            (configuration, useMapping): PropertyGroupFilter => {
+            (
+                configuration: InsightsFunctionConfigurationType,
+                useMapping: number | true | undefined
+            ): PropertyGroupFilter => {
                 // We're using mappings, but none are provided, so match zero events.
                 if (useMapping && !configuration.mappings?.length) {
                     return {
@@ -1009,7 +1667,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
 
         filtersContainPersonProperties: [
             (s) => [s.configuration],
-            (configuration) => {
+            (configuration: InsightsFunctionConfigurationType) => {
                 const filters = configuration.filters
                 let containsPersonProperties = false
                 if (filters?.properties && !containsPersonProperties) {
@@ -1031,14 +1689,18 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
 
         sourceUsesEvents: [
             (s) => [s.configuration, s.type],
-            (configuration, type) => {
+            (configuration: InsightsFunctionConfigurationType, type: InsightsFunctionTypeType) => {
                 return TYPES_WITH_REAL_EVENTS.includes(type) && (configuration.filters?.source ?? 'events') === 'events'
             },
         ],
 
         sparklineQuery: [
             (s) => [s.configuration, s.matchingFilters, s.sourceUsesEvents],
-            (configuration, matchingFilters, sourceUsesEvents): TrendsQuery | null => {
+            (
+                configuration: InsightsFunctionConfigurationType,
+                matchingFilters: PropertyGroupFilter,
+                sourceUsesEvents: boolean
+            ): TrendsQuery | null => {
                 if (!sourceUsesEvents) {
                     return null
                 }
@@ -1071,7 +1733,12 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
 
         baseEventsQuery: [
             (s) => [s.configuration, s.matchingFilters, s.groupTypes, s.sourceUsesEvents],
-            (configuration, matchingFilters, groupTypes, sourceUsesEvents): EventsQuery | null => {
+            (
+                configuration: InsightsFunctionConfigurationType,
+                matchingFilters: PropertyGroupFilter,
+                groupTypes: Map<import('~/types').GroupTypeIndex, import('~/types').GroupType>,
+                sourceUsesEvents: boolean
+            ): EventsQuery | null => {
                 if (!sourceUsesEvents) {
                     return null
                 }
@@ -1100,7 +1767,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
 
         eventsDataTableNode: [
             (s) => [s.baseEventsQuery],
-            (baseEventsQuery): DataTableNode | null => {
+            (baseEventsQuery: EventsQuery | null): DataTableNode | null => {
                 return baseEventsQuery
                     ? setLatestVersionsOnQuery(
                           {
@@ -1118,29 +1785,31 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
 
         lastEventQuery: [
             (s) => [s.baseEventsQuery],
-            (baseEventsQuery): EventsQuery | null => {
+            (baseEventsQuery: EventsQuery | null): EventsQuery | null => {
                 return baseEventsQuery ? { ...baseEventsQuery, limit: 1 } : null
             },
             { resultEqualityCheck: equal },
         ],
         lastEventSecondQuery: [
             (s) => [s.lastEventQuery],
-            (lastEventQuery): EventsQuery | null => (lastEventQuery ? { ...lastEventQuery, after: '-30d' } : null),
+            (lastEventQuery: EventsQuery | null): EventsQuery | null =>
+                lastEventQuery ? { ...lastEventQuery, after: '-30d' } : null,
         ],
         templateHasChanged: [
             (s) => [s.insightsFunction, s.configuration],
-            (insightsFunction, configuration) => {
-                return insightsFunction?.template?.code && insightsFunction.template.code !== configuration.fn
+            (insightsFunction: InsightsFunctionType | null, configuration: InsightsFunctionConfigurationType) => {
+                return insightsFunction?.template?.code && insightsFunction.template.code !== configuration.script
             },
         ],
         mappingTemplates: [
             (s) => [s.insightsFunction, s.template],
-            (insightsFunction, template) => template?.mapping_templates ?? insightsFunction?.template?.mapping_templates ?? [],
+            (insightsFunction: InsightsFunctionType | null, template: InsightsFunctionTemplateType | null) =>
+                template?.mapping_templates ?? insightsFunction?.template?.mapping_templates ?? [],
         ],
 
         usesGroups: [
             (s) => [s.configuration],
-            (configuration) => {
+            (configuration: InsightsFunctionConfigurationType) => {
                 // NOTE: Bit hacky but works good enough...
                 const configStr = JSON.stringify(configuration)
                 return configStr.includes('groups.') || configStr.includes('{groups}')
@@ -1148,20 +1817,20 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         ],
         mightDropEvents: [
             (s) => [s.configuration, s.type],
-            (configuration, type) => {
-                if (type !== 'transformation') {
+            (configuration: InsightsFunctionConfigurationType, type: InsightsFunctionTypeType) => {
+                if (type !== 'transformation' && type !== 'transformation_log') {
                     return false
                 }
-                const fnCode = configuration.fn || ''
+                const hogCode = configuration.script || ''
 
-                return mightDropEvents(fnCode)
+                return mightDropEvents(hogCode)
             },
         ],
 
-        currentScriptCode: [
-            (s) => [s.newScriptCode, s.configuration],
-            (newScriptCode: string | null, configuration: InsightsFunctionConfigurationType) => {
-                return newScriptCode ?? configuration.fn ?? ''
+        currentHogCode: [
+            (s) => [s.newHogCode, s.configuration],
+            (newHogCode: string | null, configuration: InsightsFunctionConfigurationType) => {
+                return newHogCode ?? configuration.script ?? ''
             },
         ],
 
@@ -1183,54 +1852,58 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         ],
 
         canLoadSampleGlobals: [
-            (s) => [s.lastEventQuery],
-            (lastEventQuery) => {
-                return !!lastEventQuery
+            (s) => [s.lastEventQuery, s.contextId],
+            (lastEventQuery: EventsQuery | null, contextId: InsightsFunctionConfigurationContextId) => {
+                return !!lastEventQuery || !!SAMPLE_GLOBALS_CONTEXTS[contextId]
             },
         ],
 
         showFilters: [
             (s) => [s.type],
-            (type) => {
+            (type: InsightsFunctionTypeType) => {
                 return ['destination', 'internal_destination', 'site_destination', 'transformation'].includes(type)
             },
         ],
 
         showExpectedVolume: [
             (s) => [s.type, s.sourceUsesEvents],
-            (type, sourceUsesEvents) => {
+            (type: InsightsFunctionTypeType, sourceUsesEvents: boolean) => {
                 return sourceUsesEvents && ['destination', 'site_destination', 'transformation'].includes(type)
             },
         ],
 
         canEditSource: [
             (s) => [s.type, s.template, s.insightsFunction],
-            (type, template, insightsFunction) => {
+            (
+                type: InsightsFunctionTypeType,
+                template: InsightsFunctionTemplateType | null,
+                insightsFunction: InsightsFunctionType | null
+            ) => {
                 const codeLanguage = template?.code_language || insightsFunction?.template?.code_language
 
                 if (type === 'site_app' || type === 'site_destination') {
                     return true
                 }
 
-                // Only allow editing if code language is 'fn'
-                if (codeLanguage && codeLanguage !== 'fn') {
+                // Only allow editing if code language is 'script'
+                if (codeLanguage && codeLanguage !== 'script') {
                     return false
                 }
 
-                return ['source_webhook', 'transformation', 'destination'].includes(type)
+                return ['source_webhook', 'transformation', 'transformation_log', 'destination'].includes(type)
             },
         ],
 
         showTesting: [
             (s) => [s.type],
-            (type) => {
-                return ['destination', 'internal_destination', 'transformation'].includes(type)
+            (type: InsightsFunctionTypeType) => {
+                return ['destination', 'internal_destination', 'transformation', 'transformation_log'].includes(type)
             },
         ],
 
         isLegacyPlugin: [
             (s) => [s.template, s.insightsFunction],
-            (template, insightsFunction) => {
+            (template: InsightsFunctionTemplateType | null, insightsFunction: InsightsFunctionType | null) => {
                 return (template?.id || insightsFunction?.template?.id)?.startsWith('plugin-')
             },
         ],
@@ -1284,7 +1957,12 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         upsertInsightsFunctionFailure: ({ errorObject }) => {
             const maybeValidationError = errorObject.data
 
-            if (maybeValidationError?.type === 'validation_error') {
+            if (maybeValidationError?.type === 'validation_error' && maybeValidationError.attr) {
+                // Errors on `type` (the feature gate and the enabled-function cap reject there)
+                // have no rendered form field, so a toast is the only way the user sees them.
+                if (maybeValidationError.attr === 'type') {
+                    toast.error(maybeValidationError.detail)
+                }
                 setTimeout(() => {
                     // TRICKY: We want to run on the next tick otherwise the errors don't show (possibly because of the async wait in the submit)
                     if (maybeValidationError.attr.includes('inputs__')) {
@@ -1301,7 +1979,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 }, 1)
             } else {
                 console.error(errorObject)
-                toast.error('Error submitting configuration')
+                toast.error(maybeValidationError?.detail ?? 'Error submitting configuration')
             }
         },
 
@@ -1451,7 +2129,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
     subscriptions(({ props, actions, cache }) => ({
         insightsFunction: (insightsFunction) => {
             if (insightsFunction && props.templateId) {
-                // Catch all for any scenario where we need to redirect away from the template to the actual custom function
+                // Catch all for any scenario where we need to redirect away from the template to the actual script function
 
                 cache.disabledBeforeUnload = true
                 // Preserve existing search params (integration params, returnTo, etc.) on redirect
@@ -1475,6 +2153,13 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                     actions: [],
                     data_warehouse: [],
                 })
+            }
+        },
+        surveyIdFromFilters: (surveyId) => {
+            if (surveyId) {
+                actions.loadSurvey()
+            } else {
+                actions.loadSurveySuccess(null)
             }
         },
     })),

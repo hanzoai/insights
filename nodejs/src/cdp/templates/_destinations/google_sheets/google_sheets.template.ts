@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Update a Google Sheet with the incoming event data',
     icon_url: '/static/services/google-sheets.svg',
     category: ['Custom'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 let res := fetch(f'https://sheets.googleapis.com/v4/spreadsheets/{inputs.spreadsheet_id}/values:batchUpdate', {
     'method': 'POST',

@@ -42,8 +42,8 @@ const INSIGHTS_FUNCTION_FIELD_MAPPINGS: FieldMapping<Partial<InsightsFunctionTyp
         shouldInclude: (v) => v !== undefined && v !== null,
     },
     {
-        source: 'iql',
-        target: 'iql',
+        source: 'script',
+        target: 'script',
         shouldInclude: (v) => !!v,
     },
     {

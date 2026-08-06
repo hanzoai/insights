@@ -1,5 +1,6 @@
 import { memo } from 'react'
-import { useMDXComponents } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+
+import { useMDXComponents } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 export const BooleanFlagSnippet = memo(({ language = 'javascript' }: { language?: string }): JSX.Element => {
     const { CodeBlock, dedent } = useMDXComponents()
@@ -9,7 +10,7 @@ export const BooleanFlagSnippet = memo(({ language = 'javascript' }: { language?
             if (insights.isFeatureEnabled('flag-key')) {
                 // Do something differently for this user
                 // Optional: fetch the payload
-                const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
+                const matchedFlagPayload = insights.getFeatureFlagResult('flag-key')?.payload
             }
         `,
         react: dedent`
@@ -90,5 +91,3 @@ export const BooleanFlagSnippet = memo(({ language = 'javascript' }: { language?
 
     return <CodeBlock language={langMap[language] || 'javascript'} code={snippets[language] || snippets.javascript} />
 })
-
-

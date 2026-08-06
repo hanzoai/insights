@@ -6,6 +6,7 @@ from insights.schema import (
     EndpointsUsageTrendsQuery,
     EndpointsUsageTrendsQueryResponse,
     IntervalType,
+    ProductKey,
 )
 
 from insights.insightsql import ast
@@ -96,6 +97,16 @@ class EndpointsUsageTrendsQueryRunner(EndpointsUsageQueryRunner[EndpointsUsageTr
                 name="toStartOfMonth",
                 args=[ast.Field(chain=["event_date"])],
             )
+        elif interval == IntervalType.QUARTER:
+            return ast.Call(
+                name="toStartOfQuarter",
+                args=[ast.Field(chain=["event_date"])],
+            )
+        elif interval == IntervalType.YEAR:
+            return ast.Call(
+                name="toStartOfYear",
+                args=[ast.Field(chain=["event_date"])],
+            )
         else:
             # Default to day
             return ast.Field(chain=["event_date"])
@@ -118,13 +129,14 @@ class EndpointsUsageTrendsQueryRunner(EndpointsUsageQueryRunner[EndpointsUsageTr
             return self._get_requests_count_expression()
 
     def _calculate(self) -> EndpointsUsageTrendsQueryResponse:
-        from insights.datastore.query_tagging import tag_queries
+        from insights.datastore.query_tagging import Feature, tag_queries
 
-        tag_queries(name="endpoints_usage_trends")
+        tag_queries(name="endpoints_usage_trends", product=ProductKey.ENDPOINTS, feature=Feature.USAGE_REPORT)
         response = execute_insightsql_query(
             query_type="endpoints_usage_trends_query",
             query=self.to_query(),
             team=self.team,
+            user=self.user,
             timings=self.timings,
             modifiers=self.modifiers,
             limit_context=self.limit_context,

@@ -59,6 +59,75 @@ describe('universalFiltersLogic', () => {
         })
     })
 
+    describe('taxonomicPropertyFilterGroupTypes', () => {
+        it.each([
+            { groupType: TaxonomicFilterGroupType.EventProperties, kept: true },
+            { groupType: TaxonomicFilterGroupType.PersonProperties, kept: true },
+            { groupType: TaxonomicFilterGroupType.SessionProperties, kept: true },
+            { groupType: TaxonomicFilterGroupType.Replay, kept: true },
+            { groupType: TaxonomicFilterGroupType.Cohorts, kept: true },
+            { groupType: `${TaxonomicFilterGroupType.GroupsPrefix}_0` as TaxonomicFilterGroupType, kept: true },
+            { groupType: TaxonomicFilterGroupType.EmailAddresses, kept: true },
+            { groupType: TaxonomicFilterGroupType.PageviewUrls, kept: true },
+            { groupType: TaxonomicFilterGroupType.RevenueAnalyticsProperties, kept: true },
+            { groupType: TaxonomicFilterGroupType.Events, kept: false },
+            { groupType: TaxonomicFilterGroupType.Actions, kept: false },
+            { groupType: TaxonomicFilterGroupType.AutocaptureEvents, kept: false },
+            { groupType: TaxonomicFilterGroupType.ReplaySavedFilters, kept: false },
+            { groupType: TaxonomicFilterGroupType.SuggestedFilters, kept: false },
+        ])('editing a pill keeps=$kept for $groupType', async ({ groupType, kept }) => {
+            const scopedLogic = universalFiltersLogic({
+                rootKey: 'scoped',
+                group: defaultFilter,
+                taxonomicGroupTypes: [groupType],
+                onChange: () => {},
+            })
+            scopedLogic.mount()
+
+            await expectLogic(scopedLogic).toMatchValues({
+                taxonomicPropertyFilterGroupTypes: kept ? [groupType] : [],
+            })
+        })
+
+        it('replay scene taxonomicGroupTypes yields correct property-filterable subset', async () => {
+            const groups0 = `${TaxonomicFilterGroupType.GroupsPrefix}_0` as TaxonomicFilterGroupType
+            const replaySceneGroupTypes = [
+                TaxonomicFilterGroupType.SuggestedFilters,
+                TaxonomicFilterGroupType.Replay,
+                TaxonomicFilterGroupType.ReplaySavedFilters,
+                TaxonomicFilterGroupType.Events,
+                TaxonomicFilterGroupType.EventProperties,
+                TaxonomicFilterGroupType.Actions,
+                TaxonomicFilterGroupType.Cohorts,
+                TaxonomicFilterGroupType.EventFeatureFlags,
+                TaxonomicFilterGroupType.PersonProperties,
+                TaxonomicFilterGroupType.SessionProperties,
+                groups0,
+                TaxonomicFilterGroupType.AutocaptureEvents,
+            ]
+
+            const scopedLogic = universalFiltersLogic({
+                rootKey: 'replay-regression',
+                group: defaultFilter,
+                taxonomicGroupTypes: replaySceneGroupTypes,
+                onChange: () => {},
+            })
+            scopedLogic.mount()
+
+            await expectLogic(scopedLogic).toMatchValues({
+                taxonomicPropertyFilterGroupTypes: [
+                    TaxonomicFilterGroupType.Replay,
+                    TaxonomicFilterGroupType.EventProperties,
+                    TaxonomicFilterGroupType.Cohorts,
+                    TaxonomicFilterGroupType.EventFeatureFlags,
+                    TaxonomicFilterGroupType.PersonProperties,
+                    TaxonomicFilterGroupType.SessionProperties,
+                    groups0,
+                ],
+            })
+        })
+    })
+
     it('setGroupType', async () => {
         await expectLogic(logic, () => {
             logic.actions.setGroupType(FilterLogicalOperator.Or)
@@ -88,6 +157,58 @@ describe('universalFiltersLogic', () => {
             logic.actions.removeGroupValue(0)
         }).toMatchValues({
             filterGroup: { ...defaultFilter, values: [] },
+        })
+    })
+
+    it('addGroupFilter applies full property filter from recent taxonomic item', async () => {
+        const fullFilter: AnyPropertyFilter = {
+            key: '$browser',
+            value: 'Chrome',
+            operator: PropertyOperator.Exact,
+            type: PropertyFilterType.Event,
+        }
+        const item = {
+            name: '$browser',
+            _recentContext: {
+                sourceGroupType: TaxonomicFilterGroupType.EventProperties,
+                sourceGroupName: 'Event properties',
+                propertyFilter: fullFilter,
+            },
+        }
+        await expectLogic(logic, () => {
+            logic.actions.addGroupFilter(
+                { type: TaxonomicFilterGroupType.RecentFilters } as TaxonomicFilterGroup,
+                '$browser',
+                item
+            )
+        }).toMatchValues({
+            filterGroup: {
+                ...defaultFilter,
+                values: [...defaultFilter.values, fullFilter],
+            },
+        })
+    })
+
+    it('addGroupFilter pre-fills value when search matched on a property value', async () => {
+        await expectLogic(logic, () => {
+            logic.actions.addGroupFilter(
+                { type: TaxonomicFilterGroupType.PersonProperties } as TaxonomicFilterGroup,
+                'user.email',
+                { matchedOn: 'value', matchedValue: 'frank@hanzo.ai' } as any
+            )
+        }).toMatchValues({
+            filterGroup: {
+                ...defaultFilter,
+                values: [
+                    ...defaultFilter.values,
+                    {
+                        key: 'user.email',
+                        value: ['frank@hanzo.ai'],
+                        operator: PropertyOperator.Exact,
+                        type: PropertyFilterType.Person,
+                    },
+                ],
+            },
         })
     })
 

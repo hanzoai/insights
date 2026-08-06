@@ -8,7 +8,7 @@ Also see: user-facing documentation under [in the runbook](https://hanzo.ai/docs
 
 ### Writing an async migration
 
-To write an async migration, you should create a migration file inside [`insights/async_migrations/migrations`](https://github.com/Hanzo Insights/insights/tree/main/insights/async_migrations/migrations). The name should follow the convention we use for Django and EE migrations (e.g. `0005_update_events_schema`). Check out the existing migrations or [examples](https://github.com/Hanzo Insights/insights/tree/main/insights/async_migrations/examples).
+To write an async migration, you should create a migration file inside [`insights/async_migrations/migrations`](https://github.com/Insights/insights/tree/master/insights/async_migrations/migrations). The name should follow the convention we use for Django and EE migrations (e.g. `0005_update_events_schema`). Check out the existing migrations or [examples](https://github.com/Insights/insights/tree/master/insights/async_migrations/examples).
 
 ### Workflow and architecture
 
@@ -60,7 +60,7 @@ If a migration errors, the error message is added to the migration's database re
 
 The initial implementation of async migrations targets only **data migrations**, and assumes that the migration is used as a mechanism to help users move into a new default state.
 
-For example, when we [moved our Datastore `person_distinct_id` table to a `CollapsingMergeTree`](https://github.com/Hanzo Insights/insights/pull/5563), we updated the SQL for creating the table, and wrote a migration to help users on the old schema migrate to the new schema.
+For example, when we [moved our Datastore `person_distinct_id` table to a `CollapsingMergeTree`](https://github.com/Insights/insights/pull/5563), we updated the SQL for creating the table, and wrote a migration to help users on the old schema migrate to the new schema.
 
 However, users that did a fresh deploy of Insights _after_ this change already had the table with the new schema created by default.
 

@@ -1,7 +1,7 @@
 import { IconClock } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { colonDelimitedDuration } from 'lib/utils'
+import { colonDelimitedDuration } from 'lib/utils/durations'
 
 import { PatternAssignedEventSegmentContext } from './types'
 

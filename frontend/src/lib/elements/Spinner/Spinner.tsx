@@ -1,10 +1,12 @@
 import './Spinner.scss'
 
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useEffect, useRef } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
 
 import { IconPencil } from '@hanzo/icons'
+
+import { useCancelAnimationsOnUnmount } from 'lib/hooks/useCancelAnimationsOnUnmount'
 
 function useTimingCapture(captureTime: boolean): void {
     const mountTimeRef = useRef<number>(performance.now())
@@ -33,6 +35,7 @@ export interface SpinnerProps {
     speed?: `${number}s` // Seconds
     captureTime?: boolean
     size?: 'small' | 'medium' | 'large'
+    frozen?: boolean
 }
 
 /** Smoothly animated spinner for loading states. It does not indicate progress, only that something's happening. */
@@ -40,19 +43,23 @@ export function Spinner({
     textColored = false,
     className,
     speed = '1s',
-    captureTime = true,
+    captureTime = false,
     size = 'small',
+    frozen = false,
 }: SpinnerProps): JSX.Element {
     useTimingCapture(captureTime)
+    const ref = useCancelAnimationsOnUnmount<SVGSVGElement>()
 
     return (
         <svg
+            ref={ref}
             // eslint-disable-next-line react/forbid-dom-props
             style={{ '--spinner-speed': speed } as React.CSSProperties}
             className={twMerge(
                 'Icon Spinner',
                 textColored && `Spinner--textColored`,
                 size && `Spinner--${size}`,
+                frozen && 'Spinner--frozen',
                 className
             )}
             viewBox="0 0 48 48"

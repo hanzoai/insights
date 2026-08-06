@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -46,7 +46,7 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
                                     [
                                       'insights-docusaurus',
                                       {
-                                        apiKey: '<ph_project_api_key>',
+                                        apiKey: '<ph_project_token>',
                                         appUrl: '<ph_client_api_host>',
                                         enableInDevelopment: false,
                                       },

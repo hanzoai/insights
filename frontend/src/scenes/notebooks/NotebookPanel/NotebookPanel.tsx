@@ -1,167 +1,76 @@
 import './NotebookPanel.scss'
 
 import { useActions, useValues } from 'kea'
-import { useMemo } from 'react'
 
 import { IconExpand45 } from '@hanzo/icons'
-import { Button, Link } from '@hanzo/elements'
+import { Link } from '@hanzo/elements'
 
-import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'
 
-import { SidePanelContentContainer } from '~/layout/navigation-3000/sidepanel/SidePanelContentContainer'
 import { SidePanelPaneHeader } from '~/layout/navigation-3000/sidepanel/components/SidePanelPaneHeader'
+import { SidePanelContentContainer } from '~/layout/navigation-3000/sidepanel/SidePanelContentContainer'
 
 import { Notebook } from '../Notebook/Notebook'
 import { NotebookListMini } from '../Notebook/NotebookListMini'
-import { NotebookExpandButton, NotebookSyncInfo } from '../Notebook/NotebookMeta'
 import { notebookLogic } from '../Notebook/notebookLogic'
+import { NotebookExpandButton, NotebookPresence, NotebookSyncInfo } from '../Notebook/NotebookMeta'
 import { NotebookMenu } from '../NotebookMenu'
 import { NotebookTarget } from '../types'
 import { NotebookPanelDropzone } from './NotebookPanelDropzone'
 import { notebookPanelLogic } from './notebookPanelLogic'
 
 export function NotebookPanel(): JSX.Element | null {
-    const { selectedNotebook, initialAutofocus, droppedResource, dropProperties } = useValues(notebookPanelLogic)
+    const { selectedNotebook, droppedResource, dropProperties } = useValues(notebookPanelLogic)
     const { selectNotebook, closeSidePanel } = useActions(notebookPanelLogic)
     const { notebook } = useValues(notebookLogic({ shortId: selectedNotebook, target: NotebookTarget.Popover }))
     const editable = !notebook?.is_template
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
     const { ref, size } = useResizeBreakpoints({
         0: 'small',
         832: 'medium',
     })
 
-    const contentWidthHasEffect = useMemo(() => size === 'medium', [size])
+    const contentWidthHasEffect = size === 'medium'
 
     return (
-        <div
-            ref={ref}
-            className={cn('NotebookPanel', {
-                'bg-transparent': isRemovingSidePanelFlag,
-            })}
-            {...dropProperties}
-        >
+        <div ref={ref} className={cn('NotebookPanel', 'bg-transparent')} {...dropProperties}>
             {!droppedResource ? (
                 <>
-                    {!isRemovingSidePanelFlag && (
-                        <SidePanelPaneHeader>
-                            <div className="flex gap-1">
+                    <SidePanelContentContainer>
+                        <SidePanelPaneHeader title="Notebooks">
+                            <div className="flex gap-1 overflow-hidden">
                                 <NotebookListMini
                                     selectedNotebookId={selectedNotebook}
                                     onSelectNotebook={(notebook) => {
                                         selectNotebook(notebook.short_id)
                                     }}
+                                    buttonProps={{ className: 'max-w-[120px]', truncate: true }}
                                 />
 
                                 {selectedNotebook && <NotebookSyncInfo shortId={selectedNotebook} />}
                             </div>
 
-                            {!isRemovingSidePanelFlag && <div className="flex-1" />}
-                            <div
-                                className={cn('flex items-center', {
-                                    'flex items-center gap-1': isRemovingSidePanelFlag,
-                                })}
-                            >
-                                {isRemovingSidePanelFlag && selectedNotebook && notebook && (
-                                    <UserActivityIndicator
-                                        at={notebook.last_modified_at}
-                                        by={notebook.last_modified_by}
-                                    />
-                                )}
-
-                                <NotebookMenu shortId={selectedNotebook} />
+                            <div className="flex-1" />
+                            <div className="flex items-center gap-1">
+                                {selectedNotebook && <NotebookPresence shortId={selectedNotebook} />}
+                                <NotebookMenu shortId={selectedNotebook} inPanel />
                                 {contentWidthHasEffect && <NotebookExpandButton size="small" inPanel={true} />}
-                                {isRemovingSidePanelFlag ? (
-                                    <Link
-                                        buttonProps={{
-                                            iconOnly: true,
-                                        }}
-                                        to={urls.notebook(selectedNotebook)}
-                                        onClick={() => closeSidePanel()}
-                                        target="_blank"
-                                        tooltip="Open as main focus"
-                                        tooltipPlacement="bottom-end"
-                                    >
-                                        <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
-                                    </Link>
-                                ) : (
-                                    <Button
-                                        size="small"
-                                        sideIcon={<IconExpand45 />}
-                                        to={urls.notebook(selectedNotebook)}
-                                        onClick={() => closeSidePanel()}
-                                        targetBlank
-                                        tooltip="Open as main focus"
-                                        tooltipPlacement="bottom-end"
-                                    />
-                                )}
+                                <Link
+                                    buttonProps={{
+                                        iconOnly: true,
+                                    }}
+                                    to={urls.notebook(selectedNotebook)}
+                                    onClick={() => closeSidePanel()}
+                                    target="_blank"
+                                    tooltip="Open as main focus"
+                                    tooltipPlacement="bottom-end"
+                                >
+                                    <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
+                                </Link>
                             </div>
                         </SidePanelPaneHeader>
-                    )}
-                    <SidePanelContentContainer flagOffClassName="flex flex-col flex-1 overflow-y-auto p-3 bg-[var(--color-bg-surface-primary)]">
-                        {isRemovingSidePanelFlag && (
-                            <SidePanelPaneHeader title="Notebooks">
-                                <div className="flex gap-1 overflow-hidden">
-                                    <NotebookListMini
-                                        selectedNotebookId={selectedNotebook}
-                                        onSelectNotebook={(notebook) => {
-                                            selectNotebook(notebook.short_id)
-                                        }}
-                                        buttonProps={
-                                            isRemovingSidePanelFlag
-                                                ? { className: 'max-w-[120px]', truncate: true }
-                                                : undefined
-                                        }
-                                    />
-
-                                    {selectedNotebook && <NotebookSyncInfo shortId={selectedNotebook} />}
-                                </div>
-
-                                <div className="flex-1" />
-                                <div
-                                    className={cn('flex items-center', {
-                                        'flex items-center gap-1': isRemovingSidePanelFlag,
-                                    })}
-                                >
-                                    <NotebookMenu shortId={selectedNotebook} />
-                                    {contentWidthHasEffect && <NotebookExpandButton size="small" inPanel={true} />}
-                                    {isRemovingSidePanelFlag ? (
-                                        <Link
-                                            buttonProps={{
-                                                iconOnly: true,
-                                            }}
-                                            to={urls.notebook(selectedNotebook)}
-                                            onClick={() => closeSidePanel()}
-                                            target="_blank"
-                                            tooltip="Open as main focus"
-                                            tooltipPlacement="bottom-end"
-                                        >
-                                            <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
-                                        </Link>
-                                    ) : (
-                                        <Button
-                                            size="small"
-                                            sideIcon={<IconExpand45 />}
-                                            to={urls.notebook(selectedNotebook)}
-                                            onClick={() => closeSidePanel()}
-                                            targetBlank
-                                            tooltip="Open as main focus"
-                                            tooltipPlacement="bottom-end"
-                                        />
-                                    )}
-                                </div>
-                            </SidePanelPaneHeader>
-                        )}
-                        <Notebook
-                            key={selectedNotebook}
-                            shortId={selectedNotebook}
-                            editable={editable}
-                            initialAutofocus={initialAutofocus}
-                        />
+                        <Notebook key={selectedNotebook} shortId={selectedNotebook} editable={editable} />
                     </SidePanelContentContainer>
                 </>
             ) : null}

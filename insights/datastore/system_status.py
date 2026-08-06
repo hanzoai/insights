@@ -23,7 +23,7 @@ FLAMEGRAPH_PL = abspath(join(dirname(__file__), "bin", "flamegraph.pl"))
 SystemStatusRow = dict
 
 
-def system_status() -> Generator[SystemStatusRow, None, None]:
+def system_status() -> Generator[SystemStatusRow]:
     alive = is_alive()
     yield {
         "key": "datastore_alive",
@@ -126,7 +126,7 @@ def system_status() -> Generator[SystemStatusRow, None, None]:
 
     # This timestamp is a naive timestamp (does not include a timezone)
     # Datastore always stores timezone agnostic unix timestamp
-    # See https://clickhouse.com/docs/en/sql-reference/data-types/datetime#usage-remarks
+    # See https://datastore.com/docs/en/sql-reference/data-types/datetime#usage-remarks
     last_event_ingested_timestamp = sync_execute(
         """
     SELECT max(_timestamp) FROM events

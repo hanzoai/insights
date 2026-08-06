@@ -1,12 +1,15 @@
 import { useActions, useValues } from 'kea'
 
+import * as einsteinPng from '@hanzo/brand/hoggies/png/einstein'
 import { IconBell, IconGraph, IconRocket, IconTarget } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
 
-import { ProfessorMascot } from 'lib/components/mascots'
+import { pngHoggie } from 'lib/brand/hoggies'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
 import { SurveyEditSection, surveyLogic } from 'scenes/surveys/surveyLogic'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
+
+const MascotEinstein = pngHoggie(einsteinPng)
 
 interface FirstSurveyHelperProps {
     onTabChange?: (tab: string) => void
@@ -32,7 +35,7 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
         <div className="bg-bg-light border border-border rounded-lg p-6">
             <div className="flex items-center gap-6">
                 <div className="hidden sm:block flex-shrink-0">
-                    <ProfessorMascot width={180} height={180} className="scale-x-[-1]" />
+                    <MascotEinstein width={180} height={180} className="scale-x-[-1]" />
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="mb-6">

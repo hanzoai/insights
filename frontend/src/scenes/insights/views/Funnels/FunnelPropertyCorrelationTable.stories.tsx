@@ -1,4 +1,4 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import { BindLogic } from 'kea'
 import { useState } from 'react'
 
@@ -12,10 +12,11 @@ import { insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
 import { getCachedResults } from '~/queries/nodes/InsightViz/utils'
 import { InsightLogicProps } from '~/types'
 
+import __funnelLeftToRight from '../../../../mocks/fixtures/api/projects/team_id/insights/funnelLeftToRight.json'
 import { FunnelPropertyCorrelationTable } from './FunnelPropertyCorrelationTable'
 
-type Story = StoryObj<typeof FunnelPropertyCorrelationTable>
-const meta: Meta<typeof FunnelPropertyCorrelationTable> = {
+type Story = StoryObj<{}>
+const meta: Meta = {
     title: 'Insights/FunnelPropertyCorrelationTable',
     component: FunnelPropertyCorrelationTable,
     decorators: [
@@ -26,35 +27,35 @@ const meta: Meta<typeof FunnelPropertyCorrelationTable> = {
         }),
         taxonomicFilterMocksDecorator,
     ],
+    render: () => {
+        const [dashboardItemId] = useState(() => `FunnelPropertyCorrelationTableStory.${uniqueNode++}`)
+
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const insight = __funnelLeftToRight as any
+        const cachedInsight = { ...insight, short_id: dashboardItemId }
+
+        const insightProps = { dashboardItemId, doNotLoad: true, cachedInsight } as InsightLogicProps
+
+        const dataNodeLogicProps: DataNodeLogicProps = {
+            query: insight.query.source,
+            key: insightVizDataNodeKey(insightProps),
+            cachedResults: getCachedResults(insightProps.cachedInsight, insight.query.source),
+            doNotLoad: insightProps.doNotLoad,
+        }
+
+        return (
+            <BindLogic logic={insightLogic} props={insightProps}>
+                <BindLogic logic={dataNodeLogic} props={dataNodeLogicProps}>
+                    <FunnelPropertyCorrelationTable />
+                </BindLogic>
+            </BindLogic>
+        )
+    },
 }
 export default meta
 
 let uniqueNode = 0
 
-const Template: StoryFn<typeof FunnelPropertyCorrelationTable> = () => {
-    const [dashboardItemId] = useState(() => `FunnelPropertyCorrelationTableStory.${uniqueNode++}`)
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const insight = require('../../../../mocks/fixtures/api/projects/team_id/insights/funnelLeftToRight.json')
-    const cachedInsight = { ...insight, short_id: dashboardItemId }
-
-    const insightProps = { dashboardItemId, doNotLoad: true, cachedInsight } as InsightLogicProps
-
-    const dataNodeLogicProps: DataNodeLogicProps = {
-        query: insight.query.source,
-        key: insightVizDataNodeKey(insightProps),
-        cachedResults: getCachedResults(insightProps.cachedInsight, insight.query.source),
-        doNotLoad: insightProps.doNotLoad,
-    }
-
-    return (
-        <BindLogic logic={insightLogic} props={insightProps}>
-            <BindLogic logic={dataNodeLogic} props={dataNodeLogicProps}>
-                <FunnelPropertyCorrelationTable />
-            </BindLogic>
-        </BindLogic>
-    )
+export const Default: Story = {
+    args: {},
 }
-
-export const Default: Story = Template.bind({})
-Default.args = {}

@@ -2231,7 +2231,7 @@
         {
             "key": "scale-20230117",
             "name": "Paid",
-            "description": "The whole iql. Pay per use. Email support.",
+            "description": "The whole script. Pay per use. Email support.",
             "is_free": false,
             "products": [
                 {

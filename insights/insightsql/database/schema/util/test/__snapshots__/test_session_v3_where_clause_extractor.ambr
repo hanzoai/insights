@@ -1,5 +1,5 @@
 # serializer version: 1
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_join_with_events
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_join_with_events
   '''
   SELECT
       sessions.session_id AS session_id,
@@ -16,13 +16,13 @@
       GROUP BY
           raw_sessions_v3.session_id_v7) AS sessions ON equals(events.`$session_id`, sessions.session_id)
   WHERE
-      and(equals(events.team_id, <TEAM_ID>), greater(toTimeZone(events.timestamp, %(insightsql_val_1)s), %(insightsql_val_2)s))
+      and(equals(events.team_id, <TEAM_ID>), greater(events.timestamp, toDateTime64(%(insightsql_val_1)s, 6, %(insightsql_val_2)s)))
   GROUP BY
       sessions.session_id
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_point_query
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_point_query
   '''
   SELECT
       sessions.session_id AS session_id
@@ -37,11 +37,11 @@
       GROUP BY
           raw_sessions_v3.session_id_v7) AS sessions
   WHERE
-      ifNull(equals(sessions.session_id, %(insightsql_val_2)s), 0)
+      equals(sessions.session_id, %(insightsql_val_2)s)
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_select_query_alias_type_does_not_crash
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_select_query_alias_type_does_not_crash
   '''
   SELECT
       subquery.session_id AS session_id
@@ -61,13 +61,13 @@
           GROUP BY
               raw_sessions_v3.session_id_v7) AS sessions
       WHERE
-          ifNull(greaterOrEquals(sessions.`$start_timestamp`, %(insightsql_val_2)s), 0)) AS subquery
+          greaterOrEquals(sessions.`$start_timestamp`, %(insightsql_val_2)s)) AS subquery
   WHERE
-      ifNull(equals(subquery.session_id, %(insightsql_val_3)s), 0)
+      equals(subquery.session_id, %(insightsql_val_3)s)
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_select_with_timestamp
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_select_with_timestamp
   '''
   SELECT
       sessions.session_id AS session_id
@@ -83,20 +83,20 @@
       GROUP BY
           raw_sessions_v3.session_id_v7) AS sessions
   WHERE
-      ifNull(greater(sessions.`$start_timestamp`, %(insightsql_val_2)s), 0)
+      greater(sessions.`$start_timestamp`, %(insightsql_val_2)s)
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_session_breakdown
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_session_breakdown
   '''
   SELECT
       count(DISTINCT e.`$session_id`) AS total,
       toStartOfDay(toTimeZone(e.timestamp, %(insightsql_val_7)s)) AS day_start,
-      multiIf(and(ifNull(greaterOrEquals(e__session.`$session_duration`, 2.0), 0), ifNull(less(e__session.`$session_duration`, 4.5), 0)), %(insightsql_val_8)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 4.5), 0), ifNull(less(e__session.`$session_duration`, 27.0), 0)), %(insightsql_val_9)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 27.0), 0), ifNull(less(e__session.`$session_duration`, 44.0), 0)), %(insightsql_val_10)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 44.0), 0), ifNull(less(e__session.`$session_duration`, 48.0), 0)), %(insightsql_val_11)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 48.0), 0), ifNull(less(e__session.`$session_duration`, 57.5), 0)), %(insightsql_val_12)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 57.5), 0), ifNull(less(e__session.`$session_duration`, 61.0), 0)), %(insightsql_val_13)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 61.0), 0), ifNull(less(e__session.`$session_duration`, 74.0), 0)), %(insightsql_val_14)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 74.0), 0), ifNull(less(e__session.`$session_duration`, 90.0), 0)), %(insightsql_val_15)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 90.0), 0), ifNull(less(e__session.`$session_duration`, 98.5), 0)), %(insightsql_val_16)s, and(ifNull(greaterOrEquals(e__session.`$session_duration`, 98.5), 0), ifNull(less(e__session.`$session_duration`, 167.01), 0)), %(insightsql_val_17)s, %(insightsql_val_18)s) AS breakdown_value
+      multiIf(and(greaterOrEquals(e__session.`$session_duration`, 2.0), less(e__session.`$session_duration`, 4.5)), %(insightsql_val_8)s, and(greaterOrEquals(e__session.`$session_duration`, 4.5), less(e__session.`$session_duration`, 27.0)), %(insightsql_val_9)s, and(greaterOrEquals(e__session.`$session_duration`, 27.0), less(e__session.`$session_duration`, 44.0)), %(insightsql_val_10)s, and(greaterOrEquals(e__session.`$session_duration`, 44.0), less(e__session.`$session_duration`, 48.0)), %(insightsql_val_11)s, and(greaterOrEquals(e__session.`$session_duration`, 48.0), less(e__session.`$session_duration`, 57.5)), %(insightsql_val_12)s, and(greaterOrEquals(e__session.`$session_duration`, 57.5), less(e__session.`$session_duration`, 61.0)), %(insightsql_val_13)s, and(greaterOrEquals(e__session.`$session_duration`, 61.0), less(e__session.`$session_duration`, 74.0)), %(insightsql_val_14)s, and(greaterOrEquals(e__session.`$session_duration`, 74.0), less(e__session.`$session_duration`, 90.0)), %(insightsql_val_15)s, and(greaterOrEquals(e__session.`$session_duration`, 90.0), less(e__session.`$session_duration`, 98.5)), %(insightsql_val_16)s, and(greaterOrEquals(e__session.`$session_duration`, 98.5), less(e__session.`$session_duration`, 167.01)), %(insightsql_val_17)s, %(insightsql_val_18)s) AS breakdown_value
   FROM
       events AS e
       LEFT OUTER JOIN (SELECT
-          tupleElement(argMax(tuple(person_distinct_id_overrides.person_id), person_distinct_id_overrides.version), 1) AS person_id,
+          argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version) AS person_id,
           person_distinct_id_overrides.distinct_id AS distinct_id
       FROM
           person_distinct_id_overrides
@@ -105,7 +105,7 @@
       GROUP BY
           person_distinct_id_overrides.distinct_id
       HAVING
-          ifNull(equals(tupleElement(argMax(tuple(person_distinct_id_overrides.is_deleted), person_distinct_id_overrides.version), 1), 0), 0)
+          equals(argMax(person_distinct_id_overrides.is_deleted, person_distinct_id_overrides.version), 0)
       SETTINGS optimize_aggregation_in_order=1) AS e__override ON equals(e.distinct_id, e__override.distinct_id)
       LEFT JOIN (SELECT
           dateDiff(%(insightsql_val_0)s, min(toTimeZone(raw_sessions_v3.min_timestamp, %(insightsql_val_1)s)), max(toTimeZone(raw_sessions_v3.max_timestamp, %(insightsql_val_2)s))) AS `$session_duration`,
@@ -129,7 +129,7 @@
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_session_replay_query
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_session_replay_query
   '''
   SELECT
       s.session_id AS session_id,
@@ -146,13 +146,13 @@
       GROUP BY
           raw_sessions_v3.session_id_v7) AS s__session ON equals(toUInt128(accurateCastOrNull(s.session_id, %(insightsql_val_2)s)), s__session.session_id_v7)
   WHERE
-      and(equals(s.team_id, <TEAM_ID>), ifNull(equals(s__session.`$entry_pathname`, %(insightsql_val_4)s), 0), greaterOrEquals(toTimeZone(s.min_first_timestamp, %(insightsql_val_5)s), %(insightsql_val_6)s), less(toTimeZone(s.min_first_timestamp, %(insightsql_val_7)s), now64(6, %(insightsql_val_8)s)))
+      and(equals(s.team_id, <TEAM_ID>), equals(s__session.`$entry_pathname`, %(insightsql_val_4)s), greaterOrEquals(s.min_first_timestamp, toDateTime64(%(insightsql_val_5)s, 6, %(insightsql_val_6)s)), less(s.min_first_timestamp, now64(6, %(insightsql_val_7)s)))
   GROUP BY
       s.session_id
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_single_session_lookup_with_uuidv7_timestamp
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_single_session_lookup_with_uuidv7_timestamp
   '''
   SELECT
       sessions.session_id AS session_id,
@@ -171,11 +171,11 @@
       GROUP BY
           raw_sessions_v3.session_id_v7) AS sessions
   WHERE
-      and(ifNull(greaterOrEquals(sessions.`$start_timestamp`, UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_8)s, %(insightsql_val_9)s))), 0), ifNull(lessOrEquals(sessions.`$start_timestamp`, plus(UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_10)s, %(insightsql_val_11)s)), toIntervalHour(1))), 0), ifNull(equals(sessions.session_id, %(insightsql_val_12)s), 0))
+      and(ifNull(greaterOrEquals(sessions.`$start_timestamp`, UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_8)s, %(insightsql_val_9)s))), 0), ifNull(lessOrEquals(sessions.`$start_timestamp`, plus(UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_10)s, %(insightsql_val_11)s)), toIntervalHour(1))), 0), equals(sessions.session_id, %(insightsql_val_12)s))
   LIMIT 1
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_single_session_lookup_with_uuidv7_timestamp_simple
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_single_session_lookup_with_uuidv7_timestamp_simple
   '''
   SELECT
       sessions.session_id AS session_id
@@ -191,11 +191,11 @@
       GROUP BY
           raw_sessions_v3.session_id_v7) AS sessions
   WHERE
-      and(ifNull(greaterOrEquals(sessions.`$start_timestamp`, UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_7)s, %(insightsql_val_8)s))), 0), ifNull(lessOrEquals(sessions.`$start_timestamp`, plus(UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_9)s, %(insightsql_val_10)s)), toIntervalDay(2))), 0), ifNull(equals(sessions.session_id, %(insightsql_val_11)s), 0))
+      and(ifNull(greaterOrEquals(sessions.`$start_timestamp`, UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_7)s, %(insightsql_val_8)s))), 0), ifNull(lessOrEquals(sessions.`$start_timestamp`, plus(UUIDv7ToDateTime(accurateCastOrNull(%(insightsql_val_9)s, %(insightsql_val_10)s)), toIntervalDay(2))), 0), equals(sessions.session_id, %(insightsql_val_11)s))
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_union
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_union
   '''
   SELECT
       0 AS duration
@@ -204,7 +204,13 @@
   SELECT
       events__session.`$session_duration` AS duration
   FROM
-      events
+      (SELECT
+          events.`$session_id_uuid` AS `$session_id_uuid`
+      FROM
+          events
+      WHERE
+          and(equals(events.team_id, <TEAM_ID>), less(events.timestamp, today()))
+      LIMIT 50000) AS events
       LEFT JOIN (SELECT
           dateDiff(%(insightsql_val_0)s, min(toTimeZone(raw_sessions_v3.min_timestamp, %(insightsql_val_1)s)), max(toTimeZone(raw_sessions_v3.max_timestamp, %(insightsql_val_2)s))) AS `$session_duration`,
           raw_sessions_v3.session_id_v7 AS session_id_v7
@@ -214,12 +220,10 @@
           and(equals(raw_sessions_v3.team_id, <TEAM_ID>), lessOrEquals(raw_sessions_v3.session_timestamp, plus(today(), toIntervalDay(3))))
       GROUP BY
           raw_sessions_v3.session_id_v7) AS events__session ON equals(events.`$session_id_uuid`, events__session.session_id_v7)
-  WHERE
-      and(equals(events.team_id, <TEAM_ID>), less(toTimeZone(events.timestamp, %(insightsql_val_3)s), today()))
   LIMIT 50000
   '''
 # ---
-# name: TestSessionsV3QueriesInsightsQLToClickhouse.test_urls_in_sessions_in_timestamp_query
+# name: TestSessionsV3QueriesInsightsQLToDatastore.test_urls_in_sessions_in_timestamp_query
   '''
   SELECT
       sessions.session_id AS session_id,
@@ -238,7 +242,7 @@
       GROUP BY
           raw_sessions_v3.session_id_v7) AS sessions
   WHERE
-      ifNull(greaterOrEquals(sessions.`$start_timestamp`, minus(now64(6, %(insightsql_val_2)s), toIntervalDay(7))), 0)
+      greaterOrEquals(sessions.`$start_timestamp`, minus(now64(6, %(insightsql_val_2)s), toIntervalDay(7)))
   LIMIT 50000
   '''
 # ---

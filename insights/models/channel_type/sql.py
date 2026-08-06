@@ -2,16 +2,15 @@ import os
 import json
 
 from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import DatastoreUser, get_datastore_creds
 from insights.datastore.cluster import ON_CLUSTER_CLAUSE
-from insights.datastore.dictionaries import dictionary_source
 from insights.datastore.table_engines import MergeTreeEngine, ReplicationScheme
 from insights.settings import DATASTORE_CLUSTER
 
 CHANNEL_DEFINITION_TABLE_NAME = "channel_definition"
 CHANNEL_DEFINITION_DICTIONARY_NAME = "channel_definition_dict"
 
-CHANNEL_DEFINITION_TABLE_SQL = (
-    lambda on_cluster=True: """
+CHANNEL_DEFINITION_TABLE_SQL = lambda on_cluster=True: """
 CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause} (
     domain String NOT NULL,
     kind String NOT NULL,
@@ -21,10 +20,9 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause} (
 ) ENGINE = {engine}
 ORDER BY (domain, kind);
 """.format(
-        table_name=CHANNEL_DEFINITION_TABLE_NAME,
-        engine=MergeTreeEngine("channel_definition", replication_scheme=ReplicationScheme.REPLICATED),
-        on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
-    )
+    table_name=CHANNEL_DEFINITION_TABLE_NAME,
+    engine=MergeTreeEngine("channel_definition", replication_scheme=ReplicationScheme.REPLICATED),
+    on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
 )
 
 
@@ -34,7 +32,7 @@ DROP_CHANNEL_DEFINITION_TABLE_SQL = (
 
 
 TRUNCATE_CHANNEL_DEFINITION_TABLE_SQL = (
-    f"TRUNCATE TABLE IF EXISTS {CHANNEL_DEFINITION_TABLE_NAME} ON CLUSTER '{DATASTORE_CLUSTER}'"
+    f"TRUNCATE TABLE IF EXISTS {CHANNEL_DEFINITION_TABLE_NAME} {ON_CLUSTER_CLAUSE()}"
 )
 
 with open(os.path.join(os.path.dirname(__file__), "channel_definitions.json")) as f:
@@ -50,8 +48,8 @@ def format_value(value):
         raise ValueError(f"Unknown value type {type(value)}")
 
 
-CHANNEL_DEFINITION_DATA_SQL = (
-    lambda channel_definitions=CHANNEL_DEFINITIONS: f"""
+CHANNEL_DEFINITION_DATA_SQL = lambda channel_definitions=CHANNEL_DEFINITIONS: (
+    f"""
 INSERT INTO channel_definition (domain, kind, domain_type, type_if_paid, type_if_organic) VALUES
 {
         ''',
@@ -61,18 +59,14 @@ INSERT INTO channel_definition (domain, kind, domain_type, type_if_paid, type_if
 """
 )
 
-# Use COMPLEX_KEY_HASHED, as we have a composite key.
-#
-# OR REPLACE, not IF NOT EXISTS: the definition is the thing that changes. A
-# dictionary that already exists with a stale source — one that authenticates
-# as an account this deployment does not have, say — is exactly the case a
-# re-run has to repair, and IF NOT EXISTS returns success without reading the
-# body, so the repair silently does nothing. OR REPLACE is idempotent for the
-# fresh case and corrective for the live one, which keeps this one statement
-# the only way the dictionary is ever defined.
-CHANNEL_DEFINITION_DICTIONARY_SQL = (
-    lambda on_cluster=True: f"""
-CREATE OR REPLACE DICTIONARY {CHANNEL_DEFINITION_DICTIONARY_NAME} {ON_CLUSTER_CLAUSE(on_cluster)} (
+_dict_reader_creds = get_datastore_creds(DatastoreUser.DICT_READER)
+DATASTORE_DICT_READER_USER = _dict_reader_creds.user
+DATASTORE_DICT_READER_PASSWORD = _dict_reader_creds.password
+
+# Use COMPLEX_KEY_HASHED, as we have a composite key
+CHANNEL_DEFINITION_DICTIONARY_SQL = lambda on_cluster=True: (
+    f"""
+CREATE DICTIONARY IF NOT EXISTS {CHANNEL_DEFINITION_DICTIONARY_NAME} {ON_CLUSTER_CLAUSE(on_cluster)} (
     domain String,
     kind String,
     domain_type Nullable(String),
@@ -80,7 +74,7 @@ CREATE OR REPLACE DICTIONARY {CHANNEL_DEFINITION_DICTIONARY_NAME} {ON_CLUSTER_CL
     type_if_organic Nullable(String)
 )
 PRIMARY KEY domain, kind
-{dictionary_source(table=CHANNEL_DEFINITION_TABLE_NAME)}
+SOURCE(DATASTORE(TABLE '{CHANNEL_DEFINITION_TABLE_NAME}' USER '{DATASTORE_DICT_READER_USER}' PASSWORD '{DATASTORE_DICT_READER_PASSWORD}'))
 LIFETIME(MIN 3000 MAX 3600)
 LAYOUT(COMPLEX_KEY_HASHED())
 """

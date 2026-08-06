@@ -1,4 +1,4 @@
-import { ProcessedPluginEvent } from '@hanzo/plugin-scaffold'
+import { ProcessedPluginEvent } from '~/plugin-scaffold'
 
 import { LegacyDestinationPluginMeta } from '../../types'
 

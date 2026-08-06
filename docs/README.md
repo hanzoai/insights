@@ -6,7 +6,7 @@ Developer-focused documentation alongside code. Update docs in the same PR as yo
 
 ### `published/` - Published on hanzo.ai
 
-Documentation published when merged to main. The URL mirrors the directory structure - just strip the `docs/published/` prefix:
+Documentation published when merged to master. The URL mirrors the directory structure - just strip the `docs/published/` prefix:
 
 ```text
 docs/published/docs/surveys/...          →  hanzo.ai/docs/surveys/...
@@ -37,7 +37,7 @@ GitHub Action triggers hanzo.ai preview build
   ↓
 Preview URL posted to PR
   ↓
-Merge to main
+Merge to master
   ↓
 Docs go live on hanzo.ai
 ```

@@ -1,9 +1,6 @@
-import '../../lib/components/Cards/InsightCard/InsightCard.scss'
-
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { Fragment } from 'react'
 
-import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
     ActivityChange,
     ActivityLogItem,
@@ -14,6 +11,7 @@ import {
     detectBoolean,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
+import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
     InsightBreakdownSummary,
     PropertiesSummary,
@@ -21,13 +19,19 @@ import {
 } from 'lib/components/Cards/InsightCard/InsightDetails'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { Link } from 'lib/elements/Link'
-import { areObjectValuesEmpty, pluralize } from 'lib/utils'
+import { areObjectValuesEmpty } from 'lib/utils/objects'
+import { pluralize } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
 import { filtersToQueryNode } from '~/queries/nodes/InsightQuery/utils/filtersToQueryNode'
-import { queryNodeToFilter } from '~/queries/nodes/InsightQuery/utils/queryNodeToFilter'
-import { InsightQueryNode, QuerySchema, TrendsQuery } from '~/queries/schema/schema-general'
-import { isInsightQueryNode, isValidBreakdown } from '~/queries/utils'
+import { InsightsQLQuery, InsightQueryNode, QuerySchema } from '~/queries/schema/schema-general'
+import {
+    isDataTableNodeWithInsightsQLQuery,
+    isDataVisualizationNode,
+    isInsightsQLQuery,
+    isInsightQueryNode,
+    isInsightVizNode,
+} from '~/queries/utils'
 import { FilterType, InsightModel, InsightShortId } from '~/types'
 
 const nameOrLinkToInsight = (short_id?: InsightShortId | null, name?: string | null): string | JSX.Element => {
@@ -79,7 +83,11 @@ const insightActionsMapping: Record<
     filters: function onChangedFilter(change) {
         const filtersAfter = change?.after as Partial<FilterType>
 
-        return areObjectValuesEmpty(filtersAfter) ? null : summarizeChanges(filtersAfter)
+        return areObjectValuesEmpty(filtersAfter)
+            ? null
+            : summarizeQueryChanges(
+                  filtersToQueryNode(filtersAfter, { source: 'saved_insights_activity_descriptions' })
+              )
     },
     query: function onChangedQuery(change) {
         if (change?.action === 'deleted') {
@@ -88,9 +96,17 @@ const insightActionsMapping: Record<
         }
 
         const queryAfter = change?.after as QuerySchema
-        return isInsightQueryNode(queryAfter)
-            ? summarizeChanges(queryNodeToFilter(change?.after as InsightQueryNode))
-            : { description: ["cannot yet summarize changes to this insight's query: " + queryAfter?.kind] }
+        // saved insights store the actual query wrapped in an InsightVizNode (or in a
+        // DataVisualizationNode / DataTableNode for SQL insights), so summarize the source
+        const source =
+            isInsightVizNode(queryAfter) ||
+            isDataVisualizationNode(queryAfter) ||
+            isDataTableNodeWithInsightsQLQuery(queryAfter)
+                ? queryAfter.source
+                : queryAfter
+        return isInsightQueryNode(source) || isInsightsQLQuery(source)
+            ? summarizeQueryChanges(source)
+            : { description: ['changed the query'] }
     },
     deleted: function onSoftDelete(change, logItem, asNotification) {
         const isDeleted = detectBoolean(change?.after)
@@ -239,19 +255,20 @@ const insightActionsMapping: Record<
     user_access_level: () => null,
     _create_in_folder: () => null,
     last_viewed_at: () => null,
+    viewers: () => null,
+    view_count: () => null,
+    is_cached: () => null,
+    filter_override_context: () => null,
 }
 
-function summarizeChanges(filtersAfter: Partial<FilterType>): ChangeMapping | null {
-    const query = filtersToQueryNode(filtersAfter)
-    const trendsQuery = query as TrendsQuery
-
+function summarizeQueryChanges(query: InsightQueryNode | InsightsQLQuery): ChangeMapping {
     return {
         description: ['changed query definition'],
         extendedDescription: (
             <div className="ActivityDescription">
                 <SeriesSummary query={query} />
-                <PropertiesSummary properties={query.properties} />
-                {isValidBreakdown(trendsQuery?.breakdownFilter) && <InsightBreakdownSummary query={query} />}
+                <PropertiesSummary properties={isInsightsQLQuery(query) ? query.filters?.properties : query.properties} />
+                <InsightBreakdownSummary query={query} />
             </div>
         ),
     }
@@ -330,14 +347,15 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
 
         try {
             for (const change of logItem.detail.changes || []) {
-                if (!change?.field || !insightActionsMapping[change.field]) {
+                const insightAction = insightActionsMapping[change.field as keyof InsightModel]
+                if (!change?.field || !insightAction) {
                     continue // insight updates have to have a "field" to be described
                 }
 
-                const actionHandler = insightActionsMapping[change.field]
+                const actionHandler = insightAction
                 const processedChange = actionHandler(change, logItem, asNotification)
                 if (processedChange === null) {
-                    continue // // unexpected log from backend is indescribable
+                    continue // unexpected log from backend is indescribable
                 }
 
                 const { description, extendedDescription: _extendedDescription, suffix } = processedChange
