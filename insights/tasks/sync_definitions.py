@@ -29,7 +29,7 @@ from celery import shared_task
 from insights.datastore.client import sync_execute
 from insights.datastore.client.connection import Workload
 from insights.models import Team
-from insights.models.event_definition import EventDefinition
+from products.event_definitions.backend.models.event_definition import EventDefinition
 from products.event_definitions.backend.models.property_definition import PropertyDefinition
 
 logger = structlog.get_logger(__name__)
