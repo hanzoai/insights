@@ -128,6 +128,37 @@ describe('featureFlagLogic', () => {
         expect(logic.values.featureFlags['never-granted' as never]).toBeUndefined()
     })
 
+    it('says evaluation failed, instead of looking like nothing is turned on', async () => {
+        // The regression this exists for: a broken evaluator and a deployment with
+        // nothing turned on produce the same empty set, so a reader checking
+        // whether a gated control is gone cannot tell which one they are seeing.
+        await useMountedFlags(() => [502, { featureFlags: {}, featureFlagPayloads: {}, evaluated: false }])
+        await expectLogic(logic).toDispatchActions(['setFlagsUnavailable'])
+
+        expect(logic.values.flagsUnavailable).toBe(true)
+        // Still fails closed, and still unblocks the render.
+        expect(logic.values.receivedFeatureFlags).toBe(true)
+        expect(logic.values.featureFlags['new-editor' as never]).toBeUndefined()
+    })
+
+    it('says so when the door answers without an evaluator behind it', async () => {
+        // 200, well-formed, and nothing evaluated it. It grants the same nothing as
+        // a 502, so the only thing separating it from a verdict is this signal.
+        await useMountedFlags({ featureFlags: {}, featureFlagPayloads: {}, evaluated: false })
+        await expectLogic(logic).toDispatchActions(['setFlagsUnavailable'])
+
+        expect(logic.values.flagsUnavailable).toBe(true)
+    })
+
+    it('does not cry outage when the evaluator ran and turned nothing on', async () => {
+        // The live state this had to distinguish: cloud evaluates cleanly and holds
+        // no definitions, so an empty verdict is correct and entirely trustworthy.
+        await useMountedFlags({ featureFlags: {}, featureFlagPayloads: {}, evaluated: true })
+
+        expect(logic.values.flagsUnavailable).toBe(false)
+        expect(logic.values.receivedFeatureFlags).toBe(true)
+    })
+
     it('does not ask for a verdict when there is no session to evaluate', async () => {
         // The shared-dashboard and exporter views render this app anonymously.
         const get = await useMountedFlags(REAL_VERDICT, ['a-default'], true)

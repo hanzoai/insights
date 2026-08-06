@@ -1,4 +1,4 @@
-import { MakeLogicType, actions, afterMount, kea, path, reducers } from 'kea'
+import { MakeLogicType, actions, afterMount, kea, listeners, path, reducers } from 'kea'
 import insights from 'insights-js'
 
 import api from 'lib/api'
@@ -18,6 +18,8 @@ export type FeatureFlagPayloads = Record<string, any>
 interface FeatureFlagVerdict {
     featureFlags?: FeatureFlagsSet
     featureFlagPayloads?: FeatureFlagPayloads
+    /** Did an evaluator actually decide this? False when the door answered without one. */
+    evaluated?: boolean
 }
 
 const eventsNotified: Record<string, boolean> = {}
@@ -132,6 +134,7 @@ export function getFeatureFlagPayload(flag: FeatureFlagKey): any {
 export interface featureFlagLogicValues {
     featureFlagPayloads: FeatureFlagPayloads;
     featureFlags: FeatureFlagsSet;
+    flagsUnavailable: boolean;
     receivedFeatureFlags: boolean;
 }
 
@@ -141,6 +144,9 @@ export interface featureFlagLogicActions {
         flags: string[];
         payloads: FeatureFlagPayloads;
         variants: Record<string, boolean | string>;
+    };
+    setFlagsUnavailable: (reason: string) => {
+        reason: string;
     };
 }
 
@@ -160,6 +166,9 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
             variants,
             payloads,
         }),
+        // Orthogonal to the flags themselves: "which flags are on" and "was anything
+        // able to decide that" are different facts, and only one of them is a fault.
+        setFlagsUnavailable: (reason: string) => ({ reason }),
     }),
     reducers({
         featureFlags: [
@@ -182,7 +191,27 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                 setFeatureFlags: () => true,
             },
         ],
+        // Deliberately NOT persisted: this describes this page load's evaluation,
+        // not the user. A stale `true` would accuse a healthy evaluator.
+        flagsUnavailable: [
+            false,
+            {
+                setFlagsUnavailable: () => true,
+            },
+        ],
     }),
+    listeners(() => ({
+        setFlagsUnavailable: ({ reason }) => {
+            // Loud on purpose. Every flag-gated surface is absent while this is
+            // true, and without a log line that absence is silent, so a reader
+            // concludes the feature is switched off or that a change removing it
+            // landed.
+            console.error(
+                `Feature flags could not be evaluated, so every flag reads as off: ${reason}. ` +
+                    'A gated surface missing right now is not evidence that it was removed.'
+            )
+        },
+    })),
     afterMount(({ actions }) => {
         // ALWAYS delivers, including on failure and including when there is
         // nothing to ask. The app blocks on `receivedFeatureFlags` for up to
@@ -197,9 +226,21 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
             return
         }
         void fetchVerdict()
-            .then((verdict) =>
+            .then((verdict) => {
                 actions.setFeatureFlags([], verdict.featureFlags ?? {}, verdict.featureFlagPayloads ?? {})
-            )
-            .catch(() => actions.setFeatureFlags([], {}, {}))
+                // A door that answers without an evaluator behind it grants nothing,
+                // which is indistinguishable from a deployment that turned nothing
+                // on, so it has to record which of the two happened.
+                if (verdict.evaluated === false) {
+                    actions.setFlagsUnavailable('the door answered without an evaluated verdict')
+                }
+            })
+            .catch((error) => {
+                // Still grants nothing and still unblocks the render. The failure is
+                // also recorded, because a surface missing due to a broken
+                // evaluation looks exactly like one that is deliberately off.
+                actions.setFeatureFlags([], {}, {})
+                actions.setFlagsUnavailable(String(error?.message ?? error))
+            })
     }),
 ])

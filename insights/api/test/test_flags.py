@@ -67,6 +67,7 @@ class TestEvaluate:
         assert verdict == {
             "featureFlags": {"new-editor": True, "theme": "dark"},
             "featureFlagPayloads": {"theme": {"hue": 2}},
+            "evaluated": True,
         }
 
     @configured
@@ -136,7 +137,7 @@ class TestEvaluate:
                 post.return_value = _response({"featureFlags": {"a": True}})
                 verdict = flags_api._evaluate(_User())
 
-        assert verdict == {"featureFlags": {"a": True}, "featureFlagPayloads": {}}
+        assert verdict == {"featureFlags": {"a": True}, "featureFlagPayloads": {}, "evaluated": True}
 
     @configured
     def test_the_refusal_never_carries_the_bearer(self):
@@ -194,7 +195,11 @@ class TestFlagsEndpoint:
                 response = self._get(user=_User())
 
         assert response.status_code == status.HTTP_200_OK, response.data
-        assert response.data == {"featureFlags": {"new-editor": True}, "featureFlagPayloads": {}}
+        assert response.data == {
+            "featureFlags": {"new-editor": True},
+            "featureFlagPayloads": {},
+            "evaluated": True,
+        }
 
     @configured
     def test_an_anonymous_caller_gets_no_verdict(self):
@@ -258,6 +263,39 @@ class TestFlagsEndpoint:
 
         assert response.status_code == status.HTTP_502_BAD_GATEWAY
         assert response.data["featureFlags"] == {}
+
+    @configured
+    @pytest.mark.parametrize(
+        "post_kwargs",
+        [
+            pytest.param({"return_value": _response({"detail": "X-Org-Id required"}, code=403)}, id="refused"),
+            pytest.param({"side_effect": OSError("connection refused")}, id="unreachable"),
+            pytest.param({"return_value": _response({"nonsense": True})}, id="not-a-verdict"),
+        ],
+    )
+    def test_an_answer_nobody_evaluated_says_so(self, post_kwargs):
+        # Granting nothing is right, but a caller that cannot tell this from an
+        # evaluated verdict reads every gated surface as deliberately switched off.
+        with patch("insights.api.flags.iam.authorization", return_value={"Authorization": "Bearer tok"}):
+            with patch("insights.api.flags.requests.post", **post_kwargs):
+                response = self._get(user=_User())
+
+        assert response.data["featureFlags"] == {}
+        assert response.data["evaluated"] is False
+
+    @configured
+    def test_an_evaluator_that_turned_nothing_on_is_not_reported_as_broken(self):
+        # The live state this had to distinguish: cloud evaluates cleanly and holds
+        # no definitions, so the verdict is empty and entirely trustworthy. Reporting
+        # that as unavailable would cry outage on a healthy deployment.
+        with patch("insights.api.flags.iam.authorization", return_value={"Authorization": "Bearer tok"}):
+            with patch("insights.api.flags.requests.post") as post:
+                post.return_value = _response(_verdict())
+                response = self._get(user=_User())
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["featureFlags"] == {}
+        assert response.data["evaluated"] is True
 
     @configured
     def test_a_verdict_is_never_cached(self):
