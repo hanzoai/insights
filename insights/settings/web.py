@@ -261,6 +261,18 @@ SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: str | None = os.getenv("SOCIAL_AUTH_OIDC_OIDC_EN
 SOCIAL_AUTH_OIDC_KEY: str | None = os.getenv("SOCIAL_AUTH_OIDC_KEY")
 SOCIAL_AUTH_OIDC_SECRET: str | None = os.getenv("SOCIAL_AUTH_OIDC_SECRET")
 SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
+# social-auth CONCATENATES this list with the backend's own DEFAULT_SCOPE and
+# does not deduplicate, so every value went out twice. Measured on the live
+# hanzo-insights authorize:
+#
+#     scope=openid+email+profile+openid+profile+email
+#
+# The order is the proof it is the library default rather than our list twice:
+# ours is openid,email,profile and the appended triple is openid,profile,email —
+# `OpenIdConnectAuth.DEFAULT_SCOPE`. Declaring the scope above and then
+# inheriting it again is two sources for one value; this makes the explicit list
+# the only one. Nothing is lost — it already contains `openid`.
+SOCIAL_AUTH_OIDC_IGNORE_DEFAULT_SCOPE: bool = True
 SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
 SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
 
