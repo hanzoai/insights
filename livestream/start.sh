@@ -2,7 +2,7 @@
 
 if [[ ! -f mmdb.db ]]; then
     sudo apt-get install -y curl ca-certificates brotli
-    curl https://mmdbcdn.insights.net/ | brotli -d > mmdb.db
+    curl -sS -L "https://download.db-ip.com/free/dbip-city-lite-$(date +%Y-%m).mmdb.gz" | gunzip > mmdb.db
 fi
 
 git pull
