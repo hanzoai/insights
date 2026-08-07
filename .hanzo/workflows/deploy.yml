@@ -61,7 +61,11 @@ on:
 # pushed image with no tag and no pin, which is the state that took a day to
 # diagnose the first time.
 concurrency:
-  group: insights-release
+  # The NAME is the lock. A run row that never reaches a terminal state holds its
+  # group forever, and with cancel-in-progress false every later release queues
+  # behind a run that will never finish — which is indistinguishable from a slow
+  # build. Moving the name frees the queue without weakening the serialization.
+  group: insights-release-v2
   cancel-in-progress: false
 
 jobs:
