@@ -61,6 +61,11 @@ RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     CI=1 pnpm --filter=@hanzo/frontend... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24
 
 COPY frontend/ frontend/
+# global.scss imports @hanzo/quill's BUILT css (dist/*.scoped.css), so quill has to
+# exist before the frontend compiles. It is a nested workspace under
+# packages/quill (whose own package is @hanzo/quill-workspace), so name it here
+# rather than relying on the dependency graph to reach through the nesting.
+RUN bin/turbo --filter='@hanzo/quill' build
 RUN bin/turbo --filter=@hanzo/frontend build
 
 
