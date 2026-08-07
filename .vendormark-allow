@@ -1,0 +1,24 @@
+# Paths vendormark may skip. One glob per line.
+#
+# The rule it enforces is right: a site-generator vendor's name in a tracked path
+# is a URL the browser requests, so shipping one puts that vendor's branding in
+# our page. Almost every hit is exactly that, and this file should stay almost
+# empty.
+#
+# products/mcp_analytics/frontend/harness-logos/ is the exception, and it is the
+# inverse case. That directory is a REGISTRY OF OTHER PEOPLE'S MARKS — claude,
+# cursor, vscode, notion, replit, windsurf, grok, linear and eleven more — which
+# the MCP dashboard draws beside a row to say which client made the call.
+# harnessRegistry.ts imports each one by filename and the backend maps the
+# reported client name to it, so the mark is DATA, the way a browser icon is data
+# in a web-analytics table. Fifteen of those files are unremarkable to this gate
+# and one is not, purely because `lovable` happens to sit on the vendor list —
+# the name is the same, the meaning is opposite.
+#
+# The gate's own remedy does not fit here either: it says to replace the asset
+# with the real brand mark, and the real brand mark for a row about Lovable IS
+# Lovable's. Putting ours there would mislabel the data.
+#
+# Scoped to the logo directory, so a genuine vendor asset anywhere else in
+# mcp_analytics is still caught.
+products/mcp_analytics/frontend/harness-logos/*
