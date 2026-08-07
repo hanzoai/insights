@@ -2,7 +2,7 @@ import fse from 'fs-extra'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { isDev } from './utils.mjs'
+import { isDev } from '@hanzo/esbuilder'
 
 export const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

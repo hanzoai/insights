@@ -1483,6 +1483,9 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
     devDependencies:
+      '@hanzo/esbuilder':
+        specifier: workspace:*
+        version: link:../../../common/esbuilder
       tsup:
         specifier: ^5.12.8
         version: 5.12.9(@swc/core@1.15.18)(postcss@8.5.16)(ts-node@10.9.1(@swc/core@1.15.18)(@types/node@25.8.0)(typescript@6.0.3))(typescript@6.0.3)

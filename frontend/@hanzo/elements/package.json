@@ -19,6 +19,7 @@
         "kea-router": "^3.4.1"
     },
     "devDependencies": {
+        "@hanzo/esbuilder": "workspace:*",
         "tsup": "^5.12.8",
         "typescript": "catalog:"
     },
