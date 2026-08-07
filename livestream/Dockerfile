@@ -12,11 +12,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     "ca-certificates" \
     "curl" \
-    "brotli" \
+    "gzip" \
     && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir share && \
-    ( curl -s -L "https://mmdbcdn.insights.net/" --http1.1 | brotli --decompress --output=/GeoLite2-City.mmdb ) && \
+    DBIP_MONTH=$(date +%Y-%m) && curl -sS -L "https://download.db-ip.com/free/dbip-city-lite-${DBIP_MONTH}.mmdb.gz" | gunzip > /GeoLite2-City.mmdb && \
     chmod -R 755 /GeoLite2-City.mmdb
 
 FROM ubuntu:24.04
