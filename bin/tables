@@ -107,6 +107,23 @@ LEDGER: dict[str, tuple[str, str, str]] = {
         "datastore migrations are squashed.",
     ),
     #
+    # --- additive, coexisting with the name it versions --------------------
+    #
+    "ingestion_warnings_v2": (
+        BOTH,
+        KEEP,
+        "an additive warnings table created by migration 0293, declared in "
+        "insights/models/ingestion_warnings/sql_v2.py and read by "
+        "insights/api/ingestion_warnings_v2.py. It consumes the SAME "
+        "datastore_ingestion_warnings topic as the unsuffixed table through its "
+        "own consumer group, so it takes the full stream without touching the "
+        "legacy path — which is exactly the coexistence this ledger is for. Its "
+        "kafka_, _mv and _distributed siblings are built by prefixing and "
+        "suffixing TABLE_NAME, so this root covers them. Retires when the "
+        "readers of the v1 table move to the structured columns and the plain "
+        "name can be taken.",
+    ),
+    #
     # --- held, with an exit condition --------------------------------------
     #
     # The sessions rewrite is a dual-write migration in flight: both tables are
@@ -122,12 +139,17 @@ LEDGER: dict[str, tuple[str, str, str]] = {
     # "sharded_raw_sessions_v3" does not occur in this tree at all. They are
     # real tables regardless, which is what --live is for.
     "raw_sessions_v3": (
-        BOTH,
+        WAREHOUSE,
         KEEP,
-        "the successor session table, written on every event and read only when a "
-        "query asks for it by name. TABLE_BASE_NAME_V3 in sessions_v3.py is the "
-        "root the other five are built from. Retires at the V3 cutover, when it "
-        "takes the plain name raw_sessions.",
+        "the successor session table. WAREHOUSE, not BOTH, since the cutover this "
+        "row was held for: sessions_v3.py is gone, database.py resolves no "
+        "version, and one `sessions` model carries the plain names — so no file "
+        "spells this and only system.tables still knows it. Measured live: "
+        "raw_sessions_v3, sharded_raw_sessions_v3, writable_raw_sessions_v3, "
+        "raw_sessions_v3_recordings_mv and raw_sessions_v3_v all still exist "
+        "(raw_sessions_v3_mv is already dropped), which is why this is a scope "
+        "change and not a deletion — the row goes when the tables do, and a "
+        "drop migration is an operator's call, not a build's.",
     ),
     "sharded_raw_sessions_v3": (
         WAREHOUSE,
@@ -223,6 +245,38 @@ TEST_DIR = frozenset({"test", "tests"})
 def is_test_module(path: str, name: str) -> bool:
     parts = set(path.replace(os.sep, "/").split("/"))
     return bool(parts & TEST_DIR) and (name.startswith("test_") or name.endswith("_test.py"))
+
+
+# Captured schema, and fixtures that only look like schema.
+#
+# This gate reports "the warehouse table names this tree DECLARES", and neither of
+# these declares anything.
+#
+# `insights/datastore/hcl/sql/<region>/` is a DUMP of what a region's database
+# already contains — dev, local-multi, prod-eu, prod-us, recorded so a diff has
+# something to diff against. Nothing in this tree reads those files: no loader, no
+# migration, no bin/ script. Reading a name out of one and demanding a disposition
+# that retires it inverts the direction of the whole thing — the file is evidence
+# of what IS, and the only honest way to change it is to change the database and
+# re-capture. That is how four `ingestion_warnings_v2*` names from an upstream
+# region snapshot came to block this repository's release.
+#
+# An eval fixture is not schema at all. `products/insights_ai/evals/` plants
+# deliberate needles for a retrieval suite to find — VIEW_NEEDLE_NAME is
+# `mart_active_revenue_v2`, and the version suffix is the POINT: the eval asks
+# whether the model can pick that view out of a warehouse. Renaming it to satisfy
+# a naming rule would edit the question rather than the answer.
+#
+# Both stay narrow on purpose. The exemption is the captured-schema directory and
+# an evals directory, not "sql files" or "anything under products" — a real
+# declaration in either place should still be caught.
+CAPTURED_SCHEMA = "insights/datastore/hcl/sql/"
+FIXTURE_DIR = frozenset({"evals"})
+
+
+def is_not_a_declaration(path: str) -> bool:
+    rel = path.replace(os.sep, "/")
+    return rel.startswith(CAPTURED_SCHEMA) or bool(set(rel.split("/")) & FIXTURE_DIR)
 
 
 class Hit:
@@ -357,7 +411,8 @@ def scan(root: str) -> list[Hit]:
             if not fn.endswith(SOURCE_SUFFIX):
                 continue
             path = os.path.join(dirpath, fn)
-            if is_test_module(os.path.relpath(path, root), fn):
+            rel_path = os.path.relpath(path, root)
+            if is_test_module(rel_path, fn) or is_not_a_declaration(rel_path):
                 continue
             try:
                 src = open(path, encoding="utf-8", errors="replace").read()
