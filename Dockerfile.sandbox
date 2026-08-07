@@ -18,7 +18,7 @@ ENV NODE_VERSION=24.13.0 \
 
 # --- Rarely changes: system packages ---
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    brotli \
+    gzip \
     build-essential \
     cmake \
     curl \
@@ -85,11 +85,11 @@ RUN ARCH=$(dpkg --print-architecture) && \
 RUN npm install -g @anthropic-ai/claude-code
 
 # --- Rarely changes: GeoIP database (pre-decompressed, read directly at runtime) ---
-# brotli --output writes with mode 600 by default; chmod so non-root users can
+# The stream lands with the shell's default mode; chmod so non-root users can
 # read the symlink target from /workspace/share.
 RUN mkdir -p /share && \
-    curl -L "https://mmdbcdn.insights.net/" --http1.1 --fail --retry 3 --retry-max-time 60 | \
-    brotli --decompress --output=/share/GeoLite2-City.mmdb && \
+    DBIP_MONTH=$(date +%Y-%m) && curl -sS -L --fail --retry 3 --retry-max-time 60 "https://download.db-ip.com/free/dbip-city-lite-${DBIP_MONTH}.mmdb.gz" | \
+    gunzip > /share/GeoLite2-City.mmdb && \
     chmod 644 /share/GeoLite2-City.mmdb
 
 # --- Static config ---

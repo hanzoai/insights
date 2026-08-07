@@ -1,4 +1,4 @@
-# Canary against the live GeoLite2 database from mmdbcdn.insights.net.
+# Canary against the live city database from DB-IP, the source the images fetch.
 #
 # PR and master jest runs resolve GeoIP lookups against a pinned MaxMind test
 # fixture (nodejs/jest.setup-env.ts), so they are deterministic but blind to
