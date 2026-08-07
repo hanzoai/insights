@@ -1,6 +1,30 @@
 {
+    // baseUrl is what makes the inherited `paths` resolve to one place no matter
+    // who reads this file.
+    //
+    // The root config maps "lib/*" to "./frontend/src/lib/*" and declares NO
+    // baseUrl. TypeScript's own rule is that paths without a baseUrl resolve
+    // relative to the config file that DECLARES them, so `tsc` reads that as
+    // <repo>/frontend/src/lib/* and is happy — which is why the typecheck job is
+    // green while the build job is not.
+    //
+    // tsup's dts pass does not agree. It resolves the same relative entry against
+    // THIS directory, looks for frontend/@hanzo/elements/frontend/src/lib/*, finds
+    // nothing, and every `export * from 'lib/elements/...'` in src/index.ts fails
+    // as TS2307 — "Cannot find module 'lib/elements/Popover'". A resolver
+    // disagreement, not a missing file: all of those modules exist.
+    //
+    // Pointing baseUrl at the repo root removes the disagreement rather than
+    // arguing it. With a baseUrl present, paths are resolved against it by
+    // definition, so both readers land on <repo>/frontend/src/lib/*.
+    //
+    // Set here and not in the root config on purpose: adding baseUrl at the root
+    // would give every bare specifier in the tree a new resolution root, and the
+    // typecheck that passes today is the evidence the root is fine as it is. The
+    // blast radius of this line is one package's build.
     "extends": "../../../tsconfig.json",
     "compilerOptions": {
+        "baseUrl": "../../..",
         "emitDeclarationOnly": true,
         "noEmit": false
     }
