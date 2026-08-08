@@ -227,7 +227,17 @@ export const toast = {
         // different operations often share identical pending text like "Saving..."
         const options = ensureToastId(toastOptions, 'promise')
         // see https://fkhadra.github.io/react-toastify/promise
-        return toast.promise<string | undefined, ToastError>(
+        //
+        // baseToast, not toast. This method IS `toast.promise`, so calling
+        // `toast.promise` here called itself — unbounded recursion that would
+        // blow the stack the first time anything awaited a promise toast. It
+        // type-checked as TS2558 ("Expected 0 type arguments, but got 2")
+        // because the local object declares no type parameters, while
+        // react-toastify's handlePromise<TData, TError, TPending> does; the two
+        // implicit-any binding elements below were the same mistake showing
+        // through. The CI gate greps for TS2448/TS7022 only, so all three sat
+        // unread.
+        return baseToast.promise<string | undefined, ToastError>(
             promise,
             {
                 pending: {
