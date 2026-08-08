@@ -20,9 +20,8 @@ from products.exports.backend.temporal.subscriptions.llm_change_summary import g
 from products.exports.backend.temporal.subscriptions.results_summarizer import build_results_summary
 from products.exports.backend.temporal.subscriptions.types import SnapshotInsightsInputs, SnapshotInsightsResult
 from products.insights_ai.backend.models.assistant import CoreMemory
+from products.insights_ai.backend.quota import is_team_over_ai_credit_budget
 from products.product_analytics.backend.models.insight import Insight
-
-from ee.billing.quota_limiting import is_team_over_ai_credit_budget
 
 LOGGER = get_logger(__name__)
 
