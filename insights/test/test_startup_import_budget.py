@@ -11,9 +11,7 @@ from pathlib import Path
 # of widening this budget. See logs/startup-profile and the PRs that introduced these cuts.
 FORBIDDEN_AT_SETUP = [
     "insights.api.rest_router",  # the 160-route DRF aggregator — builds lazily on first request
-    "insights.temporal.ai",  # AI temporal workflows -> ee.hogai chat-agent core
-    "ee.hogai.chat_agent.graph",  # the assistant graph
-    "ee.hogai.tools",  # the agent tool registry
+    "insights.temporal.ai",  # AI + Slack temporal workflows and every SDK they reach
     "chdb",  # embedded Datastore
     "insights.temporal.ai_observability",  # eval/clustering workers (pulls scipy, etc.)
     "scipy",  # only reached via ai_observability clustering — must not be at startup
@@ -127,7 +125,7 @@ def test_all_models_register_at_app_population_not_via_router() -> None:
 # cleanup (``alerts.backend.api.alert``) stop firing on background writes. Every receiver must be wired
 # at setup — canonically from the owning app's ``AppConfig.ready()`` — so building the router connects
 # none. The offending receivers are now wired from their owning ``AppConfig.ready()`` (feature_flags,
-# alerts, ee, and insights core); this guards against new viewset-only receivers sneaking back in.
+# alerts, and insights core); this guards against new viewset-only receivers sneaking back in.
 _ROUTER_RECEIVER_DIFF = """
 import os
 import weakref
@@ -229,7 +227,7 @@ from django.contrib.auth import signals as auth_signals
 from django.db.models import signals as model_signals
 from insights.models.signals import model_activity_signal
 
-_FIRST_PARTY = ("insights.", "products.", "ee.", "common.")
+_FIRST_PARTY = ("insights.", "products.", "common.")
 _SIGNALS = {
     name: getattr(model_signals, name)
     for name in ("pre_save", "post_save", "pre_delete", "post_delete", "m2m_changed", "pre_init", "post_init")
@@ -325,7 +323,7 @@ def test_boot_gc_window_reenables_and_freezes() -> None:
 # for packages absent from the baseline. Captured with GC disabled, because a migrating gen2
 # pause (~100ms) otherwise gets booked as self-time of whatever innocent module was executing.
 _NEW_IMPORT_THRESHOLD_MS = 100
-_FIRST_PARTY_ROOTS = ("insights", "products", "ee", "common")
+_FIRST_PARTY_ROOTS = ("insights", "products", "common")
 _IMPORT_BASELINE = Path(__file__).parent / "setup_import_baseline.txt"
 
 _IMPORTTIME_CAPTURE = """

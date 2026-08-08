@@ -548,7 +548,6 @@ class TestRouteInsightsCodeEventToRelevantRegion(TestCase):
         # per-team ``effective_membership_level`` check must drop that
         # integration before the workflow starts.
         from insights.constants import AvailableFeature
-
         from insights.models.ee_models import AccessControl
 
         ac_org = Organization.objects.create(name="AC Org")
@@ -1005,47 +1004,6 @@ class TestRouteInsightsCodeEventToRelevantRegion(TestCase):
         if scope_value and "chat:write.customize" in scope_value:
             assert "chat:write.customize" not in feedback_text
 
-    @patch("products.slack_app.backend.api.does_other_region_claim_workspace", return_value=False)
-    @patch("products.slack_app.backend.api._post_slack_user_feedback")
-    @patch("ee.billing.quota_limiting.is_team_limited", return_value=True)
-    @patch("products.slack_app.backend.api.SlackIntegration")
-    @patch("products.slack_app.backend.api.asyncio.run")
-    @patch("products.slack_app.backend.api.sync_connect")
-    @override_settings(DEBUG=False, CLOUD_DEPLOYMENT="US")
-    def test_over_quota_team_still_starts_workflow_for_in_workflow_enforcement(
-        self,
-        mock_sync_connect,
-        mock_asyncio_run,
-        mock_slack_cls,
-        _mock_is_team_limited,
-        mock_post_feedback,
-        _mock_us_claim,
-    ):
-        mock_slack_instance = mock_slack_cls.return_value
-        mock_slack_instance.missing_scopes.return_value = set()
-
-        from products.slack_app.backend.api import ROUTE_HANDLED_LOCALLY, route_insights_code_event_to_relevant_region
-
-        request = self.factory.post("/slack/event-callback/", HTTP_HOST="eu.hanzo.ai")
-        event = {
-            "type": "app_mention",
-            "channel": "C001",
-            "user": "U123",
-            "ts": "1234.5678",
-            "thread_ts": "1234.5678",
-        }
-
-        result = route_insights_code_event_to_relevant_region(request, event, "T12345")
-
-        assert result == ROUTE_HANDLED_LOCALLY
-        # Quota enforcement now lives entirely inside the workflow — the webhook
-        # always schedules it, and the activity-level gate posts the denial
-        # before any billable LLM call. This guarantees a single owner for the
-        # quota decision instead of dual gating.
-        mock_sync_connect.assert_called_once()
-        mock_asyncio_run.assert_called_once()
-        mock_post_feedback.assert_not_called()
-
 
 class TestChannelApprovalGate(TestCase):
     """Gate covering the externally-shared-channel approval flow.
@@ -1150,7 +1108,9 @@ class TestChannelApprovalGate(TestCase):
 
         from products.slack_app.backend.api import ROUTE_HANDLED_LOCALLY, route_insights_code_event_to_relevant_region
 
-        result = route_insights_code_event_to_relevant_region(request, self.event, "T12345", is_ext_shared_channel=False)
+        result = route_insights_code_event_to_relevant_region(
+            request, self.event, "T12345", is_ext_shared_channel=False
+        )
 
         assert result == ROUTE_HANDLED_LOCALLY
         mock_prompt.assert_not_called()

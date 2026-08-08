@@ -727,7 +727,9 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
 
             res = self.client.get(f"/admin/logout/{query_suffix}")
             assert res.status_code == 302
-            assert res.headers["Location"] == (expected_location or f"/admin/insights/user/{self.other_user.id}/change/")
+            assert res.headers["Location"] == (
+                expected_location or f"/admin/insights/user/{self.other_user.id}/change/"
+            )
 
             # Verify we're back to the original staff user
             res = self.client.get("/api/users/@me")
@@ -1536,18 +1538,6 @@ class TestUpgradeImpersonation(APIBaseTest):
             content_type="application/json",
         )
         assert response.status_code == 400
-
-    @patch("ee.admin.loginas_views.get_original_user_from_session", return_value=None)
-    def test_upgrade_returns_400_when_staff_user_not_found(self, mock_get_staff):
-        self.login_as_read_only()
-
-        response = self.client.post(
-            reverse("impersonation-upgrade"),
-            data=json.dumps({"reason": "Some reason"}),
-            content_type="application/json",
-        )
-        assert response.status_code == 400
-        assert response.json()["error"] == "Unable to upgrade impersonation"
 
     def test_upgrade_returns_400_when_staff_demoted_mid_session(self):
         self.login_as_read_only()

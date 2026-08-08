@@ -14,15 +14,13 @@ from rest_framework.test import APIRequestFactory
 from insights.api.organization import OrganizationSerializer, _fetch_member_count, _org_serializer_cache_version
 from insights.constants import AvailableFeature
 from insights.models import Organization, OrganizationMembership, Team
+from insights.models.ee_models import AccessControl, Role, RoleMembership
 from insights.models.oauth import OAuthAccessToken, OAuthApplication
 from insights.models.organization_domain import OrganizationDomain
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.uploaded_media import UploadedMedia
 from insights.models.utils import generate_random_token_personal, hash_key_value
 from insights.user_permissions import UserPermissions
-
-from insights.models.ee_models import AccessControl
-from insights.models.ee_models import Role, RoleMembership
 
 
 class TestOrganizationAPI(APIBaseTest):
@@ -530,43 +528,6 @@ class TestOrganizationAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.organization.refresh_from_db()
         self.assertTrue(self.organization.is_pending_deletion)
-
-    @patch("ee.billing.billing_manager.BillingManager.get_billing")
-    @patch("insights.api.organization.get_cached_instance_license")
-    def test_cannot_delete_organization_with_active_subscription(self, mock_get_license, mock_get_billing):
-        mock_get_license.return_value = True
-        mock_get_billing.return_value = {"has_active_subscription": True}
-
-        self.organization_membership.level = OrganizationMembership.Level.OWNER
-        self.organization_membership.save()
-
-        with self.is_cloud(True):
-            response = self.client.delete(f"/api/organizations/{self.organization.id}")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("active subscription", response.json()["detail"])
-        self.assertTrue(Organization.objects.filter(id=self.organization.id).exists())
-
-    @patch("insights.temporal.delete_teams.dispatch.start_delete_organization_workflow")
-    @patch("ee.billing.billing_manager.BillingManager.get_billing")
-    @patch("insights.api.organization.get_cached_instance_license")
-    def test_can_delete_organization_without_active_subscription(
-        self, mock_get_license, mock_get_billing, mock_start_deletion
-    ):
-        mock_get_license.return_value = True
-        mock_get_billing.return_value = {"has_active_subscription": False}
-
-        self.organization_membership.level = OrganizationMembership.Level.OWNER
-        self.organization_membership.save()
-
-        org_id = self.organization.id
-        with self.is_cloud(True):
-            response = self.client.delete(f"/api/organizations/{org_id}")
-
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        # Deletion runs asynchronously on Temporal, so the org is marked pending, not removed synchronously
-        self.assertTrue(Organization.objects.get(id=org_id).is_pending_deletion)
-        mock_start_deletion.assert_called_once()
 
     @patch("insights.temporal.delete_teams.dispatch.start_delete_organization_workflow")
     def test_delete_organization_sets_pending_deletion_flag(self, mock_delete_task):

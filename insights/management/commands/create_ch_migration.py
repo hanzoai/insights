@@ -3,7 +3,9 @@ import os
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now
 
-MIGRATION_PATH = "ee/datastore/migrations"
+# Where the datastore migrations actually are. This named the enterprise tree, so
+# the command raised FileNotFoundError on `os.listdir` instead of writing anything.
+MIGRATION_PATH = "insights/datastore/migrations"
 
 FILE_DEFAULT = """
 from datastore_orm import migrations # type: ignore

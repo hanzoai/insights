@@ -645,17 +645,33 @@ boot check does not see them:
 
 ## An `ee` import is a build failure
 
-`bin/check-imports-are-committed` counts `ee` as first-party, which — since the
-enterprise tree is not in this fork and never will be — means an `ee` import can
-only ever fail to resolve. That is the point. Left out of that tuple it read as
-somebody else's package and passed silently, which is how `from ee.hogai…` sat
-in a module the temporal graph loads eagerly and took down every web pod.
+`bin/check-imports-are-committed` refuses the name `ee` outright. It does not
+ask whether the import resolves: `FIRST_PARTY` answers "is this committed", and
+`ee` is not missing, it is refused. Counting it as first-party instead made the
+verdict depend on resolution, so a committed `ee/` would have satisfied the
+check and re-opened the hole — measured, with `ee/anything.py` staged and a file
+importing it, the resolution form exits 0 on the very tree the refusal form
+exits 1 on. Left out of both it read as somebody else's package and passed
+silently, which is how `from ee.hogai…` sat in a module the temporal graph loads
+eagerly and took down every web pod.
 
 The gate reports the two mistakes separately because they want different fixes:
 a named-but-uncommitted module wants committing, an `ee` import wants the
 missing thing ported natively or the dead path deleted. Never shim it, and never
 `try/except ImportError` around it — a fork that pretends to have the enterprise
 tree is worse than one that admits it does not.
+
+Two things the gate cannot see, so do not rely on it alone. Dotted paths in
+strings — `mock.patch("ee.billing…")`, backend names in `LOGIN_METHODS`,
+`CELERY_IMPORTS` entries, `to="ee.role"` in a migration — are not `ast.Import`
+nodes, so they fail at run time or never. And migration dependencies: `("ee",
+"0041_…")` is a graph node, not an import. Grep for `"ee\.` and `("ee",` as well.
+
+A dropped `("ee", …)` dependency is not free. It also carried ordering: those
+migrations came after the ee migration that created the roles, so removing it
+without a replacement made a fresh database fail on `relation "ee_role" does not
+exist`. They now depend on `insights.0002_managed_tables`, which is what creates
+those tables here.
 
 ## Why login 500s: the migration graph, and how to ask it what is wrong
 

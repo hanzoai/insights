@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        # insights.Role lives here now; this creates it.
+        ("insights", "0002_managed_tables"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("insights", "0001_initial"),
         ("event_definitions", "0002_schemapropertygroupproperty_is_optional_in_types"),

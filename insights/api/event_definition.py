@@ -44,8 +44,6 @@ from insights.settings import EE_AVAILABLE
 from insights.taxonomy.taxonomy import CORE_EVENTS, STALE_EVENT_DAYS
 from insights.utils import get_safe_cache, relative_date_parse
 
-# If EE is enabled, we use ee.api.ee_event_definition.EnterpriseEventDefinitionSerializer
-
 
 def create_event_definitions_sql(
     event_type: EventDefinitionType,
