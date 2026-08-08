@@ -21,7 +21,7 @@ const meta: Meta = {
                     region: 'EU',
                     realm: 'cloud',
                     can_create_org: true,
-                    available_social_auth_providers: { github: true, gitlab: true, 'google-oauth2': true, saml: false },
+                    available_social_auth_providers: { oidc: true, saml: false },
                 },
                 '/api/environments/@current/': () => [
                     403,

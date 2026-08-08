@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, events, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -383,7 +383,7 @@ export const preflightLogic = kea<preflightLogicType>([
     }),
     listeners(({ values, actions }) => ({
         handlePreflightFinished: () => {
-            router.actions.push(urls.signup())
+            router.actions.push(urls.login())
         },
         loadPreflightSuccess: () => {
             actions.registerInstrumentationProps()

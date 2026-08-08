@@ -35,9 +35,7 @@ const CLOUD_PREFLIGHT = {
     cloud: true,
     realm: 'cloud',
     available_social_auth_providers: {
-        github: true,
-        gitlab: false,
-        'google-oauth2': true,
+        oidc: true,
         saml: false,
     },
 }
@@ -49,7 +47,7 @@ const VERIFIED_DOMAIN_WITH_SAML_SCIM: OrganizationDomainType = {
     verified_at: '2024-01-01T00:00:00Z',
     verification_challenge: 'abc',
     jit_provisioning_enabled: true,
-    sso_enforcement: 'google-oauth2',
+    sso_enforcement: 'oidc',
     has_saml: true,
     has_scim: true,
     scim_base_url: 'https://hanzo.ai/scim/v2',

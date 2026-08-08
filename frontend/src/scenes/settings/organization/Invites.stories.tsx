@@ -51,9 +51,7 @@ export const CurrentUserIsOwner: Story = {
                     cloud: false,
                     realm: 'hosted-datastore',
                     available_social_auth_providers: {
-                        github: false,
-                        gitlab: false,
-                        'google-oauth2': false,
+                        oidc: false,
                         saml: false,
                     },
                 },
@@ -71,9 +69,7 @@ export const CurrentUserIsAdmin: Story = {
                     cloud: false,
                     realm: 'hosted-datastore',
                     available_social_auth_providers: {
-                        github: false,
-                        gitlab: false,
-                        'google-oauth2': false,
+                        oidc: false,
                         saml: false,
                     },
                 },
@@ -95,9 +91,7 @@ export const CurrentUserIsMember: Story = {
                     cloud: false,
                     realm: 'hosted-datastore',
                     available_social_auth_providers: {
-                        github: false,
-                        gitlab: false,
-                        'google-oauth2': false,
+                        oidc: false,
                         saml: false,
                     },
                 },

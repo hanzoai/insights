@@ -1,6 +1,3 @@
-import '../scenes/authentication/login/Login.scss'
-
-import clsx from 'clsx'
 import { MakeLogicType, actions, kea, path, reducers, useValues } from 'kea'
 import { Form, forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
@@ -166,24 +163,15 @@ export function ExporterLogin(props: ExporterLoginProps): JSX.Element {
                 </Banner>
             )}
             <Form logic={loginLogic} formKey="login" enableFormOnSubmit className="space-y-4">
-                <div className={clsx('PasswordWrapper')}>
-                    <Field
-                        name="password"
-                        label={
-                            <div className="flex flex-1 items-center justify-between gap-2">
-                                <span>Password</span>
-                            </div>
-                        }
-                    >
-                        <Input
-                            type="password"
-                            className="ph-ignore-input"
-                            data-attr="password"
-                            placeholder="••••••••••"
-                            autoComplete="current-password"
-                        />
-                    </Field>
-                </div>
+                <Field name="password" label="Password">
+                    <Input
+                        type="password"
+                        className="ph-ignore-input"
+                        data-attr="password"
+                        placeholder="••••••••••"
+                        autoComplete="current-password"
+                    />
+                </Field>
 
                 <Button
                     type="primary"

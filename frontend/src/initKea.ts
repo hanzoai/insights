@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import { KeaPlugin, resetContext } from 'kea'
 import { formsPlugin } from 'kea-forms'
 import { loadersPlugin } from 'kea-loaders'
@@ -6,7 +7,6 @@ import { routerPlugin } from 'kea-router'
 import { subscriptionsPlugin } from 'kea-subscriptions'
 import { waitForPlugin } from 'kea-waitfor'
 import { windowValuesPlugin } from 'kea-window-values'
-import insights from 'insights-js'
 
 import { isAccessDeniedError } from 'lib/api-error'
 import { toast } from 'lib/elements/Toast/Toast'
@@ -28,8 +28,6 @@ const ERROR_FILTER_ALLOW_LIST = [
     'loadPreflight', // Gracefully handled if it fails
     'loadUser', // App won't load (unless loading from shared dashboards)
     'loadFunnels', // Special error handling on insights
-    'authenticate', // Special error handling on login
-    'signup', // Special error handling on login
     'loadLatestVersion',
     'loadBilling', // Gracefully handled if it fails
     'loadData', // Gracefully handled in the data table
@@ -148,9 +146,6 @@ export function initKea({
                     !isAccessDenied
                 ) {
                     let errorMessage = error.detail || error.statusText
-                    const isTwoFactorError =
-                        error.code === 'two_factor_setup_required' || error.code === 'two_factor_verification_required'
-                    const isSensitiveActionError = error.code === 'sensitive_action_required_reauth'
                     // Only the 403 access-block gets the dedicated toast in apiStatusLogic; a 400
                     // with this code is form validation (e.g. inviting an outside-domain email)
                     // and must keep the generic error toast.
@@ -167,8 +162,8 @@ export function initKea({
                     ) {
                         errorMessage = `Rate limit exceeded. Please try again ${error.formattedRetryAfter}.`
                     }
-                    if (isTwoFactorError || isSensitiveActionError || isVerifiedDomainError) {
-                        // These get their own dedicated toast in apiStatusLogic.
+                    if (isVerifiedDomainError) {
+                        // This gets its own dedicated toast in apiStatusLogic.
                         errorMessage = null
                     }
                     if (errorMessage) {
@@ -199,7 +194,9 @@ export function initKea({
 
     if ((window as any).__REDUX_DEVTOOLS_EXTENSION__) {
         // oxlint-disable-next-line no-console
-        console.log('NB Redux Dev Tools are disabled on Insights. See: https://github.com/Insights/insights/issues/17482')
+        console.log(
+            'NB Redux Dev Tools are disabled on Insights. See: https://github.com/Insights/insights/issues/17482'
+        )
     }
 
     resetContext({

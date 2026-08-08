@@ -14,7 +14,6 @@ import { apiStatusLogic } from 'lib/logic/apiStatusLogic'
 import { eventIngestionRestrictionLogic } from 'lib/logic/eventIngestionRestrictionLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { liveEventsLogic } from 'scenes/activity/live/liveEventsLogic'
-import { verifyEmailLogic } from 'scenes/authentication/verify-email/verifyEmailLogic'
 import { billingLogic, BillingAlertConfig } from 'scenes/billing/billingLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -37,7 +36,6 @@ export type ProjectNoticeVariant =
     | 'provisioned_welcome'
     | 'real_project_with_no_events'
     | 'invite_teammates'
-    | 'unverified_email'
     | 'internet_connection_issue'
     | 'event_ingestion_restriction'
     | 'missing_reverse_proxy'
@@ -187,9 +185,6 @@ export interface projectNoticeLogicActions {
     reportProjectNoticeShown: (variant: string) => {
         variant: string
     } // eventUsageLogic
-    requestVerificationLink: (uuid: string) => {
-        uuid: string
-    } // verifyEmailLogic
     dismissProjectNotice: (dismissKey: string | null) => {
         dismissKey: string | null
     }
@@ -279,7 +274,6 @@ export type projectNoticeLogicType = MakeLogicType<
 export const projectNoticeLogic = kea<projectNoticeLogicType>([
     path(['layout', 'navigation', 'projectNoticeLogic']),
     connect(() => ({
-        logic: [verifyEmailLogic],
         values: [
             membersLogic,
             ['memberCount'],
@@ -295,14 +289,7 @@ export const projectNoticeLogic = kea<projectNoticeLogicType>([
             reverseProxyCheckerLogic,
             ['hasReverseProxy'],
         ],
-        actions: [
-            eventUsageLogic,
-            ['reportProjectNoticeDismissed', 'reportProjectNoticeShown'],
-            // Mount verifyEmailLogic so the "Send verification email" banner CTA's loader fires.
-            // The banner renders on every scene, but verifyEmailLogic is otherwise only mounted on the verify-email scene.
-            verifyEmailLogic,
-            ['requestVerificationLink'],
-        ],
+        actions: [eventUsageLogic, ['reportProjectNoticeDismissed', 'reportProjectNoticeShown']],
     })),
     actions({
         dismissProjectNotice: (dismissKey: string | null) => ({ dismissKey }),
@@ -417,8 +404,6 @@ export const projectNoticeLogic = kea<projectNoticeLogicType>([
                     // Don't show this project-level warning in the Insights demo environemnt though,
                     // as then Announcement is shown instance-wide
                     return 'demo_project'
-                } else if (!user?.is_email_verified && !user?.has_social_auth && preflight?.email_service_available) {
-                    return 'unverified_email'
                 } else if (isProvisionedUser && !isNoticeDismissed('provisioned_welcome')) {
                     // For partner-provisioned accounts, the welcome nudge supersedes the generic
                     // "no events yet" banner — their events arrive via the background wizard install.
@@ -479,7 +464,6 @@ export const projectNoticeLogic = kea<projectNoticeLogicType>([
                 s.effectiveBillingAlert,
                 s.projectNoticeDismissKey,
                 organizationLogic.selectors.currentOrganization,
-                userLogic.selectors.user,
                 billingLogic.selectors.canAccessBilling,
                 router.selectors.currentLocation,
                 sceneLogic.selectors.activeSceneProductKey,
@@ -489,7 +473,6 @@ export const projectNoticeLogic = kea<projectNoticeLogicType>([
                 effectiveBillingAlert: BillingAlertConfig | null,
                 dismissKey: string | null,
                 currentOrganization: null | import('~/types').OrganizationType,
-                user: UserType | null,
                 canAccessBilling: boolean,
                 currentLocation: {
                     hash: string
@@ -607,16 +590,6 @@ export const projectNoticeLogic = kea<projectNoticeLogicType>([
                                 children: 'Invite team members',
                             },
                             onClose: dismiss,
-                        }
-                    case 'unverified_email':
-                        return {
-                            message: 'Please verify your email address.',
-                            action: {
-                                'data-attr': 'unverified-email-cta',
-                                onClick: () => user && verifyEmailLogic.actions.requestVerificationLink(user.uuid),
-                                children: 'Send verification email',
-                            },
-                            type: 'warning',
                         }
                     case 'internet_connection_issue':
                         return {
