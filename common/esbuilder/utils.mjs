@@ -46,21 +46,38 @@ export function copySnappyWASMFile(absWorkingDir) {
     }
 }
 
+// Both packages ship a copy of rrweb's image-bitmap worker, each with its own content
+// hash in the filename, and which one ends up bundled depends on what imported it.
+// Reading only the first is how the build broke: @hanzo/insights-rrweb arrived, its
+// hash is the one that got bundled, and the map went looking in the other package.
+const RRWEB_PACKAGES = ['node_modules/@hanzo/insights-rrweb/dist', 'node_modules/insights-js/dist']
+
 export function copyRRWebWorkerFiles(absWorkingDir, distSubdir = 'dist') {
-    // Mirror rrweb's image-bitmap worker sourcemap (shipped from insights-js) into the output
-    // dir so the sourceMappingURL baked into our bundled rrweb resolves under collectstatic.
+    // Mirror rrweb's image-bitmap worker sourcemap into the output dir so the
+    // sourceMappingURL baked into our bundled rrweb resolves under collectstatic.
     // ManifestStaticFilesStorage resolves the reference relative to the referencing file's
     // directory, so every outdir that bundles rrweb needs its own copy.
-    try {
-        const rrwebSourceDir = path.resolve(absWorkingDir, 'node_modules/insights-js/dist')
-        const distDir = path.resolve(absWorkingDir, distSubdir)
-        const files = fse.readdirSync(rrwebSourceDir)
-        const mapFiles = files.filter((f) => f.startsWith('image-bitmap-data-url-worker-') && f.endsWith('.js.map'))
-        mapFiles.forEach((file) => {
-            fse.copyFileSync(path.join(rrwebSourceDir, file), path.join(distDir, file))
-        })
-    } catch (error) {
-        console.warn('Could not copy rrweb map files:', error.message)
+    //
+    // Copy from every package that ships one rather than picking: the maps are named by
+    // content hash, so they cannot collide, and a spare map costs a file while a missing
+    // one fails collectstatic and takes the whole image build down with it.
+    const distDir = path.resolve(absWorkingDir, distSubdir)
+    let copied = 0
+    for (const pkg of RRWEB_PACKAGES) {
+        const sourceDir = path.resolve(absWorkingDir, pkg)
+        try {
+            for (const file of fse.readdirSync(sourceDir)) {
+                if (file.startsWith('image-bitmap-data-url-worker-') && file.endsWith('.js.map')) {
+                    fse.copyFileSync(path.join(sourceDir, file), path.join(distDir, file))
+                    copied += 1
+                }
+            }
+        } catch {
+            // A package that is not installed here is not an error; the next one may hold it.
+        }
+    }
+    if (copied === 0) {
+        console.warn(`No rrweb worker sourcemap found in ${RRWEB_PACKAGES.join(' or ')} — collectstatic will fail`)
     }
 }
 
