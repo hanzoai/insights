@@ -845,9 +845,7 @@ export const sceneLogic = kea<sceneLogicType>([
                             location.pathname !== urls.projectCreateFirst() &&
                             !location.pathname.startsWith('/settings')
                         ) {
-                            console.warn(
-                                'Project not available and no other projects, redirecting to project creation'
-                            )
+                            console.warn('Project not available and no other projects, redirecting to project creation')
                             toast.error('You do not have access to any projects in this organization', {
                                 toastId: 'no-projects',
                             })

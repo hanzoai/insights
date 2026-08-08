@@ -1198,3 +1198,27 @@ environment:
         bin_script: start-desktop
         description: 'Install the nested products/desktop workspace and run its dev stack (Electron app plus package watchers via turbo); used by the desktop intent on insightscli start'
         hidden: true
+    check:imports:are:committed:
+        bin_script: check-imports-are-committed
+        description: 'Check that every first-party import resolves to a committed file, so a fresh clone of this commit starts'
+        hidden: true
+    debrand:
+        bin_script: debrand
+        description: 'Rewrite an upstream tree into the Hanzo Insights tree; --check asserts the rename holds'
+        hidden: true
+    debrand:selftest:
+        bin_script: debrand-selftest
+        description: 'Self-test bin/debrand, one check per rename defect that has happened before'
+        hidden: true
+    hog:
+        bin_script: hog
+        description: 'Run a .hoge program on the script VM (nodejs by default, --python for the Python VM)'
+        hidden: true
+    tables:
+        bin_script: tables
+        description: 'Report the warehouse table names this tree declares, and refuse a versioned one'
+        hidden: true
+    theme:
+        bin_script: theme
+        description: 'Assert the Hanzo design tokens survive a rebase onto upstream'
+        hidden: true
