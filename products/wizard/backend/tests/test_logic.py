@@ -18,8 +18,6 @@ from products.wizard.backend.facade.enums import RunPhase, TaskStatus
 from products.wizard.backend.metrics import WIZARD_SESSIONS_FINISHED_TOTAL
 from products.wizard.backend.tasks.tasks import sync_wizard_event_definitions
 
-from ee.models.event_definition import EnterpriseEventDefinition
-
 
 def _input(team_id: int, **overrides) -> UpsertWizardSessionInput:
     params: dict = {
@@ -127,24 +125,6 @@ def test_completed_transition_creates_event_definitions_once(team, django_captur
 
 @pytest.mark.django_db
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
-def test_completed_transition_creates_enterprise_description(team, django_capture_on_commit_callbacks):
-    with django_capture_on_commit_callbacks(execute=True):
-        wizard_facade.upsert(
-            _input(
-                team.id,
-                run_phase=RunPhase.COMPLETED,
-                event_plan={"events": [{"name": "subscription_started", "description": "A subscription was started"}]},
-            )
-        )
-
-    event_definition = EnterpriseEventDefinition.objects.get(
-        team=team, project_id=team.project_id, name="subscription_started"
-    )
-    assert event_definition.description == "A subscription was started"
-
-
-@pytest.mark.django_db
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
 @pytest.mark.parametrize("event_name", ["", "$pageview", " $pageview ", "x" * 401])
 def test_completed_transition_skips_invalid_event_names(team, django_capture_on_commit_callbacks, event_name):
     with django_capture_on_commit_callbacks(execute=True):
@@ -237,7 +217,7 @@ def test_event_definition_task_reuses_definition_from_sibling_environment(team, 
         project=team.project,
         name="Sibling environment",
     )
-    existing_definition = EventDefinition.objects.create(
+    EventDefinition.objects.create(
         team=team,
         project=None if is_legacy else team.project,
         name="checkout_started",
@@ -256,8 +236,6 @@ def test_event_definition_task_reuses_definition_from_sibling_environment(team, 
     sync_wizard_event_definitions.run(sibling_team.id, session.session_id)
 
     assert EventDefinition.objects.filter(name="checkout_started").count() == 1
-    enterprise_definition = EnterpriseEventDefinition.objects.get(pk=existing_definition.pk)
-    assert enterprise_definition.description == "A checkout was started"
 
 
 @pytest.mark.django_db

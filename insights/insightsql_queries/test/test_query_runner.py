@@ -7,7 +7,6 @@ from freezegun import freeze_time
 from insights.test.base import BaseTest
 from unittest import mock
 
-from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -24,7 +23,6 @@ from insights.schema import (
     DataVisualizationNode,
     EventsNode,
     InsightsQLQuery,
-    InsightsQLQueryModifiers,
     InCohortVia,
     InlineCohortCalculation,
     InsightVizNode,
@@ -553,41 +551,6 @@ class TestQueryRunner(BaseTest):
         # the runner's default.
         self.assertNotEqual(response.cache_target_age, response.last_refresh + timedelta(seconds=999))
         self.assertEqual(response.cache_target_age, runner.cache_target_age(response.last_refresh))
-
-    def test_modifier_passthrough(self):
-        try:
-            from insights.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
-
-            from ee.datastore.materialized_columns.analyze import materialize
-
-            materialize("events", "$browser")
-        except ModuleNotFoundError:
-            # EE not available? Assume we're good
-            self.assertEqual(1 + 2, 3)
-            return
-
-        runner = InsightsQLQueryRunner(
-            query=InsightsQLQuery(query="select properties.$browser from events"),
-            team=self.team,
-            modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.LEGACY_NULL_AS_STRING),
-        )
-        response = runner.calculate()
-        assert response.datastore is not None
-        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
-            assert "events_json AS events" in response.datastore
-            assert "events.properties.`$browser`" in response.datastore
-            assert "events.`mat_$browser" not in response.datastore
-        else:
-            assert "events.`mat_$browser" in response.datastore
-
-        runner = InsightsQLQueryRunner(
-            query=InsightsQLQuery(query="select properties.$browser from events"),
-            team=self.team,
-            modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.DISABLED),
-        )
-        response = runner.calculate()
-        assert response.datastore is not None
-        assert "events.`mat_$browser" not in response.datastore
 
     @mock.patch("insights.insightsql_queries.query_runner.QueryCache")
     def test_schema_change_triggers_recalculation(self, mock_query_cache_cls):

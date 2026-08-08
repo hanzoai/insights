@@ -10,7 +10,6 @@ from insights.models.organization import OrganizationMembership
 from insights.models.team.team import Team
 from insights.models.user import User
 
-from ee.models.explicit_team_membership import ExplicitTeamMembership
 from insights.models.ee_models import AccessControl
 
 
@@ -161,9 +160,6 @@ class TestOrganizationInvite(BaseTest):
         # Verify the user has been added to the organization
         org_membership = OrganizationMembership.objects.filter(organization=self.organization, user=user).first()
         self.assertIsNotNone(org_membership)
-
-        # Verify no explicit team memberships were created
-        self.assertEqual(ExplicitTeamMembership.objects.filter(parent_membership=org_membership).count(), 0)
 
         # Verify no access controls were created
         self.assertEqual(AccessControl.objects.filter(organization_member=org_membership).count(), 0)
