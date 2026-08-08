@@ -51,7 +51,6 @@ from products.error_tracking.backend.temporal.weekly_digest.workflow import (
 )
 from products.error_tracking.backend.weekly_digest import build_team_digest_data
 
-from ee.datastore.materialized_columns.columns import materialize
 from insights.models.ee_models import AccessControl
 
 _WEBHOOK_POST = "products.error_tracking.backend.weekly_digest.requests.post"
@@ -139,11 +138,6 @@ class TestLoadPageOrgs(SimpleTestCase):
 # send_digest_to_workflow refuses to send outside Cloud, so the send path needs cloud mode.
 @override_settings(CLOUD_DEPLOYMENT="US")
 class TestSendOrgDigest(DatastoreTestMixin, APIBaseTest):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        materialize("events", "$exception_issue_id", is_nullable=True)
-
     def _run(self, attempt: int = 1, dry_run: bool = False) -> SendOrgDigestResult:
         return _send_org_digest(SendOrgDigestInputs(org_id=str(self.organization.id), dry_run=dry_run), attempt=attempt)
 

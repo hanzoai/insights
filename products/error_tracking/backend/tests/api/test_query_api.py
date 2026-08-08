@@ -71,14 +71,6 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
     issue_id = "01936e7f-d7ff-7314-b2d4-7627981e34f0"
     fingerprint = "issue-fingerprint"
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        from ee.datastore.materialized_columns.columns import get_materialized_columns, materialize
-
-        if ("$exception_issue_id", "properties") not in get_materialized_columns("events"):
-            materialize("events", "$exception_issue_id", is_nullable=True)
-        super().setUpClass()
-
     def setUp(self) -> None:
         super().setUp()
         _create_person(team=self.team, distinct_ids=["user-1"], is_identified=True)

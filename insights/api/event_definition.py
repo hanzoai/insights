@@ -5,10 +5,8 @@ from collections import defaultdict
 from typing import Any, Literal, Optional, cast
 
 from django.core.cache import cache
-from django.db import transaction
 from django.db.models import Manager, Prefetch
 from django.http import Http404
-from django.utils import timezone
 
 import orjson
 import hanzo_insights
@@ -519,106 +517,16 @@ class EventDefinitionViewSet(
     )
     @action(methods=["POST"], detail=False)
     def bulk_update_verified(self, request, *args, **kwargs) -> response.Response:
-        """Mark multiple event definitions as verified or unverified in one request.
+        """Refuse to mark event definitions verified, because nothing here can hold that state.
 
-        In the same vein as ``bulk_update_tags``, but ``verified`` lives on the enterprise
-        ``EnterpriseEventDefinition`` extension rather than the base row, so this action:
-        - requires an enterprise license;
-        - scopes by project (``team__project_id``) and relies on project membership — the same
-          boundary the single-object update path uses — rather than object-level RBAC;
-        - lazily promotes ingestion-created base rows to ``EnterpriseEventDefinition`` (mirroring
-          ``_get_event_definition``) before setting ``verified``;
-        - mirrors the single-object semantics: verifying stamps ``verified_by``/``verified_at`` and
-          unhides the event (an event cannot be both hidden and verified); unverifying clears them;
-        - logs a "changed" activity per event so the History tab matches the single-object path.
-
-        Events already in the target state are skipped (not re-written, not logged).
+        ``verified`` was a field on the enterprise extension of the event definition, which this
+        fork does not carry: the base ``EventDefinition``
+        (products/event_definitions/backend/models) has no ``verified`` column, and
+        ``EventDefinitionSerializer`` exposes none, so the single-object update path cannot set it
+        either. The endpoint stays so the caller gets this answer rather than a 404 it would have
+        to guess at.
         """
-        # Gate on the enterprise build, mirroring the single-object verify path, which selects the
-        # enterprise serializer under the same flag. `verified` isn't a separately-licensed feature,
-        # so there's no stricter per-license check to make here without diverging from that path.
-        if not EE_AVAILABLE:
-            raise serializers.ValidationError("Verifying event definitions requires an enterprise license.")
-
-        from ee.models.event_definition import EnterpriseEventDefinition
-
-        serializer = EventDefinitionBulkUpdateVerifiedRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        # De-duplicate while preserving order: the no-op check below reads a pre-loop snapshot of
-        # verified state, so a repeated id would otherwise be written (and logged) more than once.
-        validated_ids = list(dict.fromkeys(serializer.validated_data["ids"]))
-        verified = serializer.validated_data["verified"]
-
-        # Base rows are authoritative for existence and project scoping.
-        found_ids = set(
-            EventDefinition.objects.filter(id__in=validated_ids, team__project_id=self.project_id).values_list(
-                "id", flat=True
-            )
-        )
-        skipped = [{"id": obj_id, "reason": "Not found"} for obj_id in validated_ids if obj_id not in found_ids]
-
-        # Current verified state comes from existing enterprise rows; a base row without one is
-        # unverified by default, so a missing entry means verified=False. `found_ids` is already
-        # project-scoped, but keep the team filter explicit for tenant-isolation (IDOR) safety.
-        verified_by_id = dict(
-            EnterpriseEventDefinition.objects.filter(id__in=found_ids, team__project_id=self.project_id).values_list(
-                "id", "verified"
-            )
-        )
-
-        user = cast(User, request.user)
-        now = timezone.now()
-        was_impersonated = is_impersonated(request)
-        updated: list[dict[str, Any]] = []
-
-        # One transaction for the whole batch: if any event fails part-way the write rolls back
-        # entirely, so the caller never has to reason about a half-applied set. Activity logs are
-        # transaction-aware and defer to commit, so they roll back with it too.
-        with transaction.atomic():
-            for obj_id in validated_ids:
-                if obj_id not in found_ids:
-                    continue
-                if bool(verified_by_id.get(obj_id, False)) == verified:
-                    continue  # no-op: skip without promoting a base row or writing
-
-                # Promote base -> enterprise if needed (same lazy path as single-object updates).
-                # EE_AVAILABLE is checked above, so _get_event_definition returns an EnterpriseEventDefinition
-                # that carries the verified/hidden fields (absent from the base EventDefinition type).
-                enterprise = cast(
-                    EnterpriseEventDefinition, self._get_event_definition(id=obj_id, team__project_id=self.project_id)
-                )
-                before_hidden = bool(enterprise.hidden)
-
-                enterprise.verified = verified
-                if verified:
-                    enterprise.verified_by = user
-                    enterprise.verified_at = now
-                    enterprise.hidden = False  # an event cannot be both hidden and verified
-                else:
-                    enterprise.verified_by = None
-                    enterprise.verified_at = None
-                enterprise.save()
-
-                # `verified` was necessarily the opposite before (no-ops were skipped above).
-                changes = dict_changes_between(
-                    "EventDefinition",
-                    {"verified": not verified, "hidden": before_hidden},
-                    {"verified": verified, "hidden": bool(enterprise.hidden)},
-                    use_field_exclusions=True,
-                )
-                log_activity(
-                    organization_id=None,
-                    team_id=self.team_id,
-                    user=user,
-                    item_id=str(enterprise.id),
-                    scope="EventDefinition",
-                    activity="changed",
-                    was_impersonated=was_impersonated,
-                    detail=Detail(name=str(enterprise.name), changes=changes),
-                )
-                updated.append({"id": enterprise.id, "verified": verified})
-
-        return response.Response({"updated": updated, "skipped": skipped})
+        raise serializers.ValidationError("Verifying event definitions is not supported.")
 
     def perform_create(self, serializer):
         """Handle context and side effects for event definition creation."""
@@ -669,8 +577,6 @@ class EventDefinitionViewSet(
         event_definition = serializer.save(**save_kwargs)
 
         # Log activity for audit trail
-        from insights.models.activity_logging.activity_log import dict_changes_between
-
         changes = dict_changes_between("EventDefinition", before_state, serializer.validated_data, True)
 
         log_activity(

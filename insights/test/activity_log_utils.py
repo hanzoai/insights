@@ -12,13 +12,13 @@ from django.utils import timezone
 
 from rest_framework import status
 
-from ee.api.test.base import APILicensedTest
+from insights.test.base import APIBaseTest
 
 if TYPE_CHECKING:
     pass
 
 
-class ActivityLogTestHelper(APILicensedTest):
+class ActivityLogTestHelper(APIBaseTest):
     """Helper class for creating and updating models with activity logging."""
 
     def setUp(self):

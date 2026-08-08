@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import timedelta
 
 from django.apps import apps
 
@@ -13,12 +12,6 @@ from products.insights_ai.eval_harness.data_setup import (
     ensure_master_demo_team,
 )
 from products.tasks.backend.facade.agents import CustomPromptSandboxContext
-
-from ee.datastore.materialized_columns.columns import (
-    backfill_materialized_columns,
-    get_materialized_columns,
-    materialize,
-)
 
 from .django_env import NullDbBlocker
 
@@ -75,33 +68,6 @@ class SandboxedDemoData:
         )
 
 
-# Event-level properties the error-tracking ``searchQuery`` test cases match on
-# (see ``products/error_tracking/backend/insightsql_queries/error_tracking_query_runner_utils.py``).
-# These are stored as JSON arrays (``["TypeError"]``); without materialized
-# columns the bare ``properties.$exception_types`` lookup goes through
-# ``JSONExtractString`` which returns ``""`` for non-string JSON values, so
-# ``searchQuery`` filtering on these properties silently never matches anything.
-# Materializing and backfilling once per session makes the sandbox behave like
-# prod for error-tracking searchQuery, including reused local Datastore state
-# where the columns already exist but older demo rows still need values.
-_EVAL_MATERIALIZED_EVENT_PROPERTIES: tuple[str, ...] = (
-    "$exception_types",
-    "$exception_values",
-)
-
-
-def _ensure_event_search_columns_materialized(django_db_blocker: NullDbBlocker) -> None:
-    with django_db_blocker.unblock():
-        existing_columns = get_materialized_columns("events")
-        columns = []
-        for property_name in _EVAL_MATERIALIZED_EVENT_PROPERTIES:
-            column = existing_columns.get((property_name, "properties"))
-            if column is None:
-                column = materialize("events", property_name)
-            columns.append(column)
-        backfill_materialized_columns("events", columns, timedelta(days=180))
-
-
 def ensure_demo_ready(
     *,
     blocker: NullDbBlocker,
@@ -112,7 +78,9 @@ def ensure_demo_ready(
 ) -> SandboxedDemoData:
     """Seed the master Hedgebox team (once) and expose a per-case context factory."""
     master_team_id = ensure_master_demo_team(blocker)
-    _ensure_event_search_columns_materialized(blocker)
+    # The sandbox reads `properties.$exception_types` straight out of the JSON blob, as prod does:
+    # materialization is not carried by this fork (insights/datastore/materialized_columns.py always
+    # reports no materialized column), so the harness matches prod by not materializing either.
     with blocker.unblock():
         rows = sync_execute(
             "SELECT event, count() FROM events WHERE team_id = %(team_id)s GROUP BY event ORDER BY 2 DESC LIMIT 20",
