@@ -2,7 +2,12 @@ import './Modal.scss'
 
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
-import Modal from 'react-modal'
+// Aliased. This file also exports its own `Modal` (below), and two declarations
+// of one name in a module is TS2440 — "Import declaration conflicts with local
+// declaration of 'Modal'". The collision also erased the imported component's
+// type, which is why `onRequestClose`'s parameter read as implicit `any` and the
+// props below did not match ModalProps: three reported errors, one cause.
+import ReactModal from 'react-modal'
 
 import { IconX } from '@hanzo/icons'
 
@@ -178,7 +183,7 @@ export function Modal({
         </div>
     ) : (
         // eslint-disable-next-line react/forbid-elements
-        <Modal
+        <ReactModal
             isOpen={isOpen}
             onRequestClose={(e) => {
                 if (hasUnsavedInput && e.type === 'click') {
@@ -216,7 +221,7 @@ export function Modal({
             parentSelector={floatingContainer ? () => floatingContainer : undefined}
         >
             {modalContent}
-        </Modal>
+        </ReactModal>
     )
 }
 
