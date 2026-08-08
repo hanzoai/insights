@@ -29,19 +29,19 @@
 name: deploy
 
 on:
-  push:
-    branches: [main]
-  # A mirror sync DOES fire push events (verified: run 1289 here has
-  # event=push and was created by a sync, not a push), so `on: push` works even
-  # though the forge holds this repo as a pull mirror of GitHub. This is here
-  # for deliberate rebuilds, not because push is broken.
-  #
-  # The flip side, worth knowing before enabling Actions on any mirror: a sync
-  # fires one push event per REF, tags included. hanzoai/console has ~200 tags
-  # and three tag-triggered workflows, so one sync enqueued ~600 runs of
-  # historical rebuilds and starved the shared FIFO queue for every repo.
-  # Keep triggers scoped to branches.
-  workflow_dispatch:
+    push:
+        branches: [main]
+    # A mirror sync DOES fire push events (verified: run 1289 here has
+    # event=push and was created by a sync, not a push), so `on: push` works even
+    # though the forge holds this repo as a pull mirror of GitHub. This is here
+    # for deliberate rebuilds, not because push is broken.
+    #
+    # The flip side, worth knowing before enabling Actions on any mirror: a sync
+    # fires one push event per REF, tags included. hanzoai/console has ~200 tags
+    # and three tag-triggered workflows, so one sync enqueued ~600 runs of
+    # historical rebuilds and starved the shared FIFO queue for every repo.
+    # Keep triggers scoped to branches.
+    workflow_dispatch:
 
 # ONE release at a time, because the immutability guard below is check-then-act.
 #
@@ -61,334 +61,344 @@ on:
 # pushed image with no tag and no pin, which is the state that took a day to
 # diagnose the first time.
 concurrency:
-  # The NAME is the lock. A run row that never reaches a terminal state holds its
-  # group forever, and with cancel-in-progress false every later release queues
-  # behind a run that will never finish — which is indistinguishable from a slow
-  # build. Moving the name frees the queue without weakening the serialization.
-  group: insights-release-v2
-  cancel-in-progress: false
+    # The NAME is the lock. A run row that never reaches a terminal state holds its
+    # group forever, and with cancel-in-progress false every later release queues
+    # behind a run that will never finish — which is indistinguishable from a slow
+    # build. Moving the name frees the queue without weakening the serialization.
+    group: insights-release-v2
+    cancel-in-progress: false
 
 jobs:
-  # A NAME THAT SHADOWS THE IMPORT IT CALLS. Twice now:
-  #
-  #     import { bannerLogic } from '...'
-  #     const bannerLogic = bannerLogic({ dismissKey })
-  #
-  # The local shadows the import for the whole scope, so the initialiser reads the
-  # local in its temporal dead zone and throws during render — which does not break
-  # a line, it takes the scene. ApprovalsPromoBanner killed feature flags,
-  # MembersPlatformAddonAd killed organization members. Both look like the debrand
-  # rename dropping a shorter name onto an existing one, so this is a class.
-  #
-  # tsc names it exactly: TS2448, plus the TS7022 that follows. Nothing checked,
-  # so both shipped. A hand-written AST check was tried first and thrown away — it
-  # produced false positives on property and type positions AND missed the real
-  # bug, because it was reimplementing scope analysis badly. The compiler already
-  # does this correctly.
-  #
-  # Only those two codes. The tree carries ~87 other type errors; gating on all of
-  # them would need a baseline that goes stale, while these two are zero today and
-  # mean exactly one thing. Separate job so it fails in minutes rather than behind
-  # an hour of image build.
-  typecheck:
-    runs-on: hanzo-build-linux-amd64
-    steps:
-      - uses: actions/checkout@v4
-      - name: No self-shadowed declarations
-        run: |
-          set -euo pipefail
-          corepack enable
-          # --no-frozen-lockfile for the same reason the image build drops it:
-          # patchedDependencies lives under `pnpm` in package.json, which pnpm 10
-          # no longer reads, so a frozen install cannot match the lockfile.
-          CI=1 pnpm install --no-frozen-lockfile --filter @hanzo/frontend...
+    # A NAME THAT SHADOWS THE IMPORT IT CALLS. Twice now:
+    #
+    #     import { bannerLogic } from '...'
+    #     const bannerLogic = bannerLogic({ dismissKey })
+    #
+    # The local shadows the import for the whole scope, so the initialiser reads the
+    # local in its temporal dead zone and throws during render — which does not break
+    # a line, it takes the scene. ApprovalsPromoBanner killed feature flags,
+    # MembersPlatformAddonAd killed organization members. Both look like the debrand
+    # rename dropping a shorter name onto an existing one, so this is a class.
+    #
+    # tsc names it exactly: TS2448, plus the TS7022 that follows. Nothing checked,
+    # so both shipped. A hand-written AST check was tried first and thrown away — it
+    # produced false positives on property and type positions AND missed the real
+    # bug, because it was reimplementing scope analysis badly. The compiler already
+    # does this correctly.
+    #
+    # Only those two codes. The tree carries ~87 other type errors; gating on all of
+    # them would need a baseline that goes stale, while these two are zero today and
+    # mean exactly one thing. Separate job so it fails in minutes rather than behind
+    # an hour of image build.
+    typecheck:
+        runs-on: hanzo-build-linux-amd64
+        steps:
+            - uses: actions/checkout@v4
+            - name: No self-shadowed declarations
+              run: |
+                  set -euo pipefail
+                  corepack enable
+                  # --no-frozen-lockfile for the same reason the image build drops it:
+                  # patchedDependencies lives under `pnpm` in package.json, which pnpm 10
+                  # no longer reads, so a frozen install cannot match the lockfile.
+                  CI=1 pnpm install --no-frozen-lockfile --filter @hanzo/frontend...
 
-          # tsc is meaningless before this: kea's generated *Type.ts files are
-          # gitignored, and without them every logic import is a missing module and
-          # the run drowns in ~9,600 cascading errors. Run through the workspace
-          # script rather than naming a path -- pnpm puts the binary under
-          # node_modules/.pnpm, not where a plain ../node_modules/.bin guess lands.
-          pnpm --filter @hanzo/frontend run typegen:write
+                  # tsc is meaningless before this: kea's generated *Type.ts files are
+                  # gitignored, and without them every logic import is a missing module and
+                  # the run drowns in ~9,600 cascading errors. Run through the workspace
+                  # script rather than naming a path -- pnpm puts the binary under
+                  # node_modules/.pnpm, not where a plain ../node_modules/.bin guess lands.
+                  pnpm --filter @hanzo/frontend run typegen:write
 
-          cd frontend
-          # 8GB because tsc OOMs on this tree at node's ~4GB default, and the
-          # `|| true` below cannot tell a crash from a clean run: a compiler that
-          # died at 4034MB wrote no diagnostics, so the grep found nothing and the
-          # gate passed without having checked anything.
-          NODE_OPTIONS=--max-old-space-size=8192 ./node_modules/.bin/tsc --noEmit -p . > /tmp/tsc.out 2>&1 || true
-          # A run that never produced diagnostics did not pass; it failed to run.
-          if grep -q 'JavaScript heap out of memory' /tmp/tsc.out; then
-            echo "::error::the typecheck ran out of memory, so this gate checked nothing — raise the heap rather than trusting the silence"
-            exit 1
-          fi
-          if grep -E 'error TS(2448|7022)' /tmp/tsc.out; then
-            echo "::error::a declaration initialises itself from the import it shadows — it throws when its scene renders"
-            exit 1
-          fi
-          echo "no self-shadowed declarations (TS2448/TS7022 clean)"
+                  cd frontend
+                  # 8GB because tsc OOMs on this tree at node's ~4GB default, and the
+                  # `|| true` below cannot tell a crash from a clean run: a compiler that
+                  # died at 4034MB wrote no diagnostics, so the grep found nothing and the
+                  # gate passed without having checked anything.
+                  NODE_OPTIONS=--max-old-space-size=8192 ./node_modules/.bin/tsc --noEmit -p . > /tmp/tsc.out 2>&1 || true
+                  # A run that never produced diagnostics did not pass; it failed to run.
+                  if grep -q 'JavaScript heap out of memory' /tmp/tsc.out; then
+                    echo "::error::the typecheck ran out of memory, so this gate checked nothing — raise the heap rather than trusting the silence"
+                    exit 1
+                  fi
+                  if grep -E 'error TS(2448|7022)' /tmp/tsc.out; then
+                    echo "::error::a declaration initialises itself from the import it shadows — it throws when its scene renders"
+                    exit 1
+                  fi
+                  echo "no self-shadowed declarations (TS2448/TS7022 clean)"
 
-  build:
-    # The live runner fleet advertises `hanzo-build-linux-amd64`. The old
-    # `hanzo-linux-amd64` matched no runner, so every job here queued forever —
-    # which is why the deployed image sat at 1.52.2 while main moved on.
-    runs-on: hanzo-build-linux-amd64
-    # Serialized above with cancel-in-progress false, so a run that hangs does
-    # not just burn a runner: it holds the release lock and no later commit can
-    # ship behind it. Generous against a cold cache on a tree that has doubled,
-    # short enough that a wedged build breaks the queue rather than the week.
-    timeout-minutes: 90
-    steps:
-      - uses: actions/checkout@v4
+    build:
+        # The live runner fleet advertises `hanzo-build-linux-amd64`. The old
+        # `hanzo-linux-amd64` matched no runner, so every job here queued forever —
+        # which is why the deployed image sat at 1.52.2 while main moved on.
+        runs-on: hanzo-build-linux-amd64
+        # Serialized above with cancel-in-progress false, so a run that hangs does
+        # not just burn a runner: it holds the release lock and no later commit can
+        # ship behind it. Generous against a cold cache on a tree that has doubled,
+        # short enough that a wedged build breaks the queue rather than the week.
+        timeout-minutes: 90
+        steps:
+            - uses: actions/checkout@v4
 
-      # Before spending 30-60 minutes on an image: does this commit's own code
-      # reference a module the commit does not contain? `git commit -- some/path/`
-      # stages tracked files under a path and skips untracked ones, which is how
-      # scheduled.py once landed importing a module that was never committed. The
-      # symptom is a ModuleNotFoundError at celery startup, so it takes the worker
-      # down on boot rather than failing one task. Reads the git index, so it
-      # answers for a fresh clone rather than for the machine that wrote it.
-      - name: Every import names a committed module
-        run: ./bin/check-imports-are-committed
+            # Before spending 30-60 minutes on an image: does this commit's own code
+            # reference a module the commit does not contain? `git commit -- some/path/`
+            # stages tracked files under a path and skips untracked ones, which is how
+            # scheduled.py once landed importing a module that was never committed. The
+            # symptom is a ModuleNotFoundError at celery startup, so it takes the worker
+            # down on boot rather than failing one task. Reads the git index, so it
+            # answers for a fresh clone rather than for the machine that wrote it.
+            - name: Every import names a committed module
+              run: ./bin/check-imports-are-committed
 
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+            - name: Log in to GHCR
+              run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
-      # The next patch is derived from what is PUBLISHED, then proven unused before
-      # anything is pushed. Both halves matter: the first stops us colliding with a
-      # tag git does not know about, the second stops us overwriting one at all.
-      - name: Next patch semver
-        id: ver
-        env:
-          GHCR_USER: ${{ secrets.GHCR_USER }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: |
-          set -euo pipefail
-          TOKEN=$(curl -fsSL -u "$GHCR_USER:$GHCR_TOKEN" \
-            "https://ghcr.io/token?scope=repository:hanzoai/insights:pull&service=ghcr.io" | jq -r .token)
+            # The next patch is derived from what is PUBLISHED, then proven unused before
+            # anything is pushed. Both halves matter: the first stops us colliding with a
+            # tag git does not know about, the second stops us overwriting one at all.
+            - name: Next patch semver
+              id: ver
+              env:
+                  GHCR_USER: ${{ secrets.GHCR_USER }}
+                  GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  TOKEN=$(curl -fsSL -u "$GHCR_USER:$GHCR_TOKEN" \
+                    "https://ghcr.io/token?scope=repository:hanzoai/insights:pull&service=ghcr.io" | jq -r .token)
 
-          LAST=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
-            "https://ghcr.io/v2/hanzoai/insights/tags/list?n=10000" \
-            | jq -r '.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' \
-            | sort -V | tail -1)
+                  LAST=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
+                    "https://ghcr.io/v2/hanzoai/insights/tags/list?n=10000" \
+                    | jq -r '.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' \
+                    | sort -V | tail -1)
 
-          # Fail loudly rather than guessing. A silent fallback to some default
-          # would eventually re-emit a live tag, which is the one outcome this
-          # whole step exists to prevent.
-          if [ -z "${LAST:-}" ]; then
-            echo "::error::could not read published semver tags from GHCR — refusing to guess the next patch"
-            exit 1
-          fi
+                  # Fail loudly rather than guessing. A silent fallback to some default
+                  # would eventually re-emit a live tag, which is the one outcome this
+                  # whole step exists to prevent.
+                  if [ -z "${LAST:-}" ]; then
+                    echo "::error::could not read published semver tags from GHCR — refusing to guess the next patch"
+                    exit 1
+                  fi
 
-          IFS=. read -r MAJ MIN PAT <<<"$LAST"
-          NEXT="$MAJ.$MIN.$((PAT + 1))"
+                  IFS=. read -r MAJ MIN PAT <<<"$LAST"
+                  NEXT="$MAJ.$MIN.$((PAT + 1))"
 
-          # Immutability guard. 404 is the ONLY acceptable answer: anything else
-          # means the tag is taken (200) or we cannot tell (network/auth), and
-          # pushing on either would risk a second digest behind an existing name.
-          CODE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
-            -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json' \
-            "https://ghcr.io/v2/hanzoai/insights/manifests/$NEXT")
-          if [ "$CODE" != "404" ]; then
-            echo "::error::refusing to push $NEXT — manifest probe returned $CODE, expected 404 (tag taken, or existence unverifiable)"
-            exit 1
-          fi
+                  # Immutability guard. 404 is the ONLY acceptable answer: anything else
+                  # means the tag is taken (200) or we cannot tell (network/auth), and
+                  # pushing on either would risk a second digest behind an existing name.
+                  CODE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+                    -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json' \
+                    "https://ghcr.io/v2/hanzoai/insights/manifests/$NEXT")
+                  if [ "$CODE" != "404" ]; then
+                    echo "::error::refusing to push $NEXT — manifest probe returned $CODE, expected 404 (tag taken, or existence unverifiable)"
+                    exit 1
+                  fi
 
-          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
-          echo "last published $LAST -> building $NEXT"
+                  echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+                  echo "last published $LAST -> building $NEXT"
 
-      # docker, not buildctl: the runner image (catthehacker/ubuntu:act-24.04)
-      # ships a docker client against the privileged dind sidecar and carries no
-      # buildctl-daemonless.sh, so the previous step could not have run even with
-      # a matching label. Same shape as platform's build, which is proven green.
-      - name: Build + push
-        run: |
-          set -euo pipefail
-          VERSION="${{ steps.ver.outputs.version }}"
-          IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
-          # The commit rides the image, so dropping it from the tag loses nothing:
-          # `docker inspect` still answers which source built this.
-          docker build -f Dockerfile \
-            --build-arg COMMIT_HASH="${GITHUB_SHA}" \
-            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
-            --label "org.opencontainers.image.version=${VERSION}" \
-            --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
-            -t "$IMAGE" .
-          docker push "$IMAGE"
-          echo "built $IMAGE (revision ${GITHUB_SHA})"
+            # docker, not buildctl: the runner image (catthehacker/ubuntu:act-24.04)
+            # ships a docker client against the privileged dind sidecar and carries no
+            # buildctl-daemonless.sh, so the previous step could not have run even with
+            # a matching label. Same shape as platform's build, which is proven green.
+            - name: Build + push
+              run: |
+                  set -euo pipefail
+                  VERSION="${{ steps.ver.outputs.version }}"
+                  IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
+                  # The commit rides the image, so dropping it from the tag loses nothing:
+                  # `docker inspect` still answers which source built this.
+                  docker build -f Dockerfile \
+                    --build-arg COMMIT_HASH="${GITHUB_SHA}" \
+                    --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+                    --label "org.opencontainers.image.version=${VERSION}" \
+                    --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
+                    -t "$IMAGE" .
+                  docker push "$IMAGE"
+                  echo "built $IMAGE (revision ${GITHUB_SHA})"
 
-      # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
-      # that makes production run it.
-      #
-      # Without it a release stops one move short of shipping: cd.hanzo.ai does
-      # not watch the registry, it watches hanzoai/universe, so an image nothing
-      # points at is just bytes in ghcr. That gap is not hypothetical — insights
-      # served 1.52.25 for ten hours while .26, .27 and .28 sat built and
-      # unreferenced, which meant a fix for a script loading off an UNREGISTERED
-      # third-party domain was merged, built, and still not running.
-      #
-      # This reverses a deliberate old decision. Several deploy workflows say CI
-      # should end at "the tag exists and resolves" because choosing what runs
-      # ought to be a reviewed change. The safety that was buying is now bought
-      # by pin.sh instead, which refuses a non-semver version, an image the
-      # registry cannot serve, a version older than the current pin, and any
-      # repository other than the one the values file already declares. Those are
-      # checks that hold every time, which a review of a one-line version bump
-      # does not.
-      - name: Ship it
-        env:
-          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
-          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
-          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
-          KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
-          KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
-          # pin.sh probes the registry before it moves anything; these let it
-          # read a private manifest instead of falling back to anonymous.
-          GHCR_USER: ${{ secrets.GHCR_USER }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: |
-          set -euo pipefail
-          VERSION="${{ steps.ver.outputs.version }}"
+            # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
+            # that makes production run it.
+            #
+            # Without it a release stops one move short of shipping: cd.hanzo.ai does
+            # not watch the registry, it watches hanzoai/universe, so an image nothing
+            # points at is just bytes in ghcr. That gap is not hypothetical — insights
+            # served 1.52.25 for ten hours while .26, .27 and .28 sat built and
+            # unreferenced, which meant a fix for a script loading off an UNREGISTERED
+            # third-party domain was merged, built, and still not running.
+            #
+            # This reverses a deliberate old decision. Several deploy workflows say CI
+            # should end at "the tag exists and resolves" because choosing what runs
+            # ought to be a reviewed change. The safety that was buying is now bought
+            # by pin.sh instead, which refuses a non-semver version, an image the
+            # registry cannot serve, a version older than the current pin, and any
+            # repository other than the one the values file already declares. Those are
+            # checks that hold every time, which a review of a one-line version bump
+            # does not.
+            - name: Ship it
+              env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
+                  KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+                  # pin.sh probes the registry before it moves anything; these let it
+                  # read a private manifest instead of falling back to anonymous.
+                  GHCR_USER: ${{ secrets.GHCR_USER }}
+                  GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  VERSION="${{ steps.ver.outputs.version }}"
 
-          # Secrets come from KMS, never from a file or a repo variable.
-          KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
-            -H 'Content-Type: application/json' \
-            -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
-            | jq -r '.accessToken // empty')
-          [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+                  # Secrets come from KMS, never from a file or a repo variable.
+                  #
+                  # These two reads are the last thing between a pushed image and the pin
+                  # that points at it, so they retry. One 503 from the endpoint published
+                  # 1.52.81 and pinned nothing: the image existed, no values file named it,
+                  # and the release needed a whole rebuild to say so. curl's own --retry
+                  # classifies this correctly — it retries a timeout and 408/429/5xx, and
+                  # does NOT retry a 401 or 400, so a wrong client secret still fails on
+                  # the first round instead of taking five rounds to say the same thing.
+                  KMS_CURL=(curl -fsS --retry 5 --retry-delay 2 --retry-connrefused --max-time 30)
 
-          PIN_TOKEN=$(curl -fsS \
-            "${KMS_ENDPOINT}/v1/kms/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
-            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
-          [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at ${KMS_ORG}/deploy (env ${KMS_SECRET_ENV})"; exit 1; }
-          echo "::add-mask::${PIN_TOKEN}"
+                  KMS_TOKEN=$("${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
 
-          # Shallow: universe is ~600MB of history and this needs one file from
-          # the tip.
-          git clone --quiet --depth 1 \
-            "https://x-access-token:${PIN_TOKEN}@git.hanzo.ai/hanzo/universe" /tmp/universe
+                  PIN_TOKEN=$("${KMS_CURL[@]}" \
+                    "${KMS_ENDPOINT}/v1/kms/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
+                    -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
+                  [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at ${KMS_ORG}/deploy (env ${KMS_SECRET_ENV})"; exit 1; }
+                  echo "::add-mask::${PIN_TOKEN}"
 
-          # Another service can land its own pin between our clone and our push.
-          # That is a normal race on a shared tree, not a failure — but a shallow
-          # clone has no common history to rebase onto, so RE-APPLY rather than
-          # merge: reset to the new tip and pin again. Pinning is idempotent and
-          # derives everything from the file it finds, so the retry also re-checks
-          # the monotonic guard against whatever just landed. Nothing to resolve,
-          # and no merge commits in the deploy history.
-          for attempt in 1 2 3 4 5; do
-            # Both halves of this service are one release and move together. A web
-            # pinned ahead of its worker is two versions of the same code sharing
-            # a database — a migration hazard, not a partial rollout.
-            /tmp/universe/charts/app/pin.sh insights-web    "$VERSION"
-            /tmp/universe/charts/app/pin.sh insights-worker "$VERSION"
+                  # Shallow: universe is ~600MB of history and this needs one file from
+                  # the tip.
+                  git clone --quiet --depth 1 \
+                    "https://x-access-token:${PIN_TOKEN}@git.hanzo.ai/hanzo/universe" /tmp/universe
 
-            if err=$(git -C /tmp/universe push --quiet origin HEAD:main 2>&1); then
-              echo "pinned insights-web + insights-worker to ${VERSION}"; exit 0
-            fi
+                  # Another service can land its own pin between our clone and our push.
+                  # That is a normal race on a shared tree, not a failure — but a shallow
+                  # clone has no common history to rebase onto, so RE-APPLY rather than
+                  # merge: reset to the new tip and pin again. Pinning is idempotent and
+                  # derives everything from the file it finds, so the retry also re-checks
+                  # the monotonic guard against whatever just landed. Nothing to resolve,
+                  # and no merge commits in the deploy history.
+                  for attempt in 1 2 3 4 5; do
+                    # Both halves of this service are one release and move together. A web
+                    # pinned ahead of its worker is two versions of the same code sharing
+                    # a database — a migration hazard, not a partial rollout.
+                    /tmp/universe/charts/app/pin.sh insights-web    "$VERSION"
+                    /tmp/universe/charts/app/pin.sh insights-worker "$VERSION"
 
-            # Only a non-fast-forward is a race. A bad or under-scoped PIN_TOKEN,
-            # a protected branch or a read-only remote cannot clear by retrying,
-            # and `2>/dev/null` hid which it was — five identical rounds of
-            # "universe moved under us" against a repo that took two commits all
-            # day, then a final error naming nothing. Report what git said.
-            case "$err" in
-              *non-fast-forward*|*"fetch first"*|*"Updates were rejected"*)
-                echo "universe moved under us (attempt ${attempt}/5) — re-applying on the new tip"
-                git -C /tmp/universe fetch --quiet --depth 1 origin main
-                git -C /tmp/universe reset --hard --quiet FETCH_HEAD
-                ;;
-              *)
-                echo "::error::pushing the pin to universe failed, and retrying cannot fix it:"
-                printf '%s\n' "$err"
-                exit 1
-                ;;
-            esac
-          done
-          echo "::error::could not push the pin after 5 attempts"; exit 1
+                    if err=$(git -C /tmp/universe push --quiet origin HEAD:main 2>&1); then
+                      echo "pinned insights-web + insights-worker to ${VERSION}"; exit 0
+                    fi
 
-  # DID IT ACTUALLY WORK? Everything above publishes an image and points
-  # production at it. Neither step opens the product.
-  #
-  # This is the only job that answers "does insights work" rather than "did the
-  # pipeline run". It waits for the commit it just built to be the one serving,
-  # then drives a real browser through every scene a signed-in user can reach and
-  # asserts each one MOUNTED -- React put something under #root, no error boundary
-  # caught a throw, no 5xx while it loaded. Every one of those scenes answers 200
-  # to a plain HTTP request whether or not it renders, because they all serve the
-  # same SPA shell, so a status check would have passed on a blank screen.
-  #
-  # It runs after the pin rather than gating it. The release has already shipped
-  # by this point; what this decides is whether we find out.
-  verify:
-    needs: build
-    runs-on: hanzo-build-linux-amd64
-    steps:
-      - uses: actions/checkout@v4
+                    # Only a non-fast-forward is a race. A bad or under-scoped PIN_TOKEN,
+                    # a protected branch or a read-only remote cannot clear by retrying,
+                    # and `2>/dev/null` hid which it was — five identical rounds of
+                    # "universe moved under us" against a repo that took two commits all
+                    # day, then a final error naming nothing. Report what git said.
+                    case "$err" in
+                      *non-fast-forward*|*"fetch first"*|*"Updates were rejected"*)
+                        echo "universe moved under us (attempt ${attempt}/5) — re-applying on the new tip"
+                        git -C /tmp/universe fetch --quiet --depth 1 origin main
+                        git -C /tmp/universe reset --hard --quiet FETCH_HEAD
+                        ;;
+                      *)
+                        echo "::error::pushing the pin to universe failed, and retrying cannot fix it:"
+                        printf '%s\n' "$err"
+                        exit 1
+                        ;;
+                    esac
+                  done
+                  echo "::error::could not push the pin after 5 attempts"; exit 1
 
-      - name: Wait for this commit to be the one serving
-        id: rollout
-        env:
-          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
-          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
-          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
-          KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
-          KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
-          LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
-        run: |
-          set -euo pipefail
+    # DID IT ACTUALLY WORK? Everything above publishes an image and points
+    # production at it. Neither step opens the product.
+    #
+    # This is the only job that answers "does insights work" rather than "did the
+    # pipeline run". It waits for the commit it just built to be the one serving,
+    # then drives a real browser through every scene a signed-in user can reach and
+    # asserts each one MOUNTED -- React put something under #root, no error boundary
+    # caught a throw, no 5xx while it loaded. Every one of those scenes answers 200
+    # to a plain HTTP request whether or not it renders, because they all serve the
+    # same SPA shell, so a status check would have passed on a blank screen.
+    #
+    # It runs after the pin rather than gating it. The release has already shipped
+    # by this point; what this decides is whether we find out.
+    verify:
+        needs: build
+        runs-on: hanzo-build-linux-amd64
+        steps:
+            - uses: actions/checkout@v4
 
-          KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
-            -H 'Content-Type: application/json' \
-            -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
-            | jq -r '.accessToken // empty')
-          [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+            - name: Wait for this commit to be the one serving
+              id: rollout
+              env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
+                  KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+                  LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
+              run: |
+                  set -euo pipefail
 
-          # The e2e account's password lives in KMS and nowhere else. It is a real
-          # account with a hashed password, not a shared human login.
-          PW=$(curl -fsS \
-            "${KMS_ENDPOINT}/v1/kms/secrets/insights/E2E_PASSWORD?env=${KMS_SECRET_ENV}" \
-            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
-          [ -n "$PW" ] || { echo "::error::E2E_PASSWORD missing in KMS at ${KMS_ORG}/insights (env ${KMS_SECRET_ENV})"; exit 1; }
-          echo "::add-mask::${PW}"
-          echo "pw=${PW}" >> "$GITHUB_OUTPUT"
+                  KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
 
-          # /_preflight/ reports insights_version as null, so the only honest
-          # signal for "which code is live" is the git sha on instance_status,
-          # which needs a session. Short sha: that is the form it reports.
-          WANT=$(printf '%s' "${GITHUB_SHA}" | cut -c1-10)
-          JAR=$(mktemp)
-          for attempt in $(seq 1 60); do
-            curl -fsS -c "$JAR" -o /dev/null -X POST "${LIVE_URL}/api/login" \
-              -H 'Content-Type: application/json' \
-              -d "$(jq -n --arg p "$PW" '{email:"e2e@hanzo.ai",password:$p}')" || true
-            GOT=$(curl -fsS -b "$JAR" "${LIVE_URL}/api/instance_status" 2>/dev/null \
-              | jq -r '.results.overview[]? | select(.key=="insights_git_sha") | .value' || true)
-            if [ "$GOT" = "$WANT" ]; then
-              echo "serving ${GOT} after ~$((attempt * 20))s"; exit 0
-            fi
-            echo "serving ${GOT:-unknown}, waiting for ${WANT} (${attempt}/60)"
-            sleep 20
-          done
-          # Not a test failure -- the rollout never arrived, which is a different
-          # fault from the product being broken, and saying so saves the next
-          # person from debugging the wrong half.
-          echo "::error::${WANT} never became the serving commit; CD did not roll it out"
-          exit 1
+                  # The e2e account's password lives in KMS and nowhere else. It is a real
+                  # account with a hashed password, not a shared human login.
+                  PW=$(curl -fsS \
+                    "${KMS_ENDPOINT}/v1/kms/secrets/insights/E2E_PASSWORD?env=${KMS_SECRET_ENV}" \
+                    -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
+                  [ -n "$PW" ] || { echo "::error::E2E_PASSWORD missing in KMS at ${KMS_ORG}/insights (env ${KMS_SECRET_ENV})"; exit 1; }
+                  echo "::add-mask::${PW}"
+                  echo "pw=${PW}" >> "$GITHUB_OUTPUT"
 
-      - name: Drive the product
-        env:
-          LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
-          LOGIN_USERNAME: e2e@hanzo.ai
-          LOGIN_PASSWORD: ${{ steps.rollout.outputs.pw }}
-        run: |
-          set -euo pipefail
-          corepack enable
-          # --no-frozen-lockfile, same as the image build one job up, and for a
-          # reason that predates this workflow: patchedDependencies is declared
-          # under `pnpm` in package.json, which pnpm 10 no longer reads, so a
-          # frozen install cannot match the lockfile and dies with
-          # ERR_PNPM_LOCKFILE_CONFIG_MISMATCH. Frozen would be the better default
-          # and should come back when that config moves to pnpm-workspace.yaml.
-          CI=1 pnpm install --no-frozen-lockfile --filter @hanzo/playwright...
-          cd playwright
-          ./node_modules/.bin/playwright install --with-deps chromium
-          ./node_modules/.bin/playwright test -c live/live.config.ts
+                  # /_preflight/ reports insights_version as null, so the only honest
+                  # signal for "which code is live" is the git sha on instance_status,
+                  # which needs a session. Short sha: that is the form it reports.
+                  WANT=$(printf '%s' "${GITHUB_SHA}" | cut -c1-10)
+                  JAR=$(mktemp)
+                  for attempt in $(seq 1 60); do
+                    curl -fsS -c "$JAR" -o /dev/null -X POST "${LIVE_URL}/api/login" \
+                      -H 'Content-Type: application/json' \
+                      -d "$(jq -n --arg p "$PW" '{email:"e2e@hanzo.ai",password:$p}')" || true
+                    GOT=$(curl -fsS -b "$JAR" "${LIVE_URL}/api/instance_status" 2>/dev/null \
+                      | jq -r '.results.overview[]? | select(.key=="insights_git_sha") | .value' || true)
+                    if [ "$GOT" = "$WANT" ]; then
+                      echo "serving ${GOT} after ~$((attempt * 20))s"; exit 0
+                    fi
+                    echo "serving ${GOT:-unknown}, waiting for ${WANT} (${attempt}/60)"
+                    sleep 20
+                  done
+                  # Not a test failure -- the rollout never arrived, which is a different
+                  # fault from the product being broken, and saying so saves the next
+                  # person from debugging the wrong half.
+                  echo "::error::${WANT} never became the serving commit; CD did not roll it out"
+                  exit 1
+
+            - name: Drive the product
+              env:
+                  LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
+                  LOGIN_USERNAME: e2e@hanzo.ai
+                  LOGIN_PASSWORD: ${{ steps.rollout.outputs.pw }}
+              run: |
+                  set -euo pipefail
+                  corepack enable
+                  # --no-frozen-lockfile, same as the image build one job up, and for a
+                  # reason that predates this workflow: patchedDependencies is declared
+                  # under `pnpm` in package.json, which pnpm 10 no longer reads, so a
+                  # frozen install cannot match the lockfile and dies with
+                  # ERR_PNPM_LOCKFILE_CONFIG_MISMATCH. Frozen would be the better default
+                  # and should come back when that config moves to pnpm-workspace.yaml.
+                  CI=1 pnpm install --no-frozen-lockfile --filter @hanzo/playwright...
+                  cd playwright
+                  ./node_modules/.bin/playwright install --with-deps chromium
+                  ./node_modules/.bin/playwright test -c live/live.config.ts
