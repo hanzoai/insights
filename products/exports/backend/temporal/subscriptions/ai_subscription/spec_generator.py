@@ -31,8 +31,7 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.schemas imp
     QueryPlan,
     RelevantEvents,
 )
-
-from ee.hogai.llm import MaxChatOpenAI
+from products.insights_ai.backend.model import MaxChatOpenAI
 
 logger = structlog.get_logger(__name__)
 
