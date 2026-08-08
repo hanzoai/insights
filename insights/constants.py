@@ -382,7 +382,7 @@ LOGIN_METHODS = [
     {
         "key": "google-oauth2",
         "display": "Google OAuth",
-        "backends": ["google-oauth2", "ee.api.authentication.CustomGoogleOAuth2"],
+        "backends": ["google-oauth2"],
     },
     {
         "key": "github",
@@ -397,7 +397,7 @@ LOGIN_METHODS = [
     {
         "key": "saml",
         "display": "SAML",
-        "backends": ["saml", "ee.api.authentication.MultitenantSAMLAuth"],
+        "backends": ["saml"],
     },
     {
         "key": "passkey",

@@ -10,8 +10,8 @@ from django.utils.timezone import now
 
 from dateutil.relativedelta import relativedelta
 
-from insights.datastore.query_tagging import Feature, Product, get_query_tags
 from insights.constants import AvailableFeature
+from insights.datastore.query_tagging import Feature, Product, get_query_tags
 from insights.models import PropertyDefinition
 
 from products.access_control.backend.models.property_access_control import PropertyAccessControl
