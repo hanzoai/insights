@@ -625,6 +625,9 @@ importers:
       '@hanzo/products-actions':
         specifier: workspace:*
         version: link:../products/actions
+      '@hanzo/products-ai-gateway':
+        specifier: workspace:*
+        version: link:../products/ai_gateway
       '@hanzo/products-ai-observability':
         specifier: workspace:*
         version: link:../products/ai_observability
@@ -643,12 +646,21 @@ importers:
       '@hanzo/products-business-knowledge':
         specifier: workspace:*
         version: link:../products/business_knowledge
+      '@hanzo/products-canvas':
+        specifier: workspace:*
+        version: link:../products/canvas
+      '@hanzo/products-cdp':
+        specifier: workspace:*
+        version: link:../products/cdp
       '@hanzo/products-cohorts':
         specifier: workspace:*
         version: link:../products/cohorts
       '@hanzo/products-conversations':
         specifier: workspace:*
         version: link:../products/conversations
+      '@hanzo/products-core-events':
+        specifier: workspace:*
+        version: link:../products/core_events
       '@hanzo/products-customer-analytics':
         specifier: workspace:*
         version: link:../products/customer_analytics
@@ -679,6 +691,9 @@ importers:
       '@hanzo/products-error-tracking':
         specifier: workspace:*
         version: link:../products/error_tracking
+      '@hanzo/products-event-definitions':
+        specifier: workspace:*
+        version: link:../products/event_definitions
       '@hanzo/products-experiments':
         specifier: workspace:*
         version: link:../products/experiments
@@ -706,12 +721,18 @@ importers:
       '@hanzo/products-live-debugger':
         specifier: workspace:*
         version: link:../products/live_debugger
+      '@hanzo/products-llm-analytics':
+        specifier: workspace:*
+        version: link:../products/llm_analytics
       '@hanzo/products-logs':
         specifier: workspace:*
         version: link:../products/logs
       '@hanzo/products-managed-migrations':
         specifier: workspace:*
         version: link:../products/managed_migrations
+      '@hanzo/products-marketing-analytics':
+        specifier: workspace:*
+        version: link:../products/marketing_analytics
       '@hanzo/products-mcp-analytics':
         specifier: workspace:*
         version: link:../products/mcp_analytics
@@ -739,9 +760,15 @@ importers:
       '@hanzo/products-product-analytics':
         specifier: workspace:*
         version: link:../products/product_analytics
+      '@hanzo/products-product-tours':
+        specifier: workspace:*
+        version: link:../products/product_tours
       '@hanzo/products-pulse':
         specifier: workspace:*
         version: link:../products/pulse
+      '@hanzo/products-reminders':
+        specifier: workspace:*
+        version: link:../products/reminders
       '@hanzo/products-replay':
         specifier: workspace:*
         version: link:../products/replay
@@ -760,6 +787,9 @@ importers:
       '@hanzo/products-session-summaries':
         specifier: workspace:*
         version: link:../products/session_summaries
+      '@hanzo/products-signals':
+        specifier: workspace:*
+        version: link:../products/signals
       '@hanzo/products-skills':
         specifier: workspace:*
         version: link:../products/skills
@@ -784,12 +814,18 @@ importers:
       '@hanzo/products-user-interviews':
         specifier: workspace:*
         version: link:../products/user_interviews
+      '@hanzo/products-visual-review':
+        specifier: workspace:*
+        version: link:../products/visual_review
       '@hanzo/products-warehouse-sources':
         specifier: workspace:*
         version: link:../products/warehouse_sources
       '@hanzo/products-web-analytics':
         specifier: workspace:*
         version: link:../products/web_analytics
+      '@hanzo/products-wizard':
+        specifier: workspace:*
+        version: link:../products/wizard
       '@hanzo/products-workflows':
         specifier: workspace:*
         version: link:../products/workflows
@@ -21875,8 +21911,8 @@ packages:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
 
-  unlayer-types@1.462.0:
-    resolution: {integrity: sha512-4evP8KinGyhYVSV9NLb2eBHUv8Th1kP1skT3B3Xwv9sbMCUXfedOYpDsC0yr78HvFj/t7fd2KyVnn5RhlnUXRA==}
+  unlayer-types@1.464.0:
+    resolution: {integrity: sha512-z4Bi5gkA1BOpl0YLpbJZwVI1L3vj4I5T71cbeYVdC3qHeoeMHqiM8g4j5tmJNoRczAMYdrjBQRDA1DeDzg4XWg==}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -41912,7 +41948,7 @@ snapshots:
   react-email-editor@1.7.11(react@18.3.1):
     dependencies:
       react: 18.3.1
-      unlayer-types: 1.462.0
+      unlayer-types: 1.464.0
 
   react-grid-layout@2.2.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
@@ -44234,7 +44270,7 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unlayer-types@1.462.0: {}
+  unlayer-types@1.464.0: {}
 
   unpipe@1.0.0: {}
 
