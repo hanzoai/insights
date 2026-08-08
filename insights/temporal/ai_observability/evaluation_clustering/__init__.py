@@ -6,37 +6,11 @@ Two-stage pipeline:
 
   Stage B (daily): per ClusteringJob, fetch accumulated embeddings, cluster (HDBSCAN),
   label, compute operational + evaluation-specific aggregates, and emit $ai_evaluation_clusters events.
+
+Import the workflows and activities from the module that defines them. This package
+re-exports nothing on purpose: a re-export runs every submodule on any import of any
+of them, including `constants`, which the trace-clustering metrics read for their
+workflow-name labels. Stage A reaches enterprise code this fork does not carry, so
+with re-exports that one submodule decides whether `insights.urls` imports at all,
+and the failure surfaces as a request-path ImportError far from its cause.
 """
-
-from insights.temporal.ai_observability.evaluation_clustering.activities import (
-    compute_evaluation_cluster_aggregates_activity,
-    emit_evaluation_cluster_events_activity,
-    fetch_evaluation_metadata_activity,
-    generate_evaluation_cluster_labels_activity,
-    perform_evaluation_clustering_compute_activity,
-)
-from insights.temporal.ai_observability.evaluation_clustering.coordinator import (
-    AIObservabilityEvaluationClusteringCoordinatorWorkflow,
-    AIObservabilityEvaluationSamplerCoordinatorWorkflow,
-)
-from insights.temporal.ai_observability.evaluation_clustering.sampling import sample_and_embed_for_job_activity
-from insights.temporal.ai_observability.evaluation_clustering.workflow import (
-    AIObservabilityEvaluationClusteringWorkflow,
-    AIObservabilityEvaluationSamplerWorkflow,
-)
-
-__all__ = [
-    # Workflows
-    "AIObservabilityEvaluationSamplerCoordinatorWorkflow",
-    "AIObservabilityEvaluationSamplerWorkflow",
-    "AIObservabilityEvaluationClusteringCoordinatorWorkflow",
-    "AIObservabilityEvaluationClusteringWorkflow",
-    # Stage A activity
-    "sample_and_embed_for_job_activity",
-    # Stage B activities
-    "perform_evaluation_clustering_compute_activity",
-    "fetch_evaluation_metadata_activity",
-    "generate_evaluation_cluster_labels_activity",
-    "compute_evaluation_cluster_aggregates_activity",
-    "emit_evaluation_cluster_events_activity",
-]

@@ -2,7 +2,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Optional, cast
 
-from datastore_connect.driver.exceptions import DatastoreError, DatabaseError, OperationalError
+from datastore_connect.driver.exceptions import ClickHouseError as DatastoreError, DatabaseError, OperationalError
 from sshtunnel import BaseSSHTunnelForwarderError
 
 from insights.schema import (
