@@ -52,6 +52,11 @@ describe('featureFlagLogic', () => {
         persisted: string[] = [],
         anonymous = false
     ): Promise<jest.SpyInstance> {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- useMocks is msw's
+        // request stubber, not a React hook; the rule only sees the `use` prefix. Every
+        // other test file calls it from an anonymous beforeEach arrow, which the rule
+        // does not inspect. This one needs the verdict per call, so it lives in a named
+        // helper and the rule applies. There is no React tree in this file at all.
         useMocks({ get: { '/v1/flags/': typeof verdict === 'function' ? verdict : () => [200, verdict] } })
         setAppContext({ anonymous, persisted_feature_flags: persisted })
         // Before initKeaTests: it mounts the common logics, and this one rides

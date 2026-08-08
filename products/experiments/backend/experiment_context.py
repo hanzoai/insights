@@ -12,8 +12,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from insights.models import Experiment
 from insights.sync import database_sync_to_async
+
+from products.experiments.backend.models.experiment import Experiment
 
 # A prompt is a budget. Ten metrics of each kind is a long report already.
 MAX_METRICS = 10
