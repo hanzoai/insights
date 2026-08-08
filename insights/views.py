@@ -10,7 +10,6 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.admin.sites import site as admin_site
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required as base_login_required
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
@@ -31,7 +30,6 @@ from insights.cloud_utils import is_cloud
 from insights.email import is_email_available
 from insights.exceptions_capture import capture_exception
 from insights.health import is_datastore_connected, is_kafka_connected
-from insights.helpers.dev_login import is_dev_login_allowed
 from insights.models import Organization, Team, User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 from insights.models.integration import SlackIntegration
@@ -100,9 +98,6 @@ def login_required(view):
             return view(request, *args, **kwargs)
         if not User.objects.exists():
             return redirect("/preflight")
-        elif not request.user.is_authenticated and settings.AUTO_LOGIN:
-            user = User.objects.filter(is_active=True).first()
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         response = base_handler(request, *args, **kwargs)
 
         # Don't include next=/ in the login redirect URL since "/" is the default destination
@@ -235,9 +230,6 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
 
     if settings.DEBUG or settings.E2E_TESTING:
         response["is_debug"] = True
-
-    if is_dev_login_allowed():
-        response["allow_dev_login"] = True
 
     if settings.TEST:
         response["is_test"] = True

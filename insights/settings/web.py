@@ -1,6 +1,5 @@
 # Web app specific settings/middleware/apps setup
 import os
-from datetime import timedelta
 
 import structlog
 from corsheaders.defaults import default_headers
@@ -19,19 +18,6 @@ logger = structlog.get_logger(__name__)
 # enforces the opt-in for them too. Env-toggleable so token enforcement can be reverted without a
 # code change.
 INSIGHT_DASHBOARDS_OPT_IN_ENFORCED = get_from_env("INSIGHT_DASHBOARDS_OPT_IN_ENFORCED", False, type_cast=str_to_bool)
-
-####
-# django-axes
-
-# lockout after too many attempts
-AXES_ENABLED = get_from_env("AXES_ENABLED", not TEST, type_cast=str_to_bool)
-AXES_HANDLER = "axes.handlers.cache.AxesCacheHandler"
-AXES_FAILURE_LIMIT = get_from_env("AXES_FAILURE_LIMIT", 30, type_cast=int)
-AXES_COOLOFF_TIME = timedelta(minutes=10)
-AXES_LOCKOUT_CALLABLE = "insights.api.authentication.axes_locked_out"
-AXES_IPWARE_META_PRECEDENCE_ORDER = ["HTTP_X_FORWARDED_FOR", "REMOTE_ADDR"]
-# Keep legacy 403 status code for lockouts (django-axes 6.0+ defaults to 429)
-AXES_HTTP_RESPONSE_CODE = 403
 
 ####
 # Application definition
@@ -131,7 +117,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "social_django",
     "django_filters",
-    "axes",
     "django_structlog",
     "drf_spectacular",
     *PRODUCTS_APPS,
@@ -140,10 +125,6 @@ INSTALLED_APPS = [
     "django_otp.plugins.otp_totp",
     # 'django_otp.plugins.otp_email',  # <- if you want email capability.
     # See above for automatically generated apps for all of our products
-    "two_factor",
-    # 'two_factor.plugins.phonenumber',  # <- if you want phone number capability.
-    # 'two_factor.plugins.email',  # <- if you want email capability.
-    # 'two_factor.plugins.yubikey',  # <- for yubikey capability.
     "oauth2_provider",
     "django_admin_inline_paginator",
 ]
@@ -186,7 +167,6 @@ MIDDLEWARE = [
     "insights.session.middleware.SessionRiskMiddleware",
     "insights.middleware.ActivityLoggingMiddleware",
     "insights.middleware.user_logging_context_middleware",
-    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "insights.middleware.AutoLogoutImpersonateMiddleware",
     "insights.middleware.ImpersonationReadOnlyMiddleware",
@@ -194,7 +174,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "insights.middleware.ActiveOrganizationMiddleware",
     "insights.middleware.CsvNeverCacheMiddleware",
-    "axes.middleware.AxesMiddleware",
     "insights.middleware.AutoProjectMiddleware",
     "insights.middleware.CHQueries",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
@@ -246,13 +225,14 @@ WSGI_APPLICATION = "insights.wsgi.application"
 # Authentication
 
 AUTHENTICATION_BACKENDS: list[str] = [
-    "axes.backends.AxesStandaloneBackend",
     # Hanzo IAM (hanzo.id) is the single federated login. Upstream's per-vendor
     # OAuth backends are not wired: this deployment has one identity provider,
     # and a second one would be a second place to revoke an account from.
     "social_core.backends.open_id_connect.OpenIdConnectAuth",
+    # Carries Django's permission lookups (`has_perm`/`get_all_permissions`), which
+    # the OIDC backend does not implement. It authenticates only when something
+    # calls `authenticate()` with a password, and nothing does.
     "django.contrib.auth.backends.ModelBackend",
-    "insights.auth.WebauthnBackend",
 ]
 
 # Hanzo IAM OIDC SSO (social-auth). All five come from the deployment; the
@@ -317,15 +297,6 @@ SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = [
     "organization_name",
     "reauth",
 ]
-SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
-SOCIAL_AUTH_GITHUB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITHUB_KEY")
-SOCIAL_AUTH_GITHUB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITHUB_SECRET")
-
-SOCIAL_AUTH_GITLAB_SCOPE = ["read_user"]
-SOCIAL_AUTH_GITLAB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITLAB_KEY")
-SOCIAL_AUTH_GITLAB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITLAB_SECRET")
-SOCIAL_AUTH_GITLAB_API_URL: str = os.getenv("SOCIAL_AUTH_GITLAB_API_URL", "https://gitlab.com")
-
 LICENSE_SECRET_KEY = os.getenv("LICENSE_SECRET_KEY", "license-so-secret")
 
 # Cookie age in seconds (default 2 weeks) - these are the standard defaults for Django but having it here to be explicit

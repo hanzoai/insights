@@ -3,16 +3,11 @@ import re
 import json
 import secrets
 import urllib.parse
-from base64 import b32encode
-from binascii import unhexlify
 from datetime import UTC, datetime, timedelta
 from typing import Any, Optional, cast
 
 from django.conf import settings
-from django.contrib.auth import login, update_session_auth_hash
-from django.contrib.auth.password_validation import validate_password
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
@@ -25,10 +20,6 @@ import requests
 import structlog
 import hanzo_insights
 from django_filters.rest_framework import DjangoFilterBackend
-from django_otp import login as otp_login
-from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
-from django_otp.plugins.otp_totp.models import TOTPDevice
-from django_otp.util import random_hex
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_field, extend_schema_view
 from loginas.utils import is_impersonated_session
 from opentelemetry import trace
@@ -38,13 +29,9 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from social_django.models import UserSocialAuth
-from two_factor.forms import TOTPDeviceForm
-from two_factor.utils import default_device
 
 from insights.schema import UserUIConfiguration
 
-from insights.api.email_verification import EmailVerifier, email_verification_token_generator
 from insights.api.oauth.toolbar_service import (
     ToolbarOAuthError,
     ToolbarOAuthState,
@@ -68,18 +55,10 @@ from insights.auth import (
     session_auth_required,
 )
 from insights.constants import INVITE_DAYS_VALIDITY
-from insights.email import is_email_available
-from insights.event_usage import (
-    report_user_deleted_account,
-    report_user_logged_in,
-    report_user_updated,
-    report_user_verified_email,
-)
+from insights.event_usage import report_user_deleted_account, report_user_updated
 from insights.exceptions_capture import capture_exception
 from insights.helpers.email_utils import EmailNormalizer, validate_display_name
-from insights.helpers.session_cache import SessionCache
-from insights.helpers.two_factor_session import has_passkeys, set_two_factor_verified_in_session
-from insights.helpers.verified_domain_enforcement import VERIFIED_DOMAIN_REQUIRED_ERROR, resolve_login_organization
+from insights.helpers.verified_domain_enforcement import VERIFIED_DOMAIN_REQUIRED_ERROR
 from insights.middleware import (
     IMPERSONATION_REASON_SESSION_KEY,
     get_impersonated_session_expires_at,
@@ -100,29 +79,17 @@ from insights.models.user import (
 )
 from insights.models.webauthn_credential import WebauthnCredential
 from insights.permissions import APIScopePermission, TimeSensitiveActionPermission, UserNoOrgMembershipDeletePermission
-from insights.rate_limit import (
-    OnboardingSkipThrottle,
-    ToolbarOAuthRefreshThrottle,
-    UserAuthenticationThrottle,
-    UserEmailVerificationThrottle,
-)
+from insights.rate_limit import OnboardingSkipThrottle, ToolbarOAuthRefreshThrottle, UserAuthenticationThrottle
 from insights.rbac.user_access_control import UserAccessControl
 from insights.session.activity import (
     list_user_sessions,
     revoke_other_sessions,
-    revoke_other_sessions_for_request,
     revoke_user_auth_session,
     session_public_id,
     sync_current_session_metadata,
 )
 from insights.session.models import Session
 from insights.session.reauth import sensitive_action_reference, step_up_required
-from insights.tasks.email import (
-    send_email_change_emails,
-    send_password_changed_email,
-    send_two_factor_auth_disabled_email,
-    send_two_factor_auth_enabled_email,
-)
 from insights.user_permissions import UserPermissions
 from insights.utils import render_template
 
@@ -133,8 +100,6 @@ _VALID_NOTIFICATION_TYPE_VALUES: frozenset[str] = frozenset(t.value for t in Not
 
 REDIRECT_TO_SITE_COUNTER = Counter("insights_redirect_to_site", "Redirect to site")
 REDIRECT_TO_SITE_FAILED_COUNTER = Counter("insights_redirect_to_site_failed", "Redirect to site failed")
-
-NUM_2FA_BACKUP_CODES = 10
 
 MAX_PIPELINE_NOTIFICATIONS = 1000
 _PIPELINE_ID_PATTERN = re.compile(r"^(?:insights_function|batch_export|plugin_config):[0-9a-zA-Z-]{1,128}$")
@@ -200,7 +165,6 @@ class OnboardingSkipRequestSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    has_password = serializers.SerializerMethodField()
     is_impersonated = serializers.SerializerMethodField()
     is_impersonated_until = serializers.SerializerMethodField()
     is_impersonated_read_only = serializers.SerializerMethodField()
@@ -208,7 +172,6 @@ class UserSerializer(serializers.ModelSerializer):
         help_text="The reason the operator gave when the current impersonation session started (or was last up/downgraded). Null when not impersonating."
     )
     sensitive_session_expires_at = serializers.SerializerMethodField()
-    is_2fa_enabled = serializers.SerializerMethodField()
     has_social_auth = serializers.SerializerMethodField()
     has_sso_enforcement = serializers.SerializerMethodField()
     pending_invites = serializers.SerializerMethodField()
@@ -217,13 +180,6 @@ class UserSerializer(serializers.ModelSerializer):
     organizations = OrganizationBasicSerializer(many=True, read_only=True)
     set_current_organization = serializers.CharField(write_only=True, required=False)
     set_current_team = serializers.CharField(write_only=True, required=False)
-    current_password = serializers.CharField(
-        write_only=True,
-        required=False,
-        help_text=(
-            "The user's current password. Required when changing `password` if the user already has a usable password set."
-        ),
-    )
     notification_settings = serializers.DictField(
         required=False,
         help_text=(
@@ -285,13 +241,11 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
-            "pending_email",
             "is_email_verified",
             "notification_settings",
             "anonymize_data",
             "allow_impersonation",
             "toolbar_mode",
-            "has_password",
             "id",
             "is_staff",
             "is_impersonated",
@@ -304,10 +258,7 @@ class UserSerializer(serializers.ModelSerializer):
             "organizations",
             "set_current_organization",
             "set_current_team",
-            "password",
-            "current_password",  # used when changing current password
             "events_column_config",
-            "is_2fa_enabled",
             "has_social_auth",
             "has_sso_enforcement",
             "has_seen_product_intro_for",
@@ -317,7 +268,6 @@ class UserSerializer(serializers.ModelSerializer):
             "allow_sidebar_suggestions",
             "shortcut_position",
             "role_at_organization",
-            "passkeys_enabled_for_2fa",
             "hide_mcp_hints",
             "ui_configuration",
             "onboarding_skipped_at",
@@ -336,9 +286,9 @@ class UserSerializer(serializers.ModelSerializer):
             "date_joined",
             "uuid",
             "distinct_id",
-            "pending_email",
+            # A user's email is whatever the identity provider asserts.
+            "email",
             "is_email_verified",
-            "has_password",
             "id",
             "is_impersonated",
             "is_impersonated_until",
@@ -362,18 +312,11 @@ class UserSerializer(serializers.ModelSerializer):
             "requires_credential_review",
         ]
 
-        extra_kwargs = {
-            "password": {"write_only": True},
-        }
-
     def validate_first_name(self, value: str) -> str:
         return validate_display_name(value)
 
     def validate_last_name(self, value: str) -> str:
         return validate_display_name(value)
-
-    def get_has_password(self, instance: User) -> bool:
-        return bool(instance.password) and instance.has_usable_password()
 
     def get_is_impersonated(self, _) -> Optional[bool]:
         if "request" not in self.context:
@@ -435,12 +378,6 @@ class UserSerializer(serializers.ModelSerializer):
         if PersonalAPIKey.objects.filter(user=instance).exists():
             return True
         return WebauthnCredential.objects.filter(user=instance).exists()
-
-    @tracer.start_as_current_span("user_serializer.is_2fa_enabled")
-    def get_is_2fa_enabled(self, instance: User) -> bool:
-        has_totp_device = default_device(instance) is not None
-        has_passkey_2fa = bool(instance.passkeys_enabled_for_2fa) and has_passkeys(instance)
-        return has_totp_device or has_passkey_2fa
 
     @tracer.start_as_current_span("user_serializer.has_sso_enforcement")
     def get_has_sso_enforcement(self, instance: User) -> bool:
@@ -660,31 +597,6 @@ class UserSerializer(serializers.ModelSerializer):
             )
         return value
 
-    def validate_password_change(
-        self, instance: User, current_password: Optional[str], password: Optional[str]
-    ) -> Optional[str]:
-        if password:
-            if instance.password and instance.has_usable_password():
-                # If user has a password set, we check it's provided to allow updating it. We need to check that is both
-                # usable (properly hashed) and that a password actually exists.
-                if not current_password:
-                    raise serializers.ValidationError(
-                        {"current_password": ["This field is required when updating your password."]},
-                        code="required",
-                    )
-
-                if not instance.check_password(current_password):
-                    raise serializers.ValidationError(
-                        {"current_password": ["Your current password is incorrect."]},
-                        code="incorrect_password",
-                    )
-            try:
-                validate_password(password, instance)
-            except ValidationError as e:
-                raise serializers.ValidationError({"password": e.messages})
-
-        return password
-
     def validate_is_staff(self, value: bool) -> bool:
         if not self.context["request"].user.is_staff:
             raise exceptions.PermissionDenied("You are not a staff user, contact your instance admin.")
@@ -693,19 +605,6 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_role_at_organization(self, value):
         if value and value not in dict(ROLE_CHOICES):
             raise serializers.ValidationError("Invalid role selected")
-        return value
-
-    def validate_passkeys_enabled_for_2fa(self, value: bool) -> bool:
-        """Validate that user has passkeys before enabling passkeys for 2FA"""
-        from insights.helpers.two_factor_session import has_passkeys
-
-        if value:  # Only validate when enabling
-            instance = cast(User, self.instance)
-            if instance and not has_passkeys(instance):
-                raise serializers.ValidationError(
-                    "You must have at least one passkey set up before enabling passkeys for 2FA.",
-                    code="no_passkeys",
-                )
         return value
 
     def update(self, instance: "User", validated_data: Any) -> Any:
@@ -724,83 +623,11 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data["current_team"] = current_team
             validated_data["current_organization"] = current_team.organization
 
-        if (
-            "email" in validated_data
-            and validated_data["email"].lower() != instance.email.lower()
-            and is_email_available()
-        ):
-            new_email = validated_data["email"]
-            # Moving between two SSO-enforced domains of the same org is a domain migration, not an SSO bypass.
-            # SSO enforcement can only be set on a verified domain, so an enforced domain is always verified.
-            current_sso_enforced = OrganizationDomain.objects.get_sso_enforcement_for_email_address(instance.email)
-            new_sso_enforced = OrganizationDomain.objects.get_sso_enforcement_for_email_address(new_email)
-            current_domain = OrganizationDomain.objects.get_verified_for_email_address(instance.email)
-            new_domain = OrganizationDomain.objects.get_verified_for_email_address(new_email)
-            is_same_org_migration = (
-                bool(current_sso_enforced)
-                and bool(new_sso_enforced)
-                and current_domain is not None
-                and new_domain is not None
-                and current_domain.organization_id == new_domain.organization_id
-            )
-
-            # Block bypass: a user on an SSO-enforced domain can't move off of it.
-            if current_sso_enforced and not is_same_org_migration:
-                raise serializers.ValidationError(
-                    "You can't change your email because SSO is enforced on your current email's domain.",
-                    code="sso_enforced_current_email",
-                )
-            # Block lockout: moving to an SSO-enforced domain blocks password reset and login.
-            if new_sso_enforced and not is_same_org_migration:
-                raise serializers.ValidationError(
-                    "You can't change your email to a domain where SSO is enforced.",
-                    code="sso_enforced_new_email",
-                )
-            validated_data.pop("email", None)  # staged as pending_email below, not written to `email` directly
-            # Serialize concurrent email changes for this user under a row lock so the token is
-            # minted against one consistent pending_email. Without it, interleaved requests can
-            # bind a token to one address but deliver its verification email to another.
-            with transaction.atomic():
-                User.objects.select_for_update().get(pk=instance.pk)
-                instance.pending_email = new_email
-                instance.save(update_fields=["pending_email"])
-                token = email_verification_token_generator.make_token(instance)
-            # Send after the transaction commits (never inside the atomic block), pinning the
-            # recipient to the captured address so a later pending_email change can't redirect
-            # this token's verification email.
-            EmailVerifier.send_verification_email(instance, token, target_email=new_email)
-
         if validated_data.get("notification_settings"):
             validated_data["partial_notification_settings"] = validated_data.pop("notification_settings")
 
-        # Update password
-        current_password = validated_data.pop("current_password", None)
-        password = self.validate_password_change(
-            cast(User, instance), current_password, validated_data.pop("password", None)
-        )
-
-        old_passkeys_enabled_for_2fa = instance.passkeys_enabled_for_2fa
         updated_attrs = list(validated_data.keys())
         instance = cast(User, super().update(instance, validated_data))
-
-        if password:
-            # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password (validated in validate_password_change above)
-            instance.set_password(password)
-            instance.save()
-            update_session_auth_hash(self.context["request"], instance)
-            updated_attrs.append("password")
-            send_password_changed_email.delay(instance.id)
-
-        # Only the upgrade (enabling) counts as a credential change — disabling is a downgrade and
-        # deliberately does not revoke other sessions.
-        credential_changed = bool(password) or (
-            "passkeys_enabled_for_2fa" in validated_data
-            and not old_passkeys_enabled_for_2fa
-            and instance.passkeys_enabled_for_2fa
-        )
-        if credential_changed:
-            # Revoke other sessions after update_session_auth_hash so the current (rotated) session is kept.
-            revoke_other_sessions_for_request(self.context["request"], instance)
 
         report_user_updated(instance, updated_attrs)
 
@@ -891,7 +718,7 @@ class UserAuthSessionSerializer(serializers.ModelSerializer):
         help_text="Browser and operating system parsed from the user agent, e.g. 'Chrome 135 on macOS'.",
     )
     login_method = serializers.CharField(
-        read_only=True, help_text="How this session signed in (e.g. password, Google, SAML)."
+        read_only=True, help_text="How this session signed in — the identity provider that authenticated it."
     )
     is_current = serializers.SerializerMethodField(
         help_text="Whether this is the login session making the current request."
@@ -1093,110 +920,6 @@ class UserViewSet(
         revoked_count = revoke_other_sessions(user, request.session.session_key)
         return Response({"revoked_count": revoked_count})
 
-    @action(methods=["POST"], detail=False, permission_classes=[AllowAny])
-    def verify_email(self, request, **kwargs):
-        token = request.data["token"] if "token" in request.data else None
-        user_uuid = request.data["uuid"]
-
-        if not token:
-            raise serializers.ValidationError({"token": ["This field is required."]}, code="required")
-
-        # Special handling for E2E tests
-        if settings.E2E_TESTING and user_uuid == "e2e_test_user" and token == "e2e_test_token":
-            return {"success": True, "token": token}
-
-        try:
-            user: Optional[User] = User.objects.filter(is_active=True).get(uuid=user_uuid)
-        except User.DoesNotExist:
-            user = None
-
-        if not user or not EmailVerifier.check_token(user, token):
-            raise serializers.ValidationError(
-                {"token": ["This verification token is invalid or has expired."]},
-                code="invalid_token",
-            )
-
-        if user.pending_email:
-            old_email = user.email
-            with transaction.atomic():
-                user.email = user.pending_email
-                user.pending_email = None
-                user.save(update_fields=["email", "pending_email"])
-                # Delete social auth so the old external identity can't keep logging in.
-                UserSocialAuth.objects.filter(user=user).delete()
-            send_email_change_emails.delay(datetime.now(UTC).isoformat(), user.first_name, old_email, user.email)
-            revoke_other_sessions_for_request(request, user)
-
-        user.is_email_verified = True
-        user.save()
-        report_user_verified_email(user)
-
-        user_has_passkeys = has_passkeys(user)
-        passkeys_enabled_for_2fa = user_has_passkeys and user.passkeys_enabled_for_2fa
-        if default_device(user) or passkeys_enabled_for_2fa:
-            return Response({"success": True, "token": token, "requires_2fa": True})
-
-        # Don't hand a non-SSO session to an account whose domain enforces SSO — verifying an email
-        # must not become a password-backend login path around the IdP. The user logs in via SSO.
-        if OrganizationDomain.objects.get_sso_enforcement_for_email_address(user.email):
-            return Response({"success": True, "token": token, "requires_sso": True})
-
-        # Domain enforcement: refuse blocked members — blocked admins still get a gated session.
-        if not resolve_login_organization(user):
-            return Response({"success": True, "token": token, "requires_login": True})
-
-        login(self.request, user, backend="django.contrib.auth.backends.ModelBackend")
-        set_two_factor_verified_in_session(self.request)
-        report_user_logged_in(user)
-        return Response({"success": True, "token": token})
-
-    @action(
-        methods=["POST"],
-        detail=False,
-        permission_classes=[AllowAny],
-        throttle_classes=[UserEmailVerificationThrottle],
-    )
-    def request_email_verification(self, request, **kwargs):
-        uuid = request.data["uuid"]
-        if not is_email_available():
-            raise serializers.ValidationError(
-                "Cannot verify email address because email is not configured for your instance. Please contact your administrator.",
-                code="email_not_available",
-            )
-        try:
-            user = User.objects.filter(is_active=True).get(uuid=uuid)
-        except User.DoesNotExist:
-            user = None
-        if user:
-            # Allow re-requests when there's a pending email change that still
-            # needs to be verified, even though the current address is verified.
-            if user.is_email_verified and not user.pending_email:
-                raise serializers.ValidationError(
-                    "Email is already verified.",
-                    code="already_verified",
-                )
-            EmailVerifier.create_token_and_send_email_verification(user)
-
-        return Response({"success": True})
-
-    @action(
-        methods=["PATCH"],
-        detail=False,
-    )
-    def cancel_email_change_request(self, request, **kwargs):
-        instance = request.user
-
-        if not instance.pending_email:
-            raise serializers.ValidationError(
-                "No active email change requests found.",
-                code="email_change_request_not_found",
-            )
-
-        instance.pending_email = None
-        instance.save()
-
-        return Response(self.get_serializer(instance=instance).data)
-
     @extend_schema(
         request=OnboardingSkipRequestSerializer,
         responses=UserSerializer,
@@ -1334,144 +1057,6 @@ class UserViewSet(
             instance.save()
             return Response(instance.mascot_config)
 
-    # Deprecated - use two_factor_start_setup instead
-    @action(methods=["GET"], detail=True)
-    def start_2fa_setup(self, request, **kwargs):
-        return self.two_factor_start_setup(request, **kwargs)
-
-    @action(methods=["GET"], detail=True)
-    def two_factor_start_setup(self, request, **kwargs):
-        key = random_hex(20)
-        rawkey = unhexlify(key.encode("ascii"))
-        b32key = b32encode(rawkey).decode("utf-8")
-
-        # Concurrent requests can overwrite session saves, breaking the 2FA setup flow, but cache is atomic
-        session_cache = SessionCache(request.session)
-
-        # Store for 10 minutes (same as django-two-factor-auth setup flow)
-        session_cache.set("django_two_factor-hex", key, timeout=600, store_in_session=True)
-        session_cache.set(
-            "django_two_factor-qr_secret_key",
-            b32key,
-            timeout=600,
-            store_in_session=True,
-        )
-
-        # Return the secret key so the frontend can generate QR code and show it for manual entry
-        return Response(
-            {
-                "success": True,
-                "secret": b32key,
-            }
-        )
-
-    # Deprecated - use two_factor_validate instead
-    @action(methods=["POST"], detail=True)
-    def validate_2fa(self, request, **kwargs):
-        return self.two_factor_validate(request, **kwargs)
-
-    @action(methods=["POST"], detail=True)
-    def two_factor_validate(self, request, **kwargs):
-        session_cache = SessionCache(request.session)
-        hex_key = session_cache.get("django_two_factor-hex")
-
-        if not hex_key:
-            raise serializers.ValidationError(
-                "2FA setup session expired. Please start setup again.",
-                code="setup_expired",
-            )
-
-        form = TOTPDeviceForm(
-            hex_key,
-            request.user,
-            data={"token": request.data["token"]},
-        )
-        if not form.is_valid():
-            raise serializers.ValidationError("Token is not valid", code="token_invalid")
-        form.save()
-        otp_login(request, default_device(request.user))
-        set_two_factor_verified_in_session(request)
-
-        send_two_factor_auth_enabled_email.delay(request.user.id)
-
-        session_cache.delete("django_two_factor-hex")
-        session_cache.delete("django_two_factor-qr_secret_key")
-
-        revoke_other_sessions_for_request(request, cast(User, request.user))
-
-        return Response({"success": True})
-
-    @action(methods=["GET"], detail=True)
-    def two_factor_status(self, request, **kwargs):
-        """Get current 2FA status including backup codes if enabled"""
-        from insights.helpers.two_factor_session import has_passkeys
-
-        user = self.get_object()
-        totp_device = TOTPDevice.objects.filter(user=user).first()
-        static_device = StaticDevice.objects.filter(user=user).first()
-        user_has_passkeys = has_passkeys(user)
-        passkeys_enabled_for_2fa = user_has_passkeys and user.passkeys_enabled_for_2fa
-
-        backup_codes = []
-        if static_device:
-            backup_codes = [token.token for token in static_device.token_set.all()]
-
-        # Determine 2FA method
-        method = None
-        if totp_device:
-            method = "TOTP"
-        elif passkeys_enabled_for_2fa:
-            method = "passkey"
-
-        return Response(
-            {
-                "is_enabled": default_device(user) is not None or passkeys_enabled_for_2fa,
-                "backup_codes": backup_codes if totp_device else [],
-                "method": method,
-                "has_passkeys": user_has_passkeys,
-                "has_totp": totp_device is not None,
-                "passkeys_enabled_for_2fa": passkeys_enabled_for_2fa,
-            }
-        )
-
-    @action(methods=["POST"], detail=True)
-    def two_factor_backup_codes(self, request, **kwargs):
-        """Generate new backup codes, invalidating any existing ones"""
-        user = self.get_object()
-
-        # Ensure user has 2FA enabled
-        if not default_device(user):
-            raise serializers.ValidationError("2FA must be enabled first", code="2fa_not_enabled")
-
-        # Remove existing backup codes
-        static_device = StaticDevice.objects.filter(user=user).first()
-        if static_device:
-            static_device.token_set.all().delete()
-        else:
-            static_device = StaticDevice.objects.create(user=user, name="Backup Codes")
-
-        # Generate new backup codes
-        backup_codes = []
-        for _ in range(NUM_2FA_BACKUP_CODES):
-            token = StaticToken.random_token()
-            static_device.token_set.create(token=token)
-            backup_codes.append(token)
-
-        return Response({"backup_codes": backup_codes})
-
-    @action(methods=["POST"], detail=True)
-    def two_factor_disable(self, request, **kwargs):
-        """Disable 2FA and remove all related devices"""
-        user = self.get_object()
-
-        # Remove all 2FA devices
-        TOTPDevice.objects.filter(user=user).delete()
-        StaticDevice.objects.filter(user=user).delete()
-
-        send_two_factor_auth_disabled_email.delay(user.id)
-
-        return Response({"success": True})
-
     @extend_schema(
         request=None,
         responses={204: None},
@@ -1479,8 +1064,7 @@ class UserViewSet(
             "Mark the user as having reviewed their existing credentials. Idempotent. "
             "Flips `requires_credential_review` to False so the post-login interstitial "
             "isn't shown again. Does not modify any credentials; the user revokes "
-            "individual Personal API Keys and passkeys via their existing endpoints from "
-            "the same screen."
+            "individual Personal API Keys via their own endpoint from the same screen."
         ),
     )
     @action(
