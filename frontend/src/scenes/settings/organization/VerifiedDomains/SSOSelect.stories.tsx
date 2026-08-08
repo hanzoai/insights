@@ -13,7 +13,7 @@ const meta: Meta<SSOSelectInterface> = {
     title: 'Components/SSO Select',
     component: SSOSelect,
     render: (args) => {
-        const [value, setValue] = useState('google-oauth2' as SSOProvider | '')
+        const [value, setValue] = useState('oidc' as SSOProvider | '')
         useStorybookMocks({
             get: {
                 '/_preflight': async () => {
@@ -21,9 +21,7 @@ const meta: Meta<SSOSelectInterface> = {
                     return HttpResponse.json({
                         ...preflightJSON,
                         available_social_auth_providers: {
-                            github: true,
-                            gitlab: false,
-                            'google-oauth2': true,
+                            oidc: true,
                         },
                     })
                 },

@@ -295,7 +295,7 @@ class TestEmail(BaseTest):
                     {"raw_email": "c@hanzo.ai"},
                 ],
                 campaign_key="http_failcount",
-                template_name="2fa_enabled",
+                template_name="login_notification",
                 properties={},
             )
 
@@ -312,7 +312,7 @@ class TestEmail(BaseTest):
 
         with override_instance_config("EMAIL_HOST", "localhost"), self.settings(CUSTOMER_IO_API_KEY="test-key"):
             message = EmailMessage(
-                campaign_key="test_campaign", subject="Test subject", template_name="2fa_enabled", use_http=True
+                campaign_key="test_campaign", subject="Test subject", template_name="login_notification", use_http=True
             )
             message.add_recipient("test@hanzo.ai", "Test User")
             message.send(send_async=False)
@@ -326,8 +326,10 @@ class TestEmail(BaseTest):
                 json={
                     "to": "test@hanzo.ai",
                     "identifiers": {"email": "test@hanzo.ai"},
-                    "transactional_message_id": CUSTOMER_IO_TEMPLATE_ID_MAP["2fa_enabled"],
-                    "message_data": {"utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=2fa_enabled"},
+                    "transactional_message_id": CUSTOMER_IO_TEMPLATE_ID_MAP["login_notification"],
+                    "message_data": {
+                        "utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=login_notification"
+                    },
                 },
                 timeout=30,
             )
@@ -336,7 +338,7 @@ class TestEmail(BaseTest):
                 distinct_id="test@hanzo.ai",
                 event="transactional email triggered",
                 properties={
-                    "template_name": "2fa_enabled",
+                    "template_name": "login_notification",
                     "campaign_key": "test_campaign",
                     "recipient_email": "test@hanzo.ai",
                     "delivery_id": "test_delivery_id",
@@ -354,7 +356,7 @@ class TestEmail(BaseTest):
             message = EmailMessage(
                 campaign_key="test_campaign",
                 subject="Test subject",
-                template_name="2fa_enabled",
+                template_name="login_notification",
                 template_context={"decimal_value": Decimal("1.23")},
                 use_http=True,
             )
@@ -370,10 +372,10 @@ class TestEmail(BaseTest):
                 json={
                     "to": "test@hanzo.ai",
                     "identifiers": {"email": "test@hanzo.ai"},
-                    "transactional_message_id": CUSTOMER_IO_TEMPLATE_ID_MAP["2fa_enabled"],
+                    "transactional_message_id": CUSTOMER_IO_TEMPLATE_ID_MAP["login_notification"],
                     "message_data": {
                         "decimal_value": 1.23,
-                        "utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=2fa_enabled",
+                        "utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=login_notification",
                     },
                 },
                 timeout=30,
@@ -388,7 +390,7 @@ class TestEmail(BaseTest):
 
         with override_instance_config("EMAIL_HOST", "localhost"), self.settings(CUSTOMER_IO_API_KEY="test-key"):
             message = EmailMessage(
-                campaign_key="test_campaign", subject="Test subject", template_name="2fa_enabled", use_http=True
+                campaign_key="test_campaign", subject="Test subject", template_name="login_notification", use_http=True
             )
             message.add_recipient("test@hanzo.ai")
 
@@ -575,7 +577,7 @@ class TestEmail(BaseTest):
             message = EmailMessage(
                 campaign_key="test_campaign",
                 subject="Test subject",
-                template_name="2fa_enabled",
+                template_name="login_notification",
                 template_context=template_context,
             )
 
@@ -594,7 +596,9 @@ class TestEmail(BaseTest):
     def test_add_recipient_sanitizes_name(self) -> None:
         # Test that add_recipient properly sanitizes the name parameter
         with override_instance_config("EMAIL_HOST", "localhost"):
-            message = EmailMessage(campaign_key="test_campaign", subject="Test subject", template_name="2fa_enabled")
+            message = EmailMessage(
+                campaign_key="test_campaign", subject="Test subject", template_name="login_notification"
+            )
 
             # Add recipient with a malicious name containing HTML/JavaScript
             message.add_recipient(email="test@example.com", name='Malicious"><script>alert("XSS")</script>')

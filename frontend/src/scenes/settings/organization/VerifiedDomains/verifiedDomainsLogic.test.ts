@@ -26,7 +26,7 @@ describe('verifiedDomainsLogic', () => {
                             id: '8db3b0c2-a0ab-490a-9037-14f3358a81bc',
                             domain: 'my.hanzo.ai',
                             jit_provisioning_enabled: true,
-                            sso_enforcement: 'google-oauth2',
+                            sso_enforcement: 'oidc',
                             is_verified: true,
                             verified_at: '2022-01-01T23:59:59',
                         },
