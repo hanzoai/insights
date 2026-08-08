@@ -5,7 +5,6 @@ from loginas.utils import is_impersonated_session
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
 
-from insights.helpers.two_factor_session import is_path_whitelisted
 from insights.models.organization import OrganizationMembership
 from insights.models.organization_domain import OrganizationDomain
 from insights.models.user import User
@@ -16,13 +15,39 @@ VERIFIED_DOMAIN_REQUIRED_ERROR = (
     "Your organization only allows members with a verified email domain. Contact your organization's admin for access."
 )
 
-_ORGANIZATION_DETAIL_PATH = re.compile(r"^/api/organizations/[^/]+/?$")
+_ORGANIZATION_DETAIL_PATH = re.compile(r"^/(?:api|v1)/organizations/[^/]+/?$")
+
+# Paths a blocked member must still reach: to see why they are blocked, to leave,
+# and to come back through Hanzo IAM. Everything else is denied.
+_EXEMPT_PATHS = frozenset(
+    {
+        "/logout/",
+        "/api/logout/",
+        "/v1/logout/",
+        "/api/users/@me/",
+        "/v1/users/@me/",
+        "/_health/",
+    }
+)
+
+_EXEMPT_PREFIXES = (
+    "/static/",
+    "/uploaded_media/",
+    "/login/oidc",
+    "/complete/oidc",
+    "/api/social_signup",
+    "/v1/social_signup",
+)
+
+
+def _is_path_exempt(path: str) -> bool:
+    return path in _EXEMPT_PATHS or path.startswith(_EXEMPT_PREFIXES)
 
 
 def is_enforcement_disable_request(request: Request) -> bool:
     """
-    The escape hatch, mirroring 2FA's whitelisted `two_factor_disable`: a PATCH to the organization
-    itself passes the domain gates so a blocked admin can turn `enforce_verified_domains` off.
+    The escape hatch: a PATCH to the organization itself passes the domain gates so a blocked
+    admin can turn `enforce_verified_domains` off.
     `OrganizationSerializer.validate` rejects every other field change from a blocked admin, and the
     standard admin-write permission still applies.
     """
@@ -36,10 +61,10 @@ def enforce_verified_domain(request: Request, user: User) -> None:
     `VerifiedDomainEnforcementPermission`, which checks the URL-resolved organization and covers
     non-session authenticators too.
 
-    Unlike the 2FA check next to this one, SSO sessions are not exempt: an IdP login proves who the
-    user is, not that the organization admits their email domain.
+    An IdP login proves who the user is, not that the organization admits their email domain, so
+    an OIDC session is not exempt either.
     """
-    if is_path_whitelisted(request.path):
+    if _is_path_exempt(request.path):
         return
 
     if is_enforcement_disable_request(request):

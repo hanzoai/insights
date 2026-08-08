@@ -189,7 +189,6 @@ export const defaultMocks: Mocks = {
                 pending_invites: [],
             },
         ],
-        '/api/users/@me/two_factor_status/': () => [200, { is_enabled: true, backup_codes: [], method: 'TOTP' }],
         '/api/users/@me/mascot_config/': {
             color: null,
             enabled: false,
@@ -205,12 +204,6 @@ export const defaultMocks: Mocks = {
         '/api/projects/:team_id/comments/count': { count: 0 },
         '/api/projects/:team_id/comments': { results: [] },
         '/_preflight': _preflight,
-        '/api/login/dev': {
-            users: [
-                { email: 'test@hanzo.ai', is_staff: true, label: 'Default test user' },
-                { email: 'staff@hanzo.ai', is_staff: true, label: null },
-            ],
-        },
         '/_system_status': _systemStatus,
         '/api/instance_status': _instanceStatus,
         // We don't want to show the "new version available" banner in tests
