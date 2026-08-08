@@ -120,7 +120,7 @@ class BulkAddOptOutsResultSerializer(serializers.Serializer):
 
 
 class MessagePreferencesViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
-    scope_object = "hog_flow"
+    scope_object = "insights_flow"
     # Only the opt-out list endpoints are reachable with API keys (and therefore MCP);
     # webhook_url and generate_link stay session-only by being listed in neither.
     scope_object_read_actions = ["opt_outs", "export_opt_outs_csv"]

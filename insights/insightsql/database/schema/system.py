@@ -1260,7 +1260,7 @@ insights_functions: PostgresTable = PostgresTable(
 message_categories: PostgresTable = PostgresTable(
     name="message_categories",
     postgres_table_name="insights_messagecategory",
-    access_scope="hog_flow",
+    access_scope="insights_flow",
     description="Message categories recipients can opt out of; one row per category. Join its id against the keys of message_recipient_preferences.preferences.",
     fields={
         "id": StringDatabaseField(name="id", description="Category UUID, used as the key in recipient preferences."),
@@ -1289,7 +1289,7 @@ message_categories: PostgresTable = PostgresTable(
 message_recipient_preferences: PostgresTable = PostgresTable(
     name="message_recipient_preferences",
     postgres_table_name="insights_messagerecipientpreference",
-    access_scope="hog_flow",
+    access_scope="insights_flow",
     description="Messaging preferences per recipient; one row per recipient. The preferences map records opt-outs and opt-ins per message category.",
     fields={
         "id": StringDatabaseField(name="id", description="Preference row UUID."),
@@ -1856,7 +1856,9 @@ class _TicketAssignmentTable(LazyTable):
         return "ticket_assignment"
 
 
-def ticket_assignment_join(join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: ast.SelectQuery) -> ast.JoinExpr:
+def ticket_assignment_join(
+    join_to_add: LazyJoinToAdd, context: InsightsQLContext, node: ast.SelectQuery
+) -> ast.JoinExpr:
     if not join_to_add.fields_accessed:
         raise ResolutionError("No fields requested from `support_tickets.assignee`")
     return ast.JoinExpr(
