@@ -25,6 +25,18 @@
     "extends": "../../../tsconfig.json",
     "compilerOptions": {
         "baseUrl": "../../..",
+        // baseUrl is deprecated and this TypeScript refuses it outright —
+        // "error TS5101: Option 'baseUrl' is deprecated and will stop functioning
+        // in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"'
+        // to silence this error." This is the escape the compiler itself names.
+        //
+        // The alternative is to restate the root's ~20 `paths` entries here with
+        // their prefixes rewritten, which would resolve without baseUrl but leave
+        // two lists to keep in step — and a path map that silently disagrees with
+        // the root is a worse failure than a deprecation notice. When TS 7 lands,
+        // the fix is to drop baseUrl everywhere and make the ROOT paths
+        // package-relative once, not to fork them per package.
+        "ignoreDeprecations": "6.0",
         "emitDeclarationOnly": true,
         // The root turns `incremental` on, which suits a project that type-checks
         // itself in place. tsup's dts pass is not that: it emits declarations to a
