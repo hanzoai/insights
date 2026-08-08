@@ -1,6 +1,5 @@
 import { LogicWrapper } from 'kea'
 import type { Insights, PropertyMatchType, SupportedWebVitalsMetrics } from 'insights-js'
-import { LogLevel } from 'insights-js/rrweb-plugin-console-record'
 import { eventWithTime } from 'insights-js/rrweb-types'
 import { ReactNode } from 'react'
 import { LayoutItem } from 'react-grid-layout'
@@ -1518,6 +1517,45 @@ export interface LogEntryMessageFilter extends LogEntryPropertyFilter {
 }
 
 export type DurationType = 'duration' | 'active_seconds' | 'inactive_seconds'
+
+/** The console method a recorded log entry came from.
+ *
+ * Declared here rather than imported. It used to come from
+ * `insights-js/rrweb-plugin-console-record`, and that specifier resolves to
+ * nothing: `insights-js` is not a dependency, it is absent from node_modules,
+ * and the root tsconfig maps only two of the fork's subpaths — `rrweb-types`
+ * and `rrweb` — because the SDK fork publishes those as sibling packages. There
+ * is no sibling for the console plugin and neither installed one exports this
+ * type, so the import has never been resolvable for anyone.
+ *
+ * It went unnoticed because the CI typecheck runs `tsc --noEmit || true` and
+ * then greps for TS2448/TS7022 alone, so a TS2307 lands in a file nothing reads.
+ * Generating declarations for @hanzo/elements is what finally refused it.
+ *
+ * The members are the console methods rrweb's console-record plugin records, so
+ * a payload that satisfied the old import still satisfies this.
+ * `FilterableLogLevel` below stays the narrower set the UI offers as filters. */
+export type LogLevel =
+    | 'assert'
+    | 'clear'
+    | 'count'
+    | 'countReset'
+    | 'debug'
+    | 'dir'
+    | 'dirxml'
+    | 'error'
+    | 'group'
+    | 'groupCollapsed'
+    | 'groupEnd'
+    | 'info'
+    | 'log'
+    | 'table'
+    | 'time'
+    | 'timeEnd'
+    | 'timeLog'
+    | 'trace'
+    | 'warn'
+
 export type FilterableLogLevel = 'info' | 'warn' | 'error'
 
 export interface LegacyRecordingFilters {
