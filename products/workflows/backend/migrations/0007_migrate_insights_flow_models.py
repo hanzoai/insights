@@ -98,9 +98,9 @@ class Migration(migrations.Migration):
                     },
                 ),
                 migrations.AlterField(
-                    model_name="hogflowbatchjob",
+                    model_name="insightsflowbatchjob",
                     name="insights_flow",
-                    field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to="workflows.hogflow"),
+                    field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to="workflows.insightsflow"),
                 ),
                 migrations.AlterField(
                     model_name="insightsflowschedule",
@@ -108,7 +108,7 @@ class Migration(migrations.Migration):
                     field=models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="schedules",
-                        to="workflows.hogflow",
+                        to="workflows.insightsflow",
                     ),
                 ),
                 migrations.CreateModel(
@@ -193,21 +193,21 @@ class Migration(migrations.Migration):
                     },
                 ),
                 migrations.AddIndex(
-                    model_name="hogflow",
+                    model_name="insightsflow",
                     index=models.Index(fields=["status", "team"], name="insights_hog_status_53a054_idx"),
                 ),
                 migrations.AddIndex(
-                    model_name="hogflow",
+                    model_name="insightsflow",
                     index=models.Index(fields=["version", "team"], name="insights_hog_version_c1677f_idx"),
                 ),
                 migrations.AddConstraint(
-                    model_name="hogflow",
+                    model_name="insightsflow",
                     constraint=models.UniqueConstraint(
                         fields=("team", "version", "id"), name="unique_version_per_flow"
                     ),
                 ),
                 migrations.AddIndex(
-                    model_name="hogflowtemplate",
+                    model_name="insightsflowtemplate",
                     index=models.Index(fields=["team"], name="hogflow_tem_team_id_cb8b2b_idx"),
                 ),
             ],
