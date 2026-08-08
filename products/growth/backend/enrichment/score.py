@@ -13,8 +13,8 @@ from typing import Optional
 
 SCORE_VERSION = "clay-parity-1"
 
-# Exempt from the -5 penalty. Matched case-sensitively against ISO alpha-2, as Clay does —
-# `country_name_to_iso_code` already normalises provider names to this casing.
+# Exempt from the -5 penalty. Matched case-sensitively against ISO alpha-2, as Clay does, so
+# callers must normalise a country to that casing before scoring on it.
 SCORED_COUNTRIES = frozenset(
     {
         "AU", "AT", "BE", "BR", "CA", "DK", "EE", "FI", "FR", "DE", "IS", "IE", "IL",

@@ -2,10 +2,9 @@ from collections.abc import Iterable
 from typing import Any, Literal, Optional, Union, cast
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, BaseTest, _create_event, cleanup_materialized_columns
+from insights.test.base import APIBaseTest, BaseTest, _create_event
 from unittest.mock import MagicMock, patch
 
-from django.conf import settings
 
 from parameterized import parameterized
 
@@ -45,7 +44,6 @@ from products.data_tools.backend.models.join import DataWarehouseJoin
 from products.event_definitions.backend.models.property_definition import PropertyType
 from products.warehouse_sources.backend.facade.models import DataWarehouseCredential, DataWarehouseTable
 
-from ee.datastore.materialized_columns.columns import materialize
 
 elements_chain_match = lambda x: parse_expr("elements_chain =~ {regex}", {"regex": ast.Constant(value=str(x))})
 elements_chain_imatch = lambda x: parse_expr("elements_chain =~* {regex}", {"regex": ast.Constant(value=str(x))})
@@ -1998,26 +1996,21 @@ class TestPropertyIsSetIsNotSetWithData(APIBaseTest):
             properties=properties,
         )
 
-    def _expected_is_set_values(self, is_materialized: bool) -> dict[str, int]:
-        uses_legacy_materialized_columns = is_materialized and not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+    def _expected_is_set_values(self) -> dict[str, int]:
+        # A property is never read from a legacy materialized column: minting one was an enterprise-edition
+        # capability, so the JSON-blob read is the only shape these queries take.
         result = {}
         for prop_name, _, _, expected in self.test_cases:
             if callable(expected):
-                result[prop_name] = 1 if expected(uses_legacy_materialized_columns) else 0
+                result[prop_name] = 1 if expected(False) else 0
             else:
                 result[prop_name] = 1 if expected else 0
         return result
 
-    def _expected_is_not_set_values(self, is_materialized: bool) -> dict[str, int]:
-        return {k: 1 - v for k, v in self._expected_is_set_values(is_materialized).items()}
+    def _expected_is_not_set_values(self) -> dict[str, int]:
+        return {k: 1 - v for k, v in self._expected_is_set_values().items()}
 
-    @parameterized.expand([("not_materialized", False), ("materialized", True)])
-    def test_is_set_operator(self, _name: str, is_materialized: bool):
-        if is_materialized:
-            self.addCleanup(cleanup_materialized_columns)
-            for prop_name, _, _, _ in self.test_cases:
-                materialize("events", prop_name)
-
+    def test_is_set_operator(self):
         select_exprs: list[ast.Expr] = [
             ast.Alias(
                 alias=prop_name,
@@ -2046,15 +2039,9 @@ class TestPropertyIsSetIsNotSetWithData(APIBaseTest):
         assert row
         results = dict(zip(result.columns, row))
 
-        assert results == self._expected_is_set_values(is_materialized)
+        assert results == self._expected_is_set_values()
 
-    @parameterized.expand([("not_materialized", False), ("materialized", True)])
-    def test_is_not_set_operator(self, _name: str, is_materialized: bool):
-        if is_materialized:
-            self.addCleanup(cleanup_materialized_columns)
-            for prop_name, _, _, _ in self.test_cases:
-                materialize("events", prop_name)
-
+    def test_is_not_set_operator(self):
         select_exprs: list[ast.Expr] = [
             ast.Alias(
                 alias=prop_name,
@@ -2083,7 +2070,7 @@ class TestPropertyIsSetIsNotSetWithData(APIBaseTest):
         assert row
         results = dict(zip(result.columns, row))
 
-        assert results == self._expected_is_not_set_values(is_materialized)
+        assert results == self._expected_is_not_set_values()
 
 
 class TestPropertyDateOperatorsWithData(APIBaseTest):

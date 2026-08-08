@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Optional
 
 from freezegun import freeze_time
-from insights.test.base import DatastoreTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -12,9 +12,10 @@ from rest_framework import status
 
 import insights.insightsql.query as insightsql_query_module
 
-from insights.datastore.query_tagging import Product, get_query_tags
 from insights.constants import AvailableFeature
+from insights.datastore.query_tagging import Product, get_query_tags
 from insights.models import EventProperty, Team, User
+from insights.models.ee_models import AccessControl
 from insights.models.utils import uuid7
 from insights.session_recordings.models.session_recording import SessionRecording
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
@@ -28,9 +29,6 @@ from products.experiments.backend.insightsql_queries.exposure_query_logic import
 from products.experiments.backend.models.experiment import Experiment
 from products.experiments.backend.session_buckets import MAX_BUCKET_METRICS, MAX_BUCKET_SCAN_DAYS, MAX_BUCKET_SOURCES
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
-
-from ee.api.test.base import APILicensedTest
-from ee.models.rbac.access_control import AccessControl
 
 NOW = datetime(2026, 1, 10, 12, 0, 0, tzinfo=UTC)
 EXPERIMENT_START = datetime(2025, 12, 20, tzinfo=UTC)
@@ -123,7 +121,7 @@ SERVER_CHARGE = {"kind": "EventsNode", "event": "server charge"}
 
 
 @freeze_time(NOW)
-class TestExperimentSessionBuckets(DatastoreTestMixin, APILicensedTest):
+class TestExperimentSessionBuckets(DatastoreTestMixin, APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
         cache.clear()

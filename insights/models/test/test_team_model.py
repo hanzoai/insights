@@ -9,14 +9,11 @@ from parameterized import parameterized
 
 from insights.models.activity_logging.activity_log import ActivityLog
 from insights.models.core_event import CoreEvent
+from insights.models.ee_models import AccessControl, Role, RoleMembership
 from insights.models.organization import OrganizationMembership
 from insights.models.team.team import Team
 from insights.models.team.team_caching import get_team_in_cache, set_team_in_cache
 from insights.models.user import User
-
-from ee.models.explicit_team_membership import ExplicitTeamMembership
-from insights.models.ee_models import AccessControl
-from insights.models.ee_models import Role, RoleMembership
 
 
 class TestCoreEvent(BaseTest):
@@ -135,18 +132,6 @@ class TestTeam(BaseTest):
         all_user_with_access_ids = list(self.team.all_users_with_access().values_list("id", flat=True))
 
         assert sorted(all_user_with_access_ids) == sorted([self.user.id, another_user.id])
-
-    def test_all_users_with_access_simple_org_membership_and_redundant_team_one(self):
-        self.organization_membership.level = OrganizationMembership.Level.MEMBER
-        self.organization_membership.save()
-        another_user = User.objects.create_and_join(self.organization, "test2@hanzo.ai", None)
-        ExplicitTeamMembership.objects.create(team=self.team, parent_membership=self.organization_membership)
-
-        all_user_with_access_ids = list(self.team.all_users_with_access().values_list("id", flat=True))
-
-        assert sorted(all_user_with_access_ids) == sorted(
-            [self.user.id, another_user.id]
-        )  # self.user should only be listed once
 
     def test_all_users_with_access_new_access_control_non_private_team(self):
         """Test that all organization members have access to a non-private team with the new access control system"""

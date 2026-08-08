@@ -40,7 +40,6 @@ from products.error_tracking.backend.weekly_digest import (
     send_digest_to_workflow,
 )
 
-from ee.datastore.materialized_columns.columns import materialize
 
 
 def _days_ago(n: int) -> str:
@@ -48,11 +47,6 @@ def _days_ago(n: int) -> str:
 
 
 class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        materialize("events", "$exception_issue_id", is_nullable=True)
-
     def _create_issue(self, name: str = "TestError", description: str = "something broke") -> ErrorTrackingIssue:
         issue = ErrorTrackingIssue.objects.create(
             id=uuid7(),
@@ -625,11 +619,6 @@ class TestSendDigestToWorkflow(SimpleTestCase):
 
 @override_settings(CLOUD_DEPLOYMENT="US")
 class TestWeeklyDigestWorkflowDelivery(DatastoreTestMixin, APIBaseTest):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        materialize("events", "$exception_issue_id", is_nullable=True)
-
     @override_settings(ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS=["*"])
     def test_task_posts_json_safe_digest_and_dedupes_on_retry(self):
         issue = ErrorTrackingIssue.objects.create(

@@ -7,10 +7,6 @@ from insights.test.base import (
     BaseTest,
     DatastoreTestMixin,
     _create_person,
-    get_index_from_explain,
-    get_inner_person_subquery_datastore_sql,
-    materialized,
-    snapshot_datastore_queries,
 )
 from unittest.mock import patch
 
@@ -20,10 +16,7 @@ from django.utils import timezone
 from parameterized import parameterized
 from rest_framework import status
 
-from insights.schema import InsightsQLQueryModifiers, MaterializationMode
 
-from insights.insightsql import ast
-from insights.insightsql.query import execute_insightsql_query
 
 from insights.models import ActivityLog, Comment, Organization, Tag, Team, User
 from insights.models.personal_api_key import PersonalAPIKey
@@ -34,9 +27,8 @@ from products.conversations.backend.api.ticket_filters import query_params_to_vi
 from products.conversations.backend.api.tickets import TicketReplyRequestSerializer
 from products.conversations.backend.models import Ticket, TicketAssignment, TicketView
 from products.conversations.backend.models.constants import Channel, ChannelDetail, Priority, Status
-from products.conversations.backend.person_lookup import PERSON_EMAIL_LOOKUP_QUERY, _get_persons_by_email
+from products.conversations.backend.person_lookup import _get_persons_by_email
 
-from ee.datastore.materialized_columns.columns import get_bloom_filter_lower_index_name
 from insights.models.ee_models import AccessControl
 from insights.models.ee_models import Role
 
@@ -1723,36 +1715,6 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
 
         assert person is not None
         assert str(person.uuid) == str(identified.uuid)
-
-    @snapshot_datastore_queries
-    def test_email_fallback_uses_bloom_filter_lower_skip_index(self, mock_on_commit):
-        _create_person(
-            team=self.team,
-            distinct_ids=["idx-test-id"],
-            properties={"email": "indexed@example.com"},
-            immediate=True,
-        )
-
-        with materialized("person", "email", create_bloom_filter_lower_index=True) as mat_col:
-            index_name = get_bloom_filter_lower_index_name(mat_col.name)
-            modifiers = InsightsQLQueryModifiers(materializationMode=MaterializationMode.AUTO)
-
-            assert "indexed@example.com" in _get_persons_by_email(
-                self.team, ["indexed@example.com"], modifiers=modifiers
-            )
-
-            # EXPLAIN the person-filter subquery of the exact query that ran, not a hand-written approximation
-            result = execute_insightsql_query(
-                PERSON_EMAIL_LOOKUP_QUERY,
-                placeholders={"emails": ast.Constant(value=["indexed@example.com"])},
-                team=self.team,
-                modifiers=modifiers,
-            )
-            assert result.datastore
-            subquery = get_inner_person_subquery_datastore_sql(result.datastore)
-            index_info = get_index_from_explain(subquery, index_name)
-            assert index_info is not None, f"Expected skip index {index_name} to be used:\n{subquery}"
-
 
 @patch.object(transaction, "on_commit", side_effect=immediate_on_commit)
 class TestTicketEmailFilter(APIBaseTest):

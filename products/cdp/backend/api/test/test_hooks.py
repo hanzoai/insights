@@ -2,22 +2,21 @@ import uuid
 from typing import Any
 
 import pytest
-from insights.test.base import DatastoreTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.cdp.templates.insights_function_template import sync_template_to_db
 from insights.cdp.templates.zapier.template_zapier import template as template_zapier
 
 from products.actions.backend.models.action import Action
 from products.cdp.backend.api.hooks import create_zapier_insights_function, valid_domain
-from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 from products.cdp.backend.models.hook import Hook
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
-from ee.api.test.base import APILicensedTest
 
 
 @pytest.mark.usefixtures("unittest_snapshot")
-class TestHooksAPI(DatastoreTestMixin, APILicensedTest):
+class TestHooksAPI(DatastoreTestMixin, APIBaseTest):
     snapshot: Any
     action: Action
 
