@@ -1875,8 +1875,8 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
             (
                 sessionPlayerData: SessionPlayerData,
                 debugSettings: {
-                    incrementalSources: import('node_modules/insights-js/dist/rrweb').IncrementalSource[]
-                    types: import('node_modules/insights-js/dist/rrweb').EventType[]
+                    incrementalSources: IncrementalSource[]
+                    types: EventType[]
                 }
             ): eventWithTime[] => {
                 const allSnapshots = Object.values(sessionPlayerData.snapshotsByWindowId).flat()
