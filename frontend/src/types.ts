@@ -1,6 +1,6 @@
-import { LogicWrapper } from 'kea'
 import type { Insights, PropertyMatchType, SupportedWebVitalsMetrics } from 'insights-js'
 import { eventWithTime } from 'insights-js/rrweb-types'
+import { LogicWrapper } from 'kea'
 import { ReactNode } from 'react'
 import { LayoutItem } from 'react-grid-layout'
 
@@ -257,15 +257,10 @@ export enum Region {
     DEV = 'DEV',
 }
 
-export type SSOProvider = 'google-oauth2' | 'github' | 'gitlab' | 'saml'
-export type LoginMethod = SSOProvider | 'password' | 'passkey' | null
-
-export interface AuthBackends {
-    'google-oauth2'?: boolean
-    gitlab?: boolean
-    github?: boolean
-    saml?: boolean
-}
+/** Backend names, as `/login/<backend>/` and `AUTHENTICATION_BACKENDS` spell them. */
+export type SSOProvider = 'oidc' | 'saml'
+/** Which providers the instance can start a handshake with, keyed by backend name. */
+export type AuthBackends = Partial<Record<SSOProvider, boolean>>
 
 export type ColumnChoice = string[] | 'DEFAULT'
 
@@ -7317,7 +7312,10 @@ export type InsightsFunctionConfigurationType = Omit<
     script?: InsightsFunctionType['script'] // In the config it can be empty if using a template
     _create_in_folder?: string | null
 }
-export type InsightsFlowConfigurationType = Omit<InsightsFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
+export type InsightsFlowConfigurationType = Omit<
+    InsightsFlow,
+    'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'
+>
 export type CyclotronJobConfigurationType = InsightsFunctionConfigurationType | InsightsFlowConfigurationType
 
 export type InsightsFunctionSubTemplateType = Pick<

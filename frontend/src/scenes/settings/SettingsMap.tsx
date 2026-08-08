@@ -162,12 +162,10 @@ import { ProjectMove } from './project/ProjectMove'
 import { ProjectSecretAPIKeys } from './project/ProjectSecretAPIKeys'
 import { SettingSection } from './types'
 import { AllowImpersonation } from './user/AllowImpersonation'
-import { ChangePassword, ChangePasswordTitle } from './user/ChangePassword'
 import { ConnectedApps } from './user/ConnectedApps'
 import { LoginSessions } from './user/LoginSessions'
 import { MCPHintsSetting } from './user/MCPHintsSetting'
 import { OptOutCapture } from './user/OptOutCapture'
-import { PasskeySettings } from './user/PasskeySettings'
 import { PersonalAPIKeys } from './user/PersonalAPIKeys'
 import { PersonalGitHubIntegrations, PersonalSlackIntegrations } from './user/PersonalIntegrations'
 import { RealtimeNotificationPreferences } from './user/RealtimeNotificationPreferences'
@@ -180,7 +178,6 @@ import {
     SidebarMyToolsSetting,
 } from './user/SidebarSettings'
 import { ThemeSwitcher } from './user/ThemeSwitcher'
-import { TwoFactorSettings } from './user/TwoFactorSettings'
 import { UpdateEmailPreferences } from './user/UpdateEmailPreferences'
 import { UserDangerZone } from './user/UserDangerZone'
 import { UserDetails } from './user/UserDetails'
@@ -815,8 +812,8 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Link to person',
                 description: (
                     <>
-                        The log attributes Insights reads to identify which person a log belongs to. A log is linked when
-                        any of these attributes matches one of the person&apos;s distinct IDs. Defaults to{' '}
+                        The log attributes Insights reads to identify which person a log belongs to. A log is linked
+                        when any of these attributes matches one of the person&apos;s distinct IDs. Defaults to{' '}
                         <code>insightsDistinctId</code>, the key the JavaScript and React Native SDKs auto-attach. Add
                         keys only if your backend pipeline emits the person identifier under different attributes.
                     </>
@@ -1608,7 +1605,6 @@ export const SETTINGS_MAP: SettingSection[] = [
         id: 'environment-secret-api-keys',
         title: 'Project secret API keys',
         flag: 'PROJECT_SECRET_API_KEYS',
-        requiresReauthentication: true,
         settings: [
             {
                 id: 'environment-secret-api-keys',
@@ -1914,26 +1910,6 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Details',
                 component: <UserDetails />,
                 keywords: ['name', 'email', 'profile', 'personal'],
-            },
-            {
-                id: 'change-password',
-                title: <ChangePasswordTitle />,
-                component: <ChangePassword />,
-                keywords: ['password', 'security', 'credential'],
-            },
-            {
-                id: '2fa',
-                title: 'Two-factor authentication',
-                description: 'Add an extra layer of security to your account using an authenticator app or passkeys.',
-                component: <TwoFactorSettings />,
-                keywords: ['two-factor', 'mfa', 'authenticator', 'security', 'totp'],
-            },
-            {
-                id: 'passkeys',
-                title: 'Passkeys',
-                description: 'Manage your passkeys for passwordless sign-in and two-factor authentication.',
-                component: <PasskeySettings />,
-                keywords: ['webauthn', 'fido', 'biometric', 'passwordless'],
             },
             {
                 id: 'login-sessions',

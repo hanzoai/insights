@@ -2,7 +2,6 @@ import { MakeLogicType, actions, connect, kea, listeners, path, reducers, select
 import { lazyLoaders, loaders } from 'kea-loaders'
 
 import api, { PaginatedResponse } from 'lib/api'
-import { timeSensitiveAuthenticationLogic } from 'lib/components/TimeSensitiveAuthentication/timeSensitiveAuthenticationLogic'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { toast } from 'lib/elements/Toast/Toast'
 import { bindModalToUrl } from 'lib/logic/bindModalToUrl'
@@ -221,9 +220,6 @@ export const inviteLogic = kea<inviteLogicType>([
                     if (values.message) {
                         payload.forEach((payload) => (payload.message = values.message))
                     }
-                    // Inviting members is a sensitive action; if re-authentication is required,
-                    // await its completion so the invite resumes once the user re-authenticates.
-                    await timeSensitiveAuthenticationLogic.findMounted()?.asyncActions.checkReauthentication()
                     return await api.create<OrganizationInviteType[]>(
                         `api/organizations/${organizationLogic.values.currentOrganizationId}/invites/bulk/`,
                         payload

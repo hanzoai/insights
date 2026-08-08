@@ -459,36 +459,6 @@ def cache():
     django_cache.clear()
 
 
-@pytest.fixture(autouse=True)
-def mock_two_factor_sso_enforcement_check(request, mocker):
-    """
-    Mock the two_factor_session.is_domain_sso_enforced check to return False for all tests.
-    Can be disabled by using @pytest.mark.no_mock_two_factor_sso_enforcement_check decorator.
-    """
-    if "no_mock_two_factor_sso_enforcement_check" in request.keywords:
-        return
-
-    mocker.patch("insights.helpers.two_factor_session.is_domain_sso_enforced", return_value=False)
-    mocker.patch("insights.helpers.two_factor_session.is_sso_authentication_backend", return_value=False)
-
-
-@pytest.fixture(autouse=True)
-def mock_code_based_verifier(request, mocker):
-    """
-    Mock the CodeBasedVerifier.should_send_code_based_verification method to return False for all tests.
-    Can be disabled by using @pytest.mark.disable_mock_code_based_verifier decorator.
-    """
-    from insights.helpers.two_factor_session import CodeBasedVerificationCheckResult
-
-    if "disable_mock_code_based_verifier" in request.keywords:
-        return
-
-    mocker.patch(
-        "insights.helpers.two_factor_session.CodeBasedVerifier.should_send_code_based_verification",
-        return_value=CodeBasedVerificationCheckResult(should_send=False),
-    )
-
-
 class _JUnitTimingsPlugin:
     """Capture wall-clock offsets and surface them as JUnit `<testsuite>` properties.
 

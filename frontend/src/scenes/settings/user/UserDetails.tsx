@@ -1,4 +1,4 @@
-import { useActions, useValues } from 'kea'
+import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { Button } from 'lib/elements/Button'
@@ -7,8 +7,7 @@ import { Input } from 'lib/elements/Input/Input'
 import { userLogic } from 'scenes/userLogic'
 
 export function UserDetails(): JSX.Element {
-    const { userLoading, isUserDetailsSubmitting, userDetailsChanged, user } = useValues(userLogic)
-    const { cancelEmailChangeRequest } = useActions(userLogic)
+    const { userLoading, isUserDetailsSubmitting, userDetailsChanged } = useValues(userLogic)
 
     return (
         <Form
@@ -46,22 +45,6 @@ export function UserDetails(): JSX.Element {
                     disabled={userLoading}
                 />
             </Field>
-            {user?.pending_email && (
-                <div className="flex flex-row gap-2">
-                    <div className="text-danger text-xs font-medium mt-1.25">
-                        Pending verification for {user.pending_email}
-                    </div>
-                    <Button
-                        type="tertiary"
-                        size="xsmall"
-                        data-attr="cancel-email-change-request-button"
-                        onClick={cancelEmailChangeRequest}
-                    >
-                        Cancel change
-                    </Button>
-                </div>
-            )}
-
             <Button
                 type="primary"
                 htmlType="submit"

@@ -1,16 +1,16 @@
 import { expect, test as setup } from '@playwright/test'
 
 /**
- * Sign in once for the whole run.
+ * Sign in once for the whole run, through Hanzo IAM.
  *
- * Every test used to sign in for itself, which put a login in front of each of
- * forty tests and, with four workers loading a heavy SPA at once, pushed three
- * of them past the render deadline against a two-pod deployment. The session is
- * the same session either way -- there is no reason to mint it forty times.
+ * There is no password form on insights and no endpoint that trades credentials
+ * for a session: `/login` redirects to `/login/oidc/`, which hands off to
+ * hanzo.id, and the session cookie is set when the IdP redirects back to
+ * `/complete/oidc/`. So the setup drives that round trip in a browser rather
+ * than posting credentials — the credentials belong to IAM, not to this app.
  *
- * There is no password form to drive: /login redirects unconditionally to
- * hanzo.id, because OIDC is how people sign in here. The API accepts the e2e
- * account, and the cookie it sets is what the browser needs.
+ * LOGIN_USERNAME/LOGIN_PASSWORD are the IAM account; in CI the password comes
+ * from KMS, never from a file or a repo variable.
  */
 
 const USERNAME = process.env.LOGIN_USERNAME || 'e2e@hanzo.ai'
@@ -18,16 +18,27 @@ const PASSWORD = process.env.LOGIN_PASSWORD || ''
 
 export const STATE = 'live/.auth/session.json'
 
-setup('sign in', async ({ request }) => {
+setup('sign in through Hanzo IAM', async ({ page }) => {
     expect(PASSWORD, 'LOGIN_PASSWORD must be set -- in CI it comes from KMS').not.toBe('')
-    const response = await request.post('/api/login', { data: { email: USERNAME, password: PASSWORD } })
-    expect(response.status(), `sign-in failed for ${USERNAME}`).toBe(200)
 
-    // Prove the session resolves to the account we meant, not just that the POST
-    // returned 200 -- a redirect to a login page is also a 200.
-    const me = await request.get('/api/users/@me/')
+    await page.goto('/login')
+
+    // The handshake leaves this origin. Landing anywhere else means the SSO gate
+    // refused before the IdP was ever reached (`/login?error_code=...`).
+    await page.waitForURL(/hanzo\.id\//, { timeout: 30_000 })
+
+    await page.getByLabel(/email|username/i).fill(USERNAME)
+    await page.getByLabel(/password/i).fill(PASSWORD)
+    await page.getByRole('button', { name: /sign in|log in|continue/i }).click()
+
+    // Back on the app with a session, not still on the IdP and not on the error scene.
+    await page.waitForURL((url) => !/hanzo\.id/.test(url.host), { timeout: 60_000 })
+    expect(page.url(), 'IAM sent us back to the login error scene').not.toContain('error_code')
+
+    // Prove the session resolves to the account we meant, rather than trusting the URL.
+    const me = await page.request.get('/api/users/@me/')
     expect(me.status()).toBe(200)
     expect((await me.json()).email).toBe(USERNAME)
 
-    await request.storageState({ path: STATE })
+    await page.context().storageState({ path: STATE })
 })
