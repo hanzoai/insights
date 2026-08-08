@@ -25,7 +25,6 @@ from products.error_tracking.backend.models import (
     sync_issues_to_datastore,
 )
 
-from ee.datastore.materialized_columns.columns import materialize
 
 MOCK_ALERTS_META = {
     "alerts": [
@@ -48,11 +47,6 @@ def _days_ago(n: int) -> str:
 
 
 class TestRecommendationsAPI(DatastoreTestMixin, APIBaseTest):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        materialize("events", "$exception_issue_id", is_nullable=True)
-
     def _list(self):
         return self.client.get(f"/api/environments/{self.team.id}/error_tracking/recommendations/")
 

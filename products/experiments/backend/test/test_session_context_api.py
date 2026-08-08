@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Optional
 
 from freezegun import freeze_time
-from insights.test.base import DatastoreTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -14,9 +14,10 @@ import insights.insightsql.query as insightsql_query_module
 from insights.insightsql.database.database import Database
 from insights.insightsql.database.models import Table, TableNode
 
-from insights.datastore.query_tagging import Product, get_query_tags
 from insights.constants import AvailableFeature
+from insights.datastore.query_tagging import Product, get_query_tags
 from insights.models import PropertyDefinition, Team, User
+from insights.models.ee_models import AccessControl
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value, uuid7
 from insights.rate_limit import SessionContextsBurstRateThrottle
@@ -34,9 +35,6 @@ from products.experiments.backend.session_context import (
     _query_stamped_flag_properties,
 )
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
-
-from ee.api.test.base import APILicensedTest
-from insights.models.ee_models import AccessControl
 
 RECORDING_START = datetime(2026, 1, 1, 10, 0, 0, tzinfo=UTC)
 RECORDING_END = datetime(2026, 1, 1, 10, 30, 0, tzinfo=UTC)
@@ -56,7 +54,7 @@ def _insightsql_table_tree(node: TableNode) -> dict[str, Any]:
 
 
 @freeze_time("2026-01-02T12:00:00Z")
-class TestSessionExperimentContext(DatastoreTestMixin, APILicensedTest):
+class TestSessionExperimentContext(DatastoreTestMixin, APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
         # Every test shares SESSION_ID and the local-memory cache outlives a test; the context
@@ -1303,7 +1301,9 @@ class TestSessionExperimentContext(DatastoreTestMixin, APILicensedTest):
         self._create_day_two_recording_with_exposure()
         flush_persons_and_events()
 
-        def _explode_for_day_two(team: Any, user: Any, shared_insightsql: Any, session_ids: list[str], *args: Any) -> Any:
+        def _explode_for_day_two(
+            team: Any, user: Any, shared_insightsql: Any, session_ids: list[str], *args: Any
+        ) -> Any:
             if DAY_TWO_SESSION_ID in session_ids:
                 raise ValueError("simulated scan failure")
             return _query_stamped_flag_properties(team, user, shared_insightsql, session_ids, *args)

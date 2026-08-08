@@ -5,7 +5,14 @@ from uuid import uuid4
 
 import unittest
 from freezegun import freeze_time
-from insights.test.base import DatastoreTestMixin, FuzzyInt, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import (
+    APIBaseTest,
+    DatastoreTestMixin,
+    FuzzyInt,
+    _create_event,
+    _create_person,
+    flush_persons_and_events,
+)
 from unittest.mock import ANY, MagicMock, patch
 
 from django.core.cache import cache
@@ -21,6 +28,7 @@ from rest_framework import status
 from insights.auth import IDJagAccessTokenAuthentication, OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
 from insights.models import Organization, OrganizationMembership, Team
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.ee_models import AccessControl
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.team.extensions import get_or_create_team_extension
 from insights.models.user import User
@@ -124,7 +132,7 @@ class _HoistFlagConfigClientMixin:
         self.client.patch = _wrap(real_patch)  # type: ignore[attr-defined]
 
 
-class TestExperimentCRUD(_HoistFlagConfigClientMixin, APILicensedTest):
+class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     # List experiments
     def test_can_list_experiments(self):
         response = self.client.get(f"/api/projects/{self.team.id}/experiments/")
@@ -6305,7 +6313,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APILicensedTest):
         self.assertEqual(update_response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class TestExperimentParametersFlagConfigCompatibility(APILicensedTest):
+class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
     """Flag config belongs on the `feature_flag` object now, but many external clients still send it
     through the deprecated `parameters` keys. Rather than reject those requests, the API copies that
     config into the `feature_flag` object so legacy callers keep working. This class sends the
@@ -6550,7 +6558,7 @@ class TestExperimentParametersFlagConfigCompatibility(APILicensedTest):
         self.assertFalse(props["experiment_update_deprecated_config_changed"])
 
 
-class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTestMixin, APILicensedTest):
+class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTestMixin, APIBaseTest):
     def _generate_experiment(self, start_date="2024-01-01T10:23", extra_parameters=None):
         ff_key = "a-b-test"
         response = self.client.post(
@@ -8560,7 +8568,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         self.assertIn(saved_metric_uuid, ordering)
 
 
-class TestExperimentParametersFieldMutation(APILicensedTest):
+class TestExperimentParametersFieldMutation(APIBaseTest):
     """
     ExperimentParametersField translates split_percent <-> rollout_percentage at the API
     boundary. Both methods must be pure transformations — mutating caller state would leak
@@ -8609,7 +8617,7 @@ class TestExperimentParametersFieldMutation(APILicensedTest):
         }
 
 
-class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APILicensedTest):
+class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APIBaseTest):
     EXPOSURE_ESTIMATE_CONFIG = {
         "conversionRateInputType": "manual",
         "manualMetricType": "funnel",
@@ -8765,7 +8773,7 @@ class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APILicen
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APILicensedTest):
+class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APIBaseTest):
     THREE_VARIANTS = [
         {"key": "control", "rollout_percentage": 34},
         {"key": "test-1", "rollout_percentage": 33},
@@ -8863,7 +8871,7 @@ class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APILicensedTes
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class TestCalculateRunningTimeEndpoint(APILicensedTest):
+class TestCalculateRunningTimeEndpoint(APIBaseTest):
     def _calculate(self, payload: dict[str, Any]):
         return self.client.post(
             f"/api/projects/{self.team.id}/experiments/calculate_running_time/",
@@ -9035,7 +9043,7 @@ class TestExperimentApiExposureCriteriaParity(unittest.TestCase):
         )
 
 
-class TestExperimentConcurrency(_HoistFlagConfigClientMixin, APILicensedTest):
+class TestExperimentConcurrency(_HoistFlagConfigClientMixin, APIBaseTest):
     """Optimistic concurrency on experiment updates: stale writes carrying `version` +
     `original_experiment` merge concurrent metric changes per uuid and 409 on everything else.
     Guards the incident class where a stale tab's full-array PATCH silently deleted metrics
