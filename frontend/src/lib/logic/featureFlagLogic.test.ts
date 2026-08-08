@@ -47,7 +47,7 @@ describe('featureFlagLogic', () => {
     }
 
     /** Mount with a given verdict on the wire and whatever the deployment defaults to. */
-    async function useMountedFlags(
+    async function mountFlags(
         verdict: any,
         persisted: string[] = [],
         anonymous = false
@@ -66,7 +66,7 @@ describe('featureFlagLogic', () => {
     }
 
     it('asks this deployment for the verdict, at /v1/flags/ and never under /api/', async () => {
-        const get = await useMountedFlags(REAL_VERDICT)
+        const get = await mountFlags(REAL_VERDICT)
 
         expect(flagRequests(get)).toEqual(['v1/flags/'])
         const url = flagRequests(get)[0]
@@ -93,26 +93,26 @@ describe('featureFlagLogic', () => {
     })
 
     it('carries a variant through, not just a boolean', async () => {
-        await useMountedFlags(REAL_VERDICT)
+        await mountFlags(REAL_VERDICT)
 
         expect(logic.values.featureFlags['theme' as never]).toBe('dark')
     })
 
     it('lets the verdict turn a deployment default back off', async () => {
-        await useMountedFlags(REAL_VERDICT, ['off-flag'])
+        await mountFlags(REAL_VERDICT, ['off-flag'])
 
         expect(logic.values.featureFlags['off-flag' as never]).toBe(false)
     })
 
     it('keeps a deployment default the verdict does not mention', async () => {
-        await useMountedFlags(REAL_VERDICT, ['a-default'])
+        await mountFlags(REAL_VERDICT, ['a-default'])
 
         expect(logic.values.featureFlags['a-default' as never]).toBe(true)
         expect(logic.values.featureFlags['new-editor' as never]).toBe(true)
     })
 
     it('exposes payloads from the verdict', async () => {
-        await useMountedFlags(REAL_VERDICT)
+        await mountFlags(REAL_VERDICT)
 
         expect(getFeatureFlagPayload('theme' as never)).toEqual({ hue: 2 })
         expect(getFeatureFlagPayload('absent' as never)).toBeUndefined()
@@ -121,7 +121,7 @@ describe('featureFlagLogic', () => {
     it('a refused evaluation grants nothing and still unblocks the app', async () => {
         // The app waits on receivedFeatureFlags before it renders anything, so a
         // failure that stayed silent would be a blank product for three seconds.
-        await useMountedFlags(() => [502, { featureFlags: {}, featureFlagPayloads: {}, detail: 'nope' }], ['a-default'])
+        await mountFlags(() => [502, { featureFlags: {}, featureFlagPayloads: {}, detail: 'nope' }], ['a-default'])
 
         expect(logic.values.receivedFeatureFlags).toBe(true)
         expect(logic.values.featureFlags['a-default' as never]).toBe(true)
@@ -132,7 +132,7 @@ describe('featureFlagLogic', () => {
         // The regression this exists for: a broken evaluator and a deployment with
         // nothing turned on produce the same empty set, so a reader checking
         // whether a gated control is gone cannot tell which one they are seeing.
-        await useMountedFlags(() => [502, { featureFlags: {}, featureFlagPayloads: {}, evaluated: false }])
+        await mountFlags(() => [502, { featureFlags: {}, featureFlagPayloads: {}, evaluated: false }])
         await expectLogic(logic).toDispatchActions(['setFlagsUnavailable'])
 
         expect(logic.values.flagsUnavailable).toBe(true)
@@ -144,7 +144,7 @@ describe('featureFlagLogic', () => {
     it('says so when the door answers without an evaluator behind it', async () => {
         // 200, well-formed, and nothing evaluated it. It grants the same nothing as
         // a 502, so the only thing separating it from a verdict is this signal.
-        await useMountedFlags({ featureFlags: {}, featureFlagPayloads: {}, evaluated: false })
+        await mountFlags({ featureFlags: {}, featureFlagPayloads: {}, evaluated: false })
         await expectLogic(logic).toDispatchActions(['setFlagsUnavailable'])
 
         expect(logic.values.flagsUnavailable).toBe(true)
@@ -153,7 +153,7 @@ describe('featureFlagLogic', () => {
     it('does not cry outage when the evaluator ran and turned nothing on', async () => {
         // The live state this had to distinguish: cloud evaluates cleanly and holds
         // no definitions, so an empty verdict is correct and entirely trustworthy.
-        await useMountedFlags({ featureFlags: {}, featureFlagPayloads: {}, evaluated: true })
+        await mountFlags({ featureFlags: {}, featureFlagPayloads: {}, evaluated: true })
 
         expect(logic.values.flagsUnavailable).toBe(false)
         expect(logic.values.receivedFeatureFlags).toBe(true)
@@ -161,7 +161,7 @@ describe('featureFlagLogic', () => {
 
     it('does not ask for a verdict when there is no session to evaluate', async () => {
         // The shared-dashboard and exporter views render this app anonymously.
-        const get = await useMountedFlags(REAL_VERDICT, ['a-default'], true)
+        const get = await mountFlags(REAL_VERDICT, ['a-default'], true)
 
         expect(flagRequests(get)).toEqual([])
         // Still unblocks, still keeps the defaults, still grants nothing else.
@@ -171,7 +171,7 @@ describe('featureFlagLogic', () => {
     })
 
     it('still accepts a two-argument setFeatureFlags, which every other test uses', async () => {
-        await useMountedFlags(REAL_VERDICT)
+        await mountFlags(REAL_VERDICT)
 
         logic.actions.setFeatureFlags([], { injected: true })
 
