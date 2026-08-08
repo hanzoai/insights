@@ -22,7 +22,14 @@ from pathlib import Path
 
 # Packages that live in this repo. An import into anything else is a dependency's
 # problem, not ours.
-FIRST_PARTY = ("insights", "products", "common")
+#
+# `ee` is here because it is OURS to answer for and it is not committed: the
+# enterprise tree is not part of this fork. Resolving it through the same
+# mechanism as the rest means an `ee` import can only ever fail — which is the
+# point. Left out of this tuple it read as somebody else's package and passed
+# silently, so `from ee.hogai...` sat in a module the temporal graph loads
+# eagerly and took down every web pod on 1.52.82.
+FIRST_PARTY = ("insights", "products", "common", "ee")
 
 
 def tracked_files() -> set[str]:
@@ -79,11 +86,28 @@ def main() -> int:
             if target.split(".")[0] in FIRST_PARTY and not resolves(target, tracked):
                 broken.append((source, node.lineno, target))
 
-    if broken:
-        print("These imports name a module that is not committed:\n")
-        for source, line, target in sorted(broken):
+    # Same scan, same verdict — two answers, because "the enterprise tree is not
+    # in this fork" and "this module was left uncommitted" are different mistakes
+    # and want different fixes.
+    enterprise = [b for b in broken if b[2].split(".")[0] == "ee"]
+    uncommitted = [b for b in broken if b[2].split(".")[0] != "ee"]
+
+    if enterprise:
+        print("The enterprise tree is not part of this fork. These imports name it:\n")
+        for source, line, target in sorted(enterprise):
             print(f"  {source}:{line}  imports  {target}")
-        print(f"\n{len(broken)} unresolved. A fresh clone of this commit would not start.")
+        print(
+            f"\n{len(enterprise)} of them. Port what is missing into insights/ or products/, "
+            "or delete the path that can never run. Do not shim it.\n"
+        )
+
+    if uncommitted:
+        print("These imports name a module that is not committed:\n")
+        for source, line, target in sorted(uncommitted):
+            print(f"  {source}:{line}  imports  {target}")
+        print(f"\n{len(uncommitted)} unresolved. A fresh clone of this commit would not start.\n")
+
+    if broken:
         return 1
 
     print(f"all first-party imports across {len(sources)} files resolve to committed modules")
