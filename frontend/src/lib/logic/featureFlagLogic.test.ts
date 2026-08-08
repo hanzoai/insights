@@ -47,16 +47,22 @@ describe('featureFlagLogic', () => {
     }
 
     /** Mount with a given verdict on the wire and whatever the deployment defaults to. */
+    // useMocks is msw's request stubber, not a React hook; the rule only sees the `use`
+    // prefix. Every other test file calls it from an anonymous beforeEach arrow, which
+    // the rule does not inspect. This one needs the verdict per call, so it lives in a
+    // named helper and the rule applies. There is no React tree in this file at all.
+    //
+    // The directive sits HERE, on the function, because that is where the rule reports:
+    // "React Hook useMocks is called in function mountFlags" is anchored at the
+    // DECLARATION below, not at the call ten lines further down.
+    // A -next-line directive above the call suppresses nothing, and one above a block of
+    // explanation suppresses the first comment line.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     async function mountFlags(
         verdict: any,
         persisted: string[] = [],
         anonymous = false
     ): Promise<jest.SpyInstance> {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- useMocks is msw's
-        // request stubber, not a React hook; the rule only sees the `use` prefix. Every
-        // other test file calls it from an anonymous beforeEach arrow, which the rule
-        // does not inspect. This one needs the verdict per call, so it lives in a named
-        // helper and the rule applies. There is no React tree in this file at all.
         useMocks({ get: { '/v1/flags/': typeof verdict === 'function' ? verdict : () => [200, verdict] } })
         setAppContext({ anonymous, persisted_feature_flags: persisted })
         // Before initKeaTests: it mounts the common logics, and this one rides
