@@ -12,6 +12,13 @@
 !common/plugin_transpiler/*.*
 !common/plugin_transpiler/src
 !common/tailwind
+# Both are COPYd by Dockerfile.node and both exist in this tree, but the
+# first rule here is `*` — so without a re-include the COPY resolves to
+# nothing and the build stops with `failed to compute cache key`, which
+# names a checksum rather than the path it could not find. Same reason
+# common/insightsql_parser is listed below.
+!common/insights-node
+!common/plugin-scaffold
 # Upstream installs its parser from PyPI, so upstream's .dockerignore has no
 # line for it and the import dropped ours. We build ours from source —
 # pyproject points insightsql-parser at this directory and the insights-build
@@ -137,3 +144,4 @@ products/**/*.stories.*
 frontend/src/**/*.test.*
 frontend/src/**/*.spec.*
 frontend/src/**/*.stories.*
+
