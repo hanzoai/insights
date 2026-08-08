@@ -10,7 +10,6 @@ from insights.insightsql_queries.ai.ai_table_resolver import query_ai_events
 from insights.insightsql_queries.ai.utils import HEAVY_COLUMN_NAMES, merge_heavy_properties
 from insights.sync import database_sync_to_async
 
-from products.ai_observability.backend.script import compile_ai_observability_hog
 from products.ai_observability.backend.models.evaluation_configs import (
     EVALUATION_TEST_LOOKBACK_DAYS,
     SESSION_EVAL_DEFAULT_QUIET_PERIOD_SECONDS,
@@ -21,8 +20,8 @@ from products.ai_observability.backend.models.evaluation_configs import (
     TRACE_EVAL_MAX_WINDOW_SECONDS,
     TRACE_EVAL_MIN_WINDOW_SECONDS,
 )
-
-from ee.hogai.tool import MaxTool
+from products.ai_observability.backend.script import compile_ai_observability_hog
+from products.insights_ai.backend.max_tool import MaxTool
 
 TOOL_DESCRIPTION = f"""Test Script evaluation code against sample data from the last {EVALUATION_TEST_LOOKBACK_DAYS} days.
 
