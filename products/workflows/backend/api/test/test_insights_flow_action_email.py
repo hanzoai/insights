@@ -142,7 +142,7 @@ class TestInsightsFlowActionEmailAPI(APIBaseTest):
     def _patch_email(self, flow_id: str, body: dict, action_id: str = "email_1", mcp: bool = True):
         url = f"/api/projects/{self.team.id}/hog_flows/{flow_id}/actions/{action_id}/email"
         if mcp:
-            return self.client.patch(url, body, HTTP_X_POSTFN_CLIENT="mcp")
+            return self.client.patch(url, body, HTTP_X_INSIGHTS_CLIENT="mcp")
         return self.client.patch(url, body)
 
     @patch(RENDER_PATH, return_value=RENDERED_HTML)
@@ -302,7 +302,7 @@ class TestInsightsFlowActionEmailAPI(APIBaseTest):
         graph = self.client.patch(
             f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
             {"operations": [{"op": "update_action", "id": "email_1", "patch": {"name": "Renamed step"}}]},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert graph.status_code == 200, graph.json()
 
@@ -354,7 +354,9 @@ class TestInsightsFlowActionEmailAPI(APIBaseTest):
         assert flow.draft is None
         assert _stored_email_value(flow)["subject"] == "Live subject"
         # A live content change must land in the revision history so it can be rolled back to.
-        latest = InsightsFlowRevision.objects.for_team(self.team.id).filter(hog_flow_id=flow_id).order_by("-version").first()
+        latest = (
+            InsightsFlowRevision.objects.for_team(self.team.id).filter(hog_flow_id=flow_id).order_by("-version").first()
+        )
         assert latest is not None
         latest_email = next(a for a in latest.content["actions"] if a["id"] == "email_1")
         assert latest_email["config"]["inputs"]["email"]["value"]["subject"] == "Live subject"
@@ -388,7 +390,7 @@ class TestInsightsFlowEmailTemplateReference(APIBaseTest):
         }
         url = f"/api/projects/{self.team.id}/hog_flows"
         if mcp:
-            return self.client.post(url, flow, HTTP_X_POSTFN_CLIENT="mcp")
+            return self.client.post(url, flow, HTTP_X_INSIGHTS_CLIENT="mcp")
         return self.client.post(url, flow)
 
     @patch(RENDER_PATH, return_value=RENDERED_HTML)
@@ -418,7 +420,7 @@ class TestInsightsFlowEmailTemplateReference(APIBaseTest):
         patch_response = self.client.patch(
             f"/api/projects/{self.team.id}/hog_flows/{flow.pk}/actions/email_1/email",
             {"email_patch": {"subject": "Patched subject"}},
-            HTTP_X_POSTFN_CLIENT="mcp",
+            HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert patch_response.status_code == 200, patch_response.json()
 
@@ -562,7 +564,7 @@ class TestInsightsFlowEmailTemplateReference(APIBaseTest):
             "products.workflows.backend.api.hog_flow.MATERIALIZED_TEMPLATE_CONTENT_MAX_BYTES",
             8000,
         ):
-            response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", flow, HTTP_X_POSTFN_CLIENT="mcp")
+            response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", flow, HTTP_X_INSIGHTS_CLIENT="mcp")
 
         assert response.status_code == 400, response.json()
         assert "author the email bodies inline" in response.json()["detail"], response.json()

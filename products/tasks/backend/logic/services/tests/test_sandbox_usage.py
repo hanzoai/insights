@@ -59,7 +59,7 @@ class TestSandboxSessionWrites(SandboxUsageBase):
     def test_open_leaves_warm_runs_unattributed(self):
         run = self._run(
             state={"await_user_message": True, "prewarmed": True},
-            client_provenance=TaskClientProvenance.POSTFN_DESKTOP,
+            client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP,
         )
 
         open_sandbox_session(run_id=run.id, sandbox_id="sb-warm", config=_config())
@@ -67,23 +67,23 @@ class TestSandboxSessionWrites(SandboxUsageBase):
         session = SandboxSession.objects.unscoped().get(sandbox_id="sb-warm")
         assert session.user_attributed_at is None
         assert session.prewarmed is True
-        assert session.client_provenance == TaskClientProvenance.POSTFN_DESKTOP
+        assert session.client_provenance == TaskClientProvenance.INSIGHTS_DESKTOP
 
     def test_warm_claim_snapshots_provenance_set_after_provisioning(self):
         run = self._run(state={"await_user_message": True, "prewarmed": True})
         open_sandbox_session(run_id=run.id, sandbox_id="sb-warm-claim", config=_config())
-        Task.objects.filter(id=run.task_id).update(client_provenance=TaskClientProvenance.POSTFN_DESKTOP)
+        Task.objects.filter(id=run.task_id).update(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP)
 
         record_task_run_user_activity(run.id, self.team.id)
 
         session = SandboxSession.objects.unscoped().get(sandbox_id="sb-warm-claim")
         assert session.user_attributed_at is not None
-        assert session.client_provenance == TaskClientProvenance.POSTFN_DESKTOP
+        assert session.client_provenance == TaskClientProvenance.INSIGHTS_DESKTOP
 
     def test_warm_claim_keeps_provenance_snapshotted_at_provisioning(self):
         run = self._run(
             state={"await_user_message": True, "prewarmed": True},
-            client_provenance=TaskClientProvenance.POSTFN_DESKTOP,
+            client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP,
         )
         open_sandbox_session(run_id=run.id, sandbox_id="sb-warm-snapshot", config=_config())
         Task.objects.filter(id=run.task_id).update(client_provenance=None)
@@ -92,10 +92,10 @@ class TestSandboxSessionWrites(SandboxUsageBase):
 
         session = SandboxSession.objects.unscoped().get(sandbox_id="sb-warm-snapshot")
         assert session.user_attributed_at is not None
-        assert session.client_provenance == TaskClientProvenance.POSTFN_DESKTOP
+        assert session.client_provenance == TaskClientProvenance.INSIGHTS_DESKTOP
 
     def test_reprovisioned_session_keeps_task_provenance_snapshot(self):
-        run = self._run(client_provenance=TaskClientProvenance.POSTFN_DESKTOP)
+        run = self._run(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP)
         open_sandbox_session(run_id=run.id, sandbox_id="sb-first", config=_config())
         resumed_run = run.task.create_run(extra_state={"resume_from_run_id": str(run.id)})
         open_sandbox_session(run_id=resumed_run.id, sandbox_id="sb-resumed", config=_config())
@@ -105,8 +105,8 @@ class TestSandboxSessionWrites(SandboxUsageBase):
 
         first = SandboxSession.objects.unscoped().get(sandbox_id="sb-first")
         resumed = SandboxSession.objects.unscoped().get(sandbox_id="sb-resumed")
-        assert first.client_provenance == TaskClientProvenance.POSTFN_DESKTOP
-        assert resumed.client_provenance == TaskClientProvenance.POSTFN_DESKTOP
+        assert first.client_provenance == TaskClientProvenance.INSIGHTS_DESKTOP
+        assert resumed.client_provenance == TaskClientProvenance.INSIGHTS_DESKTOP
 
     def test_open_records_burstable_request_floors(self):
         run = self._run()
@@ -249,7 +249,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
         return SandboxSession.objects.unscoped().create(**defaults)
 
     def _loop_session(
-        self, *, internal: bool, client_provenance: TaskClientProvenance | None = TaskClientProvenance.POSTFN_DESKTOP
+        self, *, internal: bool, client_provenance: TaskClientProvenance | None = TaskClientProvenance.INSIGHTS_DESKTOP
     ) -> SandboxSession:
         with team_scope(self.team.id):
             loop = Loop.objects.create(
@@ -294,9 +294,9 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
         )
 
     def test_billable_compute_requires_trusted_desktop_user_created_snapshot(self):
-        self._session(client_provenance=TaskClientProvenance.POSTFN_DESKTOP)
+        self._session(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP)
         for origin in (Task.OriginProduct.SLACK, Task.OriginProduct.SIGNAL_REPORT, Task.OriginProduct.LOOP, None):
-            self._session(client_provenance=TaskClientProvenance.POSTFN_DESKTOP, origin_product=origin)
+            self._session(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP, origin_product=origin)
         self._session(client_provenance=None)
 
         usage = get_billable_sandbox_compute_usage_by_team(self.BEGIN, self.END, rate_cards=(self._rate(),))
@@ -316,7 +316,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
         assert usage.credits == [(self.team.id, 2016)]
 
     def test_billable_compute_uses_session_snapshot_after_task_changes(self):
-        session = self._session(client_provenance=TaskClientProvenance.POSTFN_DESKTOP)
+        session = self._session(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP)
         Task.objects.filter(id=session.task_run.task_id).update(
             origin_product=Task.OriginProduct.SLACK, client_provenance=None
         )
@@ -329,7 +329,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
         for sandbox_id in ("sb-fraction-a", "sb-fraction-b"):
             self._session(
                 sandbox_id=sandbox_id,
-                client_provenance=TaskClientProvenance.POSTFN_DESKTOP,
+                client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP,
                 cpu_cores=1,
                 memory_gb=1,
                 ended_at=datetime(2026, 1, 2, 1, 0, 1, tzinfo=UTC),
@@ -344,7 +344,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
         for sandbox_id in ("sb-units-a", "sb-units-b"):
             self._session(
                 sandbox_id=sandbox_id,
-                client_provenance=TaskClientProvenance.POSTFN_DESKTOP,
+                client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP,
                 cpu_request_cores=0.125,
                 memory_request_mb=384,
                 ended_at=self.BEGIN + timedelta(seconds=1),
@@ -360,7 +360,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
 
     def test_integer_resource_units_support_large_values(self):
         self._session(
-            client_provenance=TaskClientProvenance.POSTFN_DESKTOP,
+            client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP,
             cpu_request_cores=999.999,
             memory_request_mb=1_048_576,
         )
@@ -371,7 +371,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
         assert usage.memory_mib_seconds == [(self.team.id, 3_774_873_600)]
 
     def test_pre_effective_usage_reports_explicit_integer_zeros(self):
-        self._session(client_provenance=TaskClientProvenance.POSTFN_DESKTOP)
+        self._session(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP)
 
         usage = get_billable_sandbox_compute_usage_by_team(
             self.BEGIN, self.END, rate_cards=(self._rate(effective_at=self.BEGIN + timedelta(hours=3)),)
@@ -385,7 +385,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
 
     def test_compute_before_first_rate_is_free_and_rate_changes_are_applied(self):
         self._session(
-            client_provenance=TaskClientProvenance.POSTFN_DESKTOP,
+            client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP,
             cpu_cores=1,
             memory_gb=1,
             created_at=self.BEGIN,
@@ -408,7 +408,7 @@ class TestSandboxUsageAggregation(SandboxUsageBase):
         assert usage.cpu_millicore_seconds == [(self.team.id, 2000)]
 
     def test_empty_rate_card_is_not_launched_but_invalid_configuration_fails(self):
-        self._session(client_provenance=TaskClientProvenance.POSTFN_DESKTOP)
+        self._session(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP)
 
         assert get_billable_sandbox_compute_usage_by_team(self.BEGIN, self.END, rate_cards=()).credits == []
         invalid = self._rate(cpu_core_second_usd=Decimal("0"))

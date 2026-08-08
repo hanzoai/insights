@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from parameterized import parameterized
 
 from insights.temporal.ai.slack_app.activities.classifiers import classify_slack_app_model_override
-from insights.temporal.ai.slack_app.insights_code_slack_mention import POSTFN_CODE_SLACK_MENTION_TIMEOUT_SECONDS
+from insights.temporal.ai.slack_app.insights_code_slack_mention import INSIGHTS_CODE_SLACK_MENTION_TIMEOUT_SECONDS
 
 from products.slack_app.backend.services.model_catalogue import ModelChoice
 
@@ -120,8 +120,8 @@ class TestClassifySlackAppModelOverride:
 
         assert fake_client.with_options.called, "the classifier must bound the gateway client"
         options = fake_client.with_options.call_args.kwargs
-        assert options["timeout"] < POSTFN_CODE_SLACK_MENTION_TIMEOUT_SECONDS
-        assert options["max_retries"] * options["timeout"] < POSTFN_CODE_SLACK_MENTION_TIMEOUT_SECONDS
+        assert options["timeout"] < INSIGHTS_CODE_SLACK_MENTION_TIMEOUT_SECONDS
+        assert options["max_retries"] * options["timeout"] < INSIGHTS_CODE_SLACK_MENTION_TIMEOUT_SECONDS
 
     def test_prompt_snapshot_matches(self, snapshot):
         """The prompt is the whole classifier — the catalogue it offers, the

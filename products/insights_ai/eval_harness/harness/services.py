@@ -59,7 +59,7 @@ def start_llm_gateway(live_server_url: str) -> Callable[[], None]:
         "UV_PROJECT_ENVIRONMENT": str(venv_dir),
         "LLM_GATEWAY_DATABASE_URL": test_db_url,
         "LLM_GATEWAY_DEBUG": "true",
-        "LLM_GATEWAY_POSTFN_HOST": live_server_url,
+        "LLM_GATEWAY_INSIGHTS_HOST": live_server_url,
     }
 
     logger.info("Starting LLM gateway on port %d", LLM_GATEWAY_PORT)
@@ -105,14 +105,14 @@ def start_mcp_server(live_server_url: str) -> Callable[[], None]:
     # bundles via esbuild then spawns Node on the bundle.
     env = {
         **os.environ,
-        "POSTFN_API_BASE_URL": api_url,
+        "INSIGHTS_API_BASE_URL": api_url,
         "MCP_APPS_BASE_URL": f"http://localhost:{MCP_PORT}",
-        "POSTFN_MCP_APPS_ANALYTICS_BASE_URL": api_url,
+        "INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL": api_url,
         "NODE_ENV": "development",
         "PORT": str(MCP_PORT),
         "HOST": "0.0.0.0",
         # The MCP server evaluates feature flags via insights-node, which is disabled
-        # here (no POSTFN_ANALYTICS_* config), so every flag would resolve false.
+        # here (no INSIGHTS_ANALYTICS_* config), so every flag would resolve false.
         # Force flag-gated behavior on for evals via the dev/test-only override seam
         # (honored only when NODE_ENV is explicitly development/test — set above).
         # product-data-catalog gates the metric-discovery section of the execute-sql

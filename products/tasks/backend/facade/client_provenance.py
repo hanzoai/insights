@@ -2,7 +2,7 @@ from rest_framework.request import Request
 
 from insights.auth import OAuthAccessTokenAuthentication
 from insights.models.oauth import OAuthRefreshToken
-from insights.temporal.oauth import POSTFN_DESKTOP_OAUTH_CLIENT_IDS
+from insights.temporal.oauth import INSIGHTS_DESKTOP_OAUTH_CLIENT_IDS
 
 from products.tasks.backend.models import TaskClientProvenance
 
@@ -17,8 +17,8 @@ def get_task_client_provenance(request: Request) -> TaskClientProvenance | None:
     scopes = set((getattr(access_token, "scope", "") or "").split())
     if application is None or "internal_run:read" in scopes or not _has_authorization_flow_lineage(access_token):
         return None
-    if application.client_id in POSTFN_DESKTOP_OAUTH_CLIENT_IDS:
-        return TaskClientProvenance.POSTFN_DESKTOP
+    if application.client_id in INSIGHTS_DESKTOP_OAUTH_CLIENT_IDS:
+        return TaskClientProvenance.INSIGHTS_DESKTOP
     return None
 
 

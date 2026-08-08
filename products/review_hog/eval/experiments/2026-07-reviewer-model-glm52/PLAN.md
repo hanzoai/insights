@@ -136,7 +136,7 @@ chunk)`), so the new head misses turn-1 artefacts organically — no scrubbing, 
 > **G1 attempt 2 (healthy, ~40 min in) was terminated by Alex's call: it ran with zero cost/token
 > telemetry**, and cost/token is a hard requirement. The fresh stack loses every local
 > `$ai_generation` in two stacked ways: the gateway process never received the
-> `LLM_GATEWAY_POSTFN_*` env from `bin/mprocs.yaml` (capture disabled entirely — fixed via repo
+> `LLM_GATEWAY_INSIGHTS_*` env from `bin/mprocs.yaml` (capture disabled entirely — fixed via repo
 > `.env` + gateway restart), and once enabled, the SDK's AI lane (`/i/v0/ai/batch/`) 200-ACKs
 > events that `ingestion-ai` then drops (its forwarder 401s on `localhost:8010/batch/` and shuts
 > down). Local bypass in the gateway callback: `_use_ai_lane=False` **and**
@@ -236,7 +236,7 @@ what we run in prod today", not a same-label comparison. Caveat recorded below (
    `isInternal` catch-all. Without this, sandbox reviews route to `background_agents`, whose allowlist lacks
    GLM → 403 → the Claude-SDK `fallbackModel` silently reruns on `claude-opus-4-8` (see the documented
    incident in `../2026-07-pipeline-models/FINAL_REPORT.md`). First sandbox after the edit pays a
-   MODAL_DOCKER image rebuild (image bakes from `LOCAL_POSTFN_CODE_MONOREPO_ROOT`).
+   MODAL_DOCKER image rebuild (image bakes from `LOCAL_INSIGHTS_CODE_MONOREPO_ROOT`).
 3. **Comment mock** (`backend/reviewer/tools/github_meta.py`): `return []` at the top of
    `PRFetcher.fetch_pr_comments`. The target PR already carries bot/human/prod-ReviewHog comments; this is
    the single choke point where comments enter the pipeline. Active for ALL 4 runs → both arms see zero
@@ -286,7 +286,7 @@ Initial state: run the wipe once before A1 (clean slate).
 
 - **Local telemetry prerequisite (required for ANY experiment run on a local stack):**
   the local ingestion-ai forwarder 401s on `/batch/` and silently drops every AI-lane `$ai_generation` event.
-  Add `LLM_GATEWAY_POSTFN_AI_LANE_CAPTURE=false` to the repo `.env` (gitignored) and restart the local gateway,
+  Add `LLM_GATEWAY_INSIGHTS_AI_LANE_CAPTURE=false` to the repo `.env` (gitignored) and restart the local gateway,
   or none of the run's generations get tracked and every cost/token number is unrecoverable.
 - temporal-worker + backend running (phrocs); worker start-time > last constants edit.
 - ngrok tunnels up: `django` → :8010, `gateway` → :3308, `mcp` → :8787.

@@ -11,7 +11,7 @@ from insights.models.user import User
 from insights.redis import get_async_client
 from insights.session_recordings.ai_summary_cap import consume_summary_quota, headroom
 from insights.sync import database_sync_to_async, database_sync_to_async_pool
-from insights.temporal.common.search_attributes import POSTFN_SCHEDULE_FINGERPRINT_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SCHEDULE_FINGERPRINT_KEY
 from insights.temporal.session_replay.rasterize_recording.activities.stuck_counter import read_stuck_session_ids
 from insights.temporal.session_replay.summarization_sweep.constants import (
     CH_QUERY_MAX_EXECUTION_SECONDS,
@@ -207,7 +207,7 @@ def _schedule_fingerprint(listing: object) -> str | None:
     except AttributeError:
         return None
     for pair in attrs:
-        if pair.key.name == POSTFN_SCHEDULE_FINGERPRINT_KEY.name:
+        if pair.key.name == INSIGHTS_SCHEDULE_FINGERPRINT_KEY.name:
             return pair.value
     return None
 
