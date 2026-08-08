@@ -42,9 +42,9 @@ from products.exports.backend.temporal.subscriptions.types import (
     RecipientResult,
 )
 
-from ee.billing.quota_limiting import is_team_over_ai_credit_budget
 from products.exports.backend.subscriptions import _capture_delivery_failed_event
 from products.exports.backend.subscriptions.auto_disable import AI_CONSENT_REVOKED_DISABLE_REASON, AI_PROMPT_INVALID_DISABLE_REASON
+from products.insights_ai.backend.quota import is_team_over_ai_credit_budget
 
 LOGGER = get_logger(__name__)
 
@@ -236,11 +236,11 @@ async def generate_ai_subscription_report(inputs: GenerateAIReportInputs) -> Gen
         )
 
     # Gate on AI credits before any LLM cost — but only past the idempotency check above, so an
-    # already-generated report (its tokens already spent) still ships. The interactive Max path
-    # enforces this same limit in ee/api/conversation.py; scheduled reports need their own check
-    # or they'd keep spending against an exhausted balance. Fail open: a transient quota-lookup
-    # error shouldn't drop a deliverable report. The check reads Redis (not the DB), so
-    # sync_to_async — but the reschedule below writes the row, so that stays database_sync_to_async.
+    # already-generated report (its tokens already spent) still ships. A scheduled report has nobody
+    # watching it, so without its own check it would keep spending against an exhausted balance.
+    # Fail open: a transient budget-lookup error shouldn't drop a deliverable report. The lookup is
+    # a blocking call, so sync_to_async — the reschedule below writes the row, so that one stays
+    # database_sync_to_async.
     try:
         over_credit_budget = await sync_to_async(is_team_over_ai_credit_budget, thread_sensitive=False)(
             subscription.team.api_token

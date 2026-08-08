@@ -2,15 +2,15 @@ import uuid
 import asyncio
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC
 from enum import StrEnum
 from typing import Optional, Union
 
 import structlog
 
-from insights.schema import AssistantInsightsQLQuery
-
+from insights.insightsql.constants import LimitContext
 from insights.insightsql.errors import ExposedInsightsQLError, InternalInsightsQLError
+from insights.insightsql.query import execute_insightsql_query
 
 from insights.exceptions_capture import capture_exception
 from insights.models import Team, User
@@ -45,11 +45,9 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.spec_genera
     build_enriched_prompt,
     build_frozen_prompt,
 )
+from products.exports.backend.temporal.subscriptions.results_summarizer import build_results_summary
 from products.exports.backend.temporal.subscriptions.types import safe_error_message
-
-from ee.hogai.context.insight.query_executor import AssistantQueryExecutor
-from ee.hogai.llm import MaxChatOpenAI
-from ee.hogai.tool_errors import MaxToolRetryableError
+from products.insights_ai.backend.model import MaxChatOpenAI
 
 logger = structlog.get_logger(__name__)
 
@@ -88,9 +86,10 @@ _MAX_CONCURRENT_STEPS = 5
 
 # Errors signalling "the query itself is wrong" — rewriting may help. Everything else (timeouts, infra
 # failures, generic exceptions) falls through to the "_Query failed to run_" placeholder without retrying,
-# since a different SELECT won't fix a Datastore outage or a heartbeat timeout.
+# since a different SELECT won't fix a Datastore outage or a heartbeat timeout. These two are the whole
+# set the engine raises for a query it will not run; `safe_error_message` draws the same line when it
+# decides which text is safe to hand back to the fixer.
 _RETRYABLE_QUERY_ERRORS: tuple[type[BaseException], ...] = (
-    MaxToolRetryableError,
     ExposedInsightsQLError,
     InternalInsightsQLError,
 )
@@ -372,6 +371,26 @@ def _compose_synthesis_human_message(spec: EnrichedPromptSpec, rendered_results:
     )
 
 
+async def _run_query(insightsql: str, *, team: Team, user: User) -> str:
+    """Run one planner-written SELECT and render its rows for the synthesis prompt.
+
+    The engine raises for a query it will not run, which is what drives the fix-and-retry above.
+    `build_results_summary` is the renderer the insight snapshot already uses, so a report reads the
+    same whether a number came from a saved insight or from a query the planner wrote.
+    """
+    response = await database_sync_to_async(execute_insightsql_query, thread_sensitive=False)(
+        insightsql,
+        team,
+        limit_context=LimitContext.INSIGHTS_AI,
+        user=user,
+    )
+    # A query resolving to a warehouse source is answered by the external server, which reports a
+    # failure in this field instead of raising. Same meaning, so give it the same retryable shape.
+    if response.error:
+        raise ExposedInsightsQLError(response.error)
+    return build_results_summary("InsightsQLQuery", response.results, columns=response.columns)
+
+
 async def _run_steps(
     spec: EnrichedPromptSpec,
     team: Team,
@@ -379,7 +398,6 @@ async def _run_steps(
     window: ReportWindow,
     trace_correlation_id: Optional[Union[int, str]],
 ) -> tuple[list[str], int, list[QueryStepDiagnostic]]:
-    executor = AssistantQueryExecutor(team, datetime.now(tz=UTC), user=user)
     # Cap simultaneous Datastore scans per report; excess steps queue until a slot frees.
     step_semaphore = asyncio.Semaphore(_MAX_CONCURRENT_STEPS)
 
@@ -402,9 +420,8 @@ async def _run_steps(
         for attempt in range(_MAX_QUERY_FIX_RETRIES + 1):
             executable_insightsql = window.render_window_filter(current_insightsql)
             try:
-                query = AssistantInsightsQLQuery(query=executable_insightsql)
-                formatted, _ = await asyncio.wait_for(
-                    executor.arun_and_format_query(query),
+                formatted = await asyncio.wait_for(
+                    _run_query(executable_insightsql, team=team, user=user),
                     timeout=_INSIGHTSQL_STEP_TIMEOUT_SECONDS,
                 )
                 # result values are attacker-influenceable (public project tokens) — strip framing markers
