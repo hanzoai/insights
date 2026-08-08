@@ -1,10 +1,16 @@
 import time
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
+from typing import TYPE_CHECKING
 
 import hanzo_insights
-from hanzo_insights.metrics_capture import InsightsMetrics
 from temporalio import workflow
+
+if TYPE_CHECKING:
+    # Only ever a type here. The SDK we ship has no metrics_capture, so importing
+    # it for real fails at module import, and this module is reached from the
+    # temporal graph during Django startup — an annotation took the web pods down.
+    from hanzo_insights.metrics_capture import InsightsMetrics
 
 MetricAttributes = Mapping[str, str | int | float | bool]
 
@@ -13,9 +19,15 @@ def _should_record() -> bool:
     return not (workflow.in_workflow() and workflow.unsafe.is_replaying())
 
 
-def _metrics() -> InsightsMetrics | None:
+def _metrics() -> "InsightsMetrics | None":
+    """The SDK's metrics sink, or None when this build has none.
+
+    getattr, not attribute access: an SDK without metrics_capture has no
+    `metrics` either, and every caller below already checks for None. This is
+    the one place that has to agree with them.
+    """
     client = hanzo_insights.default_client
-    return client.metrics if client is not None else None
+    return getattr(client, "metrics", None) if client is not None else None
 
 
 def record_counter(
