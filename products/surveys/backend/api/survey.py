@@ -19,7 +19,6 @@ import nh3
 import structlog
 import django_filters
 import hanzo_insights
-from axes.decorators import axes_dispatch
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
@@ -3456,7 +3455,6 @@ def _survey_error_response(
 
 
 @csrf_exempt
-@axes_dispatch
 def public_survey_page(request, survey_id: str):
     """
     Server-side rendered public survey page with security and performance optimizations

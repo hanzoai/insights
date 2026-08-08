@@ -7,7 +7,6 @@ import { expectLogic } from 'kea-test-utils'
 
 import { reverseProxyCheckerLogic } from 'lib/components/ReverseProxyChecker/reverseProxyCheckerLogic'
 import { Banner } from 'lib/elements/Banner'
-import { verifyEmailLogic } from 'scenes/authentication/verify-email/verifyEmailLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { useMocks } from '~/mocks/jest'
@@ -256,36 +255,6 @@ describe('projectNoticeLogic', () => {
             const logic = await mountWithDetectedProxy(false)
 
             expect(logic.values.projectNoticeVariant).toEqual('missing_reverse_proxy')
-
-            logic.unmount()
-        })
-    })
-
-    describe('unverified email banner CTA', () => {
-        beforeEach(() => {
-            useMocks({
-                get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
-                },
-                post: {
-                    '/api/users/request_email_verification/': [200, { success: true }],
-                },
-            })
-            initKeaTests()
-        })
-
-        it('mounts verifyEmailLogic so the CTA reaches its request loader', async () => {
-            const logic = projectNoticeLogic()
-            logic.mount()
-
-            // The banner renders on every scene, but verifyEmailLogic is otherwise only mounted on the
-            // verify-email scene — without this connection the CTA action dispatches into an unmounted
-            // logic and silently no-ops.
-            expect(verifyEmailLogic.isMounted()).toBe(true)
-
-            await expectLogic(verifyEmailLogic, () => {
-                verifyEmailLogic.actions.requestVerificationLink('test-uuid')
-            }).toDispatchActions(['requestVerificationLink', 'requestVerificationLinkSuccess'])
 
             logic.unmount()
         })

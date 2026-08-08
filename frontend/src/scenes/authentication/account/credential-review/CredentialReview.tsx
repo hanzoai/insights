@@ -5,7 +5,6 @@ import { Button } from '@hanzo/elements'
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { HeartHog } from 'lib/components/mascots'
 import { SceneExport } from 'scenes/sceneTypes'
-import { passkeySettingsLogic } from 'scenes/settings/user/passkeySettingsLogic'
 import { personalAPIKeysLogic } from 'scenes/settings/user/personalAPIKeysLogic'
 
 import { credentialReviewLogic } from './credentialReviewLogic'
@@ -19,7 +18,6 @@ export const scene: SceneExport = {
 export function CredentialReview(): JSX.Element {
     const { markComplete } = useActions(credentialReviewLogic)
     const { keysLoading } = useValues(personalAPIKeysLogic)
-    const { passkeysLoading } = useValues(passkeySettingsLogic)
 
     return (
         <BridgePage view="credential-review" fixedWidth={false}>
@@ -40,7 +38,7 @@ export function CredentialReview(): JSX.Element {
                     type="primary"
                     size="large"
                     onClick={() => markComplete()}
-                    disabledReason={keysLoading || passkeysLoading ? 'Loading your credentials…' : null}
+                    disabledReason={keysLoading ? 'Loading your credentials…' : null}
                 >
                     Continue to Insights
                 </Button>
