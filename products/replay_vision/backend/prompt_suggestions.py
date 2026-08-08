@@ -59,7 +59,6 @@ _MAX_DISMISSED_PROMPT_CHARS = 600
 _MAX_BRIEFING_FEEDBACK_CHARS = 600
 _MAX_TOOL_FEEDBACK_CHARS = 2000
 _MAX_TOOL_ROUNDS = 6
-_MAX_SUMMARIES_PER_RUN = 2
 _MAX_TOOL_REASONING_CHARS = 4000
 # Wall-clock budgets for the agentic loop: once spent, no new tool rounds start (the final structured
 # turn still runs). The inline API path stays close to the old single-call bound; the background
@@ -350,7 +349,6 @@ class _AgentToolState:
         self.summary_user = summary_user
         self.allow_cold_summaries = allow_cold_summaries
         self.deadline = deadline
-        self.cold_summaries_used = 0
         self.summary_cache: dict[str, str] = {}
 
 
@@ -409,30 +407,6 @@ def _tool_list_rated_sessions(state: _AgentToolState, offset: int) -> dict[str, 
             for o in rows
         ],
     }
-
-
-def _run_cold_summary(state: _AgentToolState, session_id: str, user: User, *, timeout_s: float) -> dict[str, Any]:
-    """Run the summarization workflow for an unsummarized session, waiting at most the remaining run budget."""
-    from insights.temporal.session_replay.session_summary.workflow import (  # noqa: PLC0415 (heavy temporal dep, only loaded on the cold path)
-        execute_summarize_session,
-    )
-
-    # Count before executing so a failing cold run still spends budget.
-    state.cold_summaries_used += 1
-    team = Team.objects.get(pk=state.scanner.team_id)
-
-    async def _bounded() -> dict[str, Any]:
-        return await asyncio.wait_for(
-            execute_summarize_session(
-                session_id=session_id,
-                user=user,
-                team=team,
-                custom_tags={"ai_product": "replay_vision", "feature": "suggest_scanner_prompt"},
-            ),
-            timeout=timeout_s,
-        )
-
-    return async_to_sync(_bounded)()
 
 
 def _summary_access_error(state: _AgentToolState, session_id: str) -> dict[str, Any] | None:

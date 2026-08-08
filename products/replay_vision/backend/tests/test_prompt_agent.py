@@ -20,7 +20,6 @@ from products.replay_vision.backend.models.replay_observation import (
 )
 from products.replay_vision.backend.models.replay_observation_label import ReplayObservationLabel
 from products.replay_vision.backend.prompt_suggestions import (
-    _MAX_SUMMARIES_PER_RUN,
     _MAX_TOOL_ROUNDS,
     _AgentToolState,
     _dispatch_agent_tool,
@@ -161,14 +160,6 @@ class TestPromptAgent(_VisionAPITestCase):
         summary = _dispatch_agent_tool(state, _call("get_session_summary", {"session_id": "sess-1"}))
         self.assertIn("error", summary)  # no cached summary, cold generation disallowed here
 
-        cold_state = self._state(allow_cold_summaries=True, budget_s=600.0)
-        cold_state.cold_summaries_used = _MAX_SUMMARIES_PER_RUN
-        capped = _dispatch_agent_tool(cold_state, _call("get_session_summary", {"session_id": "sess-1"}))
-        self.assertIn("budget", capped["error"])
-
-        drained = self._state(allow_cold_summaries=True, budget_s=0.0)
-        timed_out = _dispatch_agent_tool(drained, _call("get_session_summary", {"session_id": "sess-1"}))
-        self.assertIn("time", timed_out["error"])
 
     def test_summary_tool_refuses_deleted_and_inaccessible_recordings(self) -> None:
         recording = SessionRecording.objects.create(team=self.team, session_id="sess-1", deleted=True)
