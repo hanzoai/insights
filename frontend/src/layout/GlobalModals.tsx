@@ -6,12 +6,10 @@ import { LinkToModal } from 'lib/components/FileSystem/LinkTo/LinkTo'
 import { MoveToModal } from 'lib/components/FileSystem/MoveTo/MoveTo'
 import { SuperpowersModal } from 'lib/components/Superpowers/Superpowers'
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'
-import { TimeSensitiveAuthenticationModal } from 'lib/components/TimeSensitiveAuthentication/TimeSensitiveAuthentication'
 import { GlobalCustomUnitModal } from 'lib/components/UnitPicker/GlobalCustomUnitModal'
 import { UpgradeModal } from 'lib/components/UpgradeModal/UpgradeModal'
 import { useKeepMountedWhileOpen } from 'lib/hooks/useKeepMountedWhileOpen'
 import { lazyWithRetry } from 'lib/utils/retryImport'
-import { TwoFactorSetupModal } from 'scenes/authentication/two-factor-setup/TwoFactorSetupModal'
 import { PaymentEntryModal } from 'scenes/billing/PaymentEntryModal'
 import { CreateOrganizationModal } from 'scenes/organization/CreateOrganizationModal'
 import { CreateProjectModal } from 'scenes/project/CreateProjectModal'
@@ -63,7 +61,6 @@ export function GlobalModals(): JSX.Element {
             <CreateOrganizationModal isVisible={isCreateOrganizationModalShown} onClose={hideCreateOrganizationModal} />
             <CreateProjectModal isVisible={isCreateProjectModalShown} onClose={hideCreateProjectModal} />
             <UpgradeModal />
-            <TimeSensitiveAuthenticationModal />
             {shouldRenderSessionPlayerModal ? (
                 <Suspense fallback={null}>
                     <SessionPlayerModal />
@@ -75,7 +72,6 @@ export function GlobalModals(): JSX.Element {
                 </Suspense>
             ) : null}
             <PreviewingCustomCssModal />
-            <TwoFactorSetupModal />
             <PaymentEntryModal />
             <GlobalCustomUnitModal />
             <MoveToModal />

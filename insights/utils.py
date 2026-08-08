@@ -1541,38 +1541,30 @@ def get_can_create_org(user: Union["AbstractBaseUser", "AnonymousUser"]) -> bool
 
 
 def get_instance_available_sso_providers() -> dict[str, bool]:
+    """Which SSO providers this instance can start a handshake with.
+
+    The keys are backend names: the same string `/login/<backend>/` carries and
+    `AUTHENTICATION_BACKENDS` resolves. `OpenIdConnectAuth.name` is "oidc", so
+    "oidc" is the whole map — Hanzo IAM is the one identity provider, and a
+    provider this instance cannot resolve to a backend must not be advertised as
+    available. Naming one that is not wired is what made `/login` answer
+    `invalid_sso_provider`: `sso_login` rejects any backend the map omits, so the
+    one provider that could work was the one it could not reach.
+
+    A provider counts as available once the deployment has supplied every value
+    the handshake needs. For OIDC that is the issuer plus the client pair; there
+    is no partial state where a handshake would succeed.
+
+    SAML is excluded because it is configured per-domain rather than
+    per-instance (see `OrganizationDomain`).
     """
-    Returns a dictionary containing final determination to which SSO providers are available.
-    SAML is not included in this method as it can only be configured domain-based and not instance-based (see `OrganizationDomain` for details)
-    Validates configuration settings and license validity (if applicable).
-    """
-    output: dict[str, bool] = {
-        # Hanzo IAM, and the only backend AUTHENTICATION_BACKENDS actually wires
-        # (social_core OpenIdConnectAuth, whose name is "oidc"). Leaving it out of
-        # this map is what made /login answer `invalid_sso_provider`: sso_login
-        # rejects any backend the map does not name, so the one provider that can
-        # work was the one that could not be reached, while three that are
-        # deliberately unwired were listed.
+    return {
         "oidc": bool(
-            settings.SOCIAL_AUTH_OIDC_KEY
+            settings.SOCIAL_AUTH_OIDC_OIDC_ENDPOINT
+            and settings.SOCIAL_AUTH_OIDC_KEY
             and settings.SOCIAL_AUTH_OIDC_SECRET
-            and settings.SOCIAL_AUTH_OIDC_OIDC_ENDPOINT
         ),
-        "github": bool(settings.SOCIAL_AUTH_GITHUB_KEY and settings.SOCIAL_AUTH_GITHUB_SECRET),
-        "gitlab": bool(settings.SOCIAL_AUTH_GITLAB_KEY and settings.SOCIAL_AUTH_GITLAB_SECRET),
-        "google-oauth2": False,
     }
-
-    # Google SSO used to additionally require a license feature. There is no license to check, so
-    # a configured provider is simply available, the same as GitHub and GitLab above.
-    if getattr(settings, "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", None) and getattr(
-        settings,
-        "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET",
-        None,
-    ):
-        output["google-oauth2"] = True
-
-    return output
 
 
 def flatten(i: Union[list, tuple], max_depth=10) -> Generator:

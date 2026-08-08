@@ -78,7 +78,6 @@ from insights.datastore.query_log_archive import (
     WRITABLE_QUERY_LOG_ARCHIVE_OPS_TABLE_SQL,
     WRITABLE_QUERY_LOG_ARCHIVE_TABLE,
 )
-from insights.helpers.two_factor_session import code_based_verification_token_generator
 from insights.insightsql_queries.ai.ai_table_resolver import AI_EVENT_NAMES as _AI_EVENT_TYPES
 from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from insights.models import Organization, Team, User
@@ -1075,16 +1074,6 @@ class APIBaseTest(InsightsTestCase, ErrorResponsesMixin, DRFTestCase):
             scopes=scopes,
         )
         return key_value
-
-    def complete_code_based_verification(self, email: str, user: Optional[Any] = None):
-        if user is None:
-            user = User.objects.get(email=email)
-
-        token = code_based_verification_token_generator.make_token(user)
-
-        response = self.client.post("/api/login/code-based-verification/", {"email": email, "token": token})
-
-        return response
 
     def assertEntityResponseEqual(self, response1, response2, remove=("action", "label", "persons_urls", "filter")):
         stripped_response1 = stripResponse(response1, remove=remove)

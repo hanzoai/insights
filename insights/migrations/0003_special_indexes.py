@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
         ('admin', '0003_logentry_add_action_flag_choices'),
         ('analytics_platform', '0002_preaggregation_job_expires_at'),
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('axes', '0009_add_session_hash'),
         ('contenttypes', '0002_remove_content_type_name'),
         ('conversations', '0002_ticket_ticket_number'),
         ('customer_analytics', '0002_customer_profile_config'),
@@ -34,7 +33,6 @@ class Migration(migrations.Migration):
         ('product_tours', '0001_initial'),
         ('social_django', '0016_alter_usersocialauth_extra_data'),
         ('tasks', '0001_initial'),
-        ('two_factor', '0001_squashed_0008_delete_phonedevice'),
         ('user_interviews', '0001_initial'),
         ('workflows', '0001_insightsflowbatchjob')
     ]

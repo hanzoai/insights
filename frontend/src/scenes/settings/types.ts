@@ -90,7 +90,6 @@ export type SettingSectionId =
     | 'insights-mcp'
 
 export type SettingId =
-    | '2fa'
     | 'activity-log-notifications'
     | 'activity-log-org-level-settings'
     | 'activity-log-settings'
@@ -347,12 +346,4 @@ export interface SettingSection extends Pick<Setting, 'flag'> {
      * product's own configuration scene).
      */
     hideFromNavigation?: boolean
-
-    /**
-     * When true, navigating to this section prompts for re-authentication if the sensitive
-     * session has expired — matching how user- and organization-level settings behave. Use for
-     * environment/project sections that manage credentials, which otherwise only surface the
-     * re-auth modal reactively when a write is attempted.
-     */
-    requiresReauthentication?: boolean
 }

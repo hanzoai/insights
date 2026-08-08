@@ -15,8 +15,8 @@ import { ActivityTab, AnnotationType, CommentType, OnboardingStepKey, SDKKey } f
 import type { BillingSectionId } from './billing/types'
 import { DataPipelinesNewSceneKind } from './data-pipelines/DataPipelinesNewScene'
 import { OutputTab } from './data-warehouse/editor/outputPaneLogic'
-import type { InsightsFunctionSceneTab } from './insights-functions/InsightsFunctionScene'
 import type { InboxTabKey } from './inbox/types'
+import type { InsightsFunctionSceneTab } from './insights-functions/InsightsFunctionScene'
 import type { ModelsSceneTab } from './models/modelsSceneLogic'
 import type { SettingId, SettingLevelId, SettingSectionId } from './settings/types'
 
@@ -170,8 +170,6 @@ export const urls = {
     site: (url: string): string => `/site/${url === ':url' ? url : encodeURIComponent(url)}`,
     // Onboarding / setup routes
     login: (): string => '/login',
-    login2FA: (): string => '/login/2fa',
-    login2FASetup: (): string => '/login/2fa_setup',
     /** After linking a social provider to an existing session (OAuth `next`; see insights/api/authentication.py sso_login). */
     accountSocialConnected: (): string => '/account/social-connected',
     /**
@@ -186,13 +184,7 @@ export const urls = {
     cliAuthorize: (): string => '/cli/authorize',
     cliLive: (): string => '/cli/live',
     liveDebugger: (): string => '/live-debugger',
-    passwordReset: (): string => '/reset',
-    passwordResetComplete: (userUuid: string, token: string): string => `/reset/${userUuid}/${token}`,
-    twoFactorReset: (userUuid: string, token: string): string => `/reset_2fa/${userUuid}/${token}`,
     preflight: (): string => '/preflight',
-    signup: (): string => '/signup',
-    verifyEmail: (userUuid: string = '', token: string = ''): string =>
-        `/verify_email${userUuid ? `/${userUuid}` : ''}${token ? `/${token}` : ''}`,
     vercelConnect: (): string => '/connect/vercel/link',
     vercelLinkError: (): string => '/integrations/vercel/link-error',
     agenticAccountMismatch: (): string => '/agentic/account-mismatch',
@@ -300,7 +292,8 @@ export const urls = {
     batchExportNew: (service: string): string => `/pipeline/batch-exports/new/${service}`,
     batchExport: (id: string): string => `/pipeline/batch-exports/${id}`,
     legacyPlugin: (id: string): string => `/pipeline/plugins/${id}`,
-    insightsFunction: (id: string, tab?: InsightsFunctionSceneTab): string => `/functions/${id}${tab ? `?tab=${tab}` : ''}`,
+    insightsFunction: (id: string, tab?: InsightsFunctionSceneTab): string =>
+        `/functions/${id}${tab ? `?tab=${tab}` : ''}`,
     insightsFunctionNew: (templateId: string): string => `/functions/new/${templateId}`,
     productTours: (): string => '/product_tours',
     productTour: (id: string, params?: string): string =>

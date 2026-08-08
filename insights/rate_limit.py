@@ -355,29 +355,6 @@ class SignupEmailPrecheckThrottle(IPThrottle):
     rate = "30/minute"
 
 
-class LoginPrecheckThrottle(IPThrottle):
-    """
-    Rate limit login precheck requests by IP.
-
-    The response reveals which sign-in methods a passwordless account has, so cap it per-IP to make
-    bulk enumeration expensive. Per-email throttling would be useless here — enumeration uses a
-    different email on every request.
-    """
-
-    scope = "login_precheck"
-    rate = "30/minute"
-
-    def allow_request(self, request, view):
-        # The time-sensitive re-auth modal prechecks the logged-in user's *own* email, and that tells
-        # them nothing they don't already have — so exempt exactly that. The endpoint is `AllowAny`
-        # with no ownership check, so a broader exemption would let anyone with a throwaway account
-        # enumerate other people's sign-in methods for free.
-        email = request.data.get("email", "") if isinstance(request.data, dict) else ""
-        if request.user.is_authenticated and email and email.casefold() == (request.user.email or "").casefold():
-            return True
-        return super().allow_request(request, view)
-
-
 class SignupResendInviteThrottle(UserOrEmailRateThrottle):
     """
     Rate limit signup invite-resend requests per email address.
@@ -845,63 +822,6 @@ class EventValuesBurstThrottle(PersonalApiKeyRateThrottle):
 class EventValuesSustainedThrottle(PersonalApiKeyRateThrottle):
     scope = "event_values_sustained"
     rate = "300/hour"
-
-
-class UserPasswordResetThrottle(UserOrEmailRateThrottle):
-    scope = "user_password_reset"
-    rate = "6/day"
-
-
-class CodeBasedVerificationThrottle(UserOrEmailRateThrottle):
-    scope = "code_based_verification"
-    rate = "6/20minutes"
-
-    def get_cache_key(self, request, view):
-        # Key on the pending login's user id (from the session), not on request data. The base class
-        # would fall back to a request-body "email" field, which the code-verification request never
-        # legitimately carries - letting an attacker mint a fresh throttle bucket per guess by varying
-        # it. The session is the source of truth for who is being verified.
-        from insights.helpers.two_factor_session import code_based_verifier
-
-        user_id = code_based_verifier.get_pending_code_based_verification_user_id(request)
-        if user_id:
-            ident = hashlib.sha256(str(user_id).encode()).hexdigest()
-            return self.cache_format % {"scope": self.scope, "ident": ident}
-
-        return super().get_cache_key(request, view)
-
-
-class CodeBasedVerificationResendThrottle(UserOrEmailRateThrottle):
-    scope = "code_based_verification_resend"
-    rate = "1/minute"
-
-    def get_cache_key(self, request, view):
-        from insights.helpers.two_factor_session import code_based_verifier
-
-        user_id = code_based_verifier.get_pending_code_based_verification_user_id(request)
-        if user_id:
-            ident = hashlib.sha256(str(user_id).encode()).hexdigest()
-            return self.cache_format % {"scope": self.scope, "ident": ident}
-
-        return super().get_cache_key(request, view)
-
-
-class TwoFactorThrottle(UserOrEmailRateThrottle):
-    """
-    Rate limiting for TOTP/backup code verification during 2FA login.
-    Uses the pending 2FA user ID from session to throttle per-user.
-    """
-
-    scope = "two_factor"
-    rate = "6/20minutes"
-
-    def get_cache_key(self, request, view):
-        user_id = request.session.get("user_authenticated_but_no_2fa")
-        if user_id:
-            ident = hashlib.sha256(str(user_id).encode()).hexdigest()
-            return self.cache_format % {"scope": self.scope, "ident": ident}
-
-        return super().get_cache_key(request, view)
 
 
 class UserAuthenticationThrottle(UserOrEmailRateThrottle):
