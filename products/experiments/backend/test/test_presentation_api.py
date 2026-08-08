@@ -20,8 +20,6 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 from dateutil import parser
-from ee.api.test.base import APILicensedTest
-from ee.models.rbac.access_control import AccessControl
 from parameterized import parameterized
 from rest_framework import status
 

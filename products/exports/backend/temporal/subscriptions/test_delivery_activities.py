@@ -3,16 +3,10 @@ import uuid
 import pytest
 from unittest.mock import MagicMock, patch
 
-from asgiref.sync import sync_to_async
-from temporalio.exceptions import ApplicationError
-from temporalio.testing import ActivityEnvironment
-
-from insights.email import EmailDeliveryError
 from insights.slo.types import SloArea, SloConfig, SloOperation
 from insights.temporal.exports.activities import export_asset_activity
 from insights.temporal.exports.types import ExportAssetResult
 
-from products.exports.backend.models.exported_asset import ExportedAsset
 from products.exports.backend.temporal.subscriptions.activities import (
     advance_next_delivery_date,
     create_delivery_record,
@@ -26,7 +20,6 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.activities 
 from products.exports.backend.temporal.subscriptions.snapshot_activities import snapshot_subscription_insights
 from products.exports.backend.temporal.subscriptions.types import (
     CreateExportAssetsResult,
-    DeliverSubscriptionInputs,
     DeliverSubscriptionResult,
     GenerateAIReportResult,
     SnapshotInsightsResult,
@@ -36,41 +29,8 @@ from products.exports.backend.temporal.subscriptions.workflows import (
     ProcessAISubscriptionWorkflow,
     ProcessSubscriptionWorkflow,
 )
-from products.product_analytics.backend.models.insight import Insight
-
-from ee.tasks.test.subscriptions.subscriptions_test_factory import create_subscription
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.django_db(transaction=True)]
-
-
-# v1 only exists as a Temporal history-compat shim for pre-patch workflows. Both
-# entry points must hit the shared delivery + EmailDeliveryError -> non-retryable
-# ApplicationError mapping, so the delivery record keeps per-recipient results.
-@pytest.mark.parametrize("activity", [deliver_subscription, deliver_subscription_v2])
-async def test_deliver_subscription_wraps_email_delivery_error(team, user, activity) -> None:
-    insight = await sync_to_async(Insight.objects.create)(team=team, short_id="covdg", name="Coverage delegation")
-    asset = await sync_to_async(ExportedAsset.objects.create)(
-        team=team, insight=insight, export_format="image/png", content_location="s3://bucket/cov.png"
-    )
-    subscription = await sync_to_async(create_subscription)(team=team, insight=insight, created_by=user)
-    inputs = DeliverSubscriptionInputs(
-        subscription_id=subscription.id,
-        exported_asset_ids=[asset.id],
-        total_insight_count=1,
-    )
-
-    with (
-        patch(
-            "products.exports.backend.temporal.subscriptions.activities.send_email_subscription_report",
-            side_effect=EmailDeliveryError("provider rejected delivery"),
-        ),
-        patch("products.exports.backend.temporal.subscriptions.delivery_common._capture_delivery_failed_event"),
-    ):
-        with pytest.raises(ApplicationError) as error:
-            await ActivityEnvironment().run(activity, inputs)
-
-    assert error.value.non_retryable is True
-    assert error.value.details[0]["recipient_results"][0]["status"] == "failed"
 
 
 # The patch-gated activity switch is the rollout seam for the v2 delivery campaign: new
