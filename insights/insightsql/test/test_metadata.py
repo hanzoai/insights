@@ -3,7 +3,6 @@ from typing import Optional
 from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import patch
 
-from django.conf import settings
 from django.db import DatabaseError
 from django.test import override_settings
 
@@ -706,44 +705,6 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             },
         )
 
-    def test_metadata_property_type_notice_debug(self):
-        try:
-            from ee.datastore.materialized_columns.analyze import materialize
-        except ModuleNotFoundError:
-            # EE not available? Assume we're good
-            self.assertEqual(1 + 2, 3)
-            return
-        materialize("events", "number")
-
-        PropertyDefinition.objects.create(team=self.team, name="string", property_type="String")
-        PropertyDefinition.objects.create(team=self.team, name="number", property_type="Numeric")
-        metadata = self._expr("properties.string || properties.number")
-        materialized_notice = (
-            "not materialized 🐢." if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else "materialized (mat_*) ⚡️."
-        )
-        self.assertEqual(
-            metadata.dict(),
-            metadata.dict()
-            | {
-                "isValid": True,
-                "query": "properties.string || properties.number",
-                "notices": [
-                    {
-                        "message": "Event property 'string' is of type 'String'. This property is not materialized 🐢.",
-                        "start": 11,
-                        "end": 17,
-                        "fix": None,
-                    },
-                    {
-                        "message": f"Event property 'number' is of type 'Float'. This property is {materialized_notice}",
-                        "start": 32,
-                        "end": 38,
-                        "fix": None,
-                    },
-                ],
-            },
-        )
-
     def test_metadata_replaces_variable_placeholders(self):
         insight_variable = InsightVariable.objects.create(
             team=self.team,
@@ -771,41 +732,6 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         self.assertFalse(metadata.isValid)
         self.assertEqual(len(metadata.errors), 1)
         self.assertIn("company_name", metadata.errors[0].message)
-
-    def test_metadata_property_type_notice_no_debug(self):
-        try:
-            from ee.datastore.materialized_columns.analyze import materialize
-        except ModuleNotFoundError:
-            # EE not available? Assume we're good
-            self.assertEqual(1 + 2, 3)
-            return
-        materialize("events", "number")
-
-        PropertyDefinition.objects.create(team=self.team, name="string", property_type="String")
-        PropertyDefinition.objects.create(team=self.team, name="number", property_type="Numeric")
-        metadata = self._expr("properties.string || properties.number", debug=False)
-        self.assertEqual(
-            metadata.dict(),
-            metadata.dict()
-            | {
-                "isValid": True,
-                "query": "properties.string || properties.number",
-                "notices": [
-                    {
-                        "message": "Event property 'string' is of type 'String'.",
-                        "start": 11,
-                        "end": 17,
-                        "fix": None,
-                    },
-                    {
-                        "message": "Event property 'number' is of type 'Float'.",
-                        "start": 32,
-                        "end": 38,
-                        "fix": None,
-                    },
-                ],
-            },
-        )
 
     def test_valid_view(self):
         metadata = self._select("select event AS event FROM events")

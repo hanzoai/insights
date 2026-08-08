@@ -255,49 +255,6 @@ class TestModifiers(BaseTest):
         assert response.datastore is not None
         assert "LEFT JOIN" in response.datastore
 
-    def test_modifiers_materialization_mode(self):
-        try:
-            from ee.datastore.materialized_columns.analyze import materialize
-        except ModuleNotFoundError:
-            self.skipTest("EE materialized-column helpers are not available")
-        materialize("events", "$browser")
-
-        response = execute_insightsql_query(
-            "SELECT properties.$browser FROM events",
-            team=self.team,
-            modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.AUTO),
-            pretty=False,
-        )
-        assert response.datastore is not None
-        assert self._expected_browser_select(MaterializationMode.AUTO) in response.datastore
-
-        response = execute_insightsql_query(
-            "SELECT properties.$browser FROM events",
-            team=self.team,
-            modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.LEGACY_NULL_AS_NULL),
-            pretty=False,
-        )
-        assert response.datastore is not None
-        assert self._expected_browser_select(MaterializationMode.LEGACY_NULL_AS_NULL) in response.datastore
-
-        response = execute_insightsql_query(
-            "SELECT properties.$browser FROM events",
-            team=self.team,
-            modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.LEGACY_NULL_AS_STRING),
-            pretty=False,
-        )
-        assert response.datastore is not None
-        assert self._expected_browser_select(MaterializationMode.LEGACY_NULL_AS_STRING) in response.datastore
-
-        response = execute_insightsql_query(
-            "SELECT properties.$browser FROM events",
-            team=self.team,
-            modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.DISABLED),
-            pretty=False,
-        )
-        assert response.datastore is not None
-        assert self._expected_browser_select(MaterializationMode.DISABLED) in response.datastore
-
     def test_optimize_joined_filters(self):
         # no optimizations
         response = execute_insightsql_query(

@@ -488,7 +488,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
         assert self.permissions().current_team.effective_membership_level == OrganizationMembership.Level.ADMIN
 
     def _grant_project_access(self, access_level: str, *, member=None, role=None) -> None:
-        from ee.models.rbac.access_control import AccessControl
+        from insights.models.ee_models import AccessControl
 
         AccessControl.objects.create(
             team=self.team,
@@ -500,7 +500,7 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
         )
 
     def _grant_project_access_via_new_role(self, access_level: str, *, legacy_membership: bool = False) -> None:
-        from ee.models.rbac.role import Role, RoleMembership
+        from insights.models.ee_models import Role, RoleMembership
 
         role = Role.objects.create(name=f"Role {access_level}", organization=self.organization)
         RoleMembership.objects.create(
@@ -519,8 +519,8 @@ class TestUserTeamPermissions(BaseTest, WithPermissionsBase):
     def test_role_rule_from_another_organization_is_ignored(self, _name, role_level, default_level, expected_level):
         # Nothing scopes the role on an AccessControl row to the project's organization, so a rule
         # can name a role the user holds in an unrelated organization
-        from ee.models.rbac.access_control import AccessControl
-        from ee.models.rbac.role import Role, RoleMembership
+        from insights.models.ee_models import AccessControl
+        from insights.models.ee_models import Role, RoleMembership
 
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()

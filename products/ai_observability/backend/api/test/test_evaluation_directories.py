@@ -6,15 +6,11 @@ from rest_framework import status
 from insights.constants import AvailableFeature
 from insights.models import Team, User
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.ee_models import AccessControl
 from insights.models.organization import OrganizationMembership
 
 from products.ai_observability.backend.models.evaluation_directories import EvaluationDirectory
 from products.ai_observability.backend.models.evaluations import Evaluation
-
-try:
-    from ee.models.rbac.access_control import AccessControl
-except ImportError:
-    pass
 
 
 class TestEvaluationDirectoriesApi(APIBaseTest):
