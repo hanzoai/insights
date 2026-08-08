@@ -55,14 +55,15 @@ class SocialSignupSerializer(serializers.Serializer):
     def create(self, validated_data, **kwargs):
         request = self.context["request"]
 
-        if not request.session.get("backend"):
+        # The address comes from the IdP-populated session, never from the request body —
+        # the caller only gets to name their organization.
+        email = request.session.get("email")
+
+        if not request.session.get("backend") or not email:
             raise serializers.ValidationError(
                 "Inactive social login session. Go to /login and log in before continuing."
             )
 
-        # The address comes from the IdP-populated session, never from the request body —
-        # the caller only gets to name their organization.
-        email = request.session.get("email")
         organization_name = validated_data["organization_name"]
         role_at_organization = validated_data["role_at_organization"]
         referral_source = validated_data.get("referral_source", "")
