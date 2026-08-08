@@ -59,9 +59,9 @@ COPY ./common/esbuilder/ ./common/esbuilder/
 COPY ./common/plugin_transpiler/ ./common/plugin_transpiler/
 COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
 COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
-# No common/siphash: pnpm-workspace.yaml resolves `@hanzo/siphash` to the
-# registry package @posthog/siphash@1.1.1, so there is no local directory to
-# copy and never was in this fork.
+# No common/siphash: pnpm-workspace.yaml resolves `@hanzo/siphash` to a registry
+# package (see the override there), so there is no local directory to copy and
+# never was in this fork.
 COPY ./common/insights-node/ ./common/insights-node/
 # Only the files this tree actually has. `tsconfig.build.json` and `vendor/` are
 # upstream paths that did not survive the plugin-server -> nodejs rename, and a

@@ -7,6 +7,8 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
+        # insights.Role lives here now; this creates it.
+        ("insights", "0002_managed_tables"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("early_access_features", "0008_backfill_earlyaccessfeature_created_by"),
         ("insights", "0001_initial"),

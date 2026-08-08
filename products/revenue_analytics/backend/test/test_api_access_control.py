@@ -5,10 +5,9 @@ from unittest.mock import patch
 from rest_framework import status
 
 from insights.constants import AvailableFeature
+from insights.models.ee_models import AccessControl
 from insights.models.organization import OrganizationMembership
 from insights.models.user import User
-
-AccessControl = pytest.importorskip("ee.models.rbac.access_control").AccessControl
 
 pytestmark = [pytest.mark.django_db]
 

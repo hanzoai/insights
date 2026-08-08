@@ -21,9 +21,9 @@ from insights.schema import (
     DateRange,
     EventsNode,
     FilterLogicalOperator,
-    InsightsQLQueryModifiers,
     InCohortVia,
     InsightActorsQuery,
+    InsightsQLQueryModifiers,
     PersonsArgMaxVersion,
     PersonsOnEventsMode,
     TrendsQuery,
@@ -569,7 +569,6 @@ class TestArgMaxNonNullableSimplification(DatastoreTestMixin, APIBaseTest):
         assert response.datastore is not None
         # The person-overrides subquery argMaxes a non-nullable person_id -> simplified.
         assert (
-            "argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version)"
-            in response.datastore
+            "argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version)" in response.datastore
         )
         assert "tupleElement(argMax(tuple(person_distinct_id_overrides.person_id" not in response.datastore

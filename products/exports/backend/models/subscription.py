@@ -173,8 +173,7 @@ class Subscription(ModelActivityMixin, models.Model):
     # instead of re-running the planner LLM; cleared on prompt change (see save()). Shape is versioned —
     # see report_pipeline._plan_to_freeze.
     ai_query_plan = models.JSONField(null=True, blank=True, default=None)
-    # Source of truth for the shape: ee.api.subscription.AIPromptConfigSerializer (writes) and
-    # normalize_ai_window below (reads).
+    # Shape is read by normalize_ai_window below.
     ai_prompt_config = models.JSONField(default=dict, blank=True)
 
     # Subscription type (email, slack etc.)

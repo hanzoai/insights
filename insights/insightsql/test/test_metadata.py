@@ -49,7 +49,11 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _select(self, query: str, modifiers: Optional[InsightsQLQueryModifiers] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=HogLanguage.INSIGHTS_QL, query=query, response=None, modifiers=modifiers
+                kind="InsightsQLMetadata",
+                language=HogLanguage.INSIGHTS_QL,
+                query=query,
+                response=None,
+                modifiers=modifiers,
             ),
             team=self.team,
         )
@@ -79,7 +83,9 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
 
     def _template(self, query: str) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
-            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=HogLanguage.INSIGHTS_TEMPLATE, query=query, response=None),
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata", language=HogLanguage.INSIGHTS_TEMPLATE, query=query, response=None
+            ),
             team=self.team,
         )
 
@@ -802,7 +808,9 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                 "isValid": False,
                 "notices": [],
                 "warnings": [],
-                "errors": [{"end": 15, "fix": None, "message": "Script function `NONO` is not implemented", "start": 9}],
+                "errors": [
+                    {"end": 15, "fix": None, "message": "Script function `NONO` is not implemented", "start": 9}
+                ],
             },
         )
 
@@ -838,7 +846,9 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             metadata.dict()
             | {
                 "isValid": False,
-                "errors": [{"end": 17, "fix": None, "message": "Script function `NONO` is not implemented", "start": 11}],
+                "errors": [
+                    {"end": 17, "fix": None, "message": "Script function `NONO` is not implemented", "start": 11}
+                ],
             },
         )
 
