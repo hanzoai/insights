@@ -10,7 +10,7 @@ import type { LifecycleStatus } from '../types'
 // frontend/src/styles/base.scss so MCP charts match the product and series with many
 // categories (e.g. retention cohorts) get distinct colors before wrapping.
 export const CHART_COLORS = [
-    '#1d4aff',
+    '#3d3d3d',
     '#621da6',
     '#42827e',
     '#ce0e74',
@@ -32,11 +32,11 @@ export const colorAt = (index: number): string => CHART_COLORS[index % CHART_COL
 
 // Single brand blue for every funnel step's converted bar — the bar height already encodes
 // conversion, so distinct per-step colors would only add noise.
-export const FUNNEL_COLOR = '#1d4aff'
+export const FUNNEL_COLOR = '#3d3d3d'
 
 // Conventional lifecycle bucket colors — mirrors --color-lifecycle-* in frontend/src/styles/base.scss.
 export const LIFECYCLE_COLORS: Record<LifecycleStatus, string> = {
-    new: '#1d4aff',
+    new: '#3d3d3d',
     returning: '#388600',
     resurrecting: '#a56eff',
     dormant: '#db3707',

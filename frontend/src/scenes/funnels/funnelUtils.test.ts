@@ -1237,11 +1237,11 @@ describe('funnelComparePeriodDateRange', () => {
 
 describe('dimPreviousPeriodColor', () => {
     it('dims a 6-digit hex to 50% opacity (matching the trends previous-period treatment)', () => {
-        expect(dimPreviousPeriodColor('#1d4aff')).toBe('#1d4aff80')
+        expect(dimPreviousPeriodColor('#3d3d3d')).toBe('#3d3d3d80')
     })
 
     it('leaves colors that already carry alpha or a non-hex format unchanged', () => {
-        expect(dimPreviousPeriodColor('#1d4aff80')).toBe('#1d4aff80')
-        expect(dimPreviousPeriodColor('rgba(29, 74, 255, 0.5)')).toBe('rgba(29, 74, 255, 0.5)')
+        expect(dimPreviousPeriodColor('#3d3d3d80')).toBe('#3d3d3d80')
+        expect(dimPreviousPeriodColor('rgba(61, 61, 61, 0.5)')).toBe('rgba(61, 61, 61, 0.5)')
     })
 })

@@ -150,7 +150,7 @@ class TestRemoteConfig(_RemoteConfigBase):
         self.sync_remote_config()
         assert self.remote_config.config["conversations"]["enabled"] is True
         assert self.remote_config.config["conversations"]["greetingText"] == "Hey, how can I help you today?"
-        assert self.remote_config.config["conversations"]["color"] == "#1d4aff"
+        assert self.remote_config.config["conversations"]["color"] == "#000000"
         assert self.remote_config.config["conversations"]["token"] == "test_public_token_123"
         assert self.remote_config.config["conversations"]["domains"] == []
         assert self.remote_config.config["conversations"]["widgetPosition"] == "bottom_right"

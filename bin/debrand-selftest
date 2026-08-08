@@ -192,6 +192,76 @@ with tempfile.TemporaryDirectory() as tmp:
     check("a notice deleted rather than renamed is caught too", quiet(debrand.licences_unlaundered, tmp), 0)
     check("...by the invariant that asserts it is there", quiet(debrand.licence_notice_survives, tmp), 1)
 
+# A brand is not only its names. The rename table walked past the upstream
+# wordmark on both OAuth consent screens, on the toolbar error page and on the
+# 2FA template -- drawn as vector paths, so no rule could see it -- and past the
+# logo baked into index.html as a data URI, which printed it into every
+# visitor's browser console. --check was green through all of it.
+with tempfile.TemporaryDirectory() as tmp:
+    subprocess.run(["git", "init", "-q", tmp], check=True)
+
+    def write(rel: str, body: str) -> None:
+        """Put one file in the tree and nothing else.
+
+        Each case has to stand alone: a tree that accumulated the previous
+        case's fixture would report a hit for the wrong reason, and the two
+        negative cases below -- the checksum and the allowlisted mark -- would
+        fail against a guard that is working correctly.
+        """
+        for name in os.listdir(tmp):
+            if name != ".git":
+                subprocess.run(["rm", "-rf", os.path.join(tmp, name)], check=True)
+        path = os.path.join(tmp, rel)
+        os.makedirs(os.path.dirname(path) or tmp, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        subprocess.run(["git", "add", "-A"], cwd=tmp, check=True, capture_output=True)
+
+    write("app.css", ".btn { background: #3d3d3d; }\n")
+    check("a tree with no marks passes", quiet(debrand.check_marks, tmp), 0)
+
+    write("app.css", ".btn { background: #1d4aff; }\n")
+    check("a brand hue is refused", quiet(debrand.check_marks, tmp), 1)
+    write("app.css", ".btn { background: #F54E00; }\n")
+    check("...in any case", quiet(debrand.check_marks, tmp), 1)
+    # The spelling the logo actually shipped in: percent-encoded in a data URI,
+    # where `#` is `%23` and no rule matching on `#` would have found it.
+    write("icon.ts", "export const SRC = 'data:image/svg+xml,%3Csvg%20fill%3D%22%23F9BD2B%22%3E'\n")
+    check("...percent-encoded inside a data URI", quiet(debrand.check_marks, tmp), 1)
+    write("app.css", ".btn { background: #1d4aff80; }\n")
+    check("...carrying an alpha channel", quiet(debrand.check_marks, tmp), 1)
+    # Decimal is the same colour wearing a spelling a hex grep cannot see. The
+    # QA evidence annotator held these as PIL tuples and read as clean.
+    write("overlay.py", "HIGHLIGHT_COLOR = (245, 78, 0)\n")
+    check("...spelled in decimal", quiet(debrand.check_marks, tmp), 1)
+    write("overlay.js", "const c = 'rgba(29,74,255,0.3)'\n")
+    check("...and in an rgba() string", quiet(debrand.check_marks, tmp), 1)
+
+    # The mirror image, and the expensive one: lockfiles are full of 64-char
+    # hex, so a bare substring match would fail the tree at random.
+    write("sums.txt", "checksum = \"a91d4affb27c3e5109f54e0042bd8117f9bd2b6690aa41c7d3e8b5290fc61d4a\"\n")
+    check("a checksum that merely contains the run is not a hit", quiet(debrand.check_marks, tmp), 0)
+
+    # Recolouring the wordmark to ink leaves it the upstream wordmark. A hue
+    # check alone would call that fixed, which is why the geometry is refused
+    # in its own right.
+    write("logo.svg", '<svg><path fill="#000" d="M55.383 75.225c-1.2.4-2 1.1-2.4 2.3"/></svg>\n')
+    check("the wordmark's path data is refused even when recoloured", quiet(debrand.check_marks, tmp), 1)
+    write("logo.svg", '<svg><path fill="#000" d="m216.24 107.388 4.3-1.5"/></svg>\n')
+    check("...by either signature", quiet(debrand.check_marks, tmp), 1)
+
+    # Someone else's product mark keeps someone else's colours, and the
+    # allowlist is the one place that exemption may be written down.
+    write("vendor/logo.svg", '<svg><rect fill="#1d4aff"/></svg>\n')
+    saved_allow = debrand.CONTENT_ALLOWLIST
+    try:
+        check("an unlisted file carrying a hue fails", quiet(debrand.check_marks, tmp), 1)
+        debrand.CONTENT_ALLOWLIST = {**saved_allow, "vendor/logo.svg": "someone else's mark"}
+        check("...and an allowlisted one does not", quiet(debrand.check_marks, tmp), 0)
+    finally:
+        debrand.CONTENT_ALLOWLIST = saved_allow
+
+
 # Applying the rules to an already-converged tree has to be a no-op, or every
 # rerun produces a diff and convergence never terminates.
 sample = "from insights.insightsql import datastore  # @hanzo/elements, InsightsFunction\n"

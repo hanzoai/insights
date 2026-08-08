@@ -52,7 +52,7 @@ describe('resolveCssColor', () => {
     })
 
     it('passes a concrete color through unchanged', () => {
-        expect(resolveCssColor('#1d4aff')).toBe('#1d4aff')
+        expect(resolveCssColor('#3d3d3d')).toBe('#3d3d3d')
         expect(resolveCssColor('rgb(1, 2, 3)')).toBe('rgb(1, 2, 3)')
     })
 

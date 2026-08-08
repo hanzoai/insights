@@ -415,7 +415,7 @@ export const MOCK_DATA_COLOR_THEMES: DataColorThemeModel[] = [
         id: 1,
         name: 'Default Theme',
         colors: [
-            '#1d4aff',
+            '#3d3d3d',
             '#621da6',
             '#42827e',
             '#ce0e74',

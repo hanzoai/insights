@@ -52,7 +52,7 @@
         // so a transparent fill would expose internal stroke edges as lines through the letters
         color: #fff;
         paint-order: stroke;
-        -webkit-text-stroke: 4px #f54e00;
+        -webkit-text-stroke: 4px #f80;
     }
 
     &.WordArt--extrude {

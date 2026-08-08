@@ -17,8 +17,8 @@ Insights repo root. MP4 output shells out to a locally installed ``ffmpeg``; all
 other paths need no extra dependencies. No network access.
 
 Annotation styling follows Insights product color tokens (``frontend/src/styles/
-base.scss``): brand red ``#f54e00`` highlights, ``--success``/``--danger`` chips,
-brand black bar with cream text.
+base.scss``): white highlights edged in black so they read over any capture,
+``--success``/``--danger`` chips, black bar with cream text.
 """
 
 from __future__ import annotations
@@ -40,9 +40,13 @@ CHIP_TEXT = (255, 255, 255)
 CHIP_COLORS = {
     "pass": (56, 134, 0),
     "fail": (219, 55, 7),
-    "info": (29, 74, 255),
+    "info": (85, 85, 85),
 }
-HIGHLIGHT_COLOR = (245, 78, 0)
+# Highlights land on whatever the app looked like, so they are a light stroke
+# with a dark edge, same as the cursor: one of the two always has contrast,
+# whatever is underneath.
+HIGHLIGHT = (255, 255, 255)
+HIGHLIGHT_EDGE = (21, 21, 21)
 HIGHLIGHT_WIDTH = 4
 HIGHLIGHT_PADDING = 6
 MAX_ANIMATION_WIDTH = 1200
@@ -134,7 +138,8 @@ def _parse_point(value: str) -> tuple[float, float]:
 
 def _draw_cursor(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
     ring = 16
-    draw.ellipse((x - ring, y - ring, x + ring, y + ring), outline=HIGHLIGHT_COLOR, width=3)
+    draw.ellipse((x - ring, y - ring, x + ring, y + ring), outline=HIGHLIGHT_EDGE, width=5)
+    draw.ellipse((x - ring + 1, y - ring + 1, x + ring - 1, y + ring - 1), outline=HIGHLIGHT, width=3)
     arrow = [
         (x, y),
         (x, y + 17),
@@ -158,10 +163,13 @@ def annotate(args: argparse.Namespace) -> int:
         top = max(0, int(y * scale) - HIGHLIGHT_PADDING)
         right = min(width - 1, int((x + w) * scale) + HIGHLIGHT_PADDING)
         bottom = min(height - 1, int((y + h) * scale) + HIGHLIGHT_PADDING)
-        if right <= left or bottom <= top:
-            sys.stderr.write(f"warning: highlight {x},{y},{w},{h} is outside the image, skipped\n")
+        if right - left < 2 or bottom - top < 2:
+            sys.stderr.write(f"warning: highlight {x},{y},{w},{h} is outside the image or too small, skipped\n")
             continue
-        draw.rounded_rectangle((left, top, right, bottom), radius=8, outline=HIGHLIGHT_COLOR, width=HIGHLIGHT_WIDTH)
+        draw.rounded_rectangle((left, top, right, bottom), radius=8, outline=HIGHLIGHT_EDGE, width=HIGHLIGHT_WIDTH + 2)
+        draw.rounded_rectangle(
+            (left + 1, top + 1, right - 1, bottom - 1), radius=7, outline=HIGHLIGHT, width=HIGHLIGHT_WIDTH
+        )
 
     for x, y in args.click:
         _draw_cursor(draw, int(x * scale), int(y * scale))
