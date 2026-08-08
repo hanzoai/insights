@@ -21,7 +21,7 @@ const getSlackAppManifest = (): any => ({
     display_information: {
         name: 'Insights',
         description: 'Product insights right where you need them',
-        background_color: '#f54e00',
+        background_color: '#000000',
     },
     features: {
         app_home: {

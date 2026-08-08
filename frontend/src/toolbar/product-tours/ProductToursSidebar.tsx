@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCheck, IconCursorClick, IconPlay, IconPlus, IconSidebarClose, IconX } from '@hanzo/icons'
 import { Button, Input, Link } from '@hanzo/elements'
+import { IconCheck, IconCursorClick, IconPlay, IconPlus, IconSidebarClose, IconX } from '@hanzo/icons'
 
 import { Modal } from 'lib/elements/Modal'
 import { hasIncompleteTargeting } from 'scenes/product-tours/stepUtils'
@@ -294,7 +294,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                         color: '#fff',
                         fontSize: 14,
                         fontWeight: 500,
-                        boxShadow: '0 4px 12px rgba(29, 74, 255, 0.3)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                         zIndex: 2147483020,
                         pointerEvents: 'auto',
                     }}

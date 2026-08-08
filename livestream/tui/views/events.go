@@ -191,7 +191,7 @@ func (v *EventsView) View() string {
 	headerStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#FFFFFF"}).
-		Background(lipgloss.AdaptiveColor{Light: "#1D4AFF", Dark: "#1D4AFF"})
+		Background(lipgloss.Color("#333333"))
 
 	cursorStyle := lipgloss.NewStyle().
 		Background(lipgloss.AdaptiveColor{Light: "#DDE4FF", Dark: "#2A2F4A"}).
