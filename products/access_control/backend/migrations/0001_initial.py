@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("insights", "0001_initial"),
         ("event_definitions", "0002_schemapropertygroupproperty_is_optional_in_types"),
-        ("ee", "0041_migrate_dashboards_models"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="property_access_controls",
                         related_query_name="property_access_controls",
-                        to="ee.role",
+                        to="insights.role",
                     ),
                 ),
                 (
