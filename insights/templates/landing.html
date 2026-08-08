@@ -193,5 +193,19 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
   </div>
 </footer>
 
+{% if not opt_out_capture and js_insights_api_key %}
+{# The page is otherwise script-free, so this is the whole of its JavaScript: the
+   product measuring its own front door, with the library it already serves from
+   this origin. No third-party tag — those are refused here, like every other asset. #}
+<script nonce="{{ request.csp_nonce }}" src="{% static 'array.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}">
+  insights.init("{{ js_insights_api_key|escapejs }}", {
+    api_host: "{{ js_insights_host|escapejs }}" || window.location.origin,
+    defaults: "2026-05-30",
+    persistence: "localStorage+cookie",
+  });
+</script>
+{% endif %}
+
 </body>
 </html>
