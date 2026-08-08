@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1152_fix_device_bucketing_persist_across_auth"),
+        ("insights", "0001_initial"),
         ("replay_vision", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

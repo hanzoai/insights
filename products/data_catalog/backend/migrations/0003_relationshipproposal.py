@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("data_catalog", "0002_tablecertification"),
         ("data_tools", "0002_migrate_data_modeling_models"),
-        ("insights", "1247_oauthaccesstoken_token_idx"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

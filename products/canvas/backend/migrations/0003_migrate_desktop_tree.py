@@ -248,7 +248,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("canvas", "0002_source_version_required"),
         ("tasks", "0081_channelcontextgeneration_channelinstructions_and_more"),
-        ("insights", "1265_delete_duckgresserverteam"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

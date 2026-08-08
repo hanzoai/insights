@@ -11,7 +11,7 @@ import insights.uuidt
 class Migration(migrations.Migration):
     dependencies = [
         ("logs", "0016_logsview_columns"),
-        ("insights", "1258_duckgressinkschemastate_queue_last_applied_at"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

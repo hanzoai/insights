@@ -28,7 +28,7 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.spec_genera
 )
 from products.exports.backend.temporal.subscriptions.types import AI_REPORT_WINDOW_END_KEY, SubscriptionTriggerType
 
-from ee.tasks.subscriptions.slack_subscriptions import (
+from products.exports.backend.subscriptions.slack import (
     UTM_TAGS_BASE,
     SlackDeliveryResult,
     SlackMessageData,

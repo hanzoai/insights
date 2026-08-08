@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0036_github_issues_channel"),
-        ("insights", "1190_team_llm_gateway_metadata"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

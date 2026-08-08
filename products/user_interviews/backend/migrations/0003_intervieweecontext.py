@@ -8,7 +8,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1152_fix_device_bucketing_persist_across_auth"),
+        ("insights", "0001_initial"),
         ("user_interviews", "0002_userinterviewtopic"),
     ]
 

@@ -9,7 +9,7 @@ import insights.uuidt
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1261_alter_personalapikey_scoped_organizations_and_more"),
+        ("insights", "0001_initial"),
         ("workflows", "0010_email_reputation_snapshot"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

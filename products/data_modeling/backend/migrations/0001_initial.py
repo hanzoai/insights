@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("data_warehouse", "0009_alter_externaldatasource_source_type"),
-        ("insights", "0923_add_quick_filters"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

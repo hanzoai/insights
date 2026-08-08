@@ -10,7 +10,7 @@ import insights.uuidt
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1262_organization_members_can_see_org_members"),
+        ("insights", "0001_initial"),
         ("signals", "0070_signalscoutconfig_output_destinations"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

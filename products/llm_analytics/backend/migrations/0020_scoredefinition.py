@@ -6,7 +6,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1039_subscription_dashboard_export_insights"),
+        ("insights", "0001_initial"),
         ("llm_analytics", "0019_rename_default_clustering_jobs"),
     ]
 

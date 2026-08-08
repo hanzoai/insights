@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0904_alter_dashboard_creation_mode"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

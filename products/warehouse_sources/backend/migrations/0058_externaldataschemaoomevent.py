@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1247_oauthaccesstoken_token_idx"),
+        ("insights", "0001_initial"),
         ("warehouse_sources", "0057_alter_externaldatasource_source_type_and_more"),
     ]
 

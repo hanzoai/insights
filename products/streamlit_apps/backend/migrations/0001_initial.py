@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1089_ducklake_backfill_populate"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1047_dashboard_quick_filter_ids"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("llm_analytics", "0021_tracereview_and_scores"),
     ]

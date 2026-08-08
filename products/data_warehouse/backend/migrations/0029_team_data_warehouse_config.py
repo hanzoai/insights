@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1043_add_15_minute_interval_to_batch_exports"),
+        ("insights", "0001_initial"),
         ("data_warehouse", "0028_datawarehousesavedquery_updated_at"),
     ]
 

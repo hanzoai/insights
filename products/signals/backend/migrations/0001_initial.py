@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("ee", "0037_add_conversation_approval_decisions"),
-        ("insights", "0993_approvalpolicy_bypass_options"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

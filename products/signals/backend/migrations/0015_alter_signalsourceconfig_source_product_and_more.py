@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1099_subscription_delivery"),
+        ("insights", "0001_initial"),
         ("signals", "0014_signalreportartefact_report_type_idx"),
     ]
 

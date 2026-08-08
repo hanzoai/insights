@@ -10,7 +10,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1281_migrate_managed_warehouse_models"),
+        ("insights", "0001_initial"),
         ("tasks", "0080_channel_repository_configuration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

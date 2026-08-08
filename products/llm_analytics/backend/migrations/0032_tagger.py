@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1128_datadeletionrequest_person_distinct_ids_and_more"),
+        ("insights", "0001_initial"),
         ("llm_analytics", "0031_add_together_provider"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

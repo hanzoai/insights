@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1219_filesystemfoldercontextgeneration"),
+        ("insights", "0001_initial"),
         ("warehouse_sources", "0033_alter_externaldatasource_source_type_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

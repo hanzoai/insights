@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0958_drop_teamcoreeventsconfig_table"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

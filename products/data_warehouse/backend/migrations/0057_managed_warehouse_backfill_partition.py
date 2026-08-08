@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("data_warehouse", "0056_remove_data_modeling_models"),
-        ("insights", "1252_datadeletionrequest_property_removal_marker"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

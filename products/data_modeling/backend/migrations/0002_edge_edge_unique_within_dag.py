@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0925_team_business_model"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("data_modeling", "0001_initial"),
     ]

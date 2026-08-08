@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1231_duckgresserverteam"),
+        ("insights", "0001_initial"),
         ("tasks", "0054_taskrun_wizard_branch_idx"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

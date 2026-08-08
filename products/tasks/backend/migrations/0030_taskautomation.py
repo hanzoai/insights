@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1066_alter_insight_saved"),
+        ("insights", "0001_initial"),
         ("tasks", "0029_task_ci_prompt"),
     ]
 

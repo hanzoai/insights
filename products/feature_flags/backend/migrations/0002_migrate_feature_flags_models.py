@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("dashboards", "0001_migrate_dashboards_models"),
         ("feature_flags", "0001_team_feature_flag_defaults_config"),
-        ("insights", "1163_alter_batchexportrun_batch_export_and_more"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

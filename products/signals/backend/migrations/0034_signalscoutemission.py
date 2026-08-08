@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1216_migrate_cohorts_models"),
+        ("insights", "0001_initial"),
         ("signals", "0033_signalscoutrun_emitted_count_and_more"),
     ]
 

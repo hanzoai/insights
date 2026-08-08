@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
             "experiments",
             "0016_teamexperimentsconfig_default_sequential_testing_enabled_and_more",
         ),
-        ("insights", "1207_migrate_ai_observability_models"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

@@ -11,7 +11,7 @@ import insights.uuidt
 class Migration(migrations.Migration):
     dependencies = [
         ("ai_observability", "0033_evaluation_target_session"),
-        ("insights", "1285_drop_desktop_file_system"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

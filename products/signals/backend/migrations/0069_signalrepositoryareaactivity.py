@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1255_wizard_runs_rate_limit_and_provisioned_onboarding_reason"),
+        ("insights", "0001_initial"),
         ("signals", "0068_signalscoutrun_metadata"),
     ]
 

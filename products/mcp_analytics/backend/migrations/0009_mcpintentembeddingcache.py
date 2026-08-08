@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("mcp_analytics", "0008_drop_mcpsession_backfill_columns"),
-        ("insights", "1171_backfill_credentials_reviewed_at"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

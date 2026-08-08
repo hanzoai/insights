@@ -11,7 +11,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("ai_observability", "0022_add_generated_delivery_status"),
-        ("insights", "1255_wizard_runs_rate_limit_and_provisioned_onboarding_reason"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

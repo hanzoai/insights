@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1247_oauthaccesstoken_token_idx"),
+        ("insights", "0001_initial"),
         ("tasks", "0050_backfill_thread_message_mentions"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

@@ -44,15 +44,15 @@ from products.exports.backend.temporal.subscriptions.types import (
 )
 from products.product_analytics.backend.models.insight import Insight
 
-from ee.tasks.subscriptions import _capture_delivery_failed_event
-from ee.tasks.subscriptions.auto_disable import (
+from products.exports.backend.subscriptions import _capture_delivery_failed_event
+from products.exports.backend.subscriptions.auto_disable import (
     UNSUPPORTED_TARGET_DISABLE_REASON,
     disable_invalid_subscription,
     get_subscription_disable_reason,
 )
-from ee.tasks.subscriptions.email_subscriptions import send_email_subscription_report
-from ee.tasks.subscriptions.slack_subscriptions import send_slack_message_with_integration_async
-from ee.tasks.subscriptions.subscription_utils import MAX_INSIGHTS
+from products.exports.backend.subscriptions.email import send_email_subscription_report
+from products.exports.backend.subscriptions.slack import send_slack_message_with_integration_async
+from products.exports.backend.subscriptions.utils import MAX_INSIGHTS
 
 LOGGER = get_logger(__name__)
 

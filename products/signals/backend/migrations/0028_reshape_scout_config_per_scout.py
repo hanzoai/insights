@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1205_delete_batch_export_models"),
+        ("insights", "0001_initial"),
         ("signals", "0027_migrate_insights_ai_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

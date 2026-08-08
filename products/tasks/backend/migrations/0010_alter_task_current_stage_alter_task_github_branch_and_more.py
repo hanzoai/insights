@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0886_fake_social_django_jsonfield_migrations"),
+        ("insights", "0001_initial"),
         ("tasks", "0009_task_created_by"),
     ]
 

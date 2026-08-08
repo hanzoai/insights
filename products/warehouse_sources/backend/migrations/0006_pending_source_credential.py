@@ -12,7 +12,7 @@ import products.warehouse_sources.backend.models.pending_source_credential
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1218_team_ingested_production_event_last_checked_at"),
+        ("insights", "0001_initial"),
         ("warehouse_sources", "0005_alter_externaldatasource_source_type"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

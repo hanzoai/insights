@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1247_oauthaccesstoken_token_idx"),
+        ("insights", "0001_initial"),
         ("replay_vision", "0028_replayscannerpromptsuggestion"),
         ("workflows", "0008_teamworkflowsconfig"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

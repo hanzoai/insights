@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("notebooks", "0006_resourcenotebook_account_unique_constraint"),
-        ("insights", "1245_duckgres_sink_schema_state"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

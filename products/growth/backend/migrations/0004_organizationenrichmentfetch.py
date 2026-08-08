@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("growth", "0003_enrichmentsignupsnapshot"),
-        ("insights", "1251_alter_integration_kind"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

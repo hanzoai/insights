@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("customer_analytics", "0006_migrate_product_analytics_models"),
-        ("insights", "1226_identityproviderconfig_and_more"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0938_add_redirect_to_dlq_restriction_type"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

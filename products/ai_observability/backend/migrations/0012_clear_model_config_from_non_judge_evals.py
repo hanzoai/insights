@@ -46,7 +46,7 @@ def clear_model_config_from_non_judge_evals(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("ai_observability", "0011_evaluation_target"),
-        ("insights", "1245_duckgres_sink_schema_state"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

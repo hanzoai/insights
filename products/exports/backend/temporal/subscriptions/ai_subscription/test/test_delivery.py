@@ -24,7 +24,7 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.report_pipe
 from products.exports.backend.temporal.subscriptions.ai_subscription.spec_generator import ReportWindow
 from products.exports.backend.temporal.subscriptions.types import AI_REPORT_WINDOW_END_KEY, SubscriptionTriggerType
 
-from ee.tasks.subscriptions.slack_subscriptions import SlackMessageData
+from products.exports.backend.subscriptions.slack import SlackMessageData
 
 _DELIVERY = "products.exports.backend.temporal.subscriptions.ai_subscription.delivery"
 

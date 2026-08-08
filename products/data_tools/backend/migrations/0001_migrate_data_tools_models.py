@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("data_warehouse", "0053_remove_warehouse_sources_models"),
-        ("insights", "1162_drop_hourly_from_subscription_frequency_choices"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

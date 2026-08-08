@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("customer_analytics", "0004_teamcustomeranalyticsconfig_account_group_type_index"),
-        ("insights", "1151_cimd_followup_hardening"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

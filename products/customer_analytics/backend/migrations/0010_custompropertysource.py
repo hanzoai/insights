@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("customer_analytics", "0009_custompropertyvalue_validate_fks"),
         ("data_modeling", "0024_datamodelingjob_team_status_idx"),
-        ("insights", "1238_ducklakebackfill_earliest_event_date"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

@@ -7,7 +7,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("business_knowledge", "0013_bk_source_always_include_index"),
-        ("insights", "1245_duckgres_sink_schema_state"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

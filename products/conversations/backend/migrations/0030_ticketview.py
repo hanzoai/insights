@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1094_oauth_provisioning_fields"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("conversations", "0029_ticket_email_config_index"),
     ]
