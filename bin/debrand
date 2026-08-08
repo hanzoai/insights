@@ -1054,14 +1054,23 @@ GREP_PATTERN = "|".join(
     )
 )
 
-# Two segments of the upstream wordmark's path data. Coordinates identify the
-# artwork the way the fills do not: recolouring the wordmark to ink leaves it
-# the upstream wordmark, and a hue check alone would call that fixed.
-WORDMARK_SIGNATURES = ("M55.383 75.225", "m216.24 107.388")
+# Segments of the upstream artwork's path data -- the wordmark and the mascot.
+# Coordinates identify a drawing the way its fills do not: recolouring the
+# wordmark to ink leaves it the upstream wordmark, and a hue check alone would
+# call that fixed. Two of the five surfaces LLM.md records drew the mark with
+# `var(--ph-brand-*)` and no literal hex at all, so on those the path data is
+# the only tell there is.
+MARK_SIGNATURES = (
+    "M55.383 75.225",
+    "m216.24 107.388",
+    "5.77226 8.02931",
+    "M303.32 114.86",
+    "M29.375 11.6667",
+)
 
 
 def check_marks(root: str) -> int:
-    """Refuse the upstream brand's palette and the geometry of its wordmark.
+    """Refuse the upstream brand's palette and the geometry of its marks.
 
     Two stages on purpose. `git grep` narrows 35k tracked files to a handful
     using the index; the regexes then say precisely which token matched and
@@ -1083,11 +1092,11 @@ def check_marks(root: str) -> int:
                     hits.append((rel, n, m.group(0)))
 
     marks: list[tuple[str, int, str]] = []
-    sig_args = [a for s in WORDMARK_SIGNATURES for a in ("-e", s)]
+    sig_args = [a for s in MARK_SIGNATURES for a in ("-e", s)]
     for rel in sorted(set(candidates("-F", *sig_args))):
         with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
             for n, line in enumerate(fh, 1):
-                for s in WORDMARK_SIGNATURES:
+                for s in MARK_SIGNATURES:
                     if s.lower() in line.lower():
                         marks.append((rel, n, s))
 
@@ -1099,7 +1108,7 @@ def check_marks(root: str) -> int:
         for rel, n, tok in hits[:20]:
             print(f"    {rel}:{n}: {tok}")
     if marks:
-        print(f"FAIL: {len(marks)} lines carry the upstream wordmark's path data")
+        print(f"FAIL: {len(marks)} lines carry the upstream artwork's path data")
         print("    Recolouring it does not debrand it. Replace the artwork with")
         print("    the mark in frontend/public/icons/safari-pinned-tab.svg.")
         for rel, n, sig in marks[:20]:
