@@ -9,7 +9,7 @@ from insights.test.base import BaseTest
 from unittest.mock import MagicMock, call, patch
 
 import pyarrow as pa
-from datastore_connect.driver.exceptions import DatastoreError, OperationalError, ProgrammingError
+from datastore_connect.driver.exceptions import ClickHouseError as DatastoreError, OperationalError, ProgrammingError
 from parameterized import parameterized
 
 from products.warehouse_sources.backend.models.external_data_schema import ExternalDataSchema

@@ -23,7 +23,7 @@ from insights.models.team.team import Team
 from insights.models.utils import uuid7
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.rbac.user_access_control import UserAccessControl, UserAccessControlSerializerMixin
-from insights.tasks.early_access_feature import POSTFN_TEAM_ID, send_events_for_early_access_feature_stage_change
+from insights.tasks.early_access_feature import INSIGHTS_TEAM_ID, send_events_for_early_access_feature_stage_change
 from insights.utils_cors import cors_response
 
 from products.feature_flags.backend.api.feature_flag import (
@@ -413,7 +413,7 @@ class EarlyAccessFeatureSerializerCreateOnly(EarlyAccessFeatureSerializer):
         # Scoped to US cloud specifically: project ids are allocated per region, so id 2 is only
         # Insights's own team on US — on EU/DEV/E2E it belongs to an unrelated customer.
         is_us_cloud = (settings.CLOUD_DEPLOYMENT or "").upper() == "US"
-        if is_us_cloud and self.context["team_id"] == POSTFN_TEAM_ID and not (data.get("description") or "").strip():
+        if is_us_cloud and self.context["team_id"] == INSIGHTS_TEAM_ID and not (data.get("description") or "").strip():
             raise serializers.ValidationError({"description": "A description is required for early access features."})
 
         feature_flag_id = data.get("feature_flag_id", None)
