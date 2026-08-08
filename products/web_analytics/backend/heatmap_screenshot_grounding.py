@@ -22,9 +22,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from insights.sync import database_sync_to_async
 
+from products.insights_ai.backend.model import MaxChatOpenAI
 from products.web_analytics.backend.models import HeatmapSnapshot, SavedHeatmap
-
-from ee.hogai.llm import MaxChatAnthropic
 
 if TYPE_CHECKING:
     from insights.models import Team, User
@@ -172,7 +171,7 @@ _GROUNDING_PROMPT = (
 
 async def _ground(b64: str, markers: list[_Marker], page_url: str, team: "Team", user: "User") -> str | None:
     prompt = _GROUNDING_PROMPT.format(url=page_url, legend=_legend(markers))
-    model = MaxChatAnthropic(
+    model = MaxChatOpenAI(
         model=_GROUNDING_MODEL,
         streaming=False,
         disable_streaming=True,

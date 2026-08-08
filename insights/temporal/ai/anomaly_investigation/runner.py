@@ -19,10 +19,10 @@ from dataclasses import dataclass
 from typing import Any
 
 import hanzo_insights
+from hanzo_insights.ai.langchain.callbacks import CallbackHandler
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
-from hanzo_insights.ai.langchain.callbacks import CallbackHandler
 from pydantic import BaseModel, ValidationError
 
 from insights.models import Team, User
@@ -81,7 +81,7 @@ async def run_investigation(
     """
     # Imported here so the workflow module does not require the ee package at import time
     # (Temporal workflow sandbox restrictions).
-    from ee.hogai.llm import MaxChatAnthropic
+    from products.insights_ai.backend.model import MaxChatOpenAI
 
     toolkit = InvestigationToolkit(team=team, alert=alert)
     handlers: dict[str, ToolHandler] = {
@@ -138,7 +138,7 @@ async def run_investigation(
     }
 
     # No temperature: Sonnet 5 rejects non-default sampling params with a 400.
-    llm = MaxChatAnthropic(
+    llm = MaxChatOpenAI(
         model=AGENT_MODEL,
         team=team,
         user=user,
@@ -173,7 +173,7 @@ async def run_investigation(
     # model returns plain text instead, the text-JSON fallback in _parse_report still recovers it.
     llm_with_final_report = llm.bind_tools([final_report_tool])
 
-    # Without a langchain CallbackHandler attached, MaxChatAnthropic's insights_properties
+    # Without a langchain CallbackHandler attached, MaxChatOpenAI's insights_properties
     # never reach AI observability — langchain-anthropic itself doesn't emit $ai_* events.
     # Attach one here so every generation/span this agent makes shows up under
     # ai_product=alert_investigation_agent, matching the convention used by other
@@ -219,7 +219,7 @@ async def run_investigation(
                     final = await llm_with_final_report.ainvoke(messages, config=config)
                 except Exception as err:
                     # Swallow final-turn failures and return the best report we can rather
-                    # than bouncing off Temporal retries — MaxChatAnthropic already exhausted
+                    # than bouncing off Temporal retries — MaxChatOpenAI already exhausted
                     # its built-in retry budget, so another activity attempt is unlikely to help.
                     logger.warning("anomaly_investigation.llm_finalize_error", extra={"error": str(err)})
                     salvaged = _salvage_from_history(report_args_history) or _fallback_report(
