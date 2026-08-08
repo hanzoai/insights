@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("ee", "0037_add_conversation_approval_decisions"),
+        ("insights_ai", "0002_conversation"),
         ("insights", "0001_initial"),
     ]
 
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="ee.conversation",
+                        to="insights_ai.conversation",
                     ),
                 ),
                 (
