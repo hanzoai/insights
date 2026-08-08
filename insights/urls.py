@@ -10,12 +10,10 @@ from django.template import loader
 from django.urls import include, path, re_path
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, requires_csrf_token
-from django.views.generic.base import RedirectView
 
 import structlog
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from prometheus_client import CollectorRegistry, generate_latest, multiprocess
-from two_factor.urls import urlpatterns as tf_urls
 
 from insights.api import (
     api_not_found,
@@ -27,7 +25,6 @@ from insights.api import (
     sharing,
     signup,
     site_app,
-    two_factor_reset,
     unsubscribe,
     uploaded_media,
     user,
@@ -38,7 +35,6 @@ from insights.api.oauth.connected_apps import ConnectedAppsViewSet
 from insights.api.oauth.raycast_metadata import RAYCAST_METADATA_PATH, RaycastClientMetadataView
 from insights.api.oauth.wizard_metadata import WIZARD_METADATA_PATH, WizardClientMetadataView
 from insights.api.sdk_health import sdk_health
-from insights.api.two_factor_qrcode import CacheAwareQRGeneratorView
 from insights.api.utils import hostname_in_allowed_url_list
 from insights.api.web_experiment import web_experiments
 from insights.api.zendesk_orgcheck import ensure_zendesk_organization
@@ -564,9 +560,6 @@ urlpatterns = [
     path("api/", include(router.urls)),
     # The assistant was built at /v1/ from the start, so it has no `api/` twin.
     path("v1/", include("products.insights_ai.backend.api.urls")),
-    # Override the tf_urls QRGeneratorView to use the cache-aware version (handles session race conditions)
-    path("account/two_factor/qrcode/", CacheAwareQRGeneratorView.as_view()),
-    path("", include(tf_urls)),
     opt_slash_path("api/user/prepare_toolbar_preloaded_flags", user.prepare_toolbar_preloaded_flags),
     opt_slash_path("api/user/get_toolbar_preloaded_flags", user.get_toolbar_preloaded_flags),
     opt_slash_path("api/user/toolbar_oauth_refresh", user.toolbar_oauth_refresh),
@@ -579,19 +572,7 @@ urlpatterns = [
     opt_slash_path("api/push_subscriptions", push_subscriptions),
     opt_slash_path("api/product_tours", product_tours),
     re_path(r"^external_surveys/(?P<survey_id>[^/]+)/?$", public_survey_page),
-    opt_slash_path("api/signup/precheck", signup.SignupEmailPrecheckViewset.as_view()),
-    opt_slash_path("api/signup/resend-invite", signup.SignupResendInviteViewset.as_view()),
-    opt_slash_path("api/signup", signup.SignupViewset.as_view()),
     opt_slash_path("api/social_signup", signup.SocialSignupViewset.as_view()),
-    path("api/signup/<str:invite_id>/", signup.InviteSignupViewset.as_view()),
-    path(
-        "api/reset/<str:user_uuid>/",
-        authentication.PasswordResetCompleteViewSet.as_view({"get": "retrieve", "post": "create"}),
-    ),
-    path(
-        "api/reset_2fa/<str:user_uuid>/",
-        two_factor_reset.TwoFactorResetViewSet.as_view({"get": "retrieve", "post": "create"}),
-    ),
     opt_slash_path(
         "api/public_insights_function_templates",
         insights_function_template.PublicInsightsFunctionTemplateViewSet.as_view({"get": "list"}),
@@ -816,35 +797,52 @@ if settings.TEST:
 urlpatterns.append(
     re_path(r"^canvas-artifacts/(?P<token>[^/]+)/(?P<artifact_path>.+)$", canvas_artifact, name="canvas-artifact")
 )
-urlpatterns.append(
-    opt_slash_path("sign-up", RedirectView.as_view(url="/signup", permanent=True, query_string=True)),
-)
 
 
 # Hanzo IAM is the only login, so /login goes straight to the OIDC handshake
 # rather than rendering the SPA's login scene. The scene exists to offer a
 # choice of providers; with one provider it renders a blank page while the
 # bundle loads and then redirects anyway.
-def _login_oidc_redirect(request: HttpRequest) -> HttpResponseRedirect:
+def _login_oidc_redirect(request: HttpRequest) -> HttpResponse:
+    """Bare `/login` is the handshake itself, unless it carries an error to show.
+
+    `sso_login` reports a failed handshake by redirecting back to
+    `/login?error_code=...`. Sending that straight on to `/login/oidc/` retries
+    the failure that produced it, so the browser loops between the two paths and
+    never reaches the SPA's error copy. Rendering the scene instead terminates
+    the round trip on the message.
+    """
+    if request.GET.get("error_code"):
+        return home(request)
     next_url = request.GET.get("next", "/")
-    return HttpResponseRedirect(f"/login/oidc/?next={next_url}")
+    return HttpResponseRedirect("/login/oidc/?{}".format(urlencode({"next": next_url})))
 
 
 urlpatterns.append(path("login", _login_oidc_redirect))
 
+
+def _invite_signup_redirect(request: HttpRequest, invite_id: str) -> HttpResponse:
+    """An invite link is a handshake that carries the invite, for the same reason `/login` is.
+
+    `invite_id` is in `SOCIAL_AUTH_FIELDS_STORED_IN_SESSION`, so naming it here puts
+    it in the session for `process_social_signup` to read on the way back. Sending the
+    invitee to `/login` instead would drop it — only `next` survives that hop — and they
+    would be provisioned into a new organization rather than the one that invited them.
+    """
+    return HttpResponseRedirect("/login/oidc/?{}".format(urlencode({"invite_id": invite_id})))
+
+
+urlpatterns.append(re_path(r"^signup/(?P<invite_id>[^/]+)/?$", _invite_signup_redirect))
+
 # Routes added individually to remove login requirement
 frontend_unauthenticated_routes = [
     "preflight",
-    "signup",
-    r"signup\/[A-Za-z0-9\-]*",
-    "reset",
     "organization/billing/subscribed",
     "organization/confirm-creation",
     "login",
     "unsubscribe",
     # Public bridge for desktop-app canvas share links — deep-links into Insights Desktop.
     r"code/canvas/[^/]+/[^/]+",
-    "verify_email",
     r"agentic/account-mismatch",
     # OAuth redirect target when logging the local frontend into a remote cloud region;
     # the SPA handles the code→token exchange client-side, so it must load without auth.

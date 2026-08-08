@@ -1,29 +1,49 @@
-import { useActions, useValues } from 'kea'
-import { useEffect } from 'react'
+import { useValues } from 'kea'
+import { router } from 'kea-router'
 
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { passkeyLogic } from 'scenes/authentication/shared/passkeyLogic'
+import { Button } from '@hanzo/elements'
+
+import { BridgePage } from 'lib/components/BridgePage/BridgePage'
+import { Banner } from 'lib/elements/Banner'
 import { SceneExport } from 'scenes/sceneTypes'
+import { urls } from 'scenes/urls'
 
-import { authFlowVariantRegistry } from '../authFlowVariantRegistry'
-import { resolveAuthFlowVariant } from '../authFlowVariants'
-import { loginLogic } from './loginLogic'
+import { ERROR_MESSAGES } from '../shared/loginErrorMessages'
+import { SupportModalButton } from '../shared/SupportModalButton'
 
 export const scene: SceneExport = {
     component: Login,
-    logic: loginLogic,
 }
 
+/**
+ * `/login` is the identity provider handshake: the server sends the browser straight on to it. This
+ * scene renders only when the handshake comes back with `error_code`, so the message has somewhere
+ * to land instead of bouncing into a retry loop.
+ */
 export function Login(): JSX.Element {
-    const { featureFlags } = useValues(featureFlagLogic)
-    const { startConditionalPasskeyLogin } = useActions(passkeyLogic)
-    const { Login: VariantLogin } = authFlowVariantRegistry[resolveAuthFlowVariant(featureFlags)]
+    const { searchParams } = useValues(router)
 
-    // WebKit (Safari/iOS) can't open the passkey modal without a user gesture, so we show
-    // passkeys via the email field's autofill instead. Other browsers keep the auto-modal.
-    useEffect(() => {
-        startConditionalPasskeyLogin()
-    }, [startConditionalPasskeyLogin])
-
-    return <VariantLogin />
+    return (
+        <BridgePage view="login" footer={<SupportModalButton />}>
+            <div className="deprecated-space-y-4">
+                <h2>Could not sign you in</h2>
+                <Banner type="error">
+                    {ERROR_MESSAGES[searchParams.error_code] ?? 'Sign in failed. Please try again.'}
+                </Banner>
+                <Button
+                    type="primary"
+                    fullWidth
+                    center
+                    size="large"
+                    to={urls.login()}
+                    disableClientSideRouting
+                    data-attr="login-retry"
+                >
+                    Try again
+                </Button>
+            </div>
+        </BridgePage>
+    )
 }
+
+export default Login

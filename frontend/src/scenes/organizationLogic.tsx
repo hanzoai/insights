@@ -1,11 +1,10 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import type { LocationChangedPayload } from 'kea-router/lib/types'
-import insights from 'insights-js'
 
 import api, { ApiConfig, ApiError } from 'lib/api'
-import { timeSensitiveAuthenticationLogic } from 'lib/components/TimeSensitiveAuthentication/timeSensitiveAuthenticationLogic'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { toast } from 'lib/elements/Toast/Toast'
@@ -238,16 +237,11 @@ export const organizationLogic = kea<organizationLogicType>([
                         return null
                     }
                 },
-                createOrganization: async (name: string) => {
-                    await timeSensitiveAuthenticationLogic.findMounted()?.asyncActions.checkReauthentication()
-                    return await api.create('api/organizations/', { name })
-                },
+                createOrganization: async (name: string) => await api.create('api/organizations/', { name }),
                 updateOrganization: async (payload: OrganizationUpdatePayload) => {
                     if (!values.currentOrganization) {
                         throw new Error('Current organization has not been loaded yet.')
                     }
-                    // Check if re-authentication is required, if so, await its completion (or failure)
-                    await timeSensitiveAuthenticationLogic.findMounted()?.asyncActions.checkReauthentication()
                     const updatedOrganization = await api.update(
                         `api/organizations/${values.currentOrganization.id}`,
                         payload
