@@ -25,7 +25,6 @@ import type { ActionType } from '../../types'
 import { generatePiiMaskingCSS } from './piiMaskingStyles'
 
 const MARGIN = 2
-const HEDGEFN_OFFSET = 80
 
 const PII_MASKING_STYLESHEET_ID = 'insights-pii-masking-styles'
 
