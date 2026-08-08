@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from typing import Any
-from uuid import uuid4
 
 import structlog
 from temporalio import activity
@@ -16,18 +15,8 @@ from insights.insightsql.query import execute_insightsql_query
 from insights.datastore.query_tagging import Feature, Product, tags_context
 from insights.models.team import Team
 from insights.sync import database_sync_to_async
-from insights.temporal.ai_observability.evaluation_clustering.constants import (
-    AI_OBSERVABILITY_EVALUATION_DOCUMENT_ID_JOB_DELIMITER,
-    AI_OBSERVABILITY_EVALUATION_DOCUMENT_TYPE,
-    AI_OBSERVABILITY_EVALUATION_EMBEDDING_MODEL,
-    AI_OBSERVABILITY_EVALUATION_JOB_ID_METADATA_KEY,
-    AI_OBSERVABILITY_EVALUATION_RENDERING,
-)
 from insights.temporal.ai_observability.evaluation_clustering.models import SamplerActivityInputs, SamplerActivityResult
 from insights.temporal.common.heartbeat import Heartbeater
-
-from ee.hogai.llm_traces_summaries.constants import LLM_TRACES_SUMMARIES_PRODUCT
-from ee.hogai.llm_traces_summaries.tools.embed_summaries import LLMTracesSummarizerEmbedder
 
 logger = structlog.get_logger(__name__)
 
@@ -166,57 +155,15 @@ def _sample_and_embed_sync(inputs: SamplerActivityInputs) -> SamplerActivityResu
         )
         return SamplerActivityResult(team_id=team.id, job_id=inputs.job_id, sampled=0, embedded=0)
 
-    # `rendering` stays a fixed low-cardinality enum (the render mode). The job id that scopes
-    # Stage B's read is carried in the embedding `metadata` instead — see the column-cardinality
-    # note on AI_OBSERVABILITY_EVALUATION_RENDERING.
-    rendering = AI_OBSERVABILITY_EVALUATION_RENDERING
-    metadata = {AI_OBSERVABILITY_EVALUATION_JOB_ID_METADATA_KEY: inputs.job_id}
-    # Use the small (1536-dim) model — see AI_OBSERVABILITY_EVALUATION_EMBEDDING_MODEL in constants.py.
-    # The lazy import keeps EmbeddingModelName out of the module top-level (avoids pulling
-    # insights.schema into the workflow-side graph via the activity module).
-    from insights.schema import EmbeddingModelName
-
-    embedder = LLMTracesSummarizerEmbedder(
-        team=team,
-        embedding_model_name=EmbeddingModelName(AI_OBSERVABILITY_EVALUATION_EMBEDDING_MODEL),
-    )
-
-    # Enrich the composed text with each evaluator's description (from the Evaluation
-    # model) so the embedding picks up on rubric/intent, not just the emitted reasoning.
-    # Batched to a single Django query per run on the unique evaluator ids we sampled.
-    descriptions_by_id = _fetch_evaluation_descriptions(
-        team_id=team.id,
-        evaluation_ids=[row[5] for row in rows if row[5]],
-    )
-
+    # Sampling only. Embedding these documents used to run here through an ee/ helper
+    # this fork does not carry, so the whole module failed to import and took every
+    # process that loads the temporal graph down with it — the web pods included.
+    # Nothing was lost by removing it: it could never have run here.
+    #
+    # The embeddings themselves belong on the gateway (/v1/embeddings), not in a
+    # Python helper beside the sampler, so Stage B stays empty until that call is
+    # wired. embedded is 0 rather than len(rows) so the count keeps telling the truth.
     embedded = 0
-    for row in rows:
-        event_uuid = row[0]
-        eval_id = row[5]
-        content = _compose_evaluation_text(
-            name=row[1],
-            result=row[2],
-            applicable=row[3],
-            reasoning=row[4],
-            description=descriptions_by_id.get(eval_id),
-        )
-        # Scope document_id per (event, job): the job id is appended to the event uuid so two jobs
-        # that sample the same event on the same day don't share a ReplacingMergeTree key and
-        # collapse, which would drop a job's embeddings (see the delimiter note in constants).
-        # Stage B strips it back to the bare uuid. Still idempotent per job: the same job re-running
-        # the same window lands the same row.
-        document_id = (
-            f"{event_uuid or str(uuid4())}{AI_OBSERVABILITY_EVALUATION_DOCUMENT_ID_JOB_DELIMITER}{inputs.job_id}"
-        )
-        embedder.embed_document(
-            content=content,
-            document_id=document_id,
-            document_type=AI_OBSERVABILITY_EVALUATION_DOCUMENT_TYPE,
-            rendering=rendering,
-            product=LLM_TRACES_SUMMARIES_PRODUCT,
-            metadata=metadata,
-        )
-        embedded += 1
 
     logger.info(
         "eval_sampler_embedded",
