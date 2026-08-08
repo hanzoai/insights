@@ -38,8 +38,8 @@ import {
 import { earlyAccessFeaturesLogic } from './earlyAccessFeaturesLogic'
 import { GAPromotionDialogContent } from './GAPromotionDialogContent'
 
-/** Insights's own dogfooding project on US cloud — mirrors POSTFN_TEAM_ID in the backend. */
-export const POSTFN_TEAM_ID = 2
+/** Insights's own dogfooding project on US cloud — mirrors INSIGHTS_TEAM_ID in the backend. */
+export const INSIGHTS_TEAM_ID = 2
 
 export const NEW_EARLY_ACCESS_FEATURE: NewEarlyAccessFeatureType = {
     name: '',
@@ -334,7 +334,7 @@ export const earlyAccessFeatureLogic = kea<earlyAccessFeatureLogicType>([
                     description:
                         props.id === 'new' &&
                         values.preflight?.region?.toUpperCase() === Region.US &&
-                        values.currentTeamId === POSTFN_TEAM_ID &&
+                        values.currentTeamId === INSIGHTS_TEAM_ID &&
                         !description?.trim()
                             ? 'A description is required'
                             : undefined,
@@ -582,9 +582,7 @@ export const earlyAccessFeatureLogic = kea<earlyAccessFeatureLogicType>([
         deleteEarlyAccessFeature: async ({ earlyAccessFeatureId }) => {
             try {
                 await api.earlyAccessFeatures.delete(earlyAccessFeatureId)
-                toast.info(
-                    'Early access feature deleted. Remember to delete corresponding feature flag if necessary'
-                )
+                toast.info('Early access feature deleted. Remember to delete corresponding feature flag if necessary')
                 earlyAccessFeaturesLogic
                     .findMounted()
                     ?.actions.loadEarlyAccessFeaturesSuccess(
