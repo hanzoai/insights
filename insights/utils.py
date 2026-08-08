@@ -472,6 +472,41 @@ def _read_preload_manifest(manifest_path: str, include_authenticated_shell: bool
         return ("", (), "")
 
 
+def insights_js_config() -> dict:
+    """Which key insights-js reports this instance's own usage with, and where it sends it.
+
+    One place decides it because two surfaces ask: the app shell, and the signed-out
+    landing page at `/`. A second copy drifts, and the surface holding the stale copy
+    goes quiet without anything failing.
+
+    With SELF_CAPTURE off there is no key and no tag renders. That is the honest
+    reading of the setting — the alternative, pointing a token at some other instance,
+    is how this app spent its life reporting to a host that answers 404.
+    """
+    if settings.E2E_TESTING:
+        return {
+            "js_insights_api_key": "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO",
+            "js_insights_host": "https://internal-j.hanzo.ai",
+            "js_insights_ui_host": "https://us.hanzo.ai",
+        }
+
+    if settings.SELF_CAPTURE:
+        # insights-js uses this token to evaluate Insights's own gating flags, so it must point at the
+        # team those flags are synced to — the dogfood-flags team (first team by PK), the same team
+        # the server-side bootstrap evaluates against via _build_flag_provider(). Do NOT use the
+        # self-capture team here (hanzo_insights.api_key = most-recently-active user's current_team):
+        # it drifts onto demo teams that hold no internal flags, so flags load from the bootstrap and
+        # then vanish the moment insights-js reloads them against that team.
+        dogfood_team = resolve_dogfood_flags_team()
+        if dogfood_team is not None:
+            # Empty host becomes location.origin in the frontend.
+            return {"js_insights_api_key": dogfood_team.api_token, "js_insights_host": ""}
+        if hanzo_insights.api_key:
+            return {"js_insights_api_key": hanzo_insights.api_key, "js_insights_host": ""}
+
+    return {}
+
+
 @tracer.start_as_current_span("template.context")
 def get_context_for_template(
     template_name: str,
@@ -526,28 +561,7 @@ def _build_template_context(
 
     if settings.E2E_TESTING:
         context["e2e_testing"] = True
-        context["js_insights_api_key"] = "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
-        context["js_insights_host"] = "https://internal-j.hanzo.ai"
-        context["js_insights_ui_host"] = "https://us.hanzo.ai"
-
-    elif settings.SELF_CAPTURE:
-        # insights-js uses this token to evaluate Insights's own gating flags, so it must point at the
-        # team those flags are synced to — the dogfood-flags team (first team by PK), the same team
-        # the server-side bootstrap evaluates against via _build_flag_provider(). Do NOT use the
-        # self-capture team here (hanzo_insights.api_key = most-recently-active user's current_team):
-        # it drifts onto demo teams that hold no internal flags, so flags load from the bootstrap and
-        # then vanish the moment insights-js reloads them against that team.
-        dogfood_team = resolve_dogfood_flags_team()
-        if dogfood_team is not None:
-            context["js_insights_api_key"] = dogfood_team.api_token
-            context["js_insights_host"] = ""  # Becomes location.origin in the frontend
-        elif hanzo_insights.api_key:
-            context["js_insights_api_key"] = hanzo_insights.api_key
-            context["js_insights_host"] = ""  # Becomes location.origin in the frontend
-    else:
-        context["js_insights_api_key"] = "sTMFPsFhdP1Ssg"
-        context["js_insights_host"] = "https://internal-j.hanzo.ai"
-        context["js_insights_ui_host"] = "https://us.hanzo.ai"
+    context.update(insights_js_config())
 
     context["js_capture_time_to_see_data"] = settings.CAPTURE_TIME_TO_SEE_DATA
     context["js_url"] = get_js_url(request)

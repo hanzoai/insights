@@ -1,5 +1,6 @@
-from django.test import Client
+from django.test import Client, override_settings
 
+from insights.models import Team
 from insights.test.base import APIBaseTest
 
 
@@ -35,6 +36,23 @@ class TestLandingPage(APIBaseTest):
         body = Client().get("/").content.decode()
         for host in ("fonts.googleapis.com", "fonts.gstatic.com", "cdn.jsdelivr.net", "unpkg.com", "cloudflare.com"):
             assert host not in body, f"third-party asset host {host} would be blocked in prod"
+
+    @override_settings(SELF_CAPTURE=True, E2E_TESTING=False, OPT_OUT_CAPTURE=False)
+    def test_landing_reports_its_own_traffic(self):
+        """The product's front door went unmeasured while it measured every other
+        surface we run — and a page that records nothing looks exactly like a page
+        that records, which is why this asserts the key and not just the script."""
+        body = Client().get("/").content.decode()
+        assert "array.js" in body, "the landing page loads no analytics library"
+        assert Team.objects.order_by("pk").first().api_token in body
+
+    @override_settings(SELF_CAPTURE=False, E2E_TESTING=False, OPT_OUT_CAPTURE=False)
+    def test_landing_carries_no_tag_when_capture_is_off(self):
+        """Off means silent, not 'report somewhere else' — the old fallback aimed a
+        token inherited from upstream at a host that answers 404."""
+        body = Client().get("/").content.decode()
+        assert "array.js" not in body
+        assert "insights.init(" not in body
 
     def test_signed_in_root_still_serves_the_app(self):
         response = self.client.get("/")
