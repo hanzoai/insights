@@ -48,6 +48,7 @@ from insights.utils import (
     get_default_event_name,
     get_dogfood_flags_team_id,
     get_has_person_email,
+    get_instance_available_sso_providers,
     get_ip_address,
     get_js_url,
     get_self_capture_team_id,
@@ -1481,3 +1482,26 @@ class TestReadPreloadManifest(SimpleTestCase):
         path = self._write_manifest(content)
 
         assert _read_preload_manifest(path, include_authenticated_shell=True) == ("", (), "")
+
+
+class TestAvailableSSOProviders(SimpleTestCase):
+    """`/login` rejects any backend `get_instance_available_sso_providers` omits.
+
+    oidc is the only backend AUTHENTICATION_BACKENDS wires, so omitting it took
+    logging in down entirely while the site kept serving — the failure surfaced
+    as `?error_code=invalid_sso_provider`, which names the map, not the IdP.
+    """
+
+    @override_settings(
+        SOCIAL_AUTH_OIDC_KEY="k", SOCIAL_AUTH_OIDC_SECRET="s", SOCIAL_AUTH_OIDC_OIDC_ENDPOINT="https://hanzo.id"
+    )
+    def test_oidc_is_available_when_configured(self):
+        assert get_instance_available_sso_providers().get("oidc") is True
+
+    @override_settings(SOCIAL_AUTH_OIDC_KEY=None, SOCIAL_AUTH_OIDC_SECRET=None, SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=None)
+    def test_oidc_is_unavailable_when_unconfigured(self):
+        assert get_instance_available_sso_providers().get("oidc") is False
+
+    def test_oidc_is_always_named(self):
+        """Present as a key either way — sso_login rejects on absence, not on False."""
+        assert "oidc" in get_instance_available_sso_providers()
