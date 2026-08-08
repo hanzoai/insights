@@ -258,6 +258,7 @@
     --color-neutral-cool-700: hsl(0deg 0% 30%);
     --color-neutral-cool-750: hsl(0deg 0% 25%);
     --color-neutral-cool-800: hsl(0deg 0% 20%);
+
     // #212121, the raised step. This is the scene canvas (canvasBackground scenes
     // resolve --scene-layout-background to surface-primary), the popover and the
     // border, so moving it moves the whole raised layer at once -- one value, not
@@ -368,7 +369,7 @@
     --color-brand-secondary-lightness: var(--color-insights-brand-blue-lightness);
 
     // AI
-    --color-ai: oklch(0.67 0 0);
+    --color-ai: oklch(0.67 0 0deg);
 
     // Accent colors (accents can be changed to change the brand colors)
     // Used for interactive elements and highlights, inputs, toggles, charts, etc.
@@ -564,7 +565,7 @@
     // //////////////////////////////////////////////////////////
     --brand-blue: #555;
     --brand-red: #333;
-    --brand-yellow: #888888;
+    --brand-yellow: #888;
     --brand-key: #000;
 
     // Shadows
@@ -796,10 +797,10 @@
     --color-text-secondary-3000-light: rgb(17 17 17 / 70%);
     --muted-3000-light: rgb(17 17 17 / 60%);
     --trace-3000-light: rgb(17 17 17 / 25%);
-    --primary-3000-light: #111111;
+    --primary-3000-light: #111;
     --primary-highlight-light: rgb(17 17 17 / 10%);
     --primary-3000-hover-light: #333;
-    --primary-3000-active-light: #000000;
+    --primary-3000-active-light: #000;
     --secondary-3000-light: rgb(200 200 200 / 60%);
     --secondary-3000-hover-light: #ccc;
     --color-accent-3000-light: #ebebeb;
@@ -811,7 +812,7 @@
     --link-3000-light: #333;
     --primary-3000-frame-bg-light: #333;
     --primary-3000-button-bg-light: #fff;
-    --primary-3000-button-border-light: #888888;
+    --primary-3000-button-border-light: #888;
     --primary-3000-button-border-hover-light: #555;
     --secondary-3000-frame-bg-light: #e0e0e0;
     --secondary-3000-button-bg-light: #f5f5f5;
@@ -820,6 +821,7 @@
     --danger-3000-frame-bg-light: #33333380;
     --danger-3000-button-border-light: #333;
     --danger-3000-button-border-hover-light: #333;
+
     // Flat in both themes — see --shadow-elevation-3000 above.
     --shadow-elevation-3000-light: none;
     --shadow-elevation-3000-dark: none;
@@ -827,7 +829,7 @@
     --color-text-secondary-3000-dark: rgb(255 255 255 / 70%);
     --muted-3000-dark: rgb(255 255 255 / 50%);
     --trace-3000-dark: rgb(255 255 255 / 25%);
-    --primary-3000-dark: #ffffff;
+    --primary-3000-dark: #fff;
     --primary-highlight-dark: rgb(255 255 255 / 10%);
     --primary-3000-hover-dark: #e0e0e0;
     --primary-3000-active-dark: #c0c0c0;
@@ -835,6 +837,7 @@
     --secondary-3000-dark: #1f1f1f;
     --secondary-3000-hover-dark: #5d5d5d;
     --color-accent-3000-dark: #0d0d0d;
+
     // True black ground, per the brand register — panels layer up from it
     // (#0d0d0d raised, #171717 controls) rather than the app sitting on grey.
     --color-bg-3000-dark: #000;
@@ -842,15 +845,16 @@
     --border-bold-3000-dark: #3f4046;
     --glass-bg-3000-dark: #212121e6; // monochrome: was #24262a99, a blue cast
     --glass-border-3000-dark: var(--border-3000-dark);
-    --link-3000-dark: #ffffff;
+    --link-3000-dark: #fff;
+
     // The primary action is WHITE — the one high-contrast surface in a black UI.
     // It was `var(--color-accent)`, a 20%-lightness grey, under a label that
     // resolves to --text-3000-light (near-black): dark-on-dark, which is why the
     // Save button read as a muddy slab. White ground + the dark label is the
     // intended pairing. The accent stays reserved for links/active/focus.
-    --primary-3000-frame-bg-dark: #ffffff;
-    --primary-3000-button-bg-dark: #ffffff;
-    --primary-3000-button-border-dark: #ffffff;
+    --primary-3000-frame-bg-dark: #fff;
+    --primary-3000-button-bg-dark: #fff;
+    --primary-3000-button-border-dark: #fff;
     --primary-3000-button-border-hover-dark: #e0e0e0;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
@@ -907,7 +911,7 @@
     --color-brand-primary-lightness: var(--color-insights-brand-yellow-lightness);
 
     // AI colors (dark mode)
-    --color-ai: oklch(0.69 0 0);
+    --color-ai: oklch(0.69 0 0deg);
 
     // Accent colors (dark mode)
     // //////////////////////////////////////////////////////////
@@ -974,6 +978,7 @@
     // Backgrounds (dark mode)
     // //////////////////////////////////////////////////////////
     --color-bg-primary: #000;
+
     // The RAISED content panel — the one surface the eye reads as "the page".
     // #262626, a step ABOVE the #212121 it sits on, which is itself a step above
     // the black ground. It was pinned straight to neutral-cool-850 (#212121), so
@@ -981,6 +986,7 @@
     // no edge: the ladder existed in the tokens but not on screen.
     --color-bg-surface-primary: #262626;
     --color-bg-surface-secondary: var(--color-neutral-cool-850);
+
     // TRUE BLACK, not the 8% neutral. tertiary is the CHROME layer -- the left nav
     // and the shell behind the tab strip both carry bg-surface-tertiary -- and chrome
     // sits AT the ground, not above it. At 8% it read as a grey slab framing the app,
@@ -1028,6 +1034,7 @@
     --color-bg-fill-button-tertiary-hover-inverse: var(--color-bg-fill-highlight-inverse-75);
     --color-bg-fill-button-tertiary-active: var(--color-bg-fill-highlight-50);
     --color-bg-fill-button-tertiary-active-inverse: var(--color-bg-fill-highlight-inverse-50);
+
     // No fill. The org dropdown and the user chip are the same KIND of control --
     // an identity affordance in the chrome -- and only the org one carried a 10%
     // white wash, so two controls inches apart read as different components.
@@ -1103,6 +1110,7 @@
     --glass-bg-3000: var(--glass-bg-3000-dark);
     --glass-border-3000: var(--glass-border-3000-dark);
     --color-bg-light: var(--color-accent-3000);
+
     // The rows sit ON the panel, so they are the next step UP: #2e2e2e above the
     // panel's #262626, above #212121, above the black ground. It read #232429 —
     // DARKER than the panel it sits on, which inverted the ladder and made the
