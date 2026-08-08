@@ -59,8 +59,13 @@ COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
 COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
 COPY ./common/siphash/ ./common/siphash/
 COPY ./common/insights-node/ ./common/insights-node/
-COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/tsconfig.build.json ./nodejs/
-COPY ./nodejs/vendor/ ./nodejs/vendor/
+# Only the files this tree actually has. `tsconfig.build.json` and `vendor/` are
+# upstream paths that did not survive the plugin-server -> nodejs rename, and a
+# COPY of a source that is not in the context fails the whole build with
+# "failed to compute cache key" — which names a checksum, not a missing file, so
+# it reads like a cache problem. The compile is `tsc -b` off tsconfig.json, and
+# nothing in package.json, .pnpmfile.cjs or pnpm-workspace.yaml mentions vendor.
+COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
 # Use system librdkafka from Confluent (2.10.1) instead of bundled version
@@ -161,4 +166,5 @@ EXPOSE 8001
 
 # Default command: run the nodejs services
 CMD ["node", "nodejs/dist/index.js"]
+
 
