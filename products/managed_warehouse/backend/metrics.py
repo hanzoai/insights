@@ -7,9 +7,11 @@ import hanzo_insights
 from temporalio import workflow
 
 if TYPE_CHECKING:
-    # Only ever a type here. The SDK we ship has no metrics_capture, so importing
-    # it for real fails at module import, and this module is reached from the
-    # temporal graph during Django startup — an annotation took the web pods down.
+    # Only ever a type here, so it stays off the startup path: this module is
+    # reached from the temporal graph during Django setup, and an annotation
+    # should not decide whether the web pods boot. hanzo_insights 7.9.8 does ship
+    # metrics_capture — a real import would resolve now — but a type has no
+    # reason to be one.
     from hanzo_insights.metrics_capture import InsightsMetrics
 
 MetricAttributes = Mapping[str, str | int | float | bool]
