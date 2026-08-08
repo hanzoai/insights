@@ -31,7 +31,7 @@ import {
 import { Badge, Spinner } from '@hanzo/elements'
 
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
-import { IconFlare, IconMenu } from 'lib/elements/icons'
+import { IconMenu } from 'lib/elements/icons'
 import { Menu, MenuItem, MenuItems } from 'lib/elements/Menu'
 import { Link } from 'lib/elements/Link'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'

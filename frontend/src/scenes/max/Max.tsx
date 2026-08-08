@@ -13,7 +13,6 @@ import {
 } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'

@@ -12,7 +12,6 @@ import { urls } from 'scenes/urls'
 
 import { Breadcrumb } from '~/types'
 
-import type { RecordingSnapshot } from '../../../../../common/replay-shared/src/types'
 import type { FeatureFlagsSet } from '../../../lib/logic/featureFlagLogic'
 import type { PersonType } from '../../../types'
 import {
