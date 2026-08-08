@@ -49,7 +49,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
-COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json .pnpmfile.cjs ./
+# No .pnpmfile.cjs — this fork has none, and a COPY of a source the context
+# lacks fails the whole build.
+COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY ./bin/turbo ./bin/turbo
 COPY ./patches ./patches
 COPY ./rust ./rust
@@ -57,14 +59,16 @@ COPY ./common/esbuilder/ ./common/esbuilder/
 COPY ./common/plugin_transpiler/ ./common/plugin_transpiler/
 COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
 COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
-COPY ./common/siphash/ ./common/siphash/
+# No common/siphash: pnpm-workspace.yaml resolves `@hanzo/siphash` to the
+# registry package @posthog/siphash@1.1.1, so there is no local directory to
+# copy and never was in this fork.
 COPY ./common/insights-node/ ./common/insights-node/
 # Only the files this tree actually has. `tsconfig.build.json` and `vendor/` are
 # upstream paths that did not survive the plugin-server -> nodejs rename, and a
 # COPY of a source that is not in the context fails the whole build with
 # "failed to compute cache key" — which names a checksum, not a missing file, so
 # it reads like a cache problem. The compile is `tsc -b` off tsconfig.json, and
-# nothing in package.json, .pnpmfile.cjs or pnpm-workspace.yaml mentions vendor.
+# nothing in package.json or pnpm-workspace.yaml mentions vendor.
 COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
@@ -148,8 +152,6 @@ COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/in
 COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/package.json /code/common/insights-node/package.json
 COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/dist /code/common/plugin-scaffold/dist
 COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/package.json /code/common/plugin-scaffold/package.json
-COPY --from=nodejs-build --chown=insights:insights /code/common/siphash/lib /code/common/siphash/lib
-COPY --from=nodejs-build --chown=insights:insights /code/common/siphash/package.json /code/common/siphash/package.json
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/dist /code/nodejs/dist
 COPY --from=nodejs-build --chown=insights:insights /code/node_modules /code/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/node_modules /code/nodejs/node_modules
@@ -166,5 +168,6 @@ EXPOSE 8001
 
 # Default command: run the nodejs services
 CMD ["node", "nodejs/dist/index.js"]
+
 
 
