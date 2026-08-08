@@ -85,13 +85,13 @@ Touching UI code without a visible change is common, and the mandate has to be d
 Keep diagrams simple. A syntax error renders as an error block. Pick `TD` for tall pipelines, `LR` for wide paths. Mermaid cannot read CSS vars, so use the hex directly, and pair every `fill` with a text `color` so nodes stay legible in GitHub light and dark.
 
 ```text
-classDef phBlue fill:#1d4aff,stroke:#1d4aff,color:#fff;
-classDef phRed fill:#f54e00,stroke:#f54e00,color:#fff;
-classDef phYellow fill:#f9bd2b,stroke:#f9bd2b,color:#000;
-classDef phGray fill:#e5e7eb,stroke:#c7ccd1,color:#000;
+classDef primary fill:#333,stroke:#333,color:#fff;
+classDef external fill:#8f8f8f,stroke:#8f8f8f,color:#000;
+classDef terminal fill:#ccc,stroke:#ccc,color:#000;
+classDef data fill:#e5e7eb,stroke:#c7ccd1,color:#000;
 ```
 
-Assign by role (`class NodeA,NodeB phBlue;`): `phBlue` agents and primary paths, `phRed` APIs and external systems, `phYellow` entry and exit, `phGray` data and artifacts. Shape by kind: `{{hexagon}}` agents, `[rect]` steps.
+Assign by role (`class NodeA,NodeB primary;`): `primary` agents and primary paths, `external` APIs and external systems, `terminal` entry and exit, `data` data and artifacts. Shape by kind: `{{hexagon}}` agents, `[rect]` steps.
 
 ## Pass 3: cut
 

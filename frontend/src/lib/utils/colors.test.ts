@@ -11,12 +11,12 @@ describe('colors utils', () => {
 
     describe('toOpaqueHex()', () => {
         it.each([
-            ['rgba(29,74,255,0.5)', '#1d4aff'],
-            ['rgba(29, 74, 255, 0.5)', '#1d4aff'],
-            ['rgb(29,74,255)', '#1d4aff'],
+            ['rgba(61,61,61,0.5)', '#3d3d3d'],
+            ['rgba(61, 61, 61, 0.5)', '#3d3d3d'],
+            ['rgb(61,61,61)', '#3d3d3d'],
             ['rgba(0,0,0,0.5)', '#000000'],
-            ['#1d4aff80', '#1d4aff'],
-            ['#1d4aff', '#1d4aff'],
+            ['#3d3d3d80', '#3d3d3d'],
+            ['#3d3d3d', '#3d3d3d'],
             ['var(--data-color-1)', 'var(--data-color-1)'],
         ])('strips alpha from %s -> %s', (input, expected) => {
             expect(toOpaqueHex(input)).toEqual(expected)

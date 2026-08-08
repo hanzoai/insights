@@ -11,8 +11,8 @@ export function ElementHighlight({ rect, isSelected, stepNumber }: ElementHighli
     const padding = 4
     const borderWidth = 2
 
-    const color = isSelected ? '#1d4aff' : '#f97316'
-    const colorLight = isSelected ? 'rgba(29, 74, 255, 0.1)' : 'rgba(249, 115, 22, 0.1)'
+    const color = isSelected ? '#000' : '#f97316'
+    const colorLight = isSelected ? 'rgba(0, 0, 0, 0.1)' : 'rgba(249, 115, 22, 0.1)'
 
     return (
         <>
@@ -33,7 +33,7 @@ export function ElementHighlight({ rect, isSelected, stepNumber }: ElementHighli
                 }}
             />
 
-            {/* Step number badge (if provided) - always Insights blue */}
+            {/* Step number badge (if provided) - always ink */}
             {stepNumber !== undefined && (
                 <div
                     className="fixed pointer-events-none flex items-center justify-center font-bold text-white toolbar-animate-pop"
@@ -45,7 +45,7 @@ export function ElementHighlight({ rect, isSelected, stepNumber }: ElementHighli
                         height: 24,
                         fontSize: 12,
                         borderRadius: '50%',
-                        background: '#1d4aff',
+                        background: '#000',
                         boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3), 0 0 0 2px white',
                         zIndex: 2147483016,
                     }}

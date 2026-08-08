@@ -181,7 +181,7 @@ const style = (inputs) => `
         -webkit-transform: translateX(26px);
         -ms-transform: translateX(26px);
         transform: translateX(26px);
-        background-color: #1d4aff;
+        background-color: #333333;
     }
 
     /* Rounded sliders */
@@ -206,7 +206,7 @@ const style = (inputs) => `
 
     .loader {
         border: 8px solid #00000026; /* Light grey */
-        border-top: 8px solid #1d4aff; /* Blue */
+        border-top: 8px solid #333333; /* Dark grey */
         border-radius: 50%;
         width: 60px;
         height: 60px;
@@ -310,7 +310,7 @@ export function onLoad({ inputs, insights }) {
 
     Object.assign(buttonElement.style, {
         color: inputs.buttonColor || 'white',
-        background: inputs.buttonBackground || '#1d4aff',
+        background: inputs.buttonBackground || '#333333',
     })
 
     if (inputs.useButton === 'Yes') {

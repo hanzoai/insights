@@ -16,8 +16,8 @@ header a { color: #f7f7f7; font-size: 14px; text-decoration: none; }
 main { padding: 48px 32px; }
 h1 { font-size: 28px; margin-bottom: 12px; color: #111; }
 p { color: #4b4b52; margin-bottom: 28px; max-width: 480px; font-size: 15px; }
-#signup-cta { background: #f54e00; color: #fff; border: none; padding: 14px 28px; font-size: 16px; border-radius: 6px; }
-#docs-link { display: inline-block; margin-left: 20px; color: #f54e00; font-size: 16px; }
+#signup-cta { background: #2563eb; color: #fff; border: none; padding: 14px 28px; font-size: 16px; border-radius: 6px; }
+#docs-link { display: inline-block; margin-left: 20px; color: #2563eb; font-size: 16px; }
 </style></head><body>
 <header><a id="nav-home" href="/">Home</a><a id="nav-pricing" href="/pricing">Pricing</a><a id="nav-docs" href="/docs">Docs</a></header>
 <main><h1>Simple, usage-based pricing</h1>

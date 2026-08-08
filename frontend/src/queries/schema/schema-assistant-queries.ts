@@ -1735,7 +1735,7 @@ export interface AssistantDataVisualizationAxisDisplaySettings {
     trendLine?: boolean
     /** Custom label for this series, shown in the legend and tooltips instead of the column name. */
     label?: string
-    /** Custom color for this series as a hex string (e.g. `#1d4aff`). */
+    /** Custom color for this series as a hex string (e.g. `#3d3d3d`). */
     color?: string
 }
 

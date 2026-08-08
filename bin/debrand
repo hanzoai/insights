@@ -368,7 +368,10 @@ CONTENT_ALLOWLIST: dict[str, str] = {
     ),
     "LLM.md": (
         "States which upstream commit we last converged from. Naming the "
-        "upstream is the point of the sentence."
+        "upstream is the point of the sentence. It also records the brand "
+        "hues and the wordmark path data the marks check refuses, so the "
+        "next reader knows what those magic strings are; spelling them is "
+        "how the note earns its keep."
     ),
     "insights/management/commands/migrate_datastore.py": (
         "LEGACY_PACKAGE_NAMES reads historical rows already written to the "
@@ -999,6 +1002,111 @@ def check_mangled(root: str) -> int:
     return 1
 
 
+# --- marks --------------------------------------------------------------
+#
+# Everything above moves NAMES. A brand is also its geometry and its palette,
+# and neither of those is a name, so a rename pass walks straight past them:
+# `--check` was green while the upstream wordmark sat on both OAuth consent
+# screens drawn as vector paths, on the toolbar error page, on the 2FA
+# template, and inside frontend/src/index.html as a data URI that printed the
+# logo into every visitor's browser console. Nothing in any of those files
+# spelled the company. So the marks are refused directly, by what they are.
+
+# Ordered as the upstream sheet lists them: blue, orange, yellow.
+UPSTREAM_HUES = ("1d4aff", "f54e00", "f9bd2b")
+
+# The hue in any wrapper it is written in here: `#1d4aff`, `%231D4AFF` inside a
+# data URI, `bg-[#1d4aff]`, and the 8-digit `#1d4aff80` that carries an alpha.
+# Bounded by non-hex on both sides, so a checksum that happens to contain the
+# run is not a false failure -- lockfiles are full of 64-char hex.
+#
+# `%23` is the exception that has to be spelled out: it is an encoded `#`, and
+# it ENDS in a hex digit, so the plain bound rejects the one spelling the logo
+# actually shipped in -- percent-encoded inside a data URI, which is how it got
+# into frontend/src/index.html and into the Stripe app's promo banner.
+HUE_RE = re.compile(
+    r"(?:(?<=%23)|(?<![0-9a-f]))("
+    + "|".join(UPSTREAM_HUES)
+    + r")([0-9a-f]{2})?(?![0-9a-f])",
+    re.IGNORECASE,
+)
+
+# The same three colours written in decimal, which a hex grep cannot see. Not
+# hypothetical: the QA evidence annotator held `(245, 78, 0)` and `(29, 74,
+# 255)` as PIL tuples, and read as clean until someone converted them.
+
+
+def channels(h: str) -> tuple[int, int, int]:
+    return tuple(int(h[i : i + 2], 16) for i in (0, 2, 4))  # type: ignore[return-value]
+
+
+HUE_RGB_RE = re.compile(
+    "|".join(r"\b%d\s*,\s*%d\s*,\s*%d\b" % channels(h) for h in UPSTREAM_HUES)
+)
+
+# git grep speaks POSIX ERE -- no \b, no \s -- so the narrowing pattern is
+# spelled separately from the Python ones above and derived from the same
+# numbers, rather than kept in step by hand.
+GREP_PATTERN = "|".join(
+    UPSTREAM_HUES
+    + tuple(
+        "%d,[[:space:]]*%d,[[:space:]]*%d" % channels(h) for h in UPSTREAM_HUES
+    )
+)
+
+# Two segments of the upstream wordmark's path data. Coordinates identify the
+# artwork the way the fills do not: recolouring the wordmark to ink leaves it
+# the upstream wordmark, and a hue check alone would call that fixed.
+WORDMARK_SIGNATURES = ("M55.383 75.225", "m216.24 107.388")
+
+
+def check_marks(root: str) -> int:
+    """Refuse the upstream brand's palette and the geometry of its wordmark.
+
+    Two stages on purpose. `git grep` narrows 35k tracked files to a handful
+    using the index; the regexes then say precisely which token matched and
+    where, because a guard that only says "this file is dirty" makes the next
+    person grep for the answer themselves.
+    """
+    def candidates(*args: str) -> list[str]:
+        out = subprocess.run(
+            ["git", "grep", "-ilI", *args], cwd=root, capture_output=True, text=True
+        ).stdout.split()
+        return [p for p in out if p not in CONTENT_ALLOWLIST]
+
+    hits: list[tuple[str, int, str]] = []
+    for rel in sorted(set(candidates("-E", GREP_PATTERN))):
+        with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
+            for n, line in enumerate(fh, 1):
+                m = HUE_RE.search(line) or HUE_RGB_RE.search(line)
+                if m:
+                    hits.append((rel, n, m.group(0)))
+
+    marks: list[tuple[str, int, str]] = []
+    sig_args = [a for s in WORDMARK_SIGNATURES for a in ("-e", s)]
+    for rel in sorted(set(candidates("-F", *sig_args))):
+        with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
+            for n, line in enumerate(fh, 1):
+                for s in WORDMARK_SIGNATURES:
+                    if s.lower() in line.lower():
+                        marks.append((rel, n, s))
+
+    if hits:
+        print(f"FAIL: {len(hits)} lines carry an upstream brand hue")
+        print("    The mark is monochrome. Collapse decoration to ink -- prefer")
+        print("    `currentColor` so it tracks the theme -- and leave someone")
+        print("    else's product mark alone by naming it in CONTENT_ALLOWLIST.")
+        for rel, n, tok in hits[:20]:
+            print(f"    {rel}:{n}: {tok}")
+    if marks:
+        print(f"FAIL: {len(marks)} lines carry the upstream wordmark's path data")
+        print("    Recolouring it does not debrand it. Replace the artwork with")
+        print("    the mark in frontend/public/icons/safari-pinned-tab.svg.")
+        for rel, n, sig in marks[:20]:
+            print(f"    {rel}:{n}: {sig}")
+    return 1 if (hits or marks) else 0
+
+
 def check_license(root: str) -> int:
     """The licence must still carry the notice MIT obliges us to pass on.
 
@@ -1199,6 +1307,7 @@ def check(root: str) -> int:
     bad += check_workspace(root)
     bad += check_modules(root)
     bad += check_mangled(root)
+    bad += check_marks(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1

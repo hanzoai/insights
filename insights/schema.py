@@ -349,7 +349,7 @@ class AssistantDataVisualizationAxisDisplaySettings(BaseModel):
     )
     color: str | None = Field(
         default=None,
-        description="Custom color for this series as a hex string (e.g. `#1d4aff`).",
+        description="Custom color for this series as a hex string (e.g. `#3d3d3d`).",
     )
     displayType: DisplayType | None = Field(
         default=None,

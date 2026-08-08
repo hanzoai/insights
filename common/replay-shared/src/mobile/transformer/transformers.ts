@@ -681,7 +681,7 @@ function makeProgressElement(
 
 function makeToggleParts(wireframe: wireframeToggle, context: ConversionContext): serializedNodeWithId[] {
     const togglePosition = wireframe.checked ? 'right' : 'left'
-    const defaultColor = wireframe.checked ? '#1d4aff' : BACKGROUND
+    const defaultColor = wireframe.checked ? '#1d1f27' : BACKGROUND
     const sliderPartId = context.idSequence.next().value
     const handlePartId = context.idSequence.next().value
     return [

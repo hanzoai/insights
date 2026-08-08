@@ -25,7 +25,7 @@ export type DataColorTuple = readonly [light: string, dark?: string]
 
 /** Ordered categorical series palette. Index 0 → `--data-color-1`. */
 export const dataColors: readonly DataColorTuple[] = [
-    ['#1d4aff'],
+    ['#3d3d3d'],
     ['#621da6', '#7f26d9'],
     ['#42827e', '#3e7a76'],
     ['#ce0e74', '#bf0d6c'],

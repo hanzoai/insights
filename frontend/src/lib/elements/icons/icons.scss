@@ -19,7 +19,7 @@
 // to read at icon size on dark surfaces. The plain declarations double as the fallback for
 // browsers without light-dark().
 :root {
-    --insight-icon-blue: #1d4aff; // --data-color-1
+    --insight-icon-ink: #3d3d3d; // --data-color-1
     --insight-icon-purple: #7f26d9; // --data-color-2 (dark variant, the more vivid purple)
     --insight-icon-green: #42827e; // --data-color-3
     --insight-icon-lifecycle-returning: #388600; // --color-lifecycle-returning
@@ -29,7 +29,7 @@
 
 @supports (color: light-dark(#000, #fff)) {
     :root {
-        --insight-icon-blue: light-dark(#1d4aff, #5c7aff);
+        --insight-icon-ink: light-dark(#3d3d3d, #8a8a8a);
         --insight-icon-purple: light-dark(#7f26d9, #a56eff);
         --insight-icon-green: light-dark(#42827e, #58b5ad);
         --insight-icon-lifecycle-returning: light-dark(#388600, #7bbc4e);

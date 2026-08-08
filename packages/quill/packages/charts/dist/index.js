@@ -6032,7 +6032,7 @@ function Os({ onError: e, ...t }) {
 	});
 }
 function ks({ xLabels: e, yLabels: t, cells: r, theme: i, config: a, tooltip: s, onCellClick: c, onBrush: l, className: d, dataAttr: f, children: p }) {
-	let { colorScale: m = "log" } = a ?? {}, h = o(() => hn(a?.color || i.colors[0] || "#1d4aff"), [a?.color, i.colors]), g = o(() => t.map((t, n) => e.map((e, t) => r[n]?.[t] ?? 0)), [
+	let { colorScale: m = "log" } = a ?? {}, h = o(() => hn(a?.color || i.colors[0] || "#3d3d3d"), [a?.color, i.colors]), g = o(() => t.map((t, n) => e.map((e, t) => r[n]?.[t] ?? 0)), [
 		t,
 		e,
 		r
@@ -6727,7 +6727,7 @@ function Pc(e, t, n, { outerRadiusBoost: r, fillStyle: i }) {
 //#endregion
 //#region src/core/theme.ts
 var Fc = [
-	"#1d4aff",
+	"#3d3d3d",
 	"#621da6",
 	"#42827e",
 	"#ce0e74",
