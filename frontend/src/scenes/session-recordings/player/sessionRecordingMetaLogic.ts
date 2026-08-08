@@ -13,7 +13,6 @@ import { SessionRecordingId, SessionRecordingType } from '~/types'
 import type {
     AnnotationType,
     PersonType,
-    RecordingSnapshot,
     SessionRecordingSnapshotSource,
     TeamPublicType,
     TeamType,

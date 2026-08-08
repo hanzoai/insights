@@ -8,7 +8,6 @@ jest.mock('lib/api', () => ({
     default: { get: jest.fn().mockResolvedValue(null), update: jest.fn().mockResolvedValue(null) },
 }))
 
-import { expectLogic } from 'kea-test-utils'
 
 import { initKeaTests } from '~/test/init'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'

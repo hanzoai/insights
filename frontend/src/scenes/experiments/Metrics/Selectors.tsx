@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Input, Link, Select, SelectOption, SelectSection } from '@hanzo/elements'
+import { Input, Select, SelectOption, SelectSection } from '@hanzo/elements'
 import { IconInfo } from '@hanzo/icons'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
