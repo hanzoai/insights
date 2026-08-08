@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button, TextArea } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { ElementHighlight } from '~/toolbar/product-tours/ElementHighlight'
 
@@ -52,7 +52,7 @@ export function FieldNotesOverlay(): JSX.Element | null {
                         paddingBottom: 10,
                         borderRadius: 999,
                         backgroundColor: 'var(--primary-3000)',
-                        boxShadow: '0 4px 12px rgba(29, 74, 255, 0.3)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                         zIndex: 2147483020,
                         pointerEvents: 'auto',
                     }}

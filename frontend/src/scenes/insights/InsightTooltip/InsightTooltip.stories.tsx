@@ -31,7 +31,7 @@ const data = {
                 properties: {},
             },
             label: '$pageview',
-            color: '#1d4aff',
+            color: '#3d3d3d',
             count: 1,
         },
         {
@@ -157,7 +157,7 @@ export const Columns: Story = {
                     math_group_type_index: null,
                 },
                 label: '$pageview - Chrome',
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 count: 0,
                 filter: {
                     insight: InsightType.TRENDS,
@@ -248,7 +248,7 @@ export const LongNames: Story = {
                     math_group_type_index: null,
                 },
                 label: '$pageview - long',
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 count: 1234,
             },
             {
@@ -292,7 +292,7 @@ export const LongNames: Story = {
                     math_group_type_index: null,
                 },
                 label: '$pageview - long',
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 count: 789,
             },
             {
@@ -347,7 +347,7 @@ export const MathTags: Story = {
                     math_group_type_index: null,
                 },
                 label: '$pageview - Chrome',
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 count: 1234,
             },
             {
@@ -400,7 +400,7 @@ export const MathTagsAsRows: Story = {
                     math_group_type_index: null,
                 },
                 label: '$pageview',
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 count: 468,
             },
             {
@@ -453,7 +453,7 @@ export const MathTagsSingleSeries: Story = {
                     math_group_type_index: null,
                 },
                 label: '$pageview',
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 count: 1.54,
             },
         ] as any,

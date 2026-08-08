@@ -75,7 +75,7 @@ func (v *DetailView) buildLines() {
 	}
 
 	keyStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#1D4AFF", Dark: "#1D4AFF"}).
+		Foreground(lipgloss.Color("#8F8F8F")).
 		Bold(true)
 	valStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#1D1F27", Dark: "#EDEDEC"})
@@ -142,14 +142,14 @@ func (v *DetailView) View() string {
 
 	borderStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"}).
+		BorderForeground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"}).
 		Padding(1, 2).
 		Width(v.width - 4).
 		Height(v.height - 2)
 
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"})
 
 	ch := v.contentHeight()
 	end := v.scroll + ch

@@ -75,12 +75,12 @@
   - If the change alters a flow or topology (CI wiring, pipelines, state machines, request paths), include before/after mermaid diagrams as two separate `flowchart` blocks, before first. Pick `TD` (tall pipelines) or `LR` (wide paths). Keep them simple; a syntax error renders as an error block. Skip for trivial changes.
     - Brand the nodes with Insights colors: use the hex directly (mermaid can't read CSS vars), and pair every `fill` with a text `color` so nodes stay legible in GitHub light and dark.
       ```
-      classDef phBlue fill:#1d4aff,stroke:#1d4aff,color:#fff;
-      classDef phRed fill:#f54e00,stroke:#f54e00,color:#fff;
-      classDef phYellow fill:#f9bd2b,stroke:#f9bd2b,color:#000;
-      classDef phGray fill:#e5e7eb,stroke:#c7ccd1,color:#000;
+      classDef primary fill:#333,stroke:#333,color:#fff;
+      classDef external fill:#8f8f8f,stroke:#8f8f8f,color:#000;
+      classDef terminal fill:#ccc,stroke:#ccc,color:#000;
+      classDef data fill:#e5e7eb,stroke:#c7ccd1,color:#000;
       ```
-      Assign by role (`class NodeA,NodeB phBlue;`): `phBlue` agents/primary, `phRed` APIs/external, `phYellow` entry+exit, `phGray` data/artifacts. Shape by kind: `{{hexagon}}` agents, `[rect]` steps.
+      Assign by role (`class NodeA,NodeB primary;`): `primary` agents/primary, `external` APIs/external, `terminal` entry+exit, `data` data/artifacts. Shape by kind: `{{hexagon}}` agents, `[rect]` steps.
   - Use alerts (`> [!WARNING]`, `> [!NOTE]`) for behavior changes and risk callouts.
   - If you have to include long supporting content (test output, logs), collapse it in `<details>` blocks.
   - Use fenced `diff` code blocks for config before/after.

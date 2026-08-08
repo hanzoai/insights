@@ -86,7 +86,7 @@ Product tours allow Insights users to implement automated onboarding and product
   "appearance": {
     "backgroundColor": "#ffffff",
     "textColor": "#1d1d1f",
-    "buttonColor": "#1d4aff",
+    "buttonColor": "#1d1f27",
     "buttonTextColor": "#ffffff",
     "borderRadius": 8,
     "borderColor": "#e5e5e5",
@@ -289,7 +289,7 @@ Will provide a dedicated UI for viewing, managing, and analyzing product tours w
 | --------------------- | ----------------------------------------------------- |
 | Toolbar → Backend API | OAuth Bearer token (`OAuthAccessTokenAuthentication`) |
 | SDK → Public endpoint | Project token in request                              |
-| App UI → Backend API  | Session auth (standard Insights auth)                  |
+| App UI → Backend API  | Session auth (standard Insights auth)                 |
 
 ### Error Handling
 

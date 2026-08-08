@@ -23,7 +23,7 @@
     --font-mono: ui-monospace, sfmono-regular, 'SF Mono', menlo, consolas, monospace;
 
     /* Insights custom chart colors (not part of ext-apps spec, we define our own). */
-    --insights-chart-1: #1d4aff;
+    --insights-chart-1: #3d3d3d;
     --insights-chart-2: #621da6;
     --insights-chart-3: #42827e;
     --insights-chart-4: #ce0e74;

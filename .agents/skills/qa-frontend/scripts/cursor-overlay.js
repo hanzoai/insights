@@ -9,7 +9,11 @@
         return 'already injected'
     }
     // keep in sync with the colors in scripts/annotate-evidence.py
-    const BRAND_RED = '#f54e00'
+    // The ripple lands on whatever the page under test looks like, so it is a
+    // light ring with a dark edge, same as the cursor: one of the two always
+    // has contrast, whatever is underneath.
+    const RIPPLE = '#fff'
+    const RIPPLE_EDGE = '#151515'
     const cursor = document.createElement('div')
     cursor.setAttribute('data-qa-cursor', '')
     cursor.style.cssText = [
@@ -43,7 +47,8 @@
             'top: ' + (y - 18) + 'px',
             'width: 36px',
             'height: 36px',
-            'border: 3px solid ' + BRAND_RED,
+            'border: 3px solid ' + RIPPLE,
+            'box-shadow: 0 0 0 1px ' + RIPPLE_EDGE + ', inset 0 0 0 1px ' + RIPPLE_EDGE,
             'border-radius: 50%',
             'pointer-events: none',
             'opacity: 0.9',
@@ -61,7 +66,7 @@
     document.addEventListener('mousemove', (e) => moveTo(e.clientX, e.clientY), true)
     document.addEventListener('mousedown', (e) => ripple(e.clientX, e.clientY), true)
 
-    const CHIP_COLORS = { pass: '#388600', fail: '#db3707', info: '#1d4aff' }
+    const CHIP_COLORS = { pass: '#388600', fail: '#db3707', info: '#555' }
     let captionBar = null
 
     const caption = (text, status = 'info') => {

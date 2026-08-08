@@ -85,7 +85,7 @@ const breakdownCompareSteps: FunnelStepWithConversionMetrics[] = [
 ]
 
 const options = {
-    getColor: () => '#1d4aff',
+    getColor: () => '#3d3d3d',
     getLabel: (variant: FunnelStepWithConversionMetrics) => String(variant.breakdown_value ?? variant.name),
 }
 
@@ -114,7 +114,7 @@ describe('buildFunnelStepsBarData', () => {
     })
 
     it('labels and colors each series from its representative variant', () => {
-        const getColor = jest.fn(() => '#1d4aff')
+        const getColor = jest.fn(() => '#3d3d3d')
         const { series } = buildFunnelStepsBarData(breakdownSteps, { ...options, getColor })
 
         expect(series.map((s) => s.label)).toEqual(['mobile', 'desktop'])

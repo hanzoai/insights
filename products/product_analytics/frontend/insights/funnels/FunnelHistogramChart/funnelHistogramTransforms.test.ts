@@ -44,9 +44,9 @@ describe('buildFunnelHistogramData', () => {
     })
 
     it('applies the provided series color', () => {
-        const { series } = buildFunnelHistogramData(bins, { color: '#1d4aff' })
+        const { series } = buildFunnelHistogramData(bins, { color: '#3d3d3d' })
 
-        expect(series[0].color).toBe('#1d4aff')
+        expect(series[0].color).toBe('#3d3d3d')
     })
 
     it('leaves the color unset when none is provided', () => {
@@ -65,7 +65,7 @@ describe('buildFunnelHistogramData', () => {
 
     it('emits a second desaturated series for the previous period when comparing', () => {
         const { series, labels } = buildFunnelHistogramData(bins, {
-            color: '#1d4aff',
+            color: '#3d3d3d',
             previous: { data: previousBins, color: '#cccccc' },
         })
 
@@ -82,7 +82,7 @@ describe('buildFunnelHistogramData', () => {
     })
 
     it('stays single-series when no previous period is provided', () => {
-        const { series } = buildFunnelHistogramData(bins, { color: '#1d4aff' })
+        const { series } = buildFunnelHistogramData(bins, { color: '#3d3d3d' })
 
         expect(series).toHaveLength(1)
     })

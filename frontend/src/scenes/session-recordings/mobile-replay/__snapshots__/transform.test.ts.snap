@@ -5072,7 +5072,7 @@ exports[`replay/transform transform inputs input - toggle - $value 1`] = `
                               "attributes": {
                                 "data-rrweb-id": 101,
                                 "data-toggle-part": "slider",
-                                "style": "position:absolute;top:33%;left:5%;display:inline-block;width:75%;height:33%;opacity: 0.2;border-radius:7.5%;background-color:#1d4aff;",
+                                "style": "position:absolute;top:33%;left:5%;display:inline-block;width:75%;height:33%;opacity: 0.2;border-radius:7.5%;background-color:#1d1f27;",
                               },
                               "childNodes": [],
                               "id": 101,
@@ -5083,7 +5083,7 @@ exports[`replay/transform transform inputs input - toggle - $value 1`] = `
                               "attributes": {
                                 "data-rrweb-id": 102,
                                 "data-toggle-part": "handle",
-                                "style": "position:absolute;top:1.5%;right:5%;display:flex;align-items:center;justify-content:center;width:40%;height:75%;cursor:inherit;border-radius:50%;background-color:#1d4aff;border:2px solid #1d4aff;",
+                                "style": "position:absolute;top:1.5%;right:5%;display:flex;align-items:center;justify-content:center;width:40%;height:75%;cursor:inherit;border-radius:50%;background-color:#1d1f27;border:2px solid #1d1f27;",
                               },
                               "childNodes": [],
                               "id": 102,
@@ -5432,7 +5432,7 @@ exports[`replay/transform transform inputs input - toggle - $value 3`] = `
                               "attributes": {
                                 "data-rrweb-id": 101,
                                 "data-toggle-part": "slider",
-                                "style": "position:absolute;top:33%;left:5%;display:inline-block;width:75%;height:33%;opacity: 0.2;border-radius:7.5%;background-color:#1d4aff;",
+                                "style": "position:absolute;top:33%;left:5%;display:inline-block;width:75%;height:33%;opacity: 0.2;border-radius:7.5%;background-color:#1d1f27;",
                               },
                               "childNodes": [],
                               "id": 101,
@@ -5443,7 +5443,7 @@ exports[`replay/transform transform inputs input - toggle - $value 3`] = `
                               "attributes": {
                                 "data-rrweb-id": 102,
                                 "data-toggle-part": "handle",
-                                "style": "position:absolute;top:1.5%;right:5%;display:flex;align-items:center;justify-content:center;width:40%;height:75%;cursor:inherit;border-radius:50%;background-color:#1d4aff;border:2px solid #1d4aff;",
+                                "style": "position:absolute;top:1.5%;right:5%;display:flex;align-items:center;justify-content:center;width:40%;height:75%;cursor:inherit;border-radius:50%;background-color:#1d1f27;border:2px solid #1d1f27;",
                               },
                               "childNodes": [],
                               "id": 102,
@@ -5601,7 +5601,7 @@ exports[`replay/transform transform inputs input - toggle - $value 4`] = `
                           "attributes": {
                             "data-rrweb-id": 101,
                             "data-toggle-part": "slider",
-                            "style": "position:absolute;top:33%;left:5%;display:inline-block;width:75%;height:33%;opacity: 0.2;border-radius:7.5%;background-color:#1d4aff;",
+                            "style": "position:absolute;top:33%;left:5%;display:inline-block;width:75%;height:33%;opacity: 0.2;border-radius:7.5%;background-color:#1d1f27;",
                           },
                           "childNodes": [],
                           "id": 101,
@@ -5612,7 +5612,7 @@ exports[`replay/transform transform inputs input - toggle - $value 4`] = `
                           "attributes": {
                             "data-rrweb-id": 102,
                             "data-toggle-part": "handle",
-                            "style": "position:absolute;top:1.5%;right:5%;display:flex;align-items:center;justify-content:center;width:40%;height:75%;cursor:inherit;border-radius:50%;background-color:#1d4aff;border:2px solid #1d4aff;",
+                            "style": "position:absolute;top:1.5%;right:5%;display:flex;align-items:center;justify-content:center;width:40%;height:75%;cursor:inherit;border-radius:50%;background-color:#1d1f27;border:2px solid #1d1f27;",
                           },
                           "childNodes": [],
                           "id": 102,

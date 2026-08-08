@@ -40,17 +40,17 @@ func (v *HelpView) View() string {
 
 	borderStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"}).
+		BorderForeground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"}).
 		Padding(1, 2).
 		Width(v.width - 8).
 		Height(v.height - 4)
 
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"})
 
 	keyStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"}).
+		Foreground(lipgloss.Color("#8F8F8F")).
 		Bold(true).
 		Width(14)
 
