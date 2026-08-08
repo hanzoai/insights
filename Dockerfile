@@ -193,7 +193,28 @@ COPY tools/owners tools/owners/
 # [tool.uv.sources] resolves insightsql-parser-rs to this directory, so it is a
 # dependency built from source in this stage rather than fetched as a wheel.
 COPY rust/insightsql/parser rust/insightsql/parser/
-RUN --mount=type=cache,id=uv-libxmlsec1.2.37-3,target=/root/.cache/uv \
+# hanzo-insights, our own Python SDK, resolves from git.hanzo.ai, and the forge
+# answers nothing anonymously — see the pin in pyproject.toml for why the archived
+# github.com mirror cannot serve it. The token arrives as a BuildKit secret, so it
+# is readable for the life of this layer only and never lands in the image or in
+# `docker history`; the redirect is set through GIT_CONFIG_* in this command's own
+# environment rather than written to /root/.gitconfig, so nothing persists to a
+# later layer either. url.insteadOf rather than a credential in the pin, so the
+# lockfile keeps naming an address and not a secret.
+#
+# Fails here rather than 20 minutes into a resolve: an unmounted secret is an
+# operator mistake with one fix, and a git auth error against a URL nobody
+# recognises does not say that.
+RUN --mount=type=secret,id=FORGE_TOKEN \
+    --mount=type=cache,id=uv-libxmlsec1.2.37-3,target=/root/.cache/uv \
+    set -eu; \
+    [ -s /run/secrets/FORGE_TOKEN ] || { \
+      echo "FORGE_TOKEN is not mounted. hanzo-insights resolves from git.hanzo.ai, which needs a credential — pass --secret id=FORGE_TOKEN,env=FORGE_TOKEN"; \
+      exit 1; \
+    }; \
+    export GIT_CONFIG_COUNT=1 \
+      GIT_CONFIG_KEY_0="url.https://x:$(cat /run/secrets/FORGE_TOKEN)@git.hanzo.ai/.insteadOf" \
+      GIT_CONFIG_VALUE_0="https://git.hanzo.ai/"; \
     uv sync --locked --no-dev --no-install-project --no-binary-package lxml --no-binary-package xmlsec
 
 ENV PATH=/python-runtime/bin:$PATH \
