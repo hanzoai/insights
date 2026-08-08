@@ -461,7 +461,7 @@ class TestInsightsTokenCookieMiddleware(APIBaseTest):
         self.assertEqual(0, len(response.cookies))
 
     def test_logged_in_client(self):
-        self.client.force_login(self.user, backend="django.contrib.auth.backends.ModelBackend")
+        self.client.force_login(self.user, backend="insights.auth.Permissions")
         response = self.client.get("/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -510,7 +510,7 @@ class TestInsightsTokenCookieMiddleware(APIBaseTest):
         self.assertEqual(ph_last_login_method_cookie["max-age"], 31536000)
 
     def test_logout(self):
-        self.client.force_login(self.user, backend="django.contrib.auth.backends.ModelBackend")
+        self.client.force_login(self.user, backend="insights.auth.Permissions")
         response = self.client.get("/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

@@ -230,9 +230,9 @@ AUTHENTICATION_BACKENDS: list[str] = [
     # and a second one would be a second place to revoke an account from.
     "social_core.backends.open_id_connect.OpenIdConnectAuth",
     # Carries Django's permission lookups (`has_perm`/`get_all_permissions`), which
-    # the OIDC backend does not implement. It authenticates only when something
-    # calls `authenticate()` with a password, and nothing does.
-    "django.contrib.auth.backends.ModelBackend",
+    # the OIDC backend does not implement, and abstains from authenticating so no
+    # password reaches a session.
+    "insights.auth.Permissions",
 ]
 
 # Hanzo IAM OIDC SSO (social-auth). All five come from the deployment; the
@@ -368,22 +368,11 @@ PROJECT_SWITCHING_TOKEN_ALLOWLIST = get_list(os.getenv("PROJECT_SWITCHING_TOKEN_
 
 TWO_FACTOR_REMEMBER_COOKIE_AGE = 60 * 60 * 24 * 30
 
-####
-# Password validation
-# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "insights.auth.ZxcvbnValidator"},
-]
-
 if TEST:
-    # PBKDF2 is deliberately slow (~150ms per hash), which adds up because every
-    # per-test user creation hashes a password. MD5 keeps the same hasher API with
-    # none of the cost. Never used outside tests.
+    # PBKDF2 is deliberately slow (~150ms per hash), which adds up because the test
+    # factories still pass a password when they build a user. MD5 keeps the same
+    # hasher API with none of the cost. Never used outside tests.
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
-
-PASSWORD_RESET_TIMEOUT = 86_400  # 1 day
 
 ####
 # Internationalization
