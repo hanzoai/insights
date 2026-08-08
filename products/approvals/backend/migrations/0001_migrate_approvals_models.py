@@ -170,6 +170,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         db_table="insights_approvalpolicy_bypass_roles",
                         related_name="bypass_policies",
+                        db_constraint=False,
                         to="insights.role",
                     ),
                 ),

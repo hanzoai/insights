@@ -196,7 +196,7 @@ class ErrorTrackingIssueAssignment(UUIDTModel):
     user = models.ForeignKey("insights.User", null=True, on_delete=models.CASCADE)
     # DEPRECATED: issues can only be assigned to users or roles
     user_group = deprecate_field(models.ForeignKey("insights.UserGroup", null=True, on_delete=models.CASCADE))
-    role = models.ForeignKey("insights.Role", null=True, on_delete=models.CASCADE)
+    role = models.ForeignKey("insights.Role", null=True, on_delete=models.CASCADE, db_constraint=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -387,7 +387,7 @@ class ErrorTrackingAssignmentRule(UUIDTModel):
     user = models.ForeignKey("insights.User", null=True, on_delete=models.CASCADE)
     # DEPRECATED: issues can only be assigned to users or roles
     user_group = deprecate_field(models.ForeignKey("insights.UserGroup", null=True, on_delete=models.CASCADE))
-    role = models.ForeignKey("insights.Role", null=True, on_delete=models.CASCADE)
+    role = models.ForeignKey("insights.Role", null=True, on_delete=models.CASCADE, db_constraint=False)
     order_key = models.IntegerField(null=False, blank=False)
     bytecode = models.JSONField(null=False, blank=False)  # The bytecode of the rule
     filters = models.JSONField(null=False, blank=False)  # The json object describing the filter rule
@@ -435,7 +435,7 @@ class ErrorTrackingGroupingRule(UUIDTModel):
     user = models.ForeignKey("insights.User", null=True, on_delete=models.CASCADE)
     # DEPRECATED: issues can only be assigned to users or roles
     user_group = deprecate_field(models.ForeignKey("insights.UserGroup", null=True, on_delete=models.CASCADE))
-    role = models.ForeignKey("insights.Role", null=True, on_delete=models.CASCADE)
+    role = models.ForeignKey("insights.Role", null=True, on_delete=models.CASCADE, db_constraint=False)
 
     # Users will probably find it convenient to be able to add a short description to grouping rules
     description = models.TextField(null=True)

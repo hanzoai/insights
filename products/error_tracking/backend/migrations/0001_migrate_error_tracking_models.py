@@ -261,7 +261,7 @@ class Migration(migrations.Migration):
                         to="error_tracking.errortrackingissue",
                     ),
                 ),
-                ("role", models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
+                ("role", models.ForeignKey(db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
                 (
                     "user",
                     models.ForeignKey(
@@ -293,7 +293,7 @@ class Migration(migrations.Migration):
                 ("disabled_data", models.JSONField(blank=True, null=True)),
                 ("order_key", models.IntegerField()),
                 ("description", models.TextField(null=True)),
-                ("role", models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
+                ("role", models.ForeignKey(db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
                 ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",
@@ -356,7 +356,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("disabled_data", models.JSONField(blank=True, null=True)),
-                ("role", models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
+                ("role", models.ForeignKey(db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
                 ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",

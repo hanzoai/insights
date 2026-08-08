@@ -70,6 +70,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="property_access_controls",
                         related_query_name="property_access_controls",
+                        db_constraint=False,
                         to="insights.role",
                     ),
                 ),

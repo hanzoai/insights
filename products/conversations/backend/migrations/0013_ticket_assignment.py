@@ -49,6 +49,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
+                        db_constraint=False,
                         to="insights.role",
                     ),
                 ),
