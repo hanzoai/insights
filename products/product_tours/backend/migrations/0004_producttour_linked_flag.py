@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0979_survey_enable_iframe_embedding"),
+        ("insights", "0001_initial"),
         ("product_tours", "0003_producttour_linked_surveys"),
     ]
 

@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1062_migrate_links_models"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

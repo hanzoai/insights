@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1218_team_ingested_production_event_last_checked_at"),
+        ("insights", "0001_initial"),
         ("signals", "0046_signalteamconfig_backfill_default_autostart_p4"),
         ("tasks", "0037_codeworkflowconfig_codeprsnapshot_codeworkstream"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

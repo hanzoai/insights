@@ -9,7 +9,7 @@ from insights.migration_helpers import AddForeignKeyNotValid
 class Migration(migrations.Migration):
     dependencies = [
         ("customer_analytics", "0017_announcement_validate_fks"),
-        ("insights", "1238_ducklakebackfill_earliest_event_date"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

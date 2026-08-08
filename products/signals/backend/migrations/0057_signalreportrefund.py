@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1251_alter_integration_kind"),
+        ("insights", "0001_initial"),
         ("signals", "0056_alter_signalreportartefact_type"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0815_sharingconfiguration_settings"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

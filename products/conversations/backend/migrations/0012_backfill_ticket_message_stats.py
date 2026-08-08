@@ -55,7 +55,7 @@ def reverse_backfill(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0011_ticket_message_stats_fields"),
-        ("insights", "0982_comment_conversations_index"),  # Ensure Comment model is available
+        ("insights", "0001_initial"),  # Ensure Comment model is available
     ]
 
     operations = [

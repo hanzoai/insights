@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for concurrent index creation
 
     dependencies = [
-        ("insights", "1247_oauthaccesstoken_token_idx"),
+        ("insights", "0001_initial"),
         ("review_hog", "0010_remove_reviewreport_unique_review_report_per_pr_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

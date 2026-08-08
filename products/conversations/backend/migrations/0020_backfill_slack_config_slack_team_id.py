@@ -19,7 +19,7 @@ def backfill_slack_team_id(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0019_slack_config_slack_team_id"),
-        ("insights", "1017_survey_form_content"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

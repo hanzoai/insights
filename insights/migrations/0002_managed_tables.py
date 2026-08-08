@@ -13,7 +13,10 @@ class Migration(migrations.Migration):
     dependencies = [
         ("insights", "0001_initial"),
         ("tasks", "0001_initial"),
-        ("workflows", "0001_initial"),
+        # workflows' first migration is named for what it created, not "initial";
+        # naming a node that does not exist breaks the whole graph, and /_health
+        # builds the graph — the site served fine while its health check 500'd.
+        ("workflows", "0001_insightsflowbatchjob"),
     ]
 
     operations = [

@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1063_remove_surveyresponsearchive_survey_and_more"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

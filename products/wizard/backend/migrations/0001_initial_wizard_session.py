@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "1177_alter_organization_is_ai_data_processing_approved"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

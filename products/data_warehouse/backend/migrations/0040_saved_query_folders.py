@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0897_migrate_data_warehouse_models"),
+        ("insights", "0001_initial"),
         ("data_warehouse", "0039_add_parent_workflow_id_to_data_modeling_job"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

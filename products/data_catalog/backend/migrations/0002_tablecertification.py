@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("data_catalog", "0001_initial"),
         ("data_modeling", "0028_alter_datawarehousemanagedviewset_kind"),
-        ("insights", "1252_datadeletionrequest_property_removal_marker"),
+        ("insights", "0001_initial"),
         ("warehouse_sources", "0068_backfill_direct_query_enabled_false"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

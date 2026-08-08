@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("cohorts", "0007_cohortbackfillrun_cohort_bfr_reconciling_idx"),
-        ("insights", "1271_add_pardot_integration_kind"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

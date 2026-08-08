@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "1072_backfill_condition_aggregation"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

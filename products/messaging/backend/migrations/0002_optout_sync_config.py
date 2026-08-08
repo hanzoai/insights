@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1098_add_customerio_integration_kinds"),
+        ("insights", "0001_initial"),
         ("messaging", "0001_migrate_messaging_models"),
     ]
 

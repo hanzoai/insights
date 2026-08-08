@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1088_ducklake_backfill_model"),
+        ("insights", "0001_initial"),
         ("experiments", "0003_migrate_only_count_matured_users_to_experiment"),
     ]
 

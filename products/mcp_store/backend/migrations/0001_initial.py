@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1002_experiment_exposure_preaggregation_enabled"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

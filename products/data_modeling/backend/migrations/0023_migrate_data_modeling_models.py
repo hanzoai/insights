@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("data_modeling", "0022_github_sync_models"),
         ("data_tools", "0001_migrate_data_tools_models"),
-        ("insights", "1162_drop_hourly_from_subscription_frequency_choices"),
+        ("insights", "0001_initial"),
         ("warehouse_sources", "0001_migrate_warehouse_sources_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

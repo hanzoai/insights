@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("logs", "0013_alter_logsalertconfiguration_threshold_count"),
-        ("insights", "1186_activitylog_ip_address"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

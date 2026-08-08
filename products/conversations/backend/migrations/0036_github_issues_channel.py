@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0035_ticket_teams_thread_idx"),
-        ("insights", "1132_insight_dashboarditem_team_lmod_idx"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

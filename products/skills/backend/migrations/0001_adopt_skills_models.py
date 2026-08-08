@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("ai_observability", "0005_release_skills_to_skills_app"),
-        ("insights", "1218_team_ingested_production_event_last_checked_at"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

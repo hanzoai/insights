@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "1203_migrate_annotations_models"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [
