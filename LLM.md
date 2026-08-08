@@ -596,3 +596,63 @@ Until then the guard is `frontend/src/lib/elements/icons/icons.test.ts`, which
 renders every icon and asserts `class="Icon"`. Verified both ways: 318/318 pass
 on 0.36.7, and 318/318 fail on 0.36.6 — so it catches the drift rather than
 merely documenting it.
+
+## The Python SDK is pinned to the FORGE, and it lags the app tree
+
+`hanzo_insights` (our fork of `posthog-python`) resolves from
+`git.hanzo.ai/hanzoai/insights-python`, not from github.com. Two independent
+reasons, and the second is the one that will waste your afternoon:
+
+1. `github.com/hanzoai/insights-python` is ARCHIVED — read-only, frozen at
+   `5525a17`. Nothing can be pushed there. Unarchiving needs GitHub admin.
+2. uv resolves a github.com git dependency through the **GitHub REST API**, not
+   through git. Its own log says so: `Attempting GitHub fast path` →
+   `https://api.github.com/repos/.../commits/main`. So a
+   `url.insteadOf` redirect — the trick `cloud/Dockerfile` uses to point
+   `github.com/hanzoai/*` at the forge — **cannot reach past it**. The build
+   keeps resolving the archived repo's stale commit and says nothing. Naming the
+   forge directly is the only address that answers with the code that exists.
+
+The forge serves nothing anonymously (401 on every repo, not just this one), so
+the image build needs a credential: `FORGE_TOKEN`, mounted as a BuildKit secret
+and applied through `GIT_CONFIG_*` in the one `uv sync` command's environment —
+never written to `/root/.gitconfig`, so it cannot survive into a later layer.
+`bin/check-forge-credential` asks the question in two seconds, before a
+30-60 minute build spends the hour, and names exactly what to seal if the
+answer is no. Same reason `check-imports-are-committed` runs at the top of the
+job.
+
+### The fork is BEHIND the app tree — this is a live class of bug
+
+The 2026-08 rebase moved the app onto an upstream that expects a much newer
+posthog-python than the fork's 7.9.x. That is what crash-looped 1.52.84: every
+web pod died on `from hanzo_insights.metrics_capture import InsightsMetrics`,
+which the fork did not have. Find the rest of the drift with an AST sweep rather
+than by waiting for the next pod to die — collect every `from hanzo_insights…`
+and `hanzo_insights.<attr>` in the tree and check each against the installed
+package. Known remaining gaps, all runtime rather than import-time, so the web
+boot check does not see them:
+
+- `Client.__init__` takes neither `_use_ai_lane` nor `_enable_multimodal_capture`,
+  which `insights/ph_client.py:get_client` passes → `TypeError` on every
+  `ph_scoped_capture` / `ph_background_capture` call (61 non-test sites).
+  Upstream backs these with a multi-lane queue architecture; the fork has one
+  queue, so this is a real port, not a signature change.
+- `Client.flush` takes no `timeout_seconds`, which `ScopedCapture.flush` passes.
+- `hanzo_insights.flag_definition_cache_provider` does not exist as a module
+  global and `setup()` never forwards it, so `insights/apps.py` assigning it at
+  boot is a silent no-op and local flag evaluation runs without its cache.
+
+## An `ee` import is a build failure
+
+`bin/check-imports-are-committed` counts `ee` as first-party, which — since the
+enterprise tree is not in this fork and never will be — means an `ee` import can
+only ever fail to resolve. That is the point. Left out of that tuple it read as
+somebody else's package and passed silently, which is how `from ee.hogai…` sat
+in a module the temporal graph loads eagerly and took down every web pod.
+
+The gate reports the two mistakes separately because they want different fixes:
+a named-but-uncommitted module wants committing, an `ee` import wants the
+missing thing ported natively or the dead path deleted. Never shim it, and never
+`try/except ImportError` around it — a fork that pretends to have the enterprise
+tree is worse than one that admits it does not.
