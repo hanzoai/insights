@@ -13,6 +13,8 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 from dateutil import parser
+from ee.api.test.base import APILicensedTest
+from ee.models.rbac.access_control import AccessControl
 from parameterized import parameterized
 from rest_framework import status
 
@@ -42,14 +44,11 @@ from products.experiments.backend.models.experiment import (
 )
 from products.experiments.backend.models.team_experiments_config import TeamExperimentsConfig
 from products.experiments.backend.models.web_experiment import WebExperiment
+from products.experiments.backend.presentation.saved_metric import ExperimentToSavedMetricSerializer
 from products.experiments.backend.presentation.serializers import ExperimentSerializer
 from products.experiments.backend.presentation.views import LIST_DEFERRED_FIELDS, EnterpriseExperimentsViewSet
 from products.feature_flags.backend.models.evaluation_context import EvaluationContext, FeatureFlagEvaluationContext
 from products.feature_flags.backend.models.feature_flag import FeatureFlag, get_feature_flags_for_team_in_cache
-
-from ee.api.test.base import APILicensedTest
-from ee.datastore.views.experiment_saved_metrics import ExperimentToSavedMetricSerializer
-from ee.models.rbac.access_control import AccessControl
 
 
 def _make(cls, **attrs):
