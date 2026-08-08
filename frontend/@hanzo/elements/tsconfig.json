@@ -26,6 +26,18 @@
     "compilerOptions": {
         "baseUrl": "../../..",
         "emitDeclarationOnly": true,
+        // The root turns `incremental` on, which suits a project that type-checks
+        // itself in place. tsup's dts pass is not that: it emits declarations to a
+        // directory with no build-info file, and TypeScript refuses the pair —
+        // "error TS5074: Option '--incremental' can only be specified using
+        // tsconfig, emitting to single file or when option '--tsBuildInfoFile' is
+        // specified". This surfaced only once baseUrl made tsup honour the config
+        // at all; before that it never got far enough to read `incremental`.
+        //
+        // Off rather than pointing at a tsBuildInfoFile: the cache would buy
+        // nothing here. Each build runs once in a fresh container, so there is no
+        // prior run for it to reuse, and a stale one would be a liability.
+        "incremental": false,
         "noEmit": false
     }
 }
