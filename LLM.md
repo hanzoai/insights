@@ -656,3 +656,47 @@ a named-but-uncommitted module wants committing, an `ee` import wants the
 missing thing ported natively or the dead path deleted. Never shim it, and never
 `try/except ImportError` around it — a fork that pretends to have the enterprise
 tree is worse than one that admits it does not.
+
+## Why login 500s: the migration graph, and how to ask it what is wrong
+
+`POST /api/login` returns 500 on `column django_session.user_id does not exist`.
+That column comes from `insights_session`'s 0002/0003, and they have never
+applied — because `migrate` builds the WHOLE graph before running anything, so
+one unsatisfiable dependency anywhere blocks every migration in the tree.
+
+Do not grep for this. Ask Django, which is authoritative about app labels (the
+session app's label is `insights_session`, not `session`, so a filesystem guess
+reports false positives):
+
+```python
+l = MigrationLoader(None, ignore_no_migrations=True, load=False); l.load_disk()
+have = set(l.disk_migrations)
+[ (k, d) for k, m in l.disk_migrations.items() for d in m.dependencies
+  if d[0] != "__setting__" and d[1] != "__first__" and d not in have ]
+```
+
+Then walk the plan, because the defects come in three layers and each one hides
+the next — the same shape as the boot-import loop:
+
+1. **Graph build** — a dependency naming a migration or an app that is not
+   there. Fixed: twelve numbered-but-renamed nodes, seven `('ee', …)` on the
+   deleted enterprise app, plus `desktop_recordings` and `sessions`, which this
+   fork does not install.
+2. **State mutation** (`mig.mutate_state`) — `model_name=` naming a model no
+   migration creates. This is where the debrand shows: the rename moved
+   `HogFunction`→`InsightsFunction` and `HogFlow*`→`InsightsFlow*` without the
+   references. Watch for `hanzo.aiment`, which is `posthog.comment` with the
+   domain rewrite `posthog.com`→`hanzo.ai` driven through the middle of it.
+3. **Model rendering** (`state.apps`) — lazy `to="app.model"` strings, which the
+   first two layers never evaluate.
+
+Fix model references only. `db_table` and constraint-name strings name objects
+that exist in the database under those names; renaming them points the migration
+at tables that are not there.
+
+STILL BROKEN, and it is a different defect from all of the above:
+`insights.userintegration` and `insights.userpushtoken` are real managed models
+(`insights/models/user_integration.py`, `user_push_token.py`) that NO migration
+creates, so the `tasks` FKs pointing at them cannot resolve. They want a
+CreateModel, not a rename. Until that lands, `migrate` still cannot run and
+login stays down.
