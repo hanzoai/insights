@@ -27,7 +27,13 @@ FIRST_PARTY = ("insights", "products", "common")
 
 def tracked_files() -> set[str]:
     out = subprocess.run(["git", "ls-files"], capture_output=True, text=True, check=True).stdout
-    return set(out.splitlines())
+    # Compiled bytecode is not source, and this tree tracks 3393 __pycache__ files
+    # that .gitignore is meant to exclude. Left in, they answer the question this
+    # check asks: insights/temporal/quota_limiting has no source at all, only two
+    # .pyc, and the directory test below therefore called it committed. A module
+    # whose source was deleted must not resolve on the bytecode it left behind --
+    # that is the precise shape of the failure this check exists to catch.
+    return {f for f in out.splitlines() if "__pycache__/" not in f}
 
 
 def resolves(module: str, tracked: set[str]) -> bool:
