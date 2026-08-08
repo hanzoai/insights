@@ -820,6 +820,20 @@ def _login_oidc_redirect(request: HttpRequest) -> HttpResponse:
 
 urlpatterns.append(path("login", _login_oidc_redirect))
 
+
+def _invite_signup_redirect(request: HttpRequest, invite_id: str) -> HttpResponse:
+    """An invite link is a handshake that carries the invite, for the same reason `/login` is.
+
+    `invite_id` is in `SOCIAL_AUTH_FIELDS_STORED_IN_SESSION`, so naming it here puts
+    it in the session for `process_social_signup` to read on the way back. Sending the
+    invitee to `/login` instead would drop it — only `next` survives that hop — and they
+    would be provisioned into a new organization rather than the one that invited them.
+    """
+    return HttpResponseRedirect("/login/oidc/?{}".format(urlencode({"invite_id": invite_id})))
+
+
+urlpatterns.append(re_path(r"^signup/(?P<invite_id>[^/]+)/?$", _invite_signup_redirect))
+
 # Routes added individually to remove login requirement
 frontend_unauthenticated_routes = [
     "preflight",
