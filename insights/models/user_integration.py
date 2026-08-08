@@ -75,6 +75,8 @@ class UserIntegration(UUIDModel):
         "insights.User",
         on_delete=models.CASCADE,
         related_name="integrations",
+        # See UserPushToken.user: no FK constraint against the hot insights_user table.
+        db_constraint=False,
     )
     kind = models.CharField(max_length=32, choices=IntegrationKind.choices)
     # The ID of the integration in the external system, same as on Integration
