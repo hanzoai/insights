@@ -46,17 +46,23 @@ describe('featureFlagLogic', () => {
         return get.mock.calls.map((call) => call[0] as string).filter((url) => String(url).includes('flags'))
     }
 
-    /** Mount with a given verdict on the wire and whatever the deployment defaults to. */
+    /** Mount with a given verdict on the wire and whatever the deployment defaults to.
+     *
+     * useMocks is msw's request stubber, not a React hook; the rule only sees the `use`
+     * prefix. Every other test file calls it from an anonymous beforeEach arrow, which
+     * the rule does not inspect. This one needs the verdict per call, so it lives in a
+     * named helper and the rule applies. There is no React tree in this file at all.
+     */
     async function mountFlags(
         verdict: any,
         persisted: string[] = [],
         anonymous = false
     ): Promise<jest.SpyInstance> {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- useMocks is msw's
-        // request stubber, not a React hook; the rule only sees the `use` prefix. Every
-        // other test file calls it from an anonymous beforeEach arrow, which the rule
-        // does not inspect. This one needs the verdict per call, so it lives in a named
-        // helper and the rule applies. There is no React tree in this file at all.
+        // The directive is the line IMMEDIATELY above the call, and nothing may come
+        // between them. `-next-line` covers exactly one line, so the explanation lives
+        // in the docblock above rather than here — parked between the two, it disabled
+        // the rule for a comment and lint:js failed on its own exemption.
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         useMocks({ get: { '/v1/flags/': typeof verdict === 'function' ? verdict : () => [200, verdict] } })
         setAppContext({ anonymous, persisted_feature_flags: persisted })
         // Before initKeaTests: it mounts the common logics, and this one rides
