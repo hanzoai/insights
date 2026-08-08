@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlparse
 
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -24,7 +25,6 @@ from prometheus_client import Counter
 from rest_framework import authentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.request import Request
-from zxcvbn import zxcvbn
 
 from insights.constants import AvailableFeature
 from insights.datastore.query_tagging import AccessMethod, tag_authentication
@@ -130,24 +130,20 @@ def apply_auth_brand_cookie(request: HttpRequest, response: JsonResponse | HttpR
     return response
 
 
-class ZxcvbnValidator:
+class Permissions(ModelBackend):
+    """Django's permission lookups without its credential check.
+
+    The admin reads `user.has_perm` and `user.groups`, which live on
+    `ModelBackend`, so the backend has to stay in `AUTHENTICATION_BACKENDS`.
+    Its `authenticate()` is then the last code path in the process that would
+    exchange a password for a session, and rows still carry usable password
+    hashes -- seeded before IAM, or written by a test factory. Abstaining here
+    makes that exchange impossible rather than merely uncalled, so the property
+    holds without depending on nobody ever calling `authenticate()` again.
     """
-    Validate that the password satisfies zxcvbn
-    """
 
-    def __init__(self, min_length=8):
-        self.min_length = min_length
-
-    def validate(self, password, user=None):
-        result = zxcvbn(password)
-
-        if result["score"] < 3:
-            joined_feedback = " ".join(result["feedback"]["suggestions"])
-
-            raise ValidationError(
-                joined_feedback or "This password is too weak.",
-                code="password_too_weak",
-            )
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        return None
 
 
 class SessionAuthentication(authentication.SessionAuthentication):
