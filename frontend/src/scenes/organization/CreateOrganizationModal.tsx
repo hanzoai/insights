@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconLetter } from '@hanzo/icons'
 import { Button, Divider, Input, Modal, Link } from '@hanzo/elements'
+import { IconLetter } from '@hanzo/icons'
 
 import { pendingInvitesLogic } from 'lib/components/Account/pendingInvitesLogic'
 import { Banner } from 'lib/elements/Banner'
