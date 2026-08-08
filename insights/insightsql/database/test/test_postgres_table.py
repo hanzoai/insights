@@ -52,7 +52,7 @@ _SCOPE_GATED_METADATA_TABLES: frozenset[str] = frozenset(
         "custom_property_definitions",
         "account_relationship_definitions",
         # Team-level messaging data not tied to any single flow; MessagePreferencesViewSet
-        # grants the same rows at resource level (hog_flow:read) with no object-level check.
+        # grants the same rows at resource level (insights_flow:read) with no object-level check.
         "message_categories",
         "message_recipient_preferences",
     }
