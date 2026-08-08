@@ -267,7 +267,7 @@ class DatastoreAdapter:
         return ensure_read_only_raw_datastore_statement(sql)
 
     def execute(self, request: DirectQueryRequest) -> DirectQueryResult:
-        from datastore_connect.driver.exceptions import DatastoreError
+        from datastore_connect.driver.exceptions import ClickHouseError as DatastoreError
 
         source = request.source
         datastore_source, config = self.validate_source_config(source, request.team)

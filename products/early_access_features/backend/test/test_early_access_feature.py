@@ -129,7 +129,7 @@ class TestEarlyAccessFeature(APIBaseTest):
     def test_insights_team_requires_description_on_us_cloud(self, _name, description):
         with (
             self.settings(CLOUD_DEPLOYMENT="US"),
-            patch("products.early_access_features.backend.api.POSTFN_TEAM_ID", self.team.id),
+            patch("products.early_access_features.backend.api.INSIGHTS_TEAM_ID", self.team.id),
         ):
             data: dict = {"name": "Hick bondoogling", "stage": "concept"}
             if description is not None:
@@ -149,7 +149,7 @@ class TestEarlyAccessFeature(APIBaseTest):
     def test_insights_team_allows_creation_with_description_on_us_cloud(self):
         with (
             self.settings(CLOUD_DEPLOYMENT="US"),
-            patch("products.early_access_features.backend.api.POSTFN_TEAM_ID", self.team.id),
+            patch("products.early_access_features.backend.api.INSIGHTS_TEAM_ID", self.team.id),
         ):
             response = self.client.post(
                 f"/api/projects/{self.team.id}/early_access_feature/",
@@ -164,7 +164,7 @@ class TestEarlyAccessFeature(APIBaseTest):
     def test_other_team_does_not_require_description_on_us_cloud(self):
         with (
             self.settings(CLOUD_DEPLOYMENT="US"),
-            patch("products.early_access_features.backend.api.POSTFN_TEAM_ID", self.team.id + 1000),
+            patch("products.early_access_features.backend.api.INSIGHTS_TEAM_ID", self.team.id + 1000),
         ):
             response = self.client.post(
                 f"/api/projects/{self.team.id}/early_access_feature/",
@@ -185,7 +185,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         # project id 2 is Insights's own team only on US cloud — elsewhere it's an unrelated customer.
         with (
             self.settings(CLOUD_DEPLOYMENT=cloud_deployment),
-            patch("products.early_access_features.backend.api.POSTFN_TEAM_ID", self.team.id),
+            patch("products.early_access_features.backend.api.INSIGHTS_TEAM_ID", self.team.id),
         ):
             response = self.client.post(
                 f"/api/projects/{self.team.id}/early_access_feature/",

@@ -15,7 +15,7 @@ import structlog
 from datastore_connect import get_client
 from datastore_connect.driver import httputil
 from datastore_connect.driver.client import Client as DatastoreClient
-from datastore_connect.driver.exceptions import DatastoreError, ProgrammingError
+from datastore_connect.driver.exceptions import ClickHouseError as DatastoreError, ProgrammingError
 from dlt.common.normalizers.naming.snake_case import NamingConvention
 from structlog.types import FilteringBoundLogger
 from urllib3 import PoolManager
