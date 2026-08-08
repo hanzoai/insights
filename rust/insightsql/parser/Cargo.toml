@@ -12,11 +12,44 @@ name = "insightsql_parser_rs"
 # later. `cdylib` alone would break that.
 crate-type = ["cdylib", "rlib"]
 
-[lints]
-workspace = true
+# This crate has to resolve on its own, because it is built on its own.
+#
+# Dockerfile copies ONLY `rust/insightsql/parser` into the python stage — uv
+# resolves insightsql-parser-rs to that directory and maturin builds it there —
+# so `rust/Cargo.toml` is not in the image. Inheriting from the workspace across
+# that boundary cannot work, and it failed exactly that way:
+#
+#   error: failed to parse manifest at /code/rust/insightsql/parser/Cargo.toml
+#   Caused by: error inheriting `serde_json` from workspace root manifest's
+#              `workspace.dependencies.serde_json`
+#   Caused by: failed to find a workspace root
+#
+# Copying the root manifest instead would not fix it — it declares 20+ members
+# and cargo would then fail on every directory the image does not carry. Copying
+# all of `rust/` into a python stage to build one wheel is worse still.
+#
+# `[workspace]` empty makes this its own workspace root, so cargo stops
+# searching upward rather than finding one it cannot read. The two inherited
+# values are then stated here: serde_json matches the root's
+# `workspace.dependencies` exactly (1.0), and lints are declared rather than
+# inherited. Keep them in step with rust/Cargo.toml when that moves.
+[workspace]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tokio_unstable)'] }
+unstable_features = "forbid"
+macro_use_extern_crate = "forbid"
+let_underscore_drop = "deny"
+non_ascii_idents = "deny"
+trivial_casts = "deny"
+trivial_numeric_casts = "deny"
+unit_bindings = "deny"
+
+[lints.clippy]
+enum_glob_use = "deny"
 
 [dependencies]
-serde_json.workspace = true
+serde_json = { version = "1.0" }
 # `abi3-py312` lets one wheel work on every Python 3.12+ via the stable
 # CPython ABI — avoids shipping a separate wheel per minor Python.
 # 0.28: cargo allows one pyo3 version per workspace (pyo3 has `links = "python"`),
