@@ -36,11 +36,11 @@ from insights.schema import EventsQuery
 
 from insights.insightsql.query import execute_insightsql_query
 
+from insights.cloud_utils import TEST_clear_instance_license_cache
 from insights.datastore.client import sync_execute
 from insights.datastore.client.connection import DatastoreUser
 from insights.datastore.logs.logs32 import TABLE_NAME as LOGS_LOCAL_TABLE
 from insights.datastore.query_tagging import tag_queries
-from insights.cloud_utils import TEST_clear_instance_license_cache
 from insights.insightsql_queries.events_query_runner import EventsQueryRunner
 from insights.models import Organization, Project, Team
 from insights.models.app_metrics2.sql import TRUNCATE_APP_METRICS2_TABLE_SQL
@@ -91,10 +91,6 @@ from products.warehouse_sources.backend.facade.models import (
     ExternalDataSource,
 )
 from products.warehouse_sources.backend.facade.types import ExternalDataSourceType
-
-from ee.api.test.base import LicensedTestMixin
-from ee.datastore.materialized_columns.columns import materialize
-from ee.models.license import License
 
 ErrorTrackingIssue = apps.get_model("error_tracking", "ErrorTrackingIssue")
 
@@ -210,8 +206,6 @@ class TestUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreDestroyTablesMix
         # Server-global and not scoped to this database, so it outlives the process and would
         # leave every later test on this Datastore unable to merge.
         self.addCleanup(sync_execute, "SYSTEM START MERGES")
-
-        materialize("events", "$exception_values")
 
         self.expected_properties: dict = {}
 
@@ -1131,10 +1125,6 @@ class TestUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreDestroyTablesMix
 
 @freeze_time("2022-01-09T00:01:00Z")
 class TestReplayUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreDestroyTablesMixin):
-    def setUp(self) -> None:
-        super().setUp()
-        materialize("events", "$exception_values")
-
     @also_test_with_materialized_columns(event_properties=["$lib", "$exception_values"], verify_no_jsonextract=False)
     def test_usage_report_replay(self) -> None:
         _setup_replay_data(self.team.pk, include_mobile_replay=False)
@@ -1648,7 +1638,6 @@ class TestFeatureFlagsUsageReport(DatastoreDestroyTablesMixin, TestCase, Datasto
         self.org_1_team_1 = Team.objects.create(pk=3, organization=self.org_1, name="Team 1 org 1")
         self.org_1_team_2 = Team.objects.create(pk=4, organization=self.org_1, name="Team 2 org 1")
         self.org_2_team_3 = Team.objects.create(pk=5, organization=self.org_2, name="Team 3 org 2")
-        materialize("events", "$exception_values")
 
     @snapshot_datastore_queries
     @patch("insights.tasks.usage_report.get_ph_client")
@@ -1816,7 +1805,10 @@ class TestFeatureFlagsUsageReport(DatastoreDestroyTablesMixin, TestCase, Datasto
     def test_active_hog_destinations_and_transformations_per_team(
         self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
-        from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionType
+        from products.cdp.backend.models.insights_functions.insights_function import (
+            InsightsFunction,
+            InsightsFunctionType,
+        )
 
         self._setup_teams()
 
@@ -1909,11 +1901,12 @@ class TestSurveysUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTes
         self.org_1_team_1 = Team.objects.create(pk=3, organization=self.org_1, name="Team 1 org 1")
         self.org_1_team_2 = Team.objects.create(pk=4, organization=self.org_1, name="Team 2 org 1")
         self.org_2_team_3 = Team.objects.create(pk=5, organization=self.org_2, name="Team 3 org 2")
-        materialize("events", "$exception_values")
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_usage_report_survey_responses(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
+    def test_usage_report_survey_responses(
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
+    ) -> None:
         self._setup_teams()
         for i in range(10):
             _create_event(
@@ -2187,7 +2180,6 @@ class TestExternalDataSyncUsageReport(DatastoreDestroyTablesMixin, TestCase, Dat
         self.org_1_team_1 = Team.objects.create(pk=3, organization=self.org_1, name="Team 1 org 1")
         self.org_1_team_2 = Team.objects.create(pk=4, organization=self.org_1, name="Team 2 org 1")
         self.org_2_team_3 = Team.objects.create(pk=5, organization=self.org_2, name="Team 3 org 2")
-        materialize("events", "$exception_values")
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
@@ -2865,7 +2857,6 @@ class TestDWHStorageUsageReport(DatastoreDestroyTablesMixin, TestCase, Datastore
         self.org_1_team_1 = Team.objects.create(pk=3, organization=self.org_1, name="Team 1 org 1")
         self.org_1_team_2 = Team.objects.create(pk=4, organization=self.org_1, name="Team 2 org 1")
         self.org_2_team_3 = Team.objects.create(pk=5, organization=self.org_2, name="Team 3 org 2")
-        materialize("events", "$exception_values")
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
@@ -3055,11 +3046,12 @@ class TestInsightsFunctionUsageReports(DatastoreDestroyTablesMixin, TestCase, Da
         self.org_1 = Organization.objects.create(name="Org 1")
         self.org_1_team_1 = Team.objects.create(pk=3, organization=self.org_1, name="Team 1 org 1")
         self.org_1_team_2 = Team.objects.create(pk=4, organization=self.org_1, name="Team 2 org 1")
-        materialize("events", "$exception_values")
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_insights_function_usage_metrics(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
+    def test_insights_function_usage_metrics(
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
+    ) -> None:
         self._setup_teams()
 
         create_app_metric2(
@@ -3464,7 +3456,6 @@ class TestErrorTrackingUsageReport(DatastoreDestroyTablesMixin, TestCase, Datast
         self.org_1_team_1 = Team.objects.create(pk=3, organization=self.org_1, name="Team 1 org 1")
         self.org_1_team_2 = Team.objects.create(pk=4, organization=self.org_1, name="Team 2 org 1")
         self.org_2_team_3 = Team.objects.create(pk=5, organization=self.org_2, name="Team 3 org 2")
-        materialize("events", "$exception_values")
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
@@ -3546,8 +3537,6 @@ class TestAIEventsUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTe
     def _setup_teams(self) -> None:
         self.org_1 = Organization.objects.create(name="Org 1")
         self.org_1_team_1 = Team.objects.create(pk=3, organization=self.org_1, name="Team 1 org 1")
-        materialize("events", "$exception_values")
-        materialize("events", "region")
 
     def _setup_instance_group_mapping(self, team: Team, group_type_index: int = 1) -> None:
         create_group_type_mapping_without_created_at(
@@ -4955,7 +4944,7 @@ class TestInsightsCodeComputeUsageReport(SimpleTestCase):
         mock_capture.assert_not_called()
 
 
-class TestSendUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest):
+class TestSendUsage(DatastoreDestroyTablesMixin, APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
 
@@ -5006,7 +4995,6 @@ class TestSendUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest)
         )
         flush_persons_and_events()
         TEST_clear_instance_license_cache()
-        materialize("events", "$exception_values")
 
     def _assert_queued_report(self, mock_producer: MagicMock, expected_report: dict[str, Any]) -> None:
         # Assert on the decoded payload rather than the compressed bytes: `teams` is keyed by
@@ -5075,9 +5063,6 @@ class TestSendUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest)
         )
 
         send_all_org_usage_reports(dry_run=False)
-        license = License.objects.first()
-        assert license
-
         self._assert_queued_report(mock_producer, full_report_as_dict)
 
         # mock_insights.capture.assert_any_call(
@@ -5113,9 +5098,6 @@ class TestSendUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest)
                 )
             )
             send_all_org_usage_reports(dry_run=False)
-            license = License.objects.first()
-            assert license
-
             self._assert_queued_report(mock_producer, full_report_as_dict)
 
             # mock_insights.capture.assert_any_call(
@@ -5180,11 +5162,7 @@ class TestSendUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest)
         mock_client.group_identify.assert_not_called()
 
 
-class TestSendNoUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest):
-    def setUp(self) -> None:
-        super().setUp()
-        materialize("events", "$exception_values")
-
+class TestSendNoUsage(DatastoreDestroyTablesMixin, APIBaseTest):
     @freeze_time("2021-10-10T23:01:00Z")
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("requests.post")
@@ -5198,16 +5176,11 @@ class TestSendNoUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTes
 
 
 class TestSendUsageNoLicense(APIBaseTest):
-    def setUp(self) -> None:
-        super().setUp()
-        materialize("events", "$exception_values")
-
     @freeze_time("2021-10-10T23:01:00Z")
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("requests.post")
     def test_no_license(self, mock_post: MagicMock, mock_client: MagicMock) -> None:
         TEST_clear_instance_license_cache()
-        # Same test, we just don't include the LicensedTestMixin so no license
         _create_event(
             event="$pageview",
             team=self.team,
@@ -5262,7 +5235,7 @@ class TestSendUsageNoLicense(APIBaseTest):
 
 
 @freeze_time("2021-10-10T23:01:00Z")
-class TestOrganizationFiltering(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest):
+class TestOrganizationFiltering(DatastoreDestroyTablesMixin, APIBaseTest):
     """Test organization_ids filtering for send_all_org_usage_reports"""
 
     def setUp(self) -> None:
@@ -5296,7 +5269,6 @@ class TestOrganizationFiltering(LicensedTestMixin, DatastoreDestroyTablesMixin, 
         )
         flush_persons_and_events()
         TEST_clear_instance_license_cache()
-        materialize("events", "$exception_values")
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("ee.sqs.SQSProducer.get_sqs_producer")
@@ -5486,7 +5458,6 @@ class TestCalendarAlignedQuerySplitting(SimpleTestCase):
 class TestQuerySplitting(DatastoreDestroyTablesMixin, DatastoreTestMixin, TestCase):
     def setUp(self) -> None:
         super().setUp()
-        materialize("events", "$exception_values")
 
         # Clear existing Django data
         Team.objects.all().delete()
