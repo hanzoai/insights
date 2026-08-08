@@ -22,9 +22,8 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.delivery im
 )
 from products.exports.backend.temporal.subscriptions.ai_subscription.report_pipeline import AiReportResult
 from products.exports.backend.temporal.subscriptions.ai_subscription.spec_generator import ReportWindow
+from products.exports.backend.temporal.subscriptions.slack import SlackMessageData
 from products.exports.backend.temporal.subscriptions.types import AI_REPORT_WINDOW_END_KEY, SubscriptionTriggerType
-
-from ee.tasks.subscriptions.slack_subscriptions import SlackMessageData
 
 _DELIVERY = "products.exports.backend.temporal.subscriptions.ai_subscription.delivery"
 
@@ -479,7 +478,10 @@ class TestFreezePlanPersistence:
         mock_capture.assert_called_once()
 
     async def test_reused_run_does_not_persist(self) -> None:
-        frozen = {"overall_intent": "i", "steps": [{"description": "d", "query_type": "insightsql", "insightsql": "SELECT 1"}]}
+        frozen = {
+            "overall_intent": "i",
+            "steps": [{"description": "d", "query_type": "insightsql", "insightsql": "SELECT 1"}],
+        }
         sub = self._subscription(ai_query_plan=frozen)
         with (
             patch(f"{_DELIVERY}._resolve_subscription_context", return_value=self._context(sub)) as mock_ctx,

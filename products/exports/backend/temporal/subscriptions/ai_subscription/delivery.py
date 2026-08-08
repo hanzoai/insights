@@ -26,14 +26,13 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.spec_genera
     ReportWindow,
     compute_report_window,
 )
-from products.exports.backend.temporal.subscriptions.types import AI_REPORT_WINDOW_END_KEY, SubscriptionTriggerType
-
-from ee.tasks.subscriptions.slack_subscriptions import (
-    UTM_TAGS_BASE,
+from products.exports.backend.temporal.subscriptions.report import UTM_TAGS_BASE
+from products.exports.backend.temporal.subscriptions.slack import (
     SlackDeliveryResult,
     SlackMessageData,
     deliver_slack_message_data,
 )
+from products.exports.backend.temporal.subscriptions.types import AI_REPORT_WINDOW_END_KEY, SubscriptionTriggerType
 
 logger = structlog.get_logger(__name__)
 
@@ -257,38 +256,6 @@ def send_email_ai_subscription_report(
     message.send(send_async=False)
 
     raise_if_delivery_rejected(campaign_key, email)
-
-
-def send_email_ai_subscription_credit_limited(
-    *,
-    email: str,
-    subscription: Subscription,
-    resume_date: datetime,
-    billing_period_key: str,
-) -> None:
-    """Notify the owner that a scheduled AI report was skipped for lack of AI credits.
-    `billing_period_key` keys the campaign so MessagingRecord dedups to one notice per
-    credit-reset cycle even if the skip path runs more than once."""
-    utm_tags = f"{UTM_TAGS_BASE}&utm_medium=email"
-    title = subscription.title or "Your Insights AI report"
-    subscription_url = subscription.url or absolute_uri(
-        f"/project/{subscription.team_id}/subscriptions/{subscription.id}"
-    )
-    billing_url = absolute_uri("/organization/billing")
-
-    message = EmailMessage(
-        campaign_key=f"ai_subscription_credit_limited_{subscription.id}_{billing_period_key}",
-        subject=f"Insights AI report skipped - {title}",
-        template_name="ai_subscription_credit_limited",
-        template_context={
-            "title": title,
-            "resume_date": resume_date,
-            "subscription_url": f"{subscription_url}?{utm_tags}",
-            "billing_url": f"{billing_url}?{utm_tags}",
-        },
-    )
-    message.add_recipient(email=email)
-    message.send(send_async=False)
 
 
 def _build_ai_slack_message(

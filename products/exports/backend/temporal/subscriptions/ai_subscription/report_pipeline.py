@@ -1,3 +1,4 @@
+import json
 import uuid
 import asyncio
 from collections.abc import Sequence
@@ -7,11 +8,13 @@ from enum import StrEnum
 from typing import Optional, Union
 
 import structlog
+from pydantic import BaseModel
 
-from insights.schema import AssistantInsightsQLQuery
-
+from insights.insightsql.constants import LimitContext
 from insights.insightsql.errors import ExposedInsightsQLError, InternalInsightsQLError
+from insights.insightsql.parser import parse_select
 
+from insights.api.services.query import process_query_dict
 from insights.exceptions_capture import capture_exception
 from insights.models import Team, User
 from insights.security.llm_prompt_sanitization import strip_llm_framing_markers
@@ -46,10 +49,7 @@ from products.exports.backend.temporal.subscriptions.ai_subscription.spec_genera
     build_frozen_prompt,
 )
 from products.exports.backend.temporal.subscriptions.types import safe_error_message
-
-from ee.hogai.context.insight.query_executor import AssistantQueryExecutor
-from ee.hogai.llm import MaxChatOpenAI
-from ee.hogai.tool_errors import MaxToolRetryableError
+from products.insights_ai.backend.model import MaxChatOpenAI
 
 logger = structlog.get_logger(__name__)
 
@@ -90,10 +90,58 @@ _MAX_CONCURRENT_STEPS = 5
 # failures, generic exceptions) falls through to the "_Query failed to run_" placeholder without retrying,
 # since a different SELECT won't fix a Datastore outage or a heartbeat timeout.
 _RETRYABLE_QUERY_ERRORS: tuple[type[BaseException], ...] = (
-    MaxToolRetryableError,
     ExposedInsightsQLError,
     InternalInsightsQLError,
 )
+
+# Rows a single step contributes to the synthesis prompt. The step is expected to aggregate in
+# InsightsQL; this bounds what an un-aggregated one can drag in, and the count is always stated
+# so synthesis never reads a total off a trimmed list.
+_MAX_STEP_ROWS = 50
+
+
+def _query_step(team: Team, user: User, insightsql: str) -> str:
+    # Parse first so a malformed SELECT is an ExposedInsightsQLError the fix loop can act
+    # on, and so nothing but a read ever reaches the datastore.
+    parse_select(insightsql)
+
+    response = process_query_dict(
+        team,
+        {"kind": "InsightsQLQuery", "query": insightsql},
+        limit_context=LimitContext.INSIGHTS_AI,
+        # Warehouse access control resolves against the subscription's owner; without a
+        # user it fails closed and the step returns nothing.
+        user=user,
+    )
+    if isinstance(response, BaseModel):
+        response = response.model_dump()
+
+    if error := response.get("error"):
+        raise ExposedInsightsQLError(str(error))
+
+    rows = list(response.get("results") or [])
+    return json.dumps(
+        {
+            "columns": response.get("columns") or [],
+            "rows": rows[:_MAX_STEP_ROWS],
+            "returned": min(len(rows), _MAX_STEP_ROWS),
+            "truncated": len(rows) > _MAX_STEP_ROWS,
+        },
+        default=str,
+    )
+
+
+async def run_step_query(team: Team, user: User, insightsql: str) -> str:
+    """Run one plan step's InsightsQL and render its rows for the synthesis prompt.
+
+    Goes through `process_query_dict`, the seam the query API and the assistant's own
+    query tool use, so a report reads a project exactly the way everything else does —
+    same team scoping, same access control, same limit context.
+
+    Raises rather than returning an error string: a query the planner got wrong is what
+    the fix loop in `_run_steps` is for, and it decides on the exception type.
+    """
+    return await database_sync_to_async(_query_step, thread_sensitive=False)(team, user, insightsql)
 
 
 def _all_queries_failed_notice(total_steps: int) -> str:
@@ -379,7 +427,6 @@ async def _run_steps(
     window: ReportWindow,
     trace_correlation_id: Optional[Union[int, str]],
 ) -> tuple[list[str], int, list[QueryStepDiagnostic]]:
-    executor = AssistantQueryExecutor(team, datetime.now(tz=UTC), user=user)
     # Cap simultaneous Datastore scans per report; excess steps queue until a slot frees.
     step_semaphore = asyncio.Semaphore(_MAX_CONCURRENT_STEPS)
 
@@ -402,9 +449,8 @@ async def _run_steps(
         for attempt in range(_MAX_QUERY_FIX_RETRIES + 1):
             executable_insightsql = window.render_window_filter(current_insightsql)
             try:
-                query = AssistantInsightsQLQuery(query=executable_insightsql)
-                formatted, _ = await asyncio.wait_for(
-                    executor.arun_and_format_query(query),
+                formatted = await asyncio.wait_for(
+                    run_step_query(team, user, executable_insightsql),
                     timeout=_INSIGHTSQL_STEP_TIMEOUT_SECONDS,
                 )
                 # result values are attacker-influenceable (public project tokens) — strip framing markers
