@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
         ("ai_observability", "0001_adopt_llm_analytics_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("insights", "0001_initial"),
-        ("ee", "0046_migrate_cdp_models"),
     ]
 
     operations = [
