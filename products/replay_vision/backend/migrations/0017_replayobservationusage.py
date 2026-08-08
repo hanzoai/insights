@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1231_duckgresserverteam"),
+        ("insights", "0001_initial"),
         ("replay_vision", "0016_alter_visionaction_selection"),
     ]
 

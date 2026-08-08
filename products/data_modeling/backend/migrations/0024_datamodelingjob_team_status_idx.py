@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("data_modeling", "0023_migrate_data_modeling_models"),
-        ("insights", "1193_oauthaccesstoken_label_oauthapplication_scopes"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

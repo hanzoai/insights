@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("ee", "0050_migrate_replay_models"),
-        ("insights", "1238_ducklakebackfill_earliest_event_date"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

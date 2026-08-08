@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "1018_migrate_event_definition_models"),
+        ("insights", "0001_initial"),
         ("tasks", "0021_alter_task_origin_product"),
     ]
 

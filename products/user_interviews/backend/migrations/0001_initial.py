@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "0733_file_system_shortcut"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

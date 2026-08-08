@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1231_duckgresserverteam"),
+        ("insights", "0001_initial"),
         ("tasks", "0069_remove_code_home_models"),
     ]
 

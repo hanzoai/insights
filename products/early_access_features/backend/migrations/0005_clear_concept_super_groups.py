@@ -54,7 +54,7 @@ def restore_concept_super_groups(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("early_access_features", "0004_add_payload_field"),
-        ("insights", "1030_add_last_calculation_duration_ms"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

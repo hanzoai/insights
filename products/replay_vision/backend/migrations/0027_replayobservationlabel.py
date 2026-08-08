@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1247_oauthaccesstoken_token_idx"),
+        ("insights", "0001_initial"),
         ("replay_vision", "0026_replayscanner_sampling_mode"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

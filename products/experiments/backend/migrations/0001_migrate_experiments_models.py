@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1055_cohort_last_backfill_person_properties_at"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

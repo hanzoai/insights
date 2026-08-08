@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "0885_migrate_notebooks_models"),
+        ("insights", "0001_initial"),
     ]
 
     database_operations: list[migrations.RunSQL] = [

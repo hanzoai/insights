@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("error_tracking", "0014_recommendation"),
-        ("insights", "1139_alter_datadeletionrequest_person_distinct_ids_and_more"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1000_create_healthissue_table"),
+        ("insights", "0001_initial"),
         ("customer_analytics", "0002_customer_profile_config"),
     ]
 

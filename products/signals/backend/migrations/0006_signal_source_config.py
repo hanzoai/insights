@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1010_hogflowtemplate_org_scope"),
+        ("insights", "0001_initial"),
         ("signals", "0005_signalreportartefact_report_idx"),
     ]
 

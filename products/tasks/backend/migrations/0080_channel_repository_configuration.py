@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1280_alter_integration_kind"),
+        ("insights", "0001_initial"),
         ("tasks", "0079_backfill_task_repositories"),
     ]
 

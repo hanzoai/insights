@@ -9,7 +9,7 @@ import products.customer_analytics.backend.models.custom_property_definition
 class Migration(migrations.Migration):
     dependencies = [
         ("customer_analytics", "0019_custompropertysyncrun_validate_fks"),
-        ("insights", "1261_alter_personalapikey_scoped_organizations_and_more"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

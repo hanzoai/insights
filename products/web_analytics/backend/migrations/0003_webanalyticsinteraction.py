@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1219_filesystemfoldercontextgeneration"),
+        ("insights", "0001_initial"),
         ("web_analytics", "0002_add_achievements_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("notebooks", "0003_add_kernel_timeouts"),
-        ("insights", "1163_alter_batchexportrun_batch_export_and_more"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

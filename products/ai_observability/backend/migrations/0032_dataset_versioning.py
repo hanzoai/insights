@@ -41,7 +41,7 @@ END $$;
 class Migration(migrations.Migration):
     dependencies = [
         ("ai_observability", "0031_llmprompt_config"),
-        ("insights", "1277_drop_duckgresserverteam_hot_table_fks"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

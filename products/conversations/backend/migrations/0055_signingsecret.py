@@ -10,7 +10,7 @@ import insights.helpers.encrypted_fields
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0054_ticket_sla_snooze_asc_indexes"),
-        ("insights", "1280_alter_integration_kind"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

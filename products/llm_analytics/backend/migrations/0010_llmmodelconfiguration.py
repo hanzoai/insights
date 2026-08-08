@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0932_add_session_ids_to_restriction_config"),
+        ("insights", "0001_initial"),
         ("llm_analytics", "0009_rename_llm_analyti_team_pr_idx_llm_analyti_team_id_a78410_idx"),
     ]
 

@@ -5,7 +5,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1094_oauth_provisioning_fields"),
+        ("insights", "0001_initial"),
         ("conversations", "0033_ticket_snoozed_until_idx"),
     ]
 

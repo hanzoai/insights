@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "1236_userintegration_kind_extid_idx"),
+        ("insights", "0001_initial"),
         ("tasks", "0041_taskrun_created_at_idx"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

@@ -10,7 +10,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0932_add_session_ids_to_restriction_config"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("llm_analytics", "0007_drop_evaluation_prompt_column"),
     ]

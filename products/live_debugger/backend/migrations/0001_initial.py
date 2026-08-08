@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0893_add_ingestion_lane_fields_to_event_ingestion_restriction"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

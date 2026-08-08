@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1104_alter_organization_is_ai_data_processing_approved"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0891_file_system_view_log"),
+        ("insights", "0001_initial"),
         ("error_tracking", "0001_migrate_error_tracking_models"),
     ]
 

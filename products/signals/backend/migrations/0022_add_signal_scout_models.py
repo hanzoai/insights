@@ -11,7 +11,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1129_userintegration"),
+        ("insights", "0001_initial"),
         ("signals", "0021_add_signals_scout_source"),
         ("tasks", "0035_task_origin_product_signals_scout"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

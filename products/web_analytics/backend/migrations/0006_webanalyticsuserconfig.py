@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1245_duckgres_sink_schema_state"),
+        ("insights", "0001_initial"),
         ("web_analytics", "0005_savedheatmap_block_consent_modals"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

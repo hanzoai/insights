@@ -8,7 +8,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1017_survey_form_content"),
+        ("insights", "0001_initial"),
         ("conversations", "0017_ticket_slack_thread_idx"),
     ]
 

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0867_add_updated_at_to_feature_flags"),
+        ("insights", "0001_initial"),
         ("tasks", "0007_sandboxsnapshot"),
     ]
 

@@ -11,7 +11,7 @@ from insights.migration_helpers import AddForeignKeyNotValid
 class Migration(migrations.Migration):
     dependencies = [
         ("customer_analytics", "0025_alter_eventstream_created_by"),
-        ("insights", "1266_comment_convo_content_trgm"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

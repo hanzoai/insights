@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("logs", "0019_backfill_logs_distinct_id_attribute_keys"),
-        ("insights", "1238_ducklakebackfill_earliest_event_date"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

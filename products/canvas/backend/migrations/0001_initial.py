@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "1265_delete_duckgresserverteam"),
+        ("insights", "0001_initial"),
         ("tasks", "0073_task_activity"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

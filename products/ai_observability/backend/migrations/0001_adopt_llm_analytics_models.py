@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("llm_analytics", "0033_release_to_ai_observability"),
-        ("insights", "1178_datadeletionrequest_person_properties"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

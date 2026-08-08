@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "1270_untrack_provisioning_auth_columns"),
+        ("insights", "0001_initial"),
         ("tasks", "0075_task_pin"),
     ]
 

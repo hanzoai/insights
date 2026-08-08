@@ -12,7 +12,7 @@ import products.replay_vision.backend.models.vision_action
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1224_columnconfiguration_properties"),
+        ("insights", "0001_initial"),
         ("replay_vision", "0013_replayscanner_estimated_at_and_more"),
         ("workflows", "0008_teamworkflowsconfig"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

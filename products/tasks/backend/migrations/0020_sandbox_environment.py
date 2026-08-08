@@ -12,7 +12,7 @@ import insights.helpers.encrypted_fields
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "0925_team_business_model"),
+        ("insights", "0001_initial"),
         ("tasks", "0019_remove_taskrun_log_storage_path"),
     ]
 

@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("business_knowledge", "0002_knowledgedocument_stable_id_max_length"),
-        ("insights", "1192_id_jag_organization_domain_fields"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

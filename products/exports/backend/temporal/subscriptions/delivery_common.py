@@ -17,14 +17,14 @@ from products.exports.backend.temporal.subscriptions.types import (
     RecipientResult,
 )
 
-from ee.tasks.subscriptions import SLACK_USER_CONFIG_ERRORS, _capture_delivery_failed_event
-from ee.tasks.subscriptions.auto_disable import (
+from products.exports.backend.subscriptions import SLACK_USER_CONFIG_ERRORS, _capture_delivery_failed_event
+from products.exports.backend.subscriptions.auto_disable import (
     SLACK_DISCONNECTED_DISABLE_REASON,
     SLACK_PERMISSION_REVOKED_DISABLE_REASON,
     DisableReason,
     disable_invalid_subscription,
 )
-from ee.tasks.subscriptions.slack_subscriptions import SlackDeliveryResult, get_slack_integration_for_team
+from products.exports.backend.subscriptions.slack import SlackDeliveryResult, get_slack_integration_for_team
 
 LOGGER = get_logger(__name__)
 

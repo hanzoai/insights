@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("error_tracking", "0018_symbolset_last_used_created_idx"),
-        ("insights", "1245_duckgres_sink_schema_state"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

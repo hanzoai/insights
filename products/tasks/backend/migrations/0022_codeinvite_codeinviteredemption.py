@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1021_duckgresserver"),
+        ("insights", "0001_initial"),
         ("tasks", "0021_alter_task_origin_product"),
     ]
 

@@ -10,7 +10,7 @@ import insights.helpers.encrypted_fields
 class Migration(migrations.Migration):
     dependencies = [
         ("batch_exports", "0001_migrate_batch_exports_models"),
-        ("insights", "1204_migrate_batch_exports_models"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

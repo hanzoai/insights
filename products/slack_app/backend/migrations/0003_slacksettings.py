@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1177_alter_organization_is_ai_data_processing_approved"),
+        ("insights", "0001_initial"),
         ("slack_app", "0002_slackuserprofilecache_is_admin_and_more"),
     ]
 

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0548_migrate_early_access_features"),
+        ("insights", "0001_initial"),
     ]
 
     database_operations: list[Any] = []

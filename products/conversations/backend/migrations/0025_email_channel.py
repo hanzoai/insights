@@ -6,7 +6,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1051_backfill_holdout_format"),
+        ("insights", "0001_initial"),
         ("conversations", "0024_ticket_channel_detail"),
     ]
 

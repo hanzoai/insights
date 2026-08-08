@@ -11,7 +11,7 @@ import insights.uuidt
 class Migration(migrations.Migration):
     dependencies = [
         ("managed_warehouse", "0001_migrate_managed_warehouse_models"),
-        ("insights", "1281_migrate_managed_warehouse_models"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

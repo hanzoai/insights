@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0867_add_updated_at_to_feature_flags"),
+        ("insights", "0001_initial"),
         ("tasks", "0006_remove_workflowstage_agent_alter_task_workflow_and_more"),
     ]
 

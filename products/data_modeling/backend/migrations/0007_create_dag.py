@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1003_clean_up_stale_alert_subscriptions"),
+        ("insights", "0001_initial"),
         ("data_modeling", "0006_backfill_nodes_edges_from_saved_queries"),
     ]
 

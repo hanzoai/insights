@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("cohorts", "0003_cohort_filters_shape_hash"),
-        ("insights", "1252_datadeletionrequest_property_removal_marker"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

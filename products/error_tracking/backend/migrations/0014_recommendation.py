@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1097_add_is_pending_deletion_to_organization"),
+        ("insights", "0001_initial"),
         ("error_tracking", "0013_spike_events"),
     ]
 
