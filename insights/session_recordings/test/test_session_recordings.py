@@ -361,7 +361,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             ),
             snapshot_postgres_queries_context(self),
         ):
-            # request once without counting queries to cache an ee.license lookup that makes results vary otherwise
+            # request once without counting queries, to warm the caches that make the count vary otherwise
             self.client.get(f"/api/projects/{self.team.id}/session_recordings")
 
             base_time = (now() - relativedelta(days=1)).replace(microsecond=0)

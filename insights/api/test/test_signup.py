@@ -23,6 +23,7 @@ from insights.api.signup import _save_session_with_recovery, process_social_invi
 from insights.cloud_utils import TEST_clear_instance_license_cache
 from insights.constants import AvailableFeature
 from insights.models import Organization, Team, User
+from insights.models.ee_models import AccessControl
 from insights.models.identity_provider_config import IdentityProviderConfig
 from insights.models.instance_setting import override_instance_config
 from insights.models.organization import OrganizationMembership
@@ -32,8 +33,6 @@ from insights.models.webauthn_credential import WebauthnCredential
 from insights.utils import get_instance_realm
 
 from products.dashboards.backend.models.dashboard import Dashboard
-
-from insights.models.ee_models import AccessControl
 
 MOCK_GITLAB_SSO_RESPONSE = {
     "access_token": "123",
@@ -727,9 +726,7 @@ class TestSignupAPI(APIBaseTest):
         if use_invite and not expired_invite:
             # make sure the org invite no longer exists
             self.assertEqual(
-                OrganizationInvite.objects.filter(
-                    organization=new_org, target_email="jane@hogflix.hanzo.ai"
-                ).count(),
+                OrganizationInvite.objects.filter(organization=new_org, target_email="jane@hogflix.hanzo.ai").count(),
                 0,
             )
             teams = user.teams.all()
@@ -2535,7 +2532,10 @@ class TestInviteSignupAPI(APIBaseTest):
         ]
         organization.save()
         OrganizationDomain.objects.create(
-            domain="insights_sss_test.com", organization=organization, sso_enforcement="saml", verified_at=timezone.now()
+            domain="insights_sss_test.com",
+            organization=organization,
+            sso_enforcement="saml",
+            verified_at=timezone.now(),
         )
 
         invite: OrganizationInvite = OrganizationInvite.objects.create(
