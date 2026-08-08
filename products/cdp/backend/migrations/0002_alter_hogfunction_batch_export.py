@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AlterField(
-                    model_name="hogfunction",
+                    model_name="insightsfunction",
                     name="batch_export",
                     field=models.ForeignKey(
                         blank=True,

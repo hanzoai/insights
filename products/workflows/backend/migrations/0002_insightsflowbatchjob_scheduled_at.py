@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogflowbatchjob",
+            model_name="insightsflowbatchjob",
             name="scheduled_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name="hogflowbatchjob",
+            model_name="insightsflowbatchjob",
             name="filters",
             field=models.JSONField(default=dict),
         ),

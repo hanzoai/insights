@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogflow",
+            model_name="insightsflow",
             name="action_redirects",
             field=models.JSONField(blank=True, null=True),
         ),

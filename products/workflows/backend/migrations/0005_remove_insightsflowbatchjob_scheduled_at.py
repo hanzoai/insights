@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.RemoveField(
-                    model_name="hogflowbatchjob",
+                    model_name="insightsflowbatchjob",
                     name="scheduled_at",
                 ),
             ],

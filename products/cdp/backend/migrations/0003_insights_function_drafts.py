@@ -15,22 +15,22 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="insightsfunction",
             name="draft",
             field=models.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="insightsfunction",
             name="draft_updated_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="insightsfunction",
             name="draft_encrypted_inputs",
             field=insights.helpers.encrypted_fields.EncryptedJSONStringField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="insightsfunction",
             name="version",
             field=models.IntegerField(db_default=1, default=1),
         ),
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="revisions",
-                        to="cdp.hogfunction",
+                        to="cdp.insightsfunction",
                     ),
                 ),
                 (

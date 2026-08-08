@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                     "comment",
                     models.OneToOneField(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="hanzo.aiment",
+                        to="insights.comment",
                     ),
                 ),
                 (
