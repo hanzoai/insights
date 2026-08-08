@@ -251,9 +251,9 @@ async def test_request_insightsql_fix_grounds_prompt_in_project_schema(
     assert "export_created (properties: file_size)" in system_prompt
 
 
-@patch(f"{_RP}.AssistantQueryExecutor")
-async def test_run_steps_non_retryable_error_degrades_to_placeholder(mock_executor_cls: MagicMock) -> None:
-    mock_executor_cls.return_value.arun_and_format_query = AsyncMock(side_effect=RuntimeError("boom"))
+@patch(f"{_RP}._run_query", new_callable=AsyncMock)
+async def test_run_steps_non_retryable_error_degrades_to_placeholder(mock_run_query: AsyncMock) -> None:
+    mock_run_query.side_effect = RuntimeError("boom")
     rendered, failed, diagnostics = await _run_steps(_spec(steps=1), MagicMock(), MagicMock(), _test_window(), None)
     assert failed == 1
     assert "Query failed to run" in rendered[0]
@@ -263,15 +263,13 @@ async def test_run_steps_non_retryable_error_degrades_to_placeholder(mock_execut
 
 
 @patch(f"{_RP}._arequest_insightsql_fix", new_callable=AsyncMock)
-@patch(f"{_RP}.AssistantQueryExecutor")
+@patch(f"{_RP}._run_query", new_callable=AsyncMock)
 async def test_run_steps_forwards_resolution_error_message_to_fix(
-    mock_executor_cls: MagicMock, mock_fix: AsyncMock
+    mock_run_query: AsyncMock, mock_fix: AsyncMock
 ) -> None:
     # ResolutionError names the field the planner referenced — its message, not just the type name,
     # must reach the fix LLM so it can actually repair the query.
-    mock_executor_cls.return_value.arun_and_format_query = AsyncMock(
-        side_effect=[ResolutionError("Unable to resolve field 'operaton'"), ("formatted table", None)]
-    )
+    mock_run_query.side_effect = [ResolutionError("Unable to resolve field 'operaton'"), "formatted table"]
     mock_fix.return_value = "SELECT fixed"
     await _run_steps(_spec(steps=1), MagicMock(), MagicMock(), _test_window(), None)
     assert mock_fix.await_args is not None
@@ -304,12 +302,10 @@ async def test_synthesis_prompt_carries_the_failure_marker(
 
 
 @patch(f"{_RP}._arequest_insightsql_fix", new_callable=AsyncMock)
-@patch(f"{_RP}.AssistantQueryExecutor")
-async def test_run_steps_retries_then_succeeds(mock_executor_cls: MagicMock, mock_fix: AsyncMock) -> None:
+@patch(f"{_RP}._run_query", new_callable=AsyncMock)
+async def test_run_steps_retries_then_succeeds(mock_run_query: AsyncMock, mock_fix: AsyncMock) -> None:
     # First attempt raises a retryable InsightsQL error, the LLM fix yields a new query, the rerun succeeds.
-    mock_executor_cls.return_value.arun_and_format_query = AsyncMock(
-        side_effect=[ExposedInsightsQLError("bad query"), ("formatted table", None)]
-    )
+    mock_run_query.side_effect = [ExposedInsightsQLError("bad query"), "formatted table"]
     mock_fix.return_value = "SELECT fixed"
     spec = _spec(steps=1)
     rendered, failed, diagnostics = await _run_steps(spec, MagicMock(), MagicMock(), _test_window(), None)
@@ -324,19 +320,19 @@ async def test_run_steps_retries_then_succeeds(mock_executor_cls: MagicMock, moc
 
 
 @patch(f"{_RP}._arequest_insightsql_fix", new_callable=AsyncMock)
-@patch(f"{_RP}.AssistantQueryExecutor")
+@patch(f"{_RP}._run_query", new_callable=AsyncMock)
 async def test_run_steps_breaks_early_when_fix_returns_same_query(
-    mock_executor_cls: MagicMock, mock_fix: AsyncMock
+    mock_run_query: AsyncMock, mock_fix: AsyncMock
 ) -> None:
     # The fix LLM echoes the original query back — re-running it is pointless, so we must stop and
     # degrade rather than burn the retry budget on an identical query.
-    mock_executor_cls.return_value.arun_and_format_query = AsyncMock(side_effect=ExposedInsightsQLError("bad query"))
+    mock_run_query.side_effect = ExposedInsightsQLError("bad query")
     mock_fix.return_value = "SELECT 1"  # identical to QueryPlanStep.insightsql in _spec()
     rendered, failed, diagnostics = await _run_steps(_spec(steps=1), MagicMock(), MagicMock(), _test_window(), None)
     assert failed == 1
     assert "Query failed to run" in rendered[0]
-    # Executor ran exactly once (no rerun of the identical fixed query); the fix was requested once.
-    assert mock_executor_cls.return_value.arun_and_format_query.await_count == 1
+    # The query ran exactly once (no rerun of the identical fixed query); the fix was requested once.
+    assert mock_run_query.await_count == 1
     mock_fix.assert_awaited_once()
     # An ExposedInsightsQLError is safe to surface, so the diagnostic carries the human-readable reason
     # (not just the type) for the delivery viewer to show.
@@ -344,8 +340,8 @@ async def test_run_steps_breaks_early_when_fix_returns_same_query(
     assert diagnostics[0].human_readable_error == "bad query"
 
 
-@patch(f"{_RP}.AssistantQueryExecutor")
-async def test_run_steps_bounds_concurrent_query_execution(mock_executor_cls: MagicMock) -> None:
+@patch(f"{_RP}._run_query", new_callable=AsyncMock)
+async def test_run_steps_bounds_concurrent_query_execution(mock_run_query: AsyncMock) -> None:
     # The planner can emit many steps; they must not all hit Datastore at once. With more steps than
     # the cap, no more than _MAX_CONCURRENT_STEPS run their query simultaneously (a regression that drops
     # the semaphore would let every step fan out at once).
@@ -353,7 +349,7 @@ async def test_run_steps_bounds_concurrent_query_execution(mock_executor_cls: Ma
     max_concurrent = 0
     saturated = asyncio.Event()
 
-    async def _track(_query: object) -> tuple[str, None]:
+    async def _track(_insightsql: str, **_kwargs: object) -> str:
         nonlocal concurrent, max_concurrent
         concurrent += 1
         max_concurrent = max(max_concurrent, concurrent)
@@ -361,9 +357,9 @@ async def test_run_steps_bounds_concurrent_query_execution(mock_executor_cls: Ma
             saturated.set()  # cap reached — release the held steps so the rest can run
         await saturated.wait()
         concurrent -= 1
-        return ("formatted", None)
+        return "formatted"
 
-    mock_executor_cls.return_value.arun_and_format_query = AsyncMock(side_effect=_track)
+    mock_run_query.side_effect = _track
 
     await _run_steps(_spec(steps=_MAX_CONCURRENT_STEPS * 2), MagicMock(), MagicMock(), _test_window(), None)
 
@@ -539,11 +535,11 @@ def test_plan_to_freeze_requires_no_failures(total_steps: int, failed_count: int
 @patch(_SLO_CAPTURE)
 @patch(f"{_RP}.MaxChatOpenAI")
 @patch(f"{_RP}._arequest_insightsql_fix", new_callable=AsyncMock)
-@patch(f"{_RP}.AssistantQueryExecutor")
+@patch(f"{_RP}._run_query", new_callable=AsyncMock)
 @patch(f"{_RP}.build_enriched_prompt")
 async def test_freeze_carries_post_fix_insightsql(
     mock_bep: MagicMock,
-    mock_executor_cls: MagicMock,
+    mock_run_query: AsyncMock,
     mock_fix: AsyncMock,
     mock_chat: MagicMock,
     _mock_capture: MagicMock,
@@ -551,9 +547,7 @@ async def test_freeze_carries_post_fix_insightsql(
     expected_frozen_insightsql: str | None,
 ) -> None:
     mock_bep.return_value = _spec_with_window_placeholder()
-    mock_executor_cls.return_value.arun_and_format_query = AsyncMock(
-        side_effect=[ExposedInsightsQLError("bad query"), ("formatted table", None)]
-    )
+    mock_run_query.side_effect = [ExposedInsightsQLError("bad query"), "formatted table"]
     mock_fix.return_value = fixed_insightsql
     mock_chat.return_value.invoke.return_value = MagicMock(content="# Report")
 
@@ -572,13 +566,13 @@ async def test_freeze_carries_post_fix_insightsql(
 
     # Succeed only for the fixed query: a regression that froze the pre-fix original would fail here,
     # re-invoke the fixer, and trip the assert_not_awaited below.
-    async def _reuse_execute(query):
-        if "uniq(person_id)" not in query.query:
+    async def _reuse_execute(insightsql: str, **_kwargs: object) -> str:
+        if "uniq(person_id)" not in insightsql:
             raise ExposedInsightsQLError("bad query")
-        return ("formatted table", None)
+        return "formatted table"
 
-    reuse_executor = AsyncMock(side_effect=_reuse_execute)
-    mock_executor_cls.return_value.arun_and_format_query = reuse_executor
+    mock_run_query.reset_mock()
+    mock_run_query.side_effect = _reuse_execute
     with patch(f"{_SG}.build_context_blob", return_value="c"):
         reused = await generate_ai_report(
             team=MagicMock(),
@@ -588,22 +582,22 @@ async def test_freeze_carries_post_fix_insightsql(
             ai_query_plan=result.plan_to_persist,
         )
     mock_fix.assert_not_awaited()
-    reuse_executor.assert_awaited_once()  # fixed query succeeds on the first attempt, no retry
+    mock_run_query.assert_awaited_once()  # fixed query succeeds on the first attempt, no retry
     assert reused.plan_to_persist is None  # nothing new to freeze on a reused run
 
 
-@patch(f"{_RP}.AssistantQueryExecutor")
-async def test_run_steps_substitutes_fresh_window_into_placeholder_sql(mock_executor_cls: MagicMock) -> None:
-    # The frozen InsightsQL keeps the {{date_range}} placeholder; the executor substitutes THIS run's bounds.
+@patch(f"{_RP}._run_query", new_callable=AsyncMock)
+async def test_run_steps_substitutes_fresh_window_into_placeholder_sql(mock_run_query: AsyncMock) -> None:
+    # The frozen InsightsQL keeps the {{date_range}} placeholder; the run substitutes THIS run's bounds.
     # Two runs of the same frozen step at different `now` must execute different window literals (so the
     # window advances) while the rest of the SQL is byte-identical (so the metric structure is frozen).
     captured: list[str] = []
 
-    async def _capture(query: object) -> tuple[str, None]:
-        captured.append(query.query)  # type: ignore[attr-defined]
-        return ("formatted", None)
+    async def _capture(insightsql: str, **_kwargs: object) -> str:
+        captured.append(insightsql)
+        return "formatted"
 
-    mock_executor_cls.return_value.arun_and_format_query = AsyncMock(side_effect=_capture)
+    mock_run_query.side_effect = _capture
     spec = EnrichedPromptSpec(
         cleaned_prompt="p",
         context_blob="c",
