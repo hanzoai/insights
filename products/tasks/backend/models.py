@@ -144,7 +144,7 @@ PR_READY_EMAIL_PR_URL_STATE_KEY = "pr_ready_email_pr_url"
 
 
 class TaskClientProvenance(models.TextChoices):
-    POSTFN_DESKTOP = "insights_desktop", "Insights Desktop"
+    INSIGHTS_DESKTOP = "insights_desktop", "Insights Desktop"
 
 
 class Task(DeletedMetaFields, models.Model):

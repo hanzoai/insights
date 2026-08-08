@@ -9,6 +9,7 @@ import dagster
 from dagster._core.definitions.metadata import RawMetadataMapping
 from dagster_docker import PipesDockerClient
 from dagster_slack import SlackResource
+from ee.hogai.eval.schema import DatasetInput, EvalsDockerImageConfig, TeamEvaluationSnapshot
 from pydantic import BaseModel, Field, ValidationError
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -23,8 +24,6 @@ from products.insights_ai.dags.snapshot_team_data import (
     snapshot_postgres_team_data,
 )
 from products.insights_ai.dags.utils import EvaluationResults, format_results
-
-from ee.hogai.eval.schema import DatasetInput, EvalsDockerImageConfig, TeamEvaluationSnapshot
 
 
 def get_object_storage_endpoint() -> str:
@@ -269,7 +268,7 @@ def spawn_evaluation_container(
                 "report": dagster.MarkdownMetadataValue(formatted_markdown),
             },
             tags={
-                "owner": JobOwners.TEAM_POSTFN_AI.value,
+                "owner": JobOwners.TEAM_INSIGHTS_AI.value,
             },
         )
     )
@@ -278,7 +277,7 @@ def spawn_evaluation_container(
 @dagster.job(
     description="Runs an AI evaluation",
     tags={
-        "owner": JobOwners.TEAM_POSTFN_AI.value,
+        "owner": JobOwners.TEAM_INSIGHTS_AI.value,
         "dagster/max_runtime": 60 * 60,  # 1 hour
     },
     executor_def=dagster.multiprocess_executor.configured({"max_concurrent": 4}),

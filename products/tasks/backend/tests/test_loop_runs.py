@@ -186,7 +186,7 @@ class TestFireLoopGuardrails(LoopRunsTestCase):
         self.assertEqual(Task.objects.filter(team=self.team, origin_product=Task.OriginProduct.LOOP).count(), 0)
 
     def test_same_fire_key_on_a_trigger_dedups_and_returns_the_original_run(self):
-        loop = self.create_loop(client_provenance=TaskClientProvenance.POSTFN_DESKTOP)
+        loop = self.create_loop(client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP)
         trigger = self.create_trigger(loop)
 
         first = fire_loop(loop, trigger, "delivery-1", "ctx")
@@ -203,7 +203,7 @@ class TestFireLoopGuardrails(LoopRunsTestCase):
         assert first.task_id is not None
         self.assertEqual(
             Task.objects.get(id=first.task_id).client_provenance,
-            TaskClientProvenance.POSTFN_DESKTOP,
+            TaskClientProvenance.INSIGHTS_DESKTOP,
         )
 
     def test_manual_fire_dedups_on_the_idempotency_key(self):

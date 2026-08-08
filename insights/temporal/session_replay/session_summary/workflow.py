@@ -9,6 +9,14 @@ from django.conf import settings
 import structlog
 import temporalio
 import hanzo_insights
+from ee.hogai.session_summaries.constants import (
+    DEFAULT_VIDEO_UNDERSTANDING_MODEL,
+    MAX_ACTIVE_SECONDS_FOR_VIDEO_SUMMARY_S,
+    MIN_SESSION_DURATION_FOR_VIDEO_SUMMARY_S,
+    SESSION_SUMMARIES_MODEL,
+)
+from ee.hogai.session_summaries.session.summarize_session import ExtraSummaryContext
+from ee.hogai.session_summaries.utils import serialize_to_sse_event
 from redis import Redis
 from temporalio.client import WorkflowExecutionStatus, WorkflowHandle
 from temporalio.common import (
@@ -33,7 +41,7 @@ from insights.session_recordings.queries.session_replay_events import SessionRep
 from insights.sync import database_sync_to_async
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.client import async_connect
-from insights.temporal.common.search_attributes import POSTFN_SESSION_RECORDING_ID_KEY, POSTFN_TEAM_ID_KEY
+from insights.temporal.common.search_attributes import INSIGHTS_SESSION_RECORDING_ID_KEY, INSIGHTS_TEAM_ID_KEY
 from insights.temporal.session_replay.rasterize_recording.types import RasterizeRecordingInputs
 from insights.temporal.session_replay.session_summary.activities.capture_timing import (
     CaptureTimingInputs,
@@ -71,15 +79,6 @@ from insights.temporal.session_replay.session_summary.types.video import (
 )
 
 from products.replay.backend.models.session_summaries import SingleSessionSummary
-
-from ee.hogai.session_summaries.constants import (
-    DEFAULT_VIDEO_UNDERSTANDING_MODEL,
-    MAX_ACTIVE_SECONDS_FOR_VIDEO_SUMMARY_S,
-    MIN_SESSION_DURATION_FOR_VIDEO_SUMMARY_S,
-    SESSION_SUMMARIES_MODEL,
-)
-from ee.hogai.session_summaries.session.summarize_session import ExtraSummaryContext
-from ee.hogai.session_summaries.utils import serialize_to_sse_event
 
 logger = structlog.get_logger(__name__)
 
@@ -391,8 +390,8 @@ async def ensure_llm_single_session_summary(
         execution_timeout=timedelta(minutes=30),
         search_attributes=TypedSearchAttributes(
             search_attributes=[
-                SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=video_inputs.team_id),
-                SearchAttributePair(key=POSTFN_SESSION_RECORDING_ID_KEY, value=video_inputs.session_id),
+                SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=video_inputs.team_id),
+                SearchAttributePair(key=INSIGHTS_SESSION_RECORDING_ID_KEY, value=video_inputs.session_id),
             ]
         ),
     )
@@ -590,7 +589,7 @@ async def _start_video_summary_workflow(
         task_queue=settings.SESSION_REPLAY_TASK_QUEUE,
         retry_policy=retry_policy,
         search_attributes=TypedSearchAttributes(
-            search_attributes=[SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=inputs.team_id)]
+            search_attributes=[SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=inputs.team_id)]
         ),
     )
     return handle
@@ -617,7 +616,7 @@ async def _execute_single_session_summary_workflow(inputs: SingleSessionSummaryI
         task_queue=settings.SESSION_REPLAY_TASK_QUEUE,
         retry_policy=retry_policy,
         search_attributes=TypedSearchAttributes(
-            search_attributes=[SearchAttributePair(key=POSTFN_TEAM_ID_KEY, value=inputs.team_id)]
+            search_attributes=[SearchAttributePair(key=INSIGHTS_TEAM_ID_KEY, value=inputs.team_id)]
         ),
     )
 
