@@ -88,7 +88,6 @@ export enum Scene {
     IntegrationsLanding = 'IntegrationsLanding',
     StripeConfirmInstall = 'StripeConfirmInstall',
     IngestionWarnings = 'IngestionWarnings',
-    InviteSignup = 'InviteSignup',
     BusinessKnowledge = 'BusinessKnowledge',
     LegacyPlugin = 'LegacyPlugin',
     LegalDocuments = 'LegalDocuments',

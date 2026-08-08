@@ -2,12 +2,10 @@ import { isOnboardingNotRequiredForPath, withForwardedSearchParams } from './sce
 
 describe('sceneLogic', () => {
     describe('isOnboardingNotRequiredForPath', () => {
-        // Regression guard: mid-onboarding users hitting auth/account round-trips (email-change
-        // confirmation, credential/passkey review) must not be bounced to /onboarding before the
-        // scene's own logic can run, or the flow is swallowed and never completes.
+        // Regression guard: mid-onboarding users hitting an account round-trip (credential
+        // review) must not be bounced to /onboarding before the scene's own logic can run, or
+        // the flow is swallowed and never completes.
         it.each<[string, boolean]>([
-            ['/verify_email/some-uuid/some-token', true],
-            ['/project/492200/verify_email/some-uuid/some-token', true],
             ['/account/credential-review', true],
             ['/project/492200/account/credential-review', true],
             ['/project/492200/dashboard/1', false],

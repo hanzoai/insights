@@ -824,66 +824,62 @@ export const sceneLogic = kea<sceneLogicType>([
                     return
                 }
 
-                if (sceneId !== Scene.InviteSignup) {
-                    // Redirect to org/project creation if there's no org/project respectively, unless using invite
-                    if (organizationLogic.values.isCurrentOrganizationUnavailable) {
-                        if (
-                            location.pathname !== urls.organizationCreateFirst() &&
-                            !location.pathname.startsWith(urls.settings('user'))
-                        ) {
-                            console.warn('Organization not available, redirecting to organization creation')
-                            router.actions.replace(urls.organizationCreateFirst())
-                            return
-                        }
-                    } else if (teamLogic.values.isCurrentTeamUnavailable) {
-                        if (
-                            user.organization?.teams.length === 0 &&
-                            user.organization.membership_level &&
-                            user.organization.membership_level >= TeamMembershipLevel.Admin
-                        ) {
-                            // Allow settings to be opened, otherwise route to project creation
-                            if (
-                                location.pathname !== urls.projectCreateFirst() &&
-                                !location.pathname.startsWith('/settings')
-                            ) {
-                                console.warn(
-                                    'Project not available and no other projects, redirecting to project creation'
-                                )
-                                toast.error('You do not have access to any projects in this organization', {
-                                    toastId: 'no-projects',
-                                })
-                                router.actions.replace(urls.projectCreateFirst())
-                                return
-                            }
-                        }
-                    } else if (
-                        // Or redirect to onboarding in case we detect people have to do onboarding for their first project
-                        user.organization?.teams.length === 1 &&
-                        teamLogic.values.currentTeam &&
-                        !teamLogic.values.currentTeam.is_demo &&
-                        !teamLogic.values.hasOnboardedAnyProduct &&
-                        !teamLogic.values.currentTeam?.ingested_event &&
-                        // Suppress the redirect when the user has explicitly exited onboarding
-                        // (skipped for later, or delegated to a teammate with a pending invite).
-                        // If the delegation invite is cancelled or expires, the backend clears
-                        // onboarding_delegated_to_invite and the redirect re-fires.
-                        !isOnboardingRedirectSuppressed(user) &&
-                        !isOnboardingNotRequiredForPath(location.pathname)
+                // Redirect to org/project creation if there's no org/project respectively
+                if (organizationLogic.values.isCurrentOrganizationUnavailable) {
+                    if (
+                        location.pathname !== urls.organizationCreateFirst() &&
+                        !location.pathname.startsWith(urls.settings('user'))
                     ) {
-                        const nextUrl =
-                            getRelativeNextPath(params.searchParams.next, location) ??
-                            removeProjectIdIfPresent(location.pathname)
-
-                        // Check if user is coming from a coupon campaign link
-                        const campaign = nextUrl ? parseCouponCampaign(nextUrl) : null
-                        if (campaign) {
-                            router.actions.replace(urls.onboarding({ campaign }), { next: nextUrl })
-                            return
-                        }
-
-                        router.actions.replace(urls.onboarding(), nextUrl ? { next: nextUrl } : undefined)
+                        console.warn('Organization not available, redirecting to organization creation')
+                        router.actions.replace(urls.organizationCreateFirst())
                         return
                     }
+                } else if (teamLogic.values.isCurrentTeamUnavailable) {
+                    if (
+                        user.organization?.teams.length === 0 &&
+                        user.organization.membership_level &&
+                        user.organization.membership_level >= TeamMembershipLevel.Admin
+                    ) {
+                        // Allow settings to be opened, otherwise route to project creation
+                        if (
+                            location.pathname !== urls.projectCreateFirst() &&
+                            !location.pathname.startsWith('/settings')
+                        ) {
+                            console.warn('Project not available and no other projects, redirecting to project creation')
+                            toast.error('You do not have access to any projects in this organization', {
+                                toastId: 'no-projects',
+                            })
+                            router.actions.replace(urls.projectCreateFirst())
+                            return
+                        }
+                    }
+                } else if (
+                    // Or redirect to onboarding in case we detect people have to do onboarding for their first project
+                    user.organization?.teams.length === 1 &&
+                    teamLogic.values.currentTeam &&
+                    !teamLogic.values.currentTeam.is_demo &&
+                    !teamLogic.values.hasOnboardedAnyProduct &&
+                    !teamLogic.values.currentTeam?.ingested_event &&
+                    // Suppress the redirect when the user has explicitly exited onboarding
+                    // (skipped for later, or delegated to a teammate with a pending invite).
+                    // If the delegation invite is cancelled or expires, the backend clears
+                    // onboarding_delegated_to_invite and the redirect re-fires.
+                    !isOnboardingRedirectSuppressed(user) &&
+                    !isOnboardingNotRequiredForPath(location.pathname)
+                ) {
+                    const nextUrl =
+                        getRelativeNextPath(params.searchParams.next, location) ??
+                        removeProjectIdIfPresent(location.pathname)
+
+                    // Check if user is coming from a coupon campaign link
+                    const campaign = nextUrl ? parseCouponCampaign(nextUrl) : null
+                    if (campaign) {
+                        router.actions.replace(urls.onboarding({ campaign }), { next: nextUrl })
+                        return
+                    }
+
+                    router.actions.replace(urls.onboarding(), nextUrl ? { next: nextUrl } : undefined)
+                    return
                 }
             }
 

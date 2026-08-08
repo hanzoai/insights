@@ -4577,13 +4577,6 @@ export interface ScheduledChangeType {
     end_date: string | null
 }
 
-export interface PrevalidatedInvite {
-    id: string
-    target_email: string
-    first_name: string
-    organization_name: string
-}
-
 interface InstancePreferencesInterface {
     /** Whether debug queries option should be shown on the command palette. */
     debug_queries: boolean
