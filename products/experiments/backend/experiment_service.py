@@ -79,6 +79,7 @@ from products.experiments.backend.models.experiment import (
     experiment_has_legacy_metrics,
 )
 from products.experiments.backend.models.team_experiments_config import TeamExperimentsConfig
+from products.experiments.backend.presentation.saved_metric import ExperimentToSavedMetricSerializer
 from products.experiments.backend.result_serialization import strip_step_sessions
 from products.experiments.backend.warehouse_access_control import enforce_warehouse_metric_access
 from products.feature_flags.backend.api.feature_flag import parse_created_by_ids
@@ -1701,13 +1702,6 @@ class ExperimentService:
         context = serializer_context or self._build_serializer_context()
 
         for saved_metric_data in saved_metrics_ids:
-            # Imported here rather than at module scope: presentation.serializers imports
-            # ExperimentService back, so at top level neither module could import at all —
-            # it took 13 modules with it, insights.api.signup among them. A service reaching
-            # up into presentation is the edge that should not exist; this keeps it off the
-            # import graph while leaving presentation -> service, which is the right way round.
-            from products.experiments.backend.presentation.serializers import ExperimentToSavedMetricSerializer
-
             saved_metric_serializer = ExperimentToSavedMetricSerializer(
                 data={
                     "experiment": experiment.id,
@@ -3546,10 +3540,6 @@ class ExperimentService:
                             existing_link.metadata = new_metadata
                             existing_link.save(update_fields=["metadata", "updated_at"])
                     else:
-                        from products.experiments.backend.presentation.serializers import (
-                            ExperimentToSavedMetricSerializer,
-                        )
-
                         saved_metric_serializer = ExperimentToSavedMetricSerializer(
                             data={
                                 "experiment": experiment.id,
