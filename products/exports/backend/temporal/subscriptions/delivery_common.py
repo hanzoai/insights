@@ -8,23 +8,27 @@ from temporalio.exceptions import ApplicationError
 from insights.email import EmailDeliveryError
 from insights.exceptions_capture import capture_exception
 from insights.models.integration import Integration
+from insights.ph_client import ph_background_capture
 from insights.sync import database_sync_to_async
 
 from products.exports.backend.models.subscription import Subscription
-from products.exports.backend.temporal.subscriptions.types import (
-    DeliverSubscriptionInputs,
-    DeliverSubscriptionResult,
-    RecipientResult,
-)
-
-from ee.tasks.subscriptions import SLACK_USER_CONFIG_ERRORS, _capture_delivery_failed_event
-from ee.tasks.subscriptions.auto_disable import (
+from products.exports.backend.temporal.subscriptions.disable import (
     SLACK_DISCONNECTED_DISABLE_REASON,
     SLACK_PERMISSION_REVOKED_DISABLE_REASON,
     DisableReason,
     disable_invalid_subscription,
 )
-from ee.tasks.subscriptions.slack_subscriptions import SlackDeliveryResult, get_slack_integration_for_team
+from products.exports.backend.temporal.subscriptions.slack import (
+    SLACK_USER_CONFIG_ERRORS,
+    SlackDeliveryResult,
+    get_slack_integration_for_team,
+)
+from products.exports.backend.temporal.subscriptions.types import (
+    DeliverSubscriptionInputs,
+    DeliverSubscriptionResult,
+    NoExportableInsightsContext,
+    RecipientResult,
+)
 
 LOGGER = get_logger(__name__)
 
@@ -54,6 +58,30 @@ def strip_null_bytes(value: Any) -> Any:
     return value
 
 
+def capture_delivery_failed_event(
+    subscription: Subscription, e: Exception, properties: NoExportableInsightsContext | None = None
+) -> None:
+    """Record that a delivery failed, for the subscription-health analytics.
+
+    Best-effort by design: this runs inside long-lived Temporal workers, so it
+    enqueues onto the process-lifetime client rather than standing one up and
+    blocking on a flush per failure.
+    """
+    distinct_id = (subscription.created_by.distinct_id if subscription.created_by else None) or subscription.team_id
+    ph_background_capture()(
+        distinct_id=str(distinct_id),
+        event="subscription_delivery_failed",
+        properties={
+            "subscription_id": subscription.id,
+            "team_id": subscription.team_id,
+            "target_type": subscription.target_type,
+            "exception": str(e),
+            "exception_type": type(e).__name__,
+            **(properties or {}),
+        },
+    )
+
+
 async def auto_disable_and_return(
     subscription: Subscription,
     reason: DisableReason,
@@ -69,9 +97,9 @@ async def auto_disable_and_return(
             human_readable_error=reason.description,
         )
     )
-    # `_capture_delivery_failed_event` only reads `str(e)` and `type(e).__name__`,
+    # `capture_delivery_failed_event` only reads `str(e)` and `type(e).__name__`,
     # so a plain Exception conveys the same info without implying retry semantics.
-    _capture_delivery_failed_event(subscription, Exception(reason.description))
+    capture_delivery_failed_event(subscription, Exception(reason.description))
     await database_sync_to_async(disable_invalid_subscription, thread_sensitive=False)(subscription, reason)
     return DeliverSubscriptionResult(recipient_results=recipient_results)
 
@@ -118,7 +146,7 @@ async def deliver_email(
                 exc_info=True,
             )
             capture_exception(exc)
-            _capture_delivery_failed_event(subscription, exc)
+            capture_delivery_failed_event(subscription, exc)
             recipient_results.append(
                 RecipientResult(
                     recipient=email,
@@ -200,7 +228,7 @@ async def deliver_slack(
         raise
     except Exception as exc:
         slack_error_code = exc.response.get("error") if isinstance(exc, SlackApiError) else None
-        _capture_delivery_failed_event(subscription, exc)
+        capture_delivery_failed_event(subscription, exc)
         LOGGER.error(
             "deliver_subscription.slack_failed",
             subscription_id=subscription.id,

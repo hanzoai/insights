@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from ee.tasks.subscriptions.slack_subscriptions import _prepare_slack_message
+from products.exports.backend.temporal.subscriptions.slack import build_slack_message
 
 
 def _make_subscription(title: str = "Weekly report"):
@@ -35,7 +35,7 @@ class TestSlackMessageIncludesSummary:
         sub = _make_subscription()
         asset = _make_asset()
 
-        message_data = _prepare_slack_message(sub, [asset], 1, change_summary="- Pageviews up 15%")
+        message_data = build_slack_message(sub, [asset], 1, change_summary="- Pageviews up 15%")
 
         mrkdwn_blocks = [
             b
@@ -49,7 +49,7 @@ class TestSlackMessageIncludesSummary:
         sub = _make_subscription()
         asset = _make_asset()
 
-        message_data = _prepare_slack_message(sub, [asset], 1, change_summary=None)
+        message_data = build_slack_message(sub, [asset], 1, change_summary=None)
 
         mrkdwn_texts = [b.get("text", {}).get("text", "") for b in message_data.blocks if b.get("type") == "section"]
         for text in mrkdwn_texts:
@@ -60,7 +60,7 @@ class TestSlackMessageIncludesSummary:
         asset = _make_asset()
         long_summary = "x" * 5000
 
-        message_data = _prepare_slack_message(sub, [asset], 1, change_summary=long_summary)
+        message_data = build_slack_message(sub, [asset], 1, change_summary=long_summary)
 
         summary_blocks = [
             b

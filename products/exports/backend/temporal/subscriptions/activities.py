@@ -20,13 +20,22 @@ from products.exports.backend.models.subscription import Subscription, Subscript
 from products.exports.backend.temporal.subscriptions.ai_subscription.activities import _deliver_ai_subscription
 from products.exports.backend.temporal.subscriptions.delivery_common import (
     auto_disable_and_return,
+    capture_delivery_failed_event,
     deliver_email,
     deliver_slack,
 )
+from products.exports.backend.temporal.subscriptions.disable import (
+    UNSUPPORTED_TARGET_DISABLE_REASON,
+    disable_invalid_subscription,
+    get_subscription_disable_reason,
+)
+from products.exports.backend.temporal.subscriptions.email import send_email_subscription_report
 from products.exports.backend.temporal.subscriptions.insight_snapshot import (
     build_initial_content_snapshot,
     build_insight_delivery_snapshot,
 )
+from products.exports.backend.temporal.subscriptions.report import MAX_INSIGHTS
+from products.exports.backend.temporal.subscriptions.slack import send_slack_subscription_report
 from products.exports.backend.temporal.subscriptions.types import (
     CreateDeliveryRecordInputs,
     CreateExportAssetsInputs,
@@ -43,16 +52,6 @@ from products.exports.backend.temporal.subscriptions.types import (
     UpdateDeliveryRecordInputs,
 )
 from products.product_analytics.backend.models.insight import Insight
-
-from ee.tasks.subscriptions import _capture_delivery_failed_event
-from ee.tasks.subscriptions.auto_disable import (
-    UNSUPPORTED_TARGET_DISABLE_REASON,
-    disable_invalid_subscription,
-    get_subscription_disable_reason,
-)
-from ee.tasks.subscriptions.email_subscriptions import send_email_subscription_report
-from ee.tasks.subscriptions.slack_subscriptions import send_slack_message_with_integration_async
-from ee.tasks.subscriptions.subscription_utils import MAX_INSIGHTS
 
 LOGGER = get_logger(__name__)
 
@@ -238,7 +237,7 @@ async def validate_subscription_for_delivery(subscription_id: int) -> Subscripti
         target_type=subscription.target_type,
         reason=reason.key,
     )
-    _capture_delivery_failed_event(subscription, Exception(reason.description))
+    capture_delivery_failed_event(subscription, Exception(reason.description))
     await database_sync_to_async(disable_invalid_subscription, thread_sensitive=False)(subscription, reason)
     return SubscriptionAbortInfo(
         failed_recipient=RecipientResult(
@@ -302,7 +301,7 @@ async def create_export_assets(inputs: CreateExportAssetsInputs) -> CreateExport
             insight_id=subscription.insight_id,
             **failure_context,
         )
-        _capture_delivery_failed_event(
+        capture_delivery_failed_event(
             subscription,
             NoExportableInsightsError(no_exportable_reason),
             failure_context,
@@ -488,10 +487,10 @@ async def _deliver_insight_dashboard_subscription(
                 human_readable_error=NO_ASSETS_HUMAN_READABLE_REASON,
             )
         )
-        # Plain Exception — `_capture_delivery_failed_event` only reads `str(e)` and
+        # Plain Exception — `capture_delivery_failed_event` only reads `str(e)` and
         # `type(e).__name__`, and the activity returns cleanly so retry semantics on
         # ApplicationError would be misleading (matches `_auto_disable_and_return`).
-        _capture_delivery_failed_event(subscription, Exception(NO_ASSETS_REASON))
+        capture_delivery_failed_event(subscription, Exception(NO_ASSETS_REASON))
         return DeliverSubscriptionResult(recipient_results=recipient_results)
 
     if subscription.target_type == Subscription.SubscriptionTarget.EMAIL:
@@ -514,7 +513,7 @@ async def _deliver_insight_dashboard_subscription(
         result = await deliver_slack(
             subscription,
             recipient_results,
-            lambda integration: send_slack_message_with_integration_async(
+            lambda integration: send_slack_subscription_report(
                 integration,
                 subscription,
                 assets,
