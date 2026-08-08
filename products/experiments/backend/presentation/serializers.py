@@ -43,9 +43,9 @@ from products.experiments.backend.models.experiment import (
     Experiment,
     ExperimentHoldout,
     ExperimentMetricsRecalculation,
-    ExperimentToSavedMetric,
     experiment_has_legacy_metrics,
 )
+from products.experiments.backend.presentation.saved_metric import ExperimentToSavedMetricSerializer
 from products.experiments.backend.running_time_calculator import METRIC_TYPE_CHOICES
 from products.experiments.backend.session_buckets import MAX_BUCKET_SCAN_DAYS, MAX_SESSION_BUCKET_LIMIT, SessionBucket
 from products.experiments.backend.session_context import MAX_SESSION_CONTEXT_BATCH
@@ -69,24 +69,6 @@ class ExperimentHoldoutSerializer(serializers.ModelSerializer):
         model = ExperimentHoldout
         fields = ["id", "name", "description", "filters", "created_by", "created_at", "updated_at"]
         read_only_fields = fields
-
-
-class ExperimentToSavedMetricSerializer(serializers.ModelSerializer):
-    """The join between an experiment and a shared saved metric.
-
-    `metadata` records what the experiment knew about the metric when it was attached (whether it
-    is primary, for instance), which is why the join is serialized rather than the metric alone.
-    `saved_metric` is written by id and read back alongside the metric's name and query, so a
-    caller rendering an experiment does not have to fetch each metric separately.
-    """
-
-    query = serializers.JSONField(source="saved_metric.query", read_only=True)
-    name = serializers.CharField(source="saved_metric.name", read_only=True)
-
-    class Meta:
-        model = ExperimentToSavedMetric
-        fields = ["id", "experiment", "saved_metric", "metadata", "name", "query", "created_at"]
-        read_only_fields = ["id", "name", "query", "created_at"]
 
 
 class _ExperimentApiMetricsList(PydanticRootModel):
