@@ -10,40 +10,39 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ('admin', '0003_logentry_add_action_flag_choices'),
-        ('analytics_platform', '0002_initial'),
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('axes', '0009_add_session_hash'),
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('conversations', '0002_initial'),
-        ('customer_analytics', '0002_initial'),
-        ('data_modeling', '0002_initial'),
-        ('data_warehouse', '0002_initial'),
-        ('desktop_recordings', '0002_initial'),
-        ('early_access_features', '0002_initial'),
-        ('endpoints', '0002_initial'),
-        ('error_tracking', '0002_initial'),
-        ('insights', '0002_managed_tables'),
-        ('insights_ai', '0001_initial'),
-        ('live_debugger', '0001_initial'),
-        ('llm_analytics', '0001_initial'),
-        ('marketing_analytics', '0001_initial'),
-        ('notebooks', '0001_initial'),
-        ('oauth2_provider', '0012_add_token_checksum'),
-        ('otp_static', '0003_add_timestamps'),
-        ('otp_totp', '0003_add_timestamps'),
-        ('product_tours', '0001_initial'),
-        ('sessions', '0001_initial'),
-        ('signals', '0001_initial'),
-        ('social_django', '0016_alter_usersocialauth_extra_data'),
-        ('tasks', '0001_initial'),
-        ('two_factor', '0001_squashed_0008_delete_phonedevice'),
-        ('user_interviews', '0001_initial'),
-        ('workflows', '0001_initial')
+        ("admin", "0003_logentry_add_action_flag_choices"),
+        ("analytics_platform", "0002_initial"),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("conversations", "0002_initial"),
+        ("customer_analytics", "0002_initial"),
+        ("data_modeling", "0002_initial"),
+        ("data_warehouse", "0002_initial"),
+        ("desktop_recordings", "0002_initial"),
+        ("early_access_features", "0002_initial"),
+        ("endpoints", "0002_initial"),
+        ("error_tracking", "0002_initial"),
+        ("insights", "0002_managed_tables"),
+        ("insights_ai", "0001_initial"),
+        ("live_debugger", "0001_initial"),
+        ("llm_analytics", "0001_initial"),
+        ("marketing_analytics", "0001_initial"),
+        ("notebooks", "0001_initial"),
+        ("oauth2_provider", "0012_add_token_checksum"),
+        ("otp_static", "0003_add_timestamps"),
+        ("otp_totp", "0003_add_timestamps"),
+        ("product_tours", "0001_initial"),
+        ("sessions", "0001_initial"),
+        ("signals", "0001_initial"),
+        ("social_django", "0016_alter_usersocialauth_extra_data"),
+        ("tasks", "0001_initial"),
+        ("user_interviews", "0001_initial"),
+        ("workflows", "0001_initial"),
     ]
 
     operations = [
-        migrations.RunSQL(sql=r"""
+        migrations.RunSQL(
+            sql=r"""
 ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "cache_age_seconds" integer;
 ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "description" text;
 ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "parameters" jsonb;
@@ -80,7 +79,8 @@ CREATE INDEX IF NOT EXISTS insights_task_workflow_id_34ce9690 ON public.insights
 CREATE UNIQUE INDEX IF NOT EXISTS team_secret_api_token_backup_unique_idx ON public.insights_team USING btree (secret_api_token_backup);
 CREATE UNIQUE INDEX IF NOT EXISTS team_secret_api_token_unique_idx ON public.insights_team USING btree (secret_api_token);
 CREATE UNIQUE INDEX IF NOT EXISTS unique_pending_job_per_range ON public.analytics_platform_preaggregationjob USING btree (team_id, query_hash, time_range_start, time_range_end) WHERE ((status)::text = 'pending'::text);
-""", reverse_sql=r"""
+""",
+            reverse_sql=r"""
 DROP INDEX IF EXISTS endpoints_endpoint_saved_query_id_23649aa9;
 DROP INDEX IF EXISTS idx_activitylog_featureflag_updates;
 DROP INDEX IF EXISTS idx_alog_detail_gin_path_ops;
@@ -101,5 +101,6 @@ DROP INDEX IF EXISTS insights_task_workflow_id_34ce9690;
 DROP INDEX IF EXISTS team_secret_api_token_backup_unique_idx;
 DROP INDEX IF EXISTS team_secret_api_token_unique_idx;
 DROP INDEX IF EXISTS unique_pending_job_per_range;
-"""),
+""",
+        ),
     ]
