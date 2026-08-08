@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "0867_add_updated_at_to_feature_flags"),
+        ("insights", "0001_initial"),
         ("llm_analytics", "0001_initial_migration"),
     ]
 

@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1256_userproductlist_default_reason"),
+        ("insights", "0001_initial"),
         ("tasks", "0073_task_activity"),
     ]
 

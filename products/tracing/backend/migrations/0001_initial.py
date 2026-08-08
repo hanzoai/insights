@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1245_duckgres_sink_schema_state"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

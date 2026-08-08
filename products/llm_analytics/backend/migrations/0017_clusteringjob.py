@@ -6,7 +6,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1002_experiment_exposure_preaggregation_enabled"),
+        ("insights", "0001_initial"),
         ("llm_analytics", "0016_alter_evaluation_evaluation_type"),
     ]
 

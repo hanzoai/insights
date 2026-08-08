@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "1207_migrate_ai_observability_models"),
+        ("insights", "0001_initial"),
         ("batch_exports", "0003_alter_batchexportdestination_type"),
     ]
 

@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("ai_observability", "0003_normalize_evaluation_conditions"),
-        ("insights", "1207_migrate_ai_observability_models"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

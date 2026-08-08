@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1155_sharingconfiguration_interviewee_context"),
+        ("insights", "0001_initial"),
         ("signals", "0019_alter_signalsourceconfig_source_product_and_more"),
     ]
 

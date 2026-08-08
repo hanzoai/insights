@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("dashboards", "0003_backfill_dashboardtile_team_id"),
-        ("insights", "1183_migrate_product_analytics_models_state"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

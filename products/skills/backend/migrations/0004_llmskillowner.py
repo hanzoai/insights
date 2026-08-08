@@ -10,7 +10,7 @@ import insights.uuidt
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1262_organization_members_can_see_org_members"),
+        ("insights", "0001_initial"),
         ("skills", "0003_backfill_scout_category"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

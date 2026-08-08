@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             name="install_source",
             field=models.CharField(
                 choices=[
-                    ("insights", "insights"),
+                    ("insights", "0001_initial"),
                     ("twig", "twig"),
                     ("insights-code", "insights-code"),
                 ],

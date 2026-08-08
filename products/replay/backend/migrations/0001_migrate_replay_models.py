@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1213_filesystemfolderinstructions"),
+        ("insights", "0001_initial"),
         ("ee", "0049_migrate_insights_ai_models"),
     ]
 

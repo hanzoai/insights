@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1095_create_group_datastore_team"),
+        ("insights", "0001_initial"),
         ("event_definitions", "0002_schemapropertygroupproperty_is_optional_in_types"),
         ("ee", "0041_migrate_dashboards_models"),
     ]

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         ("annotations", "0003_annotation_hidden_in_user_interface"),
         ("dashboards", "0013_dashboardtile_button_tile_id_idx"),
         ("experiments", "0025_remove_teamexperimentsconfig_funnel_steps_data_disabled"),
-        ("insights", "1247_oauthaccesstoken_token_idx"),
+        ("insights", "0001_initial"),
         ("product_analytics", "0001_migrate_product_analytics_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

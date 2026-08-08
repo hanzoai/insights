@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("growth", "0006_seed_ai_pilled_prompt_config"),
-        ("insights", "1280_alter_integration_kind"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

@@ -10,7 +10,7 @@ import insights.uuidt
 class Migration(migrations.Migration):
     dependencies = [
         ("growth", "0004_organizationenrichmentfetch"),
-        ("insights", "1265_delete_duckgresserverteam"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

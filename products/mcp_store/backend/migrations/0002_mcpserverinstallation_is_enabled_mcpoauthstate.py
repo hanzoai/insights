@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1030_add_last_calculation_duration_ms"),
+        ("insights", "0001_initial"),
         ("mcp_store", "0001_initial"),
     ]
 
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                 (
                     "install_source",
                     models.CharField(
-                        choices=[("insights", "insights"), ("twig", "twig")],
+                        choices=[("insights", "0001_initial"), ("twig", "twig")],
                         default="insights",
                         max_length=20,
                     ),

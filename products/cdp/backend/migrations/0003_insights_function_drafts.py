@@ -8,7 +8,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1266_comment_convo_content_trgm"),
+        ("insights", "0001_initial"),
         ("cdp", "0002_alter_hogfunction_batch_export"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

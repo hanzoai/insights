@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1043_add_15_minute_interval_to_batch_exports"),
+        ("insights", "0001_initial"),
         ("llm_analytics", "0020_scoredefinition"),
     ]
 

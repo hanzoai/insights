@@ -9,7 +9,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0037_emailoutboxmessage"),
-        ("insights", "1226_identityproviderconfig_and_more"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

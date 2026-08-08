@@ -11,7 +11,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1245_duckgres_sink_schema_state"),
+        ("insights", "0001_initial"),
         ("warehouse_sources", "0053_alter_externaldatasource_source_type_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

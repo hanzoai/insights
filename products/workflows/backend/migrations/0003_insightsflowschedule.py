@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1071_move_tokens_to_sensitive_config"),
+        ("insights", "0001_initial"),
         ("workflows", "0002_insightsflowbatchjob_scheduled_at"),
     ]
 

@@ -11,7 +11,7 @@ from insights.migration_helpers import AddForeignKeyNotValid
 class Migration(migrations.Migration):
     dependencies = [
         ("customer_analytics", "0007_custom_property_definition"),
-        ("insights", "1237_alter_integration_kind"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

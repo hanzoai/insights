@@ -10,7 +10,7 @@ import insights.uuidt
 class Migration(migrations.Migration):
     dependencies = [
         ("messaging", "0002_optout_sync_config"),
-        ("insights", "1256_userproductlist_default_reason"),
+        ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

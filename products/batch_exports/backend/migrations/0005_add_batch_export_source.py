@@ -9,7 +9,7 @@ import insights.uuidt
 class Migration(migrations.Migration):
     dependencies = [
         ("batch_exports", "0004_migrate_managed_migrations_models"),
-        ("insights", "1257_datadeletionrequest_approved_automatically_and_more"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [

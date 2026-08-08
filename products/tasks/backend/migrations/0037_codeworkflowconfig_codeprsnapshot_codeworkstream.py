@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1166_oauth_impersonated_by"),
+        ("insights", "0001_initial"),
         ("tasks", "0036_taskrun_output_pr_url_idx"),
     ]
 

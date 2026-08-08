@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1039_subscription_dashboard_export_insights"),
+        ("insights", "0001_initial"),
     ]
 
     operations = [
