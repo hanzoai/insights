@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer = "2026-08-01T22:40:19.878636Z"
 exclude-newer-span = "P7D"
 
 [options.exclude-newer-package]
@@ -1601,7 +1601,7 @@ dependencies = [
 [[package]]
 name = "datastore-orm"
 version = "2.1.0.post20"
-source = { git = "https://github.com/hanzoai/datastore-orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb#56c46e4bc6a424fd68b12df2afbacea4090b2dbb" }
+source = { git = "https://github.com/hanzo-ds/orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb#56c46e4bc6a424fd68b12df2afbacea4090b2dbb" }
 dependencies = [
     { name = "iso8601" },
     { name = "pytz" },
@@ -3613,7 +3613,7 @@ requires-dist = [
     { name = "databricks-sql-connector", specifier = "~=4.3.0" },
     { name = "datastore-connect", git = "https://github.com/hanzo-ds/connect?rev=ccbd4b5" },
     { name = "datastore-driver", git = "https://github.com/hanzo-ds/driver?rev=119df3f" },
-    { name = "datastore-orm", git = "https://github.com/hanzoai/datastore-orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb" },
+    { name = "datastore-orm", git = "https://github.com/hanzo-ds/orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb" },
     { name = "datastore-pool", git = "https://github.com/hanzo-ds/pool?rev=7260d56" },
     { name = "defusedxml", specifier = "~=0.7.1" },
     { name = "deltalake", extras = ["pyarrow"], specifier = "==1.6.1" },
