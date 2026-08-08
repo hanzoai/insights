@@ -43,7 +43,7 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.mailgun.se
 
 US_BASE = "https://api.mailgun.net"
 EU_BASE = "https://api.eu.mailgun.net"
-POSTFN_URL = "https://us.hanzo.ai/public/webhooks/abc"
+INSIGHTS_URL = "https://us.hanzo.ai/public/webhooks/abc"
 
 
 def _make_manager(resume_state: MailgunResumeConfig | None = None) -> mock.MagicMock:
@@ -766,7 +766,7 @@ class TestWebhookManagement:
         session = self._session(mock_session, [_webhook_list_response({}), _webhook_list_response({})])
         session.post.return_value = _response({})
 
-        result = create_webhook("key", "us", POSTFN_URL)
+        result = create_webhook("key", "us", INSIGHTS_URL)
 
         assert result.success is True
         # Mailgun never returns the signing key, so the user has to paste it before deliveries verify.
@@ -776,23 +776,23 @@ class TestWebhookManagement:
         for domain in ("mg.example.com", "mg.other.com"):
             registered = {data["id"] for url, data in posted if url.endswith(f"/v3/domains/{domain}/webhooks")}
             assert registered == set(WEBHOOK_TYPES)
-        assert {data["url"] for _, data in posted} == {POSTFN_URL}
+        assert {data["url"] for _, data in posted} == {INSIGHTS_URL}
 
     @mock.patch("products.warehouse_sources.backend.temporal.data_imports.sources.mailgun.mailgun.make_tracked_session")
     def test_create_uses_the_region_host(self, mock_session):
         session = self._session(mock_session, [_webhook_list_response({}), _webhook_list_response({})])
         session.post.return_value = _response({})
 
-        create_webhook("key", "eu", POSTFN_URL)
+        create_webhook("key", "eu", INSIGHTS_URL)
 
         assert all(call.args[0].startswith(EU_BASE) for call in session.post.call_args_list)
 
     @mock.patch("products.warehouse_sources.backend.temporal.data_imports.sources.mailgun.mailgun.make_tracked_session")
     def test_create_is_idempotent_for_types_already_pointing_at_us(self, mock_session):
-        already = {webhook_type: {"urls": [POSTFN_URL]} for webhook_type in WEBHOOK_TYPES}
+        already = {webhook_type: {"urls": [INSIGHTS_URL]} for webhook_type in WEBHOOK_TYPES}
         session = self._session(mock_session, [_webhook_list_response(already), _webhook_list_response(already)])
 
-        result = create_webhook("key", "us", POSTFN_URL)
+        result = create_webhook("key", "us", INSIGHTS_URL)
 
         assert result.success is True
         session.post.assert_not_called()
@@ -810,13 +810,13 @@ class TestWebhookManagement:
         session.post.return_value = _response({})
         session.put.return_value = _response({})
 
-        create_webhook("key", "us", POSTFN_URL)
+        create_webhook("key", "us", INSIGHTS_URL)
 
         session.put.assert_called_once()
         assert session.put.call_args.args[0].endswith("/v3/domains/mg.example.com/webhooks/delivered")
         assert session.put.call_args.kwargs["data"] == [
             ("url", "https://other.example/hook"),
-            ("url", POSTFN_URL),
+            ("url", INSIGHTS_URL),
         ]
 
     @mock.patch("products.warehouse_sources.backend.temporal.data_imports.sources.mailgun.mailgun.make_tracked_session")
@@ -826,7 +826,7 @@ class TestWebhookManagement:
         session = self._session(mock_session, [_webhook_list_response(full), _webhook_list_response({})])
         session.post.return_value = _response({})
 
-        result = create_webhook("key", "us", POSTFN_URL)
+        result = create_webhook("key", "us", INSIGHTS_URL)
 
         # Every other type on that domain, and every type on the next one, still registers.
         assert result.success is True
@@ -840,7 +840,7 @@ class TestWebhookManagement:
     def test_create_fails_when_the_account_has_no_sending_domains(self, mock_session):
         mock_session.return_value.get.return_value = _response({"items": []})
 
-        result = create_webhook("key", "us", POSTFN_URL)
+        result = create_webhook("key", "us", INSIGHTS_URL)
 
         assert result.success is False
         assert "no sending domains" in (result.error or "")
@@ -850,7 +850,7 @@ class TestWebhookManagement:
         session = self._session(mock_session, [_webhook_list_response({}), _webhook_list_response({})])
         session.post.return_value = _error_response(403, f"{US_BASE}/v3/domains/mg.example.com/webhooks")
 
-        result = create_webhook("key", "us", POSTFN_URL)
+        result = create_webhook("key", "us", INSIGHTS_URL)
 
         assert result.success is False
         assert "manually" in (result.error or "")
@@ -862,8 +862,8 @@ class TestWebhookManagement:
             [
                 _webhook_list_response(
                     {
-                        "delivered": {"urls": [POSTFN_URL, "https://other.example/hook"]},
-                        "opened": {"urls": [POSTFN_URL]},
+                        "delivered": {"urls": [INSIGHTS_URL, "https://other.example/hook"]},
+                        "opened": {"urls": [INSIGHTS_URL]},
                         "clicked": {"urls": ["https://other.example/hook"]},
                     }
                 ),
@@ -873,7 +873,7 @@ class TestWebhookManagement:
         session.put.return_value = _response({})
         session.delete.return_value = _response({})
 
-        result = delete_webhook("key", "us", POSTFN_URL)
+        result = delete_webhook("key", "us", INSIGHTS_URL)
 
         assert result.success is True
         assert session.put.call_args.kwargs["data"] == [("url", "https://other.example/hook")]
@@ -884,11 +884,11 @@ class TestWebhookManagement:
     def test_delete_surfaces_a_failure_rather_than_reporting_success(self, mock_session):
         session = self._session(
             mock_session,
-            [_webhook_list_response({"opened": {"urls": [POSTFN_URL]}}), _webhook_list_response({})],
+            [_webhook_list_response({"opened": {"urls": [INSIGHTS_URL]}}), _webhook_list_response({})],
         )
         session.delete.return_value = _error_response(403, f"{US_BASE}/v3/domains/mg.example.com/webhooks/opened")
 
-        result = delete_webhook("key", "us", POSTFN_URL)
+        result = delete_webhook("key", "us", INSIGHTS_URL)
 
         assert result.success is False
         assert "403" in (result.error or "")
@@ -899,13 +899,13 @@ class TestWebhookManagement:
             mock_session,
             [
                 _webhook_list_response(
-                    {"delivered": {"urls": [POSTFN_URL]}, "opened": {"url": "https://other.example/hook"}}
+                    {"delivered": {"urls": [INSIGHTS_URL]}, "opened": {"url": "https://other.example/hook"}}
                 ),
-                _webhook_list_response({"clicked": {"urls": [POSTFN_URL]}}),
+                _webhook_list_response({"clicked": {"urls": [INSIGHTS_URL]}}),
             ],
         )
 
-        info = get_external_webhook_info("key", "us", POSTFN_URL)
+        info = get_external_webhook_info("key", "us", INSIGHTS_URL)
 
         assert info.exists is True
         # Must speak Mailgun's webhook type ids so the UI can diff them against
@@ -922,7 +922,7 @@ class TestWebhookManagement:
             ],
         )
 
-        info = get_external_webhook_info("key", "us", POSTFN_URL)
+        info = get_external_webhook_info("key", "us", INSIGHTS_URL)
 
         assert info.exists is False
 
@@ -930,7 +930,7 @@ class TestWebhookManagement:
     def test_info_reports_the_error_instead_of_raising(self, mock_session):
         mock_session.return_value.get.return_value = _error_response(401, f"{US_BASE}/v4/domains")
 
-        info = get_external_webhook_info("key", "us", POSTFN_URL)
+        info = get_external_webhook_info("key", "us", INSIGHTS_URL)
 
         assert info.exists is False
         assert "401" in (info.error or "")
@@ -939,7 +939,7 @@ class TestWebhookManagement:
     def test_sync_re_registers_so_new_domains_get_covered(self, mock_create):
         mock_create.return_value = WebhookCreationResult(success=True)
 
-        result = sync_webhook_events("key", "us", POSTFN_URL)
+        result = sync_webhook_events("key", "us", INSIGHTS_URL)
 
         assert result.success is True
-        mock_create.assert_called_once_with("key", "us", POSTFN_URL)
+        mock_create.assert_called_once_with("key", "us", INSIGHTS_URL)

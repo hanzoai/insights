@@ -11,7 +11,7 @@ import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 import { EarlyAccessFeatureStage, EarlyAccessFeatureType, FeatureFlagBasicType, Region } from '~/types'
 
-import { POSTFN_TEAM_ID, earlyAccessFeatureLogic } from './earlyAccessFeatureLogic'
+import { INSIGHTS_TEAM_ID, earlyAccessFeatureLogic } from './earlyAccessFeatureLogic'
 import { earlyAccessFeaturesLogic } from './earlyAccessFeaturesLogic'
 
 const FEATURE_FLAG: FeatureFlagBasicType = {
@@ -165,7 +165,7 @@ describe('earlyAccessFeatureLogic', () => {
         }
 
         it('requires a description when creating on US-cloud project 2', async () => {
-            await mountWith('new', POSTFN_TEAM_ID, Region.US)
+            await mountWith('new', INSIGHTS_TEAM_ID, Region.US)
             logic.actions.setEarlyAccessFeatureValue('name', 'My feature')
             logic.actions.setEarlyAccessFeatureValue('description', '   ')
 
@@ -173,7 +173,7 @@ describe('earlyAccessFeatureLogic', () => {
         })
 
         it('accepts a valid description when creating on US-cloud project 2', async () => {
-            await mountWith('new', POSTFN_TEAM_ID, Region.US)
+            await mountWith('new', INSIGHTS_TEAM_ID, Region.US)
             logic.actions.setEarlyAccessFeatureValue('name', 'My feature')
             logic.actions.setEarlyAccessFeatureValue('description', 'A real description')
 
@@ -189,7 +189,7 @@ describe('earlyAccessFeatureLogic', () => {
         })
 
         it('does not require a description for project 2 outside US cloud', async () => {
-            await mountWith('new', POSTFN_TEAM_ID, Region.EU)
+            await mountWith('new', INSIGHTS_TEAM_ID, Region.EU)
             logic.actions.setEarlyAccessFeatureValue('name', 'My feature')
             logic.actions.setEarlyAccessFeatureValue('description', '')
 
@@ -197,7 +197,7 @@ describe('earlyAccessFeatureLogic', () => {
         })
 
         it('does not block editing an existing description-less feature on US-cloud project 2', async () => {
-            await mountWith('existing-id', POSTFN_TEAM_ID, Region.US)
+            await mountWith('existing-id', INSIGHTS_TEAM_ID, Region.US)
             logic.actions.setEarlyAccessFeatureValue('description', '')
 
             expect(logic.values.earlyAccessFeatureValidationErrors.description).toBeUndefined()

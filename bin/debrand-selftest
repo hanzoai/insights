@@ -119,6 +119,38 @@ try:
 finally:
     debrand.PATH_RULES = saved_rules
 
+# A rule does not have to contain the brand to destroy it, only to overlap its
+# edge. `HOG_` ran first once, split `POSTHOG_TEAM_ID` into `POST` + `FN_`, and
+# left the brand rule -- ordered last, which the table said was the safe place
+# for it -- with nothing to match. `POSTFN_TEAM_ID` shipped and crash-looped.
+# Reproduced by moving the real rule rather than by inventing one, so the case
+# stays the defect that happened.
+saved_content = debrand.CONTENT_RULES
+try:
+    check("the shipped table leaves the brand intact", quiet(debrand.brand_survives_adjacent_rules), 0)
+    overlapping = [r for r in saved_content if r[0] == "HOG_"]
+    debrand.CONTENT_RULES = overlapping + [r for r in saved_content if r[0] != "HOG_"]
+    check("a rule that overlaps the brand's edge is refused", quiet(debrand.brand_survives_adjacent_rules), 1)
+finally:
+    debrand.CONTENT_RULES = saved_content
+
+# The other half: fixing the order stops the next convergence from minting more
+# mangled names and repairs none of the ones already in the tree.
+with tempfile.TemporaryDirectory() as tmp:
+    subprocess.run(["git", "init", "-q", tmp], check=True)
+
+    def write_mod(body: str) -> None:
+        with open(os.path.join(tmp, "mod.py"), "w", encoding="utf-8") as fh:
+            fh.write(body)
+        subprocess.run(["git", "add", "-A"], cwd=tmp, check=True, capture_output=True)
+
+    write_mod("from insights.temporal.common.search_attributes import INSIGHTS_TEAM_ID_KEY\n")
+    check("a tree with no mangled names passes", quiet(debrand.check_mangled, tmp), 0)
+    write_mod("from insights.temporal.common.search_attributes import POSTFN_TEAM_ID_KEY\n")
+    check("a mangled name is refused", quiet(debrand.check_mangled, tmp), 1)
+    write_mod("timeout = postfn_timeout_seconds\n")
+    check("...in any case", quiet(debrand.check_mangled, tmp), 1)
+
 # A licence is the one text in the tree that is not ours to rewrite: MIT grants
 # the code on condition the notice travels with it. Renaming the company inside
 # one still reads as a valid licence, so nothing downstream would notice.

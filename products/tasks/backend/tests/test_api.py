@@ -1052,7 +1052,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         task = Task.objects.get(id=response.json()["id"])
-        self.assertEqual(task.client_provenance, TaskClientProvenance.POSTFN_DESKTOP)
+        self.assertEqual(task.client_provenance, TaskClientProvenance.INSIGHTS_DESKTOP)
 
     @parameterized.expand(
         [
@@ -1094,7 +1094,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.assertEqual(client.get(f"/api/projects/@current/tasks/{task.id}/").status_code, status.HTTP_200_OK)
         response = client.patch(
             f"/api/projects/@current/tasks/{task.id}/",
-            {"client_provenance": TaskClientProvenance.POSTFN_DESKTOP},
+            {"client_provenance": TaskClientProvenance.INSIGHTS_DESKTOP},
             format="json",
         )
 

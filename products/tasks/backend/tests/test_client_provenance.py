@@ -7,8 +7,8 @@ from rest_framework.request import Request
 from insights.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
 from insights.temporal.oauth import (
     ARRAY_APP_CLIENT_ID_DEV,
-    POSTFN_DESKTOP_MOBILE_APP_CLIENT_ID_EU,
-    POSTFN_DESKTOP_MOBILE_APP_CLIENT_ID_US,
+    INSIGHTS_DESKTOP_MOBILE_APP_CLIENT_ID_EU,
+    INSIGHTS_DESKTOP_MOBILE_APP_CLIENT_ID_US,
 )
 
 from products.tasks.backend.facade.client_provenance import get_task_client_provenance
@@ -29,7 +29,7 @@ class TestTaskClientProvenance:
             (
                 "mobile_us",
                 OAuthAccessTokenAuthentication,
-                POSTFN_DESKTOP_MOBILE_APP_CLIENT_ID_US,
+                INSIGHTS_DESKTOP_MOBILE_APP_CLIENT_ID_US,
                 True,
                 "task:write",
                 True,
@@ -37,7 +37,7 @@ class TestTaskClientProvenance:
             (
                 "mobile_eu",
                 OAuthAccessTokenAuthentication,
-                POSTFN_DESKTOP_MOBILE_APP_CLIENT_ID_EU,
+                INSIGHTS_DESKTOP_MOBILE_APP_CLIENT_ID_EU,
                 True,
                 "task:write",
                 True,
@@ -95,7 +95,7 @@ class TestTaskClientProvenance:
 
         provenance = get_task_client_provenance(request)
 
-        assert (provenance == TaskClientProvenance.POSTFN_DESKTOP) is expected_desktop
+        assert (provenance == TaskClientProvenance.INSIGHTS_DESKTOP) is expected_desktop
 
     def test_missing_authentication_provenance_fails_closed(self) -> None:
         assert get_task_client_provenance(cast(Request, SimpleNamespace())) is None

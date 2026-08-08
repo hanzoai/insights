@@ -11,10 +11,10 @@ test.describe('Invites', () => {
 
         // Force link-generation mode so the modal flow is deterministic regardless of
         // whether the environment has an email service configured. Preflight is both
-        // server-rendered into POSTFN_APP_CONTEXT and refreshed via the API, so patch both.
+        // server-rendered into INSIGHTS_APP_CONTEXT and refreshed via the API, so patch both.
         await page.addInitScript(() => {
             let appContext: any = undefined
-            Object.defineProperty(window, 'POSTFN_APP_CONTEXT', {
+            Object.defineProperty(window, 'INSIGHTS_APP_CONTEXT', {
                 get() {
                     if (appContext?.preflight) {
                         appContext.preflight.email_service_available = false

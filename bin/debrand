@@ -112,8 +112,13 @@ CONTENT_RULES: list[tuple[str, str]] = [
     # Design system.
     ("lemon-ui", "elements"),
     ("lemonToast", "toast"),
-    # Core brand. Last, so the compounds above win.
-    ("POSTHOG", "INSIGHTS"),
+    # Core brand. Late, so the compounds above -- the rules whose patterns
+    # CONTAIN the brand -- match first. "Last, so the compounds above win" was
+    # the old reasoning here, and it is only half the constraint: a rule does
+    # not have to contain the brand to break it, only to overlap its edge, and
+    # `HOG_` overlaps the right edge of `POSTHOG_`. So the uppercase spelling is
+    # not in this group -- it runs above, ahead of `HOG_` -- and
+    # `brand_survives_adjacent_rules` is what holds it there.
     ("PostHog", "Insights"),
     ("Posthog", "Insights"),
     # camelCase identifiers: postHogStatusTooltip -> insightsStatusTooltip.
@@ -128,6 +133,32 @@ CONTENT_REGEX: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\bhog\b"), "script"),
     (re.compile(r"\bHog\b"), "Script"),
 ]
+
+# --- the ordering invariant ---------------------------------------------
+#
+# Order is load-bearing in two directions, and only one of them was ever
+# written down. A rule whose pattern CONTAINS the brand -- `posthog.com`,
+# `@posthog/` -- must run BEFORE the brand rule, or the brand rule fires first
+# and the compound never matches. That much the table has always said. The
+# other direction is that a rule need not contain the brand to destroy it: it
+# only has to overlap the brand's edge. `HOG_` overlaps the right edge of
+# `POSTHOG_`, so running it first split `POSTHOG_TEAM_ID` into `POST` + `FN_`,
+# and the brand rule -- correctly ordered last, per the old reasoning -- then
+# had nothing left to match. The result was `POSTFN_TEAM_ID`: a name nothing
+# defines, nothing sets, and no reader of the table would predict. It reached
+# production and crash-looped there.
+#
+# The brand as it is actually spelled. Their replacements are read out of the
+# table rather than restated here, so the two cannot drift apart.
+BRAND_TOKENS = ("POSTHOG", "PostHog", "Posthog", "postHog", "posthog")
+
+# A brand token almost never stands alone -- it is `POSTHOG_TEAM_ID`,
+# `posthogInstance`, `PostHog2` -- and it is the character AFTER it that gives
+# an adjacent rule something to overlap. Deliberately excludes `-`, `.` and `/`:
+# those legitimately begin a compound the table handles first (`posthog-js`,
+# `posthog.com`, `@posthog/`), so probing them would report a working rule as a
+# violation.
+IDENT_CONTINUATIONS = ("_", "A", "z", "0")
 
 # --- path rules ---------------------------------------------------------
 #
@@ -906,6 +937,68 @@ def path_rules_have_content_counterparts() -> int:
     return 1 if bad else 0
 
 
+def brand_survives_adjacent_rules() -> int:
+    """Refuse a rule that splits the brand before the brand rule can match it.
+
+    Asserted against the rules rather than the tree, for the same reason the
+    check above is: the tree shows the names upstream happens to use today, and
+    the rule keeps producing more of them on every convergence.
+
+    The probe is the brand plus one identifier character, because that is the
+    shape the bug needs -- a bare `POSTHOG` survives being followed by nothing,
+    and `POSTHOG_` does not.
+    """
+    first: dict[str, str] = {}
+    for old, new in CONTENT_RULES:
+        first.setdefault(old, new)  # the first match is the one that fires
+    missing = [t for t in BRAND_TOKENS if t not in first]
+    if missing:
+        print(f"FAIL: {len(missing)} brand spellings have no rule, so nothing rewrites them")
+        for token in missing:
+            print(f"    {token!r}")
+        return 1
+    bad = [
+        (token + tail, first[token] + tail, rewrite_text(token + tail))
+        for token in BRAND_TOKENS
+        for tail in IDENT_CONTINUATIONS
+        if rewrite_text(token + tail) != first[token] + tail
+    ]
+    if bad:
+        print(f"FAIL: {len(bad)} brand spellings are eaten by a rule that runs before them")
+        print("    Move the brand rule above the rule that overlaps it.")
+        for probe, want, got in bad:
+            print(f"    {probe!r} -> {got!r}, want {want!r}")
+    return 1 if bad else 0
+
+
+def check_mangled(root: str) -> int:
+    """Refuse the debris of the ordering bug above.
+
+    `POSTFN` is not a name anyone chose. It is `POSTHOG` with `HOG_` rewritten
+    out from under it, so every occurrence names something that was never
+    defined and no deployment ever sets -- `POSTFN_TEAM_ID` imported from a
+    module that exports `INSIGHTS_TEAM_ID`, an env var read under its real
+    spelling somewhere else. It fails at the import, or silently, and it did
+    both in production.
+
+    Kept as its own refusal rather than folded into the invariant above,
+    because that one guards the rules and this one guards the tree: fixing the
+    order stops the next convergence from minting more, and leaves every
+    reference the last one minted exactly where it was.
+    """
+    hits = subprocess.run(
+        ["git", "grep", "-ilI", "postfn"], cwd=root, capture_output=True, text=True
+    ).stdout.split()
+    hits = [h for h in hits if h not in CONTENT_ALLOWLIST]
+    if not hits:
+        return 0
+    print(f"FAIL: {len(hits)} files carry POSTFN, which is POSTHOG split by a rule that ran too early")
+    print("    It is never a real name. Each one is the INSIGHTS_ name the brand rule would have produced.")
+    for p in hits[:20]:
+        print(f"    {p}")
+    return 1
+
+
 def check_license(root: str) -> int:
     """The licence must still carry the notice MIT obliges us to pass on.
 
@@ -1101,9 +1194,11 @@ def check_workspace(root: str) -> int:
 
 def check(root: str) -> int:
     bad = path_rules_have_content_counterparts()
+    bad += brand_survives_adjacent_rules()
     bad += check_license(root)
     bad += check_workspace(root)
     bad += check_modules(root)
+    bad += check_mangled(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1

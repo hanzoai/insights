@@ -174,7 +174,7 @@ def get_billable_sandbox_compute_usage_by_team(
     sessions = (
         SandboxSession.objects.unscoped()
         .filter(
-            client_provenance=TaskClientProvenance.POSTFN_DESKTOP,
+            client_provenance=TaskClientProvenance.INSIGHTS_DESKTOP,
             user_attributed_at__isnull=False,
             user_attributed_at__lt=end,
         )
