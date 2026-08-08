@@ -12,12 +12,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogflow",
+            model_name="insightsflow",
             name="draft_encrypted_inputs",
             field=insights.helpers.encrypted_fields.EncryptedJSONStringField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name="hogflow",
+            model_name="insightsflow",
             name="encrypted_inputs",
             field=insights.helpers.encrypted_fields.EncryptedJSONStringField(blank=True, null=True),
         ),

@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                 (
                     "insights_flow",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="schedules", to="insights.hogflow"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="schedules", to="insights.insightsflow"
                     ),
                 ),
                 ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
