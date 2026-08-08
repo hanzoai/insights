@@ -48,6 +48,7 @@ from insights.models import User
 from insights.models.instance_setting import get_instance_setting
 from insights.oauth2_urls import urlpatterns as oauth2_urls
 from insights.temporal.codec_server import decode_payloads
+from insights.utils import insights_js_config
 
 from products.ai_observability.backend.api.personal_spend import PersonalSpendEUProxyViewSet
 from products.canvas.backend.artifacts import canvas_artifact
@@ -371,6 +372,11 @@ def root(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
             "plans_url": "https://hanzo.ai/pricing",
             "docs_url": "https://docs.hanzo.ai",
             "source_url": "https://github.com/hanzoai/insights",
+            # The product's public face is a surface like any other, and it was the
+            # only one reporting nothing. Same key the app shell uses, from the same
+            # function, so the two cannot disagree about where this instance reports.
+            "opt_out_capture": settings.OPT_OUT_CAPTURE,
+            **insights_js_config(),
         },
     )
 
