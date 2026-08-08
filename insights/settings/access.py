@@ -188,3 +188,8 @@ BLOCKED_GEOIP_REGIONS = get_list(os.getenv("BLOCKED_GEOIP_REGIONS", ""))
 # development can reach localhost services. Set this to run the production validation path in dev —
 # e.g. to reproduce or test SSRF fixes — without flipping DEBUG globally.
 FORCE_URL_VALIDATION: bool = get_from_env("INSIGHTS_FORCE_URL_VALIDATION", False, type_cast=str_to_bool)
+
+# A fixed literal so `setup_local_api_key` is idempotent: the command hashes this into
+# PersonalAPIKey, so a value that moved would mint a second key on every run. Local development
+# only -- it is a well-known string, never a credential for a deployed instance.
+DEV_API_KEY = "phx_dev_local_test_api_key_1234567890abcdef"
