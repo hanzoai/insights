@@ -50,9 +50,20 @@ RUN curl -L https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip 
 
 # Install Python dependencies including sentiment ML deps
 COPY common/insightsql_parser common/insightsql_parser/
-RUN --mount=type=cache,target=/root/.cache/uv \
+# FORGE_TOKEN: hanzo-insights resolves from git.hanzo.ai, which answers nothing
+# anonymously. Same mechanism and same reasoning as the main Dockerfile.
+RUN --mount=type=secret,id=FORGE_TOKEN \
+    --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    set -eu; \
+    [ -s /run/secrets/FORGE_TOKEN ] || { \
+      echo "FORGE_TOKEN is not mounted. hanzo-insights resolves from git.hanzo.ai, which needs a credential — pass --secret id=FORGE_TOKEN,env=FORGE_TOKEN"; \
+      exit 1; \
+    }; \
+    export GIT_CONFIG_COUNT=1 \
+      GIT_CONFIG_KEY_0="url.https://x:$(cat /run/secrets/FORGE_TOKEN)@git.hanzo.ai/.insteadOf" \
+      GIT_CONFIG_VALUE_0="https://git.hanzo.ai/"; \
     uv sync --locked --no-dev --no-install-project --group sentiment --no-binary-package lxml --no-binary-package xmlsec
 
 # Copy project files

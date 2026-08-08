@@ -308,7 +308,14 @@ datastore-connect = { git = "https://github.com/hanzo-ds/connect", rev = "ccbd4b
 datastore-pool = { git = "https://github.com/hanzo-ds/pool", rev = "7260d56" }
 insightsql-parser = { path = "common/insightsql_parser" }
 insightsql-parser-rs = { path = "rust/insightsql/parser" }
-hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "main" }
+# The forge is where this SDK lives. The github.com/hanzoai mirror is archived and
+# therefore frozen a commit behind, and uv resolves a github.com URL through the
+# GitHub API rather than git — so a url.insteadOf redirect cannot reach past it and
+# the build would silently keep resolving the stale commit. Naming the forge
+# directly is the only address that answers with the code that exists. The forge
+# needs a credential: the image build mounts FORGE_TOKEN (see Dockerfile), the same
+# way every other Hanzo image consumes our own packages.
+hanzo_insights = { git = "https://git.hanzo.ai/hanzoai/insights-python", branch = "main" }
 # pytest-split: pinned to Insights's fork (immutable tag) for the order-preserving
 # optimal_chunks split. Fork: Insights/pytest-split (of jerry-git/pytest-split).
 # To pull upstream fixes: rebase the fork's feat branch onto upstream, cut the next
