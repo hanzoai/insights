@@ -286,7 +286,7 @@ function stripBulkFields(data: unknown): unknown {
     }
     const {
         datastore_sql: _omitSql,
-        insightsql: _omitHogql,
+        insightsql: _omitInsightsql,
         insight: _omitInsight,
         baseline: rawBaseline,
         variant_results: rawVariantResults,

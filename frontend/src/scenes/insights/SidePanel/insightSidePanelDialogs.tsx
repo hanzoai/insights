@@ -8,8 +8,8 @@ const RESOURCE_TYPE = 'insight'
 
 export function openSaveAsCohortDialog(
     createStaticCohort: (name: string, query: AnyDataNode) => void,
-    hogQL: string,
-    hogQLVariables?: Record<string, any>
+    insightsQL: string,
+    insightsQLVariables?: Record<string, any>
 ): void {
     Dialog.openForm({
         title: 'Save as static cohort',
@@ -33,7 +33,11 @@ export function openSaveAsCohortDialog(
         ),
         errors: { name: (name) => (!name ? 'You must enter a name' : undefined) },
         onSubmit: async ({ name }) => {
-            createStaticCohort(name, { kind: NodeKind.InsightsQLQuery, query: hogQL, variables: hogQLVariables })
+            createStaticCohort(name, {
+                kind: NodeKind.InsightsQLQuery,
+                query: insightsQL,
+                variables: insightsQLVariables,
+            })
         },
     })
 }

@@ -175,7 +175,7 @@ function getEventTable(service: BatchExportService['type']): DatabaseSchemaBatch
             ...BASE_EVENT_FIELDS,
             ...(includeGeneric
                 ? genericPersonEventFields({
-                      teamIdHogql: overrides.teamIdHogql ?? 'team_id',
+                      teamIdInsightsql: overrides.teamIdInsightsql ?? 'team_id',
                       setName: overrides.setName ?? 'set',
                       setOnceName: overrides.setOnceName ?? 'set_once',
                   })

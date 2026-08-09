@@ -266,20 +266,20 @@ export const notebooksCollabStreamRetrieve = async (
     })
 }
 
-export const getNotebooksHogqlExecuteCreateUrl = (projectId: string, shortId: string) => {
+export const getNotebooksInsightsqlExecuteCreateUrl = (projectId: string, shortId: string) => {
     return `/api/projects/${projectId}/notebooks/${shortId}/insightsql/execute/`
 }
 
 /**
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
-export const notebooksHogqlExecuteCreate = async (
+export const notebooksInsightsqlExecuteCreate = async (
     projectId: string,
     shortId: string,
     notebookApi?: NonReadonly<NotebookApi>,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getNotebooksHogqlExecuteCreateUrl(projectId, shortId), {
+    return apiMutator<void>(getNotebooksInsightsqlExecuteCreateUrl(projectId, shortId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },

@@ -4,7 +4,7 @@ Occasionally reminds developers to run maintenance commands like
 ``insightscli doctor``, ``insightscli doctor:disk``, etc.
 
 Suppression:
-    HOGLI_NO_HINTS=1  -> disable hints
+    INSIGHTSCLI_NO_HINTS=1  -> disable hints
     CI=*              -> disable hints (same as telemetry)
 
 State file: ~/.config/insights/insightscli_hints.json
@@ -112,7 +112,7 @@ def maybe_show_hint(command: str | None) -> None:
 
 
 def _maybe_show_hint(command: str | None) -> None:
-    if os.environ.get("HOGLI_NO_HINTS") == "1":
+    if os.environ.get("INSIGHTSCLI_NO_HINTS") == "1":
         return
     if os.environ.get("CI"):
         return

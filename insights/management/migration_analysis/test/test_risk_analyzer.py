@@ -1542,7 +1542,7 @@ class TestCombinationRisks:
         # Create the SeparateDatabaseAndState operation like 0948
         state_op1 = create_mock_operation(
             migrations.AddField,
-            model_name="hogfunction",
+            model_name="insightsfunction",
             name="batch_export",
             field=models.ForeignKey("batchexport", null=True, blank=True, on_delete=models.SET_NULL),
         )

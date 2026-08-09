@@ -1168,7 +1168,7 @@ export class ApiClient {
                 connectionId,
             }: {
                 query: string
-                language: 'hogQL' | 'hogQLExpr' | 'script' | 'hogTemplate'
+                language: 'insightsQL' | 'insightsQLExpr' | 'script' | 'hogTemplate'
                 connectionId?: string
             }): Promise<
                 Result<{

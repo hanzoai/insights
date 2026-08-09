@@ -18,7 +18,7 @@ export const azureBlobDefinition: DestinationDefinition = {
     validate: (formValues) => ({
         container_name: validateAzureContainerName(formValues.container_name),
     }),
-    eventTableOverrides: { teamIdHogql: 'team_id' },
+    eventTableOverrides: { teamIdInsightsql: 'team_id' },
     Fields: function AzureBlobFields({ formValues }) {
         return (
             <>

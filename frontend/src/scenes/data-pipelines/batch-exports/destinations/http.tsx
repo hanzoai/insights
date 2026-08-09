@@ -8,7 +8,7 @@ export const httpDefinition: DestinationDefinition = {
     type: 'HTTP',
     defaults: () => ({}),
     requiredFields: () => ['url', 'token'],
-    eventTableOverrides: { teamIdHogql: 'team_id' },
+    eventTableOverrides: { teamIdInsightsql: 'team_id' },
     Fields: function HttpFields() {
         return (
             <>

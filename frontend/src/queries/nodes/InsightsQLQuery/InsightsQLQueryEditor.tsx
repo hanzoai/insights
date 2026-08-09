@@ -5,12 +5,12 @@ import { router } from 'kea-router'
 import type { editor as importedEditor } from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconMagicWand } from '@hanzo/icons'
 import { Input, Link } from '@hanzo/elements'
+import { IconMagicWand } from '@hanzo/icons'
 
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { CodeEditorLogicProps, codeEditorLogic } from 'lib/monaco/codeEditorLogic'
 import { dataWarehouseSettingsSceneLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsSceneLogic'
@@ -18,7 +18,7 @@ import { urls } from 'scenes/urls'
 
 import { InsightsQLQuery } from '~/queries/schema/schema-general'
 
-import { hogQLQueryEditorLogic } from './hogQLQueryEditorLogic'
+import { insightsQLQueryEditorLogic } from './insightsQLQueryEditorLogic'
 
 export interface InsightsQLQueryEditorProps {
     query: InsightsQLQuery
@@ -51,7 +51,7 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
         null as [Monaco, importedEditor.IStandaloneCodeEditor] | null
     )
     const [monaco, editor] = monacoAndEditor ?? []
-    const hogQLQueryEditorLogicProps = {
+    const insightsQLQueryEditorLogicProps = {
         query: props.query,
         setQuery: props.setQuery,
         onChange: props.onChange,
@@ -60,18 +60,18 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
         monaco,
         queryResponse: props.queryResponse,
     }
-    const logic = hogQLQueryEditorLogic(hogQLQueryEditorLogicProps)
+    const logic = insightsQLQueryEditorLogic(insightsQLQueryEditorLogicProps)
     const { queryInput, prompt, aiAvailable, promptError, promptLoading } = useValues(logic)
     const { setQueryInput, saveQuery, setPrompt, draftFromPrompt, draftFromMetadataFix, saveAsView, onUpdateView } =
         useActions(logic)
 
-    const codeEditorKey = `hogQLQueryEditor/${key}`
+    const codeEditorKey = `insightsQLQueryEditor/${key}`
 
     const codeEditorLogicProps: CodeEditorLogicProps = {
         key: codeEditorKey,
         sourceQuery: props.query,
         query: queryInput,
-        language: 'hogQL',
+        language: 'insightsQL',
         metadataFilters: props.query.filters,
     }
 
@@ -139,7 +139,7 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                             queryKey={codeEditorKey}
                             sourceQuery={props.query}
                             className="border rounded-b overflow-hidden h-full"
-                            language="hogQL"
+                            language="insightsQL"
                             value={queryInput}
                             onChange={(v) => {
                                 setQueryInput(v ?? '')
