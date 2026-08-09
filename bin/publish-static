@@ -32,21 +32,21 @@ middleware, which does no content negotiation and would never open them; the
 ingress `compress` middleware encodes on the way out instead. Publishing them
 would be 238MB of bytes nothing can read.
 
-Each run also writes .builds/<version>.txt, the exact key list this build
-references. That list is what makes retention exact -- see bin/prune-static.
-Pruning on object age would be actively wrong: a chunk unchanged across two
-hundred builds is never rewritten, so its LastModified is oldest precisely when
-it is most load-bearing.
+Each run also writes a manifest -- the exact key list this build references --
+to a SIBLING prefix, never inside the served tree. That list is what makes
+retention exact; see bin/prune-static. Pruning on object age would be actively
+wrong: a chunk unchanged across two hundred builds is never rewritten, so its
+LastModified is oldest precisely when it is most load-bearing.
 """
 
 from __future__ import annotations
 
-import concurrent.futures
-import hashlib
-import mimetypes
 import os
 import re
 import sys
+import hashlib
+import mimetypes
+import concurrent.futures
 from pathlib import Path
 
 import boto3
@@ -63,6 +63,14 @@ SKIP_SUFFIX = (".gz", ".br")
 
 def is_hashed(rel: str) -> bool:
     return HASHED.search(rel) is not None
+
+
+def digest(path: Path) -> str:
+    h = hashlib.md5()  # noqa: S324 - matches the store's ETag, not a security claim
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def walk(root: Path) -> list[str]:
@@ -123,10 +131,23 @@ def main() -> int:
         if is_hashed(rel):
             try:
                 head = s3.head_object(Bucket=bucket, Key=key)
-                # Same name AND same length: the name already promised the bytes,
-                # and the length agrees, so there is nothing to say.
-                if head["ContentLength"] == size:
+                # The name is a claim about bytes, so CHECK the bytes rather than
+                # the length. put_object never goes multipart, so the ETag is the
+                # object's md5 and this is an exact comparison.
+                #
+                # A mismatch means the claim is false -- the predicate that put
+                # this key in the write-once population matched a name that is
+                # not content-addressed after all (`logo-DARKMODE.svg` has the
+                # shape). Both silent outcomes are bad: skipping serves the first
+                # build's bytes forever, overwriting leaves every client holding
+                # a year-long immutable copy of the old ones. So fail the build.
+                if head["ETag"].strip('"') == digest(path):
                     return "skip", 0
+                raise SystemExit(
+                    f"{key} already exists with different bytes. A content-hashed name "
+                    f"promises one byte sequence; this one does not keep that promise, so "
+                    f"it must not be served as immutable."
+                )
             except ClientError as err:
                 if err.response["Error"]["Code"] not in ("404", "NoSuchKey", "NotFound"):
                     raise
