@@ -1,16 +1,16 @@
 import { createMockJobQueue } from '../../../tests/helpers/mocks/job-queue.mock'
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 import { closeHub, createHub } from '~/common/utils/db/hub'
 
 import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { FixtureFlowBuilder } from '../_tests/builders/flow.builder'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, createKafkaMessage } from '../_tests/fixtures'
-import { insertInsightsFlow as _insertInsightsFlow } from '../_tests/fixtures-insightsflows'
+import { insertFlow as _insertFlow } from '../_tests/fixtures-flows'
 import { CdpDataWarehouseEvent } from '../schema'
 import { HogWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
@@ -53,8 +53,8 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         return item
     }
 
-    const insertInsightsFlow = async (hogFlow: InsightsFlow): Promise<InsightsFlow> => {
-        return await _insertInsightsFlow(hub.postgres, hogFlow)
+    const insertFlow = async (flow: Flow): Promise<Flow> => {
+        return await _insertFlow(hub.postgres, flow)
     }
 
     beforeEach(async () => {
@@ -374,8 +374,8 @@ describe('CdpDatawarehouseEventsConsumer', () => {
     })
 
     describe('script flow invocations', () => {
-        const buildDataWarehouseInsightsFlow = (teamId: number, tableName: string): InsightsFlow =>
-            new FixtureInsightsFlowBuilder()
+        const buildDataWarehouseFlow = (teamId: number, tableName: string): Flow =>
+            new FixtureFlowBuilder()
                 .withTeamId(teamId)
                 .withSimpleWorkflow({
                     trigger: {
@@ -388,7 +388,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                 .build()
 
         it('should build a script flow invocation when the row table matches the trigger', async () => {
-            const hogFlow = await insertInsightsFlow(buildDataWarehouseInsightsFlow(team.id, 'postgres.table_1'))
+            const flow = await insertFlow(buildDataWarehouseFlow(team.id, 'postgres.table_1'))
 
             const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' }, 'postgres.table_1')
             const globals = await processor._parseKafkaBatch([createKafkaMessage(event)])
@@ -396,25 +396,25 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
             const { invocations } = await processor.processBatch(globals)
 
-            const hogFlowInvocations = invocations.filter((i: any) => i.hogFlow)
-            expect(hogFlowInvocations).toHaveLength(1)
-            expect(hogFlowInvocations[0].functionId).toBe(hogFlow.id)
+            const flowInvocations = invocations.filter((i: any) => i.flow)
+            expect(flowInvocations).toHaveLength(1)
+            expect(flowInvocations[0].functionId).toBe(flow.id)
         })
 
         it('should not build a script flow invocation when the row table does not match', async () => {
-            await insertInsightsFlow(buildDataWarehouseInsightsFlow(team.id, 'postgres.table_1'))
+            await insertFlow(buildDataWarehouseFlow(team.id, 'postgres.table_1'))
 
             const event = createDataWarehouseEvent(team.id, {}, 'postgres.other_table')
             const globals = await processor._parseKafkaBatch([createKafkaMessage(event)])
 
             const { invocations } = await processor.processBatch(globals)
 
-            const hogFlowInvocations = invocations.filter((i: any) => i.hogFlow)
-            expect(hogFlowInvocations).toHaveLength(0)
+            const flowInvocations = invocations.filter((i: any) => i.flow)
+            expect(flowInvocations).toHaveLength(0)
         })
 
         it('should parse rows for workflow-only teams (no script functions)', async () => {
-            await insertInsightsFlow(buildDataWarehouseInsightsFlow(team.id, 'postgres.table_1'))
+            await insertFlow(buildDataWarehouseFlow(team.id, 'postgres.table_1'))
 
             const event = createDataWarehouseEvent(team.id, {}, 'postgres.table_1')
             const globals = await processor._parseKafkaBatch([createKafkaMessage(event)])

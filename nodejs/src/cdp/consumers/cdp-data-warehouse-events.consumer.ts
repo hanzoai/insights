@@ -9,7 +9,7 @@ import { captureException } from '~/common/utils/insights'
 
 import { HealthCheckResult, PluginsServerConfig, Team } from '../../types'
 import { CdpDataWarehouseEvent, CdpDataWarehouseEventSchema } from '../schema'
-import { InsightsFlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
+import { FlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
 import { InsightsFunctionInvocationPipeline } from '../services/script-function-invocation-pipeline.service'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { CyclotronJobInvocation, InsightsFunctionInvocationGlobals, InsightsFunctionTypeType } from '../types'
@@ -21,7 +21,7 @@ import { counterParseError } from './metrics'
 export const WAREHOUSE_SOURCE_ROW_EVENT = '$warehouse_source_row'
 
 // Special property on the synthetic event holding the dot-notated source table name.
-// Used by the pipeline's eligibility predicate to match warehouse-table InsightsFlow triggers
+// Used by the pipeline's eligibility predicate to match warehouse-table Flow triggers
 // against the row's source table without adding a top-level field to globals.
 export const DWH_SOURCE_TABLE_PROPERTY = '$source_table'
 
@@ -33,7 +33,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
     protected hogflowQueue: JobQueue
     protected kafkaConsumer: KafkaConsumerInterface
     private insightsFunctionPipeline: InsightsFunctionInvocationPipeline
-    private hogFlowPipeline: InsightsFlowInvocationPipeline
+    private flowPipeline: FlowInvocationPipeline
 
     constructor(
         config: PluginsServerConfig,
@@ -58,9 +58,9 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
             redis: this.redis,
             valkeyShadow: this.valkeyShadow,
         })
-        this.hogFlowPipeline = new InsightsFlowInvocationPipeline(config, {
-            hogFlowManager: this.hogFlowManager,
-            hogFlowExecutor: this.hogFlowExecutor,
+        this.flowPipeline = new FlowInvocationPipeline(config, {
+            flowManager: this.flowManager,
+            flowExecutor: this.flowExecutor,
             hogWatcher: this.hogWatcher,
             hogWatcherMirror: this.hogWatcherMirror,
             hogMasker: this.hogMasker,
@@ -90,7 +90,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
             // consumer knows it's serving warehouse rows, so it filters flows to only those whose
             // trigger.table_name matches the row's $source_table property. The executor then just
             // evaluates filter bytecode on the matched flows.
-            this.hogFlowPipeline.buildInvocations(invocationGlobals, {
+            this.flowPipeline.buildInvocations(invocationGlobals, {
                 eligibilityFn: (flow, globals) =>
                     flow.trigger.type === 'data-warehouse-table' &&
                     flow.trigger.table_name === globals.event?.properties?.[DWH_SOURCE_TABLE_PROPERTY],
@@ -141,13 +141,13 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
                     const kafkaEvent = parseJSON(message.value!.toString()) as unknown
                     const event = CdpDataWarehouseEventSchema.parse(kafkaEvent)
 
-                    const [teamInsightsFunctions, teamInsightsFlows, team] = await Promise.all([
+                    const [teamInsightsFunctions, teamFlows, team] = await Promise.all([
                         this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, this.hogTypes),
-                        this.hogFlowManager.getInsightsFlowsForTeam(event.team_id),
+                        this.flowManager.getFlowsForTeam(event.team_id),
                         this.deps.teamManager.getTeam(event.team_id),
                     ])
 
-                    if ((!teamInsightsFunctions.length && !teamInsightsFlows.length) || !team) {
+                    if ((!teamInsightsFunctions.length && !teamFlows.length) || !team) {
                         return
                     }
 
@@ -202,7 +202,7 @@ function convertDataWarehouseEventToInsightsFunctionInvocationGlobals(
     //     billing dedup (keyed on event.uuid) counts each row distinctly and stably across re-runs
     //   - `$warehouse_source_row` as the event name so downstream code can identify warehouse-row globals
     //   - the dot-notated source table name on `properties.$source_table` so consumers can match
-    //     warehouse-table InsightsFlow triggers without a new top-level field on globals
+    //     warehouse-table Flow triggers without a new top-level field on globals
     return {
         project: {
             id: team.id,

@@ -87,7 +87,7 @@ export function convertToInsightsFunctionInvocationGlobals(
     return context
 }
 
-export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
+export function convertBatchFlowRequestToInsightsFunctionInvocationGlobals({
     team,
     personId,
     siteUrl,
@@ -126,7 +126,7 @@ export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGloba
     return context
 }
 
-export function convertAccountBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
+export function convertAccountBatchFlowRequestToInsightsFunctionInvocationGlobals({
     team,
     externalId,
     groupType,

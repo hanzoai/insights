@@ -86,7 +86,7 @@ export class CdpRerunWorkerConsumer extends CdpConsumerBase<PluginsServerConfig>
         this.paginator = new RerunPaginatorService(
             this.datastoreClient,
             this.insightsFunctionManager,
-            this.hogFlowManager,
+            this.flowManager,
             this.invocationResultsService.invocationResultsRowsService,
             this.jobQueues,
             this.invocationResultsService.monitoringService,
