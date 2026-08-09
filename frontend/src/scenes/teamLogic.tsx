@@ -236,21 +236,6 @@ export interface teamLogicActions {
             product_type: ProductKey
         }
     }
-    resetToken: () => any
-    resetTokenFailure: (
-        error: string,
-        errorObject?: any
-    ) => {
-        error: string
-        errorObject?: any
-    }
-    resetTokenSuccess: (
-        currentTeam: TeamPublicType | TeamType | null,
-        payload?: any
-    ) => {
-        currentTeam: TeamPublicType | TeamType | null
-        payload?: any
-    }
     rotateSecretToken: () => any
     rotateSecretTokenFailure: (
         error: string,
@@ -458,8 +443,6 @@ export const teamLogic = kea<teamLogicType>([
                     }
                     return await api.create(`v1/projects/${values.currentProject.id}/environments/`, { name, is_demo })
                 },
-                // Project API Token
-                resetToken: async () => await api.update(`v1/environments/${values.currentTeamId}/reset_token`, {}),
                 // Feature Flags Secure API Token
                 rotateSecretToken: async () =>
                     await api.update(`v1/environments/${values.currentTeamId}/rotate_secret_token`, {}),
