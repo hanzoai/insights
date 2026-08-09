@@ -262,10 +262,9 @@ def on_worker_process_shutdown(**kwargs) -> None:
 # Set up datastore query instrumentation
 @task_prerun.connect
 def prerun_signal_handler(task_id, task, **kwargs):
-    from statshog.defaults.django import statsd
-
     from insights.datastore.client.connection import Workload, set_default_datastore_workload_type
     from insights.datastore.query_tagging import tag_queries
+    from insights.statsd import statsd
 
     statsd.incr("celery_tasks_metrics.pre_run", tags={"name": task.name})
     tag_queries(kind="celery", id=task.name)

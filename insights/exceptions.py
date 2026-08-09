@@ -8,8 +8,8 @@ from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
-from insights.datastore.query_tagging import get_query_tags
 from insights.cloud_utils import is_cloud
+from insights.datastore.query_tagging import get_query_tags
 from insights.exceptions_capture import capture_exception
 
 logger = structlog.get_logger(__name__)
@@ -133,9 +133,9 @@ def generate_exception_response(
     Generates a friendly JSON error response in line with drf-exceptions-script for endpoints not under DRF.
     """
 
-    # Importing here because this module is loaded before Django settings are configured,
-    # and statshog relies on those being ready
-    from statshog.defaults.django import statsd
+    # Importing here because this module is loaded before Django settings are
+    # configured, and the client reads its address from them at import time.
+    from insights.statsd import statsd
 
     statsd.incr(
         f"insights_cloud_raw_endpoint_exception",

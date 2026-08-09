@@ -28,6 +28,7 @@ import os
 import re
 import subprocess
 import sys
+import tomllib
 
 # --- content rules ------------------------------------------------------
 #
@@ -1249,6 +1250,136 @@ def check_hog(root: str) -> int:
     return 1 if (leaked or paths) else 0
 
 
+# --- upstream dependency specifiers --------------------------------------
+#
+# Everything above reads source. This reads *specifiers*, because a manifest
+# entry is the one place a rename cannot reach:
+#
+#     insights-rs = { package = "posthog-rs", version = "0.21.0" }
+#
+# reads as ours in our source and installs theirs on the machine. The alias
+# renames the symbol; the registry still serves the upstream crate, and the
+# upstream name is what lands in the lockfile, the vendored path and the stack
+# trace. `--check` was green over that line for as long as it has existed.
+#
+# So each entry below is an upstream package we still take, keyed by the token
+# that gives it away, and carrying the decision that retires it. A specifier
+# that matches and is NOT listed fails: taking a new dependency from upstream
+# is a choice someone should have to write down, not one that lands quietly.
+OUTSTANDING: dict[str, str] = {
+    "drf-exceptions-hog": "reimplement: 386 LOC, one caller (insights/exceptions.py), and the "
+    "error envelope it builds is already our contract -- declared in frontend/src/types.ts "
+    "and asserted by 50 test files",
+    "pixelhog": "fork: 2,720 lines of Rust, a port of mapbox/pixelmatch plus SSIM and "
+    "clustering, proven against upstream's canonical fixtures. Reimplementing re-derives "
+    "someone else's port; the wheel build is the real cost either way",
+    "posthog-rs": "fork at 0.21.0: one consumer (cli/), and the alias hides a User-Agent, a "
+    "$lib property and a default ingestion host that all still say posthog",
+    "posthog-symbol-data": "fork: 386 LOC, but it fixes a container MAGIC that a reader in "
+    "this tree already disagrees with",
+    "pytest-split": "fork or drop: a git source that fetches from the upstream org, under a "
+    "comment that calls it ours",
+}
+
+# `posthog` outright, or the mascot as a suffix -- the shape every one of these
+# packages takes (`statshog`, `pixelhog`, `drf-exceptions-hog`). Deliberately
+# not bare `hog`: `hogland` is someone else's service, named as outstanding
+# elsewhere in this file rather than refused here.
+UPSTREAM_NAME = re.compile(r"posthog|hog(?![A-Za-z])", re.IGNORECASE)
+
+# The tables whose entries resolve to something a package manager downloads.
+PY_DEP_TABLES = ("dependencies", "optional-dependencies", "dependency-groups")
+CARGO_DEP_TABLES = ("dependencies", "dev-dependencies", "build-dependencies")
+
+
+def _dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
+    """Every (dependency, what-it-resolves-to, where-it-was-written) in a manifest.
+
+    Parsed rather than grepped: the name that resolves is the alias *target*,
+    the git URL or the tag, and only a parser tells those apart from a comment
+    that happens to sit on the same line. The dependency's own key travels
+    alongside, so a finding is attributed to the dependency rather than to
+    whichever of its fields happened to spell the brand.
+    """
+    try:
+        with open(os.path.join(root, rel), "rb") as fh:
+            doc = tomllib.load(fh)
+    except (OSError, tomllib.TOMLDecodeError):
+        return []
+    out: list[tuple[str, str, str]] = []
+
+    def requirement(spec: str, where: str) -> None:
+        # "drf-exceptions-hog==0.4.0" -> "drf-exceptions-hog"
+        name = re.split(r"[\[<>=!~; ]", spec, maxsplit=1)[0]
+        out.append((name, name, where))
+
+    def table(dep: object, key: str, where: str) -> None:
+        out.append((key, key, where))
+        if isinstance(dep, dict):
+            for field in ("package", "git", "url", "tag", "rev", "branch", "path"):
+                if isinstance(dep.get(field), str):
+                    out.append((key, dep[field], f"{where}.{key}.{field}"))
+
+    if os.path.basename(rel) == "pyproject.toml":
+        project = doc.get("project", {})
+        for spec in project.get("dependencies", []):
+            requirement(spec, "project.dependencies")
+        for group, specs in project.get("optional-dependencies", {}).items():
+            for spec in specs:
+                requirement(spec, f"project.optional-dependencies.{group}")
+        for group, specs in doc.get("dependency-groups", {}).items():
+            for spec in specs:
+                if isinstance(spec, str):
+                    requirement(spec, f"dependency-groups.{group}")
+        for key, dep in doc.get("tool", {}).get("uv", {}).get("sources", {}).items():
+            table(dep, key, "tool.uv.sources")
+    else:  # Cargo.toml
+        for name in CARGO_DEP_TABLES:
+            for key, dep in doc.get(name, {}).items():
+                table(dep, key, name)
+        for name in CARGO_DEP_TABLES:
+            for key, dep in doc.get("workspace", {}).get(name, {}).items():
+                table(dep, key, f"workspace.{name}")
+    return out
+
+
+def check_upstream_deps(root: str) -> int:
+    """Refuse a dependency specifier that resolves to upstream and is unrecorded."""
+    unrecorded: list[tuple[str, str, str]] = []
+    seen: set[str] = set()
+    for rel in tracked_files(root):
+        if os.path.basename(rel) not in ("pyproject.toml", "Cargo.toml"):
+            continue
+        for key, value, where in _dep_strings(root, rel):
+            if not UPSTREAM_NAME.search(value):
+                continue
+            entry = next(
+                (k for k in OUTSTANDING if k.lower() in value.lower() or k.lower() in key.lower()),
+                None,
+            )
+            if entry is None:
+                unrecorded.append((rel, where, value))
+            else:
+                seen.add(entry)
+
+    if seen:
+        print(f"PENDING: {len(seen)} upstream packages are still specified, each with a decision:")
+        for name in sorted(seen):
+            print(f"    {name} -- {OUTSTANDING[name]}")
+    if retired := sorted(set(OUTSTANDING) - seen):
+        # A ledger that outlives the dependency starts granting permission for a
+        # name nothing takes any more, so removing the entry is part of the work.
+        print(f"FAIL: {len(retired)} ledger entries name a dependency no manifest takes")
+        for name in retired:
+            print(f"    {name} -- retired; drop it from OUTSTANDING")
+    if unrecorded:
+        print(f"FAIL: {len(unrecorded)} dependency specifiers resolve to upstream and are unrecorded")
+        print("    A rename in our manifest does not change what the registry serves.")
+        for rel, where, value in unrecorded:
+            print(f"    {rel}: {where} -> {value!r}")
+    return 1 if (unrecorded or retired) else 0
+
+
 def check_license(root: str) -> int:
     """The licence must still carry the notice MIT obliges us to pass on.
 
@@ -1538,6 +1669,7 @@ def check(root: str) -> int:
     bad += check_mangled(root)
     bad += check_marks(root)
     bad += check_hog(root)
+    bad += check_upstream_deps(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1
