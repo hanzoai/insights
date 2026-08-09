@@ -1273,91 +1273,6 @@ def check_hog(root: str) -> int:
     return 1 if (leaked or paths) else 0
 
 
-# --- upstream packages --------------------------------------------------
-#
-# A manifest naming `@posthog/x` or `posthog-x` installs upstream's code under
-# upstream's name: it lands in the lockfile, in node_modules paths, and in any
-# stack trace a customer is shown. Reporting that as PENDING was right while the
-# list was long and the answer per entry unknown; now that the answer is known
-# for most of them, an unlisted one is a regression rather than a backlog item,
-# so the default flips to refusal.
-#
-# Keyed by package, not by file. A file-level exemption would excuse every
-# future dependency added to that file, which is the opposite of the point --
-# each upstream package we still take has to be named here and say why.
-UPSTREAM_DEPS = {
-    "@posthog/hogql-parser": (
-        "The WebAssembly build of the query parser. The source is already ours "
-        "(`common/insightsql_parser`, renamed grammar and all); only the "
-        "published artefact is still upstream's, and building it needs "
-        "emscripten. Retires when that package is published from our tree."
-    ),
-    "@posthog/mcp": (
-        "Analytics SDK for MCP servers. `services/mcp` already asks for a Hanzo "
-        "package instead; the override here is what drags it back upstream."
-    ),
-    "@posthog/siphash": (
-        "BSD-2-Clause, 57 kB, its own upstream repository -- forkable as-is, "
-        "and small enough that it is only waiting on somewhere to put it."
-    ),
-    "posthog-node": (
-        "The server SDK. `@hanzo/insights-node` is published and on the same "
-        "major line, so this is a repoint awaiting a verified server test."
-    ),
-    "posthog-rs": (
-        "The Rust capture client, renamed to `insights-rs` by Cargo's `package` "
-        "key -- the same aliasing npm was doing, found by this check. Nothing "
-        "is published under our name on crates.io yet, so the rename is all "
-        "there is; two versions are in use (0.15 in `cli`, 0.21 in `rust`)."
-    ),
-    "posthog-symbol-data": (
-        "Reads the symbol-set format the error-tracking CLI uploads, renamed to "
-        "`insights-symbol-data` the same way. It encodes a wire format we share "
-        "with upstream, so forking it means owning that format."
-    ),
-}
-
-# `@posthog/core` and `@posthog/types` arrive only as dependencies of the
-# packages above, so they are not decisions of ours; they leave when their
-# parents do.
-UPSTREAM_RE = re.compile(r"@posthog/[a-z0-9][a-z0-9.-]*|(?<![\w-])posthog-[a-z0-9][a-z0-9.-]*")
-
-
-def upstream_deps(root: str) -> dict[str, list[str]]:
-    """Upstream package names named by a manifest, mapped to the manifests."""
-    out: dict[str, list[str]] = {}
-    for rel in tracked_files(root):
-        if os.path.basename(rel) not in MANIFESTS:
-            continue
-        try:
-            text = open(os.path.join(root, rel), encoding="utf-8", errors="ignore").read()
-        except OSError:
-            continue
-        for name in sorted(set(UPSTREAM_RE.findall(text))):
-            out.setdefault(name, []).append(rel)
-    return out
-
-
-def check_upstream(root: str) -> int:
-    """Refuse a manifest that names an upstream package we have not justified."""
-    found = upstream_deps(root)
-    unlisted = {k: v for k, v in found.items() if k not in UPSTREAM_DEPS}
-    if unlisted:
-        print(f"FAIL: {len(unlisted)} upstream packages are named by a manifest and not justified")
-        print("    Fork it under our own name, or record here why we still take it from upstream.")
-        for name, files in sorted(unlisted.items()):
-            print(f"    {name}  ({', '.join(sorted(set(files)))})")
-    # The justifications are the record of outstanding work, so a stale one has
-    # to surface: once a package is gone, its entry has to go too or the list
-    # slowly stops describing the tree.
-    stale = sorted(set(UPSTREAM_DEPS) - set(found))
-    if stale:
-        print(f"FAIL: {len(stale)} justified upstream packages are no longer used (drop the entry)")
-        for name in stale:
-            print(f"    {name}")
-    if found and not unlisted and not stale:
-        print(f"upstream: {len(found)} packages still taken from upstream, each justified")
-    return 1 if (unlisted or stale) else 0
 # --- upstream dependency specifiers --------------------------------------
 #
 # Everything above reads source. This reads *specifiers*, because a manifest
@@ -1387,6 +1302,15 @@ OUTSTANDING: dict[str, str] = {
     "this tree already disagrees with",
     "pytest-split": "fork or drop: a git source that fetches from the upstream org, under a "
     "comment that calls it ours",
+    "@posthog/hogql-parser": "publish ours: the source is already in this tree "
+    "(common/insightsql_parser, renamed grammar and all) and already carries our name and "
+    "version. Only the WebAssembly artefact is still upstream's, and building it needs emscripten",
+    "@posthog/mcp": "repoint: services/mcp already asks for a Hanzo package, and this override "
+    "is the only thing dragging it back upstream",
+    "@posthog/siphash": "fork: BSD-2-Clause, 57 kB, its own upstream repository -- small enough "
+    "that it is only waiting on somewhere to put it",
+    "posthog-node": "repoint: @hanzo/insights-node is published on the same major line, so this "
+    "is a version pin away, once a server test has run against it",
 }
 
 # `posthog` outright, or the mascot as a suffix -- the shape every one of these
@@ -1451,14 +1375,63 @@ def _dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
     return out
 
 
+# npm spells the same aliasing two ways, and both end in a string starting
+# `npm:` -- a dependency whose value is `npm:@posthog/brand@0.9.1`, or a
+# workspace override that rewrites one for the whole tree. The prefix is what
+# makes the target unambiguous, so it is what we read.
+NPM_ALIAS = re.compile(r"""['"]?(?P<key>@?[\w.-]+(?:/[\w.-]+)?)['"]?\s*:\s*['"]?npm:(?P<target>@?[\w.-]+(?:/[\w.-]+)?)@""")
+
+
+def _npm_dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
+    """The same reading for package.json and pnpm-workspace.yaml.
+
+    A dependency resolves to its own key unless an `npm:` alias redirects it, so
+    both are yielded and the alias target is what gets matched against upstream.
+    """
+    path = os.path.join(root, rel)
+    out: list[tuple[str, str, str]] = []
+    if os.path.basename(rel) == "package.json":
+        try:
+            doc = json.load(open(path, encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        for section in DEP_SECTIONS:
+            for key, spec in (doc.get(section) or {}).items():
+                # `workspace:*` resolves inside this tree, so no registry serves
+                # it and no upstream name is involved -- which is the whole
+                # subject here. Our own `@hanzo/products-stamphog` is the case
+                # that proves it: the app keeps a name it cannot be renamed out
+                # of, and it is ours.
+                if isinstance(spec, str) and spec.startswith("workspace:"):
+                    continue
+                out.append((key, key, section))
+                if isinstance(spec, str) and spec.startswith("npm:"):
+                    out.append((key, spec[len("npm:") :].rsplit("@", 1)[0], f"{section}.{key}"))
+        return out
+    # pnpm-workspace.yaml: only the alias lines resolve to a package, and the
+    # `npm:` prefix is what tells them from every other key in the file.
+    try:
+        text = open(path, encoding="utf-8").read()
+    except OSError:
+        return []
+    for m in NPM_ALIAS.finditer(text):
+        out.append((m.group("key"), m.group("target"), "overrides"))
+    return out
+
+
 def check_upstream_deps(root: str) -> int:
     """Refuse a dependency specifier that resolves to upstream and is unrecorded."""
     unrecorded: list[tuple[str, str, str]] = []
     seen: set[str] = set()
     for rel in tracked_files(root):
-        if os.path.basename(rel) not in ("pyproject.toml", "Cargo.toml"):
+        base = os.path.basename(rel)
+        if base in ("package.json", "pnpm-workspace.yaml"):
+            strings = _npm_dep_strings(root, rel)
+        elif base in ("pyproject.toml", "Cargo.toml"):
+            strings = _dep_strings(root, rel)
+        else:
             continue
-        for key, value, where in _dep_strings(root, rel):
+        for key, value, where in strings:
             if not UPSTREAM_NAME.search(value):
                 continue
             entry = next(
@@ -1777,7 +1750,6 @@ def check(root: str) -> int:
     bad += check_mangled(root)
     bad += check_marks(root)
     bad += check_hog(root)
-    bad += check_upstream(root)
     bad += check_upstream_deps(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
