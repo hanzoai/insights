@@ -1,8 +1,7 @@
 import { useValues } from 'kea'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconDownload } from '@hanzo/icons'
 import { Button, Table, Tooltip } from '@hanzo/elements'
+import { IconDownload } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
@@ -16,7 +15,7 @@ import {
     getStatusTag,
 } from './ExportsListHelpers'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 export function ExportsList(): JSX.Element {
     const { exports, exportsLoading } = useValues(advancedActivityLogsLogic)

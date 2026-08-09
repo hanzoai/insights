@@ -62,7 +62,7 @@ export const loaders: Preview['loaders'] = [
         await Promise.all(
             ['400', '500', '700', '800'].flatMap((weight) => [
                 document.fonts.load(`${weight} 16px Inter`),
-                document.fonts.load(`${weight} 16px RoundHog`),
+                document.fonts.load(`${weight} 16px Geist`),
             ])
         )
             .then(() => document.fonts.ready)

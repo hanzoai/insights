@@ -1,17 +1,13 @@
 import { ComponentType, useState } from 'react'
 
-import * as einsteinPng from '@hanzo/brand/hoggies/png/einstein'
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
-
 import { pngHoggie } from 'lib/brand/hoggies'
 import { StarHog } from 'lib/components/mascots'
 
 import { WizardStep } from './surveyWizardLogic'
 
-const MascotEinstein = pngHoggie(einsteinPng)
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
-const MascotReporter = pngHoggie(reporterPng)
+const MascotEinstein = pngHoggie()
+const MascotMagnifyingGlass = pngHoggie()
+const MascotReporter = pngHoggie()
 
 interface Tip {
     text: string
