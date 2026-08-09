@@ -508,7 +508,7 @@ def find_signal_implementation_run(
     contents they chose. The head branch itself comes from GitHub (webhook payload or REST fetch),
     so both ends of the join are attested.
 
-    Callers (stamphog's inbox carve-out) pass the repository the PR event came from and own fork
+    Callers (stamp's inbox carve-out) pass the repository the PR event came from and own fork
     safety: pass ``head_branch`` only for a repo-native head, never a fork's (a fork's head ref is
     attacker-controlled). Dropping failed and cancelled runs and soft-deleted tasks stops a dead
     or disowned run from keeping the carve-out alive on later pushes. A COMPLETED run still

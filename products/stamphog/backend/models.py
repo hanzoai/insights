@@ -1,5 +1,5 @@
 """
-Django models for stamphog.
+Django models for stamp.
 
 Keep models thin — business logic belongs in logic/.
 Use types from facade/enums.py where applicable.
@@ -21,7 +21,7 @@ from .facade.enums import ChannelResolutionSource, DigestRunStatus, ReviewMode, 
 # Lives on a separate product database (see products/db_routing.yaml), so it
 # inherits ProductTeamModel: team_id is a plain BigIntegerField (no cross-DB FK
 # to Team) and the manager is fail-closed. See insights/models/scoping/README.md.
-class StamphogRepoConfig(ProductTeamModel):
+class StampRepoConfig(ProductTeamModel):
     id = models.UUIDField(primary_key=True, default=uuid7, editable=False)
     # SCM provider this config talks to. GitHub is the only implemented provider
     # today, but the installation/repository identity is provider-scoped so the
@@ -41,7 +41,7 @@ class StamphogRepoConfig(ProductTeamModel):
         choices=[(m.value, m.value) for m in ReviewMode],
         default=ReviewMode.ALL,
     )
-    trigger_label = models.CharField(max_length=100, default="stamphog")
+    trigger_label = models.CharField(max_length=100, default="stamp")
     # The Insights user who connected this repo's installation (plain id, no FK — multi-DB product).
     # The review sandbox's short-lived LLM gateway token is minted under this identity, mirroring how
     # tasks mints under task.created_by. Null means "never synced": hosted reviews fail closed.
@@ -55,7 +55,7 @@ class StamphogRepoConfig(ProductTeamModel):
     # manager. Making it explicit keeps the fail-closed contract from silently regressing.
     class Meta(ProductTeamModel.Meta):
         constraints = [
-            models.UniqueConstraint(fields=["team_id", "repository"], name="unique_stamphog_repo_per_team"),
+            models.UniqueConstraint(fields=["team_id", "repository"], name="unique_stamp_repo_per_team"),
             # Cross-team: one (provider, installation, repository) triple belongs to a single team. The
             # dedicated GitHub App can only be installed on a given repo once, so its installation_id
             # identifies exactly one repo under one team — two teams can't legitimately share it. This
@@ -66,7 +66,7 @@ class StamphogRepoConfig(ProductTeamModel):
             # otherwise one team's placeholder blocks every other team from creating the same one.
             models.UniqueConstraint(
                 fields=["provider", "installation_id", "repository"],
-                name="unique_stamphog_installation_repo",
+                name="unique_stamp_installation_repo",
                 condition=~Q(installation_id=""),
             ),
         ]
@@ -76,7 +76,7 @@ class StamphogRepoConfig(ProductTeamModel):
 
 
 class PullRequest(ProductTeamModel):
-    """One pull request stamphog knows about — the PR-grain context every review run shares.
+    """One pull request stamp knows about — the PR-grain context every review run shares.
 
     Refreshed on every relevant webhook delivery; merge state is filled in when the PR
     merges. A row is linked to a `DigestRun` once its merge has been summarized and posted.
@@ -85,7 +85,7 @@ class PullRequest(ProductTeamModel):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid7, editable=False)
-    repo_config = models.ForeignKey(StamphogRepoConfig, on_delete=models.CASCADE, related_name="pull_requests")
+    repo_config = models.ForeignKey(StampRepoConfig, on_delete=models.CASCADE, related_name="pull_requests")
     pr_number = models.IntegerField()
     title = models.CharField(max_length=512, blank=True)
     author_login = models.CharField(max_length=255, blank=True)
@@ -95,14 +95,14 @@ class PullRequest(ProductTeamModel):
     head_branch = models.CharField(max_length=255, blank=True)
     # Trimmed PR description, capped at capture time to keep rows (and the LLM prompt) bounded.
     body_excerpt = models.TextField(blank=True)
-    # Merge state — set when the PR merges, regardless of whether stamphog approved it.
+    # Merge state — set when the PR merges, regardless of whether stamp approved it.
     merged_at = models.DateTimeField(null=True)
     merge_commit_sha = models.CharField(max_length=64, blank=True)
     additions = models.IntegerField(default=0)
     deletions = models.IntegerField(default=0)
     changed_files = models.IntegerField(default=0)
     # Digest bucket resolved by the audience cascade (see logic/audiences.py) — stamped only
-    # when the merged PR is digest-eligible (stamphog approved a run); the digest filters on it.
+    # when the merged PR is digest-eligible (stamp approved a run); the digest filters on it.
     audience_key = models.CharField(max_length=255, blank=True)
     digest_run = models.ForeignKey("DigestRun", on_delete=models.SET_NULL, null=True, related_name="pull_requests")
     # The sticky comment is a PR-level artifact, upserted per PR across review runs.
@@ -114,11 +114,11 @@ class PullRequest(ProductTeamModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Inherit the base Meta so default_manager_name="all_teams" survives (see StamphogRepoConfig.Meta).
+    # Inherit the base Meta so default_manager_name="all_teams" survives (see StampRepoConfig.Meta).
     class Meta(ProductTeamModel.Meta):
         constraints = [
             models.UniqueConstraint(
-                fields=["team_id", "repo_config", "pr_number"], name="unique_stamphog_pull_request"
+                fields=["team_id", "repo_config", "pr_number"], name="unique_stamp_pull_request"
             ),
         ]
         indexes = [
@@ -129,7 +129,7 @@ class PullRequest(ProductTeamModel):
             models.Index(
                 fields=["team_id", "audience_key", "merged_at"],
                 condition=Q(digest_run__isnull=True),
-                name="stamphog_pr_pending_digest",
+                name="stamp_pr_pending_digest",
             ),
         ]
 
@@ -203,11 +203,11 @@ class DigestChannel(ProductTeamModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Inherit the base Meta so default_manager_name="all_teams" survives (see StamphogRepoConfig.Meta).
+    # Inherit the base Meta so default_manager_name="all_teams" survives (see StampRepoConfig.Meta).
     class Meta(ProductTeamModel.Meta):
         constraints = [
             models.UniqueConstraint(
-                fields=["team_id", "audience_key"], name="unique_stamphog_digest_audience_per_team"
+                fields=["team_id", "audience_key"], name="unique_stamp_digest_audience_per_team"
             ),
         ]
 

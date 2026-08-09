@@ -1,4 +1,4 @@
-"""Temporal activities for the single-turn ReviewHog PR review.
+"""Temporal activities for the single-turn Review PR review.
 
 Each activity wraps one stage of the former `run.py main()` pipeline. Inputs carry only small,
 serializable values — `(team_id, user_id, report_id, head_sha, repository, branch)` plus unit keys
@@ -180,7 +180,7 @@ class ReviewMeta:
     # head can be unchanged yet not-yet-published (a prior no-publish turn) and must still publish.
     already_published: bool
     # New inline comments since the last turn's watermark — logged only for now; they don't force a
-    # turn yet (see DECISIONS.md, Stage 5b). Will gate the early-exit once ReviewHog reacts to comments.
+    # turn yet (see DECISIONS.md, Stage 5b). Will gate the early-exit once Review reacts to comments.
     new_comment_count: int
     # The PR author's GitHub login (`pr_metadata.author`), so the parent can resolve the acting user
     # whose enabled perspectives this review applies.
@@ -381,7 +381,7 @@ class AppendCodeReviewArtefactInput:
 
 @dataclass
 class TrackReviewCompletedInput:
-    """One `reviewhog_review_completed` analytics event per finalized review turn."""
+    """One `review_review_completed` analytics event per finalized review turn."""
 
     team_id: int
     report_id: str
@@ -395,7 +395,7 @@ class TrackReviewCompletedInput:
 
 @dataclass
 class TrackReviewFailedInput:
-    """One `reviewhog_review_failed` analytics event per failed review turn."""
+    """One `review_review_failed` analytics event per failed review turn."""
 
     team_id: int
     report_id: str
@@ -1315,10 +1315,10 @@ def _track_review_completed(input: TrackReviewCompletedInput) -> None:
     )
     hanzo_insights.capture(
         distinct_id=_review_event_identity(report),
-        event="reviewhog_review_completed",
+        event="review_review_completed",
         # Deterministic per turn: an activity retry that re-captures after a worker crash emits the
         # same event uuid, so ingestion dedupes it instead of double-counting the review.
-        uuid=str(uuid.uuid5(uuid.NAMESPACE_URL, f"reviewhog_review_completed:{input.report_id}:{input.run_index}")),
+        uuid=str(uuid.uuid5(uuid.NAMESPACE_URL, f"review_review_completed:{input.report_id}:{input.run_index}")),
         properties={
             "report_id": str(report.id),
             "team_id": report.team_id,
@@ -1339,7 +1339,7 @@ def _track_review_completed(input: TrackReviewCompletedInput) -> None:
             "pr_deletions": pr_meta.deletions if pr_meta is not None else None,
             "pr_changed_files": pr_meta.changed_files if pr_meta is not None else None,
             "pr_commits": pr_meta.commits if pr_meta is not None else None,
-            # Added lines ReviewHog actually reviews (lockfiles/tests/generated filtered out) —
+            # Added lines Review actually reviews (lockfiles/tests/generated filtered out) —
             # the honest denominator for per-line cost.
             "pr_reviewable_additions": count_reviewable_additions(snapshot.pr_files) if snapshot is not None else None,
             "duration_seconds": duration_seconds,
@@ -1354,14 +1354,14 @@ def _track_review_completed_safe(input: TrackReviewCompletedInput) -> None:
     try:
         _track_review_completed(input)
     except Exception:
-        logger.exception("Failed to capture reviewhog_review_completed for report %s; continuing", input.report_id)
+        logger.exception("Failed to capture review_review_completed for report %s; continuing", input.report_id)
 
 
 @activity.defn
 @scoped_temporal()
 @close_db_connections
 async def track_review_completed_activity(input: TrackReviewCompletedInput) -> None:
-    """Capture the turn's `reviewhog_review_completed` product-analytics event.
+    """Capture the turn's `review_review_completed` product-analytics event.
 
     One event per finalized turn (published or stored), across every trigger and repo — the
     per-review count product dashboards aggregate, which the step-level `task_*` events can't
@@ -1375,11 +1375,11 @@ def _track_review_failed(input: TrackReviewFailedInput) -> None:
     report = ReviewReport.objects.for_team(input.team_id).select_related("acting_user", "team").get(id=input.report_id)
     hanzo_insights.capture(
         distinct_id=_review_event_identity(report),
-        event="reviewhog_review_failed",
+        event="review_review_failed",
         # Deterministic per turn, like the completed event: repeated failures of the same turn (a
         # re-trigger that dies again before finalize bumps run_count) dedupe to one event, so
         # completion rate counts turns, not attempts.
-        uuid=str(uuid.uuid5(uuid.NAMESPACE_URL, f"reviewhog_review_failed:{input.report_id}:{input.run_index}")),
+        uuid=str(uuid.uuid5(uuid.NAMESPACE_URL, f"review_review_failed:{input.report_id}:{input.run_index}")),
         properties={
             "report_id": str(report.id),
             "team_id": report.team_id,
@@ -1400,14 +1400,14 @@ def _track_review_failed_safe(input: TrackReviewFailedInput) -> None:
     try:
         _track_review_failed(input)
     except Exception:
-        logger.exception("Failed to capture reviewhog_review_failed for report %s; continuing", input.report_id)
+        logger.exception("Failed to capture review_review_failed for report %s; continuing", input.report_id)
 
 
 @activity.defn
 @scoped_temporal()
 @close_db_connections
 async def track_review_failed_activity(input: TrackReviewFailedInput) -> None:
-    """Capture the turn's `reviewhog_review_failed` product-analytics event.
+    """Capture the turn's `review_review_failed` product-analytics event.
 
     The completed event alone hides failures: a run that dies never emits it, so an arm of the
     reviewer-model experiment that crashes on its hardest PRs would silently shed them from every

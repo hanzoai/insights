@@ -1,4 +1,4 @@
-"""Celery beat schedules for stamphog.
+"""Celery beat schedules for stamp.
 
 The daily merged-PR digest fan-out (``send_daily_digests``) is registered centrally in
 ``insights/tasks/scheduled.py`` (``setup_periodic_tasks``), which is where every product's periodic

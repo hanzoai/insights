@@ -1839,13 +1839,13 @@ class TestFileSystemProjectScoping(APIBaseTest):
         )
 
         # insights_function – team-scoped
-        self.hog_t1 = FileSystem.objects.create(
+        self.script_t1 = FileSystem.objects.create(
             team=self.team, path="Functions/Script-T1", type="insights_function/source", created_by=self.user
         )
-        self.hog_t2 = FileSystem.objects.create(
+        self.script_t2 = FileSystem.objects.create(
             team=self.team2, path="Functions/Script-T2", type="insights_function/source", created_by=self.user
         )
-        self.hog_t3 = FileSystem.objects.create(
+        self.script_t3 = FileSystem.objects.create(
             team=self.team3, path="Functions/Script-T3", type="insights_function/source", created_by=self.user
         )
 
@@ -1874,7 +1874,7 @@ class TestFileSystemProjectScoping(APIBaseTest):
         self.assertEqual(resp.json()["path"], "Shared/Doc-T2")
 
     def test_retrieve_insights_function_from_other_team_is_forbidden(self):
-        url = f"/v1/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.script_t2.id}/"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -1888,7 +1888,7 @@ class TestFileSystemProjectScoping(APIBaseTest):
         self.assertEqual(self.doc_t2.path, "Shared/Doc-T2-Renamed")
 
     def test_update_insights_function_from_other_team_is_forbidden(self):
-        url = f"/v1/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.script_t2.id}/"
         resp = self.client.patch(url, {"path": "Functions/Script-T2-Renamed"})
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -1935,7 +1935,7 @@ class TestMoveRepairsLeftoverInsightsFunctions(APIBaseTest):
         )
 
         # Team-2 HOG function (stays behind)
-        self.hog_t2 = FileSystem.objects.create(
+        self.script_t2 = FileSystem.objects.create(
             team=self.team2,
             path="Shared/Script-func.js",
             depth=2,
@@ -1956,8 +1956,8 @@ class TestMoveRepairsLeftoverInsightsFunctions(APIBaseTest):
         self.assertEqual(self.doc_t1.path, "SharedRenamed/Doc-1.txt")
 
         # ─── Team-2 insights_function stayed in place ------------------------------
-        self.hog_t2.refresh_from_db()
-        self.assertEqual(self.hog_t2.path, "Shared/Script-func.js")
+        self.script_t2.refresh_from_db()
+        self.assertEqual(self.script_t2.path, "Shared/Script-func.js")
 
         # ─── Parent folders exist for both teams ------------------------------
         #  • Team-1 now has “SharedRenamed”
@@ -2017,7 +2017,7 @@ class TestDestroyRepairsLeftoverInsightsFunctions(APIBaseTest):
         )
 
         # Script-function file for *team 2*  (stays behind; no parent folder yet)
-        self.hog_t2 = FileSystem.objects.create(
+        self.script_t2 = FileSystem.objects.create(
             team=self.team2,
             path="Shared/Script-func.js",
             depth=2,
@@ -2036,7 +2036,7 @@ class TestDestroyRepairsLeftoverInsightsFunctions(APIBaseTest):
         )
 
         self.assertTrue(
-            FileSystem.objects.filter(id=self.hog_t2.id).exists(),
+            FileSystem.objects.filter(id=self.script_t2.id).exists(),
             "Leftover insights_function row was deleted erroneously",
         )
 

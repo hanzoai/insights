@@ -5,7 +5,7 @@ import { Button, Checkbox, Skeleton, Link } from '@hanzo/elements'
 import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { InsightsCaptureOnViewed } from '@hanzo/react'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { Banner } from 'lib/elements/Banner'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
@@ -22,7 +22,7 @@ import { VisualReviewTabs } from '../components/VisualReviewTabs'
 import type { SnapshotApi } from '../generated/api.schemas'
 import { VisualReviewRunSceneLogicProps, visualReviewRunSceneLogic } from './visualReviewRunSceneLogic'
 
-const MascotMagnifyingGlass = pngHoggie()
+const MascotMagnifyingGlass = pngMascot()
 
 export const scene: SceneExport = {
     component: VisualReviewRunScene,

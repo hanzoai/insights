@@ -453,10 +453,10 @@ export const UrgencyThresholdEnumApi = {
 } as const
 
 export interface ReviewUserSettingsApi {
-    /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: ReviewHog reviews each one and posts its findings to the pull request. */
+    /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: Review reviews each one and posts its findings to the pull request. */
     review_inbox_prs?: boolean
-    /** Also have hosted Stamphog review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamphog repository (see stamphog_connected). */
-    stamphog_review_inbox_prs?: boolean
+    /** Also have hosted Stamp review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamp repository (see stamp_connected). */
+    stamp_review_inbox_prs?: boolean
     /** Review the user's pull requests when the trigger label is added on GitHub. On by default; turning it off makes the label trigger skip PRs this user authored. */
     review_labeled_prs?: boolean
     /** Minimum priority a validated finding needs to be published: 'consider' (default) publishes everything, 'should_fix' drops consider-level findings, 'must_fix' publishes only blocking issues.
@@ -465,17 +465,17 @@ export interface ReviewUserSettingsApi {
      * * `should_fix` - Should Fix
      * * `must_fix` - Must Fix */
     urgency_threshold?: UrgencyThresholdEnumApi
-    /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated ReviewHog team while the product is in alpha). */
+    /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated Review team while the product is in alpha). */
     readonly can_trigger_reviews: boolean
-    /** Whether this project has at least one synced, enabled Stamphog repository. When false, the stamphog_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamphog GitHub App. */
-    readonly stamphog_connected: boolean
+    /** Whether this project has at least one synced, enabled Stamp repository. When false, the stamp_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamp GitHub App. */
+    readonly stamp_connected: boolean
 }
 
 export interface PatchedReviewUserSettingsApi {
-    /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: ReviewHog reviews each one and posts its findings to the pull request. */
+    /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: Review reviews each one and posts its findings to the pull request. */
     review_inbox_prs?: boolean
-    /** Also have hosted Stamphog review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamphog repository (see stamphog_connected). */
-    stamphog_review_inbox_prs?: boolean
+    /** Also have hosted Stamp review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamp repository (see stamp_connected). */
+    stamp_review_inbox_prs?: boolean
     /** Review the user's pull requests when the trigger label is added on GitHub. On by default; turning it off makes the label trigger skip PRs this user authored. */
     review_labeled_prs?: boolean
     /** Minimum priority a validated finding needs to be published: 'consider' (default) publishes everything, 'should_fix' drops consider-level findings, 'must_fix' publishes only blocking issues.
@@ -484,10 +484,10 @@ export interface PatchedReviewUserSettingsApi {
      * * `should_fix` - Should Fix
      * * `must_fix` - Must Fix */
     urgency_threshold?: UrgencyThresholdEnumApi
-    /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated ReviewHog team while the product is in alpha). */
+    /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated Review team while the product is in alpha). */
     readonly can_trigger_reviews?: boolean
-    /** Whether this project has at least one synced, enabled Stamphog repository. When false, the stamphog_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamphog GitHub App. */
-    readonly stamphog_connected?: boolean
+    /** Whether this project has at least one synced, enabled Stamp repository. When false, the stamp_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamp GitHub App. */
+    readonly stamp_connected?: boolean
 }
 
 export interface ReviewValidatorConfigApi {
@@ -506,7 +506,7 @@ export interface PatchedReviewValidatorConfigSelectApi {
     active?: boolean
 }
 
-export type ReviewHogReviewsListParams = {
+export type ReviewReviewsListParams = {
     /**
      * Maximum rows to return. The list grows this instead of paging by offset — in-progress rows reorder the list between refreshes, so offset pages would shift under the reader.
      * @minimum 1
@@ -520,17 +520,17 @@ export type ReviewHogReviewsListParams = {
      * * `everyone` - everyone
      * @minLength 1
      */
-    scope?: ReviewHogReviewsListScope
+    scope?: ReviewReviewsListScope
 }
 
-export type ReviewHogReviewsListScope = (typeof ReviewHogReviewsListScope)[keyof typeof ReviewHogReviewsListScope]
+export type ReviewReviewsListScope = (typeof ReviewReviewsListScope)[keyof typeof ReviewReviewsListScope]
 
-export const ReviewHogReviewsListScope = {
+export const ReviewReviewsListScope = {
     Mine: 'mine',
     Everyone: 'everyone',
 } as const
 
-export type ReviewHogReviewsPerspectiveStatsRetrieveParams = {
+export type ReviewReviewsPerspectiveStatsRetrieveParams = {
     /**
      * Whose reviews to aggregate: `mine` (the default) for reviews the requesting user ran plus reviews of pull requests they authored (matched via their linked GitHub login), `everyone` for every review on this project.
      *
@@ -538,13 +538,13 @@ export type ReviewHogReviewsPerspectiveStatsRetrieveParams = {
      * * `everyone` - everyone
      * @minLength 1
      */
-    scope?: ReviewHogReviewsPerspectiveStatsRetrieveScope
+    scope?: ReviewReviewsPerspectiveStatsRetrieveScope
 }
 
-export type ReviewHogReviewsPerspectiveStatsRetrieveScope =
-    (typeof ReviewHogReviewsPerspectiveStatsRetrieveScope)[keyof typeof ReviewHogReviewsPerspectiveStatsRetrieveScope]
+export type ReviewReviewsPerspectiveStatsRetrieveScope =
+    (typeof ReviewReviewsPerspectiveStatsRetrieveScope)[keyof typeof ReviewReviewsPerspectiveStatsRetrieveScope]
 
-export const ReviewHogReviewsPerspectiveStatsRetrieveScope = {
+export const ReviewReviewsPerspectiveStatsRetrieveScope = {
     Mine: 'mine',
     Everyone: 'everyone',
 } as const

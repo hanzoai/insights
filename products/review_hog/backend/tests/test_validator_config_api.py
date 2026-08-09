@@ -20,7 +20,7 @@ class TestReviewValidatorConfigAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
         sync_canonical_validation(self.team)
-        self.base = f"/v1/projects/{self.team.id}/review_hog/validators"
+        self.base = f"/v1/projects/{self.team.id}/review/validators"
 
     def _author_custom(self, created_by: User | None = None) -> None:
         LLMSkill.objects.create(
@@ -153,7 +153,7 @@ class TestReviewValidatorConfigAPI(APIBaseTest):
         # the URL made the canonicalized `for_team` filter and the raw-id create kwarg contradict,
         # so the second select 500ed on the unique constraint.
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
-        url = f"/v1/projects/{env.id}/review_hog/validators/{REVIEW_FN_VALIDATION_SKILL_NAME}/"
+        url = f"/v1/projects/{env.id}/review/validators/{REVIEW_FN_VALIDATION_SKILL_NAME}/"
 
         first = self.client.patch(url, {"active": True}, format="json")
         second = self.client.patch(url, {"active": True}, format="json")
@@ -172,7 +172,7 @@ class TestReviewValidatorConfigAPI(APIBaseTest):
         cold = Team.objects.create(organization=self.organization, name="cold")
 
         res = self.client.patch(
-            f"/v1/projects/{cold.id}/review_hog/validators/{REVIEW_FN_VALIDATION_SKILL_NAME}/",
+            f"/v1/projects/{cold.id}/review/validators/{REVIEW_FN_VALIDATION_SKILL_NAME}/",
             {"active": True},
             format="json",
         )

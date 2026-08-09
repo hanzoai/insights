@@ -145,7 +145,7 @@ class TestAIObservabilityUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreD
         assert metrics.ai_feedback_count == 4
         assert metrics.ai_evaluation_count == 6
         assert metrics.ai_llm_judge_evaluation_count == 3
-        assert metrics.ai_hog_evaluation_count == 2
+        assert metrics.ai_script_evaluation_count == 2
         assert metrics.ai_sentiment_evaluation_count == 1
         assert metrics.ai_trace_summary_count == 7
         assert metrics.ai_generation_summary_count == 12
@@ -571,7 +571,7 @@ class TestAIObservabilityUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreD
         assert org_1_report["ai_generation_count"] == 13  # 10 + 3
         assert org_1_report["ai_evaluation_count"] == 5
         assert org_1_report["ai_llm_judge_evaluation_count"] == 3
-        assert org_1_report["ai_hog_evaluation_count"] == 1
+        assert org_1_report["ai_script_evaluation_count"] == 1
         assert org_1_report["ai_sentiment_evaluation_count"] == 1
         assert org_1_report["ai_trace_summary_count"] == 6
         assert org_1_report["ai_generation_summary_count"] == 8
@@ -605,7 +605,7 @@ class TestAIObservabilityUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreD
         assert org_2_report["ai_embedding_count"] == 7
         assert org_2_report["ai_generation_count"] == 2
         assert org_2_report["ai_llm_judge_evaluation_count"] == 0
-        assert org_2_report["ai_hog_evaluation_count"] == 0
+        assert org_2_report["ai_script_evaluation_count"] == 0
         assert org_2_report["ai_sentiment_evaluation_count"] == 0
         assert org_2_report["llm_prompt_fetched_count"] == 1
         assert org_2_report["total_ai_cost_usd"] == pytest.approx(0.050, rel=1e-6)  # 2 * 0.025
@@ -683,7 +683,7 @@ class TestAIObservabilityUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreD
         assert org_report["ai_feedback_count"] == 0
         assert org_report["ai_evaluation_count"] == 0
         assert org_report["ai_llm_judge_evaluation_count"] == 0
-        assert org_report["ai_hog_evaluation_count"] == 0
+        assert org_report["ai_script_evaluation_count"] == 0
         assert org_report["ai_sentiment_evaluation_count"] == 0
         assert org_report["ai_trace_summary_count"] == 0
         assert org_report["ai_generation_summary_count"] == 0
@@ -728,7 +728,7 @@ class TestAIObservabilityUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreD
         assert org_report["ai_generation_count"] == 15  # 10 + 5
         assert org_report["ai_evaluation_count"] == 5  # 3 + 2
         assert org_report["ai_llm_judge_evaluation_count"] == 3
-        assert org_report["ai_hog_evaluation_count"] == 0
+        assert org_report["ai_script_evaluation_count"] == 0
         assert org_report["ai_sentiment_evaluation_count"] == 2
 
     def test_dimension_breakdown_aggregation_across_teams(self) -> None:

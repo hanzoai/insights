@@ -662,7 +662,7 @@ export const EvaluationStatusEnumApi = {
  * * `provider_key_quota_exceeded` - Provider API key quota exceeded
  * * `provider_key_rate_limited` - Provider API key is rate limited
  * * `model_not_found` - Model not found
- * * `hog_error` - Script evaluation code failed
+ * * `script_error` - Script evaluation code failed
  */
 export type StatusReasonEnumApi = (typeof StatusReasonEnumApi)[keyof typeof StatusReasonEnumApi]
 
@@ -675,7 +675,7 @@ export const StatusReasonEnumApi = {
     ProviderKeyQuotaExceeded: 'provider_key_quota_exceeded',
     ProviderKeyRateLimited: 'provider_key_rate_limited',
     ModelNotFound: 'model_not_found',
-    HogError: 'hog_error',
+    ScriptError: 'script_error',
 } as const
 
 /**
@@ -1026,9 +1026,9 @@ export interface PatchedEvaluationApi {
     deleted?: boolean
 }
 
-export type TestHogRequestApiConditionsItem = { [key: string]: unknown }
+export type TestScriptRequestApiConditionsItem = { [key: string]: unknown }
 
-export interface TestHogTargetConfigApi {
+export interface TestScriptTargetConfigApi {
     /**
      * Aggregation window for trace samples, in seconds.
      * @minimum 10
@@ -1043,7 +1043,7 @@ export interface TestHogTargetConfigApi {
     quiet_period_seconds?: number
 }
 
-export interface TestHogRequestApi {
+export interface TestScriptRequestApi {
     /**
      * Script source code to test. Must return a boolean (true = pass, false = fail) or null for N/A.
      * @minLength 1
@@ -1058,7 +1058,7 @@ export interface TestHogRequestApi {
     /** Whether the evaluation can return N/A for non-applicable generations. */
     allows_na?: boolean
     /** Optional trigger conditions to filter which events are sampled. */
-    conditions?: TestHogRequestApiConditionsItem[]
+    conditions?: TestScriptRequestApiConditionsItem[]
     /** What the evaluation runs against: 'generation' samples individual generations, 'trace' samples whole traces, and 'session' samples whole sessions that have gone quiet. Each target runs against the same globals it would run against online.
      *
      * * `generation` - Generation
@@ -1066,10 +1066,10 @@ export interface TestHogRequestApi {
      * * `session` - Session */
     target?: EvaluationTargetEnumApi
     /** Target-specific preview settings. For a trace target, set window_seconds between 10 and 7200. */
-    target_config?: TestHogTargetConfigApi
+    target_config?: TestScriptTargetConfigApi
 }
 
-export interface TestHogResultItemApi {
+export interface TestScriptResultItemApi {
     /** Stable identifier for the sampled generation, trace, or session. */
     sample_id: string
     /** Type of sampled unit: generation, trace, or session.
@@ -1109,8 +1109,8 @@ export interface TestHogResultItemApi {
     error: string | null
 }
 
-export interface TestHogResponseApi {
-    results: TestHogResultItemApi[]
+export interface TestScriptResponseApi {
+    results: TestScriptResultItemApi[]
     /** Optional message, e.g. when no recent events were found. */
     message?: string
 }
@@ -2781,7 +2781,7 @@ export interface LLMTaggerConfigApi {
     max_tags?: number | null
 }
 
-export interface HogTaggerConfigApi {
+export interface ScriptTaggerConfigApi {
     /**
      * Script source code to classify a generation into tags.
      * @minLength 1
@@ -2791,7 +2791,7 @@ export interface HogTaggerConfigApi {
     tags?: TagDefinitionApi[]
 }
 
-export type TaggerConfigApi = LLMTaggerConfigApi | HogTaggerConfigApi
+export type TaggerConfigApi = LLMTaggerConfigApi | ScriptTaggerConfigApi
 
 export type TaggerConditionApiPropertiesItem = { [key: string]: unknown }
 
@@ -2934,7 +2934,7 @@ export interface PatchedTaggerUpdateApi {
     deleted?: boolean
 }
 
-export interface TestHogTaggerTagApi {
+export interface TestScriptTaggerTagApi {
     /**
      * Tag identifier to allow in Script test results.
      * @maxLength 100
@@ -2947,7 +2947,7 @@ export interface TestHogTaggerTagApi {
     description?: string
 }
 
-export interface TestHogTaggerRequestApi {
+export interface TestScriptTaggerRequestApi {
     /**
      * Script source code to test. Return a tag name string, a list of tag name strings, or null.
      * @minLength 1
@@ -2960,10 +2960,10 @@ export interface TestHogTaggerRequestApi {
      */
     sample_count?: number
     /** Optional tag whitelist. Returned tags outside this list are filtered out. */
-    tags?: TestHogTaggerTagApi[]
+    tags?: TestScriptTaggerTagApi[]
 }
 
-export interface TestHogTaggerResultItemApi {
+export interface TestScriptTaggerResultItemApi {
     /** UUID of the sampled $ai_generation event. */
     event_uuid: string
     /**
@@ -2986,9 +2986,9 @@ export interface TestHogTaggerResultItemApi {
     error?: string | null
 }
 
-export interface TestHogTaggerResponseApi {
+export interface TestScriptTaggerResponseApi {
     /** Per-event Script tagger test results. */
-    results: TestHogTaggerResultItemApi[]
+    results: TestScriptTaggerResultItemApi[]
     /** Optional message, for example when no recent AI events were found. */
     message?: string
 }

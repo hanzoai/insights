@@ -45,7 +45,7 @@ class TaskDTO:
 class SignalImplementationRunDTO:
     """Identity of a signals-origin ("self-driving") implementation run that produced a PR.
 
-    Returned by ``find_signal_implementation_run``. Consumers (stamphog's inbox carve-out) use it
+    Returned by ``find_signal_implementation_run``. Consumers (stamp's inbox carve-out) use it
     to confirm a bot-authored PR is a Insights Code self-driving implementation and to find whose
     review preferences apply.
     """

@@ -142,7 +142,7 @@ TASKS_AGENT_PROXY_INTERNAL_URL: str | None = os.getenv("TASKS_AGENT_PROXY_INTERN
 # agent-proxy in production; unset (local/CI) disables the check.
 AGENT_PROXY_CALLBACK_SECRET: str | None = os.getenv("AGENT_PROXY_CALLBACK_SECRET") or None
 
-# ReviewHog production label trigger. The trigger endpoint (POST /v1/review_hog/trigger) authenticates
+# Review production label trigger. The trigger endpoint (POST /v1/review/trigger) authenticates
 # CI by comparing the request's bearer token to REVIEWFN_TRIGGER_TOKEN (a shared secret provisioned to
 # both Django and the GitHub Action). Unset fails closed outside local dev/test. REVIEWFN_TEAM_ID is the
 # team the review runs and publishes under; REVIEWFN_RUN_USER_ID is the user the sandbox tasks run as
@@ -150,7 +150,7 @@ AGENT_PROXY_CALLBACK_SECRET: str | None = os.getenv("AGENT_PROXY_CALLBACK_SECRET
 REVIEWFN_TRIGGER_TOKEN: str | None = os.getenv("REVIEWFN_TRIGGER_TOKEN") or None
 REVIEWFN_TEAM_ID: int | None = get_from_env("REVIEWFN_TEAM_ID", optional=True, type_cast=int)
 REVIEWFN_RUN_USER_ID: int | None = get_from_env("REVIEWFN_RUN_USER_ID", optional=True, type_cast=int)
-# The GitHub App's bot login (`<app slug>[bot]`) ReviewHog posts as. When set, the marker-based
+# The GitHub App's bot login (`<app slug>[bot]`) Review posts as. When set, the marker-based
 # idempotency scans only trust comments/reviews authored by this exact identity — otherwise any
 # installed bot could paste a public marker and suppress a publish (or get its comment PATCHed).
 # Unset falls back to trusting any Bot-typed author.

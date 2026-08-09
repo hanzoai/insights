@@ -90,7 +90,7 @@ export const workflowSceneLogic = kea<workflowSceneLogicType>([
                     ? {
                           activity_scope: ActivityScope.INSIGHTS_FLOW,
                           activity_item_id: id,
-                          access_control_resource: 'hog_flow',
+                          access_control_resource: 'script_flow',
                           access_control_resource_id: id,
                       }
                     : null,

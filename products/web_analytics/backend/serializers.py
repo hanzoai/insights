@@ -64,7 +64,7 @@ class RecapPersonaSerializer(serializers.Serializer):
     id = serializers.CharField(
         help_text=(
             "Stable persona identifier. One of: just_getting_started, conversion_machine, traffic_magnet, "
-            "crowd_favorite, search_hog, word_of_mouth, loyal_following, rising_star, steady_hog."
+            "crowd_favorite, search_script, word_of_mouth, loyal_following, rising_star, steady_script."
         )
     )
     name = serializers.CharField(help_text="Display name for the persona, e.g. 'Traffic Magnet'.")

@@ -3,14 +3,14 @@
 > 2 e2e runs + 1 offline chunker batch + 1 live-PR confirmation · frozen PR #62096 (head `ba725a89`) ·
 > unpinned chunks · review + validation stages untouched (sonnet-5 @ xhigh, as prod) · one-shot stages on
 > `claude-sonnet-5` @ xhigh via the LLM gateway with structured outputs. Judged per dump vs the old
-> ReviewHog 10-finding yardstick (`../2026-07-reviewer-topology/fixtures/old_reviewhog_report.md`), raw
+> Review 10-finding yardstick (`../2026-07-reviewer-topology/fixtures/old_review_report.md`), raw
 > output in `judge_results.json`. Runs 2026-07-03/04.
 > **Judge calls are unreviewed by a human — see the notes fields in `judge_results.json` before acting on close calls.**
 
 ## TL;DR
 
 1. **The one-shot mechanism works, on both sides of both gates.** Chunking ≤5k adds and dedup ≤50 findings ran as
-   single gateway calls (verified per run via `ai_product=review_hog` + `ai_stage` stamps, no
+   single gateway calls (verified per run via `ai_product=review` + `ai_stage` stamps, no
    chunking/dedup sandbox tasks); the live PR #67419 (3217 adds, 61 raw findings) exercised one-shot
    chunking AND the >50 **sandbox fallback for dedup**, then published normally.
 2. **The savings are time and reliability, not tokens.** Combine→clean→dedup→persist collapsed to
@@ -37,7 +37,7 @@
 Implements `../../POTENTIAL_EXPERIMENTS.md` item 7 with user refinements. What changed vs prod: chunking
 (within `CHUNKING_ONESHOT_MAX_ADDITIONS = 5000` reviewable adds) and dedup (within
 `DEDUP_ONESHOT_MAX_FINDINGS = 50` issues) execute as one Messages call through
-`get_async_anthropic_gateway_client(product="review_hog")` — adaptive thinking, `output_config.effort =
+`get_async_anthropic_gateway_client(product="review")` — adaptive thinking, `output_config.effort =
 xhigh`, structured outputs from the stage's pydantic model, `ai_stage` stamps, Bedrock fallback off
 (`reviewer/sandbox/direct_llm.py`). Above a gate: the previous sandbox path, byte-identical prompts.
 Deliberate confound (end-state style): these stages also moved model, agent-default opus-4-8 @ high →
@@ -96,9 +96,9 @@ accurate, one sound dismissal, and it caught that a finding's proposed fix would
 
 | check                       | result                                                                                |
 | --------------------------- | ------------------------------------------------------------------------------------- |
-| chunking one-shot ≤5k adds  | ✓ both runs + live PR (1 gen each, `review_hog/chunking`)                             |
-| dedup one-shot ≤50 findings | ✓ both runs (1 gen each, `review_hog/dedup`)                                          |
-| dedup sandbox fallback >50  | ✓ live PR #67419: 61 raw → sandbox dedup, zero `review_hog/dedup` gens                |
+| chunking one-shot ≤5k adds  | ✓ both runs + live PR (1 gen each, `review/chunking`)                             |
+| dedup one-shot ≤50 findings | ✓ both runs (1 gen each, `review/dedup`)                                          |
+| dedup sandbox fallback >50  | ✓ live PR #67419: 61 raw → sandbox dedup, zero `review/dedup` gens                |
 | schema failures             | 0 (structured outputs)                                                                |
 | stage attribution           | ✓ `ai_product`/`ai_stage` stamps separate run stages from local cron noise            |
 | live publish                | ✓ #67419 review posted (30 inline comments, pinned to head, `published_head_sha` set) |

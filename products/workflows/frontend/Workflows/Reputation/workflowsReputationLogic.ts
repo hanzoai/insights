@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 
 import { projectLogic } from 'scenes/projectLogic'
 
-import { hogFlowsReputationRetrieve } from 'products/workflows/frontend/generated/api'
+import { flowsReputationRetrieve } from 'products/workflows/frontend/generated/api'
 import type {
     AwsTenantReputationApi,
     EmailSendingRatesApi,
@@ -96,7 +96,7 @@ export const workflowsReputationLogic = kea<workflowsReputationLogicType>([
                         return null
                     }
                     const search = values.search.trim()
-                    const response = await hogFlowsReputationRetrieve(
+                    const response = await flowsReputationRetrieve(
                         String(values.currentProjectId),
                         search ? { search } : undefined
                     )

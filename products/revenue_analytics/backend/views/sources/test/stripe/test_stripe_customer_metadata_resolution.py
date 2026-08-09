@@ -106,7 +106,7 @@ class TestStripeCustomerMetadataResolution(DatastoreTestMixin, APIBaseTest):
             "subscription_details,webhooks_delivered_at,subtotal_excluding_tax,"
             "total_discount_amounts,pre_payment_credit_notes_amount,post_payment_credit_notes_amount\n"
             'in_1,0,1,"{}",1549,ch_1,"{}",SH-0001,invoice,paid,1704067200,usd,cus_no_meta,'
-            ',,0,"{}",1549,1,"[]",,1549,1704067200,1706745600,1549,,,StreamHog,1,1704067200,'
+            ',,0,"{}",1549,1,"[]",,1549,1704067200,1706745600,1549,,,StreamScript,1,1704067200,'
             'sub_1,1,"{}",Alice,subscription_create,alice@example.com,0,pi_1,US,0,0,,,0,"{}",0,'
             'charge_automatically,"[]","[]",,"{}",none,1549,"{}",1704067200,1549,"[]",0,0\n'
         )

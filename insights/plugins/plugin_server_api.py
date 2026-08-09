@@ -49,7 +49,7 @@ def reload_insights_functions_on_workers(team_id: int, insights_function_ids: li
 
 def reload_insights_flows_on_workers(team_id: int, insights_flow_ids: list[str]):
     logger.info(f"Reloading script flows {insights_flow_ids} on workers")
-    publish_message("reload-script-flows", {"teamId": team_id, "hogFlowIds": insights_flow_ids})
+    publish_message("reload-script-flows", {"teamId": team_id, "flowIds": insights_flow_ids})
 
 
 def reload_evaluations_on_workers(team_id: int, evaluation_ids: list[str]):
@@ -82,7 +82,7 @@ def populate_plugin_capabilities_on_workers(plugin_id: str):
     publish_message("populate-plugin-capabilities", {"pluginId": plugin_id})
 
 
-def create_hog_invocation_test(team_id: int, insights_function_id: str, payload: dict) -> requests.Response:
+def create_script_invocation_test(team_id: int, insights_function_id: str, payload: dict) -> requests.Response:
     logger.info(f"Creating script invocation test for script function {insights_function_id} on workers")
     return internal_requests.post(
         CDP_API_URL + f"/v1/projects/{team_id}/insights_functions/{insights_function_id}/invocations",
@@ -220,7 +220,7 @@ def create_batch_insights_flow_job_invocation(
     )
 
 
-def rerun_hog_invocations(
+def rerun_script_invocations(
     team_id: int,
     function_kind: str,
     function_id: str,

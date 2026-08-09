@@ -42,13 +42,13 @@ export interface LLMTaggerConfig {
     max_tags: number | null
 }
 
-export interface HogTaggerConfig {
+export interface ScriptTaggerConfig {
     source: string
     bytecode?: unknown[]
     tags: TagDefinition[]
 }
 
-export type TaggerConfig = LLMTaggerConfig | HogTaggerConfig
+export type TaggerConfig = LLMTaggerConfig | ScriptTaggerConfig
 
 export interface ModelConfiguration {
     provider: LLMProvider

@@ -15,7 +15,7 @@ class TestTemplateEngageso(BaseInsightsFunctionTemplateTest):
 
         assert res.result is None
 
-        event = self.createHogGlobals()["event"]
+        event = self.createScriptGlobals()["event"]
 
         event["event"] = event["name"]
 

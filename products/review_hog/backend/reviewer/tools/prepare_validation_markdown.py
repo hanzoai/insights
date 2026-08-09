@@ -117,7 +117,7 @@ def _render_review_body(
 ) -> str:
     """Render the top-level review body: the per-chunk overview plus any off-diff findings section."""
     lines = [
-        "# ReviewHog Report",
+        "# Review Report",
         "",
     ]
 

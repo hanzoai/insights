@@ -1098,7 +1098,7 @@ class TestExternalDataSource(APIBaseTest):
         mock_insights_function = MagicMock()
         mock_insights_function.id = uuid.uuid4()
         mock_insights_function.inputs = {"schema_mapping": {"value": {}}, "source_id": {"value": "test-source-id"}}
-        mock_hog_fn_result = WebhookInsightsFunctionCreateResult(
+        mock_script_fn_result = WebhookInsightsFunctionCreateResult(
             insights_function=mock_insights_function,
             webhook_url="https://test.com/webhook",
             insights_function_created=False,
@@ -1110,7 +1110,7 @@ class TestExternalDataSource(APIBaseTest):
         with (
             patch(
                 "products.warehouse_sources.backend.presentation.views.external_data_schema.get_or_create_webhook_insights_function",
-                return_value=mock_hog_fn_result,
+                return_value=mock_script_fn_result,
             ),
             patch(
                 "products.warehouse_sources.backend.temporal.data_imports.sources.stripe.source.StripeSource.sync_webhook_events",

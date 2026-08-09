@@ -43,14 +43,14 @@ class TestSocialSignupAPI(APIBaseTest):
 
         response = self.client.post(
             "/v1/social_signup",
-            {"organization_name": "Hogflix", "first_name": "Max"},
+            {"organization_name": "Scriptflix", "first_name": "Max"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # The pipeline resumes here, and it — not this endpoint — signs the user in.
         self.assertEqual(response.json(), {"continue_url": "/complete/oidc/"})
         self.assertEqual(User.objects.filter(email="max@hanzo.ai", first_name="Max", is_email_verified=True).count(), 1)
-        self.assertEqual(Organization.objects.filter(name="Hogflix").count(), 1)
+        self.assertEqual(Organization.objects.filter(name="Scriptflix").count(), 1)
 
     def test_takes_the_address_from_the_session_not_the_request(self):
         Organization.objects.all().delete()
@@ -60,7 +60,7 @@ class TestSocialSignupAPI(APIBaseTest):
 
         response = self.client.post(
             "/v1/social_signup",
-            {"organization_name": "Hogflix", "first_name": "Max", "email": "attacker@hanzo.ai"},
+            {"organization_name": "Scriptflix", "first_name": "Max", "email": "attacker@hanzo.ai"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -170,10 +170,10 @@ class TestSocialDomainJitProvisioning(APIBaseTest):
         )
 
     def test_provisions_a_new_user_on_a_verified_jit_domain(self):
-        organization_domain = self._domain("hogflix.hanzo.ai", verified=True, jit=True)
+        organization_domain = self._domain("scriptflix.hanzo.ai", verified=True, jit=True)
         strategy = FakeStrategy()
 
-        user = process_social_domain_jit_provisioning_signup(strategy, "new@hogflix.hanzo.ai", "New Person")
+        user = process_social_domain_jit_provisioning_signup(strategy, "new@scriptflix.hanzo.ai", "New Person")
 
         assert user is not None
         self.assertTrue(user.is_email_verified)

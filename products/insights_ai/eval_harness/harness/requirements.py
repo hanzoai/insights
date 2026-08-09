@@ -16,7 +16,7 @@ class Infra(enum.Enum):
     DATABASE = "database"
     """The eval test database (Postgres + persons DB + Datastore)."""
 
-    PERSONHOG = "personinsights"
+    Person = "personinsights"
     """The personinsights replica/router pair person reads route through."""
 
     LIVE_SERVER = "live_server"
@@ -52,13 +52,13 @@ _IMPLIES: dict[Infra, frozenset[Infra]] = {
     Infra.MCP_SERVER: frozenset({Infra.LIVE_SERVER}),
     # Demo seeding's person/group reads go through the personinsights router; a dead
     # router would poison its 30s negative group-types cache for the whole run.
-    Infra.DEMO_DATA: frozenset({Infra.DATABASE, Infra.PERSONHOG}),
+    Infra.DEMO_DATA: frozenset({Infra.DATABASE, Infra.Person}),
     Infra.SANDBOX: frozenset({Infra.LLM_GATEWAY, Infra.MCP_SERVER, Infra.DEMO_DATA}),
 }
 
 INFRA_BY_KIND: dict[SuiteKind, frozenset[Infra]] = {
     SuiteKind.SANDBOXED: frozenset(Infra),
-    SuiteKind.ONE_SHOT: frozenset({Infra.DATABASE, Infra.PERSONHOG, Infra.DEMO_DATA}),
+    SuiteKind.ONE_SHOT: frozenset({Infra.DATABASE, Infra.Person, Infra.DEMO_DATA}),
 }
 
 

@@ -4,7 +4,7 @@ import { IconCheckCircle, IconClock, IconRefresh, IconWarning } from '@hanzo/ico
 import { Button, Skeleton, Table, Tag, Link } from '@hanzo/elements'
 
 import { dataColorVars } from 'lib/colors'
-import { ExplorerHog } from 'lib/components/mascots'
+import { ExplorerScript } from 'lib/components/mascots'
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
 import { Progress } from 'lib/elements/Progress'
@@ -58,7 +58,7 @@ function SummaryCard(): JSX.Element {
         <Card className="bg-gradient-to-br from-accent/15 via-accent/5 to-surface-primary">
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-4 min-w-0">
-                    <ExplorerHog className="h-20 w-20 shrink-0 hidden sm:block" />
+                    <ExplorerScript className="h-20 w-20 shrink-0 hidden sm:block" />
                     <div className="min-w-0">
                         <h3 className="text-xl font-semibold m-0">
                             {summary}

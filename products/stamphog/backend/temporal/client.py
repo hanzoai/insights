@@ -1,4 +1,4 @@
-"""Temporal client helper for starting the stamphog PR review workflow.
+"""Temporal client helper for starting the stamp PR review workflow.
 
 Modeled on ``products/tasks/backend/temporal/client.py``: a thin fire-and-forget
 bridge from Django (Celery task / transaction.on_commit) into Temporal. The
@@ -16,17 +16,17 @@ from insights.temporal.common.client import async_connect
 
 logger = logging.getLogger(__name__)
 
-STAMPFN_REVIEW_WORKFLOW = "stamphog-review"
+STAMPFN_REVIEW_WORKFLOW = "stamp-review"
 
 
-def _stamphog_task_queue() -> str:
-    # Falls back to the general-purpose queue until a dedicated stamphog queue exists.
+def _stamp_task_queue() -> str:
+    # Falls back to the general-purpose queue until a dedicated stamp queue exists.
     return getattr(settings, "STAMPFN_TASK_QUEUE", settings.GENERAL_PURPOSE_TASK_QUEUE)
 
 
 @async_to_sync
-async def execute_stamphog_review_workflow(review_run_id: str, team_id: int) -> None:
-    """Start the ``stamphog-review`` workflow for a queued ReviewRun.
+async def execute_stamp_review_workflow(review_run_id: str, team_id: int) -> None:
+    """Start the ``stamp-review`` workflow for a queued ReviewRun.
 
     Decorated with ``async_to_sync`` so it bridges cleanly out of the synchronous
     ``transaction.on_commit`` callback the Celery task registers, without nesting a
@@ -35,18 +35,18 @@ async def execute_stamphog_review_workflow(review_run_id: str, team_id: int) -> 
     """
     # Deferred so the workflow module (and the temporalio workflow sandbox it drags
     # in) stays off the Celery/web import path that this client rides on.
-    from products.stamphog.backend.temporal.workflow import (  # noqa: PLC0415 — keep the workflow sandbox off the import path
-        StamphogReviewInput,
+    from products.stamp.backend.temporal.workflow import (  # noqa: PLC0415 — keep the workflow sandbox off the import path
+        StampReviewInput,
     )
 
     client = await async_connect()
-    workflow_id = f"stamphog-review-{review_run_id}"
+    workflow_id = f"stamp-review-{review_run_id}"
     await client.start_workflow(
         STAMPFN_REVIEW_WORKFLOW,
-        StamphogReviewInput(review_run_id=review_run_id, team_id=team_id),
+        StampReviewInput(review_run_id=review_run_id, team_id=team_id),
         id=workflow_id,
         id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
-        task_queue=_stamphog_task_queue(),
+        task_queue=_stamp_task_queue(),
         # Single attempt at the workflow level. A workflow retry would restart the whole review AFTER
         # mark_review_failed already ran — re-provisioning the sandbox and possibly re-posting a verdict
         # for a run already marked FAILED (run_review_in_sandbox only bails on SUPERSEDED). Retries belong
@@ -54,6 +54,6 @@ async def execute_stamphog_review_workflow(review_run_id: str, team_id: int) -> 
         retry_policy=RetryPolicy(maximum_attempts=1),
     )
     logger.info(
-        "stamphog_review_workflow_started",
+        "stamp_review_workflow_started",
         extra={"review_run_id": review_run_id, "team_id": team_id, "workflow_id": workflow_id},
     )

@@ -9,16 +9,16 @@ from django.test import SimpleTestCase, override_settings
 import jwt
 from parameterized import parameterized
 
-from products.stamphog.backend.logic.digest import DigestPRSummary, DigestSummary
-from products.stamphog.backend.logic.digest_config import load_repo_digest_config
-from products.stamphog.backend.logic.github_client import StamphogGitHubClient, StamphogGitHubError, _build_app_jwt
-from products.stamphog.backend.logic.reviewer import build_reviewer_invocation, parse_reviewer_output
-from products.stamphog.backend.logic.slack_digest import _build_blocks, _build_fallback_text
-from products.stamphog.backend.models import StamphogRepoConfig
-from products.stamphog.backend.temporal import activities as activities_module
-from products.stamphog.backend.temporal.registry import ACTIVITIES
-from products.stamphog.backend.tests import fakes
-from products.stamphog.backend.tests.conftest import _generate_app_private_key
+from products.stamp.backend.logic.digest import DigestPRSummary, DigestSummary
+from products.stamp.backend.logic.digest_config import load_repo_digest_config
+from products.stamp.backend.logic.github_client import StampGitHubClient, StampGitHubError, _build_app_jwt
+from products.stamp.backend.logic.reviewer import build_reviewer_invocation, parse_reviewer_output
+from products.stamp.backend.logic.slack_digest import _build_blocks, _build_fallback_text
+from products.stamp.backend.models import StampRepoConfig
+from products.stamp.backend.temporal import activities as activities_module
+from products.stamp.backend.temporal.registry import ACTIVITIES
+from products.stamp.backend.tests import fakes
+from products.stamp.backend.tests.conftest import _generate_app_private_key
 
 # The gate/policy engine now lives in tools/pr-approval-agent and is covered by its
 # own suite (test_gates.py, test_policy.py); it runs inside the sandbox rather than
@@ -29,7 +29,7 @@ from products.stamphog.backend.tests.conftest import _generate_app_private_key
 class ParseReviewerOutputTests(SimpleTestCase):
     def test_parses_rich_final_verdict_contract(self) -> None:
         raw = (
-            '{"stamphog_version": "2.0.0b1", "final_verdict": "APPROVED", '
+            '{"stamp_version": "2.0.0b1", "final_verdict": "APPROVED", '
             '"gates": [{"gate": "size", "passed": true, "message": "ok"}], '
             '"reviewer": {"verdict": "APPROVE", "reasoning": "Looks fine.", "issues": []}, '
             '"review_body": "Looks fine."}'
@@ -41,7 +41,7 @@ class ParseReviewerOutputTests(SimpleTestCase):
         assert verdict.reasoning == "Looks fine."
         assert verdict.gate_blocked is False
         assert verdict.review_body == "Looks fine."
-        assert verdict.stamphog_version == "2.0.0b1"
+        assert verdict.stamp_version == "2.0.0b1"
 
     def test_failed_gate_marks_gate_blocked(self) -> None:
         raw = (
@@ -163,14 +163,14 @@ class DigestConfigFetchTests(SimpleTestCase):
         # transient GitHub failure here would permanently route the merge to the author/team fallback
         # instead of the declared channel. Only confirmed absence (404 -> None inside the client) may
         # yield None; a blip must raise so the merge-record Celery task retries the delivery.
-        config = StamphogRepoConfig(repository="o/r", installation_id="1")
-        with patch("products.stamphog.backend.logic.digest_config.StamphogGitHubClient") as client_cls:
-            client_cls.return_value.get_default_branch_file.side_effect = StamphogGitHubError("503 from GitHub")
-            with pytest.raises(StamphogGitHubError):
+        config = StampRepoConfig(repository="o/r", installation_id="1")
+        with patch("products.stamp.backend.logic.digest_config.StampGitHubClient") as client_cls:
+            client_cls.return_value.get_default_branch_file.side_effect = StampGitHubError("503 from GitHub")
+            with pytest.raises(StampGitHubError):
                 load_repo_digest_config(config)
 
 
-_GH = "products.stamphog.backend.logic.github_client"
+_GH = "products.stamp.backend.logic.github_client"
 
 
 class GetPrReviewThreadsTests(SimpleTestCase):
@@ -191,7 +191,7 @@ class GetPrReviewThreadsTests(SimpleTestCase):
             patch(f"{_GH}.remember_observed_core_limit", lambda *a, **k: None),
             patch(f"{_GH}.raise_if_github_rate_limited", lambda *a, **k: None),
         ):
-            return StamphogGitHubClient("123").get_pr_review_threads("acme/widgets", 5)
+            return StampGitHubClient("123").get_pr_review_threads("acme/widgets", 5)
 
     def _threads_page(self, nodes: list[dict], *, has_next: bool) -> fakes.FakeResponse:
         payload = {
@@ -244,7 +244,7 @@ class GetPrReviewThreadsTests(SimpleTestCase):
     def test_fails_closed(self, _name: str, response: fakes.FakeResponse) -> None:
         # A silently truncated or errored thread list reads as "no blockers" to the reviewer, the one
         # wrong answer here — every failure mode must raise, exactly like get_pr_discussion.
-        with pytest.raises(StamphogGitHubError):
+        with pytest.raises(StampGitHubError):
             self._fetch(response)
 
     def _thread_comments_page(self, comments: list[tuple[str, str]], *, has_next: bool) -> fakes.FakeResponse:
@@ -286,7 +286,7 @@ class GetPrReviewThreadsTests(SimpleTestCase):
         node = fakes.review_thread_node(
             path="src/util.py", comments=[("maintainer", "hold")], comments_have_next_page=True
         )
-        with pytest.raises(StamphogGitHubError):
+        with pytest.raises(StampGitHubError):
             self._fetch(
                 self._threads_page([node], has_next=False),
                 self._thread_comments_page([("maintainer", "more")], has_next=True),
@@ -294,18 +294,18 @@ class GetPrReviewThreadsTests(SimpleTestCase):
 
     def test_page_cap_fails_closed(self) -> None:
         # A PR whose threads never stop paginating must raise rather than review a truncated list.
-        with pytest.raises(StamphogGitHubError):
+        with pytest.raises(StampGitHubError):
             self._fetch(self._threads_page([], has_next=True))
 
 
 # add_pr_reaction / remove_pr_reaction are deliberately the one fail-open pair on the client
 # (see their docstrings): a cosmetic "review in flight" 👀 must never fail or retry the calling
-# review activity, unlike every other read/write on StamphogGitHubClient.
+# review activity, unlike every other read/write on StampGitHubClient.
 class PrReactionFailOpenTests(SimpleTestCase):
     def _call(
         self,
         transport_response_or_error: fakes.FakeResponse | Exception,
-        call: Callable[[StamphogGitHubClient], object],
+        call: Callable[[StampGitHubClient], object],
     ) -> object:
         def fake_request(method: str, url: str, **kwargs: object) -> fakes.FakeResponse:
             if url.endswith("/access_tokens"):
@@ -320,7 +320,7 @@ class PrReactionFailOpenTests(SimpleTestCase):
             patch(f"{_GH}.remember_observed_core_limit", lambda *a, **k: None),
             patch(f"{_GH}.raise_if_github_rate_limited", lambda *a, **k: None),
         ):
-            return call(StamphogGitHubClient("123"))
+            return call(StampGitHubClient("123"))
 
     @parameterized.expand(
         [
@@ -379,7 +379,7 @@ class BuildAppJwtIssuerTests(SimpleTestCase):
             STAMPFN_GITHUB_APP_ID="",
             STAMPFN_GITHUB_APP_PRIVATE_KEY=_generate_app_private_key(),
         ):
-            with pytest.raises(StamphogGitHubError):
+            with pytest.raises(StampGitHubError):
                 _build_app_jwt()
 
 

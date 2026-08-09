@@ -2,12 +2,12 @@ from products.review_hog.backend.api.blind_spots import ReviewBlindSpotsConfigVi
 from products.review_hog.backend.api.perspectives import ReviewPerspectiveConfigViewSet
 from products.review_hog.backend.api.reviews import ReviewRecentReviewsViewSet
 from products.review_hog.backend.api.settings import ReviewUserSettingsViewSet
-from products.review_hog.backend.api.trigger import ReviewHogTriggerViewSet
+from products.review_hog.backend.api.trigger import ReviewTriggerViewSet
 from products.review_hog.backend.api.validators import ReviewValidatorConfigViewSet
 
 __all__ = [
     "ReviewBlindSpotsConfigViewSet",
-    "ReviewHogTriggerViewSet",
+    "ReviewTriggerViewSet",
     "ReviewPerspectiveConfigViewSet",
     "ReviewRecentReviewsViewSet",
     "ReviewUserSettingsViewSet",

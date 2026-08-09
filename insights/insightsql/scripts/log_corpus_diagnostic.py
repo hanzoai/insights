@@ -6,7 +6,7 @@ Datastore by any team that has opted into AI data processing
 (`log_comment.ai_data_processing_approved`), runs both the oracle and
 candidate parsers over each, and reports where they disagree.
 
-Sibling of `hog_corpus_diagnostic.py` (which does the same for Script
+Sibling of `script_corpus_diagnostic.py` (which does the same for Script
 *programs* from Postgres). Both are real-usage complements to
 `pbt_diagnostic.py`'s grammar-generated surface; the Metabase access,
 paginated download, parity grind and failure report are shared via

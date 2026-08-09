@@ -143,7 +143,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json()["content"]["templating"] == "liquid"
 
-    def test_create_rejects_hog_templating(self):
+    def test_create_rejects_script_templating(self):
         response = self.client.post(
             f"/v1/environments/{self.team.id}/messaging_templates/",
             data={

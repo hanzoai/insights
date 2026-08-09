@@ -32,7 +32,7 @@ UUID_B = "0198c0e8-93c8-0000-38f5-a934eeb1b93f"
 
 
 def test_s3_key_layout_is_stable():
-    # The layout is an external contract: the project-2 warehouse table url_pattern and mlhog
+    # The layout is an external contract: the project-2 warehouse table url_pattern and mlscript
     # training both point at these paths, so a change here silently breaks them.
     assert (
         common.partition_object_key("inbox_ranking", "inbox_report_model_data", "2026-07-29")

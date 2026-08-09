@@ -65,7 +65,7 @@ export const batchWorkflowJobsLogic = kea<batchWorkflowJobsLogicType>([
                         return null
                     }
 
-                    return api.hogFlows.getInsightsFlowBatchJobs(props.id)
+                    return api.flows.getInsightsFlowBatchJobs(props.id)
                 },
             },
         ],

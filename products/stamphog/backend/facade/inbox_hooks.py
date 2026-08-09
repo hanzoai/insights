@@ -1,10 +1,10 @@
-"""Hook that lets review_hog own the gate on re-reviewing self-driving inbox PRs.
+"""Hook that lets review own the gate on re-reviewing self-driving inbox PRs.
 
-review_hog's TaskRun receiver triggers the first review by calling ``queue_inbox_pr_review``, so
-review_hog depends on stamphog. Importing review_hog back here, to re-check the assigned
-reviewers' ``stamphog_review_inbox_prs`` toggles on later webhook deliveries and again when the
-first review executes, would make that a cycle. Instead review_hog registers a resolver from its
-``AppConfig.ready()``, and both Celery tasks call whatever is registered. With nothing registered (review_hog absent from
+review's TaskRun receiver triggers the first review by calling ``queue_inbox_pr_review``, so
+review depends on stamp. Importing review back here, to re-check the assigned
+reviewers' ``stamp_review_inbox_prs`` toggles on later webhook deliveries and again when the
+first review executes, would make that a cycle. Instead review registers a resolver from its
+``AppConfig.ready()``, and both Celery tasks call whatever is registered. With nothing registered (review absent from
 INSTALLED_APPS) the re-review gate fails closed: dismissal safety still runs, but no new review is
 queued. Mirrors ``products/data_modeling/backend/facade/managed_viewset_hooks.py``.
 

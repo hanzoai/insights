@@ -11,13 +11,13 @@ from insights.models.personal_api_key import PersonalAPIKey, hash_key_value
 from insights.models.team import Team
 from insights.models.utils import generate_random_token_personal
 
-from products.stamphog.backend.facade.enums import ReviewRunStatus
-from products.stamphog.backend.models import DigestChannel, PullRequest, ReviewRun, StamphogRepoConfig
-from products.stamphog.backend.presentation.views import _INSTALL_STATE_SALT
-from products.stamphog.backend.tests.conftest import PRODUCT_DATABASES, StamphogTeamScopedTestMixin
+from products.stamp.backend.facade.enums import ReviewRunStatus
+from products.stamp.backend.models import DigestChannel, PullRequest, ReviewRun, StampRepoConfig
+from products.stamp.backend.presentation.views import _INSTALL_STATE_SALT
+from products.stamp.backend.tests.conftest import PRODUCT_DATABASES, StampTeamScopedTestMixin
 
-_VIEWS = "products.stamphog.backend.presentation.views"
-_CLIENT = "products.stamphog.backend.logic.github_client.StamphogGitHubClient"
+_VIEWS = "products.stamp.backend.presentation.views"
+_CLIENT = "products.stamp.backend.logic.github_client.StampGitHubClient"
 
 
 def _install_state(team_id: int, user_id: int) -> str:
@@ -25,12 +25,12 @@ def _install_state(team_id: int, user_id: int) -> str:
     return signing.dumps({"team_id": team_id, "user_id": user_id}, salt=_INSTALL_STATE_SALT)
 
 
-class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
+class TestStampRepoConfigAPI(StampTeamScopedTestMixin, APIBaseTest):
     databases = PRODUCT_DATABASES
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/v1/projects/{self.team.id}/stamphog/repo_configs/"
+        self.url = f"/v1/projects/{self.team.id}/stamp/repo_configs/"
 
     def test_create_ignores_client_supplied_installation_id(self) -> None:
         # installation_id is read-only: a manual create must not let a caller claim an installation
@@ -46,7 +46,7 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         assert body["enabled"] is True
         assert body["provider"] == "github"
         assert body["installation_id"] == ""
-        config = StamphogRepoConfig.objects.unscoped().get(id=body["id"])
+        config = StampRepoConfig.objects.unscoped().get(id=body["id"])
         assert config.team_id == self.team.id
         assert config.installation_id == ""
 
@@ -72,16 +72,16 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         # repository; only a real synced installation is exclusive (partial unique constraint).
         self.client.post(self.url, {"repository": "Insights/insights"}, format="json")
         other_team = Team.objects.create_with_data(organization=self.organization, initiating_user=self.user)
-        StamphogRepoConfig.objects.unscoped().create(
+        StampRepoConfig.objects.unscoped().create(
             team_id=other_team.id, repository="Insights/insights", installation_id=""
         )
-        both = StamphogRepoConfig.objects.unscoped().filter(repository="Insights/insights", installation_id="")
+        both = StampRepoConfig.objects.unscoped().filter(repository="Insights/insights", installation_id="")
         assert both.count() == 2
 
     def test_list_excludes_other_teams_configs(self) -> None:
         other_team = Team.objects.create_with_data(organization=self.organization, initiating_user=self.user)
         self.client.post(self.url, {"repository": "Insights/insights", "installation_id": "1"}, format="json")
-        StamphogRepoConfig.objects.unscoped().create(
+        StampRepoConfig.objects.unscoped().create(
             team_id=other_team.id, repository="Insights/other", installation_id="2"
         )
 
@@ -95,22 +95,22 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         # ProductTeamModel.save() writes rows at the parent id, so scoping the list by the raw child id
         # would miss them. The viewset canonicalizes self.team_id, so the parent's config still lists.
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
-        StamphogRepoConfig.objects.unscoped().create(
+        StampRepoConfig.objects.unscoped().create(
             team_id=self.team.id, repository="Insights/insights", installation_id="7"
         )
 
-        response = self.client.get(f"/v1/projects/{env.id}/stamphog/repo_configs/")
+        response = self.client.get(f"/v1/projects/{env.id}/stamp/repo_configs/")
 
         assert response.status_code == status.HTTP_200_OK, response.content
         repos = [row["repository"] for row in response.json()["results"]]
         assert repos == ["Insights/insights"]
 
     def test_child_scoped_api_key_cannot_reach_parent_rows(self) -> None:
-        # stamphog rows canonicalize to the parent team, so a request through the child environment
+        # stamp rows canonicalize to the parent team, so a request through the child environment
         # reads the PARENT's data. A token scoped only to the child passes the default scope check
         # (URL team == child) but must not reach the parent's rows through it.
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
-        StamphogRepoConfig.objects.unscoped().create(
+        StampRepoConfig.objects.unscoped().create(
             team_id=self.team.id, repository="Insights/insights", installation_id="8"
         )
         key_value = generate_random_token_personal()
@@ -118,20 +118,20 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             label="child-scoped",
             user=self.user,
             secure_value=hash_key_value(key_value),
-            scopes=["stamphog:read"],
+            scopes=["stamp:read"],
             scoped_teams=[env.id],
         )
         self.client.logout()
 
         response = self.client.get(
-            f"/v1/projects/{env.id}/stamphog/repo_configs/", HTTP_AUTHORIZATION=f"Bearer {key_value}"
+            f"/v1/projects/{env.id}/stamp/repo_configs/", HTTP_AUTHORIZATION=f"Bearer {key_value}"
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
 
     def test_cannot_retrieve_other_teams_config(self) -> None:
         other_team = Team.objects.create_with_data(organization=self.organization, initiating_user=self.user)
-        theirs = StamphogRepoConfig.objects.unscoped().create(
+        theirs = StampRepoConfig.objects.unscoped().create(
             team_id=other_team.id, repository="Insights/other", installation_id="2"
         )
         response = self.client.get(f"{self.url}{theirs.id}/")
@@ -139,19 +139,19 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
 
     def test_cannot_delete_other_teams_config(self) -> None:
         other_team = Team.objects.create_with_data(organization=self.organization, initiating_user=self.user)
-        theirs = StamphogRepoConfig.objects.unscoped().create(
+        theirs = StampRepoConfig.objects.unscoped().create(
             team_id=other_team.id, repository="Insights/other", installation_id="2"
         )
         response = self.client.delete(f"{self.url}{theirs.id}/")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert StamphogRepoConfig.objects.unscoped().filter(id=theirs.id).exists()
+        assert StampRepoConfig.objects.unscoped().filter(id=theirs.id).exists()
 
     def test_delete_soft_disables_as_tombstone(self) -> None:
         # A hard delete would cascade away the PRs and review runs (including posted_review_id), so a
         # push to a previously approved PR could no longer resolve the config or dismiss the stale
         # approval — deleting a repo must not launder a standing approval. In-flight runs are
         # superseded too: their workflows never re-check enabled and could still post an approval.
-        mine = StamphogRepoConfig.objects.unscoped().create(
+        mine = StampRepoConfig.objects.unscoped().create(
             team_id=self.team.id, repository="Insights/mine", installation_id="3", enabled=True, digest_enabled=True
         )
         pull_request = PullRequest.objects.unscoped().create(
@@ -169,13 +169,13 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         assert in_flight.status == ReviewRunStatus.SUPERSEDED
 
 
-class TestReviewRunAPI(StamphogTeamScopedTestMixin, APIBaseTest):
+class TestReviewRunAPI(StampTeamScopedTestMixin, APIBaseTest):
     databases = PRODUCT_DATABASES
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/v1/projects/{self.team.id}/stamphog/review_runs/"
-        self.repo_config = StamphogRepoConfig.objects.unscoped().create(
+        self.url = f"/v1/projects/{self.team.id}/stamp/review_runs/"
+        self.repo_config = StampRepoConfig.objects.unscoped().create(
             team_id=self.team.id, repository="Insights/insights", installation_id="1"
         )
 
@@ -197,7 +197,7 @@ class TestReviewRunAPI(StamphogTeamScopedTestMixin, APIBaseTest):
 
     def test_list_only_returns_own_team_runs(self) -> None:
         other_team = Team.objects.create_with_data(organization=self.organization, initiating_user=self.user)
-        other_repo_config = StamphogRepoConfig.objects.unscoped().create(
+        other_repo_config = StampRepoConfig.objects.unscoped().create(
             team_id=other_team.id, repository="Insights/other", installation_id="2"
         )
         mine = self._make_run()
@@ -253,8 +253,8 @@ class TestReviewRunAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             "reviewer_raw": "SECRET reviewer stdout with patches",
             "pr": {"title": "secret PR", "body": "internal"},
             "files": [{"filename": "app.py", "patch": "@@ secret diff @@"}],
-            "policy_files": {".stamphog/policy.yml": "secret policy"},
-            "stamphog_version": "test-1.0.0",
+            "policy_files": {".stamp/policy.yml": "secret policy"},
+            "stamp_version": "test-1.0.0",
             "reviewer_exit_code": 0,
         }
         run.save(update_fields=["output"])
@@ -262,17 +262,17 @@ class TestReviewRunAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         response = self.client.get(f"{self.url}{run.id}/")
         assert response.status_code == status.HTTP_200_OK
         output = response.json()["output"]
-        assert output == {"stamphog_version": "test-1.0.0", "reviewer_exit_code": 0}
+        assert output == {"stamp_version": "test-1.0.0", "reviewer_exit_code": 0}
         for leaked in ("reviewer_raw", "pr", "files", "policy_files"):
             assert leaked not in output
 
 
-class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
+class TestSyncInstallationAPI(StampTeamScopedTestMixin, APIBaseTest):
     databases = PRODUCT_DATABASES
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/v1/projects/{self.team.id}/stamphog/repo_configs/sync_installation/"
+        self.url = f"/v1/projects/{self.team.id}/stamp/repo_configs/sync_installation/"
         self.state = _install_state(self.team.id, self.user.id)
 
     @patch(f"{_VIEWS}.list_user_accessible_repositories", return_value=["Insights/insights", "Insights/other"])
@@ -290,7 +290,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         assert response.json()["app_not_installed"] is False
         synced = sorted(row["repository"] for row in response.json()["synced"])
         assert synced == ["Insights/other", "Insights/insights"]
-        bound = StamphogRepoConfig.objects.unscoped().filter(team_id=self.team.id, installation_id="42")
+        bound = StampRepoConfig.objects.unscoped().filter(team_id=self.team.id, installation_id="42")
         assert bound.count() == 2
         # Bind disabled: an install can surface hundreds of repos, so none starts reviewing until toggled.
         assert all(not config.enabled for config in bound)
@@ -306,7 +306,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         # rather than reported skipped and left unbound forever — but adopted DISABLED: the placeholder's
         # flags were set by someone who never proved GitHub access, so a member could otherwise pre-arm
         # enabled=True for a private repo and have reviews start the moment a teammate installs.
-        manual = StamphogRepoConfig.objects.unscoped().create(
+        manual = StampRepoConfig.objects.unscoped().create(
             team_id=self.team.id, repository="Insights/insights", installation_id="", enabled=True, digest_enabled=True
         )
         response = self.client.post(
@@ -329,7 +329,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         # An uninstall/reinstall cycle mints a new installation id; the old binding is dead (the app
         # can only be installed once per repo). Re-syncing the verified new installation must rebind
         # the team's existing row instead of skipping it and leaving the repo dead forever.
-        stale = StamphogRepoConfig.objects.unscoped().create(
+        stale = StampRepoConfig.objects.unscoped().create(
             team_id=self.team.id, repository="Insights/insights", installation_id="41", enabled=True
         )
         response = self.client.post(
@@ -355,7 +355,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
 
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
         mock_list.assert_not_called()
-        assert not StamphogRepoConfig.objects.unscoped().filter(installation_id="999").exists()
+        assert not StampRepoConfig.objects.unscoped().filter(installation_id="999").exists()
 
     @patch(f"{_VIEWS}.list_user_accessible_repositories")
     @patch(f"{_VIEWS}.user_can_access_installation")
@@ -370,7 +370,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
         mock_verify.assert_not_called()
         mock_list.assert_not_called()
-        assert not StamphogRepoConfig.objects.unscoped().filter(installation_id="42").exists()
+        assert not StampRepoConfig.objects.unscoped().filter(installation_id="42").exists()
 
     @parameterized.expand(["team", "user"])
     @patch(f"{_VIEWS}.list_user_accessible_repositories")
@@ -423,7 +423,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         assert [row["repository"] for row in body["synced"]] == ["Insights/insights"]
         assert body["app_not_installed"] is False
         assert body["installations"] == []
-        bound = StamphogRepoConfig.objects.unscoped().filter(team_id=self.team.id, installation_id="42")
+        bound = StampRepoConfig.objects.unscoped().filter(team_id=self.team.id, installation_id="42")
         assert bound.count() == 1
 
     @patch(f"{_VIEWS}.list_user_accessible_repositories")
@@ -450,7 +450,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             {"id": "200", "account_login": "SharedOrg"},
         ]
         mock_list.assert_not_called()
-        assert not StamphogRepoConfig.objects.unscoped().filter(team_id=self.team.id).exists()
+        assert not StampRepoConfig.objects.unscoped().filter(team_id=self.team.id).exists()
 
     @patch(f"{_VIEWS}.list_user_accessible_repositories")
     @patch(f"{_VIEWS}.list_user_installations", return_value=[])
@@ -469,10 +469,10 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         assert body["synced"] == []
         assert body["skipped"] == []
         mock_list.assert_not_called()
-        assert not StamphogRepoConfig.objects.unscoped().filter(team_id=self.team.id).exists()
+        assert not StampRepoConfig.objects.unscoped().filter(team_id=self.team.id).exists()
 
 
-class TestDigestChannelAPI(StamphogTeamScopedTestMixin, APIBaseTest):
+class TestDigestChannelAPI(StampTeamScopedTestMixin, APIBaseTest):
     databases = PRODUCT_DATABASES
 
     def test_delete_soft_disables_as_tombstone(self) -> None:
@@ -485,7 +485,7 @@ class TestDigestChannelAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             slack_channel_id="C1",
             enabled=True,
         )
-        url = f"/v1/projects/{self.team.id}/stamphog/digest_channels/{channel.id}/"
+        url = f"/v1/projects/{self.team.id}/stamp/digest_channels/{channel.id}/"
         response = self.client.delete(url)
         assert response.status_code == status.HTTP_204_NO_CONTENT, response.content
         channel.refresh_from_db()
@@ -500,12 +500,12 @@ class TestDigestChannelAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             team_id=self.team.id, kind="slack", config={}, sensitive_config={"access_token": "x"}
         )
         created = self.client.post(
-            f"/v1/projects/{self.team.id}/stamphog/digest_channels/",
+            f"/v1/projects/{self.team.id}/stamp/digest_channels/",
             {"audience_key": "team-x", "slack_integration_id": integration.id, "slack_channel_id": "C1"},
             format="json",
         ).json()
         response = self.client.patch(
-            f"/v1/projects/{self.team.id}/stamphog/digest_channels/{created['id']}/",
+            f"/v1/projects/{self.team.id}/stamp/digest_channels/{created['id']}/",
             {"audience_key": "team-evil", "slack_channel_name": "renamed"},
             format="json",
         )
@@ -528,7 +528,7 @@ class TestDigestChannelAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             enabled=True,
         )
         response = self.client.post(
-            f"/v1/projects/{self.team.id}/stamphog/digest_channels/",
+            f"/v1/projects/{self.team.id}/stamp/digest_channels/",
             {"audience_key": "team-x", "slack_integration_id": integration.id, "slack_channel_id": "C2"},
             format="json",
         )

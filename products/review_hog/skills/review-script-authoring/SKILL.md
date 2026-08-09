@@ -1,20 +1,20 @@
 ---
 name: review-script-authoring
 description: >
-  How to author custom ReviewHog skills — the review perspectives, blind-spot checks, and
-  validation criteria that drive ReviewHog's automated PR reviews. Use when a user wants a new
+  How to author custom Review skills — the review perspectives, blind-spot checks, and
+  validation criteria that drive Review's automated PR reviews. Use when a user wants a new
   review perspective (a specialist lens on their PRs), a custom blind-spot sweep, or their own
-  validation bar for which findings get published. Trigger on "create a ReviewHog perspective",
+  validation bar for which findings get published. Trigger on "create a Review perspective",
   "custom review perspective", "my own blind-spot check", "custom validation criteria", "tune what
-  ReviewHog publishes".
+  Review publishes".
 metadata:
-  owner_team: review_hog
+  owner_team: review
   skill_type: authoring
 ---
 
-# Authoring ReviewHog skills
+# Authoring Review skills
 
-**ReviewHog** is Insights's automated PR reviewer. A review splits the PR into chunks, then for each
+**Review** is Insights's automated PR reviewer. A review splits the PR into chunks, then for each
 chunk runs every enabled **perspective** in parallel (independent specialist lenses), a single
 **blind-spot check** afterwards (a final sweep conditioned on what the perspectives found), and
 finally judges every surviving candidate finding against one **validation criteria** skill — only
@@ -47,7 +47,7 @@ whether it _runs_ is a per-user setting in **Inbox → Code review**.
    (lowercase slug), a one-paragraph `description` of what the lens/sweep/bar is, and the body.
    **The name prefix is the whole identity** — it is how the Code review tab and the review runs
    discover the skill. There is no `category` parameter on the skill tools and you don't need one:
-   the backend stamps the `review_hog` grouping category itself (it only affects grouping on the
+   the backend stamps the `review` grouping category itself (it only affects grouping on the
    Skills page) — do not spend turns trying to set or verify it. Iterate with
    `insights:skill-update` if the user wants changes. Author fresh — don't `skill-duplicate` a
    canonical to edit: seeded metadata rides along with the copy, and the canonical sync may

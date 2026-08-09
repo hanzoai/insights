@@ -14,7 +14,7 @@ from pydantic.dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SupportChannel:
-    """A Slack channel visible to the SupportHog bot."""
+    """A Slack channel visible to the Support bot."""
 
     id: str
     name: str

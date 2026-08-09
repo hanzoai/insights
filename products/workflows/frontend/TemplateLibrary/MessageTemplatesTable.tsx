@@ -5,7 +5,7 @@ import { router } from 'kea-router'
 
 import { IconTrash } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { More } from 'lib/elements/Button/More'
@@ -18,7 +18,7 @@ import { urls } from 'scenes/urls'
 import { MessageTemplateCard } from './MessageTemplateCard'
 import { messageTemplatesLogic } from './messageTemplatesLogic'
 
-const MascotReadingIsMagic = pngHoggie()
+const MascotReadingIsMagic = pngMascot()
 
 export function MessageTemplatesTable(): JSX.Element {
     useMountedLogic(messageTemplatesLogic)
@@ -39,7 +39,7 @@ export function MessageTemplatesTable(): JSX.Element {
                     action={() => {
                         router.actions.push(urls.workflowsLibraryTemplateNew())
                     }}
-                    customHog={MascotReadingIsMagic}
+                    customScript={MascotReadingIsMagic}
                     isEmpty
                 />
             )}

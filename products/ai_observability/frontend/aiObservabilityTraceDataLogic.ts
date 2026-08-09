@@ -23,7 +23,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
     MetricsQueryResponse,
@@ -308,7 +308,7 @@ export interface aiObservabilityTraceDataLogicValues {
     initialTab: string | null; // aiObservabilityTraceLogic
     searchQuery: string; // aiObservabilityTraceLogic
     elapsedTime: number | null; // dataNodeLogic
-    response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataNodeLogic
+    response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataNodeLogic
     responseError: string | null; // dataNodeLogic
     responseLoading: boolean; // dataNodeLogic
     availableEventTypes: string[];
@@ -359,7 +359,7 @@ export interface aiObservabilityTraceDataLogicActions {
 export interface aiObservabilityTraceDataLogicMeta {
     key: string;
     __keaTypeGenInternalSelectorTypes: {
-        trace: (response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => LLMTrace | undefined;
+        trace: (response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => LLMTrace | undefined;
         showableEvents: (trace: LLMTrace | undefined) => LLMTraceEvent[];
         filteredEvents: (showableEvents: LLMTraceEvent[], searchQuery: string, traceId: string) => LLMTraceEvent[];
         filteredTree: (traceId: string, trace: LLMTrace | undefined, searchQuery: string, filteredEvents: LLMTraceEvent[]) => TraceTreeNode[];
@@ -431,7 +431,7 @@ export const aiObservabilityTraceDataLogic = kea<aiObservabilityTraceDataLogicTy
                     | import('~/queries/schema').InsightsQLAutocompleteResponse
                     | import('~/queries/schema').InsightsQLMetadataResponse
                     | import('~/queries/schema').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema').HogQueryResponse
+                    | import('~/queries/schema').ScriptQueryResponse
                     | import('~/queries/schema').LogAttributesQueryResponse
                     | import('~/queries/schema').LogValuesQueryResponse
                     | import('~/queries/schema').MetricsQueryResponse

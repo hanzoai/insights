@@ -15,7 +15,7 @@ SCHEMA_MAPPING = {"Bounce": "schema_bounces"}
 class TestPostmarkWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

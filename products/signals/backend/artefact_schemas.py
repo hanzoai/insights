@@ -303,7 +303,7 @@ class Commit(BaseModel):
     recording an unpushed or local-only commit is always a mistake.
 
     `diff` is an optional point-in-time snapshot of the reviewed code, set only by consumers that
-    snapshot what they reviewed (e.g. ReviewHog's per-turn diff); the Signals pipeline never sets it.
+    snapshot what they reviewed (e.g. Review's per-turn diff); the Signals pipeline never sets it.
     """
 
     repository: str = Field(description="GitHub repository the commit was pushed to, as `owner/repo`.")
@@ -314,7 +314,7 @@ class Commit(BaseModel):
     diff: str | None = Field(
         default=None,
         description="Optional point-in-time unified diff of the reviewed code, set only by "
-        "snapshotting consumers (e.g. ReviewHog); the Signals pipeline never populates it.",
+        "snapshotting consumers (e.g. Review); the Signals pipeline never populates it.",
     )
 
     @field_validator("repository", "branch", "commit_sha", "message")
@@ -495,16 +495,16 @@ class CodeReviewCounts(BaseModel):
 
 
 class CodeReview(BaseModel):
-    """Content schema for a `code_review` artefact: one ReviewHog review turn over the report's
+    """Content schema for a `code_review` artefact: one Review review turn over the report's
     implementation output.
 
     Pointer-first: counts + links + the `review_report_id` drill-down handle (the SQL join key into
-    the review_hog tables). The full rendered body lives on `ReviewReport.report_markdown` — even for
-    stored-only turns — and is never duplicated here. System-generated: the ReviewHog workflow is the
+    the review tables). The full rendered body lives on `ReviewReport.report_markdown` — even for
+    stored-only turns — and is never duplicated here. System-generated: the Review workflow is the
     only writer, so the type is read-only through the generic artefact API.
     """
 
-    review_report_id: str = Field(description="ReviewHog ReviewReport UUID — the drill-down handle (SQL join key).")
+    review_report_id: str = Field(description="Review ReviewReport UUID — the drill-down handle (SQL join key).")
     repository: str = Field(description="GitHub repository the reviewed code lives in, as 'owner/repo'.")
     head_sha: str = Field(description="The reviewed head commit SHA.")
     head_branch: str = Field(description="The reviewed head branch.")
@@ -568,7 +568,7 @@ _ARTEFACT_TYPE_BY_MODEL: Mapping[type[BaseModel], str] = {model: t for t, model 
 # is their only writer, so accepting them through the generic API would let a caller fabricate edits
 # that never happened. They stay readable (and so show up in the report's artefact log) but cannot
 # be created or edited directly.
-# `code_review` is likewise system-generated — the ReviewHog workflow is its only writer; accepting
+# `code_review` is likewise system-generated — the Review workflow is its only writer; accepting
 # it through the API would let a caller fabricate review receipts for reviews that never ran.
 NON_WRITABLE_ARTEFACT_TYPES: frozenset[str] = frozenset(
     {"video_segment", "title_change", "summary_change", "code_review"}

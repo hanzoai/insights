@@ -1,4 +1,4 @@
-"""Route registration for stamphog. Auto-discovered by insights/api/__init__.py."""
+"""Route registration for stamp. Auto-discovered by insights/api/__init__.py."""
 
 from insights.api.routing import RouterRegistry
 
@@ -7,19 +7,19 @@ from .presentation.views import (
     DigestRunViewSet,
     PullRequestViewSet,
     ReviewRunViewSet,
-    StamphogRepoConfigViewSet,
+    StampRepoConfigViewSet,
 )
 
 
 def register_routes(routers: RouterRegistry) -> None:
     routers.projects.register(
-        r"stamphog/repo_configs", StamphogRepoConfigViewSet, "project_stamphog_repo_configs", ["team_id"]
+        r"stamp/repo_configs", StampRepoConfigViewSet, "project_stamp_repo_configs", ["team_id"]
     )
     routers.projects.register(
-        r"stamphog/pull_requests", PullRequestViewSet, "project_stamphog_pull_requests", ["team_id"]
+        r"stamp/pull_requests", PullRequestViewSet, "project_stamp_pull_requests", ["team_id"]
     )
-    routers.projects.register(r"stamphog/review_runs", ReviewRunViewSet, "project_stamphog_review_runs", ["team_id"])
+    routers.projects.register(r"stamp/review_runs", ReviewRunViewSet, "project_stamp_review_runs", ["team_id"])
     routers.projects.register(
-        r"stamphog/digest_channels", DigestChannelViewSet, "project_stamphog_digest_channels", ["team_id"]
+        r"stamp/digest_channels", DigestChannelViewSet, "project_stamp_digest_channels", ["team_id"]
     )
-    routers.projects.register(r"stamphog/digest_runs", DigestRunViewSet, "project_stamphog_digest_runs", ["team_id"])
+    routers.projects.register(r"stamp/digest_runs", DigestRunViewSet, "project_stamp_digest_runs", ["team_id"])

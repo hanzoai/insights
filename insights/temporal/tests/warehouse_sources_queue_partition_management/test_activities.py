@@ -329,7 +329,7 @@ class _FakePgConn:
 @contextmanager
 def _patched_pg(partitions: dict[str, list[str]] | None = None):
     # _verify_partitions is stubbed because the fake connection returns no rows, which would
-    # otherwise flood `errors` with bogus "partition missing" messages — orthogonal to the
+    # otherwise flood `errors` with bogus "partition missing" messages — ortscriptonal to the
     # S3-cleanup wiring these integration tests cover.
     conn = _FakePgConn(partitions)
     with (

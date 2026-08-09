@@ -112,7 +112,7 @@ class Command(BaseCommand):
             # Best-effort: a single un-analyzable migration must not abort the run,
             # otherwise handle() never reaches write_json_report() and the
             # downstream Migration risk check is never published — leaving
-            # stamphog stuck in WAITING with no bridge retrigger.
+            # stamp stuck in WAITING with no bridge retrigger.
             try:
                 file_path = self._migration_file_path(migration)
                 if loader:

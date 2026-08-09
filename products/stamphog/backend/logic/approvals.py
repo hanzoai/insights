@@ -1,4 +1,4 @@
-"""Shared retraction of stale stamphog approvals when a PR's head moves.
+"""Shared retraction of stale stamp approvals when a PR's head moves.
 
 GitHub never auto-dismisses an APPROVE review when new commits land, so a prior run's approval at an
 old head keeps satisfying required reviews after a push. Two paths must retract it, and they share this
@@ -13,22 +13,22 @@ from __future__ import annotations
 from django.db import router
 from django.utils import timezone
 
-from ..models import PullRequest, ReviewRun, StamphogRepoConfig
-from .github_client import StamphogGitHubClient
+from ..models import PullRequest, ReviewRun, StampRepoConfig
+from .github_client import StampGitHubClient
 
 DEFAULT_DISMISS_MESSAGE = (
-    "New commits were pushed — dismissing the stamphog approval from an earlier head; a re-review runs automatically."
+    "New commits were pushed — dismissing the stamp approval from an earlier head; a re-review runs automatically."
 )
 
 
 def dismiss_stale_approvals_for_head(
     team_id: int,
     pull_request: PullRequest,
-    repo_config: StamphogRepoConfig,
+    repo_config: StampRepoConfig,
     current_head_sha: str,
     message: str = DEFAULT_DISMISS_MESSAGE,
 ) -> int:
-    """Retract every un-dismissed stamphog approval posted at a head other than ``current_head_sha``.
+    """Retract every un-dismissed stamp approval posted at a head other than ``current_head_sha``.
 
     Keyed off ``posted_review_id`` alone — only the approve path ever sets it, and filtering on
     ``verdict=APPROVED`` too would miss a run that posted its approval but crashed (or lost a
@@ -54,7 +54,7 @@ def dismiss_stale_approvals_for_head(
     if not stale_runs:
         return 0
 
-    client = StamphogGitHubClient(repo_config.installation_id)
+    client = StampGitHubClient(repo_config.installation_id)
     dismissed = 0
     for stale in stale_runs:
         if stale.posted_review_id is None:

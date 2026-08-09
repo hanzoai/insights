@@ -12,34 +12,34 @@ import * as zod from 'zod'
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsCreateBodyAudienceKeyMax = 255
+export const stampDigestChannelsCreateBodyAudienceKeyMax = 255
 
-export const stamphogDigestChannelsCreateBodySlackIntegrationIdMin = -2147483648
-export const stamphogDigestChannelsCreateBodySlackIntegrationIdMax = 2147483647
+export const stampDigestChannelsCreateBodySlackIntegrationIdMin = -2147483648
+export const stampDigestChannelsCreateBodySlackIntegrationIdMax = 2147483647
 
-export const stamphogDigestChannelsCreateBodySlackChannelIdMax = 64
+export const stampDigestChannelsCreateBodySlackChannelIdMax = 64
 
-export const stamphogDigestChannelsCreateBodySlackChannelNameMax = 255
+export const stampDigestChannelsCreateBodySlackChannelNameMax = 255
 
-export const StamphogDigestChannelsCreateBody = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsCreateBody = /* @__PURE__ */ zod.object({
     audience_key: zod
         .string()
-        .max(stamphogDigestChannelsCreateBodyAudienceKeyMax)
+        .max(stampDigestChannelsCreateBodyAudienceKeyMax)
         .describe(
             "Opaque digest bucket this channel receives, e.g. 'repo:Insights\/insights'. Immutable after creation — it anchors the audience and its opt-out tombstone."
         ),
     slack_integration_id: zod
         .number()
-        .min(stamphogDigestChannelsCreateBodySlackIntegrationIdMin)
-        .max(stamphogDigestChannelsCreateBodySlackIntegrationIdMax)
+        .min(stampDigestChannelsCreateBodySlackIntegrationIdMin)
+        .max(stampDigestChannelsCreateBodySlackIntegrationIdMax)
         .describe("ID of the team's Slack integration used to post the digest."),
     slack_channel_id: zod
         .string()
-        .max(stamphogDigestChannelsCreateBodySlackChannelIdMax)
+        .max(stampDigestChannelsCreateBodySlackChannelIdMax)
         .describe("Slack channel ID to post the digest to, e.g. 'C012AB3CD'."),
     slack_channel_name: zod
         .string()
-        .max(stamphogDigestChannelsCreateBodySlackChannelNameMax)
+        .max(stampDigestChannelsCreateBodySlackChannelNameMax)
         .optional()
         .describe('Human-readable Slack channel name, for display only.'),
     enabled: zod.boolean().optional().describe('Whether this channel is included in the daily digest fan-out.'),
@@ -48,34 +48,34 @@ export const StamphogDigestChannelsCreateBody = /* @__PURE__ */ zod.object({
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsUpdateBodyAudienceKeyMax = 255
+export const stampDigestChannelsUpdateBodyAudienceKeyMax = 255
 
-export const stamphogDigestChannelsUpdateBodySlackIntegrationIdMin = -2147483648
-export const stamphogDigestChannelsUpdateBodySlackIntegrationIdMax = 2147483647
+export const stampDigestChannelsUpdateBodySlackIntegrationIdMin = -2147483648
+export const stampDigestChannelsUpdateBodySlackIntegrationIdMax = 2147483647
 
-export const stamphogDigestChannelsUpdateBodySlackChannelIdMax = 64
+export const stampDigestChannelsUpdateBodySlackChannelIdMax = 64
 
-export const stamphogDigestChannelsUpdateBodySlackChannelNameMax = 255
+export const stampDigestChannelsUpdateBodySlackChannelNameMax = 255
 
-export const StamphogDigestChannelsUpdateBody = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsUpdateBody = /* @__PURE__ */ zod.object({
     audience_key: zod
         .string()
-        .max(stamphogDigestChannelsUpdateBodyAudienceKeyMax)
+        .max(stampDigestChannelsUpdateBodyAudienceKeyMax)
         .describe(
             "Opaque digest bucket this channel receives, e.g. 'repo:Insights\/insights'. Immutable after creation — it anchors the audience and its opt-out tombstone."
         ),
     slack_integration_id: zod
         .number()
-        .min(stamphogDigestChannelsUpdateBodySlackIntegrationIdMin)
-        .max(stamphogDigestChannelsUpdateBodySlackIntegrationIdMax)
+        .min(stampDigestChannelsUpdateBodySlackIntegrationIdMin)
+        .max(stampDigestChannelsUpdateBodySlackIntegrationIdMax)
         .describe("ID of the team's Slack integration used to post the digest."),
     slack_channel_id: zod
         .string()
-        .max(stamphogDigestChannelsUpdateBodySlackChannelIdMax)
+        .max(stampDigestChannelsUpdateBodySlackChannelIdMax)
         .describe("Slack channel ID to post the digest to, e.g. 'C012AB3CD'."),
     slack_channel_name: zod
         .string()
-        .max(stamphogDigestChannelsUpdateBodySlackChannelNameMax)
+        .max(stampDigestChannelsUpdateBodySlackChannelNameMax)
         .optional()
         .describe('Human-readable Slack channel name, for display only.'),
     enabled: zod.boolean().optional().describe('Whether this channel is included in the daily digest fan-out.'),
@@ -84,63 +84,63 @@ export const StamphogDigestChannelsUpdateBody = /* @__PURE__ */ zod.object({
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsPartialUpdateBodyAudienceKeyMax = 255
+export const stampDigestChannelsPartialUpdateBodyAudienceKeyMax = 255
 
-export const stamphogDigestChannelsPartialUpdateBodySlackIntegrationIdMin = -2147483648
-export const stamphogDigestChannelsPartialUpdateBodySlackIntegrationIdMax = 2147483647
+export const stampDigestChannelsPartialUpdateBodySlackIntegrationIdMin = -2147483648
+export const stampDigestChannelsPartialUpdateBodySlackIntegrationIdMax = 2147483647
 
-export const stamphogDigestChannelsPartialUpdateBodySlackChannelIdMax = 64
+export const stampDigestChannelsPartialUpdateBodySlackChannelIdMax = 64
 
-export const stamphogDigestChannelsPartialUpdateBodySlackChannelNameMax = 255
+export const stampDigestChannelsPartialUpdateBodySlackChannelNameMax = 255
 
-export const StamphogDigestChannelsPartialUpdateBody = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsPartialUpdateBody = /* @__PURE__ */ zod.object({
     audience_key: zod
         .string()
-        .max(stamphogDigestChannelsPartialUpdateBodyAudienceKeyMax)
+        .max(stampDigestChannelsPartialUpdateBodyAudienceKeyMax)
         .optional()
         .describe(
             "Opaque digest bucket this channel receives, e.g. 'repo:Insights\/insights'. Immutable after creation — it anchors the audience and its opt-out tombstone."
         ),
     slack_integration_id: zod
         .number()
-        .min(stamphogDigestChannelsPartialUpdateBodySlackIntegrationIdMin)
-        .max(stamphogDigestChannelsPartialUpdateBodySlackIntegrationIdMax)
+        .min(stampDigestChannelsPartialUpdateBodySlackIntegrationIdMin)
+        .max(stampDigestChannelsPartialUpdateBodySlackIntegrationIdMax)
         .optional()
         .describe("ID of the team's Slack integration used to post the digest."),
     slack_channel_id: zod
         .string()
-        .max(stamphogDigestChannelsPartialUpdateBodySlackChannelIdMax)
+        .max(stampDigestChannelsPartialUpdateBodySlackChannelIdMax)
         .optional()
         .describe("Slack channel ID to post the digest to, e.g. 'C012AB3CD'."),
     slack_channel_name: zod
         .string()
-        .max(stamphogDigestChannelsPartialUpdateBodySlackChannelNameMax)
+        .max(stampDigestChannelsPartialUpdateBodySlackChannelNameMax)
         .optional()
         .describe('Human-readable Slack channel name, for display only.'),
     enabled: zod.boolean().optional().describe('Whether this channel is included in the daily digest fan-out.'),
 })
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsCreateBodyProviderDefault = `github`
-export const stamphogRepoConfigsCreateBodyProviderMax = 32
+export const stampRepoConfigsCreateBodyProviderDefault = `github`
+export const stampRepoConfigsCreateBodyProviderMax = 32
 
-export const stamphogRepoConfigsCreateBodyRepositoryMax = 255
+export const stampRepoConfigsCreateBodyRepositoryMax = 255
 
-export const stamphogRepoConfigsCreateBodyTriggerLabelMax = 100
+export const stampRepoConfigsCreateBodyTriggerLabelMax = 100
 
-export const StamphogRepoConfigsCreateBody = /* @__PURE__ */ zod.object({
+export const StampRepoConfigsCreateBody = /* @__PURE__ */ zod.object({
     provider: zod
         .string()
-        .max(stamphogRepoConfigsCreateBodyProviderMax)
-        .default(stamphogRepoConfigsCreateBodyProviderDefault)
+        .max(stampRepoConfigsCreateBodyProviderMax)
+        .default(stampRepoConfigsCreateBodyProviderDefault)
         .describe("SCM provider this config talks to. Defaults to 'github'."),
     repository: zod
         .string()
-        .max(stamphogRepoConfigsCreateBodyRepositoryMax)
+        .max(stampRepoConfigsCreateBodyRepositoryMax)
         .describe("Repository full name, e.g. 'Insights\/insights'."),
-    enabled: zod.boolean().optional().describe('Whether stamphog actively reviews pull requests for this repo.'),
+    enabled: zod.boolean().optional().describe('Whether stamp actively reviews pull requests for this repo.'),
     digest_enabled: zod
         .boolean()
         .optional()
@@ -154,32 +154,32 @@ export const StamphogRepoConfigsCreateBody = /* @__PURE__ */ zod.object({
         ),
     trigger_label: zod
         .string()
-        .max(stamphogRepoConfigsCreateBodyTriggerLabelMax)
+        .max(stampRepoConfigsCreateBodyTriggerLabelMax)
         .optional()
-        .describe("Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'."),
+        .describe("Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'."),
 })
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsUpdateBodyProviderDefault = `github`
-export const stamphogRepoConfigsUpdateBodyProviderMax = 32
+export const stampRepoConfigsUpdateBodyProviderDefault = `github`
+export const stampRepoConfigsUpdateBodyProviderMax = 32
 
-export const stamphogRepoConfigsUpdateBodyRepositoryMax = 255
+export const stampRepoConfigsUpdateBodyRepositoryMax = 255
 
-export const stamphogRepoConfigsUpdateBodyTriggerLabelMax = 100
+export const stampRepoConfigsUpdateBodyTriggerLabelMax = 100
 
-export const StamphogRepoConfigsUpdateBody = /* @__PURE__ */ zod.object({
+export const StampRepoConfigsUpdateBody = /* @__PURE__ */ zod.object({
     provider: zod
         .string()
-        .max(stamphogRepoConfigsUpdateBodyProviderMax)
-        .default(stamphogRepoConfigsUpdateBodyProviderDefault)
+        .max(stampRepoConfigsUpdateBodyProviderMax)
+        .default(stampRepoConfigsUpdateBodyProviderDefault)
         .describe("SCM provider this config talks to. Defaults to 'github'."),
     repository: zod
         .string()
-        .max(stamphogRepoConfigsUpdateBodyRepositoryMax)
+        .max(stampRepoConfigsUpdateBodyRepositoryMax)
         .describe("Repository full name, e.g. 'Insights\/insights'."),
-    enabled: zod.boolean().optional().describe('Whether stamphog actively reviews pull requests for this repo.'),
+    enabled: zod.boolean().optional().describe('Whether stamp actively reviews pull requests for this repo.'),
     digest_enabled: zod
         .boolean()
         .optional()
@@ -193,33 +193,33 @@ export const StamphogRepoConfigsUpdateBody = /* @__PURE__ */ zod.object({
         ),
     trigger_label: zod
         .string()
-        .max(stamphogRepoConfigsUpdateBodyTriggerLabelMax)
+        .max(stampRepoConfigsUpdateBodyTriggerLabelMax)
         .optional()
-        .describe("Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'."),
+        .describe("Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'."),
 })
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsPartialUpdateBodyProviderDefault = `github`
-export const stamphogRepoConfigsPartialUpdateBodyProviderMax = 32
+export const stampRepoConfigsPartialUpdateBodyProviderDefault = `github`
+export const stampRepoConfigsPartialUpdateBodyProviderMax = 32
 
-export const stamphogRepoConfigsPartialUpdateBodyRepositoryMax = 255
+export const stampRepoConfigsPartialUpdateBodyRepositoryMax = 255
 
-export const stamphogRepoConfigsPartialUpdateBodyTriggerLabelMax = 100
+export const stampRepoConfigsPartialUpdateBodyTriggerLabelMax = 100
 
-export const StamphogRepoConfigsPartialUpdateBody = /* @__PURE__ */ zod.object({
+export const StampRepoConfigsPartialUpdateBody = /* @__PURE__ */ zod.object({
     provider: zod
         .string()
-        .max(stamphogRepoConfigsPartialUpdateBodyProviderMax)
-        .default(stamphogRepoConfigsPartialUpdateBodyProviderDefault)
+        .max(stampRepoConfigsPartialUpdateBodyProviderMax)
+        .default(stampRepoConfigsPartialUpdateBodyProviderDefault)
         .describe("SCM provider this config talks to. Defaults to 'github'."),
     repository: zod
         .string()
-        .max(stamphogRepoConfigsPartialUpdateBodyRepositoryMax)
+        .max(stampRepoConfigsPartialUpdateBodyRepositoryMax)
         .optional()
         .describe("Repository full name, e.g. 'Insights\/insights'."),
-    enabled: zod.boolean().optional().describe('Whether stamphog actively reviews pull requests for this repo.'),
+    enabled: zod.boolean().optional().describe('Whether stamp actively reviews pull requests for this repo.'),
     digest_enabled: zod
         .boolean()
         .optional()
@@ -233,21 +233,21 @@ export const StamphogRepoConfigsPartialUpdateBody = /* @__PURE__ */ zod.object({
         ),
     trigger_label: zod
         .string()
-        .max(stamphogRepoConfigsPartialUpdateBodyTriggerLabelMax)
+        .max(stampRepoConfigsPartialUpdateBodyTriggerLabelMax)
         .optional()
-        .describe("Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'."),
+        .describe("Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'."),
 })
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsSyncInstallationCreateBodyInstallationIdDefault = ``
+export const stampRepoConfigsSyncInstallationCreateBodyInstallationIdDefault = ``
 
-export const StamphogRepoConfigsSyncInstallationCreateBody = /* @__PURE__ */ zod
+export const StampRepoConfigsSyncInstallationCreateBody = /* @__PURE__ */ zod
     .object({
         installation_id: zod
             .string()
-            .default(stamphogRepoConfigsSyncInstallationCreateBodyInstallationIdDefault)
+            .default(stampRepoConfigsSyncInstallationCreateBodyInstallationIdDefault)
             .describe(
                 "GitHub App installation ID from the fresh-install Setup URL redirect. Optional: absent or blank means discover the caller's installations from the OAuth code instead (authorize-first flow). The id is not trusted on its own — ownership is always proven via the code."
             ),

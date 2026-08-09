@@ -12,22 +12,22 @@ from typing import TYPE_CHECKING, Any
 import structlog
 
 from .digest_config import load_repo_digest_config
-from .github_client import StamphogGitHubClient
+from .github_client import StampGitHubClient
 
 if TYPE_CHECKING:
-    from ..models import StamphogRepoConfig
+    from ..models import StampRepoConfig
 
 logger = structlog.get_logger(__name__)
 
 
-def _repository_audience_key(repo_config: StamphogRepoConfig) -> str:
+def _repository_audience_key(repo_config: StampRepoConfig) -> str:
     # The pending distributed owners.yaml resolver (PR #68872, contact.slack) is a channel-
     # resolution clue, not an audience_key source — it slots into logic/channel_resolution.py to
     # correct which Slack channel a "repo:" fallback lands in, not this cascade.
     return f"repo:{repo_config.repository}"
 
 
-def _author_team_audience_key(repo_config: StamphogRepoConfig, pr_payload: dict[str, Any]) -> str:
+def _author_team_audience_key(repo_config: StampRepoConfig, pr_payload: dict[str, Any]) -> str:
     """Resolve the PR author's GitHub team, live, via the org's team memberships.
 
     Falls back to the repository key (with a warning) whenever the author has no resolvable team —
@@ -39,22 +39,22 @@ def _author_team_audience_key(repo_config: StamphogRepoConfig, pr_payload: dict[
         org = (repo_config.repository or "").split("/", 1)[0]
         if not login or not org:
             logger.warning(
-                "stamphog_author_team_audience_missing_fields",
+                "stamp_author_team_audience_missing_fields",
                 repository=repo_config.repository,
                 has_login=bool(login),
             )
             return _repository_audience_key(repo_config)
 
         # One GraphQL call per merged PR — merge volume is tiny next to API limits, not worth a cache.
-        slugs = StamphogGitHubClient(repo_config.installation_id).get_user_team_slugs(org, login)
+        slugs = StampGitHubClient(repo_config.installation_id).get_user_team_slugs(org, login)
         if not slugs:
-            logger.warning("stamphog_author_team_audience_no_team", repository=repo_config.repository, login=login)
+            logger.warning("stamp_author_team_audience_no_team", repository=repo_config.repository, login=login)
             return _repository_audience_key(repo_config)
 
         chosen, *other_teams = slugs
         if other_teams:
             logger.info(
-                "stamphog_author_team_audience_multiple_teams",
+                "stamp_author_team_audience_multiple_teams",
                 login=login,
                 chosen=chosen,
                 other_teams=other_teams,
@@ -65,12 +65,12 @@ def _author_team_audience_key(repo_config: StamphogRepoConfig, pr_payload: dict[
         return chosen
     except Exception:
         logger.warning(
-            "stamphog_author_team_audience_resolution_failed", repository=repo_config.repository, exc_info=True
+            "stamp_author_team_audience_resolution_failed", repository=repo_config.repository, exc_info=True
         )
         return _repository_audience_key(repo_config)
 
 
-def resolve_audience_key(repo_config: StamphogRepoConfig, pr_payload: dict[str, Any]) -> str:
+def resolve_audience_key(repo_config: StampRepoConfig, pr_payload: dict[str, Any]) -> str:
     """Map a merged PR to its digest audience_key via the single global cascade."""
     digest_config = load_repo_digest_config(repo_config)
     if digest_config is not None and digest_config.channel:

@@ -15,8 +15,8 @@ import type {
     PatchedReviewValidatorConfigSelectApi,
     ReviewBlindSpotsConfigApi,
     ReviewDetailApi,
-    ReviewHogReviewsListParams,
-    ReviewHogReviewsPerspectiveStatsRetrieveParams,
+    ReviewReviewsListParams,
+    ReviewReviewsPerspectiveStatsRetrieveParams,
     ReviewPerspectiveConfigApi,
     ReviewPerspectiveStatsApi,
     ReviewRecentReviewsPageApi,
@@ -43,39 +43,39 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
       }
     : DistributeReadOnlyOverUnions<T>
 
-export const getReviewHogBlindSpotsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review_hog/blind_spots/`
+export const getReviewBlindSpotsListUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/review/blind_spots/`
 }
 
 /**
  * List the `review-script-blind-spots-*` skills visible to the requesting user — the canonical skill plus the customs they authored — flagging the one active for them. The canonical skill is auto-seeded active on the first read; a custom skill the user has not selected shows as inactive.
  * @summary List blind-spots skills and which one is active
  */
-export const reviewHogBlindSpotsList = async (
+export const reviewBlindSpotsList = async (
     projectId: string,
     options?: RequestInit
 ): Promise<ReviewBlindSpotsConfigApi[]> => {
-    return apiMutator<ReviewBlindSpotsConfigApi[]>(getReviewHogBlindSpotsListUrl(projectId), {
+    return apiMutator<ReviewBlindSpotsConfigApi[]>(getReviewBlindSpotsListUrl(projectId), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getReviewHogBlindSpotsPartialUpdateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/review_hog/blind_spots/${skillName}/`
+export const getReviewBlindSpotsPartialUpdateUrl = (projectId: string, skillName: string) => {
+    return `/api/projects/${projectId}/review/blind_spots/${skillName}/`
 }
 
 /**
  * Make a `review-script-blind-spots-*` skill the single sweep that runs on the requesting user's PR reviews, switching the user's other blind-spots skills off in the same call. Only skills visible to the user — the canonical plus the customs they authored — can be selected; anything else 404s. Upserts the per-user config row, so selecting a freshly authored custom skill works in one call.
  * @summary Select the active blind-spots skill
  */
-export const reviewHogBlindSpotsPartialUpdate = async (
+export const reviewBlindSpotsPartialUpdate = async (
     projectId: string,
     skillName: string,
     patchedReviewBlindSpotsConfigSelectApi?: PatchedReviewBlindSpotsConfigSelectApi,
     options?: RequestInit
 ): Promise<ReviewBlindSpotsConfigApi> => {
-    return apiMutator<ReviewBlindSpotsConfigApi>(getReviewHogBlindSpotsPartialUpdateUrl(projectId, skillName), {
+    return apiMutator<ReviewBlindSpotsConfigApi>(getReviewBlindSpotsPartialUpdateUrl(projectId, skillName), {
         ...options,
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -83,39 +83,39 @@ export const reviewHogBlindSpotsPartialUpdate = async (
     })
 }
 
-export const getReviewHogPerspectivesListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review_hog/perspectives/`
+export const getReviewPerspectivesListUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/review/perspectives/`
 }
 
 /**
  * List the `review-script-perspective-*` skills visible to the requesting user — the canonical perspectives plus the customs they authored — joined with their enable state. The 3 canonical perspectives are auto-seeded enabled on the first read; a custom perspective the user has not switched on shows as disabled.
  * @summary List review perspectives and their enablement
  */
-export const reviewHogPerspectivesList = async (
+export const reviewPerspectivesList = async (
     projectId: string,
     options?: RequestInit
 ): Promise<ReviewPerspectiveConfigApi[]> => {
-    return apiMutator<ReviewPerspectiveConfigApi[]>(getReviewHogPerspectivesListUrl(projectId), {
+    return apiMutator<ReviewPerspectiveConfigApi[]>(getReviewPerspectivesListUrl(projectId), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getReviewHogPerspectivesPartialUpdateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/review_hog/perspectives/${skillName}/`
+export const getReviewPerspectivesPartialUpdateUrl = (projectId: string, skillName: string) => {
+    return `/api/projects/${projectId}/review/perspectives/${skillName}/`
 }
 
 /**
  * Toggle whether a `review-script-perspective-*` skill runs on the requesting user's PR reviews. Only skills visible to the user — the canonicals plus the customs they authored — can be toggled; anything else 404s. Upserts the per-user config row, so enabling a freshly authored custom perspective works in one call. Rejected if it would leave the user with no enabled perspective.
  * @summary Enable or disable a review perspective
  */
-export const reviewHogPerspectivesPartialUpdate = async (
+export const reviewPerspectivesPartialUpdate = async (
     projectId: string,
     skillName: string,
     patchedReviewPerspectiveConfigUpdateApi?: PatchedReviewPerspectiveConfigUpdateApi,
     options?: RequestInit
 ): Promise<ReviewPerspectiveConfigApi> => {
-    return apiMutator<ReviewPerspectiveConfigApi>(getReviewHogPerspectivesPartialUpdateUrl(projectId, skillName), {
+    return apiMutator<ReviewPerspectiveConfigApi>(getReviewPerspectivesPartialUpdateUrl(projectId, skillName), {
         ...options,
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -123,7 +123,7 @@ export const reviewHogPerspectivesPartialUpdate = async (
     })
 }
 
-export const getReviewHogReviewsListUrl = (projectId: string, params?: ReviewHogReviewsListParams) => {
+export const getReviewReviewsListUrl = (projectId: string, params?: ReviewReviewsListParams) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -135,47 +135,47 @@ export const getReviewHogReviewsListUrl = (projectId: string, params?: ReviewHog
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/review_hog/reviews/?${stringifiedParams}`
-        : `/api/projects/${projectId}/review_hog/reviews/`
+        ? `/api/projects/${projectId}/review/reviews/?${stringifiedParams}`
+        : `/api/projects/${projectId}/review/reviews/`
 }
 
 /**
- * Recent ReviewHog reviews on this project: actively running reviews first (with the in-flight turn's stage), then the most recent completed ones — at most `limit` rows (default 5), plus `has_more` for whether a larger `limit` would reveal more. By default only the requesting user's reviews; `scope=everyone` lists every review on the project.
+ * Recent Review reviews on this project: actively running reviews first (with the in-flight turn's stage), then the most recent completed ones — at most `limit` rows (default 5), plus `has_more` for whether a larger `limit` would reveal more. By default only the requesting user's reviews; `scope=everyone` lists every review on the project.
  * @summary List recent reviews
  */
-export const reviewHogReviewsList = async (
+export const reviewReviewsList = async (
     projectId: string,
-    params?: ReviewHogReviewsListParams,
+    params?: ReviewReviewsListParams,
     options?: RequestInit
 ): Promise<ReviewRecentReviewsPageApi> => {
-    return apiMutator<ReviewRecentReviewsPageApi>(getReviewHogReviewsListUrl(projectId, params), {
+    return apiMutator<ReviewRecentReviewsPageApi>(getReviewReviewsListUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getReviewHogReviewsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/review_hog/reviews/${id}/`
+export const getReviewReviewsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/review/reviews/${id}/`
 }
 
 /**
- * One completed ReviewHog review on this project, with the latest turn's validated findings, the findings the validator dismissed (and why), and the review body published to GitHub. Project-wide, so reviews listed under `scope=everyone` can be opened too.
+ * One completed Review review on this project, with the latest turn's validated findings, the findings the validator dismissed (and why), and the review body published to GitHub. Project-wide, so reviews listed under `scope=everyone` can be opened too.
  * @summary Retrieve one review's detail
  */
-export const reviewHogReviewsRetrieve = async (
+export const reviewReviewsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<ReviewDetailApi> => {
-    return apiMutator<ReviewDetailApi>(getReviewHogReviewsRetrieveUrl(projectId, id), {
+    return apiMutator<ReviewDetailApi>(getReviewReviewsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getReviewHogReviewsPerspectiveStatsRetrieveUrl = (
+export const getReviewReviewsPerspectiveStatsRetrieveUrl = (
     projectId: string,
-    params?: ReviewHogReviewsPerspectiveStatsRetrieveParams
+    params?: ReviewReviewsPerspectiveStatsRetrieveParams
 ) => {
     const normalizedParams = new URLSearchParams()
 
@@ -188,39 +188,39 @@ export const getReviewHogReviewsPerspectiveStatsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/review_hog/reviews/perspective_stats/?${stringifiedParams}`
-        : `/api/projects/${projectId}/review_hog/reviews/perspective_stats/`
+        ? `/api/projects/${projectId}/review/reviews/perspective_stats/?${stringifiedParams}`
+        : `/api/projects/${projectId}/review/reviews/perspective_stats/`
 }
 
 /**
  * How many findings each review skill (perspective or blind-spot sweep) raised across the recent completed reviews in scope — the requesting user's by default, every review on this project with `scope=everyone` — and how many of those the validator kept vs dismissed.
  * @summary Perspective effectiveness stats
  */
-export const reviewHogReviewsPerspectiveStatsRetrieve = async (
+export const reviewReviewsPerspectiveStatsRetrieve = async (
     projectId: string,
-    params?: ReviewHogReviewsPerspectiveStatsRetrieveParams,
+    params?: ReviewReviewsPerspectiveStatsRetrieveParams,
     options?: RequestInit
 ): Promise<ReviewPerspectiveStatsApi> => {
-    return apiMutator<ReviewPerspectiveStatsApi>(getReviewHogReviewsPerspectiveStatsRetrieveUrl(projectId, params), {
+    return apiMutator<ReviewPerspectiveStatsApi>(getReviewReviewsPerspectiveStatsRetrieveUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getReviewHogReviewsTriggerCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review_hog/reviews/trigger/`
+export const getReviewReviewsTriggerCreateUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/review/reviews/trigger/`
 }
 
 /**
- * Start a ReviewHog review of any pull request the project's GitHub App installation can access, and publish it back to the PR. The requesting user is the review's acting user: their enabled perspectives, blind-spot check, validator, and urgency threshold drive the run, and it appears under their recent reviews. Nonexistent, closed, and fork PRs are rejected synchronously; a PR whose current commit already has a published review returns 'already_reviewed' without starting a run, and triggering a PR whose review is currently running joins the in-flight run. Otherwise non-blocking: returns the Temporal workflow id immediately while the review runs in the worker.
+ * Start a Review review of any pull request the project's GitHub App installation can access, and publish it back to the PR. The requesting user is the review's acting user: their enabled perspectives, blind-spot check, validator, and urgency threshold drive the run, and it appears under their recent reviews. Nonexistent, closed, and fork PRs are rejected synchronously; a PR whose current commit already has a published review returns 'already_reviewed' without starting a run, and triggering a PR whose review is currently running joins the in-flight run. Otherwise non-blocking: returns the Temporal workflow id immediately while the review runs in the worker.
  * @summary Start a review of a pull request
  */
-export const reviewHogReviewsTriggerCreate = async (
+export const reviewReviewsTriggerCreate = async (
     projectId: string,
     reviewTriggerRequestApi: ReviewTriggerRequestApi,
     options?: RequestInit
 ): Promise<ReviewTriggerResponseApi> => {
-    return apiMutator<ReviewTriggerResponseApi>(getReviewHogReviewsTriggerCreateUrl(projectId), {
+    return apiMutator<ReviewTriggerResponseApi>(getReviewReviewsTriggerCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -228,38 +228,38 @@ export const reviewHogReviewsTriggerCreate = async (
     })
 }
 
-export const getReviewHogSettingsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review_hog/settings/`
+export const getReviewSettingsRetrieveUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/review/settings/`
 }
 
 /**
- * Fetch the requesting user's ReviewHog settings for this project, creating the row with defaults on first read.
- * @summary Get the user's ReviewHog settings
+ * Fetch the requesting user's Review settings for this project, creating the row with defaults on first read.
+ * @summary Get the user's Review settings
  */
-export const reviewHogSettingsRetrieve = async (
+export const reviewSettingsRetrieve = async (
     projectId: string,
     options?: RequestInit
 ): Promise<ReviewUserSettingsApi> => {
-    return apiMutator<ReviewUserSettingsApi>(getReviewHogSettingsRetrieveUrl(projectId), {
+    return apiMutator<ReviewUserSettingsApi>(getReviewSettingsRetrieveUrl(projectId), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getReviewHogSettingsPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review_hog/settings/`
+export const getReviewSettingsPartialUpdateUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/review/settings/`
 }
 
 /**
- * Partially update the requesting user's ReviewHog settings for this project. Only the provided fields change.
- * @summary Update the user's ReviewHog settings
+ * Partially update the requesting user's Review settings for this project. Only the provided fields change.
+ * @summary Update the user's Review settings
  */
-export const reviewHogSettingsPartialUpdate = async (
+export const reviewSettingsPartialUpdate = async (
     projectId: string,
     patchedReviewUserSettingsApi?: NonReadonly<PatchedReviewUserSettingsApi>,
     options?: RequestInit
 ): Promise<ReviewUserSettingsApi> => {
-    return apiMutator<ReviewUserSettingsApi>(getReviewHogSettingsPartialUpdateUrl(projectId), {
+    return apiMutator<ReviewUserSettingsApi>(getReviewSettingsPartialUpdateUrl(projectId), {
         ...options,
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -267,39 +267,39 @@ export const reviewHogSettingsPartialUpdate = async (
     })
 }
 
-export const getReviewHogValidatorsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review_hog/validators/`
+export const getReviewValidatorsListUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/review/validators/`
 }
 
 /**
  * List the `review-script-validation-*` skills visible to the requesting user — the canonical validator plus the customs they authored — flagging the one active for them. The canonical validator is auto-seeded active on the first read; a custom validator the user has not selected shows as inactive.
  * @summary List review validators and which one is active
  */
-export const reviewHogValidatorsList = async (
+export const reviewValidatorsList = async (
     projectId: string,
     options?: RequestInit
 ): Promise<ReviewValidatorConfigApi[]> => {
-    return apiMutator<ReviewValidatorConfigApi[]>(getReviewHogValidatorsListUrl(projectId), {
+    return apiMutator<ReviewValidatorConfigApi[]>(getReviewValidatorsListUrl(projectId), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getReviewHogValidatorsPartialUpdateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/review_hog/validators/${skillName}/`
+export const getReviewValidatorsPartialUpdateUrl = (projectId: string, skillName: string) => {
+    return `/api/projects/${projectId}/review/validators/${skillName}/`
 }
 
 /**
  * Make a `review-script-validation-*` skill the single validator that runs on the requesting user's PR reviews, switching the user's other validators off in the same call. Only skills visible to the user — the canonical plus the customs they authored — can be selected; anything else 404s. Upserts the per-user config row, so selecting a freshly authored custom validator works in one call.
  * @summary Select the active review validator
  */
-export const reviewHogValidatorsPartialUpdate = async (
+export const reviewValidatorsPartialUpdate = async (
     projectId: string,
     skillName: string,
     patchedReviewValidatorConfigSelectApi?: PatchedReviewValidatorConfigSelectApi,
     options?: RequestInit
 ): Promise<ReviewValidatorConfigApi> => {
-    return apiMutator<ReviewValidatorConfigApi>(getReviewHogValidatorsPartialUpdateUrl(projectId, skillName), {
+    return apiMutator<ReviewValidatorConfigApi>(getReviewValidatorsPartialUpdateUrl(projectId, skillName), {
         ...options,
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...options?.headers },

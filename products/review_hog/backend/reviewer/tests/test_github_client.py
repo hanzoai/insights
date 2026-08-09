@@ -8,7 +8,7 @@ _MODULE = "products.review_hog.backend.reviewer.tools.github_client"
 
 
 def test_requests_ride_the_normal_priority_lane() -> None:
-    # The transport default is CRITICAL (never shed). ReviewHog is an automated workload sharing the
+    # The transport default is CRITICAL (never shed). Review is an automated workload sharing the
     # installation budget with interactive callers — a revert to the default would let review
     # pagination burn the reserve kept for user-facing traffic under budget pressure.
     mock_transport = MagicMock(return_value=MagicMock(ok=True))

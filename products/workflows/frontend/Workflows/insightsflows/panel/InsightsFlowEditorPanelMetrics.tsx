@@ -15,11 +15,11 @@ import { urls } from 'scenes/urls'
 import { EXIT_NODE_ID, TRIGGER_NODE_ID } from '../../workflowLogic'
 import { WORKFLOW_METRICS_INFO } from '../../WorkflowMetrics'
 import { WORKFLOW_EMAIL_METRICS, WORKFLOW_PUSH_METRICS } from '../../workflowMetricsSummaryLogic'
-import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { flowEditorLogic } from '../flowEditorLogic'
 
 export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
-    const { selectedNode, workflow } = useValues(hogFlowEditorLogic)
-    const { loadActionMetricsById } = useActions(hogFlowEditorLogic)
+    const { selectedNode, workflow } = useValues(flowEditorLogic)
+    const { loadActionMetricsById } = useActions(flowEditorLogic)
     const actionId = selectedNode?.data.id
     const id = useMemo(() => {
         return actionId ? ([TRIGGER_NODE_ID, EXIT_NODE_ID].includes(actionId) ? '' : actionId) : undefined
@@ -50,7 +50,7 @@ export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
         loadOnChanges: shouldShowActionLevelMetrics,
         loadOnMount: shouldShowActionLevelMetrics,
         forceParams: {
-            appSource: 'hog_flow',
+            appSource: 'script_flow',
             appSourceId: workflow.id,
             instanceId: id,
             breakdownBy: 'metric_name',

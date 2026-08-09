@@ -10,8 +10,8 @@ Dump: `runs/C-gpt55-xhigh-1.md` (funnel 4 chunks / 7 units / 10 raw / 7 dedup / 
 
 | chunk                                  | perspective attempts | refused | completed |
 | -------------------------------------- | -------------------- | ------- | --------- |
-| c1 (review_hog backend + generated TS) | 4                    | 4       | 0         |
-| c2 (stamphog backend/facade)           | 4                    | 4       | 0         |
+| c1 (review backend + generated TS) | 4                    | 4       | 0         |
+| c2 (stamp backend/facade)           | 4                    | 4       | 0         |
 | c3 (pr-approval-agent tools)           | 6                    | 3       | 3         |
 | c4 (docs)                              | 0 (selector pruned)  | —       | —         |
 | blind-spots c1–c4                      | 4                    | 0       | 4         |

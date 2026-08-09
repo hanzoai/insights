@@ -8,7 +8,7 @@ import { Badge, Button, Tab, Tabs, Tooltip } from '@hanzo/elements'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 
 import { workflowLogic } from '../../workflowLogic'
-import { INSIGHTS_FLOW_EDITOR_MODES, InsightsFlowEditorMode, hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { INSIGHTS_FLOW_EDITOR_MODES, InsightsFlowEditorMode, flowEditorLogic } from '../flowEditorLogic'
 import { useInsightsFlowStep } from '../steps/InsightsFlowSteps'
 import { InsightsFlowEditorPanelBuild } from './InsightsFlowEditorPanelBuild'
 import { InsightsFlowEditorPanelBuildDetail } from './InsightsFlowEditorPanelBuildDetail'
@@ -19,8 +19,8 @@ import { EmailActionTestContent } from './testing/InsightsFlowEditorNotification
 import { InsightsFlowEditorPanelTest } from './testing/InsightsFlowEditorPanelTest'
 
 export function InsightsFlowEditorPanel(): JSX.Element | null {
-    const { selectedNode, mode, selectedNodeCanBeDeleted, workflow } = useValues(hogFlowEditorLogic)
-    const { setMode, setSelectedNodeId } = useActions(hogFlowEditorLogic)
+    const { selectedNode, mode, selectedNodeCanBeDeleted, workflow } = useValues(flowEditorLogic)
+    const { setMode, setSelectedNodeId } = useActions(flowEditorLogic)
     const { deleteElements } = useReactFlow()
 
     const variablesCount = workflow?.variables?.length || 0

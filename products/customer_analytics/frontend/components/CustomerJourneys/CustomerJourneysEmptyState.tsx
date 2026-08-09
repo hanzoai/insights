@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { ExplorerHog } from 'lib/components/mascots'
+import { ExplorerScript } from 'lib/components/mascots'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
@@ -31,7 +31,7 @@ export function CustomerJourneysEmptyState({ embedded }: { embedded?: boolean })
             description={description}
             action={() => router.actions.push(urls.customerJourneyTemplates())}
             disabledReason={accessControlDisabledReason ?? undefined}
-            customHog={ExplorerHog}
+            customScript={ExplorerScript}
             className={embedded ? 'border-0' : undefined}
             isEmpty
         />

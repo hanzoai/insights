@@ -187,7 +187,7 @@ export function AnnouncementsTabContent(): JSX.Element {
     if (!slackConnected) {
         return (
             <Banner type="warning">
-                Connect the SupportHog Slack bot in <Link to={urls.supportSettings()}>Support settings</Link> to send
+                Connect the Support Slack bot in <Link to={urls.supportSettings()}>Support settings</Link> to send
                 announcements to customer channels.
             </Banner>
         )

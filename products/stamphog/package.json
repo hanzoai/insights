@@ -1,5 +1,5 @@
 {
-    "name": "@hanzo/products-stamphog",
+    "name": "@hanzo/products-stamp",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short",
         "backend:contract-check": "echo 'Contract files unchanged'"

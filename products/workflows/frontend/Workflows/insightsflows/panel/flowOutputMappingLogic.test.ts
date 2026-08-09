@@ -4,13 +4,13 @@ import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 
 import { workflowLogic } from '../../workflowLogic'
-import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { flowEditorLogic } from '../flowEditorLogic'
 import { InsightsFlowAction, InsightsFlowActionNode } from '../types'
-import { hogFlowOutputMappingLogic, normalizeOutputVariable } from './hogFlowOutputMappingLogic'
+import { flowOutputMappingLogic, normalizeOutputVariable } from './flowOutputMappingLogic'
 
 const makeActionNode = (id: string, outputVariable?: InsightsFlowAction['output_variable']): InsightsFlowActionNode => ({
     id,
-    type: 'hogFlowAction',
+    type: 'flowAction',
     position: { x: 0, y: 0 },
     data: {
         id,
@@ -24,7 +24,7 @@ const makeActionNode = (id: string, outputVariable?: InsightsFlowAction['output_
     } as InsightsFlowAction,
 })
 
-describe('hogFlowOutputMappingLogic', () => {
+describe('flowOutputMappingLogic', () => {
     describe('normalizeOutputVariable', () => {
         it.each([
             { description: 'null', raw: null, expected: [] },
@@ -72,15 +72,15 @@ describe('hogFlowOutputMappingLogic', () => {
     })
 
     describe('logic', () => {
-        let logic: ReturnType<typeof hogFlowOutputMappingLogic.build>
-        let editorLogic: ReturnType<typeof hogFlowEditorLogic.build>
+        let logic: ReturnType<typeof flowOutputMappingLogic.build>
+        let editorLogic: ReturnType<typeof flowEditorLogic.build>
         let wfLogic: ReturnType<typeof workflowLogic.build>
         const WORKFLOW_ID = 'test-workflow'
 
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/v1/environments/:team_id/hog_flows/:id/': {
+                    '/v1/environments/:team_id/script_flows/:id/': {
                         id: WORKFLOW_ID,
                         name: 'Test workflow',
                         actions: [],
@@ -102,10 +102,10 @@ describe('hogFlowOutputMappingLogic', () => {
             wfLogic = workflowLogic({ id: WORKFLOW_ID })
             wfLogic.mount()
 
-            editorLogic = hogFlowEditorLogic({ id: WORKFLOW_ID })
+            editorLogic = flowEditorLogic({ id: WORKFLOW_ID })
             editorLogic.mount()
 
-            logic = hogFlowOutputMappingLogic({ id: WORKFLOW_ID })
+            logic = flowOutputMappingLogic({ id: WORKFLOW_ID })
             logic.mount()
         })
 

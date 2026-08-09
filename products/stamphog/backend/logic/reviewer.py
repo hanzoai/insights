@@ -13,7 +13,7 @@ embeds a reviewer script; it only:
   can't read is never an approval: malformed output escalates.
 
 The trusted review-norms prose and gate policy are NOT passed here — the server
-overwrites ``.stamphog/policy.yml`` and ``.stamphog/review-guidance.md`` in the
+overwrites ``.stamp/policy.yml`` and ``.stamp/review-guidance.md`` in the
 checkout with the default-branch versions, and the engine reads them from there.
 """
 
@@ -80,7 +80,7 @@ class ReviewerVerdict:
     # mechanics), posted verbatim when present.
     review_body: str = ""
     # The engine version the output reports, for analytics segmentation.
-    stamphog_version: str = ""
+    stamp_version: str = ""
 
 
 def build_reviewer_invocation(
@@ -186,7 +186,7 @@ def _parse_rich(obj: dict) -> ReviewerVerdict:
         gate_blocked=gate_blocked,
         gate_result=gate_result,
         review_body=str(obj.get("review_body") or ""),
-        stamphog_version=str(obj.get("stamphog_version") or ""),
+        stamp_version=str(obj.get("stamp_version") or ""),
     )
 
 

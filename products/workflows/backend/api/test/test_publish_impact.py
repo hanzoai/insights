@@ -24,7 +24,7 @@ def _continue_edge(source: str, target: str) -> dict:
 class TestFindVariableReferences(SimpleTestCase):
     @parameterized.expand(
         [
-            ("hog_dot", {"inputs": {"url": {"value": "{variables.foo}"}}}, {"foo"}),
+            ("script_dot", {"inputs": {"url": {"value": "{variables.foo}"}}}, {"foo"}),
             ("liquid_dot", {"inputs": {"body": {"value": "Hi {{ variables.name }}!"}}}, {"name"}),
             ("bracket", {"inputs": {"body": {"value": "{{ variables['my-var'] }}"}}}, {"my-var"}),
             ("bracket_spaced", {"inputs": {"x": {"value": "variables[ 'y' ]"}}}, {"y"}),

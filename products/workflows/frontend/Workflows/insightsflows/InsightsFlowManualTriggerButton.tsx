@@ -10,7 +10,7 @@ import { humanFriendlyNumber } from 'lib/utils/numbers'
 import { CyclotronJobInputSchemaType } from '~/types'
 
 import { WorkflowLogicProps, workflowLogic } from '../workflowLogic'
-import { hogFlowManualTriggerButtonLogic } from './InsightsFlowManualTriggerButtonLogic'
+import { flowManualTriggerButtonLogic } from './InsightsFlowManualTriggerButtonLogic'
 import { batchTriggerLogic, getAudienceDedupeKey } from './steps/batchTriggerLogic'
 
 const TriggerPopover = ({
@@ -20,7 +20,7 @@ const TriggerPopover = ({
     setPopoverVisible: (visible: boolean) => void
     props: WorkflowLogicProps
 }): JSX.Element => {
-    const logic = hogFlowManualTriggerButtonLogic(props)
+    const logic = flowManualTriggerButtonLogic(props)
     const { workflow, variableValues, inputs } = useValues(logic)
     const { setInput, clearInputs, triggerManualWorkflow, triggerBatchWorkflow } = useActions(logic)
 
@@ -138,7 +138,7 @@ const TriggerPopover = ({
 }
 
 export const InsightsFlowManualTriggerButton = (props: WorkflowLogicProps = {}): JSX.Element => {
-    const logic = hogFlowManualTriggerButtonLogic(props)
+    const logic = flowManualTriggerButtonLogic(props)
     const { workflow, hasUnsavedChanges } = useValues(workflowLogic(props))
     const { popoverVisible } = useValues(logic)
     const { setPopoverVisible } = useActions(logic)

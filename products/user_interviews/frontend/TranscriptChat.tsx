@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { Markdown } from 'lib/elements/Markdown'
 import { asDisplay } from 'scenes/persons/person-utils'
 import { PersonIcon } from 'scenes/persons/PersonDisplay'
@@ -9,7 +9,7 @@ import { PersonType } from '~/types'
 
 import { TranscriptTurn, parseTranscript } from './parseTranscript'
 
-const MascotRobot = pngHoggie()
+const MascotRobot = pngMascot()
 
 interface TranscriptChatProps {
     transcript: string

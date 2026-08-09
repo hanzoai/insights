@@ -127,7 +127,7 @@ from insights.schema_enums import (
     MascotActorColorOption as MascotActorColorOption,
     MascotActorSkinOption as MascotActorSkinOption,
     HideViewedRecordings as HideViewedRecordings,
-    HogLanguage as HogLanguage,
+    ScriptLanguage as ScriptLanguage,
     InsightsQLAlertEvaluation as InsightsQLAlertEvaluation,
     HrefMatching as HrefMatching,
     InCohortVia as InCohortVia,
@@ -1500,7 +1500,7 @@ class HeatmapGradientStop(BaseModel):
     value: float
 
 
-class HogCompileResponse(BaseModel):
+class ScriptCompileResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1518,7 +1518,7 @@ class InsightsQLVariable(BaseModel):
     variableId: str
 
 
-class HogQueryResponse(BaseModel):
+class ScriptQueryResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1998,7 +1998,7 @@ class MaxEvaluationContext(BaseModel):
     )
     description: str | None = None
     evaluation_type: EvaluationRuntime
-    hog_source: str | None = None
+    script_source: str | None = None
     id: str
     name: str | None = None
     type: Literal["evaluation"] = "evaluation"
@@ -5178,14 +5178,14 @@ class InsightsQLQueryModifiers(BaseModel):
     )
 
 
-class HogQuery(BaseModel):
+class ScriptQuery(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     code: str | None = None
-    kind: Literal["HogQuery"] = "HogQuery"
+    kind: Literal["ScriptQuery"] = "ScriptQuery"
     modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
-    response: HogQueryResponse | None = None
+    response: ScriptQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
 
@@ -23607,7 +23607,7 @@ class AnyEntityNodeDataWarehouseNode(RootModel[EventsNode | ActionsNode | DataWa
 class AnyResponseType(
     RootModel[
         dict[str, Any]
-        | HogQueryResponse
+        | ScriptQueryResponse
         | InsightsQLQueryResponse
         | InsightsQLMetadataResponse
         | InsightsQLAutocompleteResponse
@@ -23627,7 +23627,7 @@ class AnyResponseType(
 ):
     root: (
         dict[str, Any]
-        | HogQueryResponse
+        | ScriptQueryResponse
         | InsightsQLQueryResponse
         | InsightsQLMetadataResponse
         | InsightsQLAutocompleteResponse
@@ -28354,7 +28354,7 @@ class InsightsQLAutocomplete(BaseModel):
     filters: InsightsQLFilters | None = Field(default=None, description="Table to validate the expression against")
     globals: dict[str, Any] | None = Field(default=None, description="Global values in scope")
     kind: Literal["InsightsQLAutocomplete"] = "InsightsQLAutocomplete"
-    language: HogLanguage = Field(..., description="Language to validate")
+    language: ScriptLanguage = Field(..., description="Language to validate")
     modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query: str = Field(..., description="Query to validate")
     response: InsightsQLAutocompleteResponse | None = None
@@ -28369,7 +28369,7 @@ class InsightsQLAutocomplete(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28460,7 +28460,7 @@ class InsightsQLMetadata(BaseModel):
     filters: InsightsQLFilters | None = Field(default=None, description="Extra filters applied to query via {filters}")
     globals: dict[str, Any] | None = Field(default=None, description="Extra globals for the query")
     kind: Literal["InsightsQLMetadata"] = "InsightsQLMetadata"
-    language: HogLanguage = Field(..., description="Language to validate")
+    language: ScriptLanguage = Field(..., description="Language to validate")
     modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query: str = Field(..., description="Query to validate")
     response: InsightsQLMetadataResponse | None = None
@@ -28475,7 +28475,7 @@ class InsightsQLMetadata(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28595,7 +28595,7 @@ class MaxInsightContext(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28729,7 +28729,7 @@ class QueryRequest(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28855,7 +28855,7 @@ class QuerySchemaRoot(
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28951,7 +28951,7 @@ class QuerySchemaRoot(
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -29052,7 +29052,7 @@ class QueryUpgradeRequest(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -29153,7 +29153,7 @@ class QueryUpgradeResponse(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -29436,7 +29436,7 @@ class VisualizationArtifactContent(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete

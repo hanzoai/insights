@@ -63,7 +63,7 @@ once the command has run everywhere.
 
 - **Every definition is emitted, unbounded.** `_to_external_account` includes every team
   custom property definition keyed by name (`null` when unset) so workflow result paths are
-  deterministic. The hogflow executor caps all workflow variables at 5 KB of JSON combined and
+  deterministic. The flow executor caps all workflow variables at 5 KB of JSON combined and
   the Get account node's default `account` variable stores the whole response body, so a team
   with enough definitions (roughly 100–150 at typical name lengths, fewer with long names or
   populated values) makes every Get account step throw and drop its variables — even in
@@ -118,7 +118,7 @@ once the command has run everywhere.
 
 - **The channel binding is trusted as written.** `slack_channel_id` is an account property any
   account editor can set, and the summary pipeline reads whatever channel it names with the team's
-  own SupportHog bot token. An editor can therefore point an account at any channel that team's bot
+  own Support bot token. An editor can therefore point an account at any channel that team's bot
   is in — including a private channel the editor isn't a member of — and read its summary. Accepted
   for now: editors are internal team members, the token is team-scoped (no cross-team reach), and
   the announcements feature already posts through the same binding. The activity re-resolves the

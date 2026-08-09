@@ -2,7 +2,7 @@ import structlog
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
-from insights.schema import HogCompileResponse
+from insights.schema import ScriptCompileResponse
 
 from insights.insightsql.compiler.bytecode import Local, create_bytecode
 from insights.insightsql.errors import ExposedInsightsQLError
@@ -15,7 +15,7 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 logger = structlog.get_logger(__name__)
 
 
-class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
+class ScriptViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
     scope_object = "INTERNAL"
     serializer_class = _FallbackSerializer
 
@@ -44,7 +44,7 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
             )
             cleaned_locals = [[local.name, local.depth, local.is_captured] for local in compiled.locals]
             return Response(
-                HogCompileResponse(
+                ScriptCompileResponse(
                     bytecode=compiled.bytecode,
                     locals=cleaned_locals,
                 ).model_dump(),

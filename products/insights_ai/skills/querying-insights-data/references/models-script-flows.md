@@ -1,6 +1,6 @@
 # Script Flows
 
-## Script Flow (`system.hog_flows`)
+## Script Flow (`system.script_flows`)
 
 Script flows are automated user journeys — multi-step workflows that trigger actions (emails, webhooks, etc.) based on user behavior.
 
@@ -38,19 +38,19 @@ Column | Type | Nullable | Description
 ```sql
 -- Count flows by status
 SELECT status, count() AS total
-FROM system.hog_flows
+FROM system.script_flows
 GROUP BY status
 ORDER BY total DESC
 
 -- List active flows with their names
 SELECT id, name, version, created_at
-FROM system.hog_flows
+FROM system.script_flows
 WHERE status = 'active'
 ORDER BY created_at DESC
 
 -- Find flows updated in the last 7 days
 SELECT id, name, status, updated_at
-FROM system.hog_flows
+FROM system.script_flows
 WHERE updated_at > now() - toIntervalDay(7)
 ORDER BY updated_at DESC
 ```

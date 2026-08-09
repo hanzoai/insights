@@ -32,7 +32,7 @@
                                                 "type": 2,
                                                 "tagName": "title",
                                                 "attributes": {},
-                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Hogflix" }]
+                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Scriptflix" }]
                                             },
                                             { "id": 7, "type": 3, "textContent": "\n    " },
                                             {
@@ -196,7 +196,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Scriptflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -274,7 +274,7 @@
                                                                                     {
                                                                                         "id": 53,
                                                                                         "type": 3,
-                                                                                        "textContent": "Hogflix"
+                                                                                        "textContent": "Scriptflix"
                                                                                     }
                                                                                 ]
                                                                             },
@@ -711,7 +711,7 @@
                                                 "type": 2,
                                                 "tagName": "title",
                                                 "attributes": {},
-                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Hogflix" }]
+                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Scriptflix" }]
                                             },
                                             { "id": 7, "type": 3, "textContent": "\n    " },
                                             {
@@ -875,7 +875,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Scriptflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -953,7 +953,7 @@
                                                                                     {
                                                                                         "id": 53,
                                                                                         "type": 3,
-                                                                                        "textContent": "Hogflix"
+                                                                                        "textContent": "Scriptflix"
                                                                                     }
                                                                                 ]
                                                                             },
@@ -1108,7 +1108,7 @@
                                                                             {
                                                                                 "id": 78,
                                                                                 "type": 3,
-                                                                                "textContent": "Pay for Hogflix"
+                                                                                "textContent": "Pay for Scriptflix"
                                                                             }
                                                                         ]
                                                                     },
@@ -1287,7 +1287,7 @@
                                                 "type": 2,
                                                 "tagName": "title",
                                                 "attributes": {},
-                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Hogflix" }]
+                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Scriptflix" }]
                                             },
                                             { "id": 7, "type": 3, "textContent": "\n    " },
                                             {
@@ -1451,7 +1451,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Scriptflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -1529,7 +1529,7 @@
                                                                                     {
                                                                                         "id": 53,
                                                                                         "type": 3,
-                                                                                        "textContent": "Hogflix"
+                                                                                        "textContent": "Scriptflix"
                                                                                     }
                                                                                 ]
                                                                             },
@@ -2147,7 +2147,7 @@
                                                 "type": 2,
                                                 "tagName": "title",
                                                 "attributes": {},
-                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Hogflix" }]
+                                                "childNodes": [{ "id": 6, "type": 3, "textContent": "Scriptflix" }]
                                             },
                                             { "id": 7, "type": 3, "textContent": "\n    " },
                                             {
@@ -2311,7 +2311,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Scriptflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -2389,7 +2389,7 @@
                                                                                     {
                                                                                         "id": 53,
                                                                                         "type": 3,
-                                                                                        "textContent": "Hogflix"
+                                                                                        "textContent": "Scriptflix"
                                                                                     }
                                                                                 ]
                                                                             },

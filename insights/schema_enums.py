@@ -363,7 +363,7 @@ class AssistantTool(StrEnum):
     FIX_INSIGHTSQL_QUERY = "fix_insightsql_query"
     ANALYZE_USER_INTERVIEWS = "analyze_user_interviews"
     CREATE_USER_INTERVIEW_TOPIC = "create_user_interview_topic"
-    CREATE_FN_TRANSFORMATION_FUNCTION = "create_hog_transformation_function"
+    CREATE_FN_TRANSFORMATION_FUNCTION = "create_script_transformation_function"
     CREATE_FN_FUNCTION_FILTERS = "create_insights_function_filters"
     CREATE_FN_FUNCTION_INPUTS = "create_insights_function_inputs"
     CREATE_MESSAGE_TEMPLATE = "create_message_template"
@@ -406,7 +406,7 @@ class AssistantTool(StrEnum):
     FINALIZE_PLAN = "finalize_plan"
     CALL_MCP_SERVER = "call_mcp_server"
     SEARCH_LLM_TRACES = "search_llm_traces"
-    RUN_FN_EVAL_TEST = "run_hog_eval_test"
+    RUN_FN_EVAL_TEST = "run_script_eval_test"
     LIST_LLM_SKILLS = "list_llm_skills"
     GET_LLM_SKILL = "get_llm_skill"
     GET_LLM_SKILL_FILE = "get_llm_skill_file"
@@ -2554,7 +2554,7 @@ class FileSystemIconType(StrEnum):
     TOOLBAR = "toolbar"
     VISUAL_REVIEW = "visual_review"
     CODE_REVIEW = "code_review"
-    STAMPHOG = "stamphog"
+    Stamp = "stamp"
     SETTINGS = "settings"
     HEALTH = "health"
     INBOX = "inbox"
@@ -2701,18 +2701,18 @@ class MascotActorColorOption(StrEnum):
 
 class MascotActorSkinOption(StrEnum):
     DEFAULT = "default"
-    SPIDERHOG = "spiderhog"
-    ROBOHOG = "robohog"
-    HOGZILLA = "hogzilla"
+    SPIDERHOG = "spiderscript"
+    ROBOHOG = "roboscript"
+    HOGZILLA = "scriptzilla"
     GHOST = "ghost"
 
 
-class HogLanguage(StrEnum):
+class ScriptLanguage(StrEnum):
     HOG = "script"
-    INSIGHTS_JSON = "hogJson"
+    INSIGHTS_JSON = "scriptJson"
     INSIGHTS_QL = "insightsQL"
     INSIGHTS_QL_EXPR = "insightsQLExpr"
-    INSIGHTS_TEMPLATE = "hogTemplate"
+    INSIGHTS_TEMPLATE = "scriptTemplate"
     LIQUID = "liquid"
 
 
@@ -3174,7 +3174,7 @@ class NodeKind(StrEnum):
     EVENTS_QUERY = "EventsQuery"
     SESSIONS_QUERY = "SessionsQuery"
     PERSONS_NODE = "PersonsNode"
-    INSIGHTS_QUERY = "HogQuery"
+    INSIGHTS_QUERY = "ScriptQuery"
     INSIGHTS_QL_QUERY = "InsightsQLQuery"
     INSIGHTS_QL_METADATA = "InsightsQLMetadata"
     INSIGHTS_QL_AUTOCOMPLETE = "InsightsQLAutocomplete"
@@ -3470,7 +3470,7 @@ class ProductKey(StrEnum):
     PRODUCT_TOURS = "product_tours"
     PULSE = "pulse"
     REVENUE_ANALYTICS = "revenue_analytics"
-    REVIEW_HOG = "review_hog"
+    REVIEW_HOG = "review"
     SESSION_REPLAY = "session_replay"
     REPLAY_VISION = "replay_vision"
     SITE_APPS = "site_apps"

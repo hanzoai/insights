@@ -125,12 +125,12 @@ class TestInsightsFunctionDrafts(DraftTestCase):
 
     def test_metadata_in_a_draft_edit_does_not_revert_a_concurrent_live_edit(self):
         function_id = self._create()
-        concurrent_hog = "fetch(inputs.url, {'method': 'DELETE'});"
+        concurrent_script = "fetch(inputs.url, {'method': 'DELETE'});"
 
         def live_edit_lands_after_initial_fetch(_team):
             # Stand in for a builder edit committing between the request's initial unlocked fetch
             # and its write: the flag check runs after get_object() and before the transaction.
-            InsightsFunction.objects.filter(id=function_id).update(script=concurrent_hog)
+            InsightsFunction.objects.filter(id=function_id).update(script=concurrent_script)
             return True
 
         with patch(FLAG_PATH, side_effect=live_edit_lands_after_initial_fetch):
@@ -140,7 +140,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         function = InsightsFunction.objects.get(id=function_id)
         assert function.name == "Renamed"
         # The metadata save must not write the request-start config back over the concurrent edit.
-        assert function.script == concurrent_hog
+        assert function.script == concurrent_script
         assert function.draft is not None
         assert function.draft["script"] == EDITED_HOG
 
@@ -355,7 +355,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         assert response.status_code == status.HTTP_200_OK, response.json()
 
     def _test_invoke(self, function_id: str, payload: dict):
-        with patch("products.cdp.backend.api.insights_function.create_hog_invocation_test") as mock_invoke:
+        with patch("products.cdp.backend.api.insights_function.create_script_invocation_test") as mock_invoke:
             mock_invoke.return_value.status_code = 200
             mock_invoke.return_value.json.return_value = {"status": "success", "logs": []}
             response = self.client.post(self._url(function_id, "/invocations"), payload)

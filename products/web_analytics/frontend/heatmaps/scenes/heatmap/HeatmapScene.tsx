@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { Tag, Spinner } from '@hanzo/elements'
 import { IconBrowser, IconDownload } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { HeatmapCanvas } from 'lib/components/heatmaps/HeatmapCanvas'
@@ -25,7 +25,7 @@ import { FilterPanel } from '../../components/FilterPanel'
 import { HeatmapHeader } from '../../components/HeatmapHeader'
 import { heatmapLogic } from './heatmapLogic'
 
-const MascotDirector = pngHoggie()
+const MascotDirector = pngMascot()
 
 export const scene: SceneExport<{ id: string }> = {
     component: HeatmapScene,

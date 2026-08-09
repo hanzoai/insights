@@ -181,7 +181,7 @@ class TestEvaluationModel(BaseTest):
 
         mock_reload.assert_called_once_with(team_id=self.team.id, evaluation_ids=[str(evaluation.id)])
 
-    def test_hog_evaluation_compiles_source_to_bytecode(self):
+    def test_script_evaluation_compiles_source_to_bytecode(self):
         evaluation = Evaluation.objects.create(
             team=self.team,
             name="Script Eval",
@@ -200,8 +200,8 @@ class TestEvaluationModel(BaseTest):
         self.assertIsInstance(evaluation.evaluation_config["bytecode"], list)
         self.assertTrue(len(evaluation.evaluation_config["bytecode"]) > 0)
 
-    def test_hog_evaluation_compiles_null_safe_comparisons(self):
-        from insights.temporal.ai_observability.run_evaluation import run_hog_eval
+    def test_script_evaluation_compiles_null_safe_comparisons(self):
+        from insights.temporal.ai_observability.run_evaluation import run_script_eval
 
         evaluation = Evaluation.objects.create(
             team=self.team,
@@ -215,7 +215,7 @@ class TestEvaluationModel(BaseTest):
             conditions=[{"id": "cond-1", "rollout_percentage": 100, "properties": []}],
         )
 
-        result = run_hog_eval(
+        result = run_script_eval(
             evaluation.evaluation_config["bytecode"],
             {
                 "uuid": "event-id",
@@ -228,7 +228,7 @@ class TestEvaluationModel(BaseTest):
         self.assertFalse(result["verdict"])
         self.assertIsNone(result["error"])
 
-    def test_hog_evaluation_invalid_source_raises_validation_error(self):
+    def test_script_evaluation_invalid_source_raises_validation_error(self):
         with self.assertRaises(ValidationError):
             Evaluation.objects.create(
                 team=self.team,
@@ -242,7 +242,7 @@ class TestEvaluationModel(BaseTest):
                 conditions=[{"id": "cond-1", "rollout_percentage": 100, "properties": []}],
             )
 
-    def test_hog_evaluation_empty_source_rejected(self):
+    def test_script_evaluation_empty_source_rejected(self):
         with self.assertRaises(ValidationError):
             Evaluation.objects.create(
                 team=self.team,
@@ -256,7 +256,7 @@ class TestEvaluationModel(BaseTest):
                 conditions=[{"id": "cond-1", "rollout_percentage": 100, "properties": []}],
             )
 
-    def test_hog_evaluation_recompiles_bytecode_on_update(self):
+    def test_script_evaluation_recompiles_bytecode_on_update(self):
         evaluation = Evaluation.objects.create(
             team=self.team,
             name="Script Eval",

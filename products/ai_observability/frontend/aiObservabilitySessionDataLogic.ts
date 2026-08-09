@@ -23,7 +23,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
     MetricsQueryResponse,
@@ -113,7 +113,7 @@ export interface aiObservabilitySessionDataLogicValues {
     canLoadNextData: boolean; // dataNodeLogic
     hasMoreData: boolean; // dataNodeLogic
     nextDataLoading: boolean; // dataNodeLogic
-    response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataNodeLogic
+    response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataNodeLogic
     responseError: string | null; // dataNodeLogic
     responseLoading: boolean; // dataNodeLogic
     dataProcessingAccepted: boolean; // maxGlobalLogic
@@ -201,7 +201,7 @@ export interface aiObservabilitySessionDataLogicActions {
 export interface aiObservabilitySessionDataLogicMeta {
     key: string;
     __keaTypeGenInternalSelectorTypes: {
-        traces: (response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => LLMTrace[];
+        traces: (response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => LLMTrace[];
         sessionTurns: (traces: LLMTrace[], fullTraces: Record<string, LLMTrace>) => SessionTurn[];
         summariesLoading: (traceSummaries: Record<string, TraceSummary>) => boolean;
         initialLoading: (responseLoading: boolean) => boolean;

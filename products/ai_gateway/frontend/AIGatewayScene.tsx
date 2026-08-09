@@ -4,7 +4,7 @@ import { ComponentType } from 'react'
 
 import { SegmentedButton, Tabs } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -25,7 +25,7 @@ import { aiGatewayLogic, EndpointProvider, EndpointTab } from './aiGatewayLogic'
 import { GatewayBalanceCard, GatewayTopUpModal } from './GatewayTopUp'
 import { ModelBreakdownTable, SpendChart, UsageMetrics } from './gatewayUsage'
 
-const MascotRobot = pngHoggie()
+const MascotRobot = pngMascot()
 
 const AI_GATEWAY_DESCRIPTION =
     'One endpoint for every major LLM, billed at cost — no markup on tokens. Point your app at the gateway and ' +

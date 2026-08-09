@@ -1,9 +1,9 @@
-export interface HogTaggerExample {
+export interface ScriptTaggerExample {
     label: string
     source: string
 }
 
-export const FN_TAGGER_EXAMPLES: HogTaggerExample[] = [
+export const FN_TAGGER_EXAMPLES: ScriptTaggerExample[] = [
     {
         label: 'Keyword matching',
         source: `// Tag based on keywords in the output

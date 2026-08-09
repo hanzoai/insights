@@ -1,4 +1,4 @@
-"""Microsoft Teams Bot Framework messaging endpoint for SupportHog."""
+"""Microsoft Teams Bot Framework messaging endpoint for Support."""
 
 import json
 from typing import Any, cast
@@ -57,7 +57,7 @@ def _claims_match_activity(claims: dict, activity: dict) -> bool:
     claim_tenant_id = claims.get("tid") or ""
     if claim_tenant_id and body_tenant_id and claim_tenant_id != body_tenant_id:
         logger.warning(
-            "supporthog_teams_tid_mismatch",
+            "support_teams_tid_mismatch",
             body_tenant_id=body_tenant_id,
             claim_tenant_id=claim_tenant_id,
         )
@@ -65,13 +65,13 @@ def _claims_match_activity(claims: dict, activity: dict) -> bool:
 
     body_service_url = (activity.get("serviceUrl") or "").rstrip("/")
     if body_service_url and not is_trusted_teams_service_url(body_service_url):
-        logger.warning("supporthog_teams_untrusted_service_url", service_url=body_service_url)
+        logger.warning("support_teams_untrusted_service_url", service_url=body_service_url)
         return False
 
     claim_service_url = (claims.get("serviceurl") or "").rstrip("/")
     if claim_service_url and body_service_url and claim_service_url != body_service_url:
         logger.warning(
-            "supporthog_teams_serviceurl_mismatch",
+            "support_teams_serviceurl_mismatch",
             body_service_url=body_service_url,
             claim_service_url=claim_service_url,
         )
@@ -87,7 +87,7 @@ def _route_activity_to_relevant_region(request: HttpRequest, activity: dict, cla
     activity_id = activity.get("id", "")
 
     logger.info(
-        "supporthog_teams_activity",
+        "support_teams_activity",
         activity_type=activity_type,
         tenant_id=tenant_id,
         channel_id=channel_data.get("channel", {}).get("id") if isinstance(channel_data.get("channel"), dict) else None,
@@ -108,9 +108,9 @@ def _route_activity_to_relevant_region(request: HttpRequest, activity: dict, cla
             activity_id=activity_id,
         )
     elif is_primary_region(request):
-        proxy_to_secondary_region(request, log_prefix="supporthog_teams")
+        proxy_to_secondary_region(request, log_prefix="support_teams")
     else:
-        logger.warning("supporthog_teams_no_team_any_region", tenant_id=tenant_id)
+        logger.warning("support_teams_no_team_any_region", tenant_id=tenant_id)
 
 
 @csrf_exempt
@@ -134,7 +134,7 @@ def teams_event_handler(request: HttpRequest) -> HttpResponse:
     try:
         claims = validate_teams_request(request)
     except ValueError as e:
-        logger.warning("supporthog_teams_invalid_request", error=str(e))
+        logger.warning("support_teams_invalid_request", error=str(e))
         return HttpResponse("Invalid request", status=403)
 
     try:
@@ -143,7 +143,7 @@ def teams_event_handler(request: HttpRequest) -> HttpResponse:
         return HttpResponse("Invalid JSON", status=400)
 
     activity_type = activity.get("type", "")
-    logger.info("supporthog_teams_event_received", activity_type=activity_type)
+    logger.info("support_teams_event_received", activity_type=activity_type)
 
     activity_id = activity.get("id", "")
 

@@ -3,7 +3,7 @@ import { type ComponentType, isValidElement } from 'react'
 
 import { Button, Link, Spinner } from '@hanzo/elements'
 
-import { WarningHog } from 'lib/components/mascots'
+import { WarningScript } from 'lib/components/mascots'
 import {
     ProductIntroduction,
     type ProductIntroductionProps,
@@ -113,7 +113,7 @@ export function ErrorTrackingIngestionPrompt({
             className={cn(introductionClassName, className)}
             {...(introductionStacked !== undefined ? { stacked: introductionStacked } : {})}
             mcpSurfaceKey="error_tracking.assign"
-            customHog={WarningHog}
+            customScript={WarningScript}
             actionElementOverride={
                 <div className={actionElementClassName}>
                     <p className="text-sm text-secondary m-0">

@@ -595,7 +595,7 @@ export interface AnnouncementApi {
     readonly created_by: UserBasicApi
     /** Per-channel delivery rows, one per selected Slack channel. */
     readonly deliveries: readonly AnnouncementDeliveryApi[]
-    /** Slack channel IDs to send to. Each must be a channel the SupportHog bot is a member of; names are resolved server-side. */
+    /** Slack channel IDs to send to. Each must be a channel the Support bot is a member of; names are resolved server-side. */
     channels: string[]
 }
 
@@ -613,7 +613,7 @@ export interface AnnouncementChannelApi {
     id: string
     /** Slack channel display name (without the leading #). */
     name: string
-    /** Whether the SupportHog bot is a member of this channel. */
+    /** Whether the Support bot is a member of this channel. */
     is_member: boolean
     /**
      * Name of the customer account whose slack_channel_id points at this channel, or null if unmapped.

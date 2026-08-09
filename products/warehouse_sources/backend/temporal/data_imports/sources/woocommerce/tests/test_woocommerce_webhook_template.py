@@ -22,7 +22,7 @@ SCHEMA_MAPPING = {
 class TestWooCommerceWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

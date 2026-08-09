@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 
 import { Button, Input, Select, Switch, Tag, TextArea, Link, SpinnerOverlay } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dialog } from 'lib/elements/Dialog'
@@ -34,10 +34,10 @@ import {
 import { ScannerEditorStepper, STEP_LABELS } from './ScannerEditorStepper'
 import { MODEL_OPTIONS, SCANNER_TYPE_OPTIONS } from './types'
 
-const MascotConstruction2 = pngHoggie()
-const MascotImTheDriver = pngHoggie()
-const MascotMagnifyingGlass = pngHoggie()
-const MascotXRay = pngHoggie()
+const MascotConstruction2 = pngMascot()
+const MascotImTheDriver = pngMascot()
+const MascotMagnifyingGlass = pngMascot()
+const MascotXRay = pngMascot()
 
 export const scene: SceneExport = {
     component: ScannerEditorSceneComponent,

@@ -293,7 +293,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.available_product_features = [{"key": AvailableFeature.AUTOMATIC_PROVISIONING}]
         self.organization.save()
         OrganizationDomain.objects.create(
-            domain="hogflix.com", organization=self.organization, verified_at=timezone.now()
+            domain="scriptflix.com", organization=self.organization, verified_at=timezone.now()
         )
 
         response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_verified_domains": True})
@@ -320,7 +320,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.enforce_verified_domains = True
         self.organization.save()
         OrganizationDomain.objects.create(
-            domain="hogflix.com", organization=self.organization, verified_at=timezone.now()
+            domain="scriptflix.com", organization=self.organization, verified_at=timezone.now()
         )
 
         # Any other change through the hatch is rejected, alone or alongside the disable.
@@ -342,7 +342,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.enforce_verified_domains = True
         self.organization.save()
         OrganizationDomain.objects.create(
-            domain="hogflix.com", organization=self.organization, verified_at=timezone.now()
+            domain="scriptflix.com", organization=self.organization, verified_at=timezone.now()
         )
 
         response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_verified_domains": False})

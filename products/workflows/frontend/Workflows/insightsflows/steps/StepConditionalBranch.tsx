@@ -10,7 +10,7 @@ import { Input } from 'lib/elements/Input'
 import { Label } from 'lib/elements/Label'
 
 import { InsightsFlowPropertyFilters } from '../filters/InsightsFlowFilters'
-import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { flowEditorLogic } from '../flowEditorLogic'
 import { InsightsFlow, InsightsFlowAction } from '../types'
 import { StepSchemaErrors } from './components/StepSchemaErrors'
 import { getBranchRemovalDisabledReason, removeBranchEdge, useDebouncedNameInputs } from './utils'
@@ -23,8 +23,8 @@ export function StepConditionalBranchConfiguration({
     const action = node.data
     const conditions = action.config.conditions ?? []
 
-    const { edgesByActionId } = useValues(hogFlowEditorLogic)
-    const { setWorkflowAction, setWorkflowActionEdges } = useActions(hogFlowEditorLogic)
+    const { edgesByActionId } = useValues(flowEditorLogic)
+    const { setWorkflowAction, setWorkflowActionEdges } = useActions(flowEditorLogic)
 
     const nodeEdges = edgesByActionId[action.id] ?? []
 

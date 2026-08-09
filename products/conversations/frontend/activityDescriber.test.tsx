@@ -59,7 +59,7 @@ describe('ticketActivityDescriber', () => {
                     merge: null,
                     name: 'Ticket #2043',
                     changes: [statusChange],
-                    trigger: { job_type: 'hog_flow', job_id: 'flow-123', payload: {} },
+                    trigger: { job_type: 'script_flow', job_id: 'flow-123', payload: {} },
                 },
             })
         )
@@ -86,7 +86,7 @@ describe('ticketActivityDescriber', () => {
                     merge: null,
                     name: 'Ticket #2043',
                     changes: [snoozeCleared],
-                    trigger: { job_type: 'hog_flow', job_id: 'flow-123', payload: {} },
+                    trigger: { job_type: 'script_flow', job_id: 'flow-123', payload: {} },
                 },
             })
         )

@@ -84,7 +84,7 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
     <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
-    &rsaquo; <a href="{{ dashboard_url }}">TopHog Dashboard</a>
+    &rsaquo; <a href="{{ dashboard_url }}">TopFn Dashboard</a>
     &rsaquo; Restrictions
 </div>
 {% endblock %}
@@ -92,15 +92,15 @@
 
 {% block content %}
 <div id="content-main">
-    <h2>Restrictions for tophog entry</h2>
+    <h2>Restrictions for topfn entry</h2>
 
     <div class="entry-context">
         <span class="chip"><b>token:</b> {{ token }}</span>
         {% for k, v in key.items %}
         <span class="chip"><b>{{ k }}:</b> {{ v }}</span>
         {% endfor %}
-        {% if tophog_pipelines %}
-        <span class="chip"><b>pipelines:</b> {{ tophog_pipelines|join:", " }}</span>
+        {% if topfn_pipelines %}
+        <span class="chip"><b>pipelines:</b> {{ topfn_pipelines|join:", " }}</span>
         {% endif %}
     </div>
 

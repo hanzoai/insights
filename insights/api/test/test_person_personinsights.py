@@ -11,14 +11,14 @@ from rest_framework import status
 
 from insights.models import Organization, Team
 from insights.models.person.util import get_person_by_uuid
-from insights.personinsights_client.test_helpers import PersonhogTestMixin
+from insights.personinsights_client.test_helpers import PersonTestMixin
 
 from products.cohorts.backend.models.cohort import Cohort
 
 UUID_NONEXISTENT = "550e8400-e29b-41d4-a716-446655440000"
 
 
-class TestRetrievePerson(PersonhogTestMixin, APIBaseTest):
+class TestRetrievePerson(PersonTestMixin, APIBaseTest):
     def test_retrieve_by_uuid(self):
         person = self._seed_person(
             team=self.team,
@@ -72,7 +72,7 @@ class TestRetrievePerson(PersonhogTestMixin, APIBaseTest):
         assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-class TestUpdatePerson(PersonhogTestMixin, APIBaseTest):
+class TestUpdatePerson(PersonTestMixin, APIBaseTest):
     @mock.patch("insights.api.person.capture_internal")
     def test_update_properties_by_uuid(self, mock_capture):
         mock_capture.return_value = mock.MagicMock(status_code=200)
@@ -115,7 +115,7 @@ class TestUpdatePerson(PersonhogTestMixin, APIBaseTest):
         self._assert_personinsights_called("get_person")
 
 
-class TestSplitPerson(PersonhogTestMixin, APIBaseTest):
+class TestSplitPerson(PersonTestMixin, APIBaseTest):
     @mock.patch("insights.api.person.split_person")
     def test_split_by_uuid(self, mock_split):
         mock_split.delay = mock.MagicMock()
@@ -145,7 +145,7 @@ class TestSplitPerson(PersonhogTestMixin, APIBaseTest):
         mock_split.delay.assert_not_called()
 
 
-class TestCohortsByPerson(PersonhogTestMixin, APIBaseTest):
+class TestCohortsByPerson(PersonTestMixin, APIBaseTest):
     def test_cohorts_by_uuid(self):
         person = self._seed_person(
             team=self.team,
@@ -175,7 +175,7 @@ class TestCohortsByPerson(PersonhogTestMixin, APIBaseTest):
         assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-class TestDeleteProperty(PersonhogTestMixin, APIBaseTest):
+class TestDeleteProperty(PersonTestMixin, APIBaseTest):
     @mock.patch("insights.api.person.capture_internal")
     def test_uuid_lookup(self, mock_capture):
         mock_capture.return_value = mock.MagicMock(status_code=200)
@@ -230,7 +230,7 @@ class TestDeleteProperty(PersonhogTestMixin, APIBaseTest):
         assert resp.status_code != 201
 
 
-class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
+class TestBatchByDistinctIds(PersonTestMixin, APIBaseTest):
     def test_happy_path(self):
         self._seed_person(team=self.team, distinct_ids=["user_1"], properties={"email": "user1@example.com"})
         self._seed_person(team=self.team, distinct_ids=["user_2"], properties={"email": "user2@example.com"})
@@ -334,7 +334,7 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
         assert distinct_ids[200] not in results
 
 
-class TestDestroyPerson(PersonhogTestMixin, APIBaseTest):
+class TestDestroyPerson(PersonTestMixin, APIBaseTest):
     def test_destroy_returns_202(self):
         person = self._seed_person(team=self.team, distinct_ids=["did-1"])
 
@@ -373,7 +373,7 @@ class TestDestroyPerson(PersonhogTestMixin, APIBaseTest):
         self._assert_personinsights_not_called("delete_persons")
 
 
-class TestBulkDeletePersons(PersonhogTestMixin, APIBaseTest):
+class TestBulkDeletePersons(PersonTestMixin, APIBaseTest):
     def test_bulk_delete_by_ids(self):
         p1 = self._seed_person(team=self.team, distinct_ids=["did-1"])
         p2 = self._seed_person(team=self.team, distinct_ids=["did-2"])

@@ -1,4 +1,4 @@
-import { getHogEvalExample } from './hogEvalExamples'
+import { getScriptEvalExample } from './scriptEvalExamples'
 
 export type EvaluationTemplateIcon =
     | 'target'
@@ -19,7 +19,7 @@ export interface LLMJudgeTemplate {
     icon: EvaluationTemplateIcon
 }
 
-export interface HogTemplate {
+export interface ScriptTemplate {
     key: string
     name: string
     description: string
@@ -36,7 +36,7 @@ export interface SentimentTemplate {
     icon: EvaluationTemplateIcon
 }
 
-export type EvaluationTemplate = LLMJudgeTemplate | HogTemplate | SentimentTemplate
+export type EvaluationTemplate = LLMJudgeTemplate | ScriptTemplate | SentimentTemplate
 
 export const defaultEvaluationTemplates: readonly EvaluationTemplate[] = [
     {
@@ -52,7 +52,7 @@ export const defaultEvaluationTemplates: readonly EvaluationTemplate[] = [
         description: 'Flag expensive or slow generations and traces using Script code',
         evaluation_type: 'script',
         icon: 'code',
-        source: getHogEvalExample('cost_latency').source,
+        source: getScriptEvalExample('cost_latency').source,
     },
     {
         key: 'contains_keyword',
@@ -60,7 +60,7 @@ export const defaultEvaluationTemplates: readonly EvaluationTemplate[] = [
         description: 'Check the output contains required keywords using Script code',
         evaluation_type: 'script',
         icon: 'search',
-        source: getHogEvalExample('contains_keywords').source,
+        source: getScriptEvalExample('contains_keywords').source,
     },
     {
         key: 'tools_called',
@@ -68,7 +68,7 @@ export const defaultEvaluationTemplates: readonly EvaluationTemplate[] = [
         description: 'Check that specific tools were called using Script code',
         evaluation_type: 'script',
         icon: 'wrench',
-        source: getHogEvalExample('tools_called').source,
+        source: getScriptEvalExample('tools_called').source,
     },
     {
         key: 'relevance',

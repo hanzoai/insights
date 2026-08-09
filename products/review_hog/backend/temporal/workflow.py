@@ -1,4 +1,4 @@
-"""Single-turn ReviewHog PR review as a Temporal workflow.
+"""Single-turn Review PR review as a Temporal workflow.
 
 `ReviewPRWorkflow` is pure orchestration mirroring the former `run.py main()`: setup activities →
 two fan-out child workflows (perspective review / validate) → finishing activities. Only small,
@@ -350,7 +350,7 @@ class ReviewPRWorkflow:
     async def run(self, inputs: ReviewPRWorkflowInputs) -> str:
         repository = inputs.repository
         target = f"PR #{inputs.pr_number}" if inputs.pr_number is not None else f"branch '{inputs.head_branch}'"
-        workflow.logger.info(f"ReviewHog · reviewing {target} · {repository}")
+        workflow.logger.info(f"Review · reviewing {target} · {repository}")
 
         await workflow.execute_activity(
             validate_github_integration_activity,
@@ -662,7 +662,7 @@ class ReviewPRWorkflow:
             best_effort=True,
         )
 
-        workflow.logger.info(f"ReviewHog complete · report stored on ReviewReport {report_id}")
+        workflow.logger.info(f"Review complete · report stored on ReviewReport {report_id}")
         return report_id
 
     @staticmethod

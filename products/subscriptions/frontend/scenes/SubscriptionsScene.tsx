@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import { Button, Menu, Modal, Link } from '@hanzo/elements'
 import { IconEllipsis } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Spinner } from 'lib/elements/Spinner'
 import { Switch } from 'lib/elements/Switch'
@@ -31,7 +31,7 @@ import {
 } from './components/SubscriptionsTable'
 import { SubscriptionsTab, subscriptionsSceneLogic } from './subscriptionsSceneLogic'
 
-const MascotMagnifyingGlass = pngHoggie()
+const MascotMagnifyingGlass = pngMascot()
 
 function SubscriptionEnabledSwitch({ sub }: { sub: SubscriptionApi }): JSX.Element {
     const { setSubscriptionEnabled } = useActions(subscriptionsSceneLogic)
@@ -183,8 +183,8 @@ export function SubscriptionsScene(): JSX.Element {
                         titleOverride="No subscriptions yet"
                         description={emptyStateDescription}
                         isEmpty
-                        customHog={MascotMagnifyingGlass}
-                        hogLayout="responsive"
+                        customScript={MascotMagnifyingGlass}
+                        scriptLayout="responsive"
                         useMainContentContainerQueries
                         docsURL="https://hanzo.ai/docs/user-guides/subscriptions"
                         actionElementOverride={emptyStateAction}

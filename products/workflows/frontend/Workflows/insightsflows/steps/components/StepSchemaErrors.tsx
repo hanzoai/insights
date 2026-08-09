@@ -3,10 +3,10 @@ import { useValues } from 'kea'
 import { Banner } from '@hanzo/elements'
 
 import { workflowLogic } from '../../../workflowLogic'
-import { hogFlowEditorLogic } from '../../hogFlowEditorLogic'
+import { flowEditorLogic } from '../../flowEditorLogic'
 
 export function StepSchemaErrors(): JSX.Element | null {
-    const { selectedNode } = useValues(hogFlowEditorLogic)
+    const { selectedNode } = useValues(flowEditorLogic)
     const { actionValidationErrorsById } = useValues(workflowLogic)
     const validationResult = actionValidationErrorsById[selectedNode?.id ?? '']
 

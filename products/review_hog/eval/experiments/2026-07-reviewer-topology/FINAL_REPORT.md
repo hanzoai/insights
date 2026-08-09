@@ -1,7 +1,7 @@
 # Reviewer-topology quality experiment — final report
 
 > 15 runs · 7 configs · frozen PR #62096 · model constant (claude-opus-4-8 @ xhigh) · validator constant (strict)
-> Yardstick: old ReviewHog's 10 findings (archived copy: `fixtures/old_reviewhog_report.md`)
+> Yardstick: old Review's 10 findings (archived copy: `fixtures/old_review_report.md`)
 > Judged by one LLM judge per dump (root-cause matching), raw output in `judge_results.json`. Runs 2026-07-01/02.
 > **Judge calls are unreviewed by a human — spot-check the per-run `notes` in `judge_results.json` before acting on close calls.**
 
@@ -20,7 +20,7 @@ All configs share: PR #62096, 3 perspective skills (logic-correctness, contracts
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | **C0-baseline**     | Today's prod behavior: PR is under the 1000-added-lines gate → reviewed as **one chunk**; the 3 perspectives run **in parallel**, each in its own fresh sandbox (3 review units).                                                    | Control.                                                                                                   |
 | **C1-smallchunks**  | Semantic LLM chunker forced on with small targets (250/400 added lines) → PR splits into 2–3 concern chunks; 3 perspectives **× each chunk**, all parallel, fresh sandbox per unit (6–9 units).                                      | Does chunk granularity alone improve coverage?                                                             |
-| **C2-sequential**   | One chunk (as C0), but perspectives run **one after another**; each later one sees the earlier ones' findings and is told "find what they missed, don't re-report" (old ReviewHog's cumulative-pass style).                          | Does "dig deeper" pressure alone improve coverage?                                                         |
+| **C2-sequential**   | One chunk (as C0), but perspectives run **one after another**; each later one sees the earlier ones' findings and is told "find what they missed, don't re-report" (old Review's cumulative-pass style).                          | Does "dig deeper" pressure alone improve coverage?                                                         |
 | **C3-both**         | C1 + C2 combined: small chunks AND sequential perspectives within each chunk (chunks still parallel to each other).                                                                                                                  | Do the two levers compound?                                                                                |
 | **C4-completeness** | Small chunks + parallel perspectives + **one extra "completeness" agent per chunk** that runs after the wave, sees all its findings, and hunts for what everyone missed (the "gap pass").                                            | Can one gap sweep buy sequential's breadth without its latency?                                            |
 | **C5-warmsession**  | Small chunks, but instead of a fresh sandbox per (perspective × chunk), **one long-lived sandbox session per perspective**; that session reviews the chunks as successive turns, reusing its context (3 sandbox boots instead of 9). | Does context reuse cut cost without hurting quality? (Cost: yes. Quality: no — anchoring.)                 |
@@ -72,7 +72,7 @@ Secondary observations:
 
 Ordered by expected coverage-per-effort:
 
-1. **Perspective-skill content round** — the five never-surfaced findings map to concerns the current three skills demonstrably don't hunt (privileged-tool wiring/agent-safety, write-path authz ordering, output-channel injection, payload-size limits). This is where 5 of the missing 7 points live. (Old ReviewHog's ~24 cumulative review units brute-forced depth; skills can encode it directly.)
+1. **Perspective-skill content round** — the five never-surfaced findings map to concerns the current three skills demonstrably don't hunt (privileged-tool wiring/agent-safety, write-path authz ordering, output-channel injection, payload-size limits). This is where 5 of the missing 7 points live. (Old Review's ~24 cumulative review units brute-forced depth; skills can encode it directly.)
 2. **Validator calibration round** — #6 and half of #2 died at validation in nearly every run that found them. Revisit the strict criteria on "speculative"/"reachability" dismissals (the old validator upheld both).
 3. **Topology: adopt C4's gap pass** — cheapest breadth mechanism found (+1 unit per chunk, no serialization); combine with pinned/deterministic chunking only for eval reproducibility, since C6 showed structure alone isn't the driver.
 

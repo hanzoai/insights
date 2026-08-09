@@ -2,7 +2,7 @@ import { expectLogic } from 'kea-test-utils'
 
 import { initKeaTests } from '~/test/init'
 
-import { computeMoveEdges, hogFlowEditorLogic } from './hogFlowEditorLogic'
+import { computeMoveEdges, flowEditorLogic } from './flowEditorLogic'
 import { InsightsFlow, InsightsFlowAction, InsightsFlowActionEdge, InsightsFlowActionNode } from './types'
 
 type Edge = InsightsFlow['edges'][0]
@@ -88,12 +88,12 @@ describe('computeMoveEdges', () => {
     })
 })
 
-describe('hogFlowEditorLogic', () => {
-    let logic: ReturnType<typeof hogFlowEditorLogic.build>
+describe('flowEditorLogic', () => {
+    let logic: ReturnType<typeof flowEditorLogic.build>
 
     beforeEach(() => {
         initKeaTests()
-        logic = hogFlowEditorLogic()
+        logic = flowEditorLogic()
         logic.mount()
     })
 

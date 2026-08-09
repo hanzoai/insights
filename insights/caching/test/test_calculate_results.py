@@ -10,7 +10,7 @@ from insights.schema import (
     CachedMarketingAnalyticsTableQueryResponse,
     CachedRetentionQueryResponse,
     CachedTrendsQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     MarketingAnalyticsItem,
     RetentionResult,
 )
@@ -87,7 +87,7 @@ class TestCalculateForQueryBasedInsight(BaseTest):
         assert insight_result.result["spend"]["key"] == "spend"
 
     def test_scalar_results_pass_through(self):
-        insight_result = self._calculate(HogQueryResponse(results="ERROR: nope"))
+        insight_result = self._calculate(ScriptQueryResponse(results="ERROR: nope"))
 
         assert insight_result.result == "ERROR: nope"
 

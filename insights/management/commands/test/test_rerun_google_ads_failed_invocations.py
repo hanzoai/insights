@@ -7,7 +7,7 @@ from django.core.management import call_command
 
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
-RERUN_HELPER = "insights.management.commands.rerun_google_ads_failed_invocations.rerun_hog_invocations"
+RERUN_HELPER = "insights.management.commands.rerun_google_ads_failed_invocations.rerun_script_invocations"
 
 
 def _ok_response(rerun_job_id: str = "job-123") -> MagicMock:

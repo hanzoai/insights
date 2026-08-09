@@ -32,7 +32,7 @@ def _make_activity(
     if reply_to_id:
         activity["replyToId"] = reply_to_id
     if bot_mention:
-        activity["entities"] = [{"type": "mention", "mentioned": {"id": "28:bot", "name": "SupportHog", "role": "bot"}}]
+        activity["entities"] = [{"type": "mention", "mentioned": {"id": "28:bot", "name": "Support", "role": "bot"}}]
     return activity
 
 

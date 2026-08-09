@@ -17,8 +17,8 @@ camel_case_pattern = re.compile(r"(?<!^)(?<![A-Z])(?=[A-Z])")
 # Class-name → snake-case overrides that don't fall out of the default regex.
 # NOTE: Sync with ./test/test_visitor.py#test_insightsql_visitor_naming_exceptions
 _VISIT_NAME_REPLACEMENTS = {
-    "hog_qlxtag": "insightsqlx_tag",
-    "hog_qlxattribute": "insightsqlx_attribute",
+    "script_qlxtag": "insightsqlx_tag",
+    "script_qlxattribute": "insightsqlx_attribute",
     "uuidtype": "uuid_type",
     "string_jsontype": "string_json_type",
 }

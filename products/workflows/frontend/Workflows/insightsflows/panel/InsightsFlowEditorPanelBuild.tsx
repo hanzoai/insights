@@ -10,7 +10,7 @@ import { InsightsFunctionStatusTag } from 'scenes/insights-functions/misc/Insigh
 
 import { InsightsFunctionTemplateType } from '~/types'
 
-import { CreateActionType, hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { CreateActionType, flowEditorLogic } from '../flowEditorLogic'
 // Side-effect imports: register product-specific trigger and action nodes
 import '../registry'
 
@@ -167,7 +167,7 @@ function InsightsFlowEditorToolbarNode({
     onDragStart?: (event: React.DragEvent) => void
     children?: React.ReactNode
 }): JSX.Element | null {
-    const { setNodeToBeAdded } = useActions(hogFlowEditorLogic)
+    const { setNodeToBeAdded } = useActions(flowEditorLogic)
 
     const onDragStart = (event: React.DragEvent): void => {
         setNodeToBeAdded(action)

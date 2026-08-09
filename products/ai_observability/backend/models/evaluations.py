@@ -39,7 +39,7 @@ class EvaluationStatusReason(models.TextChoices):
     PROVIDER_KEY_QUOTA_EXCEEDED = "provider_key_quota_exceeded", "Provider API key quota exceeded"
     PROVIDER_KEY_RATE_LIMITED = "provider_key_rate_limited", "Provider API key is rate limited"
     MODEL_NOT_FOUND = "model_not_found", "Model not found"
-    INSIGHTS_ERROR = "hog_error", "Script evaluation code failed"
+    INSIGHTS_ERROR = "script_error", "Script evaluation code failed"
 
 
 class EvaluationQuerySet(models.QuerySet):
@@ -216,7 +216,7 @@ class Evaluation(ModelActivityMixin, UUIDTModel):
     def save(self, *args, **kwargs):
         from insights.cdp.filters import compile_filters_bytecode
 
-        from ..script import compile_ai_observability_hog  # noqa: PLC0415 - keeps Script compiler off model import path
+        from ..script import compile_ai_observability_script  # noqa: PLC0415 - keeps Script compiler off model import path
 
         # Coerce status and enabled into a consistent pair. status is authoritative, but we accept writes to
         # either field — typically `enabled` from user PATCHes, `status` from system transitions.
@@ -250,7 +250,7 @@ class Evaluation(ModelActivityMixin, UUIDTModel):
         # Compile Script source to bytecode
         if self.evaluation_type == EvaluationType.HOG and self.evaluation_config.get("source"):
             try:
-                bytecode = compile_ai_observability_hog(self.evaluation_config["source"], "destination")
+                bytecode = compile_ai_observability_script(self.evaluation_config["source"], "destination")
                 self.evaluation_config["bytecode"] = bytecode
             except Exception as e:
                 raise ValidationError({"evaluation_config": f"Failed to compile Script code: {e}"})

@@ -1,5 +1,5 @@
 """
-Facade for stamphog.
+Facade for stamp.
 
 The ONLY module other products are allowed to import.
 Accept ids / frozen dataclasses, call into models, return frozen
@@ -8,12 +8,12 @@ dataclasses. Never return ORM instances or import DRF.
 
 from __future__ import annotations
 
-from ..models import DigestChannel, DigestRun, PullRequest, ReviewRun, StamphogRepoConfig
+from ..models import DigestChannel, DigestRun, PullRequest, ReviewRun, StampRepoConfig
 from . import contracts
 from .enums import ChannelResolutionSource, DigestRunStatus, ReviewRunStatus, ReviewVerdict
 
 
-def _repo_config_to_dto(obj: StamphogRepoConfig) -> contracts.RepoConfigDTO:
+def _repo_config_to_dto(obj: StampRepoConfig) -> contracts.RepoConfigDTO:
     return contracts.RepoConfigDTO(
         id=obj.id,
         team_id=obj.team_id,
@@ -105,7 +105,7 @@ def _review_run_to_dto(obj: ReviewRun) -> contracts.ReviewRunDTO:
 
 
 def get_repo_config(team_id: int, repository: str) -> contracts.RepoConfigDTO | None:
-    obj = StamphogRepoConfig.objects.for_team(team_id).filter(repository=repository).first()
+    obj = StampRepoConfig.objects.for_team(team_id).filter(repository=repository).first()
     return _repo_config_to_dto(obj) if obj is not None else None
 
 
@@ -114,11 +114,11 @@ def has_reviewable_repo_config(team_id: int) -> bool:
 
     The config must have been bound through the authenticated sync flow: a non-blank
     installation_id and a connecting user, because the sandbox LLM credential is minted under
-    that user and reviews fail closed without one. The Code review scene disables its Stamphog
+    that user and reviews fail closed without one. The Code review scene disables its Stamp
     inbox toggle when this is false, since the toggle would have nothing to act on.
     """
     return (
-        StamphogRepoConfig.objects.for_team(team_id)
+        StampRepoConfig.objects.for_team(team_id)
         .filter(enabled=True, connected_by_user_id__isnull=False)
         .exclude(installation_id="")
         .exists()

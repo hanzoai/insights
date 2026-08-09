@@ -221,7 +221,7 @@ class JsonFormatter(RiskFormatter):
 
     `max_level` is null only when there are no migrations to analyze. CI uses
     this output to publish the Migration risk check; downstream tools (notably
-    stamphog) read `file_path` to scope the deny-list bypass to exactly the
+    stamp) read `file_path` to scope the deny-list bypass to exactly the
     files the analyzer classified — the analyzer is the source of truth.
     """
 

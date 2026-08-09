@@ -1,4 +1,4 @@
-# ReviewHog — glossary
+# Review — glossary
 
 Vocabulary settled while working on the product. Pure vocabulary — no spec, no implementation detail beyond what a term needs to be unambiguous.
 

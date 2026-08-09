@@ -8,7 +8,7 @@ import { initKeaTests } from '~/test/init'
 
 import { LLMProviderKey, llmProviderKeysLogic } from '../settings/llmProviderKeysLogic'
 import { llmEvaluationsLogic } from './llmEvaluationsLogic'
-import { HogEvaluation, LLMJudgeEvaluation, SentimentEvaluation } from './types'
+import { ScriptEvaluation, LLMJudgeEvaluation, SentimentEvaluation } from './types'
 
 const mockProviderKeys: LLMProviderKey[] = [
     {
@@ -84,7 +84,7 @@ const evaluationWithKey = (
     updated_at: '2024-01-01T00:00:00Z',
 })
 
-const hogEvaluation = (id: string): HogEvaluation => ({
+const scriptEvaluation = (id: string): ScriptEvaluation => ({
     ...evaluationWithKey(id, null),
     evaluation_type: 'script',
     evaluation_config: { source: 'return true' },
@@ -157,7 +157,7 @@ describe('llmEvaluationsLogic', () => {
                 updated_at: '2024-01-01T00:00:00Z',
             })
 
-            expect(logic.values.canEnableEvaluation(hogEvaluation('script'))).toBe(true)
+            expect(logic.values.canEnableEvaluation(scriptEvaluation('script'))).toBe(true)
             expect(logic.values.canEnableEvaluation(sentimentEvaluation('sentiment'))).toBe(true)
             expect(logic.values.canEnableEvaluation(evaluationWithKey('llm-default', null))).toBe(false)
         })

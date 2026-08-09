@@ -1,5 +1,5 @@
 """
-Contract types for stamphog.
+Contract types for stamp.
 
 Frozen dataclasses that define what this product exposes.
 No Django imports. Used by facade as inputs/outputs.
@@ -21,7 +21,7 @@ from .enums import ChannelResolutionSource, DigestRunStatus, ReviewRunStatus, Re
 
 @dataclass(frozen=True)
 class RepoConfigDTO:
-    """A repository stamphog is configured to review for a team."""
+    """A repository stamp is configured to review for a team."""
 
     id: UUID
     team_id: int
@@ -36,7 +36,7 @@ class RepoConfigDTO:
 
 @dataclass(frozen=True)
 class PullRequestDTO:
-    """A pull request stamphog knows about, including merge state once it merges."""
+    """A pull request stamp knows about, including merge state once it merges."""
 
     id: UUID
     team_id: int
@@ -95,7 +95,7 @@ class DigestRunDTO:
 
 @dataclass(frozen=True)
 class ReviewRunDTO:
-    """A single stamphog review attempt against a pull request."""
+    """A single stamp review attempt against a pull request."""
 
     id: UUID
     team_id: int

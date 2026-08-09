@@ -216,7 +216,7 @@ class Snapshot:
     # ('pixel' / 'structural'); `ssim_score` and `cluster_summary` are
     # details available alongside. `size_mismatch` flags the case where
     # baseline and current had different dimensions (composes with any
-    # change_kind — pixelhog padded the smaller image and ran metrics
+    # change_kind — pixelscript padded the smaller image and ran metrics
     # against the padded buffers).
     ssim_score: float | None = None
     change_kind: str = ""

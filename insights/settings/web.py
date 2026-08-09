@@ -29,7 +29,7 @@ PRODUCTS_APPS = [
     "products.early_access_features.backend.apps.EarlyAccessFeaturesConfig",
     "products.tasks.backend.apps.TasksConfig",
     "products.canvas.backend.apps.CanvasConfig",
-    "products.stamphog.backend.apps.StamphogConfig",
+    "products.stamp.backend.apps.StampConfig",
     "products.links.backend.apps.LinksConfig",
     "products.revenue_analytics.backend.apps.RevenueAnalyticsConfig",
     "products.user_interviews.backend.apps.UserInterviewsConfig",
@@ -60,7 +60,7 @@ PRODUCTS_APPS = [
     "products.replay_vision.backend.apps.ReplayVisionConfig",
     "products.mcp_store.backend.apps.McpStoreConfig",
     "products.event_definitions.backend.apps.EventDefinitionsConfig",
-    "products.review_hog.backend.apps.ReviewHogConfig",
+    "products.review_hog.backend.apps.ReviewConfig",
     "products.logs.backend.apps.LogsConfig",
     "products.tracing.backend.apps.TracingConfig",
     "products.metrics.backend.apps.MetricsConfig",
@@ -647,7 +647,7 @@ SPECTACULAR_SETTINGS = {
         # Canvas source diagnostics and marketing-analytics UTM issues share the same
         # error/warning severity pair; pin one shared name for the choice set.
         "DiagnosticSeverityEnum": ["error", "warning"],
-        # ReviewHog findings expose the same priority set on two fields (effective_priority +
+        # Review findings expose the same priority set on two fields (effective_priority +
         # reviewer_priority); pin one shared name for the choice set.
         "ReviewIssuePriorityEnum": ["must_fix", "should_fix", "consider"],
         # Pin the customer_analytics custom-property target so it doesn't auto-collide with the
@@ -1062,13 +1062,13 @@ INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("INSIGHTS_FUNCT
 
 # Maximum audience size for InsightsFlow batch triggers. Default that applies to all teams unless they
 # opt in to the elevated value below. Only used to inform the frontend UI; no backend enforcement.
-HOGFLOW_BATCH_TRIGGER_LIMIT = int(get_from_env("HOGFLOW_BATCH_TRIGGER_LIMIT", 50000))
-# Elevated maximum audience size, returned for teams listed in HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS.
-HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED = int(get_from_env("HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED", 100000))
+Flow_BATCH_TRIGGER_LIMIT = int(get_from_env("Flow_BATCH_TRIGGER_LIMIT", 50000))
+# Elevated maximum audience size, returned for teams listed in Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS.
+Flow_BATCH_TRIGGER_LIMIT_ELEVATED = int(get_from_env("Flow_BATCH_TRIGGER_LIMIT_ELEVATED", 100000))
 # Comma-separated list of team IDs that get the elevated batch trigger limit instead of the default.
 # Empty by default — everyone gets the 50k tier. Opt-in via env override for teams needing 100k.
-HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS: set[int] = {
-    int(team_id) for team_id in get_list(get_from_env("HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS", ""))
+Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS: set[int] = {
+    int(team_id) for team_id in get_list(get_from_env("Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS", ""))
 }
 
 # Comma-separated list of org ids allowed to receive the Error Tracking weekly digest

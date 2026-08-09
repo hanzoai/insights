@@ -113,7 +113,7 @@ class SandboxedEvalHarness:
                 )
                 self._validate_agent_options()
                 self.provider.preflight()
-            if Infra.PERSONHOG in required:
+            if Infra.Person in required:
                 ensure_personinsights_binaries()
             self._bootstrap(required)
             results = asyncio.run(self._run_suites(suites, required, reporter))
@@ -181,7 +181,7 @@ class SandboxedEvalHarness:
             self._stack.callback(database.teardown)
             self._database = database
 
-        if Infra.PERSONHOG in required:
+        if Infra.Person in required:
             # Bring personinsights up before the live server and demo seeding: those bootstrap
             # reads go through the router, and a dead router would poison personinsights's 30s
             # negative group-types cache for the rest of the run.

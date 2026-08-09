@@ -453,9 +453,9 @@ def model_to_resource(model: Model) -> Optional[APIScopeObject]:
         return "experiment_holdout"
     if name == "endpointversion":
         return "endpoint"
-    # The workflow scope is "insights_flow" but the model is "hogflow"; its batch jobs and schedules have no
+    # The workflow scope is "insights_flow" but the model is "flow"; its batch jobs and schedules have no
     # route of their own and inherit the parent workflow's access (same idea as endpointversion → endpoint).
-    if name in ("hogflow", "hogflowbatchjob", "insightsflowschedule"):
+    if name in ("flow", "flowbatchjob", "insightsflowschedule"):
         return "insights_flow"
     if name == "externaldatasource":
         return "external_data_source"

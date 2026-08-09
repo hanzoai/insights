@@ -1,6 +1,6 @@
 """Which reports are ready to classify: published, merged, and not yet done.
 
-A report is a candidate once ReviewHog published a review to its PR (`published_head_sha` set) and
+A report is a candidate once Review published a review to its PR (`published_head_sha` set) and
 its `outcomes_emitted_at` stamp is unset — the stamp lands only after the outcome events were
 flushed to capture, so a report whose outcomes were persisted but whose emission crashed stays
 discoverable and resumes from the stored artefacts. Whether its PR has actually *merged* is

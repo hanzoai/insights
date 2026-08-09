@@ -1,4 +1,4 @@
-"""Slack events endpoint for SupportHog app."""
+"""Slack events endpoint for Support app."""
 
 import json
 from typing import Any, cast
@@ -13,7 +13,7 @@ from insights.models.integration import SlackIntegrationError
 
 from products.conversations.backend.services.region_routing import is_primary_region, proxy_to_secondary_region
 from products.conversations.backend.support_slack import team_exists_for_slack_workspace, validate_support_request
-from products.conversations.backend.tasks import process_supporthog_event
+from products.conversations.backend.tasks import process_support_event
 
 logger = structlog.get_logger(__name__)
 
@@ -34,7 +34,7 @@ def _route_event_to_relevant_region(request: HttpRequest, data: dict) -> None:
     inner_event_type = event.get("type")
 
     logger.info(
-        "supporthog_event_callback",
+        "support_event_callback",
         inner_event_type=inner_event_type,
         slack_team_id=slack_team_id,
         channel=event.get("channel"),
@@ -46,17 +46,17 @@ def _route_event_to_relevant_region(request: HttpRequest, data: dict) -> None:
     team_exists = team_exists_for_slack_workspace(slack_team_id) if slack_team_id else False
 
     if team_exists and not (settings.DEBUG and is_primary_region(request)):
-        cast(Any, process_supporthog_event).delay(event=event, slack_team_id=slack_team_id, event_id=event_id)
+        cast(Any, process_support_event).delay(event=event, slack_team_id=slack_team_id, event_id=event_id)
     elif is_primary_region(request):
-        proxy_to_secondary_region(request, log_prefix="supporthog")
+        proxy_to_secondary_region(request, log_prefix="support")
     else:
-        logger.warning("supporthog_no_team_any_region", slack_team_id=slack_team_id)
+        logger.warning("support_no_team_any_region", slack_team_id=slack_team_id)
 
 
 @csrf_exempt
-def supporthog_event_handler(request: HttpRequest) -> HttpResponse:
+def support_event_handler(request: HttpRequest) -> HttpResponse:
     """
-    Handle incoming Slack events for SupportHog app.
+    Handle incoming Slack events for Support app.
 
     This endpoint handles:
     - URL verification challenges from Slack
@@ -71,12 +71,12 @@ def supporthog_event_handler(request: HttpRequest) -> HttpResponse:
     try:
         validate_support_request(request)
     except SlackIntegrationError as e:
-        logger.warning("supporthog_event_invalid_request", error=str(e))
+        logger.warning("support_event_invalid_request", error=str(e))
         return HttpResponse("Invalid request", status=403)
 
     retry_num = request.headers.get("X-Slack-Retry-Num")
     if retry_num:
-        logger.info("supporthog_event_retry_skipped", retry_num=retry_num)
+        logger.info("support_event_retry_skipped", retry_num=retry_num)
         return HttpResponse(status=200)
 
     try:
@@ -84,13 +84,13 @@ def supporthog_event_handler(request: HttpRequest) -> HttpResponse:
     except json.JSONDecodeError:
         return HttpResponse("Invalid JSON", status=400)
 
-    logger.info("supporthog_event_received", event_type=data.get("type"))
+    logger.info("support_event_received", event_type=data.get("type"))
 
     event_type = data.get("type")
 
     if event_type == "url_verification":
         challenge = data.get("challenge", "")
-        logger.info("supporthog_url_verification", challenge=challenge[:20] + "...")
+        logger.info("support_url_verification", challenge=challenge[:20] + "...")
         return JsonResponse({"challenge": challenge})
 
     if event_type == "event_callback":

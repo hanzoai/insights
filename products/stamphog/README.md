@@ -1,4 +1,4 @@
-# Stamphog
+# Stamp
 
 Approve-first PR review: an LLM reviewer that runs deterministic gates plus a scoped review over a pull request and, when the policy allows it, posts an actual GitHub **approval** — not just comments. Repos opt in per-repo; everything else stays untouched.
 
@@ -11,16 +11,16 @@ The review engine lives in [`tools/pr-approval-agent/`](../../tools/pr-approval-
 
 Hosted flow: webhook → Celery (`backend/tasks/tasks.py`) → Temporal (`backend/temporal/workflow.py`) → sandboxed engine → verdict posted back (`post_verdict`). The workflow dismisses stale approvals _first_, waits out other in-flight reviewer bots, then reviews.
 
-There is one non-webhook entry: **self-driving inbox PRs**. When a self-driving Inbox implementation run opens its (bot-authored, draft) PR, review_hog's inbox receiver calls the `queue_inbox_pr_review` facade — gated by the assigned reviewers' per-user `stamphog_review_inbox_prs` toggles on ReviewHog's settings (any opted-in reviewer is enough) — and the initial review runs while the PR is still a draft so the verdict is ready at Inbox triage time. Later pushes re-review through the normal webhook path via a positively identified carve-out (task linkage through the tasks facade, toggle re-checked through `facade/inbox_hooks.py`); every other bot author stays refused at every layer. See AGENTS.md § the self-driving carve-out.
+There is one non-webhook entry: **self-driving inbox PRs**. When a self-driving Inbox implementation run opens its (bot-authored, draft) PR, review's inbox receiver calls the `queue_inbox_pr_review` facade — gated by the assigned reviewers' per-user `stamp_review_inbox_prs` toggles on Review's settings (any opted-in reviewer is enough) — and the initial review runs while the PR is still a draft so the verdict is ready at Inbox triage time. Later pushes re-review through the normal webhook path via a positively identified carve-out (task linkage through the tasks facade, toggle re-checked through `facade/inbox_hooks.py`); every other bot author stays refused at every layer. See AGENTS.md § the self-driving carve-out.
 
 ## The digest
 
-Independently of reviews, a repo can enable a daily Slack digest of its merged PRs (`backend/tasks/digest.py`): merges are stamped with an audience (author's GitHub team, or a channel the repo declares under `digest:` in `.stamphog/policy.yml`), summarized with a small model, and posted per channel. Review-enabled repos digest only stamphog-approved merges; digest-only repos (review off) digest every merge.
+Independently of reviews, a repo can enable a daily Slack digest of its merged PRs (`backend/tasks/digest.py`): merges are stamped with an audience (author's GitHub team, or a channel the repo declares under `digest:` in `.stamp/policy.yml`), summarized with a small model, and posted per channel. Review-enabled repos digest only stamp-approved merges; digest-only repos (review off) digest every merge.
 
 ## Configuration
 
-Per-repo settings live on `StamphogRepoConfig` (synced via the GitHub App install flow, managed in the Stamphog scene): review on/off, review mode (auto vs trigger label), digest on/off. Review policy (gates, deny-lists, tiers, ownership) is read from `.stamphog/policy.yml` on the repo's **default branch** — never from the PR head — layered over hosted defaults in [`backend/logic/policy_defaults/`](backend/logic/policy_defaults/).
+Per-repo settings live on `StampRepoConfig` (synced via the GitHub App install flow, managed in the Stamp scene): review on/off, review mode (auto vs trigger label), digest on/off. Review policy (gates, deny-lists, tiers, ownership) is read from `.stamp/policy.yml` on the repo's **default branch** — never from the PR head — layered over hosted defaults in [`backend/logic/policy_defaults/`](backend/logic/policy_defaults/).
 
 ## Security model, in one paragraph
 
-The sandbox runs an LLM over untrusted PR content, so it holds no long-lived secrets: it gets a per-run OAuth token (scoped to `llm_gateway:read` + the server-mint marker) that only works against the gateway's stamphog route, egress is fenced to an explicit domain allowlist, posted bodies are scrubbed and markdown-image-neutralized, and approvals are governed by a strict supersession protocol so no approval survives events it shouldn't (pushes, re-reviews, repo disable). Details and invariants: [AGENTS.md](AGENTS.md).
+The sandbox runs an LLM over untrusted PR content, so it holds no long-lived secrets: it gets a per-run OAuth token (scoped to `llm_gateway:read` + the server-mint marker) that only works against the gateway's stamp route, egress is fenced to an explicit domain allowlist, posted bodies are scrubbed and markdown-image-neutralized, and approvals are governed by a strict supersession protocol so no approval survives events it shouldn't (pushes, re-reviews, repo disable). Details and invariants: [AGENTS.md](AGENTS.md).

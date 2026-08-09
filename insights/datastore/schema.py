@@ -293,7 +293,7 @@ from insights.models.sessions.sql import (
     SESSIONS_VIEW_SQL,
     WRITABLE_SESSIONS_TABLE_SQL,
 )
-from insights.models.tophog.sql import (
+from insights.models.topfn.sql import (
     DISTRIBUTED_TOPFN_TABLE_SQL,
     KAFKA_TOPFN_TABLE_SQL,
     TOPFN_DATA_TABLE_SQL,

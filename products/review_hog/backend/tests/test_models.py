@@ -88,7 +88,7 @@ class TestReviewArtefactContent:
             ReviewReportArtefact.add_log(
                 team_id=1,
                 report_id="r",
-                content=TaskRunArtefact(task_id="task-A", product="review_hog", type="review"),
+                content=TaskRunArtefact(task_id="task-A", product="review", type="review"),
                 attribution=ArtefactAttribution.from_task("task-B"),
             )
 

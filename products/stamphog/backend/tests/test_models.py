@@ -7,19 +7,19 @@ from insights.models.scoping import reset_current_team_id, set_current_team_id
 from insights.models.scoping.manager import TeamScopeError
 from insights.models.team import Team
 
-from products.stamphog.backend.models import PullRequest, ReviewRun, StamphogRepoConfig
-from products.stamphog.backend.tests.conftest import PRODUCT_DATABASES, StamphogTeamScopedTestMixin
+from products.stamp.backend.models import PullRequest, ReviewRun, StampRepoConfig
+from products.stamp.backend.tests.conftest import PRODUCT_DATABASES, StampTeamScopedTestMixin
 
 
 def _make_repo_config(
     team: Team, repository: str = "Insights/insights", installation_id: str = "123"
-) -> StamphogRepoConfig:
-    return StamphogRepoConfig.objects.unscoped().create(
+) -> StampRepoConfig:
+    return StampRepoConfig.objects.unscoped().create(
         team_id=team.id, repository=repository, installation_id=installation_id
     )
 
 
-def _make_pull_request(team: Team, repo_config: StamphogRepoConfig, pr_number: int = 1) -> PullRequest:
+def _make_pull_request(team: Team, repo_config: StampRepoConfig, pr_number: int = 1) -> PullRequest:
     return PullRequest.objects.unscoped().create(
         team_id=team.id,
         repo_config=repo_config,
@@ -28,7 +28,7 @@ def _make_pull_request(team: Team, repo_config: StamphogRepoConfig, pr_number: i
     )
 
 
-class TestStamphogRepoConfigModel(StamphogTeamScopedTestMixin, APIBaseTest):
+class TestStampRepoConfigModel(StampTeamScopedTestMixin, APIBaseTest):
     databases = PRODUCT_DATABASES
 
     def test_duplicate_repository_for_same_team_rejected(self) -> None:
@@ -51,11 +51,11 @@ class TestStamphogRepoConfigModel(StamphogTeamScopedTestMixin, APIBaseTest):
         mine = _make_repo_config(self.team, "Insights/insights")
         _make_repo_config(other_team, "Insights/other-repo")
 
-        results = list(StamphogRepoConfig.objects.for_team(self.team.id))
+        results = list(StampRepoConfig.objects.for_team(self.team.id))
         assert results == [mine]
 
 
-class TestReviewRunModel(StamphogTeamScopedTestMixin, APIBaseTest):
+class TestReviewRunModel(StampTeamScopedTestMixin, APIBaseTest):
     databases = PRODUCT_DATABASES
 
     def setUp(self) -> None:

@@ -1,4 +1,4 @@
-"""Dump the latest team-1 ReviewHog run to a per-config `.md` for reviewer-quality experiments.
+"""Dump the latest team-1 Review run to a per-config `.md` for reviewer-quality experiments.
 
 Run via manage.py shell so Django is configured; set OUT_DIR to the experiment's runs/ directory:
 

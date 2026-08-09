@@ -462,7 +462,7 @@ def _review_payload(
 
 
 class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
-    """Recent ReviewHog reviews on this project.
+    """Recent Review reviews on this project.
 
     Read-only meta for the Code review tab's "recent reviews" block: what was reviewed, how many
     valid findings at each effective priority, the reviewed PR's facts, and the pipeline shape of
@@ -475,10 +475,10 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
     be opened.
     """
 
-    # `review_hog` rather than INTERNAL so the reads and trigger the Code review UI drives are also
+    # `review` rather than INTERNAL so the reads and trigger the Code review UI drives are also
     # reachable with a personal API key or OAuth token, which is how MCP tools authenticate. Session
-    # UI access is unchanged; this only adds token access, gated by review_hog:read / review_hog:write.
-    scope_object = "review_hog"
+    # UI access is unchanged; this only adds token access, gated by review:read / review:write.
+    scope_object = "review"
     # Unscoped only to satisfy the router/introspection; every real query goes through `for_team`.
     queryset = ReviewReport.objects.unscoped()
     serializer_class = ReviewRecentReviewSerializer
@@ -511,7 +511,7 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
             ),
         },
         summary="List recent reviews",
-        description="Recent ReviewHog reviews on this project: actively running reviews first (with the "
+        description="Recent Review reviews on this project: actively running reviews first (with the "
         "in-flight turn's stage), then the most recent completed ones — at most `limit` rows (default 5), "
         "plus `has_more` for whether a larger `limit` would reveal more. By default only the requesting "
         "user's reviews; `scope=everyone` lists every review on the project.",
@@ -597,7 +597,7 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
         "recent completed reviews in scope — the requesting user's by default, every review on this project "
         "with `scope=everyone` — and how many of those the validator kept vs dismissed.",
     )
-    @action(methods=["GET"], detail=False, required_scopes=["review_hog:read"])
+    @action(methods=["GET"], detail=False, required_scopes=["review:read"])
     def perspective_stats(self, request: Request, **kwargs) -> Response:
         params = PerspectiveStatsParamsSerializer(data=request.query_params)
         params.is_valid(raise_exception=True)
@@ -635,12 +635,12 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
             ),
             403: OpenApiResponse(
                 response=ReviewTriggerErrorSerializer,
-                description="The ReviewHog UI trigger is not enabled for this project.",
+                description="The Review UI trigger is not enabled for this project.",
             ),
             429: OpenApiResponse(description="GitHub rate-limited the App's token; retry after the Retry-After delay."),
         },
         summary="Start a review of a pull request",
-        description="Start a ReviewHog review of any pull request the project's GitHub App installation can "
+        description="Start a Review review of any pull request the project's GitHub App installation can "
         "access, and publish it back to the PR. The requesting user is the review's acting user: their "
         "enabled perspectives, blind-spot check, validator, and urgency threshold drive the run, and it "
         "appears under their recent reviews. Nonexistent, closed, and fork PRs are rejected synchronously; "
@@ -649,14 +649,14 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
         "Otherwise non-blocking: returns the Temporal workflow id immediately while the review runs in "
         "the worker.",
     )
-    @action(methods=["POST"], detail=False, required_scopes=["review_hog:write"])
+    @action(methods=["POST"], detail=False, required_scopes=["review:write"])
     def trigger(self, request: Request, **kwargs) -> Response:
         team_id = resolve_effective_team_id(self.team_id)
-        # Dogfood gate: the UI trigger only runs on the designated ReviewHog team for now — reviews are
+        # Dogfood gate: the UI trigger only runs on the designated Review team for now — reviews are
         # expensive, so widening beyond it is a deliberate later decision, not a default.
         if not settings.REVIEWFN_TEAM_ID or team_id != settings.REVIEWFN_TEAM_ID:
             return Response(
-                {"error": "ReviewHog reviews can't be started from this project yet"},
+                {"error": "Review reviews can't be started from this project yet"},
                 status=status.HTTP_403_FORBIDDEN,
             )
         serializer = ReviewTriggerRequestSerializer(data=request.data)
@@ -680,7 +680,7 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
         if github is None:
             return Response(
                 {
-                    "error": f"ReviewHog's GitHub App can't access {repository}. It reviews repositories covered by this project's GitHub integration."
+                    "error": f"Review's GitHub App can't access {repository}. It reviews repositories covered by this project's GitHub integration."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -702,12 +702,12 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
             raise
         if pr_meta.is_fork:
             return Response(
-                {"error": "ReviewHog doesn't review fork pull requests (a fork's head can't be trusted)"},
+                {"error": "Review doesn't review fork pull requests (a fork's head can't be trusted)"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if pr_meta.state != "open":
             return Response(
-                {"error": f"Pull request #{pr_number} is {pr_meta.state}; ReviewHog reviews open pull requests"},
+                {"error": f"Pull request #{pr_number} is {pr_meta.state}; Review reviews open pull requests"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         # Repository casing can differ per trigger (the report stores whatever its trigger carried).
@@ -734,7 +734,7 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
             acting_user_id=requester_id,
             trigger_source=TRIGGER_UI,
         )
-        logger.info(f"ReviewHog UI trigger started workflow {workflow_id} for {pr_url} by user {requester_id}")
+        logger.info(f"Review UI trigger started workflow {workflow_id} for {pr_url} by user {requester_id}")
         return Response(
             ReviewTriggerResponseSerializer({"workflow_id": workflow_id, "status": "started"}).data,
             status=status.HTTP_202_ACCEPTED,
@@ -749,7 +749,7 @@ class ReviewRecentReviewsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet
             404: OpenApiResponse(description="No such review on this project."),
         },
         summary="Retrieve one review's detail",
-        description="One completed ReviewHog review on this project, with the latest turn's validated "
+        description="One completed Review review on this project, with the latest turn's validated "
         "findings, the findings the validator dismissed (and why), and the review body published to "
         "GitHub. Project-wide, so reviews listed under `scope=everyone` can be opened too.",
     )

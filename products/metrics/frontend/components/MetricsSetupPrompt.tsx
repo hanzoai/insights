@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { Button, Tabs, Link, Spinner } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { useInterval } from 'lib/hooks/useInterval'
@@ -15,7 +15,7 @@ import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-genera
 
 import { metricsIngestionLogic } from '../metricsIngestionLogic'
 
-const MascotGreek = pngHoggie()
+const MascotGreek = pngMascot()
 
 const POLLING_INTERVAL_MS = 5000
 
@@ -101,7 +101,7 @@ const NoMetricsPrompt = ({ className }: { className?: string }): JSX.Element | n
             isEmpty={true}
             productKey={ProductKey.METRICS}
             className={className}
-            customHog={MascotGreek}
+            customScript={MascotGreek}
             actionElementOverride={
                 <div className="flex flex-col items-start gap-4">
                     <p className="text-sm text-secondary m-0">

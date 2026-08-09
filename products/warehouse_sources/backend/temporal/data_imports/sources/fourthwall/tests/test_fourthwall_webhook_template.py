@@ -17,7 +17,7 @@ SCHEMA_MAPPING = {"order": "schema_orders", "donation": "schema_donations", "mem
 class TestFourthwallWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

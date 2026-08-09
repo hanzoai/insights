@@ -12,9 +12,9 @@ from insights.models import Project, Team
 from insights.models.instance_setting import override_instance_config
 from insights.models.scoping import team_scope
 
-from products.stamphog.backend.facade.enums import ReviewMode, ReviewRunStatus
-from products.stamphog.backend.models import PullRequest, ReviewRun, StamphogRepoConfig
-from products.stamphog.backend.tasks.tasks import (
+from products.stamp.backend.facade.enums import ReviewMode, ReviewRunStatus
+from products.stamp.backend.models import PullRequest, ReviewRun, StampRepoConfig
+from products.stamp.backend.tasks.tasks import (
     _INBOX_OPT_OUT_DISMISS_MESSAGE,
     _parse_pr_url,
     _upsert_pull_request,
@@ -22,7 +22,7 @@ from products.stamphog.backend.tasks.tasks import (
     process_installation_event,
     process_pull_request_event,
 )
-from products.stamphog.backend.tests.conftest import PRODUCT_DATABASES
+from products.stamp.backend.tests.conftest import PRODUCT_DATABASES
 from products.tasks.backend.facade.contracts import SignalImplementationRunDTO
 
 REPO = "acme/widgets"
@@ -31,12 +31,12 @@ INSTALLATION_ID = "1001"
 # identity `_is_self_driving_pr` requires. The self-driving fixtures below author as this bot.
 APP_SLUG = "insights-code"
 
-# The registry slot stamphog's webhook carve-out reads its toggle resolver from; patched directly
-# so the real review_hog resolver (registered at app-ready) never runs inside stamphog's tests.
-_RESOLVER_SLOT = "products.stamphog.backend.facade.inbox_hooks._inbox_acting_reviewer_resolver"
+# The registry slot stamp's webhook carve-out reads its toggle resolver from; patched directly
+# so the real review resolver (registered at app-ready) never runs inside stamp's tests.
+_RESOLVER_SLOT = "products.stamp.backend.facade.inbox_hooks._inbox_acting_reviewer_resolver"
 # Deferred import inside the carve-out, so the defining module is the patch target.
 # tasks.py imports the name at module top, so the use site is the patch target.
-_FIND_RUN = "products.stamphog.backend.tasks.tasks.find_signal_implementation_run"
+_FIND_RUN = "products.stamp.backend.tasks.tasks.find_signal_implementation_run"
 
 
 def _signal_run_dto(team_id: int) -> SignalImplementationRunDTO:
@@ -95,15 +95,15 @@ def _run_task(
     payload: dict[str, Any], delivery_id: str, team_id: int, author_permission: str = "write", app_slug: str = APP_SLUG
 ):
     # transaction.on_commit never fires on its own outside a real commit, so run it
-    # inline; execute_stamphog_review_workflow is a Temporal network call and gets mocked, as is
+    # inline; execute_stamp_review_workflow is a Temporal network call and gets mocked, as is
     # the author write-permission lookup (a GitHub API call). The App slug is set so the carve-out's
     # server-attested identity check can resolve <slug>[bot]; pass "" to exercise the fail-closed path.
     with (
         team_scope(team_id),
         override_instance_config("GITHUB_APP_SLUG", app_slug),
-        patch("products.stamphog.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()),
-        patch("products.stamphog.backend.tasks.tasks.execute_stamphog_review_workflow") as mock_execute,
-        patch("products.stamphog.backend.tasks.tasks.StamphogGitHubClient") as mock_client,
+        patch("products.stamp.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()),
+        patch("products.stamp.backend.tasks.tasks.execute_stamp_review_workflow") as mock_execute,
+        patch("products.stamp.backend.tasks.tasks.StampGitHubClient") as mock_client,
     ):
         mock_client.return_value.get_collaborator_permission.return_value = author_permission
         process_pull_request_event(payload, delivery_id)
@@ -113,7 +113,7 @@ def _run_task(
 @pytest.fixture
 def repo_config(team):
     with team_scope(team.id):
-        return StamphogRepoConfig.objects.create(team_id=team.id, repository=REPO, installation_id=INSTALLATION_ID)
+        return StampRepoConfig.objects.create(team_id=team.id, repository=REPO, installation_id=INSTALLATION_ID)
 
 
 @pytest.mark.django_db(databases=PRODUCT_DATABASES)
@@ -245,7 +245,7 @@ def test_author_permission_skip_retracts_stale_approvals_on_head_change(team, re
     _run_task(_pr_payload(), "delivery-perm-approved", team.id)
 
     cache.clear()  # the first run cached the author's "write" permission; the revocation must be seen
-    with patch("products.stamphog.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
+    with patch("products.stamp.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
         _run_task(_pr_payload(action="synchronize"), "delivery-perm-revoked", team.id, author_permission="read")
 
     dismiss.assert_called_once()
@@ -255,7 +255,7 @@ def test_author_permission_skip_retracts_stale_approvals_on_head_change(team, re
 
 @pytest.mark.django_db(databases=PRODUCT_DATABASES)
 def test_carve_out_failure_still_dismisses_stale_approval_on_head_change(team, repo_config):
-    # The carve-out resolution is cross-product and fallible (tasks facade + review_hog resolver). If
+    # The carve-out resolution is cross-product and fallible (tasks facade + review resolver). If
     # it throws on a head-changing bot-PR delivery, the stale-approval dismissal must still run — the
     # safety retraction is never gated on the carve-out succeeding, or a stale approval keeps
     # satisfying required reviews over unreviewed commits until retries exhaust.
@@ -267,7 +267,7 @@ def test_carve_out_failure_still_dismisses_stale_approval_on_head_change(team, r
     with (
         patch(_FIND_RUN, side_effect=RuntimeError("tasks DB unavailable")),
         patch(_RESOLVER_SLOT, lambda team_id, report_id, created_by: 777),
-        patch("products.stamphog.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss,
+        patch("products.stamp.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss,
     ):
         # The delivery still retries afterwards to re-attempt the re-review (suppressed here); the
         # point is that the dismissal fired before that retry.
@@ -283,9 +283,9 @@ def test_disabled_repo_skip_retracts_stale_approvals_on_head_change(team, repo_c
     # not keep satisfying required reviews over commits pushed after it.
     _run_task(_pr_payload(), "delivery-disabled-approved", team.id)
     with team_scope(team.id):
-        StamphogRepoConfig.objects.filter(id=repo_config.id).update(enabled=False)
+        StampRepoConfig.objects.filter(id=repo_config.id).update(enabled=False)
 
-    with patch("products.stamphog.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
+    with patch("products.stamp.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
         mock_execute = _run_task(_pr_payload(action="synchronize"), "delivery-disabled-push", team.id)
 
     dismiss.assert_called_once()
@@ -299,7 +299,7 @@ def test_untrusted_author_skip_retracts_stale_approvals_on_head_change(team, rep
     # drop the event — otherwise the old approval keeps satisfying required reviews.
     _run_task(_pr_payload(), "delivery-assoc-approved", team.id)
 
-    with patch("products.stamphog.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
+    with patch("products.stamp.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
         _run_task(_pr_payload(action="synchronize", author_association="NONE"), "delivery-assoc-revoked", team.id)
 
     dismiss.assert_called_once()
@@ -310,11 +310,11 @@ def test_untrusted_author_skip_retracts_stale_approvals_on_head_change(team, rep
 @pytest.mark.parametrize(
     "review_mode,payload_kwargs,expect_run",
     [
-        (ReviewMode.ALL, {"action": "labeled", "labels": ["stamphog"], "added_label": "stamphog"}, False),
-        (ReviewMode.LABEL, {"action": "labeled", "labels": ["stamphog"], "added_label": "stamphog"}, True),
-        (ReviewMode.LABEL, {"action": "labeled", "labels": ["stamphog", "bug"], "added_label": "bug"}, False),
+        (ReviewMode.ALL, {"action": "labeled", "labels": ["stamp"], "added_label": "stamp"}, False),
+        (ReviewMode.LABEL, {"action": "labeled", "labels": ["stamp"], "added_label": "stamp"}, True),
+        (ReviewMode.LABEL, {"action": "labeled", "labels": ["stamp", "bug"], "added_label": "bug"}, False),
         (ReviewMode.LABEL, {"action": "synchronize"}, False),
-        (ReviewMode.LABEL, {"action": "synchronize", "labels": ["stamphog"]}, True),
+        (ReviewMode.LABEL, {"action": "synchronize", "labels": ["stamp"]}, True),
     ],
     ids=[
         "all_mode_ignores_labeled",
@@ -354,7 +354,7 @@ def test_labeled_rereview_cooldown_skips_rapid_retrigger(team, repo_config):
         repo_config.review_mode = ReviewMode.LABEL
         repo_config.save()
 
-    payload = _pr_payload(action="labeled", labels=["stamphog"], added_label="stamphog")
+    payload = _pr_payload(action="labeled", labels=["stamp"], added_label="stamp")
     _run_task(payload, "delivery-label-1", team.id)
     mock_execute = _run_task(payload, "delivery-label-2", team.id)
 
@@ -396,7 +396,7 @@ def test_merge_capture_gates_on_either_flag(team, repo_config, enabled, digest_e
     payload["pull_request"]["merged_at"] = "2026-07-14T00:00:00Z"
     # Digest-eligible merges resolve their audience, which fetches the repo's declared digest
     # config from GitHub; stub the fetch as "file absent" (a transient error would now retry).
-    with patch("products.stamphog.backend.logic.digest_config.StamphogGitHubClient") as digest_client_cls:
+    with patch("products.stamp.backend.logic.digest_config.StampGitHubClient") as digest_client_cls:
         digest_client_cls.return_value.get_default_branch_file.return_value = None
         _run_task(payload, f"delivery-merged-{enabled}-{digest_enabled}", team.id)
 
@@ -537,7 +537,7 @@ def test_stale_payload_recheck_under_lock_does_not_supersede_newer_run(team, rep
     locked_pr = PullRequest.objects.for_team(team.id).get(id=pull_request.id)
     locked_pr.payload_updated_at = parse_datetime("2026-07-15T13:00:00Z")  # concurrent newer delivery already landed
 
-    with patch("products.stamphog.backend.tasks.tasks._upsert_pull_request", return_value=locked_pr):
+    with patch("products.stamp.backend.tasks.tasks._upsert_pull_request", return_value=locked_pr):
         mock_execute = _run_task(
             _pr_payload(action="synchronize", head_sha="sha-2", updated_at="2026-07-15T12:00:00Z"),
             f"delivery-race-{uuid.uuid4()}",
@@ -571,7 +571,7 @@ def test_base_retarget_invalidates_same_head_approval(team, repo_config, has_bas
     if has_base_change:
         payload["changes"] = {"base": {"ref": {"from": "master"}, "sha": {"from": "base-old"}}}
 
-    with patch("products.stamphog.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
+    with patch("products.stamp.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss:
         mock_execute = _run_task(payload, f"delivery-retarget-{has_base_change}", team.id)
 
     with team_scope(team.id):
@@ -661,19 +661,19 @@ def test_installation_repos_added_creates_disabled_rows_and_skips_existing(team,
     with team_scope(team.id):
         # Webhooks carry no Insights identity, so the new row must inherit the connecting user
         # (the review-credential principal) from its synced sibling.
-        StamphogRepoConfig.objects.filter(id=repo_config.id).update(connected_by_user_id=4242)
+        StampRepoConfig.objects.filter(id=repo_config.id).update(connected_by_user_id=4242)
     payload = _installation_payload(action="added", added=["acme/new-repo", REPO])
     process_installation_event(payload, "delivery-inst-added")
 
     with team_scope(team.id):
-        new_row = StamphogRepoConfig.objects.get(repository="acme/new-repo")
+        new_row = StampRepoConfig.objects.get(repository="acme/new-repo")
         assert new_row.enabled is False
         assert new_row.digest_enabled is False
         assert new_row.installation_id == INSTALLATION_ID
         assert new_row.connected_by_user_id == 4242
         repo_config.refresh_from_db()
         assert repo_config.enabled is True  # existing row untouched
-        assert StamphogRepoConfig.objects.count() == 2
+        assert StampRepoConfig.objects.count() == 2
 
 
 @pytest.mark.parametrize(
@@ -724,7 +724,7 @@ def test_installation_event_for_unbound_installation_is_a_noop(team, repo_config
     payload = _installation_payload(action="added", installation_id="9999", added=["acme/orphan-repo"])
     process_installation_event(payload, "delivery-inst-unbound")
 
-    assert StamphogRepoConfig.objects.unscoped().filter(repository="acme/orphan-repo").exists() is False
+    assert StampRepoConfig.objects.unscoped().filter(repository="acme/orphan-repo").exists() is False
 
 
 def _make_second_team(organization) -> Team:
@@ -738,7 +738,7 @@ def test_installation_uninstall_tombstones_every_owning_team(team, repo_config):
     # resolving to a single (oldest) team would leave the other team's rows live after the app is gone.
     second_team = _make_second_team(team.organization)
     with team_scope(second_team.id):
-        second_config = StamphogRepoConfig.objects.create(
+        second_config = StampRepoConfig.objects.create(
             team_id=second_team.id, repository="acme/other", installation_id=INSTALLATION_ID, digest_enabled=True
         )
     with team_scope(team.id):
@@ -762,14 +762,14 @@ def test_installation_repos_added_skips_when_installation_spans_multiple_teams(t
     # authenticated sync flow — no row is created for either team.
     second_team = _make_second_team(team.organization)
     with team_scope(second_team.id):
-        StamphogRepoConfig.objects.create(
+        StampRepoConfig.objects.create(
             team_id=second_team.id, repository="acme/other", installation_id=INSTALLATION_ID
         )
 
     payload = _installation_payload(action="added", added=["acme/brand-new"])
     process_installation_event(payload, "delivery-multi-add")
 
-    assert StamphogRepoConfig.objects.unscoped().filter(repository="acme/brand-new").exists() is False
+    assert StampRepoConfig.objects.unscoped().filter(repository="acme/brand-new").exists() is False
 
 
 def _selfdriving_payload(**overrides: Any) -> dict[str, Any]:
@@ -787,10 +787,10 @@ def _selfdriving_payload(**overrides: Any) -> dict[str, Any]:
     return _pr_payload(**kwargs)
 
 
-def _sync_repo_config(team_id: int, repo_config: StamphogRepoConfig) -> None:
+def _sync_repo_config(team_id: int, repo_config: StampRepoConfig) -> None:
     # The carve-out requires a synced config (connecting user present); the fixture row has none.
     with team_scope(team_id):
-        StamphogRepoConfig.objects.filter(id=repo_config.id).update(connected_by_user_id=4242)
+        StampRepoConfig.objects.filter(id=repo_config.id).update(connected_by_user_id=4242)
 
 
 @pytest.mark.django_db(databases=PRODUCT_DATABASES)
@@ -801,7 +801,7 @@ def test_inbox_carve_out_rereviews_a_selfdriving_pr_past_every_gate(team, repo_c
     # and the acting reviewer's toggle is on. Any one gate accidentally re-applied breaks this.
     _sync_repo_config(team.id, repo_config)
     with team_scope(team.id):
-        StamphogRepoConfig.objects.filter(id=repo_config.id).update(review_mode=ReviewMode.LABEL)
+        StampRepoConfig.objects.filter(id=repo_config.id).update(review_mode=ReviewMode.LABEL)
 
     dto = _signal_run_dto(team.id)
     with (
@@ -835,7 +835,7 @@ def test_inbox_carve_out_toggle_off_still_dismisses_stale_approvals(team, repo_c
     with (
         patch(_FIND_RUN, return_value=_signal_run_dto(team.id)),
         patch(_RESOLVER_SLOT, lambda team_id, report_id, created_by: None),
-        patch("products.stamphog.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss,
+        patch("products.stamp.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss,
     ):
         mock_execute = _run_task(_selfdriving_payload(), "delivery-inbox-off", team.id)
 
@@ -851,7 +851,7 @@ def test_inbox_carve_out_toggle_off_still_dismisses_stale_approvals(team, repo_c
     with (
         patch(_FIND_RUN, return_value=_signal_run_dto(team.id)),
         patch(_RESOLVER_SLOT, lambda team_id, report_id, created_by: None),
-        patch("products.stamphog.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss,
+        patch("products.stamp.backend.tasks.tasks.dismiss_stale_approvals_for_head", return_value=1) as dismiss,
     ):
         mock_execute = _run_task(_selfdriving_payload(), "delivery-inbox-off-2", team.id)
 
@@ -886,7 +886,7 @@ def test_inbox_carve_out_toggle_off_still_dismisses_stale_approvals(team, repo_c
 def test_inbox_carve_out_scope(team, repo_config, carve_kwargs, find_result_team_delta, resolver, expect_run):
     # The carve-out must stay exactly as narrow as decided: later head-changing deliveries only
     # (opened belongs to the receiver leg; ready_for_review keeps the draft-time verdict), never for
-    # fork heads, never across teams, and fail-closed when review_hog isn't there to answer the
+    # fork heads, never across teams, and fail-closed when review isn't there to answer the
     # toggle question. Everything else keeps today's bot-author skip.
     _sync_repo_config(team.id, repo_config)
     dto = _signal_run_dto(team.id + find_result_team_delta)
@@ -980,9 +980,9 @@ def _run_inbox_task(
         override_instance_config("GITHUB_APP_SLUG", app_slug),
         patch(_RESOLVER_SLOT, resolver),
         patch(_FIND_RUN, return_value=find_result),
-        patch("products.stamphog.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()),
-        patch("products.stamphog.backend.tasks.tasks.execute_stamphog_review_workflow") as mock_execute,
-        patch("products.stamphog.backend.tasks.tasks.StamphogGitHubClient") as mock_client,
+        patch("products.stamp.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()),
+        patch("products.stamp.backend.tasks.tasks.execute_stamp_review_workflow") as mock_execute,
+        patch("products.stamp.backend.tasks.tasks.StampGitHubClient") as mock_client,
     ):
         mock_client.return_value.get_pr.return_value = pr
         process_inbox_pr_review(
@@ -1114,10 +1114,10 @@ def test_inbox_receiver_leg_refuses_a_pr_outside_the_linked_task_repo(team, repo
 def test_inbox_receiver_leg_noops_without_a_reviewable_config(team, repo_config, config_mutation):
     # Self-scoping (decision): toggle on without a synced+enabled config covering the PR's repository
     # is a silent no-op — no GitHub fetch, no run — so the toggle is inert for teams that never
-    # installed the Stamphog App, and a disabled/unsynced repo can't be reviewed through the side door.
+    # installed the Stamp App, and a disabled/unsynced repo can't be reviewed through the side door.
     _sync_repo_config(team.id, repo_config)
     with team_scope(team.id):
-        config_mutation(StamphogRepoConfig.objects.filter(id=repo_config.id))
+        config_mutation(StampRepoConfig.objects.filter(id=repo_config.id))
 
     mock_execute, mock_client = _run_inbox_task(team.id, _inbox_pr())
 

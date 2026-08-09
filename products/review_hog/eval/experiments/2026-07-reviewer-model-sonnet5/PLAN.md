@@ -23,8 +23,8 @@ support-stage cost cleanly in arm B.
 
 **Review URL (exact, every run): `https://github.com/Insights/insights/pull/62096`**
 head `ba725a897db35053525e5bdfac2c64a8b007fcb4` (re-verified 2026-07-03: unchanged, OPEN, 674 add / 1 del / 10 files).
-Yardstick = the old ReviewHog's 10 findings — archived copy + coverage-matrix vocabulary in
-`../2026-07-reviewer-topology/` (`fixtures/old_reviewhog_report.md`, `FINAL_REPORT.md`).
+Yardstick = the old Review's 10 findings — archived copy + coverage-matrix vocabulary in
+`../2026-07-reviewer-topology/` (`fixtures/old_review_report.md`, `FINAL_REPORT.md`).
 
 ## Instruments (what changed to run this)
 
@@ -72,7 +72,7 @@ nudge, new chunking constants), so archived C7 (18.9/21.5M in, 6 valid ×2, pinn
    If any: re-run `run_review` (DB skip-resume reuses every review result and re-attempts ONLY the missing
    verdicts, minutes not a full run), then re-dump over the same label. A1 skipped this (state already
    wiped when discovered; user accepted the floor) — every later run must not.
-6. `flox activate -- bash -c "DJANGO_SETTINGS_MODULE=insights.settings python manage.py reset_review_hog --yes"`
+6. `flox activate -- bash -c "DJANGO_SETTINGS_MODULE=insights.settings python manage.py reset_review --yes"`
    (dump BEFORE reset).
 
 ## Pre-flight (every run — inherited from the topology round)

@@ -59,7 +59,7 @@ from .support_slack import (
     SUPPORT_SLACK_ALLOWED_HOST_SUFFIXES,
     SUPPORT_SLACK_FILE_READ_SCOPE,
     get_support_slack_bot_token,
-    supporthog_missing_file_scopes,
+    support_missing_file_scopes,
 )
 
 logger = structlog.get_logger(__name__)
@@ -115,8 +115,8 @@ def get_safe_ticket_emoji(settings_dict: dict) -> str:
 
 # Action IDs for the "open a ticket?" nudge prompt (slack_nudge_enabled, on by default).
 # The buttons are posted by post_ticket_confirmation_prompt and routed by the interactivity endpoint.
-TICKET_CONFIRM_ACTION_OPEN = "supporthog_open_ticket_confirm"
-TICKET_CONFIRM_ACTION_DISMISS = "supporthog_open_ticket_dismiss"
+TICKET_CONFIRM_ACTION_OPEN = "support_open_ticket_confirm"
+TICKET_CONFIRM_ACTION_DISMISS = "support_open_ticket_dismiss"
 
 
 def _get_team_id(team: Team) -> int:
@@ -140,7 +140,7 @@ def get_slack_client(team: Team) -> WebClient:
     """
     Get a Slack WebClient for the team.
 
-    Uses the team-scoped SupportHog bot token when configured.
+    Uses the team-scoped Support bot token when configured.
     """
     bot_token = get_support_slack_bot_token(team)
     if bot_token:
@@ -437,7 +437,7 @@ def extract_slack_files(files: list[dict] | None, team: Team, client: WebClient 
     # Slack answers an unauthorized download with a 200 sign-in page, which is indistinguishable
     # from a genuine text/html attachment. So don't ask: we've requested files:read for as long as
     # we've recorded granted scopes, meaning an install with none recorded definitively lacks it.
-    missing_file_scopes = supporthog_missing_file_scopes(team)
+    missing_file_scopes = support_missing_file_scopes(team)
     can_read_files = SUPPORT_SLACK_FILE_READ_SCOPE not in missing_file_scopes
     logger.info("🖼️ slack_file_extract_started", team_id=team_id, total_files=len(files), has_bot_token=bool(bot_token))
     attachments: list[dict] = []
@@ -1086,7 +1086,7 @@ def post_ticket_confirmation_prompt(
     prompt_text = f"👋 <@{slack_user_id}> - did you want to open a support ticket?"
     emoji = get_safe_ticket_emoji(team.conversations_settings or {})
     bot_id = get_bot_user_id_cached(team, client)
-    mention = f"<@{bot_id}>" if bot_id else "the SupportHog bot"
+    mention = f"<@{bot_id}>" if bot_id else "the Support bot"
     hint_text = f"You can also react to your original message with :{emoji}: or tag {mention} to open a ticket."
     try:
         client.chat_postMessage(
@@ -1312,7 +1312,7 @@ def handle_support_mention(event: dict, team: Team, slack_team_id: str) -> None:
                 )
                 return
 
-    # A bare "@supporthog" (mention only, no message or files) must not create an empty
+    # A bare "@support" (mention only, no message or files) must not create an empty
     # ticket. The parent-seeding branch above already handled thread-escalation mentions.
     if not strip_slack_user_mentions(text).strip() and not files:
         logger.info(

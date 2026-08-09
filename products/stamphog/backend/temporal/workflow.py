@@ -1,10 +1,10 @@
-"""Stamphog review workflow.
+"""Stamp review workflow.
 
 Orchestrates a single PR review: fetch context -> run the whole engine (gates, tier,
 familiarity, LLM review) offline in a sandbox -> post the verdict. Gate blocks are now
 determined inside the sandbox and surfaced through the verdict output, so there is no
 separate server-side gate step. Any unrecoverable error marks the ``ReviewRun`` FAILED.
-The workflow only ever moves ``StamphogReviewInput`` (two small fields) between activities;
+The workflow only ever moves ``StampReviewInput`` (two small fields) between activities;
 all bulky data lives on ``ReviewRun.output`` in Postgres.
 """
 
@@ -17,7 +17,7 @@ from temporalio import workflow
 
 from insights.temporal.common.base import InsightsWorkflow
 
-from products.stamphog.backend.temporal.constants import (
+from products.stamp.backend.temporal.constants import (
     ACTIVITY_RETRY_POLICY,
     FETCH_CONTEXT_TIMEOUT,
     MARK_FAILED_TIMEOUT,
@@ -29,9 +29,9 @@ from products.stamphog.backend.temporal.constants import (
 )
 
 with temporalio.workflow.unsafe.imports_passed_through():
-    from products.stamphog.backend.temporal.activities import (
+    from products.stamp.backend.temporal.activities import (
         MarkReviewFailedInput,
-        StamphogReviewInput,
+        StampReviewInput,
         dismiss_stale_approvals,
         fetch_review_context,
         list_in_flight_reviewer_bots,
@@ -42,12 +42,12 @@ with temporalio.workflow.unsafe.imports_passed_through():
     )
 
 
-@workflow.defn(name="stamphog-review")
-class StamphogReviewWorkflow(InsightsWorkflow):
-    inputs_cls = StamphogReviewInput
+@workflow.defn(name="stamp-review")
+class StampReviewWorkflow(InsightsWorkflow):
+    inputs_cls = StampReviewInput
 
     @workflow.run
-    async def run(self, input: StamphogReviewInput) -> dict:
+    async def run(self, input: StampReviewInput) -> dict:
         try:
             # Dismiss any approval from an earlier head FIRST — before context fetch, not just before
             # the re-review. Fail-closed ordering: if any later step exhausts retries and the run is
@@ -64,7 +64,7 @@ class StamphogReviewWorkflow(InsightsWorkflow):
             # replaying their recorded history (which never saw this activity) don't hit a
             # Non-Deterministic Error. The moment this run commits to reviewing (right after the stale
             # approval sweep) is also the moment it should show a "review in flight" 👀 on the PR.
-            if workflow.patched("stamphog-eyes-reaction"):
+            if workflow.patched("stamp-eyes-reaction"):
                 await workflow.execute_activity(
                     signal_review_started,
                     input,
@@ -112,8 +112,8 @@ class StamphogReviewWorkflow(InsightsWorkflow):
         except Exception as e:
             # Log the full error to the worker before marking the run failed: mark_review_failed
             # persists only the first line (raw exception text can embed repo file content, and run.error
-            # is exposed to stamphog:read), so the worker log is where full detail is kept.
-            workflow.logger.error(f"stamphog_review_workflow_failed for run {input.review_run_id}: {e}")
+            # is exposed to stamp:read), so the worker log is where full detail is kept.
+            workflow.logger.error(f"stamp_review_workflow_failed for run {input.review_run_id}: {e}")
             await workflow.execute_activity(
                 mark_review_failed,
                 MarkReviewFailedInput(

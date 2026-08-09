@@ -93,12 +93,12 @@ async def flush_kafka_batch_async(
 
 def evaluate_event_combined_filters_sync(
     combined_bytecode: list[Any],
-    hog_globals: dict[str, Any],
+    script_globals: dict[str, Any],
     event_uuid: str,
 ) -> dict[str, Any]:
     """Execute combined bytecode for event filters, returning {condition_hash: result}."""
     try:
-        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, hog_globals)
+        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, script_globals)
         result = bytecode_result.result
         if isinstance(result, dict):
             return result
@@ -114,14 +114,14 @@ def evaluate_event_combined_filters_sync(
 
 def evaluate_event_individual_filters_sync(
     filters: list[BehavioralEventFilter],
-    hog_globals: dict[str, Any],
+    script_globals: dict[str, Any],
     event_uuid: str,
 ) -> dict[str, Any]:
     """Execute each filter's bytecode individually for error isolation."""
     results = {}
     for filter_obj in filters:
         try:
-            bytecode_result: BytecodeResult = execute_bytecode(filter_obj.bytecode, hog_globals)
+            bytecode_result: BytecodeResult = execute_bytecode(filter_obj.bytecode, script_globals)
             result = bytecode_result.result
             if isinstance(result, bool):
                 results[filter_obj.condition_hash] = result
@@ -138,12 +138,12 @@ def evaluate_event_individual_filters_sync(
 def evaluate_event_filters_with_fallback_sync(
     combined_bytecode: list[Any],
     filters: list[BehavioralEventFilter],
-    hog_globals: dict[str, Any],
+    script_globals: dict[str, Any],
     event_uuid: str,
 ) -> dict[str, Any]:
     """Execute combined bytecode with fallback to individual filter execution."""
     try:
-        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, hog_globals)
+        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, script_globals)
         result = bytecode_result.result
 
         if isinstance(result, dict):
@@ -162,7 +162,7 @@ def evaluate_event_filters_with_fallback_sync(
             error=str(e),
         )
 
-    return evaluate_event_individual_filters_sync(filters, hog_globals, event_uuid)
+    return evaluate_event_individual_filters_sync(filters, script_globals, event_uuid)
 
 
 @dataclasses.dataclass
@@ -329,21 +329,21 @@ async def backfill_precalculated_events_activity(
                         continue
 
                     # Build ScriptVM globals for event evaluation
-                    hog_globals = {"event": event_name, "properties": event_properties}
+                    script_globals = {"event": event_name, "properties": event_properties}
 
                     if combined_bytecode:
                         filter_results = await asyncio.to_thread(
                             evaluate_event_filters_with_fallback_sync,
                             combined_bytecode,
                             event_filters,
-                            hog_globals,
+                            script_globals,
                             event_uuid,
                         )
                     else:
                         filter_results = await asyncio.to_thread(
                             evaluate_event_individual_filters_sync,
                             event_filters,
-                            hog_globals,
+                            script_globals,
                             event_uuid,
                         )
 

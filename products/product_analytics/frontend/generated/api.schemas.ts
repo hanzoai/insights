@@ -7282,25 +7282,25 @@ export interface DataVisualizationNodeApi {
     version?: number | null
 }
 
-export type HogQueryApiKind = (typeof HogQueryApiKind)[keyof typeof HogQueryApiKind]
+export type ScriptQueryApiKind = (typeof ScriptQueryApiKind)[keyof typeof ScriptQueryApiKind]
 
-export const HogQueryApiKind = {
-    HogQuery: 'HogQuery',
+export const ScriptQueryApiKind = {
+    ScriptQuery: 'ScriptQuery',
 } as const
 
-export interface HogQueryResponseApi {
+export interface ScriptQueryResponseApi {
     bytecode?: unknown[] | null
     coloredBytecode?: unknown[] | null
     results: unknown
     stdout?: string | null
 }
 
-export interface HogQueryApi {
+export interface ScriptQueryApi {
     code?: string | null
-    kind: HogQueryApiKind
+    kind: ScriptQueryApiKind
     /** Modifiers used when performing the query */
     modifiers?: InsightsQLQueryModifiersApi | null
-    response?: HogQueryResponseApi | null
+    response?: ScriptQueryResponseApi | null
     tags?: QueryLogTagsApi | null
     /** version of the node, used for schema migrations */
     version?: number | null
@@ -7311,9 +7311,9 @@ export interface HogQueryApi {
  * - `InsightVizNode` — product analytics (trends, funnels, retention, paths, stickiness, lifecycle)
  * - `DataVisualizationNode` — SQL insights using InsightsQL
  * - `DataTableNode` — raw data tables
- * - `HogQuery` — Script language queries
+ * - `ScriptQuery` — Script language queries
  */
-export type _InsightQuerySchemaApi = InsightVizNodeApi | DataTableNodeApi | DataVisualizationNodeApi | HogQueryApi
+export type _InsightQuerySchemaApi = InsightVizNodeApi | DataTableNodeApi | DataVisualizationNodeApi | ScriptQueryApi
 
 export interface DashboardTileBasicApi {
     readonly id: number

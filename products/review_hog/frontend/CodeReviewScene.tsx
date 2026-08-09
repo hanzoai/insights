@@ -32,7 +32,7 @@ import { Logomark } from 'lib/brand'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconStamphog } from 'lib/elements/icons'
+import { IconStamp } from 'lib/elements/icons'
 import { Card } from 'lib/elements/Card'
 import { Collapse } from 'lib/elements/Collapse'
 import { Drawer } from 'lib/elements/Drawer'
@@ -51,10 +51,10 @@ import type {
     ReviewRecentReviewApi,
     UrgencyThresholdEnumApi,
 } from 'products/review_hog/frontend/generated/api.schemas'
-import { ReviewHogReviewsListScope } from 'products/review_hog/frontend/generated/api.schemas'
+import { ReviewReviewsListScope } from 'products/review_hog/frontend/generated/api.schemas'
 
 import { PipelineDetailModal } from './PipelineDetailModal'
-import { REVIEWS_PAGE_SIZE, ReviewDrawerTab, ReviewSkillKind, reviewHogSettingsLogic } from './reviewHogSettingsLogic'
+import { REVIEWS_PAGE_SIZE, ReviewDrawerTab, ReviewSkillKind, reviewSettingsLogic } from './reviewSettingsLogic'
 
 /** "review-script-perspective-logic-correctness" → "Logic correctness" */
 function prettifySkillName(skillName: string): string {
@@ -160,8 +160,8 @@ function SectionHeader({
  * and the recent-reviews list below. Skill toggles stay per-user regardless of scope.
  */
 function PageScopeSwitch(): JSX.Element {
-    const { reviewsScope } = useValues(reviewHogSettingsLogic)
-    const { setReviewsScope } = useActions(reviewHogSettingsLogic)
+    const { reviewsScope } = useValues(reviewSettingsLogic)
+    const { setReviewsScope } = useActions(reviewSettingsLogic)
     return (
         <SegmentedButton
             size="small"
@@ -169,12 +169,12 @@ function PageScopeSwitch(): JSX.Element {
             onChange={(value) => setReviewsScope(value)}
             options={[
                 {
-                    value: ReviewHogReviewsListScope.Mine,
+                    value: ReviewReviewsListScope.Mine,
                     label: 'For you',
                     tooltip: 'Stats and reviews for pull requests you authored',
                 },
                 {
-                    value: ReviewHogReviewsListScope.Everyone,
+                    value: ReviewReviewsListScope.Everyone,
                     label: 'Entire project',
                     tooltip: 'Stats and reviews for every pull request on this project',
                 },
@@ -188,8 +188,8 @@ function PageScopeSwitch(): JSX.Element {
  * stats the effectiveness cards use. Hidden while there are no reviewed findings in scope yet.
  */
 function ProofCard(): JSX.Element | null {
-    const { perspectiveStats, reviewsScope } = useValues(reviewHogSettingsLogic)
-    const everyone = reviewsScope === ReviewHogReviewsListScope.Everyone
+    const { perspectiveStats, reviewsScope } = useValues(reviewSettingsLogic)
+    const everyone = reviewsScope === ReviewReviewsListScope.Everyone
 
     if (perspectiveStats === null) {
         return <Skeleton className="h-24 w-full" />
@@ -233,7 +233,7 @@ function ProofCard(): JSX.Element | null {
 }
 
 function PipelineSection(): JSX.Element {
-    const { openPipelineDetail } = useActions(reviewHogSettingsLogic)
+    const { openPipelineDetail } = useActions(reviewSettingsLogic)
     return (
         <section className="flex flex-col gap-4 border-t border-primary pt-8">
             <SectionHeader
@@ -376,9 +376,9 @@ function progressLabel(review: ReviewRecentReviewApi): string {
 
 /** A first review still running: no findings to expand into yet, just the live stage. */
 function RunningReviewRow({ review }: { review: ReviewRecentReviewApi }): JSX.Element {
-    const { reviewsScope } = useValues(reviewHogSettingsLogic)
+    const { reviewsScope } = useValues(reviewSettingsLogic)
     // On the Entire project scope, whose PR it is matters at a glance; on For you it's always yours.
-    const showAuthor = reviewsScope === ReviewHogReviewsListScope.Everyone && !!review.pr_author
+    const showAuthor = reviewsScope === ReviewReviewsListScope.Everyone && !!review.pr_author
     return (
         <div className="flex items-center gap-3 px-4 py-3">
             <span className="flex w-6 shrink-0 justify-center">
@@ -409,12 +409,12 @@ function RunningReviewRow({ review }: { review: ReviewRecentReviewApi }): JSX.El
 
 /** One expandable review row: essentials collapsed; PR facts + funnel + findings entry when open. */
 function RecentReviewRow({ review }: { review: ReviewRecentReviewApi }): JSX.Element {
-    const { expandedReviewIds, reviewsScope } = useValues(reviewHogSettingsLogic)
-    const { toggleReviewRowExpanded, openReviewDetail } = useActions(reviewHogSettingsLogic)
+    const { expandedReviewIds, reviewsScope } = useValues(reviewSettingsLogic)
+    const { toggleReviewRowExpanded, openReviewDetail } = useActions(reviewSettingsLogic)
     const expanded = expandedReviewIds.includes(review.id)
     const validated = review.must_fix_count + review.should_fix_count + review.consider_count
     // On the Entire project scope, whose PR it is matters at a glance; on For you it's always yours.
-    const showAuthor = reviewsScope === ReviewHogReviewsListScope.Everyone && !!review.pr_author
+    const showAuthor = reviewsScope === ReviewReviewsListScope.Everyone && !!review.pr_author
 
     // A first review has no completed turn to expand into — it renders as a live progress row.
     if (review.in_progress && review.run_count === 0) {
@@ -549,9 +549,9 @@ function RecentReviewsSection(): JSX.Element | null {
         reviewsExpanding,
         reviewsScope,
         hasUserChosenReviewsScope,
-    } = useValues(reviewHogSettingsLogic)
-    const { showMoreReviews, showFewerReviews } = useActions(reviewHogSettingsLogic)
-    const everyone = reviewsScope === ReviewHogReviewsListScope.Everyone
+    } = useValues(reviewSettingsLogic)
+    const { showMoreReviews, showFewerReviews } = useActions(reviewSettingsLogic)
+    const everyone = reviewsScope === ReviewReviewsListScope.Everyone
     const loadedEmpty = recentReviews !== null && recentReviews.length === 0
 
     // Settled-and-empty on the Entire project scope means the project has no reviews at all — hide
@@ -571,8 +571,8 @@ function RecentReviewsSection(): JSX.Element | null {
         <section className="flex flex-col gap-4">
             <SectionHeader icon={<IconPullRequest />} title={everyone ? 'Recent reviews' : 'Your recent reviews'}>
                 {everyone
-                    ? 'The latest ReviewHog runs on pull requests across this project. Expand a review for its details and findings.'
-                    : 'The latest ReviewHog runs on pull requests you authored. Expand a review for its details and findings.'}
+                    ? 'The latest Review runs on pull requests across this project. Expand a review for its details and findings.'
+                    : 'The latest Review runs on pull requests you authored. Expand a review for its details and findings.'}
             </SectionHeader>
             <Card hoverEffect={false} className="divide-y divide-primary p-0">
                 {recentReviews === null || emptyAwaitingReload ? (
@@ -627,11 +627,11 @@ function RecentReviewsSection(): JSX.Element | null {
 /**
  * "Review a pull request": paste any PR URL the project's GitHub App installation can access and
  * start a publishing review, acting as the requesting user. Hidden unless the backend says this
- * project can trigger reviews (limited to the designated ReviewHog team while in alpha).
+ * project can trigger reviews (limited to the designated Review team while in alpha).
  */
 function TriggerReviewSection(): JSX.Element | null {
-    const { settings, triggerPrUrl, triggeringReview } = useValues(reviewHogSettingsLogic)
-    const { setTriggerPrUrl, submitTriggerReview } = useActions(reviewHogSettingsLogic)
+    const { settings, triggerPrUrl, triggeringReview } = useValues(reviewSettingsLogic)
+    const { setTriggerPrUrl, submitTriggerReview } = useActions(reviewSettingsLogic)
 
     if (!settings?.can_trigger_reviews) {
         return null
@@ -671,7 +671,7 @@ function TriggerReviewSection(): JSX.Element | null {
 type FindingSection = 'description' | 'suggestion' | 'validator'
 
 function FindingCard({ finding, dismissed }: { finding: ReviewFindingApi; dismissed?: boolean }): JSX.Element {
-    const { reviewDetail } = useValues(reviewHogSettingsLogic)
+    const { reviewDetail } = useValues(reviewSettingsLogic)
     const priority = PRIORITY_TAG[finding.effective_priority]
     const location = finding.lines.length
         ? `${finding.file}:${finding.lines.map((r) => (r.end && r.end !== r.start ? `${r.start}–${r.end}` : `${r.start}`)).join(', ')}`
@@ -766,7 +766,7 @@ function DrawerFindingsSkeleton(): JSX.Element {
 
 /** The "Published" tab: the findings that crossed the urgency threshold, caveated while unpublished. */
 function DrawerPublishedTab(): JSX.Element {
-    const { reviewFindingsSplit, reviewDetail } = useValues(reviewHogSettingsLogic)
+    const { reviewFindingsSplit, reviewDetail } = useValues(reviewSettingsLogic)
 
     if (!reviewFindingsSplit) {
         return <DrawerFindingsSkeleton />
@@ -800,7 +800,7 @@ function DrawerPublishedTab(): JSX.Element {
 
 /** The "Below threshold" tab: findings the validator kept, but the user's urgency bar held back. */
 function DrawerBelowThresholdTab(): JSX.Element {
-    const { reviewFindingsSplit } = useValues(reviewHogSettingsLogic)
+    const { reviewFindingsSplit } = useValues(reviewSettingsLogic)
 
     if (!reviewFindingsSplit) {
         return <DrawerFindingsSkeleton />
@@ -829,7 +829,7 @@ function DrawerBelowThresholdTab(): JSX.Element {
 
 /** The "Dismissed" tab: findings that failed validation, each with the validator's reasoning. */
 function DrawerDismissedTab(): JSX.Element {
-    const { reviewDetail } = useValues(reviewHogSettingsLogic)
+    const { reviewDetail } = useValues(reviewSettingsLogic)
 
     if (!reviewDetail) {
         return <DrawerFindingsSkeleton />
@@ -853,7 +853,7 @@ function DrawerDismissedTab(): JSX.Element {
 
 /** The "Chunks" tab: how the PR was split, each chunk's files (expandable), and its perspective picks. */
 function DrawerChunksTab(): JSX.Element {
-    const { reviewDetail } = useValues(reviewHogSettingsLogic)
+    const { reviewDetail } = useValues(reviewSettingsLogic)
 
     if (!reviewDetail) {
         return <DrawerFindingsSkeleton />
@@ -940,8 +940,8 @@ function ReviewDetailDrawer(): JSX.Element {
         reviewDrawerTab,
         reviewFindingsSplit,
         perspectiveScoreboard,
-    } = useValues(reviewHogSettingsLogic)
-    const { closeReviewDrawer, setReviewDrawerTab } = useActions(reviewHogSettingsLogic)
+    } = useValues(reviewSettingsLogic)
+    const { closeReviewDrawer, setReviewDrawerTab } = useActions(reviewSettingsLogic)
 
     // The list row carries the header facts, so the drawer opens instantly while findings load.
     const review = reviewDetail ?? openedReview
@@ -1046,15 +1046,15 @@ function ReviewDetailDrawer(): JSX.Element {
 }
 
 function TriggersSection(): JSX.Element {
-    const { settings, settingsLoading } = useValues(reviewHogSettingsLogic)
-    const { updateSettings } = useActions(reviewHogSettingsLogic)
+    const { settings, settingsLoading } = useValues(reviewSettingsLogic)
+    const { updateSettings } = useActions(reviewSettingsLogic)
 
     const switchDisabledReason = settings === null ? 'Loading…' : settingsLoading ? 'Saving…' : undefined
 
     return (
         <section className="flex flex-col gap-4 border-t border-primary pt-8">
             <SectionHeader icon={<IconFilter />} title="What gets reviewed">
-                Choose which pull requests ReviewHog picks up automatically.
+                Choose which pull requests Review picks up automatically.
             </SectionHeader>
             <Card hoverEffect={false} className="divide-y divide-primary p-0">
                 <div className="flex items-center gap-4 p-4">
@@ -1064,7 +1064,7 @@ function TriggersSection(): JSX.Element {
                     <div className="min-w-0 flex-1">
                         <div className="text-sm font-semibold">Review all your Inbox PRs</div>
                         <div className="text-xs text-secondary">
-                            When a self-driving implementation from your Inbox opens a pull request, ReviewHog reviews
+                            When a self-driving implementation from your Inbox opens a pull request, Review reviews
                             it and posts the review to the pull request automatically.
                         </div>
                     </div>
@@ -1077,24 +1077,24 @@ function TriggersSection(): JSX.Element {
                 </div>
                 <div className="flex items-center gap-4 p-4">
                     <div className="flex size-9 shrink-0 items-center justify-center rounded border border-primary bg-primary">
-                        <IconStamphog className="size-5" />
+                        <IconStamp className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold">Let Stamphog review your Inbox PRs</div>
+                        <div className="text-sm font-semibold">Let Stamp review your Inbox PRs</div>
                         <div className="text-xs text-secondary">
-                            When a self-driving implementation from your Inbox opens a pull request, Stamphog reviews it
+                            When a self-driving implementation from your Inbox opens a pull request, Stamp reviews it
                             and approves it if it passes.
                         </div>
                     </div>
                     <Switch
-                        aria-label="Let Stamphog review your Inbox PRs"
-                        checked={settings?.stamphog_review_inbox_prs ?? false}
-                        onChange={(checked) => updateSettings({ stamphog_review_inbox_prs: checked })}
+                        aria-label="Let Stamp review your Inbox PRs"
+                        checked={settings?.stamp_review_inbox_prs ?? false}
+                        onChange={(checked) => updateSettings({ stamp_review_inbox_prs: checked })}
                         disabledReason={
                             // A switch that is already on stays usable while disconnected, so
-                            // turning it off never requires connecting Stamphog first.
-                            settings && !settings.stamphog_connected && !settings.stamphog_review_inbox_prs
-                                ? 'Connect a repository to Stamphog first. Stamphog is not set up for this project yet.'
+                            // turning it off never requires connecting Stamp first.
+                            settings && !settings.stamp_connected && !settings.stamp_review_inbox_prs
+                                ? 'Connect a repository to Stamp first. Stamp is not set up for this project yet.'
                                 : switchDisabledReason
                         }
                     />
@@ -1107,22 +1107,22 @@ function TriggersSection(): JSX.Element {
                         <div className="text-sm font-semibold">
                             Review all your PRs with the{' '}
                             <CopyToClipboardInline
-                                explicitValue="reviewhog"
+                                explicitValue="review"
                                 description="label"
                                 iconSize="xsmall"
                                 className="rounded border border-warning bg-warning-highlight px-1.5 py-0.5 font-mono text-xs text-warning"
                             >
-                                reviewhog
+                                review
                             </CopyToClipboardInline>{' '}
                             label
                         </div>
                         <div className="text-xs text-secondary">
-                            Add the reviewhog label to a pull request you author in a connected repository and ReviewHog
+                            Add the review label to a pull request you author in a connected repository and Review
                             reviews it.
                         </div>
                     </div>
                     <Switch
-                        aria-label="Review all your PRs with the reviewhog label"
+                        aria-label="Review all your PRs with the review label"
                         checked={settings?.review_labeled_prs ?? true}
                         onChange={(checked) => updateSettings({ review_labeled_prs: checked })}
                         disabledReason={switchDisabledReason}
@@ -1134,8 +1134,8 @@ function TriggersSection(): JSX.Element {
 }
 
 function UrgencySection(): JSX.Element {
-    const { settings } = useValues(reviewHogSettingsLogic)
-    const { updateSettings } = useActions(reviewHogSettingsLogic)
+    const { settings } = useValues(reviewSettingsLogic)
+    const { updateSettings } = useActions(reviewSettingsLogic)
 
     const activeIndex = Math.max(
         0,
@@ -1145,7 +1145,7 @@ function UrgencySection(): JSX.Element {
     return (
         <section className="flex flex-col gap-4 border-t border-primary pt-8">
             <SectionHeader icon={<IconBalance />} title="Urgency threshold">
-                Set how strict ReviewHog is. The further right, the fewer findings reach the pull request — but the
+                Set how strict Review is. The further right, the fewer findings reach the pull request — but the
                 higher their priority.
             </SectionHeader>
             <Card hoverEffect={false} className="flex flex-col p-5">
@@ -1212,8 +1212,8 @@ function SkillCard({
     offLabel: string
     onToggle: (checked: boolean) => void
 }): JSX.Element {
-    const { savingSkillNames } = useValues(reviewHogSettingsLogic)
-    const { viewSkill } = useActions(reviewHogSettingsLogic)
+    const { savingSkillNames } = useValues(reviewSettingsLogic)
+    const { viewSkill } = useActions(reviewSettingsLogic)
     const title = prettifySkillName(skill.skill_name)
 
     return (
@@ -1262,8 +1262,8 @@ function SkillListSkeleton(): JSX.Element {
 }
 
 function CreateYourOwnButton({ kind, label }: { kind: ReviewSkillKind; label: string }): JSX.Element {
-    const { creatingSkillKind } = useValues(reviewHogSettingsLogic)
-    const { startSkillAuthorTask } = useActions(reviewHogSettingsLogic)
+    const { creatingSkillKind } = useValues(reviewSettingsLogic)
+    const { startSkillAuthorTask } = useActions(reviewSettingsLogic)
     return (
         <div>
             <Button
@@ -1330,8 +1330,8 @@ function EffectivenessRows({
  * stats describe the project, while the toggles stay per-user.
  */
 function EffectivenessCard({ kind }: { kind: 'perspectives' | 'blind_spots' }): JSX.Element | null {
-    const { perspectiveStats, reviewsScope } = useValues(reviewHogSettingsLogic)
-    const everyone = reviewsScope === ReviewHogReviewsListScope.Everyone
+    const { perspectiveStats, reviewsScope } = useValues(reviewSettingsLogic)
+    const everyone = reviewsScope === ReviewReviewsListScope.Everyone
 
     if (!perspectiveStats?.perspectives.length) {
         return null
@@ -1375,8 +1375,8 @@ function EffectivenessCard({ kind }: { kind: 'perspectives' | 'blind_spots' }): 
  * aren't attributed to a validator skill), with dismissals as the headline — its job is filtering.
  */
 function ValidatorEffectivenessCard(): JSX.Element | null {
-    const { perspectiveStats, reviewsScope } = useValues(reviewHogSettingsLogic)
-    const everyone = reviewsScope === ReviewHogReviewsListScope.Everyone
+    const { perspectiveStats, reviewsScope } = useValues(reviewSettingsLogic)
+    const everyone = reviewsScope === ReviewReviewsListScope.Everyone
 
     if (!perspectiveStats?.perspectives.length) {
         return null
@@ -1440,8 +1440,8 @@ function ValidatorEffectivenessCard(): JSX.Element | null {
 }
 
 function PerspectivesSection(): JSX.Element {
-    const { perspectives } = useValues(reviewHogSettingsLogic)
-    const { togglePerspective } = useActions(reviewHogSettingsLogic)
+    const { perspectives } = useValues(reviewSettingsLogic)
+    const { togglePerspective } = useActions(reviewSettingsLogic)
 
     return (
         <section className="flex flex-col gap-4">
@@ -1499,7 +1499,7 @@ function SingleActiveSection({
     onSelect: (skillName: string) => void
     preamble?: JSX.Element
 }): JSX.Element {
-    const { blockSingleActiveDeactivation } = useActions(reviewHogSettingsLogic)
+    const { blockSingleActiveDeactivation } = useActions(reviewSettingsLogic)
 
     return (
         <section className="flex flex-col gap-4">
@@ -1538,8 +1538,8 @@ function SingleActiveSection({
 }
 
 function SkillDrawer(): JSX.Element {
-    const { viewedSkill, skillDrawerOpen } = useValues(reviewHogSettingsLogic)
-    const { closeSkillDrawer } = useActions(reviewHogSettingsLogic)
+    const { viewedSkill, skillDrawerOpen } = useValues(reviewSettingsLogic)
+    const { closeSkillDrawer } = useActions(reviewSettingsLogic)
 
     return (
         <Drawer
@@ -1568,19 +1568,19 @@ function SkillDrawer(): JSX.Element {
 
 export const scene: SceneExport = {
     component: CodeReviewScene,
-    logic: reviewHogSettingsLogic,
+    logic: reviewSettingsLogic,
 }
 
 /**
- * The "Code review" scene: ReviewHog's combined onboarding and settings page. One scrollable
+ * The "Code review" scene: Review's combined onboarding and settings page. One scrollable
  * guided-configuration page — every control is live from load, no save step. See
- * `reviewHogSettingsLogic` for the data flow. Staff-only while ReviewHog is an internal alpha;
+ * `reviewSettingsLogic` for the data flow. Staff-only while Review is an internal alpha;
  * the FEATURE_FLAGS.REVIEW_HOG flag only controls the menu entry's visibility.
  */
 export function CodeReviewScene(): JSX.Element {
     const { user } = useValues(userLogic)
-    const { blindSpots, validators, initialLoadFailed } = useValues(reviewHogSettingsLogic)
-    const { selectBlindSpots, selectValidator, loadAll } = useActions(reviewHogSettingsLogic)
+    const { blindSpots, validators, initialLoadFailed } = useValues(reviewSettingsLogic)
+    const { selectBlindSpots, selectValidator, loadAll } = useActions(reviewSettingsLogic)
 
     if (user != null && !user.is_staff) {
         return <NotFound object="page" />
@@ -1606,7 +1606,7 @@ export function CodeReviewScene(): JSX.Element {
                         </div>
                     </div>
                     <h2 className="m-0 text-3xl font-bold" style={{ textWrap: 'balance' }}>
-                        ReviewHog reviews pull requests before humans do
+                        Review reviews pull requests before humans do
                     </h2>
                     <p className="m-0 max-w-155 text-sm text-secondary">
                         Specialist review skills read your changed code in parallel each from their own perspective, a
@@ -1618,7 +1618,7 @@ export function CodeReviewScene(): JSX.Element {
 
                 {initialLoadFailed && (
                     <Banner type="error" action={{ children: 'Retry', onClick: () => loadAll() }}>
-                        Some ReviewHog settings failed to load.
+                        Some Review settings failed to load.
                     </Banner>
                 )}
 
@@ -1640,7 +1640,7 @@ export function CodeReviewScene(): JSX.Element {
                     <SingleActiveSection
                         icon={<IconSearch />}
                         title="Blind-spot check"
-                        intro="After the enabled perspectives finish, ReviewHog runs one more sweep over each chunk — it sees what they found and hunts for real issues they all missed. Add as many sweeps as you like, but only one runs."
+                        intro="After the enabled perspectives finish, Review runs one more sweep over each chunk — it sees what they found and hunts for real issues they all missed. Add as many sweeps as you like, but only one runs."
                         kind="blind_spots"
                         kindLabel="blind-spot check"
                         preamble={<EffectivenessCard kind="blind_spots" />}

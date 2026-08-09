@@ -5,7 +5,7 @@ import { IconPlusSmall } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { BigLeaguesHog } from 'lib/components/mascots'
+import { BigLeaguesScript } from 'lib/components/mascots'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
@@ -106,7 +106,7 @@ export function EndpointsScene(): JSX.Element {
                             activeTab === 'usage' ? ENDPOINTS_USAGE_PRODUCT_DESCRIPTION : ENDPOINTS_PRODUCT_DESCRIPTION
                         }
                         docsURL="https://hanzo.ai/docs/endpoints"
-                        customHog={BigLeaguesHog}
+                        customScript={BigLeaguesScript}
                         isEmpty={false}
                         action={() => router.actions.push(urls.sqlEditor({ source: 'endpoint' }))}
                     />

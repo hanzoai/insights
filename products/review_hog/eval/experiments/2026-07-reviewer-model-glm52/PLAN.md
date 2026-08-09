@@ -24,7 +24,7 @@
 > revert + wipe.
 >
 > **Context injection is NATIVE — no harness changes beyond round 5's.** The pipeline already
-> injects prior turns' findings from the ReviewHog DB into every review unit's prompt as
+> injects prior turns' findings from the Review DB into every review unit's prompt as
 > `<already_covered_findings_for_chunk>` (`load_prior_findings_with_verdicts` keyed by
 > `before_run_index`, publication-independent — "some … were never posted as inline comments"),
 > and the same set joins the dedup gate as an enforcement backstop. The round-3
@@ -108,11 +108,11 @@ chunk)`), so the new head misses turn-1 artefacts organically — no scrubbing, 
 >
 > **G1 attempt 1 (2026-07-30 ~12:00) failed on a gateway allowlist gap, not the model.** All 8
 > units died in ~30 min with `stopReason:"refusal"` at 0 tokens. ngrok's request inspector showed
-> every sandbox call as `POST /review_hog/v1/responses → 403`: the gateway's `review_hog` product
+> every sandbox call as `POST /review/v1/responses → 403`: the gateway's `review` product
 > allowlist lacked the 5.6 family (only glm-5.2 / sonnet-5 / opus-4-8 / gpt-5.5). Fixed by adding
 > `gpt-5.6-luna` + `gpt-5.6-terra` to `services/llm-gateway/.../products/config.py`; uvicorn
 > `--reload` picked it up; product-path probes then 200'd. Two durable lessons: (1) preflight must
-> probe the **product-scoped** path (`/review_hog/v1/responses`), not the generic `/v1/responses` —
+> probe the **product-scoped** path (`/review/v1/responses`), not the generic `/v1/responses` —
 > the generic path runs under the allow-everything `llm_gateway` product; (2) codex-app-server maps
 > codex `TurnStatus:"failed"` → ACP `"refusal"` (`mapTurnStopReason`), so "refusal" in our logs
 > means "turn failed", not necessarily a safety refusal — which casts doubt on whether round-3's
@@ -204,7 +204,7 @@ chunk)`), so the new head misses turn-1 artefacts organically — no scrubbing, 
 > End state: revert mock + pin + constants to the Sonnet baseline; extend FINAL_REPORT.md to the
 > 4-way verdict; RUN_LOG + memory + Slack summary (/tmp).
 
-**Question:** is `@cf/zai-org/glm-5.2` better than `claude-sonnet-5` at applying ReviewHog's review perspectives?
+**Question:** is `@cf/zai-org/glm-5.2` better than `claude-sonnet-5` at applying Review's review perspectives?
 Everything else in the pipeline is held constant.
 
 Follows the shared on-pipeline protocol (`../2026-07-reviewer-topology/PLAN.md` §"The dump/reset harness",
@@ -227,18 +227,18 @@ what we run in prod today", not a same-label comparison. Caveat recorded below (
 
 ## What changes vs prod (all in the working tree, per-arm)
 
-1. **Gateway allowlist** (`services/llm-gateway/src/llm_gateway/products/config.py`, `review_hog` entry):
+1. **Gateway allowlist** (`services/llm-gateway/src/llm_gateway/products/config.py`, `review` entry):
    `allowed_models=None` → `frozenset({"@cf/zai-org/glm-5.2", "claude-sonnet-5", "claude-opus-4-8", "gpt-5.5"})`.
    Deliberately the _simple_ shape — no `allowed_application_ids`/`requires_server_credential` hardening
-   (stamphog-style) yet; the one-shot direct calls authenticate through this product and must keep working.
-2. **Agent-side routing** (code repo, `packages/agent/src/utils/gateway.ts`): add `"review_hog"` to the
-   `GatewayProduct` union + an `originProduct === "review_hog"` case in `resolveGatewayProduct`, before the
+   (stamp-style) yet; the one-shot direct calls authenticate through this product and must keep working.
+2. **Agent-side routing** (code repo, `packages/agent/src/utils/gateway.ts`): add `"review"` to the
+   `GatewayProduct` union + an `originProduct === "review"` case in `resolveGatewayProduct`, before the
    `isInternal` catch-all. Without this, sandbox reviews route to `background_agents`, whose allowlist lacks
    GLM → 403 → the Claude-SDK `fallbackModel` silently reruns on `claude-opus-4-8` (see the documented
    incident in `../2026-07-pipeline-models/FINAL_REPORT.md`). First sandbox after the edit pays a
    MODAL_DOCKER image rebuild (image bakes from `LOCAL_INSIGHTS_CODE_MONOREPO_ROOT`).
 3. **Comment mock** (`backend/reviewer/tools/github_meta.py`): `return []` at the top of
-   `PRFetcher.fetch_pr_comments`. The target PR already carries bot/human/prod-ReviewHog comments; this is
+   `PRFetcher.fetch_pr_comments`. The target PR already carries bot/human/prod-Review comments; this is
    the single choke point where comments enter the pipeline. Active for ALL 4 runs → both arms see zero
    comments. Experiment-only hack.
 4. **Chunk pin** (`backend/reviewer/`): re-add a minimal `EXPERIMENT_PINNED_CHUNKS` (the mechanism was
@@ -258,7 +258,7 @@ calls (chunking / perspective selection / dedup, `claude-sonnet-5` @ xhigh), all
 ## Target PR
 
 `https://github.com/Insights/insights/pull/72680` (own PR — open, non-draft, non-fork,
-head `insights-code/stamphog-reviews-inbox-prs`). ~742 reviewable additions after filters → one-shot
+head `insights-code/stamp-reviews-inbox-prs`). ~742 reviewable additions after filters → one-shot
 chunking path. **Frozen for the duration: no pushes to the branch until the experiment is done.**
 Runs never use `--publish`; with a fresh `ReviewReport` row each run, zero GitHub writes (the mid-run
 status-comment refresh is a no-op when `status_comment_id` is NULL).
@@ -276,8 +276,8 @@ python manage.py shell -c "exec(open('products/review_hog/eval/scripts/dump_resu
    every `issues-review-*` / `blind-spots-*` gen — `$ai_model` is the only trustworthy signal; a 403'd or
    unlisted model silently falls back to Opus with no warning. For B1, additionally probe `$ai_generation`
    in Datastore mid-run as soon as the first review units start and abort early if Opus appears.
-6. Wipe: `DEBUG=1 python manage.py reset_review_hog --yes` (dump ALWAYS before reset). Wipes all four
-   review_hog tables across all teams; skill configs re-seed to defaults → identical roster every run.
+6. Wipe: `DEBUG=1 python manage.py reset_review --yes` (dump ALWAYS before reset). Wipes all four
+   review tables across all teams; skill configs re-seed to defaults → identical roster every run.
 7. Next run.
 
 Initial state: run the wipe once before A1 (clean slate).
@@ -291,7 +291,7 @@ Initial state: run the wipe once before A1 (clean slate).
 - temporal-worker + backend running (phrocs); worker start-time > last constants edit.
 - ngrok tunnels up: `django` → :8010, `gateway` → :3308, `mcp` → :8787.
 - Local gateway restarted after the allowlist edit (verify it serves the edited config).
-- GLM servable: gateway `/review_hog/v1/models` lists `@cf/zai-org/glm-5.2` (requires Cloudflare or Modal
+- GLM servable: gateway `/review/v1/models` lists `@cf/zai-org/glm-5.2` (requires Cloudflare or Modal
   creds on the local gateway — `_glm_backend_configured`) + a tiny direct Messages probe returns from GLM.
 - Code-repo routing edit in place (`resolveGatewayProduct`).
 - No `ReviewReport` row for PR 72680 / team 1.
@@ -323,11 +323,11 @@ Initial state: run the wipe once before A1 (clean slate).
 ## Decisions log
 
 1. GLM @ MAX vs Sonnet @ XHIGH — each model at its strongest registered setting (no XHIGH for GLM).
-2. Unblock GLM via a dedicated `review_hog` gateway product route (two-sided: gateway allowlist +
+2. Unblock GLM via a dedicated `review` gateway product route (two-sided: gateway allowlist +
    agent-side `resolveGatewayProduct` case) — not by widening `background_agents`.
-3. Gateway entry keeps the simple shape (allowlist only); stamphog-style hardening is a separate follow-up.
+3. Gateway entry keeps the simple shape (allowlist only); stamp-style hardening is a separate follow-up.
 4. Blind-spot sweep switches with the arm (it's a perspective).
-5. Comments mocked to `[]` for all runs (clean-room; PR was already reviewed by other bots + prod ReviewHog).
+5. Comments mocked to `[]` for all runs (clean-room; PR was already reviewed by other bots + prod Review).
 6. Chunks pinned from A1's natural split for all subsequent runs.
 7. Serial runs; wipe after every dump; PR frozen; no publish; team 1 / user 1.
 8. End state: the infra edits (gateway allowlist, agent-side routing) STAY in the working tree — they're

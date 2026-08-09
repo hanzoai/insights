@@ -1,1 +1,1 @@
-"""Temporal wiring for the stamphog PR review workflow."""
+"""Temporal wiring for the stamp PR review workflow."""

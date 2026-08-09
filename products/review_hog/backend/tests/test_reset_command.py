@@ -11,14 +11,14 @@ from products.review_hog.backend.reviewer.models.issues_review import IssuePrior
 from products.signals.backend.artefact_attribution import ArtefactAttribution
 
 
-class TestResetReviewHog(BaseTest):
+class TestResetReview(BaseTest):
     def test_refuses_outside_debug(self) -> None:
         # The command wipes every team's rows — it must be impossible to run against a non-DEBUG DB.
         with pytest.raises(CommandError):
-            call_command("reset_review_hog", yes=True)
+            call_command("reset_review", yes=True)
 
     @override_settings(DEBUG=True)
-    def test_wipes_every_review_hog_model(self) -> None:
+    def test_wipes_every_review_model(self) -> None:
         # The command IS the clean-slate story: a model left off its wipe list (ReviewUserSettings
         # was) silently survives resets and keeps steering later runs' triggers and publishing.
         report = ReviewReport.objects.for_team(self.team.id).create(
@@ -44,7 +44,7 @@ class TestResetReviewHog(BaseTest):
         )
         ReviewUserSettings.objects.for_team(self.team.id).create(team_id=self.team.id, user_id=self.user.id)
 
-        call_command("reset_review_hog", yes=True)
+        call_command("reset_review", yes=True)
 
         assert ReviewReport.objects.unscoped().count() == 0
         assert ReviewReportArtefact.objects.unscoped().count() == 0

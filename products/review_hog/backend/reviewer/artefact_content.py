@@ -4,7 +4,7 @@ Mirrors Signals' `artefact_schemas` leaf: one model per artefact type, parsed at
 `parse_artefact_content` and passed around typed; the row's type is derived from the content
 model's class so type and content can never diverge.
 
-ReviewHog owns its own registry and helpers — Signals' `artefact_type_for` / `parse_artefact_content`
+Review owns its own registry and helpers — Signals' `artefact_type_for` / `parse_artefact_content`
 close over Signals' module-global registry and cannot take ours — but reuses the content models
 that fit unchanged (`Commit`, `CodeReference`, `TaskRunArtefact`, `NoteArtefact`) and the shared
 `ArtefactContentValidationError` from the Signals leaf.
@@ -113,7 +113,7 @@ class FindingOutcomeArtefact(BaseModel):
         "judge_confirmed",
         "judge_rejected",
         "comment_reply",
-        # A reply from an agent other than ReviewHog itself. Engagement like `comment_reply`, kept
+        # A reply from an agent other than Review itself. Engagement like `comment_reply`, kept
         # apart so "a human responded" stays answerable as agents take over more of the replying.
         "comment_reply_agent",
         "comment_reaction",
@@ -198,7 +198,7 @@ class PRSnapshotArtefact(BaseModel):
     pr_files: list[PRFile] = Field(default_factory=list, description="The PR's reviewable files with code context.")
 
 
-# Reused leaf models back the work-log entry types; ReviewHog adds findings + verdicts. The
+# Reused leaf models back the work-log entry types; Review adds findings + verdicts. The
 # working-state types (chunk_set / perspective_result) are per-turn pipeline scaffolding the
 # DB-driven resume reads back — head_sha-scoped, latest-wins within a turn.
 ReviewLogArtefactContent = TaskRunArtefact | Commit | CodeReference | NoteArtefact

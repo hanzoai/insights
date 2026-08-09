@@ -15,7 +15,7 @@ _MODULE = "products.review_hog.backend.reviewer.sandbox.direct_llm"
 
 
 def _api_error(status: int) -> APIStatusError:
-    request = httpx.Request("POST", "http://gateway/review_hog/v1/messages")
+    request = httpx.Request("POST", "http://gateway/review/v1/messages")
     return APIStatusError("boom", response=httpx.Response(status, request=request), body=None)
 
 
@@ -48,7 +48,7 @@ async def test_oneshot_call_pins_model_effort_schema_and_stage() -> None:
         result = await _call()
 
     assert result is parsed
-    assert mock_get.call_args.kwargs["product"] == "review_hog"
+    assert mock_get.call_args.kwargs["product"] == "review"
     assert mock_get.call_args.kwargs["team_id"] == 1
     kwargs = mock_parse.call_args.kwargs
     assert kwargs["model"] == ONESHOT_MODEL

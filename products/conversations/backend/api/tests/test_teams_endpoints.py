@@ -93,7 +93,7 @@ class TestTeamsEventHandler(BaseTest):
         mock_validate.return_value = {}
         activity = _make_activity(activity_type="conversationUpdate")
         bot_id = "28:bot-app-id"
-        activity["recipient"] = {"id": bot_id, "name": "SupportHog"}
+        activity["recipient"] = {"id": bot_id, "name": "Support"}
         activity["membersAdded"] = [{"id": bot_id}]
 
         response = self._post(activity)
@@ -110,7 +110,7 @@ class TestTeamsEventHandler(BaseTest):
         """A non-bot member joining must not trigger the welcome card."""
         mock_validate.return_value = {}
         activity = _make_activity(activity_type="conversationUpdate")
-        activity["recipient"] = {"id": "28:bot-app-id", "name": "SupportHog"}
+        activity["recipient"] = {"id": "28:bot-app-id", "name": "Support"}
         activity["membersAdded"] = [{"id": "29:some-other-user"}]
 
         response = self._post(activity)
@@ -186,7 +186,7 @@ class TestTeamsEventHandler(BaseTest):
         mock_validate.return_value = {}
         activity = _make_activity(activity_type="conversationUpdate")
         bot_id = "28:bot-app-id"
-        activity["recipient"] = {"id": bot_id, "name": "SupportHog"}
+        activity["recipient"] = {"id": bot_id, "name": "Support"}
         activity["membersAdded"] = [{"id": bot_id}]
 
         self._post(activity)
