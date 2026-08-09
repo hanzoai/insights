@@ -116,7 +116,7 @@ CREATE_ENABLED_MESSAGE = (
 # would change. Signing the live timestamp too is what stops a publish from silently discarding a
 # concurrent web edit: the draft is a full snapshot, so it overwrites whatever landed since.
 PUBLISH_CONFIRM_TOKEN_MAX_AGE = timedelta(minutes=15)
-_PUBLISH_CONFIRM_SALT = "hogfunction-publish"
+_PUBLISH_CONFIRM_SALT = "insightsfunction-publish"
 
 
 def _publish_confirm_value(insights_function: InsightsFunction) -> str:

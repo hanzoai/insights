@@ -5,7 +5,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/PostHog/posthog.git",
+        "url": "https://github.com/hanzoai/insights.git",
         "directory": "packages/quill/packages/charts"
     },
     "files": [

@@ -310,7 +310,7 @@ What happens at startup, for a command that opted in:
 1. If the secrets file exists AND contains `marker` AND `wrap[0]` is on `PATH`:
    insightscli re-execs itself under `wrap` (with `{file}` substituted to the
    absolute path of the secrets file). The wrap binary resolves secrets and
-   re-runs insightscli with them in the env. A `HOGLI_SECRETS_WRAPPED=1` sentinel
+   re-runs insightscli with them in the env. A `INSIGHTSCLI_SECRETS_WRAPPED=1` sentinel
    is set in the wrap-child's env and is **inherited by any subprocesses it
    spawns** (so composite commands like `dev:reset` only prompt for auth
    once, not once per step).

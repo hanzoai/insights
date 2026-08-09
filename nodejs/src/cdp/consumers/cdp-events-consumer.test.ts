@@ -154,7 +154,10 @@ describe('CdpEventsConsumer', () => {
                 })
             })
 
-            const matchInvocation = (insightsFunction: InsightsFunctionType, globals: InsightsFunctionInvocationGlobals) => {
+            const matchInvocation = (
+                insightsFunction: InsightsFunctionType,
+                globals: InsightsFunctionInvocationGlobals
+            ) => {
                 return {
                     insightsFunction: {
                         id: insightsFunction.id,
@@ -698,8 +701,7 @@ describe('script flow processing', () => {
 
             await (processor as any)['flowPipeline']['buildInvocations']([globals])
 
-            const producedMetrics =
-                mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
+            const producedMetrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(producedMetrics).not.toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
@@ -792,8 +794,7 @@ describe('script flow processing', () => {
             await processor['insightsFunctionMonitoringService'].flush()
 
             // Should have queued a quota limited metric
-            const producedMetrics =
-                mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
+            const producedMetrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(producedMetrics).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({

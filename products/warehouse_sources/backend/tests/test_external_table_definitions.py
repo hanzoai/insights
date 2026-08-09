@@ -3,7 +3,7 @@ from parameterized import parameterized
 from products.warehouse_sources.backend.models.external_table_definitions import get_insightsql_column_name_mapping
 
 
-class TestGetHogqlColumnNameMapping:
+class TestGetInsightsqlColumnNameMapping:
     @parameterized.expand(
         [
             # Direct renames (`StringDatabaseField(name="customer")` exposed as `customer_id`).

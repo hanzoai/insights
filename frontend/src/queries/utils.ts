@@ -883,14 +883,14 @@ export function taxonomicGroupFilterToInsightsQL(
     return null
 }
 
-export function isInsightsQLAggregation(hogQl: string): boolean {
+export function isInsightsQLAggregation(insightsQl: string): boolean {
     return (
-        hogQl.includes('count(') ||
-        hogQl.includes('any(') ||
-        hogQl.includes('sum(') ||
-        hogQl.includes('avg(') ||
-        hogQl.includes('min(') ||
-        hogQl.includes('max(')
+        insightsQl.includes('count(') ||
+        insightsQl.includes('any(') ||
+        insightsQl.includes('sum(') ||
+        insightsQl.includes('avg(') ||
+        insightsQl.includes('min(') ||
+        insightsQl.includes('max(')
     )
 }
 
@@ -902,7 +902,7 @@ export interface InsightsQLIdentifier {
     identifier: string
 }
 
-function hogQLIdentifier(identifier: string): InsightsQLIdentifier {
+function insightsQLIdentifier(identifier: string): InsightsQLIdentifier {
     return {
         __insightsql_identifier: true,
         identifier,
@@ -918,7 +918,7 @@ export interface InsightsQLRaw {
     raw: string
 }
 
-function hogQLRaw(raw: string): InsightsQLRaw {
+function insightsQLRaw(raw: string): InsightsQLRaw {
     return {
         __insightsql_raw: true,
         raw,
@@ -983,8 +983,8 @@ export function insightsql(strings: TemplateStringsArray, ...values: any[]): Ins
         ''
     ) as unknown as InsightsQLQueryString
 }
-insightsql.identifier = hogQLIdentifier
-insightsql.raw = hogQLRaw
+insightsql.identifier = insightsQLIdentifier
+insightsql.raw = insightsQLRaw
 
 type SingleBreakdownFilter = BreakdownFilter & {
     breakdown: NonNullable<BreakdownFilter['breakdown']>

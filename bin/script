@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [[ "$@" == *".hoge"* ]]; then
+if [[ "$@" == *".scriptc"* ]]; then
   if [[ "$@" == *"--python"* ]]; then
     exec python3 -m common.scriptvm.python.cli "$@"
 
@@ -30,8 +30,8 @@ else
   echo "$0 - the full script! 🦔+🐗=Script"
   echo ""
   echo "Usage:     bin/script <file.script>                 run .script source code"
-  echo "           bin/script <file.hoge>                run compiled .hoge bytecode"
-  echo "           bin/hoge <file.script> [output.hoge]  compile .script into .hoge"
+  echo "           bin/script <file.scriptc>                run compiled .scriptc bytecode"
+  echo "           bin/scriptc <file.script> [output.scriptc]  compile .script into .scriptc"
   echo ""
   echo "Options:   bin/script --debug                    run the debugger (Python only)"
   echo "           bin/script --python                   use the Python VM"

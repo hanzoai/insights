@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     BuiltLogic,
@@ -16,7 +17,6 @@ import {
     selectors,
 } from 'kea'
 import { combineUrl } from 'kea-router'
-import insights from 'insights-js'
 
 import { IconCursor, IconFlag, IconServer } from '@hanzo/icons'
 
@@ -373,7 +373,7 @@ export interface taxonomicFilterLogicValues {
     groupType: any
     hadInteraction: boolean
     hideBehavioralCohorts: boolean
-    hogQLExpressionComponentProps: {
+    insightsQLExpressionComponentProps: {
         globals?: Record<string, any>
         showBreakdownLabelHint: boolean
     }
@@ -522,7 +522,7 @@ export interface taxonomicFilterLogicMeta {
         }
         allowNonCapturedEvents: (arg: any) => boolean
         hideBehavioralCohorts: (arg: any) => boolean
-        hogQLExpressionComponentProps: (
+        insightsQLExpressionComponentProps: (
             arg: any,
             arg2: any
         ) => {
@@ -562,7 +562,7 @@ export interface taxonomicFilterLogicMeta {
             maxContextOptions: any,
             hideBehavioralCohorts: boolean,
             endpointFilters: Record<string, any>,
-            hogQLExpressionComponentProps: {
+            insightsQLExpressionComponentProps: {
                 globals?: Record<string, any>
                 showBreakdownLabelHint: boolean
             },
@@ -891,13 +891,16 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
             () => [(_, props) => props.hideBehavioralCohorts],
             (hideBehavioralCohorts: boolean | undefined) => hideBehavioralCohorts ?? false,
         ],
-        hogQLExpressionComponentProps: [
-            () => [(_, props) => props.hogQLGlobals, (_, props) => props.hogQLExpressionShowBreakdownLabelHint],
+        insightsQLExpressionComponentProps: [
+            () => [
+                (_, props) => props.insightsQLGlobals,
+                (_, props) => props.insightsQLExpressionShowBreakdownLabelHint,
+            ],
             (
-                hogQLGlobals: Record<string, any> | undefined,
+                insightsQLGlobals: Record<string, any> | undefined,
                 showBreakdownLabelHint: boolean | undefined
             ): { globals?: Record<string, any>; showBreakdownLabelHint: boolean } => ({
-                globals: hogQLGlobals,
+                globals: insightsQLGlobals,
                 showBreakdownLabelHint: showBreakdownLabelHint ?? false,
             }),
             { resultEqualityCheck: objectsEqual },
@@ -932,7 +935,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                 s.maxContextOptions,
                 s.hideBehavioralCohorts,
                 s.endpointFilters,
-                s.hogQLExpressionComponentProps,
+                s.insightsQLExpressionComponentProps,
                 s.featureFlags,
             ],
             (
@@ -965,7 +968,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                 maxContextOptions: MaxContextTaxonomicFilterOption[],
                 hideBehavioralCohorts: boolean,
                 endpointFilters: Record<string, any> | undefined,
-                hogQLExpressionComponentProps: {
+                insightsQLExpressionComponentProps: {
                     globals?: Record<string, any>
                     showBreakdownLabelHint: boolean
                 },
@@ -1812,7 +1815,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         // to selectItem, so it never relied on getValue.
                         getValue: (option) => (option as { value?: TaxonomicFilterValue }).value ?? option.name,
                         getPopoverHeader: () => 'SQL expression',
-                        componentProps: { metadataSource, ...hogQLExpressionComponentProps },
+                        componentProps: { metadataSource, ...insightsQLExpressionComponentProps },
                     },
                     {
                         name: 'Replay',

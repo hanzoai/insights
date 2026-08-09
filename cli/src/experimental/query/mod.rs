@@ -40,7 +40,7 @@ pub struct MetadataQuery {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum MetadataLanguage {
-    #[serde(rename = "hogQL")]
+    #[serde(rename = "insightsQL")]
     InsightsQL,
 }
 

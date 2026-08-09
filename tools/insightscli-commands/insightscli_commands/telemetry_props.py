@@ -26,7 +26,7 @@ _INSIGHTS_DEV_CACHE_TTL_SECONDS = 30 * 86400  # 30 days
 
 # Created by hogland's guest overlay (script-env-materialise) on every hogbox
 # boot; the guest exposes no ambient env var, so this path is the marker.
-# Prefer baking HOGLI_ENVIRONMENT=hogland into the guest image -- this is the
+# Prefer baking INSIGHTSCLI_ENVIRONMENT=hogland into the guest image -- this is the
 # fallback until that ships.
 _HOGLAND_MARKER = Path("/var/lib/script")
 
@@ -36,7 +36,7 @@ _DEVBOX_ENV_MARKERS = ("CODER", "CODER_WORKSPACE_NAME")
 # Ambient markers set by agent harnesses in the shells they spawn. Ordered
 # most-specific first: insights-code drives claude/codex under the hood, so its
 # marker must win over theirs. Harnesses without an ambient marker (e.g.
-# non-sandboxed codex) can self-declare via HOGLI_AGENT instead.
+# non-sandboxed codex) can self-declare via INSIGHTSCLI_AGENT instead.
 _AGENT_ENV_MARKERS = (
     ("INSIGHTS_CODE_VERSION", "insights-code"),
     ("CLAUDECODE", "claude-code"),
@@ -54,9 +54,9 @@ def _detect_environment() -> str:
     """Classify where insightscli is running: ci, devbox, hogland, local, or a self-declared value.
 
     Environments without an ambient marker (e.g. agent sandboxes) should export
-    ``HOGLI_ENVIRONMENT`` in their bootstrap to self-declare.
+    ``INSIGHTSCLI_ENVIRONMENT`` in their bootstrap to self-declare.
     """
-    declared = _declared("HOGLI_ENVIRONMENT")
+    declared = _declared("INSIGHTSCLI_ENVIRONMENT")
     if declared:
         return declared
     # Unreachable while the CI gate disables telemetry entirely; kept so the
@@ -73,7 +73,7 @@ def _detect_environment() -> str:
 
 def _detect_agent() -> str | None:
     """Name of the agent harness driving this invocation, or None for a human."""
-    declared = _declared("HOGLI_AGENT")
+    declared = _declared("INSIGHTSCLI_AGENT")
     if declared:
         return declared
     for var, agent in _AGENT_ENV_MARKERS:
@@ -135,7 +135,7 @@ def _git_branch() -> str | None:
 
 
 def _infer_process_manager(command: str | None) -> str | None:
-    pm = os.environ.get("HOGLI_PROCESS_MANAGER")
+    pm = os.environ.get("INSIGHTSCLI_PROCESS_MANAGER")
     if pm:
         return os.path.basename(pm)
     if command == "start":

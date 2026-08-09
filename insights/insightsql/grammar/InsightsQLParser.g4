@@ -335,8 +335,8 @@ insightsqlxChildElement
 insightsqlxText : INSIGHTSQLX_TEXT_TEXT ;
 
 insightsqlxTagElement
-    : LT identifier insightsqlxTagAttribute* SLASH_GT                                          # HogqlxTagElementClosed
-    | LT identifier insightsqlxTagAttribute* GT insightsqlxChildElement* LT_SLASH identifier GT     # HogqlxTagElementNested
+    : LT identifier insightsqlxTagAttribute* SLASH_GT                                          # InsightsqlxTagElementClosed
+    | LT identifier insightsqlxTagAttribute* GT insightsqlxChildElement* LT_SLASH identifier GT     # InsightsqlxTagElementNested
     ;
 insightsqlxTagAttribute
     :   identifier EQ_SINGLE string

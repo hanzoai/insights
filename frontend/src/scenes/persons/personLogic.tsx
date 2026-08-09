@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, kea, key, path, props, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -12,7 +12,7 @@ import { Breadcrumb, PersonType } from '~/types'
 
 import { CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS } from 'products/customer_analytics/frontend/constants'
 
-import { getHogqlQueryStringForPersonId, parsePersonFromInsightsQLRow } from './person-utils'
+import { getInsightsqlQueryStringForPersonId, parsePersonFromInsightsQLRow } from './person-utils'
 
 export interface PersonLogicProps {
     id: string | undefined
@@ -154,7 +154,7 @@ export const personLogic = kea<personLogicType>([
                     const queryResponse = await api.query<InsightsQLQuery>(
                         {
                             kind: NodeKind.InsightsQLQuery,
-                            query: getHogqlQueryStringForPersonId(),
+                            query: getInsightsqlQueryStringForPersonId(),
                             values: { id: props.id },
                             tags: CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS,
                         },

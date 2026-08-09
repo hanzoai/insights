@@ -82,8 +82,8 @@ public:
     RuleSelectColumnExprListBeforeFrom = 74, RuleSelectColumnExprList = 75, 
     RuleSelectColumnExpr = 76, RuleColumnExpr = 77, RuleColumnExprValue = 78, 
     RuleColumnLambdaExpr = 79, RuleColumnsReplaceList = 80, RuleColumnsReplaceItem = 81, 
-    RuleHogqlxChildElement = 82, RuleHogqlxText = 83, RuleHogqlxTagElement = 84, 
-    RuleHogqlxTagAttribute = 85, RuleWithExprList = 86, RuleWithExpr = 87, 
+    RuleInsightsqlxChildElement = 82, RuleInsightsqlxText = 83, RuleInsightsqlxTagElement = 84, 
+    RuleInsightsqlxTagAttribute = 85, RuleWithExprList = 86, RuleWithExpr = 87, 
     RuleWithExprColumnNameList = 88, RuleColumnIdentifier = 89, RuleNestedIdentifier = 90, 
     RuleTableExpr = 91, RulePivotColumnList = 92, RulePivotColumn = 93, 
     RuleUnpivotColumnList = 94, RuleUnpivotColumn = 95, RuleColumnExprTupleOrSingle = 96, 
@@ -195,10 +195,10 @@ public:
   class ColumnLambdaExprContext;
   class ColumnsReplaceListContext;
   class ColumnsReplaceItemContext;
-  class HogqlxChildElementContext;
-  class HogqlxTextContext;
-  class HogqlxTagElementContext;
-  class HogqlxTagAttributeContext;
+  class InsightsqlxChildElementContext;
+  class InsightsqlxTextContext;
+  class InsightsqlxTagElementContext;
+  class InsightsqlxTagAttributeContext;
   class WithExprListContext;
   class WithExprContext;
   class WithExprColumnNameListContext;
@@ -610,7 +610,7 @@ public:
     antlr4::tree::TerminalNode *EOF();
     SelectSetStmtContext *selectSetStmt();
     SelectStmtContext *selectStmt();
-    HogqlxTagElementContext *insightsqlxTagElement();
+    InsightsqlxTagElementContext *insightsqlxTagElement();
     antlr4::tree::TerminalNode *SEMICOLON();
 
 
@@ -2160,7 +2160,7 @@ public:
   public:
     ColumnExprTagElementContext(ColumnExprValueContext *ctx);
 
-    HogqlxTagElementContext *insightsqlxTagElement();
+    InsightsqlxTagElementContext *insightsqlxTagElement();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -2856,12 +2856,12 @@ public:
 
   ColumnsReplaceItemContext* columnsReplaceItem();
 
-  class  HogqlxChildElementContext : public antlr4::ParserRuleContext {
+  class  InsightsqlxChildElementContext : public antlr4::ParserRuleContext {
   public:
-    HogqlxChildElementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    InsightsqlxChildElementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    HogqlxTagElementContext *insightsqlxTagElement();
-    HogqlxTextContext *insightsqlxText();
+    InsightsqlxTagElementContext *insightsqlxTagElement();
+    InsightsqlxTextContext *insightsqlxText();
     antlr4::tree::TerminalNode *LBRACE();
     ColumnExprContext *columnExpr();
     antlr4::tree::TerminalNode *RBRACE();
@@ -2871,11 +2871,11 @@ public:
    
   };
 
-  HogqlxChildElementContext* insightsqlxChildElement();
+  InsightsqlxChildElementContext* insightsqlxChildElement();
 
-  class  HogqlxTextContext : public antlr4::ParserRuleContext {
+  class  InsightsqlxTextContext : public antlr4::ParserRuleContext {
   public:
-    HogqlxTextContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    InsightsqlxTextContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *INSIGHTSQLX_TEXT_TEXT();
 
@@ -2884,14 +2884,14 @@ public:
    
   };
 
-  HogqlxTextContext* insightsqlxText();
+  InsightsqlxTextContext* insightsqlxText();
 
-  class  HogqlxTagElementContext : public antlr4::ParserRuleContext {
+  class  InsightsqlxTagElementContext : public antlr4::ParserRuleContext {
   public:
-    HogqlxTagElementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    InsightsqlxTagElementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
-    HogqlxTagElementContext() = default;
-    void copyFrom(HogqlxTagElementContext *context);
+    InsightsqlxTagElementContext() = default;
+    void copyFrom(InsightsqlxTagElementContext *context);
     using antlr4::ParserRuleContext::copyFrom;
 
     virtual size_t getRuleIndex() const override;
@@ -2899,22 +2899,22 @@ public:
    
   };
 
-  class  HogqlxTagElementClosedContext : public HogqlxTagElementContext {
+  class  InsightsqlxTagElementClosedContext : public InsightsqlxTagElementContext {
   public:
-    HogqlxTagElementClosedContext(HogqlxTagElementContext *ctx);
+    InsightsqlxTagElementClosedContext(InsightsqlxTagElementContext *ctx);
 
     antlr4::tree::TerminalNode *LT();
     IdentifierContext *identifier();
     antlr4::tree::TerminalNode *SLASH_GT();
-    std::vector<HogqlxTagAttributeContext *> insightsqlxTagAttribute();
-    HogqlxTagAttributeContext* insightsqlxTagAttribute(size_t i);
+    std::vector<InsightsqlxTagAttributeContext *> insightsqlxTagAttribute();
+    InsightsqlxTagAttributeContext* insightsqlxTagAttribute(size_t i);
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  HogqlxTagElementNestedContext : public HogqlxTagElementContext {
+  class  InsightsqlxTagElementNestedContext : public InsightsqlxTagElementContext {
   public:
-    HogqlxTagElementNestedContext(HogqlxTagElementContext *ctx);
+    InsightsqlxTagElementNestedContext(InsightsqlxTagElementContext *ctx);
 
     antlr4::tree::TerminalNode *LT();
     std::vector<IdentifierContext *> identifier();
@@ -2922,19 +2922,19 @@ public:
     std::vector<antlr4::tree::TerminalNode *> GT();
     antlr4::tree::TerminalNode* GT(size_t i);
     antlr4::tree::TerminalNode *LT_SLASH();
-    std::vector<HogqlxTagAttributeContext *> insightsqlxTagAttribute();
-    HogqlxTagAttributeContext* insightsqlxTagAttribute(size_t i);
-    std::vector<HogqlxChildElementContext *> insightsqlxChildElement();
-    HogqlxChildElementContext* insightsqlxChildElement(size_t i);
+    std::vector<InsightsqlxTagAttributeContext *> insightsqlxTagAttribute();
+    InsightsqlxTagAttributeContext* insightsqlxTagAttribute(size_t i);
+    std::vector<InsightsqlxChildElementContext *> insightsqlxChildElement();
+    InsightsqlxChildElementContext* insightsqlxChildElement(size_t i);
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  HogqlxTagElementContext* insightsqlxTagElement();
+  InsightsqlxTagElementContext* insightsqlxTagElement();
 
-  class  HogqlxTagAttributeContext : public antlr4::ParserRuleContext {
+  class  InsightsqlxTagAttributeContext : public antlr4::ParserRuleContext {
   public:
-    HogqlxTagAttributeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    InsightsqlxTagAttributeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     IdentifierContext *identifier();
     antlr4::tree::TerminalNode *EQ_SINGLE();
@@ -2948,7 +2948,7 @@ public:
    
   };
 
-  HogqlxTagAttributeContext* insightsqlxTagAttribute();
+  InsightsqlxTagAttributeContext* insightsqlxTagAttribute();
 
   class  WithExprListContext : public antlr4::ParserRuleContext {
   public:
@@ -3078,7 +3078,7 @@ public:
   public:
     TableExprTagContext(TableExprContext *ctx);
 
-    HogqlxTagElementContext *insightsqlxTagElement();
+    InsightsqlxTagElementContext *insightsqlxTagElement();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };

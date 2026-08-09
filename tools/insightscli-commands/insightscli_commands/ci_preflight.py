@@ -12,7 +12,7 @@ migration collisions, generated-file drift, CI changes on main).
     insightscli ci:preflight --strict   # exit non-zero on failed checks (the pre-push hook)
     insightscli ci:preflight --against origin/main   # diff against an explicit base
 
-``HOGLI_PREFLIGHT_DISABLED=1`` makes the command (and thus the pre-push hook) a
+``INSIGHTSCLI_PREFLIGHT_DISABLED=1`` makes the command (and thus the pre-push hook) a
 no-op — the rollout/emergency kill switch (still emits a run event so opt-out
 prevalence is measurable).
 
@@ -460,9 +460,9 @@ def _staleness(branch_files: list[str]) -> tuple[Status, str, dict[str, Any]]:
     age_days = _commit_age_days(merge_base)  # merge-base age ≈ time since the branch last synced with main
     conflicts = _merge_conflicts()
     risks = _staleness_risks(branch_files, _changed_on_trunk(merge_base), conflicts)
-    if behind >= _env_int("HOGLI_PREFLIGHT_STALE_COMMITS", _STALE_COMMITS_DEFAULT):
+    if behind >= _env_int("INSIGHTSCLI_PREFLIGHT_STALE_COMMITS", _STALE_COMMITS_DEFAULT):
         risks.append(f"{behind} commits (≈ PRs) behind")
-    elif age_days is not None and age_days >= _env_int("HOGLI_PREFLIGHT_STALE_DAYS", _STALE_DAYS_DEFAULT):
+    elif age_days is not None and age_days >= _env_int("INSIGHTSCLI_PREFLIGHT_STALE_DAYS", _STALE_DAYS_DEFAULT):
         risks.append(f"last synced {age_days}d ago")
 
     props: dict[str, Any] = {
@@ -527,13 +527,13 @@ def _emit_telemetry(summary: dict[str, Any]) -> None:
 @click.option("--against", default=None, help="Diff against this base ref instead of the branch default.")
 @click.option("--json", "as_json", is_flag=True, help="Emit the result summary as JSON.")
 def ci_preflight(do_fix: bool, strict: bool, against: str | None, as_json: bool) -> None:
-    if os.environ.get("HOGLI_PREFLIGHT_DISABLED", "").lower() in {"1", "true"}:
+    if os.environ.get("INSIGHTSCLI_PREFLIGHT_DISABLED", "").lower() in {"1", "true"}:
         disabled_summary: dict[str, Any] = {"mode": "disabled", "results": []}
         if as_json:
             click.echo(json.dumps(disabled_summary))
         else:
             click.secho(
-                "  ci:preflight disabled by operator (HOGLI_PREFLIGHT_DISABLED) — intentional; "
+                "  ci:preflight disabled by operator (INSIGHTSCLI_PREFLIGHT_DISABLED) — intentional; "
                 "do not unset. Nothing to check, CI remains the gate.",
                 fg="yellow",
             )

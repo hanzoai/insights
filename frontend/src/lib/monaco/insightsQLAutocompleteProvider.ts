@@ -92,7 +92,7 @@ const emptyCompletionList = (): languages.CompletionList => ({
     incomplete: false,
 })
 
-export const hogQLAutocompleteProvider = (type: HogLanguage): languages.CompletionItemProvider => ({
+export const insightsQLAutocompleteProvider = (type: HogLanguage): languages.CompletionItemProvider => ({
     triggerCharacters: [' ', ',', '.', '{'],
     provideCompletionItems: async (model, position) => {
         const logic: BuiltLogic<codeEditorLogicType> | undefined = (model as any).codeEditorLogic

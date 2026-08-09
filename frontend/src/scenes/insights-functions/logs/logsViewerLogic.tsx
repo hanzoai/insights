@@ -32,7 +32,13 @@ export const LOG_GROUP_TOTAL_LOGS_LIMIT = 5000
 
 export type LogsViewerLogicProps = {
     logicKey?: string
-    sourceType: 'insights_function' | 'hog_flow' | 'batch_exports' | 'external_data_jobs' | 'data_modeling_run' | 'endpoints'
+    sourceType:
+        | 'insights_function'
+        | 'hog_flow'
+        | 'batch_exports'
+        | 'external_data_jobs'
+        | 'data_modeling_run'
+        | 'endpoints'
     sourceId: string
     groupByInstanceId?: boolean
     searchGroups?: string[]
@@ -458,7 +464,7 @@ export type logsViewerLogicType = MakeLogicType<
 >
 
 export const logsViewerLogic = kea<logsViewerLogicType>([
-    path((key) => ['scenes', 'pipeline', 'hogfunctions', 'logs', 'logsViewerLogic', key]),
+    path((key) => ['scenes', 'pipeline', 'insightsfunctions', 'logs', 'logsViewerLogic', key]),
     props({} as LogsViewerLogicProps), // TODO: Remove `stage` from props, it isn't needed here for anything
     key(({ sourceType, sourceId, logicKey }) => logicKey || `${sourceType}:${sourceId}`),
     actions({
