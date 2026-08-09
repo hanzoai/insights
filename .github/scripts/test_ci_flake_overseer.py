@@ -327,7 +327,7 @@ def test_capture_events_noop_without_api_key(monkeypatch: pytest.MonkeyPatch) ->
 def test_capture_events_noop_without_events(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(ci_flake_overseer.urllib.request, "urlopen", _raise_if_called)
 
-    capture_events("phc_test", "https://us.i.hanzo.ai", [])
+    capture_events("pk-test", "https://us.i.hanzo.ai", [])
 
 
 def test_capture_events_posts_batch(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -348,10 +348,10 @@ def test_capture_events_posts_batch(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(ci_flake_overseer.urllib.request, "urlopen", fake_urlopen)
     events = [{"event": DECISION_EVENT, "distinct_id": "Insights/insights", "properties": {}}]
 
-    capture_events("phc_test", "https://us.i.hanzo.ai/", events)
+    capture_events("pk-test", "https://us.i.hanzo.ai/", events)
 
     assert captured["url"] == "https://us.i.hanzo.ai/batch/"
-    assert captured["body"] == {"api_key": "phc_test", "batch": events}
+    assert captured["body"] == {"api_key": "pk-test", "batch": events}
 
 
 def test_decision_is_minimal_dataclass() -> None:

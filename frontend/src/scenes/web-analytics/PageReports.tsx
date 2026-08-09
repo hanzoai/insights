@@ -1,7 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import * as xRayPng from '@hanzo/brand/hoggies/png/x-ray'
-
 import { pngHoggie } from 'lib/brand/hoggies'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'
@@ -13,7 +11,7 @@ import { PathCleaningToggle } from './PathCleaningToggle'
 import { Tiles } from './WebAnalyticsDashboard'
 import { WebAnalyticsCompareFilter, WebAnalyticsDomainSelector } from './WebAnalyticsFilters'
 
-const MascotXRay = pngHoggie(xRayPng)
+const MascotXRay = pngHoggie()
 
 function NoUrlSelectedMessage(): JSX.Element {
     return (

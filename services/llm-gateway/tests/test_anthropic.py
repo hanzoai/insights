@@ -170,7 +170,7 @@ class TestAnthropicMessagesEndpoint:
 
     @pytest.fixture
     def provider_request_headers(self, provider) -> dict[str, str]:
-        headers = {"Authorization": "Bearer phx_test_key"}
+        headers = {"Authorization": "Bearer sk-test_key"}
         if provider == "bedrock":
             headers["X-Insights-Provider"] = "bedrock"
         return headers
@@ -207,7 +207,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             "/v1/messages",
             json=invalid_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
         assert response.status_code == 422
         assert expected_field in str(response.json())
@@ -254,7 +254,7 @@ class TestAnthropicMessagesEndpoint:
                 "model": "claude-opus-4-8",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -280,7 +280,7 @@ class TestAnthropicMessagesEndpoint:
                 "messages": [{"role": "user", "content": "Hello"}],
                 "context_management": {"edits": [{"type": "clear_thinking_20251015", "keep": "all"}]},
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -523,7 +523,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             f"/{product}/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -548,7 +548,7 @@ class TestAnthropicMessagesEndpoint:
                 "provider": "bedrock",
                 "use_bedrock_fallback": True,
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -584,7 +584,7 @@ class TestAnthropicMessagesEndpoint:
                         "messages": [{"role": "user", "content": "Hello"}],
                     },
                     headers={
-                        "Authorization": "Bearer phx_test_key",
+                        "Authorization": "Bearer sk-test_key",
                         "X-Insights-Provider": "cloudflare",
                     },
                 )
@@ -627,7 +627,7 @@ class TestAnthropicMessagesEndpoint:
                         ],
                     },
                     # No X-Insights-Provider header -> defaults to anthropic, as a claude-runtime scout sends.
-                    headers={"Authorization": "Bearer phx_test_key"},
+                    headers={"Authorization": "Bearer sk-test_key"},
                 )
 
         assert response.status_code == 200
@@ -672,7 +672,7 @@ class TestAnthropicMessagesEndpoint:
                         "stream": True,
                     },
                     headers={
-                        "Authorization": "Bearer phx_test_key",
+                        "Authorization": "Bearer sk-test_key",
                         "X-Insights-Provider": "cloudflare",
                     },
                 ) as response:
@@ -698,7 +698,7 @@ class TestAnthropicMessagesEndpoint:
                         "messages": [{"role": "user", "content": "Hello"}],
                     },
                     headers={
-                        "Authorization": "Bearer phx_test_key",
+                        "Authorization": "Bearer sk-test_key",
                         "X-Insights-Provider": "cloudflare",
                     },
                 )
@@ -719,7 +719,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             "/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "vertex"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "vertex"},
         )
 
         assert response.status_code == 400
@@ -734,7 +734,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             "/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Use-Bedrock-Fallback": "1"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Use-Bedrock-Fallback": "1"},
         )
 
         assert response.status_code == 400
@@ -1146,7 +1146,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=invalid_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
         assert response.status_code == 422
         assert expected_field in str(response.json())
@@ -1175,7 +1175,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -1235,7 +1235,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=body_with_extras,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -1265,7 +1265,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 503
@@ -1311,7 +1311,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == error_status
@@ -1340,7 +1340,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/wizard/v1/messages/count_tokens",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -1362,7 +1362,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             f"/{product}/v1/messages/count_tokens",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -1393,7 +1393,7 @@ class TestAnthropicCountTokensEndpoint:
             response = authenticated_client.post(
                 "/v1/messages/count_tokens",
                 json=valid_request_body,
-                headers={"Authorization": "Bearer phx_test_key"},
+                headers={"Authorization": "Bearer sk-test_key"},
             )
 
             assert response.status_code == 200
@@ -1427,7 +1427,7 @@ class TestAnthropicCountTokensEndpoint:
                 "provider": "bedrock",
                 "use_bedrock_fallback": True,
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -1444,7 +1444,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "vertex"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "vertex"},
         )
 
         assert response.status_code == 400
@@ -1461,7 +1461,7 @@ class TestAnthropicCountTokensEndpoint:
                 "model": "@cf/moonshotai/kimi-k2.6",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "cloudflare"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "cloudflare"},
         )
 
         assert response.status_code == 200
@@ -1485,7 +1485,7 @@ class TestAnthropicCountTokensEndpoint:
                     "messages": [{"role": "user", "content": "Hello"}],
                 },
                 # No X-Insights-Provider header -> defaults to anthropic, as a claude-runtime scout sends.
-                headers={"Authorization": "Bearer phx_test_key"},
+                headers={"Authorization": "Bearer sk-test_key"},
             )
 
         assert response.status_code == 200
@@ -1504,7 +1504,7 @@ class TestAnthropicCountTokensEndpoint:
                     "model": "moonshotai/kimi-k3",
                     "messages": [{"role": "user", "content": "Hello"}],
                 },
-                headers={"Authorization": "Bearer phx_test_key"},
+                headers={"Authorization": "Bearer sk-test_key"},
             )
 
         assert response.status_code == 200
@@ -1522,7 +1522,7 @@ class TestAnthropicCountTokensEndpoint:
                 "model": "@cf/meta/llama-3.3-70b-instruct",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "cloudflare"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "cloudflare"},
         )
 
         assert response.status_code == 400
@@ -1537,7 +1537,7 @@ class TestAnthropicCountTokensEndpoint:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Use-Bedrock-Fallback": "1"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Use-Bedrock-Fallback": "1"},
         )
 
         assert response.status_code == 400
@@ -1606,7 +1606,7 @@ class TestAnthropicCircuitBreakerIntegration:
                 "/v1/messages",
                 json=request_body,
                 headers={
-                    "Authorization": "Bearer phx_test_key",
+                    "Authorization": "Bearer sk-test_key",
                     "X-Insights-Use-Bedrock-Fallback": "true",
                 },
             )
@@ -1637,7 +1637,7 @@ class TestAnthropicCircuitBreakerIntegration:
         response = authenticated_client.post(
             "/v1/messages",
             json=request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -1664,7 +1664,7 @@ class TestAnthropicCircuitBreakerIntegration:
             "/v1/messages",
             json=request_body,
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "true",
             },
         )
@@ -1692,7 +1692,7 @@ class TestAnthropicCircuitBreakerIntegration:
         response = authenticated_client.post(
             "/v1/messages",
             json=request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 503
@@ -1716,7 +1716,7 @@ class TestAnthropicCircuitBreakerIntegration:
         response = authenticated_client.post(
             "/v1/messages",
             json=request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -1740,7 +1740,7 @@ class TestAnthropicCircuitBreakerIntegration:
         response = authenticated_client.post(
             "/v1/messages",
             json=request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 429
@@ -1773,7 +1773,7 @@ class TestAnthropicCircuitBreakerIntegration:
                 "/v1/messages",
                 json=request_body,
                 headers={
-                    "Authorization": "Bearer phx_test_key",
+                    "Authorization": "Bearer sk-test_key",
                     "X-Insights-Use-Bedrock-Fallback": "true",
                 },
             )
@@ -1818,7 +1818,7 @@ class TestAnthropicCircuitBreakerIntegration:
                 "/v1/messages",
                 json=request_body,
                 headers={
-                    "Authorization": "Bearer phx_test_key",
+                    "Authorization": "Bearer sk-test_key",
                     "X-Insights-Use-Bedrock-Fallback": "true",
                 },
             )
@@ -1859,7 +1859,7 @@ class TestAnthropicCircuitBreakerIntegration:
                 "/v1/messages",
                 json=request_body,
                 headers={
-                    "Authorization": "Bearer phx_test_key",
+                    "Authorization": "Bearer sk-test_key",
                     "X-Insights-Use-Bedrock-Fallback": "true",
                 },
             )
@@ -1889,7 +1889,7 @@ class TestAnthropicCircuitBreakerIntegration:
         response = authenticated_client.post(
             "/v1/messages",
             json=request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -1912,7 +1912,7 @@ class TestAnthropicCircuitBreakerIntegration:
             "/v1/messages",
             json=request_body,
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "true",
             },
         )
@@ -1942,7 +1942,7 @@ class TestAnthropicCircuitBreakerIntegration:
             "/v1/messages",
             json=request_body,
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "true",
             },
         )

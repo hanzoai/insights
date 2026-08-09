@@ -136,10 +136,7 @@ export default defineConfig(({ mode }) => {
         optimizeDeps: {
             include: ['react', 'react-dom', 'buffer'],
             // snappy-wasm: don't pre-bundle so the WASM file stays with the JS.
-            // @hanzo/brand: its PNG stubs resolve assets via `new URL(..., import.meta.url)`,
-            // which pre-bundling rewrites to .vite/deps/ where the images don't exist — hoggie
-            // art silently 404s in dev serve (production builds are unaffected).
-            exclude: ['snappy-wasm', '@hanzo/brand'],
+            exclude: ['snappy-wasm'],
         },
     }
 })

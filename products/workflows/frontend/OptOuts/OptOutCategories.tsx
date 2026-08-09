@@ -1,9 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
-import { IconDownload, IconPlus } from '@hanzo/icons'
 import { Button, Collapse, Dialog, Skeleton, Tag } from '@hanzo/elements'
+import { IconDownload, IconPlus } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -15,7 +14,7 @@ import { NewCategoryModal } from './NewCategoryModal'
 import { optOutCategoriesLogic } from './optOutCategoriesLogic'
 import { OptOutList } from './OptOutList'
 
-const MascotConstruction2 = pngHoggie(construction2Png)
+const MascotConstruction2 = pngHoggie()
 
 interface MessageCategory {
     id: string

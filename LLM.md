@@ -23,10 +23,11 @@ no separate ingest route exists or is needed.
 Branding: zero upstream art. Workflow template cards, choosers, auth
 wallpaper, previews and fixtures carry no posthog cloudinary; the CSP does
 not allow that host; the mascot easter egg is deleted with its sprite
-package; `insights-js` resolves to `@hanzo/insights` for every consumer —
-the react wrapper's peer included, via `common/sdk-peer` (a workspace package
-carrying the peer's name). The wrapper package's own export names
-(`PostHog*`) are aliased at import sites listed in `bin/debrand`'s allowlist.
+package; `insights-js` resolves to `@hanzo/insights` for every consumer.
+The react wrapper is our own `@hanzo/insights-react`, whose peer is
+`@hanzo/insights` by name, so it needs no shim standing in for an upstream
+peer and its exports are `Insights*` — the aliased `PostHog*` import names,
+and the allowlist entries that excused them, are gone.
 
 Known debt, deliberate: ~85 type-level errors under `tsgo --noEmit`
 (size-prop enums, generated deep-relative imports in a few products,
@@ -37,17 +38,18 @@ imports; they are inert (not in INSTALLED_APPS).
 
 ## Django → Go observability map (both planes live)
 
-| Django surface | Go replacement | Status |
-|---|---|---|
-| LLM analytics (`products/llm_analytics`, `api/llm_proxy`) | `/v1/evals/*` + `/v1/analytics/llm/*` | **evals LIVE**; analytics/llm backend = GAP (below) |
-| Evals / datasets / scores | `/v1/evals/{datasets,dataset-items,evaluators,score-configs,scores,traces,runs}` | **LIVE** (`cloud/clients/eval`) |
-| Trace/observation query | `/v1/evals/traces` (+ `hanzo.traces`/`hanzo.observations`) | **LIVE** |
-| Product / web / revenue / marketing / customer analytics, insights, dashboards, funnels, retention, trends | `/v1/analytics/{overview,timeseries,realtime,top/*}` | **GAP** — backend not shipped (below) |
-| Org / user / project / `personal_api_keys` / `login` | **Hanzo IAM** (`hanzo.id`, OIDC `owner`) + `/v1/projects` | covered by IAM (auth/tenancy, not observability) |
-| Data warehouse / data_modeling / batch_exports | Datastore warehouse (`hanzoai/datastore`) direct | substrate retained |
-| Feature flags, early access, surveys, experiments, product tours, session replay, error tracking, CDP, notebooks, groups, user interviews | — | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
+| Django surface                                                                                                                            | Go replacement                                                                   | Status                                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| LLM analytics (`products/llm_analytics`, `api/llm_proxy`)                                                                                 | `/v1/evals/*` + `/v1/analytics/llm/*`                                            | **evals LIVE**; analytics/llm backend = GAP (below)                                                                                         |
+| Evals / datasets / scores                                                                                                                 | `/v1/evals/{datasets,dataset-items,evaluators,score-configs,scores,traces,runs}` | **LIVE** (`cloud/clients/eval`)                                                                                                             |
+| Trace/observation query                                                                                                                   | `/v1/evals/traces` (+ `hanzo.traces`/`hanzo.observations`)                       | **LIVE**                                                                                                                                    |
+| Product / web / revenue / marketing / customer analytics, insights, dashboards, funnels, retention, trends                                | `/v1/analytics/{overview,timeseries,realtime,top/*}`                             | **GAP** — backend not shipped (below)                                                                                                       |
+| Org / user / project / `personal_api_keys` / `login`                                                                                      | **Hanzo IAM** (`hanzo.id`, OIDC `owner`) + `/v1/projects`                        | covered by IAM (auth/tenancy, not observability)                                                                                            |
+| Data warehouse / data_modeling / batch_exports                                                                                            | Datastore warehouse (`hanzoai/datastore`) direct                                 | substrate retained                                                                                                                          |
+| Feature flags, early access, surveys, experiments, product tours, session replay, error tracking, CDP, notebooks, groups, user interviews | —                                                                                | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
 
 ### Honest GAPs (must port before claiming full parity)
+
 1. **`cloud/clients/analytics` is NOT shipped.** `console2` allow-lists and calls
    `/v1/analytics/{overview,timeseries,realtime,llm/overview}` but the cloud
    subsystem does not exist → `GET /v1/analytics/health` → `404`. The LLM-lens
@@ -62,7 +64,7 @@ imports; they are inert (not in INSTALLED_APPS).
 
 Events are ingested by the **cloud Go binary**, not by the Rust capture service:
 
-```
+```text
 insights.hanzo.ai/{e,/e/,v1/e,/v1/e/,batch,capture}   (ingress prio 150)
   → middleware insights-cloud-ingest-rewrite (fixed replacePath)
   → service api-hanzo-ai → cloud.hanzo.svc:8000
@@ -104,7 +106,7 @@ false, so re-measure before repeating any of it:
   `insights-plugin`, `insights-livestream`, against services `kafka`, `kv`,
   `datastore`, `s3`.
 
-What is still absent is a *dedicated* write door. `rust/capture` has
+What is still absent is a _dedicated_ write door. `rust/capture` has
 `CaptureMode::Recordings` in source but NO workflow builds it — `.hanzo/workflows`
 builds exactly three images (`insights`, `insights-plugin`, `insights-livestream`).
 `/v1/s` no longer 502s at a retired capture service; it falls through to the
@@ -188,11 +190,11 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
 A `_v2` is a confession — two tables are the same thing and nobody deleted one.
 The fork brought nine into the `insights` database:
 
-| name | disposition |
-|---|---|
-| `query_log_archive_v2` | **retired** by `0230` — renamed to `retired.query_log_archive` |
-| `kafka_log_entries_v3`, `log_entries_v3_mv` | **retired** by `0230` — the clean pair takes over |
-| the six `raw_sessions_v3*` | **held** — the sessions rewrite is mid-flight |
+| name                                        | disposition                                                    |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| `query_log_archive_v2`                      | **retired** by `0230` — renamed to `retired.query_log_archive` |
+| `kafka_log_entries_v3`, `log_entries_v3_mv` | **retired** by `0230` — the clean pair takes over              |
+| the six `raw_sessions_v3*`                  | **held** — the sessions rewrite is mid-flight                  |
 
 `bin/tables` is the gate. `--check` reads source and is stdlib-only (no Django,
 no warehouse, no services, runs in `env -i`); `--live` reads `system.tables`.
@@ -220,9 +222,9 @@ make writing the cleanup down the thing that fails the build.
 **`0230` never drops a row.** `query_log_archive_v2` holds 575 rows, so it is
 MOVED — a cross-database `RENAME` between Atomic databases is metadata-only.
 The version distinction becomes a NAMESPACE distinction, which is the rule
-itself: `retired.query_log_archive` needs no number. The two log_entries objects
+itself: `retired.query_log_archive` needs no number. The two log*entries objects
 dropped are a Kafka table and a view, neither of which stores anything. Note
-`max_table_size_to_drop = 0` (used in `0201`) *disables* the size guard — it is
+`max_table_size_to_drop = 0` (used in `0201`) \_disables* the size guard — it is
 not a safety rail.
 
 **The duplicate consumer, found on the way.** `kafka_log_entries` and
@@ -272,10 +274,10 @@ reads. What a reader is SHOWN is ours — "0 users", "Users & groups".
 **Three views, one source.** `event_mv`, `user_mv` and `user_alias_mv` all
 project `event.event` through the same identity expressions:
 
-| view | writes | fact |
-|---|---|---|
-| `event_mv` | `writable_events` | this event happened |
-| `user_mv` | `writable_person` | this user exists |
+| view            | writes                                  | fact                      |
+| --------------- | --------------------------------------- | ------------------------- |
+| `event_mv`      | `writable_events`                       | this event happened       |
+| `user_mv`       | `writable_person`                       | this user exists          |
 | `user_alias_mv` | `writable_person_distinct_id_overrides` | this visitor IS that user |
 
 The alias is what makes signing up non-destructive: a visitor's pageviews are
@@ -333,8 +335,10 @@ whole class of bug survivable in the first place: the source read `toInt64(0)`
 while the warehouse ran `toInt64(1)`, and nothing reconciles the two but running
 `manage.py migrate_datastore`. Check the warehouse, not the file:
 
-    SELECT extract(create_table_query, 'toInt64\([0-9]+\)') FROM system.tables
-    WHERE database = 'insights' AND name = 'event_mv'
+```sql
+SELECT extract(create_table_query, 'toInt64\([0-9]+\)') FROM system.tables
+WHERE database = 'insights' AND name = 'event_mv'
+```
 
 ### Routing is derived, and `route_orgs` is its only writer
 
@@ -394,6 +398,7 @@ are imported by app code — they are NOT migrations; never delete them in a squ
 the squash.
 
 ### Guard + adoption
+
 - **Fresh install / CI guard**: `manage.py migrate` from zero on a scratch
   Postgres must reach head clean (validated: 246/246 tables, 0 missing columns,
   index parity).
@@ -477,19 +482,19 @@ The step below is right, but it depended on three things nobody had checked, and
 missing any one of them makes a build publish an image and pin nothing — while
 every dashboard stays green, because the BUILD succeeded:
 
- 1. `KMS_CLIENT_ID` / `KMS_CLIENT_SECRET` as ORG-level forge action secrets.
-    They were absent. `hanzo` had `GHCR_TOKEN`, `GHCR_USER`, `GH_PAT`, `OCI_*`
-    and nothing else — which is exactly why builds worked and deploys did not.
-    Repo-level secrets on `hanzo/insights` are empty; everything is inherited.
-    Check with: `GET /v1/orgs/hanzo/actions/secrets` (names only, never values).
- 2. A VALID `UNIVERSE_PIN_TOKEN` in KMS. The one provisioned there matched no
-    live token in the forge and answered 401 on every username, so even a
-    successful KMS login could not have pushed.
- 3. The token must be able to push to `hanzo/universe`. Verify without pushing:
-    `curl -o /dev/null -w '%{http_code}' -u "z:$TOKEN" \
-      https://git.hanzo.ai/hanzo/universe/info/refs?service=git-receive-pack`
-    200 means yes; 401 means the token is dead; 403 means the repo is a PULL
-    MIRROR and cannot be pushed to at all (several `hanzoai/*` repos are).
+1. `KMS_CLIENT_ID` / `KMS_CLIENT_SECRET` as ORG-level forge action secrets.
+   They were absent. `hanzo` had `GHCR_TOKEN`, `GHCR_USER`, `GH_PAT`, `OCI_*`
+   and nothing else — which is exactly why builds worked and deploys did not.
+   Repo-level secrets on `hanzo/insights` are empty; everything is inherited.
+   Check with: `GET /v1/orgs/hanzo/actions/secrets` (names only, never values).
+2. A VALID `UNIVERSE_PIN_TOKEN` in KMS. The one provisioned there matched no
+   live token in the forge and answered 401 on every username, so even a
+   successful KMS login could not have pushed.
+3. The token must be able to push to `hanzo/universe`. Verify without pushing:
+   `curl -o /dev/null -w '%{http_code}' -u "z:$TOKEN" \
+https://git.hanzo.ai/hanzo/universe/info/refs?service=git-receive-pack`
+   200 means yes; 401 means the token is dead; 403 means the repo is a PULL
+   MIRROR and cannot be pushed to at all (several `hanzoai/*` repos are).
 
 The lesson worth keeping: `1.52.37`, `.38` and `.39` all built and published
 while production sat on `.36`. A green build is not a deploy, and the only
@@ -527,7 +532,9 @@ Listing `frontend` alone does not include packages nested inside it.
 
 Before changing either, run the exact line the Dockerfile runs:
 
-    CI=1 pnpm --filter=@hanzo/frontend... install --no-frozen-lockfile
+```bash
+CI=1 pnpm --filter=@hanzo/frontend... install --no-frozen-lockfile
+```
 
 ## Verify a deploy by the POD image, never the Deployment spec
 
@@ -564,7 +571,9 @@ before believing it; nothing in CI reads letterforms.
 **What is NOT fixed, and it is the widest surface of the lot.** The browser SDK
 still ships the upstream mark, and we serve it:
 
-    https://insights.hanzo.ai/static/array.full.js   200, contains the hedgehog
+```text
+https://insights.hanzo.ai/static/array.full.js   200, contains the upstream mark
+```
 
 It comes from `@hanzo/insights` (1.358.1), copied into `frontend/dist` by
 `frontend/bin/copy-insights-js`, and it renders `Tour by <mark>` and

@@ -1,8 +1,8 @@
 """
 Gateway credential HyperCache — projection for the Go ai-gateway's auth path (RFC #1103).
 
-One blob per phs_ project secret key / pha_ OAuth token, keyed by the credential's hash
-so the secret never sits in a Redis key. Public phc_ project tokens can't dispatch.
+One blob per sk- project secret key / at- OAuth token, keyed by the credential's hash
+so the secret never sits in a Redis key. Public pk- project tokens can't dispatch.
 
     Key: cache/team_tokens_hashed/<sha256$hex>/team_metadata/gateway_credential.json
     Body: {team_id, project_token, scopes, billing_mode, revoked_at, overspend_allowance_usd?}
@@ -10,8 +10,8 @@ so the secret never sits in a Redis key. Public phc_ project tokens can't dispat
 The hash matches Django's hash_key_value(token, mode="sha256") = "sha256$"+hex, which the
 gateway derives identically. A credential holding llm_gateway:read attributes to its team
 directly (no per-gateway entity); team_id is the billing-attribution dimension. project_token
-is the team's phc_ key, carried only so the gateway can stamp the $ai_generation envelope —
-it never authorizes dispatch; the phs_/pha_ secret does. The gateway fails closed on a
+is the team's pk- key, carried only so the gateway can stamp the $ai_generation envelope —
+it never authorizes dispatch; the sk-/at- secret does. The gateway fails closed on a
 missing field, so a blob is written only for a fully-resolvable credential and cleared
 otherwise. Redis-only: a ~1h OAuth token would outlive an S3 lifecycle and resurrect on a
 cold Redis.
@@ -417,7 +417,7 @@ def _decode_last_used_marks(raw: dict[Any, Any]) -> dict[str, int]:
 def drain_gateway_credential_last_used() -> int:
     """Stamp ProjectSecretAPIKey.last_used_at from the gateway-coalesced Valkey hash.
 
-    phs_ only (OAuthAccessToken has no such field). bulk_update bypasses signals,
+    sk- only (OAuthAccessToken has no such field). bulk_update bypasses signals,
     like the authenticator's .update(), to avoid churning the cache. Returns rows updated.
     """
     if not settings.AI_GATEWAY_REDIS_URL:

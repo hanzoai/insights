@@ -240,7 +240,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="pha_test_oauth_access_token_123",
+            token="at-test_oauth_access_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="annotation:read",
         )
@@ -291,7 +291,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         expired_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="pha_expired_oauth_token_123",
+            token="at-expired_oauth_token_123",
             expires=timezone.now() - timedelta(hours=1),
             scope="annotation:read",
         )

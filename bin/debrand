@@ -28,6 +28,8 @@ import os
 import re
 import subprocess
 import sys
+import tomllib
+from collections.abc import Iterable
 
 # --- content rules ------------------------------------------------------
 #
@@ -144,7 +146,11 @@ CONTENT_RULES: list[tuple[str, str]] = [
 # because the two names have to stay one letter apart or the compiler and the
 # runner stop agreeing about what they hand each other.
 CONTENT_REGEX: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
+    # `Lemon` names our design system, but it also opens `LemonSqueezy` -- a
+    # payments vendor whose warehouse source we import. Stripping the prefix off
+    # a name we do not own renames someone else's product to `Squeezy`, so the
+    # third parties are named here and the rule declines them.
+    (re.compile(r"\bLemon(?!Squeezy)(?=[A-Z][A-Za-z0-9]*)"), ""),
     # The query language and the VM. Only the prefix is ours -- `QL` is SQL's
     # and `VM` is a virtual machine's -- so the rule renames the prefix and
     # leaves the suffix's casing exactly as the author wrote it. One rule per
@@ -405,31 +411,6 @@ CONTENT_ALLOWLIST: dict[str, str] = {
         "The live smoke asserts the upstream name is ABSENT from the served "
         "page; the assertion must spell the name it forbids."
     ),
-    "frontend/src/layout/ErrorBoundary/ErrorBoundary.tsx": (
-        "Aliases the react wrapper package's own export names; the npm API is "
-        "upstream's to name."
-    ),
-    "frontend/src/lib/components/MarkdownNotebook/NotebookComponentShell.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "products/visual_review/frontend/scenes/VisualReviewRunScene.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/session-recordings/filters/ProductAnalyticsOverLimitBanner.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/insights/filters/ActionFilter/ActionFilterRow/SaveAsActionBanner.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/notebooks/Nodes/NotebookNodePlaylist.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/session-recordings/SessionRecordings.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/App.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
     "frontend/src/scenes/saved-insights/insightTypesMetadata.tsx": (
         "Aliases `IconHogQL` from the icons package, which we take from "
         "upstream under our own scope. The export name is theirs; aliasing it "
@@ -487,7 +468,7 @@ PRESERVE: list[re.Pattern[str]] = [
     # nowhere. Renaming a package we merely depend on has no upside: it cannot
     # make the dependency ours, only unresolvable.
     re.compile(r"\bdrf-exceptions-hog\b"),
-    # The far side of an alias. `@hanzo/brand: npm:@posthog/brand@0.9.1` says
+    # The far side of an alias. `insights-node: npm:posthog-node@5.25.0` says
     # our name for it and whose package it actually is; rewriting the second
     # half would point the alias back at itself. Same for cargo's `package =`
     # and for a version pinned in the release-age exclusions.
@@ -635,26 +616,44 @@ def prune_manifests(root: str, dry: bool) -> int:
     return len(dangling)
 
 
-def rewrite_text(s: str, path: str = "") -> str:
-    s = SELF_URL.sub(SELF_URL_TO, s)
-    if os.path.basename(path) not in MANIFESTS:
-        for old, new in CONTENT_RULES:
-            s = s.replace(old, new)
-        for pat, rep in CONTENT_REGEX:
-            s = pat.sub(rep, s)
-        return s
-    return _rewrite_manifest(s)
+# A name that identifies something outside this tree is not ours to spell. A
+# Postgres table, a Datastore table and a route a client calls are all read back
+# by something that was not rebuilt from this checkout, so renaming one to match
+# a file move is a data incident rather than a refactor. The `hog_flow` rules
+# would do exactly that on the next run, so those identities are held out of the
+# rewrite and put back verbatim.
+#
+# Each is anchored on what makes it an identity and not a label: the table's
+# `db_table`, the Datastore table's dotted id, the column's `_id`, and -- for the
+# route -- the trailing slash, which is what separates `/hog_flows/` on the wire
+# from the `hog_flows.py` module that PATH_RULES may rename freely.
+PRESERVE_IDENT: list[re.Pattern[str]] = [
+    re.compile(r"insights_hogflow[a-z]*"),
+    re.compile(r"system\.hog_flows"),
+    re.compile(r"\bhog_flow_id\b"),
+    re.compile(r"/hog_flows/"),
+]
 
 
-def _rewrite_manifest(s: str) -> str:
+def _hold(s: str, pats: Iterable[re.Pattern[str]]) -> tuple[str, list[str]]:
     held: list[str] = []
 
-    def hold(mm: re.Match[str]) -> str:
+    def take(mm: re.Match[str]) -> str:
         held.append(mm.group(0))
         return f"\0{len(held) - 1}\0"
 
-    for pat in PRESERVE:
-        s = pat.sub(hold, s)
+    for pat in pats:
+        s = pat.sub(take, s)
+    return s, held
+
+
+def rewrite_text(s: str, path: str = "") -> str:
+    s = SELF_URL.sub(SELF_URL_TO, s)
+    # Manifests additionally hold the package identities they have to resolve.
+    holds = [*PRESERVE_IDENT]
+    if os.path.basename(path) in MANIFESTS:
+        holds += PRESERVE
+    s, held = _hold(s, holds)
     for old, new in CONTENT_RULES:
         s = s.replace(old, new)
     for pat, rep in CONTENT_REGEX:
@@ -1177,13 +1176,28 @@ RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     # named it after the SQL dialect instead. Refused so the language cannot go
     # back to having two names.
     (re.compile(r"\.iqle?(?![A-Za-z0-9])"), ".script and .scriptc"),
+    # The credential marks. `phc_ phx_ phs_ pha_ phr_ phvt_` all opened with the
+    # upstream's initials, and they were the one piece of its brand a customer
+    # read back to us in every SDK snippet -- unreachable by any word rule,
+    # because `ph` is not a word. A key now opens with what it may touch: `pk-`
+    # if it is safe in a browser, `sk-` if it is not. Refused as a shape rather
+    # than as six strings, so a seventh cannot be coined.
+    #
+    # Declined, and why each is not a credential: `php_` and `phf_` open a
+    # third-party package name (PHP events, the `phf` crate), and `pha_client`
+    # is the analytics client handle.
+    (
+        re.compile(r"(?<![A-Za-z0-9_])ph(?!p_)(?!f_)(?!a_client)[a-z]{1,2}_[A-Za-z0-9]"),
+        "a pk-/sk- mark, minted by insights.models.utils.mint "
+        "(at-/rt-/vt- carry the protocol tokens)",
+    ),
 )
 
 # Coarse enough for POSIX ERE, which has no word boundary. `git grep` narrows
 # 35k tracked files to the few hundred worth opening; RETIRED then says which
 # token matched and where, because a guard that only says "this file is dirty"
 # makes the next person grep for the answer themselves.
-RETIRED_GREP = "hog|HOG|Hog|[.]iql"
+RETIRED_GREP = "hog|HOG|Hog|[.]iql|ph[a-z][a-z]?_"
 
 
 def is_manifest(p: str) -> bool:
@@ -1257,6 +1271,194 @@ def check_hog(root: str) -> int:
         for p in paths[:20]:
             print(f"    {p}")
     return 1 if (leaked or paths) else 0
+
+
+# --- upstream dependency specifiers --------------------------------------
+#
+# Everything above reads source. This reads *specifiers*, because a manifest
+# entry is the one place a rename cannot reach:
+#
+#     insights-rs = { package = "posthog-rs", version = "0.21.0" }
+#
+# reads as ours in our source and installs theirs on the machine. The alias
+# renames the symbol; the registry still serves the upstream crate, and the
+# upstream name is what lands in the lockfile, the vendored path and the stack
+# trace. `--check` was green over that line for as long as it has existed.
+#
+# So each entry below is an upstream package we still take, keyed by the token
+# that gives it away, and carrying the decision that retires it. A specifier
+# that matches and is NOT listed fails: taking a new dependency from upstream
+# is a choice someone should have to write down, not one that lands quietly.
+OUTSTANDING: dict[str, str] = {
+    "drf-exceptions-hog": "reimplement: 386 LOC, one caller (insights/exceptions.py), and the "
+    "error envelope it builds is already our contract -- declared in frontend/src/types.ts "
+    "and asserted by 50 test files",
+    "pixelhog": "fork: 2,720 lines of Rust, a port of mapbox/pixelmatch plus SSIM and "
+    "clustering, proven against upstream's canonical fixtures. Reimplementing re-derives "
+    "someone else's port; the wheel build is the real cost either way",
+    "posthog-rs": "fork at 0.21.0: one consumer (cli/), and the alias hides a User-Agent, a "
+    "$lib property and a default ingestion host that all still say posthog",
+    "posthog-symbol-data": "fork: 386 LOC, but it fixes a container MAGIC that a reader in "
+    "this tree already disagrees with",
+    "pytest-split": "fork or drop: a git source that fetches from the upstream org, under a "
+    "comment that calls it ours",
+    "@posthog/hogql-parser": "publish ours: the source is already in this tree "
+    "(common/insightsql_parser, renamed grammar and all) and already carries our name and "
+    "version. Only the WebAssembly artefact is still upstream's, and building it needs emscripten",
+    "@posthog/mcp": "repoint: services/mcp already asks for a Hanzo package, and this override "
+    "is the only thing dragging it back upstream",
+    "@posthog/siphash": "fork: BSD-2-Clause, 57 kB, its own upstream repository -- small enough "
+    "that it is only waiting on somewhere to put it",
+    "posthog-node": "repoint: @hanzo/insights-node is published on the same major line, so this "
+    "is a version pin away, once a server test has run against it",
+}
+
+# `posthog` outright, or the mascot as a suffix -- the shape every one of these
+# packages takes (`statshog`, `pixelhog`, `drf-exceptions-hog`). Deliberately
+# not bare `hog`: `hogland` is someone else's service, named as outstanding
+# elsewhere in this file rather than refused here.
+UPSTREAM_NAME = re.compile(r"posthog|hog(?![A-Za-z])", re.IGNORECASE)
+
+# The tables whose entries resolve to something a package manager downloads.
+PY_DEP_TABLES = ("dependencies", "optional-dependencies", "dependency-groups")
+CARGO_DEP_TABLES = ("dependencies", "dev-dependencies", "build-dependencies")
+
+
+def _dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
+    """Every (dependency, what-it-resolves-to, where-it-was-written) in a manifest.
+
+    Parsed rather than grepped: the name that resolves is the alias *target*,
+    the git URL or the tag, and only a parser tells those apart from a comment
+    that happens to sit on the same line. The dependency's own key travels
+    alongside, so a finding is attributed to the dependency rather than to
+    whichever of its fields happened to spell the brand.
+    """
+    try:
+        with open(os.path.join(root, rel), "rb") as fh:
+            doc = tomllib.load(fh)
+    except (OSError, tomllib.TOMLDecodeError):
+        return []
+    out: list[tuple[str, str, str]] = []
+
+    def requirement(spec: str, where: str) -> None:
+        # "drf-exceptions-hog==0.4.0" -> "drf-exceptions-hog"
+        name = re.split(r"[\[<>=!~; ]", spec, maxsplit=1)[0]
+        out.append((name, name, where))
+
+    def table(dep: object, key: str, where: str) -> None:
+        out.append((key, key, where))
+        if isinstance(dep, dict):
+            for field in ("package", "git", "url", "tag", "rev", "branch", "path"):
+                if isinstance(dep.get(field), str):
+                    out.append((key, dep[field], f"{where}.{key}.{field}"))
+
+    if os.path.basename(rel) == "pyproject.toml":
+        project = doc.get("project", {})
+        for spec in project.get("dependencies", []):
+            requirement(spec, "project.dependencies")
+        for group, specs in project.get("optional-dependencies", {}).items():
+            for spec in specs:
+                requirement(spec, f"project.optional-dependencies.{group}")
+        for group, specs in doc.get("dependency-groups", {}).items():
+            for spec in specs:
+                if isinstance(spec, str):
+                    requirement(spec, f"dependency-groups.{group}")
+        for key, dep in doc.get("tool", {}).get("uv", {}).get("sources", {}).items():
+            table(dep, key, "tool.uv.sources")
+    else:  # Cargo.toml
+        for name in CARGO_DEP_TABLES:
+            for key, dep in doc.get(name, {}).items():
+                table(dep, key, name)
+        for name in CARGO_DEP_TABLES:
+            for key, dep in doc.get("workspace", {}).get(name, {}).items():
+                table(dep, key, f"workspace.{name}")
+    return out
+
+
+# npm spells the same aliasing two ways, and both end in a string starting
+# `npm:` -- a dependency whose value is `npm:@posthog/brand@0.9.1`, or a
+# workspace override that rewrites one for the whole tree. The prefix is what
+# makes the target unambiguous, so it is what we read.
+NPM_ALIAS = re.compile(r"""['"]?(?P<key>@?[\w.-]+(?:/[\w.-]+)?)['"]?\s*:\s*['"]?npm:(?P<target>@?[\w.-]+(?:/[\w.-]+)?)@""")
+
+
+def _npm_dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
+    """The same reading for package.json and pnpm-workspace.yaml.
+
+    A dependency resolves to its own key unless an `npm:` alias redirects it, so
+    both are yielded and the alias target is what gets matched against upstream.
+    """
+    path = os.path.join(root, rel)
+    out: list[tuple[str, str, str]] = []
+    if os.path.basename(rel) == "package.json":
+        try:
+            doc = json.load(open(path, encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        for section in DEP_SECTIONS:
+            for key, spec in (doc.get(section) or {}).items():
+                # `workspace:*` resolves inside this tree, so no registry serves
+                # it and no upstream name is involved -- which is the whole
+                # subject here. Our own `@hanzo/products-stamphog` is the case
+                # that proves it: the app keeps a name it cannot be renamed out
+                # of, and it is ours.
+                if isinstance(spec, str) and spec.startswith("workspace:"):
+                    continue
+                out.append((key, key, section))
+                if isinstance(spec, str) and spec.startswith("npm:"):
+                    out.append((key, spec[len("npm:") :].rsplit("@", 1)[0], f"{section}.{key}"))
+        return out
+    # pnpm-workspace.yaml: only the alias lines resolve to a package, and the
+    # `npm:` prefix is what tells them from every other key in the file.
+    try:
+        text = open(path, encoding="utf-8").read()
+    except OSError:
+        return []
+    for m in NPM_ALIAS.finditer(text):
+        out.append((m.group("key"), m.group("target"), "overrides"))
+    return out
+
+
+def check_upstream_deps(root: str) -> int:
+    """Refuse a dependency specifier that resolves to upstream and is unrecorded."""
+    unrecorded: list[tuple[str, str, str]] = []
+    seen: set[str] = set()
+    for rel in tracked_files(root):
+        base = os.path.basename(rel)
+        if base in ("package.json", "pnpm-workspace.yaml"):
+            strings = _npm_dep_strings(root, rel)
+        elif base in ("pyproject.toml", "Cargo.toml"):
+            strings = _dep_strings(root, rel)
+        else:
+            continue
+        for key, value, where in strings:
+            if not UPSTREAM_NAME.search(value):
+                continue
+            entry = next(
+                (k for k in OUTSTANDING if k.lower() in value.lower() or k.lower() in key.lower()),
+                None,
+            )
+            if entry is None:
+                unrecorded.append((rel, where, value))
+            else:
+                seen.add(entry)
+
+    if seen:
+        print(f"PENDING: {len(seen)} upstream packages are still specified, each with a decision:")
+        for name in sorted(seen):
+            print(f"    {name} -- {OUTSTANDING[name]}")
+    if retired := sorted(set(OUTSTANDING) - seen):
+        # A ledger that outlives the dependency starts granting permission for a
+        # name nothing takes any more, so removing the entry is part of the work.
+        print(f"FAIL: {len(retired)} ledger entries name a dependency no manifest takes")
+        for name in retired:
+            print(f"    {name} -- retired; drop it from OUTSTANDING")
+    if unrecorded:
+        print(f"FAIL: {len(unrecorded)} dependency specifiers resolve to upstream and are unrecorded")
+        print("    A rename in our manifest does not change what the registry serves.")
+        for rel, where, value in unrecorded:
+            print(f"    {rel}: {where} -> {value!r}")
+    return 1 if (unrecorded or retired) else 0
 
 
 def check_license(root: str) -> int:
@@ -1548,6 +1750,7 @@ def check(root: str) -> int:
     bad += check_mangled(root)
     bad += check_marks(root)
     bad += check_hog(root)
+    bad += check_upstream_deps(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1

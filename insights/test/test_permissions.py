@@ -697,7 +697,7 @@ class TestOAuthAccessTokenAPIScopePermission(BaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_application,
-            token="pha_test_oauth_scoped_token",
+            token="at-test_oauth_scoped_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="feature_flag:read",
         )
@@ -875,7 +875,7 @@ class TestOAuthAccessTokenWithOrganizationScoping(BaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_application,
-            token="pha_test_org_scoped_token",
+            token="at-test_org_scoped_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="*",
             scoped_organizations=[str(self.organization.id)],
@@ -928,7 +928,7 @@ class TestOAuthAccessTokenWithTeamScoping(BaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_application,
-            token="pha_test_team_scoped_token",
+            token="at-test_team_scoped_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="*",
             scoped_organizations=[],
@@ -984,7 +984,7 @@ class TestOAuthAccessTokenWithBothTeamAndOrgScoping(BaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_application,
-            token="pha_test_mixed_scoped_token",
+            token="at-test_mixed_scoped_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="*",
             scoped_organizations=[str(self.organization.id)],
@@ -1040,7 +1040,7 @@ class TestOAuthAccessTokenExpiration(BaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_application,
-            token="pha_test_expiring_token",
+            token="at-test_expiring_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="feature_flag:read",
         )
@@ -1102,7 +1102,7 @@ class TestOAuthAccessTokenUserMembership(BaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_application,
-            token="pha_test_membership_token",
+            token="at-test_membership_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="feature_flag:read",
         )
@@ -1145,7 +1145,7 @@ class TestOAuthAccessTokenUserMembership(BaseTest):
         other_team_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_application,
-            token="pha_test_other_team_token",
+            token="at-test_other_team_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="feature_flag:read",
             scoped_teams=[other_team.id],

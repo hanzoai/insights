@@ -1,6 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import * as remoteWork from '@hanzo/brand/hoggies/png/remote-work'
 import { Button, Modal } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -8,7 +7,7 @@ import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 
 import { upgradeModalLogic } from './upgradeModalLogic'
 
-const MascotRemoteWork = pngHoggie(remoteWork)
+const MascotRemoteWork = pngHoggie()
 
 export function UpgradeModal(): JSX.Element {
     const {

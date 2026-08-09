@@ -37,12 +37,7 @@ from insights.models.integration import SlackIntegration
 from insights.models.oauth import find_oauth_access_token, find_oauth_refresh_token
 from insights.models.personal_api_key import find_personal_api_key
 from insights.models.project_secret_api_key import find_project_secret_api_key
-from insights.models.utils import (
-    OAUTH_ACCESS_TOKEN_PREFIX,
-    OAUTH_REFRESH_TOKEN_PREFIX,
-    PROJECT_API_TOKEN_PREFIX,
-    SECRET_API_TOKEN_PREFIX,
-)
+from insights.models.utils import KeyKind, key_kind
 from insights.plugins.plugin_server_api import validate_messaging_preferences_token
 from insights.redis import get_client
 from insights.utils import (
@@ -462,17 +457,14 @@ def api_key_search_view(request: HttpRequest):
             return HttpResponseNotAllowed(permitted_methods=["POST"])
         query = query.strip()
 
+    searched_kind = key_kind(query)
+
     personal_api_key_object = None
     personal_api_key_hash_mode = None
-    # Legacy personal API keys predate the phx_ prefix, so any query without another known
-    # prefix is also treated as a personal key candidate (matching authentication behavior).
-    non_personal_api_key_prefixes = (
-        SECRET_API_TOKEN_PREFIX,
-        OAUTH_ACCESS_TOKEN_PREFIX,
-        OAUTH_REFRESH_TOKEN_PREFIX,
-        PROJECT_API_TOKEN_PREFIX,
-    )
-    if query and not query.startswith(non_personal_api_key_prefixes):
+    # A personal key and a project secret key share the secret mark, so both are looked
+    # up and whichever store holds it answers. Legacy personal keys predate the marks
+    # entirely, so an unmarked query is a candidate too (matching authentication).
+    if query and searched_kind in (None, KeyKind.SECRET):
         result = find_personal_api_key(query)
         if result is not None:
             personal_api_key_object, personal_api_key_hash_mode = result
@@ -480,7 +472,7 @@ def api_key_search_view(request: HttpRequest):
     project_secret_api_key_object = None
     team_object = None
     team_object_key_type = None
-    if query is not None and query.startswith(SECRET_API_TOKEN_PREFIX):
+    if searched_kind is KeyKind.SECRET:
         project_secret_api_key_object = find_project_secret_api_key(query)
 
         Team = apps.get_model(app_label="insights", model_name="Team")
@@ -494,11 +486,11 @@ def api_key_search_view(request: HttpRequest):
             pass
 
     oauth_access_token_object = None
-    if query is not None and query.startswith(OAUTH_ACCESS_TOKEN_PREFIX):
+    if searched_kind is KeyKind.OAUTH_ACCESS:
         oauth_access_token_object = find_oauth_access_token(query)
 
     oauth_refresh_token_object = None
-    if query is not None and query.startswith(OAUTH_REFRESH_TOKEN_PREFIX):
+    if searched_kind is KeyKind.OAUTH_REFRESH:
         oauth_refresh_token_object = find_oauth_refresh_token(query)
 
     context = {

@@ -34,7 +34,6 @@ from loginas.utils import is_impersonated_session, restore_original_login
 from opentelemetry import trace
 from prometheus_client import Counter, Histogram
 from social_core.exceptions import AuthCanceled, AuthException, AuthFailed
-from statshog.defaults.django import statsd
 
 from insights.api.shared import UserBasicSerializer
 from insights.cloud_utils import is_cloud, is_dev_mode
@@ -51,10 +50,11 @@ from insights.models.activity_logging.utils import (
     ACTIVITY_LOG_CLIENT_MAX_LENGTH,
     activity_storage,
 )
-from insights.models.utils import generate_random_token
+from insights.models.utils import KeyKind, generate_random_token, key_kind
 from insights.mount import canonical
 from insights.rbac.user_access_control import UserAccessControl
 from insights.settings import PROJECT_SWITCHING_TOKEN_ALLOWLIST, SITE_URL
+from insights.statsd import statsd
 from insights.user_permissions import UserPermissions
 from insights.utils import get_ip_address, get_trusted_client_ip
 
@@ -245,7 +245,7 @@ class AutoProjectMiddleware:
             if (
                 len(path_parts) >= 2
                 and path_parts[0] == "project"
-                and (path_parts[1].startswith("phc_") or path_parts[1] in self.token_allowlist)
+                and (key_kind(path_parts[1]) is KeyKind.PUBLISHABLE or path_parts[1] in self.token_allowlist)
             ):
 
                 def do_redirect():

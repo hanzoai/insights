@@ -34,7 +34,7 @@ describe('CLI context', () => {
     })
 
     it('uses an opaque analytics distinct ID when identity resolution fails', async () => {
-        const apiKey = 'phx_secret-token'
+        const apiKey = 'sk-secret-token'
         const context = await buildCliContext({ apiKey, host: 'https://us.hanzo.ai', version: 2 })
 
         await context.trackEvent(AnalyticsEvent.MCP_TOOL_CALL)

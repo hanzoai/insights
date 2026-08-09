@@ -14,12 +14,12 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import APIException, UnsupportedMediaType, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from statshog.defaults.django import statsd
 
 from insights.api.documentation import _FallbackSerializer
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.models import UploadedMedia
 from insights.models.uploaded_media import ObjectStorageUnavailable
+from insights.statsd import statsd
 from insights.storage import object_storage
 
 FOUR_MEGABYTES = 4 * 1024 * 1024

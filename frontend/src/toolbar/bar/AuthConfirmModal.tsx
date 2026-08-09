@@ -127,7 +127,7 @@ export function AuthConfirmModal({ visible, onClose }: AuthConfirmModalProps): J
                     <IconX />
                 </button>
                 <div className="UiHostConfigModal__branding">
-                    <Logomark variant="mono" />
+                    <Logomark />
                 </div>
                 <h2 id={HEADING_ID} className="UiHostConfigModal__header">
                     Confirm sign in

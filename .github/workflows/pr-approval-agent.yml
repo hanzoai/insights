@@ -78,7 +78,7 @@ jobs:
                   # stays ANTHROPIC_API_KEY — that's what the Claude Agent SDK reads.
                   ANTHROPIC_API_KEY: ${{ secrets.STAMPFN_ANTHROPIC_API_KEY }}
                   # ai-gateway cutover: when both are set, the review routes through
-                  # the Go ai-gateway (phs_ secret) instead of Anthropic directly.
+                  # the Go ai-gateway (sk- secret) instead of Anthropic directly.
                   # Unset = direct path, so setting them is the cutover.
                   AI_GATEWAY_URL: ${{ secrets.STAMPFN_AI_GATEWAY_URL }}
                   AI_GATEWAY_API_KEY: ${{ secrets.STAMPFN_AI_GATEWAY_API_KEY }}

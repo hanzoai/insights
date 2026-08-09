@@ -205,8 +205,8 @@ class TestGlobalRateLimitThresholdConfigAdmin:
 
     def test_display_resolved_key_reads_model_property(self):
         admin_instance = GlobalRateLimitThresholdConfigAdmin(GlobalRateLimitThresholdConfig, AdminSite())
-        obj = GlobalRateLimitThresholdConfig(token="phc_abc", distinct_id="noisy_user", threshold=10)
-        assert admin_instance.display_resolved_key(obj) == "phc_abc:noisy_user"
+        obj = GlobalRateLimitThresholdConfig(token="pk-abc", distinct_id="noisy_user", threshold=10)
+        assert admin_instance.display_resolved_key(obj) == "pk-abc:noisy_user"
 
 
 class TestProductAdminRegistration:

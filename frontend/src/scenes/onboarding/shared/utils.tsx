@@ -1,11 +1,3 @@
-import * as chart from '@hanzo/brand/hoggies/png/chart'
-import * as construction from '@hanzo/brand/hoggies/png/construction-1'
-import * as director from '@hanzo/brand/hoggies/png/director'
-import * as experiment from '@hanzo/brand/hoggies/png/experiment'
-import * as magnifyingGlass from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import * as readingIsMagic from '@hanzo/brand/hoggies/png/reading-is-magic'
-import * as reporter from '@hanzo/brand/hoggies/png/reporter'
-import * as robot from '@hanzo/brand/hoggies/png/robot'
 import {
     IconBolt,
     IconBuilding,
@@ -45,14 +37,14 @@ import { urls } from 'scenes/urls'
 import { ProductKey } from '~/queries/schema/schema-general'
 import { type AvailableOnboardingProducts, type OnboardingProduct } from '~/types'
 
-const MascotChart = pngHoggie(chart)
-const MascotConstruction = pngHoggie(construction)
-const MascotDirector = pngHoggie(director)
-const MascotExperiment = pngHoggie(experiment)
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlass)
-const MascotReadingIsMagic = pngHoggie(readingIsMagic)
-const MascotReporter = pngHoggie(reporter)
-const MascotRobot = pngHoggie(robot)
+const MascotChart = pngHoggie()
+const MascotConstruction = pngHoggie()
+const MascotDirector = pngHoggie()
+const MascotExperiment = pngHoggie()
+const MascotMagnifyingGlass = pngHoggie()
+const MascotReadingIsMagic = pngHoggie()
+const MascotReporter = pngHoggie()
+const MascotRobot = pngHoggie()
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string; color?: string }>> = {
     IconBolt,

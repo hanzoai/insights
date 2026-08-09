@@ -9,7 +9,7 @@ services:
     agent:
         image: insights-metrics-agent:test
         environment:
-            INSIGHTS_API_KEY: phc_test
+            INSIGHTS_API_KEY: pk-test
             INSIGHTS_HOST: http://sink:4318
             INSIGHTS_INGEST_PATH: /v1/metrics
             SCRAPE_TARGETS: fixture:9464

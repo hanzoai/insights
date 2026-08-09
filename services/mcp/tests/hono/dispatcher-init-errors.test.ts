@@ -86,7 +86,7 @@ function createMockRedis(): RedisLike {
 
 function makeProps(): RequestProperties {
     return {
-        apiToken: 'phx_test',
+        apiToken: 'sk-test',
         mcpClientName: 'test-client',
         mcpClientVersion: '1.0.0',
         mcpProtocolVersion: LATEST_PROTOCOL_VERSION,
