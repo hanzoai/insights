@@ -82,6 +82,13 @@ services/agent-*/.next
 !requirements-dev.txt
 !requirements.txt
 !rust
+# rust/.cargo/config.toml sets SQLX_OFFLINE=true, and offline mode reads the
+# committed query cache — so the cache has to be IN the context. `!rust` does
+# not cover it: the first rule here is `*`, and a re-include of a directory
+# does not pull in a dot-entry beneath it. Listed explicitly so that once
+# `cargo sqlx prepare` output is committed, the build actually sees it
+# instead of failing again with `no cached data for this query`.
+!rust/.sqlx
 !share/GeoLite2-City.mmdb
 !staticfiles
 !tailwind.config.js
@@ -144,4 +151,5 @@ products/**/*.stories.*
 frontend/src/**/*.test.*
 frontend/src/**/*.spec.*
 frontend/src/**/*.stories.*
+
 
