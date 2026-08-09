@@ -30,7 +30,7 @@ the two steps that touch the network are replaced with injected data:
   the injected PR set (see _familiarity_offline) because Pipeline._compute_familiarity
   hardcodes the `gh` fetch and must not be modified (the Action stays additive-only).
 
-Trusted policy (`.stamphog/policy.yml`, `.stamphog/review-guidance.md`) is read
+Trusted policy (`.stamp/policy.yml`, `.stamp/review-guidance.md`) is read
 by the engine from the checkout at import time; the server overwrites those paths
 in the checkout with the default-branch versions before this runs, so a PR head
 can't substitute its own gate. The reviewer key comes from the environment
@@ -157,7 +157,7 @@ def _build_pr_data(context: dict) -> PRData:
     # consumes. Only UNRESOLVED threads reach the prompt (see _build_pr_data's docstring); the full
     # list stays in the context. Each comment passes the same author-trust gate as reviews and
     # discussion — an untrusted external commenter must not plant a fake maintainer hold, and
-    # stamphog's own prior comments must not feed back as third-party claims. Absent key -> empty, so
+    # stamp's own prior comments must not feed back as third-party claims. Absent key -> empty, so
     # the Action runtime (which doesn't pass it) is unaffected and the prompt renders no
     # inline-comments section, exactly as before.
     review_comments: list[dict] = []
@@ -173,7 +173,7 @@ def _build_pr_data(context: dict) -> PRData:
             # only marks reply-ness — the prompt's "(reply)" label and _summarize_assurance's
             # "count threads (in_reply_to_id is None), not comments" semantic both key off it.
             # Parity with the Action (github.py): only the TRUE thread root (index 0) may carry None.
-            # When the root is filtered (untrusted author, or stamphog's own finding), every survivor
+            # When the root is filtered (untrusted author, or stamp's own finding), every survivor
             # is a reply, so the thread contributes 0 to unresolved_threads — exactly like the Action,
             # whose surviving replies keep their real non-None replyTo ids.
             review_comments.append(
@@ -364,7 +364,7 @@ def _escalate_result(context: dict, exc: Exception) -> dict:
     """
     pr = context.get("pr") or {}
     return {
-        "stamphog_version": STAMPFN_VERSION,
+        "stamp_version": STAMPFN_VERSION,
         "pr_number": pr.get("number"),
         "repo": context.get("repo") or "",
         "classification": {},

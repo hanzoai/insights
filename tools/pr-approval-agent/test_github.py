@@ -91,13 +91,13 @@ def test_normalize_reviews_filters_by_trust_source(
 @pytest.mark.parametrize(
     "login,expected_count",
     [
-        pytest.param("stamphog[bot]", 0, id="own-refuse-comment-review"),
+        pytest.param("stamp[bot]", 0, id="own-refuse-comment-review"),
         pytest.param("github-actions[bot]", 0, id="own-approve-review"),
         pytest.param("greptile-apps[bot]", 1, id="other-bot-kept"),
     ],
 )
-def test_normalize_reviews_excludes_stamphogs_own_prior_reviews(login: str, expected_count: int) -> None:
-    # Feeding stamphog's own stale reviews back into the prompt makes the next
+def test_normalize_reviews_excludes_stamps_own_prior_reviews(login: str, expected_count: int) -> None:
+    # Feeding stamp's own stale reviews back into the prompt makes the next
     # run read them as third-party claims about state that no longer matches —
     # it then suspects tampering and refuses forever.
     normalized = _normalize_reviews_for_prompt(
@@ -120,7 +120,7 @@ def test_normalize_reviews_excludes_stamphogs_own_prior_reviews(login: str, expe
 @pytest.mark.parametrize(
     "login,user_type,author_association,expected_count",
     [
-        pytest.param("stamphog[bot]", "Bot", "NONE", 0, id="own-refuse-comment-excluded"),
+        pytest.param("stamp[bot]", "Bot", "NONE", 0, id="own-refuse-comment-excluded"),
         pytest.param("github-actions[bot]", "Bot", "NONE", 0, id="own-approve-identity-excluded"),
         pytest.param("greptile-apps[bot]", "Bot", "NONE", 1, id="other-bot-kept"),
         pytest.param("alice", "User", "MEMBER", 1, id="trusted-member-kept"),
@@ -289,7 +289,7 @@ def test_review_threads_query_stays_under_github_node_limit() -> None:
 @pytest.mark.parametrize(
     "login,expected_users",
     [
-        pytest.param("stamphog[bot]", ["greptile-apps[bot]"], id="own-inline-comment-excluded"),
+        pytest.param("stamp[bot]", ["greptile-apps[bot]"], id="own-inline-comment-excluded"),
         pytest.param("github-actions[bot]", ["greptile-apps[bot]"], id="own-approve-identity-excluded"),
         pytest.param(
             "copilot-pull-request-reviewer[bot]",
@@ -298,10 +298,10 @@ def test_review_threads_query_stays_under_github_node_limit() -> None:
         ),
     ],
 )
-def test_fetch_threads_excludes_stamphogs_own_inline_comments(
+def test_fetch_threads_excludes_stamps_own_inline_comments(
     monkeypatch: pytest.MonkeyPatch, login: str, expected_users: list[str]
 ) -> None:
-    # Stamphog's earlier verdicts fed back through inline comments read as
+    # Stamp's earlier verdicts fed back through inline comments read as
     # third-party claims about a stale snapshot — later runs then suspect
     # impersonation and refuse forever, exactly like stale top-level reviews.
     def fake_graphql(query: str, variables: dict | None = None) -> dict:
