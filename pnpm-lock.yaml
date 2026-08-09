@@ -351,12 +351,15 @@ importers:
 
   common/replay-headless:
     dependencies:
+      '@hanzo/insights-rrweb':
+        specifier: 0.0.26
+        version: 0.0.26
+      '@hanzo/insights-rrweb-types':
+        specifier: 0.0.26
+        version: 0.0.26
       '@hanzo/replay-shared':
         specifier: workspace:*
         version: link:../replay-shared
-      insights-js:
-        specifier: npm:@hanzo/insights@1.358.1
-        version: '@hanzo/insights@1.358.1'
       p-limit:
         specifier: 3.1.0
         version: 3.1.0
@@ -379,6 +382,12 @@ importers:
 
   common/replay-shared:
     dependencies:
+      '@hanzo/insights-rrweb':
+        specifier: 0.0.26
+        version: 0.0.26
+      '@hanzo/insights-rrweb-types':
+        specifier: 0.0.26
+        version: 0.0.26
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
