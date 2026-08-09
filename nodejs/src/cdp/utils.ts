@@ -4,11 +4,17 @@ import { gunzip, gzip } from 'zlib'
 
 import { parseJSON } from '~/common/utils/json-parse'
 import { sanitizeForUTF8 } from '~/common/utils/strings'
-import { UUIDT, castTimestampOrNow, clickHouseTimestampToISO } from '~/common/utils/utils'
+import { UUIDT, castTimestampOrNow, datastoreTimestampToISO } from '~/common/utils/utils'
 
 import { RawDatastoreEvent, Team, TimestampFormat } from '../types'
 import { CdpInternalEvent } from './schema'
-import { InsightsFunctionInvocationGlobals, InsightsFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
+import {
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionType,
+    LogEntry,
+    LogEntrySerialized,
+    MinimalLogEntry,
+} from './types'
 
 // ID of functions that are hidden from normal users and used by us for special testing
 // For example, transformations use this to only run if in comparison mode
@@ -57,12 +63,12 @@ export function convertToInsightsFunctionInvocationGlobals(
     // so we need to handle that case
     const eventTimestamp = DateTime.fromISO(event.timestamp).isValid
         ? event.timestamp
-        : clickHouseTimestampToISO(event.timestamp)
+        : datastoreTimestampToISO(event.timestamp)
 
     const eventCapturedAt = event.captured_at
         ? DateTime.fromISO(event.captured_at).isValid
             ? event.captured_at
-            : clickHouseTimestampToISO(event.captured_at)
+            : datastoreTimestampToISO(event.captured_at)
         : null
 
     const context: InsightsFunctionInvocationGlobals = {

@@ -73,6 +73,14 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("CLICKHOUSE", "DATASTORE"),
     ("ClickHouse", "Datastore"),
     ("Clickhouse", "Datastore"),
+    # camelCase identifiers, the same shape as `postHog` below and missing for
+    # the same reason it was: a table of whole-word pairs reads the tree in the
+    # casings a sentence uses and misses the ones an identifier uses. Without it
+    # `clickHouseEvent`, `clickHouseTimestampToISO` and `clickHousePersons` were
+    # the only spelling of the engine left in our own code, across nodejs and the
+    # frontend, while every type they touched already said Datastore. Renames the
+    # prefix only, so the rest of the name stays exactly as its author wrote it.
+    ("clickHouse", "datastore"),
     ("clickhouse", "datastore"),
     # Script VM, flows, functions.
     ("hog-transformations", "script-transformations"),
@@ -416,6 +424,25 @@ CONTENT_ALLOWLIST: dict[str, str] = {
         "upstream under our own scope. The export name is theirs; aliasing it "
         "on import is how the name stops at the boundary."
     ),
+    "nodejs/src/common/utils/insights.ts": (
+        "Aliases `PostHog` from `insights-node`, which pnpm-workspace.yaml "
+        "serves from the upstream package. That class name is what the package "
+        "exports, so the import spells it and renames it on the way in -- the "
+        "same boundary as IconHogQL above. Rewriting it produces `Insights as "
+        "Insights`, an import of a name the package does not have."
+    ),
+    "Dockerfile.node": (
+        "One comment, naming the upstream package that `insights-node` is a "
+        "registry alias for. The sentence exists to say which artifact the "
+        "alias resolves to, so renaming it leaves the alias pointing at itself."
+    ),
+    "rust/capture-logs/src/log_record.rs": (
+        "`#[derive(Row)]` expands to an unqualified `clickhouse::Row`, resolved "
+        "in this crate's namespace rather than the macro's, so the crate we link "
+        "as `datastore` also has to be bound under the name the generated code "
+        "emits. The file's comment is about that one forced binding, and names "
+        "the macro, the crate and the path it writes."
+    ),
 }
 
 # Never rewrite bytes in these. Lockfiles pin upstream package identities we
@@ -472,7 +499,13 @@ PRESERVE: list[re.Pattern[str]] = [
     # our name for it and whose package it actually is; rewriting the second
     # half would point the alias back at itself. Same for cargo's `package =`
     # and for a version pinned in the release-age exclusions.
-    re.compile(r"npm:@?[\w.\-]+(?:/[\w.\-]+)?@[\w.\-]+"),
+    #
+    # The version runs to the closing quote rather than through a word class:
+    # `^1.12.0` is a range, not a version, and `^` is not a word character, so
+    # the old pattern simply failed to match `npm:@clickhouse/client@^1.12.0` and
+    # left the one alias in the tree that carries a caret unheld. The rule read
+    # as if it covered every alias and covered only the exactly-pinned ones.
+    re.compile(r"""npm:@?[\w.\-]+(?:/[\w.\-]+)?@[^'"\s,}\]]+"""),
     re.compile(r'package = "[\w.\-]+"'),
     re.compile(r"'@posthog/[\w.\-]+@[\w.\-]+'"),
 ]
@@ -627,11 +660,49 @@ def prune_manifests(root: str, dry: bool) -> int:
 # `db_table`, the Datastore table's dotted id, the column's `_id`, and -- for the
 # route -- the trailing slash, which is what separates `/hog_flows/` on the wire
 # from the `hog_flows.py` module that PATH_RULES may rename freely.
+#
+# The storage engine is the same distinction drawn one layer down. Our fork of it
+# is Datastore and every label we chose says so, but the engine we forked still
+# answers to its own name in the places another program does the reading: a word
+# in the server's DDL grammar, a symbol a package exports, an option key a driver
+# puts on the wire, a path a macro expands to. Those are held, and `check_engine`
+# reads this same list to decide which residual spellings are legitimate -- one
+# table, so the rewrite and the refusal cannot drift apart.
 PRESERVE_IDENT: list[re.Pattern[str]] = [
     re.compile(r"insights_hogflow[a-z]*"),
     re.compile(r"system\.hog_flows"),
     re.compile(r"\bhog_flow_id\b"),
     re.compile(r"/hog_flows/"),
+    # The dictionary source type, resolved against a fixed registry the server
+    # compiles in. `SOURCE(DATASTORE(...))` is answered with "unknown dictionary
+    # source type", so the dictionary is never created and the failure surfaces
+    # far away, as a read failing on dictGet. Anchored on the absence of a
+    # trailing name character, which is what separates the bare grammar word from
+    # a `CLICKHOUSE_HOST`-shaped setting -- those are ours and still get renamed.
+    re.compile(r"CLICKHOUSE(?![A-Za-z0-9_])"),
+    # The class `@clickhouse/client` exports, which pnpm-workspace.yaml serves
+    # under our `@datastore/client` alias. Every import already aliases it to
+    # `DatastoreClient` on the way in; renaming the export itself asks the package
+    # for a name it does not have, and the import resolves to undefined.
+    re.compile(r"\bClickHouseClient\b"),
+    # The exception `datastore_connect` exports, aliased to `DatastoreError` at
+    # each import for the same reason. The name lives in that package at a pinned
+    # revision, so spelling it differently here is an ImportError, not a rename.
+    re.compile(r"\bClickHouseError\b"),
+    # The per-query option key the driver serializes onto the wire. It is read by
+    # the server, not by us, so it travels under the engine's own name.
+    re.compile(r"\bclickhouse_settings\b"),
+    # The crate path `#[derive(Row)]` expands to. The macro emits an unqualified
+    # `clickhouse::Row` resolved in the calling crate's namespace, so that name has
+    # to be bound there even though the crate is linked as `datastore`.
+    re.compile(r"\bas clickhouse\b|::clickhouse\b|\bclickhouse::|\bclickhouse-derive\b"),
+    # The crate and the npm package as their registries publish them, named in
+    # the prose beside the `package =` alias that takes them. The specifier is
+    # already held as a manifest identity; the sentence next to it saying WHICH
+    # artifact the alias resolves to has to survive too, or the comment ends up
+    # denying the one thing it exists to document -- and the next reader deletes
+    # the alias it was warning them to keep.
+    re.compile(r"`clickhouse(?:-types)?`|@clickhouse/[\w.\-]+"),
 ]
 
 
@@ -1223,6 +1294,77 @@ def partition(hits: list[str]) -> tuple[list[str], list[str], list[str]]:
     )
 
 
+# --- the storage engine --------------------------------------------------
+#
+# Our fork of the engine is Datastore, and the running pod agrees: the image is
+# ghcr.io/hanzoai/datastore, the config is /etc/hanzo-datastore-server, the
+# Python client is datastore_orm, the management command is migrate_datastore
+# and the settings are DATASTORE_*. There is no clickhouse-client binary in it,
+# because ours is named ours.
+#
+# So a residual upstream spelling in our own code is not a naming preference; it
+# is the one place a reader learns the engine has two names. Refused here, with
+# exactly one way to be legitimate: PRESERVE_IDENT already lists the spellings
+# another program resolves, and a line whose engine name survives being held is
+# a line naming something we do not own. Reading that same list rather than a
+# second one is what stops the rewrite and the refusal from disagreeing.
+
+ENGINE = re.compile(r"clickhouse", re.IGNORECASE)
+
+
+def check_engine(root: str) -> int:
+    """Refuse the upstream engine's name in first-party code."""
+    text = subprocess.run(
+        ["git", "grep", "-lI", "-i", "clickhouse"], cwd=root, capture_output=True, text=True
+    ).stdout.split()
+    leaked: list[tuple[str, int, str]] = []
+    pending: set[str] = set()
+    for rel in sorted(set(text) - set(CONTENT_ALLOWLIST)):
+        if is_licence(rel):
+            continue
+        with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
+            for n, line in enumerate(fh, 1):
+                # Hold the identities, then look at what is left. A spelling that
+                # survives is one no other program reads back.
+                if not ENGINE.search(_hold(line, PRESERVE_IDENT)[0]):
+                    continue
+                if is_manifest(rel):
+                    pending.add(rel)
+                    break
+                leaked.append((rel, n, line.strip()[:100]))
+
+    # A compiled artefact carries the name in its bytes, where no rule reaches.
+    # `git grep -I` skips it for being binary, so it would leave the guard green
+    # by being unreadable. Listed as owed rather than exempt: only a rebuild
+    # changes it, and an allowlist entry would file that under "decided".
+    binary = [
+        p
+        for p in subprocess.run(
+            ["git", "grep", "-l", "-i", "clickhouse"], cwd=root, capture_output=True, text=True
+        ).stdout.split()
+        if p not in set(text)
+    ]
+
+    if pending:
+        print(f"PENDING: {len(pending)} dependency manifests still name the upstream engine.")
+        print("    The specifier is the finding; check_upstream_deps carries the decision.")
+        for p in sorted(pending):
+            print(f"    {p}")
+    if binary:
+        print(f"OWED: {len(binary)} compiled artefacts carry the engine's name in their bytes")
+        print("    No rule reaches a binary. Rebuilding is the only edit that changes them.")
+        for p in sorted(binary):
+            print(f"    {p}")
+    if leaked:
+        print(f"FAIL: {len(leaked)} lines name the upstream engine where we own the name")
+        print("    We say datastore. If the name is one another program reads back --")
+        print("    a word in its DDL grammar, a symbol a package exports, an option key")
+        print("    on the wire -- hold it in PRESERVE_IDENT and say which program reads it.")
+        for rel, n, line in leaked[:20]:
+            print(f"    {rel}:{n}: {line}")
+    return 1 if leaked else 0
+
+
 def check_hog(root: str) -> int:
     """Refuse the spellings this fork has retired, in content and in paths."""
     # Classify on what RETIRED actually matches, not on what the coarse grep
@@ -1311,13 +1453,33 @@ OUTSTANDING: dict[str, str] = {
     "that it is only waiting on somewhere to put it",
     "posthog-node": "repoint: @hanzo/insights-node is published on the same major line, so this "
     "is a version pin away, once a server test has run against it",
+    # The engine's client libraries. Ordered before the bare `clickhouse` key
+    # below, because a specifier is attributed to the FIRST entry whose token it
+    # contains and every one of these contains that word -- listed generic-first,
+    # all three would report as the crate and the other two would read as retired.
+    "@clickhouse/client": "fork under our org, as the Python client already is: pyproject takes "
+    "datastore-connect from a repository we host, and this is the same client one language over, "
+    "still taken from the registry under an @datastore alias that points at their scope",
+    "clickhouse-types": "fork with the crate below -- it is the one that reaches the shipped "
+    "artefact. The name is compiled into insights/user_scripts/aggregate_funnel_*, so this entry "
+    "and the OWED binaries in check_engine retire together or not at all",
+    "clickhouse": "fork and publish ours: a bare `datastore` rename is already known not to work "
+    "(a different crates.io package answers to it, which failed every cargo invocation in the "
+    "workspace), and a crate we publish under our own name is what makes the alias unnecessary "
+    "rather than load-bearing",
 }
 
 # `posthog` outright, or the mascot as a suffix -- the shape every one of these
 # packages takes (`statshog`, `pixelhog`, `drf-exceptions-hog`). Deliberately
 # not bare `hog`: `hogland` is someone else's service, named as outstanding
 # elsewhere in this file rather than refused here.
-UPSTREAM_NAME = re.compile(r"posthog|hog(?![A-Za-z])", re.IGNORECASE)
+#
+# The storage engine is here for the reason the comment above this ledger gives:
+# an alias renames the symbol, and the registry still serves the upstream
+# artifact. `datastore = { package = "clickhouse" }` reads as ours in every file
+# that uses it, and the crate that lands in the lockfile, the vendored path and
+# the stack trace is theirs.
+UPSTREAM_NAME = re.compile(r"posthog|hog(?![A-Za-z])|clickhouse", re.IGNORECASE)
 
 # The tables whose entries resolve to something a package manager downloads.
 PY_DEP_TABLES = ("dependencies", "optional-dependencies", "dependency-groups")
@@ -1750,6 +1912,7 @@ def check(root: str) -> int:
     bad += check_mangled(root)
     bad += check_marks(root)
     bad += check_hog(root)
+    bad += check_engine(root)
     bad += check_upstream_deps(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:

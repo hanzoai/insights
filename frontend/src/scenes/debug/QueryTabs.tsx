@@ -68,10 +68,10 @@ export function QueryTabs<Q extends Node>({
     onLoadQuery,
 }: QueryTabsProps<Q>): JSX.Element {
     const [tab, setTab] = useState<string | null>(null)
-    const clickHouseTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './datastore_execute')?.t ?? 0
+    const datastoreTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './datastore_execute')?.t ?? 0
     const explainTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './explain')?.t ?? 0
     const totalTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === '.')?.t ?? 0
-    const insightsQLTime = totalTime - explainTime - clickHouseTime
+    const insightsQLTime = totalTime - explainTime - datastoreTime
     const tabs: TabsProps<string>['tabs'] = query
         ? [
               response?.error && {
@@ -159,7 +159,7 @@ export function QueryTabs<Q extends Node>({
                   label: (
                       <>
                           {getExecutedQueryTabLabel(query)}
-                          {clickHouseTime ? <Tag className="ml-2">{Math.floor(clickHouseTime * 10) / 10}s</Tag> : null}
+                          {datastoreTime ? <Tag className="ml-2">{Math.floor(datastoreTime * 10) / 10}s</Tag> : null}
                       </>
                   ),
                   content: (
