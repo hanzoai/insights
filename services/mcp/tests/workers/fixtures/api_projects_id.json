@@ -47,7 +47,7 @@
   "live_events_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZWFtX2lkIjoxLCJhcGlfdG9rZW4iOiJwaGNfQXd3WDJnakxORFl4am82OTMzb1RFWWlMOFd4ZU14ZVdSRGp2d0RtNnp0Y3QiLCJ1c2VyX2lkIjoxLCJvcmdhbml6YXRpb25faWQiOiIwMTlkODVlZi03ZTdkLTAwMDAtMDkwYy1mMmY1OThiMzk0OWIiLCJleHAiOjE3Nzc1NTQ4MzcsImF1ZCI6InBvc3Rob2c6bGl2ZXN0cmVhbSJ9.GXiqX9AHedgt5qda1CxUc-_QFIM5im_6y6HHCvVQboM",
   "updated_at": "2026-04-13T08:22:53.298917Z",
   "uuid": "00000000-0000-0000-0000-000000000001",
-  "api_token": "phc_test_token",
+  "api_token": "pk-test_token",
   "app_urls": [],
   "anonymize_ips": false,
   "completed_snippet_onboarding": true,

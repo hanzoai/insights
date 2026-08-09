@@ -1,6 +1,5 @@
 import { useActions } from 'kea'
 
-import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
 import { Link } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -8,7 +7,7 @@ import { supportLogic } from 'lib/components/Support/supportLogic'
 import { Banner } from 'lib/elements/Banner'
 import { Tag } from 'lib/elements/Tag/Tag'
 
-const MascotConstruction2 = pngHoggie(construction2Png)
+const MascotConstruction2 = pngHoggie()
 
 export function BillingEarlyAccessBanner(): JSX.Element {
     const { openSupportForm } = useActions(supportLogic)

@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 // Debug token, used to get metrics for debug builds - team 89529
-const DEBUG_INSIGHTS_API_TOKEN: &str = "phc_raG2H9V246hkNZk6K89DZGG98qQyPrKKlicifGlpOXA";
+const DEBUG_INSIGHTS_API_TOKEN: &str = "pk-raG2H9V246hkNZk6K89DZGG98qQyPrKKlicifGlpOXA";
 const API_CLI_BUNDLE: &str = "lib/insights-api-cli.mjs";
 
 fn write_api_cli_bundle_include() {

@@ -7,7 +7,7 @@ Shape:
     Body:
         {
             "id": 123,
-            "api_token": "phc_...",
+            "api_token": "pk-...",
             "llm_gateway_enabled_at": "2026-05-29T20:46:30+00:00" | null,
             "llm_gateway_revoked_at": "2026-05-20T12:34:56+00:00" | null
         }

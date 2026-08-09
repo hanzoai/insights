@@ -97,7 +97,7 @@ class TestLLMGatewayTeamCommand(BaseTest):
     @parameterized.expand(
         [
             ("unknown_team_id", "999999999"),
-            ("unknown_api_token", "phc_does_not_exist"),
+            ("unknown_api_token", "pk-does_not_exist"),
             ("garbage_arg", "not-an-id-or-token"),
         ]
     )

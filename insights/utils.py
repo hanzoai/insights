@@ -485,7 +485,7 @@ def insights_js_config() -> dict:
     """
     if settings.E2E_TESTING:
         return {
-            "js_insights_api_key": "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO",
+            "js_insights_api_key": "pk-ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO",
             "js_insights_host": "https://internal-j.hanzo.ai",
             "js_insights_ui_host": "https://us.hanzo.ai",
         }

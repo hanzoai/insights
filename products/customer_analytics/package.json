@@ -6,19 +6,18 @@
     },
     "dependencies": {
         "@hanzo/quill-charts": "workspace:*",
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-forms": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "kea-test-utils": "catalog:",
-        "insights-js": "catalog:"
+        "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
         "@dnd-kit/core": "*",
         "@dnd-kit/modifiers": "*",
         "@dnd-kit/sortable": "*",
         "@dnd-kit/utilities": "*",
-        "@hanzo/brand": "catalog:",
         "@hanzo/icons": "catalog:",
         "@storybook/react": "catalog:",
         "@testing-library/dom": "*",

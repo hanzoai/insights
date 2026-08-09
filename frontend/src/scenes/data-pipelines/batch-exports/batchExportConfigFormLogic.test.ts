@@ -266,7 +266,7 @@ const HTTP_BATCH_EXPORT = fixture('fixture-http', 'HTTP Export', {
     type: 'HTTP',
     config: {
         url: 'https://us.i.hanzo.ai/batch/',
-        token: 'phc_test',
+        token: 'pk-test',
         exclude_events: [],
         include_events: [],
     },
@@ -950,13 +950,13 @@ describe('batchExportConfigFormLogic', () => {
                 service: 'HTTP' as const,
                 requiredValues: {
                     url: 'https://us.i.hanzo.ai/batch/',
-                    token: 'phc_xxx',
+                    token: 'pk-xxx',
                 },
                 expectedDestination: {
                     type: 'HTTP',
                     config: {
                         url: 'https://us.i.hanzo.ai/batch/',
-                        token: 'phc_xxx',
+                        token: 'pk-xxx',
                     },
                 },
             },

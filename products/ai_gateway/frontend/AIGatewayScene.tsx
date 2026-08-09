@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ComponentType } from 'react'
 
-import * as robotPng from '@hanzo/brand/hoggies/png/robot'
 import { SegmentedButton, Tabs } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -26,7 +25,7 @@ import { aiGatewayLogic, EndpointProvider, EndpointTab } from './aiGatewayLogic'
 import { GatewayBalanceCard, GatewayTopUpModal } from './GatewayTopUp'
 import { ModelBreakdownTable, SpendChart, UsageMetrics } from './gatewayUsage'
 
-const MascotRobot = pngHoggie(robotPng)
+const MascotRobot = pngHoggie()
 
 const AI_GATEWAY_DESCRIPTION =
     'One endpoint for every major LLM, billed at cost — no markup on tokens. Point your app at the gateway and ' +
@@ -123,7 +122,7 @@ function GatewayEndpoint(): JSX.Element {
     }
 
     const gatewayBase = preflight.ai_gateway_url.replace(/\/$/, '')
-    const key = '<your phs_… project secret key with the llm_gateway:read scope>'
+    const key = '<your sk-… project secret key with the llm_gateway:read scope>'
 
     // provider → language → snippet. The OpenAI SDK appends "chat/completions" to base + "/v1";
     // the Anthropic SDK appends "/v1/messages" to the gateway base.

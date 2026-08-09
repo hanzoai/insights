@@ -133,7 +133,7 @@ def enable_feature_flags(team: Team, user: User) -> list[str]:
     """Enable the marketing flags at 100% on the target team and on the local
     self-capture team (the one whose flags the local Insights UI evaluates)."""
     teams = {team.pk: team}
-    self_capture_team = Team.objects.filter(api_token="phc_localinsightsprojecttoken").first()
+    self_capture_team = Team.objects.filter(api_token="pk-localinsightsprojecttoken").first()
     if self_capture_team:
         teams[self_capture_team.pk] = self_capture_team
     enabled = []

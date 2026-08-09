@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # insightscli `ai_gateway` capability entry — one-shot local ai-gateway in resolver
-# mode with a real phs_ credential.
+# mode with a real sk- credential.
 #
-# Provisioning lives in bin/setup-gateway-e2e: enable the team, mint the phs_,
+# Provisioning lives in bin/setup-gateway-e2e: enable the team, mint the sk-,
 # publish the credential blob to the gateway's valkey, set resolver mode, fund
 # the ledger. We run it (retried until Insights's DB/migrations are ready), start
 # the gateway on the host under air, then once it's up — and has created its
@@ -32,7 +32,7 @@ fi
 # sibling's `bin/start gateway` below.
 export COMPOSE_PROJECT_NAME=ai-gateway
 
-# Provision (deps + resolver mode + phs_ + blob; ledger funding is best-effort
+# Provision (deps + resolver mode + sk- + blob; ledger funding is best-effort
 # until the gateway has booted once). Retry until Insights's DB/migrations ready.
 provisioned=false
 for i in $(seq 1 10); do

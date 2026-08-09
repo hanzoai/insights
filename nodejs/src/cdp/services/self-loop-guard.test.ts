@@ -12,9 +12,9 @@ import {
 
 // Synthetic, non-production values. OWN_TOKEN is the project the destination runs in;
 // OTHER_TOKEN is a different project (legitimate cross-project replication).
-const OWN_TOKEN = 'phc_synthetic_own_0000000000000000'
-const OWN_SECRET_TOKEN = 'phsx_synthetic_own_secret_00000000'
-const OTHER_TOKEN = 'phc_synthetic_other_111111111111111'
+const OWN_TOKEN = 'pk-synthetic_own_0000000000000000'
+const OWN_SECRET_TOKEN = 'sk-syntheticownsecret00000000'
+const OTHER_TOKEN = 'pk-synthetic_other_111111111111111'
 
 const TEAM: Pick<Team, 'api_token' | 'secret_api_token'> = {
     api_token: OWN_TOKEN,

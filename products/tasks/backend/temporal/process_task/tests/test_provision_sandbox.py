@@ -278,18 +278,18 @@ def test_build_environment_variables_disables_telemetry_when_restricted(
     [
         (
             "https://us.i.hanzo.ai/i/v1/logs",
-            "phc_telemetry",
+            "pk-telemetry",
             "https://us.i.hanzo.ai/i/v1/traces",
             {"INSIGHTS_AGENT_OTEL_LOGS_URL", "INSIGHTS_AGENT_OTEL_LOGS_TOKEN", "INSIGHTS_AGENT_OTEL_TRACES_URL"},
         ),
         (
             "https://us.i.hanzo.ai/i/v1/logs",
-            "phc_telemetry",
+            "pk-telemetry",
             None,
             {"INSIGHTS_AGENT_OTEL_LOGS_URL", "INSIGHTS_AGENT_OTEL_LOGS_TOKEN"},
         ),
         ("https://us.i.hanzo.ai/i/v1/logs", None, None, set()),
-        (None, "phc_telemetry", None, set()),
+        (None, "pk-telemetry", None, set()),
         # Traces alone are useless without the logs pair carrying the token.
         (None, None, "https://us.i.hanzo.ai/i/v1/traces", set()),
     ],
@@ -317,7 +317,7 @@ def test_build_environment_variables_omits_otel_env_when_flag_disabled(_api, _jw
 
     with override_settings(
         SANDBOX_AGENT_OTEL_LOGS_URL="https://us.i.hanzo.ai/i/v1/logs",
-        SANDBOX_AGENT_OTEL_LOGS_TOKEN="phc_telemetry",
+        SANDBOX_AGENT_OTEL_LOGS_TOKEN="pk-telemetry",
         SANDBOX_AGENT_OTEL_TRACES_URL="https://us.i.hanzo.ai/i/v1/traces",
     ):
         env = _build_environment_variables(ctx, MagicMock(), "", "access-token")

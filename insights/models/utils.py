@@ -8,6 +8,7 @@ from collections import namedtuple
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from decimal import Decimal
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
@@ -159,41 +160,98 @@ def generate_random_token(nbytes: int = 32) -> str:
     return int_to_base(value, 57, alphabet=BASE57)
 
 
-# Key/token prefixes. Reserved-prefix checks elsewhere (auth, the admin key search) must
-# reference these constants rather than hardcoding the strings.
-PROJECT_API_TOKEN_PREFIX = "phc_"  # "c" standing for "client"
-PERSONAL_API_KEY_PREFIX = "phx_"  # "x" standing for nothing in particular
-SECRET_API_TOKEN_PREFIX = "phs_"  # "s" standing for "secret"; team secret tokens and project secret API keys
-OAUTH_ACCESS_TOKEN_PREFIX = "pha_"  # "a" standing for "access"
-OAUTH_REFRESH_TOKEN_PREFIX = "phr_"  # "r" standing for "refresh"
+class KeyKind(StrEnum):
+    """What a key is allowed to touch, which is the only thing its mark has to say.
+
+    A publishable key is meant to be read by anyone the page is served to, so it
+    carries no authority beyond naming the project it writes into. A secret key
+    speaks for a person or a service and never leaves a server.
+
+    The rest are not API keys at all. The two OAuth tokens are protocol tokens, and
+    the parser has to tell an access token from a refresh token before either is
+    looked up, so each keeps its own mark. A verification token proves control of a
+    domain and is read only by the check that issued it.
+    """
+
+    PUBLISHABLE = "publishable"
+    SECRET = "secret"
+    OAUTH_ACCESS = "oauth_access"
+    OAUTH_REFRESH = "oauth_refresh"
+    VERIFICATION = "verification"
 
 
+# The mark that opens a key, and the entropy behind it. Reading a key's mark is
+# `key_kind`; writing one is `mint`. Nothing else spells these strings.
+KEY_MARKS: dict[KeyKind, str] = {
+    KeyKind.PUBLISHABLE: "pk-",
+    KeyKind.SECRET: "sk-",
+    KeyKind.OAUTH_ACCESS: "at-",
+    KeyKind.OAUTH_REFRESH: "rt-",
+    KeyKind.VERIFICATION: "vt-",
+}
+
+# A secret key is stored hashed except for its last four characters, which the UI
+# shows so a person can recognize their own key. Those four have to be entropy
+# rather than a window onto the hashed part, so a secret is minted three bytes
+# longer than the 32 that (https://docs.python.org/3/library/secrets.html#how-many-bytes-should-tokens-use)
+# calls sufficient.
+KEY_BYTES: dict[KeyKind, int] = {
+    KeyKind.PUBLISHABLE: 32,
+    KeyKind.SECRET: 35,
+    KeyKind.OAUTH_ACCESS: 32,
+    KeyKind.OAUTH_REFRESH: 32,
+    KeyKind.VERIFICATION: 32,
+}
+
+# Anchored at both ends: a key is its mark and then base57 to the end of the
+# string, so a value that merely starts with a mark is not a key.
+KEY_RE = re.compile(rf"^(?P<mark>{'|'.join(re.escape(m) for m in KEY_MARKS.values())})[A-Za-z0-9]+$")
+
+_KIND_BY_MARK: dict[str, KeyKind] = {mark: kind for kind, mark in KEY_MARKS.items()}
+
+
+def key_kind(value: str | None) -> Optional[KeyKind]:
+    """Read what kind of key a string is, or None if it is not one.
+
+    This is the only place a key's shape is decided. Callers routing on a kind ask
+    here rather than matching a mark themselves, so a key can never be well-formed
+    to one reader and malformed to another.
+    """
+    if not value:
+        return None
+    match = KEY_RE.match(value)
+    return _KIND_BY_MARK[match.group("mark")] if match else None
+
+
+def mint(kind: KeyKind) -> str:
+    """Make a new key of `kind`. The only place a key is created."""
+    return KEY_MARKS[kind] + generate_random_token(KEY_BYTES[kind])
+
+
+# Django migrations record the import path of a field's default, so these keep the
+# names already written into migration files. Each is `mint` under a pinned name.
 def generate_random_token_project() -> str:
-    return PROJECT_API_TOKEN_PREFIX + generate_random_token()
+    return mint(KeyKind.PUBLISHABLE)
 
 
 def generate_random_token_personal() -> str:
-    # We want 32 bytes of entropy (https://docs.python.org/3/library/secrets.html#how-many-bytes-should-tokens-use).
-    # Note that we store the last 4 characters of a personal API key in plain text in the database, so that users
-    # can recognize their keys in the UI. This means we need 3 bytes of extra entropy. Ultimately, we want 35 bytes.
-    return PERSONAL_API_KEY_PREFIX + generate_random_token(35)
+    return mint(KeyKind.SECRET)
 
 
 def generate_random_token_secret() -> str:
-    # Similar to personal API keys, but for retrieving feature flag definitions for local evaluation.
-    return SECRET_API_TOKEN_PREFIX + generate_random_token(35)
+    return mint(KeyKind.SECRET)
 
 
 def generate_random_oauth_access_token(_request) -> str:
-    return OAUTH_ACCESS_TOKEN_PREFIX + generate_random_token()
+    return mint(KeyKind.OAUTH_ACCESS)
 
 
 def generate_random_oauth_refresh_token(_request) -> str:
-    return OAUTH_REFRESH_TOKEN_PREFIX + generate_random_token()
+    return mint(KeyKind.OAUTH_REFRESH)
 
 
 def mask_key_value(value: str) -> str:
-    """Turn 'phx_123456abcd' into 'phx_...abcd'."""
+    """Turn 'sk-0123456789abcd' into 'sk-0...abcd'."""
     if len(value) < 16:
         # If the token is less than 16 characters, mask the whole token.
         # This should never happen, but want to be safe.

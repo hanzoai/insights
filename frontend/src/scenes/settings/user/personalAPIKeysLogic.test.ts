@@ -35,7 +35,7 @@ describe('personalAPIKeysLogic', () => {
                             scopes: capturedCreatePayload?.scopes,
                             scoped_organizations: capturedCreatePayload?.scoped_organizations ?? [],
                             scoped_teams: capturedCreatePayload?.scoped_teams ?? [],
-                            value: 'phx_test',
+                            value: 'sk-test',
                         },
                     ]
                 },

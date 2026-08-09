@@ -362,7 +362,7 @@ pub fn validate_single_event_payload(title: &str, got_events: Vec<ProcessedEvent
     // introspect on extracted event attributes
     let event = &got.event;
     assert_eq!(
-        "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
+        "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
         "mismatched token in case: {title}",
     );
     assert_eq!(
@@ -478,7 +478,7 @@ pub fn validate_single_engage_event_payload(title: &str, got_events: Vec<Process
     // introspect on extracted event attributes
     let event = &got.event;
     assert_eq!(
-        "phc_VXRzc3poSG9GZm1JenRiZnJ6TTJFZGh4OWY2QXzx9f3", &event.token,
+        "pk-VXRzc3poSG9GZm1JenRiZnJ6TTJFZGh4OWY2QXzx9f3", &event.token,
         "mismatched token in case: {title}",
     );
     assert_eq!(
@@ -586,7 +586,7 @@ pub fn validate_single_replay_event_payload(title: &str, got_events: Vec<Process
     // introspect on extracted event attributes
     let event = &got.event;
     assert_eq!(
-        "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
+        "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
         "mismatched token in case: {title}",
     );
     assert_eq!(
@@ -709,7 +709,7 @@ pub fn validate_batch_events_payload(title: &str, got_events: Vec<ProcessedEvent
     // introspect on extracted event attributes
     let event = &pageview.event;
     assert_eq!(
-        "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
+        "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
         "mismatched token on $pageview in case: {title}",
     );
     assert_eq!(
@@ -829,7 +829,7 @@ pub fn validate_batch_events_payload(title: &str, got_events: Vec<ProcessedEvent
     // introspect on extracted event attributes
     let event = &pageleave.event;
     assert_eq!(
-        "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
+        "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3", &event.token,
         "mismatched token on $pageleave in case: {title}",
     );
     assert_eq!(

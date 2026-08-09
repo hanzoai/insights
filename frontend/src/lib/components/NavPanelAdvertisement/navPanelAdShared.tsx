@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 
-import type { AssetSvgProps } from '@hanzo/brand'
 import { IconX } from '@hanzo/icons'
 
+import type { AssetSvgProps } from 'lib/brand/hoggies'
 import { Button } from 'lib/elements/Button'
 
 import { navPanelAdvertisementLogic } from './NavPanelAdvertisementLogic'
