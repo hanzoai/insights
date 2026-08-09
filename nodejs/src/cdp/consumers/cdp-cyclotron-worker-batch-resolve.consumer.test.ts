@@ -1,24 +1,24 @@
 import { Team } from '~/types'
 
-import { CyclotronJobInvocationInsightsFlow } from '../types'
-import { buildAccountInsightsFlowInvocation } from './cdp-cyclotron-worker-batch-resolve.consumer'
+import { CyclotronJobInvocationFlow } from '../types'
+import { buildAccountFlowInvocation } from './cdp-cyclotron-worker-batch-resolve.consumer'
 
-describe('buildAccountInsightsFlowInvocation', () => {
+describe('buildAccountFlowInvocation', () => {
     const team = { id: 123, name: 'Test team' } as Team
 
     it('carries the account group key and no person', () => {
-        const invocation = buildAccountInsightsFlowInvocation({
+        const invocation = buildAccountFlowInvocation({
             siteUrl: 'https://us.hanzo.ai',
             parentRunId: 'batch-job-1',
             team,
-            hogFlowId: 'flow-1',
+            flowId: 'flow-1',
             flowVersion: 4,
             externalId: 'acme-1',
             groupType: 'customer',
             defaultVariables: { greeting: 'hi' },
         })
 
-        const state = invocation.state as CyclotronJobInvocationInsightsFlow['state']
+        const state = invocation.state as CyclotronJobInvocationFlow['state']
 
         expect(state.event.event).toEqual('$batch_hog_flow_invocation')
         // distinct_id doubles as the per-account key for invocation_results; it must NOT
