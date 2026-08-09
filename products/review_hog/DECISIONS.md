@@ -2206,7 +2206,7 @@ pipeline just built + hardened).
 ```text
 reviewhog label on a non-fork Insights/insights PR
   └─ .github/workflows/review-script.yml   (gates: label==reviewhog by a human, head.repo==base.repo, concurrency; any author)
-       └─ one authenticated curl  →  POST /api/review_hog/trigger  {repo, pr_number}   (Authorization: Bearer <secret>)
+       └─ one authenticated curl  →  POST /v1/review_hog/trigger  {repo, pr_number}   (Authorization: Bearer <secret>)
             └─ endpoint: verify shared secret · validate repo allowlist (forks blocked upstream by the Action
                  + downstream by the fetch activity) · resolve team-2 integration + run user
                  · start_workflow (NON-blocking) · 202 + workflow_id
@@ -2260,7 +2260,7 @@ github-actions[bot] trick), and its Action carries **one** secret (no Anthropic 
    (`_installation_token(team_id, repository)` → `GitHubIntegration.first_for_team_repository(...).get_access_token()`),
    dropping the worker's `GITHUB_TOKEN` env dependency.
 2. ✅ **The endpoint** (`products/review_hog/backend/api/trigger.py` + `routes.py`, mounted unscoped at
-   `/api/review_hog/trigger`): plain `viewsets.ViewSet`, `@action`-+-`@extend_schema`, shared-secret check
+   `/v1/review_hog/trigger`): plain `viewsets.ViewSet`, `@action`-+-`@extend_schema`, shared-secret check
    (`hmac.compare_digest` vs `settings.REVIEWFN_TRIGGER_TOKEN`, fail-closed outside DEBUG/TEST), repo allowlist
    (`{"insights/insights"}`, case-insensitive), team from `settings.REVIEWFN_TEAM_ID`, run user from
    `settings.REVIEWFN_RUN_USER_ID` (fallback: the team's GitHub integration creator), `start_workflow` with
@@ -2548,7 +2548,7 @@ trigger_source=TRIGGER_UI)` with `user_id = request.user.id` too (inbox preceden
 **As built (2026-07-16):**
 
 - `backend/api/reviews.py` — `trigger` action on `ReviewRecentReviewsViewSet`
-  (`POST /api/projects/:id/review_hog/reviews/trigger/`): team gate vs `settings.REVIEWFN_TEAM_ID`
+  (`POST /v1/projects/:id/review_hog/reviews/trigger/`): team gate vs `settings.REVIEWFN_TEAM_ID`
   (403), `PRParser` URL parse (400), sync `GitHubIntegration.first_for_team_repository` access check
   (400), then `start_review_pr_workflow(publish=True, user_id=acting_user_id=request.user.id,
 trigger_source=TRIGGER_UI)` → `202 {workflow_id, status}`. The URL is canonicalized (trailing
@@ -3016,7 +3016,7 @@ PERSPECTIVES`); the obsolete `test_registry_order_matches_perspective_type_enum`
   `--user-id`** so an eval run applies a known user's perspectives against any PR (the PR author need not be a
   Insights user). This is an explicit, exercised override, not dead fallback code.
 - **The toggle viewset is `scope_object = "INTERNAL"` (session/UI-only, not MCP/PAK), keyed by `skill_name`.**
-  `ReviewPerspectiveConfigViewSet` at `/api/projects/:team_id/review_hog/perspectives` exposes `list` (the full
+  `ReviewPerspectiveConfigViewSet` at `/v1/projects/:team_id/review_hog/perspectives` exposes `list` (the full
   perspective menu joined with the user's enable state — canonicals seed enabled, an un-toggled custom shows
   disabled) and `partial_update` (PATCH `…/{skill_name}/ {enabled}`), which **upserts** the config row so enabling a
   freshly authored custom works in one call. Min-1 is enforced at the viewset (reject disabling the last enabled)
@@ -3068,7 +3068,7 @@ What shipped:
   input swapped from `ValidateIntegrationInput(team_id)` to a new `LoadValidationInput(team_id, acting_user_id)` (the
   `LoadPerspectivesInput` analogue). `ValidateIntegrationInput` is still used by `validate_github_integration_activity`.
 - **A sibling viewset `ReviewValidatorConfigViewSet`** (`api/validators.py`, `scope_object="INTERNAL"`) at
-  `/api/projects/:team_id/review_hog/validators` — chosen over branching the perspectives viewset because the two have
+  `/v1/projects/:team_id/review_hog/validators` — chosen over branching the perspectives viewset because the two have
   different interaction semantics (radio vs checkbox, no floor vs min-1) and one handler carrying both is a
   conditional-behavior-by-prefix smell; the shared model + loader helpers mean no logic duplication. `list` shows every
   validator with the user's active one flagged (canonical auto-seeds active); `partial_update` PATCH `{active: true}`
