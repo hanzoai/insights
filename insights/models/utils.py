@@ -170,7 +170,9 @@ class KeyKind(StrEnum):
     The rest are not API keys at all. The two OAuth tokens are protocol tokens, and
     the parser has to tell an access token from a refresh token before either is
     looked up, so each keeps its own mark. A verification token proves control of a
-    domain and is read only by the check that issued it.
+    domain and is read only by the check that issued it. A widget token lets an
+    embedded conversations widget speak for the team that embedded it, and reaches
+    that one door rather than the ingest door.
     """
 
     PUBLISHABLE = "publishable"
@@ -178,6 +180,7 @@ class KeyKind(StrEnum):
     OAUTH_ACCESS = "oauth_access"
     OAUTH_REFRESH = "oauth_refresh"
     VERIFICATION = "verification"
+    WIDGET = "widget"
 
 
 # The mark that opens a key, and the entropy behind it. Reading a key's mark is
@@ -188,24 +191,36 @@ KEY_MARKS: dict[KeyKind, str] = {
     KeyKind.OAUTH_ACCESS: "at-",
     KeyKind.OAUTH_REFRESH: "rt-",
     KeyKind.VERIFICATION: "vt-",
+    KeyKind.WIDGET: "wt-",
 }
 
+# The kinds this deployment mints, and the entropy behind each. A publishable key
+# is absent because Hanzo cloud mints that one; see `mint`.
+#
 # A secret key is stored hashed except for its last four characters, which the UI
 # shows so a person can recognize their own key. Those four have to be entropy
 # rather than a window onto the hashed part, so a secret is minted three bytes
 # longer than the 32 that (https://docs.python.org/3/library/secrets.html#how-many-bytes-should-tokens-use)
 # calls sufficient.
 KEY_BYTES: dict[KeyKind, int] = {
-    KeyKind.PUBLISHABLE: 32,
     KeyKind.SECRET: 35,
     KeyKind.OAUTH_ACCESS: 32,
     KeyKind.OAUTH_REFRESH: 32,
     KeyKind.VERIFICATION: 32,
+    KeyKind.WIDGET: 32,
 }
 
-# Anchored at both ends: a key is its mark and then base57 to the end of the
-# string, so a value that merely starts with a mark is not a key.
-KEY_RE = re.compile(rf"^(?P<mark>{'|'.join(re.escape(m) for m in KEY_MARKS.values())})[A-Za-z0-9]+$")
+# Anchored at both ends: a key is its mark and then its encoded bytes to the end
+# of the string, so a value that merely starts with a mark is not a key.
+#
+# The tail is base64url, which covers both encodings in play: the base57 minted
+# here, and the `base64.RawURLEncoding` cloud mints an ingest key in. Reading only
+# base57 dropped roughly three of every four real cloud keys -- 1 - (62/64)^43 --
+# and a key that cannot be read is a key that cannot be routed. The wider alphabet
+# costs the accident that a third party's `sk-` used to fail the shape: an
+# Anthropic key now reads as secret-shaped and is refused by the store instead,
+# which is where the unmarked legacy keys have always been decided.
+KEY_RE = re.compile(rf"^(?P<mark>{'|'.join(re.escape(m) for m in KEY_MARKS.values())})[A-Za-z0-9_-]+$")
 
 _KIND_BY_MARK: dict[str, KeyKind] = {mark: kind for kind, mark in KEY_MARKS.items()}
 
@@ -224,14 +239,43 @@ def key_kind(value: str | None) -> Optional[KeyKind]:
 
 
 def mint(kind: KeyKind) -> str:
-    """Make a new key of `kind`. The only place a key is created."""
+    """Make a new key of `kind`. The only place a key is created.
+
+    Except the ingest key. Hanzo cloud mints that one at `POST /v1/projects`,
+    where it is born already resolving to an (org, project) that cloud stamps
+    onto every row it accepts. A `pk-` invented here resolves to nothing, so the
+    ingest door refuses it -- and a team holding one looks healthy while dropping
+    every event. Refusing to make one is what keeps that state unreachable.
+    """
+    if kind is KeyKind.PUBLISHABLE:
+        raise RuntimeError("an ingest key is minted by Hanzo cloud at POST /v1/projects, not here")
     return KEY_MARKS[kind] + generate_random_token(KEY_BYTES[kind])
+
+
+# A team that no cloud project has been created for yet holds this instead of a
+# key. It deliberately carries none of the marks above, so `key_kind` reads it as
+# nothing and no reader can mistake it for a credential; it is an absence the
+# column can store, not a weaker key. The door refuses it with
+# `ingest_key_unknown`, which is the true answer -- it names no project.
+UNBOUND_MARK = "unbound-"
 
 
 # Django migrations record the import path of a field's default, so these keep the
 # names already written into migration files. Each is `mint` under a pinned name.
 def generate_random_token_project() -> str:
-    return mint(KeyKind.PUBLISHABLE)
+    """`Team.api_token` before cloud has named a project for it.
+
+    Not a key, and not a mint: cloud mints the ingest key at `POST /v1/projects`
+    and the three doors that create a team (the IAM login pipeline, and the team
+    and project serializers) put it here at birth. What reaches this is a team
+    born outside all three -- a fixture, or a local bootstrap -- and the honest
+    value for one of those is that it has no key, spelled so that nothing reads it
+    as having one.
+
+    It stays random because the column is unique. The name stays because
+    `insights/migrations/0001_initial.py` records it as the field's default.
+    """
+    return UNBOUND_MARK + generate_random_token(16)
 
 
 def generate_random_token_personal() -> str:

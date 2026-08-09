@@ -25,10 +25,12 @@ from insights.models.instance_setting import get_instance_setting
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.signals import mutable_receiver, secret_api_token_rotated
 from insights.models.utils import (
+    KeyKind,
     UUIDTClassicModel,
     generate_random_token_project,
     generate_random_token_secret,
     mask_key_value,
+    mint,
     sane_repr,
     validate_rate_limit,
 )
@@ -916,17 +918,6 @@ class Team(UUIDTClassicModel):
                 continue
         return filters
 
-    def reset_token_and_save(self, *, user: "User", is_impersonated_session: bool):
-        old_token = self.api_token
-        self.api_token = generate_random_token_project()
-        self._persist_api_token_change(old_token=old_token, user=user, is_impersonated_session=is_impersonated_session)
-
-    def _notify_vercel_of_token_rotation(self) -> None:
-        """Push updated API token to Vercel integrations in the background."""
-        from insights.tasks.integrations import push_vercel_secrets
-
-        push_vercel_secrets.delay(self.id)
-
     def set_token_and_save(self, *, new_token: str, user: "User", is_impersonated_session: bool):
         new_token = new_token.strip()
         if not new_token:
@@ -973,8 +964,6 @@ class Team(UUIDTClassicModel):
                 ],
             ),
         )
-
-        self._notify_vercel_of_token_rotation()
 
     def rotate_secret_token_and_save(self, *, user: "User", is_impersonated_session: bool):
         from insights.models.activity_logging.activity_log import Change, Detail, log_activity
@@ -1041,7 +1030,7 @@ class Team(UUIDTClassicModel):
 
         settings = self.conversations_settings or {}
         old_token = settings.get("widget_public_token")
-        new_token = generate_random_token_project()
+        new_token = mint(KeyKind.WIDGET)
         settings["widget_public_token"] = new_token
         self.conversations_settings = settings
         self.save()

@@ -361,9 +361,8 @@ class TestTeamSetTokenAndSave(BaseTest):
         self.team.refresh_from_db()
         assert self.team.api_token == "pk-old_token_value"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
     @patch("insights.models.team.team.set_team_in_cache")
-    def test_set_token_and_save_success_runs_full_side_effect_chain(self, mock_set_cache, mock_push_vercel) -> None:
+    def test_set_token_and_save_success_runs_full_side_effect_chain(self, mock_set_cache) -> None:
         self.team.set_token_and_save(
             new_token="pk-new_token_value",
             user=self.user,
@@ -376,8 +375,6 @@ class TestTeamSetTokenAndSave(BaseTest):
         cache_calls = [call.args for call in mock_set_cache.call_args_list]
         assert ("pk-old_token_value", None) in cache_calls
         assert any(args[0] == "pk-new_token_value" and args[1] is self.team for args in cache_calls)
-
-        mock_push_vercel.assert_called_once_with(self.team.id)
 
         log_entry = ActivityLog.objects.get(scope="Team", item_id=str(self.team.pk), activity="updated")
         assert log_entry.detail is not None
@@ -411,9 +408,8 @@ class TestTeamSetTokenAndSave(BaseTest):
         self.team.refresh_from_db()
         assert self.team.api_token == "pk-trimmed"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
     @patch("insights.models.team.team.set_team_in_cache")
-    def test_set_token_and_save_accepts_token_at_field_max_length(self, _mock_set_cache, _mock_push_vercel) -> None:
+    def test_set_token_and_save_accepts_token_at_field_max_length(self, _mock_set_cache) -> None:
         new_token = "a" * self.API_TOKEN_MAX_LENGTH
         self.team.set_token_and_save(
             new_token=new_token,
@@ -423,8 +419,7 @@ class TestTeamSetTokenAndSave(BaseTest):
         self.team.refresh_from_db()
         assert self.team.api_token == new_token
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
-    def test_set_token_and_save_evicts_old_and_warms_new_cache(self, _mock_push_vercel) -> None:
+    def test_set_token_and_save_evicts_old_and_warms_new_cache(self) -> None:
         cache.clear()
         set_team_in_cache("pk-old_token_value", self.team)
         assert get_team_in_cache("pk-old_token_value") is not None
@@ -441,8 +436,7 @@ class TestTeamSetTokenAndSave(BaseTest):
         assert cached_new is not None
         assert cached_new.api_token == "pk-new_token_value"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
-    def test_set_token_and_save_rejection_leaves_cache_untouched(self, _mock_push_vercel) -> None:
+    def test_set_token_and_save_rejection_leaves_cache_untouched(self) -> None:
         Team.objects.create(organization=self.organization, api_token="pk-already_taken")
         cache.clear()
         set_team_in_cache("pk-old_token_value", self.team)
