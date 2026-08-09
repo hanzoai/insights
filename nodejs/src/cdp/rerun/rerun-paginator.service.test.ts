@@ -1,6 +1,6 @@
 import { MockKafkaProducerWrapper } from '~/tests/helpers/mocks/producer.mock'
 
-import { DatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient } from '@datastore/client'
 import { DateTime } from 'luxon'
 
 import { KAFKA_FN_INVOCATION_RESULTS } from '~/common/config/kafka-topics'
