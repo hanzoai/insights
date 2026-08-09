@@ -217,7 +217,7 @@ session. When `False`, the docs render a generic "discovered from your account" 
 
 The richer the table list, the better the docs — so pair this with `canonical_descriptions.py`
 (table/column descriptions). Verify the rendered output via the API:
-`GET /api/public_source_configs` → your source → `tables`.
+`GET /v1/public_source_configs` → your source → `tables`.
 
 ## Source category & keywords
 

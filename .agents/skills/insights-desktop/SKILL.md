@@ -76,8 +76,8 @@ dependency change alter the root lockfile — the root install must stay byte-id
 
 ## Cross-boundary: the Django API
 
-`packages/api-client/` calls monorepo endpoints — tasks (`/api/projects/:id/tasks/...`),
-signals, agent applications, environments/MCP installations, `/api/users/`. When a change needs
+`packages/api-client/` calls monorepo endpoints — tasks (`/v1/projects/:id/tasks/...`),
+signals, agent applications, environments/MCP installations, `/v1/users/`. When a change needs
 the backend:
 
 - Read the Django side to get the contract right; that is in scope without asking.

@@ -65,7 +65,7 @@ python3 scripts/print_summary.py /path/to/persisted-file.json
 python3 scripts/print_timeline.py /path/to/persisted-file.json
 
 # 3. Drill into a specific span by name
-SPAN="HTTP GET /api/users" python3 scripts/extract_span.py /path/to/persisted-file.json
+SPAN="HTTP GET /v1/users" python3 scripts/extract_span.py /path/to/persisted-file.json
 
 # 4. Search for a keyword across span names, services, IDs
 SEARCH="keyword" python3 scripts/search_spans.py /path/to/persisted-file.json
