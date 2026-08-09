@@ -3319,7 +3319,7 @@ None` (mirrors the existing `runtime_adapter` / `model` fields).
 3. `facade/run_config.py`: exposed `ReasoningEffort` (added to imports + `__all__`) so Review imports it from the
    public facade.
 
-**As-built — Review (`products/review_hog`):**
+**As-built — Review (`products/review`):**
 
 4. `reviewer/sandbox/executor.py`: `run_sandbox_review` gains optional `runtime_adapter` / `model` / `reasoning_effort`
    (default `None`) → threaded into its `CustomPromptSandboxContext`. Default-`None` means chunk + dedup callers are
@@ -3382,7 +3382,7 @@ findings → 4 verdicts → 2 valid → 1261-char body. The first run (pre-`full
 every review sandbox stalled on the MCP approval prompt — which is what forced the gotcha fix above.
 
 **Scope footprint.** 3 small edits in `products/tasks` (shared infra — only _adds_ an optional capability; now carries
-`model` / `runtime_adapter` / `reasoning_effort` / `initial_permission_mode`) + 3 in `products/review_hog` (executor,
+`model` / `runtime_adapter` / `reasoning_effort` / `initial_permission_mode`) + 3 in `products/review` (executor,
 constants, one activity wiring) + 4 tests + this doc. **No DB migration.**
 
 ---

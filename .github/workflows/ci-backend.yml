@@ -1712,7 +1712,7 @@ jobs:
               run: |
                   if [ ! -f migration_analysis.json ]; then
                     # Analyzer crashed before writing JSON. Publish a failure
-                    # check so stamphog (or any consumer) gets a definitive
+                    # check so stamp (or any consumer) gets a definitive
                     # verdict instead of looping in "wait for the check."
                     echo "No migration_analysis.json — analyzer didn't run; publishing failure check"
                     jq -n \
@@ -1721,7 +1721,7 @@ jobs:
                       '{name: $name, head_sha: $head_sha, status: "completed",
                         conclusion: "failure",
                         output: {title: "❌ Analyzer failed",
-                                 summary: "<!-- stamphog:v1 [] -->\nMigration analyzer did not produce migration_analysis.json. Re-run the Backend CI job; if it keeps failing, inspect the analyzer step logs."}}' \
+                                 summary: "<!-- stamp:v1 [] -->\nMigration analyzer did not produce migration_analysis.json. Re-run the Backend CI job; if it keeps failing, inspect the analyzer step logs."}}' \
                       | gh api "repos/$REPO/check-runs" --method POST --input -
                     exit 0
                   fi
@@ -1748,13 +1748,13 @@ jobs:
                   esac
 
                   # Embed the analyzed file paths in the summary as a hidden
-                  # marker. Stamphog parses this to scope its deny-list bypass
+                  # marker. Stamp parses this to scope its deny-list bypass
                   # to exactly the files the analyzer classified — heuristics
                   # over directory names produce false bypasses for unrelated
                   # systems (Datastore, async migrations) that share the
                   # `migrations/` directory naming.
                   ANALYZED_PATHS=$(jq -c '[.migrations[].file_path | select(. != null)]' migration_analysis.json 2>/dev/null || echo '[]')
-                  MARKER="<!-- stamphog:v1 ${ANALYZED_PATHS} -->"
+                  MARKER="<!-- stamp:v1 ${ANALYZED_PATHS} -->"
 
                   # Truncate the human report to fit the check-run output
                   # limit (~64KB); the full markdown is also posted in the CI
