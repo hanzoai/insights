@@ -6,7 +6,7 @@ import { logger } from '~/common/utils/logger'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult } from '../types'
 import { createAddLogFunction, sanitizeLogMessage } from '../utils'
 import { createInvocationResult } from '../utils/invocation-utils'
-import { HogvmNodeModule, RUST_MAX_STEPS, isUnsupportedByRustVm, loadHogvmNodeModule } from './rust-vm'
+import { RUST_MAX_STEPS, ScriptvmNodeModule, isUnsupportedByRustVm, loadScriptvmNodeModule } from './rust-vm'
 
 /**
  * Executes transformation invocations on the Rust ScriptVM (via the `@hanzo/scriptvm-node` napi
@@ -31,8 +31,8 @@ export const rustVmExecutionDuration = new Histogram({
 export class RustVmExecutor {
     constructor(private options: { mmdbPath: string }) {}
 
-    private getModule(): HogvmNodeModule | null {
-        return loadHogvmNodeModule({ mmdbPath: this.options.mmdbPath })
+    private getModule(): ScriptvmNodeModule | null {
+        return loadScriptvmNodeModule({ mmdbPath: this.options.mmdbPath })
     }
 
     /**

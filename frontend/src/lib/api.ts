@@ -229,6 +229,7 @@ import type {
 import type { SymbolSetOrder } from 'products/error_tracking/frontend/scenes/ErrorTrackingConfigurationScene/symbol_sets/symbolSetLogic'
 import type { ErrorTrackingRecommendation } from 'products/error_tracking/frontend/scenes/ErrorTrackingScene/tabs/recommendations/types'
 import type { CopyFlagsResponseApi } from 'products/feature_flags/frontend/generated/api.schemas'
+import type { Task, TaskListParams, TaskRun, TaskUpsertProps } from 'products/insights_ai/frontend/types/taskTypes'
 import type {
     GitHubBranchesResponseApi,
     GitHubReposResponseApi,
@@ -236,7 +237,6 @@ import type {
 import type { LogExplanation } from 'products/logs/frontend/components/LogsViewer/LogDetailsModal/Tabs/ExploreWithAI/types'
 import type { BulkAddOptOutsResultApi, BulkOptOutEntryApi } from 'products/messaging/frontend/generated/api.schemas'
 import type { NotebookCollabCursorApi } from 'products/notebooks/frontend/generated/api.schemas'
-import type { Task, TaskListParams, TaskRun, TaskUpsertProps } from 'products/insights_ai/frontend/types/taskTypes'
 import type {
     ColumnConfigurationApi,
     PaginatedColumnConfigurationListApi,
@@ -6918,22 +6918,22 @@ const api = {
             queryKind?: string
         }
     ): Promise<InsightsQLQueryResponse<T>> {
-        const hogQLQuery: InsightsQLQuery = setLatestVersionsOnQuery({
+        const insightsQLQuery: InsightsQLQuery = setLatestVersionsOnQuery({
             ...queryOptions?.queryParams,
             kind: NodeKind.InsightsQLQuery,
             query,
             tags,
         })
-        if (queryOptions?.queryKind && queryOptions.queryKind !== hogQLQuery.kind) {
+        if (queryOptions?.queryKind && queryOptions.queryKind !== insightsQLQuery.kind) {
             throw new Error(
-                `Query kind mismatch: path kind "${queryOptions.queryKind}" does not match body kind "${hogQLQuery.kind}".`
+                `Query kind mismatch: path kind "${queryOptions.queryKind}" does not match body kind "${insightsQLQuery.kind}".`
             )
         }
 
-        return await new ApiRequest().query(undefined, hogQLQuery.kind).create({
+        return await new ApiRequest().query(undefined, insightsQLQuery.kind).create({
             ...queryOptions?.requestOptions,
             data: {
-                query: hogQLQuery,
+                query: insightsQLQuery,
                 client_query_id: queryOptions?.clientQueryId,
                 refresh: queryOptions?.refresh,
                 filters_override: queryOptions?.filtersOverride,

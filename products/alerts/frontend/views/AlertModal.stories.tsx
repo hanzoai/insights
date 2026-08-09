@@ -122,7 +122,7 @@ const funnelAlert = makeAlert({
     },
 })
 
-const hogQLAlert = makeAlert({
+const insightsQLAlert = makeAlert({
     id: 'alert-insightsql',
     name: 'Queue depth above 1,000',
     checks: makeChecks([720, 810, 760, 880, 920, 1050, 980, 1200]),
@@ -176,7 +176,7 @@ interface AlertTypeStoryProps {
 const storyAlerts: Record<StoryInsightType, AlertType> = {
     trends: trendsAlert,
     funnel: funnelAlert,
-    insightsql: hogQLAlert,
+    insightsql: insightsQLAlert,
 }
 
 const alertsById = Object.fromEntries(Object.values(storyAlerts).map((alert) => [alert.id, alert]))

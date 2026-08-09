@@ -3120,7 +3120,7 @@ class InsightsQLParseTreeJSONConverter : public InsightsQLParserBaseVisitor {
 
   VISIT(ImplicitAlias) { return unquoteIdentifierText(ctx->getText()); }
 
-  VISIT(HogqlxTagAttribute) {
+  VISIT(InsightsqlxTagAttribute) {
     Json json = Json::object();
     json["node"] = "InsightsQLXAttribute";
     if (!is_internal) addPositionInfo(json, ctx);
@@ -3142,7 +3142,7 @@ class InsightsQLParseTreeJSONConverter : public InsightsQLParserBaseVisitor {
     return json;
   }
 
-  VISIT(HogqlxChildElement) {
+  VISIT(InsightsqlxChildElement) {
     if (const auto tag_element_ctx = ctx->insightsqlxTagElement()) {
       return visitAsJSON(tag_element_ctx);
     }
@@ -3152,7 +3152,7 @@ class InsightsQLParseTreeJSONConverter : public InsightsQLParserBaseVisitor {
     return visitAsJSON(ctx->columnExpr());
   }
 
-  VISIT(HogqlxText) {
+  VISIT(InsightsqlxText) {
     Json json = Json::object();
     json["node"] = "Constant";
     if (!is_internal) addPositionInfo(json, ctx);
@@ -3160,7 +3160,7 @@ class InsightsQLParseTreeJSONConverter : public InsightsQLParserBaseVisitor {
     return json;
   }
 
-  VISIT(HogqlxTagElementClosed) {
+  VISIT(InsightsqlxTagElementClosed) {
     Json json = Json::object();
     json["node"] = "InsightsQLXTag";
     if (!is_internal) addPositionInfo(json, ctx);
@@ -3169,7 +3169,7 @@ class InsightsQLParseTreeJSONConverter : public InsightsQLParserBaseVisitor {
     return json;
   }
 
-  VISIT(HogqlxTagElementNested) {
+  VISIT(InsightsqlxTagElementNested) {
     std::string opening = visitAsString(ctx->identifier(0));
     std::string closing = visitAsString(ctx->identifier(1));
     if (opening != closing) {
