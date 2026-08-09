@@ -7,7 +7,7 @@ export const template: InsightsFunctionTemplate = {
     id: 'template-log-transformation-pii-scrub',
     name: 'Scrub PII from log bodies',
     description: 'Redact emails, API keys, and bearer tokens from the log body using regular expressions.',
-    icon_url: '/static/mascot/builder-script-02.png',
+    icon_url: '/static/script/builder-script-02.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

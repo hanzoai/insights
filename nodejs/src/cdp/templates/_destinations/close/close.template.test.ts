@@ -47,7 +47,7 @@ describe('close template', () => {
         firstName: 'Max',
         lastName: 'AI',
         properties: {
-            title: 'Mascot in Residence',
+            title: 'Script in Residence',
         },
         leadProperties: {},
     }
@@ -86,7 +86,7 @@ describe('close template', () => {
                 {
                     emails: [{ email: 'max@hanzo.ai', type: 'office' }],
                     name: 'Max AI',
-                    title: 'Mascot in Residence',
+                    title: 'Script in Residence',
                 },
             ],
             url: 'https://hanzo.ai',
@@ -119,7 +119,7 @@ describe('close template', () => {
         // replace the contact's existing emails
         expect(parseBody(updateRequest.invocation)).toEqual({
             name: 'Max AI',
-            title: 'Mascot in Residence',
+            title: 'Script in Residence',
         })
 
         const done = await tester.invokeFetchResponse(updateRequest.invocation, {
@@ -143,7 +143,7 @@ describe('close template', () => {
             contacts: [
                 {
                     emails: [{ email: 'max@hanzo.ai', type: 'office' }],
-                    title: 'Mascot in Residence',
+                    title: 'Script in Residence',
                 },
             ],
         })
@@ -168,7 +168,7 @@ describe('close template', () => {
             {
                 ...defaultInputs,
                 properties: {
-                    title: 'Mascot in Residence',
+                    title: 'Script in Residence',
                     'custom.cf_addresses': [{ city: 'Berlin' }, { city: 'London' }],
                 },
             },
@@ -182,7 +182,7 @@ describe('close template', () => {
 
         const body = parseBody(createRequest.invocation)
         expect(body.contacts[0]['custom.cf_addresses']).toBe('[{"city":"Berlin"},{"city":"London"}]')
-        expect(body.contacts[0].title).toBe('Mascot in Residence')
+        expect(body.contacts[0].title).toBe('Script in Residence')
     })
 
     it('skips when email is empty', async () => {
