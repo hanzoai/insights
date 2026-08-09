@@ -6,7 +6,7 @@ import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
 import { PubSub } from '~/common/utils/pubsub'
 import { TeamManager } from '~/common/utils/team-manager'
-import { clickHouseTimestampSecondPrecisionToISO, clickHouseTimestampToISO } from '~/common/utils/utils'
+import { datastoreTimestampSecondPrecisionToISO, datastoreTimestampToISO } from '~/common/utils/utils'
 
 import { Action, Hook, HookPayload, PostIngestionEvent, RawDatastoreEvent, RawKafkaEvent, Team } from '../../types'
 import { counterParseError } from '../consumers/metrics'
@@ -99,16 +99,16 @@ export class LegacyWebhookService {
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
                     if (
-                        !this.actionMatcher.hasWebhooks(clickHouseEvent.team_id) ||
-                        !(await this.teamManager.hasAvailableFeature(clickHouseEvent.team_id, 'zapier'))
+                        !this.actionMatcher.hasWebhooks(datastoreEvent.team_id) ||
+                        !(await this.teamManager.hasAvailableFeature(datastoreEvent.team_id, 'zapier'))
                     ) {
                         return
                     }
 
-                    events.push(convertToPostIngestionEvent(clickHouseEvent))
+                    events.push(convertToPostIngestionEvent(datastoreEvent))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
@@ -142,11 +142,11 @@ function convertToPostIngestionEvent(event: RawKafkaEvent): PostIngestionEvent {
         projectId: event.project_id,
         distinctId: event.distinct_id,
         properties,
-        timestamp: clickHouseTimestampToISO(event.timestamp),
+        timestamp: datastoreTimestampToISO(event.timestamp),
         elementsList: undefined,
         person_id: event.person_id,
         person_created_at: event.person_created_at
-            ? clickHouseTimestampSecondPrecisionToISO(event.person_created_at)
+            ? datastoreTimestampSecondPrecisionToISO(event.person_created_at)
             : null,
         person_properties: event.person_properties ? parseJSON(event.person_properties) : {},
     }

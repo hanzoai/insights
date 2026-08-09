@@ -425,12 +425,59 @@ check(
     "insights/tasks/insights_flows.py",
 )
 
+# The storage engine, one layer down. Our fork is Datastore and every label we
+# chose says so, but these six spellings are read back by a program that was not
+# built from this checkout, and the rules renamed all six until they were held.
+# Each line below broke something specific: a dictionary the server refuses to
+# create, an import of a class the package does not export, an option key the
+# server never sees, a derive macro with nothing to resolve, and an alias
+# pointing at itself.
+for ident in (
+    "SOURCE(CLICKHOUSE(TABLE 't'))",
+    "import { ClickHouseClient as DatastoreClient } from '@datastore/client'",
+    "from datastore_connect.driver.exceptions import ClickHouseError as DatastoreError",
+    "clickhouse_settings: { max_execution_time: 30 }",
+    "use datastore as clickhouse;",
+):
+    check(f"{ident[:44]} survives the rewrite", debrand.rewrite_text(ident), ident)
+check(
+    "an npm alias keeps the scope it resolves to, caret and all",
+    debrand.rewrite_text("'@datastore/client': 'npm:@clickhouse/client@^1.12.0'", "pnpm-workspace.yaml"),
+    "'@datastore/client': 'npm:@clickhouse/client@^1.12.0'",
+)
+# The other side of that line: a name we chose is ours, in every casing. The
+# camelCase one is the spelling a table of whole-word pairs keeps missing.
+check("...while an identifier we named still moves", debrand.rewrite_text("clickHouseTimestampToISO"), "datastoreTimestampToISO")
+check("...and so does a setting we read", debrand.rewrite_text("CLICKHOUSE_HOST"), "DATASTORE_HOST")
+
 
 # Applying the rules to an already-converged tree has to be a no-op, or every
 # rerun produces a diff and convergence never terminates.
 sample = "from insights.insightsql import datastore  # @hanzo/elements, InsightsFunction\n"
 check("content rewriting is idempotent", debrand.rewrite_text(debrand.rewrite_text(sample)), debrand.rewrite_text(sample))
-check("path rewriting is idempotent", debrand.rewrite_path(debrand.rewrite_path("posthog/hogql/clickhouse.py")), debrand.rewrite_path("posthog/hogql/clickhouse.py"))
+
+# One probe per path rule, built from the rule's own pattern rather than written
+# out here. A hand-picked fixture tests one path and has to spell the upstream
+# names to do it -- which is how `posthog/hogql/clickhouse.py` sat in this file,
+# naming both the brand and the engine, exempt because the allowlist exempts
+# files and this file is on it for its licence and import fixtures. Reading the
+# tables instead covers every rule, spells nothing, and cannot fall behind a
+# rule someone adds later.
+path_probes = (
+    [old + "/x.py" for old, _ in debrand.PATH_DIR_RULES]      # matched on prefix
+    + [f"a/{old}/b.py" for old, _ in debrand.PATH_RULES]      # matched anywhere
+    + [f"a/{base}" for base in debrand.PATH_EXACT_RULES]      # matched on basename
+)
+once = [debrand.rewrite_path(p) for p in path_probes]
+check(
+    "path rewriting is idempotent",
+    [debrand.rewrite_path(p) for p in once],
+    once,
+)
+# A probe is built from a rule's own left-hand side, so a probe that comes back
+# unchanged is a rule that no longer fires -- shadowed by an earlier one, or
+# left behind by a rename it was written for.
+check("every path rule fires", [p for p, o in zip(path_probes, once) if p == o], [])
 
 print()
 if failures:
