@@ -1786,7 +1786,7 @@ describe('Script Executor', () => {
         })
 
         describe('self-loop guard', () => {
-            const OWN_TOKEN = 'phc_synthetic_own_0000000000000000'
+            const OWN_TOKEN = 'pk-synthetic_own_0000000000000000'
             const INGEST_URL = 'https://us.i.hanzo.ai/capture/'
 
             const mockOwnTeam = (): void => {

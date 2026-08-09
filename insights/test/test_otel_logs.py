@@ -141,7 +141,7 @@ class TestOtelLogMirror(SimpleTestCase):
         assert mirror(None, "info", dict(event_dict)) == event_dict
 
     @parameterized.expand(
-        [("both_empty", "", ""), ("endpoint_only", "http://c/i/v1/logs", ""), ("token_only", "", "phc_x")]
+        [("both_empty", "", ""), ("endpoint_only", "http://c/i/v1/logs", ""), ("token_only", "", "pk-x")]
     )
     def test_noop_when_unconfigured(self, _name: str, endpoint: str, token: str) -> None:
         with override_settings(OTLP_LOGS_INGEST_ENDPOINT=endpoint, OTLP_LOGS_INGEST_TOKEN=token):
@@ -152,11 +152,11 @@ class TestOtelLogMirror(SimpleTestCase):
     def test_production_exporter_bypasses_egress_proxy(self) -> None:
         # trust_env=False, else the worker's Smokescreen proxy 407s the in-cluster ClusterIP.
         endpoint = "http://capture-logs.insights.svc.cluster.local:4318/i/v1/logs"
-        with override_settings(OTLP_LOGS_INGEST_ENDPOINT=endpoint, OTLP_LOGS_INGEST_TOKEN="phc_x"):
+        with override_settings(OTLP_LOGS_INGEST_ENDPOINT=endpoint, OTLP_LOGS_INGEST_TOKEN="pk-x"):
             with mock.patch("opentelemetry.exporter.otlp.proto.http._log_exporter.OTLPLogExporter") as mock_otlp:
                 provider = otel_logs._build_provider("replay-vision")
         assert mock_otlp.call_args.kwargs["endpoint"] == endpoint
-        assert mock_otlp.call_args.kwargs["headers"] == {"authorization": "Bearer phc_x"}
+        assert mock_otlp.call_args.kwargs["headers"] == {"authorization": "Bearer pk-x"}
         assert mock_otlp.call_args.kwargs["session"].trust_env is False
         if provider is not None:
             provider.shutdown()

@@ -672,7 +672,7 @@ mod tests {
 
     #[test]
     fn test_token_distinct_id_cache_key_truncates_long_distinct_id() {
-        let token = "phc_abc";
+        let token = "pk-abc";
         let long_id = "d".repeat(300);
         let key = GlobalRateLimitKey::TokenDistinctId(token, &long_id);
         let result = key.to_cache_key();
@@ -807,28 +807,28 @@ mod tests {
 
     #[rstest]
     // Token-scope override: applies to the token and ALL of its token:distinct_id keys.
-    #[case::token_scope_exact(&[("phc_tok", 10)], "phc_tok", Some(10))]
-    #[case::token_scope_matches_any_distinct_id(&[("phc_tok", 10)], "phc_tok:alice", Some(10))]
-    #[case::token_scope_matches_other_distinct_id(&[("phc_tok", 10)], "phc_tok:bob", Some(10))]
-    #[case::token_scope_other_token_unmatched(&[("phc_tok", 10)], "other:alice", None)]
-    #[case::token_scope_other_bare_token_unmatched(&[("phc_tok", 10)], "other", None)]
+    #[case::token_scope_exact(&[("pk-tok", 10)], "pk-tok", Some(10))]
+    #[case::token_scope_matches_any_distinct_id(&[("pk-tok", 10)], "pk-tok:alice", Some(10))]
+    #[case::token_scope_matches_other_distinct_id(&[("pk-tok", 10)], "pk-tok:bob", Some(10))]
+    #[case::token_scope_other_token_unmatched(&[("pk-tok", 10)], "other:alice", None)]
+    #[case::token_scope_other_bare_token_unmatched(&[("pk-tok", 10)], "other", None)]
     // token:distinct_id-scope override: applies to that exact pair only.
-    #[case::distinct_scope_exact(&[("phc_tok:alice", 5)], "phc_tok:alice", Some(5))]
-    #[case::distinct_scope_other_distinct_unmatched(&[("phc_tok:alice", 5)], "phc_tok:bob", None)]
-    #[case::distinct_scope_bare_token_unmatched(&[("phc_tok:alice", 5)], "phc_tok", None)]
+    #[case::distinct_scope_exact(&[("pk-tok:alice", 5)], "pk-tok:alice", Some(5))]
+    #[case::distinct_scope_other_distinct_unmatched(&[("pk-tok:alice", 5)], "pk-tok:bob", None)]
+    #[case::distinct_scope_bare_token_unmatched(&[("pk-tok:alice", 5)], "pk-tok", None)]
     // Exact match wins over the token-prefix fallback.
-    #[case::exact_wins_over_fallback(&[("phc_tok", 10), ("phc_tok:vip", 100)], "phc_tok:vip", Some(100))]
-    #[case::fallback_when_no_exact(&[("phc_tok", 10), ("phc_tok:vip", 100)], "phc_tok:other", Some(10))]
-    #[case::bare_token_with_both(&[("phc_tok", 10), ("phc_tok:vip", 100)], "phc_tok", Some(10))]
+    #[case::exact_wins_over_fallback(&[("pk-tok", 10), ("pk-tok:vip", 100)], "pk-tok:vip", Some(100))]
+    #[case::fallback_when_no_exact(&[("pk-tok", 10), ("pk-tok:vip", 100)], "pk-tok:other", Some(10))]
+    #[case::bare_token_with_both(&[("pk-tok", 10), ("pk-tok:vip", 100)], "pk-tok", Some(10))]
     // Safety: fallback is colon-delimited, never a raw string prefix.
-    #[case::not_string_prefix_bare(&[("phc_tok", 10)], "phc_tokEXTRA", None)]
-    #[case::not_string_prefix_with_distinct(&[("phc_tok", 10)], "phc_tokEXTRA:alice", None)]
+    #[case::not_string_prefix_bare(&[("pk-tok", 10)], "pk-tokEXTRA", None)]
+    #[case::not_string_prefix_with_distinct(&[("pk-tok", 10)], "pk-tokEXTRA:alice", None)]
     // Corner cases: empty distinct_id, extra colons, empty token, utf8.
-    #[case::empty_distinct_id_falls_back(&[("phc_tok", 10)], "phc_tok:", Some(10))]
-    #[case::only_first_colon_splits(&[("phc_tok", 10)], "phc_tok:a:b", Some(10))]
+    #[case::empty_distinct_id_falls_back(&[("pk-tok", 10)], "pk-tok:", Some(10))]
+    #[case::only_first_colon_splits(&[("pk-tok", 10)], "pk-tok:a:b", Some(10))]
     #[case::empty_token_key(&[("", 3)], ":alice", Some(3))]
-    #[case::utf8_distinct_id_falls_back(&[("phc_tok", 10)], "phc_tok:ünïcödé", Some(10))]
-    #[case::empty_map_no_match(&[], "phc_tok:alice", None)]
+    #[case::utf8_distinct_id_falls_back(&[("pk-tok", 10)], "pk-tok:ünïcödé", Some(10))]
+    #[case::empty_map_no_match(&[], "pk-tok:alice", None)]
     fn test_hierarchical_resolver(
         #[case] pairs: &[(&str, u64)],
         #[case] key: &str,
@@ -844,11 +844,11 @@ mod tests {
         // Gap fix vs master: a static-CSV token-level override (dynamic source
         // OFF) now applies to that token's token:distinct_id keys too, because
         // the hierarchical resolver is always set — not just on the dynamic path.
-        let limiter = GlobalRateLimiter::for_test_hierarchical_seeded(Some("phc_seed=7"));
+        let limiter = GlobalRateLimiter::for_test_hierarchical_seeded(Some("pk-seed=7"));
 
-        assert!(limiter.is_custom_key("phc_seed"), "exact token override");
+        assert!(limiter.is_custom_key("pk-seed"), "exact token override");
         assert!(
-            limiter.is_custom_key("phc_seed:any_user"),
+            limiter.is_custom_key("pk-seed:any_user"),
             "token override must apply to token:distinct_id (master only did exact match)"
         );
         assert!(

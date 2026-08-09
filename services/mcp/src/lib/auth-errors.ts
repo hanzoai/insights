@@ -80,7 +80,7 @@ export function buildInvalidTokenFormatResponse(): Response {
 }
 
 // Validate the bearer token format. Accepts:
-//   * Personal API keys (`phx_…`) and OAuth access tokens (`pha_…`).
+//   * Personal API keys (`sk-…`) and OAuth access tokens (`at-…`).
 //   * ID-JAG access tokens — RFC 9068 JWTs with `typ: at+jwt` (issued by the
 //     ID-JAG JWT Bearer grant served from the OAuth token endpoint at `/oauth/token`).
 // Returns the auth-error response if invalid, or null if the token is well-formed.
@@ -92,7 +92,7 @@ export function validateBearerToken(
     if (!token) {
         return buildMissingTokenResponse(request, effectiveRegion)
     }
-    if (token.startsWith('phx_') || token.startsWith('pha_')) {
+    if (token.startsWith('sk-') || token.startsWith('at-')) {
         return null
     }
     if (isIdJagAccessToken(token)) {

@@ -93,8 +93,8 @@ def _make_event(
 
 class TestBuildV1Headers(SimpleTestCase):
     def test_all_required_headers_present(self) -> None:
-        headers = _build_v1_headers("phc_test123", attempt=1)
-        assert headers["Authorization"] == "Bearer phc_test123"
+        headers = _build_v1_headers("pk-test123", attempt=1)
+        assert headers["Authorization"] == "Bearer pk-test123"
         assert headers["Content-Type"] == "application/json"
         assert "insights-capture-v1-internal" in headers["User-Agent"]
         assert headers["Insights-Sdk-Info"] == "insights-capture-v1-internal/1.0"
@@ -431,10 +431,10 @@ class TestCaptureBatchInternal(SimpleTestCase):
         events = [_make_event(event_uuid=uid)]
         spy = InstallV1Spy(mock_session_fn, [MockResponse(body=_ok_results(uid))])
 
-        capture_batch_internal(events=events, token="phc_abc", event_source="hdr")
+        capture_batch_internal(events=events, token="pk-abc", event_source="hdr")
 
         headers = spy.calls[0]["headers"]
-        assert headers["Authorization"] == "Bearer phc_abc"
+        assert headers["Authorization"] == "Bearer pk-abc"
         assert headers["Content-Type"] == "application/json"
         assert headers["Insights-Sdk-Info"] == "insights-capture-v1-internal/1.0"
         assert headers["Insights-Attempt"] == "1"

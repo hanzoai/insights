@@ -21,7 +21,7 @@ from insightscli_commands import feedback
 def isolated_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # Keep get_anonymous_id() off the real ~/.config and pin a deterministic key.
     monkeypatch.setenv("HOME", str(tmp_path))
-    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "phc_test")
+    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "pk-test")
     monkeypatch.delenv("INSIGHTS_TELEMETRY_HOST", raising=False)
 
 
@@ -34,7 +34,7 @@ def test_send_posts_wellformed_feedback_event(isolated_config: None) -> None:
     url = post.call_args.args[0]
     body = post.call_args.kwargs["json"]
     assert url.endswith("/batch/")
-    assert body["api_key"] == "phc_test"
+    assert body["api_key"] == "pk-test"
 
     (event,) = body["batch"]
     assert event["event"] == "insightscli_feedback"
@@ -52,7 +52,7 @@ def test_opt_out_uses_ephemeral_distinct_id(tmp_path: Path, monkeypatch: pytest.
     # persist a durable anonymous id on disk just to do it.
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("DO_NOT_TRACK", "1")
-    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "phc_test")
+    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "pk-test")
     with patch.object(feedback.requests, "post") as post:
         post.return_value.raise_for_status.return_value = None
         ok, _ = feedback._send("hi", None, {})
@@ -116,10 +116,10 @@ def test_endpoint_host_precedence(
         monkeypatch.delenv("INSIGHTS_TELEMETRY_HOST", raising=False)
     else:
         monkeypatch.setenv("INSIGHTS_TELEMETRY_HOST", env_host)
-    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "phc_test")
+    monkeypatch.setenv("INSIGHTS_TELEMETRY_API_KEY", "pk-test")
     # Omit the host key entirely when manifest_host is None so the `.get(..., default)`
     # fallback is exercised, rather than storing an explicit None that shadows it.
-    telemetry_cfg: dict[str, str] = {"api_key": "phc_manifest"}
+    telemetry_cfg: dict[str, str] = {"api_key": "pk-manifest"}
     if manifest_host is not None:
         telemetry_cfg["host"] = manifest_host
     with patch.object(feedback, "get_manifest") as gm:

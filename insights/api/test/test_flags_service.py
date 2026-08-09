@@ -77,7 +77,7 @@ class TestGetFlagsFromServiceRetries(SimpleTestCase):
         ok.json.return_value = {"flags": {}}
         mock_post.side_effect = [requests.exceptions.ConnectionError("refused"), ok]
 
-        result = get_flags_from_service(token="phc_x", distinct_id="user-1", max_retries=2)
+        result = get_flags_from_service(token="pk-x", distinct_id="user-1", max_retries=2)
 
         self.assertEqual(result, {"flags": {}})
         self.assertEqual(mock_post.call_count, 2)
@@ -89,7 +89,7 @@ class TestGetFlagsFromServiceRetries(SimpleTestCase):
         mock_post.side_effect = requests.exceptions.ConnectionError("refused")
 
         with self.assertRaises(requests.exceptions.ConnectionError):
-            get_flags_from_service(token="phc_x", distinct_id="user-1", max_retries=2)
+            get_flags_from_service(token="pk-x", distinct_id="user-1", max_retries=2)
 
         self.assertEqual(mock_post.call_count, 3)
 
@@ -100,7 +100,7 @@ class TestGetFlagsFromServiceRetries(SimpleTestCase):
         mock_post.side_effect = requests.exceptions.ConnectionError("refused")
 
         with self.assertRaises(requests.exceptions.ConnectionError):
-            get_flags_from_service(token="phc_x", distinct_id="user-1")
+            get_flags_from_service(token="pk-x", distinct_id="user-1")
 
         self.assertEqual(mock_post.call_count, 1)
         mock_sleep.assert_not_called()
@@ -114,7 +114,7 @@ class TestGetFlagsFromServiceRetries(SimpleTestCase):
         mock_post.side_effect = requests.exceptions.ConnectionError("refused")
 
         with self.assertRaises(requests.exceptions.ConnectionError):
-            get_flags_from_service(token="phc_x", distinct_id="user-1", max_retries=-1)
+            get_flags_from_service(token="pk-x", distinct_id="user-1", max_retries=-1)
 
         self.assertEqual(mock_post.call_count, 1)
         mock_sleep.assert_not_called()
@@ -128,7 +128,7 @@ class TestGetFlagsFromServiceRetries(SimpleTestCase):
         mock_post.return_value = response
 
         with self.assertRaises(requests.HTTPError):
-            get_flags_from_service(token="phc_x", distinct_id="user-1", max_retries=2)
+            get_flags_from_service(token="pk-x", distinct_id="user-1", max_retries=2)
 
         self.assertEqual(mock_post.call_count, 1)
         mock_sleep.assert_not_called()

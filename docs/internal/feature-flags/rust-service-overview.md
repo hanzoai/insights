@@ -137,7 +137,7 @@ This endpoint serves flag definitions for server-side SDKs that evaluate flags l
 
 Authenticated via:
 
-- Team secret API token (`Authorization: Bearer phs_...`), or
+- Team secret API token (`Authorization: Bearer sk-...`), or
 - Personal API key with `feature_flag:read` scope
 
 Current implementation returns flag definitions with cohort data from HyperCache, with PostgreSQL fallback on cache miss. Supports ETag-based conditional requests (`If-None-Match` header) to avoid re-transferring unchanged definitions. Rate limited per team (default 600/minute).

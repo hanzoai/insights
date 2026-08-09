@@ -144,20 +144,20 @@ mod tests {
     #[tokio::test]
     async fn known_token_resolves_to_team_id() {
         let r = resolver(
-            "insights:1:team_token:phc_valid",
-            Ok(cached(r#"{"id":42,"project_id":42,"api_token":"phc_valid","name":"Acme"}"#)),
+            "insights:1:team_token:pk-valid",
+            Ok(cached(r#"{"id":42,"project_id":42,"api_token":"pk-valid","name":"Acme"}"#)),
         );
-        assert_eq!(r.resolve("phc_valid").await, Ok(42));
+        assert_eq!(r.resolve("pk-valid").await, Ok(42));
     }
 
     #[tokio::test]
     async fn unknown_token_is_rejected() {
         // Cache miss (NotFound) is the forged / unknown / revoked token signal.
         let r = resolver(
-            "insights:1:team_token:phc_forged",
+            "insights:1:team_token:pk-forged",
             Err(CustomRedisError::NotFound),
         );
-        assert_eq!(r.resolve("phc_forged").await, Err(TeamResolveError::Unknown));
+        assert_eq!(r.resolve("pk-forged").await, Err(TeamResolveError::Unknown));
     }
 
     #[tokio::test]
@@ -165,19 +165,19 @@ mod tests {
         // A KV outage must NOT masquerade as a forged token (that would let a
         // blip fail-closed the whole analytics path); the caller decides posture.
         let r = resolver(
-            "insights:1:team_token:phc_x",
+            "insights:1:team_token:pk-x",
             Err(CustomRedisError::Timeout),
         );
-        assert_eq!(r.resolve("phc_x").await, Err(TeamResolveError::Unavailable));
+        assert_eq!(r.resolve("pk-x").await, Err(TeamResolveError::Unavailable));
     }
 
     #[tokio::test]
     async fn corrupt_cache_value_is_unavailable_not_unknown() {
         let r = resolver(
-            "insights:1:team_token:phc_c",
+            "insights:1:team_token:pk-c",
             Ok(b"not-valid-pickle".to_vec()),
         );
-        assert_eq!(r.resolve("phc_c").await, Err(TeamResolveError::Unavailable));
+        assert_eq!(r.resolve("pk-c").await, Err(TeamResolveError::Unavailable));
     }
 
     #[tokio::test]
@@ -185,8 +185,8 @@ mod tests {
         // Proves the exact Django key is used: seeding the un-prefixed key resolves
         // to nothing (NotFound), so only the real `insights:1:team_token:` key hits.
         let mock = MockRedisClient::new()
-            .get_raw_bytes_ret("team_token:phc_valid", Ok(cached(r#"{"id":7}"#)));
+            .get_raw_bytes_ret("team_token:pk-valid", Ok(cached(r#"{"id":7}"#)));
         let r = KvTeamResolver::new(Arc::new(mock));
-        assert_eq!(r.resolve("phc_valid").await, Err(TeamResolveError::Unknown));
+        assert_eq!(r.resolve("pk-valid").await, Err(TeamResolveError::Unknown));
     }
 }

@@ -29,7 +29,7 @@ from ...marketplace.credentials import issue_marketplace_credential
 from ...marketplace.packaging import SkillExport, build_skill_zip
 from ...models.skills import LLMSkill, LLMSkillFile
 
-_PAK_TOKEN = "phx_marketplacetoken123"
+_PAK_TOKEN = "sk-marketplacetoken123"
 
 
 def _basic_header(token: str) -> str:
@@ -382,7 +382,7 @@ class TestMarketplaceInstallCommand(APIBaseTest):
         body = response.json()
         assert body["status"] == "created"
         assert body["connected"] is True
-        assert body["token"].startswith("phx_")
+        assert body["token"].startswith("sk-")
         assert body["token"] in body["command"]
         assert "x-access-token:" in body["command"]
         assert f"/v1/projects/{self.team.id}/llm_skills/marketplace.git" in body["command"]
@@ -430,7 +430,7 @@ class TestMarketplaceInstallCommand(APIBaseTest):
         response = self.client.post(self._url(), {"rotate": True}, format="json")
         body = response.json()
         assert body["status"] == "rotated"
-        assert body["token"].startswith("phx_")
+        assert body["token"].startswith("sk-")
 
         # Same record (no sprawl), new secret, rotation timestamp set, and crucially the returned
         # token matches the stored hash (the rotate is atomic — no lost update).

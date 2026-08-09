@@ -982,13 +982,16 @@ class TestIDJagAccessTokenAuthentication(APIBaseTest):
         req.headers = {"authorization": f"Bearer {non_id_jag}"}
         self.assertIsNone(auth.authenticate(req))
 
-    def test_personal_api_key_prefix_passes_through(self) -> None:
+    def test_key_marks_pass_through(self) -> None:
         auth = IDJagAccessTokenAuthentication()
         from unittest.mock import Mock
 
-        for prefix in ("phx_abc", "pha_abc", "phs_abc"):
+        from insights.models.utils import KEY_MARKS
+
+        # Every mark belongs to a key backend, so none of them is an ID-JAG token.
+        for mark in KEY_MARKS.values():
             req = Mock()
-            req.headers = {"authorization": f"Bearer {prefix}"}
+            req.headers = {"authorization": f"Bearer {mark}abc"}
             self.assertIsNone(auth.authenticate(req))
 
     def test_no_authorization_header_passes_through(self) -> None:

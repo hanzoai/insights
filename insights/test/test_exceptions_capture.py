@@ -25,7 +25,7 @@ def test_capture_exception_merges_ambient_and_explicit_properties():
     # Ambient context flows into captured exceptions; explicit call-site properties win on collision.
     with (
         mock.patch("insights.datastore.query_tagging.get_query_tags") as mock_tags,
-        mock.patch("hanzo_insights.api_key", "phc_test"),
+        mock.patch("hanzo_insights.api_key", "pk-test"),
         mock.patch("hanzo_insights.capture_exception", return_value=None) as mock_capture,
     ):
         mock_tags.return_value.model_dump.return_value = {}

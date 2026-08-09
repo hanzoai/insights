@@ -484,7 +484,7 @@ def team_api_test_factory():
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertNotEqual(response_data["api_token"], "xyz")
             self.assertEqual(response_data["api_token"], self.team.api_token)
-            self.assertTrue(response_data["api_token"].startswith("phc_"))
+            self.assertTrue(response_data["api_token"].startswith("pk-"))
 
             self._assert_activity_log(
                 [
@@ -545,7 +545,7 @@ def team_api_test_factory():
             self.team.refresh_from_db()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             new_secret_api_token = self.team.secret_api_token or ""
-            self.assertTrue(new_secret_api_token.startswith("phs_"))
+            self.assertTrue(new_secret_api_token.startswith("sk-"))
             self.assertEqual(response_data["secret_api_token"], new_secret_api_token)
             self.assertIsNone(self.team.secret_api_token_backup)
             self._assert_activity_log(
@@ -590,7 +590,7 @@ def team_api_test_factory():
             self._assert_activity_log_is_empty()
 
             # Set the secret API token
-            secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            secret_api_token = "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
             self.team.secret_api_token = secret_api_token
             self.team.secret_api_token_backup = None
             self.team.save()
@@ -603,7 +603,7 @@ def team_api_test_factory():
             self.assertNotEqual(response_data["secret_api_token"], secret_api_token)
             self.assertNotEqual(response_data["secret_api_token"], self.team.secret_api_token_backup)
             self.assertEqual(response_data["secret_api_token"], self.team.secret_api_token)
-            self.assertTrue(response_data["secret_api_token"].startswith("phs_"))
+            self.assertTrue(response_data["secret_api_token"].startswith("sk-"))
             # Backup token should now be the old secret API token
             self.assertEqual(response_data["secret_api_token_backup"], secret_api_token)
             self._assert_activity_log(
@@ -617,10 +617,10 @@ def team_api_test_factory():
                                     "action": "changed",
                                     "after": {
                                         "secret_api_token": mask_key_value(self.team.secret_api_token),
-                                        "secret_api_token_backup": "phs_...F11C",
+                                        "secret_api_token_backup": "sk-...F11C",
                                     },
                                     "before": {
-                                        "secret_api_token": "phs_...F11C",
+                                        "secret_api_token": "sk-...F11C",
                                         "secret_api_token_backup": None,
                                     },
                                     "field": "secret_api_token",
@@ -652,9 +652,9 @@ def team_api_test_factory():
             self._assert_activity_log_is_empty()
 
             # Set the secret API token
-            secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            secret_api_token = "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
             self.team.secret_api_token = secret_api_token
-            self.team.secret_api_token_backup = "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            self.team.secret_api_token_backup = "sk-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
             response = self.client.patch(f"/v1/environments/{self.team.id}/rotate_secret_token/")
@@ -664,7 +664,7 @@ def team_api_test_factory():
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertNotEqual(response_data["secret_api_token"], secret_api_token)
             self.assertEqual(response_data["secret_api_token"], self.team.secret_api_token)
-            self.assertTrue(response_data["secret_api_token"].startswith("phs_"))
+            self.assertTrue(response_data["secret_api_token"].startswith("sk-"))
             # Backup token should now be the old secret API token
             self.assertEqual(response_data["secret_api_token_backup"], secret_api_token)
             self._assert_activity_log(
@@ -678,11 +678,11 @@ def team_api_test_factory():
                                     "action": "changed",
                                     "after": {
                                         "secret_api_token": mask_key_value(self.team.secret_api_token),
-                                        "secret_api_token_backup": "phs_...F11C",
+                                        "secret_api_token_backup": "sk-...F11C",
                                     },
                                     "before": {
-                                        "secret_api_token": "phs_...F11C",
-                                        "secret_api_token_backup": "phs_...6789",
+                                        "secret_api_token": "sk-...F11C",
+                                        "secret_api_token_backup": "sk-...6789",
                                     },
                                     "field": "secret_api_token",
                                     "type": "Team",
@@ -706,7 +706,7 @@ def team_api_test_factory():
         @parameterized.expand(
             [
                 ("no_existing_token", None, False, status.HTTP_400_BAD_REQUEST),
-                ("existing_token", "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C", False, status.HTTP_200_OK),
+                ("existing_token", "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C", False, status.HTTP_200_OK),
                 # Support has no alternative to this token for signing widget identity hashes
                 ("no_existing_token_conversations_enabled", None, True, status.HTTP_200_OK),
             ]
@@ -732,7 +732,7 @@ def team_api_test_factory():
                 self.assertIsNone(self.team.secret_api_token)
             else:
                 self.assertNotEqual(self.team.secret_api_token, existing_token)
-                self.assertTrue((self.team.secret_api_token or "").startswith("phs_"))
+                self.assertTrue((self.team.secret_api_token or "").startswith("sk-"))
                 self.assertEqual(self.team.secret_api_token_backup, existing_token)
 
         @freeze_time("2022-02-08")
@@ -743,8 +743,8 @@ def team_api_test_factory():
             self._assert_activity_log_is_empty()
 
             # Set the secret API token
-            self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
-            self.team.secret_api_token_backup = "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            self.team.secret_api_token = "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            self.team.secret_api_token_backup = "sk-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
             response = self.client.patch(f"/v1/environments/{self.team.id}/delete_secret_token_backup/")
@@ -752,7 +752,7 @@ def team_api_test_factory():
 
             self.team.refresh_from_db()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response_data["secret_api_token"], "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
+            self.assertEqual(response_data["secret_api_token"], "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
             self.assertIsNone(response_data["secret_api_token_backup"])
             self.assertIsNone(self.team.secret_api_token_backup)
             self._assert_activity_log(
@@ -765,7 +765,7 @@ def team_api_test_factory():
                                 {
                                     "action": "deleted",
                                     "after": None,
-                                    "before": "phs_...6789",
+                                    "before": "sk-...6789",
                                     "field": "secret_api_token_backup",
                                     "type": "Team",
                                 },
@@ -788,28 +788,28 @@ def team_api_test_factory():
         def test_rotate_secret_token_insufficient_privileges(self):
             self.organization_membership.level = OrganizationMembership.Level.MEMBER
             self.organization_membership.save()
-            self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            self.team.secret_api_token = "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
             self.team.secret_api_token_backup = None
             self.team.save()
 
             response = self.client.patch(f"/v1/environments/{self.team.id}/rotate_secret_token/")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             # Make sure it's unchanged
-            self.assertEqual(self.team.secret_api_token, "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
+            self.assertEqual(self.team.secret_api_token, "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
             self.assertIsNone(self.team.secret_api_token_backup)
 
         def test_delete_secret_token_backup_insufficient_privileges(self):
             self.organization_membership.level = OrganizationMembership.Level.MEMBER
             self.organization_membership.save()
-            self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
-            self.team.secret_api_token_backup = "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            self.team.secret_api_token = "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            self.team.secret_api_token_backup = "sk-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
             response = self.client.patch(f"/v1/environments/{self.team.id}/delete_secret_token_backup/")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             # Make sure it's unchanged
-            self.assertEqual(self.team.secret_api_token, "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
-            self.assertEqual(self.team.secret_api_token_backup, "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+            self.assertEqual(self.team.secret_api_token, "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
+            self.assertEqual(self.team.secret_api_token_backup, "sk-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
         def test_update_primary_dashboard(self):
             d = Dashboard.objects.create(name="Test", team=self.team)
@@ -2567,7 +2567,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         access_token = OAuthAccessToken.objects.create(
             application=oauth_app,
             user=self.user,
-            token="pha_test_oauth_token",
+            token="at-test_oauth_token",
             scope="*",
             expires=timezone.now() + timedelta(hours=1),
             scoped_teams=[other_team_in_project.id],
@@ -2593,7 +2593,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         access_token = OAuthAccessToken.objects.create(
             application=oauth_app,
             user=self.user,
-            token="pha_test_oauth_token",
+            token="at-test_oauth_token",
             scope="*",
             expires=timezone.now() + timedelta(hours=1),
             scoped_organizations=[str(other_org.id)],

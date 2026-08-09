@@ -44,12 +44,7 @@ from insights.models.project_secret_api_key import ProjectSecretAPIKey, find_pro
 from insights.models.sharing_configuration import SharingConfiguration
 from insights.models.team import Team
 from insights.models.user import User
-from insights.models.utils import (
-    OAUTH_ACCESS_TOKEN_PREFIX,
-    PERSONAL_API_KEY_PREFIX,
-    SECRET_API_TOKEN_PREFIX,
-    hash_key_value,
-)
+from insights.models.utils import KeyKind, hash_key_value, key_kind
 from insights.rbac.user_access_control import UserAccessControl
 from insights.shared_link_user import SharedLinkUser
 from insights.synthetic_user import SyntheticUser
@@ -71,8 +66,6 @@ logger = logging.getLogger(__name__)
 structlog_logger = structlog.get_logger(__name__)
 
 tracer = trace.get_tracer(__name__)
-
-_SECRET_API_KEY_RE = re.compile(r"^phs_[a-zA-Z0-9]+$")
 
 PERSONAL_API_KEY_QUERY_PARAM_COUNTER = Counter(
     "api_auth_personal_api_key_query_param",
@@ -213,9 +206,11 @@ class PersonalAPIKeyAuthentication(authentication.BaseAuthentication):
             if authorization_match:
                 token = authorization_match.group(1).strip()
 
-                if token.startswith(
-                    OAUTH_ACCESS_TOKEN_PREFIX
-                ):  # TRICKY: This returns None to allow the next authentication method to have a go. This should be `if not token.startswith("phx_")`, but we need to support legacy personal api keys that may not have been prefixed with phx_.
+                # An OAuth access token belongs to the OAuth backend, so hand it on by
+                # returning None. Everything else is a candidate: personal keys minted
+                # before the marks existed carry no mark at all, so the store decides
+                # whether this is a key, not the shape.
+                if key_kind(token) is KeyKind.OAUTH_ACCESS:
                     return None
                 return token, cls.SOURCE_HEADER
         data = request.data if request_data is None and isinstance(request, Request) else request_data
@@ -333,17 +328,22 @@ class PersonalAPIKeyAuthentication(authentication.BaseAuthentication):
         return cls.keyword
 
 
-def _extract_phs_token(request: Union[HttpRequest, Request]) -> Optional[str]:
+def _extract_secret_key(request: Union[HttpRequest, Request]) -> Optional[str]:
     """
-    Find a `phs_` secret token in the request Authorization header (Bearer scheme).
-    Used by both TeamSecretTokenAuthentication (legacy Team.secret_api_token) and
-    ProjectSecretAPIKeyAuthentication (PSAK model).
+    Find a secret key in the request Authorization header (Bearer scheme).
+
+    A personal key and a project secret key carry the same mark, so the mark says
+    only that this is a secret and not which store holds it. Both
+    TeamSecretTokenAuthentication (legacy Team.secret_api_token) and
+    ProjectSecretAPIKeyAuthentication read the key from here and then ask their own
+    store; whichever holds it answers, and the others return None so the next
+    authenticator gets its turn.
     """
     if "authorization" in request.headers:
         authorization_match = re.match(r"^Bearer\s+(.+)$", request.headers["authorization"])
         if authorization_match:
             token = authorization_match.group(1).strip()
-            if _SECRET_API_KEY_RE.match(token):
+            if key_kind(token) is KeyKind.SECRET:
                 return token
 
     return None
@@ -364,7 +364,7 @@ class TeamSecretTokenAuthentication(authentication.BaseAuthentication):
     Authenticates using the legacy team-level Team.secret_api_token field.
 
     This is not a ProjectSecretAPIKey (PSAK) model authenticator — it validates the
-    `phs_*` token against the legacy per-team secret stored on the Team row. It's
+    `sk-*` token against the legacy per-team secret stored on the Team row. It's
     intended for endpoints that were gated before PSAK existed.
 
     When authenticated, returns a synthetic TeamSecretTokenUser with the team
@@ -377,7 +377,7 @@ class TeamSecretTokenAuthentication(authentication.BaseAuthentication):
     keyword = "Bearer"
 
     def authenticate(self, request: Union[HttpRequest, Request]) -> Optional[tuple[Any, None]]:
-        secret_api_token = _extract_phs_token(request)
+        secret_api_token = _extract_secret_key(request)
 
         if not secret_api_token:
             return None
@@ -435,7 +435,7 @@ class ProjectSecretAPIKeyAuthentication(authentication.BaseAuthentication):
     keyword = "Bearer"
 
     def authenticate(self, request: Union[HttpRequest, Request]) -> Optional[tuple[Any, None]]:
-        token = _extract_phs_token(request)
+        token = _extract_secret_key(request)
         if not token:
             return None
 
@@ -551,7 +551,8 @@ class IDJagAccessTokenAuthentication(authentication.BaseAuthentication):
     @classmethod
     def _is_id_jag_token(cls, token: str) -> bool:
         # Personal/OAuth API key prefixes are reserved for those auth backends.
-        if token.startswith((PERSONAL_API_KEY_PREFIX, OAUTH_ACCESS_TOKEN_PREFIX, SECRET_API_TOKEN_PREFIX)):
+        # Every marked key belongs to a key backend, so none of them is a JWT.
+        if key_kind(token) is not None:
             return False
 
         if token.count(".") != 2:
@@ -890,7 +891,7 @@ class OAuthAccessTokenAuthentication(authentication.BaseAuthentication):
             if authorization_match:
                 token = authorization_match.group(1).strip()
 
-                if token.startswith("pha_"):
+                if key_kind(token) is KeyKind.OAUTH_ACCESS:
                     return token
                 return None
         return None

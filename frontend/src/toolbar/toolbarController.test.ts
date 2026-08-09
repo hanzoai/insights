@@ -148,8 +148,8 @@ describe('InsightsToolbarController', () => {
         it('no-ops when already authenticated', () => {
             const logic = toolbarConfigLogic.build({
                 apiURL: 'http://localhost',
-                accessToken: 'pha_test_token',
-                refreshToken: 'phr_refresh',
+                accessToken: 'at-test_token',
+                refreshToken: 'rt-refresh',
                 clientId: 'client-id',
             })
             logic.mount()
@@ -176,8 +176,8 @@ describe('InsightsToolbarController', () => {
         it('returns false when toolbarConfigLogic is mounted but setToolbarRefs has not been called', () => {
             const logic = toolbarConfigLogic.build({
                 apiURL: 'http://localhost',
-                accessToken: 'pha_test_token',
-                refreshToken: 'phr_refresh',
+                accessToken: 'at-test_token',
+                refreshToken: 'rt-refresh',
                 clientId: 'client-id',
             })
             logic.mount()
@@ -190,8 +190,8 @@ describe('InsightsToolbarController', () => {
         it('returns true when toolbar is loaded and toolbarConfigLogic has accessToken', () => {
             const logic = toolbarConfigLogic.build({
                 apiURL: 'http://localhost',
-                accessToken: 'pha_test_token',
-                refreshToken: 'phr_refresh',
+                accessToken: 'at-test_token',
+                refreshToken: 'rt-refresh',
                 clientId: 'client-id',
             })
             logic.mount()

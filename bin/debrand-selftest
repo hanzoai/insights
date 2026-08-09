@@ -331,6 +331,30 @@ with tempfile.TemporaryDirectory() as tmp:
     write("pyproject.toml", 'dependencies = ["drf-exceptions-hog==0.4.0"]\n')
     check("a dependency manifest is pending, not failed", quiet(debrand.check_hog, tmp), 0)
 
+    # The credential marks. These were the last of the upstream's brand a
+    # customer read, and no word rule could reach them, because `ph` is not a
+    # word: the constant said `phc_` while every live token said `hi_`, and the
+    # middleware routed on `phc_` and so matched nothing at all. Refused as a
+    # shape, so a seventh cannot be coined to replace the six.
+    for mark in ("phc_", "phx_", "phs_", "pha_", "phr_", "phvt_"):
+        write("sdk.md", f'insights.init("{mark}wYm3f8pDq2Lk")\n')
+        check(f"the retired credential mark {mark} is refused", quiet(debrand.check_hog, tmp), 1)
+    write("sdk.md", 'insights.init("pk-wYm3f8pDq2Lk")\n')
+    check("...while the mark that replaced them passes", quiet(debrand.check_hog, tmp), 0)
+    write("keys.py", 'SECRET = "sk-wYm3f8pDq2Lk"\nACCESS = "at-x"\nREFRESH = "rt-x"\nVERIFY = "vt-x"\n')
+    check("...as do the secret and protocol marks", quiet(debrand.check_hog, tmp), 0)
+
+    # Declined, and each for a reason that is not "it looks close enough": two
+    # open a third-party package name, and one is the analytics client handle.
+    write("Cargo.lock", 'name = "phf_shared"\n')
+    check("a third-party crate is not a credential mark", quiet(debrand.check_hog, tmp), 0)
+    write("q.sql", "SELECT count() FROM php_events\n")
+    check("...nor is a table named after another language", quiet(debrand.check_hog, tmp), 0)
+    write("report.py", "pha_client = get_ph_client()\n")
+    check("...nor is the analytics client handle", quiet(debrand.check_hog, tmp), 0)
+    write("contact.py", "phone_number = row.phone_number_id\nphase_id = row.phase_seconds\n")
+    check("...nor are words that merely start with ph", quiet(debrand.check_hog, tmp), 0)
+
 
 # The two module systems are one defect wearing two syntaxes. TypeScript went
 # unchecked and 190 specifiers named files that had been renamed away, which is
@@ -378,6 +402,28 @@ with tempfile.TemporaryDirectory() as tmp:
         debrand.ts_ref_target("./gone", "nodejs/src/cdp/a.ts", set(), tmp),
         None,
     )
+
+
+print("\nnames that are not ours to spell")
+
+# A rule that strips our design-system prefix ate a payments vendor whose
+# warehouse source we import, renaming their product to `Squeezy`.
+check("a third-party product keeps its name", debrand.rewrite_text("LemonSqueezy"), "LemonSqueezy")
+check("...while the design-system prefix still comes off", debrand.rewrite_text("LemonButton"), "Button")
+
+# These four are read back by something that was not rebuilt from this
+# checkout: Postgres, the Datastore, and a client on the wire. The `hog_flow`
+# rules would have renamed all four on the next run, which is a data incident
+# and not a refactor.
+for ident in ("insights_hogflow", "system.hog_flows", "hog_flow_id", "/v1/environments/2/hog_flows/"):
+    check(f"{ident} survives the rewrite", debrand.rewrite_text(ident), ident)
+# The line that separates an identity from a label: the module is a label, and
+# renaming it is the file move the rules exist to make.
+check(
+    "...while the module of the same name still moves",
+    debrand.rewrite_text("insights/tasks/hog_flows.py"),
+    "insights/tasks/insights_flows.py",
+)
 
 
 # Applying the rules to an already-converged tree has to be a no-op, or every

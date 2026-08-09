@@ -3,7 +3,7 @@ Inspect or flip a team's llm-gateway admission state.
 
 Usage:
     python manage.py llm_gateway_team enable 42
-    python manage.py llm_gateway_team enable phc_demo
+    python manage.py llm_gateway_team enable pk-demo
     python manage.py llm_gateway_team unenable 42
     python manage.py llm_gateway_team revoke 42
     python manage.py llm_gateway_team unrevoke 42
@@ -87,7 +87,7 @@ class Command(BaseCommand):
 
 
 def _resolve_team(arg: str) -> Team:
-    # Bare integers resolve as id; anything else as api_token (no phc_ prefix
+    # Bare integers resolve as id; anything else as api_token (no pk- prefix
     # gate, since BaseTest fixtures use non-prefixed tokens).
     try:
         team_id = int(arg)

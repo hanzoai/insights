@@ -55,7 +55,7 @@ function createInMemoryRedis(): RedisLike & {
 }
 
 let app: ReturnType<typeof createApp>['app']
-const TOKEN = 'phx_session_mode_pool_test'
+const TOKEN = 'sk-session_mode_pool_test'
 const BASE_URL = new URL('http://hono.test')
 
 beforeAll(async () => {

@@ -33,7 +33,7 @@ use common_types::RawEvent;
 /// tokens and distinct ids, so each side gets a limiter keyed for its own.
 const V0_TOKEN: &str = "test_token";
 const V0_DISTINCT_ID: &str = "test_user";
-const V1_HOT_KEY: &str = "phc_test_token:user-42";
+const V1_HOT_KEY: &str = "pk-test_token:user-42";
 
 /// The lane an event landed on, independent of each path's test topic names.
 #[derive(Debug, PartialEq, Eq)]
@@ -183,7 +183,7 @@ async fn run_v1(limits: Limits, batch_size: usize, observe: usize) -> Observed {
         builder = builder.with_overflow_preserve_locality();
     }
     if limits.force_limited {
-        builder = builder.with_overflow_forced_key("phc_test_token");
+        builder = builder.with_overflow_forced_key("pk-test_token");
     }
     if limits.globally_limited {
         builder = builder

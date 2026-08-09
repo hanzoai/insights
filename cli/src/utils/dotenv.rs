@@ -52,10 +52,10 @@ mod tests {
     #[test]
     fn load_dotenv_parses_file() {
         let mut f = tempfile::NamedTempFile::new().unwrap();
-        writeln!(f, "INSIGHTS_CLI_API_KEY=phx_from_file").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=sk-from_file").unwrap();
         writeln!(f, "INSIGHTS_CLI_PROJECT_ID=99").unwrap();
         let map = load_dotenv(f.path()).unwrap();
-        assert_eq!(map.get("INSIGHTS_CLI_API_KEY").unwrap(), "phx_from_file");
+        assert_eq!(map.get("INSIGHTS_CLI_API_KEY").unwrap(), "sk-from_file");
         assert_eq!(map.get("INSIGHTS_CLI_PROJECT_ID").unwrap(), "99");
     }
 
@@ -70,10 +70,10 @@ mod tests {
         let mut f = tempfile::NamedTempFile::new().unwrap();
         writeln!(f, "# a comment").unwrap();
         writeln!(f).unwrap();
-        writeln!(f, "INSIGHTS_CLI_API_KEY=\"phx_quoted\"").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=\"sk-quoted\"").unwrap();
         writeln!(f, "INSIGHTS_CLI_HOST='https://eu.hanzo.ai'").unwrap();
         let map = load_dotenv(f.path()).unwrap();
-        assert_eq!(map.get("INSIGHTS_CLI_API_KEY").unwrap(), "phx_quoted");
+        assert_eq!(map.get("INSIGHTS_CLI_API_KEY").unwrap(), "sk-quoted");
         assert_eq!(
             map.get("INSIGHTS_CLI_HOST").unwrap(),
             "https://eu.hanzo.ai"

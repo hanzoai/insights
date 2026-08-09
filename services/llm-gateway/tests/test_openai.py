@@ -62,7 +62,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=invalid_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
         assert response.status_code == 422
         assert expected_field in str(response.json())
@@ -82,7 +82,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -131,7 +131,7 @@ class TestChatCompletionsEndpoint:
                 "/v1/chat/completions",
                 json=valid_request_body,
                 headers={
-                    "Authorization": "Bearer phx_test_key",
+                    "Authorization": "Bearer sk-test_key",
                     "x-insights-property-team_id": "42",
                     "x-insights-property-$ai_billable": "false",
                 },
@@ -168,7 +168,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == error_status
@@ -198,7 +198,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=body_with_injection,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -235,7 +235,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=body_with_model_list,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -268,7 +268,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=body_with_nested_injection,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -301,7 +301,7 @@ class TestChatCompletionsEndpoint:
                 "model": "@cf/moonshotai/kimi-k2.6",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -340,7 +340,7 @@ class TestChatCompletionsEndpoint:
                 "messages": [{"role": "user", "content": "Hello"}],
                 "stream": True,
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         ) as response:
             assert response.status_code == 200
             body = "".join(response.iter_text())
@@ -365,7 +365,7 @@ class TestChatCompletionsEndpoint:
                 "model": "@cf/meta/llama-3.3-70b-instruct",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -403,7 +403,7 @@ class TestResponsesRoutedModels:
                 "model": "@cf/zai-org/glm-5.2",
                 "input": "Hello",
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -429,7 +429,7 @@ class TestResponsesRoutedModels:
         response = authenticated_client.post(
             "/v1/responses",
             json={"model": "moonshotai/kimi-k3", "input": "Hello"},
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 200
@@ -466,7 +466,7 @@ class TestResponsesRoutedModels:
                 "input": "Hello",
                 "stream": True,
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         ) as response:
             assert response.status_code == 200
             body = "".join(response.iter_text())
@@ -491,7 +491,7 @@ class TestResponsesRoutedModels:
                 "model": "@cf/meta/llama-3.3-70b-instruct",
                 "input": "Hello",
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -520,7 +520,7 @@ class TestResponsesRoutedModels:
                 "input": "Hello",
                 "previous_response_id": "resp_abc123",
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -548,7 +548,7 @@ class TestResponsesRoutedModels:
                 "input": "Hello",
                 "tools": [{"type": "function", "function": {"name": "get_weather", "parameters": {}}}],
             },
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -596,7 +596,7 @@ class TestUnsupportedModelRejection:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json={"model": model, "messages": [{"role": "user", "content": "Hi"}]},
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 400
@@ -633,7 +633,7 @@ class TestUnsupportedModelRejection:
                 response = authenticated_client.post(
                     "/v1/chat/completions",
                     json={"model": "gemini-pro-bare", "messages": [{"role": "user", "content": "Hi"}]},
-                    headers={"Authorization": "Bearer phx_test_key"},
+                    headers={"Authorization": "Bearer sk-test_key"},
                 )
         finally:
             ModelRegistryService.reset_instance()
@@ -661,7 +661,7 @@ class TestAudioTranscriptionsEndpoint:
         response = authenticated_client.post(
             path,
             files={"file": ("a.mp3", b"audio-bytes", "audio/mpeg")},
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
 
         assert response.status_code == 422
