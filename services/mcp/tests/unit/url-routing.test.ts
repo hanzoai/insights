@@ -226,7 +226,7 @@ describe('URL Routing', () => {
         it('uses header mode before URL mode', () => {
             const request = new Request('https://example.com/mcp?mode=tools', {
                 headers: {
-                    Authorization: 'Bearer phx_test',
+                    Authorization: 'Bearer sk-test',
                     'x-insights-mcp-mode': 'cli',
                 },
             })
@@ -239,7 +239,7 @@ describe('URL Routing', () => {
         it('captures x-anthropic-client into mcpVendorClient', () => {
             const request = new Request('https://example.com/mcp', {
                 headers: {
-                    Authorization: 'Bearer phx_test',
+                    Authorization: 'Bearer sk-test',
                     'x-anthropic-client': 'ClaudeCode',
                 },
             })
@@ -248,7 +248,7 @@ describe('URL Routing', () => {
 
         it('returns undefined when x-anthropic-client is missing', () => {
             const request = new Request('https://example.com/mcp', {
-                headers: { Authorization: 'Bearer phx_test' },
+                headers: { Authorization: 'Bearer sk-test' },
             })
             expect(parseRequestProperties(request, {}).mcpVendorClient).toBeUndefined()
         })
@@ -259,7 +259,7 @@ describe('URL Routing', () => {
             // dashboard buckets the traffic as "Other".
             const request = new Request('https://example.com/mcp', {
                 headers: {
-                    Authorization: 'Bearer phx_test',
+                    Authorization: 'Bearer sk-test',
                     'x-anthropic-client': 'ClaudeCode',
                 },
             })
@@ -269,7 +269,7 @@ describe('URL Routing', () => {
         it('keeps the self-reported clientName over the vendor header', () => {
             const request = new Request('https://example.com/mcp', {
                 headers: {
-                    Authorization: 'Bearer phx_test',
+                    Authorization: 'Bearer sk-test',
                     'x-anthropic-client': 'ClaudeCode',
                 },
             })

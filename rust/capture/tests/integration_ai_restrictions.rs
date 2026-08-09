@@ -282,7 +282,7 @@ fn assert_event(event: &ProcessedEvent, expected: &ExpectedEvent) {
 
 #[tokio::test]
 async fn test_ai_drop_event_restriction() {
-    let restricted_token = "phc_restricted_drop_token";
+    let restricted_token = "pk-restricted_drop_token";
     let (router, sink) =
         setup_ai_router_with_restriction(RestrictionType::DropEvent, restricted_token).await;
     let test_client = TestClient::new(router);
@@ -307,7 +307,7 @@ async fn test_ai_drop_event_restriction() {
 
 #[tokio::test]
 async fn test_ai_redirect_to_dlq_restriction() {
-    let restricted_token = "phc_restricted_dlq_token";
+    let restricted_token = "pk-restricted_dlq_token";
     let (router, sink) =
         setup_ai_router_with_restriction(RestrictionType::RedirectToDlq, restricted_token).await;
     let test_client = TestClient::new(router);
@@ -344,7 +344,7 @@ async fn test_ai_redirect_to_dlq_restriction() {
 
 #[tokio::test]
 async fn test_ai_force_overflow_restriction() {
-    let restricted_token = "phc_restricted_overflow_token";
+    let restricted_token = "pk-restricted_overflow_token";
     let (router, sink) =
         setup_ai_router_with_restriction(RestrictionType::ForceOverflow, restricted_token).await;
     let test_client = TestClient::new(router);
@@ -381,7 +381,7 @@ async fn test_ai_force_overflow_restriction() {
 
 #[tokio::test]
 async fn test_ai_skip_person_processing_restriction() {
-    let restricted_token = "phc_restricted_skip_person_token";
+    let restricted_token = "pk-restricted_skip_person_token";
     let (router, sink) =
         setup_ai_router_with_restriction(RestrictionType::SkipPersonProcessing, restricted_token)
             .await;
@@ -419,7 +419,7 @@ async fn test_ai_skip_person_processing_restriction() {
 
 #[tokio::test]
 async fn test_ai_restriction_does_not_apply_to_other_tokens() {
-    let restricted_token = "phc_restricted_token";
+    let restricted_token = "pk-restricted_token";
     let (router, sink) =
         setup_ai_router_with_restriction(RestrictionType::DropEvent, restricted_token).await;
     let test_client = TestClient::new(router);
@@ -431,7 +431,7 @@ async fn test_ai_restriction_does_not_apply_to_other_tokens() {
     let form = create_ai_event_form("$ai_generation", "test_user", properties);
 
     let response =
-        send_multipart_request(&test_client, form, Some("phc_not_restricted_token")).await;
+        send_multipart_request(&test_client, form, Some("pk-not_restricted_token")).await;
 
     assert_eq!(response.status(), StatusCode::OK);
 
@@ -444,7 +444,7 @@ async fn test_ai_restriction_does_not_apply_to_other_tokens() {
     assert_event(
         &events[0],
         &ExpectedEvent {
-            token: "phc_not_restricted_token",
+            token: "pk-not_restricted_token",
             distinct_id: "test_user",
             event_name: "$ai_generation",
             data_type: DataType::AnalyticsMain,
@@ -621,7 +621,7 @@ async fn test_ai_force_overflow_restriction_wins_over_overflow_limiter() {
     // fire first, leaving the limiter untouched: force_overflow = true,
     // overflow_reason = None, skip_person_processing stays false (because the
     // restriction only sets force_overflow, not skip_person_processing).
-    let restricted_token = "phc_force_overflow_with_limiter_token";
+    let restricted_token = "pk-force_overflow_with_limiter_token";
     let distinct_id = "test_user";
     let hot_key = format!("{restricted_token}:{distinct_id}");
 
@@ -681,7 +681,7 @@ async fn test_ai_endpoint_ignores_analytics_ai_routing_config() {
     // on the AnalyticsMain lane and the OverflowLimiter applies by analytics
     // rules. Catches a regression that types AI-endpoint events as
     // DataType::AiEvents or gates their overflow on the analytics valve.
-    let token = "phc_ai_endpoint_routing_leak_token";
+    let token = "pk-ai_endpoint_routing_leak_token";
     let distinct_id = "test_user";
     let hot_key = format!("{token}:{distinct_id}");
 
@@ -694,7 +694,7 @@ async fn test_ai_endpoint_ignores_analytics_ai_routing_config() {
 
     // Restriction is registered for a different token, so only the limiter acts.
     let (router, sink) = setup_ai_router_with_force_overflow_and_limiter(
-        "phc_some_other_token",
+        "pk-some_other_token",
         overflow_limiter,
         AiRouting::Secondary,
         true,
@@ -724,7 +724,7 @@ async fn test_ai_endpoint_ignores_analytics_ai_routing_config() {
 
 #[tokio::test]
 async fn test_ai_redirect_to_topic_restriction() {
-    let restricted_token = "phc_restricted_redirect_topic_token";
+    let restricted_token = "pk-restricted_redirect_topic_token";
     let target_topic = "custom_ai_topic";
     let (router, sink) =
         setup_ai_router_with_redirect_to_topic(restricted_token, target_topic).await;

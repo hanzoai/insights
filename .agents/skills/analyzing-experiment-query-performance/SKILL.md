@@ -66,11 +66,11 @@ await fetch('/v1/personal_api_keys/', {
 }).then(async (r) => (await r.json()).value)
 ```
 
-The returned `phx_...` value is shown only this once. Then export it:
+The returned `sk-...` value is shown only this once. Then export it:
 
 ```bash
-export INSIGHTS_QUERY_PERF_PAT_US=phx_...
-export INSIGHTS_QUERY_PERF_PAT_EU=phx_...
+export INSIGHTS_QUERY_PERF_PAT_US=sk-...
+export INSIGHTS_QUERY_PERF_PAT_EU=sk-...
 ```
 
 Prompt the user to do this themselves — never ask them to paste the key into the conversation,

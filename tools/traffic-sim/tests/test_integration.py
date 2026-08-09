@@ -29,7 +29,7 @@ FIXTURE_HTML = """<!doctype html>
     // hitting the network during tests.
     window.insights = {
       __loaded: true,
-      config: {token: 'phc_test_fixture', api_host: 'https://example.com'},
+      config: {token: 'pk-test_fixture', api_host: 'https://example.com'},
       get_distinct_id: function() { return 'test-distinct-id'; },
     };
   </script>
@@ -80,4 +80,4 @@ def test_check_loading_detects_stubbed_insights(fixture_server):
     assert page_data["runtime_state"]["loaded"] is True
     # The stub uses #insights-init script tag, which we treat as head_snippet.
     assert page_data["load_method"] == "head_snippet"
-    assert page_data["init_config"]["api_key"] == "phc_test_fixture"
+    assert page_data["init_config"]["api_key"] == "pk-test_fixture"

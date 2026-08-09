@@ -373,7 +373,7 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
 
         # Verify the API key is valid
         api_key = data["personal_api_key"]
-        self.assertTrue(api_key.startswith("phx_"))
+        self.assertTrue(api_key.startswith("sk-"))
 
     def test_poll_returns_expired_for_old_code(self):
         """Test that polling returns expired for old device codes"""

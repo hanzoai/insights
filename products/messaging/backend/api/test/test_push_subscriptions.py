@@ -33,8 +33,8 @@ def _es256_keypair() -> tuple[str, str]:
 
 
 class TestPushSubscriptionsAPI(BaseTest):
-    # Realistic length (>= 32 bytes) so signing/verification exercises a real phs_ secret.
-    SECRET = "phs_project_secret_0123456789abcdef0123"
+    # Realistic length (>= 32 bytes) so signing/verification exercises a real sk- secret.
+    SECRET = "sk-project_secret_0123456789abcdef0123"
 
     def setUp(self):
         super().setUp()
@@ -238,7 +238,7 @@ class TestPushSubscriptionsAPI(BaseTest):
     def test_invalid_token_returns_401(self):
         response = self._post(
             {"distinct_id": "user-1", "device_token": "t", "platform": "android", "app_id": "proj"},
-            api_key="phc_invalid_token",
+            api_key="pk-invalid_token",
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

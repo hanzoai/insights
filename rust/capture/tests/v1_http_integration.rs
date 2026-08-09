@@ -24,7 +24,7 @@ use capture::v1::analytics::types::Event;
 use capture::v1::gateway_provenance::sign_for_test;
 use capture::v1::test_utils::{batch_payload, raw_obj, valid_event};
 
-const TOKEN: &str = "phc_http_integration_token";
+const TOKEN: &str = "pk-http_integration_token";
 const GW_SECRET: &str = "test-signing-secret";
 
 /// A fresh `$pageview` event with a unique UUID and the given distinct_id.

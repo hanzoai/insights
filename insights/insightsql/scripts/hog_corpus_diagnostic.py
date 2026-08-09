@@ -95,7 +95,7 @@ _REDACTION_PASSES: list[tuple[str, str]] = [
         r"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
         "<uuid>",
     ),
-    (r"\yph[a-z]_[A-Za-z0-9]{10,}", "<ph_token>"),
+    (r"\y(?:pk-|sk-|at-|rt-|vt-)[A-Za-z0-9]{10,}", "<key>"),
     (r"\yeyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+", "<jwt>"),
     (r"\y[sprk]k_(live|test)_[A-Za-z0-9]{10,}", "<stripe_key>"),
     (r"\y(AKIA|ASIA)[A-Z0-9]{16}\y", "<aws_key>"),

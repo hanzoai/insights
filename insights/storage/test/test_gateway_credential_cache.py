@@ -74,7 +74,7 @@ class GatewayCredentialTestMixin(BaseTest):
         token: str | None = None,
         user: User | None = None,
     ) -> OAuthAccessToken:
-        token = token or f"pha_{generate_random_token()}"
+        token = token or f"at-{generate_random_token()}"
         app = OAuthApplication.objects.create(
             name="Insights Desktop",
             client_type=OAuthApplication.CLIENT_CONFIDENTIAL,
@@ -140,7 +140,7 @@ class TestGatewayCredentialWireShape(GatewayCredentialTestMixin):
         self.assertNotIn(token, hypercache.get_cache_key(cache_hash))
 
     def test_team_without_api_token_fails_closed(self):
-        # team_id resolves but the team has no phc_ token to stamp — fail closed.
+        # team_id resolves but the team has no pk- token to stamp — fail closed.
         key, _ = self._make_secret_key([GATEWAY_SCOPE])
         Team.objects.filter(pk=self.team.pk).update(api_token="")
         fresh = ProjectSecretAPIKey.objects.get(pk=key.pk)
@@ -733,7 +733,7 @@ class TestGatewayCredentialSignals(GatewayCredentialTestMixin):
         mock_transaction.on_commit.side_effect = lambda fn: fn()
 
         team = Team.objects.get(pk=self.team.pk)  # snapshot api_token under patched setting
-        team.api_token = "phc_rotated_for_test"
+        team.api_token = "pk-rotated_for_test"
         team.save()
 
         mock_delay.assert_called_with(self.team.id)
