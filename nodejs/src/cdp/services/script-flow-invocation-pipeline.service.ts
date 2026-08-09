@@ -78,7 +78,7 @@ export class FlowInvocationPipeline {
             // knows its own source (events consumer → event triggers; DWH consumer → matching
             // warehouse-table triggers). Flows that fail the predicate are skipped without
             // touching the executor.
-            eligibilityFn?: (hogFlow: Flow, globals: InsightsFunctionInvocationGlobals) => boolean
+            eligibilityFn?: (flow: Flow, globals: InsightsFunctionInvocationGlobals) => boolean
         }
     ): Promise<CyclotronJobInvocation[]> {
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
@@ -106,7 +106,7 @@ export class FlowInvocationPipeline {
             )
         ).flat()
 
-        const flowIds = possibleInvocations.map((x) => x.hogFlow.id)
+        const flowIds = possibleInvocations.map((x) => x.flow.id)
         const states = await mirrorCompare(
             'script-watcher.getEffectiveStates',
             () =>
@@ -117,7 +117,7 @@ export class FlowInvocationPipeline {
         )
 
         const rateLimitInputs: KeyedRateLimitRequest[] = possibleInvocations.map((x) => ({
-            id: x.hogFlow.id,
+            id: x.flow.id,
             cost: 1,
         }))
         const rateLimits = await mirrorCompare(
@@ -145,7 +145,7 @@ export class FlowInvocationPipeline {
                                 metric_kind: 'failure',
                                 metric_name: 'rate_limited',
                                 count: 1,
-                                app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
+                                app_source_version: { id: item.flow.id, version: item.flow.version },
                             },
                             'hog_flow'
                         )
@@ -167,7 +167,7 @@ export class FlowInvocationPipeline {
                         logger.warn('⚠️', 'Hogflow invocation rate limited', {
                             teamId: item.teamId,
                             flowId: item.functionId,
-                            flowName: item.hogFlow.name,
+                            flowName: item.flow.name,
                             eventUuid,
                             personId,
                         })
@@ -189,7 +189,7 @@ export class FlowInvocationPipeline {
                     return
                 }
 
-                const state = states[item.hogFlow.id].state
+                const state = states[item.flow.id].state
                 if (state === HogWatcherState.disabled) {
                     this.deps.insightsFunctionMonitoringService.queueAppMetric(
                         {
@@ -198,7 +198,7 @@ export class FlowInvocationPipeline {
                             metric_kind: 'failure',
                             metric_name: 'disabled_permanently',
                             count: 1,
-                            app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
+                            app_source_version: { id: item.flow.id, version: item.flow.version },
                         },
                         'hog_flow'
                     )
@@ -222,7 +222,7 @@ export class FlowInvocationPipeline {
                 metric_kind: 'other',
                 metric_name: 'masked',
                 count: 1,
-                app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
+                app_source_version: { id: item.flow.id, version: item.flow.version },
             })),
             'hog_flow'
         )
@@ -236,7 +236,7 @@ export class FlowInvocationPipeline {
                 metric_kind: 'other',
                 metric_name: 'triggered',
                 count: 1,
-                app_source_version: { id: item.hogFlow.id, version: item.hogFlow.version },
+                app_source_version: { id: item.flow.id, version: item.flow.version },
             })
         })
 
