@@ -49,7 +49,7 @@ describe('BatchExportInsightsFunctionService', () => {
         team = await getFirstTeam(hub.postgres)
 
         api = new CdpApi(hub, createCdpConsumerDeps(hub), {
-            hogQueue: createMockJobQueue(),
+            scriptQueue: createMockJobQueue(),
             flowQueue: createMockJobQueue(),
         })
         app = setupExpressApp()

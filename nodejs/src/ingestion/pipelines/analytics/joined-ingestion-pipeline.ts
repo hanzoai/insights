@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { GroupTypeManager } from '~/common/groups/group-type-manager'
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { AppMetricsOutput, DlqOutput, GroupsOutput, IngestionWarningsOutput, OverflowOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { EventIngestionRestrictionManager } from '~/common/utils/event-ingestion-restrictions'
@@ -30,12 +30,12 @@ import {
 } from '~/ingestion/common/steps/event-preprocessing'
 import { EventPipelineRunnerOptions } from '~/ingestion/common/steps/event-processing/event-pipeline-options'
 import { createFlushBatchStoresStep } from '~/ingestion/common/steps/event-processing/flush-batch-stores-step'
-import { createFlushHogTransformerStep } from '~/ingestion/common/steps/event-processing/flush-script-transformer-step'
+import { createFlushScriptTransformerStep } from '~/ingestion/common/steps/event-processing/flush-script-transformer-step'
 import { createGroupStoreBeforeBatchStep } from '~/ingestion/common/steps/group-store-batch-step'
 import { createPersonsStoreBeforeBatchStep } from '~/ingestion/common/steps/persons-store-batch-step'
 import { AiEventSubpipelineFactory } from '~/ingestion/common/subpipelines/ai-subpipeline.contract'
 import { IngestionOverflowMode } from '~/ingestion/config'
-import { TopHogRegistry, createTopHogWrapper } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry, createTopFnWrapper } from '~/ingestion/framework/extensions/topfn'
 
 import {
     AiEventOutput,
@@ -88,7 +88,7 @@ export interface JoinedIngestionPipelineConfig {
 export interface JoinedIngestionPipelineDeps {
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
-    hogTransformer: HogTransformer
+    scriptTransformer: ScriptTransformer
     aiSubpipelineFactory: AiEventSubpipelineFactory
     eventFilterManager: EventFilterManager
     eventIngestionRestrictionManager: EventIngestionRestrictionManager
@@ -100,7 +100,7 @@ export interface JoinedIngestionPipelineDeps {
     teamManager: TeamManager
     cookielessManager: CookielessManager
     groupTypeManager: GroupTypeManager
-    topHog: TopHogRegistry
+    topFn: TopFnRegistry
 }
 
 export interface JoinedIngestionPipelineInput {
@@ -135,7 +135,7 @@ export function createJoinedIngestionPipeline<
     const {
         personsStore,
         groupStore,
-        hogTransformer,
+        scriptTransformer,
         eventFilterManager,
         eventIngestionRestrictionManager,
         eventSchemaEnforcementManager,
@@ -146,11 +146,11 @@ export function createJoinedIngestionPipeline<
         teamManager,
         cookielessManager,
         groupTypeManager,
-        topHog,
+        topFn,
         aiSubpipelineFactory,
     } = deps
 
-    const topHogWrapper = createTopHogWrapper(topHog)
+    const topFnWrapper = createTopFnWrapper(topFn)
 
     const postTeamConfig: PostTeamPreprocessingSubpipelineConfig = {
         eventFilterManager,
@@ -175,8 +175,8 @@ export function createJoinedIngestionPipeline<
         aiSubpipelineFactory,
         teamManager,
         groupTypeManager,
-        hogTransformer,
-        topHog: topHogWrapper,
+        scriptTransformer,
+        topFn: topFnWrapper,
     }
 
     const mergeFoldPlanningStep = createMergeFoldPlanningStep<PerDistinctIdPipelineInput>(perDistinctIdOptions)
@@ -186,7 +186,7 @@ export function createJoinedIngestionPipeline<
             teamManager,
             outputs,
             promiseScheduler,
-            topHog,
+            topFn,
             // Batch stores are singleton persistent caches, but each batch receives a
             // batch-bound view so entries can be reference-counted and released after
             // that batch's flush lifecycle completes. The Rust consumer's per-worker
@@ -236,7 +236,7 @@ export function createJoinedIngestionPipeline<
                 afterBatch
                     .pipe(createFlushBatchStoresStep({ personsStore, groupStore, outputs }))
                     .pipe(createFlushEventFiltersBatchAppMetricsStep())
-                    .pipe(createFlushHogTransformerStep(hogTransformer))
+                    .pipe(createFlushScriptTransformerStep(scriptTransformer))
             )
             .build()
     )

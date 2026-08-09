@@ -1,7 +1,7 @@
 import { GroupReadRepository } from '~/common/groups/repositories/group-repository.interface'
 import { TeamManager } from '~/common/utils/team-manager'
 
-import { createHogExecutionGlobals } from '../../_tests/fixtures'
+import { createScriptExecutionGlobals } from '../../_tests/fixtures'
 import { GroupsManagerService } from './groups-manager.service'
 
 describe('Groups Manager', () => {
@@ -81,7 +81,7 @@ describe('Groups Manager', () => {
     })
 
     it('sets empty properties when no group properties found in DB', async () => {
-        const globals = createHogExecutionGlobals({
+        const globals = createScriptExecutionGlobals({
             groups: undefined,
             event: {
                 properties: {
@@ -116,7 +116,7 @@ describe('Groups Manager', () => {
             { team_id: 1, group_type_index: 0, group_key: 'id-1', group_properties: { prop: 'value-1' } },
             { team_id: 1, group_type_index: 1, group_key: 'id-2', group_properties: { prop: 'value-2' } },
         ]
-        const globals = createHogExecutionGlobals({
+        const globals = createScriptExecutionGlobals({
             groups: undefined,
             event: {
                 properties: {
@@ -157,15 +157,15 @@ describe('Groups Manager', () => {
         ]
 
         const items = [
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 groups: undefined,
                 event: { properties: { $groups: { GroupA: 'id-1', GroupB: 'id-2' } } } as any,
             }),
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 groups: undefined,
                 event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
             }),
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 groups: undefined,
                 project: { id: 2 } as any,
                 event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
@@ -222,7 +222,7 @@ describe('Groups Manager', () => {
     })
 
     it('handles invalid group properties', async () => {
-        const globals = createHogExecutionGlobals({
+        const globals = createScriptExecutionGlobals({
             groups: undefined,
             event: {
                 properties: { $groups: { GroupA: { i: 'did', not: 'read', the: 'docs' }, GroupB: 'id-2' } },
@@ -233,8 +233,8 @@ describe('Groups Manager', () => {
         expect(mockFetchGroupTypesByTeamIds).toHaveBeenCalledTimes(1)
         expect(mockFetchGroupsByKeys).toHaveBeenCalledTimes(1)
 
-        expect(mockFetchGroupTypesByTeamIds).toHaveBeenCalledWith([1], 'cdp/hogflow-group-type-resolution')
-        expect(mockFetchGroupsByKeys).toHaveBeenCalledWith([1], [1], ['id-2'], 'cdp/hogflow-group-property-enrichment')
+        expect(mockFetchGroupTypesByTeamIds).toHaveBeenCalledWith([1], 'cdp/flow-group-type-resolution')
+        expect(mockFetchGroupsByKeys).toHaveBeenCalledWith([1], [1], ['id-2'], 'cdp/flow-group-property-enrichment')
     })
 
     it.each([
@@ -243,7 +243,7 @@ describe('Groups Manager', () => {
         { $groups: 'not-an-object', desc: 'a string' },
         { $groups: {}, desc: 'an empty object' },
     ])('skips group type loading when $groups is $desc', async ({ $groups }) => {
-        const globals = createHogExecutionGlobals({
+        const globals = createScriptExecutionGlobals({
             groups: undefined,
             event: { properties: { $groups } } as any,
         })
@@ -256,7 +256,7 @@ describe('Groups Manager', () => {
 
     it('skips enrichment when groups already set', async () => {
         const existingGroups = { SomeGroup: { id: 'existing', index: 0, type: 'SomeGroup', url: '', properties: {} } }
-        const globals = createHogExecutionGlobals({
+        const globals = createScriptExecutionGlobals({
             groups: existingGroups,
             event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
         })
@@ -268,7 +268,7 @@ describe('Groups Manager', () => {
 
     it('sets empty groups when team has no group_analytics feature', async () => {
         mockHasAvailableFeature.mockResolvedValue(false)
-        const globals = createHogExecutionGlobals({
+        const globals = createScriptExecutionGlobals({
             groups: undefined,
             event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
         })
@@ -281,7 +281,7 @@ describe('Groups Manager', () => {
     it('caches group type and property lookups across calls', async () => {
         mockGroups = [{ team_id: 1, group_type_index: 0, group_key: 'id-1', group_properties: { prop: 'value-1' } }]
 
-        const globals1 = createHogExecutionGlobals({
+        const globals1 = createScriptExecutionGlobals({
             groups: undefined,
             project: { id: 1 } as any,
             event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
@@ -293,7 +293,7 @@ describe('Groups Manager', () => {
         mockFetchGroupsByKeys.mockClear()
 
         // Second call with same data - both group types AND properties are cached
-        const globals2 = createHogExecutionGlobals({
+        const globals2 = createScriptExecutionGlobals({
             groups: undefined,
             project: { id: 1 } as any,
             event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
@@ -309,7 +309,7 @@ describe('Groups Manager', () => {
         // this via its ?? [] fallback.
         mockFetchGroupTypesByTeamIds.mockResolvedValue({})
 
-        const globals = createHogExecutionGlobals({
+        const globals = createScriptExecutionGlobals({
             groups: undefined,
             project: { id: 99 } as any,
             event: { properties: { $groups: { UnknownType: 'some-key' } } } as any,
@@ -318,7 +318,7 @@ describe('Groups Manager', () => {
         await groupsManager.addGroupsToGlobals(globals)
 
         expect(globals.groups).toEqual({})
-        expect(mockFetchGroupTypesByTeamIds).toHaveBeenCalledWith([99], 'cdp/hogflow-group-type-resolution')
+        expect(mockFetchGroupTypesByTeamIds).toHaveBeenCalledWith([99], 'cdp/flow-group-type-resolution')
         expect(mockFetchGroupsByKeys).not.toHaveBeenCalled()
     })
 
@@ -328,7 +328,7 @@ describe('Groups Manager', () => {
             // A malformed invocation whose state.globals is present but missing project/event
             // must not crash the worker — otherwise it becomes a poison pill that crash-loops
             // the cyclotron-script consumer and stalls the partition it owns.
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 groups: undefined,
                 event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
             })
@@ -340,7 +340,7 @@ describe('Groups Manager', () => {
     )
 
     it('respects clear() to reset all caches', async () => {
-        const globals1 = createHogExecutionGlobals({
+        const globals1 = createScriptExecutionGlobals({
             groups: undefined,
             project: { id: 1 } as any,
             event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
@@ -351,7 +351,7 @@ describe('Groups Manager', () => {
 
         groupsManager.clear()
 
-        const globals2 = createHogExecutionGlobals({
+        const globals2 = createScriptExecutionGlobals({
             groups: undefined,
             project: { id: 1 } as any,
             event: { properties: { $groups: { GroupA: 'id-1' } } } as any,

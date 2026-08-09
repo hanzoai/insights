@@ -7,7 +7,7 @@ import {
     InsightsFunctionType,
 } from '~/cdp/types'
 
-import { HogExecutorAsyncService, HogExecutorExecuteAsyncOptions } from '../script-executor-async.service'
+import { ScriptExecutorAsyncService, ScriptExecutorExecuteAsyncOptions } from '../script-executor-async.service'
 import { InsightsFunctionTemplateManagerService } from '../managers/script-function-template-manager.service'
 
 type FunctionActionType = 'function' | 'function_email' | 'function_sms'
@@ -18,7 +18,7 @@ export class FlowFunctionsService {
     constructor(
         private siteUrl: string,
         private insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService,
-        private insightsFunctionExecutor: HogExecutorAsyncService
+        private insightsFunctionExecutor: ScriptExecutorAsyncService
     ) {}
 
     async buildInsightsFunction(flow: Flow, configuration: Action['config']): Promise<InsightsFunctionType> {
@@ -110,7 +110,7 @@ export class FlowFunctionsService {
             ...invocation,
             insightsFunction,
             state: invocation.state.currentAction?.insightsFunctionState ?? {
-                globals: await this.insightsFunctionExecutor.hogExecutor.buildInputsWithGlobals(
+                globals: await this.insightsFunctionExecutor.scriptExecutor.buildInputsWithGlobals(
                     insightsFunction,
                     globalsWithSource
                 ),
@@ -131,8 +131,8 @@ export class FlowFunctionsService {
 
     async executeWithAsyncFunctions(
         invocation: CyclotronJobInvocationInsightsFunction,
-        hogExecutorOptions?: HogExecutorExecuteAsyncOptions
+        scriptExecutorOptions?: ScriptExecutorExecuteAsyncOptions
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
-        return this.insightsFunctionExecutor.executeWithAsyncFunctions(invocation, hogExecutorOptions)
+        return this.insightsFunctionExecutor.executeWithAsyncFunctions(invocation, scriptExecutorOptions)
     }
 }

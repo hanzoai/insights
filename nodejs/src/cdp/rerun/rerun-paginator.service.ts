@@ -13,7 +13,7 @@ import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from '../services/monitoring/script-function-monitoring.service'
 import {
-    HogInvocationResultsService,
+    ScriptInvocationResultsService,
     decodeInvocationGlobals,
 } from '../services/monitoring/script-invocation-results.service'
 import {
@@ -111,7 +111,7 @@ export class RerunPaginatorService {
         private datastore: DatastoreClient,
         private insightsFunctionManager: InsightsFunctionManagerService,
         private flowManager: FlowManagerService,
-        private invocationResultsRowsService: HogInvocationResultsService,
+        private invocationResultsRowsService: ScriptInvocationResultsService,
         // Re-enqueue targets keyed by function kind — see RerunJobQueues.
         private jobQueues: RerunJobQueues,
         private monitoringService: InsightsFunctionMonitoringService,

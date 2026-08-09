@@ -3,7 +3,7 @@ import pLimit from 'p-limit'
 
 import { buildIntegerMatcher } from '~/common/config/config'
 import { KafkaConsumerV2 } from '~/common/kafka/consumer/consumer-v2'
-import { DlqOutput, IngestionWarningsOutput, LogEntriesOutput, OverflowOutput, TophogOutput } from '~/common/outputs'
+import { DlqOutput, IngestionWarningsOutput, LogEntriesOutput, OverflowOutput, TopFnOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 import { PostgresRouter } from '~/common/utils/db/postgres'
@@ -14,7 +14,7 @@ import {
 import { logger } from '~/common/utils/logger'
 import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 import { IngestionConsumerConfig } from '~/ingestion/config'
-import { TopHog } from '~/ingestion/framework/tophog/tophog'
+import { TopFn } from '~/ingestion/framework/topfn/topfn'
 import {
     SessionReplayPipeline,
     SessionReplayPipelineConfig,
@@ -57,7 +57,7 @@ export type SessionRecordingIngesterConfig = SessionRecordingConfig &
     SessionRecordingApiConfig &
     Pick<
         IngestionConsumerConfig,
-        // INGESTION_OVERFLOW_MODE drives force-overflow routing; the rest are for TopHog metrics.
+        // INGESTION_OVERFLOW_MODE drives force-overflow routing; the rest are for TopFn metrics.
         'INGESTION_OVERFLOW_MODE' | 'INGESTION_PIPELINE' | 'INGESTION_LANE'
     >
 
@@ -115,12 +115,12 @@ export class SessionRecordingIngester {
         | IngestionWarningsOutput
         | DlqOutput
         | OverflowOutput
-        | TophogOutput
+        | TopFnOutput
         | LogEntriesOutput
         | ReplayEventsOutput
         | SessionFeaturesOutput
     >
-    private readonly topHog: TopHog
+    private readonly topFn: TopFn
     private readonly sessionTracker: SessionTracker
     private readonly sessionFilter: SessionFilter
     private readonly keyStore: KeyStore
@@ -134,7 +134,7 @@ export class SessionRecordingIngester {
             | IngestionWarningsOutput
             | DlqOutput
             | OverflowOutput
-            | TophogOutput
+            | TopFnOutput
             | LogEntriesOutput
             | ReplayEventsOutput
             | SessionFeaturesOutput
@@ -167,7 +167,7 @@ export class SessionRecordingIngester {
         // Only needed to build the default file storage; skip it when storage is injected.
         const s3Client = collaborators.fileStorage ? null : buildSessionRecordingS3Client(config)
 
-        this.topHog = new TopHog({
+        this.topFn = new TopFn({
             outputs,
             pipeline: config.INGESTION_PIPELINE ?? 'unknown',
             lane: config.INGESTION_LANE ?? 'unknown',
@@ -358,7 +358,7 @@ export class SessionRecordingIngester {
             sessionFilter: this.sessionFilter,
             keyStore: this.keyStore,
             sessionKeyResolutionMaxConcurrency: this.config.SESSION_RECORDING_KEY_RESOLUTION_MAX_CONCURRENCY,
-            topHog: this.topHog,
+            topFn: this.topFn,
             isDebugLoggingEnabled: this.isDebugLoggingEnabled,
         })
 
@@ -372,8 +372,8 @@ export class SessionRecordingIngester {
             (revokedPartitions) => this.onRevokePartitions(revokedPartitions)
         )
 
-        // Start periodic flushing of TopHog metrics
-        this.topHog.start()
+        // Start periodic flushing of TopFn metrics
+        this.topFn.start()
     }
 
     public async stop(): Promise<PromiseSettledResult<any>[]> {
@@ -384,8 +384,8 @@ export class SessionRecordingIngester {
         // race a poll batch that is still recording (and scheduling side effects) concurrently.
         await this.kafkaConsumer.stopConsuming()
 
-        // Stop TopHog and flush final metrics
-        await this.topHog.stop()
+        // Stop TopFn and flush final metrics
+        await this.topFn.stop()
 
         // Persist whatever is buffered and store its offsets while we still own the partitions;
         // disconnect commits them as it leaves the group.

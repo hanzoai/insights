@@ -11,9 +11,9 @@ import { defaultConfig } from '~/common/config/config'
 import { GeoIPService, GeoIp } from '~/common/utils/geoip'
 
 import { PluginsServerConfig } from '../../../types'
-import { HogExecutorAsyncService } from '../../services/script-executor-async.service'
-import { HogExecutorService } from '../../services/script-executor.service'
-import { HogInputsService } from '../../services/script-inputs.service'
+import { ScriptExecutorAsyncService } from '../../services/script-executor-async.service'
+import { ScriptExecutorService } from '../../services/script-executor.service'
+import { ScriptInputsService } from '../../services/script-inputs.service'
 import { EmailService } from '../../services/messaging/email.service'
 import { EmailTrackingCodeSigner } from '../../services/messaging/helpers/tracking-code'
 import { RecipientTokensService } from '../../services/messaging/recipient-tokens.service'
@@ -30,7 +30,7 @@ import {
     NativeTemplate,
 } from '../../types'
 import { cloneInvocation, createInvocation } from '../../utils/invocation-utils'
-import { compileHog } from '../compiler'
+import { compileScript } from '../compiler'
 
 /**
  * Sets templating value of 'script' or 'liquid' on script inputs based on the template used.
@@ -85,9 +85,9 @@ const compileObject = async (
         // If the string looks like a Liquid template, render it first
         if (templating_engine === 'liquid') {
             const rendered = formatLiquidInput(obj, globals || createGlobals())
-            return await compileHog(`return f'${rendered}'`)
+            return await compileScript(`return f'${rendered}'`)
         }
-        return await compileHog(`return f'${obj}'`)
+        return await compileScript(`return f'${obj}'`)
     } else {
         return obj
     }
@@ -167,7 +167,7 @@ const createGlobals = (
 
 export class TemplateTester {
     public template: InsightsFunctionTemplateCompiled
-    private hogExecutor: HogExecutorAsyncService
+    private scriptExecutor: ScriptExecutorAsyncService
     private nativeExecutor: NativeDestinationExecutorService
     private mockHub: PluginsServerConfig
 
@@ -189,14 +189,14 @@ export class TemplateTester {
 
         this.mockHub = { ...defaultConfig } as any
 
-        this.hogExecutor = this.createHogExecutor()
+        this.scriptExecutor = this.createScriptExecutor()
         this.nativeExecutor = new NativeDestinationExecutorService(defaultConfig)
     }
 
-    private createHogExecutor(): HogExecutorAsyncService {
+    private createScriptExecutor(): ScriptExecutorAsyncService {
         const config = this.mockHub
         const recipientTokensService = new RecipientTokensService(config.ENCRYPTION_SALT_KEYS, config.SITE_URL)
-        const hogInputsService = new HogInputsService(undefined as any, recipientTokensService, undefined as any)
+        const scriptInputsService = new ScriptInputsService(undefined as any, recipientTokensService, undefined as any)
         const emailService = new EmailService(
             {
                 sesAccessKeyId: config.SES_ACCESS_KEY_ID,
@@ -215,10 +215,10 @@ export class TemplateTester {
             undefined as any,
             undefined as any
         )
-        return new HogExecutorAsyncService(
-            new HogExecutorService(
+        return new ScriptExecutorAsyncService(
+            new ScriptExecutorService(
                 { executionTimeoutMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS },
-                hogInputsService
+                scriptInputsService
             ),
             {
                 googleAdwordsDeveloperToken: config.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
@@ -229,7 +229,7 @@ export class TemplateTester {
             },
             {
                 teamManager: this.mockTeamManager as any,
-                hogInputsService,
+                scriptInputsService,
                 emailService,
                 recipientTokensService,
                 pushNotificationService: undefined as any,
@@ -237,8 +237,8 @@ export class TemplateTester {
         )
     }
 
-    private getExecutor(): HogExecutorAsyncService | NativeDestinationExecutorService {
-        return isNativeInsightsFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.hogExecutor
+    private getExecutor(): ScriptExecutorAsyncService | NativeDestinationExecutorService {
+        return isNativeInsightsFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.scriptExecutor
     }
 
     /*
@@ -257,10 +257,10 @@ export class TemplateTester {
 
         this.template = {
             ...this._template,
-            bytecode: await compileHog(this._template.code),
+            bytecode: await compileScript(this._template.code),
         }
 
-        this.hogExecutor = this.createHogExecutor()
+        this.scriptExecutor = this.createScriptExecutor()
         this.nativeExecutor = new NativeDestinationExecutorService(this.mockHub)
     }
 
@@ -299,7 +299,7 @@ export class TemplateTester {
             template_id: this.template.id,
         }
 
-        const globalsWithInputs = await this.hogExecutor.hogExecutor.buildInputsWithGlobals(insightsFunction, globals)
+        const globalsWithInputs = await this.scriptExecutor.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
         const invocation = createInvocation(globalsWithInputs, insightsFunction)
         const transformationFunctions = getTransformationFunctions(this.geoIp!)
         const extraFunctions = invocation.insightsFunction.type === 'transformation' ? transformationFunctions : {}
@@ -367,7 +367,7 @@ export class TemplateTester {
             mappings: [compiledMappingInputs],
         }
 
-        const globalsWithInputs = await this.hogExecutor.hogExecutor.buildInputsWithGlobals(
+        const globalsWithInputs = await this.scriptExecutor.scriptExecutor.buildInputsWithGlobals(
             insightsFunction,
             this.createGlobals(_globals),
             compiledMappingInputs.inputs
@@ -389,7 +389,7 @@ export class TemplateTester {
             body: response.body,
         })
 
-        const result = await this.hogExecutor.execute(modifiedInvocation)
+        const result = await this.scriptExecutor.execute(modifiedInvocation)
         result.logs = this.logsForSnapshot(result.logs)
 
         return result

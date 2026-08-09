@@ -17,8 +17,8 @@ import { mirrorCall } from '../utils/mirror-call'
 import { InvocationResultsService } from './invocation-results.service'
 import { GroupsManagerService } from './managers/groups-manager.service'
 import { InsightsFunctionManagerService } from './managers/script-function-manager.service'
-import { HogWatcherService } from './monitoring/script-watcher.service'
-import { HogExecutorAsyncService } from './script-executor-async.service'
+import { ScriptWatcherService } from './monitoring/script-watcher.service'
+import { ScriptExecutorAsyncService } from './script-executor-async.service'
 
 // TODO: This might be too strict so we need to validate that it matches well what we would expect to get from batch exports
 const batchExportRequestBodySchema = z.object({
@@ -45,10 +45,10 @@ export class BatchExportInsightsFunctionService {
         private teamManager: TeamManager,
         private groupsManager: GroupsManagerService,
         private insightsFunctionManager: InsightsFunctionManagerService,
-        private hogExecutorAsync: HogExecutorAsyncService,
-        private hogWatcher: HogWatcherService,
+        private scriptExecutorAsync: ScriptExecutorAsyncService,
+        private scriptWatcher: ScriptWatcherService,
         private invocationResultsService: InvocationResultsService,
-        private hogWatcherMirror: HogWatcherService | null = null
+        private scriptWatcherMirror: ScriptWatcherService | null = null
     ) {
         this.promiseScheduler = new PromiseScheduler()
     }
@@ -86,14 +86,14 @@ export class BatchExportInsightsFunctionService {
         const globals = this.buildRequestGlobals(datastore_event as RawDatastoreEvent, insightsFunction, team)
         await this.groupsManager.addGroupsToGlobals(globals)
 
-        const globalsWithInputs = await this.hogExecutorAsync.hogExecutor.buildInputsWithGlobals(
+        const globalsWithInputs = await this.scriptExecutorAsync.scriptExecutor.buildInputsWithGlobals(
             insightsFunction,
             globals
         )
         const invocation = createInvocation(globalsWithInputs, insightsFunction)
         invocation.id = invocationId.toString()
 
-        const result = await this.hogExecutorAsync.executeWithAsyncFunctions(invocation, { maxFetchRetries: 0 }) // Retries are handled by the batch export service
+        const result = await this.scriptExecutorAsync.executeWithAsyncFunctions(invocation, { maxFetchRetries: 0 }) // Retries are handled by the batch export service
 
         // TODO: Follow up - we might want to more accuratelt link an execution to the fact it came from a batch export
         // We have the parent_id but that overrides the function id which is not always what we want
@@ -102,9 +102,9 @@ export class BatchExportInsightsFunctionService {
         void this.promiseScheduler.schedule(
             Promise.all([
                 this.invocationResultsService.queueInvocationResultsAndFlush([result]),
-                this.hogWatcher.observeResultsBuffered(result),
+                this.scriptWatcher.observeResultsBuffered(result),
                 mirrorCall('script-watcher.observeResultsBuffered', () =>
-                    this.hogWatcherMirror?.observeResultsBuffered(result)
+                    this.scriptWatcherMirror?.observeResultsBuffered(result)
                 ),
             ])
         )

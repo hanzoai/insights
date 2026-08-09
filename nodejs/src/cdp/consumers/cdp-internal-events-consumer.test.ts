@@ -8,7 +8,7 @@ import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabas
 import { Hub, Team } from '../../types'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, createInternalEvent, createKafkaMessage } from '../_tests/fixtures'
-import { HogWatcherState } from '../services/monitoring/script-watcher.service'
+import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionType } from '../types'
 import { CdpInternalEventsConsumer } from './cdp-internal-event.consumer'
 
@@ -189,7 +189,7 @@ describe('CDP Internal Events Consumer', () => {
                 ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
                 ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
-            await processor.hogWatcher.forceStateChange(fn, HogWatcherState.disabled)
+            await processor.scriptWatcher.forceStateChange(fn, ScriptWatcherState.disabled)
 
             const messages = [createKafkaMessage(createInternalEvent(team.id, {}))]
             const globals = await processor._parseKafkaBatch(messages)

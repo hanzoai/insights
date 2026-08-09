@@ -3,14 +3,14 @@ import { createOkContext } from '~/ingestion/framework/helpers'
 import { PipelineResult, dlq, isOkResult, ok } from '~/ingestion/framework/results'
 
 import {
-    TopHogRegistry,
+    TopFnRegistry,
     average,
     averageOk,
     averageResult,
     count,
     countOk,
     countResult,
-    createTopHogWrapper,
+    createTopFnWrapper,
     max,
     maxOk,
     maxResult,
@@ -18,10 +18,10 @@ import {
     sumOk,
     sumResult,
     timer,
-} from './tophog'
+} from './topfn'
 
-describe('topHog wrapper', () => {
-    function createMockTopHog(): TopHogRegistry & {
+describe('topFn wrapper', () => {
+    function createMockTopFn(): TopFnRegistry & {
         record: jest.Mock
         registerSum: jest.Mock
         registerMax: jest.Mock
@@ -35,15 +35,15 @@ describe('topHog wrapper', () => {
     }
 
     it('should record count metric on OK result', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ processed: true }))
         }
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(myStep, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(myStep, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 42 }, {}))
@@ -53,15 +53,15 @@ describe('topHog wrapper', () => {
     })
 
     it('should record time metric on OK result', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ processed: true }))
         }
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(myStep, [timer('events', (input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(myStep, [timer('events', (input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 42 }, {}))
@@ -71,8 +71,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should track multiple metrics with different keys', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number; userId: string }) {
             return Promise.resolve(ok({ processed: true }))
@@ -80,7 +80,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number; userId: string }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     count('by_team', (input) => ({ team_id: String(input.teamId) })),
                     timer('by_user', (input) => ({ user_id: input.userId })),
                 ])
@@ -96,12 +96,12 @@ describe('topHog wrapper', () => {
     })
 
     it('should use custom metric name when provided', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(ok({ done: true }))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(step, [count('heatmap_events', (input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(step, [count('heatmap_events', (input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 7 }, {}))
@@ -111,12 +111,12 @@ describe('topHog wrapper', () => {
     })
 
     it('should track even on non-OK results from step', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(step, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(step, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 1 }, {}))
@@ -125,11 +125,11 @@ describe('topHog wrapper', () => {
     })
 
     it('should not track when descriptors are empty', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(ok({ done: true }))
 
-        const pipeline = newPipelineBuilder<{ teamId: number }>().pipe(topHog(step, [])).build()
+        const pipeline = newPipelineBuilder<{ teamId: number }>().pipe(topFn(step, [])).build()
 
         await pipeline.process(createOkContext({ teamId: 1 }, {}))
 
@@ -138,15 +138,15 @@ describe('topHog wrapper', () => {
     })
 
     it('should preserve step name on wrapped function', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function namedStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ processed: true }))
         }
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(namedStep, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(namedStep, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         const result = await pipeline.process(createOkContext({ teamId: 5 }, {}))
@@ -155,15 +155,15 @@ describe('topHog wrapper', () => {
     })
 
     it('should not interfere with step result or context propagation', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function trackedStep(input: { teamId: number }) {
             return Promise.resolve(ok({ processed: input.teamId }))
         }
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(trackedStep, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(trackedStep, [count('events', (input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         const result = await pipeline.process(createOkContext({ teamId: 5 }, {}))
@@ -176,8 +176,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record sum metric with custom value', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number; size: number }) {
             return Promise.resolve(ok({ done: true }))
@@ -185,7 +185,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     sum(
                         'total_bytes',
                         (input) => ({ team_id: String(input.teamId) }),
@@ -202,8 +202,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record sumResult metric on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number; size: number }) {
             return Promise.resolve(ok({ done: true }))
@@ -211,7 +211,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     sumResult(
                         'total_bytes',
                         (_result, input) => ({ team_id: String(input.teamId) }),
@@ -228,13 +228,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should record sumResult metric on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(step, [
+                topFn(step, [
                     sumResult(
                         'total_bytes',
                         (_result: PipelineResult<unknown, string>, input) => ({ team_id: String(input.teamId) }),
@@ -250,8 +250,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record sumOk metric only on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ bytes: 2048 }))
@@ -259,7 +259,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     sumOk(
                         'output_bytes',
                         (output) => ({ bytes: String(output.bytes) }),
@@ -276,13 +276,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should not record sumOk on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(step, [
+                topFn(step, [
                     sumOk(
                         'output_bytes',
                         (_output: { bytes: number }) => ({ team_id: '1' }),
@@ -298,15 +298,15 @@ describe('topHog wrapper', () => {
     })
 
     it('should record countResult metric on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ done: true }))
         }
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(myStep, [countResult('processed', (_result, input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(myStep, [countResult('processed', (_result, input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 42 }, {}))
@@ -316,13 +316,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should record countResult metric on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(step, [
+                topFn(step, [
                     countResult('processed', (_result: PipelineResult<unknown, string>, input) => ({
                         team_id: String(input.teamId),
                     })),
@@ -336,15 +336,15 @@ describe('topHog wrapper', () => {
     })
 
     it('should record countOk metric only on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ done: true }))
         }
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
-            .pipe(topHog(myStep, [countOk('processed', (output, input) => ({ team_id: String(input.teamId) }))]))
+            .pipe(topFn(myStep, [countOk('processed', (output, input) => ({ team_id: String(input.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 42 }, {}))
@@ -354,13 +354,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should not record countOk on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(step, [countOk('processed', (_output: unknown, input) => ({ team_id: String(input.teamId) }))])
+                topFn(step, [countOk('processed', (_output: unknown, input) => ({ team_id: String(input.teamId) }))])
             )
             .build()
 
@@ -370,8 +370,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record average metric before step returns', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number; size: number }) {
             return Promise.resolve(ok({ done: true }))
@@ -379,7 +379,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     average(
                         'avg_size',
                         (input) => ({ team_id: String(input.teamId) }),
@@ -396,8 +396,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record averageResult metric on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number; size: number }) {
             return Promise.resolve(ok({ done: true }))
@@ -405,7 +405,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     averageResult(
                         'avg_size',
                         (_result, input) => ({ team_id: String(input.teamId) }),
@@ -422,13 +422,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should record averageResult metric on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(step, [
+                topFn(step, [
                     averageResult(
                         'avg_size',
                         (_result: PipelineResult<unknown, string>, input) => ({ team_id: String(input.teamId) }),
@@ -444,8 +444,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record averageOk metric only on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ count: 5 }))
@@ -453,7 +453,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     averageOk(
                         'avg_count',
                         (output) => ({ count: String(output.count) }),
@@ -470,13 +470,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should not record averageOk on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(step, [
+                topFn(step, [
                     averageOk(
                         'avg_count',
                         (_output: { count: number }) => ({ team_id: '1' }),
@@ -492,8 +492,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record max metric before step returns', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number; size: number }) {
             return Promise.resolve(ok({ done: true }))
@@ -501,7 +501,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     max(
                         'max_size',
                         (input) => ({ team_id: String(input.teamId) }),
@@ -518,8 +518,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record maxResult metric on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number; size: number }) {
             return Promise.resolve(ok({ done: true }))
@@ -527,7 +527,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     maxResult(
                         'max_size',
                         (_result, input) => ({ team_id: String(input.teamId) }),
@@ -544,13 +544,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should record maxResult metric on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number; size: number }>()
             .pipe(
-                topHog(step, [
+                topFn(step, [
                     maxResult(
                         'max_size',
                         (_result: PipelineResult<unknown, string>, input) => ({ team_id: String(input.teamId) }),
@@ -566,8 +566,8 @@ describe('topHog wrapper', () => {
     })
 
     it('should record maxOk metric only on OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
 
         function myStep(_input: { teamId: number }) {
             return Promise.resolve(ok({ size: 512 }))
@@ -575,7 +575,7 @@ describe('topHog wrapper', () => {
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(myStep, [
+                topFn(myStep, [
                     maxOk(
                         'max_output_size',
                         (output) => ({ size: String(output.size) }),
@@ -592,13 +592,13 @@ describe('topHog wrapper', () => {
     })
 
     it('should not record maxOk on non-OK results', async () => {
-        const mockTracker = createMockTopHog()
-        const topHog = createTopHogWrapper(mockTracker)
+        const mockTracker = createMockTopFn()
+        const topFn = createTopFnWrapper(mockTracker)
         const step = jest.fn().mockResolvedValue(dlq('bad data'))
 
         const pipeline = newPipelineBuilder<{ teamId: number }>()
             .pipe(
-                topHog(step, [
+                topFn(step, [
                     maxOk(
                         'max_size',
                         (_output: { size: number }) => ({ team_id: '1' }),

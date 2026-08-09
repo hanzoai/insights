@@ -3,7 +3,7 @@ import { Message } from 'node-rdkafka'
 
 import { ReadOnlyGroupTypeManager } from '~/common/groups/readonly-group-type-manager'
 import { KafkaProducerWrapper } from '~/common/kafka/producer'
-import { TophogOutput } from '~/common/outputs'
+import { TopFnOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { SingleIngestionOutput } from '~/common/outputs/single-ingestion-output'
 import { PersonReadRepository } from '~/common/persons/repositories/person-repository'
@@ -14,15 +14,15 @@ import { TeamManager } from '~/common/utils/team-manager'
 import { UUIDT } from '~/common/utils/utils'
 import { COOKIELESS_SENTINEL_VALUE, CookielessManager } from '~/ingestion/common/cookieless/cookieless-manager'
 import { OverflowRedirectService } from '~/ingestion/common/overflow-redirect/overflow-redirect-service'
-import { TopHogRegistry } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry } from '~/ingestion/framework/extensions/topfn'
 import { ok } from '~/ingestion/framework/results'
-import { TopHog } from '~/ingestion/framework/tophog'
+import { TopFn } from '~/ingestion/framework/topfn'
 import { createTestTeam } from '~/tests/helpers/team'
 import { InternalPerson } from '~/types'
 
 import { CymbalClient } from './cymbal/client'
 import { CymbalResponse } from './cymbal/types'
-import { ErrorTrackingHogTransformer } from './error-tracking-consumer'
+import { ErrorTrackingScriptTransformer } from './error-tracking-consumer'
 import {
     ErrorTrackingPipelineConfig,
     createErrorTrackingPipeline,
@@ -49,7 +49,7 @@ describe('ErrorTrackingPipeline', () => {
     let mockKafkaProducer: jest.Mocked<KafkaProducerWrapper>
     let mockTeamManager: jest.Mocked<TeamManager>
     let mockPersonRepository: jest.Mocked<PersonReadRepository>
-    let mockHogTransformer: jest.Mocked<ErrorTrackingHogTransformer>
+    let mockScriptTransformer: jest.Mocked<ErrorTrackingScriptTransformer>
     let mockCymbalClient: jest.Mocked<CymbalClient>
     let mockGroupTypeManager: jest.Mocked<ReadOnlyGroupTypeManager>
     let mockEventIngestionRestrictionManager: jest.Mocked<EventIngestionRestrictionManager>
@@ -249,8 +249,8 @@ describe('ErrorTrackingPipeline', () => {
             inTransaction: jest.fn(),
         } as unknown as jest.Mocked<PersonReadRepository>
 
-        // HogTransformer mock that passes through events unchanged by default
-        mockHogTransformer = {
+        // ScriptTransformer mock that passes through events unchanged by default
+        mockScriptTransformer = {
             start: jest.fn().mockResolvedValue(undefined),
             stop: jest.fn().mockResolvedValue(undefined),
             transformEventAndProduceMessages: jest
@@ -285,9 +285,9 @@ describe('ErrorTrackingPipeline', () => {
 
         promiseScheduler = new PromiseScheduler()
 
-        // Mock TopHog registry that returns no-op recorders
+        // Mock TopFn registry that returns no-op recorders
         const mockRecorder = { record: jest.fn() }
-        const mockTopHog: TopHogRegistry = {
+        const mockTopFn: TopFnRegistry = {
             registerSum: () => mockRecorder,
             registerMax: () => mockRecorder,
             registerAverage: () => mockRecorder,
@@ -304,7 +304,7 @@ describe('ErrorTrackingPipeline', () => {
                 ),
                 dlq: new SingleIngestionOutput('dlq', 'error_tracking_dlq', mockKafkaProducer, 'test'),
                 overflow: new SingleIngestionOutput('overflow', 'error_tracking_overflow', mockKafkaProducer, 'test'),
-                tophog: new SingleIngestionOutput('tophog', 'datastore_tophog_test', mockKafkaProducer, 'test'),
+                topfn: new SingleIngestionOutput('tophog', 'datastore_topfn_test', mockKafkaProducer, 'test'),
                 app_metrics: new SingleIngestionOutput(
                     'app_metrics',
                     'datastore_app_metrics2_test',
@@ -315,14 +315,14 @@ describe('ErrorTrackingPipeline', () => {
             promiseScheduler,
             teamManager: mockTeamManager,
             personRepository: mockPersonRepository,
-            hogTransformer: mockHogTransformer,
+            scriptTransformer: mockScriptTransformer,
             cymbalClient: mockCymbalClient,
             groupTypeManager: mockGroupTypeManager,
             cookielessManager: mockCookielessManager,
             eventIngestionRestrictionManager: mockEventIngestionRestrictionManager,
             overflowMode: 'disabled',
             preservePartitionLocality: false,
-            topHog: mockTopHog,
+            topFn: mockTopFn,
         }
     })
 
@@ -347,7 +347,7 @@ describe('ErrorTrackingPipeline', () => {
             mockCymbalClient.processExceptions.mockResolvedValue([cymbalResponse])
 
             // Script transformations run AFTER Cymbal and add GeoIP properties
-            mockHogTransformer.transformEventAndProduceMessages.mockImplementation((event) =>
+            mockScriptTransformer.transformEventAndProduceMessages.mockImplementation((event) =>
                 Promise.resolve({
                     event: {
                         ...event,
@@ -370,7 +370,7 @@ describe('ErrorTrackingPipeline', () => {
             await runErrorTrackingPipeline(pipeline, [message])
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
             // Verify event was emitted to Kafka
             const producedEvents = getProducedEvents()
@@ -427,7 +427,7 @@ describe('ErrorTrackingPipeline', () => {
             expect(cymbalCall).toHaveLength(2)
 
             // Verify Script transformations were run for each event
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(2)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(2)
 
             // Verify both events were emitted
             const producedEvents = getProducedEvents()
@@ -482,7 +482,7 @@ describe('ErrorTrackingPipeline', () => {
             await runErrorTrackingPipeline(pipeline, [message])
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
             const producedEvents = getProducedEvents()
             expect(producedEvents).toHaveLength(1)
@@ -504,7 +504,7 @@ describe('ErrorTrackingPipeline', () => {
             await runErrorTrackingPipeline(pipeline, [message])
 
             // Suppressed events are dropped before Script transformations run
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
 
             // Suppressed events are dropped, nothing emitted
             expect(getProducedEvents()).toHaveLength(0)
@@ -529,7 +529,7 @@ describe('ErrorTrackingPipeline', () => {
 
             // Events with unknown tokens are dropped before Cymbal or Script transformations
             expect(mockCymbalClient.processExceptions).not.toHaveBeenCalled()
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
 
             // Event should not be produced anywhere (dropped silently)
             expect(getProducedEvents()).toHaveLength(0)
@@ -549,7 +549,7 @@ describe('ErrorTrackingPipeline', () => {
 
             // Events redirected to DLQ skip processing entirely
             expect(mockCymbalClient.processExceptions).not.toHaveBeenCalled()
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
 
             // Event should not be produced to output topic
             expect(getProducedEvents()).toHaveLength(0)
@@ -572,7 +572,7 @@ describe('ErrorTrackingPipeline', () => {
 
             // Dropped events skip processing entirely
             expect(mockCymbalClient.processExceptions).not.toHaveBeenCalled()
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
 
             // Event should not be produced anywhere
             expect(getProducedEvents()).toHaveLength(0)
@@ -598,7 +598,7 @@ describe('ErrorTrackingPipeline', () => {
 
             // Events redirected to overflow skip processing entirely
             expect(mockCymbalClient.processExceptions).not.toHaveBeenCalled()
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
 
             // Event should not be produced to output topic
             expect(getProducedEvents()).toHaveLength(0)
@@ -626,7 +626,7 @@ describe('ErrorTrackingPipeline', () => {
 
             // Event should be processed normally including Script transformations
             expect(mockCymbalClient.processExceptions).toHaveBeenCalledTimes(1)
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
             expect(getProducedEvents()).toHaveLength(1)
             expect(getOverflowMessages()).toHaveLength(0)
         })
@@ -644,7 +644,7 @@ describe('ErrorTrackingPipeline', () => {
 
             // Cymbal was called but Script transformations weren't reached due to person lookup failure
             expect(mockCymbalClient.processExceptions).toHaveBeenCalledTimes(1)
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
         })
 
         it('retries Cymbal errors and propagates after exhausting retries', async () => {
@@ -665,7 +665,7 @@ describe('ErrorTrackingPipeline', () => {
 
             // Cymbal was called 3 times (initial + 2 retries) before giving up
             expect(mockCymbalClient.processExceptions).toHaveBeenCalledTimes(3)
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
         })
 
         it('retries Cymbal errors and succeeds on subsequent attempts', async () => {
@@ -688,7 +688,7 @@ describe('ErrorTrackingPipeline', () => {
             // Cymbal was called 3 times before succeeding
             expect(mockCymbalClient.processExceptions).toHaveBeenCalledTimes(3)
             // Processing continued after Cymbal succeeded
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
             // Event was emitted
             expect(getProducedEvents()).toHaveLength(1)
         })
@@ -709,7 +709,7 @@ describe('ErrorTrackingPipeline', () => {
             // Non-retriable errors should not be retried
             expect(mockCymbalClient.processExceptions).toHaveBeenCalledTimes(1)
             // Processing should not continue past Cymbal
-            expect(mockHogTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
+            expect(mockScriptTransformer.transformEventAndProduceMessages).not.toHaveBeenCalled()
             // Event should not be produced to output topic
             expect(getProducedEvents()).toHaveLength(0)
             // Event should be sent to DLQ
@@ -753,7 +753,7 @@ describe('ErrorTrackingPipeline', () => {
             await runErrorTrackingPipeline(pipeline, [message])
 
             // Verify the transformer was called
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
             const producedEvents = getProducedEvents()
             expect(producedEvents).toHaveLength(1)
@@ -764,7 +764,7 @@ describe('ErrorTrackingPipeline', () => {
             mockCymbalClient.processExceptions.mockResolvedValue([createCymbalResponse()])
 
             // Mock the transformer to add GeoIP properties (simulating the GeoIP transformation)
-            mockHogTransformer.transformEventAndProduceMessages.mockImplementation((event) =>
+            mockScriptTransformer.transformEventAndProduceMessages.mockImplementation((event) =>
                 Promise.resolve({
                     event: {
                         ...event,
@@ -821,7 +821,7 @@ describe('ErrorTrackingPipeline', () => {
             await runErrorTrackingPipeline(pipeline, [message])
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
             const producedEvents = getProducedEvents()
             expect(producedEvents).toHaveLength(1)
@@ -914,14 +914,14 @@ describe('ErrorTrackingPipeline', () => {
             await runErrorTrackingPipeline(pipeline1, [createKafkaMessage({})])
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
             let producedEvents = getProducedEvents()
             expect(producedEvents[0].person_mode).toBe('full')
 
             // Reset mocks
             mockKafkaProducer.produce.mockClear()
-            mockHogTransformer.transformEventAndProduceMessages.mockClear()
+            mockScriptTransformer.transformEventAndProduceMessages.mockClear()
 
             // Test without person found - still uses 'full' mode because processPerson=true
             mockPersonRepository.fetchPerson.mockResolvedValue(undefined)
@@ -931,7 +931,7 @@ describe('ErrorTrackingPipeline', () => {
             await runErrorTrackingPipeline(pipeline2, [createKafkaMessage({ distinctId: 'no-person' })])
 
             // Verify Script transformations were run for second pipeline too
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
             producedEvents = getProducedEvents()
             // Error tracking sets processPerson=true so it's always 'full' mode
@@ -1049,25 +1049,25 @@ describe('ErrorTrackingPipeline', () => {
         })
     })
 
-    describe('TopHog metrics', () => {
-        let mockTophogQueueMessages: jest.Mock
-        let topHog: TopHog
+    describe('TopFn metrics', () => {
+        let mockTopFnQueueMessages: jest.Mock
+        let topFn: TopFn
 
         beforeEach(() => {
-            mockTophogQueueMessages = jest.fn().mockResolvedValue(undefined)
-            const tophogOutputs = {
-                queueMessages: mockTophogQueueMessages,
-            } as unknown as IngestionOutputs<TophogOutput>
+            mockTopFnQueueMessages = jest.fn().mockResolvedValue(undefined)
+            const topfnOutputs = {
+                queueMessages: mockTopFnQueueMessages,
+            } as unknown as IngestionOutputs<TopFnOutput>
 
-            topHog = new TopHog({
-                outputs: tophogOutputs,
+            topFn = new TopFn({
+                outputs: topfnOutputs,
                 pipeline: 'errortracking',
                 lane: 'main',
             })
         })
 
-        const getTopHogMessages = (): any[] => {
-            return mockTophogQueueMessages.mock.calls.flatMap((call: any) =>
+        const getTopFnMessages = (): any[] => {
+            return mockTopFnQueueMessages.mock.calls.flatMap((call: any) =>
                 call[1].map((m: any) => parseJSON(m.value.toString()))
             )
         }
@@ -1077,19 +1077,19 @@ describe('ErrorTrackingPipeline', () => {
             mockPersonRepository.fetchPersonsByDistinctIds.mockResolvedValue([person])
             mockCymbalClient.processExceptions.mockResolvedValue([createCymbalResponse()])
 
-            const configWithTopHog: ErrorTrackingPipelineConfig = {
+            const configWithTopFn: ErrorTrackingPipelineConfig = {
                 ...pipelineConfig,
-                topHog,
+                topFn,
             }
 
-            const pipeline = createErrorTrackingPipeline(configWithTopHog)
+            const pipeline = createErrorTrackingPipeline(configWithTopFn)
             await runErrorTrackingPipeline(pipeline, [createKafkaMessage({})])
-            await topHog.flush()
+            await topFn.flush()
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
-            const messages = getTopHogMessages()
+            const messages = getTopFnMessages()
             const messagesByToken = messages.find((m) => m.metric === 'messages_by_token')
             expect(messagesByToken).toBeDefined()
             expect(messagesByToken.type).toBe('sum')
@@ -1102,19 +1102,19 @@ describe('ErrorTrackingPipeline', () => {
             mockPersonRepository.fetchPersonsByDistinctIds.mockResolvedValue([person])
             mockCymbalClient.processExceptions.mockResolvedValue([createCymbalResponse()])
 
-            const configWithTopHog: ErrorTrackingPipelineConfig = {
+            const configWithTopFn: ErrorTrackingPipelineConfig = {
                 ...pipelineConfig,
-                topHog,
+                topFn,
             }
 
-            const pipeline = createErrorTrackingPipeline(configWithTopHog)
+            const pipeline = createErrorTrackingPipeline(configWithTopFn)
             await runErrorTrackingPipeline(pipeline, [createKafkaMessage({})])
-            await topHog.flush()
+            await topFn.flush()
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
-            const messages = getTopHogMessages()
+            const messages = getTopFnMessages()
             const emittedEventsMetric = messages.find((m) => m.metric === 'emitted_events')
             expect(emittedEventsMetric).toBeDefined()
             expect(emittedEventsMetric.type).toBe('sum')
@@ -1127,19 +1127,19 @@ describe('ErrorTrackingPipeline', () => {
             mockPersonRepository.fetchPersonsByDistinctIds.mockResolvedValue([person])
             mockCymbalClient.processExceptions.mockResolvedValue([createCymbalResponse()])
 
-            const configWithTopHog: ErrorTrackingPipelineConfig = {
+            const configWithTopFn: ErrorTrackingPipelineConfig = {
                 ...pipelineConfig,
-                topHog,
+                topFn,
             }
 
-            const pipeline = createErrorTrackingPipeline(configWithTopHog)
+            const pipeline = createErrorTrackingPipeline(configWithTopFn)
             await runErrorTrackingPipeline(pipeline, [createKafkaMessage({ distinctId: 'specific-user' })])
-            await topHog.flush()
+            await topFn.flush()
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
-            const messages = getTopHogMessages()
+            const messages = getTopFnMessages()
             const perDistinctIdMetric = messages.find((m) => m.metric === 'emitted_events_per_distinct_id')
             expect(perDistinctIdMetric).toBeDefined()
             expect(perDistinctIdMetric.type).toBe('sum')
@@ -1148,24 +1148,24 @@ describe('ErrorTrackingPipeline', () => {
             expect(perDistinctIdMetric.value).toBe(1)
         })
 
-        it('includes pipeline and lane labels in TopHog output', async () => {
+        it('includes pipeline and lane labels in TopFn output', async () => {
             const person = createTestPerson()
             mockPersonRepository.fetchPersonsByDistinctIds.mockResolvedValue([person])
             mockCymbalClient.processExceptions.mockResolvedValue([createCymbalResponse()])
 
-            const configWithTopHog: ErrorTrackingPipelineConfig = {
+            const configWithTopFn: ErrorTrackingPipelineConfig = {
                 ...pipelineConfig,
-                topHog,
+                topFn,
             }
 
-            const pipeline = createErrorTrackingPipeline(configWithTopHog)
+            const pipeline = createErrorTrackingPipeline(configWithTopFn)
             await runErrorTrackingPipeline(pipeline, [createKafkaMessage({})])
-            await topHog.flush()
+            await topFn.flush()
 
             // Verify Script transformations were run
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
 
-            const messages = getTopHogMessages()
+            const messages = getTopFnMessages()
             expect(messages.length).toBeGreaterThan(0)
             for (const msg of messages) {
                 expect(msg.pipeline).toBe('errortracking')
@@ -1180,9 +1180,9 @@ describe('ErrorTrackingPipeline', () => {
                 Promise.resolve(events.map(() => createCymbalResponse()))
             )
 
-            const configWithTopHog: ErrorTrackingPipelineConfig = {
+            const configWithTopFn: ErrorTrackingPipelineConfig = {
                 ...pipelineConfig,
-                topHog,
+                topFn,
             }
 
             const messages = [
@@ -1191,25 +1191,25 @@ describe('ErrorTrackingPipeline', () => {
                 createKafkaMessage({ distinctId: 'user-1' }),
             ]
 
-            const pipeline = createErrorTrackingPipeline(configWithTopHog)
+            const pipeline = createErrorTrackingPipeline(configWithTopFn)
             await runErrorTrackingPipeline(pipeline, messages)
-            await topHog.flush()
+            await topFn.flush()
 
             // Verify Script transformations were run for all events
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(3)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(3)
 
-            const topHogMessages = getTopHogMessages()
+            const topFnMessages = getTopFnMessages()
 
             // messages_by_token should have count=3 (one per parsed message)
-            const messagesByToken = topHogMessages.find((m) => m.metric === 'messages_by_token')
+            const messagesByToken = topFnMessages.find((m) => m.metric === 'messages_by_token')
             expect(messagesByToken.value).toBe(3)
 
             // emitted_events should have value=3
-            const emittedEventsMetric = topHogMessages.find((m) => m.metric === 'emitted_events')
+            const emittedEventsMetric = topFnMessages.find((m) => m.metric === 'emitted_events')
             expect(emittedEventsMetric.value).toBe(3)
 
             // emitted_events_per_distinct_id should have two entries (user-1 with 2, user-2 with 1)
-            const perDistinctIdMetrics = topHogMessages.filter((m) => m.metric === 'emitted_events_per_distinct_id')
+            const perDistinctIdMetrics = topFnMessages.filter((m) => m.metric === 'emitted_events_per_distinct_id')
             const user1Metric = perDistinctIdMetrics.find((m) => m.key.distinct_id === 'user-1')
             const user2Metric = perDistinctIdMetrics.find((m) => m.key.distinct_id === 'user-2')
             expect(user1Metric.value).toBe(2)

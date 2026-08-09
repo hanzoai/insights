@@ -27,9 +27,9 @@ export const DWH_SOURCE_TABLE_PROPERTY = '$source_table'
 
 export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
     protected name = 'CdpDatawarehouseEventsConsumer'
-    protected hogTypes: InsightsFunctionTypeType[] = ['destination']
+    protected scriptTypes: InsightsFunctionTypeType[] = ['destination']
 
-    protected hogQueue: JobQueue
+    protected scriptQueue: JobQueue
     protected flowQueue: JobQueue
     protected kafkaConsumer: KafkaConsumerInterface
     private insightsFunctionPipeline: InsightsFunctionInvocationPipeline
@@ -38,10 +38,10 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
     constructor(
         config: PluginsServerConfig,
         deps: CdpConsumerBaseDeps,
-        jobQueues: { hogQueue: JobQueue; flowQueue: JobQueue }
+        jobQueues: { scriptQueue: JobQueue; flowQueue: JobQueue }
     ) {
         super(config, deps)
-        this.hogQueue = jobQueues.hogQueue
+        this.scriptQueue = jobQueues.scriptQueue
         this.flowQueue = jobQueues.flowQueue
         this.kafkaConsumer = createKafkaConsumer({
             groupId: 'cdp-data-warehouse-events-consumer',
@@ -49,10 +49,10 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
         })
         this.insightsFunctionPipeline = new InsightsFunctionInvocationPipeline(config, {
             insightsFunctionManager: this.insightsFunctionManager,
-            hogInputsService: this.hogInputsService,
-            hogWatcher: this.hogWatcher,
-            hogWatcherMirror: this.hogWatcherMirror,
-            hogMasker: this.hogMasker,
+            scriptInputsService: this.scriptInputsService,
+            scriptWatcher: this.scriptWatcher,
+            scriptWatcherMirror: this.scriptWatcherMirror,
+            scriptMasker: this.scriptMasker,
             insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
             quotaLimiting: deps.quotaLimiting,
             redis: this.redis,
@@ -61,9 +61,9 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
         this.flowPipeline = new FlowInvocationPipeline(config, {
             flowManager: this.flowManager,
             flowExecutor: this.flowExecutor,
-            hogWatcher: this.hogWatcher,
-            hogWatcherMirror: this.hogWatcherMirror,
-            hogMasker: this.hogMasker,
+            scriptWatcher: this.scriptWatcher,
+            scriptWatcherMirror: this.scriptWatcherMirror,
+            scriptMasker: this.scriptMasker,
             insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
             quotaLimiting: deps.quotaLimiting,
             redis: this.redis,
@@ -81,9 +81,9 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
         // Warehouse rows carry no `$groups` property — group enrichment is a no-op here, so we skip the
         // call entirely to avoid the per-batch group-types lookup.
 
-        const [hogInvocations, flowInvocations] = await Promise.all([
+        const [scriptInvocations, flowInvocations] = await Promise.all([
             this.insightsFunctionPipeline.buildInvocations(invocationGlobals, {
-                hogTypes: this.hogTypes,
+                scriptTypes: this.scriptTypes,
                 filterFn: (fn) => (fn.filters?.source ?? 'events') === 'data-warehouse-table',
             }),
             // Source-compatibility matching lives in the consumer rather than the executor — the
@@ -97,7 +97,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
             }),
         ])
 
-        const invocationsToBeQueued = [...hogInvocations, ...flowInvocations]
+        const invocationsToBeQueued = [...scriptInvocations, ...flowInvocations]
 
         // Emit a `running` lifecycle row for each freshly-created invocation so the runs UI shows
         // warehouse-triggered flows as in-flight (matching the event consumer). The terminal row is
@@ -110,7 +110,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
         return {
             backgroundTask: Promise.all([
                 instrumentFn({ key: 'cdp.background_task.queue_hog_invocations', sendException: false }, () =>
-                    this.hogQueue.queueInvocations(hogInvocations)
+                    this.scriptQueue.queueInvocations(scriptInvocations)
                 ),
                 instrumentFn({ key: 'cdp.background_task.queue_hogflow_invocations', sendException: false }, () =>
                     this.flowQueue.queueInvocations(flowInvocations)
@@ -142,7 +142,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
                     const event = CdpDataWarehouseEventSchema.parse(kafkaEvent)
 
                     const [teamInsightsFunctions, teamFlows, team] = await Promise.all([
-                        this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, this.hogTypes),
+                        this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, this.scriptTypes),
                         this.flowManager.getFlowsForTeam(event.team_id),
                         this.deps.teamManager.getTeam(event.team_id),
                     ])
@@ -166,7 +166,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
 
     public override async start(): Promise<void> {
         await super.start()
-        await Promise.all([this.hogQueue.startAsProducer(), this.flowQueue.startAsProducer()])
+        await Promise.all([this.scriptQueue.startAsProducer(), this.flowQueue.startAsProducer()])
         await this.kafkaConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, { size: messages.length })
             return await instrumentFn('cdpConsumer.handleEachBatch', async () => {
@@ -180,7 +180,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
     public override async stop(): Promise<void> {
         logger.info('💤', 'Stopping consumer...')
         await this.kafkaConsumer.disconnect()
-        await Promise.all([this.hogQueue.stopProducer(), this.flowQueue.stopProducer()])
+        await Promise.all([this.scriptQueue.stopProducer(), this.flowQueue.stopProducer()])
         await super.stop()
     }
 

@@ -47,7 +47,7 @@ import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { EventIngestionRestrictionManager } from '~/common/utils/event-ingestion-restrictions'
 import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 import { createApplyEventRestrictionsStep, createParseHeadersStep } from '~/ingestion/common/steps/event-preprocessing'
-import { TopHogRegistry } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry } from '~/ingestion/framework/extensions/topfn'
 import { ok } from '~/ingestion/framework/results'
 import { SessionBatchRecorder } from '~/ingestion/pipelines/sessionreplay/sessions/session-batch-recorder'
 import { SessionFilter } from '~/ingestion/pipelines/sessionreplay/sessions/session-filter'
@@ -224,7 +224,7 @@ describe('session-replay-pipeline rate limiter failure modes', () => {
             sessionFilter,
             keyStore,
             sessionKeyResolutionMaxConcurrency: 20,
-            topHog: createMockTopHog(),
+            topFn: createMockTopFn(),
             isDebugLoggingEnabled: () => false,
         })
     }
@@ -495,7 +495,7 @@ interface MockRecorder {
     record: jest.Mock
 }
 
-function createMockTopHog(): TopHogRegistry {
+function createMockTopFn(): TopFnRegistry {
     const make = () => new Map<string, MockRecorder>()
     const sumRecorders = make()
     const maxRecorders = make()
@@ -516,5 +516,5 @@ function createMockTopHog(): TopHogRegistry {
             averageRecorders.set(name, recorder)
             return recorder
         }),
-    } as unknown as TopHogRegistry
+    } as unknown as TopFnRegistry
 }

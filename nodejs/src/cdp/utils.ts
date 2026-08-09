@@ -153,7 +153,7 @@ export function convertAccountBatchFlowRequestToInsightsFunctionInvocationGlobal
             uuid: new UUIDT().toString(),
             // The account's group key doubles as the invocation's distinct_id so
             // invocation_results are filterable per account. Account runs carry no person;
-            // the hogflow worker skips person resolution for account audiences.
+            // the flow worker skips person resolution for account audiences.
             distinct_id: externalId,
             elements_chain: '',
             timestamp: DateTime.now().toISO(),

@@ -6,7 +6,7 @@ import { logger } from '~/common/utils/logger'
 
 import { CYCLOTRON_INVOCATION_JOB_QUEUES, CyclotronJobInvocationFlow } from '../../types'
 import { v2JobToInvocation } from '../job-queue/job-queue-postgres-v2'
-import { HogInvocationResultsService } from '../monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from '../monitoring/script-invocation-results.service'
 import { CyclotronV2CleanupResult, CyclotronV2DequeuedJob, CyclotronV2JanitorConfig } from './types'
 
 // Stable, low-cardinality `error_kind` stamped on the failed invocation result
@@ -107,7 +107,7 @@ export class CyclotronV2Janitor {
         // the give-up path can construct a janitor without Kafka. When absent
         // the janitor never deletes poison pills (it only resets/retries) — it
         // refuses to drop a job it can't record a recovery row for.
-        private invocationResults?: HogInvocationResultsService
+        private invocationResults?: ScriptInvocationResultsService
     ) {
         this.pool = new Pool({
             connectionString: config.pool.dbUrl,

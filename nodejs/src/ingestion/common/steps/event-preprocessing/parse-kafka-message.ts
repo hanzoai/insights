@@ -4,22 +4,22 @@ import { sanitizeEvent } from '~/common/utils/event'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
 import { UUID } from '~/common/utils/utils'
-import { TopHogMetricFactory, count, max, sum, timer } from '~/ingestion/framework/extensions/tophog'
+import { TopFnMetricFactory, count, max, sum, timer } from '~/ingestion/framework/extensions/topfn'
 import { dlq, ok } from '~/ingestion/framework/results'
 import { ProcessingStep } from '~/ingestion/framework/steps'
 import { EventHeaders, IncomingEvent, PipelineEvent } from '~/types'
 
 /**
- * TopHog metrics for the parse step: parse timing and raw message sizes,
+ * TopFn metrics for the parse step: parse timing and raw message sizes,
  * keyed by token (the team is not resolved yet at parse time). Sizes are
  * recorded from the raw Kafka message, so malformed events that DLQ at parse
  * still show up — this is the earliest per-sender visibility the pipeline
- * has. Wire via `.parseMessage({ wrap: (step) => topHog(step, parseMessageTopHogMetrics()) })`.
+ * has. Wire via `.parseMessage({ wrap: (step) => topFn(step, parseMessageTopFnMetrics()) })`.
  */
-export function parseMessageTopHogMetrics<
+export function parseMessageTopFnMetrics<
     TInput extends { message: Message; headers: EventHeaders },
     TOutput,
->(): TopHogMetricFactory<TInput, TOutput>[] {
+>(): TopFnMetricFactory<TInput, TOutput>[] {
     const byToken = (input: TInput) => ({ token: input.headers.token ?? 'unknown' })
     const messageBytes = (input: TInput) => input.message.value?.length ?? 0
     return [

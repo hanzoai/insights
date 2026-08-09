@@ -10,7 +10,7 @@ import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 import { v4 } from 'uuid'
 
-import { createHogTransformerService } from '~/cdp/script-transformations/script-transformer.service'
+import { createScriptTransformerService } from '~/cdp/script-transformations/script-transformer.service'
 import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
 import { KafkaProducerWrapper } from '~/common/kafka/producer'
 import { UUIDT } from '~/common/utils/utils'
@@ -186,7 +186,7 @@ const createTestWithTeamIngester = (baseConfig: Partial<PluginsServerConfig> = {
             const ingester = new IngestionConsumer(infra.config, {
                 ...infra,
                 aiSubpipelineFactory: createAiEventSubpipeline,
-                hogTransformer: createHogTransformerService(infra.config, {
+                scriptTransformer: createScriptTransformerService(infra.config, {
                     ...infra,
                     monitoringOutputs: createTestMonitoringOutputs(kafkaProducer),
                 }),

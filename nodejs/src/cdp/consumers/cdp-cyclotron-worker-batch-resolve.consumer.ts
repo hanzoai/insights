@@ -181,7 +181,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
         ])
 
         if (!team || !flow) {
-            logger.error('🔴', `${this.name} - missing team or hogflow, failing resolver`, {
+            logger.error('🔴', `${this.name} - missing team or flow, failing resolver`, {
                 teamId: state.teamId,
                 flowId: state.flowId,
                 batchJobId: state.batchJobId,
@@ -467,7 +467,7 @@ function mergeDefaultVariables(
 }
 
 // Mirrors buildFlowInvocation for an account audience: the invocation carries the
-// account's group key (via $groups and distinct_id) and no person at all — the hogflow
+// account's group key (via $groups and distinct_id) and no person at all — the flow
 // worker skips person resolution for account audiences.
 export function buildAccountFlowInvocation(params: {
     siteUrl: string

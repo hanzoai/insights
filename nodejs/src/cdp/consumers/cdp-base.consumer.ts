@@ -15,8 +15,8 @@ import {
     createCdpCoreServices,
 } from '../cdp-services'
 import type { CdpConfig } from '../config'
-import { HogExecutorAsyncService } from '../services/script-executor-async.service'
-import { HogInputsService } from '../services/script-inputs.service'
+import { ScriptExecutorAsyncService } from '../services/script-executor-async.service'
+import { ScriptInputsService } from '../services/script-inputs.service'
 import { FlowExecutorService } from '../services/flows/flow-executor.service'
 import { FlowFunctionsService } from '../services/flows/flow-functions.service'
 import { FlowManagerService } from '../services/flows/flow-manager.service'
@@ -30,8 +30,8 @@ import { InsightsFunctionTemplateManagerService } from '../services/managers/scr
 import { EmailService } from '../services/messaging/email.service'
 import { RecipientPreferencesService } from '../services/messaging/recipient-preferences.service'
 import { InsightsFunctionMonitoringService } from '../services/monitoring/script-function-monitoring.service'
-import { HogMaskerService } from '../services/monitoring/script-masker.service'
-import { HogWatcherService } from '../services/monitoring/script-watcher.service'
+import { ScriptMaskerService } from '../services/monitoring/script-masker.service'
+import { ScriptWatcherService } from '../services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from '../services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from '../services/segment-destination-executor.service'
 
@@ -56,12 +56,12 @@ export abstract class CdpConsumerBase<TConfig extends CdpConsumerBaseConfig = Cd
     valkeyShadow: CdpValkeyShadowPools | null
     isStopping = false
 
-    hogExecutorAsync: HogExecutorAsyncService
-    hogInputsService: HogInputsService
+    scriptExecutorAsync: ScriptExecutorAsyncService
+    scriptInputsService: ScriptInputsService
     flowExecutor: FlowExecutorService
-    hogMasker: HogMaskerService
-    hogWatcher: HogWatcherService
-    hogWatcherMirror: HogWatcherService | null
+    scriptMasker: ScriptMaskerService
+    scriptWatcher: ScriptWatcherService
+    scriptWatcherMirror: ScriptWatcherService | null
 
     groupsManager: GroupsManagerService
     flowManager: FlowManagerService
@@ -92,10 +92,10 @@ export abstract class CdpConsumerBase<TConfig extends CdpConsumerBaseConfig = Cd
         this.valkeyShadow = services.valkeyShadow
         this.insightsFunctionManager = services.insightsFunctionManager
         this.flowManager = services.flowManager
-        this.hogWatcher = services.hogWatcher
-        this.hogWatcherMirror = services.hogWatcherMirror
-        this.hogExecutorAsync = services.hogExecutorAsync
-        this.hogInputsService = services.hogInputsService
+        this.scriptWatcher = services.scriptWatcher
+        this.scriptWatcherMirror = services.scriptWatcherMirror
+        this.scriptExecutorAsync = services.scriptExecutorAsync
+        this.scriptInputsService = services.scriptInputsService
         this.insightsFunctionTemplateManager = services.insightsFunctionTemplateManager
         this.flowFunctionsService = services.flowFunctionsService
         this.recipientsManager = services.recipientsManager
@@ -109,7 +109,7 @@ export abstract class CdpConsumerBase<TConfig extends CdpConsumerBaseConfig = Cd
         this.outputs = services.outputs
 
         // Base-only services
-        this.hogMasker = new HogMaskerService(services.redis, services.valkeyShadow?.writer ?? null)
+        this.scriptMasker = new ScriptMaskerService(services.redis, services.valkeyShadow?.writer ?? null)
         this.personsManager = new PersonsManagerService(deps.teamManager, deps.personRepository, config.SITE_URL)
         this.groupsManager = new GroupsManagerService(deps.teamManager, deps.groupRepository)
         this.pluginDestinationExecutorService = new LegacyPluginExecutorService(deps.postgres, deps.geoipService)

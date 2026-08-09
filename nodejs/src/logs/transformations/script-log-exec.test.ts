@@ -1,4 +1,4 @@
-import { compileHog } from '~/cdp/templates/compiler'
+import { compileScript } from '~/cdp/templates/compiler'
 import { parseJSON } from '~/common/utils/json-parse'
 
 import type { LogRecord } from '../log-record-avro'
@@ -35,7 +35,7 @@ const createRecord = (overrides: Partial<LogRecord> = {}): LogRecord => ({
 })
 
 const run = async (script: string, record: LogRecord, inputs: Record<string, unknown> = {}, options = {}) => {
-    const bytecode = await compileHog(script)
+    const bytecode = await compileScript(script)
     const globals = buildLogRecordGlobals(record, PROJECT, inputs)
     return executeLogTransformation(bytecode, record, globals, options)
 }
@@ -92,7 +92,7 @@ describe('script-log-exec', () => {
                     inputs: {
                         svc: {
                             value: 'service = {record.service_name}',
-                            bytecode: await compileHog(`return f'service = {record.service_name}'`),
+                            bytecode: await compileScript(`return f'service = {record.service_name}'`),
                             order: 0,
                         },
                     },
@@ -112,7 +112,7 @@ describe('script-log-exec', () => {
             const { inputs } = resolveLogTransformationInputs(
                 {
                     inputs: {
-                        obj: { value: '', bytecode: await compileHog(`return {'k': 'v', 'list': [1, 2]}`), order: 0 },
+                        obj: { value: '', bytecode: await compileScript(`return {'k': 'v', 'list': [1, 2]}`), order: 0 },
                     },
                     encrypted_inputs: null,
                 } as any,
@@ -127,7 +127,7 @@ describe('script-log-exec', () => {
             // get the same 8MB cap as the body, not the VM's larger default. The
             // allocation lands between the two so this fails if the cap is lost.
             const record = createRecord()
-            const bytecode = await compileHog(`
+            const bytecode = await compileScript(`
                 let s := 'xxxxxxxxxxxxxxxx'
                 for (let i := 0; i < 19; i := i + 1) {
                     s := concat(s, s)

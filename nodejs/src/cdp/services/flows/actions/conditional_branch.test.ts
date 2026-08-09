@@ -11,18 +11,18 @@ import { findActionById, findActionByType } from '../flow-utils'
 import {
     ConditionalBranchHandler,
     checkConditions,
-    counterHogflowRekeyWake,
-    counterHogflowWaitPollOnlyAdvance,
+    counterScriptflowRekeyWake,
+    counterScriptflowWaitPollOnlyAdvance,
 } from './conditional_branch'
 
 const pollOnlyAdvanceCount = async (): Promise<number> =>
-    (await counterHogflowWaitPollOnlyAdvance.get()).values[0]?.value ?? 0
+    (await counterScriptflowWaitPollOnlyAdvance.get()).values[0]?.value ?? 0
 
 const pollOnlyAdvanceLabels = async (): Promise<Record<string, string | number> | undefined> =>
-    (await counterHogflowWaitPollOnlyAdvance.get()).values[0]?.labels
+    (await counterScriptflowWaitPollOnlyAdvance.get()).values[0]?.labels
 
 const rekeyWakeCount = async (outcome: 'advanced' | 'reparked'): Promise<number> =>
-    (await counterHogflowRekeyWake.get()).values.find((v) => v.labels.outcome === outcome)?.value ?? 0
+    (await counterScriptflowRekeyWake.get()).values.find((v) => v.labels.outcome === outcome)?.value ?? 0
 
 describe('action.conditional_branch', () => {
     let invocation: CyclotronJobInvocationFlow
@@ -215,8 +215,8 @@ describe('action.conditional_branch', () => {
                 startedAtTimestamp: DateTime.utc().toMillis(),
             }
             handler = new ConditionalBranchHandler()
-            counterHogflowWaitPollOnlyAdvance.reset()
-            counterHogflowRekeyWake.reset()
+            counterScriptflowWaitPollOnlyAdvance.reset()
+            counterScriptflowRekeyWake.reset()
         })
 
         it('advances to the matched branch and clears eventMatched', async () => {

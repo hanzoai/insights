@@ -6,19 +6,19 @@ import { delay } from '~/common/utils/utils'
 import { Hub } from '~/types'
 
 import { INSIGHTS_FLOW_MASK_EXAMPLES, INSIGHTS_MASK_EXAMPLES } from '../../_tests/examples'
-import { createExampleInvocation, createHogExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
+import { createExampleInvocation, createScriptExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
 import { createExampleFlowInvocation } from '../../_tests/fixtures-flows'
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../../types'
-import { BASE_REDIS_KEY, HogMaskerService } from './script-masker.service'
+import { BASE_REDIS_KEY, ScriptMaskerService } from './script-masker.service'
 
 const mockNow: jest.SpyInstance = jest.spyOn(Date, 'now')
 
-describe('HogMasker', () => {
+describe('ScriptMasker', () => {
     jest.retryTimes(3)
     describe('integration', () => {
         let now: number
         let hub: Hub
-        let masker: HogMaskerService
+        let masker: ScriptMaskerService
         let redis: RedisV2
 
         beforeEach(async () => {
@@ -38,7 +38,7 @@ describe('HogMasker', () => {
             })
             await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
 
-            masker = new HogMaskerService(redis)
+            masker = new ScriptMaskerService(redis)
         })
 
         const advanceTime = (ms: number) => {
@@ -96,15 +96,15 @@ describe('HogMasker', () => {
 
             const invocation1 = createExampleInvocation(
                 functionWithAllMasking,
-                createHogExecutionGlobals({ event: { uuid: '1' } as any })
+                createScriptExecutionGlobals({ event: { uuid: '1' } as any })
             )
             const invocation2 = createExampleInvocation(
                 functionWithAllMasking,
-                createHogExecutionGlobals({ event: { uuid: '2' } as any })
+                createScriptExecutionGlobals({ event: { uuid: '2' } as any })
             )
             const invocation3 = createExampleInvocation(
                 functionWithAllMasking,
-                createHogExecutionGlobals({ event: { uuid: '3' } as any })
+                createScriptExecutionGlobals({ event: { uuid: '3' } as any })
             )
             const invocations = [invocation1, invocation2, invocation3]
 
@@ -128,7 +128,7 @@ describe('HogMasker', () => {
                 ...INSIGHTS_MASK_EXAMPLES.all,
             })
             const functionWithNoMasking = createInsightsFunction({})
-            const globals = createHogExecutionGlobals()
+            const globals = createScriptExecutionGlobals()
             const invocations = [
                 createExampleInvocation(functionWithAllMasking, globals),
                 createExampleInvocation(functionWithAllMasking2, globals),
@@ -191,15 +191,15 @@ describe('HogMasker', () => {
             })
 
             it('should mask with custom script hash', async () => {
-                const globals1 = createHogExecutionGlobals({
+                const globals1 = createScriptExecutionGlobals({
                     person: { id: '1' } as any,
                     event: { event: '$pageview' } as any,
                 })
-                const globals2 = createHogExecutionGlobals({
+                const globals2 = createScriptExecutionGlobals({
                     person: { id: '2' } as any,
                     event: { event: '$autocapture' } as any,
                 })
-                const globals3 = createHogExecutionGlobals({
+                const globals3 = createScriptExecutionGlobals({
                     person: { id: '2' } as any,
                     event: { event: '$pageview' } as any,
                 })
@@ -278,7 +278,7 @@ describe('HogMasker', () => {
                 ])('should deduplicate $name on the same calendar day', async ({ example, globals }) => {
                     const insightsFunction = createInsightsFunction({ ...example })
                     const invocations = globals.map((g) =>
-                        createExampleInvocation(insightsFunction, createHogExecutionGlobals(g))
+                        createExampleInvocation(insightsFunction, createScriptExecutionGlobals(g))
                     )
 
                     // First call: all distinct invocations should fire
@@ -297,7 +297,7 @@ describe('HogMasker', () => {
                         ...INSIGHTS_MASK_EXAMPLES.personPerDay,
                     })
 
-                    const globals = createHogExecutionGlobals({
+                    const globals = createScriptExecutionGlobals({
                         person: { id: '1' } as any,
                     })
                     const inv = createExampleInvocation(insightsFunctionPersonPerDay, globals)

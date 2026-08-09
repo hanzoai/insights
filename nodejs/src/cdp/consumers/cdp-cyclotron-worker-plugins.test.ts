@@ -14,7 +14,7 @@ import { Hub, Team } from '../../types'
 import {
     insertInsightsFunction as _insertInsightsFunction,
     createExampleInvocation,
-    createHogExecutionGlobals,
+    createScriptExecutionGlobals,
 } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
@@ -68,7 +68,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
             template_id: 'plugin-insights-intercom-plugin',
         })
         globals = {
-            ...createHogExecutionGlobals({
+            ...createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,

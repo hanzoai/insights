@@ -103,16 +103,16 @@ export const file_personinsights_service_v1_service: GenFile =
     )
 
 /**
- * PersonHogService is the public API exposed by the router.
+ * PersonFnService is the public API exposed by the router.
  * Clients call this service; the router handles backend selection and routing.
  *
- * @generated from service personinsights.service.v1.PersonHogService
+ * @generated from service personinsights.service.v1.PersonFnService
  */
-export const PersonHogService: GenService<{
+export const PersonFnService: GenService<{
     /**
      * Person lookups by ID
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetPerson
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetPerson
      */
     getPerson: {
         methodKind: 'unary'
@@ -120,7 +120,7 @@ export const PersonHogService: GenService<{
         output: typeof GetPersonResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetPersons
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetPersons
      */
     getPersons: {
         methodKind: 'unary'
@@ -128,7 +128,7 @@ export const PersonHogService: GenService<{
         output: typeof PersonsResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetPersonByUuid
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetPersonByUuid
      */
     getPersonByUuid: {
         methodKind: 'unary'
@@ -136,7 +136,7 @@ export const PersonHogService: GenService<{
         output: typeof GetPersonResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetPersonsByUuids
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetPersonsByUuids
      */
     getPersonsByUuids: {
         methodKind: 'unary'
@@ -146,7 +146,7 @@ export const PersonHogService: GenService<{
     /**
      * Person lookups by distinct ID
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetPersonByDistinctId
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetPersonByDistinctId
      */
     getPersonByDistinctId: {
         methodKind: 'unary'
@@ -154,7 +154,7 @@ export const PersonHogService: GenService<{
         output: typeof GetPersonResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetPersonsByDistinctIdsInTeam
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetPersonsByDistinctIdsInTeam
      */
     getPersonsByDistinctIdsInTeam: {
         methodKind: 'unary'
@@ -162,7 +162,7 @@ export const PersonHogService: GenService<{
         output: typeof PersonsByDistinctIdsInTeamResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetPersonsByDistinctIds
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetPersonsByDistinctIds
      */
     getPersonsByDistinctIds: {
         methodKind: 'unary'
@@ -172,7 +172,7 @@ export const PersonHogService: GenService<{
     /**
      * Distinct ID operations
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetDistinctIdsForPerson
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetDistinctIdsForPerson
      */
     getDistinctIdsForPerson: {
         methodKind: 'unary'
@@ -180,7 +180,7 @@ export const PersonHogService: GenService<{
         output: typeof GetDistinctIdsForPersonResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetDistinctIdsForPersons
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetDistinctIdsForPersons
      */
     getDistinctIdsForPersons: {
         methodKind: 'unary'
@@ -190,7 +190,7 @@ export const PersonHogService: GenService<{
     /**
      * Feature flag hash key override support
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetHashKeyOverrideContext
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetHashKeyOverrideContext
      */
     getHashKeyOverrideContext: {
         methodKind: 'unary'
@@ -198,7 +198,7 @@ export const PersonHogService: GenService<{
         output: typeof GetHashKeyOverrideContextResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.UpsertHashKeyOverrides
+     * @generated from rpc personinsights.service.v1.PersonFnService.UpsertHashKeyOverrides
      */
     upsertHashKeyOverrides: {
         methodKind: 'unary'
@@ -206,7 +206,7 @@ export const PersonHogService: GenService<{
         output: typeof UpsertHashKeyOverridesResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeleteHashKeyOverridesByTeams
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeleteHashKeyOverridesByTeams
      */
     deleteHashKeyOverridesByTeams: {
         methodKind: 'unary'
@@ -216,7 +216,7 @@ export const PersonHogService: GenService<{
     /**
      * Cohort membership
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.CheckCohortMembership
+     * @generated from rpc personinsights.service.v1.PersonFnService.CheckCohortMembership
      */
     checkCohortMembership: {
         methodKind: 'unary'
@@ -224,7 +224,7 @@ export const PersonHogService: GenService<{
         output: typeof CohortMembershipResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.CountCohortMembers
+     * @generated from rpc personinsights.service.v1.PersonFnService.CountCohortMembers
      */
     countCohortMembers: {
         methodKind: 'unary'
@@ -232,7 +232,7 @@ export const PersonHogService: GenService<{
         output: typeof CountCohortMembersResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeleteCohortMember
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeleteCohortMember
      */
     deleteCohortMember: {
         methodKind: 'unary'
@@ -240,7 +240,7 @@ export const PersonHogService: GenService<{
         output: typeof DeleteCohortMemberResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeleteCohortMembersBulk
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeleteCohortMembersBulk
      */
     deleteCohortMembersBulk: {
         methodKind: 'unary'
@@ -248,7 +248,7 @@ export const PersonHogService: GenService<{
         output: typeof DeleteCohortMembersBulkResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.InsertCohortMembers
+     * @generated from rpc personinsights.service.v1.PersonFnService.InsertCohortMembers
      */
     insertCohortMembers: {
         methodKind: 'unary'
@@ -256,7 +256,7 @@ export const PersonHogService: GenService<{
         output: typeof InsertCohortMembersResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.ListCohortMemberIds
+     * @generated from rpc personinsights.service.v1.PersonFnService.ListCohortMemberIds
      */
     listCohortMemberIds: {
         methodKind: 'unary'
@@ -266,7 +266,7 @@ export const PersonHogService: GenService<{
     /**
      * Groups
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroup
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroup
      */
     getGroup: {
         methodKind: 'unary'
@@ -274,7 +274,7 @@ export const PersonHogService: GenService<{
         output: typeof GetGroupResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroups
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroups
      */
     getGroups: {
         methodKind: 'unary'
@@ -282,7 +282,7 @@ export const PersonHogService: GenService<{
         output: typeof GroupsResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroupsBatch
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroupsBatch
      */
     getGroupsBatch: {
         methodKind: 'unary'
@@ -290,7 +290,7 @@ export const PersonHogService: GenService<{
         output: typeof GetGroupsBatchResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.ListGroups
+     * @generated from rpc personinsights.service.v1.PersonFnService.ListGroups
      */
     listGroups: {
         methodKind: 'unary'
@@ -300,7 +300,7 @@ export const PersonHogService: GenService<{
     /**
      * Group type mappings
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroupTypeMappingsByTeamId
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroupTypeMappingsByTeamId
      */
     getGroupTypeMappingsByTeamId: {
         methodKind: 'unary'
@@ -308,7 +308,7 @@ export const PersonHogService: GenService<{
         output: typeof GroupTypeMappingsResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroupTypeMappingsByTeamIds
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroupTypeMappingsByTeamIds
      */
     getGroupTypeMappingsByTeamIds: {
         methodKind: 'unary'
@@ -316,7 +316,7 @@ export const PersonHogService: GenService<{
         output: typeof GroupTypeMappingsBatchResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroupTypeMappingsByProjectId
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroupTypeMappingsByProjectId
      */
     getGroupTypeMappingsByProjectId: {
         methodKind: 'unary'
@@ -324,7 +324,7 @@ export const PersonHogService: GenService<{
         output: typeof GroupTypeMappingsResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroupTypeMappingsByProjectIds
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroupTypeMappingsByProjectIds
      */
     getGroupTypeMappingsByProjectIds: {
         methodKind: 'unary'
@@ -332,7 +332,7 @@ export const PersonHogService: GenService<{
         output: typeof GroupTypeMappingsBatchResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.GetGroupTypeMappingByDashboardId
+     * @generated from rpc personinsights.service.v1.PersonFnService.GetGroupTypeMappingByDashboardId
      */
     getGroupTypeMappingByDashboardId: {
         methodKind: 'unary'
@@ -340,7 +340,7 @@ export const PersonHogService: GenService<{
         output: typeof GetGroupTypeMappingByDashboardIdResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.CountGroupTypeMappings
+     * @generated from rpc personinsights.service.v1.PersonFnService.CountGroupTypeMappings
      */
     countGroupTypeMappings: {
         methodKind: 'unary'
@@ -350,7 +350,7 @@ export const PersonHogService: GenService<{
     /**
      * Group writes (routed to replica — non-person data)
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.CreateGroup
+     * @generated from rpc personinsights.service.v1.PersonFnService.CreateGroup
      */
     createGroup: {
         methodKind: 'unary'
@@ -358,7 +358,7 @@ export const PersonHogService: GenService<{
         output: typeof CreateGroupResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.UpdateGroup
+     * @generated from rpc personinsights.service.v1.PersonFnService.UpdateGroup
      */
     updateGroup: {
         methodKind: 'unary'
@@ -366,7 +366,7 @@ export const PersonHogService: GenService<{
         output: typeof UpdateGroupResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeleteGroupsBatchForTeam
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeleteGroupsBatchForTeam
      */
     deleteGroupsBatchForTeam: {
         methodKind: 'unary'
@@ -376,7 +376,7 @@ export const PersonHogService: GenService<{
     /**
      * Group type mapping writes (routed to replica — non-person data)
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.UpdateGroupTypeMapping
+     * @generated from rpc personinsights.service.v1.PersonFnService.UpdateGroupTypeMapping
      */
     updateGroupTypeMapping: {
         methodKind: 'unary'
@@ -384,7 +384,7 @@ export const PersonHogService: GenService<{
         output: typeof UpdateGroupTypeMappingResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeleteGroupTypeMapping
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeleteGroupTypeMapping
      */
     deleteGroupTypeMapping: {
         methodKind: 'unary'
@@ -392,7 +392,7 @@ export const PersonHogService: GenService<{
         output: typeof DeleteGroupTypeMappingResponseSchema
     }
     /**
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeleteGroupTypeMappingsBatchForTeam
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeleteGroupTypeMappingsBatchForTeam
      */
     deleteGroupTypeMappingsBatchForTeam: {
         methodKind: 'unary'
@@ -402,7 +402,7 @@ export const PersonHogService: GenService<{
     /**
      * Person property updates (routed to leader)
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.UpdatePersonProperties
+     * @generated from rpc personinsights.service.v1.PersonFnService.UpdatePersonProperties
      */
     updatePersonProperties: {
         methodKind: 'unary'
@@ -416,7 +416,7 @@ export const PersonHogService: GenService<{
      * (which uses the primary Postgres pool) as a temporary measure.
      * TODO: Migrate routing to leader before personinsights-leader goes live.
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeletePersons
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeletePersons
      */
     deletePersons: {
         methodKind: 'unary'
@@ -426,7 +426,7 @@ export const PersonHogService: GenService<{
     /**
      * WARNING: Same routing caveat as DeletePersons above.
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.DeletePersonsBatchForTeam
+     * @generated from rpc personinsights.service.v1.PersonFnService.DeletePersonsBatchForTeam
      */
     deletePersonsBatchForTeam: {
         methodKind: 'unary'
@@ -438,7 +438,7 @@ export const PersonHogService: GenService<{
      * WARNING: Same routing caveat as DeletePersons above — write operation on person data
      * routed through replica (primary pool) until leader supports transactional writes.
      *
-     * @generated from rpc personinsights.service.v1.PersonHogService.SplitPerson
+     * @generated from rpc personinsights.service.v1.PersonFnService.SplitPerson
      */
     splitPerson: {
         methodKind: 'unary'

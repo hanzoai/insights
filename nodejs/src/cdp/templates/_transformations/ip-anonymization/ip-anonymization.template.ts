@@ -8,7 +8,7 @@ export const template: InsightsFunctionTemplate = {
     name: 'IP Anonymization',
     description:
         'This transformation sets the last octet of an IP address to zero (e.g., 12.214.31.144 → 12.214.31.0), protecting user privacy and reducing disclosure risk.',
-    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png',
+    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_script_01_955c082cad.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

@@ -17,7 +17,7 @@ import {
     LogEntry,
     MinimalAppMetric,
 } from '../types'
-import { execHog } from './script-exec'
+import { execScript } from './script-exec'
 
 // Module-level constants for fixed regex patterns to avoid recompilation
 // These patterns are compiled once at module load and reused for all events
@@ -50,7 +50,7 @@ const insightsFunctionPreFilterCounter = new Counter({
     labelNames: ['result'],
 })
 
-interface HogFilterResult {
+interface ScriptFilterResult {
     match: boolean
     error?: unknown
     logs: LogEntry[]
@@ -348,22 +348,22 @@ function preFilterResult(
 
 /**
  * Shared utility to check if an event matches the filters of a InsightsFunction.
- * Used by both the HogExecutorService (for destinations) and HogTransformerService (for transformations).
+ * Used by both the ScriptExecutorService (for destinations) and ScriptTransformerService (for transformations).
  */
 export async function filterFunctionInstrumented(options: {
     fn: InsightsFunctionType | Flow
     filterGlobals: InsightsFunctionFilterGlobals
     /** Optional filters to use instead of those on the function */
     filters: InsightsFunctionType['filters']
-}): Promise<HogFilterResult> {
+}): Promise<ScriptFilterResult> {
     const { fn, filters, filterGlobals } = options
-    const type = 'type' in fn ? fn.type : 'hogflow'
+    const type = 'type' in fn ? fn.type : 'flow'
     const fnKind = 'type' in fn ? 'InsightsFunction' : 'Flow'
     const logs: LogEntry[] = []
     const metrics: MinimalAppMetric[] = []
 
     let execResult: ExecResult | undefined
-    const result: HogFilterResult = {
+    const result: ScriptFilterResult = {
         match: false,
         logs,
         metrics,
@@ -402,35 +402,35 @@ export async function filterFunctionInstrumented(options: {
             throw new Error('Filters were not compiled correctly and so could not be executed')
         }
 
-        const execHogOutcome = await execHog(filters.bytecode, { globals: filterGlobals })
+        const execScriptOutcome = await execScript(filters.bytecode, { globals: filterGlobals })
 
-        if (execHogOutcome) {
-            insightsFunctionFilterDuration.observe({ type }, execHogOutcome.durationMs)
+        if (execScriptOutcome) {
+            insightsFunctionFilterDuration.observe({ type }, execScriptOutcome.durationMs)
         }
 
-        if (execHogOutcome.durationMs > INSIGHTS_FILTERING_TIMEOUT_MS) {
+        if (execScriptOutcome.durationMs > INSIGHTS_FILTERING_TIMEOUT_MS) {
             logger.error('🦔', `[${fnKind}] Filter took longer than expected`, {
                 functionId: fn.id,
                 functionName: fn.name,
                 teamId: fn.team_id,
-                duration: execHogOutcome.durationMs,
+                duration: execScriptOutcome.durationMs,
                 eventId: filterGlobals.uuid,
             })
         }
 
-        execResult = execHogOutcome.execResult
+        execResult = execScriptOutcome.execResult
 
-        if (!execHogOutcome.execResult || execHogOutcome.error || execHogOutcome.execResult.error) {
-            throw execHogOutcome.error ?? execHogOutcome.execResult?.error ?? new Error('Unknown error')
+        if (!execScriptOutcome.execResult || execScriptOutcome.error || execScriptOutcome.execResult.error) {
+            throw execScriptOutcome.error ?? execScriptOutcome.execResult?.error ?? new Error('Unknown error')
         }
 
         // Metric the actual result of the filter to investigate if we get anything other than booleans
         insightsFunctionFilterOutcomes.inc({
-            result: JSON.stringify(execHogOutcome.execResult.result),
-            result_type: typeof execHogOutcome.execResult.result,
+            result: JSON.stringify(execScriptOutcome.execResult.result),
+            result_type: typeof execScriptOutcome.execResult.result,
         })
 
-        result.match = typeof execHogOutcome.execResult.result === 'boolean' && execHogOutcome.execResult.result
+        result.match = typeof execScriptOutcome.execResult.result === 'boolean' && execScriptOutcome.execResult.result
 
         if (!result.match) {
             metrics.push({

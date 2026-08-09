@@ -8,7 +8,7 @@ export const template: InsightsFunctionTemplate = {
     name: 'PII Data Hashing',
     description:
         'This transformation hashes sensitive personal data (PII) like email, phone numbers, etc. using SHA-256 to protect user privacy.',
-    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_02_13ef93b4cb.png',
+    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_script_02_13ef93b4cb.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

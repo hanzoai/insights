@@ -4,7 +4,7 @@ import { Message } from 'node-rdkafka'
 import { Counter, Gauge } from 'prom-client'
 
 import { ReadOnlyGroupTypeManager } from '~/common/groups/readonly-group-type-manager'
-import { HogTransformationResult } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformationResult } from '~/common/script-transformations/script-transformer.interface'
 import { KafkaConsumerInterface, createKafkaConsumer } from '~/common/kafka/consumer'
 import { PersonReadRepository } from '~/common/persons/repositories/person-repository'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
@@ -22,7 +22,7 @@ import { OverflowRedirectService } from '~/ingestion/common/overflow-redirect/ov
 import { RedisOverflowRepository } from '~/ingestion/common/overflow-redirect/overflow-redis-repository'
 import { eventRateStrategy } from '~/ingestion/common/overflow-redirect/overflow-strategy'
 import { IngestionLane, IngestionOverflowMode } from '~/ingestion/config'
-import { TopHog } from '~/ingestion/framework/tophog'
+import { TopFn } from '~/ingestion/framework/topfn'
 import { PluginEvent } from '~/plugin-scaffold'
 import { HealthCheckResult, PluginServerService } from '~/types'
 
@@ -60,13 +60,13 @@ export interface ErrorTrackingConsumerOptions {
 }
 
 /**
- * Interface for the HogTransformer methods used by the error tracking consumer.
+ * Interface for the ScriptTransformer methods used by the error tracking consumer.
  * This allows for easier mocking in tests without needing the full service implementation.
  */
-export interface ErrorTrackingHogTransformer {
+export interface ErrorTrackingScriptTransformer {
     start(): Promise<void>
     stop(): Promise<void>
-    transformEventAndProduceMessages(event: PluginEvent): Promise<HogTransformationResult>
+    transformEventAndProduceMessages(event: PluginEvent): Promise<ScriptTransformationResult>
     processInvocationResults(): Promise<void>
 }
 
@@ -77,7 +77,7 @@ export interface ErrorTrackingHogTransformer {
 export interface ErrorTrackingConsumerDeps {
     outputs: ErrorTrackingOutputs
     teamManager: TeamManager
-    hogTransformer: ErrorTrackingHogTransformer
+    scriptTransformer: ErrorTrackingScriptTransformer
     groupTypeManager: ReadOnlyGroupTypeManager
     cookielessManager: CookielessManager
     redisPool: GenericPool<Redis>
@@ -110,7 +110,7 @@ export class ErrorTrackingConsumer {
     private stopEventIngestionRestrictionManager?: () => Promise<void>
     protected overflowRedirectService?: OverflowRedirectService
     protected overflowLaneTTLRefreshService?: OverflowRedirectService
-    protected topHog?: TopHog
+    protected topFn?: TopFn
 
     constructor(
         private config: ErrorTrackingConsumerOptions,
@@ -198,22 +198,22 @@ export class ErrorTrackingConsumer {
 
     private async initializePipeline(): Promise<void> {
         // Start the Script transformer service
-        await this.deps.hogTransformer.start()
+        await this.deps.scriptTransformer.start()
 
-        // Initialize TopHog for metrics
-        this.topHog = new TopHog({
+        // Initialize TopFn for metrics
+        this.topFn = new TopFn({
             outputs: this.deps.outputs,
             pipeline: this.config.pipeline,
             lane: this.config.lane,
         })
-        this.topHog.start()
+        this.topFn.start()
 
         this.pipeline = createErrorTrackingPipeline({
             outputs: this.deps.outputs,
             promiseScheduler: this.promiseScheduler,
             teamManager: this.deps.teamManager,
             personRepository: this.deps.personRepository,
-            hogTransformer: this.deps.hogTransformer,
+            scriptTransformer: this.deps.scriptTransformer,
             cymbalClient: this.cymbalClient,
             groupTypeManager: this.deps.groupTypeManager,
             cookielessManager: this.deps.cookielessManager,
@@ -222,7 +222,7 @@ export class ErrorTrackingConsumer {
             preservePartitionLocality: this.config.preservePartitionLocality,
             overflowRedirectService: this.overflowRedirectService,
             overflowLaneTTLRefreshService: this.overflowLaneTTLRefreshService,
-            topHog: this.topHog,
+            topFn: this.topFn,
         })
 
         logger.info('✅', `${this.name} - pipeline initialized`)
@@ -239,10 +239,10 @@ export class ErrorTrackingConsumer {
         await this.overflowLaneTTLRefreshService?.shutdown()
 
         // Stop Script transformer service
-        await this.deps.hogTransformer.stop()
+        await this.deps.scriptTransformer.stop()
 
-        // Stop TopHog metrics
-        await this.topHog?.stop()
+        // Stop TopFn metrics
+        await this.topFn?.stop()
 
         await this.kafkaConsumer.disconnect()
 
@@ -277,7 +277,7 @@ export class ErrorTrackingConsumer {
             throw error
         } finally {
             // Flush scheduled work and invocation results to prevent memory accumulation
-            await Promise.all([this.promiseScheduler.waitForAll(), this.deps.hogTransformer.processInvocationResults()])
+            await Promise.all([this.promiseScheduler.waitForAll(), this.deps.scriptTransformer.processInvocationResults()])
         }
     }
 }

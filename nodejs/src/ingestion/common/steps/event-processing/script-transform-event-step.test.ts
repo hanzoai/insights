@@ -1,14 +1,14 @@
-import { HogTransformerService, TransformationResult } from '~/cdp/script-transformations/script-transformer.service'
+import { ScriptTransformerService, TransformationResult } from '~/cdp/script-transformations/script-transformer.service'
 import { PipelineResultType, isDropResult, isOkResult } from '~/ingestion/framework/results'
 import { PluginEvent } from '~/plugin-scaffold'
 import { createTestPluginEvent } from '~/tests/helpers/plugin-event'
 import { createTestTeam } from '~/tests/helpers/team'
 
-import { HogTransformEventInput, createHogTransformEventStep } from './script-transform-event-step'
+import { ScriptTransformEventInput, createScriptTransformEventStep } from './script-transform-event-step'
 
-type MockHogTransformer = Pick<HogTransformerService, 'transformEventAndProduceMessages'>
+type MockScriptTransformer = Pick<ScriptTransformerService, 'transformEventAndProduceMessages'>
 
-const createTestInput = (): HogTransformEventInput => {
+const createTestInput = (): ScriptTransformEventInput => {
     return {
         event: createTestPluginEvent({
             event: '$pageview',
@@ -19,18 +19,18 @@ const createTestInput = (): HogTransformEventInput => {
     }
 }
 
-const createMockHogTransformer = (transformFn: (event: PluginEvent) => TransformationResult): MockHogTransformer => {
+const createMockScriptTransformer = (transformFn: (event: PluginEvent) => TransformationResult): MockScriptTransformer => {
     return {
         transformEventAndProduceMessages: jest.fn((event) => Promise.resolve(transformFn(event))),
     }
 }
 
-describe('createHogTransformEventStep', () => {
+describe('createScriptTransformEventStep', () => {
     it('passes through unchanged when no transformer configured', async () => {
-        const hogTransformEventStep = createHogTransformEventStep(null)
+        const scriptTransformEventStep = createScriptTransformEventStep(null)
         const input = createTestInput()
 
-        const result = await hogTransformEventStep(input)
+        const result = await scriptTransformEventStep(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
         if (isOkResult(result)) {
@@ -40,14 +40,14 @@ describe('createHogTransformEventStep', () => {
     })
 
     it('passes through unchanged when transformer returns same event', async () => {
-        const mockTransformer = createMockHogTransformer((event) => ({
+        const mockTransformer = createMockScriptTransformer((event) => ({
             event,
             invocationResults: [],
         }))
-        const hogTransformEventStep = createHogTransformEventStep(mockTransformer)
+        const scriptTransformEventStep = createScriptTransformEventStep(mockTransformer)
         const input = createTestInput()
 
-        const result = await hogTransformEventStep(input)
+        const result = await scriptTransformEventStep(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
         expect(mockTransformer.transformEventAndProduceMessages).toHaveBeenCalledWith(input.event)
@@ -57,15 +57,15 @@ describe('createHogTransformEventStep', () => {
     })
 
     it('drops event when transformation returns null and emits a warning naming the transformation', async () => {
-        const mockTransformer = createMockHogTransformer(() => ({
+        const mockTransformer = createMockScriptTransformer(() => ({
             event: null,
             invocationResults: [],
             droppedBy: { id: 'script-fn-1', name: 'Drop internal users' },
         }))
-        const hogTransformEventStep = createHogTransformEventStep(mockTransformer)
+        const scriptTransformEventStep = createScriptTransformEventStep(mockTransformer)
         const input = createTestInput()
 
-        const result = await hogTransformEventStep(input)
+        const result = await scriptTransformEventStep(input)
 
         expect(result.type).toBe(PipelineResultType.DROP)
         if (isDropResult(result)) {
@@ -88,17 +88,17 @@ describe('createHogTransformEventStep', () => {
     })
 
     it('returns transformed event with modified properties', async () => {
-        const mockTransformer = createMockHogTransformer((event) => ({
+        const mockTransformer = createMockScriptTransformer((event) => ({
             event: {
                 ...event,
                 properties: { ...event.properties, transformed: true },
             },
             invocationResults: [{} as any],
         }))
-        const hogTransformEventStep = createHogTransformEventStep(mockTransformer)
+        const scriptTransformEventStep = createScriptTransformEventStep(mockTransformer)
         const input = createTestInput()
 
-        const result = await hogTransformEventStep(input)
+        const result = await scriptTransformEventStep(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
         if (isOkResult(result)) {
@@ -111,17 +111,17 @@ describe('createHogTransformEventStep', () => {
     })
 
     it('returns transformed event with modified event name', async () => {
-        const mockTransformer = createMockHogTransformer((event) => ({
+        const mockTransformer = createMockScriptTransformer((event) => ({
             event: {
                 ...event,
                 event: 'custom_event',
             },
             invocationResults: [{} as any],
         }))
-        const hogTransformEventStep = createHogTransformEventStep(mockTransformer)
+        const scriptTransformEventStep = createScriptTransformEventStep(mockTransformer)
         const input = createTestInput()
 
-        const result = await hogTransformEventStep(input)
+        const result = await scriptTransformEventStep(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
         if (isOkResult(result)) {
@@ -131,17 +131,17 @@ describe('createHogTransformEventStep', () => {
     })
 
     it('returns transformed event with modified distinct_id', async () => {
-        const mockTransformer = createMockHogTransformer((event) => ({
+        const mockTransformer = createMockScriptTransformer((event) => ({
             event: {
                 ...event,
                 distinct_id: 'new-user-id',
             },
             invocationResults: [{} as any],
         }))
-        const hogTransformEventStep = createHogTransformEventStep(mockTransformer)
+        const scriptTransformEventStep = createScriptTransformEventStep(mockTransformer)
         const input = createTestInput()
 
-        const result = await hogTransformEventStep(input)
+        const result = await scriptTransformEventStep(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
         if (isOkResult(result)) {
@@ -151,14 +151,14 @@ describe('createHogTransformEventStep', () => {
     })
 
     it('counts multiple invocation results', async () => {
-        const mockTransformer = createMockHogTransformer((event) => ({
+        const mockTransformer = createMockScriptTransformer((event) => ({
             event,
             invocationResults: [{} as any, {} as any, {} as any],
         }))
-        const hogTransformEventStep = createHogTransformEventStep(mockTransformer)
+        const scriptTransformEventStep = createScriptTransformEventStep(mockTransformer)
         const input = createTestInput()
 
-        const result = await hogTransformEventStep(input)
+        const result = await scriptTransformEventStep(input)
 
         expect(result.type).toBe(PipelineResultType.OK)
         if (isOkResult(result)) {
@@ -167,12 +167,12 @@ describe('createHogTransformEventStep', () => {
     })
 
     it('rethrows exceptions from the transformer', async () => {
-        const mockTransformer: MockHogTransformer = {
+        const mockTransformer: MockScriptTransformer = {
             transformEventAndProduceMessages: jest.fn().mockRejectedValue(new Error('transformer broke')),
         }
-        const hogTransformEventStep = createHogTransformEventStep(mockTransformer)
+        const scriptTransformEventStep = createScriptTransformEventStep(mockTransformer)
         const input = createTestInput()
 
-        await expect(hogTransformEventStep(input)).rejects.toThrow('transformer broke')
+        await expect(scriptTransformEventStep(input)).rejects.toThrow('transformer broke')
     })
 })

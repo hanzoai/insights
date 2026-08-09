@@ -14,7 +14,7 @@ import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { Datastore } from '~/tests/helpers/datastore'
 import { waitForExpect } from '~/tests/helpers/expectations'
 import { TEST_KAFKA_TOPICS, ensureKafkaTopics } from '~/tests/helpers/kafka'
-import { waitForHogInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
+import { waitForScriptInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
@@ -22,7 +22,7 @@ import { FixtureFlowBuilder } from '../_tests/builders/flow.builder'
 import { INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
-    createHogExecutionGlobals,
+    createScriptExecutionGlobals,
     insertInsightsFunctionTemplate,
 } from '../_tests/fixtures'
 import { insertFlow } from '../_tests/fixtures-flows'
@@ -33,7 +33,7 @@ import { CdpEventsConsumer } from '../consumers/cdp-events.consumer'
 import { CdpRerunWorkerConsumer } from '../consumers/cdp-rerun-worker.consumer'
 import { CyclotronJobQueueKafka } from '../services/job-queue/job-queue-kafka'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
-import { compileHog } from '../templates/compiler'
+import { compileScript } from '../templates/compiler'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { RerunJobManager } from './rerun-job.manager'
 import { RERUN_QUEUE_NAME } from './rerun-job.types'
@@ -109,7 +109,7 @@ describe('CDP script invocation rerun e2e', () => {
         // which this test's MV needs but the shared set does not cover.
         await ensureKafkaTopics([...TEST_KAFKA_TOPICS, KAFKA_FN_INVOCATION_RESULTS])
         await datastore.truncate('hog_invocation_results_data')
-        await waitForHogInvocationResultsMvReady(datastore)
+        await waitForScriptInvocationResultsMvReady(datastore)
         await resetTestDatabase()
         await datastore.truncate('hog_invocation_results_data')
 
@@ -169,7 +169,7 @@ describe('CDP script invocation rerun e2e', () => {
         fnFetch = await _insertInsightsFunction(hub.postgres, team.id, {
             type: 'destination',
             script,
-            bytecode: await compileHog(script),
+            bytecode: await compileScript(script),
             inputs_schema: INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? [],
             inputs: INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs,
             ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
@@ -181,7 +181,7 @@ describe('CDP script invocation rerun e2e', () => {
         cdpDeps = { ...createCdpConsumerDeps(hub, kafkaProducer), personRepository: mockPersonRepo }
 
         eventsConsumer = new CdpEventsConsumer(hub, cdpDeps, {
-            hogQueue: kafkaQueue,
+            scriptQueue: kafkaQueue,
             flowQueue: postgresV2Queue,
         })
         // We call processBatch directly — no need to actually join the kafka group.
@@ -200,7 +200,7 @@ describe('CDP script invocation rerun e2e', () => {
         rerunManager = new RerunJobManager({ dbUrl: NODE_DB_URL, maxCount: 10000 })
         await rerunManager.connect()
 
-        globals = createHogExecutionGlobals({
+        globals = createScriptExecutionGlobals({
             project: { id: team.id } as any,
             event: {
                 uuid: '0d0ff14e-1b15-4afe-99e3-1ea83f0e3aab',
@@ -354,14 +354,14 @@ describe('CDP script invocation rerun e2e', () => {
         // Custom function whose input specifically dereferences
         // `person.properties.foo` — the shape that crashed pre-fix.
         const FALLBACK_WEBHOOK_URL = 'https://example.com/person-props-fallback'
-        const gclidLikeHog = `
+        const gclidLikeScript = `
         let res := fetch(inputs.url, { 'method': 'POST', 'body': f'foo={inputs.foo}' });
         print('Fetch response:', res);
         `
         const personPropsFn = await _insertInsightsFunction(hub.postgres, team.id, {
             type: 'destination',
-            script: gclidLikeHog,
-            bytecode: await compileHog(gclidLikeHog),
+            script: gclidLikeScript,
+            bytecode: await compileScript(gclidLikeScript),
             inputs_schema: [
                 { key: 'url', type: 'string', label: 'URL', secret: false, required: true },
                 { key: 'foo', type: 'string', label: 'foo', secret: false, required: false },
@@ -375,7 +375,7 @@ describe('CDP script invocation rerun e2e', () => {
                 // event.properties as the tail fallback.
                 foo: {
                     value: '{person.properties.foo ?? event.properties.foo}',
-                    bytecode: await compileHog('return person.properties.foo ?? event.properties.foo'),
+                    bytecode: await compileScript('return person.properties.foo ?? event.properties.foo'),
                 },
             },
             ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
@@ -402,7 +402,7 @@ describe('CDP script invocation rerun e2e', () => {
         // coalesce falls through to event.properties.foo — proving the
         // fallback wiring is real (and letting the rerun's stubbed-empty
         // person hit the same branch).
-        const cookielessGlobals = createHogExecutionGlobals({
+        const cookielessGlobals = createScriptExecutionGlobals({
             project: { id: team.id } as any,
             event: {
                 uuid: 'aaaa1111-bbbb-2222-cccc-333333333333',

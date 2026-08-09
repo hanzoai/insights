@@ -9,7 +9,7 @@ import {
     InsightsFunctionMasking,
 } from '../../types'
 import { mirrorCompare } from '../../utils/mirror-call'
-import { execHog } from '../../utils/script-exec'
+import { execScript } from '../../utils/script-exec'
 
 export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-masker' : '@hanzo/script-masker'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/mask`
@@ -28,7 +28,7 @@ type MaskContext = {
     threshold: number | null
 }
 
-type GenericHogInvocationWithMasker = CyclotronJobInvocation & {
+type GenericScriptInvocationWithMasker = CyclotronJobInvocation & {
     masker?: MaskContext
 }
 
@@ -102,13 +102,13 @@ function getTtl(invocation: CyclotronJobInvocation, maskingConfig: InsightsFunct
 }
 
 /**
- * HogMaskerService
+ * ScriptMaskerService
  *
  * Responsible for determining if a function is "masked" or not based on the function configuration
  */
 
 // Script masker is meant to be done per batch
-export class HogMaskerService {
+export class ScriptMaskerService {
     constructor(
         private redis: RedisV2,
         private redisMirror: RedisV2 | null = null
@@ -120,7 +120,7 @@ export class HogMaskerService {
         masked: T[]
         notMasked: T[]
     }> {
-        const invocationsWithMasker: GenericHogInvocationWithMasker[] = [...invocations]
+        const invocationsWithMasker: GenericScriptInvocationWithMasker[] = [...invocations]
         const masks: Record<string, MaskContext> = {}
 
         // We find all functions/flows that have a mask and we load their masking from redis
@@ -130,18 +130,18 @@ export class HogMaskerService {
                 const globals = extractGlobals(item)
 
                 // TODO: Catch errors
-                const execHogResult = await execHog(maskingConfig.bytecode, {
+                const execScriptResult = await execScript(maskingConfig.bytecode, {
                     globals,
                     timeout: 50,
                 })
 
-                if (!execHogResult.execResult?.result) {
+                if (!execScriptResult.execResult?.result) {
                     continue
                 }
                 // What to do if it is null....
 
                 const hash = createHash('md5')
-                    .update(String(execHogResult.execResult.result))
+                    .update(String(execScriptResult.execResult.result))
                     .digest('hex')
                     .substring(0, 32)
                 const entityId = getEntityId(item)

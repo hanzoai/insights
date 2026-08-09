@@ -1,12 +1,12 @@
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, PluginServerService } from '../../../types'
-import { HogInvocationResultsService } from '../monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from '../monitoring/script-invocation-results.service'
 import { CyclotronV2Janitor } from './janitor'
 import { CyclotronV2JanitorConfig } from './types'
 
 export class CyclotronV2JanitorService {
     private janitor: CyclotronV2Janitor
 
-    constructor(config: CyclotronV2JanitorConfig, invocationResults?: HogInvocationResultsService) {
+    constructor(config: CyclotronV2JanitorConfig, invocationResults?: ScriptInvocationResultsService) {
         this.janitor = new CyclotronV2Janitor(config, invocationResults)
     }
 

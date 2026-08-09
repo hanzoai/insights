@@ -14,7 +14,7 @@ import { IngestionTestInfra, createIngestionTestInfra } from '~/tests/helpers/in
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { PipelineEvent, Team } from '~/types'
 
-import { ErrorTrackingConsumer, ErrorTrackingHogTransformer } from './error-tracking-consumer'
+import { ErrorTrackingConsumer, ErrorTrackingScriptTransformer } from './error-tracking-consumer'
 
 /** Creates a mock KafkaConsumer for tests that don't need actual Kafka connections */
 const createMockKafkaConsumer = (): jest.Mocked<Pick<KafkaConsumer, 'connect' | 'disconnect' | 'isHealthy'>> => ({
@@ -88,8 +88,8 @@ jest.mock('./cymbal', () => ({
     })),
 }))
 
-// Create a mock HogTransformerService that passes through events unchanged
-const createMockHogTransformer = (): jest.Mocked<ErrorTrackingHogTransformer> => ({
+// Create a mock ScriptTransformerService that passes through events unchanged
+const createMockScriptTransformer = (): jest.Mocked<ErrorTrackingScriptTransformer> => ({
     start: jest.fn().mockResolvedValue(undefined),
     stop: jest.fn().mockResolvedValue(undefined),
     transformEventAndProduceMessages: jest
@@ -132,7 +132,7 @@ describe('ErrorTrackingConsumer', () => {
     let infra: IngestionTestInfra
     let team: Team
     let fixedTime: DateTime
-    let mockHogTransformer: jest.Mocked<ErrorTrackingHogTransformer>
+    let mockScriptTransformer: jest.Mocked<ErrorTrackingScriptTransformer>
 
     const createConsumer = async (infra: IngestionTestInfra) => {
         const config = {
@@ -151,7 +151,7 @@ describe('ErrorTrackingConsumer', () => {
             pipeline: infra.config.INGESTION_PIPELINE ?? 'errortracking',
         }
         // Create and store the mock so tests can configure it
-        mockHogTransformer = createMockHogTransformer()
+        mockScriptTransformer = createMockScriptTransformer()
         const deps = {
             outputs: new IngestionOutputs({
                 events: new SingleIngestionOutput(
@@ -178,7 +178,7 @@ describe('ErrorTrackingConsumer', () => {
                     mockProducer,
                     'test'
                 ),
-                tophog: new SingleIngestionOutput('tophog', 'datastore_tophog_test', mockProducer, 'test'),
+                topfn: new SingleIngestionOutput('tophog', 'datastore_topfn_test', mockProducer, 'test'),
                 app_metrics: new SingleIngestionOutput(
                     'app_metrics',
                     'datastore_app_metrics2_test',
@@ -187,7 +187,7 @@ describe('ErrorTrackingConsumer', () => {
                 ),
             }),
             teamManager: infra.teamManager,
-            hogTransformer: mockHogTransformer,
+            scriptTransformer: mockScriptTransformer,
             groupTypeManager: new ReadOnlyGroupTypeManager({
                 fetchGroupsByKeys: jest.fn().mockResolvedValue([]),
                 fetchGroupTypesByTeamIds: jest.fn().mockResolvedValue({}),
@@ -329,7 +329,7 @@ describe('ErrorTrackingConsumer', () => {
 
         it('should run Script transformations on events', async () => {
             // Configure the mock to add GeoIP properties (simulating the GeoIP transformation)
-            mockHogTransformer.transformEventAndProduceMessages.mockImplementation((event) =>
+            mockScriptTransformer.transformEventAndProduceMessages.mockImplementation((event) =>
                 Promise.resolve({
                     event: {
                         ...event,
@@ -355,7 +355,7 @@ describe('ErrorTrackingConsumer', () => {
             expect(producedMessages).toHaveLength(1)
 
             // Verify Script transformations were called and added GeoIP properties
-            expect(mockHogTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.transformEventAndProduceMessages).toHaveBeenCalledTimes(1)
             const properties = parseJSON(producedMessages[0].value.properties as string)
             expect(properties.$geoip_country_code).toBe('SE')
             expect(properties.$geoip_city_name).toBe('Linköping')
@@ -365,18 +365,18 @@ describe('ErrorTrackingConsumer', () => {
             const messages = createKafkaMessages([createEvent()])
             await consumer.handleKafkaBatch(messages)
 
-            expect(mockHogTransformer.processInvocationResults).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.processInvocationResults).toHaveBeenCalledTimes(1)
         })
 
         it('should flush invocation results even when batch processing fails', async () => {
             // Make the pipeline throw an error
-            mockHogTransformer.transformEventAndProduceMessages.mockRejectedValueOnce(new Error('Test error'))
+            mockScriptTransformer.transformEventAndProduceMessages.mockRejectedValueOnce(new Error('Test error'))
 
             const messages = createKafkaMessages([createEvent()])
             await expect(consumer.handleKafkaBatch(messages)).rejects.toThrow('Test error')
 
             // processInvocationResults should still be called via finally block
-            expect(mockHogTransformer.processInvocationResults).toHaveBeenCalledTimes(1)
+            expect(mockScriptTransformer.processInvocationResults).toHaveBeenCalledTimes(1)
         })
     })
 

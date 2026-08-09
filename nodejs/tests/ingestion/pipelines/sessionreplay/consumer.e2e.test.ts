@@ -854,7 +854,7 @@ describe('Session Recording Consumer Integration', () => {
             ),
             [TOPFN_OUTPUT]: new SingleIngestionOutput(
                 TOPFN_OUTPUT,
-                'datastore_tophog_test',
+                'datastore_topfn_test',
                 kafkaMessageProducer,
                 'test'
             ),

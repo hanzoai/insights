@@ -1,2 +1,2 @@
-export { TopHog, TopHogComponent } from './tophog'
-export type { TopHogRequiredConfig, TopHogOptionalConfig } from './tophog'
+export { TopFn, TopFnComponent } from './topfn'
+export type { TopFnRequiredConfig, TopFnOptionalConfig } from './topfn'

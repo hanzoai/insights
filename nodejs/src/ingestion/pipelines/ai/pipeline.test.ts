@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { ReadOnlyGroupTypeManager } from '~/common/groups/readonly-group-type-manager'
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { KafkaProducerWrapper } from '~/common/kafka/producer'
 import { APP_METRICS_OUTPUT, DLQ_OUTPUT, INGESTION_WARNINGS_OUTPUT, OVERFLOW_OUTPUT } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
@@ -18,7 +18,7 @@ import { DisabledOverflowRedirect } from '~/ingestion/common/overflow-redirect/d
 import { createOkContext } from '~/ingestion/framework/helpers'
 import { ok } from '~/ingestion/framework/results'
 import { createTestTeam } from '~/tests/helpers/team'
-import { createNoopTopHog } from '~/tests/helpers/tophog'
+import { createNoopTopFn } from '~/tests/helpers/topfn'
 
 import { AI_EVENTS_OUTPUT, EVENTS_OUTPUT } from './outputs'
 import { AiIngestionPipelineConfig, createAiIngestionPipeline } from './pipeline'
@@ -37,8 +37,8 @@ describe('AiIngestionPipeline', () => {
     let mockEventIngestionRestrictionManager: jest.Mocked<EventIngestionRestrictionManager>
     let mockEventFilterManager: { getFilter: jest.Mock }
     let mockCookielessManager: jest.Mocked<CookielessManager>
-    let mockHogTransformer: jest.Mocked<
-        Pick<HogTransformer, 'transformEventAndProduceMessages' | 'processInvocationResults'>
+    let mockScriptTransformer: jest.Mocked<
+        Pick<ScriptTransformer, 'transformEventAndProduceMessages' | 'processInvocationResults'>
     >
     let mockPersonRepository: jest.Mocked<PersonReadRepository>
     let mockGroupTypeManager: jest.Mocked<ReadOnlyGroupTypeManager>
@@ -116,13 +116,13 @@ describe('AiIngestionPipeline', () => {
             doBatch: jest.fn().mockImplementation((events: any[]) => Promise.resolve(events.map((e) => ok(e)))),
         } as unknown as jest.Mocked<CookielessManager>
 
-        mockHogTransformer = {
+        mockScriptTransformer = {
             transformEventAndProduceMessages: jest
                 .fn()
                 .mockImplementation((event) => Promise.resolve({ event, invocationResults: [] })),
             processInvocationResults: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<
-            Pick<HogTransformer, 'transformEventAndProduceMessages' | 'processInvocationResults'>
+            Pick<ScriptTransformer, 'transformEventAndProduceMessages' | 'processInvocationResults'>
         >
 
         mockPersonRepository = {
@@ -156,7 +156,7 @@ describe('AiIngestionPipeline', () => {
             eventFilterManager: mockEventFilterManager as any,
             cookielessManager: mockCookielessManager,
             promiseScheduler,
-            hogTransformer: mockHogTransformer as unknown as HogTransformer,
+            scriptTransformer: mockScriptTransformer as unknown as ScriptTransformer,
             personRepository: mockPersonRepository,
             groupTypeManager: mockGroupTypeManager,
             overflowMode: 'disabled',
@@ -166,7 +166,7 @@ describe('AiIngestionPipeline', () => {
             concurrentBatches: 1,
             eventSchemaEnforcementEnabled: false,
             eventSchemaEnforcementManager: {} as unknown as EventSchemaEnforcementManager,
-            topHog: createNoopTopHog(),
+            topFn: createNoopTopFn(),
             aiBlobStore: null,
             aiBlobOffloadConfig: {
                 isTeamEnabled: (): boolean => false,
@@ -209,7 +209,7 @@ describe('AiIngestionPipeline', () => {
     it('drains script transformer invocation results once per batch', async () => {
         await runPipeline([createMessage('$ai_generation'), createMessage('$ai_span')])
 
-        expect(mockHogTransformer.processInvocationResults).toHaveBeenCalledTimes(1)
+        expect(mockScriptTransformer.processInvocationResults).toHaveBeenCalledTimes(1)
     })
 
     it('prefetches script transformation states for the batch teams before transforming', async () => {

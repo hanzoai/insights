@@ -7,17 +7,17 @@ import { Hub, ProjectId, Team } from '../../../types'
 import { createExampleInvocation, createInsightsFunction } from '../../_tests/fixtures'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, InsightsFunctionType } from '../../types'
 import { createInvocationResult } from '../../utils/invocation-utils'
-import { BASE_REDIS_KEY, HogWatcherConfig, HogWatcherService, HogWatcherState } from './script-watcher.service'
+import { BASE_REDIS_KEY, ScriptWatcherConfig, ScriptWatcherService, ScriptWatcherState } from './script-watcher.service'
 
 jest.mock('~/common/utils/insights', () => ({ captureTeamEvent: jest.fn() }))
 
 const mockNow: jest.SpyInstance = jest.spyOn(Date, 'now')
 const mockCaptureTeamEvent: jest.Mock = require('~/common/utils/insights').captureTeamEvent as any
 
-const DEFAULT_WATCHER_CONFIG: HogWatcherConfig = {
-    hogCostTimingLowerMs: 50,
-    hogCostTimingUpperMs: 550,
-    hogCostTiming: 100,
+const DEFAULT_WATCHER_CONFIG: ScriptWatcherConfig = {
+    scriptCostTimingLowerMs: 50,
+    scriptCostTimingUpperMs: 550,
+    scriptCostTiming: 100,
     asyncCostTimingLowerMs: 100,
     asyncCostTimingUpperMs: 5000,
     asyncCostTiming: 20,
@@ -32,11 +32,11 @@ const DEFAULT_WATCHER_CONFIG: HogWatcherConfig = {
     observeResultsBufferMaxResults: 500,
 }
 
-describe('HogWatcher', () => {
+describe('ScriptWatcher', () => {
     let now: number
     let hub: Hub
-    let watcher: HogWatcherService
-    let watcherConfig: HogWatcherConfig
+    let watcher: ScriptWatcherService
+    let watcherConfig: ScriptWatcherConfig
     let onStateChangeSpy: jest.SpyInstance
     let redis: RedisV2
     const insightsFunctionId: string = 'script-function-id'
@@ -71,7 +71,7 @@ describe('HogWatcher', () => {
         await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
         watcherConfig = { ...DEFAULT_WATCHER_CONFIG }
 
-        watcher = new HogWatcherService(hub.teamManager, watcherConfig, redis)
+        watcher = new ScriptWatcherService(hub.teamManager, watcherConfig, redis)
         onStateChangeSpy = jest.spyOn(watcher as any, 'onStateChange') as jest.SpyInstance
         insightsFunction = createInsightsFunction({ id: insightsFunctionId, team_id: 2 })
     })
@@ -113,13 +113,13 @@ describe('HogWatcher', () => {
     describe('constructor', () => {
         it('should validate the bounds configuration', () => {
             expect(() => {
-                const _badWatcher = new HogWatcherService(
+                const _badWatcher = new ScriptWatcherService(
                     hub.teamManager,
                     {
                         ...DEFAULT_WATCHER_CONFIG,
-                        hogCostTimingLowerMs: 100,
-                        hogCostTimingUpperMs: 100,
-                        hogCostTiming: 1,
+                        scriptCostTimingLowerMs: 100,
+                        scriptCostTimingUpperMs: 100,
+                        scriptCostTiming: 1,
                         asyncCostTimingLowerMs: 100,
                         asyncCostTimingUpperMs: 100,
                         asyncCostTiming: 1,
@@ -284,8 +284,8 @@ describe('HogWatcher', () => {
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(1) // New state change
                 expect(onStateChangeSpy).toHaveBeenLastCalledWith({
                     insightsFunction,
-                    state: HogWatcherState.degraded,
-                    previousState: HogWatcherState.healthy,
+                    state: ScriptWatcherState.degraded,
+                    previousState: ScriptWatcherState.healthy,
                 })
 
                 await watcher.clearLock(insightsFunctionId) // For testing the logic
@@ -312,14 +312,14 @@ describe('HogWatcher', () => {
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(2) // New state change
                 expect(onStateChangeSpy).toHaveBeenLastCalledWith({
                     insightsFunction,
-                    state: HogWatcherState.disabled,
-                    previousState: HogWatcherState.degraded,
+                    state: ScriptWatcherState.disabled,
+                    previousState: ScriptWatcherState.degraded,
                 })
             })
 
             it('should not transition to disabled if not enabled', async () => {
                 watcherConfig.automaticallyDisableFunctions = false
-                watcher = new HogWatcherService(hub.teamManager, watcherConfig, redis)
+                watcher = new ScriptWatcherService(hub.teamManager, watcherConfig, redis)
                 onStateChangeSpy = jest.spyOn(watcher as any, 'onStateChange') as jest.SpyInstance
                 await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'script' })))
                 // Cold-start denial: V3 lua floor-drains to 0. State transition fires
@@ -333,8 +333,8 @@ describe('HogWatcher', () => {
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(1)
                 expect(onStateChangeSpy).toHaveBeenLastCalledWith({
                     insightsFunction,
-                    state: HogWatcherState.degraded,
-                    previousState: HogWatcherState.healthy,
+                    state: ScriptWatcherState.degraded,
+                    previousState: ScriptWatcherState.healthy,
                 })
 
                 await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'script' })))
@@ -372,9 +372,9 @@ describe('HogWatcher', () => {
             })
 
             it('should not change states if recently changed', async () => {
-                await watcher.doStageChanges([[insightsFunction, HogWatcherState.healthy]])
+                await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.healthy]])
                 await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'script' })))
-                expect((await watcher.getPersistedState(insightsFunctionId)).state).toEqual(HogWatcherState.healthy)
+                expect((await watcher.getPersistedState(insightsFunctionId)).state).toEqual(ScriptWatcherState.healthy)
                 const res = await redis.usePipeline({ name: 'getLock' }, (pipeline) => {
                     pipeline.get(`@insights-test/script-watcher-2/state-lock/${insightsFunctionId}`)
                     pipeline.ttl(`@insights-test/script-watcher-2/state-lock/${insightsFunctionId}`)
@@ -385,7 +385,7 @@ describe('HogWatcher', () => {
             })
 
             it('should not transition to a different state if forcefully set', async () => {
-                await watcher.doStageChanges([[insightsFunction, HogWatcherState.forcefully_degraded]], true)
+                await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.forcefully_degraded]], true)
                 await watcher.clearLock(insightsFunctionId)
                 expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
@@ -409,7 +409,7 @@ describe('HogWatcher', () => {
         it('should return healthy with full bucket for unknown function', async () => {
             const state = await watcher.getPersistedState('totally-unknown-function-id')
             expect(state).toEqual({
-                state: HogWatcherState.healthy,
+                state: ScriptWatcherState.healthy,
                 tokens: 10000,
             })
         })
@@ -471,7 +471,7 @@ describe('HogWatcher', () => {
             // Tokens should be reduced but function still healthy
             expect(state.tokens).toBeLessThan(watcherConfig.bucketSize)
             expect(state.tokens).toBeGreaterThan(0)
-            expect(state.state).toEqual(HogWatcherState.healthy)
+            expect(state.state).toEqual(ScriptWatcherState.healthy)
         })
     })
 
@@ -489,43 +489,43 @@ describe('HogWatcher', () => {
 
         it('should change the state of a script function', async () => {
             expect(await watcher.getPersistedState(insightsFunction.id)).toEqual({
-                state: HogWatcherState.healthy,
+                state: ScriptWatcherState.healthy,
                 tokens: 10000,
             })
-            await watcher.doStageChanges([[insightsFunction, HogWatcherState.degraded]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.degraded]], true)
             expect(await watcher.getPersistedState(insightsFunction.id)).toEqual({
-                state: HogWatcherState.degraded,
+                state: ScriptWatcherState.degraded,
                 tokens: 8000,
             })
 
             expect(onStateChangeSpy).toHaveBeenCalledWith({
                 insightsFunction,
-                state: HogWatcherState.degraded,
-                previousState: HogWatcherState.healthy,
+                state: ScriptWatcherState.degraded,
+                previousState: ScriptWatcherState.healthy,
             })
         })
 
         it('should only trigger state change events if the state actually changed', async () => {
-            await watcher.doStageChanges([[insightsFunction, HogWatcherState.degraded]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.degraded]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(1)
             expect(onStateChangeSpy).toHaveBeenLastCalledWith({
                 insightsFunction,
-                state: HogWatcherState.degraded,
-                previousState: HogWatcherState.healthy,
+                state: ScriptWatcherState.degraded,
+                previousState: ScriptWatcherState.healthy,
             })
             expectMockCaptureTeamEvent('degraded', 'healthy')
 
-            await watcher.doStageChanges([[insightsFunction, HogWatcherState.degraded]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.degraded]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(1)
-            await watcher.doStageChanges([[insightsFunction, HogWatcherState.disabled]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.disabled]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(2)
             expect(onStateChangeSpy).toHaveBeenLastCalledWith({
                 insightsFunction,
-                state: HogWatcherState.disabled,
-                previousState: HogWatcherState.degraded,
+                state: ScriptWatcherState.disabled,
+                previousState: ScriptWatcherState.degraded,
             })
             expectMockCaptureTeamEvent('disabled', 'degraded')
-            await watcher.doStageChanges([[insightsFunction, HogWatcherState.disabled]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.disabled]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(2)
         })
     })
@@ -585,7 +585,7 @@ describe('HogWatcher', () => {
             await watcher.observeResults([createResult({ duration: 1000, kind: 'script' })])
 
             const failingReader = makeFailingReader(new Error('reader unavailable'))
-            const watcherWithFailingReader = new HogWatcherService(hub.teamManager, watcherConfig, redis, failingReader)
+            const watcherWithFailingReader = new ScriptWatcherService(hub.teamManager, watcherConfig, redis, failingReader)
 
             const state = await watcherWithFailingReader.getPersistedState(insightsFunctionId)
 
@@ -604,7 +604,7 @@ describe('HogWatcher', () => {
             await watcher.observeResults(Array(10000).fill(createResult({ duration: 25000, kind: 'async_function' })))
 
             const failingReader = makeFailingReader(new Error('reader unavailable'))
-            const watcherWithFailingReader = new HogWatcherService(hub.teamManager, watcherConfig, redis, failingReader)
+            const watcherWithFailingReader = new ScriptWatcherService(hub.teamManager, watcherConfig, redis, failingReader)
 
             const states = await watcherWithFailingReader.getAllFunctionStates()
 
@@ -618,7 +618,7 @@ describe('HogWatcher', () => {
         })
 
         it('should not log a fallback when the reader is healthy', async () => {
-            const healthyWatcher = new HogWatcherService(hub.teamManager, watcherConfig, redis, redis)
+            const healthyWatcher = new ScriptWatcherService(hub.teamManager, watcherConfig, redis, redis)
 
             await healthyWatcher.getPersistedState(insightsFunctionId)
 
@@ -665,7 +665,7 @@ describe('HogWatcher', () => {
             await watcher.observeAggregatedResults([{ insightsFunction, totalDurationMs: 10050 }])
             const state = await watcher.getPersistedState(insightsFunctionId)
             expect(state.tokens).toEqual(8000)
-            expect(state.state).toEqual(HogWatcherState.degraded)
+            expect(state.state).toEqual(ScriptWatcherState.degraded)
         })
 
         it('charges each function independently', async () => {

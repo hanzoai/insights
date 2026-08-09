@@ -13,7 +13,7 @@ import {
     Team,
 } from '../types'
 
-export type HogBytecode = any[]
+export type ScriptBytecode = any[]
 
 // subset of EntityFilter
 export interface InsightsFunctionFilterBase {
@@ -25,13 +25,13 @@ export interface InsightsFunctionFilterBase {
 
 export interface InsightsFunctionFilterEvent extends InsightsFunctionFilterBase {
     type: 'events'
-    bytecode?: HogBytecode
+    bytecode?: ScriptBytecode
 }
 
 export interface InsightsFunctionFilterAction extends InsightsFunctionFilterBase {
     type: 'actions'
     // Loaded at run time from Action model
-    bytecode?: HogBytecode
+    bytecode?: ScriptBytecode
 }
 
 export type InsightsFunctionFilter = InsightsFunctionFilterEvent | InsightsFunctionFilterAction
@@ -39,7 +39,7 @@ export type InsightsFunctionFilter = InsightsFunctionFilterEvent | InsightsFunct
 export type InsightsFunctionMasking = {
     ttl: number | null
     hash: string
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
     threshold: number | null
 }
 
@@ -49,7 +49,7 @@ export interface InsightsFunctionFilters {
     actions?: InsightsFunctionFilterAction[]
     properties?: Record<string, any>[] // Global property filters that apply to all events
     filter_test_accounts?: boolean
-    bytecode?: HogBytecode
+    bytecode?: ScriptBytecode
 }
 
 export type GroupType = {
@@ -333,7 +333,7 @@ export type CyclotronJobInvocationInsightsFunctionContext = {
     // verbatim — ReplacingMergeTree would otherwise collapse to the latest
     // version (a retry's scheduled time) and lose the original.
     firstScheduledAt?: string
-    actionId?: string // The hogflow action node ID, used for metrics instance_id when executing within a workflow
+    actionId?: string // The flow action node ID, used for metrics instance_id when executing within a workflow
 }
 
 export type CyclotronJobInvocationInsightsFunction = CyclotronJobInvocation & {
@@ -397,7 +397,7 @@ export type FlowInvocationContext = {
         // Set by script-function action handler when it returns `finished: false` without an
         // explicit `queueScheduledAt` — i.e. the reschedule is purely to move the job onto a
         // dedicated queue (e.g. 'email' for SES rate-limit gating) and the next dequeue will
-        // continue the same action. Consumed across three sites in hogflow-executor.service.ts
+        // continue the same action. Consumed across three sites in flow-executor.service.ts
         // to suppress the redundant log lines that would otherwise leak the routing into
         // customer-visible workflow logs:
         //   - `scheduleInvocation` on the dequeue that set it: skips the "Workflow will pause
@@ -510,7 +510,7 @@ export type InsightsFunctionType = {
     enabled: boolean
     deleted: boolean
     script: string
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
     inputs_schema?: InsightsFunctionInputSchemaType[]
     inputs?: Record<string, CyclotronInputType | null>
     encrypted_inputs?: Record<string, CyclotronInputType>
@@ -550,7 +550,7 @@ export type InsightsFunctionTemplate = {
 }
 
 export type InsightsFunctionTemplateCompiled = InsightsFunctionTemplate & {
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
 }
 
 // Slightly different model from the DB
@@ -560,7 +560,7 @@ export type DBInsightsFunctionTemplate = {
     sha: string
     name: string
     inputs_schema: InsightsFunctionInputSchemaType[]
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
     type: InsightsFunctionTypeType
     free: boolean
 }

@@ -1,7 +1,7 @@
 /**
- * # Chapter 16: TopHog Step Metrics
+ * # Chapter 16: TopFn Step Metrics
  *
- * TopHog is an in-process metric extension for pipeline steps. It tracks the
+ * TopFn is an in-process metric extension for pipeline steps. It tracks the
  * top contributors to a named metric across arbitrary dimensions (e.g.
  * `team_id`), keeping only the top N per metric and periodically flushing them
  * to Kafka. It is a troubleshooting tool for multi-tenant systems - "which
@@ -9,11 +9,11 @@
  * system.
  *
  * This chapter is an introduction; the full reference (metric types, keys,
- * tuning, architecture) lives in `framework/tophog/README.md`.
+ * tuning, architecture) lives in `framework/topfn/README.md`.
  *
  * ## Key concepts
  *
- * - **`createTopHogWrapper(registry)`** returns a `topHog(step, factories)`
+ * - **`createTopFnWrapper(registry)`** returns a `topFn(step, factories)`
  *   wrapper. Wrapping a step with metric factories records metrics around each
  *   invocation without changing the step's result or context.
  * - **Metric factories** come in families - `count`, `sum`, `max`, `average`,
@@ -22,31 +22,31 @@
  *   - `*Result` (`countResult`, ...): records after the step, on *every* result
  *     (ok, drop, dlq, redirect)
  *   - `*Ok` (`countOk`, ...): records after the step, only on OK results
- * - **`MetricTracker` / `TopHog`** is the registry. It accumulates records
+ * - **`MetricTracker` / `TopFn`** is the registry. It accumulates records
  *   keyed by dimension, evicts to stay within `maxKeys`, and on `flush()` emits
  *   the top N entries per metric.
  *
  * ## How it works
  *
  * ```
- * const topHog = createTopHogWrapper(registry)
- * builder.pipe(topHog(myStep, [count('events', (in) => ({ team_id: ... }))]))
+ * const topFn = createTopFnWrapper(registry)
+ * builder.pipe(topFn(myStep, [count('events', (in) => ({ team_id: ... }))]))
  * ```
  */
-import { TOPFN_OUTPUT, TophogOutput } from '~/common/outputs'
+import { TOPFN_OUTPUT, TopFnOutput } from '~/common/outputs'
 import { parseJSON } from '~/common/utils/json-parse'
 import { newPipelineBuilder } from '~/ingestion/framework/builders'
 import {
-    TopHogRegistry,
+    TopFnRegistry,
     count,
     countOk,
     countResult,
-    createTopHogWrapper,
+    createTopFnWrapper,
     timer,
-} from '~/ingestion/framework/extensions/tophog'
+} from '~/ingestion/framework/extensions/topfn'
 import { createOkContext } from '~/ingestion/framework/helpers'
 import { dlq, ok } from '~/ingestion/framework/results'
-import { TopHog } from '~/ingestion/framework/tophog'
+import { TopFn } from '~/ingestion/framework/topfn'
 import { createMockIngestionOutputs } from '~/tests/helpers/mock-ingestion-outputs'
 
 interface Event {
@@ -54,9 +54,9 @@ interface Event {
 }
 
 // A minimal registry that captures every recorded metric, so a test can assert
-// exactly what was recorded without a full TopHog flush.
+// exactly what was recorded without a full TopFn flush.
 function createRecordingRegistry(): {
-    registry: TopHogRegistry
+    registry: TopFnRegistry
     records: { metric: string; key: Record<string, string>; value: number }[]
 } {
     const records: { metric: string; key: Record<string, string>; value: number }[] = []
@@ -73,7 +73,7 @@ function createRecordingRegistry(): {
     }
 }
 
-describe('TopHog Step Metrics', () => {
+describe('TopFn Step Metrics', () => {
     /**
      * Wrapping a step with `count` records once per invocation, keyed by the
      * dimension the factory extracts from the input. The step's own result is
@@ -81,14 +81,14 @@ describe('TopHog Step Metrics', () => {
      */
     it('count records once per invocation, keyed by a dimension', async () => {
         const { registry, records } = createRecordingRegistry()
-        const topHog = createTopHogWrapper(registry)
+        const topFn = createTopFnWrapper(registry)
 
         function processEvent(event: Event) {
             return Promise.resolve(ok({ ...event, processed: true }))
         }
 
         const pipeline = newPipelineBuilder<Event>()
-            .pipe(topHog(processEvent, [count('events', (event) => ({ team_id: String(event.teamId) }))]))
+            .pipe(topFn(processEvent, [count('events', (event) => ({ team_id: String(event.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 1 }, {}))
@@ -109,7 +109,7 @@ describe('TopHog Step Metrics', () => {
      */
     it('countResult records on all results, countOk only on OK results', async () => {
         const { registry, records } = createRecordingRegistry()
-        const topHog = createTopHogWrapper(registry)
+        const topFn = createTopFnWrapper(registry)
 
         function rejectEvent(_event: Event) {
             return Promise.resolve(dlq<Event>('invalid'))
@@ -117,7 +117,7 @@ describe('TopHog Step Metrics', () => {
 
         const pipeline = newPipelineBuilder<Event>()
             .pipe(
-                topHog(rejectEvent, [
+                topFn(rejectEvent, [
                     countResult('seen', (_result, event) => ({ team_id: String(event.teamId) })),
                     countOk('accepted', (_output, event) => ({ team_id: String(event.teamId) })),
                 ])
@@ -136,7 +136,7 @@ describe('TopHog Step Metrics', () => {
      */
     it('timer records elapsed step time', async () => {
         const { registry, records } = createRecordingRegistry()
-        const topHog = createTopHogWrapper(registry)
+        const topFn = createTopFnWrapper(registry)
 
         async function slowStep(event: Event) {
             await new Promise((resolve) => setTimeout(resolve, 5))
@@ -144,7 +144,7 @@ describe('TopHog Step Metrics', () => {
         }
 
         const pipeline = newPipelineBuilder<Event>()
-            .pipe(topHog(slowStep, [timer('step_time', (event) => ({ team_id: String(event.teamId) }))]))
+            .pipe(topFn(slowStep, [timer('step_time', (event) => ({ team_id: String(event.teamId) }))]))
             .build()
 
         await pipeline.process(createOkContext({ teamId: 3 }, {}))
@@ -156,30 +156,30 @@ describe('TopHog Step Metrics', () => {
     })
 
     /**
-     * A real `TopHog` registry accumulates records via its `MetricTracker`s and,
+     * A real `TopFn` registry accumulates records via its `MetricTracker`s and,
      * on `flush()`, emits the top contributors per metric to its Kafka output.
      * Team 1 (3 events) outranks team 2 (1 event).
      */
-    it('TopHog aggregates records and flushes top contributors', async () => {
-        const outputs = createMockIngestionOutputs<TophogOutput>()
-        const tophog = new TopHog({ outputs, pipeline: 'docs', lane: 'test' })
-        const topHog = createTopHogWrapper(tophog)
+    it('TopFn aggregates records and flushes top contributors', async () => {
+        const outputs = createMockIngestionOutputs<TopFnOutput>()
+        const topfn = new TopFn({ outputs, pipeline: 'docs', lane: 'test' })
+        const topFn = createTopFnWrapper(topfn)
 
         function processEvent(event: Event) {
             return Promise.resolve(ok(event))
         }
 
         const pipeline = newPipelineBuilder<Event>()
-            .pipe(topHog(processEvent, [count('events_by_team', (event) => ({ team_id: String(event.teamId) }))]))
+            .pipe(topFn(processEvent, [count('events_by_team', (event) => ({ team_id: String(event.teamId) }))]))
             .build()
 
         for (const teamId of [1, 1, 1, 2]) {
             await pipeline.process(createOkContext({ teamId }, {}))
         }
 
-        await tophog.flush()
+        await topfn.flush()
 
-        // flush() queues one message per top-N entry to the TopHog output
+        // flush() queues one message per top-N entry to the TopFn output
         expect(outputs.queueMessages).toHaveBeenCalledTimes(1)
         const [output, messages] = outputs.queueMessages.mock.calls[0]
         expect(output).toBe(TOPFN_OUTPUT)

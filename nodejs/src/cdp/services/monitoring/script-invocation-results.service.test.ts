@@ -6,8 +6,8 @@ import { parseJSON } from '~/common/utils/json-parse'
 import { createExampleInvocation } from '../../_tests/fixtures'
 import { CdpOutput } from '../../cdp-services'
 import {
-    HogInvocationResultRow,
-    HogInvocationResultsService,
+    ScriptInvocationResultRow,
+    ScriptInvocationResultsService,
     decodeInvocationGlobals,
 } from './script-invocation-results.service'
 
@@ -17,25 +17,25 @@ const buildOutputsMock = (): jest.Mocked<IngestionOutputs<CdpOutput>> => {
     } as unknown as jest.Mocked<IngestionOutputs<CdpOutput>>
 }
 
-const parseProducedRows = (outputs: jest.Mocked<IngestionOutputs<CdpOutput>>): HogInvocationResultRow[] => {
+const parseProducedRows = (outputs: jest.Mocked<IngestionOutputs<CdpOutput>>): ScriptInvocationResultRow[] => {
     return outputs.produce.mock.calls.map((call) => {
         const arg = call[1] as { key: Buffer | null; value: Buffer | null }
-        return parseJSON(arg.value!.toString('utf8')) as HogInvocationResultRow
+        return parseJSON(arg.value!.toString('utf8')) as ScriptInvocationResultRow
     })
 }
 
-describe('HogInvocationResultsService', () => {
+describe('ScriptInvocationResultsService', () => {
     let outputs: jest.Mocked<IngestionOutputs<CdpOutput>>
-    let service: HogInvocationResultsService
+    let service: ScriptInvocationResultsService
 
     beforeEach(() => {
         outputs = buildOutputsMock()
-        service = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
+        service = new ScriptInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
     })
 
     describe('feature flag', () => {
         it('produces nothing when INSIGHTS_INVOCATION_RESULTS_ENABLED is false', async () => {
-            service = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: false })
+            service = new ScriptInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: false })
 
             const invocation = createExampleInvocation()
             service.queueLifecycleRow(invocation, 'running')
@@ -84,7 +84,7 @@ describe('HogInvocationResultsService', () => {
         })
 
         it('returns false when recording is disabled', async () => {
-            service = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: false })
+            service = new ScriptInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: false })
             const ok = await service.recordTerminalFailureDurably(createExampleInvocation(), { error: 'boom' })
             expect(ok).toBe(false)
             expect(outputs.produce).not.toHaveBeenCalled()

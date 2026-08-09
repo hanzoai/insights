@@ -53,7 +53,7 @@ export class GroupsManagerService {
 
     /**
      * Loads groups for a given team and event, returning the groups record.
-     * Can be used directly when a full globals object isn't available (e.g. hogflow worker).
+     * Can be used directly when a full globals object isn't available (e.g. flow worker).
      */
     public async getGroupsForEvent(
         teamId: number,
@@ -157,7 +157,7 @@ export class GroupsManagerService {
         if (teamsToLoad.length > 0) {
             const repoResult = await this.groupRepository.fetchGroupTypesByTeamIds(
                 teamsToLoad,
-                'cdp/hogflow-group-type-resolution'
+                'cdp/flow-group-type-resolution'
             )
             for (const teamId of teamsToLoad) {
                 const groupTypes = repoResult[String(teamId)] ?? []
@@ -185,7 +185,7 @@ export class GroupsManagerService {
             teamIds,
             groupIndexes,
             groupKeys,
-            'cdp/hogflow-group-property-enrichment'
+            'cdp/flow-group-property-enrichment'
         )
 
         const result: Record<string, Record<string, any> | null | undefined> = {}

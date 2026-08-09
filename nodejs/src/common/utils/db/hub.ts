@@ -2,7 +2,7 @@ import { IntegrationManagerService } from '~/cdp/services/managers/integration-m
 import { EncryptedFields } from '~/cdp/utils/encryption-utils'
 import { GroupTypeManager } from '~/common/groups/group-type-manager'
 import { PostgresGroupRepository } from '~/common/groups/repositories/postgres-group-repository'
-import { buildGroupRepository, buildPersonRepository, createPersonHogClient } from '~/common/personinsights'
+import { buildGroupRepository, buildPersonRepository, createPersonFnClient } from '~/common/personinsights'
 import { PostgresPersonRepository } from '~/common/persons/repositories/postgres-person-repository'
 import { QuotaLimiting } from '~/common/services/quota-limiting.service'
 import { Hub, PluginsServerConfig } from '~/types'
@@ -65,7 +65,7 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
     const pubSub = new PubSub(redisPool)
     await pubSub.start()
 
-    const personinsightsClient = createPersonHogClient(serverConfig)
+    const personinsightsClient = createPersonFnClient(serverConfig)
     const clientLabel = serverConfig.PLUGIN_SERVER_MODE ?? 'unknown'
 
     const postgresGroupRepository = new PostgresGroupRepository(postgres)

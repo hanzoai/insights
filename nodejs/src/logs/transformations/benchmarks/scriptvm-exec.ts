@@ -1,6 +1,6 @@
-import { ExecResult, convertHogToJS } from '@hanzo/scriptvm'
+import { ExecResult, convertScriptToJS } from '@hanzo/scriptvm'
 
-import { execHogImmediate } from '~/cdp/utils/script-exec'
+import { execScriptImmediate } from '~/cdp/utils/script-exec'
 
 import type { BenchGlobals } from './fixtures'
 
@@ -11,7 +11,7 @@ export function execBenchProgram(
     globals: BenchGlobals,
     timeoutMs: number
 ): { execResult?: ExecResult; error?: unknown; durationMs: number } {
-    const { execResult, error, durationMs } = execHogImmediate(bytecode, {
+    const { execResult, error, durationMs } = execScriptImmediate(bytecode, {
         globals,
         timeout: timeoutMs,
         maxAsyncSteps: 0,
@@ -21,7 +21,7 @@ export function execBenchProgram(
     })
 
     if (execResult?.finished) {
-        execResult.result = convertHogToJS(execResult.result)
+        execResult.result = convertScriptToJS(execResult.result)
     }
 
     return { execResult, error, durationMs }

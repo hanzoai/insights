@@ -7,7 +7,7 @@ export const template: InsightsFunctionTemplate = {
     id: 'template-filter-properties',
     name: 'Filter Properties',
     description: 'Filter out specific properties from the event by setting them to null or removing them completely.',
-    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png',
+    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_script_01_955c082cad.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

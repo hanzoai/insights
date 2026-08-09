@@ -1,14 +1,14 @@
 import { create } from '@bufbuild/protobuf'
 import { type ServiceImpl, createClient, createRouterTransport } from '@connectrpc/connect'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { PersonSchema } from '~/common/generated/personinsights/personinsights/types/v1/person_pb'
 import type {
     GetPersonsByDistinctIdsRequest,
     GetPersonsByUuidsRequest,
 } from '~/common/generated/personinsights/personinsights/types/v1/person_pb'
 
-import { PersonHogPersonOperations } from './persons'
+import { PersonFnPersonOperations } from './persons'
 
 const textEncoder = new TextEncoder()
 
@@ -30,7 +30,7 @@ function makeProtoPerson(id: number, uuid: string, teamId: number) {
     })
 }
 
-const SERVICE_DEFAULTS: ServiceImpl<typeof PersonHogService> = {
+const SERVICE_DEFAULTS: ServiceImpl<typeof PersonFnService> = {
     getGroup: () => ({}),
     getGroups: () => ({ groups: [], missingGroups: [] }),
     getGroupsBatch: () => ({ results: [] }),
@@ -71,8 +71,8 @@ const SERVICE_DEFAULTS: ServiceImpl<typeof PersonHogService> = {
     splitPerson: () => ({ splits: [] }),
 }
 
-function createOperations(overrides: Partial<ServiceImpl<typeof PersonHogService>> = {}): {
-    ops: PersonHogPersonOperations
+function createOperations(overrides: Partial<ServiceImpl<typeof PersonFnService>> = {}): {
+    ops: PersonFnPersonOperations
     handlers: { getPersonsByDistinctIds: jest.Mock; getPersonsByUuids: jest.Mock }
 } {
     const handlers = {
@@ -81,19 +81,19 @@ function createOperations(overrides: Partial<ServiceImpl<typeof PersonHogService
     }
 
     const transport = createRouterTransport(({ service }) => {
-        service(PersonHogService, {
+        service(PersonFnService, {
             ...SERVICE_DEFAULTS,
             ...handlers,
             ...overrides,
         })
     })
 
-    const client = createClient(PersonHogService, transport)
-    const ops = new PersonHogPersonOperations(client)
+    const client = createClient(PersonFnService, transport)
+    const ops = new PersonFnPersonOperations(client)
     return { ops, handlers }
 }
 
-describe('PersonHogPersonOperations', () => {
+describe('PersonFnPersonOperations', () => {
     describe.each([
         {
             method: 'fetchPersonsByDistinctIds' as const,
@@ -106,7 +106,7 @@ describe('PersonHogPersonOperations', () => {
             makeItem: (i: number) => ({ teamId: 1, personId: `uuid-${i}` }),
         },
     ])('$method batching', ({ method, handler, makeItem }) => {
-        const invoke = (ops: PersonHogPersonOperations, count: number): Promise<any> =>
+        const invoke = (ops: PersonFnPersonOperations, count: number): Promise<any> =>
             (ops[method] as any)(Array.from({ length: count }, (_, i) => makeItem(i)))
 
         it('sends a single RPC when under the batch limit', async () => {

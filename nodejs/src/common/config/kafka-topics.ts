@@ -100,5 +100,5 @@ export const KAFKA_METRICS_INGESTION_DLQ = `${prefix}metrics_ingestion_dlq${suff
 export const KAFKA_METRICS_INGESTION_OVERFLOW = `${prefix}metrics_ingestion_overflow${suffix}`
 export const KAFKA_METRICS_DATASTORE = `${prefix}datastore_metrics${suffix}`
 
-// TopHog metrics
-export const KAFKA_DATASTORE_TOPHOG = `${prefix}datastore_tophog${suffix}`
+// TopFn metrics
+export const KAFKA_DATASTORE_TOPFN = `${prefix}datastore_topfn${suffix}`
