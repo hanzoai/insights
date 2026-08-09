@@ -28,7 +28,7 @@ pub trait CustomKeyThresholdSource: Send + Sync {
 /// Parse the dynamic-threshold JSON blob.
 ///
 /// The blob is a flat JSON object mapping a fully-resolved key to its threshold,
-/// e.g. `{"phc_abc": 1000, "phc_abc:noisy_user": 50}`. The key structure is
+/// e.g. `{"pk-abc": 1000, "pk-abc:noisy_user": 50}`. The key structure is
 /// opaque to this crate; callers give meaning to keys via a `CustomKeyResolver`.
 pub fn parse_thresholds(json_str: &str) -> Result<HashMap<String, u64>, CustomRedisError> {
     serde_json::from_str(json_str)
@@ -208,10 +208,10 @@ mod tests {
 
     #[test]
     fn test_parse_thresholds_flat_object() {
-        let json = r#"{"phc_abc": 1000, "phc_abc:noisy": 50}"#;
+        let json = r#"{"pk-abc": 1000, "pk-abc:noisy": 50}"#;
         let map = parse_thresholds(json).unwrap();
-        assert_eq!(map.get("phc_abc"), Some(&1000));
-        assert_eq!(map.get("phc_abc:noisy"), Some(&50));
+        assert_eq!(map.get("pk-abc"), Some(&1000));
+        assert_eq!(map.get("pk-abc:noisy"), Some(&50));
         assert_eq!(map.len(), 2);
     }
 
@@ -260,11 +260,11 @@ mod tests {
     #[tokio::test]
     async fn test_fetch_success_parses_and_reuses_client() {
         let (source, builds) = source_with("thresholds", |_| {
-            MockRedisClient::new().get_ret("thresholds", Ok(r#"{"phc_abc": 1000}"#.to_string()))
+            MockRedisClient::new().get_ret("thresholds", Ok(r#"{"pk-abc": 1000}"#.to_string()))
         });
 
         let map = source.fetch().await.unwrap().unwrap();
-        assert_eq!(map.get("phc_abc"), Some(&1000));
+        assert_eq!(map.get("pk-abc"), Some(&1000));
 
         // A healthy connection is cached: the second fetch does not rebuild.
         source.fetch().await.unwrap();

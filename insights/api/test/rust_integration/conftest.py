@@ -62,11 +62,11 @@ def _bootstrap_test_env() -> TestEnv:
         id=project.id,
         project=project,
         organization=org,
-        api_token=f"phc_test_{uuid.uuid4().hex}",
+        api_token=f"pk-test_{uuid.uuid4().hex}",
     )
     user = User.objects.create_and_join(org, "rust-integration@test.hanzo.ai", "testpassword12345")
 
-    key_value = f"phx_test_{uuid.uuid4().hex}"
+    key_value = f"sk-test_{uuid.uuid4().hex}"
     secure_value = hashlib.sha256(key_value.encode()).hexdigest()
     PersonalAPIKey.objects.create(
         user=user,

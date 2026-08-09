@@ -93,7 +93,7 @@ async fn post(client: &TestClient, path: &str, body: &str) -> (u16, Option<Strin
 }
 
 const KEYLESS: &str = r#"{"event":"$pageview","distinct_id":"d1"}"#;
-const KEYED: &str = r#"{"event":"$pageview","distinct_id":"d1","api_key":"phc_real"}"#;
+const KEYED: &str = r#"{"event":"$pageview","distinct_id":"d1","api_key":"pk-real"}"#;
 
 #[tokio::test]
 async fn keyless_analytics_is_refused_by_name() {
@@ -218,7 +218,7 @@ async fn refusals_are_visible_to_an_operator() {
 
     // The credential itself is never scraped.
     assert!(
-        !scrape.contains("phc_real"),
+        !scrape.contains("pk-real"),
         "a refused credential must not reach the metrics plane:\n{scrape}"
     );
 }

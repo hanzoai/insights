@@ -602,7 +602,7 @@ jobs:
                   PersonalAPIKey.objects.create(
                       user=user,
                       label='mcp_ci_api_key',
-                      secure_value=hash_key_value('phx_e2e_demo_api_key'),
+                      secure_value=hash_key_value('sk-e2e_demo_api_key'),
                       scopes=['*'],
                   )
                   # Ensure common event definitions exist for MCP integration tests
@@ -639,7 +639,7 @@ jobs:
               run: cd services/mcp && pnpm run test:integration -- --reporter=default --reporter=junit --outputFile.junit=junit-integration.xml
               env:
                   TEST_INSIGHTS_API_BASE_URL: http://localhost:8000
-                  TEST_INSIGHTS_PERSONAL_API_KEY: phx_e2e_demo_api_key
+                  TEST_INSIGHTS_PERSONAL_API_KEY: sk-e2e_demo_api_key
                   TEST_ORG_ID: ${{ env.TEST_ORG_ID }}
                   TEST_PROJECT_ID: ${{ env.TEST_PROJECT_ID }}
 

@@ -74,13 +74,13 @@ from products.surveys.backend.models import Survey
 def _make_feature_flag_psak(
     team: Team, label: str = "psak", scopes: list[str] | None = None
 ) -> tuple[str, ProjectSecretAPIKey]:
-    # Token must match _SECRET_API_KEY_RE = r"^phs_[a-zA-Z0-9]+$", so only alphanumerics after phs_.
+    # Token must match _SECRET_API_KEY_RE = r"^sk-[a-zA-Z0-9]+$", so only alphanumerics after sk-.
     suffix = "".join(c for c in label if c.isalnum())
-    token = "phs_" + ("b" * 35) + suffix
+    token = "sk-" + ("b" * 35) + suffix
     psak = ProjectSecretAPIKey.objects.create(
         team=team,
         label=label,
-        mask_value=f"phs_...{suffix[:4]}",
+        mask_value=f"sk-...{suffix[:4]}",
         secure_value=hash_key_value(token),
         scopes=["feature_flag:read"] if scopes is None else scopes,
     )
@@ -2526,7 +2526,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.team.rotate_secret_token_and_save(user=self.user, is_impersonated_session=False)
         other_team = Team.objects.create(
             organization=self.organization,
-            api_token="phc_other_team_token",
+            api_token="pk-other_team_token",
             name="Other Team",
         )
         other_team.rotate_secret_token_and_save(user=self.user, is_impersonated_session=False)
@@ -2563,7 +2563,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_remote_config_with_numeric_id_scopes_to_project(self):
         other_team = Team.objects.create(
             organization=self.organization,
-            api_token="phc_numeric_id_test",
+            api_token="pk-numeric_id_test",
             name="Numeric ID Team",
         )
 
@@ -2588,7 +2588,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_remote_config_with_string_key_scopes_to_project(self):
         other_team = Team.objects.create(
             organization=self.organization,
-            api_token="phc_string_key_test",
+            api_token="pk-string_key_test",
             name="String Key Team",
         )
 

@@ -285,7 +285,7 @@
         "$pathname": "/project/1/error_tracking/2845fb04-dbc7-4945-bb58-48d6f77d2015",
         "$recording_status": "active",
         "$feature/feature-management-ui": true,
-        "token": "phc_ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7",
+        "token": "pk-ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7",
         "$feature/bigquery-dwh": true,
         "$feature/settings-persons-on-events-hidden": true,
         "current_usage.integrations": 0,

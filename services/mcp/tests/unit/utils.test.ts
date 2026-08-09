@@ -67,7 +67,7 @@ describe('utils', () => {
 
     describe('redactToken', () => {
         it('keeps only the last 4 chars and masks the rest', () => {
-            expect(redactToken('phx_abcdefgh1234')).toBe('****1234')
+            expect(redactToken('sk-abcdefgh1234')).toBe('****1234')
         })
 
         it('fully masks tokens of 4 chars or fewer', () => {
@@ -91,35 +91,35 @@ describe('utils', () => {
             })
 
         it('prefers the Authorization bearer header', () => {
-            expect(extractBearerToken(req({ header: 'Bearer phx_header', url: 'https://x/?token=phx_query' }))).toBe(
-                'phx_header'
+            expect(extractBearerToken(req({ header: 'Bearer sk-header', url: 'https://x/?token=sk-query' }))).toBe(
+                'sk-header'
             )
         })
 
         it('falls back to the ?token query param in development', () => {
-            expect(extractBearerToken(req({ url: 'https://x/?token=phx_query' }))).toBe('phx_query')
+            expect(extractBearerToken(req({ url: 'https://x/?token=sk-query' }))).toBe('sk-query')
         })
 
         it('falls back to the ?token query param in test', () => {
             env.NODE_ENV = 'test'
-            expect(extractBearerToken(req({ url: 'https://x/?token=phx_query' }))).toBe('phx_query')
+            expect(extractBearerToken(req({ url: 'https://x/?token=sk-query' }))).toBe('sk-query')
         })
 
         it('ignores the ?token query param in production', () => {
             env.NODE_ENV = 'production'
-            expect(extractBearerToken(req({ url: 'https://x/?token=phx_query' }))).toBeUndefined()
+            expect(extractBearerToken(req({ url: 'https://x/?token=sk-query' }))).toBeUndefined()
         })
 
         // Fail closed: an unset NODE_ENV (e.g. no Cloudflare Workers binding) must
         // not enable the query-param path.
         it('ignores the ?token query param when NODE_ENV is unset', () => {
             env.NODE_ENV = undefined
-            expect(extractBearerToken(req({ url: 'https://x/?token=phx_query' }))).toBeUndefined()
+            expect(extractBearerToken(req({ url: 'https://x/?token=sk-query' }))).toBeUndefined()
         })
 
         it('still reads the header in production', () => {
             env.NODE_ENV = 'production'
-            expect(extractBearerToken(req({ header: 'Bearer phx_header' }))).toBe('phx_header')
+            expect(extractBearerToken(req({ header: 'Bearer sk-header' }))).toBe('sk-header')
         })
 
         it('returns undefined when no token is present', () => {
