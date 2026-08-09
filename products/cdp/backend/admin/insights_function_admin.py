@@ -91,7 +91,7 @@ class RerunGoogleAdsFailedInvocationsForm(forms.Form):
 @admin.register(InsightsFunction)
 class InsightsFunctionAdmin(admin.ModelAdmin):
     form = InsightsFunctionAdminForm
-    change_list_template = "admin/cdp/hogfunction/change_list.html"
+    change_list_template = "admin/cdp/insightsfunction/change_list.html"
     list_select_related = ("team",)
     list_display = ("id", "name", "enabled")
     list_filter = (
@@ -194,6 +194,6 @@ class InsightsFunctionAdmin(admin.ModelAdmin):
 
         return render(
             request,
-            "admin/cdp/hogfunction/rerun_google_ads.html",
+            "admin/cdp/insightsfunction/rerun_google_ads.html",
             {"form": form, "output": output, "title": "Rerun Google Ads failed invocations"},
         )

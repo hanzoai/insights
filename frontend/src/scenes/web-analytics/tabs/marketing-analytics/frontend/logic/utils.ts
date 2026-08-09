@@ -330,8 +330,8 @@ function buildConversionExpr(
     }
     const defaultPerRow = availableFields.map((field) => safeFloat(field)).join(' + ')
     const perRowValueExpr = buildPerRowExpr ? buildPerRowExpr(availableFields) : defaultPerRow
-    const mathHogql = buildExpr ? buildExpr(availableFields) : `SUM(${defaultPerRow})`
-    return { math: InsightsQLMathType.InsightsQL, math_insightsql: mathHogql, perRowValueExpr }
+    const mathInsightsql = buildExpr ? buildExpr(availableFields) : `SUM(${defaultPerRow})`
+    return { math: InsightsQLMathType.InsightsQL, math_insightsql: mathInsightsql, perRowValueExpr }
 }
 
 const sourceTileConfigs: Record<NativeMarketingSource, SourceTileConfig> = {
@@ -593,7 +593,7 @@ function buildNativeTileNode(
     integrationConfig: (typeof MARKETING_INTEGRATION_CONFIGS)[NativeMarketingSource],
     tileConfig: SourceTileConfig,
     tileColumnSelection: validColumnsForTiles,
-    mathHogql: string
+    mathInsightsql: string
 ): DataWarehouseNode {
     return {
         kind: NodeKind.DataWarehouseNode,
@@ -605,7 +605,7 @@ function buildNativeTileNode(
         timestamp_field: tileConfig.timestampField,
         table_name: table.name,
         math: InsightsQLMathType.InsightsQL,
-        math_insightsql: mathHogql,
+        math_insightsql: mathInsightsql,
     }
 }
 
@@ -687,8 +687,9 @@ export function createMarketingTile(
             MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue,
             tileConfig.columnMappings.reportedConversionValue
         )
-        const mathHogql = conversionValueExpr === '0' ? '0' : `${conversionValueExpr} / nullIf(SUM(${costExpr}), 0)`
-        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathHogql)
+        const mathInsightsql =
+            conversionValueExpr === '0' ? '0' : `${conversionValueExpr} / nullIf(SUM(${costExpr}), 0)`
+        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathInsightsql)
     }
 
     // Handle Cost per Reported Conversion - calculated as cost / reported_conversions
@@ -700,8 +701,8 @@ export function createMarketingTile(
             MarketingAnalyticsColumnsSchemaNames.ReportedConversion,
             tileConfig.columnMappings.reportedConversion
         )
-        const mathHogql = conversionExpr === '0' ? '0' : `SUM(${costExpr}) / nullIf(${conversionExpr}, 0)`
-        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathHogql)
+        const mathInsightsql = conversionExpr === '0' ? '0' : `SUM(${costExpr}) / nullIf(${conversionExpr}, 0)`
+        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathInsightsql)
     }
 
     const column = columnTileConfig[sourceType].columns[tileColumnSelection as rawColumnsForTiles]
@@ -713,23 +714,23 @@ export function createMarketingTile(
     if (tileConfig.specialConversionLogic) {
         const specialLogic = tileConfig.specialConversionLogic(table, tileColumnSelection)
         if (specialLogic) {
-            let finalMathHogql = specialLogic.math_insightsql
+            let finalMathInsightsql = specialLogic.math_insightsql
 
             if (
                 tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue &&
-                finalMathHogql &&
-                finalMathHogql !== '0'
+                finalMathInsightsql &&
+                finalMathInsightsql !== '0'
             ) {
                 if (specialLogic.perRowValueExpr) {
-                    finalMathHogql = wrapWithCurrencyConversion(
+                    finalMathInsightsql = wrapWithCurrencyConversion(
                         specialLogic.perRowValueExpr,
                         tileConfig.columnMappings,
                         table,
                         baseCurrency
                     )
                 } else {
-                    finalMathHogql = wrapAggregatedWithCurrencyConversion(
-                        finalMathHogql,
+                    finalMathInsightsql = wrapAggregatedWithCurrencyConversion(
+                        finalMathInsightsql,
                         tileConfig.columnMappings,
                         table,
                         baseCurrency
@@ -744,24 +745,24 @@ export function createMarketingTile(
                     integrationConfig,
                     tileConfig,
                     tileColumnSelection,
-                    finalMathHogql ?? '0'
+                    finalMathInsightsql ?? '0'
                 ),
                 ...specialLogicRest,
-                math_insightsql: finalMathHogql,
+                math_insightsql: finalMathInsightsql,
             }
         }
     }
 
     if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.Cost) {
         const costExpr = buildNativeCostExpr(tileConfig.columnMappings)
-        const mathHogql = wrapWithCurrencyConversion(costExpr, tileConfig.columnMappings, table, baseCurrency)
-        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathHogql)
+        const mathInsightsql = wrapWithCurrencyConversion(costExpr, tileConfig.columnMappings, table, baseCurrency)
+        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathInsightsql)
     }
 
     if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
         const valueExpr = safeFloat(column.name)
-        const mathHogql = wrapWithCurrencyConversion(valueExpr, tileConfig.columnMappings, table, baseCurrency)
-        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathHogql)
+        const mathInsightsql = wrapWithCurrencyConversion(valueExpr, tileConfig.columnMappings, table, baseCurrency)
+        return buildNativeTileNode(table, integrationConfig, tileConfig, tileColumnSelection, mathInsightsql)
     }
 
     // Default tile configuration for non-monetary columns

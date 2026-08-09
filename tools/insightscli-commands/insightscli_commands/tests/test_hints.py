@@ -11,7 +11,7 @@ from insightscli_commands import hints
 
 @pytest.fixture(autouse=True)
 def _isolated_state(tmp_path, monkeypatch):
-    monkeypatch.delenv("HOGLI_NO_HINTS", raising=False)
+    monkeypatch.delenv("INSIGHTSCLI_NO_HINTS", raising=False)
     monkeypatch.delenv("CI", raising=False)
     state_path = tmp_path / "insightscli_hints.json"
     with patch.object(hints, "_get_state_path", return_value=state_path):
@@ -99,7 +99,7 @@ class TestPickHint:
 
 class TestMaybeShowHint:
     def test_suppressed_by_env_var(self, _isolated_state):
-        with patch.dict("os.environ", {"HOGLI_NO_HINTS": "1"}):
+        with patch.dict("os.environ", {"INSIGHTSCLI_NO_HINTS": "1"}):
             hints.maybe_show_hint("start")
         assert not _isolated_state.exists()
 

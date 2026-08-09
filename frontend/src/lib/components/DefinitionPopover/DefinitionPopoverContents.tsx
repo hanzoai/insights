@@ -2,8 +2,8 @@ import { hide } from '@floating-ui/react'
 import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useMemo } from 'react'
 
-import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
 import { Button, Divider, InputSelect, SegmentedButton, Tag } from '@hanzo/elements'
+import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
 
 import { ActionPopoverInfo } from 'lib/components/DefinitionPopover/ActionPopoverInfo'
 import { CohortPopoverInfo } from 'lib/components/DefinitionPopover/CohortPopoverInfo'
@@ -20,8 +20,8 @@ import {
     TaxonomicFilterGroupType,
 } from 'lib/components/TaxonomicFilter/types'
 import { IconOpenInNew } from 'lib/elements/icons'
-import { TextArea } from 'lib/elements/TextArea/TextArea'
 import { Popover } from 'lib/elements/Popover'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 import { isKeyOf } from 'lib/utils/guards'
@@ -493,7 +493,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                 label,
                                 description,
                                 allowInsightsQL,
-                                hogQLOnly,
+                                insightsQLOnly,
                                 tableName,
                                 optional,
                                 type,
@@ -519,7 +519,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                                 </Tooltip>
                                             )}
                                         </label>
-                                        {!hogQLOnly && (
+                                        {!insightsQLOnly && (
                                             <InputSelect
                                                 mode="single"
                                                 fullWidth
@@ -548,11 +548,13 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                                 }
                                             />
                                         )}
-                                        {((allowInsightsQL && isInsightsQL) || hogQLOnly) && (
+                                        {((allowInsightsQL && isInsightsQL) || insightsQLOnly) && (
                                             <InsightsQLDropdown
-                                                hogQLValue={fieldValue || ''}
+                                                insightsQLValue={fieldValue || ''}
                                                 tableName={tableName || _definition.name}
-                                                onInsightsQLValueChange={(value) => setLocalDefinition({ [key]: value })}
+                                                onInsightsQLValueChange={(value) =>
+                                                    setLocalDefinition({ [key]: value })
+                                                }
                                             />
                                         )}
                                     </Fragment>

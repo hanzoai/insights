@@ -6,17 +6,17 @@ The Insights-specific extension layer lives in `tools/insightscli-commands/insig
 
 ## What belongs where
 
-| Concern                                                                    | `tools/insightscli/` (core, PyPI) | `tools/insightscli-commands/` (Insights extension)  |
-| -------------------------------------------------------------------------- | --------------------------- | -------------------------------------------- |
-| Command discovery (manifest schema, lazy click, extends)                   | ✅                          | ❌                                           |
-| Categorized help output                                                    | ✅                          | ❌                                           |
-| Telemetry framework (hook registration)                                    | ✅                          | ❌                                           |
-| Generic env file loading (`config.env.files`)                              | ✅                          | ❌                                           |
-| Generic secret-wrapper hook (`config.env.secrets` — file, marker, wrap)    | ✅                          | ❌                                           |
-| Insights command implementations (`migrations:run`, `test`, `doctor`…)      | ❌                          | ✅                                           |
-| Insights precheck handlers / telemetry properties / hint hooks              | ❌                          | ✅                                           |
-| Knowledge of `1Password` / `op` / `op://` specifically                     | ❌                          | ❌ — _neither._ Use the generic wrap config  |
-| Knowledge of `.env.development` / `.env.services` / `.env.local` filenames | ❌                          | ❌ — _neither._ Declare them in `insightscli.yaml` |
+| Concern                                                                    | `tools/insightscli/` (core, PyPI) | `tools/insightscli-commands/` (Insights extension) |
+| -------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------- |
+| Command discovery (manifest schema, lazy click, extends)                   | ✅                                | ❌                                                 |
+| Categorized help output                                                    | ✅                                | ❌                                                 |
+| Telemetry framework (hook registration)                                    | ✅                                | ❌                                                 |
+| Generic env file loading (`config.env.files`)                              | ✅                                | ❌                                                 |
+| Generic secret-wrapper hook (`config.env.secrets` — file, marker, wrap)    | ✅                                | ❌                                                 |
+| Insights command implementations (`migrations:run`, `test`, `doctor`…)     | ❌                                | ✅                                                 |
+| Insights precheck handlers / telemetry properties / hint hooks             | ❌                                | ✅                                                 |
+| Knowledge of `1Password` / `op` / `op://` specifically                     | ❌                                | ❌ — _neither._ Use the generic wrap config        |
+| Knowledge of `.env.development` / `.env.services` / `.env.local` filenames | ❌                                | ❌ — _neither._ Declare them in `insightscli.yaml` |
 
 ## Reviewer checklist for PRs touching `tools/insightscli/`
 
@@ -49,7 +49,7 @@ Even 1Password's own docs don't recommend a "task runner integration" — they j
 
 - `config.env.files: [...]` — list of dotenv files, loaded in order, first wins, shell env always wins.
 - `config.env.secrets.{file, marker, wrap}` — optional generic wrapper hook. Re-execs the invocation under `wrap` when (1) the invoked subcommand opts in via `needs_secrets: true`, (2) the file contains `marker`, and (3) `wrap[0]` is on PATH. Otherwise loads the file directly with marker-matching lines skipped, so literals don't leak as garbage strings.
-- `HOGLI_SECRETS_WRAPPED=1` sentinel — set before the wrap re-exec, inherited by subprocesses so composite/steps chains don't re-prompt for auth on every step.
+- `INSIGHTSCLI_SECRETS_WRAPPED=1` sentinel — set before the wrap re-exec, inherited by subprocesses so composite/steps chains don't re-prompt for auth on every step.
 - Per-command `needs_secrets: true` — opt-in gate for the wrap. Without it the wrap never fires; the built-in `insightscli run` is the one framework command that always opts in.
 
 **Not in core:**
@@ -88,10 +88,10 @@ If you're about to add code to `tools/insightscli/` and you're not sure whether 
 
 ## HOGLI\_\* environment variable namespace
 
-Core and consumers share the `HOGLI_` env prefix; check both lists before minting a new name.
+Core and consumers share the `INSIGHTSCLI_` env prefix; check both lists before minting a new name.
 
-Core-reserved (defined in `tools/insightscli/src/insightscli/`): `HOGLI_DEBUG`, `HOGLI_MANIFEST`, `HOGLI_SECRETS_WRAPPED`, `HOGLI_NESTED_INVOCATION`.
+Core-reserved (defined in `tools/insightscli/src/insightscli/`): `INSIGHTSCLI_DEBUG`, `INSIGHTSCLI_MANIFEST`, `INSIGHTSCLI_SECRETS_WRAPPED`, `INSIGHTSCLI_NESTED_INVOCATION`.
 
-Consumer-owned (defined in `tools/insightscli-commands/`): `HOGLI_ENVIRONMENT`, `HOGLI_AGENT`, `HOGLI_PROCESS_MANAGER` (telemetry self-declaration), `HOGLI_NO_HINTS`, `HOGLI_MPROCS_PATH`, `HOGLI_DEVBOX_CODER_URL`, `HOGLI_DEVBOX_CODER_VERSION`.
+Consumer-owned (defined in `tools/insightscli-commands/`): `INSIGHTSCLI_ENVIRONMENT`, `INSIGHTSCLI_AGENT`, `INSIGHTSCLI_PROCESS_MANAGER` (telemetry self-declaration), `INSIGHTSCLI_NO_HINTS`, `INSIGHTSCLI_MPROCS_PATH`, `INSIGHTSCLI_DEVBOX_CODER_URL`, `INSIGHTSCLI_DEVBOX_CODER_VERSION`.
 
 If core needs a name a consumer already uses (or vice versa), rename rather than overload — bootstraps in other repos export these and silently changing semantics breaks them.

@@ -13,7 +13,7 @@ import { NotebookNodeLogicProps, notebookNodeLogic } from './notebookNodeLogic'
 import { KNOWN_NODES } from '../utils'
 import { NotebookNodeTitle } from './components/NotebookNodeTitle'
 import { DuckSqlRunMenu } from './components/DuckSqlRunMenu'
-import { HogqlSqlRunMenu } from './components/HogqlSqlRunMenu'
+import { InsightsqlSqlRunMenu } from './components/InsightsqlSqlRunMenu'
 import { PythonRunMenu } from './components/PythonRunMenu'
 import { NotebookNodeContext } from './NotebookNodeContext'
 import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconPencil, IconX } from '@hanzo/icons'
@@ -87,7 +87,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         copyToClipboard,
         runPythonNodeWithMode,
         runDuckSqlNodeWithMode,
-        runHogqlSqlNodeWithMode,
+        runInsightsqlSqlNodeWithMode,
     } = useActions(nodeLogic)
 
     const { ref: inViewRef, inView } = useInView({ triggerOnce: true })
@@ -173,7 +173,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     )
     const isPythonNode = nodeType === NotebookNodeType.Python
     const isDuckSqlNode = nodeType === NotebookNodeType.DuckSQL
-    const isHogqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
+    const isInsightsqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
     const runDisabledReason = !notebook ? 'Notebook not loaded' : undefined
     const pythonAttributes = attributes as {
         code?: string
@@ -325,14 +325,14 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                         onRun={(mode) => void runDuckSqlNodeWithMode({ mode })}
                                                     />
                                                 ) : null}
-                                                {isHogqlSqlNode ? (
-                                                    <HogqlSqlRunMenu
+                                                {isInsightsqlSqlNode ? (
+                                                    <InsightsqlSqlRunMenu
                                                         isFresh={insightsqlSqlIsFresh}
                                                         isStale={insightsqlSqlIsStale}
                                                         loading={insightsqlSqlRunLoading}
                                                         queued={insightsqlSqlRunQueued}
                                                         disabledReason={runDisabledReason}
-                                                        onRun={(mode) => void runHogqlSqlNodeWithMode({ mode })}
+                                                        onRun={(mode) => void runInsightsqlSqlNodeWithMode({ mode })}
                                                     />
                                                 ) : null}
 

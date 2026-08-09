@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 
 import { Link } from '@hanzo/elements'
 
-import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { Button } from 'lib/elements/Button'
+import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 
 import { AnyDataNode } from '~/queries/schema/schema-general'
@@ -67,7 +67,7 @@ export function InsightsQLEditor({
                 onChange={(newValue) => {
                     setBufferedValue(newValue ?? '')
                 }}
-                language="hogQLExpr"
+                language="insightsQLExpr"
                 className={CLICK_OUTSIDE_BLOCK_CLASS}
                 minHeight="78px"
                 autoFocus={!disableAutoFocus}

@@ -3027,8 +3027,8 @@ InsightsQLParser::SelectStmtContext* InsightsQLParser::SelectContext::selectStmt
   return getRuleContext<InsightsQLParser::SelectStmtContext>(0);
 }
 
-InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::SelectContext::insightsqlxTagElement() {
-  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::InsightsqlxTagElementContext* InsightsQLParser::SelectContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::InsightsqlxTagElementContext>(0);
 }
 
 tree::TerminalNode* InsightsQLParser::SelectContext::SEMICOLON() {
@@ -10359,8 +10359,8 @@ std::any InsightsQLParser::ColumnExprIntervalStringContext::accept(tree::ParseTr
 }
 //----------------- ColumnExprTagElementContext ------------------------------------------------------------------
 
-InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::ColumnExprTagElementContext::insightsqlxTagElement() {
-  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::InsightsqlxTagElementContext* InsightsQLParser::ColumnExprTagElementContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::InsightsqlxTagElementContext>(0);
 }
 
 InsightsQLParser::ColumnExprTagElementContext::ColumnExprTagElementContext(ColumnExprValueContext *ctx) { copyFrom(ctx); }
@@ -13879,48 +13879,48 @@ InsightsQLParser::ColumnsReplaceItemContext* InsightsQLParser::columnsReplaceIte
   return _localctx;
 }
 
-//----------------- HogqlxChildElementContext ------------------------------------------------------------------
+//----------------- InsightsqlxChildElementContext ------------------------------------------------------------------
 
-InsightsQLParser::HogqlxChildElementContext::HogqlxChildElementContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::InsightsqlxChildElementContext::InsightsqlxChildElementContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::HogqlxChildElementContext::insightsqlxTagElement() {
-  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::InsightsqlxTagElementContext* InsightsQLParser::InsightsqlxChildElementContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::InsightsqlxTagElementContext>(0);
 }
 
-InsightsQLParser::HogqlxTextContext* InsightsQLParser::HogqlxChildElementContext::insightsqlxText() {
-  return getRuleContext<InsightsQLParser::HogqlxTextContext>(0);
+InsightsQLParser::InsightsqlxTextContext* InsightsQLParser::InsightsqlxChildElementContext::insightsqlxText() {
+  return getRuleContext<InsightsQLParser::InsightsqlxTextContext>(0);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxChildElementContext::LBRACE() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxChildElementContext::LBRACE() {
   return getToken(InsightsQLParser::LBRACE, 0);
 }
 
-InsightsQLParser::ColumnExprContext* InsightsQLParser::HogqlxChildElementContext::columnExpr() {
+InsightsQLParser::ColumnExprContext* InsightsQLParser::InsightsqlxChildElementContext::columnExpr() {
   return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxChildElementContext::RBRACE() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxChildElementContext::RBRACE() {
   return getToken(InsightsQLParser::RBRACE, 0);
 }
 
 
-size_t InsightsQLParser::HogqlxChildElementContext::getRuleIndex() const {
-  return InsightsQLParser::RuleHogqlxChildElement;
+size_t InsightsQLParser::InsightsqlxChildElementContext::getRuleIndex() const {
+  return InsightsQLParser::RuleInsightsqlxChildElement;
 }
 
 
-std::any InsightsQLParser::HogqlxChildElementContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any InsightsQLParser::InsightsqlxChildElementContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
-    return parserVisitor->visitHogqlxChildElement(this);
+    return parserVisitor->visitInsightsqlxChildElement(this);
   else
     return visitor->visitChildren(this);
 }
 
-InsightsQLParser::HogqlxChildElementContext* InsightsQLParser::insightsqlxChildElement() {
-  HogqlxChildElementContext *_localctx = _tracker.createInstance<HogqlxChildElementContext>(_ctx, getState());
-  enterRule(_localctx, 164, InsightsQLParser::RuleHogqlxChildElement);
+InsightsQLParser::InsightsqlxChildElementContext* InsightsQLParser::insightsqlxChildElement() {
+  InsightsqlxChildElementContext *_localctx = _tracker.createInstance<InsightsqlxChildElementContext>(_ctx, getState());
+  enterRule(_localctx, 164, InsightsQLParser::RuleInsightsqlxChildElement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -13972,32 +13972,32 @@ InsightsQLParser::HogqlxChildElementContext* InsightsQLParser::insightsqlxChildE
   return _localctx;
 }
 
-//----------------- HogqlxTextContext ------------------------------------------------------------------
+//----------------- InsightsqlxTextContext ------------------------------------------------------------------
 
-InsightsQLParser::HogqlxTextContext::HogqlxTextContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::InsightsqlxTextContext::InsightsqlxTextContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxTextContext::INSIGHTSQLX_TEXT_TEXT() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTextContext::INSIGHTSQLX_TEXT_TEXT() {
   return getToken(InsightsQLParser::INSIGHTSQLX_TEXT_TEXT, 0);
 }
 
 
-size_t InsightsQLParser::HogqlxTextContext::getRuleIndex() const {
-  return InsightsQLParser::RuleHogqlxText;
+size_t InsightsQLParser::InsightsqlxTextContext::getRuleIndex() const {
+  return InsightsQLParser::RuleInsightsqlxText;
 }
 
 
-std::any InsightsQLParser::HogqlxTextContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any InsightsQLParser::InsightsqlxTextContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
-    return parserVisitor->visitHogqlxText(this);
+    return parserVisitor->visitInsightsqlxText(this);
   else
     return visitor->visitChildren(this);
 }
 
-InsightsQLParser::HogqlxTextContext* InsightsQLParser::insightsqlxText() {
-  HogqlxTextContext *_localctx = _tracker.createInstance<HogqlxTextContext>(_ctx, getState());
-  enterRule(_localctx, 166, InsightsQLParser::RuleHogqlxText);
+InsightsQLParser::InsightsqlxTextContext* InsightsQLParser::insightsqlxText() {
+  InsightsqlxTextContext *_localctx = _tracker.createInstance<InsightsqlxTextContext>(_ctx, getState());
+  enterRule(_localctx, 166, InsightsQLParser::RuleInsightsqlxText);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -14021,106 +14021,106 @@ InsightsQLParser::HogqlxTextContext* InsightsQLParser::insightsqlxText() {
   return _localctx;
 }
 
-//----------------- HogqlxTagElementContext ------------------------------------------------------------------
+//----------------- InsightsqlxTagElementContext ------------------------------------------------------------------
 
-InsightsQLParser::HogqlxTagElementContext::HogqlxTagElementContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::InsightsqlxTagElementContext::InsightsqlxTagElementContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t InsightsQLParser::HogqlxTagElementContext::getRuleIndex() const {
-  return InsightsQLParser::RuleHogqlxTagElement;
+size_t InsightsQLParser::InsightsqlxTagElementContext::getRuleIndex() const {
+  return InsightsQLParser::RuleInsightsqlxTagElement;
 }
 
-void InsightsQLParser::HogqlxTagElementContext::copyFrom(HogqlxTagElementContext *ctx) {
+void InsightsQLParser::InsightsqlxTagElementContext::copyFrom(InsightsqlxTagElementContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
-//----------------- HogqlxTagElementClosedContext ------------------------------------------------------------------
+//----------------- InsightsqlxTagElementClosedContext ------------------------------------------------------------------
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagElementClosedContext::LT() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagElementClosedContext::LT() {
   return getToken(InsightsQLParser::LT, 0);
 }
 
-InsightsQLParser::IdentifierContext* InsightsQLParser::HogqlxTagElementClosedContext::identifier() {
+InsightsQLParser::IdentifierContext* InsightsQLParser::InsightsqlxTagElementClosedContext::identifier() {
   return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagElementClosedContext::SLASH_GT() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagElementClosedContext::SLASH_GT() {
   return getToken(InsightsQLParser::SLASH_GT, 0);
 }
 
-std::vector<InsightsQLParser::HogqlxTagAttributeContext *> InsightsQLParser::HogqlxTagElementClosedContext::insightsqlxTagAttribute() {
-  return getRuleContexts<InsightsQLParser::HogqlxTagAttributeContext>();
+std::vector<InsightsQLParser::InsightsqlxTagAttributeContext *> InsightsQLParser::InsightsqlxTagElementClosedContext::insightsqlxTagAttribute() {
+  return getRuleContexts<InsightsQLParser::InsightsqlxTagAttributeContext>();
 }
 
-InsightsQLParser::HogqlxTagAttributeContext* InsightsQLParser::HogqlxTagElementClosedContext::insightsqlxTagAttribute(size_t i) {
-  return getRuleContext<InsightsQLParser::HogqlxTagAttributeContext>(i);
+InsightsQLParser::InsightsqlxTagAttributeContext* InsightsQLParser::InsightsqlxTagElementClosedContext::insightsqlxTagAttribute(size_t i) {
+  return getRuleContext<InsightsQLParser::InsightsqlxTagAttributeContext>(i);
 }
 
-InsightsQLParser::HogqlxTagElementClosedContext::HogqlxTagElementClosedContext(HogqlxTagElementContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::InsightsqlxTagElementClosedContext::InsightsqlxTagElementClosedContext(InsightsqlxTagElementContext *ctx) { copyFrom(ctx); }
 
 
-std::any InsightsQLParser::HogqlxTagElementClosedContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any InsightsQLParser::InsightsqlxTagElementClosedContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
-    return parserVisitor->visitHogqlxTagElementClosed(this);
+    return parserVisitor->visitInsightsqlxTagElementClosed(this);
   else
     return visitor->visitChildren(this);
 }
-//----------------- HogqlxTagElementNestedContext ------------------------------------------------------------------
+//----------------- InsightsqlxTagElementNestedContext ------------------------------------------------------------------
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagElementNestedContext::LT() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagElementNestedContext::LT() {
   return getToken(InsightsQLParser::LT, 0);
 }
 
-std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::HogqlxTagElementNestedContext::identifier() {
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::InsightsqlxTagElementNestedContext::identifier() {
   return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-InsightsQLParser::IdentifierContext* InsightsQLParser::HogqlxTagElementNestedContext::identifier(size_t i) {
+InsightsQLParser::IdentifierContext* InsightsQLParser::InsightsqlxTagElementNestedContext::identifier(size_t i) {
   return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-std::vector<tree::TerminalNode *> InsightsQLParser::HogqlxTagElementNestedContext::GT() {
+std::vector<tree::TerminalNode *> InsightsQLParser::InsightsqlxTagElementNestedContext::GT() {
   return getTokens(InsightsQLParser::GT);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagElementNestedContext::GT(size_t i) {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagElementNestedContext::GT(size_t i) {
   return getToken(InsightsQLParser::GT, i);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagElementNestedContext::LT_SLASH() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagElementNestedContext::LT_SLASH() {
   return getToken(InsightsQLParser::LT_SLASH, 0);
 }
 
-std::vector<InsightsQLParser::HogqlxTagAttributeContext *> InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxTagAttribute() {
-  return getRuleContexts<InsightsQLParser::HogqlxTagAttributeContext>();
+std::vector<InsightsQLParser::InsightsqlxTagAttributeContext *> InsightsQLParser::InsightsqlxTagElementNestedContext::insightsqlxTagAttribute() {
+  return getRuleContexts<InsightsQLParser::InsightsqlxTagAttributeContext>();
 }
 
-InsightsQLParser::HogqlxTagAttributeContext* InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxTagAttribute(size_t i) {
-  return getRuleContext<InsightsQLParser::HogqlxTagAttributeContext>(i);
+InsightsQLParser::InsightsqlxTagAttributeContext* InsightsQLParser::InsightsqlxTagElementNestedContext::insightsqlxTagAttribute(size_t i) {
+  return getRuleContext<InsightsQLParser::InsightsqlxTagAttributeContext>(i);
 }
 
-std::vector<InsightsQLParser::HogqlxChildElementContext *> InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxChildElement() {
-  return getRuleContexts<InsightsQLParser::HogqlxChildElementContext>();
+std::vector<InsightsQLParser::InsightsqlxChildElementContext *> InsightsQLParser::InsightsqlxTagElementNestedContext::insightsqlxChildElement() {
+  return getRuleContexts<InsightsQLParser::InsightsqlxChildElementContext>();
 }
 
-InsightsQLParser::HogqlxChildElementContext* InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxChildElement(size_t i) {
-  return getRuleContext<InsightsQLParser::HogqlxChildElementContext>(i);
+InsightsQLParser::InsightsqlxChildElementContext* InsightsQLParser::InsightsqlxTagElementNestedContext::insightsqlxChildElement(size_t i) {
+  return getRuleContext<InsightsQLParser::InsightsqlxChildElementContext>(i);
 }
 
-InsightsQLParser::HogqlxTagElementNestedContext::HogqlxTagElementNestedContext(HogqlxTagElementContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::InsightsqlxTagElementNestedContext::InsightsqlxTagElementNestedContext(InsightsqlxTagElementContext *ctx) { copyFrom(ctx); }
 
 
-std::any InsightsQLParser::HogqlxTagElementNestedContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any InsightsQLParser::InsightsqlxTagElementNestedContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
-    return parserVisitor->visitHogqlxTagElementNested(this);
+    return parserVisitor->visitInsightsqlxTagElementNested(this);
   else
     return visitor->visitChildren(this);
 }
-InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::insightsqlxTagElement() {
-  HogqlxTagElementContext *_localctx = _tracker.createInstance<HogqlxTagElementContext>(_ctx, getState());
-  enterRule(_localctx, 168, InsightsQLParser::RuleHogqlxTagElement);
+InsightsQLParser::InsightsqlxTagElementContext* InsightsQLParser::insightsqlxTagElement() {
+  InsightsqlxTagElementContext *_localctx = _tracker.createInstance<InsightsqlxTagElementContext>(_ctx, getState());
+  enterRule(_localctx, 168, InsightsQLParser::RuleInsightsqlxTagElement);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -14135,7 +14135,7 @@ InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::insightsqlxTagEleme
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 218, _ctx)) {
     case 1: {
-      _localctx = _tracker.createInstance<InsightsQLParser::HogqlxTagElementClosedContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::InsightsqlxTagElementClosedContext>(_localctx);
       enterOuterAlt(_localctx, 1);
       setState(1751);
       match(InsightsQLParser::LT);
@@ -14160,7 +14160,7 @@ InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::insightsqlxTagEleme
     }
 
     case 2: {
-      _localctx = _tracker.createInstance<InsightsQLParser::HogqlxTagElementNestedContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::InsightsqlxTagElementNestedContext>(_localctx);
       enterOuterAlt(_localctx, 2);
       setState(1761);
       match(InsightsQLParser::LT);
@@ -14215,52 +14215,52 @@ InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::insightsqlxTagEleme
   return _localctx;
 }
 
-//----------------- HogqlxTagAttributeContext ------------------------------------------------------------------
+//----------------- InsightsqlxTagAttributeContext ------------------------------------------------------------------
 
-InsightsQLParser::HogqlxTagAttributeContext::HogqlxTagAttributeContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::InsightsqlxTagAttributeContext::InsightsqlxTagAttributeContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-InsightsQLParser::IdentifierContext* InsightsQLParser::HogqlxTagAttributeContext::identifier() {
+InsightsQLParser::IdentifierContext* InsightsQLParser::InsightsqlxTagAttributeContext::identifier() {
   return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagAttributeContext::EQ_SINGLE() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagAttributeContext::EQ_SINGLE() {
   return getToken(InsightsQLParser::EQ_SINGLE, 0);
 }
 
-InsightsQLParser::StringContext* InsightsQLParser::HogqlxTagAttributeContext::string() {
+InsightsQLParser::StringContext* InsightsQLParser::InsightsqlxTagAttributeContext::string() {
   return getRuleContext<InsightsQLParser::StringContext>(0);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagAttributeContext::LBRACE() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagAttributeContext::LBRACE() {
   return getToken(InsightsQLParser::LBRACE, 0);
 }
 
-InsightsQLParser::ColumnExprContext* InsightsQLParser::HogqlxTagAttributeContext::columnExpr() {
+InsightsQLParser::ColumnExprContext* InsightsQLParser::InsightsqlxTagAttributeContext::columnExpr() {
   return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* InsightsQLParser::HogqlxTagAttributeContext::RBRACE() {
+tree::TerminalNode* InsightsQLParser::InsightsqlxTagAttributeContext::RBRACE() {
   return getToken(InsightsQLParser::RBRACE, 0);
 }
 
 
-size_t InsightsQLParser::HogqlxTagAttributeContext::getRuleIndex() const {
-  return InsightsQLParser::RuleHogqlxTagAttribute;
+size_t InsightsQLParser::InsightsqlxTagAttributeContext::getRuleIndex() const {
+  return InsightsQLParser::RuleInsightsqlxTagAttribute;
 }
 
 
-std::any InsightsQLParser::HogqlxTagAttributeContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any InsightsQLParser::InsightsqlxTagAttributeContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
-    return parserVisitor->visitHogqlxTagAttribute(this);
+    return parserVisitor->visitInsightsqlxTagAttribute(this);
   else
     return visitor->visitChildren(this);
 }
 
-InsightsQLParser::HogqlxTagAttributeContext* InsightsQLParser::insightsqlxTagAttribute() {
-  HogqlxTagAttributeContext *_localctx = _tracker.createInstance<HogqlxTagAttributeContext>(_ctx, getState());
-  enterRule(_localctx, 170, InsightsQLParser::RuleHogqlxTagAttribute);
+InsightsQLParser::InsightsqlxTagAttributeContext* InsightsQLParser::insightsqlxTagAttribute() {
+  InsightsqlxTagAttributeContext *_localctx = _tracker.createInstance<InsightsqlxTagAttributeContext>(_ctx, getState());
+  enterRule(_localctx, 170, InsightsQLParser::RuleInsightsqlxTagAttribute);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -14984,8 +14984,8 @@ void InsightsQLParser::TableExprContext::copyFrom(TableExprContext *ctx) {
 
 //----------------- TableExprTagContext ------------------------------------------------------------------
 
-InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::TableExprTagContext::insightsqlxTagElement() {
-  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::InsightsqlxTagElementContext* InsightsQLParser::TableExprTagContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::InsightsqlxTagElementContext>(0);
 }
 
 InsightsQLParser::TableExprTagContext::TableExprTagContext(TableExprContext *ctx) { copyFrom(ctx); }

@@ -1,7 +1,7 @@
+import { ExecResult } from '@hanzo/scriptvm'
 import { DateTime } from 'luxon'
 import { Counter, Histogram } from 'prom-client'
 
-import { ExecResult } from '@hanzo/scriptvm'
 
 import { Flow } from '~/cdp/schema/flow'
 import { parseJSON } from '~/common/utils/json-parse'
@@ -328,7 +328,10 @@ export function convertToInsightsFunctionFilterGlobal(
 
 const INSIGHTS_FILTERING_TIMEOUT_MS = 100
 
-function preFilterResult(filters: InsightsFunctionType['filters'], filterGlobals: InsightsFunctionFilterGlobals): boolean {
+function preFilterResult(
+    filters: InsightsFunctionType['filters'],
+    filterGlobals: InsightsFunctionFilterGlobals
+): boolean {
     const eventMatches = filters?.events?.some((eventFilter) => {
         // We need to test if the id is null (all events) or if it is in the list of event matchers
         return eventFilter.id === null || eventFilter.id === filterGlobals.event

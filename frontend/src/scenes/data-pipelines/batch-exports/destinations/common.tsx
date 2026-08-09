@@ -227,10 +227,7 @@ export function CompressionField({ fileFormat }: { fileFormat: string | undefine
 
     return (
         <Field name="compression" label="Compression" className="flex-1">
-            <Select
-                options={compressionOptions}
-                placeholder={!fileFormat ? 'Select file format first' : undefined}
-            />
+            <Select options={compressionOptions} placeholder={!fileFormat ? 'Select file format first' : undefined} />
         </Field>
     )
 }
@@ -489,14 +486,14 @@ export function S3FamilyFields({
 // S3 and Databricks override these (S3 uses person_id/person_properties/created_at; Databricks
 // emits a different team_id+ingestion-timestamp pair).
 export function genericPersonEventFields(opts: {
-    teamIdHogql: string
+    teamIdInsightsql: string
     setName: string
     setOnceName: string
 }): Record<string, DatabaseSchemaField> {
     return {
         team_id: {
             name: 'team_id',
-            insightsql_value: opts.teamIdHogql,
+            insightsql_value: opts.teamIdInsightsql,
             type: 'integer',
             schema_valid: true,
         },

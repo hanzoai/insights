@@ -54,8 +54,8 @@ export interface UseTaxonomicGroupsContextInput {
     maxContextOptions?: MaxContextTaxonomicFilterOption[]
     hideBehavioralCohorts?: boolean
     endpointFilters?: Record<string, any>
-    hogQLGlobals?: Record<string, any>
-    hogQLExpressionShowBreakdownLabelHint?: boolean
+    insightsQLGlobals?: Record<string, any>
+    insightsQLExpressionShowBreakdownLabelHint?: boolean
 }
 
 const DEFAULT_METADATA_SOURCE: AnyDataNode = {
@@ -113,9 +113,9 @@ export function useTaxonomicGroupsContext(input: UseTaxonomicGroupsContextInput)
                 | Record<TaxonomicFilterGroupType, (string | number | null)[]>
                 | undefined,
         }
-        const hogQLExpressionComponentProps = {
-            globals: input.hogQLGlobals,
-            showBreakdownLabelHint: input.hogQLExpressionShowBreakdownLabelHint ?? false,
+        const insightsQLExpressionComponentProps = {
+            globals: input.insightsQLGlobals,
+            showBreakdownLabelHint: input.insightsQLExpressionShowBreakdownLabelHint ?? false,
         }
         return {
             // `BuildTaxonomicGroupsContext.currentTeam` is non-nullable; the
@@ -147,7 +147,7 @@ export function useTaxonomicGroupsContext(input: UseTaxonomicGroupsContextInput)
             maxContextOptions: input.maxContextOptions ?? (EMPTY_ARRAY as unknown as MaxContextTaxonomicFilterOption[]),
             hideBehavioralCohorts: input.hideBehavioralCohorts ?? false,
             endpointFilters: input.endpointFilters,
-            hogQLExpressionComponentProps,
+            insightsQLExpressionComponentProps,
             // `featureFlags` from featureFlagLogic returns the project's
             // own `FeatureFlagsSet` shape; widen to the looser
             // `Record<string, boolean | string | undefined>` the
@@ -179,7 +179,7 @@ export function useTaxonomicGroupsContext(input: UseTaxonomicGroupsContextInput)
         input.maxContextOptions,
         input.hideBehavioralCohorts,
         input.endpointFilters,
-        input.hogQLGlobals,
-        input.hogQLExpressionShowBreakdownLabelHint,
+        input.insightsQLGlobals,
+        input.insightsQLExpressionShowBreakdownLabelHint,
     ])
 }

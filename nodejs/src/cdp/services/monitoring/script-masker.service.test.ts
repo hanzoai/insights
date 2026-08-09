@@ -142,9 +142,15 @@ describe('HogMasker', () => {
             const res2 = await masker.filterByMasking(invocations)
             expect(res2.notMasked).toHaveLength(1)
             expect(res2.masked).toHaveLength(2)
-            expect((res2.notMasked[0] as CyclotronJobInvocationInsightsFunction).insightsFunction).toEqual(functionWithNoMasking)
-            expect((res2.masked[0] as CyclotronJobInvocationInsightsFunction).insightsFunction).toEqual(functionWithAllMasking)
-            expect((res2.masked[1] as CyclotronJobInvocationInsightsFunction).insightsFunction).toEqual(functionWithAllMasking2)
+            expect((res2.notMasked[0] as CyclotronJobInvocationInsightsFunction).insightsFunction).toEqual(
+                functionWithNoMasking
+            )
+            expect((res2.masked[0] as CyclotronJobInvocationInsightsFunction).insightsFunction).toEqual(
+                functionWithAllMasking
+            )
+            expect((res2.masked[1] as CyclotronJobInvocationInsightsFunction).insightsFunction).toEqual(
+                functionWithAllMasking2
+            )
         })
 
         describe('ttl', () => {
@@ -244,7 +250,8 @@ describe('HogMasker', () => {
 
                 // If we have 10 invocations in a batch then we should have 2 invocations that are not masked
                 expect(
-                    (await masker.filterByMasking(Array(10).fill(createExampleInvocation(insightsFunctionAll)))).notMasked
+                    (await masker.filterByMasking(Array(10).fill(createExampleInvocation(insightsFunctionAll))))
+                        .notMasked
                 ).toHaveLength(2)
 
                 // Next one should cross the threshold
