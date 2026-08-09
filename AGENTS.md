@@ -1,5 +1,10 @@
 # Insights Development Guide
 
+> **Read [LLM.md](LLM.md) too.** This file is the development guide; LLM.md is the accumulated
+> operational record — the traps, the measurements, and the reasons behind decisions that are
+> expensive to rediscover. Both are loaded via `CLAUDE.md`.
+
+
 ## Codebase Structure
 
 - Key entry points: `insights/api/__init__.py` (API URL routing skeleton; products register their own routes in `products/<name>/backend/routes.py` via `register_routes(routers)`), `insights/settings/web.py` (Django settings, INSTALLED_APPS), `products/` (product apps)
