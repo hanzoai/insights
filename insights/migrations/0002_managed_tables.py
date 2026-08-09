@@ -4,10 +4,18 @@ from django.db import migrations
 class Migration(migrations.Migration):
     """
     Create the managed=False tables (Person/Group/PersonOverride/CohortPeople/Role
-    families + task/workflow) that Django's makemigrations skips. DDL captured
-    verbatim from the live insights DB (pg_dump --schema-only), so the squashed
-    initial reaches full schema parity. Runs after 0001_initial (all managed
-    tables + Fks targets exist).
+    families) that Django's makemigrations skips. DDL captured verbatim from the live
+    insights DB (pg_dump --schema-only), so the squashed initial reaches full schema
+    parity. Runs after 0001_initial (all managed tables + Fks targets exist).
+
+    A pg_dump knows nothing about which tables Django owns, so the capture also swept in
+    `insights_task_progress`, `insights_task_workflow` and `insights_workflow_stage` —
+    all three managed, all three created by `tasks.0001` and `tasks.0002` as plain
+    CreateModels. On a database that already had them this migration was long since
+    recorded, so the duplicate only ever bit a fresh build, which died at `relation
+    "insights_task_workflow" already exists`. Their DDL is gone from here; `tasks` owns
+    them. The Django-generated constraint names in the capture --
+    `insights_task_workflow_team_id_name_afa790f8_uniq` -- are what give such a table away.
     """
 
     dependencies = [
@@ -243,30 +251,6 @@ ALTER TABLE public.insights_personoverridemapping ALTER COLUMN id ADD GENERATED 
     NO MAXVALUE
     CACHE 1
 );
-CREATE TABLE public.insights_task_workflow (
-    id uuid NOT NULL,
-    name character varying(255) NOT NULL,
-    description text NOT NULL,
-    is_default boolean NOT NULL,
-    is_active boolean NOT NULL,
-    version integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    team_id integer NOT NULL,
-    color character varying(7) NOT NULL
-);
-CREATE TABLE public.insights_workflow_stage (
-    id uuid NOT NULL,
-    name character varying(100) NOT NULL,
-    key character varying(50) NOT NULL,
-    "position" integer NOT NULL,
-    color character varying(7) NOT NULL,
-    is_manual_only boolean NOT NULL,
-    is_archived boolean NOT NULL,
-    fallback_stage_id uuid,
-    workflow_id uuid NOT NULL,
-    agent_name character varying(50)
-);
 ALTER TABLE ONLY public.insights_featureflaghashkeyoverride
     ADD CONSTRAINT "Unique hash_key for a user/team/feature_flag combo" UNIQUE (team_id, person_id, feature_flag_key);
 ALTER TABLE public.insights_person
@@ -305,16 +289,6 @@ ALTER TABLE ONLY public.insights_personoverride
     ADD CONSTRAINT insights_personoverride_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.insights_personoverridemapping
     ADD CONSTRAINT insights_personoverridemapping_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.insights_task_workflow
-    ADD CONSTRAINT insights_task_workflow_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.insights_task_workflow
-    ADD CONSTRAINT insights_task_workflow_team_id_name_afa790f8_uniq UNIQUE (team_id, name);
-ALTER TABLE ONLY public.insights_workflow_stage
-    ADD CONSTRAINT insights_workflow_stage_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.insights_workflow_stage
-    ADD CONSTRAINT insights_workflow_stage_workflow_id_key_6f223ba4_uniq UNIQUE (workflow_id, key);
-ALTER TABLE ONLY public.insights_workflow_stage
-    ADD CONSTRAINT insights_workflow_stage_workflow_id_position_cbb3125a_uniq UNIQUE (workflow_id, "position");
 ALTER TABLE ONLY public.insights_persondistinctid
     ADD CONSTRAINT "unique distinct_id for team" UNIQUE (team_id, distinct_id);
 ALTER TABLE ONLY public.insights_grouptypemapping
@@ -348,9 +322,6 @@ CREATE INDEX insights_persondistinctid_person_id_71923cce ON public.insights_per
 CREATE INDEX insights_personoverride_old_person_id_ca0516f1 ON public.insights_personoverride USING btree (old_person_id);
 CREATE INDEX insights_personoverride_override_person_id_ceccd1ef ON public.insights_personoverride USING btree (override_person_id);
 CREATE INDEX insights_personoverride_team_id_cf1a22c0 ON public.insights_personoverride USING btree (team_id);
-CREATE INDEX insights_task_workflow_team_id_b0074670 ON public.insights_task_workflow USING btree (team_id);
-CREATE INDEX insights_workflow_stage_fallback_stage_id_504d1e08 ON public.insights_workflow_stage USING btree (fallback_stage_id);
-CREATE INDEX insights_workflow_stage_workflow_id_b5825ecf ON public.insights_workflow_stage USING btree (workflow_id);
 ALTER TABLE ONLY public.ee_accesscontrol
     ADD CONSTRAINT ee_accesscontrol_created_by_id_c52b886d_fk_insights_user_id FOREIGN KEY (created_by_id) REFERENCES public.insights_user(id) DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY public.ee_accesscontrol
@@ -403,12 +374,6 @@ ALTER TABLE ONLY public.insights_personoverride
     ADD CONSTRAINT insights_personoverr_old_person_id_ca0516f1_fk_insights_ FOREIGN KEY (old_person_id) REFERENCES public.insights_personoverridemapping(id) DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY public.insights_personoverride
     ADD CONSTRAINT insights_personoverr_override_person_id_ceccd1ef_fk_insights_ FOREIGN KEY (override_person_id) REFERENCES public.insights_personoverridemapping(id) DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY public.insights_task_workflow
-    ADD CONSTRAINT insights_task_workflow_team_id_b0074670_fk_insights_team_id FOREIGN KEY (team_id) REFERENCES public.insights_team(id) DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY public.insights_workflow_stage
-    ADD CONSTRAINT insights_workflow_st_fallback_stage_id_504d1e08_fk_insights_ FOREIGN KEY (fallback_stage_id) REFERENCES public.insights_workflow_stage(id) DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY public.insights_workflow_stage
-    ADD CONSTRAINT insights_workflow_st_workflow_id_b5825ecf_fk_insights_ FOREIGN KEY (workflow_id) REFERENCES public.insights_task_workflow(id) DEFERRABLE INITIALLY DEFERRED;
 
 """,
             reverse_sql=r"""
@@ -427,8 +392,6 @@ DROP TABLE IF EXISTS "insights_persondistinctid" CASCADE;
 DROP TABLE IF EXISTS "insights_personlessdistinctid" CASCADE;
 DROP TABLE IF EXISTS "insights_personoverride" CASCADE;
 DROP TABLE IF EXISTS "insights_personoverridemapping" CASCADE;
-DROP TABLE IF EXISTS "insights_task_workflow" CASCADE;
-DROP TABLE IF EXISTS "insights_workflow_stage" CASCADE;
 """,
         ),
     ]
