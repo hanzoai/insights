@@ -2,6 +2,7 @@ import math
 from random import Random
 from uuid import UUID
 
+import pytest
 from insights.test.base import BaseTest
 
 from django.core.exceptions import ValidationError
@@ -11,6 +12,7 @@ from parameterized import parameterized
 from insights.models.utils import (
     AMBIGUOUS_CHARS,
     BASE57,
+    KEY_BYTES,
     KEY_MARKS,
     KeyKind,
     convert_legacy_metric,
@@ -71,16 +73,40 @@ def test_mask_key_value():
 BASE57_SET = set(BASE57)
 
 
+# Ingest keys Hanzo cloud minted, live. Cloud encodes 32 random bytes with
+# `base64.RawURLEncoding`, whose alphabet includes `-` and `_`, so most real keys
+# carry at least one -- three of these four do, and the fourth is what a key that
+# happens to miss them looks like.
+CLOUD_KEYS = [
+    "pk-rM_CdaF2MQckGCrla113SrR1oH4zvqN8xh2I95Z9tY8",
+    "pk-gUZp6ZVfhJzSwK-rb4oLbVkpCnMBx5uSCpxf_5yEhQk",
+    "pk-CmfLA2K6kvsPflrS9DSkt06H_kSoQB_21sjedt6VJdc",
+    "pk-3TKpKnERV9AQSsBUERWkZejC1O1mUxc1jRzsP3MPbs4",
+]
+
+
 class TestKeyMarks:
     """The mint and the reader are one pair, so what one writes the other reads."""
 
-    @parameterized.expand([(kind.value, kind) for kind in KeyKind])
+    @parameterized.expand([(kind.value, kind) for kind in KeyKind if kind in KEY_BYTES])
     def test_minted_key_reads_back_as_its_own_kind(self, _name, kind):
         for _ in range(20):
             assert key_kind(mint(kind)) is kind
 
     def test_every_kind_has_its_own_mark(self):
         assert len(set(KEY_MARKS.values())) == len(KeyKind)
+
+    @parameterized.expand([(key, key) for key in CLOUD_KEYS])
+    def test_a_cloud_minted_ingest_key_reads_as_publishable(self, _name, value):
+        # The reader has to span both encodings in play, because the key it routes
+        # on is cloud's. Reading only base57 dropped the first three of these.
+        assert key_kind(value) is KeyKind.PUBLISHABLE
+
+    def test_the_cloud_alphabet_is_actually_exercised(self):
+        # Guards the guard: if these vectors ever lost their `-` and `_` the case
+        # above would still pass while proving nothing.
+        assert any("-" in key[3:] for key in CLOUD_KEYS)
+        assert any("_" in key[3:] for key in CLOUD_KEYS)
 
     @parameterized.expand(
         [
@@ -92,9 +118,6 @@ class TestKeyMarks:
             ("mark_only", "sk-"),
             # A mark has to open the string, not merely appear in it.
             ("mark_not_leading", "Bearer sk-F2bC9xLq"),
-            # Anchored at the end too, so a third party's key -- OpenAI and
-            # Anthropic also open with `sk-` -- is not read as one of ours.
-            ("foreign_key_shape", "sk-ant-api03-F2bC9xLq"),
             ("trailing_space", "sk-F2bC9xLq "),
             ("unknown_mark", "zz-F2bC9xLq"),
             ("none", None),
@@ -102,6 +125,49 @@ class TestKeyMarks:
     )
     def test_a_value_that_is_not_a_key_reads_as_none(self, _name, value):
         assert key_kind(value) is None
+
+    def test_a_third_partys_key_is_shaped_like_ours_and_decided_by_the_store(self):
+        # OpenAI and Anthropic also open with `sk-`, and used to fail the shape only
+        # because base57 has no hyphen. Cloud's alphabet does, so shape no longer
+        # separates them -- which is where the unmarked legacy keys have always been
+        # decided anyway: a lookup that finds nothing.
+        assert key_kind("sk-ant-api03-F2bC9xLq") is KeyKind.SECRET
+
+
+class TestIngestKeyIsNotMintedHere:
+    """Cloud is the one authority that mints an ingest key.
+
+    A `pk-` invented here resolves to no project, and the ingest door answers
+    `ingest_key_unknown` -- a team that looks configured and drops every event. So
+    the mint refuses outright, and `Team.api_token`'s default stands in something
+    that is not a key at all rather than a weaker one.
+    """
+
+    def test_minting_a_publishable_key_refuses(self):
+        with pytest.raises(RuntimeError, match="POST /v1/projects"):
+            mint(KeyKind.PUBLISHABLE)
+
+    def test_the_field_default_is_not_a_key(self):
+        # `key_kind` is the one predicate every reader routes on, so a placeholder
+        # it read as a kind would be a credential to somebody. Reading as nothing
+        # is what a team cloud has not named a project for actually has.
+        assert key_kind(generate_random_token_project()) is None
+
+    def test_two_placeholders_never_collide(self):
+        # `Team.api_token` is unique, so a constant placeholder would leave the
+        # second team unsaveable.
+        assert len({generate_random_token_project() for _ in range(1000)}) == 1000
+
+    def test_the_placeholder_fits_through_the_edge(self):
+        # `rust/capture/src/token.rs` refuses anything over 64 characters as
+        # `TooLong` before it looks at what the value is. A placeholder that grew
+        # past that would be refused for its length rather than for naming no
+        # project, which is a different answer to the same question.
+        assert len(generate_random_token_project()) <= 64
+
+    def test_the_mark_survives_so_a_cloud_key_stays_readable(self):
+        # Only the minting goes. `pk-` is how a cloud key is recognized.
+        assert KEY_MARKS[KeyKind.PUBLISHABLE] == "pk-"
 
 
 class TestTokenGeneration:
@@ -113,11 +179,11 @@ class TestTokenGeneration:
     @parameterized.expand(
         [
             ("bare", generate_random_token, "", 32),
-            ("project", generate_random_token_project, "pk-", 32),
             ("personal", generate_random_token_personal, "sk-", 35),
             ("secret", generate_random_token_secret, "sk-", 35),
             ("oauth_access", lambda: generate_random_oauth_access_token(None), "at-", 32),
             ("oauth_refresh", lambda: generate_random_oauth_refresh_token(None), "rt-", 32),
+            ("widget", lambda: mint(KeyKind.WIDGET), "wt-", 32),
         ]
     )
     def test_uses_base57_alphabet(self, _name, generator, prefix, _entropy_bytes):
@@ -133,11 +199,11 @@ class TestTokenGeneration:
     @parameterized.expand(
         [
             ("bare_32B", generate_random_token, "", 32),
-            ("project_32B", generate_random_token_project, "pk-", 32),
             ("personal_35B", generate_random_token_personal, "sk-", 35),
             ("secret_35B", generate_random_token_secret, "sk-", 35),
             ("oauth_access_32B", lambda: generate_random_oauth_access_token(None), "at-", 32),
             ("oauth_refresh_32B", lambda: generate_random_oauth_refresh_token(None), "rt-", 32),
+            ("widget_32B", lambda: mint(KeyKind.WIDGET), "wt-", 32),
         ]
     )
     def test_exact_length(self, _name, generator, prefix, entropy_bytes):

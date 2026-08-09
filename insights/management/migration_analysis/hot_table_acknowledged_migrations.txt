@@ -20,3 +20,10 @@ insights.1244_team_event_retention_months
 insights.1262_organization_members_can_see_org_members
 insights.1272_user_ui_configuration
 insights.1284_organization_enforce_verified_domains
+# Repairs for tables whose CreateModel is recorded as applied but never ran. Each
+# creates its tables exactly as a fresh install does, so the FK constraints to
+# insights_team / insights_user take the same brief SHARE ROW EXCLUSIVE lock on
+# those parents that the original migration takes.
+workflows.0017_absent_tables
+replay_vision.0062_absent_tables
+streamlit_apps.0004_absent_tables

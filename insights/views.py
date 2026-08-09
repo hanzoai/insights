@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required as base_login_required
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
 from django.db.models import Q
-from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -107,6 +107,19 @@ def login_required(view):
         return apply_auth_brand_cookie(request, response)
 
     return handler
+
+
+def static_not_found(request: HttpRequest) -> HttpResponse:
+    """A hashed asset this build does not have is missing, not private.
+
+    Every deploy emits new filenames and drops the previous set, so a page loaded
+    before a rollout asks for chunks the new pods never had. Those requests used to
+    fall through to the SPA catch-all, which is login_required -- so the browser
+    asked for a JavaScript module and got a 302 to the IdP, then reported "Expected
+    a JavaScript module but the server responded with MIME type text/html". That
+    reads as a bundler fault and sends you hunting; the truth is the file is gone.
+    """
+    return HttpResponseNotFound("Not found\n", content_type="text/plain")
 
 
 def health(request):

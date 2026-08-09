@@ -1,6 +1,6 @@
 import { MockKafkaProducerWrapper } from '~/tests/helpers/mocks/producer.mock'
 
-import { DatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient } from '@datastore/client'
 import { DateTime } from 'luxon'
 
 import { KAFKA_FN_INVOCATION_RESULTS } from '~/common/config/kafka-topics'
@@ -59,7 +59,7 @@ describe('RerunPaginatorService integration', () => {
     let paginator: RerunPaginatorService
     // script functions re-enqueue to the kafka queue, script flows to postgres-v2.
     let hogQueue: jest.Mocked<JobQueue>
-    let hogflowQueue: jest.Mocked<CyclotronJobQueuePostgresV2>
+    let flowQueue: jest.Mocked<CyclotronJobQueuePostgresV2>
     let paginatorLifecycleService: jest.Mocked<HogInvocationResultsService>
     let paginatorMonitoringService: jest.Mocked<InsightsFunctionMonitoringService>
     let insightsFunctionManager: InsightsFunctionManagerService
@@ -240,7 +240,7 @@ describe('RerunPaginatorService integration', () => {
         hogQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<JobQueue>
-        hogflowQueue = {
+        flowQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<CyclotronJobQueuePostgresV2>
 
@@ -265,7 +265,7 @@ describe('RerunPaginatorService integration', () => {
             insightsFunctionManager,
             flowManager,
             paginatorLifecycleService,
-            { insights_function: hogQueue, hog_flow: hogflowQueue },
+            { insights_function: hogQueue, hog_flow: flowQueue },
             paginatorMonitoringService,
             10000
         )
@@ -622,7 +622,7 @@ describe('RerunPaginatorService integration', () => {
                 insightsFunctionManager,
                 flowManager,
                 paginatorLifecycleService,
-                { insights_function: hogQueue, hog_flow: hogflowQueue },
+                { insights_function: hogQueue, hog_flow: flowQueue },
                 paginatorMonitoringService,
                 10000
             )

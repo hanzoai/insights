@@ -10,7 +10,8 @@ anywhere), `names/retire-version-suffix`, `schema/event-fact`, and upstream
 master `fa1a9a60` (2026-08-06) re-derived through `bin/debrand`. The tag for
 this state is v1.53.0.
 
-ONE ingest door: `POST https://api.hanzo.ai/v1/event` (cloud binary). Every
+ONE ingest door: `POST https://api.hanzo.ai/v1/event` (cloud binary), and ONE
+authority that mints the key it accepts: cloud, at `POST /v1/projects`. Every
 SDK wire path (`/e`, `/batch`, `/capture`, `/i/v0/e`, `/v1/e`) on
 insights/analytics/sentry hosts rewrites to it at the ingress. Cloud also
 serves the Sentry wires (`/v1/event/:project/envelope|store`), the tag script
@@ -65,24 +66,40 @@ imports; they are inert (not in INSTALLED_APPS).
 Events are ingested by the **cloud Go binary**, not by the Rust capture service:
 
 ```text
-insights.hanzo.ai/{e,/e/,v1/e,/v1/e/,batch,capture}   (ingress prio 150)
-  → middleware insights-cloud-ingest-rewrite (fixed replacePath)
+{insights,analytics,sentry}.hanzo.ai/{e,/v1/e,/batch,/capture,/i/v0/e,/v1/event}
+  → middleware insights-cloud-ingest-rewrite (replacePath /v1/event)
   → service api-hanzo-ai → cloud.hanzo.svc:8000
-  → POST /v1/insights/e → cloud/clients/analytics insightsIngest → hanzo.events
+  → POST /v1/event → cloud apps/analytics → JetStream → event.fact
 ```
 
-Tenant is resolved SERVER-SIDE by `captureTenant`, in this order: validated
-principal → presented project key (`cloud.OrgForKey`) → brand host. It fails
-**CLOSED** on a presented-but-unresolvable key, and deliberately does NOT fall
-back to the brand host in that case, so a bogus key cannot borrow the host's
-org. Consequence when testing: verify anonymously (no `api_key`) to exercise the
-brand-host path, or a valid-looking key will make a working route look broken.
+CLOUD IS THE ONE AUTHORITY THAT MINTS AN INGEST KEY, and this deployment mints
+none. A team's `api_token` HOLDS the key cloud minted at `POST /v1/projects`;
+`insights/ingest.py` is the only place it is obtained and `Team.objects.create`
+the only place it is stored. `generate_random_token_project` raises — a locally
+minted key names no cloud project, so the door refuses it and the events are
+gone. The three teams map to cloud projects `hanzo/insights`, `lux/insights`,
+`zoo/insights`.
 
-`/v1/e` was NOT on this router until 2026-07-26 — it fell to the Django
-catch-all, which answers **403 HTML**, so every event sent to the path our own
-SDK posts to was discarded silently. When debugging a 403 here, read the BODY:
-Django answers HTML, cloud answers
-`{"status":403,"error":"valid bearer or a recognized brand host required"}`.
+Tenant is resolved SERVER-SIDE by `eventTenant` (cloud `apps/analytics/event.go`),
+in this order: validated IAM bearer → a `pk-` on `Authorization` /
+`x-hanzo-ingest-key` / `?ingest_key=` → `?api_key=` / `x-api-key` / the PostHog
+body field `api_key` → a Hanzo Team workspace token. **There is no brand-host
+fallback any more** — a request Host names no tenant on any door. Earlier notes
+here described `captureTenant` and a brand-host path; both are gone, and testing
+anonymously now proves nothing except that the door refuses anonymous writes.
+
+Read the refusal BODY, it names the cause exactly (measured 2026-08-09):
+
+```text
+no credential          401 ingest_key_required   "create a project (POST /v1/projects)…"
+key naming no project  403 ingest_key_unknown    "this ingest key names no project…"
+accepted               200 {"accepted":N,"dropped":M}
+```
+
+A 200 means published to JetStream, not yet in the table — a separate consumer
+inserts into `event.fact`. Prove a landing by querying it, never by the status
+code: `SELECT org, product, name, time FROM event.fact WHERE distinct_id = …`.
+`product` holds the cloud project slug, stamped server-side by `attributeProject`.
 
 `POST /v1/ai` is likewise unrouted and falls through to Django.
 

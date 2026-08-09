@@ -2,8 +2,6 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 
-// Debug token, used to get metrics for debug builds - team 89529
-const DEBUG_INSIGHTS_API_TOKEN: &str = "pk-raG2H9V246hkNZk6K89DZGG98qQyPrKKlicifGlpOXA";
 const API_CLI_BUNDLE: &str = "lib/insights-api-cli.mjs";
 
 fn write_api_cli_bundle_include() {
@@ -25,14 +23,10 @@ fn write_api_cli_bundle_include() {
     fs::write(out_path, contents).expect("write embedded API CLI bundle include");
 }
 
-// This build file just sets this token for debug builds - for production builds, we use the token from our CI's secrets
 pub fn main() {
     write_api_cli_bundle_include();
 
-    let profile = env::var("PROFILE").expect("Profile variable is set by cargo");
-    if profile == "debug" {
-        println!("cargo:rustc-env=INSIGHTS_API_TOKEN={DEBUG_INSIGHTS_API_TOKEN}");
-    } else {
-        eprintln!("Not setting debug insights api token");
-    }
+    // No token is baked in here. A debug build therefore sends nothing:
+    // init_insights_telemetry returns early when INSIGHTS_API_TOKEN is unset.
+    // Production builds get theirs from CI's secrets.
 }
