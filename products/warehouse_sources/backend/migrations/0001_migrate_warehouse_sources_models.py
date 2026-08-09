@@ -8,6 +8,7 @@ from django.db import migrations, models
 
 import insights.models.utils
 import insights.helpers.encrypted_fields
+from insights.migration_helpers import CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -606,5 +607,15 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="datawarehousecredential"),
+                CreateTableIfNotExists(model_name="datawarehousetable"),
+                CreateTableIfNotExists(model_name="externaldatasource"),
+                CreateTableIfNotExists(model_name="externaldataschema"),
+                CreateTableIfNotExists(model_name="externaldatajob"),
+            ],
         ),
     ]

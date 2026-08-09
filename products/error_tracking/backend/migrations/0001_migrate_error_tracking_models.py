@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import insights.models.utils
+from insights.migration_helpers import CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -261,7 +262,12 @@ class Migration(migrations.Migration):
                         to="error_tracking.errortrackingissue",
                     ),
                 ),
-                ("role", models.ForeignKey(db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
+                (
+                    "role",
+                    models.ForeignKey(
+                        db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role"
+                    ),
+                ),
                 (
                     "user",
                     models.ForeignKey(
@@ -293,7 +299,12 @@ class Migration(migrations.Migration):
                 ("disabled_data", models.JSONField(blank=True, null=True)),
                 ("order_key", models.IntegerField()),
                 ("description", models.TextField(null=True)),
-                ("role", models.ForeignKey(db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
+                (
+                    "role",
+                    models.ForeignKey(
+                        db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role"
+                    ),
+                ),
                 ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",
@@ -356,7 +367,12 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("disabled_data", models.JSONField(blank=True, null=True)),
-                ("role", models.ForeignKey(db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role")),
+                (
+                    "role",
+                    models.ForeignKey(
+                        db_constraint=False, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.role"
+                    ),
+                ),
                 ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",
@@ -424,5 +440,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(database_operations=database_operations, state_operations=state_operations)
+        migrations.SeparateDatabaseAndState(database_operations=database_operations, state_operations=state_operations),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="errortrackinggroup"),
+                CreateTableIfNotExists(model_name="errortrackingissue"),
+                CreateTableIfNotExists(model_name="errortrackingrelease"),
+                CreateTableIfNotExists(model_name="errortrackingsymbolset"),
+                CreateTableIfNotExists(model_name="errortrackingsuppressionrule"),
+                CreateTableIfNotExists(model_name="errortrackingstackframe"),
+                CreateTableIfNotExists(model_name="errortrackingissuefingerprintv2"),
+                CreateTableIfNotExists(model_name="errortrackingissuefingerprint"),
+                CreateTableIfNotExists(model_name="errortrackingissueassignment"),
+                CreateTableIfNotExists(model_name="errortrackinggroupingrule"),
+                CreateTableIfNotExists(model_name="errortrackingexternalreference"),
+                CreateTableIfNotExists(model_name="errortrackingassignmentrule"),
+            ],
+        ),
     ]

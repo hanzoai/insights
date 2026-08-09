@@ -20,6 +20,7 @@ from django.db import migrations, models
 
 import insights.models.utils
 import insights.helpers.encrypted_fields
+from insights.migration_helpers import CreateTableIfNotExists
 
 MODELS_TO_MOVE = (
     "clusteringconfig",
@@ -1266,4 +1267,28 @@ class Migration(migrations.Migration):
             database_operations=[],
         ),
         migrations.RunPython(forward_content_types, reverse_content_types),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="clusteringconfig"),
+                CreateTableIfNotExists(model_name="dataset"),
+                CreateTableIfNotExists(model_name="datasetitem"),
+                CreateTableIfNotExists(model_name="evaluation"),
+                CreateTableIfNotExists(model_name="evaluationreport"),
+                CreateTableIfNotExists(model_name="evaluationreportrun"),
+                CreateTableIfNotExists(model_name="llmmodelconfiguration"),
+                CreateTableIfNotExists(model_name="llmproviderkey"),
+                CreateTableIfNotExists(model_name="evaluationconfig"),
+                CreateTableIfNotExists(model_name="llmskill"),
+                CreateTableIfNotExists(model_name="llmskillfile"),
+                CreateTableIfNotExists(model_name="reviewqueue"),
+                CreateTableIfNotExists(model_name="reviewqueueitem"),
+                CreateTableIfNotExists(model_name="scoredefinition"),
+                CreateTableIfNotExists(model_name="scoredefinitionversion"),
+                CreateTableIfNotExists(model_name="tagger"),
+                CreateTableIfNotExists(model_name="tracereview"),
+                CreateTableIfNotExists(model_name="tracereviewscore"),
+                CreateTableIfNotExists(model_name="clusteringjob"),
+            ],
+        ),
     ]
