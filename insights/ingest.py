@@ -27,17 +27,15 @@ project. The login pipeline re-runs on every sign-in, so it has to land on the
 same key every time.
 """
 
-import time
 from typing import Optional
 
 from django.conf import settings
 from django.utils.text import slugify
 
-import jwt
 import requests
 import structlog
 
-from insights.iam import REFRESH_MARGIN_SECONDS
+from insights import iam
 
 logger = structlog.get_logger(__name__)
 
@@ -64,62 +62,17 @@ def _slug(name: str) -> str:
     return slugify(name.replace("_", "-"))[:_SLUG_MAX].strip("-")
 
 
-def _stale(token: str) -> bool:
-    """Whether `token` is too close to its own `exp` to send.
-
-    The signature is not checked -- cloud does that, and this only has to decide
-    whether it is worth asking. Anything unreadable counts as stale, so a token
-    of an unexpected shape gets refreshed rather than sent and refused.
-    """
-    try:
-        expires_at = jwt.decode(token, options={"verify_signature": False})["exp"]
-    except Exception:
-        return True
-    return time.time() + REFRESH_MARGIN_SECONDS >= float(expires_at)
-
-
 def _bearer(user, *, fresh: Optional[str] = None) -> str:
     """The acting user's current IAM access token.
 
-    A login already holds one, and passes it as `fresh` -- that path touches
-    neither the database nor IAM a second time. Everywhere else reads the token
-    python-social-auth stored at sign-in, which is usually expired: these live
-    hours, and a person creates their second project days later.
-
-    So an expired one is REFRESHED, using the refresh token stored beside it and
-    social-auth's own machinery, which writes the new token back where it found
-    the old one. It is deliberately not backfilled from this deployment's service
-    identity: that token carries a different `owner`, so the project would land in
-    the wrong org, and two ways to authorize one call is the thing being removed.
+    Identity has one home — `insights.iam` — so an ingest key and an LLM call
+    prove who is asking the same way. Only the failure type changes here, to the
+    one this module's callers already handle; the message is IAM's own.
     """
-    if fresh:
-        return fresh
-
-    from social_django.utils import load_strategy  # noqa: PLC0415 — needs configured settings
-
-    social = user.social_auth.filter(provider="oidc").first()
-    if social is None:
-        raise IngestKeyUnavailable("this account has no Hanzo IAM login; sign in again")
-
-    token = (social.extra_data or {}).get("access_token")
-    if token and not _stale(token):
-        return token
-
     try:
-        social.refresh_token(load_strategy())
-    except Exception as e:
-        raise IngestKeyUnavailable(
-            f"the Hanzo IAM login could not be refreshed ({type(e).__name__}); sign in again"
-        ) from e
-
-    # Re-read rather than trust the call: `refresh_token` is a no-op when there is
-    # no refresh token to spend, and a silent no-op would send the stale one.
-    token = (social.extra_data or {}).get("access_token")
-    if not token or _stale(token):
-        raise IngestKeyUnavailable("the Hanzo IAM login could not be refreshed; sign in again")
-
-    logger.info("ingest.bearer_refreshed", user_id=str(user.uuid))
-    return token
+        return iam.user_token(user, fresh=fresh)
+    except iam.IamUnavailable as e:
+        raise IngestKeyUnavailable(str(e)) from e
 
 
 def _body(response) -> dict:
