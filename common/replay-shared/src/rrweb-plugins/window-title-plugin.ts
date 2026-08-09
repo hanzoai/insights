@@ -1,5 +1,5 @@
-import { ReplayPlugin } from 'insights-js/rrweb'
-import { EventType, IncrementalSource, eventWithTime } from 'insights-js/rrweb-types'
+import { ReplayPlugin } from '@hanzo/insights-rrweb'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 type Node = {
     id: number
