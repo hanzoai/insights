@@ -40,6 +40,7 @@ from insights.schema import (
     SourceMap,
 )
 
+from insights import ingest
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import TeamBasicSerializer
 from insights.api.utils import action, validate_authorized_url_wildcards
@@ -1649,6 +1650,15 @@ class TeamSerializer(serializers.ModelSerializer, UserPermissionsSerializerMixin
                 # but Datastore doesn't support Saturday as the first day of the week, so we fall back to Sunday
                 validated_data["week_start_day"] = 1 if week_start_day_for_user_ip_location == 1 else 0
 
+        # The ingest key comes from cloud, which mints it against the acting user's
+        # own IAM identity so the project lands in their org. Nothing here can make
+        # one up, so a team that cloud would not name is not created.
+        name = validated_data.get("name") or Team._meta.get_field("name").default
+        try:
+            validated_data["api_token"] = ingest.key(name=name, user=request.user)
+        except ingest.IngestKeyUnavailable as e:
+            raise exceptions.ValidationError(str(e)) from e
+
         team = Team.objects.create_with_data(
             initiating_user=request.user,
             organization=self.context["view"].organization,
@@ -2177,17 +2187,6 @@ class TeamViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.Mo
         )
         # TRICKY: We pass in `team` here as access to `user.current_team` can fail if it was deleted
         report_user_action(user, "team deleted", team=team, request=self.request)
-
-    @action(
-        methods=["PATCH"],
-        detail=True,
-        # Only ADMIN or higher users are allowed to access this project
-        permission_classes=[TeamMemberStrictManagementPermission],
-    )
-    def reset_token(self, request: request.Request, id: str, **kwargs) -> response.Response:
-        team = self.get_object()
-        team.reset_token_and_save(user=request.user, is_impersonated_session=is_impersonated(request))
-        return response.Response(TeamSerializer(team, context=self.get_serializer_context()).data)
 
     @action(
         methods=["PATCH"],

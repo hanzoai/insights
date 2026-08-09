@@ -18,6 +18,10 @@ Invariants, all of which are the difference between a login and a tenancy bug:
     authenticated user in the wrong tenant is worse than a failed login.
   - Membership level is derived from the IAM role claim and defaults to MEMBER.
     Being the first user in an organization grants nothing.
+  - A team is born holding the ingest key Hanzo cloud minted for it. Cloud is the
+    one authority that mints one, so a team no key could be obtained for is not
+    created at all: a team holding a locally invented key looks configured and
+    drops every event it is sent.
 """
 
 from typing import Any, Optional, Union
@@ -28,6 +32,7 @@ import structlog
 from social_core.exceptions import AuthFailed
 from social_django.strategy import DjangoStrategy
 
+from insights import ingest
 from insights.models import Organization, OrganizationMembership, Team, User
 
 logger = structlog.get_logger(__name__)
@@ -88,16 +93,24 @@ def _ensure_organization(org_slug: str) -> Organization:
         raise AuthFailed("hanzo-iam", f"Could not resolve organization for slug '{slug}'")
 
 
-def _ensure_default_team(org: Organization) -> Team:
+def _ensure_default_team(org: Organization, user: User, access_token: str) -> Team:
     """Every organization needs at least one team before it can ingest anything."""
     team = Team.objects.filter(organization=org).first()
     if team:
         return team
 
+    # Asked for before the transaction opens: this is a network round trip, and
+    # holding a write open across one holds its locks for the whole of it. The
+    # token in hand is the one this login just minted, so cloud is asked as the
+    # person signing in and puts the project in their org.
+    name = f"{org.name} Default"
+    api_token = ingest.key(name=name, user=user, fresh=access_token)
+
     with transaction.atomic():
         team = Team.objects.create(
             organization=org,
-            name=f"{org.name} Default",
+            name=name,
+            api_token=api_token,
         )
         logger.info(
             "iam_org_pipeline_created_default_team",
@@ -173,7 +186,7 @@ def iam_org_assign(
 
     try:
         org = _ensure_organization(org_slug)
-        _ensure_default_team(org)
+        _ensure_default_team(org, user, response.get("access_token", ""))
         _ensure_membership(user, org, _membership_level(response))
 
         if user.current_organization_id != org.id:
