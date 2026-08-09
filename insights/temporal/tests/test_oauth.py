@@ -218,7 +218,7 @@ class TestCreateWizardOAuthAccessTokenForUser(TestCase):
         token = create_wizard_oauth_access_token_for_user(user, team.id)
 
         assert token is not None
-        assert token.startswith("pha_")
+        assert token.startswith("at-")
 
         access_token = OAuthAccessToken.objects.get(token=token)
         assert access_token.application_id == app.id

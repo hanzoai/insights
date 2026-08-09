@@ -335,12 +335,12 @@ export interface LLMSkillMarketplaceCommandApi {
     /** Codex install command with a YOUR_PHS_TOKEN placeholder instead of a live token; always present. */
     codex_command_template: string
     /**
-     * The raw read-only `phx_` credential. Returned once, only when minted or rotated; it cannot be retrieved again afterwards.
+     * The raw read-only `sk-` credential. Returned once, only when minted or rotated; it cannot be retrieved again afterwards.
      * @nullable
      */
     token: string | null
     /**
-     * Masked preview of the existing credential (e.g. phx_...abcd).
+     * Masked preview of the existing credential (e.g. sk-...abcd).
      * @nullable
      */
     mask_value: string | null

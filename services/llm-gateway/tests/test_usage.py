@@ -81,7 +81,7 @@ class TestUsageEndpoint:
     def test_returns_pro_limits_by_default(self, authenticated_usage_client: TestClient) -> None:
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -99,7 +99,7 @@ class TestUsageEndpoint:
     def test_response_has_no_usd_fields(self, authenticated_usage_client: TestClient) -> None:
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -123,7 +123,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -146,7 +146,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         billing_period_end = response.json()["billing_period_end"]
@@ -172,7 +172,7 @@ class TestUsageEndpoint:
         with structlog.testing.capture_logs() as logs:
             response = authenticated_usage_client.get(
                 "/v1/usage/insights_code",
-                headers={"Authorization": "Bearer phx_test"},
+                headers={"Authorization": "Bearer sk-test"},
             )
         assert response.status_code == 200
         assert response.json()["billing_period_end"] is None
@@ -186,7 +186,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         assert response.json()["billing_period_end"] is None
@@ -209,7 +209,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         assert response.json()["is_pro"] is expected_is_pro
@@ -222,7 +222,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -241,7 +241,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -260,7 +260,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -303,7 +303,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -344,7 +344,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -355,7 +355,7 @@ class TestUsageEndpoint:
     def test_ignores_user_id_query_param(self, authenticated_usage_client: TestClient) -> None:
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code?user_id=99",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         assert response.json()["user_id"] == 42
@@ -374,7 +374,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -400,7 +400,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -416,7 +416,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/slack_app",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -436,7 +436,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         assert response.json()["ai_credits"] == {"exhausted": False, "used_usd": 12.4, "limit_usd": 50.0}
@@ -456,7 +456,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.get(
             "/v1/usage/insights_code",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         assert response.json()["code_usage_subscribed"] is billing_active
@@ -467,7 +467,7 @@ class TestUsageEndpoint:
 
         response = authenticated_usage_client.post(
             "/v1/usage/insights_code/invalidate-plan-cache",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 200
         assert response.json() == {"ok": True}
@@ -476,7 +476,7 @@ class TestUsageEndpoint:
     def test_invalidate_plan_cache_404_for_other_product(self, authenticated_usage_client: TestClient) -> None:
         response = authenticated_usage_client.post(
             "/v1/usage/wizard/invalidate-plan-cache",
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
         )
         assert response.status_code == 404
 

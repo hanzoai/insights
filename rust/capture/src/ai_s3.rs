@@ -362,7 +362,7 @@ mod tests {
     fn test_s3_url_format() {
         let bucket = "capture";
         let prefix = "llma/";
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let event_uuid = "550e8400-e29b-41d4-a716-446655440000";
 
         let token_hash = hash_token(token);
@@ -382,7 +382,7 @@ mod tests {
         // Malicious tokens with path traversal attempts should be safely hashed
         let malicious_tokens = [
             "../../../etc/passwd",
-            "phc_test/../other_customer",
+            "pk-test/../other_customer",
             "token/with/slashes",
             "token\0with\0nulls",
         ];

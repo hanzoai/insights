@@ -46,7 +46,7 @@ class TestWorkerShutdownFlushesAnalyticsMetrics(TestCase):
             # worker recycle until the dependency is bumped).
             (
                 "real_client_on_pinned_sdk_version",
-                lambda: hanzo_insights.Client("phc_test", sync_mode=True, disabled=True),
+                lambda: hanzo_insights.Client("pk-test", sync_mode=True, disabled=True),
             ),
             ("flush_raises", lambda: MagicMock(**{"metrics.flush.side_effect": RuntimeError("network down")})),
         ]

@@ -404,8 +404,8 @@ export class MetricsIngestionConsumer {
 
                     let team
                     try {
-                        if (isDevEnv() && token === 'phc_local') {
-                            // phc_local is a special token used in dev to refer to team 1
+                        if (isDevEnv() && token === 'pk-local') {
+                            // pk-local is a special token used in dev to refer to team 1
                             team = await this.deps.teamManager.getTeam(1)
                         } else {
                             team = await this.deps.teamManager.getTeamByToken(token)

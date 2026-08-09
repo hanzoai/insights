@@ -20,7 +20,7 @@ services:
     shard0:
         image: insights-metrics-agent:test
         environment: &shard-env
-            INSIGHTS_API_KEY: phc_test
+            INSIGHTS_API_KEY: pk-test
             INSIGHTS_HOST: http://sink:4318
             INSIGHTS_INGEST_PATH: /v1/metrics
             SCRAPE_TARGETS: '${SCRAPE_TARGETS}'

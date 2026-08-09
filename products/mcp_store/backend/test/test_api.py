@@ -268,7 +268,7 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_application,
-            token="pha_test_mcp_icon",
+            token="at-test_mcp_icon",
             expires=timezone.now() + timedelta(hours=1),
             scope="project:read",
         )
@@ -1074,7 +1074,7 @@ class TestMCPGatewayWriteScopeAPI(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token="pha_read_only_mcp_gateway",
+            token="at-read_only_mcp_gateway",
             expires=timezone.now() + timedelta(hours=1),
             scope="project:read",
             scoped_teams=[self.team.id],
@@ -1159,7 +1159,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token=f"pha_mcp_agent_{'built_in' if built_in_agent else 'generic'}",
+            token=f"at-mcp_agent_{'built_in' if built_in_agent else 'generic'}",
             expires=timezone.now() + timedelta(hours=1),
             scope=" ".join(scopes),
             scoped_teams=[self.team.id],

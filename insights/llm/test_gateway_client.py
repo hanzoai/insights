@@ -19,7 +19,7 @@ from insights.llm.gateway_client import (
 )
 
 AI_GATEWAY_URL = "https://ai-gateway.example/v1"
-AI_GATEWAY_KEY = "phs_project_secret"
+AI_GATEWAY_KEY = "sk-project_secret"
 TEAM_42_TRACE_ID = "30a04c7a-98b4-5119-8597-8c696e44a270"
 
 

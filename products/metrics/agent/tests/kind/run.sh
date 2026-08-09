@@ -63,7 +63,7 @@ $K -n fixtures rollout status deployment/fixture deployment/fixture-decoy deploy
 
 helm --kube-context "$CTX" install scrape "$AGENT_DIR/chart/insights-metrics-agent" \
     -n agent \
-    --set insights.apiKey=phc_test \
+    --set insights.apiKey=pk-test \
     --set insights.host=http://sink.fixtures.svc.cluster.local:4318 \
     --set insights.ingestPath=/v1/metrics \
     --set shards=2 \

@@ -1763,7 +1763,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         )
         key, _ = create_project_secret_api_key(team=self.team, created_by=self.user, label="Production key")
 
-        send_project_secret_api_key_exposed(self.team.id, key.id, "phs_...abcd", "This key was detected by GitHub.")
+        send_project_secret_api_key_exposed(self.team.id, key.id, "sk-...abcd", "This key was detected by GitHub.")
 
         assert len(mocked_email_messages) == 1
         message = mocked_email_messages[0]
@@ -1773,7 +1773,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         recipient_emails = {dest["raw_email"] for dest in message.to}
         assert recipient_emails == {self.user.email}
         assert message.properties["label"] == "Production key"
-        assert message.properties["mask_value"] == "phs_...abcd"
+        assert message.properties["mask_value"] == "sk-...abcd"
         assert (
             message.properties["url"]
             == f"{settings.SITE_URL}/project/{self.team.pk}/settings/environment-secret-api-keys"
@@ -1789,7 +1789,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         self.user.save()
         key, _ = create_project_secret_api_key(team=self.team, label="Production key")
 
-        send_project_secret_api_key_exposed(self.team.id, key.id, "phs_...abcd", "")
+        send_project_secret_api_key_exposed(self.team.id, key.id, "sk-...abcd", "")
 
         assert len(mocked_email_messages) == 0
 

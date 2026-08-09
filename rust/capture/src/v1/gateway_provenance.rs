@@ -271,7 +271,7 @@ mod tests {
     use super::*;
 
     const SECRET: &[u8] = b"test-signing-secret";
-    const TOKEN: &str = "phc_test";
+    const TOKEN: &str = "pk-test";
     const DISTINCT_ID: &str = "user-7";
 
     fn sign(token: &str, distinct_id: &str, request_id: &str, signed_at: &str) -> String {
@@ -318,7 +318,7 @@ mod tests {
     #[test]
     fn rejects_a_tampered_token() {
         assert_eq!(
-            verify(SECRET, "phc_other", DISTINCT_ID, &valid_sig("req-1"), now()),
+            verify(SECRET, "pk-other", DISTINCT_ID, &valid_sig("req-1"), now()),
             Provenance::Invalid
         );
     }
@@ -624,7 +624,7 @@ mod tests {
         };
         let now: DateTime<Utc> = "2026-05-28T10:00:00Z".parse().unwrap();
         assert_eq!(
-            verify(b"test-signing-secret", "phc_test", "user-7", &sig, now),
+            verify(b"test-signing-secret", "pk-test", "user-7", &sig, now),
             Provenance::Verified
         );
     }

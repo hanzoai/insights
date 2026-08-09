@@ -22,7 +22,7 @@ def build_langchain_chat_client(model: str, timeout: float, ai_product: str | No
 
     Routes through the internal Go ai-gateway when configured; on a misconfiguration the shared
     resolver logs and returns None, so this falls back to direct OpenAI rather than failing the
-    call. In gateway mode the ``phs_`` bearer is team-scoped, so no per-team header is needed;
+    call. In gateway mode the ``sk-`` bearer is team-scoped, so no per-team header is needed;
     ``ai_product`` (when given) tags the captured ``$ai_generation`` via X-Insights-Properties.
     """
     if not settings.DEBUG and not is_cloud():

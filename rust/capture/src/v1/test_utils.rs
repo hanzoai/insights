@@ -39,7 +39,7 @@ pub fn raw_obj(s: &str) -> Box<RawValue> {
 
 pub fn test_context() -> RequestContext {
     RequestContext {
-        api_token: "phc_test_token".to_string(),
+        api_token: "pk-test_token".to_string(),
         user_agent: "test-agent/1.0".to_string(),
         content_type: "application/json".to_string(),
         content_encoding: None,

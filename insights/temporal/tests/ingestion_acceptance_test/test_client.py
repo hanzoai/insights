@@ -15,7 +15,7 @@ from insights.temporal.ingestion_acceptance_test.config import Config
 def config() -> Config:
     return Config(
         api_host="https://test.hanzo.ai",
-        project_api_key="phc_test_key",
+        project_api_key="pk-test_key",
         team_id=12345,
         event_timeout_seconds=5,
         poll_interval_seconds=0.1,

@@ -114,7 +114,7 @@ fn build_prometheus_builder(product: Option<String>) -> PrometheusBuilder {
 /// Normalize an unmatched path to its first segment to avoid high-cardinality
 /// metric labels from arbitrary 404 paths (tokens, locales, scanner probes, etc.).
 ///
-/// Examples: `/array/phc_xxx/config.js` → `/array/`, `/metrics` → `/metrics`
+/// Examples: `/array/pk-xxx/config.js` → `/array/`, `/metrics` → `/metrics`
 pub fn normalize_unmatched_path(raw: &str) -> String {
     match raw.find('/').and_then(|_| raw[1..].find('/')) {
         Some(i) => raw[..i + 2].to_owned(),
@@ -350,8 +350,8 @@ mod tests {
     fn test_normalize_unmatched_path() {
         let cases = [
             // (input, expected)
-            ("/array/phc_xxx/config.js", "/array/"),
-            ("/array/phc_xxx/en_GB/config.js", "/array/"),
+            ("/array/pk-xxx/config.js", "/array/"),
+            ("/array/pk-xxx/en_GB/config.js", "/array/"),
             ("/array/N/A/config", "/array/"),
             ("/array/https:/us.i.hanzo.ai/config", "/array/"),
             ("/api/surveys/blah", "/api/"),
@@ -364,7 +364,7 @@ mod tests {
             ("//", "//"),
             ("/array/", "/array/"),
             ("/a/b", "/a/"),
-            ("/array/phc_xxx/", "/array/"),
+            ("/array/pk-xxx/", "/array/"),
             ("", ""),
         ];
         for (input, expected) in cases {

@@ -8,7 +8,7 @@ function makeContext(): Context {
     return {
         api: {
             baseUrl: 'https://us.hanzo.ai',
-            config: { apiToken: 'phx_test' },
+            config: { apiToken: 'sk-test' },
         },
         stateManager: {
             getProjectId: vi.fn().mockResolvedValue(2),
